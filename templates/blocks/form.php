@@ -59,17 +59,17 @@ $getFieldIcon = static function (string $fieldType, string $fieldName, string $f
                 // JS показывает его при совпадении значения триггера.
                 $cond = $field['condition'] ?? null;
                 $condAttrs = '';
-                $hiddenStyle = '';
+                $hiddenAttr = '';
                 if (is_array($cond) && !empty($cond['field'])) {
                     $condAttrs = ' data-cond-field="' . htmlspecialchars((string) $cond['field'], ENT_QUOTES)
                         . '" data-cond-value="' . htmlspecialchars((string) ($cond['value'] ?? ''), ENT_QUOTES) . '"';
-                    $hiddenStyle = ' style="display:none"';
+                    $hiddenAttr = ' hidden';
                 }
 
                 $isFullWidth = in_array($fieldType, ['textarea', 'file', 'checkbox_group', 'checkbox'], true);
                 $fieldClass = 'block-form__field' . ($isFullWidth ? ' block-form__field--full' : '');
                 ?>
-                <div class="<?= $fieldClass ?>"<?= $condAttrs ?><?= $hiddenStyle ?>>
+                <div class="<?= $fieldClass ?>"<?= $condAttrs ?><?= $hiddenAttr ?>>
                     <?php if ($fieldType !== 'checkbox'): ?>
                         <label for="<?= $inputId ?>"><?= $fieldLabel ?></label>
                     <?php endif; ?>
@@ -85,7 +85,7 @@ $getFieldIcon = static function (string $fieldType, string $fieldName, string $f
                             <?php if ($iconSvg !== null): ?><span class="block-form__input-icon" aria-hidden="true"><?= $iconSvg ?></span><?php endif; ?>
                             <textarea id="<?= $inputId ?>" name="<?= $fieldName ?>" maxlength="2000" data-maxlength="2000" <?= $required ?>></textarea>
                         </div>
-                        <div class="block-form__char-counter" style="font-size:12px; color:var(--text-muted, #718096); text-align:right; margin-top:4px;">
+                        <div class="block-form__char-counter">
                             <span class="char-count">0</span> / 2000 <?= htmlspecialchars(t('символов'), ENT_QUOTES) ?>
                         </div>
                     <?php elseif ($fieldType === 'file'): ?>
@@ -110,10 +110,10 @@ $getFieldIcon = static function (string $fieldType, string $fieldName, string $f
                         </div>
                     <?php elseif ($fieldType === 'radio'): ?>
                         <?php $opts = array_map('trim', explode(',', (string) ($field['options'] ?? ''))); ?>
-                        <div class="block-form__radio-group" style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
+                        <div class="block-form__radio-group">
                             <?php foreach ($opts as $opt): ?>
                                 <?php if ($opt !== ''): ?>
-                                    <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-weight:normal;">
+                                    <label>
                                         <input type="radio" name="<?= $fieldName ?>" value="<?= htmlspecialchars($opt, ENT_QUOTES) ?>" <?= $required ?>>
                                         <?= htmlspecialchars($opt, ENT_QUOTES) ?>
                                     </label>
@@ -122,10 +122,10 @@ $getFieldIcon = static function (string $fieldType, string $fieldName, string $f
                         </div>
                     <?php elseif ($fieldType === 'checkbox_group'): ?>
                         <?php $opts = array_map('trim', explode(',', (string) ($field['options'] ?? ''))); ?>
-                        <div class="block-form__checkbox-group" style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
+                        <div class="block-form__checkbox-group">
                             <?php foreach ($opts as $opt): ?>
                                 <?php if ($opt !== ''): ?>
-                                    <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-weight:normal;">
+                                    <label>
                                         <input type="checkbox" name="<?= $fieldName ?>[]" value="<?= htmlspecialchars($opt, ENT_QUOTES) ?>">
                                         <?= htmlspecialchars($opt, ENT_QUOTES) ?>
                                     </label>
@@ -133,9 +133,9 @@ $getFieldIcon = static function (string $fieldType, string $fieldName, string $f
                             <?php endforeach; ?>
                         </div>
                     <?php elseif ($fieldType === 'checkbox'): ?>
-                        <div class="block-form__checkbox-single" style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                        <div class="block-form__checkbox-single">
                             <input type="checkbox" id="<?= $inputId ?>" name="<?= $fieldName ?>" value="1" <?= $required ?>>
-                            <label for="<?= $inputId ?>" style="display:inline; cursor:pointer; font-weight:normal;"><?= $fieldLabel ?></label>
+                            <label for="<?= $inputId ?>"><?= $fieldLabel ?></label>
                         </div>
                     <?php elseif ($fieldType === 'date'): ?>
                         <div class="block-form__input-wrapper<?= $iconSvg !== null ? ' has-icon' : '' ?>">

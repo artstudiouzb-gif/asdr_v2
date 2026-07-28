@@ -1460,7 +1460,7 @@ body.reader-mode-active { overflow: hidden !important; }
 }
 .reader-mode-overlay[data-reader-theme="dark"] .reader-mode-bar { border-bottom-color: rgba(255, 255, 255, 0.1); }
 
-.reader-mode-bar__progress { height: 3px; background: var(--gov-teal, #0d9488); transition: width 0.1s linear; }
+.reader-mode-bar__progress { width: 0; height: 3px; background: var(--gov-teal, #0d9488); transition: width 0.1s linear; }
 .reader-mode-bar__inner {
     max-width: 900px; margin: 0 auto; padding: 10px 20px;
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
@@ -1763,6 +1763,7 @@ body.lightbox-active { overflow: hidden !important; }
 .news-poll-card__question {
     margin: 0 0 16px; font-size: 1.1rem; font-weight: 700; color: var(--gov-title);
 }
+.news-poll-card__header .news-poll-card__question { margin-top: 6px; font-size: 1rem; }
 .news-poll-options { display: flex; flex-direction: column; gap: 10px; }
 .news-poll-option {
     display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px;
@@ -1786,8 +1787,10 @@ body.lightbox-active { overflow: hidden !important; }
 .news-poll-res-row { margin-bottom: 14px; }
 .news-poll-res-info { display: flex; justify-content: space-between; font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: var(--gov-title); }
 .news-poll-bar-track { height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--gov-border) 40%, transparent); overflow: hidden; }
-.news-poll-bar-fill { height: 100%; border-radius: 5px; background: var(--gov-teal, #0d9488); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+.news-poll-bar-fill { width: var(--poll-percent, 0%); height: 100%; border-radius: 5px; background: var(--gov-teal, #0d9488); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
 .news-poll-card__meta { margin-top: 14px; font-size: 0.8125rem; color: var(--gov-subtext); }
+.news-poll-card__actions { margin-top: 14px; }
+.news-poll-card__actions .btn { width: 100%; justify-content: center; }
 
 /* Виджет информера валют (JSON API) */
 .currency-widget {
@@ -2225,6 +2228,21 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 }
 .newsdetail-card { background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: 12px; padding: 22px; }
 .newsdetail-card__title { font-size: 1.08rem; margin: 0 0 16px; }
+.newsdetail-card--thesis-inline {
+    margin-bottom: 30px;
+    border: 1px solid var(--gov-border);
+    border-left: 4px solid var(--gov-teal);
+    border-radius: 0 12px 12px 0;
+    background: color-mix(in srgb, var(--gov-teal) 4%, var(--gov-surface));
+}
+.newsdetail-card--thesis-inline .newsdetail-card__title {
+    margin-bottom: 14px;
+    color: var(--gov-teal-text);
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+.newsdetail-card--thesis-inline .newsdetail-points { gap: 12px; }
+.newsdetail-card--thesis-inline .newsdetail-points__item { font-size: .92rem; line-height: 1.55; }
 .newsdetail-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
 .newsdetail-points__item { display: grid; grid-template-columns: auto 1fr; gap: 10px; font-size: .9rem; line-height: 1.5; color: var(--gov-ink); }
 .newsdetail-points__icon { color: var(--gov-teal); margin-top: 1px; }
@@ -2258,6 +2276,7 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 .newsdetail-subscribe__row button:hover { filter: brightness(1.08); }
 .newsdetail-subscribe__consent { display: flex; gap: 9px; align-items: flex-start; margin-top: 12px; color: rgba(255,255,255,.75); font-size: .78rem; line-height: 1.5; cursor: pointer; }
 .newsdetail-subscribe__consent input { margin-top: 2px; accent-color: var(--gov-teal); }
+.newsdetail-subscribe--fallback { margin-top: 20px; }
 
 /* --- Фотогалерея --- */
 .newsdetail-photos__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }

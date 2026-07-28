@@ -106,7 +106,7 @@ final class TranslationGroupHelper
 
                     if ($parentId !== false && (int) $parentId > 0 && (int) $parentId !== $id) {
                         $parentSlug = (string) $pdo->query("SELECT slug FROM {$table} WHERE id = " . (int) $parentId)->fetchColumn();
-                        if ($parentSlug !== '' && $parentSlug !== $slug && !$isHome && $slug !== 'bosh-sahifa' && $slug !== 'home') {
+                        if ($table !== 'news' && $parentSlug !== '' && $parentSlug !== $slug && !$isHome && $slug !== 'bosh-sahifa' && $slug !== 'home') {
                             $pdo->prepare("UPDATE {$table} SET translation_group_id = :parent_id, slug = :parent_slug WHERE id = :id")
                                 ->execute([':parent_id' => (int) $parentId, ':parent_slug' => $parentSlug, ':id' => $id]);
                         } else {
@@ -180,6 +180,16 @@ final class TranslationGroupHelper
 
         $newSlug = (string) ($orig['slug'] ?? 'item');
         if ($table === 'news') {
+            $newSlug = Slug::unique(
+                $newSlug . '-' . $targetLang,
+                static function (string $candidate, ?int $_excludeId) use ($targetLang): bool {
+                    $check = Database::pdo()->prepare(
+                        'SELECT COUNT(*) FROM news WHERE slug = :slug AND lang = :lang AND deleted_at IS NULL'
+                    );
+                    $check->execute([':slug' => $candidate, ':lang' => $targetLang]);
+                    return (int) $check->fetchColumn() > 0;
+                }
+            );
             $ins = Database::pdo()->prepare(
                 "INSERT INTO news (title, slug, excerpt, badge, content, image, video_url, audio_url, audio_title, hashtags, press_release_url, key_points, event_meta, timeline_json, docs, source_note, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
                  VALUES (:t, :s, :e, :b, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, 'draft', NOW(), :auth, :lang, :gid, NOW())"

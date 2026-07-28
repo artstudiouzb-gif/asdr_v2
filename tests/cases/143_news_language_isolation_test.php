@@ -164,6 +164,8 @@ test('Новости: публичные списки, рубрики и свя�
         $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Site/NewsController.php');
         assert_contains('News::distinctBadges($lang)', $controller);
         assert_contains('News::publishedCount($badge !== \'\' ? $badge : null, $lang)', $controller);
+        assert_contains('$requestedSlug !== $canonicalSlug', $controller, 'Чужой slug перенаправляется на canonical slug выбранного языка');
+        assert_contains("Locale::url('news/' . \$canonicalSlug, \$lang)", $controller, 'Canonical redirect сохраняет языковой префикс');
     } finally {
         if ($ids !== []) {
             $placeholders = implode(',', array_fill(0, count($ids), '?'));

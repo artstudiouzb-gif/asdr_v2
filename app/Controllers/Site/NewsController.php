@@ -149,12 +149,19 @@ final class NewsController
     public function show(array $params): void
     {
         $lang = Locale::current();
-        $news = News::findPublishedBySlug($params['slug'] ?? '', $lang);
+        $requestedSlug = trim((string) ($params['slug'] ?? ''));
+        $news = News::findPublishedBySlug($requestedSlug, $lang);
 
         if (!$news) {
             http_response_code(404);
             View::render('errors/404');
             return;
+        }
+
+        $canonicalSlug = (string) ($news['slug'] ?? '');
+        if (($news['lang'] ?? '') === $lang && $canonicalSlug !== '' && $requestedSlug !== $canonicalSlug) {
+            header('Location: ' . Locale::url('news/' . $canonicalSlug, $lang), true, 301);
+            exit;
         }
 
         $available = News::availableLangs((int) $news['id']);

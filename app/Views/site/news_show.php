@@ -300,11 +300,11 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 </div>
             <?php endif; ?>
             <?php if ($hasLeft && $hasSidebar): ?>
-                <div class="newsdetail-card newsdetail-card--thesis-inline" style="margin-bottom: 30px; background: color-mix(in srgb, var(--gov-teal) 4%, var(--gov-surface)); border-left: 4px solid var(--gov-teal); border-top: 1px solid var(--gov-border); border-right: 1px solid var(--gov-border); border-bottom: 1px solid var(--gov-border); border-radius: 0 12px 12px 0; padding: 22px;">
-                    <h2 class="newsdetail-card__title" style="color: var(--gov-teal-text); font-weight: 700; margin: 0 0 14px; font-size: 1.05rem;"><?= htmlspecialchars(t('Ключевые тезисы'), ENT_QUOTES) ?></h2>
-                    <ul class="newsdetail-points" style="gap: 12px;">
+                <div class="newsdetail-card newsdetail-card--thesis-inline">
+                    <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Ключевые тезисы'), ENT_QUOTES) ?></h2>
+                    <ul class="newsdetail-points">
                         <?php foreach ($keyPoints as $point): ?>
-                            <li class="newsdetail-points__item" style="font-size: 0.92rem; line-height: 1.55;"><span class="newsdetail-points__icon" style="color: var(--gov-teal);"><?= $pointIcon ?></span><?= htmlspecialchars($point, ENT_QUOTES) ?></li>
+                            <li class="newsdetail-points__item"><span class="newsdetail-points__icon"><?= $pointIcon ?></span><?= htmlspecialchars($point, ENT_QUOTES) ?></li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
@@ -386,7 +386,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <div class="newsdetail-card news-poll-card" data-poll-id="<?= (int) $poll['id'] ?>">
                     <div class="news-poll-card__header">
                         <span class="news-poll-card__badge"><?= htmlspecialchars(t('Опрос читателей'), ENT_QUOTES) ?></span>
-                        <h3 class="news-poll-card__question" style="font-size:1rem;margin-top:6px;"><?= htmlspecialchars((string) $poll['question'], ENT_QUOTES) ?></h3>
+                        <h3 class="news-poll-card__question"><?= htmlspecialchars((string) $poll['question'], ENT_QUOTES) ?></h3>
                     </div>
                     <div class="news-poll-card__body">
                         <?php if ($hasVoted): ?>
@@ -398,11 +398,11 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                                             <span class="news-poll-res-val"><?= $resItem['percent'] ?>%</span>
                                         </div>
                                         <div class="news-poll-bar-track">
-                                            <div class="news-poll-bar-fill" style="width: <?= $resItem['percent'] ?>%;"></div>
+                                            <div class="news-poll-bar-fill" style="--poll-percent:<?= (float) $resItem['percent'] ?>%;"></div>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
-                                <div class="news-poll-card__meta" style="margin-top:10px;font-size:0.8rem;"><?= htmlspecialchars(t('Всего голосов:'), ENT_QUOTES) ?> <strong><?= $results['total'] ?></strong></div>
+                                <div class="news-poll-card__meta"><?= htmlspecialchars(t('Всего голосов:'), ENT_QUOTES) ?> <strong><?= $results['total'] ?></strong></div>
                             </div>
                         <?php else: ?>
                             <form class="news-poll-card__form" data-poll-form>
@@ -416,11 +416,11 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                                         </label>
                                     <?php endforeach; ?>
                                 </div>
-                                <div class="news-poll-card__actions" style="margin-top: 14px;">
-                                    <button type="submit" class="btn btn--primary btn--sm" style="width:100%;justify-content:center;"><?= htmlspecialchars(t('Голосовать'), ENT_QUOTES) ?></button>
+                                <div class="news-poll-card__actions">
+                                    <button type="submit" class="btn btn--primary btn--sm"><?= htmlspecialchars(t('Голосовать'), ENT_QUOTES) ?></button>
                                 </div>
                             </form>
-                            <div class="news-poll-card__results" style="display:none;" aria-live="polite"></div>
+                            <div class="news-poll-card__results" hidden aria-live="polite"></div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -471,19 +471,19 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 echo $sidebarWidgets;
             } else {
             ?>
-                <div class="newsdetail-subscribe no-print" style="margin-top:20px;border-radius:14px;padding:22px;background:#18181b;color:#ffffff;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
-                    <h2 class="newsdetail-subscribe__title" style="color:#ffffff;font-size:1.15rem;font-weight:700;margin-top:0;margin-bottom:8px;line-height:1.35;"><?= htmlspecialchars(t('Agentlik yangiliklariga obuna bo\'ling'), ENT_QUOTES) ?></h2>
-                    <p class="newsdetail-subscribe__text" style="color:#a1a1aa;font-size:0.88rem;margin-top:0;margin-bottom:16px;line-height:1.45;"><?= htmlspecialchars(t('Eng muhim yangiliklar va tahliliy materiallarni pochtangizga oling.'), ENT_QUOTES) ?></p>
+                <div class="newsdetail-subscribe newsdetail-subscribe--fallback no-print">
+                    <h2 class="newsdetail-subscribe__title"><?= htmlspecialchars(t('Agentlik yangiliklariga obuna bo\'ling'), ENT_QUOTES) ?></h2>
+                    <p class="newsdetail-subscribe__text"><?= htmlspecialchars(t('Eng muhim yangiliklar va tahliliy materiallarni pochtangizga oling.'), ENT_QUOTES) ?></p>
                     <form class="newsdetail-subscribe__form" method="post" action="<?= htmlspecialchars(Locale::url('subscribe', $lang), ENT_QUOTES) ?>">
                         <?= \App\Core\Csrf::field() ?>
-                        <input type="text" name="website" value="" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off" aria-hidden="true">
-                        <div class="newsdetail-subscribe__row" style="display:flex;gap:8px;align-items:center;">
+                        <input class="form-honeypot" type="text" name="website" value="" tabindex="-1" autocomplete="off" aria-hidden="true">
+                        <div class="newsdetail-subscribe__row">
                             <label class="visually-hidden" for="nd-sub-email"><?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?></label>
-                            <input id="nd-sub-email" type="email" name="email" required placeholder="<?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?>" autocomplete="email" style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#ffffff;padding:10px 14px;border-radius:8px;font-size:0.88rem;">
-                            <button type="submit" aria-label="<?= htmlspecialchars(t('Obuna bo\'lish'), ENT_QUOTES) ?>" style="background:var(--gov-teal,#0d9488);color:#ffffff;border:none;border-radius:8px;padding:10px 16px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;justify-content:center;">→</button>
+                            <input id="nd-sub-email" type="email" name="email" required placeholder="<?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?>" autocomplete="email">
+                            <button type="submit" aria-label="<?= htmlspecialchars(t('Obuna bo\'lish'), ENT_QUOTES) ?>">→</button>
                         </div>
                         <?php if (Setting::get('form_consent_enabled', '0') === '1'): ?>
-                            <label class="newsdetail-subscribe__consent" style="color:#a1a1aa;font-size:0.78rem;margin-top:10px;display:flex;gap:6px;">
+                            <label class="newsdetail-subscribe__consent">
                                 <input type="checkbox" name="consent" value="1" required>
                                 <span><?= htmlspecialchars((string) Setting::get('form_consent_text', t('Я даю согласие на обработку персональных данных')), ENT_QUOTES) ?></span>
                             </label>
@@ -597,7 +597,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
 )) ?>
 <div class="reader-mode-overlay" id="reader-mode-overlay" hidden role="dialog" aria-modal="true" aria-label="<?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?>">
     <div class="reader-mode-bar">
-        <div class="reader-mode-bar__progress" id="reader-progress" style="width: 0%;" role="progressbar" aria-label="<?= htmlspecialchars(t('Прогресс чтения'), ENT_QUOTES) ?>" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+        <div class="reader-mode-bar__progress" id="reader-progress" role="progressbar" aria-label="<?= htmlspecialchars(t('Прогресс чтения'), ENT_QUOTES) ?>" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
         <div class="reader-mode-bar__inner">
             <div class="reader-mode-bar__title"><?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?></div>
             <div class="reader-mode-controls">
