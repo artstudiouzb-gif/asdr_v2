@@ -109,7 +109,7 @@ jobs:
           echo "release_name=${safe_name}" >> "${GITHUB_OUTPUT}"
 
       - name: Upload verified package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: asdr-cms-${{ steps.package.outputs.release_name }}
           path: |
