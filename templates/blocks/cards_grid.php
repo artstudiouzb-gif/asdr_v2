@@ -21,8 +21,16 @@ $cardClasses .= $cardsText !== '' ? ' block-cards--custom-text' : '';
 <div class="block-cards<?= $cardClasses ?>">
     <?php if ($title !== '' || ($allText !== '' && $allUrl !== '')): ?>
         <div class="section-head">
-            <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
-            <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
+            <?php if ($title !== ''): ?>
+                <h2 class="section-head__title">
+                    <?= htmlspecialchars($title, ENT_QUOTES) ?>
+                </h2>
+            <?php endif; ?>
+            <?php if ($allText !== '' && $allUrl !== ''): ?>
+                <a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>">
+                    <?= htmlspecialchars($allText, ENT_QUOTES) ?> →
+                </a>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
     <?php if (empty($items)): ?>
@@ -30,12 +38,30 @@ $cardClasses .= $cardsText !== '' ? ' block-cards--custom-text' : '';
     <?php else: ?>
         <div class="cards-grid">
             <?php foreach ($items as $item): ?>
-                <?php $url = trim((string) ($item['url'] ?? '')); $tag = $url !== '' ? 'a' : 'div'; ?>
-                <<?= $tag ?> class="feature-card"<?= $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"' : '' ?>>
-                    <?php if (!empty($item['icon_svg'])): ?><span class="feature-card__icon" aria-hidden="true"><?= $item['icon_svg'] ?></span><?php endif; ?>
-                    <h3 class="feature-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
-                    <?php if (!empty($item['text'])): ?><p class="feature-card__text"><?= htmlspecialchars((string) $item['text'], ENT_QUOTES) ?></p><?php endif; ?>
-                </<?= $tag ?>>
+                <?php $url = trim((string) ($item['url'] ?? '')); ?>
+                <?php if ($url !== ''): ?>
+                    <a class="feature-card" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                <?php else: ?>
+                    <article class="feature-card">
+                <?php endif; ?>
+                    <?php if (!empty($item['icon_svg'])): ?>
+                        <span class="feature-card__icon" aria-hidden="true">
+                            <?= $item['icon_svg'] ?>
+                        </span>
+                    <?php endif; ?>
+                    <h3 class="feature-card__title">
+                        <?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?>
+                    </h3>
+                    <?php if (!empty($item['text'])): ?>
+                        <p class="feature-card__text">
+                            <?= htmlspecialchars((string) $item['text'], ENT_QUOTES) ?>
+                        </p>
+                    <?php endif; ?>
+                <?php if ($url !== ''): ?>
+                    </a>
+                <?php else: ?>
+                    </article>
+                <?php endif; ?>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>

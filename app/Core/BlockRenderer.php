@@ -182,10 +182,6 @@ final class BlockRenderer
         if (!in_array($revealType, ['fade', 'slide-up', 'slide-left', 'slide-right', 'zoom-in'], true)) {
             $revealType = 'fade';
         }
-        $reveal = $revealOn
-            ? ' data-reveal data-reveal-type="' . htmlspecialchars($revealType, ENT_QUOTES) . '"'
-            : '';
-
         // Фон секции, полноширинная подложка и независимые отступы сверху/снизу.
         $bg = (string) ($data['_bg'] ?? 'none');
         if (!in_array($bg, ['none', 'light', 'tint', 'navy'], true)) {
@@ -217,16 +213,23 @@ final class BlockRenderer
             $scopedCss = $scopedCss !== '' ? $scopedCss . "\n" . $sectionCss : $sectionCss;
         }
 
-        $wrapped = sprintf(
-            '<section id="block-%d" class="cms-block cms-block--%s cms-block--space-%s%s" data-block-type="%s"%s>%s</section>',
-            $blockId,
-            htmlspecialchars($type, ENT_QUOTES),
-            htmlspecialchars($spacing, ENT_QUOTES),
-            $extraClass,
-            htmlspecialchars($type, ENT_QUOTES),
-            $reveal,
-            $html
-        );
+        $sectionAttributes = [
+            'id="block-' . $blockId . '"',
+            'class="cms-block cms-block--' . htmlspecialchars($type, ENT_QUOTES)
+                . ' cms-block--space-' . htmlspecialchars($spacing, ENT_QUOTES)
+                . $extraClass . '"',
+            'data-block-type="' . htmlspecialchars($type, ENT_QUOTES) . '"',
+        ];
+        if ($revealOn) {
+            $sectionAttributes[] = 'data-reveal';
+            $sectionAttributes[] = 'data-reveal-type="' . htmlspecialchars($revealType, ENT_QUOTES) . '"';
+        }
+
+        $wrapped = "<section\n    "
+            . implode("\n    ", $sectionAttributes)
+            . "\n>\n"
+            . trim($html)
+            . "\n</section>";
 
         $preloadImage = null;
         if ($type === 'hero') {
@@ -349,11 +352,13 @@ final class BlockRenderer
                     $cssParts[] = $rendered['css'];
                 }
             }
-            $colsHtml .= '<div class="cms-columns__col">' . $inner . '</div>';
+            $colsHtml .= "    <div class=\"cms-columns__col\">\n"
+                . trim($inner)
+                . "\n    </div>\n";
         }
 
         $html = sprintf(
-            '<div class="cms-columns cms-columns--%d cms-columns--gap-%s">%s</div>',
+            "<div class=\"cms-columns cms-columns--%d cms-columns--gap-%s\">\n%s</div>",
             $count,
             htmlspecialchars($gap, ENT_QUOTES),
             $colsHtml
@@ -374,10 +379,17 @@ final class BlockRenderer
         $title = trim((string) ($block['title'] ?? ''));
 
         return sprintf(
-            '<section id="block-%d" class="cms-block cms-block--empty-notice" data-block-type="%s">'
-            . '<div class="cms-empty-notice"><strong>Блок «%s»%s пока пуст</strong>'
-            . '<span>Заполните поля блока — на сайте он появится. Сейчас посетители его не видят.</span>'
-            . '<a class="cms-empty-notice__edit" href="/admin/blocks/%d/edit">Заполнить</a></div></section>',
+            "<section\n"
+            . "    id=\"block-%d\"\n"
+            . "    class=\"cms-block cms-block--empty-notice\"\n"
+            . "    data-block-type=\"%s\"\n"
+            . ">\n"
+            . "    <div class=\"cms-empty-notice\">\n"
+            . "        <strong>Блок «%s»%s пока пуст</strong>\n"
+            . "        <span>Заполните поля блока — на сайте он появится. Сейчас посетители его не видят.</span>\n"
+            . "        <a class=\"cms-empty-notice__edit\" href=\"/admin/blocks/%d/edit\">Заполнить</a>\n"
+            . "    </div>\n"
+            . "</section>",
             (int) $block['id'],
             htmlspecialchars($type, ENT_QUOTES),
             htmlspecialchars($label, ENT_QUOTES),

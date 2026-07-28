@@ -532,7 +532,16 @@ if ($extraHeadCss !== '') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="<?= htmlspecialchars($currentLang, ENT_QUOTES) ?>" data-theme="<?= htmlspecialchars($defaultTheme, ENT_QUOTES) ?>"<?= $a11y['on'] ? ' data-a11y="1" data-a11y-scheme="' . htmlspecialchars($a11y['scheme'], ENT_QUOTES) . '" data-a11y-size="' . htmlspecialchars($a11y['size'], ENT_QUOTES) . '" data-a11y-images="' . htmlspecialchars($a11y['images'], ENT_QUOTES) . '"' : '' ?>>
+<html
+    lang="<?= htmlspecialchars($currentLang, ENT_QUOTES) ?>"
+    data-theme="<?= htmlspecialchars($defaultTheme, ENT_QUOTES) ?>"
+    <?php if ($a11y['on']): ?>
+        data-a11y="1"
+        data-a11y-scheme="<?= htmlspecialchars($a11y['scheme'], ENT_QUOTES) ?>"
+        data-a11y-size="<?= htmlspecialchars($a11y['size'], ENT_QUOTES) ?>"
+        data-a11y-images="<?= htmlspecialchars($a11y['images'], ENT_QUOTES) ?>"
+    <?php endif; ?>
+>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/js/theme-init.js'), ENT_QUOTES) ?>"></script>
@@ -675,9 +684,36 @@ foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
 <?php
 $hasHeaderContent = trim($zones['left'] . $zones['center'] . $zones['right'] . $topbarHtml . $navBarHtml) !== '';
 $containerMode = in_array($hcfg['container_mode'] ?? 'full', ['full', 'container', 'floating'], true) ? $hcfg['container_mode'] : 'full';
+$headerClasses = [
+    'site-header',
+    'site-header--layout-' . $layout,
+    'site-header--logo-' . $logoPos,
+    'site-header--container-' . $containerMode,
+    $navBarHtml !== '' ? 'site-header--has-nav' : '',
+    $drawerMenu !== '' ? 'site-header--has-drawer' : '',
+    !empty($hcfg['sticky']) ? 'site-header--sticky' : '',
+    !empty($hcfg['sticky_full_width']) ? 'site-header--sticky-full' : '',
+    $transparentOn ? 'site-header--transparent' : '',
+    'site-header--h-' . (in_array($hcfg['middlebar']['height'] ?? 'normal', HeaderConfig::HEIGHTS, true)
+        ? $hcfg['middlebar']['height']
+        : 'normal'),
+    'site-header--nav-h-' . (in_array($hcfg['bottombar']['height'] ?? 'normal', HeaderConfig::HEIGHTS, true)
+        ? $hcfg['bottombar']['height']
+        : 'normal'),
+    'site-header--borders-' . (in_array($hcfg['borders'] ?? 'full', HeaderConfig::BORDER_MODES, true)
+        ? $hcfg['borders']
+        : 'full'),
+    trim($headerExtraClass),
+];
+$headerClasses = implode(' ', array_filter($headerClasses));
 ?>
 <?php if ($hasHeaderContent): ?>
-<header class="site-header site-header--layout-<?= htmlspecialchars($layout, ENT_QUOTES) ?> site-header--logo-<?= htmlspecialchars($logoPos, ENT_QUOTES) ?> site-header--container-<?= htmlspecialchars($containerMode, ENT_QUOTES) ?><?= $navBarHtml !== '' ? ' site-header--has-nav' : '' ?><?= $drawerMenu !== '' ? ' site-header--has-drawer' : '' ?><?= !empty($hcfg['sticky']) ? ' site-header--sticky' : '' ?><?= !empty($hcfg['sticky_full_width']) ? ' site-header--sticky-full' : '' ?><?= $transparentOn ? ' site-header--transparent' : '' ?> site-header--h-<?= htmlspecialchars(in_array($hcfg['middlebar']['height'] ?? 'normal', HeaderConfig::HEIGHTS, true) ? $hcfg['middlebar']['height'] : 'normal', ENT_QUOTES) ?> site-header--nav-h-<?= htmlspecialchars(in_array($hcfg['bottombar']['height'] ?? 'normal', HeaderConfig::HEIGHTS, true) ? $hcfg['bottombar']['height'] : 'normal', ENT_QUOTES) ?> site-header--borders-<?= htmlspecialchars(in_array($hcfg['borders'] ?? 'full', HeaderConfig::BORDER_MODES, true) ? $hcfg['borders'] : 'full', ENT_QUOTES) ?><?= $headerExtraClass ?>"<?= (!empty($hcfg['sticky']) || $transparentOn) ? ' data-header-scroll' : '' ?>>
+<header
+    class="<?= htmlspecialchars($headerClasses, ENT_QUOTES) ?>"
+    <?php if (!empty($hcfg['sticky']) || $transparentOn): ?>
+        data-header-scroll
+    <?php endif; ?>
+>
     <div class="site-header__inner">
         <div class="site-header__zone site-header__zone--left"><?= $zones['left'] ?></div>
         <div class="site-header__zone site-header__zone--center"><?= $zones['center'] ?></div>

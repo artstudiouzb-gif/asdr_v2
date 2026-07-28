@@ -21,7 +21,7 @@ test('public chrome avoids first-party executable inline scripts', function (): 
 test('public landmarks and builder blocks use semantic markup without style attributes', function (): void {
     $header = (string) file_get_contents(APP_ROOT . '/app/Views/site/_header.php');
     $footer = (string) file_get_contents(APP_ROOT . '/app/Views/site/_footer.php');
-    $toolbar = (string) file_get_contents(APP_ROOT . '/app/Core/AppToolbar.php');
+    $toolbar = (string) file_get_contents(APP_ROOT . '/app/Views/site/components/admin_toolbar.php');
     $hero = (string) file_get_contents(APP_ROOT . '/templates/blocks/hero.php');
     $cards = (string) file_get_contents(APP_ROOT . '/templates/blocks/cards_grid.php');
 
