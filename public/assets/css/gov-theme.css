@@ -743,7 +743,6 @@ body .site-header--transparent:not(.is-scrolled) .site-header__logo:has(.site-he
 .site-header--transparent:not(.is-scrolled) .site-menu__link:hover,
 .site-header--transparent:not(.is-scrolled) .site-menu__link:focus-visible { color: #9fe3e4 !important; }
 /* Линия подчеркивания активного и наведенного пункта меню с настройками длины, высоты и толщины */
-.site-menu__link::after,
 .site-menu--style-underline .site-menu__link::after {
     content: '' !important;
     position: absolute !important;
@@ -765,13 +764,18 @@ body .site-header--transparent:not(.is-scrolled) .site-header__logo:has(.site-he
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.site-menu__link:hover::after,
-.site-menu__link.is-active::after,
-.site-menu__link[aria-current="page"]::after {
+.site-menu--style-underline .site-menu__link:hover::after,
+.site-menu--style-underline .site-menu__link:focus-visible::after,
+.site-menu--style-underline .site-menu__link.is-active::after,
+.site-menu--style-underline .site-menu__link[aria-current="page"]::after,
+.site-menu--style-underline .site-menu__item--has-children:hover > .site-menu__link::after,
+.site-menu--style-underline .site-menu__item--has-children:focus-within > .site-menu__link::after,
+.site-menu--style-underline .site-menu__item.is-open > .site-menu__link::after {
     transform: scaleX(1) !important;
+    opacity: 1;
 }
 
-body .site-header--transparent:not(.is-scrolled) .site-menu__link::after {
+body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline .site-menu__link::after {
     bottom: var(--hoverline-bottom, 4px) !important;
     left: var(--hoverline-inset, 4px) !important;
     right: var(--hoverline-inset, 4px) !important;
@@ -4657,8 +4661,8 @@ body.quick-search-active { overflow: hidden; }
    ========================================================================== */
 /* Мягкое glow-подчёркивание: заметное, но без неонового пересвета
    на светлом фоне шапки. */
-.site-menu > .site-menu__link::after,
-.site-menu > .site-menu__item > .site-menu__link::after {
+.site-menu--style-underline > .site-menu__link::after,
+.site-menu--style-underline > .site-menu__item > .site-menu__link::after {
     content: '' !important;
     display: block !important;
     background: linear-gradient(
@@ -4683,8 +4687,8 @@ body.quick-search-active { overflow: hidden; }
     ) !important;
     opacity: 1;
 }
-body .site-header--transparent:not(.is-scrolled) .site-menu > .site-menu__link::after,
-body .site-header--transparent:not(.is-scrolled) .site-menu > .site-menu__item > .site-menu__link::after {
+body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline > .site-menu__link::after,
+body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline > .site-menu__item > .site-menu__link::after {
     background: linear-gradient(
         90deg,
         rgba(0, 242, 254, 0) 0%,
@@ -4739,6 +4743,11 @@ body .site-header--transparent:not(.is-scrolled) .site-menu > .site-menu__item >
     box-shadow: none !important;
     transform: none !important;
 }
+.site-menu__item--has-children:hover > .site-menu__link,
+.site-menu__item--has-children:focus-within > .site-menu__link,
+.site-menu__item.is-open > .site-menu__link {
+    color: var(--menu-hover-color, var(--gov-teal)) !important;
+}
 .site-menu__item--has-children:hover > .site-menu__toggle .site-menu__toggle-icon,
 .site-menu__item--has-children:focus-within > .site-menu__toggle .site-menu__toggle-icon,
 .site-menu__item.is-open > .site-menu__toggle .site-menu__toggle-icon {
@@ -4757,6 +4766,11 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:
 body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .site-menu__toggle {
     color: #9fe3e4 !important;
     background: transparent !important;
+}
+body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:hover > .site-menu__link,
+body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:focus-within > .site-menu__link,
+body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .site-menu__link {
+    color: #9fe3e4 !important;
 }
 
 .site-submenu {

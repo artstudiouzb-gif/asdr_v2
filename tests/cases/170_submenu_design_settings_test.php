@@ -83,4 +83,14 @@ test('Конструктор шапки выводит и применяет н�
     assert_contains('--submenu-shadow', $themeCss);
     assert_contains('.site-menu--submenu-cards', $css);
     assert_contains('.site-menu--submenu-divider-none', $css);
+    assert_contains(
+        '.site-menu--style-underline .site-menu__item--has-children:hover > .site-menu__link::after',
+        $css,
+        'линия родительского пункта остаётся активной при переходе в подменю'
+    );
+    assert_contains(
+        '.site-menu--style-underline .site-menu__item.is-open > .site-menu__link::after',
+        $css,
+        'линия родительского пункта остаётся активной у открытого подменю'
+    );
 });
