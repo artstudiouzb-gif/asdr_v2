@@ -102,6 +102,8 @@ jobs:
         run: npm audit --audit-level=high
       - name: Verify generated asset bundles
         run: npm run check:assets
+      - name: Reject new static inline styles
+        run: npm run check:styles
       - name: Check JavaScript syntax
         run: find public/assets/js -not -path '*/vendor/*' -type f -name '*.js' -print0 | xargs -0 -n1 node --check
 

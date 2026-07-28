@@ -406,7 +406,7 @@
         if (!tabs.length) { return; }
         var cards = gallery.querySelectorAll('[data-media-kind]');
         var apply = function (kind) {
-            cards.forEach(function (c) { c.style.display = c.getAttribute('data-media-kind') === kind ? '' : 'none'; });
+            cards.forEach(function (c) { c.hidden = c.getAttribute('data-media-kind') !== kind; });
             tabs.forEach(function (t) {
                 var on = t.getAttribute('data-media-tab') === kind;
                 t.classList.toggle('is-active', on);
@@ -691,7 +691,7 @@
             lastFocus = trigger || document.activeElement;
             render();
             box.classList.add('is-open');
-            document.body.style.overflow = 'hidden';
+            document.body.classList.add('lightbox-active');
             box.querySelector('.cms-lightbox__close').focus();
         }
 
@@ -699,7 +699,7 @@
             if (!box) { return; }
             box.classList.remove('is-open');
             stage.innerHTML = ''; // останавливает видео
-            document.body.style.overflow = '';
+            document.body.classList.remove('lightbox-active');
             if (lastFocus && lastFocus.focus) { lastFocus.focus(); }
         }
 
@@ -756,7 +756,7 @@
             entries.forEach(function (entry) {
                 if (!entry.isIntersecting) { return; }
                 (entry.target.__animCards || []).forEach(function (card, i) {
-                    card.style.transitionDelay = Math.min(i * 60, 360) + 'ms';
+                    card.style.setProperty('--card-reveal-delay', Math.min(i * 60, 360) + 'ms');
                     card.classList.add('is-inview');
                 });
                 obs.unobserve(entry.target);
@@ -1052,7 +1052,7 @@
             var winScroll = document.documentElement.scrollTop || document.body.scrollTop;
             var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             var scrolled = height > 0 ? (winScroll / height) * 100 : 0;
-            bar.style.width = Math.min(Math.max(scrolled, 0), 100) + '%';
+            bar.style.setProperty('--scroll-progress', Math.min(Math.max(scrolled, 0), 100) + '%');
         };
         window.addEventListener('scroll', update, { passive: true });
         update();
@@ -1191,7 +1191,7 @@
             var scrollHeight = overlay.scrollHeight - overlay.clientHeight;
             var pct = scrollHeight > 0 ? Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100)) : 0;
             if (progress) {
-                progress.style.width = pct + '%';
+                progress.style.setProperty('--reader-progress', pct + '%');
                 progress.setAttribute('aria-valuenow', String(Math.round(pct)));
             }
         };
@@ -1396,8 +1396,8 @@
             }
 
             modalCounter.innerText = (currentIndex + 1) + ' / ' + validImages.length;
-            prevBtn.style.display = validImages.length > 1 ? '' : 'none';
-            nextBtn.style.display = validImages.length > 1 ? '' : 'none';
+            prevBtn.hidden = validImages.length <= 1;
+            nextBtn.hidden = validImages.length <= 1;
         };
 
         var closeModal = function () {
@@ -1482,8 +1482,8 @@
             var range = sel.getRangeAt(0);
             var rect = range.getBoundingClientRect();
 
-            popover.style.top = (window.scrollY + rect.top - 48) + 'px';
-            popover.style.left = (window.scrollX + rect.left + (rect.width / 2)) + 'px';
+            popover.style.setProperty('--quote-popover-top', (window.scrollY + rect.top - 48) + 'px');
+            popover.style.setProperty('--quote-popover-left', (window.scrollX + rect.left + (rect.width / 2)) + 'px');
             popover.hidden = false;
         };
 

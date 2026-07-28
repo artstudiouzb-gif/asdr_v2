@@ -9,7 +9,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var array $items */
 ?>
 <div class="form-card">
-    <h2 style="margin-top:0;">Новый тип контента</h2>
+    <h2 class="u-inline-291b7bbb01">Новый тип контента</h2>
     <p class="form-hint">Например «Вакансии», «Отзывы», «Услуги». После создания добавьте поля — и раздел заработает сам.</p>
     <form method="post" action="/admin/content-types/create" class="form-grid">
         <?= Csrf::field() ?>
@@ -37,7 +37,7 @@ require __DIR__ . '/../layout/header.php';
     </form>
 </div>
 
-<table class="data-table" style="margin-top:20px;">
+<table class="data-table u-inline-9eb125f52f">
     <thead><tr><th>Название</th><th>Адрес</th><th>Переводы</th><th>На сайте</th><th></th></tr></thead>
     <tbody>
         <?php if (empty($items)): ?><tr><td colspan="5" class="data-table__empty">Типов пока нет.</td></tr><?php endif; ?>

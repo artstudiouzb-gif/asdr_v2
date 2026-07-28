@@ -29,7 +29,7 @@ require __DIR__ . '/_header.php';
                         <?php endif; ?>
                     </div>
                 </div>
-                <span class="badge badge--<?= $check['ok'] ? 'success' : 'danger' ?>" style="font-size:0.75rem;">
+                <span class="badge badge--<?= $check['ok'] ? 'success' : 'danger' ?> u-inline-07bbf13a37">
                     <?= $check['ok'] ? 'Соответствует' : 'Ошибка' ?>
                 </span>
             </div>
@@ -54,7 +54,7 @@ require __DIR__ . '/_header.php';
                         <?php endif; ?>
                     </div>
                 </div>
-                <span class="badge badge--<?= $check['ok'] ? 'success' : 'danger' ?>" style="font-size:0.75rem;">
+                <span class="badge badge--<?= $check['ok'] ? 'success' : 'danger' ?> u-inline-07bbf13a37">
                     <?= $check['ok'] ? 'Запись разрешена' : 'Нет прав' ?>
                 </span>
             </div>
@@ -73,7 +73,7 @@ require __DIR__ . '/_header.php';
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
             Проверить снова
         </a>
-        <span class="form-hint" style="align-self:center; color:#ef4444; font-weight:600;">Исправьте ошибки выше для продолжения.</span>
+        <span class="form-hint u-inline-30739594c7">Исправьте ошибки выше для продолжения.</span>
     <?php endif; ?>
 </div>
 <?php require __DIR__ . '/_footer.php'; ?>

@@ -16,8 +16,8 @@ $error = $error ?? null;
 $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . urlencode((string) ($block['lang'] ?? ''));
 ?>
 <?php if ($error): ?><div class="alert alert--error"><?= htmlspecialchars($error, ENT_QUOTES) ?></div><?php endif; ?>
-<a href="<?= htmlspecialchars($backUrl, ENT_QUOTES) ?>" class="btn btn--small" style="margin-bottom:16px;">&larr; Назад к странице</a>
-<a href="/admin/blocks/<?= (int) $block['id'] ?>/revisions" class="btn btn--small" style="margin-bottom:16px;">История изменений</a>
+<a href="<?= htmlspecialchars($backUrl, ENT_QUOTES) ?>" class="btn btn--small u-inline-79a1c5a5db">&larr; Назад к странице</a>
+<a href="/admin/blocks/<?= (int) $block['id'] ?>/revisions" class="btn btn--small u-inline-79a1c5a5db">История изменений</a>
 
 <div class="form-card">
     <form method="post" action="/admin/blocks/<?= (int) $block['id'] ?>/edit" class="form-grid" data-content-draft="block:<?= (int) $block['id'] ?>" data-record-updated="<?= htmlspecialchars((string) ($block['updated_at'] ?? ''), ENT_QUOTES) ?>">
@@ -39,14 +39,14 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php if ($type === 'text'): ?>
             <div class="form-field">
                 <label for="content">Текст</label>
-                <textarea id="content" name="content" data-wysiwyg style="min-height:200px;"><?= htmlspecialchars($data['content'] ?? '', ENT_QUOTES) ?></textarea>
+                <textarea class="u-inline-9bef318bc9" id="content" name="content" data-wysiwyg><?= htmlspecialchars($data['content'] ?? '', ENT_QUOTES) ?></textarea>
             </div>
         <?php endif; ?>
 
         <?php if ($type === 'html'): ?>
             <div class="form-field">
                 <label for="html">HTML-код блока</label>
-                <textarea id="html" name="html" style="min-height:200px; font-family: monospace;"><?= htmlspecialchars($data['html'] ?? '', ENT_QUOTES) ?></textarea>
+                <textarea class="u-inline-6650b8308c" id="html" name="html"><?= htmlspecialchars($data['html'] ?? '', ENT_QUOTES) ?></textarea>
                 <span class="form-hint">Выполняется как есть — используйте только доверенный код (виджеты карт, встраиваемые видео и т.п.).</span>
             </div>
         <?php endif; ?>
@@ -276,7 +276,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <?= \App\Core\AdminUi::colorField('card_bg', $data['card_bg'] ?? '', 'Цвет карточки (фон)', '#ffffff', 'По умолчанию (белая)') ?>
                 <?= \App\Core\AdminUi::colorField('text_color', $data['text_color'] ?? '', 'Цвет текста и цифр', '#173a63', 'По умолчанию (тёмно-синий)') ?>
             </div>
-            <span class="form-hint" style="display:block;margin:-6px 0 14px;">Оставьте «по умолчанию», чтобы карточка была белой с тёмным текстом. Для тёмной карточки выберите тёмный фон и светлый текст.</span>
+            <span class="form-hint u-inline-1e51bacc25">Оставьте «по умолчанию», чтобы карточка была белой с тёмным текстом. Для тёмной карточки выберите тёмный фон и светлый текст.</span>
             <div>
                 <label>Счётчики</label>
                 <div data-repeater="items">
@@ -450,7 +450,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
             <div class="form-field" data-hero-custom-height<?= $heroHeightMode !== 'custom' ? ' hidden' : '' ?>>
                 <label for="hero_height_value">Своя высота секции</label>
-                <div style="display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px;">
+                <div class="u-inline-6c78ba1694">
                     <input type="number" id="hero_height_value" name="hero_height_value" min="10" max="2000" step="0.1" value="<?= htmlspecialchars($heroHeightValue, ENT_QUOTES) ?>">
                     <select id="hero_height_unit" name="hero_height_unit" aria-label="Единица высоты">
                         <?php foreach (['px' => 'px', 'vh' => 'vh', 'dvh' => 'dvh', 'rem' => 'rem'] as $unit => $label): ?>
@@ -536,7 +536,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <div class="colorfield-row">
                 <?= \App\Core\AdminUi::colorField('bg_color', $data['bg_color'] ?? '', 'Цвет фона под текстом (градиент)', '#0b1a30', 'Нет (по теме)') ?>
             </div>
-            <span class="form-hint" style="display:block;margin:-6px 0 14px;">Полупрозрачный градиент выбранного цвета под текстом — не зависит от светлой/тёмной темы. Полезно для героя без фото: иначе фон берётся из темы (светло-серый / тёмно-синий).</span>
+            <span class="form-hint u-inline-1e51bacc25">Полупрозрачный градиент выбранного цвета под текстом — не зависит от светлой/тёмной темы. Полезно для героя без фото: иначе фон берётся из темы (светло-серый / тёмно-синий).</span>
             <div class="form-field"><label for="text_position">Положение текста</label>
                 <select id="text_position" name="text_position">
                     <?php $tp = $data['text_position'] ?? 'left'; ?>
@@ -552,7 +552,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             ?>
             <div class="form-field">
                 <label for="text_width_value">Ширина текстовой колонки</label>
-                <div style="display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px;">
+                <div class="u-inline-6c78ba1694">
                     <input type="number" id="text_width_value" name="text_width_value" min="10" max="2000" step="0.1" value="<?= htmlspecialchars($twValue, ENT_QUOTES) ?>" placeholder="по теме (620)">
                     <select id="text_width_unit" name="text_width_unit" aria-label="Единица ширины">
                         <?php foreach (['px' => 'px', '%' => '%', 'vw' => 'vw'] as $unit => $label): ?>
@@ -566,7 +566,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <?= \App\Core\AdminUi::colorField('text_color', $data['text_color'] ?? '', 'Цвет текста', '#ffffff', 'Авто (белый на фото, тёмный без фона)') ?>
                 <?= \App\Core\AdminUi::colorField('button_color', $data['button_color'] ?? '', 'Цвет фона основной кнопки', '#173a63', 'По умолчанию') ?>
             </div>
-            <span class="form-hint" style="display:block;margin:-6px 0 14px;">Применяется к первой кнопке Hero. Вторая кнопка остаётся прозрачной и контурной.</span>
+            <span class="form-hint u-inline-1e51bacc25">Применяется к первой кнопке Hero. Вторая кнопка остаётся прозрачной и контурной.</span>
             <div class="form-field">
                 <label class="hb-switch"><input type="checkbox" name="panel_enabled" value="1" <?= !empty($data['panel_enabled']) ? 'checked' : '' ?>><span class="hb-switch__track"></span> Подложка под текстом</label>
                 <span class="form-hint">Цветная полупрозрачная плашка под заголовком — для читаемости на пёстром фоне. Если делаете светлую подложку — задайте тёмный цвет текста выше.</span>
@@ -771,8 +771,8 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                             <div class="form-field"><label>Мета (напр. PDF · 2.4 МБ)</label><input type="text" name="docs[<?= $i ?>][meta]" value="<?= htmlspecialchars($doc['meta'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field">
                                 <label>Ссылка на файл</label>
-                                <div style="display:flex;gap:8px;">
-                                    <input type="text" name="docs[<?= $i ?>][url]" value="<?= htmlspecialchars($doc['url'] ?? '', ENT_QUOTES) ?>" placeholder="/uploads/public/....pdf" style="flex:1;">
+                                <div class="u-inline-b9bbe540d3">
+                                    <input class="u-inline-7623f05545" type="text" name="docs[<?= $i ?>][url]" value="<?= htmlspecialchars($doc['url'] ?? '', ENT_QUOTES) ?>" placeholder="/uploads/public/....pdf">
                                     <button type="button" class="btn btn--secondary btn--small" data-media-pick data-media-target="[name='docs[<?= $i ?>][url]']" data-media-type="all_files">Выбрать</button>
                                 </div>
                             </div>
@@ -785,8 +785,8 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <div class="form-field"><label>Мета (напр. PDF · 2.4 МБ)</label><input type="text" name="docs[__INDEX__][meta]"></div>
                     <div class="form-field">
                         <label>Ссылка на файл</label>
-                        <div style="display:flex;gap:8px;">
-                            <input type="text" name="docs[__INDEX__][url]" style="flex:1;">
+                        <div class="u-inline-b9bbe540d3">
+                            <input class="u-inline-7623f05545" type="text" name="docs[__INDEX__][url]">
                             <button type="button" class="btn btn--secondary btn--small" data-media-pick data-media-target="[name='docs[__INDEX__][url]']" data-media-type="all_files">Выбрать</button>
                         </div>
                     </div>
@@ -985,8 +985,8 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                             <div class="form-field"><label>Мета (PDF · 2.4 МБ)</label><input type="text" name="items[<?= $i ?>][meta]" value="<?= htmlspecialchars($item['meta'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field">
                                 <label>Ссылка на файл</label>
-                                <div style="display:flex;gap:8px;">
-                                    <input type="text" name="items[<?= $i ?>][url]" value="<?= htmlspecialchars($item['url'] ?? '', ENT_QUOTES) ?>" style="flex:1;">
+                                <div class="u-inline-b9bbe540d3">
+                                    <input class="u-inline-7623f05545" type="text" name="items[<?= $i ?>][url]" value="<?= htmlspecialchars($item['url'] ?? '', ENT_QUOTES) ?>">
                                     <button type="button" class="btn btn--secondary btn--small" data-media-pick data-media-target="[name='items[<?= $i ?>][url]']" data-media-type="all_files">Выбрать</button>
                                 </div>
                             </div>
@@ -999,8 +999,8 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <div class="form-field"><label>Мета</label><input type="text" name="items[__INDEX__][meta]"></div>
                     <div class="form-field">
                         <label>Ссылка на файл</label>
-                        <div style="display:flex;gap:8px;">
-                            <input type="text" name="items[__INDEX__][url]" style="flex:1;">
+                        <div class="u-inline-b9bbe540d3">
+                            <input class="u-inline-7623f05545" type="text" name="items[__INDEX__][url]">
                             <button type="button" class="btn btn--secondary btn--small" data-media-pick data-media-target="[name='items[__INDEX__][url]']" data-media-type="all_files">Выбрать</button>
                         </div>
                     </div>
@@ -1175,7 +1175,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <div class="form-section__body">
         <div class="form-field">
             <label for="custom_css">Собственный CSS блока</label>
-            <textarea id="custom_css" name="custom_css" style="min-height:140px; font-family: monospace;"><?= htmlspecialchars($block['custom_css'] ?? '', ENT_QUOTES) ?></textarea>
+            <textarea class="u-inline-bf60e927c2" id="custom_css" name="custom_css"><?= htmlspecialchars($block['custom_css'] ?? '', ENT_QUOTES) ?></textarea>
             <span class="form-hint">
                 Стили автоматически изолируются: любой селектор при выводе на сайте получает префикс
                 <code>#block-<?= (int) $block['id'] ?></code>, поэтому не может повлиять на остальную страницу.

@@ -58,15 +58,15 @@ $qs = static function (int $p) use ($filters): string {
     return $params === [] ? '/admin/audit' : '/admin/audit?' . http_build_query($params);
 };
 ?>
-<div style="display:flex;gap:8px;margin-bottom:14px;">
+<div class="u-inline-f94566b02a">
     <a class="btn btn--small btn--primary" href="/admin/audit">Действия администраторов</a>
     <a class="btn btn--small" href="/admin/audit/errors">Ошибки сайта</a>
 </div>
 
 <p class="form-hint">Все изменяющие действия администраторов в панели: кто, что, когда и с какого IP. Входы/выходы и события безопасности дополнительно пишутся в security-лог. Записи старше 180 дней удаляются автоматически.</p>
 
-<form method="get" action="/admin/audit" class="form-grid form-grid--inline" style="margin-bottom:18px;display:flex;flex-direction:row;flex-wrap:wrap;gap:10px;align-items:flex-end;">
-    <div class="form-field" style="margin:0;">
+<form method="get" action="/admin/audit" class="form-grid form-grid--inline u-inline-6f145d537e">
+    <div class="form-field u-inline-1da9facb4d">
         <label for="f_user">Администратор</label>
         <select id="f_user" name="user_id">
             <option value="">— все —</option>
@@ -77,19 +77,19 @@ $qs = static function (int $p) use ($filters): string {
             <?php endforeach; ?>
         </select>
     </div>
-    <div class="form-field" style="margin:0;">
+    <div class="form-field u-inline-1da9facb4d">
         <label for="f_q">Путь содержит</label>
         <input type="text" id="f_q" name="q" value="<?= htmlspecialchars($filters['q'], ENT_QUOTES) ?>" placeholder="например: pages">
     </div>
-    <div class="form-field" style="margin:0;">
+    <div class="form-field u-inline-1da9facb4d">
         <label for="f_from">С даты</label>
         <input type="date" id="f_from" name="from" value="<?= htmlspecialchars($filters['from'], ENT_QUOTES) ?>">
     </div>
-    <div class="form-field" style="margin:0;">
+    <div class="form-field u-inline-1da9facb4d">
         <label for="f_to">По дату</label>
         <input type="date" id="f_to" name="to" value="<?= htmlspecialchars($filters['to'], ENT_QUOTES) ?>">
     </div>
-    <div class="form-actions" style="margin:0;">
+    <div class="form-actions u-inline-1da9facb4d">
         <button type="submit" class="btn btn--primary"><?= \App\Core\AdminUi::icon('filter') ?>Фильтровать</button>
         <a href="/admin/audit" class="btn"><?= \App\Core\AdminUi::icon('reset') ?>Сбросить</a>
     </div>
@@ -107,10 +107,10 @@ $qs = static function (int $p) use ($filters): string {
         <tbody>
             <?php foreach ($items as $item): ?>
                 <tr>
-                    <td style="white-space:nowrap;"><?= htmlspecialchars((string) $item['created_at'], ENT_QUOTES) ?></td>
+                    <td class="u-inline-a9efa5449f"><?= htmlspecialchars((string) $item['created_at'], ENT_QUOTES) ?></td>
                     <td><?= htmlspecialchars((string) $item['username'], ENT_QUOTES) ?></td>
                     <td><?= htmlspecialchars($sectionOf((string) $item['path']), ENT_QUOTES) ?></td>
-                    <td><code style="font-size:12px;"><?= htmlspecialchars($item['method'] . ' ' . $item['path'], ENT_QUOTES) ?></code></td>
+                    <td><code class="u-inline-e71ae94b55"><?= htmlspecialchars($item['method'] . ' ' . $item['path'], ENT_QUOTES) ?></code></td>
                     <td><?= htmlspecialchars((string) ($item['ip'] ?? '—'), ENT_QUOTES) ?></td>
                 </tr>
             <?php endforeach; ?>
@@ -118,7 +118,7 @@ $qs = static function (int $p) use ($filters): string {
     </table>
 
     <?php if ($pages > 1): ?>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:16px;">
+        <div class="u-inline-d2576ac843">
             <?php if ($page > 1): ?><a class="btn btn--small" href="<?= htmlspecialchars($qs($page - 1), ENT_QUOTES) ?>">← Новее</a><?php endif; ?>
             <span class="form-hint">Страница <?= (int) $page ?> из <?= (int) $pages ?></span>
             <?php if ($page < $pages): ?><a class="btn btn--small" href="<?= htmlspecialchars($qs($page + 1), ENT_QUOTES) ?>">Старее →</a><?php endif; ?>

@@ -54,7 +54,7 @@ final class WafGuard
 
         http_response_code(403);
         header('Content-Type: text/html; charset=utf-8');
-        echo '<!DOCTYPE html><html><head><title>403 Access Denied</title><style>body{font-family:sans-serif;text-align:center;padding:10% 5%;background:#0f172a;color:#f8fafc;}h1{color:#ef4444;}.box{max-width:500px;margin:0 auto;background:#1e293b;padding:30px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.3);}</style></head><body><div class="box"><h1>403 Forbidden</h1><p>Запрос заблокирован WAF-системой безопасности.</p><p style="font-size:0.85rem;color:#94a3b8;">IP: ' . htmlspecialchars($ip, ENT_QUOTES) . '</p></div></body></html>';
+        echo '<!DOCTYPE html><html><head><title>403 Access Denied</title><link rel="stylesheet" href="/assets/css/system.css"></head><body class="waf-error"><div class="waf-error__box"><h1>403 Forbidden</h1><p>Запрос заблокирован WAF-системой безопасности.</p><p class="waf-error__ip">IP: ' . htmlspecialchars($ip, ENT_QUOTES) . '</p></div></body></html>';
         exit;
     }
 }

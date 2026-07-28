@@ -90,10 +90,10 @@ $extBadge = static function (array $f): string {
     <?php endif; ?>
 
     <section class="rd-list">
-        <div class="rd-section-head" style="align-items:center;">
+        <div class="rd-section-head u-inline-1ca832ca6c">
             <h2><?= ($query !== '' || $category > 0 || $ext !== '') ? 'Найдено: ' . count($files) : 'Все документы' ?></h2>
             
-            <div style="display:flex;align-items:center;gap:12px;">
+            <div class="u-inline-16f2d51288">
                 <?php if ($query !== '' || $category > 0 || $ext !== ''): ?>
                     <a class="rd-reset" href="/repo">Сбросить фильтры ↺</a>
                 <?php endif; ?>
@@ -111,10 +111,10 @@ $extBadge = static function (array $f): string {
         </div>
 
         <!-- Быстрые фильтры по формату файлов и сортировка -->
-        <div class="rd-filter-bar" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;padding:12px 16px;background:#fff;border:1px solid var(--repo-border);border-radius:12px;box-shadow:var(--repo-shadow);">
+        <div class="rd-filter-bar u-inline-8efb6b218d">
             <!-- Фильтры форматов -->
-            <div class="rd-format-pills" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-                <span style="font-size:0.83rem;font-weight:700;color:var(--repo-muted);margin-right:4px;">Формат:</span>
+            <div class="rd-format-pills u-inline-b7cb07acd6">
+                <span class="u-inline-4c8be246cc">Формат:</span>
                 <?php
                 $exts = [
                     '' => 'Все',
@@ -129,14 +129,14 @@ $extBadge = static function (array $f): string {
                     $url = '/repo' . (!empty($urlParams) ? '?' . http_build_query($urlParams) : '');
                     $isActive = ($ext === $eKey);
                 ?>
-                    <a href="<?= htmlspecialchars($url, ENT_QUOTES) ?>" class="rd-pill<?= $isActive ? ' is-active' : '' ?>" style="padding:4px 12px;border-radius:999px;font-size:0.82rem;font-weight:700;text-decoration:none;<?= $isActive ? 'background:var(--repo-navy);color:#fff;' : 'background:#f1f5f9;color:var(--repo-navy);' ?>"><?= $eLabel ?></a>
+                    <a href="<?= htmlspecialchars($url, ENT_QUOTES) ?>" class="rd-pill<?= $isActive ? ' is-active' : '' ?>"><?= $eLabel ?></a>
                 <?php endforeach; ?>
             </div>
 
             <!-- Сортировка -->
-            <div style="display:flex;align-items:center;gap:8px;">
-                <span style="font-size:0.83rem;font-weight:700;color:var(--repo-muted);">Сортировка:</span>
-                <select onchange="location = this.value;" style="padding:5px 10px;border-radius:8px;border:1px solid var(--repo-border);font-size:0.84rem;font-weight:600;background:#fff;cursor:pointer;">
+            <div class="u-inline-e3f61041ef">
+                <span class="u-inline-ca3527ff7a">Сортировка:</span>
+                <select class="u-inline-0993c6d0fe" onchange="location = this.value;">
                     <?php
                     $sorts = [
                         'newest' => 'Сначала новые',
@@ -158,7 +158,7 @@ $extBadge = static function (array $f): string {
             <div class="rd-empty"><?= ($query !== '' || $category > 0) ? 'По вашему запросу ничего не найдено.' : 'В хранилище пока нет файлов.' ?></div>
         <?php else: ?>
             <!-- Табличный вид (скрыт по умолчанию, переключается кнопкой) -->
-            <div class="rd-table-wrapper" id="rd-table-view" style="display:none;">
+            <div class="rd-table-wrapper u-inline-c8be1ccba6" id="rd-table-view">
                 <table class="repo-table">
                     <thead>
                         <tr>
@@ -174,7 +174,7 @@ $extBadge = static function (array $f): string {
                         <?php foreach ($files as $f): ?>
                             <?php $extName = htmlspecialchars($extBadge($f), ENT_QUOTES); ?>
                             <tr>
-                                <td style="width:75px;">
+                                <td class="u-inline-33af915758">
                                     <span class="rd-doc__ext" data-ext="<?= $extName ?>"><?= $extName ?></span>
                                 </td>
                                 <td>
@@ -187,13 +187,13 @@ $extBadge = static function (array $f): string {
                                     <?php if (!empty($f['category'])): ?>
                                         <span class="rd-doc__cat"><?= htmlspecialchars((string) $f['category'], ENT_QUOTES) ?></span>
                                     <?php else: ?>
-                                        <span style="color:#94a3b8;">—</span>
+                                        <span class="u-inline-aa3ee35a72">—</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="repo-meta"><?= htmlspecialchars(Format::fileSize((int) $f['size']), ENT_QUOTES) ?></td>
                                 <td class="repo-meta"><?= htmlspecialchars(date('d.m.Y', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></td>
                                 <td>
-                                    <div style="display:flex;gap:8px;align-items:center;">
+                                    <div class="u-inline-78cead6503">
                                         <a class="rd-btn rd-btn--primary rd-btn--sm" href="/repo/download/<?= (int) $f['id'] ?>">Скачать</a>
                                         <button type="button" class="rd-btn rd-btn--ghost rd-btn--sm" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку">📋</button>
                                     </div>
@@ -219,12 +219,12 @@ $extBadge = static function (array $f): string {
                         <?php if (!empty($f['description'])): ?>
                             <p class="rd-doc__desc"><?= htmlspecialchars(mb_substr((string) $f['description'], 0, 120), ENT_QUOTES) ?></p>
                         <?php endif; ?>
-                        <div class="rd-doc__actions" style="display:flex;gap:8px;">
-                            <a class="rd-btn rd-btn--primary" href="/repo/download/<?= (int) $f['id'] ?>" style="flex:1;justify-content:center;">
+                        <div class="rd-doc__actions u-inline-b9bbe540d3">
+                            <a class="rd-btn rd-btn--primary u-inline-2d3aafab92" href="/repo/download/<?= (int) $f['id'] ?>">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 4v11m0 0 4-4m-4 4-4-4"/><path d="M5 19h14"/></svg>
                                 Скачать
                             </a>
-                            <button type="button" class="rd-btn rd-btn--ghost" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку" style="padding:10px;">📋</button>
+                            <button type="button" class="rd-btn rd-btn--ghost u-inline-481ed7e754" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку">📋</button>
                         </div>
                     </article>
                 <?php endforeach; ?>

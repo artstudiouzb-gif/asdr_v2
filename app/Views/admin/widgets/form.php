@@ -45,14 +45,14 @@ $currentType = $widget['type'] ?? 'latest_news';
         $savedTitles = is_array($data['titles'] ?? null) ? $data['titles'] : [];
         ?>
         <?php if (count($activeLangs) > 1): ?>
-            <fieldset style="border:1px solid var(--admin-border);border-radius:8px;padding:12px 14px;margin-bottom:16px;background:var(--admin-bg-alt, rgba(0,0,0,0.02));">
-                <legend style="padding:0 8px;font-weight:600;font-size:0.85rem;color:var(--admin-muted);">Перевод заголовка на языки сайта</legend>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;margin-top:6px;">
+            <fieldset class="u-inline-1acd52fd8a">
+                <legend class="u-inline-d9d85faa60">Перевод заголовка на языки сайта</legend>
+                <div class="u-inline-c37fe6a935">
                     <?php foreach ($activeLangs as $al): ?>
                         <?php $acode = (string) $al['code']; ?>
-                        <div class="form-field" style="margin:0;">
-                            <label for="title_<?= $acode ?>" style="font-size:0.82rem;font-weight:600;"><?= htmlspecialchars($al['name'], ENT_QUOTES) ?> (<?= strtoupper($acode) ?>)</label>
-                            <input type="text" id="title_<?= $acode ?>" name="titles[<?= $acode ?>]" value="<?= htmlspecialchars((string) ($savedTitles[$acode] ?? ''), ENT_QUOTES) ?>" placeholder="<?= htmlspecialchars((string) ($widget['title'] ?? ''), ENT_QUOTES) ?>" style="font-size:0.88rem;padding:6px 10px;">
+                        <div class="form-field u-inline-1da9facb4d">
+                            <label class="u-inline-e8d4cc3d50" for="title_<?= $acode ?>"><?= htmlspecialchars($al['name'], ENT_QUOTES) ?> (<?= strtoupper($acode) ?>)</label>
+                            <input class="u-inline-6735d86a52" type="text" id="title_<?= $acode ?>" name="titles[<?= $acode ?>]" value="<?= htmlspecialchars((string) ($savedTitles[$acode] ?? ''), ENT_QUOTES) ?>" placeholder="<?= htmlspecialchars((string) ($widget['title'] ?? ''), ENT_QUOTES) ?>">
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -82,7 +82,7 @@ $currentType = $widget['type'] ?? 'latest_news';
         <!-- Настройки: количество (latest_news / projects_list / team_list) -->
         <?php foreach (['latest_news', 'projects_list', 'team_list'] as $countType): ?>
             <?php if ($showType($countType)): ?>
-                <div class="form-field" data-wtype="<?= $countType ?>" style="<?= (!$isEdit && $countType !== 'latest_news') ? 'display:none;' : 'display:flex;' ?>">
+                <div class="form-field<?= (!$isEdit && $countType !== 'latest_news') ? ' is-hidden' : '' ?>" data-wtype="<?= $countType ?>">
                     <label>Сколько элементов показывать</label>
                     <input type="number" name="count" value="<?= (int) ($data['count'] ?? 5) ?>" min="1" max="20">
                 </div>
@@ -91,7 +91,7 @@ $currentType = $widget['type'] ?? 'latest_news';
 
         <!-- Настройки: latest_news (Превью картинки) -->
         <?php if ($showType('latest_news')): ?>
-            <div class="form-field form-field--checkbox" data-wtype="latest_news" style="<?= (!$isEdit || $currentType === 'latest_news') ? 'display:flex;' : 'display:none;' ?>">
+            <div class="form-field form-field--checkbox<?= (!$isEdit || $currentType === 'latest_news') ? '' : ' is-hidden' ?>" data-wtype="latest_news">
                 <input type="checkbox" id="show_thumb" name="show_thumb" value="1" <?= !empty($data['show_thumb']) ? 'checked' : '' ?>>
                 <label for="show_thumb">Отображать миниатюры фотографий к новостям</label>
             </div>
@@ -99,7 +99,7 @@ $currentType = $widget['type'] ?? 'latest_news';
 
         <!-- Настройки: contacts -->
         <?php if ($showType('contacts')): ?>
-            <div class="form-field form-field--checkbox" data-wtype="contacts" style="<?= (!$isEdit) ? 'display:none;' : 'display:flex;' ?>">
+            <div class="form-field form-field--checkbox<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="contacts">
                 <input type="checkbox" id="show_socials" name="show_socials" value="1" <?= !empty($data['show_socials']) ? 'checked' : '' ?>>
                 <label for="show_socials">Показывать иконки соцсетей (из настроек шапки)</label>
             </div>
@@ -107,23 +107,23 @@ $currentType = $widget['type'] ?? 'latest_news';
 
         <!-- Настройки: custom_html -->
         <?php if ($showType('custom_html')): ?>
-            <div class="form-field" data-wtype="custom_html" style="<?= (!$isEdit) ? 'display:none;' : 'display:flex;' ?>">
+            <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="custom_html">
                 <label>HTML-код виджета</label>
-                <textarea name="html" style="min-height:160px; font-family: monospace;"><?= htmlspecialchars($data['html'] ?? '', ENT_QUOTES) ?></textarea>
+                <textarea class="u-inline-f86bea4b15" name="html"><?= htmlspecialchars($data['html'] ?? '', ENT_QUOTES) ?></textarea>
             </div>
         <?php endif; ?>
 
         <!-- Настройки: subscribe -->
         <?php if ($showType('subscribe')): ?>
-            <div class="form-field" data-wtype="subscribe" style="<?= (!$isEdit) ? 'display:none;' : 'display:flex;' ?>">
+            <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="subscribe">
                 <label>Подзаголовок формы подписки (необязательно)</label>
                 <input type="text" name="text" value="<?= htmlspecialchars((string) ($data['text'] ?? 'Eng muhim yangiliklar va tahliliy materiallarni pochtangizga oling.'), ENT_QUOTES) ?>">
             </div>
         <?php endif; ?>
 
         <?php $design = \App\Core\WidgetRenderer::normalizeDesign($data); ?>
-        <fieldset style="border:1px solid var(--admin-border);border-radius:8px;padding:16px;">
-            <legend style="padding:0 8px;font-weight:600;">Оформление</legend>
+        <fieldset class="u-inline-c00ceb2874">
+            <legend class="u-inline-1204c3c3eb">Оформление</legend>
             <div class="form-field">
                 <label for="design_style">Стиль</label>
                 <select id="design_style" name="design_style">

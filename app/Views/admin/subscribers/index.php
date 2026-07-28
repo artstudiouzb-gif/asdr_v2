@@ -24,7 +24,7 @@ require __DIR__ . '/../layout/header.php';
             <?php foreach ($items as $item): ?>
                 <tr>
                     <td><?= htmlspecialchars((string) $item['email'], ENT_QUOTES) ?></td>
-                    <td style="white-space:nowrap;"><?= htmlspecialchars((string) $item['created_at'], ENT_QUOTES) ?></td>
+                    <td class="u-inline-a9efa5449f"><?= htmlspecialchars((string) $item['created_at'], ENT_QUOTES) ?></td>
                     <td class="data-table__actions">
                         <form method="post" action="/admin/subscribers/<?= (int) $item['id'] ?>/delete" data-confirm="Удалить подписчика «<?= htmlspecialchars((string) $item['email'], ENT_QUOTES) ?>»?">
                             <?= Csrf::field() ?>

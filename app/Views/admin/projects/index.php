@@ -47,7 +47,7 @@ $langs = Language::active();
 <table class="data-table">
     <thead>
         <tr>
-            <th style="width:32px;"><input type="checkbox" data-select-all aria-label="Выбрать все"></th>
+            <th class="u-inline-5aec6ffae3"><input type="checkbox" data-select-all aria-label="Выбрать все"></th>
             <th>Название</th>
             <th>Языки</th>
             <th>Статус</th>
@@ -71,7 +71,7 @@ $langs = Language::active();
                     <a class="data-table__primary" href="/admin/projects/<?= (int) $item['id'] ?>/edit"><?= htmlspecialchars($item['title'], ENT_QUOTES) ?></a>
                     <?php if (!empty($item['is_featured'])): ?><span class="badge badge--success" title="Показывается в блоке «Проекты» на главной">★ на главной</span><?php endif; ?>
                 </td>
-                <td style="white-space:nowrap;"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? [], 'module' => 'projects', 'origId' => (int) $item['id']]) ?></td>
+                <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? [], 'module' => 'projects', 'origId' => (int) $item['id']]) ?></td>
                 <td>
                     <span class="badge badge--<?= $item['status'] ?>">
                         <?= $item['status'] === 'published' ? 'Опубликовано' : 'Черновик' ?>

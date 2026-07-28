@@ -115,7 +115,7 @@ $renderFields = static function (?array $item) use ($pages, $parentCandidates): 
         ?>
         <div class="form-field menu-icon-picker-field">
             <label for="<?= $prefix ?>_icon_select">Иконка пункта <span class="form-hint">(выберите из AdminUI или укажите свой SVG)</span></label>
-            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+            <div class="u-inline-7a9664ce54">
                 <select id="<?= $prefix ?>_icon_select" class="form-control" data-icon-select="<?= $prefix ?>_icon">
                     <option value="">— Без иконки —</option>
                     <optgroup label="Иконки AdminUI">
@@ -127,11 +127,11 @@ $renderFields = static function (?array $item) use ($pages, $parentCandidates): 
                     </optgroup>
                     <option value="custom" <?= $iconValue !== '' && $selectedIconKey === '' ? 'selected' : '' ?>>Свой SVG-код…</option>
                 </select>
-                <div class="menu-icon-preview" id="<?= $prefix ?>_icon_preview" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1px solid var(--admin-border, #cbd5e1); border-radius: 6px; background: var(--admin-bg, #f8fafc); flex-shrink: 0;" title="Превью иконки">
-                    <?= $iconValue !== '' ? ($selectedIconKey !== '' ? \App\Core\AdminUi::icon($selectedIconKey, 20) : (str_contains($iconValue, '<svg') ? $iconValue : \App\Core\AdminUi::icon($iconValue, 20))) : '<span style="color:#94a3b8;font-size:10px;">нет</span>' ?>
+                <div class="menu-icon-preview u-inline-893519dbf3" id="<?= $prefix ?>_icon_preview" title="Превью иконки">
+                    <?= $iconValue !== '' ? ($selectedIconKey !== '' ? \App\Core\AdminUi::icon($selectedIconKey, 20) : (str_contains($iconValue, '<svg') ? $iconValue : \App\Core\AdminUi::icon($iconValue, 20))) : '<span class="u-inline-081bc4f452">нет</span>' ?>
                 </div>
             </div>
-            <div class="menu-icon-custom-box" id="<?= $prefix ?>_icon_custom_box" style="<?= $selectedIconKey !== '' || $iconValue === '' ? 'display: none;' : '' ?>">
+            <div class="menu-icon-custom-box<?= $selectedIconKey !== '' || $iconValue === '' ? ' is-hidden' : '' ?>" id="<?= $prefix ?>_icon_custom_box">
                 <textarea id="<?= $prefix ?>_icon" name="icon_svg" rows="3" placeholder="<svg viewBox=&quot;0 0 24 24&quot;>…</svg>"><?= htmlspecialchars($iconValue, ENT_QUOTES) ?></textarea>
                 <span class="form-hint">Векторный SVG-код или имя иконки из AdminUi. Скрипты и события удаляются автоматически.</span>
         </div>
@@ -139,7 +139,7 @@ $renderFields = static function (?array $item) use ($pages, $parentCandidates): 
         <div class="form-field form-field--checkbox">
             <input type="checkbox" id="<?= $prefix ?>_hide_title" name="hide_title" value="1"<?= !empty($item['hide_title']) ? ' checked' : '' ?>>
             <label for="<?= $prefix ?>_hide_title">Скрыть текст названия (показывать только иконку)</label>
-            <span class="form-hint" style="display:block;margin-top:2px;">Работает, когда у пункта выведена иконка. Текст остаётся для скринридеров и подсказки.</span>
+            <span class="form-hint u-inline-6f8ae3477e">Работает, когда у пункта выведена иконка. Текст остаётся для скринридеров и подсказки.</span>
         </div>
 
         <?php $badgeColor = (string) ($item['badge_color'] ?? 'red'); ?>
@@ -368,9 +368,9 @@ document.addEventListener('change', function(e) {
             if (textarea) textarea.value = val;
             if (preview) {
                 if (!val) {
-                    preview.innerHTML = '<span style="color:#94a3b8;font-size:10px;">нет</span>';
+                    preview.innerHTML = '<span class="u-inline-081bc4f452">нет</span>';
                 } else {
-                    preview.innerHTML = '<span style="color:var(--admin-accent,#17999b);font-weight:600;font-size:11px;">✓</span>';
+                    preview.innerHTML = '<span class="u-inline-cc19ec9cf7">✓</span>';
                 }
             }
         }

@@ -48,7 +48,7 @@ $langs = Language::active();
 <table class="data-table">
     <thead>
         <tr>
-            <th style="width:32px;"><input type="checkbox" data-select-all aria-label="Выбрать все"></th>
+            <th class="u-inline-5aec6ffae3"><input type="checkbox" data-select-all aria-label="Выбрать все"></th>
             <th>Заголовок</th>
             <th>URL</th>
             <th>Языки</th>
@@ -80,18 +80,18 @@ $langs = Language::active();
                     $otherTitles = [];
                     foreach ($transGroup as $tCode => $tRow) {
                         if ((int) $tRow['id'] !== (int) $item['id'] && !empty($tRow['title'])) {
-                            $otherTitles[] = '<span style="color:#64748b;font-weight:600;">' . strtoupper($tCode) . ':</span> ' . htmlspecialchars((string) $tRow['title'], ENT_QUOTES);
+                            $otherTitles[] = '<span class="u-inline-b6c72f2984">' . strtoupper($tCode) . ':</span> ' . htmlspecialchars((string) $tRow['title'], ENT_QUOTES);
                         }
                     }
                     ?>
                     <?php if ($otherTitles !== []): ?>
-                        <div style="font-size:0.78rem;margin-top:3px;">
+                        <div class="u-inline-85b4085512">
                             <?= implode(' &nbsp;•&nbsp; ', $otherTitles) ?>
                         </div>
                     <?php endif; ?>
                 </td>
                 <td>/<?= htmlspecialchars($item['slug'], ENT_QUOTES) ?></td>
-                <td style="white-space:nowrap;"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? [], 'module' => 'pages', 'origId' => (int) $item['id']]) ?></td>
+                <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? [], 'module' => 'pages', 'origId' => (int) $item['id']]) ?></td>
                 <td>
                     <span class="badge badge--<?= $item['status'] ?>">
                         <?= $item['status'] === 'published' ? 'Опубликовано' : 'Черновик' ?>

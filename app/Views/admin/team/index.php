@@ -35,7 +35,7 @@ $langs = Language::active();
             <tr>
                 <td><?= htmlspecialchars($item['name'], ENT_QUOTES) ?></td>
                 <td><?= htmlspecialchars($item['position'] ?? '', ENT_QUOTES) ?></td>
-                <td style="white-space:nowrap;"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? []]) ?></td>
+                <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? []]) ?></td>
                 <td>
                     <span class="badge badge--<?= $item['status'] ?>">
                         <?= $item['status'] === 'published' ? 'Опубликовано' : 'Черновик' ?>

@@ -101,7 +101,7 @@ final class ErrorHandler
         }
 
         if (self::$debug) {
-            echo '<pre style="padding:20px;font:14px monospace;color:#c00;">';
+            echo '<pre class="system-debug-error">';
             echo htmlspecialchars((string) $e, ENT_QUOTES);
             echo '</pre>';
             return;

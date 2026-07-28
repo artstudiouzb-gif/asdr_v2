@@ -24,9 +24,9 @@ $blockName = $block['title'] !== null && $block['title'] !== ''
     ? htmlspecialchars((string) $block['title'], ENT_QUOTES)
     : ('#' . (int) $block['id'] . ' (' . $typeLabel . ')');
 ?>
-<a href="<?= htmlspecialchars($backUrl, ENT_QUOTES) ?>" class="btn btn--small" style="margin-bottom:16px;">&larr; Назад к странице</a>
+<a href="<?= htmlspecialchars($backUrl, ENT_QUOTES) ?>" class="btn btn--small u-inline-79a1c5a5db">&larr; Назад к странице</a>
 
-<h1 style="margin-top:0;">История версий блока: <?= $blockName ?></h1>
+<h1 class="u-inline-291b7bbb01">История версий блока: <?= $blockName ?></h1>
 <p class="admin-hint">
     Хранятся последние 20 версий. Восстановление применяет выбранную версию
     и само создаётся как новая запись истории (текущее состояние не теряется).

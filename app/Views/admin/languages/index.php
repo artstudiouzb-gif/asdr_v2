@@ -16,7 +16,7 @@ require __DIR__ . '/../layout/header.php';
     </form>
 <?php endforeach; ?>
 
-<table class="data-table" style="margin-bottom:30px;">
+<table class="data-table u-inline-5370cbf1a7">
     <thead>
         <tr><th>Код</th><th>Название</th><th>По умолчанию</th><th>Активен</th><th>Порядок</th><th></th></tr>
     </thead>
@@ -24,11 +24,11 @@ require __DIR__ . '/../layout/header.php';
         <?php foreach ($items as $item): ?>
             <?php $f = 'lang-' . (int) $item['id']; ?>
             <tr>
-                <td><input type="text" name="code" value="<?= htmlspecialchars($item['code'], ENT_QUOTES) ?>" style="width:80px;" form="<?= $f ?>"></td>
+                <td><input class="u-inline-1a91ef9eca" type="text" name="code" value="<?= htmlspecialchars($item['code'], ENT_QUOTES) ?>" form="<?= $f ?>"></td>
                 <td><input type="text" name="name" value="<?= htmlspecialchars($item['name'], ENT_QUOTES) ?>" form="<?= $f ?>"></td>
-                <td style="text-align:center;"><input type="checkbox" name="is_default" value="1" <?= $item['is_default'] ? 'checked' : '' ?> form="<?= $f ?>"></td>
-                <td style="text-align:center;"><input type="checkbox" name="is_active" value="1" <?= $item['is_active'] ? 'checked' : '' ?> form="<?= $f ?>"></td>
-                <td><input type="number" name="sort_order" value="<?= (int) $item['sort_order'] ?>" style="width:70px;" form="<?= $f ?>"></td>
+                <td class="u-inline-dac4fe6c9b"><input type="checkbox" name="is_default" value="1" <?= $item['is_default'] ? 'checked' : '' ?> form="<?= $f ?>"></td>
+                <td class="u-inline-dac4fe6c9b"><input type="checkbox" name="is_active" value="1" <?= $item['is_active'] ? 'checked' : '' ?> form="<?= $f ?>"></td>
+                <td><input class="u-inline-d26d79f4c2" type="number" name="sort_order" value="<?= (int) $item['sort_order'] ?>" form="<?= $f ?>"></td>
                 <td class="data-table__actions">
                     <button type="submit" class="btn btn--small btn--primary" form="<?= $f ?>">Сохранить</button>
                     <?php if (!$item['is_default']): ?>
@@ -44,7 +44,7 @@ require __DIR__ . '/../layout/header.php';
 </table>
 
 <div class="form-card">
-    <h2 style="margin-top:0;">Добавить язык</h2>
+    <h2 class="u-inline-291b7bbb01">Добавить язык</h2>
     <form method="post" action="/admin/languages/create" class="form-grid">
         <?= Csrf::field() ?>
         <div class="form-field">

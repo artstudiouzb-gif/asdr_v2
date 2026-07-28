@@ -71,32 +71,7 @@ $e = static fn ($s): string => htmlspecialchars((string) $s, ENT_QUOTES);
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
 <title>404 — <?= $e($title) ?></title>
-<style>
-    :root { --navy: #173a63; --teal: #17999b; --ink: #1f2b3d; --muted: #667182; --bg: #f4f6f9; --line: #e5e9f0; }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'PT Sans', 'Segoe UI', Roboto, Arial, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.6; }
-    .wrap { max-width: 760px; margin: 0 auto; padding: 64px 20px 80px; }
-    .code { font-family: 'PT Serif', Georgia, serif; font-size: 88px; line-height: 1; font-weight: 700; color: var(--navy); margin: 0; }
-    h1 { font-family: 'PT Serif', Georgia, serif; font-size: 26px; margin: 8px 0 6px; color: var(--navy); }
-    .lead { color: var(--muted); margin: 0 0 28px; }
-    form.s404 { display: flex; gap: 8px; margin: 0 0 32px; }
-    form.s404 input { flex: 1; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 16px; }
-    form.s404 button { padding: 12px 20px; border: 0; border-radius: 8px; background: var(--teal); color: #fff; font-size: 16px; cursor: pointer; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
-    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
-    .card h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 12px; }
-    .card ul { list-style: none; padding: 0; margin: 0; }
-    .card li { margin: 0 0 10px; }
-    a { color: var(--teal); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .home { display: inline-block; margin-top: 8px; padding: 11px 22px; background: var(--navy); color: #fff; border-radius: 8px; }
-    .home:hover { text-decoration: none; opacity: .92; }
-    .suggest { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 0 0 32px; }
-    .suggest h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 12px; }
-    .suggest ul { list-style: none; padding: 0; margin: 0; }
-    .suggest li { margin: 0 0 10px; }
-    .suggest .t { color: var(--muted); font-size: 13px; }
-</style>
+<link rel="stylesheet" href="/assets/css/system.css">
 </head>
 <body>
 <div class="wrap">
@@ -139,7 +114,7 @@ $e = static fn ($s): string => htmlspecialchars((string) $s, ENT_QUOTES);
         <?php endif; ?>
     </div>
 
-    <p style="margin-top:32px;"><a class="home" href="<?= $e($homeUrl) ?>"><?= $e($homeLabel) ?></a></p>
+    <p class="u-inline-8d74c20df9"><a class="home" href="<?= $e($homeUrl) ?>"><?= $e($homeLabel) ?></a></p>
 </div>
 </body>
 </html>

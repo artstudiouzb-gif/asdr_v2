@@ -14,7 +14,7 @@ $roleLabels = ['admin' => 'Супер-администратор', 'super_admin'
 ?>
 <p class="form-hint">Редактор управляет только контентом (страницы, новости, проекты, команда, формы, файлы). Системные разделы доступны супер-администратору.</p>
 
-<table class="data-table" style="margin-bottom:30px;">
+<table class="data-table u-inline-5370cbf1a7">
     <thead>
         <tr><th>Логин</th><th>Email</th><th>Роль</th><th>Язык админки</th><th>Телефон (код входа)</th><th>Последний вход</th><th></th></tr>
     </thead>
@@ -43,7 +43,7 @@ $roleLabels = ['admin' => 'Супер-администратор', 'super_admin'
 </table>
 
 <div class="form-card">
-    <h2 style="margin-top:0;">Добавить пользователя</h2>
+    <h2 class="u-inline-291b7bbb01">Добавить пользователя</h2>
     <?php if (!empty($error)): ?><div class="alert alert--error"><?= htmlspecialchars($error, ENT_QUOTES) ?></div><?php endif; ?>
     <form method="post" action="/admin/users/create" class="form-grid">
         <?= Csrf::field() ?>

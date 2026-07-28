@@ -16,366 +16,6 @@ $selectedDate = (string) ($_GET['date'] ?? '');
 $selectedSort = (string) ($_GET['sort'] ?? 'date_desc');
 $searchQuery = (string) ($_GET['q'] ?? '');
 ?>
-
-<style>
-/* ============================================================================
-   ПРЕМИАЛЬНАЯ МЕДИАБИБЛИОТЕКА (Modern Media Library)
-   ============================================================================ */
-
-.media-lib {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-/* Верхняя панель действий и фильтров */
-.media-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 14px 18px;
-    background: #ffffff;
-    border: 1px solid var(--admin-border, #e6e8ec);
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.media-toolbar__left {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-}
-
-.media-toolbar__right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-left: auto;
-}
-
-.media-toolbar select,
-.media-toolbar input[type="search"] {
-    padding: 8px 12px;
-    font-size: 13px;
-    border-radius: 8px;
-    border: 1px solid var(--admin-border, #d0d7de);
-    background: #f8fafc;
-    color: var(--admin-ink, #0f172a);
-    outline: none;
-    transition: all 0.2s ease;
-}
-
-.media-toolbar select:focus,
-.media-toolbar input[type="search"]:focus {
-    background: #ffffff;
-    border-color: var(--admin-accent, #0f2756);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent, #0f2756) 15%, transparent);
-}
-
-/* Кнопка выбора режима просмотра (Список / Сетка) */
-#view_mode_list.is-active, #view_mode_grid.is-active {
-    background: var(--admin-accent, #173a63) !important;
-    color: #ffffff !important;
-    border-color: var(--admin-accent, #173a63) !important;
-}
-
-.files-view-list .media-grid { display: none !important; }
-.files-view-grid .files-table { display: none !important; }
-
-/* Кнопка множественного выбора и пакетного удаления */
-.media-bulk-bar {
-    display: none;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 12px 18px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    border-radius: 10px;
-    font-size: 13px;
-    color: #1e40af;
-}
-
-.media-bulk-bar.is-active {
-    display: flex;
-}
-
-/* Драг-н-Дроп зона загрузки файлов */
-.media-upload-drawer {
-    display: none;
-    padding: 30px 24px;
-    background: #f8fafc;
-    border: 2px dashed var(--admin-accent, #0f2756);
-    border-radius: 14px;
-    text-align: center;
-    margin-bottom: 20px;
-    transition: all 0.2s ease;
-}
-
-.media-upload-drawer.is-open,
-.media-upload-drawer.is-dragover {
-    display: block;
-    background: #f0f7ff;
-}
-
-.media-dropzone__title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--admin-ink, #0f172a);
-    margin-bottom: 6px;
-}
-
-.media-dropzone__sub {
-    font-size: 13px;
-    color: var(--admin-muted, #64748b);
-    margin-bottom: 16px;
-}
-
-/* Сетка карточек медиабиблиотеки (Квадратные плитки) */
-.media-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
-    gap: 14px;
-}
-
-@media (min-width: 1200px) {
-    .media-grid {
-        grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-    }
-}
-
-.media-card {
-    position: relative;
-    aspect-ratio: 1 / 1;
-    background: #f1f5f9;
-    border: 2px solid transparent;
-    border-radius: 10px;
-    overflow: hidden;
-    cursor: pointer;
-    user-select: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.media-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-}
-
-.media-card.is-selected {
-    border-color: #0284c7 !important;
-    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.3) !important;
-}
-
-.media-card__thumb {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.media-card__icon-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    padding: 12px;
-    color: var(--admin-muted, #64748b);
-    text-align: center;
-    background: #e2e8f0;
-}
-
-.media-card__ext {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-top: 4px;
-    letter-spacing: 0.05em;
-}
-
-.media-card__caption {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 6px 8px;
-    background: rgba(15, 23, 42, 0.85);
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    backdrop-filter: blur(4px);
-}
-
-.media-card__check {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #0284c7;
-    color: #ffffff;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    z-index: 5;
-}
-
-.media-card.is-selected .media-card__check {
-    display: flex;
-}
-
-/* Инспекционная модальная панель (Media Details Modal Drawer) */
-.media-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(8px);
-    z-index: 1000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.media-modal.is-open {
-    display: flex;
-    animation: media-fade-in 0.25s ease;
-}
-
-@keyframes media-fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.media-modal__dialog {
-    position: relative;
-    display: flex;
-    width: 100%;
-    max-width: 1000px;
-    max-height: 88vh;
-    background: #ffffff;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
-}
-
-@media (max-width: 800px) {
-    .media-modal__dialog {
-        flex-direction: column;
-        max-height: 94vh;
-        overflow-y: auto;
-    }
-}
-
-.media-modal__preview-side {
-    flex: 1.3;
-    background: #0f172a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    position: relative;
-    min-height: 320px;
-}
-
-.media-modal__preview-side img,
-.media-modal__preview-side video {
-    max-width: 100%;
-    max-height: 70vh;
-    object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-}
-
-.media-modal__details-side {
-    flex: 1;
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    overflow-y: auto;
-    background: #ffffff;
-}
-
-.media-modal__close {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    transition: background 0.2s ease;
-}
-
-.media-modal__close:hover {
-    background: rgba(255, 255, 255, 0.4);
-}
-
-.media-modal__title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--admin-ink, #0f172a);
-    margin: 0;
-    word-break: break-all;
-}
-
-.media-modal__meta-list {
-    font-size: 13px;
-    color: var(--admin-muted, #64748b);
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--admin-border, #e2e8f0);
-}
-
-.media-modal__field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.media-modal__field label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--admin-muted, #64748b);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.media-modal__input-group {
-    display: flex;
-    gap: 8px;
-}
-
-.media-modal__input-group input {
-    flex: 1;
-    padding: 8px 12px;
-    font-size: 13px;
-    border-radius: 8px;
-    border: 1px solid var(--admin-border, #cbd5e1);
-    background: #f8fafc;
-}
-</style>
-
 <div class="media-lib">
     <!-- Драг-н-Дроп зона для загрузки файлов -->
     <div class="media-upload-drawer" id="media_upload_drawer">
@@ -383,16 +23,16 @@ $searchQuery = (string) ($_GET['q'] ?? '');
             <?= Csrf::field() ?>
             <div class="media-dropzone__title">Перетащите файлы сюда</div>
             <div class="media-dropzone__sub">или нажмите кнопку ниже для выбора на диске</div>
-            <div style="display:flex; justify-content:center; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:14px;">
-                <input type="file" id="media_file_input" name="file" style="display:none;" required>
+            <div class="u-inline-bea13c7a75">
+                <input class="u-inline-c8be1ccba6" type="file" id="media_file_input" name="file" required>
                 <button type="button" class="btn btn--primary" onclick="document.getElementById('media_file_input').click()">Выберите файлы</button>
-                <select name="access_type" style="padding:8px 12px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px;">
+                <select class="u-inline-732d6ab846" name="access_type">
                     <option value="public">Открытый доступ</option>
                     <option value="protected">Защищённый доступ</option>
                 </select>
             </div>
-            <div id="upload_filename_preview" style="font-weight:600; font-size:13px; color:var(--admin-accent);"></div>
-            <div id="upload_action_row" style="display:none; margin-top:12px;">
+            <div class="u-inline-783c7afd53" id="upload_filename_preview"></div>
+            <div class="u-inline-ba853ea68c" id="upload_action_row">
                 <button type="submit" class="btn btn--success">Загрузить файл на сервер</button>
             </div>
         </form>
@@ -449,10 +89,10 @@ $searchQuery = (string) ($_GET['q'] ?? '');
             </select>
 
             <!-- Переключатель режима: Список / Сетка -->
-            <button type="button" class="btn btn--small is-active" id="view_mode_grid" title="Сетка" style="min-width:36px;padding:6px 10px;">
+            <button type="button" class="btn btn--small is-active u-inline-d1df8577ab" id="view_mode_grid" title="Сетка">
                 <?= AdminUi::icon('grid', 18) ?>
             </button>
-            <button type="button" class="btn btn--small" id="view_mode_list" title="Список" style="min-width:36px;padding:6px 10px;">
+            <button type="button" class="btn btn--small u-inline-d1df8577ab" id="view_mode_list" title="Список">
                 <?= AdminUi::icon('list', 18) ?>
             </button>
         </div>
@@ -473,7 +113,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
         <!-- Квадратная Сетка Медиафайлов (Square Grid) -->
         <div class="media-grid">
             <?php if (empty($items)): ?>
-                <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--admin-muted); font-size: 15px;">Медиафайлы не найдены.</div>
+                <div class="u-inline-4c7fa37fe5">Медиафайлы не найдены.</div>
             <?php endif; ?>
             <?php foreach ($items as $item): ?>
                 <?php 
@@ -553,7 +193,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
                                 <?= $item['access_type'] === 'public' ? 'Открытый' : 'Защищённый' ?>
                             </span>
                         </td>
-                        <td style="max-width:260px; word-break:break-all;">
+                        <td class="u-inline-bbfba05910">
                             <code><?= htmlspecialchars($url, ENT_QUOTES) ?></code>
                         </td>
                         <td class="data-table__action-cell">
@@ -596,7 +236,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
                 </div>
             </div>
 
-            <div style="margin-top:auto; display:flex; gap:10px; justify-content:space-between; align-items:center; padding-top:16px; border-top:1px solid #e2e8f0;">
+            <div class="u-inline-ffed13198a">
                 <form method="post" action="" id="modal_delete_form" onsubmit="return confirm('Вы уверены, что хотите навсегда удалить этот медиафайл?')">
                     <?= Csrf::field() ?>
                     <button type="submit" class="btn btn--danger">Удалить навсегда</button>
@@ -735,9 +375,9 @@ $searchQuery = (string) ($_GET['q'] ?? '');
                 } else if (isVideo) {
                     previewContainer.innerHTML = '<video src="' + url + '" controls autoplay></video>';
                 } else {
-                    previewContainer.innerHTML = '<div style="color:#ffffff; text-align:center;">'
+                    previewContainer.innerHTML = '<div class="u-inline-3c7c5ffa2b">'
                         + <?= json_encode(AdminUi::icon('document', 64, 'media-preview__file-icon', 1.8), JSON_UNESCAPED_SLASHES) ?>
-                        + '<div style="margin-top:12px; font-weight:600;">' + mime + '</div></div>';
+                        + '<div class="u-inline-cca6ad4b4f">' + mime + '</div></div>';
                 }
             }
 

@@ -9,7 +9,7 @@ require __DIR__ . '/../layout/header.php';
 
 /** @var array $settings */
 ?>
-<div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+<div class="u-inline-7de67ad799">
     <a href="#settings-general" class="btn btn--small btn--outline"><?= AdminUi::icon('settings') ?>Основные настройки</a>
     <a href="#smtp-section" class="btn btn--small btn--outline"><?= AdminUi::icon('email') ?>Почта (SMTP)</a>
     <a href="#demo-section" class="btn btn--small btn--warning"><?= AdminUi::icon('performance') ?>Демо-контент и RESET</a>
@@ -90,7 +90,7 @@ require __DIR__ . '/../layout/header.php';
             <span class="form-hint">Заменяет буквенный бейдж в шапке админки и на странице входа. Лучше всего — горизонтальный логотип на прозрачном фоне (SVG или PNG).</span>
             <div class="form-field">
                 <label for="admin_brand_accent">Акцентный цвет панели</label>
-                <input type="color" id="admin_brand_accent" name="admin_brand_accent" style="width:64px;height:38px;padding:4px;"
+                <input class="u-inline-cb38de4646" type="color" id="admin_brand_accent" name="admin_brand_accent"
                        value="<?= htmlspecialchars(\App\Core\AdminBrand::accent(), ENT_QUOTES) ?>">
                 <span class="form-hint">Кнопки, ссылки и активные пункты меню админки. Стандартный — синий <?= \App\Core\AdminBrand::DEFAULT_ACCENT ?>; оттенки (hover, подсветка) вычисляются автоматически.</span>
             </div>
@@ -98,7 +98,7 @@ require __DIR__ . '/../layout/header.php';
 
         <fieldset class="settings-group" id="smtp-section">
             <legend>Настройки почты (SMTP / Email-уведомления)</legend>
-            <p class="form-hint" style="margin-top:0;">
+            <p class="form-hint u-inline-291b7bbb01">
                 Для отправки писем подписки, восстановления паролей и сообщений с веб-форм требуется подключение к SMTP-серверу (например, Яндекс <code>smtp.yandex.ru</code>, Gmail <code>smtp.gmail.com</code>, Mail.ru <code>smtp.mail.ru</code> или SMTP вашего хостинга).
             </p>
             <div class="form-field">
@@ -156,11 +156,11 @@ require __DIR__ . '/../layout/header.php';
                 <input type="checkbox" id="webpush_enabled" name="webpush_enabled" value="1" <?= ($settings['webpush_enabled'] ?? '') === '1' ? 'checked' : '' ?>>
                 <label for="webpush_enabled">Включить подписку на Web Push уведомления</label>
             </div>
-            <div class="form-field form-field--checkbox" style="margin-left: 24px;">
+            <div class="form-field form-field--checkbox u-inline-2cf3de3c05">
                 <input type="checkbox" id="webpush_auto_prompt" name="webpush_auto_prompt" value="1" <?= ($settings['webpush_auto_prompt'] ?? '1') === '1' ? 'checked' : '' ?>>
                 <label for="webpush_auto_prompt">Автоматически показывать всплывающую плашку подписки (Prompt Banner)</label>
             </div>
-            <div class="form-field" style="margin-left: 24px; max-width: 320px;">
+            <div class="form-field u-inline-9d7ab0e223">
                 <label for="webpush_prompt_delay">Задержка автоматического показа (в секундах)</label>
                 <input type="number" id="webpush_prompt_delay" name="webpush_prompt_delay" value="<?= htmlspecialchars((string) ($settings['webpush_prompt_delay'] ?? '15'), ENT_QUOTES) ?>" min="1" max="300" placeholder="15">
                 <span class="form-hint">Время в секундах от захода на страницу до появления предложения подписки (по умолчанию: 15 сек).</span>
@@ -299,31 +299,31 @@ require __DIR__ . '/../layout/header.php';
 </div>
 
 <div class="form-card admin-mt-24">
-    <h3 style="margin-top:0;display:flex;align-items:center;gap:8px;">
+    <h3 class="u-inline-8981e56111">
         <?= AdminUi::icon('email', 18) ?> Проверка отправки писем (SMTP Test)
     </h3>
     <p class="form-hint">
         Сохраните настройки SMTP в форме выше, затем укажите ваш E-mail и нажмите кнопку для отправки тестового сообщения.
     </p>
-    <form method="post" action="/admin/settings/test-email" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;max-width:560px;">
+    <form class="u-inline-a8022cb6d9" method="post" action="/admin/settings/test-email">
         <?= Csrf::field() ?>
-        <input type="email" name="test_email" placeholder="ваш_email@example.com" required style="flex:1;min-width:240px;">
+        <input class="u-inline-65e3af54b5" type="email" name="test_email" placeholder="ваш_email@example.com" required>
         <button type="submit" class="btn btn--outline"><?= AdminUi::icon('send', 16) ?>Отправить тестовое письмо</button>
     </form>
 </div>
 
 <div class="form-card admin-mt-24" id="demo-section">
-    <h2 style="margin-top:0;">Демо-контент и Инициализация</h2>
+    <h2 class="u-inline-291b7bbb01">Демо-контент и Инициализация</h2>
     <p class="form-hint">Выберите один из двух вариантов управления демонстрационными данными:</p>
     
     <div class="admin-card-grid">
         <div class="admin-demo-card">
-            <h4 style="margin: 0 0 8px 0;">1. Безопасное дополнение (DEMO)</h4>
-            <p class="form-hint" style="font-size: .84rem; margin-bottom: 14px;">Добавляет недостающие демо-записи в пустые разделы. Ваши текущие записи, отредактированная главная страница и меню <strong>не изменяются и не удаляются</strong>.</p>
+            <h4 class="u-inline-ee3d7719a8">1. Безопасное дополнение (DEMO)</h4>
+            <p class="form-hint u-inline-7ca9af90e8">Добавляет недостающие демо-записи в пустые разделы. Ваши текущие записи, отредактированная главная страница и меню <strong>не изменяются и не удаляются</strong>.</p>
             <form method="post" action="/admin/settings/demo-content" data-confirm="Дополнить демо-контентом разделы сайта?">
                 <?= Csrf::field() ?>
-                <div class="form-field" style="margin-bottom: 12px;">
-                    <label for="demo_confirm_code" style="font-size:.82rem;">Код подтверждения</label>
+                <div class="form-field u-inline-72d6c38e5f">
+                    <label class="u-inline-f6909f80c2" for="demo_confirm_code">Код подтверждения</label>
                     <input type="text" id="demo_confirm_code" name="demo_confirm_code" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Введите DEMO">
                     <span class="form-hint">Для запуска введите <code>DEMO</code>.</span>
                 </div>
@@ -332,12 +332,12 @@ require __DIR__ . '/../layout/header.php';
         </div>
 
         <div class="admin-demo-card admin-demo-card--danger">
-            <h4 style="margin: 0 0 8px 0;">2. Полный сброс и перезагрузка (RESET + DEMO)</h4>
-            <p class="form-hint" style="font-size: .84rem; margin-bottom: 14px;"><strong>ВНИМАНИЕ!</strong> Очищает все разделы сайта (новости, документы, вакансии, тендеры, проекты, страницы, меню и блоки) и создает их заново «с чистого листа».</p>
+            <h4 class="u-inline-ee3d7719a8">2. Полный сброс и перезагрузка (RESET + DEMO)</h4>
+            <p class="form-hint u-inline-7ca9af90e8"><strong>ВНИМАНИЕ!</strong> Очищает все разделы сайта (новости, документы, вакансии, тендеры, проекты, страницы, меню и блоки) и создает их заново «с чистого листа».</p>
             <form method="post" action="/admin/settings/demo-reset" data-confirm="ВНИМАНИЕ: Все текущие новости, страницы, меню и каталог будут полностью очищены и заменены эталонным демо-комплектом. Продолжить?">
                 <?= Csrf::field() ?>
-                <div class="form-field" style="margin-bottom: 12px;">
-                    <label for="reset_confirm_code" style="font-size:.82rem;">Код подтверждения полным сбросом</label>
+                <div class="form-field u-inline-72d6c38e5f">
+                    <label class="u-inline-f6909f80c2" for="reset_confirm_code">Код подтверждения полным сбросом</label>
                     <input type="text" id="reset_confirm_code" name="demo_confirm_code" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Введите RESET">
                     <span class="form-hint">Для подтверждения полного сброса введите <code>RESET</code>.</span>
                 </div>
@@ -348,7 +348,7 @@ require __DIR__ . '/../layout/header.php';
 </div>
 
 <div class="form-card admin-mt-24" id="backup-section">
-    <h2 style="margin-top:0;">Резервное копирование</h2>
+    <h2 class="u-inline-291b7bbb01">Резервное копирование</h2>
     <p class="form-hint">Скачать полный бэкап (дамп базы данных + загруженные файлы) одним архивом.</p>
     <form method="post" action="/admin/backup">
         <?= Csrf::field() ?>

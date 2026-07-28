@@ -9,20 +9,20 @@ require __DIR__ . '/../layout/header.php';
 /** @var array $users */
 /** @var string|null $error */
 ?>
-<div style="display:flex;gap:8px;margin-bottom:16px;">
+<div class="u-inline-f1b7a56d35">
     <a href="/admin/repository" class="btn btn--small">Файлы</a>
     <a href="/admin/repository/categories" class="btn btn--small">Категории</a>
     <a href="/admin/repository/users" class="btn btn--small btn--primary">Пользователи портала</a>
 </div>
 <p class="form-hint">Учётные записи для входа в файловый портал <code>/repo</code>. Это отдельные аккаунты, не связанные с пользователями админ-панели. 2FA пользователь включает самостоятельно после первого входа.</p>
 
-<table class="data-table" style="margin-bottom:30px;">
+<table class="data-table u-inline-5370cbf1a7">
     <thead>
         <tr><th>Логин</th><th>Имя</th><th>Организация</th><th>Email</th><th>Статус</th><th>2FA</th><th>Последний вход</th><th></th></tr>
     </thead>
     <tbody>
         <?php if (empty($users)): ?>
-            <tr><td colspan="8" style="text-align:center;color:#888;padding:24px;">Пользователей пока нет.</td></tr>
+            <tr><td class="u-inline-0e883e39e4" colspan="8">Пользователей пока нет.</td></tr>
         <?php else: ?>
             <?php foreach ($users as $u): ?>
                 <tr>
@@ -39,14 +39,14 @@ require __DIR__ . '/../layout/header.php';
                     </td>
                     <td><?= (int) $u['totp_enabled'] === 1 ? '✓' : '—' ?></td>
                     <td class="form-hint"><?= htmlspecialchars((string) ($u['last_login_at'] ?? '—'), ENT_QUOTES) ?></td>
-                    <td class="data-table__actions" style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <td class="data-table__actions u-inline-c8d67009fe">
                         <form method="post" action="/admin/repository/users/<?= (int) $u['id'] ?>/toggle">
                             <?= Csrf::field() ?>
                             <button type="submit" class="btn btn--small"><?= (int) $u['is_active'] === 1 ? 'Отключить' : 'Включить' ?></button>
                         </form>
                         <details class="repo-reset">
                             <summary class="btn btn--small">Сбросить пароль</summary>
-                            <form method="post" action="/admin/repository/users/<?= (int) $u['id'] ?>/reset-password" style="margin-top:8px;display:flex;gap:6px;">
+                            <form class="u-inline-861256d7a6" method="post" action="/admin/repository/users/<?= (int) $u['id'] ?>/reset-password">
                                 <?= Csrf::field() ?>
                                 <input type="password" name="password" placeholder="Новый пароль" required autocomplete="new-password">
                                 <button type="submit" class="btn btn--small btn--primary">OK</button>
@@ -64,7 +64,7 @@ require __DIR__ . '/../layout/header.php';
 </table>
 
 <div class="form-card">
-    <h2 style="margin-top:0;">Добавить пользователя портала</h2>
+    <h2 class="u-inline-291b7bbb01">Добавить пользователя портала</h2>
     <?php if (!empty($error)): ?><div class="alert alert--error"><?= htmlspecialchars((string) $error, ENT_QUOTES) ?></div><?php endif; ?>
     <form method="post" action="/admin/repository/users/create" class="form-grid">
         <?= Csrf::field() ?>

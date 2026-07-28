@@ -60,10 +60,10 @@ final class Media
         if ($focalX !== null && $focalY !== null) {
             $fx = max(0, min(100, $focalX));
             $fy = max(0, min(100, $focalY));
-            $styleAttr = ' style="object-position:' . $fx . '% ' . $fy . '%"';
+            $styleAttr = ' style="--media-object-position:' . $fx . '% ' . $fy . '%"';
         } else {
             $focalPos = SmartCrop::focalPosition($url);
-            $styleAttr = ' style="object-position:' . htmlspecialchars($focalPos, ENT_QUOTES) . '"';
+            $styleAttr = ' style="--media-object-position:' . htmlspecialchars($focalPos, ENT_QUOTES) . '"';
         }
 
         $img = '<img src="' . htmlspecialchars($url, ENT_QUOTES) . '" alt="' . $altAttr . '"'

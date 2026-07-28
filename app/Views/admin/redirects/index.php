@@ -12,8 +12,8 @@ require __DIR__ . '/../layout/header.php';
 ?>
 <p class="form-hint">301/302-редиректы сохраняют посетителей и SEO-вес при переезде со старого сайта: старый адрес автоматически ведёт на новый. Совпадение — по пути (query-строка переносится). Редирект срабатывает раньше страниц, поэтому им можно переопределить и существующий адрес.</p>
 
-<div class="form-card" style="margin-bottom:20px;">
-    <h2 style="margin-top:0;">Добавить редирект</h2>
+<div class="form-card u-inline-7dde5e56b3">
+    <h2 class="u-inline-291b7bbb01">Добавить редирект</h2>
     <form method="post" action="/admin/redirects/create" class="form-grid">
         <?= Csrf::field() ?>
         <div class="form-field">
@@ -38,8 +38,8 @@ require __DIR__ . '/../layout/header.php';
     </form>
 </div>
 
-<div class="form-card" style="margin-bottom:20px;">
-    <h2 style="margin-top:0;">Массовый импорт</h2>
+<div class="form-card u-inline-7dde5e56b3">
+    <h2 class="u-inline-291b7bbb01">Массовый импорт</h2>
     <form method="post" action="/admin/redirects/import" class="form-grid">
         <?= Csrf::field() ?>
         <div class="form-field">
@@ -63,11 +63,11 @@ require __DIR__ . '/../layout/header.php';
         <tbody>
             <?php foreach ($items as $item): ?>
                 <tr>
-                    <td><code style="font-size:12px;"><?= htmlspecialchars((string) $item['from_path'], ENT_QUOTES) ?></code></td>
-                    <td><code style="font-size:12px;"><?= htmlspecialchars((string) $item['to_url'], ENT_QUOTES) ?></code></td>
+                    <td><code class="u-inline-e71ae94b55"><?= htmlspecialchars((string) $item['from_path'], ENT_QUOTES) ?></code></td>
+                    <td><code class="u-inline-e71ae94b55"><?= htmlspecialchars((string) $item['to_url'], ENT_QUOTES) ?></code></td>
                     <td><?= (int) $item['code'] ?></td>
                     <td><?= (int) $item['hits'] ?></td>
-                    <td style="white-space:nowrap;"><?= htmlspecialchars((string) ($item['last_hit_at'] ?? '—'), ENT_QUOTES) ?></td>
+                    <td class="u-inline-a9efa5449f"><?= htmlspecialchars((string) ($item['last_hit_at'] ?? '—'), ENT_QUOTES) ?></td>
                     <td>
                         <?php if ((int) $item['is_active'] === 1): ?>
                             <span class="badge badge--success">Активен</span>
@@ -75,13 +75,13 @@ require __DIR__ . '/../layout/header.php';
                             <span class="badge">Выключен</span>
                         <?php endif; ?>
                     </td>
-                    <td class="data-table__actions" style="white-space:nowrap;">
-                        <form method="post" action="/admin/redirects/<?= (int) $item['id'] ?>/toggle" style="display:inline;">
+                    <td class="data-table__actions u-inline-a9efa5449f">
+                        <form class="u-inline-0cd28ce9ba" method="post" action="/admin/redirects/<?= (int) $item['id'] ?>/toggle">
                             <?= Csrf::field() ?>
                             <input type="hidden" name="active" value="<?= (int) $item['is_active'] === 1 ? '0' : '1' ?>">
                             <button type="submit" class="btn btn--small"><?= (int) $item['is_active'] === 1 ? 'Выключить' : 'Включить' ?></button>
                         </form>
-                        <form method="post" action="/admin/redirects/<?= (int) $item['id'] ?>/delete" style="display:inline;" data-confirm="Удалить редирект «<?= htmlspecialchars((string) $item['from_path'], ENT_QUOTES) ?>»?">
+                        <form class="u-inline-0cd28ce9ba" method="post" action="/admin/redirects/<?= (int) $item['id'] ?>/delete" data-confirm="Удалить редирект «<?= htmlspecialchars((string) $item['from_path'], ENT_QUOTES) ?>»?">
                             <?= Csrf::field() ?>
                             <button type="submit" class="btn btn--small btn--danger"><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
                         </form>
@@ -91,7 +91,7 @@ require __DIR__ . '/../layout/header.php';
         </tbody>
     </table>
 <?php endif; ?>
-<section style="margin-top:28px;">
+<section class="u-inline-f0778f9dce">
     <h2>Недавние 404 (кандидаты в редиректы)</h2>
     <p class="form-hint">Пути, по которым посетители получили «страница не найдена». Записи с внешним источником перехода — вверху: это живые старые ссылки, их стоит закрыть 301-редиректом. Статика и следы сканеров не учитываются; записи старше 90 дней удаляются автоматически.</p>
     <?php if (empty($notFound)): ?>
@@ -104,15 +104,15 @@ require __DIR__ . '/../layout/header.php';
             <tbody>
                 <?php foreach ($notFound as $nf): ?>
                     <tr>
-                        <td><code style="font-size:12px;"><?= htmlspecialchars((string) $nf['path'], ENT_QUOTES) ?></code></td>
+                        <td><code class="u-inline-e71ae94b55"><?= htmlspecialchars((string) $nf['path'], ENT_QUOTES) ?></code></td>
                         <td><?= (int) $nf['hits'] ?></td>
-                        <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                        <td class="u-inline-3a618ca4cc">
                             <?= $nf['last_referer'] !== null ? htmlspecialchars((string) $nf['last_referer'], ENT_QUOTES) : '—' ?>
                         </td>
-                        <td style="white-space:nowrap;"><?= htmlspecialchars((string) $nf['last_hit_at'], ENT_QUOTES) ?></td>
-                        <td class="data-table__actions" style="white-space:nowrap;">
+                        <td class="u-inline-a9efa5449f"><?= htmlspecialchars((string) $nf['last_hit_at'], ENT_QUOTES) ?></td>
+                        <td class="data-table__actions u-inline-a9efa5449f">
                             <a class="btn btn--small btn--primary" href="/admin/redirects?from=<?= urlencode((string) $nf['path']) ?>#from_path">Создать 301</a>
-                            <form method="post" action="/admin/redirects/404/<?= (int) $nf['id'] ?>/delete" style="display:inline;">
+                            <form class="u-inline-0cd28ce9ba" method="post" action="/admin/redirects/404/<?= (int) $nf['id'] ?>/delete">
                                 <?= Csrf::field() ?>
                                 <button type="submit" class="btn btn--small">Скрыть</button>
                             </form>

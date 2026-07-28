@@ -15,32 +15,32 @@ $size = static function (mixed $bytes): string {
     return is_numeric($bytes) ? number_format((float) $bytes / 1024, 1, ',', ' ') . ' КиБ' : '—';
 };
 ?>
-<div class="form-card" style="margin-bottom:20px;">
-    <div class="header-builder__group" style="margin-bottom:0;">
+<div class="form-card u-inline-7dde5e56b3">
+    <div class="header-builder__group u-inline-76084ee4e5">
         <h3>Статус PHP OPcache и системного кеша</h3>
-        <p class="form-hint" style="margin-top:0;">
+        <p class="form-hint u-inline-291b7bbb01">
             OPcache ускоряет выполнение PHP в 3-5 раз за счет хранения байткода в оперативной памяти сервера.
         </p>
-        <div style="display:flex; flex-wrap:wrap; gap:16px; margin:14px 0;">
-            <div style="background:var(--admin-surface-soft, #f4f6f9); padding:10px 16px; border-radius:8px; border:1px solid var(--admin-border, #e0e0e0);">
+        <div class="u-inline-7561f48274">
+            <div class="u-inline-2a7e2ecd89">
                 <strong>Статус OPcache:</strong>
                 <span class="badge <?= !empty($opcacheInfo['enabled']) ? 'badge--success' : 'badge--secondary' ?>">
                     <?= !empty($opcacheInfo['enabled']) ? 'Включен' : 'Отключен' ?>
                 </span>
             </div>
             <?php if (!empty($opcacheInfo['enabled'])): ?>
-                <div style="background:var(--admin-surface-soft, #f4f6f9); padding:10px 16px; border-radius:8px; border:1px solid var(--admin-border, #e0e0e0);">
+                <div class="u-inline-2a7e2ecd89">
                     <strong>Память:</strong> <?= $opcacheInfo['memory_used'] ?> / <?= $opcacheInfo['memory_free'] ?> свободно
                 </div>
-                <div style="background:var(--admin-surface-soft, #f4f6f9); padding:10px 16px; border-radius:8px; border:1px solid var(--admin-border, #e0e0e0);">
+                <div class="u-inline-2a7e2ecd89">
                     <strong>Эффективность (Hit Rate):</strong> <?= $opcacheInfo['hit_rate'] ?>
                 </div>
-                <div style="background:var(--admin-surface-soft, #f4f6f9); padding:10px 16px; border-radius:8px; border:1px solid var(--admin-border, #e0e0e0);">
+                <div class="u-inline-2a7e2ecd89">
                     <strong>Скриптов в кэше:</strong> <?= $opcacheInfo['cached_scripts'] ?>
                 </div>
             <?php endif; ?>
         </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="u-inline-1e90930a6f">
             <form method="post" action="/admin/performance/clear-cache">
                 <?= Csrf::field() ?>
                 <button type="submit" class="btn btn--primary">Очистить весь кэш (файлы + Cloudflare + OPcache)</button>
@@ -92,26 +92,26 @@ $size = static function (mixed $bytes): string {
                 сайт загрузит отдельные исходные файлы. Если сборка отсутствует или повреждена,
                 переключение на исходники произойдёт автоматически.
             </p>
-            <div style="display:flex; flex-wrap:wrap; gap:12px; margin:14px 0;">
-                <div style="background:var(--admin-surface-soft, #f4f6f9); padding:10px 14px; border-radius:8px; border:1px solid var(--admin-border, #e0e0e0);">
+            <div class="u-inline-e27394a4cc">
+                <div class="u-inline-4f738c4fe1">
                     <strong>Режим:</strong>
                     <span class="badge <?= !empty($assetStatus['enabled']) ? 'badge--success' : 'badge--secondary' ?>">
                         <?= !empty($assetStatus['enabled']) ? 'Оптимизирован' : 'Исходные файлы' ?>
                     </span>
                 </div>
-                <div style="background:var(--admin-surface-soft, #f4f6f9); padding:10px 14px; border-radius:8px; border:1px solid var(--admin-border, #e0e0e0);">
+                <div class="u-inline-4f738c4fe1">
                     <strong>Сборка:</strong>
                     <span class="badge <?= !empty($assetStatus['current']) ? 'badge--success' : 'badge--secondary' ?>">
                         <?= !empty($assetStatus['current']) ? 'Актуальна' : (!empty($assetStatus['ready']) ? 'Требует пересборки' : 'Недоступна') ?>
                     </span>
                 </div>
-                <div style="background:var(--admin-surface-soft, #f4f6f9); padding:10px 14px; border-radius:8px; border:1px solid var(--admin-border, #e0e0e0);">
+                <div class="u-inline-4f738c4fe1">
                     <strong>Передача сервером:</strong>
                     Brotli <?= !empty($assetStatus['brotliConfigured']) ? '✓' : '—' ?> ·
                     gzip <?= !empty($assetStatus['gzipConfigured']) ? '✓' : '—' ?>
                 </div>
             </div>
-            <div style="overflow-x:auto;">
+            <div class="u-inline-d0698c48c3">
                 <table class="data-table">
                     <thead>
                     <tr><th>Ресурс</th><th>Без сжатия</th><th>gzip</th><th>Brotli</th></tr>
@@ -133,7 +133,7 @@ $size = static function (mixed $bytes): string {
                 </table>
             </div>
             <?php if (empty($assetStatus['current'])): ?>
-                <p class="form-hint" style="color:var(--admin-danger, #b42318);">
+                <p class="form-hint u-inline-018813c94c">
                     Выполните <code>npm ci &amp;&amp; npm run build:assets</code> перед публикацией.
                 </p>
             <?php endif; ?>
@@ -175,12 +175,12 @@ $size = static function (mixed $bytes): string {
 
         <div class="header-builder__group">
             <h3>Cloudflare (очистка кэша по API)</h3>
-            <p class="form-hint" style="margin-top:0;">
+            <p class="form-hint u-inline-291b7bbb01">
                 Нужно только если сайт или его поддомен <b>проксируется через Cloudflare</b>
                 (оранжевое облако). Тогда при изменении контента кэш Cloudflare очищается автоматически.
                 Токен создайте в Cloudflare → My Profile → API Tokens с правом <code>Zone · Cache Purge</code>.
             </p>
-            <label class="hb-switch" style="margin-bottom:10px;">
+            <label class="hb-switch u-inline-af3fee87a1">
                 <input type="checkbox" name="cf_enabled" value="1" <?= $val('cf_enabled') === '1' ? 'checked' : '' ?>>
                 <span class="hb-switch__track"></span> Включить интеграцию с Cloudflare
             </label>
@@ -206,14 +206,14 @@ $size = static function (mixed $bytes): string {
     </form>
 
     <?php if ($cfTokenConfigured && ($val('cf_zone_id') !== '')): ?>
-        <div class="header-builder__group" style="margin-top:18px;">
+        <div class="header-builder__group u-inline-e7673d9ced">
             <h3>Cloudflare — проверка и очистка</h3>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <form method="post" action="/admin/cloudflare/verify" style="margin:0;">
+            <div class="u-inline-1e90930a6f">
+                <form class="u-inline-1da9facb4d" method="post" action="/admin/cloudflare/verify">
                     <?= \App\Core\Csrf::field() ?>
                     <button type="submit" class="btn">Проверить подключение</button>
                 </form>
-                <form method="post" action="/admin/cloudflare/purge" style="margin:0;">
+                <form class="u-inline-1da9facb4d" method="post" action="/admin/cloudflare/purge">
                     <?= \App\Core\Csrf::field() ?>
                     <button type="submit" class="btn btn--primary">Очистить кэш Cloudflare</button>
                 </form>

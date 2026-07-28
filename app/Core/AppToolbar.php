@@ -43,113 +43,6 @@ final class AppToolbar
         $csrfToken = Csrf::token();
 
         $html = <<<HTML
-<style nonce="%NONCE%">
-.app-admin-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 38px;
-    background: #0f172a;
-    color: #f8fafc;
-    z-index: 100000;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: 13px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-body.has-admin-bar {
-    --hdr-panel-height: 38px !important;
-    --hdr-top: 38px !important;
-    margin-top: 38px !important;
-}
-body.has-admin-bar .site-header--sticky,
-body.has-admin-bar .site-header.is-scrolled,
-body.has-admin-bar .site-header[data-header-scroll],
-body.has-admin-bar .site-header--transparent,
-body.has-admin-bar .a11y-panel,
-body.has-admin-bar .preview-bar {
-    top: 38px !important;
-}
-body.has-admin-bar:has(.site-header--transparent) .site-topbar {
-    top: 38px !important;
-}
-.app-admin-bar__left, .app-admin-bar__right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.app-admin-bar__brand {
-    font-weight: 700;
-    color: #38bdf8;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.app-admin-bar__btn {
-    color: #e2e8f0;
-    text-decoration: none;
-    padding: 4px 10px;
-    border-radius: 4px;
-    background: rgba(255,255,255,0.08);
-    transition: background 0.15s ease, color 0.15s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    border: none;
-    cursor: pointer;
-    font-size: 12px;
-}
-.app-admin-bar__btn:hover {
-    background: #0284c7;
-    color: #ffffff;
-}
-.app-admin-bar__btn--edit {
-    background: #0284c7;
-    color: #ffffff;
-    font-weight: 600;
-}
-.app-admin-bar__btn--edit:hover {
-    background: #0369a1;
-}
-.app-admin-bar__drop {
-    position: relative;
-    display: inline-block;
-}
-.app-admin-bar__drop-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    min-width: 160px;
-    padding: 6px 0;
-    z-index: 100001;
-}
-.app-admin-bar__drop:hover .app-admin-bar__drop-menu {
-    display: block;
-}
-.app-admin-bar__drop-item {
-    display: block;
-    padding: 6px 14px;
-    color: #cbd5e1;
-    text-decoration: none;
-    font-size: 12px;
-}
-.app-admin-bar__drop-item:hover {
-    background: #0284c7;
-    color: #ffffff;
-}
-</style>
-
 <div class="app-admin-bar" id="app-admin-bar">
     <div class="app-admin-bar__left">
         <a href="/admin" class="app-admin-bar__brand">
@@ -173,7 +66,7 @@ body.has-admin-bar:has(.site-header--transparent) .site-topbar {
             </div>
         </div>
 
-        <form method="post" action="/admin/performance/clear-cache" style="display:inline;margin:0;">
+        <form class="u-inline-1654353117" method="post" action="/admin/performance/clear-cache">
             <input type="hidden" name="csrf_token" value="{$csrfToken}">
             <button type="submit" class="app-admin-bar__btn" title="Сбросить кеш сайта">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -183,7 +76,7 @@ body.has-admin-bar:has(.site-header--transparent) .site-topbar {
     </div>
 
     <div class="app-admin-bar__right">
-        <span style="display:inline-flex;align-items:center;gap:5px;">
+        <span class="u-inline-a223f6dc36">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             {$username} ({$role})
         </span>

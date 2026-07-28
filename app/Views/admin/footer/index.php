@@ -38,7 +38,7 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
 
         <div class="header-builder__group">
             <h3>Колонки подвала</h3>
-            <p class="form-hint" style="margin-top:0;">
+            <p class="form-hint u-inline-291b7bbb01">
                 До <?= FooterConfig::MAX_COLUMNS ?> колонок. Каждая колонка — заголовок и виджет.
                 Для виджета «Текст / HTML» можно вставить произвольную разметку или сниппет
                 (скрипты и небезопасные теги вырезаются).

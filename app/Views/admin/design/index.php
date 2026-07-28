@@ -27,7 +27,7 @@ foreach ($options as $key => $opt) {
             <?= \App\Core\AdminUi::icon('eye', 18) ?>
             Интерактивный предпросмотр компонентов
         </span>
-        <span class="form-hint" style="color:#94a3b8;margin:0;">Изменения параметров мгновенно отображаются в карточках</span>
+        <span class="form-hint u-inline-abed5788ce">Изменения параметров мгновенно отображаются в карточках</span>
     </div>
     <div class="live-deck__canvas" id="liveDeckCanvas">
         <div class="live-deck__grid">
@@ -36,7 +36,7 @@ foreach ($options as $key => $opt) {
                 <h2 class="live-deck__h2">Раздел H2</h2>
                 <h3 class="live-deck__h3">Карточка H3</h3>
                 <p class="live-deck__p">Пример текста: выбранные цвета, шрифты и отступы подставляются динамически.</p>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <div class="u-inline-1e90930a6f">
                     <button type="button" class="live-deck__btn-primary">Основная кнопка</button>
                     <button type="button" class="live-deck__btn-accent">Акцентная кнопка</button>
                 </div>
@@ -44,9 +44,9 @@ foreach ($options as $key => $opt) {
             <div class="live-deck__card">
                 <h3 class="live-deck__h3">Информационный блок</h3>
                 <p class="live-deck__p">Показывает скругления углов, глубину тени карточек и гармонию темы.</p>
-                <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
-                    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--live-color-accent, #17999b);"></span>
-                    <span style="font-size:13px;font-weight:600;">Состояние системы: Активна</span>
+                <div class="u-inline-7ce543f1f8">
+                    <span class="u-inline-ef1c305505"></span>
+                    <span class="u-inline-e378797d0c">Состояние системы: Активна</span>
                 </div>
             </div>
         </div>
@@ -77,7 +77,7 @@ foreach ($options as $key => $opt) {
     <section class="design-section" id="design-presets">
         <h2 class="design-section__title">Мои конфигурации</h2>
         <?php if (!empty($userPresets)): ?>
-            <div class="design-presets" style="margin-bottom:16px;">
+            <div class="design-presets u-inline-79a1c5a5db">
                 <?php foreach ($userPresets as $uslug => $upreset): ?>
                     <div class="design-preset design-preset--user<?= $activePreset === 'user:' . $uslug ? ' is-active' : '' ?>">
                         <div class="design-preset__head">
@@ -85,13 +85,13 @@ foreach ($options as $key => $opt) {
                             <?php if ($activePreset === 'user:' . $uslug): ?><span class="design-preset__badge">Активна</span><?php endif; ?>
                         </div>
                         <p class="design-preset__desc">Сохранённая вами конфигурация.</p>
-                        <div style="display:flex;gap:8px;">
-                            <form method="post" action="/admin/design/preset" style="margin:0;">
+                        <div class="u-inline-b9bbe540d3">
+                            <form class="u-inline-1da9facb4d" method="post" action="/admin/design/preset">
                                 <?= Csrf::field() ?>
                                 <input type="hidden" name="preset" value="user:<?= htmlspecialchars($uslug, ENT_QUOTES) ?>">
                                 <button type="submit" class="btn btn--small btn--primary">Применить</button>
                             </form>
-                            <form method="post" action="/admin/design/preset/delete" style="margin:0;" data-confirm="Удалить конфигурацию «<?= htmlspecialchars((string) $upreset['label'], ENT_QUOTES) ?>»?">
+                            <form class="u-inline-1da9facb4d" method="post" action="/admin/design/preset/delete" data-confirm="Удалить конфигурацию «<?= htmlspecialchars((string) $upreset['label'], ENT_QUOTES) ?>»?">
                                 <?= Csrf::field() ?>
                                 <input type="hidden" name="slug" value="<?= htmlspecialchars($uslug, ENT_QUOTES) ?>">
                                 <button type="submit" class="btn btn--small btn--danger"><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
@@ -142,7 +142,7 @@ foreach ($options as $key => $opt) {
                     <small>Перекрывает выбор «Ширина контейнера». Напр. <code>1440px</code> или <code>90%</code>. Пусто — значение пресета.</small>
                 </div>
                 <div class="design-opt__choices">
-                    <input type="text" name="container_custom" value="<?= htmlspecialchars((string) \App\Models\Setting::get('design_container_custom', ''), ENT_QUOTES) ?>" placeholder="напр. 1440px" style="max-width:220px;" data-design-preview-field>
+                    <input class="u-inline-e73ebf4146" type="text" name="container_custom" value="<?= htmlspecialchars((string) \App\Models\Setting::get('design_container_custom', ''), ENT_QUOTES) ?>" placeholder="напр. 1440px" data-design-preview-field>
                 </div>
             </div>
             <div class="design-opt">
@@ -152,8 +152,8 @@ foreach ($options as $key => $opt) {
                 </div>
                 <div class="design-opt__choices">
                     <?php $radiusCustom = preg_replace('/px$/', '', \App\Core\DesignSettings::radiusCustom()); ?>
-                    <input type="number" name="radius_custom" min="0" max="48" step="0.5" inputmode="decimal"
-                           value="<?= htmlspecialchars((string) $radiusCustom, ENT_QUOTES) ?>" placeholder="напр. 12" style="max-width:220px;" data-design-preview-field>
+                    <input class="u-inline-e73ebf4146" type="number" name="radius_custom" min="0" max="48" step="0.5" inputmode="decimal"
+                           value="<?= htmlspecialchars((string) $radiusCustom, ENT_QUOTES) ?>" placeholder="напр. 12" data-design-preview-field>
                 </div>
             </div>
         </section>
@@ -221,10 +221,10 @@ foreach ($options as $key => $opt) {
                     </div>
                 </div>
 
-                <div class="design-code-preview" style="margin-top: 24px; padding: 18px 20px; background: #0f172a; border-radius: 12px; color: #f8fafc; font-family: monospace; font-size: 13px; line-height: 1.6;">
-                    <div style="font-weight: 700; margin-bottom: 6px; color: #38bdf8; font-family: inherit;">💻 Полное дерево выводимых CSS-переменных (:root)</div>
-                    <div style="opacity: 0.85; font-size: 12px;">Все указанные выше 7 основных цветов и производные алиасы автоматически транслируются в следующий блок переменных:</div>
-                    <pre style="margin: 12px 0 0; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; overflow-x: auto; color: #e2e8f0; font-family: consolas, monaco, monospace; font-size: 12.5px;">:root {
+                <div class="design-code-preview u-inline-50f7d15eb8">
+                    <div class="u-inline-b5b5b4c4bc">💻 Полное дерево выводимых CSS-переменных (:root)</div>
+                    <div class="u-inline-b9f96fe18b">Все указанные выше 7 основных цветов и производные алиасы автоматически транслируются в следующий блок переменных:</div>
+                    <pre class="u-inline-aad4dde478">:root {
     --color-primary: <?= htmlspecialchars($primary, ENT_QUOTES) ?>;
     --color-accent: <?= htmlspecialchars($accent, ENT_QUOTES) ?>; /* Яркий фоновый акцент (кнопки, заливки) */
     --gov-navy: var(--color-primary);
@@ -262,7 +262,7 @@ foreach ($options as $key => $opt) {
             <input type="hidden" name="font_size" value="<?= htmlspecialchars((string) ($values['font_size'] ?? 'md'), ENT_QUOTES) ?>">
             <input type="hidden" name="line_height" value="<?= htmlspecialchars((string) ($values['line_height'] ?? 'normal'), ENT_QUOTES) ?>">
 
-            <div class="design-manual" style="margin-bottom:20px;">
+            <div class="design-manual u-inline-7dde5e56b3">
                 <div class="design-manual__head">
                     <strong>Семейства шрифтов</strong>
                 </div>
@@ -274,7 +274,7 @@ foreach ($options as $key => $opt) {
                                 <?php foreach (\App\Core\DesignSettings::FONTS as $fontKey => $fontData): ?>
                                     <?php if ($fontKey === 'custom') { continue; } ?>
                                     <?php $choice = 'style:' . $fontKey; ?>
-                                    <option value="<?= htmlspecialchars($choice, ENT_QUOTES) ?>" style="font-family:<?= htmlspecialchars($fontData[1], ENT_QUOTES) ?>"
+                                    <option value="<?= htmlspecialchars($choice, ENT_QUOTES) ?>" data-font-family="<?= htmlspecialchars($fontData[1], ENT_QUOTES) ?>"
                                             <?= $bodyFontChoice === $choice ? 'selected' : '' ?>><?= htmlspecialchars($fontData[0], ENT_QUOTES) ?></option>
                                 <?php endforeach; ?>
                             </optgroup>
@@ -334,8 +334,8 @@ foreach ($options as $key => $opt) {
                     <small>Базовый размер текста в px. Пусто — (<?= htmlspecialchars($fontSizePreset, ENT_QUOTES) ?> px).</small>
                 </div>
                 <div class="design-opt__choices">
-                    <input type="number" name="font_size_custom" min="12" max="24" step="0.5" inputmode="decimal"
-                           value="<?= htmlspecialchars((string) $fontSizeCustom, ENT_QUOTES) ?>" placeholder="напр. <?= htmlspecialchars($fontSizePreset, ENT_QUOTES) ?>" style="max-width:220px;" data-design-preview-field>
+                    <input class="u-inline-e73ebf4146" type="number" name="font_size_custom" min="12" max="24" step="0.5" inputmode="decimal"
+                           value="<?= htmlspecialchars((string) $fontSizeCustom, ENT_QUOTES) ?>" placeholder="напр. <?= htmlspecialchars($fontSizePreset, ENT_QUOTES) ?>" data-design-preview-field>
                 </div>
             </div>
             <div class="design-opt">
@@ -344,8 +344,8 @@ foreach ($options as $key => $opt) {
                     <small>Множитель высоты строки текста (от 1.0 до 2.5). Пусто — (<?= htmlspecialchars($lineHeightPreset, ENT_QUOTES) ?>).</small>
                 </div>
                 <div class="design-opt__choices">
-                    <input type="number" name="line_height_custom" min="1" max="2.5" step="0.05" inputmode="decimal"
-                           value="<?= htmlspecialchars((string) $lineHeightCustom, ENT_QUOTES) ?>" placeholder="напр. <?= htmlspecialchars($lineHeightPreset, ENT_QUOTES) ?>" style="max-width:220px;" data-design-preview-field>
+                    <input class="u-inline-e73ebf4146" type="number" name="line_height_custom" min="1" max="2.5" step="0.05" inputmode="decimal"
+                           value="<?= htmlspecialchars((string) $lineHeightCustom, ENT_QUOTES) ?>" placeholder="напр. <?= htmlspecialchars($lineHeightPreset, ENT_QUOTES) ?>" data-design-preview-field>
                 </div>
             </div>
             <div class="design-opt">
@@ -355,8 +355,8 @@ foreach ($options as $key => $opt) {
                 </div>
                 <div class="design-opt__choices">
                     <?php $headingLineHeightCustom = \App\Core\DesignSettings::headingLineHeightCustom(); ?>
-                    <input type="number" name="heading_line_height_custom" min="1" max="2.5" step="0.05" inputmode="decimal"
-                           value="<?= htmlspecialchars((string) $headingLineHeightCustom, ENT_QUOTES) ?>" placeholder="напр. 1.25" style="max-width:220px;" data-design-preview-field>
+                    <input class="u-inline-e73ebf4146" type="number" name="heading_line_height_custom" min="1" max="2.5" step="0.05" inputmode="decimal"
+                           value="<?= htmlspecialchars((string) $headingLineHeightCustom, ENT_QUOTES) ?>" placeholder="напр. 1.25" data-design-preview-field>
                 </div>
             </div>
             <div class="design-opt">
@@ -366,7 +366,7 @@ foreach ($options as $key => $opt) {
                 </div>
                 <div class="design-opt__choices">
                     <?php $hWeight = (string) \App\Models\Setting::get('design_heading_font_weight', '700'); ?>
-                    <select name="heading_font_weight" style="max-width:220px;" data-design-preview-field>
+                    <select class="u-inline-e73ebf4146" name="heading_font_weight" data-design-preview-field>
                         <option value="400" <?= $hWeight === '400' ? 'selected' : '' ?>>400 — Обычный (Regular)</option>
                         <option value="600" <?= $hWeight === '600' ? 'selected' : '' ?>>600 — Полужирный (SemiBold)</option>
                         <option value="700" <?= $hWeight === '700' ? 'selected' : '' ?>>700 — Жирный (Bold)</option>
@@ -381,7 +381,7 @@ foreach ($options as $key => $opt) {
                 </div>
                 <div class="design-opt__choices">
                     <?php $hLetter = (string) \App\Models\Setting::get('design_heading_letter_spacing', 'normal'); ?>
-                    <select name="heading_letter_spacing" style="max-width:220px;" data-design-preview-field>
+                    <select class="u-inline-e73ebf4146" name="heading_letter_spacing" data-design-preview-field>
                         <option value="tight" <?= $hLetter === 'tight' ? 'selected' : '' ?>>Плотный (-0.03em)</option>
                         <option value="normal" <?= $hLetter === 'normal' ? 'selected' : '' ?>>Обычный (-0.02em)</option>
                         <option value="wide" <?= $hLetter === 'wide' ? 'selected' : '' ?>>Широкий (0em)</option>
@@ -418,21 +418,21 @@ foreach ($options as $key => $opt) {
                 </div>
             </div>
 
-            <div class="typo-preview" style="margin-top:16px;">
+            <div class="typo-preview u-inline-8a359a76eb">
                 <div class="typo-preview__head">Как это выглядит</div>
                 <div class="typo-preview__row">
                     <?php foreach (['fs_h1' => 'H1', 'fs_h2' => 'H2', 'fs_h3' => 'H3', 'fs_h4' => 'H4', 'fs_h5' => 'H5'] as $k => $label): ?>
                         <div class="typo-preview__item">
-                            <span class="typo-preview__sample" style="font-size:<?= htmlspecialchars($previewSizes[$k] ?? '16px', ENT_QUOTES) ?>;line-height:1.15;"><?= $label ?></span>
+                            <span class="typo-preview__sample" data-font-size="<?= htmlspecialchars($previewSizes[$k] ?? '16px', ENT_QUOTES) ?>"><?= $label ?></span>
                             <span class="typo-preview__size"><?= htmlspecialchars($previewSizes[$k] ?? '', ENT_QUOTES) ?><?= ($overrides[$k] ?? '') !== '' ? ' → ' . htmlspecialchars($overrides[$k], ENT_QUOTES) : '' ?></span>
                         </div>
                     <?php endforeach; ?>
                 </div>
             </div>
 
-            <details class="design-manual" open style="margin-top:16px;">
+            <details class="design-manual u-inline-8a359a76eb" open>
                 <summary><strong>Точные размеры</strong> <span class="form-hint">— переопределяют автоматическую шкалу при заполнении</span></summary>
-                <div class="design-manual__grid" style="margin-top:12px;">
+                <div class="design-manual__grid u-inline-9374e84210">
                     <?php foreach (\App\Core\DesignSettings::TYPO_SIZES as $fsKey => $fsMeta): ?>
                         <?php $fromScale = $scaleSizes[$fsKey] ?? ''; ?>
                         <div class="form-field">
