@@ -4020,6 +4020,19 @@ body.auth-page {
 }
 /* generated:embedded-styles:end */
 
+@media (pointer: coarse) {
+    .admin-tbtn,
+    .admin-user__btn,
+    .art-editor__btn,
+    .media-modal__close,
+    .btn--icon-only,
+    .menu-node__move,
+    .fb-move {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
 /* Centralized state and dynamic-preview helpers. */
 .is-hidden {
     display: none !important;

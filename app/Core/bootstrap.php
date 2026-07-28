@@ -44,16 +44,40 @@ if (is_file($configFile)) {
     ErrorHandler::register((bool) ($config['app']['debug'] ?? false));
 
     if (APP_INSTALLED) {
+        // Forwarded IP headers are accepted only from explicitly trusted
+        // reverse proxies configured outside the database.
+        \App\Core\ClientIp::applyTrustedProxy();
+        // Inspect the request before opening MySQL so obvious malicious input
+        // cannot consume a database connection first.
+        \App\Core\WafGuard::inspect();
+
         // Рабочий режим: недоступность БД -> брендированный 503 (fail-safe),
         // без вывода системного трейса.
         try {
             Database::init($config['db']);
-            \App\Core\WafGuard::inspect();
         } catch (\Throwable $e) {
             \App\Core\Logger::critical('Падение БД (503): ' . $e->getMessage(), [
                 'url' => $_SERVER['REQUEST_URI'] ?? 'cli',
             ]);
             if (PHP_SAPI !== 'cli') {
+                $failedPath = (string) (parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/');
+                if ($failedPath === '/health') {
+                    $logDir = APP_ROOT . '/storage/logs';
+                    http_response_code(503);
+                    header('Content-Type: application/json; charset=UTF-8');
+                    header('Cache-Control: no-store');
+                    header('Retry-After: 60');
+                    echo json_encode([
+                        'status' => 'down',
+                        'checks' => [
+                            'db' => false,
+                            'storage' => is_dir($logDir) && is_writable($logDir),
+                        ],
+                        'workers' => [],
+                        'release' => \App\Core\Release::id(),
+                    ], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
                 http_response_code(503);
                 header('Retry-After: 60');
                 $view = APP_ROOT . '/app/Views/errors/503.php';

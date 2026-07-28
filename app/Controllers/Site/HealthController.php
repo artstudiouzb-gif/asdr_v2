@@ -63,6 +63,7 @@ final class HealthController
             'status' => $ok ? ($stale === [] ? 'ok' : 'degraded') : 'down',
             'checks' => $checks,
             'workers' => $workers,
+            'release' => \App\Core\Release::id(),
         ], JSON_UNESCAPED_UNICODE);
     }
 }

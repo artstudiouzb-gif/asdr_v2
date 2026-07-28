@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 test('503 fail-safe remains standalone, responsive and actionable', function (): void {
     $html = (string) file_get_contents(APP_ROOT . '/app/Views/errors/503.php');
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/system.css');
 
     assert_contains('<meta name="robots" content="noindex, nofollow">', $html);
+    assert_contains('class="system-error system-error--503"', $html);
     assert_contains('<main>', $html);
     assert_contains('href="">Повторить попытку</a>', $html);
-    assert_contains('a:focus-visible', $html);
-    assert_contains('@media (max-width: 420px)', $html);
+    assert_contains('.system-error--503 a:focus-visible', $css);
+    assert_contains('@media (max-width: 420px)', $css);
     assert_false(str_contains($html, '<?php'), 'bootstrap отдаёт 503 через file_get_contents, PHP-код здесь не выполнится');
 });
 
