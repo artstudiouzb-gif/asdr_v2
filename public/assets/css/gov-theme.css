@@ -1272,7 +1272,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
 
 /* --- Кнопки --- */
 .block-hero__button, .block-cta a, .content-detail__download, .site-search__submit,
-.block-cta__button, .btn-cta, .btn, button, input[type="button"], input[type="submit"], input[type="reset"] {
+.block-cta__button, .btn-cta, .btn, input[type="button"], input[type="submit"], input[type="reset"] {
     background: linear-gradient(to bottom, var(--gov-navy) 0%, color-mix(in srgb, var(--gov-navy) 90%, #000) 100%) !important;
     color: #fff !important;
     border-radius: var(--btn-radius, 8px) !important;

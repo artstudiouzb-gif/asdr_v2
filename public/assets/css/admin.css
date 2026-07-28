@@ -144,7 +144,47 @@ body[data-admin-theme="dark_emerald"] {
     --admin-muted: #94a3b8;
     --admin-border: #334155;
     --admin-surface-soft: #1e293b;
+    --admin-input-bg: #0f172a;
+    --admin-input-border: #334155;
+    --admin-input-text: #f8fafc;
+    color-scheme: dark;
 }
+
+[data-admin-theme="dark_emerald"] .admin-card,
+[data-admin-theme="dark_emerald"] .admin-box,
+[data-admin-theme="dark_emerald"] .admin-panel,
+[data-admin-theme="dark_emerald"] .admin-cmd-palette-modal,
+[data-admin-theme="dark_emerald"] .admin-table-wrap,
+[data-admin-theme="dark_emerald"] .admin-filter-bar,
+[data-admin-theme="dark_emerald"] .admin-modal__content {
+    background-color: var(--admin-card-bg, #1e293b);
+    color: var(--admin-text, #f8fafc);
+    border-color: var(--admin-border, #334155);
+}
+
+[data-admin-theme="dark_emerald"] input[type="text"],
+[data-admin-theme="dark_emerald"] input[type="search"],
+[data-admin-theme="dark_emerald"] input[type="email"],
+[data-admin-theme="dark_emerald"] input[type="password"],
+[data-admin-theme="dark_emerald"] input[type="url"],
+[data-admin-theme="dark_emerald"] input[type="number"],
+[data-admin-theme="dark_emerald"] textarea,
+[data-admin-theme="dark_emerald"] select {
+    background-color: #0f172a;
+    color: #f8fafc;
+    border-color: #334155;
+}
+
+[data-admin-theme="dark_emerald"] .admin-cmd-item {
+    color: #f8fafc;
+}
+
+[data-admin-theme="dark_emerald"] .admin-cmd-item.is-selected,
+[data-admin-theme="dark_emerald"] .admin-cmd-item:hover {
+    background-color: #334155;
+    color: #34d399;
+}
+
 
 * { box-sizing: border-box; }
 
