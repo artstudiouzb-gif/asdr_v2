@@ -3,13 +3,15 @@
 declare(strict_types=1);
 
 /*
- * Полное демо-наполнение сайта государственного агентства: главная, проекты,
- * медиа, новости, документы, вакансии, тендеры, руководство, формы, типовые
- * страницы и меню. Идемпотентно: существующие данные не изменяются.
+ * Актуальный двуязычный демо-комплект государственного агентства: главная,
+ * проекты, медиа, новости, документы, вакансии, тендеры, мероприятия,
+ * руководство, формы, типовые страницы и меню.
  *
  *   php database/seed_demo.php
+ *   php database/seed_demo.php --reset
  *
- * Логика — в App\Core\DemoSeeder (используется и кнопкой в админке).
+ * Без флага существующие данные не изменяются. --reset полностью заменяет
+ * контент эталонным комплектом и запускает проверку целостности.
  */
 
 require __DIR__ . '/../app/Core/Cli.php';
@@ -17,9 +19,18 @@ require __DIR__ . '/../app/Core/Cli.php';
 
 require __DIR__ . '/../app/Core/bootstrap.php';
 
-$created = \App\Core\DemoSeeder::run(\App\Core\Database::pdo());
+$reset = in_array('--reset', $argv, true);
+if ($reset) {
+    $backupPath = \App\Core\Backup::create();
+    fwrite(STDOUT, 'Резервная копия создана: ' . basename($backupPath) . "\n");
+}
+$created = $reset
+    ? \App\Core\DemoSeeder::resetAndRun(\App\Core\Database::pdo())
+    : \App\Core\DemoSeeder::run(\App\Core\Database::pdo());
 
-fwrite(STDOUT, "Демо-контент добавлен:\n");
+fwrite(STDOUT, $reset
+    ? "Старый контент удалён, новый демо-комплект создан и проверен:\n"
+    : "Демо-контент добавлен:\n");
 foreach ($created as $section => $n) {
     fwrite(STDOUT, sprintf("  %-12s +%d\n", $section, $n));
 }

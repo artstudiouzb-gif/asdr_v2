@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers\Admin;
 
 use App\Core\Auth;
+use App\Core\Backup;
 use App\Core\Cache;
 use App\Core\Csrf;
 use App\Core\Database;
@@ -152,7 +153,7 @@ final class SettingsController
             Cache::forgetPrefix('page:');
             $added = array_sum($c);
             Flash::success($added > 0
-                ? sprintf('Демо-контент загружен: новости +%d, документы +%d, проекты +%d, медиа +%d, формы +%d, вакансии +%d, тендеры +%d, руководство +%d, страницы +%d, меню +%d.', $c['news'], $c['documenty'], $c['projects'], $c['albums'] + $c['videos'], $c['forms'], $c['vakansii'], $c['tendery'], $c['team'], $c['pages'], $c['menu'])
+                ? sprintf('Демо-контент загружен: новости +%d, документы +%d, проекты +%d, медиа +%d, формы +%d, вакансии +%d, тендеры +%d, мероприятия +%d, руководство +%d, страницы +%d, меню +%d.', $c['news'], $c['documenty'], $c['projects'], $c['albums'] + $c['videos'], $c['forms'], $c['vakansii'], $c['tendery'], $c['meropriyatiya'], $c['team'], $c['pages'], $c['menu'])
                 : 'Демо-контент уже загружен — новых записей не добавлено.');
         } catch (\Throwable $e) {
             Flash::error('Не удалось загрузить демо-контент: ' . $e->getMessage());
@@ -176,9 +177,10 @@ final class SettingsController
         }
 
         try {
+            $backupPath = Backup::create();
             $c = DemoSeeder::resetAndRun(Database::pdo());
             Cache::forgetPrefix('page:');
-            Flash::success(sprintf('Выполнен полный сброс и перезагрузка демо-данных! Добавлено: новости %d, документы %d, проекты %d, медиа %d, формы %d, вакансии %d, тендеры %d, руководство %d, страницы %d, меню %d.', $c['news'], $c['documenty'], $c['projects'], $c['albums'] + $c['videos'], $c['forms'], $c['vakansii'], $c['tendery'], $c['team'], $c['pages'], $c['menu']));
+            Flash::success(sprintf('Резервная копия %s создана. Выполнен полный сброс, загрузка и проверка нового демо-комплекта! Создано: новости %d, документы %d, проекты %d, медиа %d, формы %d, вакансии %d, тендеры %d, мероприятия %d, руководство %d, страницы %d, меню %d.', basename($backupPath), $c['news'], $c['documenty'], $c['projects'], $c['albums'] + $c['videos'], $c['forms'], $c['vakansii'], $c['tendery'], $c['meropriyatiya'], $c['team'], $c['pages'], $c['menu']));
         } catch (\Throwable $e) {
             Flash::error('Не удалось сбросить и загрузить демо-контент: ' . $e->getMessage());
         }

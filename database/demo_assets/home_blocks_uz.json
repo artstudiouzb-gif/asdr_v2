@@ -1,0 +1,195 @@
+[
+  {
+    "type": "hero",
+    "title": "",
+    "data": {
+      "title": "Farovon O‘zbekiston kelajagini birgalikda bunyod etamiz",
+      "eyebrow": "Strategiya. Islohotlar. Taraqqiyot.",
+      "subtitle": "Barqaror iqtisodiy o‘sish, hayot sifatini yuksaltirish va inson kapitalini rivojlantirishga qaratilgan strategik tashabbuslarni ishlab chiqamiz hamda amalga oshiramiz.",
+      "image": "/uploads/public/demo-agency-hero.jpg",
+      "video_url": "",
+      "button_text": "Agentlik haqida",
+      "button_url": "/o-nas",
+      "button2_text": "O‘zbekiston–2030",
+      "button2_url": "/strategiya-2030",
+      "video_button_text": "Videoni ko‘rish",
+      "video_button_url": "/press-centr",
+      "bg_type": "image",
+      "youtube_url": "",
+      "overlay_color": "#0b1a30",
+      "overlay_opacity": 55,
+      "text_position": "left",
+      "panel_enabled": false,
+      "panel_color": "#0b1a30",
+      "panel_opacity": 35
+    }
+  },
+  {
+    "type": "counters",
+    "title": "",
+    "data": {
+      "title": "",
+      "items": [
+        {
+          "value": "100",
+          "suffix": "+",
+          "label": "strategik tashabbus amalga oshirildi"
+        },
+        {
+          "value": "20",
+          "suffix": "+",
+          "label": "ustuvor tarmoqlardagi loyiha"
+        },
+        {
+          "value": "30",
+          "suffix": "+",
+          "label": "har yili tayyorlanadigan tahliliy tadqiqot"
+        },
+        {
+          "value": "10",
+          "suffix": "+",
+          "label": "xalqaro hamkor va tashkilot"
+        }
+      ]
+    }
+  },
+  {
+    "type": "cards_grid",
+    "title": "",
+    "data": {
+      "title": "Ustuvor yo‘nalishlar",
+      "all_text": "Barcha yo‘nalishlar",
+      "all_url": "/napravleniya",
+      "columns": 5,
+      "items": [
+        {
+          "title": "Barqaror iqtisodiy o‘sish",
+          "text": "Biznes va investitsiyalar uchun qulay sharoit yaratish",
+          "url": "/ustoychivyy-ekonomicheskiy-rost"
+        },
+        {
+          "title": "Inson kapitali",
+          "text": "Ta’lim, sog‘liqni saqlash va kelajak ko‘nikmalarini rivojlantirish",
+          "url": "/analitika"
+        },
+        {
+          "title": "Samarali davlat",
+          "text": "Institutlarni takomillashtirish va boshqaruv sifatini oshirish",
+          "url": "/strategiya-2030"
+        },
+        {
+          "title": "Yashil iqtisodiyot",
+          "text": "Kam uglerodli modelga o‘tish va resurslardan oqilona foydalanish",
+          "url": "/projects/zelenaya-energetika"
+        },
+        {
+          "title": "Hududiy rivojlanish",
+          "text": "Hududlarni muvozanatli rivojlantirish va infratuzilmani yaxshilash",
+          "url": "/projects/transportnaya-infrastruktura"
+        }
+      ]
+    }
+  },
+  {
+    "type": "image_cards",
+    "title": "",
+    "data": {
+      "title": "Loyihalar va tashabbuslar",
+      "all_text": "Barcha loyihalar",
+      "all_url": "/projects",
+      "source": "projects",
+      "limit": 6,
+      "items": [
+        {
+          "image": "/uploads/public/demo-strategy-meeting.jpg",
+          "title": "Ustuvor tarmoqlarga investitsiyalarni jalb qilish",
+          "url": "/projects/investicii-prioritetnye-otrasli"
+        },
+        {
+          "image": "/uploads/public/demo-urban-development.jpg",
+          "title": "Transport va logistika infratuzilmasini rivojlantirish",
+          "url": "/projects/transportnaya-infrastruktura"
+        },
+        {
+          "image": "/uploads/public/demo-agency-hero.jpg",
+          "title": "Raqamli transformatsiya va innovatsiyalarni rivojlantirish",
+          "url": "/projects/cifrovaya-transformaciya"
+        },
+        {
+          "image": "/uploads/public/demo-green-energy.jpg",
+          "title": "Qayta tiklanuvchi energiya manbalari ulushini oshirish",
+          "url": "/projects/zelenaya-energetika"
+        },
+        {
+          "image": "/uploads/public/demo-strategy-meeting.jpg",
+          "title": "Kichik va o‘rta biznesni qo‘llab-quvvatlash",
+          "url": "/ustoychivyy-ekonomicheskiy-rost"
+        },
+        {
+          "image": "/uploads/public/demo-urban-development.jpg",
+          "title": "Inson kapitali va ta’limni rivojlantirish",
+          "url": "/analitika"
+        }
+      ]
+    }
+  },
+  {
+    "type": "news_feature",
+    "title": "",
+    "data": {
+      "title": "Yangiliklar va tahlil",
+      "all_text": "Barcha yangiliklar",
+      "all_url": "/news",
+      "limit": 6
+    }
+  },
+  {
+    "type": "media_gallery",
+    "title": "",
+    "data": {
+      "title": "Media",
+      "all_text": "Barcha materiallar",
+      "all_url": "/albums",
+      "source": "media",
+      "limit": 8,
+      "items": [
+        {
+          "image": "/uploads/public/demo-strategy-meeting.jpg",
+          "title": "O‘zbekiston–2030: asosiy maqsadlar",
+          "meta": "02:35",
+          "text": "2026-yil 20-may",
+          "kind": "video",
+          "url": "/press-centr"
+        },
+        {
+          "image": "/uploads/public/demo-green-energy.jpg",
+          "title": "Yashil iqtisodiyotga o‘tish",
+          "meta": "03:12",
+          "text": "2026-yil 18-may",
+          "kind": "video",
+          "url": "/press-centr"
+        },
+        {
+          "image": "/uploads/public/demo-agency-hero.jpg",
+          "title": "Davlat xizmatlarining raqamli transformatsiyasi",
+          "meta": "02:08",
+          "text": "2026-yil 15-may",
+          "kind": "video",
+          "url": "/press-centr"
+        },
+        {
+          "image": "/uploads/public/demo-urban-development.jpg",
+          "title": "Hududiy rivojlanish loyihalari",
+          "meta": "",
+          "text": "2026-yil 12-may",
+          "kind": "photo",
+          "url": "/albums"
+        }
+      ],
+      "_bg": "light",
+      "_fullwidth": true,
+      "_pad_top": "large",
+      "_pad_bottom": "large"
+    }
+  }
+]

@@ -14,21 +14,57 @@ use PDO;
  */
 final class DemoSeeder
 {
+    private const DEMO_VERSION = '2026.07-v2';
+
     /** @return array<string,int> счётчики добавленного по разделам */
     public static function run(PDO $pdo): array
     {
-        $c = ['assets' => 0, 'home' => 0, 'news' => 0, 'documenty' => 0, 'vakansii' => 0, 'tendery' => 0, 'projects' => 0, 'albums' => 0, 'videos' => 0, 'forms' => 0, 'team' => 0, 'pages' => 0, 'menu' => 0];
+        $ownsTransaction = !$pdo->inTransaction();
+        if ($ownsTransaction) {
+            $pdo->beginTransaction();
+        }
 
-        self::seedAssets($pdo, $c);
-        self::seedNews($pdo, $c);
-        self::seedEntries($pdo, $c);
-        self::seedProjects($pdo, $c);
-        self::seedMedia($pdo, $c);
-        self::seedForms($pdo, $c);
-        self::seedTeam($pdo, $c);
-        self::seedHome($pdo, $c);
-        self::seedPages($pdo, $c);
-        return $c;
+        try {
+            $c = [
+                'assets' => 0,
+                'home' => 0,
+                'news' => 0,
+                'documenty' => 0,
+                'vakansii' => 0,
+                'tendery' => 0,
+                'meropriyatiya' => 0,
+                'projects' => 0,
+                'albums' => 0,
+                'videos' => 0,
+                'forms' => 0,
+                'team' => 0,
+                'pages' => 0,
+                'menu' => 0,
+            ];
+
+            self::seedAssets($pdo, $c);
+            self::seedNews($pdo, $c);
+            self::seedEntries($pdo, $c);
+            self::seedProjects($pdo, $c);
+            self::seedMedia($pdo, $c);
+            self::seedForms($pdo, $c);
+            self::seedTeam($pdo, $c);
+            self::seedHome($pdo, $c);
+            self::seedPages($pdo, $c);
+            self::seedMenu($pdo, $c);
+            self::storeVersion($pdo);
+
+            if ($ownsTransaction) {
+                $pdo->commit();
+            }
+
+            return $c;
+        } catch (\Throwable $e) {
+            if ($ownsTransaction && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**
@@ -37,45 +73,201 @@ final class DemoSeeder
      */
     public static function resetAndRun(PDO $pdo): array
     {
+        $ownsTransaction = !$pdo->inTransaction();
+        if ($ownsTransaction) {
+            $pdo->beginTransaction();
+        }
+
+        // Дочерние таблицы идут раньше родительских. Это позволяет выполнить
+        // сброс без отключения FOREIGN_KEY_CHECKS и не скрывать реальные ошибки.
         $tables = [
+            'news_poll_votes',
+            'news_polls',
+            'news_images',
+            'news_translations',
+            'social_posts',
+            'news_views',
+            'news',
+            'block_revisions',
             'blocks',
             'page_translations',
             'pages',
-            'news_images',
-            'news_translations',
-            'news',
+            'content_entry_translations',
             'content_entries',
+            'project_images',
+            'project_fields',
             'project_translations',
             'projects',
             'photo_album_images',
+            'photo_album_translations',
             'photo_albums',
+            'video_translations',
             'videos',
+            'form_submissions',
             'forms',
+            'team_member_translations',
             'team_members',
             'menu_items',
+            'content_revisions',
         ];
 
-        $driver = strtolower((string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
-        if ($driver === 'mysql') {
-            try { $pdo->exec('SET FOREIGN_KEY_CHECKS = 0'); } catch (\Throwable) {}
-        }
-
-        foreach ($tables as $t) {
-            try {
-                $hasTable = $driver === 'sqlite'
-                    ? (bool) $pdo->query("SELECT 1 FROM sqlite_master WHERE type='table' AND name='{$t}'")->fetchColumn()
-                    : (bool) $pdo->query("SHOW TABLES LIKE '{$t}'")->fetchColumn();
-                if ($hasTable) {
+        try {
+            foreach ($tables as $t) {
+                if (self::tableExists($pdo, $t)) {
                     $pdo->exec('DELETE FROM `' . $t . '`');
                 }
-            } catch (\Throwable) {}
+            }
+
+            // Медиабиблиотеку пользователя не очищаем целиком: удаляем только
+            // записи файлов, которыми управляет этот демо-комплект.
+            if (self::tableExists($pdo, 'files')) {
+                $assetDir = \dirname(__DIR__, 2) . '/database/demo_assets';
+                $demoNames = array_map('basename', glob($assetDir . '/*.jpg') ?: []);
+                if ($demoNames !== []) {
+                    $placeholders = implode(',', array_fill(0, count($demoNames), '?'));
+                    $deleteDemoFiles = $pdo->prepare(
+                        "DELETE FROM files WHERE stored_name IN ({$placeholders})"
+                    );
+                    $deleteDemoFiles->execute($demoNames);
+                }
+            }
+
+            $result = self::run($pdo);
+            $issues = self::verify($pdo);
+            if ($issues !== []) {
+                throw new \RuntimeException(
+                    'Проверка демо-данных не пройдена: ' . implode('; ', $issues)
+                );
+            }
+            if ($ownsTransaction) {
+                $pdo->commit();
+            }
+
+            return $result;
+        } catch (\Throwable $e) {
+            if ($ownsTransaction && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Проверяет полноту и внутреннюю согласованность эталонного демо-комплекта.
+     *
+     * @return list<string>
+     */
+    public static function verify(PDO $pdo): array
+    {
+        $issues = [];
+        $minimums = [
+            'news' => 7,
+            'news_translations' => 6,
+            'news_images' => 4,
+            'news_polls' => 1,
+            'pages' => 12,
+            'blocks' => 40,
+            'projects' => 4,
+            'project_images' => 8,
+            'project_fields' => 16,
+            'project_translations' => 4,
+            'content_entries' => 14,
+            'content_entry_translations' => 14,
+            'photo_albums' => 3,
+            'photo_album_images' => 12,
+            'photo_album_translations' => 3,
+            'videos' => 3,
+            'video_translations' => 3,
+            'forms' => 3,
+            'team_members' => 4,
+            'team_member_translations' => 4,
+            'menu_items' => 40,
+        ];
+
+        foreach ($minimums as $table => $minimum) {
+            if (!self::tableExists($pdo, $table)) {
+                $issues[] = "отсутствует таблица {$table}";
+                continue;
+            }
+            $count = (int) $pdo->query('SELECT COUNT(*) FROM `' . $table . '`')->fetchColumn();
+            if ($count < $minimum) {
+                $issues[] = "{$table}: {$count}, ожидалось не менее {$minimum}";
+            }
         }
 
-        if ($driver === 'mysql') {
-            try { $pdo->exec('SET FOREIGN_KEY_CHECKS = 1'); } catch (\Throwable) {}
+        if (self::tableExists($pdo, 'pages')) {
+            $homeCount = (int) $pdo->query('SELECT COUNT(*) FROM pages WHERE is_home = 1')->fetchColumn();
+            if ($homeCount !== 1) {
+                $issues[] = "главных страниц: {$homeCount}, ожидалась 1";
+            }
         }
 
-        return self::run($pdo);
+        if (self::tableExists($pdo, 'blocks')) {
+            $knownTypes = BlockTypeRegistry::types();
+            $actualTypes = $pdo->query('SELECT DISTINCT type FROM blocks')->fetchAll(PDO::FETCH_COLUMN) ?: [];
+            foreach ($actualTypes as $type) {
+                if (!in_array((string) $type, $knownTypes, true)) {
+                    $issues[] = "неизвестный тип блока {$type}";
+                }
+            }
+
+            $homeStacks = $pdo->query(
+                'SELECT b.lang, COUNT(*) AS total
+                 FROM blocks b
+                 INNER JOIN pages p ON p.id = b.page_id AND p.is_home = 1
+                 WHERE b.parent_block_id IS NULL
+                 GROUP BY b.lang'
+            )->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+            foreach (['ru', 'uz'] as $lang) {
+                if ((int) ($homeStacks[$lang] ?? 0) < 6) {
+                    $issues[] = "главная {$lang}: неполный стек блоков";
+                }
+            }
+        }
+
+        if (self::tableExists($pdo, 'menu_items') && self::tableExists($pdo, 'pages')) {
+            $brokenTargets = (int) $pdo->query(
+                "SELECT COUNT(*)
+                 FROM menu_items mi
+                 LEFT JOIN pages p
+                   ON mi.url_type = 'page'
+                  AND p.slug = mi.url_value
+                  AND p.status = 'published'
+                  AND p.deleted_at IS NULL
+                 WHERE mi.url_type = 'page' AND p.id IS NULL"
+            )->fetchColumn();
+            if ($brokenTargets > 0) {
+                $issues[] = "пункты меню с отсутствующими страницами: {$brokenTargets}";
+            }
+
+            foreach (['ru', 'uz'] as $lang) {
+                $stmt = $pdo->prepare('SELECT COUNT(*) FROM menu_items WHERE lang = :lang');
+                $stmt->execute([':lang' => $lang]);
+                if ((int) $stmt->fetchColumn() < 20) {
+                    $issues[] = "меню {$lang}: недостаточно пунктов";
+                }
+            }
+        }
+
+        if (self::tableExists($pdo, 'content_entries')) {
+            $stmt = $pdo->query('SELECT id, data FROM content_entries');
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $entry) {
+                json_decode((string) $entry['data'], true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $issues[] = 'некорректный JSON content_entries #' . (int) $entry['id'];
+                }
+            }
+        }
+
+        $assetSource = \dirname(__DIR__, 2) . '/database/demo_assets';
+        foreach (glob($assetSource . '/*.jpg') ?: [] as $source) {
+            $target = self::uploadsDir() . '/' . basename($source);
+            if (!is_file($target) || hash_file('sha256', $source) !== hash_file('sha256', $target)) {
+                $issues[] = 'демо-медиа не синхронизировано: ' . basename($source);
+            }
+        }
+
+        return $issues;
     }
 
     /** Абсолютный путь каталога публичных загрузок. */
@@ -98,11 +290,11 @@ final class DemoSeeder
         if (!is_dir($src)) {
             return;
         }
-        if (!is_dir($dest)) {
-            @mkdir($dest, 0775, true);
+        if (!is_dir($dest) && !mkdir($dest, 0775, true) && !is_dir($dest)) {
+            throw new \RuntimeException('Не удалось создать каталог демо-медиа: ' . $dest);
         }
 
-        $hasFiles = (bool) $pdo->query("SHOW TABLES LIKE 'files'")->fetchColumn();
+        $hasFiles = self::tableExists($pdo, 'files');
         $fileIns = $hasFiles ? $pdo->prepare(
             "INSERT INTO files (original_name, stored_name, mime_type, size, access_type, uploaded_by, created_at)
              SELECT :n, :s, 'image/jpeg', :sz, 'public', NULL, NOW()
@@ -112,8 +304,12 @@ final class DemoSeeder
         foreach (glob($src . '/*.jpg') ?: [] as $file) {
             $name = basename($file);
             $target = $dest . '/' . $name;
-            if (!is_file($target)) {
-                @copy($file, $target);
+            $needsCopy = !is_file($target)
+                || hash_file('sha256', $file) !== hash_file('sha256', $target);
+            if ($needsCopy) {
+                if (!copy($file, $target)) {
+                    throw new \RuntimeException('Не удалось обновить демо-медиа: ' . $name);
+                }
                 $c['assets']++;
             }
             if ($fileIns !== null) {
@@ -130,12 +326,22 @@ final class DemoSeeder
      */
     private static function seedHome(PDO $pdo, array &$c): void
     {
-        $fixture = \dirname(__DIR__, 2) . '/database/demo_assets/home_blocks.json';
-        if (!is_file($fixture)) {
-            return;
+        $fixtureDir = \dirname(__DIR__, 2) . '/database/demo_assets';
+        $fixtureFiles = [
+            'ru' => $fixtureDir . '/home_blocks.json',
+            'uz' => $fixtureDir . '/home_blocks_uz.json',
+        ];
+        $localizedBlocks = [];
+        foreach ($fixtureFiles as $lang => $fixture) {
+            if (!is_file($fixture)) {
+                continue;
+            }
+            $blocks = json_decode((string) file_get_contents($fixture), true);
+            if (is_array($blocks) && $blocks !== []) {
+                $localizedBlocks[$lang] = $blocks;
+            }
         }
-        $blocks = json_decode((string) file_get_contents($fixture), true);
-        if (!is_array($blocks) || $blocks === []) {
+        if ($localizedBlocks === []) {
             return;
         }
 
@@ -174,26 +380,46 @@ final class DemoSeeder
         $pdo->prepare('UPDATE pages SET transparent_header = 1, layout_type = ? WHERE id = ?')
             ->execute(['no_sidebar', $homeId]);
 
-        $lang = self::defaultLang($pdo);
         $ins = $pdo->prepare(
             'INSERT INTO blocks (page_id, lang, type, title, data, sort_order, is_active, created_at)
              VALUES (:pid, :lang, :ty, :ti, :d, :so, 1, NOW())'
         );
-        $order = 1;
-        foreach ($blocks as $b) {
-            if (!isset($b['type'])) {
-                continue;
+        foreach ($localizedBlocks as $lang => $blocks) {
+            $order = 1;
+            foreach ($blocks as $b) {
+                if (!isset($b['type'])) {
+                    continue;
+                }
+                $ins->execute([
+                    ':pid' => $homeId,
+                    ':lang' => $lang,
+                    ':ty' => (string) $b['type'],
+                    ':ti' => (string) ($b['title'] ?? ''),
+                    ':d' => json_encode($b['data'] ?? [], JSON_UNESCAPED_UNICODE),
+                    ':so' => $order++,
+                ]);
+                $c['home']++;
             }
-            $ins->execute([
-                ':pid' => $homeId,
-                ':lang' => $lang,
-                ':ty' => (string) $b['type'],
-                ':ti' => (string) ($b['title'] ?? ''),
-                ':d' => json_encode($b['data'] ?? [], JSON_UNESCAPED_UNICODE),
-                ':so' => $order++,
+        }
+
+        if (isset($localizedBlocks['uz']) && self::tableExists($pdo, 'page_translations')) {
+            $translation = $pdo->prepare(
+                "INSERT INTO page_translations (page_id, lang, title, meta_title, meta_description, `lead`)
+                 VALUES (:page_id, 'uz', :title, :meta_title, :meta_description, :lead)
+                 ON DUPLICATE KEY UPDATE
+                    title = VALUES(title),
+                    meta_title = VALUES(meta_title),
+                    meta_description = VALUES(meta_description),
+                    `lead` = VALUES(`lead`)"
+            );
+            $translation->execute([
+                ':page_id' => $homeId,
+                ':title' => 'Bosh sahifa',
+                ':meta_title' => 'Strategik rivojlanish va islohotlar agentligi',
+                ':meta_description' => 'Agentlikning strategik tashabbuslari, loyihalari, yangiliklari va tahliliy materiallari.',
+                ':lead' => 'Strategiya. Islohotlar. Taraqqiyot.',
             ]);
         }
-        $c['home'] = $order - 1;
     }
 
     private static function seedNews(PDO $pdo, array &$c): void
@@ -201,22 +427,121 @@ final class DemoSeeder
         self::seedFlagshipNews($pdo, $c);
 
         $news = [
-            ['Запуск обновлённого официального портала', 'zapusk-portala', 'Представлен новый сайт организации с современным дизайном, удобной навигацией и версией для слабовидящих.'],
-            ['График приёма граждан на квартал', 'grafik-priema', 'Опубликовано расписание личного приёма граждан руководством организации.'],
-            ['Итоги деятельности за год', 'itogi-goda', 'Подведены основные итоги работы и ключевые показатели за отчётный период.'],
-            ['Расширен перечень электронных услуг', 'elektronnye-uslugi', 'Теперь больше документов можно получить онлайн без личного визита.'],
-            ['Объявлен новый набор специалистов', 'nabor-specialistov', 'Открыты вакансии в нескольких подразделениях. Подробности — в разделе «Вакансии».'],
+            [
+                'title' => 'Представлена цифровая платформа мониторинга реформ',
+                'slug' => 'platforma-monitoringa-reform',
+                'excerpt' => 'Новая платформа объединяет ключевые показатели Стратегии «Узбекистан–2030» и позволяет отслеживать достижение результатов.',
+                'badge' => 'Цифровизация',
+                'image' => '/uploads/public/demo-agency-hero.jpg',
+                'hashtags' => '#Узбекистан2030 #цифровизация #реформы',
+                'layout' => 'standard',
+                'uz_title' => 'Islohotlarni monitoring qilish raqamli platformasi taqdim etildi',
+                'uz_excerpt' => 'Yangi platforma «O‘zbekiston–2030» strategiyasining asosiy ko‘rsatkichlarini birlashtiradi va natijalar ijrosini kuzatish imkonini beradi.',
+                'uz_badge' => 'Raqamlashtirish',
+            ],
+            [
+                'title' => 'Обсуждены приоритеты устойчивого регионального развития',
+                'slug' => 'regionalnoe-razvitie-prioritety',
+                'excerpt' => 'Эксперты и представители регионов рассмотрели проекты инфраструктуры, занятости и развития человеческого капитала.',
+                'badge' => 'Региональное развитие',
+                'image' => '/uploads/public/demo-urban-development.jpg',
+                'hashtags' => '#регионы #инфраструктура #развитие',
+                'layout' => 'side_image',
+                'uz_title' => 'Hududlarni barqaror rivojlantirish ustuvor yo‘nalishlari muhokama qilindi',
+                'uz_excerpt' => 'Ekspertlar va hududlar vakillari infratuzilma, bandlik va inson kapitalini rivojlantirish loyihalarini ko‘rib chiqdilar.',
+                'uz_badge' => 'Hududiy rivojlanish',
+            ],
+            [
+                'title' => 'Опубликован аналитический обзор социально-экономической динамики',
+                'slug' => 'analiticheskiy-obzor-dinamiki',
+                'excerpt' => 'Обзор содержит ключевые тенденции, сценарные оценки и рекомендации для дальнейшего повышения устойчивости экономики.',
+                'badge' => 'Аналитика',
+                'image' => '/uploads/public/demo-strategy-meeting.jpg',
+                'hashtags' => '#аналитика #экономика #прогноз',
+                'layout' => 'premium',
+                'uz_title' => 'Ijtimoiy-iqtisodiy dinamika bo‘yicha tahliliy sharh e’lon qilindi',
+                'uz_excerpt' => 'Sharh asosiy tendensiyalar, ssenariy baholari va iqtisodiyot barqarorligini oshirish bo‘yicha tavsiyalarni qamrab oladi.',
+                'uz_badge' => 'Tahlil',
+            ],
+            [
+                'title' => 'Расширяется портфель проектов зелёной экономики',
+                'slug' => 'portfel-zelenoy-ekonomiki',
+                'excerpt' => 'В портфель включены инициативы в сфере возобновляемой энергетики, энергоэффективности и устойчивой инфраструктуры.',
+                'badge' => 'Зелёная экономика',
+                'image' => '/uploads/public/demo-green-energy.jpg',
+                'hashtags' => '#зелёнаяэкономика #энергетика #ESG',
+                'layout' => 'gallery',
+                'uz_title' => 'Yashil iqtisodiyot loyihalari portfeli kengaymoqda',
+                'uz_excerpt' => 'Portfelga qayta tiklanuvchi energiya, energiya samaradorligi va barqaror infratuzilma tashabbuslari kiritildi.',
+                'uz_badge' => 'Yashil iqtisodiyot',
+            ],
+            [
+                'title' => 'Открыт приём заявок в экспертный кадровый резерв',
+                'slug' => 'ekspertnyy-kadrovyy-rezerv',
+                'excerpt' => 'К участию приглашаются специалисты в области стратегического планирования, анализа данных и управления проектами.',
+                'badge' => 'Карьера',
+                'image' => '/uploads/public/hero-demo-g2.jpg',
+                'hashtags' => '#карьера #эксперты #вакансии',
+                'layout' => 'standard',
+                'uz_title' => 'Ekspert kadrlar zaxirasiga arizalar qabul qilinmoqda',
+                'uz_excerpt' => 'Strategik rejalashtirish, ma’lumotlar tahlili va loyihalarni boshqarish sohasidagi mutaxassislar taklif etiladi.',
+                'uz_badge' => 'Karyera',
+            ],
         ];
-        // Обложки берём из демо-изображений (регистрируются в seedAssets).
-        $covers = ['/uploads/public/hero-demo.jpg', '/uploads/public/hero-demo-g2.jpg', '/uploads/public/hero-demo-g3.jpg', '/uploads/public/hero-demo-g4.jpg'];
         $ins = $pdo->prepare(
-            "INSERT INTO news (title, slug, excerpt, content, image, status, published_at, created_at)
-             SELECT :t, :s, :e, :co, :img, 'published', NOW() - INTERVAL :d DAY, NOW()
+            "INSERT INTO news (title, slug, excerpt, badge, content, image, hashtags, layout_type, sidebar_layout, meta_title, meta_description, status, published_at, lang, created_at)
+             SELECT :t, :s, :e, :b, :co, :img, :hashtags, :layout, 'right_sidebar', :mt, :md, 'published', NOW() - INTERVAL :d DAY, 'ru', NOW()
              FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM news WHERE slug = :s2)"
         );
         foreach ($news as $i => $n) {
-            $ins->execute([':t' => $n[0], ':s' => $n[1], ':e' => $n[2], ':co' => '<p>' . $n[2] . '</p><p>Полный текст материала.</p>', ':img' => $covers[$i % count($covers)], ':d' => $i * 2, ':s2' => $n[1]]);
+            $content = '<p><strong>' . htmlspecialchars($n['excerpt'], ENT_QUOTES) . '</strong></p>'
+                . '<p>Материал демонстрирует полноценную публикацию: структурированный текст, тематическую обложку, метаданные и связанную узбекскую версию.</p>'
+                . '<h3>Основные направления</h3><ul><li>измеримые цели и показатели;</li><li>межведомственная координация;</li><li>открытость результатов для общества.</li></ul>';
+            $ins->execute([
+                ':t' => $n['title'],
+                ':s' => $n['slug'],
+                ':e' => $n['excerpt'],
+                ':b' => $n['badge'],
+                ':co' => $content,
+                ':img' => $n['image'],
+                ':hashtags' => $n['hashtags'],
+                ':layout' => $n['layout'],
+                ':mt' => $n['title'] . ' — Агентство',
+                ':md' => $n['excerpt'],
+                ':d' => $i + 2,
+                ':s2' => $n['slug'],
+            ]);
             $c['news'] += $ins->rowCount();
+
+            if (self::tableExists($pdo, 'news_translations')) {
+                $idStmt = $pdo->prepare("SELECT id FROM news WHERE slug = :slug AND lang = 'ru' LIMIT 1");
+                $idStmt->execute([':slug' => $n['slug']]);
+                $newsId = $idStmt->fetchColumn();
+                if ($newsId !== false) {
+                    $trans = $pdo->prepare(
+                        "INSERT INTO news_translations
+                            (news_id, lang, title, badge, excerpt, content, hashtags, meta_title, meta_description)
+                         SELECT :nid, 'uz', :t, :b, :e, :co, :hashtags, :mt, :md
+                         FROM DUAL
+                         WHERE NOT EXISTS (
+                             SELECT 1 FROM news_translations WHERE news_id = :nid2 AND lang = 'uz'
+                         )"
+                    );
+                    $uzContent = '<p><strong>' . htmlspecialchars($n['uz_excerpt'], ENT_QUOTES) . '</strong></p>'
+                        . '<p>Material to‘liq nashr imkoniyatlarini namoyish etadi: tuzilgan matn, mavzuli muqova, metadata va ikki tilli kontent.</p>';
+                    $trans->execute([
+                        ':nid' => (int) $newsId,
+                        ':t' => $n['uz_title'],
+                        ':b' => $n['uz_badge'],
+                        ':e' => $n['uz_excerpt'],
+                        ':co' => $uzContent,
+                        ':hashtags' => '#O‘zbekiston2030 #islohotlar',
+                        ':mt' => $n['uz_title'] . ' — Agentlik',
+                        ':md' => $n['uz_excerpt'],
+                        ':nid2' => (int) $newsId,
+                    ]);
+                }
+            }
         }
     }
 
@@ -233,6 +558,11 @@ final class DemoSeeder
             ['title' => 'Пресс-релиз по итогам заседания', 'meta' => 'PDF · 245 КБ', 'url' => '/catalog/documenty'],
             ['title' => 'Презентация: ход реализации Стратегии', 'meta' => 'PDF · 1,2 МБ', 'url' => '/catalog/documenty'],
         ];
+        $timeline = [
+            ['date' => '09:30', 'title' => 'Открытие заседания', 'text' => 'Представлена повестка и ожидаемые результаты.'],
+            ['date' => '10:15', 'title' => 'Отчёты по направлениям', 'text' => 'Рассмотрена динамика ключевых показателей.'],
+            ['date' => '12:00', 'title' => 'Приняты решения', 'text' => 'Определены ответственные исполнители и контрольные сроки.'],
+        ];
         $content = '<p><strong>В Агентстве стратегического развития и реформ Республики Узбекистан состоялось расширенное заседание, посвящённое вопросам реализации Стратегии «Узбекистан–2030».</strong></p>'
             . '<p>В заседании приняли участие руководители профильных министерств и ведомств, представители регионов и эксперты. Участники обсудили ход выполнения ключевых инициатив, определили приоритеты на предстоящий период и утвердили конкретные меры по их реализации.</p>'
             . '<blockquote><p>Наша задача — обеспечить эффективную реализацию всех намеченных инициатив и достичь конкретных результатов, которые ощутит каждый гражданин нашей страны.</p><cite>Директор Агентства</cite></blockquote>'
@@ -245,8 +575,8 @@ final class DemoSeeder
             . '<p>По итогам заседания ответственным ведомствам и регионам даны поручения по ускорению реализации проектов и обеспечению своевременного достижения ключевых показателей.</p>';
 
         $ins = $pdo->prepare(
-            "INSERT INTO news (title, slug, excerpt, badge, content, image, key_points, event_meta, docs, source_note, layout_type, status, published_at, created_at)
-             SELECT :t, :s, :e, :b, :co, :img, :kp, :em, :dc, :sn, 'premium', 'published', NOW() - INTERVAL 1 DAY, NOW()
+            "INSERT INTO news (title, slug, excerpt, badge, content, image, hashtags, key_points, event_meta, timeline_json, docs, source_note, views, layout_type, sidebar_layout, meta_title, meta_description, status, published_at, lang, created_at)
+             SELECT :t, :s, :e, :b, :co, :img, :hashtags, :kp, :em, :timeline, :dc, :sn, 1284, 'premium', 'right_sidebar', :mt, :md, 'published', NOW() - INTERVAL 1 DAY, 'ru', NOW()
              FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM news WHERE slug = :s2)"
         );
         $ins->execute([
@@ -256,10 +586,14 @@ final class DemoSeeder
             ':b' => 'Мероприятие',
             ':co' => $content,
             ':img' => '/uploads/public/demo-strategy-meeting.jpg',
+            ':hashtags' => '#Узбекистан2030 #стратегия #реформы #развитие',
             ':kp' => "Рассмотрены приоритетные направления Стратегии «Узбекистан–2030»\nПроанализирован прогресс реализации ключевых инициатив\nУтверждены дальнейшие шаги и ответственные исполнители\nОсобое внимание уделено инвестициям, инновациям и человеческому капиталу",
             ':em' => "Дата: 20 мая 2026 года\nФормат: расширенное заседание\nУчастники: министерства, ведомства, регионы",
+            ':timeline' => json_encode($timeline, JSON_UNESCAPED_UNICODE),
             ':dc' => json_encode($docs, JSON_UNESCAPED_UNICODE),
             ':sn' => 'Подготовлено пресс-службой Агентства',
+            ':mt' => 'Реализация Стратегии «Узбекистан–2030» — итоги заседания',
+            ':md' => 'Ключевые решения расширенного заседания по реализации Стратегии «Узбекистан–2030».',
             ':s2' => $slug,
         ]);
         $c['news'] += $ins->rowCount();
@@ -277,7 +611,7 @@ final class DemoSeeder
                 . '<p>Yig‘ilishda tegishli vazirlik va idoralar rahbarlari, hududlar vakillari hamda ekspertlar ishtirok etdilar. Ishtirokchilar ustuvor tashabbuslarning bajarilish borishini muhokama qildilar.</p>'
                 . '<blockquote><p>Vazifamiz — barcha belgilangan tashabbuslarning samarali amalga oshirilishini ta’minlash va har bir fuqaro sezadigan aniq natijalarga erishishdir.</p><cite>Agentlik direktori</cite></blockquote>';
 
-            if ((bool) $pdo->query("SHOW TABLES LIKE 'news_translations'")->fetchColumn()) {
+            if (self::tableExists($pdo, 'news_translations')) {
 
                 $transIns = $pdo->prepare(
                     'INSERT INTO news_translations (news_id, lang, title, badge, excerpt, content, key_points, event_meta, docs, poll_question, poll_options_json)
@@ -321,7 +655,7 @@ final class DemoSeeder
                 }
             }
 
-            if ((bool) $pdo->query("SHOW TABLES LIKE 'news_images'")->fetchColumn()) {
+            if (self::tableExists($pdo, 'news_images')) {
                 $imgIns = $pdo->prepare(
                     'INSERT INTO news_images (news_id, path, alt_text, sort_order, created_at)
                      SELECT :nid, :p, :a, :o, NOW()
@@ -337,6 +671,24 @@ final class DemoSeeder
                     $imgIns->execute([':nid' => (int) $nid, ':p' => $path, ':a' => 'Заседание по Стратегии «Узбекистан–2030»', ':o' => $i, ':nid2' => (int) $nid, ':p2' => $path]);
                 }
             }
+
+            if (self::tableExists($pdo, 'news_polls')) {
+                $pollIns = $pdo->prepare(
+                    "INSERT INTO news_polls (news_id, question, options_json, created_at)
+                     SELECT :nid, :question, :options, NOW()
+                     FROM DUAL
+                     WHERE NOT EXISTS (SELECT 1 FROM news_polls WHERE news_id = :nid2)"
+                );
+                $pollIns->execute([
+                    ':nid' => (int) $nid,
+                    ':question' => 'Какое направление Стратегии наиболее важно для устойчивого развития?',
+                    ':options' => json_encode(
+                        ['Человеческий капитал', 'Экономический рост', 'Зелёная экономика', 'Цифровая трансформация'],
+                        JSON_UNESCAPED_UNICODE
+                    ),
+                    ':nid2' => (int) $nid,
+                ]);
+            }
         }
     }
 
@@ -349,12 +701,10 @@ final class DemoSeeder
         );
         $byType = [
             'documenty' => [
-                ['Приказ №112 об утверждении регламента', 'prikaz-112', ['doc_number' => '112', 'doc_date' => '2026-05-14', 'category' => 'Приказы', 'summary' => 'Об утверждении регламента предоставления государственных услуг.']],
-                ['Постановление №34 о мерах поддержки', 'postanovlenie-34', ['doc_number' => '34', 'doc_date' => '2026-04-02', 'category' => 'Постановления', 'summary' => 'О мерах по улучшению качества обслуживания граждан.']],
-                ['Приказ №118 о структуре организации', 'prikaz-118', ['doc_number' => '118', 'doc_date' => '2026-05-28', 'category' => 'Приказы', 'summary' => 'Об утверждении организационной структуры.']],
-                ['Регламент рассмотрения обращений', 'reglament-obrashcheniy', ['doc_number' => '7-Р', 'doc_date' => '2026-03-10', 'category' => 'Регламенты', 'summary' => 'Порядок и сроки рассмотрения обращений граждан.']],
-                ['Отчёт о деятельности за год', 'otchet-god', ['doc_number' => 'ОТ-2026', 'doc_date' => '2026-01-20', 'category' => 'Отчёты', 'summary' => 'Годовой отчёт о результатах деятельности.']],
-                ['Положение об антикоррупционной политике', 'polozhenie-antikorrupciya', ['doc_number' => '5-П', 'doc_date' => '2026-02-15', 'category' => 'Положения', 'summary' => 'Основные принципы противодействия коррупции.']],
+                ['Методология мониторинга Стратегии «Узбекистан–2030»', 'metodologiya-monitoringa-2030', ['doc_number' => 'ММ-2030', 'doc_date' => '2026-07-15', 'category' => 'Методология', 'summary' => 'Единые подходы к оценке достижения целей, индикаторов и результатов реформ.', 'file' => '/catalog/documenty/metodologiya-monitoringa-2030']],
+                ['Аналитический отчёт о ходе структурных реформ', 'otchet-strukturnye-reformy', ['doc_number' => 'АО-07/26', 'doc_date' => '2026-07-01', 'category' => 'Аналитические отчёты', 'summary' => 'Результаты мониторинга структурных преобразований и рекомендации по дальнейшим шагам.', 'file' => '/catalog/documenty/otchet-strukturnye-reformy']],
+                ['Регламент межведомственной координации', 'reglament-koordinacii', ['doc_number' => 'РК-12', 'doc_date' => '2026-06-20', 'category' => 'Регламенты', 'summary' => 'Порядок обмена данными, согласования решений и контроля исполнения.', 'file' => '/catalog/documenty/reglament-koordinacii']],
+                ['Обзор международного опыта стратегического планирования', 'obzor-mezhdunarodnogo-opyta', ['doc_number' => 'ОМО-04', 'doc_date' => '2026-06-05', 'category' => 'Обзоры', 'summary' => 'Сравнение современных моделей стратегического управления и оценки реформ.', 'file' => '/catalog/documenty/obzor-mezhdunarodnogo-opyta']],
             ],
             'vakansii' => [
                 ['Ведущий специалист отдела ИТ', 'vedushchiy-it', ['department' => 'Отдел информационных технологий', 'salary' => 'по договорённости', 'deadline' => '2026-08-31', 'requirements' => 'Высшее образование, опыт от 3 лет, знание PHP/MySQL.', 'duties' => 'Сопровождение и развитие информационных систем.']],
@@ -363,10 +713,38 @@ final class DemoSeeder
                 ['Пресс-секретарь', 'press-sekretar', ['department' => 'Пресс-служба', 'salary' => 'по итогам собеседования', 'deadline' => '2026-08-05', 'requirements' => 'Опыт в СМИ или PR, грамотная речь.', 'duties' => 'Взаимодействие со СМИ, ведение новостей сайта.']],
             ],
             'tendery' => [
-                ['Поставка компьютерной техники', 'postavka-tekhniki', ['tender_number' => 'T-2026-014', 'budget' => '350 000 000 сум', 'start_date' => '2026-06-01', 'deadline' => '2026-07-15', 'summary' => 'Закупка рабочих станций и периферии.']],
-                ['Ремонт административного здания', 'remont-zdaniya', ['tender_number' => 'T-2026-019', 'budget' => '1 200 000 000 сум', 'start_date' => '2026-06-10', 'deadline' => '2026-08-01', 'summary' => 'Капитальный ремонт помещений.']],
-                ['Услуги охраны объектов', 'uslugi-ohrany', ['tender_number' => 'T-2026-021', 'budget' => '480 000 000 сум', 'start_date' => '2026-06-20', 'deadline' => '2026-07-30', 'summary' => 'Физическая охрана административных объектов.']],
-                ['Разработка мобильного приложения', 'razrabotka-prilozheniya', ['tender_number' => 'T-2026-025', 'budget' => '600 000 000 сум', 'start_date' => '2026-07-01', 'deadline' => '2026-08-20', 'summary' => 'Создание мобильного приложения для граждан.']],
+                ['Развитие аналитической платформы мониторинга', 'platforma-monitoringa-zakupka', ['tender_number' => 'T-2026-031', 'budget' => 'по итогам конкурса', 'start_date' => '2026-07-10', 'deadline' => '2026-08-20', 'summary' => 'Разработка модулей визуализации показателей и межведомственного обмена данными.', 'file' => '/catalog/tendery/platforma-monitoringa-zakupka']],
+                ['Исследование социально-экономической динамики регионов', 'issledovanie-regionov', ['tender_number' => 'T-2026-034', 'budget' => 'по итогам конкурса', 'start_date' => '2026-07-18', 'deadline' => '2026-09-01', 'summary' => 'Комплексное исследование факторов роста и качества жизни в регионах.', 'file' => '/catalog/tendery/issledovanie-regionov']],
+                ['Организация международного экспертного форума', 'ekspertnyy-forum', ['tender_number' => 'T-2026-038', 'budget' => 'по итогам конкурса', 'start_date' => '2026-07-25', 'deadline' => '2026-09-15', 'summary' => 'Организационное и техническое сопровождение экспертного форума.', 'file' => '/catalog/tendery/ekspertnyy-forum']],
+            ],
+            'meropriyatiya' => [
+                ['Открытая презентация системы мониторинга Стратегии', 'prezentaciya-monitoringa-strategii', ['event_date' => '2026-09-12', 'event_time' => '10:00', 'location' => 'Ташкент, конференц-зал Агентства', 'summary' => 'Презентация цифровой системы мониторинга целей и показателей Стратегии «Узбекистан–2030».']],
+                ['Экспертный диалог по региональному развитию', 'dialog-regionalnoe-razvitie', ['event_date' => '2026-10-03', 'event_time' => '15:00', 'location' => 'Гибридный формат', 'summary' => 'Обсуждение новых подходов к развитию регионов и оценке качества государственных программ.']],
+                ['Форум стратегических инициатив', 'forum-strategicheskih-iniciativ', ['event_date' => '2026-11-18', 'event_time' => '09:30', 'location' => 'Ташкент', 'summary' => 'Площадка для обмена опытом между государственными органами, экспертами и международными партнёрами.']],
+            ],
+        ];
+        $translations = [
+            'documenty' => [
+                'metodologiya-monitoringa-2030' => ['«O‘zbekiston–2030» strategiyasini monitoring qilish metodologiyasi', ['category' => 'Metodologiya', 'summary' => 'Islohotlar maqsadlari, indikatorlari va natijalarini baholashga yagona yondashuvlar.']],
+                'otchet-strukturnye-reformy' => ['Tarkibiy islohotlarning borishi bo‘yicha tahliliy hisobot', ['category' => 'Tahliliy hisobotlar', 'summary' => 'Tarkibiy o‘zgarishlar monitoringi natijalari va keyingi qadamlar bo‘yicha tavsiyalar.']],
+                'reglament-koordinacii' => ['Idoralararo muvofiqlashtirish reglamenti', ['category' => 'Reglamentlar', 'summary' => 'Ma’lumot almashish, qarorlarni kelishish va ijroni nazorat qilish tartibi.']],
+                'obzor-mezhdunarodnogo-opyta' => ['Strategik rejalashtirish bo‘yicha xalqaro tajriba sharhi', ['category' => 'Sharhlar', 'summary' => 'Strategik boshqaruv va islohotlarni baholashning zamonaviy modellarini taqqoslash.']],
+            ],
+            'vakansii' => [
+                'vedushchiy-it' => ['IT bo‘limining yetakchi mutaxassisi', ['department' => 'Axborot texnologiyalari bo‘limi', 'requirements' => 'Oliy ma’lumot, kamida 3 yillik tajriba, PHP/MySQL bilimlari.', 'duties' => 'Axborot tizimlarini qo‘llab-quvvatlash va rivojlantirish.']],
+                'yuriskonsult' => ['Yuriskonsult', ['department' => 'Yuridik bo‘lim', 'requirements' => 'Oliy yuridik ma’lumot va kamida 2 yillik tajriba.', 'duties' => 'Agentlik faoliyatini huquqiy qo‘llab-quvvatlash.']],
+                'specialist-kadry' => ['Kadrlar bo‘yicha mutaxassis', ['department' => 'Inson resurslari bo‘limi', 'requirements' => 'Kadrlar ish yurituvi bo‘yicha tajriba.', 'duties' => 'Kadrlar hisobi va hujjatlarini yuritish.']],
+                'press-sekretar' => ['Matbuot kotibi', ['department' => 'Matbuot xizmati', 'requirements' => 'OAV yoki PR sohasida tajriba, savodli nutq.', 'duties' => 'OAV bilan hamkorlik va sayt yangiliklarini yuritish.']],
+            ],
+            'tendery' => [
+                'platforma-monitoringa-zakupka' => ['Monitoring tahliliy platformasini rivojlantirish', ['summary' => 'Ko‘rsatkichlarni vizuallashtirish va idoralararo ma’lumot almashish modullarini ishlab chiqish.']],
+                'issledovanie-regionov' => ['Hududlarning ijtimoiy-iqtisodiy dinamikasini o‘rganish', ['summary' => 'Hududlarda o‘sish omillari va hayot sifatini kompleks o‘rganish.']],
+                'ekspertnyy-forum' => ['Xalqaro ekspert forumini tashkil etish', ['summary' => 'Ekspert forumini tashkiliy va texnik jihatdan qo‘llab-quvvatlash.']],
+            ],
+            'meropriyatiya' => [
+                'prezentaciya-monitoringa-strategii' => ['Strategiyani monitoring qilish tizimining ochiq taqdimoti', ['location' => 'Toshkent, Agentlik konferensiya zali', 'summary' => '«O‘zbekiston–2030» strategiyasi maqsad va ko‘rsatkichlarini monitoring qilish raqamli tizimi taqdimoti.']],
+                'dialog-regionalnoe-razvitie' => ['Hududiy rivojlanish bo‘yicha ekspert muloqoti', ['location' => 'Gibrid shakl', 'summary' => 'Hududlarni rivojlantirish va davlat dasturlari sifatini baholashning yangi yondashuvlari muhokamasi.']],
+                'forum-strategicheskih-iniciativ' => ['Strategik tashabbuslar forumi', ['location' => 'Toshkent', 'summary' => 'Davlat organlari, ekspertlar va xalqaro hamkorlar o‘rtasida tajriba almashish maydoni.']],
             ],
         ];
         foreach ($byType as $slug => $rows) {
@@ -377,13 +755,40 @@ final class DemoSeeder
             foreach ($rows as $r) {
                 $ins->execute([':tid' => $tid, ':t' => $r[0], ':s' => $r[1], ':d' => json_encode($r[2], JSON_UNESCAPED_UNICODE), ':tid2' => $tid, ':s2' => $r[1]]);
                 $c[$slug] += $ins->rowCount();
+
+                if (self::tableExists($pdo, 'content_entry_translations')) {
+                    $entryStmt = $pdo->prepare(
+                        'SELECT id FROM content_entries WHERE type_id = :type_id AND slug = :slug LIMIT 1'
+                    );
+                    $entryStmt->execute([':type_id' => $tid, ':slug' => $r[1]]);
+                    $entryId = $entryStmt->fetchColumn();
+                    $translation = $translations[$slug][$r[1]] ?? null;
+                    if ($entryId !== false && is_array($translation)) {
+                        $translatedData = array_replace($r[2], $translation[1] ?? []);
+                        $transIns = $pdo->prepare(
+                            "INSERT INTO content_entry_translations (entry_id, lang, title, data)
+                             SELECT :entry_id, 'uz', :title, :data
+                             FROM DUAL
+                             WHERE NOT EXISTS (
+                                 SELECT 1 FROM content_entry_translations
+                                 WHERE entry_id = :entry_id2 AND lang = 'uz'
+                             )"
+                        );
+                        $transIns->execute([
+                            ':entry_id' => (int) $entryId,
+                            ':title' => (string) $translation[0],
+                            ':data' => json_encode($translatedData, JSON_UNESCAPED_UNICODE),
+                            ':entry_id2' => (int) $entryId,
+                        ]);
+                    }
+                }
             }
         }
     }
 
     private static function seedProjects(PDO $pdo, array &$c): void
     {
-        if (!(bool) $pdo->query("SHOW TABLES LIKE 'projects'")->fetchColumn()) {
+        if (!self::tableExists($pdo, 'projects')) {
             return;
         }
 
@@ -407,9 +812,70 @@ final class DemoSeeder
         foreach ($projects as $i => $project) {
             $ins->execute([':t' => $project[1], ':s' => $project[0], ':d' => $project[3], ':i' => $projectImages[$project[0]] ?? $project[2], ':o' => $i, ':s2' => $project[0]]);
             $c['projects'] += $ins->rowCount();
+
+            $pidStmt = $pdo->prepare('SELECT id FROM projects WHERE slug = :s LIMIT 1');
+            $pidStmt->execute([':s' => $project[0]]);
+            $projectId = $pidStmt->fetchColumn();
+            if ($projectId === false) {
+                continue;
+            }
+
+            if (self::tableExists($pdo, 'project_images')) {
+                $imageIns = $pdo->prepare(
+                    "INSERT INTO project_images (project_id, file_path, caption, sort_order)
+                     SELECT :pid, :path, :caption, :sort
+                     FROM DUAL
+                     WHERE NOT EXISTS (
+                         SELECT 1 FROM project_images WHERE project_id = :pid2 AND file_path = :path2
+                     )"
+                );
+                $gallery = array_values(array_unique([
+                    $projectImages[$project[0]] ?? $project[2],
+                    '/uploads/public/demo-strategy-meeting.jpg',
+                    '/uploads/public/demo-urban-development.jpg',
+                ]));
+                foreach ($gallery as $sort => $path) {
+                    $imageIns->execute([
+                        ':pid' => (int) $projectId,
+                        ':path' => $path,
+                        ':caption' => $project[1],
+                        ':sort' => $sort,
+                        ':pid2' => (int) $projectId,
+                        ':path2' => $path,
+                    ]);
+                }
+            }
+
+            if (self::tableExists($pdo, 'project_fields')) {
+                $fieldIns = $pdo->prepare(
+                    "INSERT INTO project_fields (project_id, field_key, field_value, sort_order)
+                     SELECT :pid, :field_key, :field_value, :sort
+                     FROM DUAL
+                     WHERE NOT EXISTS (
+                         SELECT 1 FROM project_fields WHERE project_id = :pid2 AND field_key = :field_key2
+                     )"
+                );
+                $fields = [
+                    'Статус' => 'В реализации',
+                    'Период' => '2026–2030',
+                    'Уровень' => $i % 2 === 0 ? 'Национальный' : 'Межрегиональный',
+                    'Ключевой результат' => 'Измеримый вклад в достижение целей Стратегии «Узбекистан–2030»',
+                ];
+                $fieldOrder = 0;
+                foreach ($fields as $fieldKey => $value) {
+                    $fieldIns->execute([
+                        ':pid' => (int) $projectId,
+                        ':field_key' => $fieldKey,
+                        ':field_value' => $value,
+                        ':sort' => $fieldOrder++,
+                        ':pid2' => (int) $projectId,
+                        ':field_key2' => $fieldKey,
+                    ]);
+                }
+            }
         }
 
-        if ((bool) $pdo->query("SHOW TABLES LIKE 'project_translations'")->fetchColumn()) {
+        if (self::tableExists($pdo, 'project_translations')) {
             $transIns = $pdo->prepare(
                 'INSERT INTO project_translations (project_id, lang, title, description)
                  SELECT :pid, "uz", :t, :d
@@ -434,10 +900,11 @@ final class DemoSeeder
 
     private static function seedMedia(PDO $pdo, array &$c): void
     {
-        if ((bool) $pdo->query("SHOW TABLES LIKE 'photo_albums'")->fetchColumn()) {
+        if (self::tableExists($pdo, 'photo_albums')) {
             $albums = [
-                ['strategiya-2030-v-deystvii', 'Стратегия «Узбекистан–2030» в действии', 'Рабочие заседания, презентации и обсуждение приоритетных реформ.', '/uploads/public/demo-strategy-meeting.jpg'],
-                ['regionalnoe-razvitie', 'Развитие регионов Узбекистана', 'Проекты инфраструктуры и новые точки экономического роста.', '/uploads/public/demo-urban-development.jpg'],
+                ['strategiya-2030-v-deystvii', 'Стратегия «Узбекистан–2030» в действии', 'Рабочие заседания, презентации и обсуждение приоритетных реформ.', '/uploads/public/demo-strategy-meeting.jpg', '«O‘zbekiston–2030» strategiyasi amalda', 'Ishchi yig‘ilishlar, taqdimotlar va ustuvor islohotlar muhokamasi.'],
+                ['regionalnoe-razvitie', 'Развитие регионов Узбекистана', 'Проекты инфраструктуры и новые точки экономического роста.', '/uploads/public/demo-urban-development.jpg', 'O‘zbekiston hududlarini rivojlantirish', 'Infratuzilma loyihalari va iqtisodiy o‘sishning yangi nuqtalari.'],
+                ['zelenaya-transformaciya', 'Зелёная трансформация', 'Энергетика, устойчивые города и экологические инициативы.', '/uploads/public/demo-green-energy.jpg', 'Yashil transformatsiya', 'Energetika, barqaror shaharlar va ekologik tashabbuslar.'],
             ];
             $albumIns = $pdo->prepare(
                 "INSERT INTO photo_albums (title, slug, description, cover_url, is_published, is_featured, created_at)
@@ -447,7 +914,7 @@ final class DemoSeeder
             foreach ($albums as $album) {
                 $albumIns->execute([':t' => $album[1], ':s' => $album[0], ':d' => $album[2], ':c' => $album[3], ':s2' => $album[0]]);
                 $c['albums'] += $albumIns->rowCount();
-                if ((bool) $pdo->query("SHOW TABLES LIKE 'photo_album_images'")->fetchColumn()) {
+                if (self::tableExists($pdo, 'photo_album_images')) {
                     $albumIdStmt = $pdo->prepare('SELECT id FROM photo_albums WHERE slug = :slug LIMIT 1');
                     $albumIdStmt->execute([':slug' => $album[0]]);
                     $albumId = $albumIdStmt->fetchColumn();
@@ -460,16 +927,34 @@ final class DemoSeeder
                         foreach (['/uploads/public/demo-strategy-meeting.jpg', '/uploads/public/demo-urban-development.jpg', '/uploads/public/demo-agency-hero.jpg', '/uploads/public/demo-green-energy.jpg'] as $order => $url) {
                             $imageIns->execute([':aid' => (int) $albumId, ':url' => $url, ':caption' => $album[1], ':ord' => $order, ':aid2' => (int) $albumId, ':url2' => $url]);
                         }
+
+                        if (self::tableExists($pdo, 'photo_album_translations')) {
+                            $translationIns = $pdo->prepare(
+                                "INSERT INTO photo_album_translations (album_id, lang, title, description)
+                                 SELECT :album_id, 'uz', :title, :description
+                                 FROM DUAL
+                                 WHERE NOT EXISTS (
+                                     SELECT 1 FROM photo_album_translations
+                                     WHERE album_id = :album_id2 AND lang = 'uz'
+                                 )"
+                            );
+                            $translationIns->execute([
+                                ':album_id' => (int) $albumId,
+                                ':title' => $album[4],
+                                ':description' => $album[5],
+                                ':album_id2' => (int) $albumId,
+                            ]);
+                        }
                     }
                 }
             }
         }
 
-        if ((bool) $pdo->query("SHOW TABLES LIKE 'videos'")->fetchColumn()) {
+        if (self::tableExists($pdo, 'videos')) {
             $videos = [
-                ['uzbekistan-2030-klyuchevye-celi', 'Узбекистан–2030: ключевые цели и приоритеты', '/uploads/public/demo-strategy-meeting.jpg', '02:35'],
-                ['zelenaya-ekonomika', 'Переход к «зелёной» экономике', '/uploads/public/demo-green-energy.jpg', '03:12'],
-                ['cifrovye-gosuslugi', 'Цифровая трансформация государственных услуг', '/uploads/public/demo-agency-hero.jpg', '02:08'],
+                ['uzbekistan-2030-klyuchevye-celi', 'Узбекистан–2030: ключевые цели и приоритеты', '/uploads/public/demo-strategy-meeting.jpg', '02:35', 'O‘zbekiston–2030: asosiy maqsad va ustuvor yo‘nalishlar'],
+                ['zelenaya-ekonomika', 'Переход к «зелёной» экономике', '/uploads/public/demo-green-energy.jpg', '03:12', 'Yashil iqtisodiyotga o‘tish'],
+                ['cifrovye-gosuslugi', 'Цифровая трансформация государственных услуг', '/uploads/public/demo-agency-hero.jpg', '02:08', 'Davlat xizmatlarining raqamli transformatsiyasi'],
             ];
             $videoIns = $pdo->prepare(
                 "INSERT INTO videos (title, slug, description, cover_url, video_url, duration, is_published, is_featured, sort_order, created_at)
@@ -479,47 +964,106 @@ final class DemoSeeder
             foreach ($videos as $i => $video) {
                 $videoIns->execute([':t' => $video[1], ':s' => $video[0], ':d' => 'Информационный видеоматериал Агентства.', ':c' => $video[2], ':du' => $video[3], ':o' => $i, ':s2' => $video[0]]);
                 $c['videos'] += $videoIns->rowCount();
+
+                if (self::tableExists($pdo, 'video_translations')) {
+                    $videoIdStmt = $pdo->prepare('SELECT id FROM videos WHERE slug = :slug LIMIT 1');
+                    $videoIdStmt->execute([':slug' => $video[0]]);
+                    $videoId = $videoIdStmt->fetchColumn();
+                    if ($videoId !== false) {
+                        $videoTranslationIns = $pdo->prepare(
+                            "INSERT INTO video_translations (video_id, lang, title, description)
+                             SELECT :video_id, 'uz', :title, :description
+                             FROM DUAL
+                             WHERE NOT EXISTS (
+                                 SELECT 1 FROM video_translations
+                                 WHERE video_id = :video_id2 AND lang = 'uz'
+                             )"
+                        );
+                        $videoTranslationIns->execute([
+                            ':video_id' => (int) $videoId,
+                            ':title' => $video[4],
+                            ':description' => 'Agentlikning axborot videomateriali.',
+                            ':video_id2' => (int) $videoId,
+                        ]);
+                    }
+                }
             }
         }
     }
 
     private static function seedForms(PDO $pdo, array &$c): void
     {
-        if (!(bool) $pdo->query("SHOW TABLES LIKE 'forms'")->fetchColumn()) {
+        if (!self::tableExists($pdo, 'forms')) {
             return;
         }
-        $fields = [
-            ['name' => 'name', 'label' => 'Ваше имя', 'type' => 'text', 'required' => true],
-            ['name' => 'email', 'label' => 'E-mail', 'type' => 'email', 'required' => true],
-            ['name' => 'phone', 'label' => 'Телефон', 'type' => 'tel', 'required' => false],
-            ['name' => 'topic', 'label' => 'Тема обращения', 'type' => 'select', 'options' => 'Общий вопрос,Предложение,Запрос информации,Запись на приём', 'required' => true],
-            ['name' => 'message', 'label' => 'Сообщение', 'type' => 'textarea', 'required' => true],
+        $forms = [
+            [
+                'Обращение в Агентство',
+                'public-appeal',
+                [
+                    ['name' => 'name', 'label' => 'Ваше имя', 'type' => 'text', 'required' => true],
+                    ['name' => 'email', 'label' => 'E-mail', 'type' => 'email', 'required' => true],
+                    ['name' => 'phone', 'label' => 'Телефон', 'type' => 'tel', 'required' => false],
+                    ['name' => 'topic', 'label' => 'Тема обращения', 'type' => 'select', 'options' => 'Общий вопрос,Предложение,Запрос информации,Запись на приём', 'required' => true],
+                    ['name' => 'message', 'label' => 'Сообщение', 'type' => 'textarea', 'required' => true],
+                    ['name' => 'consent', 'label' => 'Согласен на обработку предоставленных данных', 'type' => 'checkbox', 'required' => true],
+                ],
+                'Спасибо! Ваше обращение зарегистрировано.',
+            ],
+            [
+                'Регистрация на мероприятие',
+                'event-registration',
+                [
+                    ['name' => 'name', 'label' => 'Ф.И.О.', 'type' => 'text', 'required' => true],
+                    ['name' => 'organization', 'label' => 'Организация', 'type' => 'text', 'required' => true],
+                    ['name' => 'email', 'label' => 'E-mail', 'type' => 'email', 'required' => true],
+                    ['name' => 'participation', 'label' => 'Формат участия', 'type' => 'radio', 'options' => 'Очно,Онлайн', 'required' => true],
+                    ['name' => 'topics', 'label' => 'Интересующие направления', 'type' => 'checkbox_group', 'options' => 'Стратегическое планирование,Региональное развитие,Зелёная экономика,Цифровизация', 'required' => false],
+                    ['name' => 'event_date', 'label' => 'Предпочтительная дата', 'type' => 'date', 'required' => false],
+                ],
+                'Регистрация принята. Подтверждение будет направлено на указанный e-mail.',
+            ],
+            [
+                'Заявка в экспертный резерв',
+                'expert-pool',
+                [
+                    ['name' => 'name', 'label' => 'Ф.И.О.', 'type' => 'text', 'required' => true],
+                    ['name' => 'email', 'label' => 'E-mail', 'type' => 'email', 'required' => true],
+                    ['name' => 'specialization', 'label' => 'Специализация', 'type' => 'select', 'options' => 'Экономика,Аналитика данных,Управление проектами,Международное сотрудничество', 'required' => true],
+                    ['name' => 'experience', 'label' => 'Кратко опишите опыт', 'type' => 'textarea', 'required' => true],
+                    ['name' => 'resume', 'label' => 'Резюме', 'type' => 'file', 'required' => true],
+                    ['name' => 'consent', 'label' => 'Подтверждаю достоверность сведений', 'type' => 'checkbox', 'required' => true],
+                ],
+                'Заявка принята и направлена на рассмотрение.',
+            ],
         ];
         $ins = $pdo->prepare(
             "INSERT INTO forms (name, slug, fields_json, success_message, created_at)
              SELECT :n, :s, :f, :m, NOW()
              FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM forms WHERE slug = :s2)"
         );
-        $ins->execute([
-            ':n' => 'Обращение в Агентство',
-            ':s' => 'public-appeal',
-            ':f' => json_encode($fields, JSON_UNESCAPED_UNICODE),
-            ':m' => 'Спасибо! Ваше обращение зарегистрировано.',
-            ':s2' => 'public-appeal',
-        ]);
-        $c['forms'] += $ins->rowCount();
+        foreach ($forms as $form) {
+            $ins->execute([
+                ':n' => $form[0],
+                ':s' => $form[1],
+                ':f' => json_encode($form[2], JSON_UNESCAPED_UNICODE),
+                ':m' => $form[3],
+                ':s2' => $form[1],
+            ]);
+            $c['forms'] += $ins->rowCount();
+        }
     }
 
     private static function seedTeam(PDO $pdo, array &$c): void
     {
-        if (!(bool) $pdo->query("SHOW TABLES LIKE 'team_members'")->fetchColumn()) {
+        if (!self::tableExists($pdo, 'team_members')) {
             return;
         }
         $team = [
-            ['Нуриддинов Шерзод Бахтиярович', 'Директор'],
-            ['Юлдашева Нилуфар Азизовна', 'Заместитель директора'],
-            ['Каримов Бехзод Шухратович', 'Начальник юридического отдела'],
-            ['Исмоилова Дилноза Фарходовна', 'Руководитель пресс-службы'],
+            ['Нуриддинов Шерзод Бахтиярович', 'Директор', 'Nuriddinov Sherzod Baxtiyarovich', 'Direktor'],
+            ['Юлдашева Нилуфар Азизовна', 'Заместитель директора', 'Yuldasheva Nilufar Azizovna', 'Direktor o‘rinbosari'],
+            ['Каримов Бехзод Шухратович', 'Руководитель направления стратегического анализа', 'Karimov Behzod Shuhratovich', 'Strategik tahlil yo‘nalishi rahbari'],
+            ['Исмоилова Дилноза Фарходовна', 'Руководитель пресс-службы', 'Ismoilova Dilnoza Farhodovna', 'Matbuot xizmati rahbari'],
         ];
         $ins = $pdo->prepare(
             "INSERT INTO team_members (name, position, status, sort_order, created_at)
@@ -529,6 +1073,29 @@ final class DemoSeeder
         foreach ($team as $i => $t) {
             $ins->execute([':n' => $t[0], ':p' => $t[1], ':o' => $i, ':n2' => $t[0]]);
             $c['team'] += $ins->rowCount();
+
+            if (self::tableExists($pdo, 'team_member_translations')) {
+                $memberStmt = $pdo->prepare('SELECT id FROM team_members WHERE name = :name LIMIT 1');
+                $memberStmt->execute([':name' => $t[0]]);
+                $memberId = $memberStmt->fetchColumn();
+                if ($memberId !== false) {
+                    $translationIns = $pdo->prepare(
+                        "INSERT INTO team_member_translations (member_id, lang, name, position)
+                         SELECT :member_id, 'uz', :name, :position
+                         FROM DUAL
+                         WHERE NOT EXISTS (
+                             SELECT 1 FROM team_member_translations
+                             WHERE member_id = :member_id2 AND lang = 'uz'
+                         )"
+                    );
+                    $translationIns->execute([
+                        ':member_id' => (int) $memberId,
+                        ':name' => $t[2],
+                        ':position' => $t[3],
+                        ':member_id2' => (int) $memberId,
+                    ]);
+                }
+            }
         }
     }
 
@@ -647,14 +1214,14 @@ final class DemoSeeder
         }
 
         $pageIns = $pdo->prepare(
-            "INSERT INTO pages (title, slug, status, is_home, layout_type, created_at)
-             SELECT :t, :s, 'published', 0, 'no_sidebar', NOW()
+            "INSERT INTO pages (title, slug, meta_title, meta_description, `lead`, status, is_home, layout_type, lang, created_at)
+             SELECT :t, :s, :mt, :md, :lead, 'published', 0, 'no_sidebar', 'ru', NOW()
              FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM pages WHERE slug = :s2)"
         );
 
         $transIns = $pdo->prepare(
-            "INSERT INTO page_translations (page_id, lang, title)
-             SELECT :pid, :lang, :title
+            "INSERT INTO page_translations (page_id, lang, title, meta_title, meta_description, `lead`)
+             SELECT :pid, :lang, :title, :meta_title, :meta_description, :lead
              FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM page_translations WHERE page_id = :pid2 AND lang = :lang2)"
         );
 
@@ -669,7 +1236,14 @@ final class DemoSeeder
             }
             $ruData = $langData['ru'] ?? [];
             $defaultTitle = is_array($ruData) ? (string) ($ruData['title'] ?? '') : '';
-            $pageIns->execute([':t' => $defaultTitle, ':s' => $slug, ':s2' => $slug]);
+            $pageIns->execute([
+                ':t' => $defaultTitle,
+                ':s' => $slug,
+                ':mt' => $defaultTitle . ' — Агентство стратегического развития и реформ',
+                ':md' => 'Официальная информация раздела «' . $defaultTitle . '».',
+                ':lead' => 'Стратегические инициативы, результаты и актуальные материалы Агентства.',
+                ':s2' => $slug,
+            ]);
             $c['pages'] += $pageIns->rowCount();
             $pid = self::pageId($pdo, $slug);
             if ($pid === null) {
@@ -690,6 +1264,13 @@ final class DemoSeeder
                     ':pid' => $pid,
                     ':lang' => $lang,
                     ':title' => $title,
+                    ':meta_title' => $title . ($lang === 'uz' ? ' — Strategik rivojlanish va islohotlar agentligi' : ' — Агентство стратегического развития и реформ'),
+                    ':meta_description' => $lang === 'uz'
+                        ? '«' . $title . '» bo‘limining rasmiy ma’lumotlari.'
+                        : 'Официальная информация раздела «' . $title . '».',
+                    ':lead' => $lang === 'uz'
+                        ? 'Agentlikning strategik tashabbuslari, natijalari va dolzarb materiallari.'
+                        : 'Стратегические инициативы, результаты и актуальные материалы Агентства.',
                     ':pid2' => $pid,
                     ':lang2' => $lang
                 ]);
@@ -746,36 +1327,113 @@ final class DemoSeeder
 
     private static function seedMenu(PDO $pdo, array &$c): void
     {
-        if (!(bool) $pdo->query("SHOW TABLES LIKE 'menu_items'")->fetchColumn()) {
+        if (!self::tableExists($pdo, 'menu_items')) {
             return;
         }
         if ((int) $pdo->query('SELECT COUNT(*) FROM menu_items')->fetchColumn() > 0) {
             return;
         }
-        $items = [
-            ['О нас', '/o-nas'],
-            ['Направления', '/napravleniya'],
-            ['Проекты', '/projects'],
-            ['Аналитика', '/analitika'],
-            ['Документы', '/catalog/documenty'],
-            ['Пресс-центр', '/press-centr'],
-            ['Контакты', '/kontakty'],
+        $menus = [
+            'ru' => [
+                ['title' => 'Агентство', 'type' => 'page', 'value' => 'o-nas', 'mega' => 3, 'children' => [
+                    ['Об агентстве', 'page', 'o-nas'],
+                    ['Руководство', 'page', 'rukovodstvo'],
+                    ['Структура', 'page', 'struktura'],
+                    ['Директор', 'page', 'direktor'],
+                    ['Противодействие коррупции', 'page', 'antikorrupciya'],
+                ]],
+                ['title' => 'Деятельность', 'type' => 'page', 'value' => 'napravleniya', 'mega' => 3, 'children' => [
+                    ['Стратегия «Узбекистан–2030»', 'page', 'strategiya-2030', '2030'],
+                    ['Приоритетные направления', 'page', 'napravleniya'],
+                    ['Устойчивый экономический рост', 'page', 'ustoychivyy-ekonomicheskiy-rost'],
+                    ['Проекты и инициативы', 'custom', '/projects'],
+                    ['Аналитика', 'page', 'analitika'],
+                ]],
+                ['title' => 'Пресс-центр', 'type' => 'page', 'value' => 'press-centr', 'mega' => 2, 'children' => [
+                    ['Новости', 'news_index', ''],
+                    ['Мероприятия', 'page', 'meropriyatiya'],
+                    ['Фотоальбомы', 'custom', '/albums'],
+                    ['Видеоматериалы', 'custom', '/videos'],
+                ]],
+                ['title' => 'Открытые данные', 'type' => 'custom', 'value' => '/catalog/documenty', 'mega' => 2, 'children' => [
+                    ['Документы', 'custom', '/catalog/documenty'],
+                    ['Тендеры', 'custom', '/catalog/tendery'],
+                    ['Вакансии', 'custom', '/catalog/vakansii'],
+                ]],
+                ['title' => 'Контакты', 'type' => 'page', 'value' => 'kontakty', 'mega' => 0, 'children' => []],
+            ],
+            'uz' => [
+                ['title' => 'Agentlik', 'type' => 'page', 'value' => 'o-nas', 'mega' => 3, 'children' => [
+                    ['Agentlik haqida', 'page', 'o-nas'],
+                    ['Rahbariyat', 'page', 'rukovodstvo'],
+                    ['Tuzilma', 'page', 'struktura'],
+                    ['Direktor', 'page', 'direktor'],
+                    ['Korrupsiyaga qarshi kurash', 'page', 'antikorrupciya'],
+                ]],
+                ['title' => 'Faoliyat', 'type' => 'page', 'value' => 'napravleniya', 'mega' => 3, 'children' => [
+                    ['«O‘zbekiston–2030» strategiyasi', 'page', 'strategiya-2030', '2030'],
+                    ['Ustuvor yo‘nalishlar', 'page', 'napravleniya'],
+                    ['Barqaror iqtisodiy o‘sish', 'page', 'ustoychivyy-ekonomicheskiy-rost'],
+                    ['Loyihalar va tashabbuslar', 'custom', '/projects'],
+                    ['Tahlil', 'page', 'analitika'],
+                ]],
+                ['title' => 'Matbuot markazi', 'type' => 'page', 'value' => 'press-centr', 'mega' => 2, 'children' => [
+                    ['Yangiliklar', 'news_index', ''],
+                    ['Tadbirlar', 'page', 'meropriyatiya'],
+                    ['Fotoalbomlar', 'custom', '/albums'],
+                    ['Videomateriallar', 'custom', '/videos'],
+                ]],
+                ['title' => 'Ochiq ma’lumotlar', 'type' => 'custom', 'value' => '/catalog/documenty', 'mega' => 2, 'children' => [
+                    ['Hujjatlar', 'custom', '/catalog/documenty'],
+                    ['Tenderlar', 'custom', '/catalog/tendery'],
+                    ['Bo‘sh ish o‘rinlari', 'custom', '/catalog/vakansii'],
+                ]],
+                ['title' => 'Aloqa', 'type' => 'page', 'value' => 'kontakty', 'mega' => 0, 'children' => []],
+            ],
         ];
-        // Меню привязано к конкретному языку (без «Все языки») — сеем свой набор
-        // для каждого активного языка.
         $langs = $pdo->query('SELECT code FROM languages WHERE is_active = 1 ORDER BY sort_order, id')->fetchAll(PDO::FETCH_COLUMN) ?: [];
         if ($langs === []) {
             return;
         }
         $ins = $pdo->prepare(
-            "INSERT INTO menu_items (lang, title, url_type, url_value, sort_order, is_active, created_at)
-             SELECT :lang, :t, 'custom', :u, :o, 1, NOW()
-             FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM menu_items WHERE url_value = :u2 AND lang = :lang2)"
+            'INSERT INTO menu_items
+                (lang, title, badge_text, badge_color, badge_pos, url_type, url_value, parent_id, mega_columns, sort_order, is_active, created_at)
+             VALUES
+                (:lang, :title, :badge, :badge_color, :badge_pos, :url_type, :url_value, :parent_id, :mega, :sort_order, 1, NOW())'
         );
         foreach ($langs as $lang) {
-            foreach ($items as $i => $it) {
-                $ins->execute([':lang' => (string) $lang, ':t' => $it[0], ':u' => $it[1], ':o' => $i, ':u2' => $it[1], ':lang2' => (string) $lang]);
+            $lang = (string) $lang;
+            $items = $menus[$lang] ?? $menus['ru'];
+            foreach ($items as $i => $item) {
+                $ins->execute([
+                    ':lang' => $lang,
+                    ':title' => $item['title'],
+                    ':badge' => null,
+                    ':badge_color' => 'blue',
+                    ':badge_pos' => 'right',
+                    ':url_type' => $item['type'],
+                    ':url_value' => $item['value'],
+                    ':parent_id' => null,
+                    ':mega' => $item['mega'],
+                    ':sort_order' => $i,
+                ]);
                 $c['menu'] += $ins->rowCount();
+                $parentId = (int) $pdo->lastInsertId();
+                foreach ($item['children'] as $childOrder => $child) {
+                    $ins->execute([
+                        ':lang' => $lang,
+                        ':title' => $child[0],
+                        ':badge' => $child[3] ?? null,
+                        ':badge_color' => isset($child[3]) ? 'blue' : null,
+                        ':badge_pos' => 'right',
+                        ':url_type' => $child[1],
+                        ':url_value' => $child[2],
+                        ':parent_id' => $parentId,
+                        ':mega' => 0,
+                        ':sort_order' => $childOrder,
+                    ]);
+                    $c['menu'] += $ins->rowCount();
+                }
             }
         }
     }
@@ -787,6 +1445,43 @@ final class DemoSeeder
         $id = $stmt->fetchColumn();
 
         return $id !== false ? (int) $id : null;
+    }
+
+    private static function tableExists(PDO $pdo, string $table): bool
+    {
+        $driver = strtolower((string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+        if ($driver === 'sqlite') {
+            $stmt = $pdo->prepare(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = :name LIMIT 1"
+            );
+            $stmt->execute([':name' => $table]);
+
+            return (bool) $stmt->fetchColumn();
+        }
+
+        $stmt = $pdo->prepare(
+            'SELECT 1
+             FROM information_schema.tables
+             WHERE table_schema = DATABASE() AND table_name = :name
+             LIMIT 1'
+        );
+        $stmt->execute([':name' => $table]);
+
+        return (bool) $stmt->fetchColumn();
+    }
+
+    private static function storeVersion(PDO $pdo): void
+    {
+        if (!self::tableExists($pdo, 'settings')) {
+            return;
+        }
+
+        $stmt = $pdo->prepare(
+            "INSERT INTO settings (`key`, `value`, updated_at)
+             VALUES ('demo_data_version', :version, NOW())
+             ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), updated_at = NOW()"
+        );
+        $stmt->execute([':version' => self::DEMO_VERSION]);
     }
 
     private static function isUntouchedStarterHome(PDO $pdo, int $pageId): bool

@@ -6,28 +6,31 @@ declare(strict_types=1);
 // валидны, иначе «Загрузить демо-контент» даст сломанную главную.
 
 test('Демо: фикстура главной валидна и содержит ожидаемые блоки', function () {
-    $path = APP_ROOT . '/database/demo_assets/home_blocks.json';
-    assert_true(is_file($path), 'файл фикстуры существует');
+    foreach (['ru' => 'home_blocks.json', 'uz' => 'home_blocks_uz.json'] as $lang => $file) {
+        $path = APP_ROOT . '/database/demo_assets/' . $file;
+        assert_true(is_file($path), "фикстура главной {$lang} существует");
 
-    $blocks = json_decode((string) file_get_contents($path), true);
-    assert_true(is_array($blocks) && count($blocks) >= 6, 'минимум 6 блоков главной');
+        $blocks = json_decode((string) file_get_contents($path), true);
+        assert_true(is_array($blocks) && count($blocks) >= 6, "минимум 6 блоков главной {$lang}");
 
-    $types = array_map(static fn ($b) => $b['type'] ?? '', $blocks);
-    foreach (['hero', 'counters', 'cards_grid', 'image_cards', 'news_feature', 'media_gallery'] as $need) {
-        assert_true(in_array($need, $types, true), "есть блок $need");
+        $types = array_map(static fn ($b) => $b['type'] ?? '', $blocks);
+        foreach (['hero', 'counters', 'cards_grid', 'image_cards', 'news_feature', 'media_gallery'] as $need) {
+            assert_true(in_array($need, $types, true), "в {$lang} есть блок {$need}");
+        }
     }
 });
 
 test('Демо: все изображения фикстуры бандлятся в demo_assets', function () {
     $dir = APP_ROOT . '/database/demo_assets';
-    $blocks = json_decode((string) file_get_contents($dir . '/home_blocks.json'), true);
-
     $images = [];
-    array_walk_recursive($blocks, static function ($v, $k) use (&$images) {
-        if ($k === 'image' && is_string($v) && $v !== '') {
-            $images[] = $v;
-        }
-    });
+    foreach (['home_blocks.json', 'home_blocks_uz.json'] as $fixture) {
+        $blocks = json_decode((string) file_get_contents($dir . '/' . $fixture), true);
+        array_walk_recursive($blocks, static function ($v, $k) use (&$images) {
+            if ($k === 'image' && is_string($v) && $v !== '') {
+                $images[] = $v;
+            }
+        });
+    }
     assert_true($images !== [], 'в фикстуре есть изображения');
 
     foreach (array_unique($images) as $url) {
@@ -59,6 +62,9 @@ test('Демо: повторный запуск не удаляет страни
     assert_not_contains('DELETE FROM page_translations', $seeder);
     assert_contains("SELECT COUNT(*) FROM menu_items", $seeder);
     assert_contains("prototype_pages.json", $seeder);
+    assert_contains("home_blocks_uz.json", $seeder);
+    assert_contains("self::seedMenu", $seeder);
+    assert_contains("self::verify", $seeder);
     assert_contains('isUntouchedStarterHome', $seeder);
 });
 
@@ -74,4 +80,5 @@ test('Демо: запуск доступен только в настройка
     assert_contains("DEMO_CONFIRM_CODE = 'DEMO'", $controller);
     assert_contains('/admin/settings/demo-content', $routes);
     assert_not_contains("[DashboardController::class, 'seedDemo']", $routes);
+    assert_contains('Backup::create()', $controller, 'перед полным сбросом создаётся резервная копия');
 });

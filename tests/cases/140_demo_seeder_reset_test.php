@@ -25,4 +25,13 @@ test('DemoSeeder RESET полностью заменяет контент эта
 
     assert_true($c['news'] > 0, 'Счётчик новостей > 0');
     assert_true($c['pages'] > 0, 'Счётчик страниц > 0');
+    assert_true($c['menu'] >= 40, 'Создано полное двухъязычное меню');
+    assert_true($c['meropriyatiya'] >= 3, 'Созданы мероприятия');
+    assert_same([], DemoSeeder::verify($pdo), 'Встроенная проверка не обнаружила конфликтов');
+
+    $secondRun = DemoSeeder::run($pdo);
+    assert_same(0, array_sum($secondRun), 'Повторный запуск полностью идемпотентен');
+
+    $version = $pdo->query("SELECT `value` FROM settings WHERE `key` = 'demo_data_version' LIMIT 1")->fetchColumn();
+    assert_same('2026.07-v2', (string) $version, 'Версия демо-комплекта сохранена');
 });
