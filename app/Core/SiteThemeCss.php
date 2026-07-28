@@ -65,6 +65,12 @@ final class SiteThemeCss
             '--hoverline-bottom' => self::hoverlineOffset((string) ($styles['hoverline_offset'] ?? 'normal')),
             '--hoverline-height' => self::hoverlineThickness((string) ($styles['hoverline_thickness'] ?? '2px')),
             '--hoverline-inset' => self::hoverlineInset((string) ($styles['hoverline_length'] ?? 'normal')),
+            '--submenu-width' => self::submenuWidth((string) ($styles['submenu_width'] ?? 'normal')),
+            '--submenu-font-size' => self::submenuFontSize((string) ($styles['submenu_font_size'] ?? 'normal')),
+            '--submenu-padding-y' => self::submenuPadding((string) ($styles['submenu_padding'] ?? 'normal')),
+            '--submenu-text-transform' => self::submenuTransform((string) ($styles['submenu_transform'] ?? 'none')),
+            '--submenu-radius' => self::submenuRadius((string) ($styles['submenu_radius'] ?? 'soft')),
+            '--submenu-shadow' => self::submenuShadow((string) ($styles['submenu_shadow'] ?? 'soft')),
         ];
 
         foreach ([
@@ -74,6 +80,10 @@ final class SiteThemeCss
             '--menu-hover' => (string) ($styles['nav_hover'] ?? ''),
             '--menu-active' => (string) ($styles['nav_active'] ?? ''),
             '--menu-pill-bg' => (string) ($styles['nav_pill_bg'] ?? ''),
+            '--submenu-bg' => (string) ($styles['submenu_bg'] ?? ''),
+            '--submenu-color' => (string) ($styles['submenu_color'] ?? ''),
+            '--submenu-hover' => (string) ($styles['submenu_hover'] ?? ''),
+            '--submenu-divider-color' => (string) ($styles['submenu_divider_color'] ?? ''),
         ] as $name => $value) {
             if ($value !== '') {
                 $variables[$name] = $value;
@@ -199,6 +209,60 @@ final class SiteThemeCss
             'compact', '12px' => '12px',
             'full', '0px' => '0px',
             default => is_numeric($value) ? (int) $value . 'px' : '4px',
+        };
+    }
+
+    private static function submenuWidth(string $value): string
+    {
+        return match ($value) {
+            'compact' => '220px',
+            'wide' => '320px',
+            default => '260px',
+        };
+    }
+
+    private static function submenuFontSize(string $value): string
+    {
+        return match ($value) {
+            'compact' => '.78rem',
+            'large' => '.95rem',
+            default => '.86rem',
+        };
+    }
+
+    private static function submenuPadding(string $value): string
+    {
+        return match ($value) {
+            'compact' => '8px',
+            'spacious' => '14px',
+            default => '11px',
+        };
+    }
+
+    private static function submenuTransform(string $value): string
+    {
+        return match ($value) {
+            'uppercase' => 'uppercase',
+            'capitalize' => 'capitalize',
+            default => 'none',
+        };
+    }
+
+    private static function submenuRadius(string $value): string
+    {
+        return match ($value) {
+            'none' => '0px',
+            'rounded' => '16px',
+            default => '10px',
+        };
+    }
+
+    private static function submenuShadow(string $value): string
+    {
+        return match ($value) {
+            'none' => 'none',
+            'deep' => '0 24px 60px rgba(15,23,42,.18),0 6px 18px rgba(15,23,42,.08)',
+            default => '0 18px 42px rgba(15,23,42,.11),0 3px 10px rgba(15,23,42,.05)',
         };
     }
 }

@@ -4759,19 +4759,28 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .sit
     background: transparent !important;
 }
 
+.site-submenu {
+    background: var(--submenu-bg, var(--gov-surface));
+    border-radius: var(--submenu-radius, 10px);
+    box-shadow: var(--submenu-shadow, 0 18px 42px rgba(15, 23, 42, .11));
+}
+.site-submenu__link {
+    color: var(--submenu-color, var(--gov-title));
+    font-size: var(--submenu-font-size, .86rem);
+    text-transform: var(--submenu-text-transform, none);
+}
+
 @media (min-width: 901px) {
     .site-submenu {
         top: calc(100% + 6px);
-        min-width: 260px;
+        min-width: var(--submenu-width, 260px);
         margin-top: 0;
         gap: 0;
         padding: 6px 12px 8px;
         border: 0;
-        border-radius: 10px;
-        background: var(--gov-surface);
-        box-shadow:
-            0 18px 42px rgba(15, 23, 42, .11),
-            0 3px 10px rgba(15, 23, 42, .05);
+        border-radius: var(--submenu-radius, 10px);
+        background: var(--submenu-bg, var(--gov-surface));
+        box-shadow: var(--submenu-shadow, 0 18px 42px rgba(15, 23, 42, .11));
         transform: translateY(8px) scale(.985);
         transform-origin: top left;
     }
@@ -4784,14 +4793,18 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .sit
     }
     .site-submenu__link {
         min-height: 40px;
-        padding: 11px 2px 10px;
+        padding: var(--submenu-padding-y, 11px) 2px;
         border: 0;
-        border-bottom: 1px solid color-mix(in srgb, var(--gov-border) 88%, transparent);
+        border-bottom: 1px solid var(
+            --submenu-divider-color,
+            color-mix(in srgb, var(--gov-border) 88%, transparent)
+        );
         border-radius: 0;
-        color: var(--gov-title);
-        font-size: .86rem;
+        color: var(--submenu-color, var(--gov-title));
+        font-size: var(--submenu-font-size, .86rem);
         font-weight: 600;
         line-height: 1.35;
+        text-transform: var(--submenu-text-transform, none);
         white-space: normal;
         transition:
             color .16s ease,
@@ -4800,17 +4813,53 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .sit
     }
     .site-submenu__link:hover,
     .site-submenu__link:focus-visible {
-        color: var(--menu-hover-color, var(--gov-teal)) !important;
+        color: var(--submenu-hover, var(--menu-hover-color, var(--gov-teal))) !important;
         background: transparent !important;
-        border-bottom-color: var(--menu-hover-color, var(--gov-teal));
+        border-bottom-color: var(--submenu-hover, var(--menu-hover-color, var(--gov-teal)));
         transform: none;
     }
     .site-submenu__link.is-active,
     .site-submenu__link[aria-current="page"] {
-        color: var(--menu-active-color, var(--gov-teal)) !important;
+        color: var(--submenu-hover, var(--menu-active-color, var(--gov-teal))) !important;
         background: transparent !important;
-        border-bottom-color: var(--menu-active-color, var(--gov-teal));
+        border-bottom-color: var(--submenu-hover, var(--menu-active-color, var(--gov-teal)));
         box-shadow: none;
+    }
+    .site-menu--submenu-divider-accent .site-submenu__link {
+        border-bottom-color: color-mix(
+            in srgb,
+            var(--submenu-hover, var(--menu-hover-color, var(--gov-teal))) 38%,
+            transparent
+        );
+    }
+    .site-menu--submenu-divider-accent .site-submenu__link:hover,
+    .site-menu--submenu-divider-accent .site-submenu__link:focus-visible,
+    .site-menu--submenu-divider-accent .site-submenu__link.is-active,
+    .site-menu--submenu-divider-accent .site-submenu__link[aria-current="page"] {
+        border-bottom-color: var(--submenu-hover, var(--menu-hover-color, var(--gov-teal)));
+    }
+    .site-menu--submenu-divider-none .site-submenu__link,
+    .site-menu--submenu-minimal .site-submenu__link {
+        border-bottom-color: transparent;
+    }
+    .site-menu--submenu-cards .site-submenu {
+        padding: 8px;
+    }
+    .site-menu--submenu-cards .site-submenu__link {
+        margin: 2px 0;
+        padding-inline: 12px;
+        border-bottom: 0;
+        border-radius: 8px;
+    }
+    .site-menu--submenu-cards .site-submenu__link:hover,
+    .site-menu--submenu-cards .site-submenu__link:focus-visible,
+    .site-menu--submenu-cards .site-submenu__link.is-active,
+    .site-menu--submenu-cards .site-submenu__link[aria-current="page"] {
+        background: color-mix(
+            in srgb,
+            var(--submenu-hover, var(--menu-hover-color, var(--gov-teal))) 9%,
+            var(--submenu-bg, var(--gov-surface))
+        ) !important;
     }
 }
 

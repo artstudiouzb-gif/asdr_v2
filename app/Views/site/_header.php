@@ -133,6 +133,8 @@ if (!empty($menuItems)) {
     $navPadding = in_array($st['nav_padding'] ?? '', ['compact', 'normal', 'spacious'], true) ? $st['nav_padding'] : 'normal';
     $navIconPos = in_array($st['nav_icon_pos'] ?? '', ['left', 'top'], true) ? $st['nav_icon_pos'] : 'left';
     $navDividers = !empty($st['nav_item_dividers']) ? ' site-menu--with-item-dividers' : '';
+    $submenuStyle = in_array($st['submenu_style'] ?? '', ['lines', 'minimal', 'cards'], true) ? $st['submenu_style'] : 'lines';
+    $submenuDivider = in_array($st['submenu_divider'] ?? '', ['subtle', 'accent', 'none'], true) ? $st['submenu_divider'] : 'subtle';
 
     $menuClasses = 'site-menu'
         . ' site-menu--font-' . $navFontSize
@@ -141,6 +143,8 @@ if (!empty($menuItems)) {
         . ' site-menu--style-' . $navStyleType
         . ' site-menu--padding-' . $navPadding
         . ' site-menu--icon-' . $navIconPos
+        . ' site-menu--submenu-' . $submenuStyle
+        . ' site-menu--submenu-divider-' . $submenuDivider
         . $navDividers;
 
     $menuHtml = '<nav class="' . $menuClasses . '" aria-label="' . $et('Основное меню') . '">';

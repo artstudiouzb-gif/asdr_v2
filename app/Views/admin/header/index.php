@@ -386,6 +386,121 @@ $heightSelect = function (string $name, string $current): string {
                         </select>
                     </div>
                 </div>
+
+                <div class="u-inline-d4e35c613b">
+                    <h4 class="u-inline-2e67dd3b15">Дизайн подменю</h4>
+                    <p class="form-hint">Настройте панель, тип пунктов, разделители и цвета выпадающего меню.</p>
+
+                    <div class="hb-inline-grid">
+                        <div class="form-field">
+                            <label for="styles_submenu_style">Стиль пунктов</label>
+                            <select id="styles_submenu_style" name="styles_submenu_style">
+                                <option value="lines" <?= ($st['submenu_style'] ?? 'lines') === 'lines' ? 'selected' : '' ?>>Разделительные линии</option>
+                                <option value="minimal" <?= ($st['submenu_style'] ?? 'lines') === 'minimal' ? 'selected' : '' ?>>Минимальный — только текст</option>
+                                <option value="cards" <?= ($st['submenu_style'] ?? 'lines') === 'cards' ? 'selected' : '' ?>>Мягкие плашки</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_submenu_width">Ширина панели</label>
+                            <select id="styles_submenu_width" name="styles_submenu_width">
+                                <option value="compact" <?= ($st['submenu_width'] ?? 'normal') === 'compact' ? 'selected' : '' ?>>Компактная — 220px</option>
+                                <option value="normal" <?= ($st['submenu_width'] ?? 'normal') === 'normal' ? 'selected' : '' ?>>Стандартная — 260px</option>
+                                <option value="wide" <?= ($st['submenu_width'] ?? 'normal') === 'wide' ? 'selected' : '' ?>>Широкая — 320px</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_submenu_font_size">Размер текста</label>
+                            <select id="styles_submenu_font_size" name="styles_submenu_font_size">
+                                <option value="compact" <?= ($st['submenu_font_size'] ?? 'normal') === 'compact' ? 'selected' : '' ?>>Компактный — 12.5px</option>
+                                <option value="normal" <?= ($st['submenu_font_size'] ?? 'normal') === 'normal' ? 'selected' : '' ?>>Обычный — 13.8px</option>
+                                <option value="large" <?= ($st['submenu_font_size'] ?? 'normal') === 'large' ? 'selected' : '' ?>>Крупный — 15.2px</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_submenu_padding">Плотность пунктов</label>
+                            <select id="styles_submenu_padding" name="styles_submenu_padding">
+                                <option value="compact" <?= ($st['submenu_padding'] ?? 'normal') === 'compact' ? 'selected' : '' ?>>Компактная</option>
+                                <option value="normal" <?= ($st['submenu_padding'] ?? 'normal') === 'normal' ? 'selected' : '' ?>>Стандартная</option>
+                                <option value="spacious" <?= ($st['submenu_padding'] ?? 'normal') === 'spacious' ? 'selected' : '' ?>>Просторная</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="hb-inline-grid u-inline-c90ff0dd8c">
+                        <div class="form-field">
+                            <label for="styles_submenu_transform">Регистр текста</label>
+                            <select id="styles_submenu_transform" name="styles_submenu_transform">
+                                <option value="none" <?= ($st['submenu_transform'] ?? 'none') === 'none' ? 'selected' : '' ?>>Обычный текст</option>
+                                <option value="uppercase" <?= ($st['submenu_transform'] ?? 'none') === 'uppercase' ? 'selected' : '' ?>>ЗАГЛАВНЫЕ</option>
+                                <option value="capitalize" <?= ($st['submenu_transform'] ?? 'none') === 'capitalize' ? 'selected' : '' ?>>С Заглавной Буквы</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_submenu_radius">Скругление панели</label>
+                            <select id="styles_submenu_radius" name="styles_submenu_radius">
+                                <option value="none" <?= ($st['submenu_radius'] ?? 'soft') === 'none' ? 'selected' : '' ?>>Без скругления</option>
+                                <option value="soft" <?= ($st['submenu_radius'] ?? 'soft') === 'soft' ? 'selected' : '' ?>>Мягкое — 10px</option>
+                                <option value="rounded" <?= ($st['submenu_radius'] ?? 'soft') === 'rounded' ? 'selected' : '' ?>>Выраженное — 16px</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_submenu_shadow">Тень панели</label>
+                            <select id="styles_submenu_shadow" name="styles_submenu_shadow">
+                                <option value="none" <?= ($st['submenu_shadow'] ?? 'soft') === 'none' ? 'selected' : '' ?>>Без тени</option>
+                                <option value="soft" <?= ($st['submenu_shadow'] ?? 'soft') === 'soft' ? 'selected' : '' ?>>Мягкая</option>
+                                <option value="deep" <?= ($st['submenu_shadow'] ?? 'soft') === 'deep' ? 'selected' : '' ?>>Глубокая</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_submenu_divider">Разделительные линии</label>
+                            <select id="styles_submenu_divider" name="styles_submenu_divider">
+                                <option value="subtle" <?= ($st['submenu_divider'] ?? 'subtle') === 'subtle' ? 'selected' : '' ?>>Нейтральные</option>
+                                <option value="accent" <?= ($st['submenu_divider'] ?? 'subtle') === 'accent' ? 'selected' : '' ?>>Акцентные</option>
+                                <option value="none" <?= ($st['submenu_divider'] ?? 'subtle') === 'none' ? 'selected' : '' ?>>Без линий</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="hb-inline-grid u-inline-c90ff0dd8c">
+                        <div class="form-field">
+                            <label>Фон подменю</label>
+                            <div class="color-picker-group">
+                                <input type="color" name="styles_submenu_bg" value="<?= htmlspecialchars($st['submenu_bg'] ?: '#ffffff', ENT_QUOTES) ?>">
+                                <label><input type="checkbox" name="styles_submenu_bg_use" value="1" <?= $st['submenu_bg'] !== '' ? 'checked' : '' ?>> Свой цвет</label>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label>Цвет текста</label>
+                            <div class="color-picker-group">
+                                <input type="color" name="styles_submenu_color" value="<?= htmlspecialchars($st['submenu_color'] ?: '#1e293b', ENT_QUOTES) ?>">
+                                <label><input type="checkbox" name="styles_submenu_color_use" value="1" <?= $st['submenu_color'] !== '' ? 'checked' : '' ?>> Свой цвет</label>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label>Цвет при наведении</label>
+                            <div class="color-picker-group">
+                                <input type="color" name="styles_submenu_hover" value="<?= htmlspecialchars($st['submenu_hover'] ?: '#0284c7', ENT_QUOTES) ?>">
+                                <label><input type="checkbox" name="styles_submenu_hover_use" value="1" <?= $st['submenu_hover'] !== '' ? 'checked' : '' ?>> Свой цвет</label>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label>Цвет разделителей</label>
+                            <div class="color-picker-group">
+                                <input type="color" name="styles_submenu_divider_color" value="<?= htmlspecialchars($st['submenu_divider_color'] ?: '#e2e8f0', ENT_QUOTES) ?>">
+                                <label><input type="checkbox" name="styles_submenu_divider_color_use" value="1" <?= $st['submenu_divider_color'] !== '' ? 'checked' : '' ?>> Свой цвет</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
