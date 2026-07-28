@@ -4655,12 +4655,19 @@ body.quick-search-active { overflow: hidden; }
 /* ==========================================================================
    Навигация: единый шеврон и обновлённое подменю
    ========================================================================== */
-/* Верхнее меню без glow-линии: состояние показывается только цветом текста. */
+/* Чистое подчёркивание без glow, blur и неоновой тени. */
 .site-menu > .site-menu__link::after,
 .site-menu > .site-menu__item > .site-menu__link::after {
-    content: none !important;
-    display: none !important;
-    background: none !important;
+    content: '' !important;
+    display: block !important;
+    background: var(--menu-active-color, var(--gov-teal)) !important;
+    box-shadow: none !important;
+    filter: none !important;
+    opacity: 1;
+}
+body .site-header--transparent:not(.is-scrolled) .site-menu > .site-menu__link::after,
+body .site-header--transparent:not(.is-scrolled) .site-menu > .site-menu__item > .site-menu__link::after {
+    background: #00f2fe !important;
     box-shadow: none !important;
     filter: none !important;
 }
