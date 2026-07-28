@@ -1575,7 +1575,7 @@
                     track.setAttribute('aria-label', resultLabel.textContent);
                     var fill = document.createElement('div');
                     fill.className = 'news-poll-bar-fill';
-                    fill.style.width = percent + '%';
+                    fill.style.setProperty('--poll-percent', percent + '%');
                     track.appendChild(fill);
 
                     row.appendChild(info);
@@ -1591,8 +1591,8 @@
                 total.textContent = String(Number.isFinite(totalValue) ? Math.max(0, totalValue) : 0);
                 meta.appendChild(total);
                 resDiv.appendChild(meta);
-                resDiv.style.display = 'block';
-                form.style.display = 'none';
+                resDiv.hidden = false;
+                form.hidden = true;
             }).catch(function (err) {
                 if (btn) { btn.disabled = false; }
                 if (window.showToast) {

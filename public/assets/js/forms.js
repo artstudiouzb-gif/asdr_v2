@@ -68,7 +68,7 @@
                     var trigger = form.querySelector('[name="' + trigName + '"]');
                     var current = trigger ? String(trigger.value || '') : '';
                     var show = current === trigVal;
-                    fieldEl.style.display = show ? '' : 'none';
+                    fieldEl.hidden = !show;
                     // Отключаем скрытые поля, чтобы браузер их не валидировал/не слал.
                     fieldEl.querySelectorAll('input, textarea, select').forEach(function (inp) {
                         inp.disabled = !show;

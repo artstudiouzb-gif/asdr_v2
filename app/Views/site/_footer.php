@@ -87,7 +87,7 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
             return '<p class="site-footer__line">' . htmlspecialchars(t('Будьте в курсе наших новостей и аналитических материалов.'), ENT_QUOTES) . '</p>'
                 . '<form class="footer-subscribe" method="post" action="/subscribe">'
                 . \App\Core\Csrf::field()
-                . '<div style="position:absolute;left:-9999px;" aria-hidden="true"><input type="text" name="hp_website" tabindex="-1" autocomplete="off"></div>'
+                . '<div class="form-honeypot" aria-hidden="true"><input type="text" name="hp_website" tabindex="-1" autocomplete="off"></div>'
                 . '<input type="hidden" name="hp_ts" value="' . htmlspecialchars($ts, ENT_QUOTES) . '">'
                 . '<input type="email" name="email" placeholder="' . htmlspecialchars(t('Ваш e-mail'), ENT_QUOTES) . '" aria-label="E-mail" required>'
                 . '<button type="submit" aria-label="' . htmlspecialchars(t('Подписаться'), ENT_QUOTES) . '">&rarr;</button>'

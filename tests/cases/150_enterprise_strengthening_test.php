@@ -26,6 +26,72 @@ test('Усиление системы: Sitemap & RSS генерация', functi
     assert_true(str_contains($rssXml, '<rss version="2.0"'), 'RSS содержит валидный элемент rss');
 });
 
+test('Sitemap использует canonical URL каждой языковой версии новости', function (): void {
+    ensure_test_db();
+
+    $defaultLang = \App\Models\Language::defaultCode();
+    $targetLang = null;
+    foreach (\App\Models\Language::active() as $language) {
+        $code = (string) ($language['code'] ?? '');
+        if ($code !== '' && $code !== $defaultLang) {
+            $targetLang = $code;
+            break;
+        }
+    }
+    if ($targetLang === null) {
+        skip_test('Нет второго активного языка');
+    }
+
+    $suffix = bin2hex(random_bytes(4));
+    $originalSlug = 'canonical-news-' . $suffix;
+    $translatedSlug = 'canonical-news-' . $targetLang . '-' . $suffix;
+    $originalId = \App\Models\News::create([
+        'title' => 'Canonical sitemap test',
+        'slug' => $originalSlug,
+        'excerpt' => null,
+        'content' => '<p>Test</p>',
+        'status' => 'published',
+        'published_at' => date('Y-m-d H:i:s'),
+        'lang' => $defaultLang,
+    ]);
+    $translatedId = \App\Core\TranslationGroupHelper::createTranslation('news', $originalId, $targetLang);
+
+    try {
+        \App\Core\Database::pdo()->prepare(
+            "UPDATE news SET slug = :slug, status = 'published', published_at = NOW() WHERE id = :id"
+        )->execute([':slug' => $translatedSlug, ':id' => $translatedId]);
+
+        ob_start();
+        (new SitemapController())->sitemap();
+        $xml = (string) ob_get_clean();
+
+        $defaultUrl = 'http://localhost' . \App\Core\Locale::url('news/' . $originalSlug, $defaultLang);
+        $translatedUrl = 'http://localhost' . \App\Core\Locale::url('news/' . $translatedSlug, $targetLang);
+
+        assert_contains('<loc>' . $defaultUrl . '</loc>', $xml, 'Основная версия использует canonical URL');
+        assert_contains('<loc>' . $translatedUrl . '</loc>', $xml, 'Перевод использует свой slug и языковой префикс');
+        assert_contains('hreflang="' . $targetLang . '" href="' . $translatedUrl . '"', $xml, 'hreflang совпадает с canonical перевода');
+        assert_contains('hreflang="x-default" href="' . $defaultUrl . '"', $xml, 'x-default ведёт на основной язык');
+    } finally {
+        \App\Models\News::forceDelete($translatedId);
+        \App\Models\News::forceDelete($originalId);
+    }
+});
+
+test('Публичные шаблоны не содержат статические inline-стили компонентов', function (): void {
+    foreach ([
+        APP_ROOT . '/app/Views/site/news_show.php',
+        APP_ROOT . '/templates/widgets/subscribe.php',
+        APP_ROOT . '/templates/blocks/form.php',
+        APP_ROOT . '/app/Views/site/_footer.php',
+    ] as $file) {
+        $source = (string) file_get_contents($file);
+        assert_not_contains('style="display:', $source, basename($file) . ': display вынесен из разметки');
+        assert_not_contains('style="margin-', $source, basename($file) . ': отступы вынесены из разметки');
+        assert_not_contains('style="color:', $source, basename($file) . ': цвета вынесены из разметки');
+    }
+});
+
 test('Усиление системы: MediaOptimizer srcset generation', function (): void {
     $html = MediaOptimizer::renderImg('/assets/images/hero.jpg', 'Hero Image', 'hero-class');
     assert_true(str_contains($html, '<img src="/assets/images/hero.jpg"'), 'Рендерит базовый src');

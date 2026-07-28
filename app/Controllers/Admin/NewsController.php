@@ -483,9 +483,13 @@ final class NewsController
     {
         $title = trim((string) ($_POST['title'] ?? ''));
         $slugInput = trim((string) ($_POST['slug'] ?? ''));
+        $lang = (string) ($_POST['lang'] ?? $_GET['lang'] ?? Language::defaultCode());
+        if (!Language::isActive($lang)) {
+            $lang = Language::defaultCode();
+        }
         $excerpt = trim((string) ($_POST['excerpt'] ?? ''));
         // WYSIWYG-контент прогоняем через типограф/санитайзер (задача 75).
-        $content = TextProcessor::process((string) ($_POST['content'] ?? ''), Language::defaultCode());
+        $content = TextProcessor::process((string) ($_POST['content'] ?? ''), $lang);
         $metaTitle = trim((string) ($_POST['meta_title'] ?? ''));
         $metaDescription = trim((string) ($_POST['meta_description'] ?? ''));
         $status = (isset($_POST['publish_action']) || ($_POST['status'] ?? 'draft') === 'published') ? 'published' : 'draft';
@@ -512,7 +516,11 @@ final class NewsController
         }
 
         $rawSlug = $slugInput !== '' ? $slugInput : $title;
-        $slug = Slug::unique($rawSlug, [News::class, 'slugExists'], $id);
+        $slug = Slug::unique(
+            $rawSlug,
+            static fn (string $candidate, ?int $excludeId): bool => News::slugExists($candidate, $excludeId, $lang),
+            $id
+        );
 
         $publishedAt = $publishedAtInput !== '' ? str_replace('T', ' ', $publishedAtInput) . ':00' : date('Y-m-d H:i:s');
 
@@ -554,7 +562,7 @@ final class NewsController
             'status' => $status,
             'published_at' => $publishedAt,
             'author_id' => Auth::id(),
-            'lang' => (string) ($_POST['lang'] ?? $_GET['lang'] ?? Language::defaultCode()),
+            'lang' => $lang,
         ];
 
         return [$data, null];

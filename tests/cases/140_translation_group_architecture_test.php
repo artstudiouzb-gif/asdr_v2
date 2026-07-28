@@ -30,6 +30,16 @@ test('Мультиязычная архитектура: создание отд
     assert_true($uzNews !== null, 'Узбекская новость найдена в таблице news по своему ID');
     assert_same('uz', $uzNews['lang'], 'Узбекская новость имеет lang=uz');
     assert_same($origId, (int) $uzNews['translation_group_id'], 'Узбекская новость привязана к группе перевода оригинала');
+    assert_same('original-news-ru', (string) News::findById($origId)['slug'], 'Slug оригинала не меняется при создании перевода');
+    assert_same('original-news-ru-uz', (string) $uzNews['slug'], 'Перевод получает свой slug');
+
+    \App\Core\Database::pdo()
+        ->prepare('UPDATE news SET translation_group_id = id WHERE id = :id')
+        ->execute([':id' => $uzId]);
+    TranslationGroupHelper::autoLinkStandaloneTranslations();
+    $relinkedUzNews = News::findById($uzId);
+    assert_same($origId, (int) $relinkedUzNews['translation_group_id'], 'Автосвязывание восстановило группу перевода новости');
+    assert_same('original-news-ru-uz', (string) $relinkedUzNews['slug'], 'Автосвязывание не перезаписывает slug перевода');
 
     $translations = TranslationGroupHelper::getTranslations('news', $origId);
     assert_true(isset($translations['ru']), 'В группе есть русский вариант');
