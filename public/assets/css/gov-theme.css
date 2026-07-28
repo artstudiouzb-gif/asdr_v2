@@ -2830,11 +2830,31 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     box-shadow: 0 0 15px var(--gov-teal);
 }
 
-/* YouTube-фон: iframe масштабируется, чтобы всегда закрывать секцию (cover). */
-.block-hero__yt { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+/* YouTube-фон: сначала виден лёгкий poster, iframe проявляется только после
+   начала воспроизведения. Оба слоя масштабируются как cover. */
+.block-hero__youtube-poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--gov-navy);
+}
+.block-hero__yt {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .45s ease;
+}
+.block-hero__yt.is-ready { opacity: 1; }
 .block-hero__yt iframe {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.78vh; border: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+    .block-hero__yt { transition: none; }
 }
 
 /* Hero со своим цветом фона (без фото): текст и элементы — светлые, как на

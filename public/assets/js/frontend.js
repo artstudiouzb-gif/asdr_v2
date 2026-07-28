@@ -82,16 +82,29 @@
         });
     })();
 
-    // YouTube-фон использует те же правила. enablejsapi=1 в iframe позволяет
-    // вернуть воспроизведение после фоновой приостановки вкладки, не открывая
-    // пользователю элементы плеера.
+    // YouTube-фон загружается только рядом с viewport. До готовности плеера
+    // Hero показывает poster, поэтому тяжёлый third-party iframe не блокирует
+    // первый рендер и не вызывает пустую вспышку.
     (function () {
         var frames = document.querySelectorAll('[data-hero-youtube-background]');
         if (!frames.length) { return; }
 
         frames.forEach(function (frame) {
+            var container = frame.closest('[data-hero-youtube-container]');
+            var loaded = false;
+            var readyTimer = null;
+            var markReady = function () {
+                if (container) { container.classList.add('is-ready'); }
+            };
+            var load = function () {
+                if (loaded) { return; }
+                var source = frame.getAttribute('data-src');
+                if (!source) { return; }
+                loaded = true;
+                frame.src = source;
+            };
             var command = function (name, args) {
-                if (!frame.contentWindow) { return; }
+                if (!loaded || !frame.contentWindow) { return; }
                 frame.contentWindow.postMessage(JSON.stringify({
                     event: 'command',
                     func: name,
@@ -108,20 +121,27 @@
                 }
             };
 
-            frame.addEventListener('load', resume);
+            frame.addEventListener('load', function () {
+                resume();
+                // Резерв: отдельные версии плеера не присылают playerState,
+                // хотя видео уже отображается.
+                readyTimer = window.setTimeout(markReady, 1200);
+            });
             document.addEventListener('visibilitychange', function () {
-                if (!document.hidden) { resume(); }
+                if (!document.hidden && loaded) { resume(); }
             });
 
             // Слушаем сообщения об изменении состояния плеера YouTube,
             // чтобы перехватить окончание или время воспроизведения и запустить ролик заново.
             window.addEventListener('message', function (e) {
+                if (e.source !== frame.contentWindow) { return; }
                 if (!/https?:\/\/(www\.)?youtube(-nocookie)?\.com/.test(e.origin)) { return; }
                 try {
                     var data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
                     if (!data) { return; }
 
                     var ended = false;
+                    var playing = false;
                     if (data.event === 'infoDelivery' && data.info) {
                         // Опережающий перезапуск за 0.3 секунды до конца видео, чтобы избежать черного экрана
                         if (typeof data.info.currentTime === 'number' && typeof data.info.duration === 'number') {
@@ -131,9 +151,21 @@
                         }
                         if (data.info.playerState === 0) {
                             ended = true;
+                        } else if (data.info.playerState === 1) {
+                            playing = true;
                         }
                     } else if (data.event === 'onStateChange' && (data.info === 0 || data.data === 0)) {
                         ended = true;
+                    } else if (data.event === 'onStateChange' && (data.info === 1 || data.data === 1)) {
+                        playing = true;
+                    }
+
+                    if (playing) {
+                        if (readyTimer !== null) {
+                            window.clearTimeout(readyTimer);
+                            readyTimer = null;
+                        }
+                        markReady();
                     }
 
                     if (ended) {
@@ -144,6 +176,21 @@
                     // Игнорируем невалидные сообщения от сторонних скриптов
                 }
             });
+
+            if ('IntersectionObserver' in window) {
+                var observer = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (!entry.isIntersecting) { return; }
+                        load();
+                        observer.unobserve(frame);
+                    });
+                }, { rootMargin: '300px 0px', threshold: 0.01 });
+                observer.observe(frame);
+            } else if (document.readyState === 'complete') {
+                load();
+            } else {
+                window.addEventListener('load', load, { once: true });
+            }
         });
     })();
 

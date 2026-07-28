@@ -23,14 +23,32 @@ test('Hero: YouTube-фон рендерит iframe с nocookie-доменом и
     ]);
     assert_true(str_contains($html, 'youtube-nocookie.com/embed/dQw4w9WgXcQ'), 'iframe YouTube с id');
     assert_true(str_contains($html, 'block-hero--video'), 'класс видео-героя');
-    assert_true(str_contains($html, 'autoplay=1&mute=1&loop=1'), 'автозапуск без звука, цикл');
+    assert_true(str_contains($html, 'autoplay=1&amp;mute=1&amp;loop=1'), 'автозапуск без звука, цикл');
     assert_contains('playlist=dQw4w9WgXcQ', $html, 'playlist нужен YouTube для бесшовного loop');
     assert_contains('controls=0', $html, 'стандартные элементы управления отключены');
     assert_contains('enablejsapi=1', $html, 'фон можно возобновить после системной паузы');
+    assert_contains('origin=http%3A%2F%2Flocalhost', $html, 'JS API ограничен origin сайта');
     assert_contains('data-hero-youtube-background', $html);
-    assert_true(str_contains($html, 'loading="eager"'), 'фон первого экрана загружается сразу');
+    assert_contains('data-src="https://www.youtube-nocookie.com/', $html, 'iframe загружается JS только рядом с viewport');
+    assert_true(str_contains($html, 'loading="lazy"'), 'third-party iframe не блокирует первый рендер');
     assert_contains('referrerpolicy="strict-origin-when-cross-origin"', $html, 'YouTube получает origin сайта для проверки embed');
-    assert_true(!str_contains($html, 'loading="lazy"'), 'YouTube hero не откладывается lazy-loading');
+    assert_not_contains('showinfo=', $html);
+    assert_not_contains('modestbranding=', $html);
+    assert_not_contains('rel=', $html);
+    assert_not_contains('iv_load_policy=', $html);
+});
+
+test('Hero: YouTube использует изображение как poster до готовности iframe', function () {
+    $html = render_hero([
+        'title' => 'Заголовок',
+        'bg_type' => 'youtube',
+        'youtube_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        'image' => '/uploads/public/hero-poster.jpg',
+    ]);
+
+    assert_contains('class="block-hero__youtube-poster"', $html);
+    assert_contains('src="/uploads/public/hero-poster.jpg"', $html);
+    assert_contains('fetchpriority="high"', $html);
 });
 
 test('Hero: сохранённая ссылка YouTube включает фон даже при старом bg_type none', function () {
@@ -66,6 +84,8 @@ test('Hero: сохранённый MP4 включает фон даже при �
     assert_contains("command('playVideo')", $js);
     assert_contains("command('mute')", $js);
     assert_contains("command('setLoop', [true])", $js);
+    assert_contains("new IntersectionObserver", $js);
+    assert_contains("frame.getAttribute('data-src')", $js);
 });
 
 test('Hero: overlay использует начальный и конечный цвета, направление и прозрачность', function () {

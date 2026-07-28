@@ -3,6 +3,7 @@
 use App\Core\UrlGuard;
 use App\Core\Video;
 use App\Core\Media;
+use App\Core\AppUrl;
 
 /** @var array $data */
 $title = $data['title'] ?? '';
@@ -125,6 +126,27 @@ $scrimStyle = '--hero-scrim-rgb:' . $hex2rgb($ovColor)
 $templateCss = ($heroRootStyle !== '' ? '#block-' . $blockId . ' .block-hero{' . $heroRootStyle . '}' : '')
     . ($hasMedia ? "\n#block-" . $blockId . ' .block-hero__scrim{' . $scrimStyle . '}' : '')
     . ($textStyle !== '' ? "\n#block-" . $blockId . ' .block-hero__text{' . $textStyle . '}' : '');
+
+$youtubeEmbedUrl = '';
+if ($bgType === 'youtube' && $youtubeId !== null) {
+    $youtubeParams = [
+        'autoplay' => '1',
+        'mute' => '1',
+        'loop' => '1',
+        'playlist' => $youtubeId,
+        'controls' => '0',
+        'playsinline' => '1',
+        'disablekb' => '1',
+        'fs' => '0',
+        'enablejsapi' => '1',
+    ];
+    $youtubeOrigin = AppUrl::base();
+    if ($youtubeOrigin !== '') {
+        $youtubeParams['origin'] = $youtubeOrigin;
+    }
+    $youtubeEmbedUrl = 'https://www.youtube-nocookie.com/embed/' . $youtubeId
+        . '?' . http_build_query($youtubeParams, '', '&', PHP_QUERY_RFC3986);
+}
 ?>
 <?php // Без медиа и без своего фона hero — это просто шапка страницы:
       // карточка с рамкой и подложкой в этой роли читается как чужой блок. ?>
@@ -136,10 +158,27 @@ $templateCss = ($heroRootStyle !== '' ? '#block-' . $blockId . ' .block-hero{' .
             <source src="<?= htmlspecialchars($videoFile, ENT_QUOTES) ?>" type="video/mp4">
         </video>
     <?php elseif ($bgType === 'youtube' && $youtubeId !== null): ?>
-        <div class="block-hero__yt" aria-hidden="true">
-            <?php // Hero находится на первом экране: lazy iframe Chrome может
-                  // отложить навсегда из-за абсолютного позиционирования фона. ?>
-            <iframe data-hero-youtube-background src="https://www.youtube-nocookie.com/embed/<?= htmlspecialchars($youtubeId, ENT_QUOTES) ?>?autoplay=1&mute=1&loop=1&playlist=<?= htmlspecialchars($youtubeId, ENT_QUOTES) ?>&controls=0&showinfo=0&modestbranding=1&rel=0&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&enablejsapi=1" tabindex="-1" loading="eager" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media"></iframe>
+        <?php if ($image !== '' && UrlGuard::isSafeMedia($image)): ?>
+            <img
+                class="block-hero__youtube-poster"
+                src="<?= htmlspecialchars($image, ENT_QUOTES) ?>"
+                alt=""
+                loading="eager"
+                decoding="async"
+                fetchpriority="high"
+                aria-hidden="true"
+            >
+        <?php endif; ?>
+        <div class="block-hero__yt" data-hero-youtube-container aria-hidden="true">
+            <iframe
+                data-hero-youtube-background
+                data-src="<?= htmlspecialchars($youtubeEmbedUrl, ENT_QUOTES) ?>"
+                tabindex="-1"
+                loading="lazy"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allow="autoplay; encrypted-media"
+                aria-hidden="true"
+            ></iframe>
         </div>
     <?php elseif ($bgType === 'image' && $image !== ''): ?>
         <?= Media::picture($image, '', null, null, 'block-hero__image', false, '100vw', true, 'block-hero__media') ?>

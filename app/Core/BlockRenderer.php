@@ -240,7 +240,7 @@ final class BlockRenderer
                     ? 'youtube'
                     : (trim((string) ($data['video_url'] ?? '')) !== '' ? 'video' : ($heroImage !== '' ? 'image' : 'none'));
             }
-            if ($heroBgType === 'image' && $heroImage !== '') {
+            if (in_array($heroBgType, ['image', 'youtube'], true) && $heroImage !== '') {
                 $preloadImage = $heroImage;
             }
         }
