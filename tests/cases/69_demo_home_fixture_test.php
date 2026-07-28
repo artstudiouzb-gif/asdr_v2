@@ -66,6 +66,10 @@ test('Демо: повторный запуск не удаляет страни
     assert_contains("self::seedMenu", $seeder);
     assert_contains("self::verify", $seeder);
     assert_contains('isUntouchedStarterHome', $seeder);
+
+    $cliSeeder = (string) file_get_contents(APP_ROOT . '/database/seed_demo.php');
+    assert_contains('Database::isConnected()', $cliSeeder, 'CLI проверяет подключение к БД');
+    assert_contains('Database::init($dbConfig)', $cliSeeder, 'CLI самостоятельно инициализирует БД');
 });
 
 test('Демо: запуск доступен только в настройках и требует код подтверждения', function () {
