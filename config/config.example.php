@@ -45,6 +45,15 @@ return [
         // HSTS с preload (hstspreload.org): включать только после месяца
         // стабильной работы по HTTPS на всех поддоменах — снять быстро нельзя.
         'hsts_preload' => false,
+        // Заголовки CF-Connecting-IP / X-Forwarded-For принимаются только от
+        // этих reverse-proxy адресов. Пустой список безопасно игнорирует их.
+        // Пример для локального nginx: TRUSTED_PROXY_CIDRS=127.0.0.1/32,::1/128
+        // Для Cloudflare укажите актуальные диапазоны из панели/официальной
+        // документации и запретите прямой доступ к origin на firewall.
+        'trusted_proxy_cidrs' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', getenv('TRUSTED_PROXY_CIDRS') ?: '')
+        ))),
     ],
     'paths' => [
         'protected_uploads' => __DIR__ . '/../storage/protected_uploads',

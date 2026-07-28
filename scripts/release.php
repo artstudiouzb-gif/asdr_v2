@@ -53,6 +53,28 @@ if ($newestBackup === '' || (int) filemtime($newestBackup) < $backupStartedAt - 
 releaseRun('Миграции базы данных', $root . '/database/migrate.php');
 releaseRun('Шифрование секретов БД', $root . '/database/encrypt_secrets.php');
 
+$releaseId = trim((string) (getenv('APP_RELEASE') ?: ''));
+if ($releaseId === '') {
+    $gitCommand = 'git -C ' . escapeshellarg($root) . ' rev-parse HEAD 2>&1';
+    $releaseId = trim((string) shell_exec($gitCommand));
+}
+if (!preg_match('/^[0-9a-zA-Z._-]{7,100}$/', $releaseId)) {
+    $releaseId = substr(hash('sha256',
+        (string) @file_get_contents($root . '/app/Core/bootstrap.php')
+        . (string) @file_get_contents($root . '/public/assets/asset-manifest.json')
+    ), 0, 16);
+}
+$releaseFile = $root . '/storage/release.json';
+$releasePayload = json_encode([
+    'release' => $releaseId,
+    'deployed_at' => gmdate('c'),
+], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+if (!is_string($releasePayload)
+    || file_put_contents($releaseFile, $releasePayload . PHP_EOL, LOCK_EX) === false) {
+    fwrite(STDERR, "Выпуск остановлен: не удалось записать идентификатор релиза.\n");
+    exit(1);
+}
+
 fwrite(STDOUT, "\n== Очистка файлового кеша ==\n");
 $cacheDir = $root . '/storage/cache';
 if (is_dir($cacheDir)) {
@@ -76,6 +98,6 @@ if (is_dir($cacheDir)) {
 fwrite(STDOUT, "Кеш очищен.\n");
 
 releaseRun('Проверка после миграций', $root . '/scripts/release_check.php');
-releaseRun('Smoke-обход сайта', $root . '/scripts/smoke.php', [$baseUrl]);
+releaseRun('Smoke-обход сайта', $root . '/scripts/smoke.php', [$baseUrl, '--expect-release', $releaseId]);
 
 fwrite(STDOUT, "\nВыпуск завершён успешно.\n");

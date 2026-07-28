@@ -853,7 +853,9 @@ $containerMode = in_array($hcfg['container_mode'] ?? 'full', ['full', 'container
     <?php endif; ?>
 </div>
 <?php foreach (Flash::pull() as $flash): ?>
-    <div class="site-alert site-alert--<?= htmlspecialchars($flash['type'], ENT_QUOTES) ?>">
+    <div class="site-alert site-alert--<?= htmlspecialchars($flash['type'], ENT_QUOTES) ?>"
+         role="<?= ($flash['type'] ?? '') === 'error' ? 'alert' : 'status' ?>"
+         aria-live="<?= ($flash['type'] ?? '') === 'error' ? 'assertive' : 'polite' ?>">
         <?= htmlspecialchars($flash['message'], ENT_QUOTES) ?>
     </div>
 <?php endforeach; ?>

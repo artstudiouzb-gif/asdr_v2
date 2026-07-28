@@ -73,7 +73,7 @@ $e = static fn ($s): string => htmlspecialchars((string) $s, ENT_QUOTES);
 <title>404 — <?= $e($title) ?></title>
 <link rel="stylesheet" href="/assets/css/system.css">
 </head>
-<body>
+<body class="system-error system-error--404">
 <div class="wrap">
     <p class="code">404</p>
     <h1><?= $e($title) ?></h1>

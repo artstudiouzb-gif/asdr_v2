@@ -13,7 +13,7 @@ $message = Setting::get('maintenance_message', 'Сайт временно зак
 <title><?= htmlspecialchars($siteName, ENT_QUOTES) ?> — техническое обслуживание</title>
 <link rel="stylesheet" href="/assets/css/system.css">
 </head>
-<body>
+<body class="system-error system-error--maintenance">
 <div class="icon">🛠️</div>
 <h1><?= htmlspecialchars($siteName, ENT_QUOTES) ?></h1>
 <p><?= htmlspecialchars($message, ENT_QUOTES) ?></p>

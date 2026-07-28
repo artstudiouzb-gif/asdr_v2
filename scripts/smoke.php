@@ -21,12 +21,15 @@ declare(strict_types=1);
 $base = 'http://127.0.0.1:8000';
 $adminCreds = null;
 $maxPages = 200;
+$expectedRelease = null;
 
 $args = array_slice($argv, 1);
 for ($i = 0; $i < count($args); $i++) {
     $a = $args[$i];
     if ($a === '--admin' && isset($args[$i + 1])) {
         $adminCreds = $args[++$i];
+    } elseif ($a === '--expect-release' && isset($args[$i + 1])) {
+        $expectedRelease = trim((string) $args[++$i]);
     } elseif ($a === '--max' && isset($args[$i + 1])) {
         $maxPages = max(1, (int) $args[++$i]);
     } elseif (str_starts_with($a, 'http://') || str_starts_with($a, 'https://')) {
@@ -137,6 +140,7 @@ $seed = [
     $base . '/', $base . '/news', $base . '/projects', $base . '/albums',
     $base . '/search?q=test', $base . '/calendar', $base . '/opendata',
     $base . '/sitemap.xml', $base . '/robots.txt', $base . '/health',
+    $base . '/assets/css/system.css',
 ];
 $queue = $seed;
 $visited = [];
@@ -152,6 +156,15 @@ while (!empty($queue) && count($visited) < $maxPages) {
 
     $r = fetch($url, $cookieJar);
     $errSig = $r['status'] < 400 ? $checkBody($r['body']) : null;
+    if ($expectedRelease !== null
+        && (string) parse_url($url, PHP_URL_PATH) === '/health'
+        && $r['status'] < 400) {
+        $healthData = json_decode($r['body'], true);
+        $actualRelease = is_array($healthData) ? (string) ($healthData['release'] ?? '') : '';
+        if (!hash_equals($expectedRelease, $actualRelease)) {
+            $errSig = 'release mismatch: expected ' . $expectedRelease . ', got ' . ($actualRelease !== '' ? $actualRelease : 'empty');
+        }
+    }
     $ok = $r['status'] > 0 && $r['status'] < 400 && $errSig === null;
     if (!$ok) {
         $fail++;

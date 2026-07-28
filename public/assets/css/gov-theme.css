@@ -4629,3 +4629,13 @@ body.quick-search-active { overflow: hidden; }
     border-color: var(--gov-teal, #0d9488);
     color: #ffffff;
 }
+@media (pointer: coarse) {
+    .site-search-toggle,
+    .site-theme-toggle,
+    .site-footer__social-link,
+    .site-search-overlay__close,
+    .site-quick-search__close {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}

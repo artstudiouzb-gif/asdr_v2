@@ -75,5 +75,9 @@ $a11y = [
 </div>
 <main class="repo-main">
     <?php foreach (Flash::pull() as $flash): ?>
-        <div class="repo-alert repo-alert--<?= $flash['type'] === 'success' ? 'success' : 'error' ?>"><?= htmlspecialchars($flash['message'], ENT_QUOTES) ?></div>
+        <div class="repo-alert repo-alert--<?= $flash['type'] === 'success' ? 'success' : 'error' ?>"
+             role="<?= $flash['type'] === 'success' ? 'status' : 'alert' ?>"
+             aria-live="<?= $flash['type'] === 'success' ? 'polite' : 'assertive' ?>">
+            <?= htmlspecialchars($flash['message'], ENT_QUOTES) ?>
+        </div>
     <?php endforeach; ?>

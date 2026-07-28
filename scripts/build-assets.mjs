@@ -111,7 +111,7 @@ async function verifyOrWrite(path, content) {
 
     let current = '';
     try {
-        current = await readFile(path, 'utf8');
+        current = (await readFile(path, 'utf8')).replace(/\r\n?/g, '\n');
     } catch {
         throw new Error(`${path} is missing. Run npm run build:assets.`);
     }

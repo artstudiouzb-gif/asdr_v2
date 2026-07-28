@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Core;
 
 /**
- * Web Application Firewall (WAF) & L7 Rate Limiter.
- * Проверяет входные параметры запроса на наличие атак (SQLi, XSS, Path Traversal)
- * и ограничивает частоту аномальных запросов.
+ * Lightweight request-signature guard for obviously malicious traffic.
+ * Проверяет входные параметры запроса на сигнатуры SQLi, XSS и Path Traversal.
  */
 final class WafGuard
 {

@@ -8,7 +8,7 @@
 <title>503 — Сервис временно недоступен</title>
 <link rel="stylesheet" href="/assets/css/system.css">
 </head>
-<body>
+<body class="system-error system-error--503">
 <main>
     <div class="status" role="status">Временные технические работы</div>
     <p class="code" aria-hidden="true">503</p>

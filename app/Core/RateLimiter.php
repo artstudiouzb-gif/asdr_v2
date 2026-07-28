@@ -92,6 +92,22 @@ final class RateLimiter
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $identifier = $namespace . '|' . $key;
 
+        // Routine throttles use an atomic filesystem bucket. Keeping these
+        // counters out of MySQL avoids two DB operations per public request
+        // and still leaves the dedicated login-attempt audit unchanged.
+        $fileDecision = FileRateLimiter::allow($identifier, $maxAttempts, max(1, $windowMinutes) * 60);
+        if ($fileDecision !== null) {
+            if (!$fileDecision) {
+                Logger::warning(
+                    sprintf('Превышен лимит запросов: %s (%d за %d мин.)', $namespace, $maxAttempts, $windowMinutes),
+                    ['ip' => $ip, 'key' => $key]
+                );
+            }
+
+            return $fileDecision;
+        }
+
+        // Filesystem unavailable: retain the previous DB-backed fallback.
         try {
             $count = self::countRecent($identifier, $windowMinutes);
             self::recordAttempt($identifier, false);

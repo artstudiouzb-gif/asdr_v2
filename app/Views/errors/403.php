@@ -6,7 +6,7 @@
 <title>403 — Доступ запрещён</title>
 <link rel="stylesheet" href="/assets/css/system.css">
 </head>
-<body>
+<body class="system-error system-error--403">
 <h1>403</h1>
 <p>Недостаточно прав для доступа к этому разделу.</p>
 <a href="/admin">В панель управления</a>

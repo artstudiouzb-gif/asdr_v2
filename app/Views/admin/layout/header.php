@@ -94,7 +94,7 @@ $navUserId = (int) ($navUser['id'] ?? 0);
 $navAdminTheme = $_SESSION['admin_theme'] ?? (\App\Models\Setting::get('admin_theme_user_' . $navUserId, 'default'));
 ?>
 <!DOCTYPE html>
-<html lang="ru" data-theme="light" data-admin-theme="<?= htmlspecialchars((string) $navAdminTheme, ENT_QUOTES) ?>">
+<html lang="<?= htmlspecialchars($currentLang, ENT_QUOTES) ?>" data-theme="light" data-admin-theme="<?= htmlspecialchars((string) $navAdminTheme, ENT_QUOTES) ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -275,7 +275,9 @@ try {
 
     <main class="admin-main" id="admin-content" tabindex="-1">
         <?php foreach (Flash::pull() as $flash): ?>
-            <div class="alert alert--<?= htmlspecialchars($flash['type'], ENT_QUOTES) ?>">
+            <div class="alert alert--<?= htmlspecialchars($flash['type'], ENT_QUOTES) ?>"
+                 role="<?= ($flash['type'] ?? '') === 'error' ? 'alert' : 'status' ?>"
+                 aria-live="<?= ($flash['type'] ?? '') === 'error' ? 'assertive' : 'polite' ?>">
                 <?= htmlspecialchars($flash['message'], ENT_QUOTES) ?>
             </div>
         <?php endforeach; ?>
