@@ -23,7 +23,17 @@ final class EnvironmentCheck
             'hint' => $phpOk ? '' : 'Обновите PHP до версии 8.2+.',
         ];
 
-        foreach (['pdo_mysql', 'mbstring', 'json', 'gd'] as $ext) {
+        foreach ([
+            'pdo_mysql',
+            'mbstring',
+            'json',
+            'gd',
+            'curl',
+            'dom',
+            'fileinfo',
+            'openssl',
+            'zip',
+        ] as $ext) {
             $ok = extension_loaded($ext);
             $checks[] = [
                 'label' => 'Расширение PHP: ' . $ext,
