@@ -418,20 +418,6 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-dot .site-men
     background: var(--menu-divider-color, rgba(148, 163, 184, 0.35));
 }
 
-/* === Submenu Chevron Arrow (Вариант 1) === */
-.site-menu__arrow {
-    display: inline-flex;
-    align-items: center;
-    margin-left: 4px;
-    opacity: 0.75;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-}
-.site-menu__item:hover .site-menu__arrow,
-.site-menu__item:focus-within .site-menu__arrow {
-    transform: rotate(180deg);
-    opacity: 1;
-}
-
 /* === Header Container Modes === */
 /* 1. Boxed Container Mode (По ширине контента) */
 .site-header--container-container {
@@ -4663,5 +4649,155 @@ body.quick-search-active { overflow: hidden; }
     .site-quick-search__close {
         min-width: 44px;
         min-height: 44px;
+    }
+}
+
+/* ==========================================================================
+   Навигация: единый шеврон и обновлённое подменю
+   ========================================================================== */
+/* Верхнее меню без glow-линии: состояние показывается только цветом текста. */
+.site-menu > .site-menu__link::after,
+.site-menu > .site-menu__item > .site-menu__link::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+.site-menu__item--has-children {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Глобальные стили button не должны превращать контрол подменю в тёмную
+   круглую кнопку. Иконка повторяет шеврон переключателя языка. */
+.site-header .site-menu__toggle,
+.site-drawer .site-menu__toggle {
+    appearance: none;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 22px;
+    height: 30px;
+    margin: 0 0 0 -8px;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    color: var(--menu-text-color, var(--gov-title)) !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    line-height: 1;
+    cursor: pointer;
+    transition: color .2s ease, background-color .2s ease !important;
+}
+.site-menu__toggle-icon {
+    display: block;
+    opacity: .7;
+    transform-origin: center;
+    transition: transform .2s ease, opacity .2s ease;
+}
+.site-menu__item--has-children:hover > .site-menu__toggle,
+.site-menu__item--has-children:focus-within > .site-menu__toggle,
+.site-menu__item.is-open > .site-menu__toggle {
+    color: var(--menu-hover-color, var(--gov-teal)) !important;
+    background: color-mix(in srgb, var(--gov-teal) 7%, transparent) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+.site-menu__item--has-children:hover > .site-menu__toggle .site-menu__toggle-icon,
+.site-menu__item--has-children:focus-within > .site-menu__toggle .site-menu__toggle-icon,
+.site-menu__item.is-open > .site-menu__toggle .site-menu__toggle-icon {
+    opacity: 1;
+    transform: rotate(180deg);
+}
+.site-menu__toggle:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--gov-teal) 60%, transparent);
+    outline-offset: 1px;
+}
+body .site-header--transparent:not(.is-scrolled) .site-menu__toggle {
+    color: #fff !important;
+}
+body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:hover > .site-menu__toggle,
+body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:focus-within > .site-menu__toggle,
+body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .site-menu__toggle {
+    color: #9fe3e4 !important;
+    background: rgba(255, 255, 255, .1) !important;
+}
+
+@media (min-width: 901px) {
+    .site-submenu {
+        top: calc(100% + 6px);
+        min-width: 260px;
+        margin-top: 0;
+        gap: 2px;
+        padding: 8px;
+        border: 1px solid color-mix(in srgb, var(--gov-border) 82%, transparent);
+        border-radius: 14px;
+        background: color-mix(in srgb, var(--gov-surface) 97%, transparent);
+        box-shadow:
+            0 20px 50px rgba(15, 23, 42, .13),
+            0 4px 12px rgba(15, 23, 42, .06);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        transform: translateY(8px) scale(.985);
+        transform-origin: top left;
+    }
+    .site-submenu::before {
+        display: none;
+    }
+    .site-submenu::after {
+        top: -12px;
+        height: 14px;
+    }
+    .site-submenu__link {
+        min-height: 40px;
+        padding: 10px 13px;
+        border: 1px solid transparent;
+        border-radius: 9px;
+        color: var(--gov-title);
+        font-size: .86rem;
+        font-weight: 600;
+        line-height: 1.35;
+        white-space: normal;
+        transition:
+            color .16s ease,
+            background-color .16s ease,
+            border-color .16s ease,
+            transform .16s ease;
+    }
+    .site-submenu__link:hover,
+    .site-submenu__link:focus-visible {
+        color: var(--menu-hover-color, var(--gov-teal)) !important;
+        background: color-mix(in srgb, var(--gov-teal) 8%, var(--gov-surface)) !important;
+        border-color: color-mix(in srgb, var(--gov-teal) 14%, transparent);
+        transform: translateX(2px);
+    }
+    .site-submenu__link.is-active,
+    .site-submenu__link[aria-current="page"] {
+        color: var(--menu-active-color, var(--gov-teal)) !important;
+        background: color-mix(in srgb, var(--gov-teal) 10%, var(--gov-surface)) !important;
+        border-color: color-mix(in srgb, var(--gov-teal) 15%, transparent);
+        box-shadow: inset 2px 0 0 var(--menu-active-color, var(--gov-teal));
+    }
+}
+
+@media (max-width: 900px) {
+    .site-header .site-menu__toggle,
+    .site-drawer .site-menu__toggle,
+    body.mobile-menu-open .site-menu__toggle {
+        width: 44px;
+        height: 44px;
+        margin-left: 0;
+        border-radius: 9px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-menu__toggle-icon,
+    .site-submenu__link {
+        transition: none;
     }
 }

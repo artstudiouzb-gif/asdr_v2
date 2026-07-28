@@ -172,8 +172,7 @@ if (!empty($menuItems)) {
             static fn ($c) => (int) $c['is_active'] === 1 && empty($c['is_divider'])
         ));
 
-        $arrowChevron = $children !== [] ? '<span class="site-menu__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></span>' : '';
-        $label = $badgeHtml . $icon . '<span class="' . $textClass . '">' . htmlspecialchars($mi['title'], ENT_QUOTES) . '</span>' . $arrowChevron;
+        $label = $badgeHtml . $icon . '<span class="' . $textClass . '">' . htmlspecialchars($mi['title'], ENT_QUOTES) . '</span>';
 
         $isDirectActive = $isNavUrlActive($url);
 
@@ -224,7 +223,9 @@ if (!empty($menuItems)) {
             . ($megaCols > 0 ? ' site-menu__item--mega' : '') . '">';
         $menuHtml .= '<a class="site-menu__link' . $parentActiveClass . $iconOnlyClass . '" href="' . htmlspecialchars($url, ENT_QUOTES) . '"' . $parentAriaCurrent . $titleAttr . '>'
             . $label . '</a>';
-        $menuHtml .= '<button type="button" class="site-menu__toggle" aria-expanded="false" aria-label="' . $et('Открыть подменю') . '">▾</button>';
+        $menuHtml .= '<button type="button" class="site-menu__toggle" aria-expanded="false" aria-label="' . $et('Открыть подменю') . '">'
+            . '<svg class="site-menu__toggle-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">'
+            . '<path d="m6 9 6 6 6-6"/></svg></button>';
         $menuHtml .= $megaCols > 0
             ? '<div class="site-submenu site-submenu--mega site-submenu--cols-' . $megaCols . '">'
             : '<div class="site-submenu">';
