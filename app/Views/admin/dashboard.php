@@ -11,6 +11,7 @@ require __DIR__ . '/layout/header.php';
 /** @var array<int, array<string, mixed>> $recentItems */
 /** @var array<int, array<string, mixed>> $recentSubmissions */
 /** @var array<string, mixed> $systemHealth */
+/** @var bool $canManageSensitive */
 ?>
 <section class="admin-welcome" aria-labelledby="admin-welcome-title">
     <div>
@@ -48,10 +49,12 @@ require __DIR__ . '/layout/header.php';
         <span class="stat-card__value"><?= (int) $counts['forms'] ?></span>
         <span class="stat-card__label"><?= htmlspecialchars(t('Формы'), ENT_QUOTES) ?></span>
     </a>
-    <a href="/admin/forms" class="stat-card<?= $counts['submissions_unread'] > 0 ? ' stat-card--highlight' : '' ?>">
-        <span class="stat-card__value"><?= (int) $counts['submissions_unread'] ?></span>
-        <span class="stat-card__label"><?= htmlspecialchars(t('Непрочитанные заявки'), ENT_QUOTES) ?></span>
-    </a>
+    <?php if ($canManageSensitive): ?>
+        <a href="/admin/forms" class="stat-card<?= $counts['submissions_unread'] > 0 ? ' stat-card--highlight' : '' ?>">
+            <span class="stat-card__value"><?= (int) $counts['submissions_unread'] ?></span>
+            <span class="stat-card__label"><?= htmlspecialchars(t('Непрочитанные заявки'), ENT_QUOTES) ?></span>
+        </a>
+    <?php endif; ?>
     <a href="/admin/files" class="stat-card">
         <span class="stat-card__value"><?= (int) $counts['files'] ?></span>
         <span class="stat-card__label"><?= htmlspecialchars(t('Медиафайлы'), ENT_QUOTES) ?></span>
@@ -67,7 +70,9 @@ require __DIR__ . '/layout/header.php';
     <div class="form-card">
         <div class="u-inline-359c202582">
             <h3 class="u-inline-1da9facb4d"><?= htmlspecialchars(t('Статус системы'), ENT_QUOTES) ?></h3>
-            <a href="/admin/security" class="btn btn--small u-inline-e71ae94b55"><?= htmlspecialchars(t('Безопасность'), ENT_QUOTES) ?> →</a>
+            <?php if ($canManageSensitive): ?>
+                <a href="/admin/security" class="btn btn--small u-inline-e71ae94b55"><?= htmlspecialchars(t('Безопасность'), ENT_QUOTES) ?> →</a>
+            <?php endif; ?>
         </div>
         <div class="u-inline-6435a88594">
             <div class="u-inline-4588dc62ed">
@@ -97,6 +102,7 @@ require __DIR__ . '/layout/header.php';
         </div>
     </div>
 
+    <?php if ($canManageSensitive): ?>
     <!-- Виджет: Последние поступившие заявки с сайта -->
     <div class="form-card">
         <div class="u-inline-359c202582">
@@ -129,6 +135,7 @@ require __DIR__ . '/layout/header.php';
             </div>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
 </div>
 
 <!-- Виджет: Поисковые запросы по сайту за последние 30 дней -->
@@ -209,6 +216,7 @@ require __DIR__ . '/layout/header.php';
 </div>
 <?php endif; ?>
 
+<?php if ($canManageSensitive): ?>
 <?php
 $maxVal = max(1, ...array_values($chartData));
 $width = 500;
@@ -297,5 +305,6 @@ $fillPointsStr = "$padding," . ($height - $padding) . " $pointsStr " . ($width -
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <?php require __DIR__ . '/layout/footer.php'; ?>

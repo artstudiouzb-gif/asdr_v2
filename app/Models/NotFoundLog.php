@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use App\Core\Logger;
 
 /**
  * 404-трекер: агрегирует пути, вызвавшие 404 (счётчик + последний внешний
@@ -42,7 +43,7 @@ final class NotFoundLog
             if ($referer !== '' && $host !== '' && str_contains($referer, '://' . $host)) {
                 $referer = '';
             }
-            $referer = $referer !== '' ? mb_substr($referer, 0, 500) : null;
+            $referer = $referer !== '' ? mb_substr(Logger::redact($referer), 0, 500) : null;
 
             $pdo = Database::pdo();
 
@@ -67,7 +68,7 @@ final class NotFoundLog
             );
             $stmt->execute([':p' => $path, ':r' => $referer]);
         } catch (\Throwable $e) {
-            error_log('NotFoundLog failed: ' . $e->getMessage());
+            error_log(Logger::redact('NotFoundLog failed: ' . $e->getMessage()));
         }
     }
 

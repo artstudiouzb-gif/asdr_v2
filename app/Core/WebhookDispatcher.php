@@ -71,7 +71,14 @@ final class WebhookDispatcher
             $headers[] = self::SIGNATURE_HEADER . ': ' . self::sign($body, (string) $webhook['secret']);
         }
 
-        $send = $http ?? static fn (string $u, string $b, array $h) => Http::request('POST', $u, $b, $h, 15);
+        $send = $http ?? static fn (string $u, string $b, array $h) => Http::requestSafeRemote(
+            'POST',
+            $u,
+            $b,
+            $h,
+            15,
+            1024 * 1024
+        );
         $res = $send($url, $body, $headers);
 
         $code = (int) ($res['status'] ?? 0);

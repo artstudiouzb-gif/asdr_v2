@@ -12,7 +12,7 @@ final class SecurityController
 {
     public function index(): void
     {
-        Auth::requireLogin();
+        Auth::requireSuperAdmin();
 
         $auditLogs = [];
         if (Database::isConnected()) {

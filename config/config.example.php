@@ -37,6 +37,8 @@ return [
     'session' => [
         'name' => 'asc_session',
         'lifetime' => 7200,
+        // Жёсткий предел сессии, даже если пользователь остаётся активным.
+        'absolute_lifetime' => (int) (getenv('SESSION_ABSOLUTE_LIFETIME') ?: 28800),
     ],
     'security' => [
         'login_max_attempts' => 5,

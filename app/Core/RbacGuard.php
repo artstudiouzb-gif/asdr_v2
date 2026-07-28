@@ -10,18 +10,19 @@ namespace App\Core;
  */
 final class RbacGuard
 {
-    public const ROLE_SUPERADMIN = 'superadmin';
     public const ROLE_ADMIN = 'admin';
     public const ROLE_EDITOR = 'editor';
-    public const ROLE_AUTHOR = 'author';
 
     private const PERMISSIONS = [
-        'manage_users' => [self::ROLE_SUPERADMIN],
-        'manage_settings' => [self::ROLE_SUPERADMIN, self::ROLE_ADMIN],
-        'manage_design' => [self::ROLE_SUPERADMIN, self::ROLE_ADMIN],
-        'manage_trash' => [self::ROLE_SUPERADMIN, self::ROLE_ADMIN],
-        'publish_content' => [self::ROLE_SUPERADMIN, self::ROLE_ADMIN, self::ROLE_EDITOR],
-        'edit_content' => [self::ROLE_SUPERADMIN, self::ROLE_ADMIN, self::ROLE_EDITOR, self::ROLE_AUTHOR],
+        'manage_users' => [self::ROLE_ADMIN],
+        'manage_settings' => [self::ROLE_ADMIN],
+        'manage_design' => [self::ROLE_ADMIN],
+        'manage_trash' => [self::ROLE_ADMIN],
+        'manage_audit' => [self::ROLE_ADMIN],
+        'manage_submissions' => [self::ROLE_ADMIN],
+        'manage_protected_files' => [self::ROLE_ADMIN],
+        'publish_content' => [self::ROLE_ADMIN, self::ROLE_EDITOR],
+        'edit_content' => [self::ROLE_ADMIN, self::ROLE_EDITOR],
     ];
 
     public static function can(string $permission): bool
@@ -31,8 +32,13 @@ final class RbacGuard
             return false;
         }
 
-        $role = (string) ($user['role'] ?? self::ROLE_SUPERADMIN);
-        $allowed = self::PERMISSIONS[$permission] ?? [self::ROLE_SUPERADMIN];
+        $role = (string) ($user['role'] ?? self::ROLE_EDITOR);
+        return self::roleCan($role, $permission);
+    }
+
+    public static function roleCan(string $role, string $permission): bool
+    {
+        $allowed = self::PERMISSIONS[$permission] ?? [self::ROLE_ADMIN];
 
         return in_array($role, $allowed, true);
     }

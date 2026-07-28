@@ -15,10 +15,9 @@ namespace App\Core;
  *     дополнительно резолвит хост и запрещает приватные/loopback/link-local
  *     диапазоны (защита от SSRF).
  *
- * На текущий момент CMS нигде не выполняет серверных запросов по введённому
- * пользователем URL (изображения по ссылке только сохраняются как строка, без
- * скачивания). isSafeRemote() предоставляется как обязательный шлюз на случай
- * появления такой функции (webhooks, импорт по URL, авто-публикация).
+ * Для фактического запроса одной проверки недостаточно: Http::getSafeRemote()
+ * и Http::requestSafeRemote() закрепляют проверенный DNS-результат в cURL и
+ * сверяют адрес установленного соединения.
  */
 final class UrlGuard
 {
@@ -66,33 +65,53 @@ final class UrlGuard
      */
     public static function isSafeRemote(string $url): bool
     {
+        return self::safeRemoteTarget($url) !== null;
+    }
+
+    /**
+     * Возвращает уже проверенную цель для безопасного HTTP-клиента. Полученные
+     * IP нужно закрепить на уровне соединения (CURLOPT_RESOLVE), иначе между
+     * проверкой и запросом возможна DNS-rebinding атака.
+     *
+     * @return array{host:string,port:int,ips:list<string>}|null
+     */
+    public static function safeRemoteTarget(string $url): ?array
+    {
         $url = trim($url);
         $parts = parse_url($url);
-        if ($parts === false || empty($parts['host'])) {
-            return false;
+        if ($parts === false || empty($parts['host']) || isset($parts['user']) || isset($parts['pass'])) {
+            return null;
         }
 
         $scheme = strtolower($parts['scheme'] ?? '');
         if (!in_array($scheme, ['http', 'https'], true)) {
-            return false;
+            return null;
         }
 
-        $host = $parts['host'];
+        $host = strtolower(trim((string) $parts['host'], '[]'));
+        $port = isset($parts['port']) ? (int) $parts['port'] : ($scheme === 'https' ? 443 : 80);
+        if ($host === '' || $port < 1 || $port > 65535) {
+            return null;
+        }
 
         // Резолвим все A/AAAA-записи и проверяем каждую: DNS-rebinding и
         // хитрые имена не должны привести на внутренний адрес.
         $ips = self::resolveHost($host);
         if ($ips === []) {
-            return false;
+            return null;
         }
 
         foreach ($ips as $ip) {
             if (!self::isPublicIp($ip)) {
-                return false;
+                return null;
             }
         }
 
-        return true;
+        return [
+            'host' => $host,
+            'port' => $port,
+            'ips' => array_values(array_unique($ips)),
+        ];
     }
 
     /** @return array<int, string> */

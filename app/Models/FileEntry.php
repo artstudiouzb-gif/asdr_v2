@@ -16,7 +16,7 @@ final class FileEntry
         return $stmt->fetchAll();
     }
 
-    public static function filtered(array $params): array
+    public static function filtered(array $params, bool $includeProtected = true): array
     {
         $q = trim((string) ($params['q'] ?? ''));
         $type = trim((string) ($params['type'] ?? ''));
@@ -25,6 +25,10 @@ final class FileEntry
 
         $sql = 'SELECT * FROM files WHERE 1=1';
         $bind = [];
+
+        if (!$includeProtected) {
+            $sql .= " AND access_type = 'public'";
+        }
 
         if ($q !== '') {
             $sql .= ' AND original_name LIKE :q';

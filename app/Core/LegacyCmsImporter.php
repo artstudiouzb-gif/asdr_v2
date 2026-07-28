@@ -385,35 +385,20 @@ final class LegacyCmsImporter
         }
     }
 
-    /** Скачивание без автоматических редиректов: иначе новый Location мог бы
-     * увести запрос на loopback/приватную сеть после первичной SSRF-проверки. */
+    /** Скачивание с закреплением проверенного публичного IP и лимитом 20 МБ. */
     private static function download(string $url, string $dest): bool
     {
-        if (!function_exists('curl_init')) {
-            if (!UrlGuard::isSafeRemote($url)) {
-                return false;
-            }
-            $data = @file_get_contents($url);
-            return $data !== false && file_put_contents($dest, $data) !== false;
-        }
-        $fh = fopen($dest, 'wb');
-        if ($fh === false) {
+        $response = Http::getSafeRemote(
+            $url,
+            ['User-Agent: ArtStudio-Legacy-Import/1.0'],
+            60,
+            20 * 1024 * 1024
+        );
+        if ($response['status'] < 200 || $response['status'] >= 300 || $response['body'] === '') {
             return false;
         }
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_FILE => $fh,
-            CURLOPT_FOLLOWLOCATION => false,
-            CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
-            CURLOPT_TIMEOUT => 60,
-            CURLOPT_CONNECTTIMEOUT => 15,
-            CURLOPT_USERAGENT => 'ArtStudio-Legacy-Import/1.0',
-        ]);
-        $ok = curl_exec($ch);
-        $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        fclose($fh);
 
-        return $ok !== false && $status >= 200 && $status < 300 && filesize($dest) > 0;
+        return file_put_contents($dest, $response['body'], LOCK_EX) !== false;
     }
 
     private static function sameOrigin(string $url, string $base): bool

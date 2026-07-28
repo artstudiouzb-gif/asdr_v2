@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\Flash;
+use App\Core\RbacGuard;
 use App\Core\Slug;
 use App\Core\View;
 use App\Models\FormDef;
@@ -17,11 +18,17 @@ final class FormController
     public function index(): void
     {
         Auth::requireLogin();
+        $canManageSubmissions = RbacGuard::can('manage_submissions');
         $items = FormDef::all();
         foreach ($items as &$item) {
-            $item['unread'] = FormSubmission::countUnread((int) $item['id']);
+            $item['unread'] = $canManageSubmissions
+                ? FormSubmission::countUnread((int) $item['id'])
+                : 0;
         }
-        View::render('admin/forms/index', ['items' => $items]);
+        View::render('admin/forms/index', [
+            'items' => $items,
+            'canManageSubmissions' => $canManageSubmissions,
+        ]);
     }
 
     public function create(): void
@@ -102,6 +109,7 @@ final class FormController
     public function submissions(array $params): void
     {
         Auth::requireLogin();
+        RbacGuard::requirePermission('manage_submissions');
 
         $form = FormDef::findById((int) $params['id']);
         if (!$form) {
@@ -121,6 +129,7 @@ final class FormController
     public function deleteSubmission(array $params): void
     {
         Auth::requireLogin();
+        RbacGuard::requirePermission('manage_submissions');
         Csrf::verifyRequest();
 
         FormSubmission::delete((int) $params['id']);

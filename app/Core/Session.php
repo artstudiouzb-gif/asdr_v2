@@ -20,6 +20,10 @@ final class Session
         }
 
         $lifetime = (int) Config::get('session.lifetime', 7200);
+        $absoluteLifetime = max(
+            $lifetime,
+            (int) Config::get('session.absolute_lifetime', 28800)
+        );
         session_name((string) Config::get('session.name', 'asc_session'));
         ini_set('session.use_strict_mode', '1');
         ini_set('session.use_only_cookies', '1');
@@ -34,11 +38,17 @@ final class Session
         ]);
 
         session_start();
-        if (!empty($_SESSION['last_activity']) && time() - (int) $_SESSION['last_activity'] > $lifetime) {
+        $now = time();
+        $idleExpired = !empty($_SESSION['last_activity'])
+            && $now - (int) $_SESSION['last_activity'] > $lifetime;
+        $absoluteExpired = !empty($_SESSION['started_at'])
+            && $now - (int) $_SESSION['started_at'] > $absoluteLifetime;
+        if ($idleExpired || $absoluteExpired) {
             $_SESSION = [];
             session_destroy();
             session_start();
         }
-        $_SESSION['last_activity'] = time();
+        $_SESSION['started_at'] ??= $now;
+        $_SESSION['last_activity'] = $now;
     }
 }

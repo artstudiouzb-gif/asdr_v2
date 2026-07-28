@@ -20,6 +20,7 @@ final class Logger
 
     public static function log(string $channel, string $message, string $level = 'INFO'): void
     {
+        $message = self::redact($message);
         $dir = self::dir();
         if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
             return;
@@ -119,6 +120,8 @@ final class Logger
     {
         $level = strtoupper($level);
         $channel = self::LEVEL_CHANNEL[$level] ?? 'app';
+        $message = self::redact($message);
+        $context = self::redactContext($context);
 
         // Компактная запись контекста в файл.
         $suffix = '';
@@ -140,7 +143,7 @@ final class Logger
         try {
             TelegramNotifier::send($level, $message, $context);
         } catch (\Throwable $e) {
-            error_log('Logger telegram dispatch failed: ' . $e->getMessage());
+            error_log(self::redact('Logger telegram dispatch failed: ' . $e->getMessage()));
         }
     }
 
@@ -172,12 +175,98 @@ final class Logger
      */
     public static function error(string $message, string $channel = 'error', array $context = []): void
     {
+        $message = self::redact($message);
+        $context = self::redactContext($context);
         self::log($channel, $message, 'ERROR');
         try {
             TelegramNotifier::send('ERROR', $message, $context);
         } catch (\Throwable $e) {
-            error_log('Logger telegram dispatch failed: ' . $e->getMessage());
+            error_log(self::redact('Logger telegram dispatch failed: ' . $e->getMessage()));
         }
+    }
+
+    /**
+     * Удаляет секреты из произвольной строки перед записью в файл, БД или
+     * отправкой во внешний канал оповещений.
+     */
+    public static function redact(string $value): string
+    {
+        if ($value === '') {
+            return '';
+        }
+
+        // Authorization/Cookie headers.
+        $value = (string) preg_replace(
+            '/\b(authorization\s*:\s*(?:bearer|basic)\s+)[^\s,;]+/i',
+            '$1[REDACTED]',
+            $value
+        );
+        $value = (string) preg_replace(
+            '/\b((?:set-)?cookie\s*:\s*)[^\r\n]+/i',
+            '$1[REDACTED]',
+            $value
+        );
+
+        // JSON, query string, env/config and обычные key=value записи.
+        $sensitiveKey = '(?:pass(?:word|wd)?|secret|token|api[_-]?key|access[_-]?key|private[_-]?key|'
+            . 'authorization|session(?:_?id)?|csrf(?:_?token)?|signature)';
+        $value = (string) preg_replace(
+            '/(["\']?' . $sensitiveKey . '["\']?\s*(?:=|:)\s*)(["\'])[^"\']*\\2/i',
+            '$1$2[REDACTED]$2',
+            $value
+        );
+        $value = (string) preg_replace(
+            '/(["\']?' . $sensitiveKey . '["\']?\s*(?:=|:)\s*)(?!["\'])[^\\s,;&}\\]]+/i',
+            '$1[REDACTED]',
+            $value
+        );
+
+        // Токены, переданные в URL, и одноразовые ссылки восстановления.
+        $value = (string) preg_replace(
+            '/([?&](?:token|access_token|key|signature|code)=)[^&\s#]+/i',
+            '$1[REDACTED]',
+            $value
+        );
+        $value = (string) preg_replace(
+            '#(/admin/reset/)[A-Za-z0-9_-]{16,}#i',
+            '$1[REDACTED]',
+            $value
+        );
+
+        return $value;
+    }
+
+    /**
+     * Рекурсивно очищает контекст логов. Значение чувствительного ключа
+     * заменяется целиком, остальные строки проходят маскирование шаблонов.
+     *
+     * @param array<string|int, mixed> $context
+     * @return array<string|int, mixed>
+     */
+    public static function redactContext(array $context): array
+    {
+        $safe = [];
+        foreach ($context as $key => $value) {
+            $keyString = (string) $key;
+            if (preg_match(
+                '/(?:pass(?:word|wd)?|secret|token|api[_-]?key|access[_-]?key|private[_-]?key|'
+                . 'authorization|cookie|session(?:_?id)?|csrf|signature)/i',
+                $keyString
+            )) {
+                $safe[$key] = '[REDACTED]';
+                continue;
+            }
+
+            if (is_array($value)) {
+                $safe[$key] = self::redactContext($value);
+            } elseif (is_string($value)) {
+                $safe[$key] = self::redact($value);
+            } else {
+                $safe[$key] = $value;
+            }
+        }
+
+        return $safe;
     }
 
     private static function rotateIfNeeded(string $file): void

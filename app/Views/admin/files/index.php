@@ -11,6 +11,7 @@ require __DIR__ . '/../layout/header.php';
 
 /** @var array $items */
 /** @var array $availableDates */
+/** @var bool $canManageProtected */
 $selectedType = (string) ($_GET['type'] ?? '');
 $selectedDate = (string) ($_GET['date'] ?? '');
 $selectedSort = (string) ($_GET['sort'] ?? 'date_desc');
@@ -26,10 +27,14 @@ $searchQuery = (string) ($_GET['q'] ?? '');
             <div class="u-inline-bea13c7a75">
                 <input class="u-inline-c8be1ccba6" type="file" id="media_file_input" name="file" required>
                 <button type="button" class="btn btn--primary" onclick="document.getElementById('media_file_input').click()">Выберите файлы</button>
-                <select class="u-inline-732d6ab846" name="access_type">
-                    <option value="public">Открытый доступ</option>
-                    <option value="protected">Защищённый доступ</option>
-                </select>
+                <?php if ($canManageProtected): ?>
+                    <select class="u-inline-732d6ab846" name="access_type">
+                        <option value="public">Открытый доступ</option>
+                        <option value="protected">Защищённый доступ</option>
+                    </select>
+                <?php else: ?>
+                    <input type="hidden" name="access_type" value="public">
+                <?php endif; ?>
             </div>
             <div class="u-inline-783c7afd53" id="upload_filename_preview"></div>
             <div class="u-inline-ba853ea68c" id="upload_action_row">

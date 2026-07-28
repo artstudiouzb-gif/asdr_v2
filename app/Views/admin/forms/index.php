@@ -8,6 +8,7 @@ $pageActions = '<a href="/admin/forms/create" class="btn btn--primary">' . \App\
 require __DIR__ . '/../layout/header.php';
 
 /** @var array $items */
+/** @var bool $canManageSubmissions */
 ?>
 
 <table class="data-table">
@@ -28,9 +29,13 @@ require __DIR__ . '/../layout/header.php';
                 <td><?= htmlspecialchars($item['name'], ENT_QUOTES) ?></td>
                 <td><?= htmlspecialchars($item['slug'], ENT_QUOTES) ?></td>
                 <td>
-                    <a href="/admin/forms/<?= (int) $item['id'] ?>/submissions">
-                        Просмотреть<?= $item['unread'] > 0 ? ' (' . (int) $item['unread'] . ' новых)' : '' ?>
-                    </a>
+                    <?php if ($canManageSubmissions): ?>
+                        <a href="/admin/forms/<?= (int) $item['id'] ?>/submissions">
+                            Просмотреть<?= $item['unread'] > 0 ? ' (' . (int) $item['unread'] . ' новых)' : '' ?>
+                        </a>
+                    <?php else: ?>
+                        <span class="form-hint">Только администратор</span>
+                    <?php endif; ?>
                 </td>
                 <td class="data-table__actions">
                     <a class="btn btn--small" href="/admin/forms/<?= (int) $item['id'] ?>/edit"><?= \App\Core\AdminUi::icon('edit') ?>Редактировать</a>

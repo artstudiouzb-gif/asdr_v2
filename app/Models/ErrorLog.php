@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use App\Core\Logger;
 
 /**
  * Журнал ошибок сайта: перехваченные исключения и фаталы с объяснением
@@ -72,6 +73,7 @@ final class ErrorLog
      */
     public static function record(string $level, string $message, string $file, int $line): void
     {
+        $message = Logger::redact($message);
         try {
             $stmt = Database::pdo()->prepare(
                 'INSERT INTO error_log (level, human, message, file, line, url, ip, created_at)
@@ -83,13 +85,13 @@ final class ErrorLog
                 ':message' => mb_substr($message, 0, 10000),
                 ':file' => mb_substr($file, 0, 500),
                 ':line' => max(0, $line),
-                ':url' => mb_substr((string) ($_SERVER['REQUEST_URI'] ?? 'cli'), 0, 500),
+                ':url' => mb_substr(Logger::redact((string) ($_SERVER['REQUEST_URI'] ?? 'cli')), 0, 500),
                 ':ip' => mb_substr((string) ($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45) ?: null,
             ]);
             self::purgeExpired();
         } catch (\Throwable $e) {
             // БД недоступна или таблицы ещё нет — файл-лог всё равно ведётся.
-            error_log('Error log failed: ' . $e->getMessage());
+            error_log(Logger::redact('Error log failed: ' . $e->getMessage()));
         }
     }
 

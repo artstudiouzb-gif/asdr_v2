@@ -8,6 +8,7 @@ use App\Core\Auth;
 use App\Core\Config;
 use App\Core\Csrf;
 use App\Core\Flash;
+use App\Core\RbacGuard;
 use App\Core\Uploader;
 use App\Core\View;
 use App\Models\FileEntry;
@@ -17,9 +18,11 @@ final class FileController
     public function index(): void
     {
         Auth::requireLogin();
+        $canManageProtected = RbacGuard::can('manage_protected_files');
         View::render('admin/files/index', [
-            'items' => FileEntry::filtered($_GET),
+            'items' => FileEntry::filtered($_GET, $canManageProtected),
             'availableDates' => FileEntry::availableDates(),
+            'canManageProtected' => $canManageProtected,
         ]);
     }
 
@@ -70,6 +73,9 @@ final class FileController
         Csrf::verifyRequest();
 
         $accessType = ($_POST['access_type'] ?? 'public') === 'protected' ? 'protected' : 'public';
+        if ($accessType === 'protected') {
+            RbacGuard::requirePermission('manage_protected_files');
+        }
 
         if (empty($_FILES['file']) || ($_FILES['file']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
             Flash::error('Выберите файл для загрузки.');
@@ -95,6 +101,9 @@ final class FileController
 
         $file = FileEntry::findById((int) $params['id']);
         if ($file) {
+            if (($file['access_type'] ?? '') === 'protected') {
+                RbacGuard::requirePermission('manage_protected_files');
+            }
             // Переиспользование файлов (задача 90): не удаляем файл, который ещё
             // где-то используется — иначе сломались бы связанные сущности.
             $publicUrl = FileEntry::publicUrl($file);
@@ -133,6 +142,7 @@ final class FileController
     public function regenerateToken(array $params): void
     {
         Auth::requireLogin();
+        RbacGuard::requirePermission('manage_protected_files');
         Csrf::verifyRequest();
 
         FileEntry::regenerateToken((int) $params['id']);
@@ -163,6 +173,12 @@ final class FileController
             $file = FileEntry::findById((int) $id);
             if (!$file) {
                 continue;
+            }
+            if (($file['access_type'] ?? '') === 'protected'
+                && !RbacGuard::can('manage_protected_files')) {
+                http_response_code(403);
+                View::render('errors/403');
+                return;
             }
             $publicUrl = FileEntry::publicUrl($file);
             $refs = \App\Core\MediaCleaner::referenceCount($publicUrl);

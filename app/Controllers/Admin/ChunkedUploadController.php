@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\RateLimiter;
+use App\Core\RbacGuard;
 use App\Core\Uploader;
 use App\Models\FileEntry;
 
@@ -43,6 +44,9 @@ final class ChunkedUploadController
         $total = (int) ($_POST['total'] ?? 0);
         $name = (string) ($_POST['name'] ?? '');
         $accessType = ($_POST['access_type'] ?? 'public') === 'protected' ? 'protected' : 'public';
+        if ($accessType === 'protected' && !RbacGuard::can('manage_protected_files')) {
+            $this->json(['ok' => false, 'error' => 'Недостаточно прав для защищённого файла'], 403);
+        }
 
         if (strlen($uploadId) !== 32 || $index < 0 || $total < 1 || $index >= $total || $name === '') {
             $this->json(['ok' => false, 'error' => 'Некорректные параметры чанка'], 400);

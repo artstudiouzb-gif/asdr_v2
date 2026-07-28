@@ -15,7 +15,7 @@ final class ExternalJsonService
      */
     public static function fetch(string $url, int $ttlSec = 900): mixed
     {
-        if (!preg_match("#^https?://#i", $url)) {
+        if (!UrlGuard::isSafeRemote($url)) {
             return null;
         }
 
@@ -38,7 +38,7 @@ final class ExternalJsonService
         }
 
         // Запрашиваем внешнюю систему через нативный HTTP-клиент
-        $res = Http::get($url, [], 4);
+        $res = Http::getSafeRemote($url, [], 4);
 
         if ($res["status"] === 200 && !empty($res["body"])) {
             $decoded = json_decode((string) $res["body"], true);
@@ -59,4 +59,3 @@ final class ExternalJsonService
         return null;
     }
 }
-

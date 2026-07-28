@@ -78,7 +78,7 @@ final class TelegramNotifier
             }
         } catch (\Throwable $e) {
             // Не логируем через Logger, чтобы не спровоцировать рекурсию.
-            error_log('Telegram send failed: ' . $e->getMessage());
+            error_log(Logger::redact('Telegram send failed: ' . $e->getMessage()));
         }
     }
 

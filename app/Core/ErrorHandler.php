@@ -38,20 +38,21 @@ final class ErrorHandler
 
     public static function handleException(Throwable $e): void
     {
-        $concise = get_class($e) . ': ' . $e->getMessage();
+        $concise = Logger::redact(get_class($e) . ': ' . $e->getMessage());
+        $trace = Logger::redact($e->getTraceAsString());
         // Полный стек — в файл; в Telegram уходит компактное сообщение + контекст.
         Logger::log('error', $concise . ' in ' . $e->getFile() . ':' . $e->getLine()
-            . PHP_EOL . 'Stack trace:' . PHP_EOL . $e->getTraceAsString(), 'ERROR');
+            . PHP_EOL . 'Stack trace:' . PHP_EOL . $trace, 'ERROR');
         // Журнал ошибок в панели (понятное объяснение + 7 дней хранения).
         if (defined('APP_INSTALLED') && APP_INSTALLED) {
             \App\Models\ErrorLog::record('ERROR', $concise, $e->getFile(), $e->getLine());
         }
-        \App\Core\TelegramNotifier::send('ERROR', $concise, [
+        \App\Core\TelegramNotifier::send('ERROR', $concise, Logger::redactContext([
             'file' => $e->getFile(),
             'line' => $e->getLine(),
             'url' => $_SERVER['REQUEST_URI'] ?? 'cli',
             'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
-        ]);
+        ]));
 
         self::renderErrorPage($e);
     }
@@ -66,13 +67,18 @@ final class ErrorHandler
             return;
         }
 
-        Logger::critical('Fatal: ' . $error['message'], [
+        Logger::critical('Fatal: ' . Logger::redact($error['message']), [
             'file' => $error['file'],
             'line' => $error['line'],
             'url' => $_SERVER['REQUEST_URI'] ?? 'cli',
         ]);
         if (defined('APP_INSTALLED') && APP_INSTALLED) {
-            \App\Models\ErrorLog::record('CRITICAL', $error['message'], (string) $error['file'], (int) $error['line']);
+            \App\Models\ErrorLog::record(
+                'CRITICAL',
+                Logger::redact($error['message']),
+                (string) $error['file'],
+                (int) $error['line']
+            );
         }
 
         self::renderErrorPage(new \ErrorException(

@@ -8,6 +8,7 @@ use App\Core\Auth;
 use App\Core\Config;
 use App\Core\Database;
 use App\Core\RateLimiter;
+use App\Core\RbacGuard;
 
 $fileId = filter_input(INPUT_GET, 'file_id', FILTER_VALIDATE_INT);
 $token = $_GET['token'] ?? null;
@@ -41,16 +42,17 @@ $authorized = false;
 
 if ($file['access_type'] === 'public') {
     $authorized = true;
-} elseif (Auth::check()) {
-    // Любой авторизованный пользователь панели управления имеет доступ.
+} elseif (Auth::check() && RbacGuard::can('manage_protected_files')) {
+    // Защищённые файлы без bearer-токена доступны только администратору.
     $authorized = true;
 } elseif (is_string($token) && $token !== '' && !empty($file['access_token']) && hash_equals((string) $file['access_token'], $token)) {
     $authorized = true;
 }
 
 if (!$authorized) {
-    http_response_code(403);
-    exit('Доступ запрещён.');
+    // Не подтверждаем существование защищённого файла по последовательному id.
+    http_response_code(404);
+    exit('Файл не найден.');
 }
 
 $basePath = $file['access_type'] === 'protected'

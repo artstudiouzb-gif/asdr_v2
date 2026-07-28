@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 
 use App\Core\Auth;
 use App\Core\Database;
+use App\Core\RbacGuard;
 use App\Core\View;
 
 final class DashboardController
@@ -13,6 +14,8 @@ final class DashboardController
     public function index(): void
     {
         Auth::requireLogin();
+        $canManageSensitive = RbacGuard::can('manage_submissions')
+            && RbacGuard::can('manage_audit');
 
         $counts = [
             'news' => (int) Database::pdo()->query('SELECT COUNT(*) FROM news WHERE deleted_at IS NULL')->fetchColumn(),
@@ -21,12 +24,16 @@ final class DashboardController
             'projects' => (int) Database::pdo()->query('SELECT COUNT(*) FROM projects WHERE deleted_at IS NULL')->fetchColumn(),
             'team' => (int) Database::pdo()->query('SELECT COUNT(*) FROM team_members')->fetchColumn(),
             'forms' => (int) Database::pdo()->query('SELECT COUNT(*) FROM forms')->fetchColumn(),
-            'submissions_unread' => (int) Database::pdo()->query('SELECT COUNT(*) FROM form_submissions WHERE is_read = 0')->fetchColumn(),
+            'submissions_unread' => $canManageSensitive
+                ? (int) Database::pdo()->query('SELECT COUNT(*) FROM form_submissions WHERE is_read = 0')->fetchColumn()
+                : 0,
             'files' => (int) Database::pdo()->query('SELECT COUNT(*) FROM files')->fetchColumn(),
         ];
 
         // Получаем последние 5 действий из журнала аудита
-        $recentLogs = \App\Models\AuditLog::search([], 1, 5)['items'];
+        $recentLogs = $canManageSensitive
+            ? \App\Models\AuditLog::search([], 1, 5)['items']
+            : [];
 
         // «Продолжить работу»: последние редактированные новости и страницы
         $recentItems = [];
@@ -43,15 +50,17 @@ final class DashboardController
 
         // Последние поступившие заявки с сайта
         $recentSubmissions = [];
-        try {
-            $recentSubmissions = Database::pdo()->query(
-                'SELECT fs.id, fs.form_id, fs.data_json, fs.is_read, fs.created_at, f.title AS form_title
-                 FROM form_submissions fs
-                 LEFT JOIN forms f ON fs.form_id = f.id
-                 ORDER BY fs.id DESC LIMIT 4'
-            )->fetchAll();
-        } catch (\Throwable $e) {
-            // Игнорируем если таблица пуста
+        if ($canManageSensitive) {
+            try {
+                $recentSubmissions = Database::pdo()->query(
+                    'SELECT fs.id, fs.form_id, fs.data_json, fs.is_read, fs.created_at, f.title AS form_title
+                     FROM form_submissions fs
+                     LEFT JOIN forms f ON fs.form_id = f.id
+                     ORDER BY fs.id DESC LIMIT 4'
+                )->fetchAll();
+            } catch (\Throwable $e) {
+                // Игнорируем если таблица пуста
+            }
         }
 
         // Статистика здоровья и конфигурации системы
@@ -68,15 +77,17 @@ final class DashboardController
             $date = date('Y-m-d', strtotime("-$i days"));
             $chartData[$date] = 0;
         }
-        try {
-            $stmt = Database::pdo()->query('SELECT DATE(created_at) as d, COUNT(*) as c FROM form_submissions WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) GROUP BY DATE(created_at)');
-            foreach ($stmt->fetchAll() as $row) {
-                if (isset($chartData[$row['d']])) {
-                    $chartData[$row['d']] = (int) $row['c'];
+        if ($canManageSensitive) {
+            try {
+                $stmt = Database::pdo()->query('SELECT DATE(created_at) as d, COUNT(*) as c FROM form_submissions WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) GROUP BY DATE(created_at)');
+                foreach ($stmt->fetchAll() as $row) {
+                    if (isset($chartData[$row['d']])) {
+                        $chartData[$row['d']] = (int) $row['c'];
+                    }
                 }
+            } catch (\Throwable $e) {
+                // Игнорируем ошибки при отсутствии таблицы
             }
-        } catch (\Throwable $e) {
-            // Игнорируем ошибки при отсутствии таблицы
         }
 
         // Статистика внутренних поисковых запросов
@@ -94,7 +105,8 @@ final class DashboardController
             'systemHealth' => $systemHealth,
             'popularSearches' => $popularSearches,
             'topReadNews' => $topReadNews,
-            'chartData' => $chartData
+            'chartData' => $chartData,
+            'canManageSensitive' => $canManageSensitive,
         ]);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use App\Core\Logger;
 
 /**
  * Журнал действий администраторов: кто, что (метод + путь), когда и с какого
@@ -65,7 +66,7 @@ final class AuditLog
             ]);
             self::maybePurge();
         } catch (\Throwable $e) {
-            error_log('Audit log failed: ' . $e->getMessage());
+            error_log(Logger::redact('Audit log failed: ' . $e->getMessage()));
         }
     }
 
@@ -91,7 +92,7 @@ final class AuditLog
             ]);
             self::maybePurge();
         } catch (\Throwable $e) {
-            error_log('Audit auth log failed: ' . $e->getMessage());
+            error_log(Logger::redact('Audit auth log failed: ' . $e->getMessage()));
         }
     }
 

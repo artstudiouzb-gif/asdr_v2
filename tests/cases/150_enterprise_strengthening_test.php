@@ -107,17 +107,11 @@ test('Усиление системы: AI Assistant metadata extraction', functi
 });
 
 test('Усиление системы: RBAC права доступа', function (): void {
-    $_SERVER['HTTP_USER_AGENT'] = 'asdr-test';
-    $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-    $_SESSION = [
-        'user_id' => 1,
-        'username' => 'admin',
-        'role' => 'superadmin',
-        'fingerprint' => hash('sha256', 'asdr-test|127.0'),
-    ];
-
-    assert_true(RbacGuard::can('manage_users'), 'Супер-админ может управлять пользователями');
-    assert_true(RbacGuard::can('publish_content'), 'Супер-админ может публиковать контент');
+    assert_true(RbacGuard::roleCan('admin', 'manage_users'), 'Администратор может управлять пользователями');
+    assert_true(RbacGuard::roleCan('admin', 'publish_content'), 'Администратор может публиковать контент');
+    assert_false(RbacGuard::roleCan('editor', 'manage_users'), 'Редактор не управляет пользователями');
+    assert_false(RbacGuard::roleCan('editor', 'manage_submissions'), 'Редактор не читает персональные данные заявок');
+    assert_true(RbacGuard::roleCan('editor', 'publish_content'), 'Редактор может публиковать контент');
 });
 
 test('Усиление системы: S3 Backup Adapter проверка инициализации', function (): void {
