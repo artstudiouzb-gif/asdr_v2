@@ -1,0 +1,220 @@
+[
+    {
+        "type": "hero",
+        "title": "",
+        "data": {
+            "title": "Строим будущее для процветающего Узбекистана",
+            "eyebrow": "Стратегия. Реформы. Развитие.",
+            "subtitle": "Разрабатываем и реализуем стратегические инициативы, направленные на устойчивый экономический рост, повышение качества жизни и развитие человеческого капитала.",
+            "image": "\/uploads\/public\/demo-agency-hero.jpg",
+            "video_url": "",
+            "button_text": "Об агентстве",
+            "button_url": "\/o-nas",
+            "button2_text": "Стратегия-2030",
+            "button2_url": "\/strategiya-2030",
+            "video_button_text": "Смотреть видео",
+            "video_button_url": "\/press-centr",
+            "bg_type": "image",
+            "youtube_url": "",
+            "overlay_color": "#0b1a30",
+            "overlay_opacity": 55,
+            "text_position": "left",
+            "panel_enabled": false,
+            "panel_color": "#0b1a30",
+            "panel_opacity": 35
+        }
+    },
+    {
+        "type": "counters",
+        "title": "",
+        "data": {
+            "title": "",
+            "items": [
+                {
+                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><path d=\"M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6\"\/><\/svg>",
+                    "value": "100",
+                    "suffix": "+",
+                    "label": "стратегических инициатив реализовано"
+                },
+                {
+                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><circle cx=\"9\" cy=\"8\" r=\"3\"\/><path d=\"M3 20c0-3 3-5 6-5s6 2 6 5\"\/><path d=\"M17 8a3 3 0 0 1 0 6\"\/><\/svg>",
+                    "value": "20",
+                    "suffix": "+",
+                    "label": "проектов в ключевых отраслях"
+                },
+                {
+                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><path d=\"M4 20V10M10 20V4M16 20v-8M22 20H2\"\/><\/svg>",
+                    "value": "30",
+                    "suffix": "+",
+                    "label": "аналитических исследований ежегодно"
+                },
+                {
+                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><circle cx=\"12\" cy=\"12\" r=\"9\"\/><path d=\"M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18\"\/><\/svg>",
+                    "value": "10",
+                    "suffix": "+",
+                    "label": "международных партнёров и организаций"
+                }
+            ]
+        }
+    },
+    {
+        "type": "cards_grid",
+        "title": "",
+        "data": {
+            "title": "Приоритетные направления",
+            "all_text": "Все направления",
+            "all_url": "\/napravleniya",
+            "columns": 5,
+            "items": [
+                {
+                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><path d=\"M3 17l6-6 4 4 8-8M21 7v6M15 7h6\"\/><\/svg>",
+                    "title": "Устойчивый экономический рост",
+                    "text": "Создание благоприятных условий для бизнеса и инвестиций",
+                    "url": "\/ustoychivyy-ekonomicheskiy-rost"
+                },
+                {
+                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><circle cx=\"9\" cy=\"8\" r=\"3\"\/><path d=\"M3 20c0-3 3-5 6-5s6 2 6 5\"\/><path d=\"M17 8a3 3 0 0 1 0 6\"\/><\/svg>",
+                    "title": "Человеческий капитал",
+                    "text": "Развитие образования, здравоохранения и навыков будущего",
+                    "url": "\/analitika"
+                },
+                {
+                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><path d=\"M3 21h18M5 21V8l7-5 7 5v13\"\/><\/svg>",
+                    "title": "Эффективное государство",
+                    "text": "Совершенствование институтов и повышение качества управления",
+                    "url": "\/strategiya-2030"
+                },
+                {
+                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><path d=\"M12 3c-4 4-4 10 0 18 4-8 4-14 0-18zM12 8c-3 0-5 2-5 5\"\/><\/svg>",
+                    "title": "«Зелёная» экономика",
+                    "text": "Переход к низкоуглеродной модели и рациональное использование ресурсов",
+                    "url": "\/projects\/zelenaya-energetika"
+                },
+                {
+                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><circle cx=\"6\" cy=\"12\" r=\"2\"\/><circle cx=\"18\" cy=\"6\" r=\"2\"\/><circle cx=\"18\" cy=\"18\" r=\"2\"\/><path d=\"M8 11l8-4M8 13l8 4\"\/><\/svg>",
+                    "title": "Региональное развитие",
+                    "text": "Сбалансированное развитие регионов и улучшение инфраструктуры",
+                    "url": "\/projects\/transportnaya-infrastruktura"
+                }
+            ]
+        }
+    },
+    {
+        "type": "image_cards",
+        "title": "",
+        "data": {
+            "title": "Проекты и инициативы",
+            "all_text": "Все проекты",
+            "all_url": "\/projects",
+            "source": "projects",
+            "limit": 6,
+            "items": [
+                {
+                    "image": "\/uploads\/public\/hero-demo.jpg",
+                    "title": "Привлечение инвестиций в приоритетные отрасли",
+                    "url": "\/projects\/investicii-prioritetnye-otrasli"
+                },
+                {
+                    "image": "\/uploads\/public\/hero-demo-g2.jpg",
+                    "title": "Развитие транспортной и логистической инфраструктуры",
+                    "url": "\/projects\/transportnaya-infrastruktura"
+                },
+                {
+                    "image": "\/uploads\/public\/hero-demo-g3.jpg",
+                    "title": "Цифровая трансформация и развитие инноваций",
+                    "url": "\/projects\/cifrovaya-transformaciya"
+                },
+                {
+                    "image": "\/uploads\/public\/hero-demo-g4.jpg",
+                    "title": "Увеличение доли возобновляемых источников энергии",
+                    "url": "\/projects\/zelenaya-energetika"
+                },
+                {
+                    "image": "\/uploads\/public\/hero-demo.jpg",
+                    "title": "Поддержка малого и среднего бизнеса",
+                    "url": "\/ustoychivyy-ekonomicheskiy-rost"
+                },
+                {
+                    "image": "\/uploads\/public\/hero-demo-g2.jpg",
+                    "title": "Развитие человеческого капитала и образования",
+                    "url": "\/analitika"
+                }
+            ]
+        }
+    },
+    {
+        "type": "news_feature",
+        "title": "",
+        "data": {
+            "title": "Новости и аналитика",
+            "all_text": "Все новости",
+            "all_url": "\/news",
+            "limit": 6
+        }
+    },
+    {
+        "type": "media_gallery",
+        "title": "",
+        "data": {
+            "title": "Медиа",
+            "all_text": "Все материалы",
+            "all_url": "\/albums",
+            "source": "media",
+            "limit": 8,
+            "items": [
+                {
+                    "image": "\/uploads\/public\/hero-demo.jpg",
+                    "title": "Узбекистан–2030: ключевые цели",
+                    "meta": "02:35",
+                    "text": "20 мая 2026",
+                    "kind": "video",
+                    "url": "\/news"
+                },
+                {
+                    "image": "\/uploads\/public\/hero-demo-g2.jpg",
+                    "title": "Переход к «зелёной» экономике",
+                    "meta": "03:12",
+                    "text": "18 мая 2026",
+                    "kind": "video",
+                    "url": "\/news"
+                },
+                {
+                    "image": "\/uploads\/public\/hero-demo-g3.jpg",
+                    "title": "Развитие инфраструктуры",
+                    "meta": "02:08",
+                    "text": "15 мая 2026",
+                    "kind": "video",
+                    "url": "\/news"
+                },
+                {
+                    "image": "\/uploads\/public\/hero-demo-g4.jpg",
+                    "title": "Заседание по Стратегии-2030",
+                    "meta": "",
+                    "text": "20 мая 2026",
+                    "kind": "photo",
+                    "url": "\/albums"
+                },
+                {
+                    "image": "\/uploads\/public\/hero-demo.jpg",
+                    "title": "Международный форум",
+                    "meta": "",
+                    "text": "18 мая 2026",
+                    "kind": "photo",
+                    "url": "\/albums"
+                },
+                {
+                    "image": "\/uploads\/public\/hero-demo-g2.jpg",
+                    "title": "Церемония подписания",
+                    "meta": "",
+                    "text": "12 мая 2026",
+                    "kind": "photo",
+                    "url": "\/albums"
+                }
+            ],
+            "_bg": "light",
+            "_fullwidth": true,
+            "_pad_top": "large",
+            "_pad_bottom": "large"
+        }
+    }
+]

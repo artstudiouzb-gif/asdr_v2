@@ -1,0 +1,20 @@
+# Автоматическая нормализация окончаний строк
+* text=auto
+
+# Служебные папки CI/CD и тестов (исключаются при создании ZIP-архива релиза через git archive)
+/.github export-ignore
+/.claude export-ignore
+/.agents export-ignore
+/.antigravity export-ignore
+/.gemini export-ignore
+/tests export-ignore
+/playwright-report export-ignore
+/test-results export-ignore
+
+# Инструменты разработки и конфигурации линтеров
+/phpunit.xml export-ignore
+/phpstan.neon export-ignore
+/playwright.config.js export-ignore
+
+# Документация
+/README.md export-ignore

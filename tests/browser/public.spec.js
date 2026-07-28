@@ -1,0 +1,73 @@
+const { test, expect } = require('@playwright/test');
+
+test('public home renders without horizontal overflow', async ({ page }) => {
+    const response = await page.goto('/');
+    expect(response).not.toBeNull();
+    expect(response.status()).toBe(200);
+    await expect(page.locator('main#main-content')).toBeVisible();
+
+    const overflow = await page.evaluate(() => ({
+        viewport: document.documentElement.clientWidth,
+        content: document.documentElement.scrollWidth
+    }));
+    expect(overflow.content).toBeLessThanOrEqual(overflow.viewport + 15);
+});
+
+test('quick search traps keyboard focus and restores the trigger', async ({ page }) => {
+    const response = await page.goto('/');
+    expect(response).not.toBeNull();
+    expect(response.status()).toBe(200);
+
+    await page.keyboard.press('Tab');
+    const trigger = page.locator('.skip-link');
+    await expect(trigger).toBeFocused();
+
+    await page.keyboard.press('Control+KeyK');
+    const modal = page.locator('#site-quick-search-modal');
+    await expect(modal).toBeVisible();
+    await expect(page.locator('#site-quick-search-input')).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(modal).toBeHidden();
+    await expect(trigger).toBeFocused();
+});
+
+test('Uzbek home uses localized title and secure language URL', async ({ page }) => {
+    const response = await page.goto('/uz');
+    expect(response).not.toBeNull();
+    expect(response.status()).toBe(200);
+    await expect(page).toHaveTitle(/Bosh sahifa/);
+    expect(page.url()).toMatch(/^http:\/\/127\.0\.0\.1:8080\/uz\/?$/);
+});
+
+test('selected language persists until the visitor explicitly changes it', async ({ page }) => {
+    await page.goto('/uz');
+    await page.goto('/projects');
+    expect(page.url()).toMatch(/^http:\/\/127\.0\.0\.1:8080\/uz\/projects\/?$/);
+
+    let cookies = await page.context().cookies();
+    expect(cookies.find((cookie) => cookie.name === 'site_lang')?.value).toBe('uz');
+
+    await page.goto('/projects?_lang=ru');
+    expect(page.url()).toMatch(/^http:\/\/127\.0\.0\.1:8080\/projects\/?$/);
+    cookies = await page.context().cookies();
+    expect(cookies.find((cookie) => cookie.name === 'site_lang')?.value).toBe('ru');
+
+    await page.goto('/uz/projects');
+    expect(page.url()).toMatch(/^http:\/\/127\.0\.0\.1:8080\/projects\/?$/);
+    cookies = await page.context().cookies();
+    expect(cookies.find((cookie) => cookie.name === 'site_lang')?.value).toBe('ru');
+});
+
+test('health endpoint and admin login are reachable', async ({ page, request }) => {
+    const health = await request.get('/health');
+    expect(health.status()).toBe(200);
+    const healthPayload = await health.json();
+    expect(healthPayload.status).toMatch(/^(ok|degraded)$/);
+
+    const response = await page.goto('/admin/login');
+    expect(response).not.toBeNull();
+    expect(response.status()).toBe(200);
+    await expect(page.locator('input[name="username"]')).toBeVisible();
+    await expect(page.locator('input[name="password"]')).toBeVisible();
+});

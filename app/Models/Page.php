@@ -1,0 +1,663 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use App\Core\Database;
+use App\Core\ConcurrencyException;
+
+final class Page
+{
+    /** Кэш slug главной страницы на время запроса (см. homeSlug()). */
+    private static ?string $homeSlugCache = null;
+
+    public static function all(): array
+    {
+        $stmt = Database::pdo()->query('SELECT * FROM pages WHERE deleted_at IS NULL ORDER BY created_at DESC');
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Список с фильтрами админки (задача 91). deleted_at IS NULL всегда.
+     * $lang (не-дефолтный) ограничивает страницами, имеющими перевод.
+     */
+    public static function filter(?string $status = null, ?string $lang = null): array
+    {
+        $sql = 'SELECT p.* FROM pages p';
+        $params = [];
+        if ($lang !== null && $lang !== '' && $lang !== Language::defaultCode()) {
+            $sql .= ' INNER JOIN page_translations pt ON pt.page_id = p.id AND pt.lang = :lang';
+            $params[':lang'] = $lang;
+        }
+        $sql .= ' WHERE p.deleted_at IS NULL';
+        if ($status === 'published' || $status === 'draft') {
+            $sql .= ' AND p.status = :status';
+            $params[':status'] = $status;
+        }
+        $sql .= ' ORDER BY p.created_at DESC';
+
+        $stmt = Database::pdo()->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll();
+    }
+
+    public static function adminList(array $filters): array
+    {
+        [$from, $params] = self::adminListFrom($filters);
+        $orders = [
+            'newest' => 'p.created_at DESC, p.id DESC',
+            'oldest' => 'p.created_at ASC, p.id ASC',
+            'title_asc' => 'p.title ASC, p.id ASC',
+            'title_desc' => 'p.title DESC, p.id DESC',
+        ];
+        $order = $orders[$filters['sort'] ?? 'newest'] ?? $orders['newest'];
+        $stmt = Database::pdo()->prepare("SELECT p.* {$from} ORDER BY {$order} LIMIT :limit OFFSET :offset");
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':limit', (int) $filters['per_page'], \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int) $filters['offset'], \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public static function adminCount(array $filters): int
+    {
+        [$from, $params] = self::adminListFrom($filters);
+        $stmt = Database::pdo()->prepare("SELECT COUNT(*) {$from}");
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /** @return array{0:string,1:array<string,string>} */
+    private static function adminListFrom(array $filters): array
+    {
+        $from = 'FROM pages p';
+        $params = [];
+        $where = ['p.deleted_at IS NULL'];
+
+        $langFilter = (string) ($filters['lang'] ?? '');
+        if ($langFilter !== '' && $langFilter !== 'all') {
+            $where[] = 'p.lang = :lang';
+            $params[':lang'] = $langFilter;
+        }
+
+        if (in_array($filters['status'] ?? '', ['published', 'draft'], true)) {
+            $where[] = 'p.status = :status';
+            $params[':status'] = (string) $filters['status'];
+        }
+        if (($filters['q'] ?? '') !== '') {
+            $where[] = '(p.title LIKE :q_title OR p.slug LIKE :q_slug'
+                . ' OR EXISTS (SELECT 1 FROM page_translations pqs WHERE pqs.page_id = p.id AND pqs.title LIKE :q_translation))';
+            $like = '%' . (string) $filters['q'] . '%';
+            $params[':q_title'] = $like;
+            $params[':q_slug'] = $like;
+            $params[':q_translation'] = $like;
+        }
+
+        $from .= ' WHERE ' . implode(' AND ', $where);
+
+        return [$from, $params];
+    }
+
+    public static function setStatus(int $id, string $status): void
+    {
+        if (!in_array($status, ['draft', 'published'], true)) {
+            return;
+        }
+        $stmt = Database::pdo()->prepare('UPDATE pages SET status = :s WHERE id = :id AND deleted_at IS NULL');
+        $stmt->execute([':s' => $status, ':id' => $id]);
+    }
+
+    /** Полная копия страницы с блоками и переводами (черновик, slug -copy). */
+    public static function duplicate(int $id): ?int
+    {
+        $page = self::findById($id);
+        if (!$page) {
+            return null;
+        }
+
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+        try {
+            $newSlug = \App\Core\Duplicator::uniqueCopySlug(
+                (string) $page['slug'],
+                static fn (string $s) => self::slugExists($s)
+            );
+            $newId = \App\Core\Duplicator::copyRow('pages', $page, [
+                'slug' => $newSlug,
+                'status' => 'draft',
+                'is_home' => 0,
+                'deleted_at' => null,
+            ]);
+            \App\Core\Duplicator::copyChildren('blocks', 'page_id', $id, $newId);
+            \App\Core\Duplicator::copyChildren('page_translations', 'page_id', $id, $newId);
+
+            $pdo->commit();
+
+            return $newId;
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    public static function trashed(): array
+    {
+        $stmt = Database::pdo()->query('SELECT * FROM pages WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC');
+
+        return $stmt->fetchAll();
+    }
+
+    public static function restore(int $id): void
+    {
+        $stmt = Database::pdo()->prepare('UPDATE pages SET deleted_at = NULL WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+    }
+
+    public static function forceDelete(int $id): void
+    {
+        $stmt = Database::pdo()->prepare('DELETE FROM pages WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        ContentRevision::deleteForEntity('page', $id);
+    }
+
+    public static function findBySlug(string $slug, ?string $lang = null): ?array
+    {
+        $lang = $lang ?? Language::defaultCode();
+
+        // 1. Ищем точное совпадение по slug и запрашиваемому языку
+        $stmtExact = Database::pdo()->prepare(
+            "SELECT * FROM pages WHERE slug = :slug AND lang = :lang AND status = 'published' AND deleted_at IS NULL LIMIT 1"
+        );
+        $stmtExact->execute([':slug' => $slug, ':lang' => $lang]);
+        $exactRow = $stmtExact->fetch();
+        if ($exactRow) {
+            return $exactRow;
+        }
+
+        // 2. Ищем любой первичный материал по slug
+        $stmt = Database::pdo()->prepare(
+            "SELECT * FROM pages WHERE slug = :slug AND status = 'published' AND deleted_at IS NULL LIMIT 1"
+        );
+        $stmt->execute([':slug' => $slug]);
+        $row = $stmt->fetch();
+
+        if (!$row) {
+            return null;
+        }
+
+        // Если у страницы есть связанный независимый пост на запрашиваемом языке
+        $groupId = (int) ($row['translation_group_id'] ?? $row['id']);
+        $stmtTrans = Database::pdo()->prepare(
+            "SELECT * FROM pages WHERE (translation_group_id = :gid OR id = :gid2) AND lang = :lang AND status = 'published' AND deleted_at IS NULL LIMIT 1"
+        );
+        $stmtTrans->execute([':gid' => $groupId, ':gid2' => $groupId, ':lang' => $lang]);
+        $transRow = $stmtTrans->fetch();
+        if ($transRow) {
+            return $transRow;
+        }
+
+        return self::localize($row, $lang);
+    }
+
+    /**
+     * Находит именно опубликованную запись страницы нужного языка для меню.
+     *
+     * В отличие от findBySlug() этот метод не возвращает локализованный
+     * контент основной записи как fallback: меню языка должно вести только
+     * на самостоятельную опубликованную версию этого языка.
+     */
+    public static function findPublishedMenuTarget(string $slug, string $lang): ?array
+    {
+        $slug = ltrim(trim($slug), '/');
+        if ($slug === '' || !Language::isActive($lang)) {
+            return null;
+        }
+
+        $pdo = Database::pdo();
+        $stmtExact = $pdo->prepare(
+            "SELECT * FROM pages
+             WHERE slug = :slug AND lang = :lang
+               AND status = 'published' AND deleted_at IS NULL
+             LIMIT 1"
+        );
+        $stmtExact->execute([':slug' => $slug, ':lang' => $lang]);
+        $exact = $stmtExact->fetch();
+        if ($exact) {
+            return $exact;
+        }
+
+        $stmtSource = $pdo->prepare(
+            "SELECT * FROM pages
+             WHERE slug = :slug AND status = 'published' AND deleted_at IS NULL
+             ORDER BY (lang = :default_lang) DESC, id ASC
+             LIMIT 1"
+        );
+        $stmtSource->execute([':slug' => $slug, ':default_lang' => Language::defaultCode()]);
+        $source = $stmtSource->fetch();
+        if (!$source) {
+            return null;
+        }
+
+        $groupId = (int) ($source['translation_group_id'] ?: $source['id']);
+        $stmtTarget = $pdo->prepare(
+            "SELECT * FROM pages
+             WHERE (id = :group_id OR translation_group_id = :translation_group_id)
+               AND lang = :lang AND status = 'published' AND deleted_at IS NULL
+             ORDER BY id ASC
+             LIMIT 1"
+        );
+        $stmtTarget->execute([
+            ':group_id' => $groupId,
+            ':translation_group_id' => $groupId,
+            ':lang' => $lang,
+        ]);
+        $target = $stmtTarget->fetch();
+
+        return $target ?: null;
+    }
+
+    public static function findHome(?string $lang = null): ?array
+    {
+        $targetLang = $lang ?? \App\Core\Locale::current();
+        $pdo = Database::pdo();
+
+        // 1. Ищем опубликованную главную страницу именно для запрошенного языка
+        $stmtLang = $pdo->prepare(
+            "SELECT p.*,
+                    (SELECT COUNT(*) FROM blocks b WHERE b.page_id = p.id AND b.is_active = 1) AS blocks_count
+             FROM pages p
+             WHERE (p.is_home = 1 OR p.slug = 'home')
+               AND p.lang = :lang
+               AND p.status = 'published' AND p.deleted_at IS NULL
+             ORDER BY p.is_home DESC, (blocks_count > 0) DESC, p.id DESC
+             LIMIT 1"
+        );
+        $stmtLang->execute([':lang' => $targetLang]);
+        $row = $stmtLang->fetch();
+        if ($row) {
+            return $row;
+        }
+
+        // 2. Ищем главную страницу основного языка (RU)
+        $defaultLang = Language::defaultCode();
+        $stmtDefault = $pdo->prepare(
+            "SELECT p.*,
+                    (SELECT COUNT(*) FROM blocks b WHERE b.page_id = p.id AND b.is_active = 1) AS blocks_count
+             FROM pages p
+             WHERE (p.is_home = 1 OR p.slug = 'home')
+               AND p.status = 'published' AND p.deleted_at IS NULL
+             ORDER BY (p.lang = :default_lang) DESC, p.is_home DESC, (blocks_count > 0) DESC, p.id DESC
+             LIMIT 1"
+        );
+        $stmtDefault->execute([':default_lang' => $defaultLang]);
+        $row = $stmtDefault->fetch();
+
+        if (!$row) {
+            $stmtFallback = Database::pdo()->query(
+                "SELECT * FROM pages WHERE status = 'published' AND deleted_at IS NULL ORDER BY id ASC LIMIT 1"
+            );
+            $row = $stmtFallback->fetch();
+            if (!$row) {
+                return null;
+            }
+        }
+
+        if ((string) ($row['lang'] ?? $defaultLang) === $targetLang) {
+            return $row;
+        }
+
+        // 3. Локализация главной страницы для запрошенного языка через группу переводов
+        $groupId = (int) ($row['translation_group_id'] ?? $row['id']);
+        $stmtTrans = Database::pdo()->prepare(
+            "SELECT * FROM pages WHERE (translation_group_id = :gid OR id = :gid2) AND lang = :lang AND status = 'published' AND deleted_at IS NULL LIMIT 1"
+        );
+        $stmtTrans->execute([':gid' => $groupId, ':gid2' => $groupId, ':lang' => $targetLang]);
+        $transRow = $stmtTrans->fetch();
+        if ($transRow) {
+            $transRow['is_home'] = 1;
+            return $transRow;
+        }
+
+        return self::localize($row, $targetLang);
+    }
+
+    /**
+     * Точно определяет, является ли страница Главной страницей для указанного языка (или для своего языка).
+     */
+    public static function isHomePage(array|int $page, ?string $lang = null): bool
+    {
+        if (is_int($page)) {
+            $pageRow = self::findById($page);
+            if (!$pageRow) {
+                return false;
+            }
+            $page = $pageRow;
+        }
+
+        $targetLang = $lang ?? (string) ($page['lang'] ?? Language::defaultCode());
+        if ($targetLang !== (string) ($page['lang'] ?? Language::defaultCode())) {
+            return false;
+        }
+
+        if (!empty($page['is_home']) || (string) ($page['slug'] ?? '') === 'home') {
+            return true;
+        }
+
+        if (!isset($page['id'])) {
+            return false;
+        }
+
+        $homePage = self::findHome($targetLang);
+        if (!$homePage) {
+            return false;
+        }
+
+        return (int) $page['id'] === (int) $homePage['id'];
+    }
+
+    /**
+     * Slug опубликованной главной страницы (кэш на запрос). Нужен, чтобы ссылки
+     * на главную вели на «/», а не на «/{slug}». Пусто — главная не задана.
+     */
+    public static function homeSlug(): string
+    {
+        if (self::$homeSlugCache === null) {
+            $slug = Database::pdo()->query(
+                "SELECT slug FROM pages WHERE is_home = 1 AND status = 'published' AND deleted_at IS NULL LIMIT 1"
+            )->fetchColumn();
+            self::$homeSlugCache = $slug !== false ? (string) $slug : '';
+        }
+
+        return self::$homeSlugCache;
+    }
+
+    /**
+     * Накладывает перевод (title/meta) на базовую строку страницы.
+     */
+    public static function localize(array $row, string $lang): array
+    {
+        if ($lang === Language::defaultCode()) {
+            return $row;
+        }
+
+        $translation = PageTranslation::find((int) $row['id'], $lang);
+        if ($translation === null) {
+            return $row;
+        }
+
+        if (isset($translation['title']) && trim((string) $translation['title']) !== '') {
+            $row['title'] = $translation['title'];
+        }
+        $row['meta_title'] = $translation['meta_title'] ?? null;
+        $row['meta_description'] = $translation['meta_description'] ?? null;
+        if (isset($translation['lead']) && trim((string) $translation['lead']) !== '') {
+            $row['lead'] = $translation['lead'];
+        }
+
+        return $row;
+    }
+
+    public static function findById(int $id): ?array
+    {
+        $stmt = Database::pdo()->prepare('SELECT * FROM pages WHERE id = :id LIMIT 1');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+
+        return $row ?: null;
+    }
+
+    /**
+     * Языки контента для набора страниц в виде списка кодов ['ru', 'uz'] (или с картой целевых постов при $withTargets = true).
+     *
+     * @param array<int|string> $ids
+     * @return array<int, list<string>>|array<int, array<string, int>>
+     */
+    public static function availableLangsForIds(array $ids, bool $withTargets = false): array
+    {
+        $targets = self::availableLangTargetsForIds($ids);
+        if ($withTargets) {
+            return $targets;
+        }
+
+        $map = [];
+        foreach ($targets as $id => $langs) {
+            $map[$id] = array_values(array_unique(array_keys($langs)));
+        }
+
+        return $map;
+    }
+
+    /**
+     * Карта языков контента с ID целевых записей для кликабельных баджей ['ru' => 15, 'uz' => 98].
+     *
+     * @param array<int|string> $ids
+     * @return array<int, array<string, int>>
+     */
+    public static function availableLangTargetsForIds(array $ids): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        $default = Language::defaultCode();
+        $map = [];
+        foreach ($ids as $id) {
+            $map[$id] = [];
+        }
+        if ($ids === []) {
+            return $map;
+        }
+
+        $in = implode(',', array_fill(0, count($ids), '?'));
+        $pdo = Database::pdo();
+
+        try {
+            $stmtGroup = $pdo->prepare(
+                "SELECT p1.id AS ref_id, p2.lang, p2.id AS target_id, p2.title
+                 FROM pages p1
+                 JOIN pages p2 ON (p2.translation_group_id = COALESCE(NULLIF(p1.translation_group_id, 0), p1.id)
+                                OR p2.id = COALESCE(NULLIF(p1.translation_group_id, 0), p1.id)
+                                OR (p1.translation_group_id > 0 AND p2.translation_group_id = p1.translation_group_id))
+                 WHERE p1.id IN ($in) AND p2.deleted_at IS NULL"
+            );
+            $stmtGroup->execute($ids);
+            foreach ($stmtGroup->fetchAll() as $row) {
+                $refId = (int) $row['ref_id'];
+                $lang = (string) ($row['lang'] ?? $default);
+                $targetId = (int) $row['target_id'];
+                $title = trim((string) ($row['title'] ?? ''));
+                if ($title !== '' && isset($map[$refId])) {
+                    $map[$refId][$lang] = $targetId;
+                }
+            }
+        } catch (\Throwable) {}
+
+        try {
+            $stmtLegacy = $pdo->prepare(
+                "SELECT page_id, lang FROM page_translations
+                 WHERE page_id IN ($in) AND TRIM(COALESCE(title, '')) <> ''
+                 UNION
+                 SELECT DISTINCT page_id, lang FROM blocks WHERE page_id IN ($in)"
+            );
+            $stmtLegacy->execute(array_merge($ids, $ids));
+            foreach ($stmtLegacy->fetchAll() as $row) {
+                $id = (int) $row['page_id'];
+                $lang = (string) $row['lang'];
+                if (isset($map[$id]) && !isset($map[$id][$lang])) {
+                    $map[$id][$lang] = $id;
+                }
+            }
+        } catch (\Throwable) {}
+
+        foreach ($ids as $id) {
+            if (empty($map[$id])) {
+                $map[$id] = [$default => $id];
+            }
+        }
+
+        return $map;
+    }
+
+    public static function availableLangs(int $id): array
+    {
+        $langs = [Language::defaultCode()];
+        $pdo = Database::pdo();
+
+        $stmtPage = $pdo->prepare(
+            'SELECT COALESCE(NULLIF(translation_group_id, 0), id) FROM pages WHERE id = :id LIMIT 1'
+        );
+        $stmtPage->execute([':id' => $id]);
+        $groupId = (int) ($stmtPage->fetchColumn() ?: $id);
+
+        // Независимые языковые версии считаются доступными на публичном сайте
+        // только после публикации.
+        $stmtGroup = $pdo->prepare(
+            "SELECT DISTINCT lang FROM pages
+             WHERE (id = :group_id OR translation_group_id = :translation_group_id)
+               AND status = 'published' AND deleted_at IS NULL"
+        );
+        $stmtGroup->execute([
+            ':group_id' => $groupId,
+            ':translation_group_id' => $groupId,
+        ]);
+        foreach ($stmtGroup->fetchAll(\PDO::FETCH_COLUMN) as $lang) {
+            if (is_string($lang) && $lang !== '') {
+                $langs[] = $lang;
+            }
+        }
+
+        // Совместимость со старой схемой переводов и языковыми стеками блоков.
+        $stmt = $pdo->prepare(
+            "SELECT lang FROM page_translations WHERE page_id = :id AND TRIM(COALESCE(title, '')) <> ''
+             UNION SELECT DISTINCT lang FROM blocks WHERE page_id = :id2"
+        );
+        $stmt->execute([':id' => $groupId, ':id2' => $groupId]);
+        foreach ($stmt->fetchAll(\PDO::FETCH_COLUMN) as $lang) {
+            if (is_string($lang) && $lang !== '') {
+                $langs[] = $lang;
+            }
+        }
+
+        return array_values(array_unique($langs));
+    }
+
+    public static function create(array $data): int
+    {
+        return Database::transaction(static function (\PDO $pdo) use ($data): int {
+            if (!empty($data['is_home'])) {
+                $pdo->exec('UPDATE pages SET is_home = 0');
+            }
+
+            $lang = (string) ($data['lang'] ?? Language::defaultCode());
+
+            $stmt = $pdo->prepare(
+                'INSERT INTO pages (title, slug, meta_title, meta_description, `lead`, status, is_home, layout_type, hide_chrome, transparent_header, lang, translation_group_id, created_at)
+                 VALUES (:title, :slug, :meta_title, :meta_description, :lead, :status, :is_home, :layout_type, :hide_chrome, :transparent_header, :lang, NULL, NOW())'
+            );
+            $stmt->execute([
+                ':title' => $data['title'],
+                ':slug' => $data['slug'],
+                ':meta_title' => $data['meta_title'] ?? null,
+                ':meta_description' => $data['meta_description'] ?? null,
+                ':lead' => $data['lead'] ?? null,
+                ':status' => $data['status'] ?? 'draft',
+                ':is_home' => !empty($data['is_home']) ? 1 : 0,
+                ':layout_type' => $data['layout_type'] ?? 'no_sidebar',
+                ':hide_chrome' => !empty($data['hide_chrome']) ? 1 : 0,
+                ':transparent_header' => !empty($data['transparent_header']) ? 1 : 0,
+                ':lang' => $lang,
+            ]);
+            $id = (int) $pdo->lastInsertId();
+
+            $pdo->prepare('UPDATE pages SET translation_group_id = id WHERE id = :id AND (translation_group_id IS NULL OR translation_group_id = 0)')
+                ->execute([':id' => $id]);
+
+            return $id;
+        });
+    }
+
+    public static function update(int $id, array $data, ?int $expectedLockVersion = null): void
+    {
+        Database::transaction(static function (\PDO $pdo) use ($id, $data, $expectedLockVersion): void {
+            if (!empty($data['is_home'])) {
+                $pdo->exec('UPDATE pages SET is_home = 0');
+            }
+
+            $stmt = $pdo->prepare(
+                'UPDATE pages SET title = :title, slug = :slug, meta_title = :meta_title,
+                 meta_description = :meta_description, `lead` = :lead, status = :status, is_home = :is_home,
+                 layout_type = :layout_type, hide_chrome = :hide_chrome,
+                 transparent_header = :transparent_header' . (isset($data['lang']) ? ', lang = :lang' : '') . ', lock_version = lock_version + 1
+                 WHERE id = :id' . ($expectedLockVersion !== null ? ' AND lock_version = :expected_lock_version' : '')
+            );
+            $params = [
+                ':title' => $data['title'],
+                ':slug' => $data['slug'],
+                ':meta_title' => $data['meta_title'] ?? null,
+                ':meta_description' => $data['meta_description'] ?? null,
+                ':lead' => $data['lead'] ?? null,
+                ':status' => $data['status'],
+                ':is_home' => !empty($data['is_home']) ? 1 : 0,
+                ':layout_type' => $data['layout_type'] ?? 'no_sidebar',
+                ':hide_chrome' => !empty($data['hide_chrome']) ? 1 : 0,
+                ':transparent_header' => !empty($data['transparent_header']) ? 1 : 0,
+                ':id' => $id,
+            ];
+            if (isset($data['lang'])) {
+                $params[':lang'] = (string) $data['lang'];
+            }
+            if ($expectedLockVersion !== null) {
+                $params[':expected_lock_version'] = $expectedLockVersion;
+            }
+            $stmt->execute($params);
+            if ($expectedLockVersion !== null && $stmt->rowCount() !== 1) {
+                throw new ConcurrencyException('Страница была изменена другим пользователем.');
+            }
+        });
+    }
+
+    public static function delete(int $id): void
+    {
+        // Мягкое удаление: страница отправляется в корзину (блоки сохраняются).
+        $stmt = Database::pdo()->prepare('UPDATE pages SET deleted_at = NOW(), is_home = 0 WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+    }
+
+    public static function slugExists(string $slug, ?int $excludeId = null, ?string $lang = null): bool
+    {
+        $lang = $lang ?? Language::defaultCode();
+        $sql = 'SELECT COUNT(*) FROM pages WHERE slug = :slug AND lang = :lang AND deleted_at IS NULL';
+        $params = [':slug' => $slug, ':lang' => $lang];
+
+        if ($excludeId !== null) {
+            $sql .= ' AND id <> :id';
+            $params[':id'] = $excludeId;
+        }
+
+        $stmt = Database::pdo()->prepare($sql);
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    public static function langCounts(): array
+    {
+        $pdo = Database::pdo();
+        $totalAll = (int) $pdo->query("SELECT COUNT(*) FROM pages WHERE deleted_at IS NULL")->fetchColumn();
+
+        $stmt = $pdo->query("SELECT lang, COUNT(*) as cnt FROM pages WHERE deleted_at IS NULL GROUP BY lang");
+        $counts = ['all' => $totalAll];
+        foreach (Language::active() as $l) {
+            $counts[$l['code']] = 0;
+        }
+        foreach ($stmt->fetchAll() as $row) {
+            $counts[(string) $row['lang']] = (int) $row['cnt'];
+        }
+
+        return $counts;
+    }
+}

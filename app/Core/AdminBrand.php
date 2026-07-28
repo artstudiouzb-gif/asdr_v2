@@ -1,0 +1,118 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Core;
+
+use App\Models\Setting;
+
+/**
+ * White-label панели управления: название, логотип и акцентный цвет админки
+ * задаются в «Настройках» и применяются в топбаре, <title> и на страницах
+ * входа. Пустые значения означают стандартный брендинг ArtStudio.
+ */
+final class AdminBrand
+{
+    public const DEFAULT_NAME = 'ASDR';
+    public const DEFAULT_ACCENT = '#2271b1';
+
+    /** Название панели для топбара и <title>. */
+    public static function name(): string
+    {
+        $name = trim(self::setting('admin_brand_name'));
+        return $name !== '' ? $name : self::DEFAULT_NAME;
+    }
+
+    /** URL логотипа панели; null — рисуем буквенный бейдж. */
+    public static function logo(): ?string
+    {
+        $logo = trim(self::setting('admin_brand_logo'));
+        return $logo !== '' ? $logo : null;
+    }
+
+    /** Первая буква названия для бейджа-заглушки. */
+    public static function letter(): string
+    {
+        return mb_strtoupper(mb_substr(self::name(), 0, 1));
+    }
+
+    /** Акцентный цвет панели (#rrggbb). */
+    public static function accent(): string
+    {
+        return SettingsValidator::hexColor(self::setting('admin_brand_accent'), self::DEFAULT_ACCENT);
+    }
+
+    /**
+     * Инлайновый <style> с переопределением CSS-переменных админки.
+     * При стандартном акценте возвращает пустую строку — работает admin.css.
+     */
+    public static function styleTag(): string
+    {
+        $accent = self::accent();
+        if ($accent === self::DEFAULT_ACCENT) {
+            return '';
+        }
+
+        return '<style>:root{'
+            . '--admin-accent:' . $accent . ';'
+            . '--admin-accent-hover:' . self::mix($accent, [0, 0, 0], 0.14) . ';'
+            . '--admin-accent-soft:' . self::mix($accent, [255, 255, 255], 0.90) . ';'
+            . '--admin-accent-2:' . self::mix($accent, [255, 255, 255], 0.12) . ';'
+            . '}</style>';
+    }
+
+    /**
+     * HTML-теги фавиконки для страниц админ-панели и авторизации.
+     */
+    public static function faviconHtml(): string
+    {
+        $html = "<link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/apple-touch-icon.png\">\n"
+              . "<link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/favicon-32x32.png\">\n"
+              . "<link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/favicon-16x16.png\">\n";
+
+        $favicon = trim(self::setting('favicon_url'));
+        if ($favicon !== '') {
+            $type = str_ends_with(strtolower($favicon), '.svg') ? 'image/svg+xml' : 'image/png';
+            $html .= '<link rel="icon" type="' . $type . '" href="' . htmlspecialchars($favicon, ENT_QUOTES) . "\">\n";
+        }
+
+        return $html;
+    }
+
+
+    /** Разметка бренда для топбара и карточек входа. */
+    public static function badgeHtml(string $imgClass = 'admin-topbar__logoimg', string $letterClass = 'admin-topbar__logo'): string
+    {
+        $logo = self::logo();
+        if ($logo !== null) {
+            return '<img src="' . htmlspecialchars($logo, ENT_QUOTES) . '" alt="" class="' . $imgClass . '">';
+        }
+        return '<span class="' . $letterClass . '">' . htmlspecialchars(self::letter(), ENT_QUOTES) . '</span>';
+    }
+
+    /** Смешивание цвета с RGB-точкой (weight — доля второй точки). */
+    private static function mix(string $hex, array $with, float $weight): string
+    {
+        $r = (int) hexdec(substr($hex, 1, 2));
+        $g = (int) hexdec(substr($hex, 3, 2));
+        $b = (int) hexdec(substr($hex, 5, 2));
+        $mix = static fn (int $a, int $b2): string => str_pad(
+            dechex(max(0, min(255, (int) round($a * (1 - $weight) + $b2 * $weight)))),
+            2,
+            '0',
+            STR_PAD_LEFT
+        );
+
+        return '#' . $mix($r, (int) $with[0]) . $mix($g, (int) $with[1]) . $mix($b, (int) $with[2]);
+    }
+
+    /** Настройка с защитой от отсутствующей БД (страницы входа при сбое). */
+    private static function setting(string $key): string
+    {
+        try {
+            return Setting::get($key);
+        } catch (\Throwable) {
+            return '';
+        }
+    }
+}

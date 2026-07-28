@@ -1,0 +1,636 @@
+<?php
+
+use App\Core\AssetCollector;
+use App\Core\DateFormatter;
+use App\Core\Csrf;
+use App\Core\Locale;
+use App\Models\News;
+use App\Models\Setting;
+
+/** @var array $news */
+/** @var array $gallery */
+/** @var array $related */
+/** @var ?array $prevNews */
+/** @var ?array $nextNews */
+$gallery = $gallery ?? [];
+$related = $related ?? [];
+$prevNews = $prevNews ?? null;
+$nextNews = $nextNews ?? null;
+$lang = Locale::current();
+
+$metaTitle = $news['meta_title'] ?: $news['title'];
+$metaDescription = $news['meta_description'] ?: ($news['excerpt'] ?? '');
+$ogType = 'article';
+$ogImage = News::getCoverImage($news) ?? '';
+
+AssetCollector::requireJs('news');
+
+require __DIR__ . '/_header.php';
+
+// Крошки: у премиум-макета рендерятся внутри hero (см. ниже), у остальных —
+// обычной полосой перед статьёй.
+$crumbs = [
+    ['label' => t('Главная'), 'url' => Locale::url('/')],
+    ['label' => t('Новости'), 'url' => Locale::url('news')],
+    ['label' => (string) $news['title']],
+];
+
+$date = (string) ($news['published_at'] ?? '');
+// Дата — единым числовым форматом на всех языках: 19.07.2026.
+$dateLong = $date !== '' ? DateFormatter::short($date) : '';
+// Время чтения: ~180 слов в минуту по тексту статьи (юникод-подсчёт слов).
+preg_match_all('/[\p{L}\p{N}]+/u', strip_tags((string) ($news['content'] ?? '')), $m);
+$readMin = max(1, (int) ceil(count($m[0]) / 180));
+$views = (int) ($news['views'] ?? 0);
+
+// Слайды: обложка + галерея (уникальные пути).
+$slides = [];
+$cover = trim((string) ($news['image'] ?? ''));
+if ($cover !== '') {
+    $slides[] = ['path' => $cover, 'alt' => (string) $news['title']];
+}
+foreach ($gallery as $img) {
+    $p = trim((string) $img['path']);
+    if ($p !== '' && $p !== $cover) {
+        $slides[] = ['path' => $p, 'alt' => (string) ($img['alt_text'] ?? '')];
+    }
+}
+
+$keyPoints = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) ($news['key_points'] ?? '')) ?: [])));
+$eventMeta = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) ($news['event_meta'] ?? '')) ?: [])));
+$docs = json_decode((string) ($news['docs'] ?? '[]'), true);
+$docs = is_array($docs) ? $docs : [];
+$videoUrl = trim((string) ($news['video_url'] ?? ''));
+$audioUrl = trim((string) ($news['audio_url'] ?? ''));
+$audioTitle = trim((string) ($news['audio_title'] ?? ''));
+$legacyPressUrl = trim((string) ($news['press_release_url'] ?? ''));
+if ($legacyPressUrl !== '') {
+    $alreadyInDocs = false;
+    foreach ($docs as $doc) {
+        if (is_array($doc) && trim((string) ($doc['url'] ?? '')) === $legacyPressUrl) {
+            $alreadyInDocs = true;
+            break;
+        }
+    }
+    if (!$alreadyInDocs) {
+        // Старые записи показываем в едином разделе документов до их сохранения
+        // в обновлённой форме админки.
+        $docs[] = ['title' => t('Пресс-релиз'), 'meta' => '', 'url' => $legacyPressUrl];
+    }
+}
+
+$base = \App\Core\AppUrl::base();
+$pageUrl = $base . Locale::url('news/' . $news['slug'], $lang);
+$shareTitle = rawurlencode((string) $news['title']);
+$shareUrl = rawurlencode($pageUrl);
+
+// Общие мини-иконки (событие: календарь, место, участники, теги — по кругу).
+$eventIcons = [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 10h16"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><path d="M12 21s-6-5.2-6-10a6 6 0 1 1 12 0c0 4.8-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><circle cx="9" cy="8" r="3"/><path d="M3 19c0-3 2.7-4.5 6-4.5s6 1.5 6 4.5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.7c2.6.3 5 1.7 5 4.3"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><path d="M4 11V5a1 1 0 0 1 1-1h6l9 9-7 7-9-9z"/><circle cx="8.5" cy="8.5" r="1.3"/></svg>',
+];
+$pointIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="22" height="22"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.3 2.3 4.7-4.8"/></svg>';
+$docIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>';
+$dlIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M12 4v11m0 0 4-4m-4 4-4-4"/><path d="M5 19h14"/></svg>';
+?>
+<?php
+// Тип отображения (выбирается в админке): standard — только обложка,
+// gallery — слайдер с миниатюрами, video — модуль YouTube с play,
+// side_image — компактное фото сбоку от заголовка.
+$layout = News::normalizeLayout($news['layout_type'] ?? 'standard');
+$videoId = \App\Core\Video::youtubeId($news['video_url'] ?? null);
+if ($layout === 'video' && $videoId === null) {
+    $layout = 'standard'; // без валидного YouTube-URL показываем обложку
+}
+
+// Умный макет: если загружено больше 1 фото, автоматически включается интерактивный слайдер галереи!
+if ($layout === 'standard' || $layout === 'gallery') {
+    if (count($slides) > 1) {
+        $layout = 'gallery';
+        $heroSlides = $slides;
+    } else {
+        $layout = 'standard';
+        $heroSlides = array_slice($slides, 0, 1);
+    }
+} else {
+    $heroSlides = array_slice($slides, 0, 1);
+}
+
+$isPremium = $layout === 'premium';
+$hasMedia = !$isPremium && ($layout === 'video' || !empty($heroSlides));
+$hasLeft = !empty($keyPoints);
+
+// Оглавление статьи (премиум): собираем из <h2>/<h3> контента и проставляем id.
+$toc = [];
+$contentHtml = \App\Core\SocialEmbed::transform((string) $news['content']);
+if ($isPremium) {
+    $n = 0;
+    $contentHtml = (string) preg_replace_callback(
+        '/<h([23])([^>]*)>(.*?)<\/h\1>/su',
+        static function (array $m) use (&$toc, &$n): string {
+            $n++;
+            $id = 'sec-' . $n;
+            $toc[] = ['id' => $id, 'label' => trim(strip_tags($m[3]))];
+            return '<h' . $m[1] . $m[2] . ' id="' . $id . '">' . $m[3] . '</h' . $m[1] . '>';
+        },
+        $contentHtml
+    ) ?: $contentHtml;
+}
+
+$shareBlock = static function (string $extraClass) use ($shareUrl, $shareTitle, $pageUrl): void { ?>
+            <div class="newsdetail-share no-print<?= $extraClass ?>">
+                <h2 class="newsdetail-share__title"><?= htmlspecialchars(t('Поделиться'), ENT_QUOTES) ?></h2>
+                <div class="newsdetail-share__row">
+                    <a class="newsdetail-share__btn" href="https://t.me/share/url?url=<?= $shareUrl ?>&text=<?= $shareTitle ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в Telegram'), ENT_QUOTES) ?>"><svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17"><path d="M21.9 4.6 19 19.3c-.2 1-.8 1.2-1.6.8l-4.5-3.3-2.2 2.1c-.2.2-.4.4-.9.4l.3-4.6 8.4-7.6c.4-.3-.1-.5-.6-.2L7.6 13.4l-4.5-1.4c-1-.3-1-1 .2-1.4l17.3-6.7c.8-.3 1.5.2 1.3 1.3z"/></svg></a>
+                    <a class="newsdetail-share__btn" href="https://www.facebook.com/sharer/sharer.php?u=<?= $shareUrl ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в Facebook'), ENT_QUOTES) ?>"><svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17"><path d="M14 8h3V5h-3c-2.2 0-4 1.8-4 4v2H7v3h3v7h3v-7h3l1-3h-4V9c0-.6.4-1 1-1z"/></svg></a>
+                    <a class="newsdetail-share__btn" href="https://x.com/intent/post?url=<?= $shareUrl ?>&text=<?= $shareTitle ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в X'), ENT_QUOTES) ?>"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.7 3H21l-7.1 8.2L22 21h-6.6l-5.1-6.1L4.5 21H1.2l7.6-8.7L1 3h6.8l4.6 5.6L17.7 3zm-1.2 16h1.8L6.9 4.9H5L16.5 19z"/></svg></a>
+                    <a class="newsdetail-share__btn" href="https://www.linkedin.com/sharing/share-offsite/?url=<?= $shareUrl ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в LinkedIn'), ENT_QUOTES) ?>"><svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17"><path d="M6.5 8.8H3.6V21h2.9V8.8zM5 7.4a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4zM21 14.2c0-3.2-1.7-4.7-4-4.7-1.8 0-2.6 1-3.1 1.7V8.8H11V21h2.9v-6.5c0-1.7.8-2.7 2.2-2.7 1.3 0 2 .9 2 2.7V21H21v-6.8z"/></svg></a>
+                    <button type="button" class="newsdetail-share__btn" data-copy-link="<?= htmlspecialchars($pageUrl, ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Скопировать ссылку'), ENT_QUOTES) ?>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 1 0-6.4-6.4L11.6 6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 1 0 6.4 6.4l1.6-1.6"/></svg></button>
+                    <button type="button" class="newsdetail-share__btn" data-print-page aria-label="<?= htmlspecialchars(t('Распечатать'), ENT_QUOTES) ?>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2m-12 0v4h8v-4m-8 0h8"/></svg></button>
+                </div>
+            </div>
+<?php };
+
+if (!$isPremium) {
+    require __DIR__ . '/_crumbs.php';
+}
+
+$sidebar = $sidebar ?? null;
+$hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '';
+?>
+<article class="newsdetail<?= $isPremium ? ' newsdetail--premium' : '' ?>">
+    <?php if ($isPremium): ?>
+    <div class="newsdetail-phero"<?= $cover !== '' ? ' style="background-image:url(\'' . htmlspecialchars($cover, ENT_QUOTES) . '\')"' : '' ?>>
+        <span class="newsdetail-phero__overlay"></span>
+        <div class="newsdetail-phero__body">
+            <?php require __DIR__ . '/_crumbs.php'; ?>
+            <?php if (!empty($news['badge'])): ?>
+                <span class="newsdetail__badge newsdetail__badge--onDark"><?= htmlspecialchars((string) $news['badge'], ENT_QUOTES) ?></span>
+            <?php endif; ?>
+            <div class="newsdetail__meta newsdetail__meta--onDark">
+                <?php if ($dateLong !== ''): ?>
+                    <span class="newsdetail__meta-item"><?= $eventIcons[0] ?><time datetime="<?= htmlspecialchars(substr($date, 0, 10), ENT_QUOTES) ?>"><?= htmlspecialchars($dateLong, ENT_QUOTES) ?></time></span>
+                <?php endif; ?>
+                <span class="newsdetail__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><?= $readMin ?> <?= htmlspecialchars(t('мин.'), ENT_QUOTES) ?></span>
+                <?php if ($views > 0): ?>
+                    <span class="newsdetail__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><?= htmlspecialchars(trim(number_format($views, 0, '', ' ') . ' ' . t('просмотров')), ENT_QUOTES) ?></span>
+                <?php endif; ?>
+            </div>
+            <h1 class="newsdetail-phero__title"><?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?></h1>
+            <?php if (!empty($news['excerpt'])): ?>
+                <p class="newsdetail-phero__lead"><?= htmlspecialchars((string) $news['excerpt'], ENT_QUOTES) ?></p>
+            <?php endif; ?>
+            <?php if (!empty($news['source_note'])): ?>
+                <p class="newsdetail__source newsdetail__source--onDark"><?= htmlspecialchars((string) $news['source_note'], ENT_QUOTES) ?></p>
+            <?php endif; ?>
+            <?php if ($videoUrl !== ''): ?>
+                <a class="newsdetail-phero__video" href="<?= htmlspecialchars($videoUrl, ENT_QUOTES) ?>" target="_blank" rel="noopener">
+                    <span class="newsdetail-phero__play"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+                    <?= htmlspecialchars(t('Смотреть видео'), ENT_QUOTES) ?>
+                </a>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php else: ?>
+    <div class="newsdetail-head<?= ($hasMedia && !$hasSidebar) ? '' : ' newsdetail-head--full' ?><?= $hasMedia && $layout === 'side_image' && !$hasSidebar ? ' newsdetail-head--side' : '' ?>">
+        <div class="newsdetail-head__info">
+            <?php if (!empty($news['badge'])): ?>
+                <span class="newsdetail__badge"><?= htmlspecialchars((string) $news['badge'], ENT_QUOTES) ?></span>
+            <?php endif; ?>
+            <div class="newsdetail__meta">
+                <?php if ($dateLong !== ''): ?>
+                    <span class="newsdetail__meta-item"><?= $eventIcons[0] ?><time datetime="<?= htmlspecialchars(substr($date, 0, 10), ENT_QUOTES) ?>"><?= htmlspecialchars($dateLong, ENT_QUOTES) ?></time></span>
+                <?php endif; ?>
+                <span class="newsdetail__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><?= $readMin ?> <?= htmlspecialchars(t('мин.'), ENT_QUOTES) ?></span>
+                <?php if ($views > 0): ?>
+                    <span class="newsdetail__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><?= htmlspecialchars(trim(number_format($views, 0, '', ' ') . ' ' . t('просмотров')), ENT_QUOTES) ?></span>
+                <?php endif; ?>
+                <button type="button" class="newsdetail__reader-btn" data-reader-mode-toggle aria-label="<?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?>" title="<?= htmlspecialchars(t('Открыть режим чтения'), ENT_QUOTES) ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    <span><?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?></span>
+                </button>
+            </div>
+            <h1 class="newsdetail__title"><?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?></h1>
+            <?php if (!empty($news['excerpt'])): ?>
+                <p class="newsdetail__lead"><?= htmlspecialchars((string) $news['excerpt'], ENT_QUOTES) ?></p>
+            <?php endif; ?>
+            <?php if (!empty($news['source_note'])): ?>
+                <p class="newsdetail__source"><?= htmlspecialchars((string) $news['source_note'], ENT_QUOTES) ?></p>
+            <?php endif; ?>
+            <?php if ($videoUrl !== ''): ?>
+                <div class="newsdetail__actions">
+                    <a class="newsdetail__btn newsdetail__btn--primary" href="<?= htmlspecialchars($videoUrl, ENT_QUOTES) ?>" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5.5v13l11-6.5z"/></svg>
+                        <?= htmlspecialchars(t('Смотреть видео'), ENT_QUOTES) ?>
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+        <?php if ($layout === 'video'): ?>
+            <?php
+            // Модуль видео: обложка YouTube, плеер грузится только по клику (news.js).
+            $thumb = \App\Core\Video::youtubeThumbnail($videoId);
+            $fallback = 'https://i.ytimg.com/vi/' . $videoId . '/hqdefault.jpg';
+            $embed = \App\Core\Video::youtubeEmbed($videoId) . '&autoplay=1';
+            ?>
+            <div class="newsdetail-media">
+                <div class="news-video newsdetail-video skeleton" data-youtube="<?= htmlspecialchars($videoId, ENT_QUOTES) ?>" data-embed="<?= htmlspecialchars($embed, ENT_QUOTES) ?>" data-replay-label="<?= htmlspecialchars(t('Посмотреть ещё раз'), ENT_QUOTES) ?>">
+                    <img class="news-video__thumb" src="<?= htmlspecialchars($cover !== '' ? $cover : $thumb, ENT_QUOTES) ?>" data-fallback="<?= htmlspecialchars($fallback, ENT_QUOTES) ?>" alt="<?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?>" loading="eager" decoding="async">
+                    <button type="button" class="news-video__play" aria-label="<?= htmlspecialchars(t('Смотреть видео'), ENT_QUOTES) ?>"></button>
+                </div>
+            </div>
+        <?php elseif (!empty($heroSlides)): ?>
+            <div class="newsdetail-gallery" data-ndgallery>
+                <div class="newsdetail-gallery__main">
+                    <?php foreach ($heroSlides as $i => $s): ?>
+                        <?= \App\Core\Media::picture((string) $s['path'], (string) $s['alt'], null, null, 'newsdetail-gallery__slide' . ($i === 0 ? ' is-active' : ''), $i !== 0, '(max-width: 900px) 100vw, 70vw') ?>
+                    <?php endforeach; ?>
+                    <?php if (count($heroSlides) > 1): ?>
+                        <button type="button" class="newsdetail-gallery__nav newsdetail-gallery__nav--prev" data-ndg-prev aria-label="<?= htmlspecialchars(t('Предыдущее фото'), ENT_QUOTES) ?>">‹</button>
+                        <button type="button" class="newsdetail-gallery__nav newsdetail-gallery__nav--next" data-ndg-next aria-label="<?= htmlspecialchars(t('Следующее фото'), ENT_QUOTES) ?>">›</button>
+                        <span class="newsdetail-gallery__counter"><span data-ndg-current>1</span> <?= htmlspecialchars(t('из'), ENT_QUOTES) ?> <?= count($heroSlides) ?></span>
+                    <?php endif; ?>
+                </div>
+                <?php if (count($heroSlides) > 1): ?>
+                    <div class="newsdetail-gallery__thumbs">
+                        <?php foreach ($heroSlides as $i => $s): ?>
+                            <button type="button" class="newsdetail-gallery__thumb<?= $i === 0 ? ' is-active' : '' ?>" data-ndg-thumb="<?= $i ?>" aria-label="<?= htmlspecialchars(t('Фото'), ENT_QUOTES) ?> <?= $i + 1 ?>">
+                                <img src="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" alt="<?= htmlspecialchars((string) ($s['alt'] ?? ''), ENT_QUOTES) ?>" loading="lazy">
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <div class="newsdetail-body<?= ($hasLeft && !$hasSidebar) ? '' : ' newsdetail-body--no-left' ?>">
+        <?php if ($hasLeft && !$hasSidebar): ?>
+        <aside class="newsdetail-side">
+            <div class="newsdetail-card">
+                <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Ключевые тезисы'), ENT_QUOTES) ?></h2>
+                <ul class="newsdetail-points">
+                    <?php foreach ($keyPoints as $point): ?>
+                        <li class="newsdetail-points__item"><span class="newsdetail-points__icon"><?= $pointIcon ?></span><?= htmlspecialchars($point, ENT_QUOTES) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+            <?php $shareBlock(''); ?>
+        </aside>
+        <?php endif; ?>
+
+        <div class="newsdetail-article">
+            <?php if ($audioUrl !== ''): ?>
+                <div class="news-audio-player" data-audio-player>
+                    <div class="news-audio-player__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                            <path d="M9 18V5l12-2v13"></path>
+                            <circle cx="6" cy="18" r="3"></circle>
+                            <circle cx="18" cy="16" r="3"></circle>
+                        </svg>
+                    </div>
+                    <div class="news-audio-player__info">
+                        <span class="news-audio-player__badge"><?= htmlspecialchars(t('Аудиозапись'), ENT_QUOTES) ?></span>
+                        <span class="news-audio-player__title"><?= htmlspecialchars($audioTitle !== '' ? $audioTitle : t('Аудиоверсия новости'), ENT_QUOTES) ?></span>
+                    </div>
+                    <audio class="news-audio-player__element" src="<?= htmlspecialchars($audioUrl, ENT_QUOTES) ?>" controls preload="metadata"></audio>
+                </div>
+            <?php endif; ?>
+            <?php if ($hasLeft && $hasSidebar): ?>
+                <div class="newsdetail-card newsdetail-card--thesis-inline" style="margin-bottom: 30px; background: color-mix(in srgb, var(--gov-teal) 4%, var(--gov-surface)); border-left: 4px solid var(--gov-teal); border-top: 1px solid var(--gov-border); border-right: 1px solid var(--gov-border); border-bottom: 1px solid var(--gov-border); border-radius: 0 12px 12px 0; padding: 22px;">
+                    <h2 class="newsdetail-card__title" style="color: var(--gov-teal-text); font-weight: 700; margin: 0 0 14px; font-size: 1.05rem;"><?= htmlspecialchars(t('Ключевые тезисы'), ENT_QUOTES) ?></h2>
+                    <ul class="newsdetail-points" style="gap: 12px;">
+                        <?php foreach ($keyPoints as $point): ?>
+                            <li class="newsdetail-points__item" style="font-size: 0.92rem; line-height: 1.55;"><span class="newsdetail-points__icon" style="color: var(--gov-teal);"><?= $pointIcon ?></span><?= htmlspecialchars($point, ENT_QUOTES) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <div class="newsdetail-article__content rich-content"><?= $contentHtml ?></div>
+
+            <?php // Хронология событий (Таймлайн) ?>
+            <?php if (!empty($news['timeline_json'])): ?>
+                <?php $tEvents = json_decode((string) $news['timeline_json'], true); ?>
+                <?php if (is_array($tEvents) && $tEvents !== []): ?>
+                    <div class="newsdetail-timeline">
+                        <h3 class="newsdetail-timeline__title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <?= htmlspecialchars(t('Хронология событий'), ENT_QUOTES) ?>
+                        </h3>
+                        <div class="newsdetail-timeline__list">
+                            <?php foreach ($tEvents as $evt): ?>
+                                <div class="newsdetail-timeline__item">
+                                    <div class="newsdetail-timeline__dot"></div>
+                                    <div class="newsdetail-timeline__content">
+                                        <span class="newsdetail-timeline__date"><?= htmlspecialchars((string) ($evt['date'] ?? ''), ENT_QUOTES) ?></span>
+                                        <h4 class="newsdetail-timeline__heading"><?= htmlspecialchars((string) ($evt['title'] ?? ''), ENT_QUOTES) ?></h4>
+                                        <?php if (!empty($evt['text'])): ?>
+                                            <p class="newsdetail-timeline__desc"><?= htmlspecialchars((string) $evt['text'], ENT_QUOTES) ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            <?php endif; ?>
+
+            <?php $hashtagsClean = \App\Models\News::cleanHashtags($news['hashtags'] ?? null); ?>
+            <?php if ($hashtagsClean !== null): ?>
+                <div class="newsdetail-hashtags">
+                    <?php foreach (explode(' ', $hashtagsClean) as $tag): ?>
+                        <a href="<?= Locale::url('news') ?>?q=<?= rawurlencode($tag) ?>" class="newsdetail-tag"><?= htmlspecialchars($tag, ENT_QUOTES) ?></a>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+            <?php if (!$hasLeft || $hasSidebar): ?>
+                <?php $shareBlock(' newsdetail-share--inline'); ?>
+            <?php endif; ?>
+        </div>
+
+        <aside class="newsdetail-side newsdetail-side--right">
+            <?php // Интерактивный опрос (часть новости, отображается как карточка в сайдбаре) ?>
+            <?php
+                $poll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $news['id']) : null;
+                if (!empty($news['poll_question'])) {
+                    $lPollOptions = [];
+                    if (!empty($news['poll_options_json'])) {
+                        $lPollOptions = is_array($news['poll_options_json']) ? $news['poll_options_json'] : (json_decode((string) $news['poll_options_json'], true) ?: []);
+                    }
+                    if ($poll === null) {
+                        $poll = [
+                            'id' => (int) $news['id'],
+                            'question' => (string) $news['poll_question'],
+                            'options' => $lPollOptions,
+                        ];
+                    } else {
+                        $poll['question'] = (string) $news['poll_question'];
+                        if (!empty($lPollOptions)) {
+                            $poll['options'] = $lPollOptions;
+                        }
+                    }
+                }
+            ?>
+            <?php if ($poll !== null && !empty($poll['question'])): ?>
+                <?php
+                    $pollCsrfToken = Csrf::token();
+                    $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                    $voterHash = hash('sha256', $ip . '|' . session_id());
+                    $hasVoted = \App\Models\NewsPoll::hasVoted((int) $poll['id'], $voterHash);
+                    $results = \App\Models\NewsPoll::getResults((int) $poll['id'], $poll['options']);
+                ?>
+                <div class="newsdetail-card news-poll-card" data-poll-id="<?= (int) $poll['id'] ?>">
+                    <div class="news-poll-card__header">
+                        <span class="news-poll-card__badge"><?= htmlspecialchars(t('Опрос читателей'), ENT_QUOTES) ?></span>
+                        <h3 class="news-poll-card__question" style="font-size:1rem;margin-top:6px;"><?= htmlspecialchars((string) $poll['question'], ENT_QUOTES) ?></h3>
+                    </div>
+                    <div class="news-poll-card__body">
+                        <?php if ($hasVoted): ?>
+                            <div class="news-poll-card__results">
+                                <?php foreach ($results['items'] as $resItem): ?>
+                                    <div class="news-poll-res-row">
+                                        <div class="news-poll-res-info">
+                                            <span class="news-poll-res-label"><?= htmlspecialchars($resItem['label'], ENT_QUOTES) ?></span>
+                                            <span class="news-poll-res-val"><?= $resItem['percent'] ?>%</span>
+                                        </div>
+                                        <div class="news-poll-bar-track">
+                                            <div class="news-poll-bar-fill" style="width: <?= $resItem['percent'] ?>%;"></div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                                <div class="news-poll-card__meta" style="margin-top:10px;font-size:0.8rem;"><?= htmlspecialchars(t('Всего голосов:'), ENT_QUOTES) ?> <strong><?= $results['total'] ?></strong></div>
+                            </div>
+                        <?php else: ?>
+                            <form class="news-poll-card__form" data-poll-form>
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($pollCsrfToken, ENT_QUOTES) ?>">
+                                <div class="news-poll-options">
+                                    <?php foreach ($poll['options'] as $idx => $optLabel): ?>
+                                        <label class="news-poll-option">
+                                            <input type="radio" name="poll_option" value="<?= $idx ?>" required>
+                                            <span class="news-poll-option__custom"></span>
+                                            <span class="news-poll-option__text"><?= htmlspecialchars($optLabel, ENT_QUOTES) ?></span>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div class="news-poll-card__actions" style="margin-top: 14px;">
+                                    <button type="submit" class="btn btn--primary btn--sm" style="width:100%;justify-content:center;"><?= htmlspecialchars(t('Голосовать'), ENT_QUOTES) ?></button>
+                                </div>
+                            </form>
+                            <div class="news-poll-card__results" style="display:none;" aria-live="polite"></div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <?php if ($isPremium && !empty($slides)): ?>
+                <div class="newsdetail-card">
+                    <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Галерея'), ENT_QUOTES) ?></h2>
+                    <div class="newsdetail-sidegallery">
+                        <?php foreach (array_slice($slides, 0, 4) as $i => $s): ?>
+                            <a class="newsdetail-sidegallery__item<?= $i === 0 ? ' newsdetail-sidegallery__item--wide' : '' ?>" href="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars($s['alt'] !== '' ? $s['alt'] : 'Фото', ENT_QUOTES) ?>"><?= \App\Core\Media::picture((string) $s['path'], (string) $s['alt'], null, null, '', true, '(max-width: 900px) 50vw, 280px') ?></a>
+                        <?php endforeach; ?>
+                    </div>
+                    <a class="newsdetail__btn newsdetail__btn--ghost newsdetail-sidegallery__all" href="<?= htmlspecialchars(Locale::url('news/' . $news['slug'] . '/photos.zip', $lang), ENT_QUOTES) ?>"><?= htmlspecialchars(t('Скачать все фото'), ENT_QUOTES) ?> <?= $dlIcon ?></a>
+                </div>
+            <?php endif; ?>
+            <?php if (!empty($eventMeta)): ?>
+                <div class="newsdetail-card">
+                    <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('О мероприятии'), ENT_QUOTES) ?></h2>
+                    <ul class="newsdetail-event">
+                        <?php foreach ($eventMeta as $i => $line): ?>
+                            <li class="newsdetail-event__item"><span class="newsdetail-event__icon"><?= $eventIcons[$i % count($eventIcons)] ?></span><?= htmlspecialchars($line, ENT_QUOTES) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+            <?php if (!empty($docs)): ?>
+                <div class="newsdetail-card">
+                    <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Документы'), ENT_QUOTES) ?></h2>
+                    <div class="newsdetail-docs">
+                        <?php foreach ($docs as $doc): ?>
+                            <?php $du = trim((string) ($doc['url'] ?? '')); ?>
+                            <a class="newsdetail-doc" href="<?= htmlspecialchars($du, ENT_QUOTES) ?>" <?= $du !== '' ? 'download' : '' ?>>
+                                <span class="newsdetail-doc__icon"><?= $docIcon ?></span>
+                                <span class="newsdetail-doc__body">
+                                    <span class="newsdetail-doc__title"><?= htmlspecialchars((string) ($doc['title'] ?? ''), ENT_QUOTES) ?></span>
+                                    <?php if (!empty($doc['meta'])): ?><span class="newsdetail-doc__meta"><?= htmlspecialchars((string) $doc['meta'], ENT_QUOTES) ?></span><?php endif; ?>
+                                </span>
+                                <span class="newsdetail-doc__dl"><?= $dlIcon ?></span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <?php
+            // Виджеты из «Настройки › Виджеты» (отображаем все активные виджеты системы)
+            $sidebarWidgets = trim(\App\Models\Widget::renderSidebar('right', $lang) . \App\Models\Widget::renderSidebar('left', $lang));
+            if ($sidebarWidgets !== '') {
+                echo $sidebarWidgets;
+            } else {
+            ?>
+                <div class="newsdetail-subscribe no-print" style="margin-top:20px;border-radius:14px;padding:22px;background:#18181b;color:#ffffff;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
+                    <h2 class="newsdetail-subscribe__title" style="color:#ffffff;font-size:1.15rem;font-weight:700;margin-top:0;margin-bottom:8px;line-height:1.35;"><?= htmlspecialchars(t('Agentlik yangiliklariga obuna bo\'ling'), ENT_QUOTES) ?></h2>
+                    <p class="newsdetail-subscribe__text" style="color:#a1a1aa;font-size:0.88rem;margin-top:0;margin-bottom:16px;line-height:1.45;"><?= htmlspecialchars(t('Eng muhim yangiliklar va tahliliy materiallarni pochtangizga oling.'), ENT_QUOTES) ?></p>
+                    <form class="newsdetail-subscribe__form" method="post" action="<?= htmlspecialchars(Locale::url('subscribe', $lang), ENT_QUOTES) ?>">
+                        <?= \App\Core\Csrf::field() ?>
+                        <input type="text" name="website" value="" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off" aria-hidden="true">
+                        <div class="newsdetail-subscribe__row" style="display:flex;gap:8px;align-items:center;">
+                            <label class="visually-hidden" for="nd-sub-email"><?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?></label>
+                            <input id="nd-sub-email" type="email" name="email" required placeholder="<?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?>" autocomplete="email" style="flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#ffffff;padding:10px 14px;border-radius:8px;font-size:0.88rem;">
+                            <button type="submit" aria-label="<?= htmlspecialchars(t('Obuna bo\'lish'), ENT_QUOTES) ?>" style="background:var(--gov-teal,#0d9488);color:#ffffff;border:none;border-radius:8px;padding:10px 16px;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;justify-content:center;">→</button>
+                        </div>
+                        <?php if (Setting::get('form_consent_enabled', '0') === '1'): ?>
+                            <label class="newsdetail-subscribe__consent" style="color:#a1a1aa;font-size:0.78rem;margin-top:10px;display:flex;gap:6px;">
+                                <input type="checkbox" name="consent" value="1" required>
+                                <span><?= htmlspecialchars((string) Setting::get('form_consent_text', t('Я даю согласие на обработку персональных данных')), ENT_QUOTES) ?></span>
+                            </label>
+                        <?php endif; ?>
+                    </form>
+                </div>
+            <?php } ?>
+        </aside>
+    </div>
+
+    <?php
+    // Фотогалерея-лента снизу: показывается для стандартного макета с несколькими фото или для видео.
+    // Если макет новости «gallery» — все фото уже показаны в верхнем слайдере!
+    $showPhotoStrip = !$isPremium && $layout !== 'gallery' && ($layout === 'video' ? !empty($slides) : count($slides) > 1);
+    ?>
+    <?php if ($showPhotoStrip): ?>
+        <section class="newsdetail-photos">
+            <div class="section-head">
+                <h2 class="section-head__title"><?= htmlspecialchars(t('Фотогалерея'), ENT_QUOTES) ?></h2>
+                <a class="newsdetail-dl-btn" href="<?= htmlspecialchars(Locale::url('news/' . $news['slug'] . '/photos.zip', $lang), ENT_QUOTES) ?>" title="<?= htmlspecialchars(t('Скачать все фото архивом ZIP'), ENT_QUOTES) ?>">
+                    <span class="newsdetail-dl-btn__icon"><?= $dlIcon ?></span>
+                    <span class="newsdetail-dl-btn__text"><?= htmlspecialchars(t('Скачать архив ZIP'), ENT_QUOTES) ?></span>
+                </a>
+            </div>
+            <div class="newsdetail-photos__grid">
+                <?php foreach (array_slice($slides, 0, 8) as $s): ?>
+                    <a class="newsdetail-photos__item" href="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars($s['alt'] !== '' ? $s['alt'] : 'Фото', ENT_QUOTES) ?>"><?= \App\Core\Media::picture((string) $s['path'], (string) $s['alt'], null, null, '', true, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw') ?></a>
+                <?php endforeach; ?>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if (!empty($related)): ?>
+        <section class="newsdetail-related no-print">
+            <div class="section-head">
+                <h2 class="section-head__title"><?= htmlspecialchars(t('Другие новости по теме'), ENT_QUOTES) ?></h2>
+                <a class="section-head__all" href="<?= htmlspecialchars(Locale::url('news'), ENT_QUOTES) ?>"><?= htmlspecialchars(t('Все новости'), ENT_QUOTES) ?> →</a>
+            </div>
+            <div class="newsdetail-related__grid">
+                <?php foreach ($related as $item): ?>
+                    <?php $rc = News::getCoverImage($item); ?>
+                    <a class="relnews-card" href="<?= htmlspecialchars(Locale::url('news/' . $item['slug'], $lang), ENT_QUOTES) ?>">
+                        <?php if ($rc !== null): ?>
+                            <?= \App\Core\Media::picture($rc, (string) $item['title'], null, null, 'relnews-card__media', true, '(max-width: 700px) 100vw, 33vw') ?>
+                        <?php else: ?>
+                            <span class="relnews-card__media relnews-card__media--empty" aria-hidden="true"></span>
+                        <?php endif; ?>
+                        <?php if (!empty($item['published_at'])): ?><time class="relnews-card__date"><?= htmlspecialchars(DateFormatter::short((string) $item['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                        <h3 class="relnews-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($prevNews !== null || $nextNews !== null || ($isPremium && !empty($toc))): ?>
+        <nav class="newsdetail-adjacent no-print<?= $isPremium && !empty($toc) ? ' newsdetail-adjacent--with-toc' : '' ?>" aria-label="<?= htmlspecialchars(t('Соседние новости'), ENT_QUOTES) ?>">
+            <?php if ($isPremium && !empty($toc)): ?>
+                <div class="newsdetail-toc">
+                    <span class="newsdetail-toc__title"><?= htmlspecialchars(t('Навигация по статье'), ENT_QUOTES) ?></span>
+                    <ol class="newsdetail-toc__list">
+                        <?php foreach ($toc as $i => $item): ?>
+                            <li><a href="#<?= htmlspecialchars($item['id'], ENT_QUOTES) ?>"><span class="newsdetail-toc__num"><?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span><?= htmlspecialchars($item['label'], ENT_QUOTES) ?></a></li>
+                        <?php endforeach; ?>
+                    </ol>
+                </div>
+            <?php endif; ?>
+            <?php if ($prevNews !== null): ?>
+                <?php $pc = News::getCoverImage($prevNews); ?>
+                <a class="adjnews adjnews--prev" href="<?= htmlspecialchars(Locale::url('news/' . $prevNews['slug'], $lang), ENT_QUOTES) ?>">
+                    <span class="adjnews__arrow">←</span>
+                    <?php if ($pc !== null): ?>
+                        <?= \App\Core\Media::picture($pc, (string) $prevNews['title'], null, null, 'adjnews__media', true, '92px') ?>
+                    <?php else: ?>
+                        <span class="adjnews__media adjnews__media--empty" aria-hidden="true"></span>
+                    <?php endif; ?>
+                    <span class="adjnews__body">
+                        <span class="adjnews__label"><?= htmlspecialchars(t('Предыдущая новость'), ENT_QUOTES) ?></span>
+                        <?php if (!empty($prevNews['published_at'])): ?><time class="adjnews__date"><?= htmlspecialchars(DateFormatter::short((string) $prevNews['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                        <h3 class="adjnews__title"><?= htmlspecialchars((string) $prevNews['title'], ENT_QUOTES) ?></h3>
+                    </span>
+                </a>
+            <?php else: ?><span class="adjnews adjnews--empty"></span><?php endif; ?>
+            <?php if ($nextNews !== null): ?>
+                <?php $nc = News::getCoverImage($nextNews); ?>
+                <a class="adjnews adjnews--next" href="<?= htmlspecialchars(Locale::url('news/' . $nextNews['slug'], $lang), ENT_QUOTES) ?>">
+                    <?php if ($nc !== null): ?>
+                        <?= \App\Core\Media::picture($nc, (string) $nextNews['title'], null, null, 'adjnews__media', true, '92px') ?>
+                    <?php else: ?>
+                        <span class="adjnews__media adjnews__media--empty" aria-hidden="true"></span>
+                    <?php endif; ?>
+                    <span class="adjnews__body">
+                        <span class="adjnews__label"><?= htmlspecialchars(t('Следующая новость'), ENT_QUOTES) ?></span>
+                        <?php if (!empty($nextNews['published_at'])): ?><time class="adjnews__date"><?= htmlspecialchars(DateFormatter::short((string) $nextNews['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                        <h3 class="adjnews__title"><?= htmlspecialchars((string) $nextNews['title'], ENT_QUOTES) ?></h3>
+                    </span>
+                    <span class="adjnews__arrow">→</span>
+                </a>
+            <?php else: ?><span class="adjnews adjnews--empty"></span><?php endif; ?>
+        </nav>
+    <?php endif; ?>
+</article>
+<?php // Schema.org: карточка новости для поисковиков. ?>
+<?= \App\Core\SchemaOrg::render(\App\Core\SchemaOrg::newsArticle(
+    (string) $news['title'],
+    $pageUrl,
+    (string) ($news['published_at'] ?? ''),
+    (string) ($news['excerpt'] ?? ''),
+    $ogImage !== '' ? $base . $ogImage : '',
+    \App\Models\Setting::get('site_name', '')
+)) ?>
+<div class="reader-mode-overlay" id="reader-mode-overlay" hidden role="dialog" aria-modal="true" aria-label="<?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?>">
+    <div class="reader-mode-bar">
+        <div class="reader-mode-bar__progress" id="reader-progress" style="width: 0%;" role="progressbar" aria-label="<?= htmlspecialchars(t('Прогресс чтения'), ENT_QUOTES) ?>" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+        <div class="reader-mode-bar__inner">
+            <div class="reader-mode-bar__title"><?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?></div>
+            <div class="reader-mode-controls">
+                <div class="reader-mode-themes">
+                    <button type="button" class="reader-theme-btn reader-theme-btn--light is-active" data-reader-theme="light" title="<?= htmlspecialchars(t('Светлая тема'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Светлая тема'), ENT_QUOTES) ?>" aria-pressed="true">☀️</button>
+                    <button type="button" class="reader-theme-btn reader-theme-btn--sepia" data-reader-theme="sepia" title="<?= htmlspecialchars(t('Сепия'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Сепия'), ENT_QUOTES) ?>" aria-pressed="false">📜</button>
+                    <button type="button" class="reader-theme-btn reader-theme-btn--dark" data-reader-theme="dark" title="<?= htmlspecialchars(t('Тёмная тема'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Тёмная тема'), ENT_QUOTES) ?>" aria-pressed="false">🌙</button>
+                </div>
+                <div class="reader-mode-fonts">
+                    <button type="button" class="reader-font-btn" data-reader-font="dec" title="<?= htmlspecialchars(t('Уменьшить шрифт'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Уменьшить шрифт'), ENT_QUOTES) ?>">A-</button>
+                    <button type="button" class="reader-font-btn" data-reader-font="inc" title="<?= htmlspecialchars(t('Увеличить шрифт'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Увеличить шрифт'), ENT_QUOTES) ?>">A+</button>
+                </div>
+                <button type="button" class="reader-mode-close" data-reader-close aria-label="<?= htmlspecialchars(t('Закрыть режим чтения'), ENT_QUOTES) ?>">&times;</button>
+            </div>
+        </div>
+    </div>
+    <div class="reader-mode-container">
+        <article class="reader-mode-content">
+            <h1 class="reader-mode__headline"><?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?></h1>
+            <div class="reader-mode__submeta">
+                <?php if ($dateLong !== ''): ?><span><?= htmlspecialchars($dateLong, ENT_QUOTES) ?></span> • <?php endif; ?>
+                <span><?= $readMin ?> <?= htmlspecialchars(t('мин чтения'), ENT_QUOTES) ?></span>
+            </div>
+            <?php if (!empty($news['excerpt'])): ?>
+                <p class="reader-mode__lead"><?= htmlspecialchars((string) $news['excerpt'], ENT_QUOTES) ?></p>
+            <?php endif; ?>
+            <?php if ($cover !== ''): ?>
+                <img class="reader-mode__cover" src="<?= htmlspecialchars($cover, ENT_QUOTES) ?>" alt="<?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?>">
+            <?php endif; ?>
+            <div class="reader-mode__body rich-content">
+                <?= $contentHtml ?>
+            </div>
+        </article>
+    </div>
+</div>
+<?php require __DIR__ . '/_footer.php'; ?>

@@ -1,0 +1,198 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Core;
+
+use PDO;
+
+final class TranslationGroupMigration
+{
+    private static bool $migrated = false;
+
+    public static function run(): void
+    {
+        if (self::$migrated || !Database::isConnected()) {
+            return;
+        }
+
+        TranslationGroupHelper::ensureSchema();
+        $pdo = Database::pdo();
+
+        // 1. Убеждаемся, что все существующие записи имеют lang='ru' и translation_group_id = id
+        $pdo->exec("UPDATE news SET lang = 'ru' WHERE lang IS NULL OR lang = ''");
+        $pdo->exec("UPDATE news SET translation_group_id = id WHERE translation_group_id IS NULL OR translation_group_id = 0");
+
+        $pdo->exec("UPDATE pages SET lang = 'ru' WHERE lang IS NULL OR lang = ''");
+        $pdo->exec("UPDATE pages SET translation_group_id = id WHERE translation_group_id IS NULL OR translation_group_id = 0");
+
+        $pdo->exec("UPDATE projects SET lang = 'ru' WHERE lang IS NULL OR lang = ''");
+        $pdo->exec("UPDATE projects SET translation_group_id = id WHERE translation_group_id IS NULL OR translation_group_id = 0");
+
+        // 2. Миграция news_translations в независимые строки таблицы news
+        try {
+            if ((bool) $pdo->query("SHOW TABLES LIKE 'news_translations'")->fetchColumn()) {
+                $rows = $pdo->query("SELECT * FROM news_translations")->fetchAll();
+                foreach ($rows as $nt) {
+                    $origId = (int) $nt['news_id'];
+                    $lang = (string) $nt['lang'];
+                    $title = trim((string) ($nt['title'] ?? ''));
+                    if ($title === '' || $lang === '' || $lang === 'ru') {
+                        continue;
+                    }
+
+                    $existStmt = $pdo->prepare("SELECT id FROM news WHERE translation_group_id = :gid AND lang = :lang AND deleted_at IS NULL LIMIT 1");
+                    $existStmt->execute([':gid' => $origId, ':lang' => $lang]);
+                    $exists = $existStmt->fetchColumn();
+                    if ($exists !== false) {
+                        continue;
+                    }
+
+                    $origStmt = $pdo->prepare("SELECT * FROM news WHERE id = :id LIMIT 1");
+                    $origStmt->execute([':id' => $origId]);
+                    $orig = $origStmt->fetch();
+                    if (!$orig) {
+                        continue;
+                    }
+
+                    $newSlug = ($orig['slug'] ?? 'news') . '-' . strtolower($lang);
+                    $slugCheck = $pdo->prepare("SELECT id FROM news WHERE slug = :s LIMIT 1");
+                    $slugCheck->execute([':s' => $newSlug]);
+                    if ($slugCheck->fetchColumn() !== false) {
+                        $newSlug .= '-' . bin2hex(random_bytes(2));
+                    }
+
+                    $ins = $pdo->prepare(
+                        "INSERT INTO news (title, slug, excerpt, badge, content, image, video_url, audio_url, audio_title, hashtags, press_release_url, key_points, event_meta, timeline_json, docs, source_note, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
+                         VALUES (:t, :s, :e, :b, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, :st, :pub, :auth, :lang, :gid, NOW())"
+                    );
+                    $ins->execute([
+                        ':t' => $title,
+                        ':s' => $newSlug,
+                        ':e' => $nt['excerpt'] ?? $orig['excerpt'] ?? null,
+                        ':b' => $nt['badge'] ?? $orig['badge'] ?? null,
+                        ':c' => $nt['content'] ?? $orig['content'] ?? null,
+                        ':img' => $orig['image'] ?? null,
+                        ':v' => $orig['video_url'] ?? null,
+                        ':a' => $orig['audio_url'] ?? null,
+                        ':at' => $orig['audio_title'] ?? null,
+                        ':h' => $nt['hashtags'] ?? $orig['hashtags'] ?? null,
+                        ':pr' => $orig['press_release_url'] ?? null,
+                        ':kp' => $nt['key_points'] ?? $orig['key_points'] ?? null,
+                        ':em' => $nt['event_meta'] ?? $orig['event_meta'] ?? null,
+                        ':tj' => $nt['timeline_json'] ?? $orig['timeline_json'] ?? null,
+                        ':dc' => $nt['docs'] ?? $orig['docs'] ?? null,
+                        ':sn' => $orig['source_note'] ?? null,
+                        ':lt' => $orig['layout_type'] ?? 'standard',
+                        ':sl' => $orig['sidebar_layout'] ?? 'right_sidebar',
+                        ':fx' => $orig['focal_x'] ?? null,
+                        ':fy' => $orig['focal_y'] ?? null,
+                        ':mt' => $nt['meta_title'] ?? $orig['meta_title'] ?? null,
+                        ':md' => $nt['meta_description'] ?? $orig['meta_description'] ?? null,
+                        ':st' => $orig['status'] ?? 'published',
+                        ':pub' => $orig['published_at'] ?? date('Y-m-d H:i:s'),
+                        ':auth' => $orig['author_id'] ?? null,
+                        ':lang' => $lang,
+                        ':gid' => $origId,
+                    ]);
+                }
+            }
+        } catch (\Throwable) {}
+
+        // 3. Миграция page_translations в независимые строки таблицы pages
+        try {
+            if ((bool) $pdo->query("SHOW TABLES LIKE 'page_translations'")->fetchColumn()) {
+                $rows = $pdo->query("SELECT * FROM page_translations")->fetchAll();
+                foreach ($rows as $pt) {
+                    $origId = (int) $pt['page_id'];
+                    $lang = (string) $pt['lang'];
+                    $title = trim((string) ($pt['title'] ?? ''));
+                    if ($title === '' || $lang === '' || $lang === 'ru') {
+                        continue;
+                    }
+
+                    $existStmt = $pdo->prepare("SELECT id FROM pages WHERE translation_group_id = :gid AND lang = :lang AND deleted_at IS NULL LIMIT 1");
+                    $existStmt->execute([':gid' => $origId, ':lang' => $lang]);
+                    $exists = $existStmt->fetchColumn();
+                    if ($exists !== false) {
+                        continue;
+                    }
+
+                    $origStmt = $pdo->prepare("SELECT * FROM pages WHERE id = :id LIMIT 1");
+                    $origStmt->execute([':id' => $origId]);
+                    $orig = $origStmt->fetch();
+                    if (!$orig) {
+                        continue;
+                    }
+
+                    $newSlug = ($orig['slug'] ?? 'page') . '-' . strtolower($lang);
+                    $ins = $pdo->prepare(
+                        "INSERT INTO pages (title, slug, meta_title, meta_description, `lead`, status, is_home, layout_type, hide_chrome, transparent_header, lang, translation_group_id, created_at)
+                         VALUES (:t, :s, :mt, :md, :l, :st, 0, :lt, :hc, :th, :lang, :gid, NOW())"
+                    );
+                    $ins->execute([
+                        ':t' => $title,
+                        ':s' => $newSlug,
+                        ':mt' => $pt['meta_title'] ?? $orig['meta_title'] ?? null,
+                        ':md' => $pt['meta_description'] ?? $orig['meta_description'] ?? null,
+                        ':l' => $pt['lead'] ?? $orig['lead'] ?? null,
+                        ':st' => $orig['status'] ?? 'published',
+                        ':lt' => $orig['layout_type'] ?? 'no_sidebar',
+                        ':hc' => $orig['hide_chrome'] ?? 0,
+                        ':th' => $orig['transparent_header'] ?? 0,
+                        ':lang' => $lang,
+                        ':gid' => $origId,
+                    ]);
+                }
+            }
+        } catch (\Throwable) {}
+
+        // 4. Миграция project_translations в независимые строки таблицы projects
+        try {
+            if ((bool) $pdo->query("SHOW TABLES LIKE 'project_translations'")->fetchColumn()) {
+                $rows = $pdo->query("SELECT * FROM project_translations")->fetchAll();
+                foreach ($rows as $prt) {
+                    $origId = (int) $prt['project_id'];
+                    $lang = (string) $prt['lang'];
+                    $title = trim((string) ($prt['title'] ?? ''));
+                    if ($title === '' || $lang === '' || $lang === 'ru') {
+                        continue;
+                    }
+
+                    $existStmt = $pdo->prepare("SELECT id FROM projects WHERE translation_group_id = :gid AND lang = :lang AND deleted_at IS NULL LIMIT 1");
+                    $existStmt->execute([':gid' => $origId, ':lang' => $lang]);
+                    $exists = $existStmt->fetchColumn();
+                    if ($exists !== false) {
+                        continue;
+                    }
+
+                    $origStmt = $pdo->prepare("SELECT * FROM projects WHERE id = :id LIMIT 1");
+                    $origStmt->execute([':id' => $origId]);
+                    $orig = $origStmt->fetch();
+                    if (!$orig) {
+                        continue;
+                    }
+
+                    $newSlug = ($orig['slug'] ?? 'project') . '-' . strtolower($lang);
+                    $ins = $pdo->prepare(
+                        "INSERT INTO projects (title, slug, description, cover_image, status, is_featured, sort_order, lang, translation_group_id, created_at)
+                         VALUES (:t, :s, :d, :ci, :st, :if, :so, :lang, :gid, NOW())"
+                    );
+                    $ins->execute([
+                        ':t' => $title,
+                        ':s' => $newSlug,
+                        ':d' => $prt['description'] ?? $orig['description'] ?? null,
+                        ':ci' => $orig['cover_image'] ?? null,
+                        ':st' => $orig['status'] ?? 'published',
+                        ':if' => $orig['is_featured'] ?? 0,
+                        ':so' => $orig['sort_order'] ?? 0,
+                        ':lang' => $lang,
+                        ':gid' => $origId,
+                    ]);
+                }
+            }
+        } catch (\Throwable) {}
+
+        self::$migrated = true;
+    }
+}
