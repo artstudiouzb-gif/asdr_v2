@@ -1,6 +1,15 @@
 (function () {
     'use strict';
-    if (!window.__pushEnabled || !('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+    var configNode = document.getElementById('push-config');
+    var config = {};
+    if (configNode) {
+        try {
+            config = JSON.parse(configNode.textContent || '{}');
+        } catch (error) {
+            config = {};
+        }
+    }
+    if (!config.enabled || !('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
         return;
     }
 
@@ -16,7 +25,7 @@
         return out;
     }
 
-    var LABELS = window.__pushLabels || {};
+    var LABELS = config.labels || {};
     var LABEL_ON = LABELS.on || 'Уведомления включены';
     var LABEL_OFF = LABELS.off || 'Уведомления о новостях';
     var BELL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>';
@@ -77,8 +86,8 @@
                 host.appendChild(footerBtn);
             }
 
-            var autoPrompt = window.__pushAutoPrompt !== false;
-            var promptDelayMs = Math.max(1, (window.__pushPromptDelay || 15)) * 1000;
+            var autoPrompt = config.autoPrompt !== false;
+            var promptDelayMs = Math.max(1, (config.promptDelay || 15)) * 1000;
 
             var dismissedUntil = parseInt(localStorage.getItem('push_dismissed_until') || '0', 10);
             if (autoPrompt && !isSubscribed && Date.now() > dismissedUntil && Notification.permission !== 'denied') {

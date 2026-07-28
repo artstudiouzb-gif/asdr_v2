@@ -1,7 +1,8 @@
 * { box-sizing: border-box; }
 
 /* Семантическая дизайн-система: светлая тема по умолчанию.
-   --color-primary/--color-accent/--font-family задаются из настроек в <head>. */
+   --color-primary/--color-accent/--font-family задаются внешним
+   content-addressed CSS из настроек CMS. */
 :root {
     --bg-primary: #ffffff;
     --bg-surface: #f4f5f7;
@@ -1839,6 +1840,9 @@ body.design-header-dark .site-nav { border-top-color: rgba(255, 255, 255, .14); 
 }
 body.mobile-menu-open .site-drawer { visibility: visible; opacity: 1; }
 .site-drawer__backdrop {
+    padding: 0;
+    border: 0;
+    appearance: none;
     position: absolute; inset: 0;
     background: rgba(15, 23, 42, 0.4);
     backdrop-filter: blur(4px);

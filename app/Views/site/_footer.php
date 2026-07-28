@@ -20,10 +20,10 @@ if ($privacyPageId > 0) {
     }
 }
 ?>
-<div class="print-only print-footer">
+<footer class="print-only print-footer">
     <?php if ($printUrl !== ''): ?><?= htmlspecialchars(t('Источник:'), ENT_QUOTES) ?> <?= htmlspecialchars($printUrl, ENT_QUOTES) ?> &nbsp;·&nbsp; <?php endif; ?>
     &copy; <?= date('Y') ?> <?= htmlspecialchars($siteName, ENT_QUOTES) ?>
-</div>
+</footer>
 </main>
 <?php if (empty($hideChrome)): // лендинг (группа 6) скрывает футер сайта ?>
 <?php
@@ -165,8 +165,7 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
 </button>
 <?php $cspNonce = \App\Core\SecurityHeaders::nonce(); ?>
-<script nonce="<?= $cspNonce ?>">
-window.__frontendLabels = <?= json_encode([
+<script type="application/json" id="frontend-labels"><?= json_encode([
     'linkCopied' => t('Ссылка скопирована'),
     'mediaViewer' => t('Просмотр медиа'),
     'imageViewer' => t('Просмотр изображения'),
@@ -182,20 +181,21 @@ window.__frontendLabels = <?= json_encode([
     'copy' => t('Копировать'),
     'copied' => t('Скопировано'),
     'totalVotes' => t('Всего голосов:'),
-], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>
 </script>
 <?php foreach (\App\Core\FrontendAssets::scripts() as $script): ?>
 <script src="<?= htmlspecialchars(\App\Core\Asset::url($script), ENT_QUOTES) ?>" defer></script>
 <?php endforeach; ?>
 <?php if (\App\Core\WebPush::isEnabled()): ?>
-<script nonce="<?= $cspNonce ?>">
-window.__pushEnabled = true;
-window.__pushAutoPrompt = <?= \App\Models\Setting::get('webpush_auto_prompt', '1') === '1' ? 'true' : 'false' ?>;
-window.__pushPromptDelay = <?= (int) \App\Models\Setting::get('webpush_prompt_delay', '15') ?>;
-window.__pushLabels = <?= json_encode([
-    'off' => t('Уведомления о новостях'),
-    'on' => t('Уведомления включены'),
-], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+<script type="application/json" id="push-config"><?= json_encode([
+    'enabled' => true,
+    'autoPrompt' => \App\Models\Setting::get('webpush_auto_prompt', '1') === '1',
+    'promptDelay' => (int) \App\Models\Setting::get('webpush_prompt_delay', '15'),
+    'labels' => [
+        'off' => t('Уведомления о новостях'),
+        'on' => t('Уведомления включены'),
+    ],
+], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>
 </script>
 <script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/js/push.js'), ENT_QUOTES) ?>" defer></script>
 <?php endif; ?>
@@ -204,19 +204,11 @@ window.__pushLabels = <?= json_encode([
 <?php // Код счётчиков инертен (type text/plain); consent.js активирует его,
       // перенося nonce с держателя на создаваемый <script> (CSP). ?>
 <script type="text/plain" id="analytics-init" nonce="<?= $cspNonce ?>"><?= $analyticsInit ?></script>
-<script nonce="<?= $cspNonce ?>">window.__consent = {required: <?= $consentRequired ? 'true' : 'false' ?>, privacyUrl: <?= json_encode($privacyUrl, JSON_UNESCAPED_SLASHES) ?>};</script>
+<script type="application/json" id="consent-config"><?= json_encode([
+    'required' => $consentRequired,
+    'privacyUrl' => $privacyUrl,
+], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?></script>
 <script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/js/consent.js'), ENT_QUOTES) ?>" defer></script>
-<?php endif; ?>
-<?php // Schema.org: карточка организации — только на главной (JSON-LD валиден в body). ?>
-<?php if (\App\Core\Locale::path() === '/'): ?>
-<?= \App\Core\SchemaOrg::render(\App\Core\SchemaOrg::organization(
-    $siteName,
-    \App\Core\AppUrl::base() ?: '/',
-    Setting::get('contact_phone', ''),
-    Setting::get('contact_email', ''),
-    Setting::get('contact_address', ''),
-    $logo !== '' ? \App\Core\AppUrl::base() . $logo : ''
-)) . "\n" ?>
 <?php endif; ?>
 <?php // Глобальный произвольный JS (группа 6, супер-админ). ?>
 <?php $globalJs = Setting::get('custom_js_global', ''); ?>

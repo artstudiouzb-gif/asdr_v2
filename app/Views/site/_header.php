@@ -22,12 +22,8 @@ $logo = trim((string) ($hcfgAll['logo_by_lang'][\App\Core\Locale::current()] ?? 
 if ($logo === '') {
     $logo = (string) Setting::get('logo_url', '');
 }
-// Гос-тема (по утверждённым эскизам): navy #173a63 + бирюзовый #17999b,
-// типографика PT Serif (заголовки) / PT Sans (текст) — см. gov-theme.css.
-$primaryColor = Setting::get('color_primary', '#173a63');
-$accentColor = Setting::get('color_accent', '#17999b');
-$semanticColors = \App\Core\DesignSettings::semanticColors();
-$semanticSpacings = \App\Core\DesignSettings::semanticSpacings();
+// Выбранные семейства нужны для точечного preload локальных файлов шрифтов;
+// сами CSS-переменные публикует SiteThemeCss.
 $font = Setting::get('font_family', "'PT Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif");
 $fontHeading = Setting::get('font_heading', '');
 if (trim((string) $fontHeading) === '') {
@@ -138,32 +134,6 @@ if (!empty($menuItems)) {
     $navIconPos = in_array($st['nav_icon_pos'] ?? '', ['left', 'top'], true) ? $st['nav_icon_pos'] : 'left';
     $navDividers = !empty($st['nav_item_dividers']) ? ' site-menu--with-item-dividers' : '';
 
-    $hoverlineLength = (string) ($st['hoverline_length'] ?? 'normal');
-    $hoverlineOffset = (string) ($st['hoverline_offset'] ?? 'normal');
-    $hoverlineThickness = (string) ($st['hoverline_thickness'] ?? '2px');
-
-    $lineBottomPx = match($hoverlineOffset) {
-        'close', '1px' => '1px',
-        'far', '8px' => '8px',
-        default => is_numeric($hoverlineOffset) ? (int)$hoverlineOffset . 'px' : '4px',
-    };
-    $lineHeightPx = match($hoverlineThickness) {
-        'thin', '1px' => '1px',
-        'normal', '2px' => '2px',
-        'thick', '3px' => '3px',
-        'heavy', '4px' => '4px',
-        '5px' => '5px',
-        '6px' => '6px',
-        '8px' => '8px',
-        default => is_numeric($hoverlineThickness) ? (int)$hoverlineThickness . 'px' : '2px',
-    };
-    $lineInsetPx = match($hoverlineLength) {
-        'compact', '12px' => '12px',
-        'full', '0px' => '0px',
-        default => is_numeric($hoverlineLength) ? (int)$hoverlineLength . 'px' : '4px',
-    };
-    $hoverlineAttr = 'style="--hoverline-bottom:' . $lineBottomPx . ';--hoverline-height:' . $lineHeightPx . ';--hoverline-inset:' . $lineInsetPx . ';"';
-
     $menuClasses = 'site-menu'
         . ' site-menu--font-' . $navFontSize
         . ' site-menu--transform-' . $navTransform
@@ -173,7 +143,7 @@ if (!empty($menuItems)) {
         . ' site-menu--icon-' . $navIconPos
         . $navDividers;
 
-    $menuHtml = '<nav class="' . $menuClasses . '" ' . $hoverlineAttr . ' aria-label="' . $et('Основное меню') . '">';
+    $menuHtml = '<nav class="' . $menuClasses . '" aria-label="' . $et('Основное меню') . '">';
     foreach ($menuItems as $mi) {
         // Пункт-разделитель: визуальная черта/зазор без ссылки.
         if (!empty($mi['is_divider'])) {
@@ -256,7 +226,7 @@ if (!empty($menuItems)) {
             . $label . '</a>';
         $menuHtml .= '<button type="button" class="site-menu__toggle" aria-expanded="false" aria-label="' . $et('Открыть подменю') . '">▾</button>';
         $menuHtml .= $megaCols > 0
-            ? '<div class="site-submenu site-submenu--mega" style="--mega-cols:' . $megaCols . ';">'
+            ? '<div class="site-submenu site-submenu--mega site-submenu--cols-' . $megaCols . '">'
             : '<div class="site-submenu">';
         $menuHtml .= $submenuHtml;
         $menuHtml .= '</div></div>';
@@ -541,15 +511,31 @@ $drawerMenu = '';
 if ($menuHtml !== '') {
     $drawerMenu = $menuHtml;
 }
+
+// Dynamic design values are published as an immutable external stylesheet.
+// This keeps the public HTML free from persistent inline CSS attributes and
+// database-driven embedded CSS blocks while preserving the live design builder.
+$headerExtraClass = \App\Core\SiteThemeCss::headerClasses($hcfg, $transparentOn);
+$generatedCssUrls = [];
+$themeCssUrl = \App\Core\GeneratedCss::publish(
+    \App\Core\SiteThemeCss::build($designVals, $hcfg, $transparentOn),
+    'site-theme'
+);
+if ($themeCssUrl !== null) {
+    $generatedCssUrls['theme'] = $themeCssUrl;
+}
+if ($extraHeadCss !== '') {
+    $pageCssUrl = \App\Core\GeneratedCss::publish($extraHeadCss, 'page');
+    if ($pageCssUrl !== null) {
+        $generatedCssUrls['page'] = $pageCssUrl;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars($currentLang, ENT_QUOTES) ?>" data-theme="<?= htmlspecialchars($defaultTheme, ENT_QUOTES) ?>"<?= $a11y['on'] ? ' data-a11y="1" data-a11y-scheme="' . htmlspecialchars($a11y['scheme'], ENT_QUOTES) . '" data-a11y-size="' . htmlspecialchars($a11y['size'], ENT_QUOTES) . '" data-a11y-images="' . htmlspecialchars($a11y['images'], ENT_QUOTES) . '"' : '' ?>>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script nonce="<?= \App\Core\SecurityHeaders::nonce() ?>">
-/* Применяем сохранённую тему до отрисовки, исключая мигание (FOUC). */
-(function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
-</script>
+<script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/js/theme-init.js'), ENT_QUOTES) ?>"></script>
 <?= \App\Core\SeoHelper::resourceHintsHtml() ?>
 <?= \App\Core\SeoHelper::faviconsHtml($appUrl) ?>
 <?php
@@ -611,14 +597,6 @@ if (is_array($cdnParts) && in_array($cdnParts['scheme'] ?? '', ['http', 'https']
 <?php endif; ?>
 <?php if ($fontUrl !== '' && $fontFaceName !== ''): ?>
 <link rel="preload" href="<?= htmlspecialchars($fontUrl, ENT_QUOTES) ?>" as="font" type="font/woff2" crossorigin>
-<style>
-@font-face {
-    font-family: '<?= htmlspecialchars($fontFaceName, ENT_QUOTES) ?>';
-    src: url('<?= htmlspecialchars($fontUrl, ENT_QUOTES) ?>') format('woff2');
-    font-weight: 100 900;
-    font-display: swap;
-}
-</style>
 <?php endif; ?>
 <?php if ($faviconUrl !== ''): ?>
 <link rel="icon" href="<?= htmlspecialchars($faviconUrl, ENT_QUOTES) ?>">
@@ -652,66 +630,19 @@ foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
 <?php // Google-шрифты (если выбраны в «Дизайне»); кириллица включена в css2. ?>
 <?php $googleFontsHref = \App\Core\DesignSettings::googleFontsHref(); ?>
 <?php if ($googleFontsHref !== null): ?>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="<?= htmlspecialchars($googleFontsHref, ENT_QUOTES) ?>">
 <?php endif; ?>
 <?php foreach (\App\Core\FrontendAssets::styles() as $stylesheet): ?>
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url($stylesheet), ENT_QUOTES) ?>">
 <?php endforeach; ?>
-<style>
-:root {
-    --color-primary: <?= htmlspecialchars($primaryColor, ENT_QUOTES) ?>;
-    --color-accent: <?= htmlspecialchars($accentColor, ENT_QUOTES) ?>;
-    --gov-navy: var(--color-primary);
-    --gov-teal: var(--color-accent);
-    --gov-teal-text: <?= htmlspecialchars(\App\Core\AccentContrast::onLight($accentColor, $semanticColors['bg_surface']), ENT_QUOTES) ?>;
-    --gov-teal-on-dark: <?= htmlspecialchars(\App\Core\AccentContrast::onDark($accentColor), ENT_QUOTES) ?>;
-    --bg-primary: <?= htmlspecialchars($semanticColors['bg_primary'], ENT_QUOTES) ?>;
-    --bg-surface: <?= htmlspecialchars($semanticColors['bg_surface'], ENT_QUOTES) ?>;
-    --text-main: <?= htmlspecialchars($semanticColors['text_main'], ENT_QUOTES) ?>;
-    --text-muted: <?= htmlspecialchars($semanticColors['text_muted'], ENT_QUOTES) ?>;
-    --border-color: <?= htmlspecialchars($semanticColors['border_color'], ENT_QUOTES) ?>;
-    --gov-bg: var(--bg-primary);
-    --gov-surface: var(--bg-surface);
-    --gov-ink: var(--text-main);
-    --gov-muted: var(--text-muted);
-    --gov-border: var(--border-color);
-    --space-small: <?= htmlspecialchars($semanticSpacings['space_small'], ENT_QUOTES) ?>;
-    --space-premium: <?= htmlspecialchars($semanticSpacings['space_premium'], ENT_QUOTES) ?>;
-    --space-max: <?= htmlspecialchars($semanticSpacings['space_max'], ENT_QUOTES) ?>;
-    <?php // Внутри <style> HTML-экранирование ломает кавычки ('Inter' -> &#039;Inter&#039;).
-          // Санитизация под CSS: только буквы/цифры/пробел/запятая/дефис/одинарные кавычки. ?>
-    --font-family: <?= preg_replace("/[^a-zA-Z0-9 ,'\\-]/", '', (string) $font) ?: 'system-ui, sans-serif' ?>;
-    --font-heading: <?= preg_replace("/[^a-zA-Z0-9 ,'\\-]/", '', (string) $fontHeading) ?: "'Montserrat', system-ui, sans-serif" ?>;
-}
-<?php // Тема-билдер: переменные дизайна (ширина, скругления, отступы, кнопки). ?>
-<?= \App\Core\DesignSettings::cssVariables($designVals) ?>
-<?php
-$hdrStyles = $hcfgAll['styles'] ?? [];
-if (!empty($hdrStyles['nav_color'])) { echo '.site-menu__link { color: ' . htmlspecialchars($hdrStyles['nav_color'], ENT_QUOTES) . ' !important; }'; }
-if (!empty($hdrStyles['nav_hover'])) { echo '.site-menu__link:hover { color: ' . htmlspecialchars($hdrStyles['nav_hover'], ENT_QUOTES) . ' !important; }'; }
-if (!empty($hdrStyles['nav_active'])) { echo '.site-menu__link.is-active, .site-menu__link[aria-current="page"] { color: ' . htmlspecialchars($hdrStyles['nav_active'], ENT_QUOTES) . ' !important; }'; }
-if (!empty($hdrStyles['topbar_bg'])) { echo '.site-topbar { background-color: ' . htmlspecialchars($hdrStyles['topbar_bg'], ENT_QUOTES) . ' !important; }'; }
-if (!empty($hdrStyles['topbar_text'])) { echo '.site-topbar, .site-topbar a { color: ' . htmlspecialchars($hdrStyles['topbar_text'], ENT_QUOTES) . ' !important; }'; }
-if (!empty($hdrStyles['border_color'])) { echo '.site-header { border-bottom-color: ' . htmlspecialchars($hdrStyles['border_color'], ENT_QUOTES) . ' !important; }'; }
-if (!empty($hdrStyles['border_width'])) { echo '.site-header { border-bottom-width: ' . htmlspecialchars($hdrStyles['border_width'], ENT_QUOTES) . ' !important; border-bottom-style: solid; }'; }
-?>
-</style>
-<?php if ($extraHeadCss !== ''): ?>
-<style id="block-styles">
-<?= $extraHeadCss ?>
-</style>
-<?php endif; ?>
-<?php // Глобальный произвольный CSS (группа 6, супер-админ). ?>
-<?php $globalCss = Setting::get('custom_css_global', ''); ?>
-<?php if (trim($globalCss) !== ''): ?>
-<style id="global-custom-css">
-<?= $globalCss ?>
-</style>
-<?php endif; ?>
+<?php foreach ($generatedCssUrls as $cssScope => $generatedCssUrl): ?>
+<link rel="stylesheet" href="<?= htmlspecialchars($generatedCssUrl, ENT_QUOTES) ?>" data-generated-site-css="<?= htmlspecialchars($cssScope, ENT_QUOTES) ?>">
+<?php endforeach; ?>
 </head>
-<body class="<?= htmlspecialchars(trim($designBodyClass . (!empty($previewNotice) ? ' is-preview' : '')), ENT_QUOTES) ?>">
+<?php $bodyClass = trim($designBodyClass
+    . (!empty($previewNotice) ? ' is-preview' : '')
+    . (\App\Core\AppToolbar::isVisible() ? ' has-admin-bar' : '')); ?>
+<body class="<?= htmlspecialchars($bodyClass, ENT_QUOTES) ?>">
 <?= \App\Core\AppToolbar::renderHtml(get_defined_vars()) ?>
 <a href="#main-content" class="skip-link"><?= $et('Перейти к содержимому') ?></a>
 <?php if (!empty($previewNotice)): ?>
@@ -720,7 +651,7 @@ if (!empty($hdrStyles['border_width'])) { echo '.site-header { border-bottom-wid
 </div>
 <?php endif; ?>
 <?php if (empty($hideChrome)): // лендинг (группа 6) скрывает шапку сайта ?>
-<div class="a11y-panel<?= $a11y['on'] ? ' is-open' : '' ?>" id="a11y-panel" role="region" aria-label="<?= $et('Настройки версии для слабовидящих') ?>">
+<section class="a11y-panel<?= $a11y['on'] ? ' is-open' : '' ?>" id="a11y-panel" aria-label="<?= $et('Настройки версии для слабовидящих') ?>">
     <div class="a11y-panel__group">
         <b><?= $et('Цвет:') ?></b>
         <button type="button" data-a11y-set="scheme:cw" title="<?= $et('Чёрным по белому') ?>">A</button>
@@ -739,54 +670,14 @@ if (!empty($hdrStyles['border_width'])) { echo '.site-header { border-bottom-wid
         <button type="button" data-a11y-set="images:off" title="<?= $et('Скрыть') ?>"><?= $et('Выкл') ?></button>
     </div>
     <a href="#" class="a11y-panel__off"><?= $et('Обычная версия') ?></a>
-</div>
+</section>
 <?= $topbarHtml ?>
 <?php
-// Свои фоны секций и тень шапки (конструктор шапки). Цвета прошли hex-валидацию
-// в HeaderConfig; тень не включается в прозрачном режиме (пока шапка наложена).
-$midBg = (string) ($hcfg['middlebar']['bg'] ?? '');
-$navBg = (string) ($hcfg['bottombar']['bg'] ?? '');
-$shadowOn = !empty($hcfg['shadow']['enabled']) && !$transparentOn;
-$headerExtraClass = ($midBg !== '' ? ' site-header--mid-bg' : '')
-    . ($navBg !== '' ? ' site-header--nav-bg' : '')
-    . ($shadowOn ? ' site-header--shadow' : '');
-
-$st = $hcfg['styles'] ?? [];
-$navColor = (string) ($st['nav_color'] ?? '');
-$navHover = (string) ($st['nav_hover'] ?? '');
-$navActive = (string) ($st['nav_active'] ?? '');
-$navPillBg = (string) ($st['nav_pill_bg'] ?? '');
-
-$flOp = round(max(5, min(100, (int) ($st['floating_opacity'] ?? 25))) / 100, 2);
-$flAng = (int) ($st['floating_gradient_angle'] ?? 135);
-$flBlur = (int) ($st['floating_blur'] ?? 14);
-
-$elementsGapMode = (string) ($st['elements_gap'] ?? 'normal');
-$elementsGapPx = match ($elementsGapMode) {
-    'ultra_compact' => '6px',
-    'compact' => '10px',
-    'spacious' => '28px',
-    'loose' => '38px',
-    default => '18px',
-};
-
-$headerExtraVars = ($midBg !== '' ? '--header-mid-bg:' . $midBg . ';' : '')
-    . ($navBg !== '' ? '--header-nav-bg:' . $navBg . ';' : '')
-    . ($shadowOn ? '--header-shadow-size:' . (int) ($hcfg['shadow']['size'] ?? 14) . 'px;' : '')
-    . ($navColor !== '' ? '--menu-color:' . $navColor . ';' : '')
-    . ($navHover !== '' ? '--menu-hover:' . $navHover . ';' : '')
-    . ($navActive !== '' ? '--menu-active:' . $navActive . ';' : '')
-    . ($navPillBg !== '' ? '--menu-pill-bg:' . $navPillBg . ';' : '')
-    . '--header-elements-gap:' . $elementsGapPx . ';'
-    . '--header-floating-radius:' . (int) ($st['floating_radius'] ?? 18) . 'px;'
-    . '--header-floating-opacity:' . $flOp . ';'
-    . '--header-floating-angle:' . $flAng . 'deg;'
-    . '--header-floating-blur:' . $flBlur . 'px;';
 $hasHeaderContent = trim($zones['left'] . $zones['center'] . $zones['right'] . $topbarHtml . $navBarHtml) !== '';
 $containerMode = in_array($hcfg['container_mode'] ?? 'full', ['full', 'container', 'floating'], true) ? $hcfg['container_mode'] : 'full';
 ?>
 <?php if ($hasHeaderContent): ?>
-<header class="site-header site-header--layout-<?= htmlspecialchars($layout, ENT_QUOTES) ?> site-header--logo-<?= htmlspecialchars($logoPos, ENT_QUOTES) ?> site-header--container-<?= htmlspecialchars($containerMode, ENT_QUOTES) ?><?= $navBarHtml !== '' ? ' site-header--has-nav' : '' ?><?= $drawerMenu !== '' ? ' site-header--has-drawer' : '' ?><?= !empty($hcfg['sticky']) ? ' site-header--sticky' : '' ?><?= !empty($hcfg['sticky_full_width']) ? ' site-header--sticky-full' : '' ?><?= $transparentOn ? ' site-header--transparent' : '' ?> site-header--h-<?= htmlspecialchars(in_array($hcfg['middlebar']['height'] ?? 'normal', HeaderConfig::HEIGHTS, true) ? $hcfg['middlebar']['height'] : 'normal', ENT_QUOTES) ?> site-header--nav-h-<?= htmlspecialchars(in_array($hcfg['bottombar']['height'] ?? 'normal', HeaderConfig::HEIGHTS, true) ? $hcfg['bottombar']['height'] : 'normal', ENT_QUOTES) ?> site-header--borders-<?= htmlspecialchars(in_array($hcfg['borders'] ?? 'full', HeaderConfig::BORDER_MODES, true) ? $hcfg['borders'] : 'full', ENT_QUOTES) ?><?= $headerExtraClass ?>" style="--header-logo-width:<?= (int) ($hcfg['logo_width'] ?? 240) ?>px;--header-logo-height:<?= (int) ($hcfg['logo_height'] ?? 48) ?>px;<?= $headerExtraVars ?>"<?= (!empty($hcfg['sticky']) || $transparentOn) ? ' data-header-scroll' : '' ?>>
+<header class="site-header site-header--layout-<?= htmlspecialchars($layout, ENT_QUOTES) ?> site-header--logo-<?= htmlspecialchars($logoPos, ENT_QUOTES) ?> site-header--container-<?= htmlspecialchars($containerMode, ENT_QUOTES) ?><?= $navBarHtml !== '' ? ' site-header--has-nav' : '' ?><?= $drawerMenu !== '' ? ' site-header--has-drawer' : '' ?><?= !empty($hcfg['sticky']) ? ' site-header--sticky' : '' ?><?= !empty($hcfg['sticky_full_width']) ? ' site-header--sticky-full' : '' ?><?= $transparentOn ? ' site-header--transparent' : '' ?> site-header--h-<?= htmlspecialchars(in_array($hcfg['middlebar']['height'] ?? 'normal', HeaderConfig::HEIGHTS, true) ? $hcfg['middlebar']['height'] : 'normal', ENT_QUOTES) ?> site-header--nav-h-<?= htmlspecialchars(in_array($hcfg['bottombar']['height'] ?? 'normal', HeaderConfig::HEIGHTS, true) ? $hcfg['bottombar']['height'] : 'normal', ENT_QUOTES) ?> site-header--borders-<?= htmlspecialchars(in_array($hcfg['borders'] ?? 'full', HeaderConfig::BORDER_MODES, true) ? $hcfg['borders'] : 'full', ENT_QUOTES) ?><?= $headerExtraClass ?>"<?= (!empty($hcfg['sticky']) || $transparentOn) ? ' data-header-scroll' : '' ?>>
     <div class="site-header__inner">
         <div class="site-header__zone site-header__zone--left"><?= $zones['left'] ?></div>
         <div class="site-header__zone site-header__zone--center"><?= $zones['center'] ?></div>
@@ -808,7 +699,7 @@ $containerMode = in_array($hcfg['container_mode'] ?? 'full', ['full', 'container
 <?php // Off-canvas меню вынесено за пределы <header>, чтобы position:fixed не
       // зависел от containing block шапки (sticky/трансформации). ?>
 <div class="site-drawer" data-drawer>
-    <div class="site-drawer__backdrop" data-mobile-menu-toggle aria-hidden="true"></div>
+    <button type="button" class="site-drawer__backdrop" data-mobile-menu-toggle aria-label="<?= $et('Закрыть меню') ?>" tabindex="-1"></button>
     <div class="site-drawer__panel" role="dialog" aria-label="<?= $et('Меню') ?>" aria-modal="true">
         <button type="button" class="site-drawer__close" data-mobile-menu-toggle aria-label="<?= $et('Закрыть меню') ?>" aria-expanded="false">&times;</button>
         <?= $drawerMenu ?>
@@ -827,7 +718,7 @@ $containerMode = in_array($hcfg['container_mode'] ?? 'full', ['full', 'container
 
 <!-- Быстрый поиск Ctrl + K (Command Palette) -->
 <div class="site-quick-search" id="site-quick-search-modal" hidden role="dialog" aria-modal="true" aria-label="<?= htmlspecialchars(t('Быстрый поиск по сайту'), ENT_QUOTES) ?>">
-    <div class="site-quick-search__backdrop" data-quick-search-close></div>
+    <button type="button" class="site-quick-search__backdrop" data-quick-search-close aria-label="<?= $et('Закрыть') ?>" tabindex="-1"></button>
     <div class="site-quick-search__container">
         <form class="site-quick-search__form" method="get" action="<?= $searchAction ?>" role="search">
             <span class="site-quick-search__icon" aria-hidden="true"><?= $searchIcon ?></span>
@@ -845,13 +736,13 @@ $containerMode = in_array($hcfg['container_mode'] ?? 'full', ['full', 'container
 <div class="site-toast-container" id="site-toast-container" aria-live="polite" aria-atomic="true"></div>
 <?php endif; ?>
 <main class="site-content" id="main-content">
-<div class="print-only print-header">
+<header class="print-only print-header">
     <?php if ($logo !== ''): ?>
         <img src="<?= htmlspecialchars($logo, ENT_QUOTES) ?>" alt="<?= htmlspecialchars($siteName, ENT_QUOTES) ?>">
     <?php else: ?>
         <div class="print-name"><?= htmlspecialchars($siteName, ENT_QUOTES) ?></div>
     <?php endif; ?>
-</div>
+</header>
 <?php foreach (Flash::pull() as $flash): ?>
     <div class="site-alert site-alert--<?= htmlspecialchars($flash['type'], ENT_QUOTES) ?>"
          role="<?= ($flash['type'] ?? '') === 'error' ? 'alert' : 'status' ?>"

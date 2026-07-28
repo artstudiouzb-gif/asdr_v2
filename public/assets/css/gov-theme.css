@@ -1171,6 +1171,9 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
     /* Стрелка-указатель у широкой панели не к месту — она ни на что не указывает. */
     .site-submenu--mega::before { display: none; }
 }
+.site-submenu--cols-2 { --mega-cols: 2; }
+.site-submenu--cols-3 { --mega-cols: 3; }
+.site-submenu--cols-4 { --mega-cols: 4; }
 
 /* --- Живой поиск: подсказки под полем --- */
 .site-search.has-suggest, .site-search-overlay__form.has-suggest { position: relative; }
@@ -3984,19 +3987,19 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 .block-banner[style*="--banner-btn"] .block-banner__button { background: var(--banner-btn); }
 
 /* Направления (cards_grid) */
-.block-cards[style*="--card-bg"] .feature-card {
+.block-cards--custom-bg .feature-card {
     background: color-mix(in srgb, var(--card-bg) 68%, transparent) !important;
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     border: 1px solid color-mix(in srgb, var(--gov-border) 45%, transparent) !important;
 }
-.block-cards[style*="--card-bg"] .feature-card:hover {
+.block-cards--custom-bg .feature-card:hover {
     background: color-mix(in srgb, var(--card-bg) 88%, transparent) !important;
 }
-.block-cards[style*="--cards-text"] .feature-card__title { color: var(--cards-text); }
-.block-cards[style*="--cards-text"] .feature-card__text { color: var(--cards-text); opacity: .82; }
-.block-cards[style*="--cards-text"] .feature-card__icon { color: var(--cards-text); }
-.block-cards[style*="--cards-text"] .feature-card:hover .feature-card__title { color: var(--color-accent, var(--gov-teal)) !important; }
+.block-cards--custom-text .feature-card__title { color: var(--cards-text); }
+.block-cards--custom-text .feature-card__text { color: var(--cards-text); opacity: .82; }
+.block-cards--custom-text .feature-card__icon { color: var(--cards-text); }
+.block-cards--custom-text .feature-card:hover .feature-card__title { color: var(--color-accent, var(--gov-teal)) !important; }
 
 /* CTA-полоса */
 .block-ctaband[style*="--ctaband-bg"] { background: var(--ctaband-bg); }
@@ -4414,6 +4417,9 @@ body.quick-search-active { overflow: hidden; }
     pointer-events: auto;
 }
 .site-quick-search__backdrop {
+    padding: 0;
+    border: 0;
+    appearance: none;
     position: absolute;
     inset: 0;
     background: rgba(15, 23, 42, 0.65);

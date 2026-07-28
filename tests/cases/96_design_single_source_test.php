@@ -75,14 +75,17 @@ test('ручное оформление сохраняется отдельно 
 });
 
 test('семантические цвета выводятся как переменные общей и государственной темы', function (): void {
-    $header = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/site/_header.php');
-    foreach (['--bg-primary:', '--bg-surface:', '--text-main:', '--text-muted:', '--border-color:'] as $variable) {
-        assert_contains($variable, $header);
+    $themeCss = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Core/SiteThemeCss.php');
+    foreach (['--bg-primary', '--bg-surface', '--text-main', '--text-muted', '--border-color'] as $variable) {
+        assert_contains($variable, $themeCss);
     }
-    foreach (['--space-small:', '--space-premium:', '--space-max:'] as $variable) {
-        assert_contains($variable, $header);
+    foreach (['--space-small', '--space-premium', '--space-max'] as $variable) {
+        assert_contains($variable, $themeCss);
     }
-    assert_contains('--gov-bg: var(--bg-primary)', $header);
-    assert_contains('--gov-surface: var(--bg-surface)', $header);
-    assert_contains('--gov-ink: var(--text-main)', $header);
+    assert_contains("'--gov-bg' => 'var(--bg-primary)'", $themeCss);
+    assert_contains("'--gov-surface' => 'var(--bg-surface)'", $themeCss);
+    assert_contains("'--gov-ink' => 'var(--text-main)'", $themeCss);
+    assert_contains('SiteThemeCss::build', (string) file_get_contents(
+        dirname(__DIR__, 2) . '/app/Views/site/_header.php'
+    ));
 });

@@ -1053,8 +1053,8 @@ final class DesignSettings
         $headingFontWeight = isset($v['heading_font_weight']) && in_array((string) $v['heading_font_weight'], ['400', '500', '600', '700', '800'], true) ? (string) $v['heading_font_weight'] : '700';
         $headingLetterSpacing = ['tight' => '-0.03em', 'normal' => '-0.02em', 'wide' => '0em'][$v['heading_letter_spacing'] ?? 'normal'] ?? '-0.02em';
 
-        // Точечные размеры по элементам (типографика) дописываются после :root —
-        // строка целиком выводится внутри <style> в шапке.
+        // Точечные размеры по элементам дописываются после :root; итоговую
+        // строку SiteThemeCss публикует во внешнем сгенерированном файле.
         return self::typographyCss() . sprintf(
             ':root{--container-max:%s;--radius:%s;--radius-sm:calc(%s * .6);--card-gap:%s;--section-pad:%s;--btn-radius:%s;--base-font-size:%s;--base-line-height:%s;--heading-line-height:%s;--heading-font-weight:%s;--heading-letter-spacing:%s;--card-shadow:%s;--menu-divider-color:%s;--menu-divider-width:%s;--menu-divider-height:%s;}',
             $container,

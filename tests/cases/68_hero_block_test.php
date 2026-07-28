@@ -10,7 +10,9 @@ use App\Core\BlockData\HeroBlockNormalizer;
 
 function render_hero(array $data): string
 {
-    return BlockRenderer::render(['id' => 1, 'type' => 'hero', 'data' => json_encode($data), 'custom_css' => null])['html'];
+    $rendered = BlockRenderer::render(['id' => 1, 'type' => 'hero', 'data' => json_encode($data), 'custom_css' => null]);
+
+    return $rendered['html'] . "\n" . $rendered['css'];
 }
 
 test('Hero: YouTube-фон рендерит iframe с nocookie-доменом и id', function () {
@@ -73,10 +75,11 @@ test('Hero: overlay использует начальный и конечный 
         'overlay_direction' => 'to_bottom_right', 'overlay_opacity' => 80,
     ]);
     // #123456 = rgb(18,52,86), #abcdef = rgb(171,205,239), 80% => 0.8
-    assert_true(str_contains($html, '--hero-scrim-rgb: 18,52,86'), 'overlay RGB из цвета');
-    assert_true(str_contains($html, '--hero-scrim-end-rgb: 171,205,239'), 'конечный RGB overlay');
-    assert_true(str_contains($html, '--hero-scrim-a: 0.8'), 'overlay alpha из прозрачности');
-    assert_true(str_contains($html, '--hero-scrim-direction: 135deg'), 'направление градиента');
+    assert_true(str_contains($html, '--hero-scrim-rgb:18,52,86'), 'overlay RGB из цвета');
+    assert_true(str_contains($html, '--hero-scrim-end-rgb:171,205,239'), 'конечный RGB overlay');
+    assert_true(str_contains($html, '--hero-scrim-a:0.8'), 'overlay alpha из прозрачности');
+    assert_true(str_contains($html, '--hero-scrim-direction:135deg'), 'направление градиента');
+    assert_not_contains(' style="', $html, 'Динамические параметры hero публикуются как scoped CSS');
 });
 
 test('Hero: overlay поддерживает сплошную заливку без градиента', function () {
@@ -96,13 +99,13 @@ test('Hero: автоматическое направление overlay след
         'title' => 'X', 'bg_type' => 'image', 'image' => '/uploads/public/x.jpg',
         'overlay_direction' => 'auto', 'text_position' => 'right',
     ]);
-    assert_contains('--hero-scrim-direction: 270deg', $right);
+    assert_contains('--hero-scrim-direction:270deg', $right);
 
     $invalid = render_hero([
         'title' => 'X', 'bg_type' => 'image', 'image' => '/uploads/public/x.jpg',
         'overlay_direction' => '90deg;background:red', 'text_position' => 'center',
     ]);
-    assert_contains('--hero-scrim-direction: 0deg', $invalid);
+    assert_contains('--hero-scrim-direction:0deg', $invalid);
     assert_not_contains('background:red', $invalid);
 });
 

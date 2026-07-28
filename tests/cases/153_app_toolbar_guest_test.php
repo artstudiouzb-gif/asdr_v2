@@ -13,5 +13,5 @@ test('AppToolbar: для гостей (когда разлогинен) адми
     // Проверяем, что для гостя нет разметки админ-панели
     assert_true(strpos($output, 'app-admin-bar') === false, 'Гость не получает HTML админ-панели');
     assert_true(strpos($output, 'has-admin-bar') === false, 'Гость не получает класс margin-top для body');
-    assert_true(strpos($output, '<script') !== false, 'Гость получает скрипт мгновенной предзагрузки страниц');
+    assert_true(strpos($output, '<script') === false, 'Гость не получает inline-скрипты');
 });

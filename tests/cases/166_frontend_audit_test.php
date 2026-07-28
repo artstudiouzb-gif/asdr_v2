@@ -21,7 +21,8 @@ test('public dynamic UI uses localized labels and text-only untrusted values', f
     $en = require APP_ROOT . '/app/Core/lang/en.php';
     $uz = require APP_ROOT . '/app/Core/lang/uz.php';
 
-    assert_contains('window.__frontendLabels', $footer);
+    assert_contains('type="application/json" id="frontend-labels"', $footer);
+    assert_not_contains('window.__frontendLabels', $footer);
     assert_contains("'totalVotes' => t('Всего голосов:')", $footer);
     assert_same('Image viewer', $en['Просмотр изображения'] ?? null);
     assert_same('Rasmni ko‘rish', $uz['Просмотр изображения'] ?? null);

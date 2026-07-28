@@ -139,13 +139,16 @@ final class BlockRenderer
         // Блок «columns» (группа 4.1): рендерим вложенные блоки, сгруппированные
         // по колонкам. Дочерние блоки — обычные блоки со своими scoped-стилями.
         $childrenCss = '';
+        $templateCss = '';
         if ($type === 'columns') {
             [$html, $childrenCss] = self::renderColumns($block, $data);
         } else {
             $templateFile = BlockTypeRegistry::templateFile($type);
-            $html = $templateFile !== null && is_file($templateFile)
-                ? self::renderTemplate($templateFile, $data, $blockId)
-                : '<!-- Неизвестный тип блока: ' . htmlspecialchars($type, ENT_QUOTES) . ' -->';
+            if ($templateFile !== null && is_file($templateFile)) {
+                [$html, $templateCss] = self::renderTemplate($templateFile, $data, $blockId);
+            } else {
+                $html = '<!-- Неизвестный тип блока: ' . htmlspecialchars($type, ENT_QUOTES) . ' -->';
+            }
         }
 
         $scopedCss = '';
@@ -154,6 +157,9 @@ final class BlockRenderer
         }
         if ($childrenCss !== '') {
             $scopedCss = $scopedCss !== '' ? $scopedCss . "\n" . $childrenCss : $childrenCss;
+        }
+        if ($templateCss !== '') {
+            $scopedCss = $scopedCss !== '' ? $scopedCss . "\n" . $templateCss : $templateCss;
         }
 
         // Дизайн-система: пресет отступов и опция анимации появления.
@@ -206,17 +212,19 @@ final class BlockRenderer
         if (isset($padMap[$padBottom])) {
             $styleVars .= '--block-pad-bottom:' . $padMap[$padBottom] . ';';
         }
-        $styleAttr = $styleVars !== '' ? ' style="' . $styleVars . '"' : '';
+        if ($styleVars !== '') {
+            $sectionCss = '#block-' . $blockId . '{' . $styleVars . '}';
+            $scopedCss = $scopedCss !== '' ? $scopedCss . "\n" . $sectionCss : $sectionCss;
+        }
 
         $wrapped = sprintf(
-            '<section id="block-%d" class="cms-block cms-block--%s cms-block--space-%s%s" data-block-type="%s"%s%s>%s</section>',
+            '<section id="block-%d" class="cms-block cms-block--%s cms-block--space-%s%s" data-block-type="%s"%s>%s</section>',
             $blockId,
             htmlspecialchars($type, ENT_QUOTES),
             htmlspecialchars($spacing, ENT_QUOTES),
             $extraClass,
             htmlspecialchars($type, ENT_QUOTES),
             $reveal,
-            $styleAttr,
             $html
         );
 
@@ -535,16 +543,20 @@ final class BlockRenderer
         return $data;
     }
 
-    private static function renderTemplate(string $file, array $data, int $blockId): string
+    /** @return array{0:string,1:string} */
+    private static function renderTemplate(string $file, array $data, int $blockId): array
     {
-        $render = static function (string $__file, array $data, int $blockId): void {
+        $render = static function (string $__file, array $data, int $blockId): string {
+            $templateCss = '';
             extract(['data' => $data, 'blockId' => $blockId], EXTR_SKIP);
             require $__file;
+
+            return $templateCss;
         };
 
         ob_start();
-        $render($file, $data, $blockId);
+        $templateCss = $render($file, $data, $blockId);
 
-        return (string) ob_get_clean();
+        return [(string) ob_get_clean(), $templateCss];
     }
 }

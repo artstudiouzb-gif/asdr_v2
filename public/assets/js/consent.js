@@ -1,7 +1,15 @@
 (function () {
     'use strict';
 
-    var cfg = window.__consent || { required: false, privacyUrl: '' };
+    var cfg = { required: false, privacyUrl: '' };
+    var configNode = document.getElementById('consent-config');
+    if (configNode) {
+        try {
+            cfg = JSON.parse(configNode.textContent || '{}');
+        } catch (error) {
+            cfg = { required: false, privacyUrl: '' };
+        }
+    }
     var COOKIE = 'cookie_consent';
 
     function hasConsent() {

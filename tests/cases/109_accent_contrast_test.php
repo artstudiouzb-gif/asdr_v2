@@ -39,10 +39,10 @@ test('Акцент: проходящий цвет не меняется, мус�
 });
 
 test('Тема отдаёт вычисленные варианты акцента, а не константы', function () {
-    $header = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/site/_header.php');
-    assert_contains('AccentContrast::onLight', $header);
-    assert_contains('AccentContrast::onDark', $header);
-    assert_contains('--gov-teal-on-dark', $header);
+    $theme = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Core/SiteThemeCss.php');
+    assert_contains('AccentContrast::onLight', $theme);
+    assert_contains('AccentContrast::onDark', $theme);
+    assert_contains('--gov-teal-on-dark', $theme);
 
     $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
     // На тёмных подложках текстовый акцент переключается на светлый вариант.

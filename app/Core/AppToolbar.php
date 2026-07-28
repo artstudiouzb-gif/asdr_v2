@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace App\Core;
 
 /**
- * Плавающая панель администратора/редактора на публичном сайте (Admin TopBar)
- * + Движок мгновенной предзагрузки страниц (Speculative Prefetching < 5ms).
+ * Плавающая панель администратора/редактора на публичном сайте (Admin TopBar).
  */
 final class AppToolbar
 {
+    public static function isVisible(): bool
+    {
+        return Auth::sessionUser() !== null;
+    }
+
     /**
      * Рендерит плавающую панель администратора на публичных страницах.
      */
@@ -17,7 +21,7 @@ final class AppToolbar
     {
         $user = Auth::sessionUser();
         if ($user === null) {
-            return self::renderPrefetchScript();
+            return '';
         }
         $username = htmlspecialchars((string) ($user['username'] ?? 'Admin'), ENT_QUOTES);
         $role = htmlspecialchars((string) ($user['role'] ?? 'admin'), ENT_QUOTES);
@@ -43,8 +47,8 @@ final class AppToolbar
         $csrfToken = Csrf::token();
 
         $html = <<<HTML
-<div class="app-admin-bar" id="app-admin-bar">
-    <div class="app-admin-bar__left">
+<aside class="app-admin-bar" id="app-admin-bar" aria-label="Панель администратора" lang="ru">
+    <nav class="app-admin-bar__left" aria-label="Управление содержимым">
         <a href="/admin" class="app-admin-bar__brand">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             ASDR CMS
@@ -73,7 +77,7 @@ final class AppToolbar
                 Сбросить кеш
             </button>
         </form>
-    </div>
+    </nav>
 
     <div class="app-admin-bar__right">
         <span class="u-inline-a223f6dc36">
@@ -83,45 +87,9 @@ final class AppToolbar
         <a href="/admin/profile" class="app-admin-bar__btn">Профиль</a>
         <a href="/admin/logout" class="app-admin-bar__btn">Выйти</a>
     </div>
-</div>
-
-<script nonce="%NONCE%">
-document.body.classList.add('has-admin-bar');
-</script>
+</aside>
 HTML;
 
-        $nonce = SecurityHeaders::nonce();
-        $html = str_replace('%NONCE%', $nonce, $html);
-
-        return $html . self::renderPrefetchScript();
-    }
-
-    /**
-     * Скрипт мнимой предзагрузки страниц (Speculative Prefetch < 5ms).
-     */
-    public static function renderPrefetchScript(): string
-    {
-        $nonce = SecurityHeaders::nonce();
-        return <<<HTML
-<script nonce="{$nonce}">
-(function(){
-    var prefetched = new Set();
-    function prefetch(url) {
-        if (!url || prefetched.has(url)) return;
-        prefetched.add(url);
-        var link = document.createElement('link');
-        link.rel = 'prefetch';
-        link.href = url;
-        document.head.appendChild(link);
-    }
-    document.addEventListener('mouseover', function(e) {
-        var a = e.target.closest('a');
-        if (a && a.href && a.origin === location.origin && !a.href.includes('#') && !a.href.includes('/admin')) {
-            prefetch(a.href);
-        }
-    }, {passive: true});
-})();
-</script>
-HTML;
+        return $html;
     }
 }

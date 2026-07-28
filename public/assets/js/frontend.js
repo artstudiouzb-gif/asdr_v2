@@ -1,10 +1,37 @@
 (function () {
     'use strict';
 
-    var labels = window.__frontendLabels || {};
+    var labels = {};
+    var labelsNode = document.getElementById('frontend-labels');
+    if (labelsNode) {
+        try {
+            labels = JSON.parse(labelsNode.textContent || '{}');
+        } catch (error) {
+            labels = {};
+        }
+    }
     var label = function (key, fallback) {
         return typeof labels[key] === 'string' && labels[key] !== '' ? labels[key] : fallback;
     };
+
+    // Same-origin page hints belong to the shared frontend bundle, not to
+    // executable snippets injected into every response.
+    (function () {
+        var prefetched = new Set();
+        document.addEventListener('mouseover', function (event) {
+            var anchor = event.target.closest('a');
+            if (!anchor || !anchor.href || anchor.origin !== location.origin
+                || anchor.href.includes('#') || anchor.href.includes('/admin')
+                || prefetched.has(anchor.href)) {
+                return;
+            }
+            prefetched.add(anchor.href);
+            var link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = anchor.href;
+            document.head.appendChild(link);
+        }, { passive: true });
+    })();
 
     // MP4 в Hero — декоративный фон, а не видеоплеер. Атрибутов разметки
     // достаточно в большинстве браузеров, но после возврата на вкладку или
