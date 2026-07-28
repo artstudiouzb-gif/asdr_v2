@@ -65,7 +65,7 @@ if ($overlayDirection === 'auto' || !isset($overlayAngles[$overlayDirection])) {
 }
 
 // Инлайн-стиль контейнера текста: подложка + переопределения цветов через CSS-переменные.
-$textStyle = ($panelOn ? 'background: rgba(' . $hex2rgb($panelColor) . ', ' . $panelOpacity . ');' : '')
+$textStyle = ($panelOn ? '--hero-panel-bg:rgba(' . $hex2rgb($panelColor) . ', ' . $panelOpacity . ');' : '')
     . ($heroText !== '' ? '--hero-text:' . $heroText . ';' : '')
     . ($heroBtn !== '' ? '--hero-btn:' . $heroBtn . ';' : '');
 
@@ -79,7 +79,7 @@ if ($heroBg !== '') {
     $rgb = $hex2rgb($heroBg);
     // Направление градиента — от стороны с текстом к прозрачному краю.
     $dir = $textPos === 'right' ? '270deg' : ($textPos === 'center' ? '180deg' : '90deg');
-    $heroRootStyle = 'background: linear-gradient(' . $dir . ', rgba(' . $rgb . ',.96) 0%, rgba(' . $rgb . ',.92) 42%, rgba(' . $rgb . ',.55) 72%, rgba(' . $rgb . ',.12) 100%)'
+    $heroRootStyle = '--hero-background:linear-gradient(' . $dir . ', rgba(' . $rgb . ',.96) 0%, rgba(' . $rgb . ',.92) 42%, rgba(' . $rgb . ',.55) 72%, rgba(' . $rgb . ',.12) 100%)'
         // Инлайновый background перебивает navy темы, и сквозь полупрозрачные
         // участки градиента просвечивал белый фон страницы — hero выглядел
         // светлее задуманного. Под медиа подкладываем сплошной navy-слой;

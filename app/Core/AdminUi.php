@@ -332,15 +332,15 @@ final class AdminUi
         $y = is_numeric($yVal) ? max(0, min(100, (int) $yVal)) : 50;
 
         $html = '<div class="form-field focal-field" data-focal-picker data-image-input-name="' . $esc($imageTargetInput) . '">';
-        $html .= '<label class="focal-field__label" style="font-weight:600;margin-bottom:6px;display:block;">Фокальная точка обложки <span class="form-hint">(для мобильного кадрирования)</span></label>';
+        $html .= '<label class="focal-field__label u-inline-e925a44577">Фокальная точка обложки <span class="form-hint">(для мобильного кадрирования)</span></label>';
 
         $html .= '<div class="focal-field__container">';
 
         // Визуальная интерактивная область клика с маркером.
         $html .= '<div class="focal-field__preview" data-focal-canvas title="Кликните по обложке для установки точки фокусировки">';
-        $html .= '<img src="" alt="" data-focal-img style="display:none;">';
+        $html .= '<img class="u-inline-c8be1ccba6" src="" alt="" data-focal-img>';
         $html .= '<div class="focal-field__placeholder" data-focal-placeholder><span>Кликните по фото для установки точки фокусировки</span></div>';
-        $html .= '<div class="focal-field__pin" data-focal-pin style="left:' . $x . '%;top:' . $y . '%;">🎯</div>';
+        $html .= '<div class="focal-field__pin" data-focal-pin style="--focal-x:' . $x . '%;--focal-y:' . $y . '%;">🎯</div>';
         $html .= '</div>';
 
         // Панель быстрой сетки 3x3 и числовых полей.
@@ -395,13 +395,9 @@ final class AdminUi
         $isAllActive = ($currentLang === '' || $currentLang === 'all');
 
         $items[] = sprintf(
-            '<a href="%s" class="%s" style="font-weight:%s;color:%s;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">Все языки <span style="background:%s;color:%s;padding:1px 6px;border-radius:10px;font-size:0.75rem;font-weight:600;">%d</span></a>',
+            '<a href="%s" class="lang-filter-link %s">Все языки <span class="lang-filter-count">%d</span></a>',
             htmlspecialchars($allUrl, ENT_QUOTES),
             $isAllActive ? 'is-active' : '',
-            $isAllActive ? '700' : '500',
-            $isAllActive ? 'var(--admin-primary,#2563eb)' : 'var(--admin-text,#334155)',
-            $isAllActive ? '#eff6ff' : '#f1f5f9',
-            $isAllActive ? '#2563eb' : '#64748b',
             $allCount
         );
 
@@ -417,20 +413,16 @@ final class AdminUi
             $isActive = ($currentLang === $code);
 
             $items[] = sprintf(
-                '<a href="%s" class="%s" style="font-weight:%s;color:%s;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">%s <span style="background:%s;color:%s;padding:1px 6px;border-radius:10px;font-size:0.75rem;font-weight:600;">%d</span></a>',
+                '<a href="%s" class="lang-filter-link %s">%s <span class="lang-filter-count">%d</span></a>',
                 htmlspecialchars($url, ENT_QUOTES),
                 $isActive ? 'is-active' : '',
-                $isActive ? '700' : '500',
-                $isActive ? 'var(--admin-primary,#2563eb)' : 'var(--admin-text,#334155)',
                 htmlspecialchars($name, ENT_QUOTES),
-                $isActive ? '#eff6ff' : '#f1f5f9',
-                $isActive ? '#2563eb' : '#64748b',
                 $count
             );
         }
 
-        return '<div class="lang-subsubsub-bar" style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;font-size:0.88rem;padding:10px 16px;background:var(--admin-card-bg,#ffffff);border:1px solid var(--admin-border,#e2e8f0);border-radius:10px;box-shadow:0 1px 2px rgba(0,0,0,0.03);">'
-            . implode('<span style="color:#cbd5e1;font-weight:300;">|</span>', $items)
+        return '<div class="lang-subsubsub-bar u-inline-c0f5c28d5f">'
+            . implode('<span class="u-inline-16a33d931a">|</span>', $items)
             . '</div>';
     }
 
@@ -446,55 +438,54 @@ final class AdminUi
         $title = htmlspecialchars((string) ($data['title'] ?? 'Заголовок вашей новости'), ENT_QUOTES);
         $excerpt = htmlspecialchars((string) ($data['excerpt'] ?? $data['meta_description'] ?? 'Краткое описание или лид новости отображается здесь...'), ENT_QUOTES);
         $image = htmlspecialchars((string) ($data['image_url'] ?? ''), ENT_QUOTES);
-
-        $imgStyle = $image !== '' ? 'block' : 'none';
-        $noImgStyle = $image === '' ? 'inline-block' : 'none';
+        $imageClass = $image === '' ? ' is-hidden' : '';
+        $placeholderClass = $image !== '' ? ' is-hidden' : '';
 
         return <<<HTML
-<div class="seo-live-preview" style="margin-top:20px;border:1px solid var(--admin-border,#e2e8f0);border-radius:12px;padding:20px;background:var(--admin-card-bg,#ffffff);box-shadow:0 1px 3px rgba(0,0,0,0.03);">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;border-bottom:1px solid #f1f5f9;padding-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:1.05rem;color:var(--admin-ink,#0f172a);">
+<div class="seo-live-preview u-inline-136e5b68ed">
+    <div class="u-inline-7d8f4cd990">
+        <div class="u-inline-a359bfa933">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             Интерактивный SEO & Соцсети Предпросмотр
         </div>
-        <div class="seo-preview-tabs" style="display:flex;gap:6px;">
-            <button type="button" class="btn btn--small btn--outline is-active" data-seo-tab="google" style="font-size:0.8rem;">🔍 Поисковики (Google/Yandex)</button>
-            <button type="button" class="btn btn--small btn--outline" data-seo-tab="social" style="font-size:0.8rem;">💬 Telegram & Соцсети</button>
+        <div class="seo-preview-tabs u-inline-1d8943fa86">
+            <button type="button" class="btn btn--small btn--outline is-active u-inline-94db95e1b0" data-seo-tab="google">🔍 Поисковики (Google/Yandex)</button>
+            <button type="button" class="btn btn--small btn--outline u-inline-94db95e1b0" data-seo-tab="social">💬 Telegram & Соцсети</button>
         </div>
     </div>
 
     <!-- 1. Google / Yandex Card -->
-    <div class="seo-preview-panel" data-seo-panel="google" style="display:block;">
-        <div style="font-family:arial,sans-serif;max-width:600px;background:#fff;padding:14px 18px;border-radius:8px;border:1px solid #e2e8f0;">
-            <div style="font-size:12px;color:#202124;display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-                <span style="display:inline-block;width:16px;height:16px;background:#2563eb;color:#fff;border-radius:50%;text-align:center;line-height:16px;font-size:10px;font-weight:bold;">A</span>
-                <span style="color:#202124;font-size:14px;">{$siteName}</span>
-                <span style="color:#5f6368;font-size:12px;">https://{$domain} › news › ...</span>
+    <div class="seo-preview-panel u-inline-21d91b7027" data-seo-panel="google">
+        <div class="u-inline-b75b1843b5">
+            <div class="u-inline-d60c3b2481">
+                <span class="u-inline-0484dc067f">A</span>
+                <span class="u-inline-43ae67e204">{$siteName}</span>
+                <span class="u-inline-ab7dab3c79">https://{$domain} › news › ...</span>
             </div>
-            <div style="font-size:20px;color:#1a0dab;line-height:1.3;margin-bottom:4px;word-break:break-word;" data-seo-google-title>
+            <div class="u-inline-152ccfa629" data-seo-google-title>
                 {$title}
             </div>
-            <div style="font-size:14px;color:#4d5156;line-height:1.5;word-break:break-word;" data-seo-google-desc>
+            <div class="u-inline-f8b0a0e950" data-seo-google-desc>
                 {$excerpt}
             </div>
         </div>
-        <div style="margin-top:10px;display:flex;gap:16px;font-size:0.78rem;color:#64748b;">
+        <div class="u-inline-6804b2c0e5">
             <span>Заголовок: <strong data-seo-title-count>0</strong> / 60 симв.</span>
             <span>Описание: <strong data-seo-desc-count>0</strong> / 160 симв.</span>
         </div>
     </div>
 
     <!-- 2. Telegram / Social Card -->
-    <div class="seo-preview-panel" data-seo-panel="social" style="display:none;">
-        <div style="max-width:440px;background:#182533;color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-            <div class="seo-social-img-wrap" style="height:200px;background:#0e1621;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-                <img src="{$image}" alt="" data-seo-social-img style="width:100%;height:100%;object-fit:cover;display:{$imgStyle};">
-                <span data-seo-social-noimg style="color:#6c7883;font-size:13px;display:{$noImgStyle};">🖼️ Фотография новости</span>
+    <div class="seo-preview-panel u-inline-c8be1ccba6" data-seo-panel="social">
+        <div class="u-inline-99bcb5a34b">
+            <div class="seo-social-img-wrap u-inline-0d855cb4f4">
+                <img class="seo-social-image{$imageClass}" src="{$image}" alt="" data-seo-social-img>
+                <span class="seo-social-placeholder{$placeholderClass}" data-seo-social-noimg>🖼️ Фотография новости</span>
             </div>
-            <div style="padding:14px 16px;">
-                <div style="font-weight:700;font-size:15px;margin-bottom:6px;color:#ffffff;line-height:1.3;" data-seo-social-title>{$title}</div>
-                <div style="font-size:13px;color:#7f91a4;line-height:1.4;margin-bottom:10px;" data-seo-social-desc>{$excerpt}</div>
-                <div style="font-size:12px;color:#64748b;text-transform:lowercase;display:flex;align-items:center;gap:4px;">
+            <div class="u-inline-4680c65b6a">
+                <div class="u-inline-7235472cc2" data-seo-social-title>{$title}</div>
+                <div class="u-inline-4774201452" data-seo-social-desc>{$excerpt}</div>
+                <div class="u-inline-2ce9644849">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                     {$domain}
                 </div>

@@ -64,214 +64,6 @@ $heightSelect = function (string $name, string $current): string {
     return $out . '</select>';
 };
 ?>
-
-<style>
-/* Премиальный дизайн рабочего пространства Конструктора Шапки Pro Max */
-.hdr-workspace-header {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: #ffffff;
-    border-radius: 16px;
-    padding: 20px 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-.hdr-workspace-header__title {
-    font-size: 1.35rem;
-    font-weight: 800;
-    margin: 0 0 4px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.hdr-workspace-header__desc {
-    font-size: 0.9rem;
-    color: #94a3b8;
-    margin: 0;
-}
-
-/* Предпросмотр шапки */
-.hdr-live-preview {
-    background: var(--admin-surface, #ffffff);
-    border: 1px solid var(--admin-border, #e2e8f0);
-    border-radius: 14px;
-    padding: 16px 20px;
-    margin-bottom: 24px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.03);
-}
-.hdr-live-preview__head {
-    font-size: 0.82rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--admin-text-muted, #64748b);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.hdr-live-preview__box {
-    border: 1px solid var(--admin-border, #e2e8f0);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-}
-.hdr-live-preview__top {
-    padding: 6px 16px;
-    font-size: 0.78rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #173a63;
-    color: #ffffff;
-    transition: all 0.2s ease;
-}
-.hdr-live-preview__main {
-    padding: 14px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #ffffff;
-    border-top: 1px solid #e2e8f0;
-    transition: all 0.2s ease;
-}
-.hdr-live-preview__logo {
-    font-weight: 800;
-    font-size: 1.05rem;
-    letter-spacing: -0.02em;
-    color: var(--admin-text, #0f172a);
-}
-.hdr-live-preview__nav {
-    display: flex;
-    gap: 18px;
-    font-size: 0.88rem;
-    font-weight: 600;
-}
-.hdr-live-preview__nav-item {
-    color: var(--prev-nav-color, #1e293b);
-    text-decoration: none;
-    padding: 4px 0;
-    position: relative;
-    transition: color 0.15s ease;
-}
-.hdr-live-preview__nav-item.is-active,
-.hdr-live-preview__nav-item:hover {
-    color: var(--prev-nav-active, #0284c7);
-}
-
-/* Модульная панель навигации по вкладкам */
-.hdr-tabs-nav {
-    display: flex;
-    gap: 8px;
-    background: var(--admin-bg, #f1f5f9);
-    padding: 6px;
-    border-radius: 12px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-}
-.hdr-tab-btn {
-    flex: 1;
-    min-width: 170px;
-    padding: 10px 14px;
-    border: none;
-    background: transparent;
-    border-radius: 8px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--admin-text-muted, #64748b);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-}
-.hdr-tab-btn:hover {
-    color: var(--admin-text, #0f172a);
-    background: rgba(255,255,255,0.6);
-}
-.hdr-tab-btn.is-active {
-    background: #ffffff;
-    color: var(--admin-accent, #2563eb);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-/* Визуальные карточки селекторов */
-.hdr-card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 16px;
-    margin-top: 12px;
-}
-.hdr-select-card {
-    background: var(--admin-surface, #ffffff);
-    border: 2px solid var(--admin-border, #e2e8f0);
-    border-radius: 12px;
-    padding: 16px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    transition: all 0.2s ease;
-    position: relative;
-}
-.hdr-select-card:hover {
-    border-color: var(--admin-accent-soft, #93c5fd);
-    transform: translateY(-2px);
-}
-.hdr-select-card.is-selected {
-    border-color: var(--admin-accent, #2563eb);
-    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
-    box-shadow: 0 4px 14px rgba(37,99,235,0.08);
-}
-.hdr-select-card__title {
-    font-weight: 700;
-    font-size: 0.98rem;
-    color: var(--admin-text, #0f172a);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.hdr-select-card__desc {
-    font-size: 0.82rem;
-    color: var(--admin-text-muted, #64748b);
-    line-height: 1.4;
-}
-.hdr-select-card input[type="radio"] {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-}
-
-.hb-inline-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px;
-    margin-top: 12px;
-}
-.color-picker-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--admin-bg, #f8fafc);
-    border: 1px solid var(--admin-border, #e2e8f0);
-    border-radius: 8px;
-    padding: 6px 12px;
-}
-.color-picker-group input[type="color"] {
-    border: none;
-    width: 36px;
-    height: 30px;
-    border-radius: 4px;
-    cursor: pointer;
-    background: transparent;
-}
-</style>
-
 <div class="admin-builder-workspace">
     <!-- Workspace Header Banner -->
     <div class="hdr-workspace-header">
@@ -284,7 +76,7 @@ $heightSelect = function (string $name, string $current): string {
             </p>
         </div>
         <div>
-            <a class="btn btn--outline" href="/admin/menu" target="_blank" style="background:rgba(255,255,255,0.1); color:#fff; border-color:rgba(255,255,255,0.25);">
+            <a class="btn btn--outline u-inline-608586e10d" href="/admin/menu" target="_blank">
                 <?= AdminUi::icon('edit') ?> Пункты меню →
             </a>
         </div>
@@ -294,7 +86,7 @@ $heightSelect = function (string $name, string $current): string {
     <div class="hdr-live-preview">
         <div class="hdr-live-preview__head">
             <span><?= AdminUi::icon('eye', 16) ?> Интерактивный предпросмотр структуры шапки</span>
-            <span style="font-weight:normal;text-transform:none;color:var(--admin-accent,#2563eb);">Изменения отображаются мгновенно</span>
+            <span class="u-inline-2921120983">Изменения отображаются мгновенно</span>
         </div>
         <div class="hdr-live-preview__box">
             <div class="hdr-live-preview__top" id="prevTopbar">
@@ -341,11 +133,11 @@ $heightSelect = function (string $name, string $current): string {
         <!-- MODULE 1: ARCHITECTURE & GLASSMORPHISM -->
         <div class="admin-tab-content is-active" id="tab-hdr-arch">
             <!-- Container Mode Card Selector -->
-            <div class="header-builder__group form-card" style="padding:20px;">
-                <h3 style="margin:0 0 4px; font-size:1.1rem; color:var(--admin-text,#0f172a);">
+            <div class="header-builder__group form-card u-inline-8cddc29a69">
+                <h3 class="u-inline-0e0c39e056">
                     1. Форма и Режим Контейнера Шапки (Container Mode)
                 </h3>
-                <p class="form-hint" style="margin-top:0;">Выберите архитектуру отображения шапки относительно краев экрана.</p>
+                <p class="form-hint u-inline-291b7bbb01">Выберите архитектуру отображения шапки относительно краев экрана.</p>
 
                 <div class="hdr-card-grid">
                     <?php $cmode = $config['container_mode'] ?? 'full'; ?>
@@ -370,11 +162,11 @@ $heightSelect = function (string $name, string $current): string {
             </div>
 
             <!-- Glassmorphic Engine Controls -->
-            <div class="header-builder__group form-card" style="margin-top:20px; padding:20px; background: linear-gradient(135deg, rgba(37,99,235,0.02) 0%, rgba(147,197,253,0.05) 100%);">
-                <h3 style="margin:0 0 4px; font-size:1.1rem; color:var(--admin-text,#0f172a); display:flex; align-items:center; gap:8px;">
+            <div class="header-builder__group form-card u-inline-108a780011">
+                <h3 class="u-inline-39a35c5e86">
                     <?= AdminUi::icon('sliders', 20, 'text-primary') ?> 2. Движок парящего стекла (Glassmorphism Engine)
                 </h3>
-                <p class="form-hint" style="margin-top:0;">Настройте прозрачность, скругление, матовость и направление градиента парящей капсулы.</p>
+                <p class="form-hint u-inline-291b7bbb01">Настройте прозрачность, скругление, матовость и направление градиента парящей капсулы.</p>
 
                 <div class="hb-inline-grid">
                     <div class="form-field">
@@ -431,11 +223,11 @@ $heightSelect = function (string $name, string $current): string {
             </div>
 
             <!-- Scroll Behavior Switches -->
-            <div class="header-builder__group form-card" style="margin-top:20px; padding:20px;">
-                <h3 style="margin:0 0 4px; font-size:1.1rem; color:var(--admin-text,#0f172a);">
+            <div class="header-builder__group form-card u-inline-d40eaf045d">
+                <h3 class="u-inline-0e0c39e056">
                     3. Поведение при прокрутке и Прозрачность
                 </h3>
-                <div class="hb-behavior__options" style="margin-top:12px;">
+                <div class="hb-behavior__options u-inline-9374e84210">
                     <label class="hb-behavior-card">
                         <span class="hb-switch">
                             <input type="checkbox" name="header_sticky" value="1" <?= !empty($config['sticky']) ? 'checked' : '' ?>>
@@ -466,14 +258,14 @@ $heightSelect = function (string $name, string $current): string {
             </div>
 
             <!-- Element Spacing Density Control -->
-            <div class="header-builder__group form-card" style="margin-top:20px; padding:20px;">
-                <h3 style="margin:0 0 4px; font-size:1.1rem; color:var(--admin-text,#0f172a); display:flex; align-items:center; gap:8px;">
+            <div class="header-builder__group form-card u-inline-d40eaf045d">
+                <h3 class="u-inline-39a35c5e86">
                     <?= AdminUi::icon('maximize', 20, 'text-primary') ?> 4. Плотность и расстояния между элементами (Element Spacing)
                 </h3>
-                <p class="form-hint" style="margin-top:0;">Управляйте отступами между логотипом, элементами, поиском и кнопками в зонах шапки.</p>
+                <p class="form-hint u-inline-291b7bbb01">Управляйте отступами между логотипом, элементами, поиском и кнопками в зонах шапки.</p>
 
                 <?php $elGap = $config['styles']['elements_gap'] ?? 'normal'; ?>
-                <div class="hb-inline-grid" style="margin-top:16px;">
+                <div class="hb-inline-grid u-inline-8a359a76eb">
                     <div class="form-field">
                         <label for="styles_elements_gap">Отступ между элементами в зонах</label>
                         <select id="styles_elements_gap" name="styles_elements_gap">
@@ -490,14 +282,14 @@ $heightSelect = function (string $name, string $current): string {
 
         <!-- MODULE 2: MENU & INDICATORS -->
         <div class="admin-tab-content" id="tab-hdr-menu">
-            <div class="header-builder__group form-card" style="padding:20px;">
-                <h3 style="margin:0 0 4px; font-size:1.1rem; color:var(--admin-text,#0f172a);">
+            <div class="header-builder__group form-card u-inline-8cddc29a69">
+                <h3 class="u-inline-0e0c39e056">
                     Стили подсветки и Адаптивность Главного Меню
                 </h3>
-                <p class="form-hint" style="margin-top:0;">Выберите стиль индикации активного раздела, иконок и разделителей.</p>
+                <p class="form-hint u-inline-291b7bbb01">Выберите стиль индикации активного раздела, иконок и разделителей.</p>
 
                 <?php $st = $config['styles'] ?? []; ?>
-                <div class="hb-inline-grid" style="margin-top:16px;">
+                <div class="hb-inline-grid u-inline-8a359a76eb">
                     <div class="form-field">
                         <label for="styles_nav_style_type">Индикатор активности / наведения</label>
                         <select id="styles_nav_style_type" name="styles_nav_style_type">
@@ -519,8 +311,8 @@ $heightSelect = function (string $name, string $current): string {
                 </div>
 
                 <!-- Настройки неоновой линии подчеркивания меню (Hoverline) -->
-                <div style="margin-top:20px; padding:16px; background:var(--admin-bg-subtle,#f8fafc); border:1px solid var(--admin-border,#e2e8f0); border-radius:8px;">
-                    <h4 style="margin:0 0 12px; font-size:0.95rem; font-weight:700; color:var(--admin-text,#0f172a);">
+                <div class="u-inline-d4e35c613b">
+                    <h4 class="u-inline-2e67dd3b15">
                         Параметры линии подчеркивания меню (Hoverline)
                     </h4>
                     <div class="hb-inline-grid">
@@ -557,7 +349,7 @@ $heightSelect = function (string $name, string $current): string {
                     </div>
                 </div>
 
-                <div class="hb-inline-grid" style="margin-top:20px; padding-top:16px; border-top:1px solid var(--admin-border,#e2e8f0);">
+                <div class="hb-inline-grid u-inline-c90ff0dd8c">
                     <div class="form-field">
                         <label for="styles_nav_font_size">Размер шрифта пунктов</label>
                         <select id="styles_nav_font_size" name="styles_nav_font_size">
@@ -599,14 +391,14 @@ $heightSelect = function (string $name, string $current): string {
 
         <!-- MODULE 3: VISUAL ZONE BUILDER -->
         <div class="admin-tab-content" id="tab-hdr-builder">
-            <div class="header-builder__group form-card" style="padding:20px;">
-                <h3 style="margin:0 0 4px; font-size:1.1rem; color:var(--admin-text,#0f172a);">
+            <div class="header-builder__group form-card u-inline-8cddc29a69">
+                <h3 class="u-inline-0e0c39e056">
                     Интерактивный конструктор элементов по зонам
                 </h3>
-                <p class="form-hint" style="margin-top:0;">Перетаскивайте элемент <code>Главное меню</code>, <code>Логотип</code>, Поиск и утилиты из палитры в нужные зоны шапки.</p>
+                <p class="form-hint u-inline-291b7bbb01">Перетаскивайте элемент <code>Главное меню</code>, <code>Логотип</code>, Поиск и утилиты из палитры в нужные зоны шапки.</p>
 
                 <!-- Palette of available elements -->
-                <div class="hb-palette" style="margin-top:16px;">
+                <div class="hb-palette u-inline-8a359a76eb">
                     <div class="hb-palette__title">Доступные элементы (перетащите в нужную зону):</div>
                     <div class="hb-palette__items hdr-builder__palette" data-hdr-zone="palette">
                         <?php foreach (array_keys($elements) as $type): ?>
@@ -616,7 +408,7 @@ $heightSelect = function (string $name, string $current): string {
                 </div>
 
                 <!-- Main Middlebar Zone Editor -->
-                <div class="hb-section" data-hdr-builder style="margin-top:20px;">
+                <div class="hb-section u-inline-9eb125f52f" data-hdr-builder>
                     <div class="hb-section__head">
                         <div class="hb-section__title">Основная секция (Middlebar)</div>
                         <div class="hb-section__height">Высота: <?= $heightSelect('middlebar_height', $config['middlebar']['height'] ?? 'normal') ?></div>
@@ -625,10 +417,10 @@ $heightSelect = function (string $name, string $current): string {
                 </div>
 
                 <!-- Topbar Zone Editor -->
-                <div class="hb-section" data-hdr-builder style="margin-top:20px;">
+                <div class="hb-section u-inline-9eb125f52f" data-hdr-builder>
                     <div class="hb-section__head">
                         <div class="hb-section__title">Верхняя полоса (Topbar)</div>
-                        <div style="display:flex; gap:16px; align-items:center;">
+                        <div class="u-inline-138b28c6d0">
                             <label><input type="checkbox" name="topbar_enabled" value="1" <?= !empty($config['topbar']['enabled']) ? 'checked' : '' ?>> Включить Topbar</label>
                             <label><input type="checkbox" name="topbar_border" value="1" <?= !empty($config['topbar']['show_border']) ? 'checked' : '' ?>> Граница</label>
                             <div class="hb-section__height">Высота: <?= $heightSelect('topbar_height', $config['topbar']['height'] ?? 'normal') ?></div>
@@ -638,7 +430,7 @@ $heightSelect = function (string $name, string $current): string {
                 </div>
 
                 <!-- Bottombar Zone Editor -->
-                <div class="hb-section" data-hdr-builder style="margin-top:20px;">
+                <div class="hb-section u-inline-9eb125f52f" data-hdr-builder>
                     <div class="hb-section__head">
                         <div class="hb-section__title">Нижняя полоса (Bottombar)</div>
                         <div class="hb-section__height">Высота: <?= $heightSelect('bottombar_height', $config['bottombar']['height'] ?? 'normal') ?></div>
@@ -651,14 +443,14 @@ $heightSelect = function (string $name, string $current): string {
         <!-- MODULE 4: ELEMENT CONTROLS & TOOLS SETUP -->
         <div class="admin-tab-content" id="tab-hdr-elements">
             <!-- 1. Language Switcher Controls -->
-            <div class="header-builder__group form-card" style="padding:20px;">
-                <h3 style="margin:0 0 4px; font-size:1.1rem; color:var(--admin-text,#0f172a); display:flex; align-items:center; gap:8px;">
+            <div class="header-builder__group form-card u-inline-8cddc29a69">
+                <h3 class="u-inline-39a35c5e86">
                     <?= AdminUi::icon('globe', 20, 'text-primary') ?> 1. Настройка Переключателя Языков
                 </h3>
-                <p class="form-hint" style="margin-top:0;">Управляйте видом, форматом и поведением отображения переключателя языков в шапке.</p>
+                <p class="form-hint u-inline-291b7bbb01">Управляйте видом, форматом и поведением отображения переключателя языков в шапке.</p>
 
                 <?php $lsCfg = $config['language_switcher'] ?? []; ?>
-                <div class="hb-inline-grid" style="margin-top:16px;">
+                <div class="hb-inline-grid u-inline-8a359a76eb">
                     <div class="form-field">
                         <label for="ls_format">Формат подписи языка</label>
                         <select id="ls_format" name="ls_format">
@@ -678,7 +470,7 @@ $heightSelect = function (string $name, string $current): string {
                     </div>
                 </div>
 
-                <div class="hb-behavior__options" style="margin-top:16px;">
+                <div class="hb-behavior__options u-inline-8a359a76eb">
                     <label class="hb-behavior-card">
                         <span class="hb-switch">
                             <input type="checkbox" name="ls_enabled" value="1" <?= !empty($lsCfg['enabled']) ? 'checked' : '' ?>>
@@ -700,14 +492,14 @@ $heightSelect = function (string $name, string $current): string {
             </div>
 
             <!-- 2. CTA Button Controls -->
-            <div class="header-builder__group form-card" style="margin-top:20px; padding:20px;">
-                <h3 style="margin:0 0 4px; font-size:1.1rem; color:var(--admin-text,#0f172a);">
+            <div class="header-builder__group form-card u-inline-d40eaf045d">
+                <h3 class="u-inline-0e0c39e056">
                     2. Кнопка призыва к действию (CTA Button)
                 </h3>
-                <p class="form-hint" style="margin-top:0;">Настройте текст, ссылку, стиль и иконку яркой кнопки в шапке.</p>
+                <p class="form-hint u-inline-291b7bbb01">Настройте текст, ссылку, стиль и иконку яркой кнопки в шапке.</p>
 
                 <?php $ctaCfg = $config['cta'] ?? []; ?>
-                <div class="hb-inline-grid" style="margin-top:16px;">
+                <div class="hb-inline-grid u-inline-8a359a76eb">
                     <div class="form-field">
                         <label for="cta_text">Текст на кнопке</label>
                         <input id="cta_text" name="cta_text" type="text" placeholder="Например: Записаться" value="<?= htmlspecialchars($ctaCfg['text'] ?? '', ENT_QUOTES) ?>">
@@ -740,7 +532,7 @@ $heightSelect = function (string $name, string $current): string {
                     </div>
                 </div>
 
-                <div class="hb-behavior__options" style="margin-top:16px;">
+                <div class="hb-behavior__options u-inline-8a359a76eb">
                     <label class="hb-behavior-card">
                         <span class="hb-switch">
                             <input type="checkbox" name="cta_enabled" value="1" <?= !empty($ctaCfg['enabled']) ? 'checked' : '' ?>>
@@ -753,13 +545,13 @@ $heightSelect = function (string $name, string $current): string {
             </div>
 
             <!-- 3. Search & Social Controls -->
-            <div class="header-builder__group form-card" style="margin-top:20px; padding:20px;">
-                <h3 style="margin:0 0 4px; font-size:1.1rem; color:var(--admin-text,#0f172a);">
+            <div class="header-builder__group form-card u-inline-d40eaf045d">
+                <h3 class="u-inline-0e0c39e056">
                     3. Поиск по сайту и Социальные сети
                 </h3>
 
                 <?php $srchCfg = $config['search'] ?? []; ?>
-                <div class="hb-inline-grid" style="margin-top:16px;">
+                <div class="hb-inline-grid u-inline-8a359a76eb">
                     <div class="form-field">
                         <label for="search_style">Стиль поля поиска</label>
                         <select id="search_style" name="search_style">
@@ -787,12 +579,12 @@ $heightSelect = function (string $name, string $current): string {
 
         <!-- MODULE 5: LOGOS & BRANDING -->
         <div class="admin-tab-content" id="tab-hdr-logos">
-            <div class="header-builder__group form-card" style="padding:20px;">
-                <h3 style="margin:0 0 4px; font-size:1.1rem; color:var(--admin-text,#0f172a);">
+            <div class="header-builder__group form-card u-inline-8cddc29a69">
+                <h3 class="u-inline-0e0c39e056">
                     Логотипы и Мультиязычный Брендинг
                 </h3>
 
-                <div class="hb-inline-grid" style="margin-top:16px;">
+                <div class="hb-inline-grid u-inline-8a359a76eb">
                     <div class="form-field">
                         <label for="logo_position">Позиционирование логотипа</label>
                         <select id="logo_position" name="logo_position">
@@ -810,7 +602,7 @@ $heightSelect = function (string $name, string $current): string {
                     </div>
                 </div>
 
-                <div class="hb-behavior__media" style="margin-top:20px;">
+                <div class="hb-behavior__media u-inline-9eb125f52f">
                     <?= AdminUi::imageField('logo_light', $config['logo_light'] ?? '', [
                         'label' => 'Светлый (белый) логотип для прозрачной шапки над баннером',
                         'file' => 'logo_light_file',
@@ -819,11 +611,11 @@ $heightSelect = function (string $name, string $current): string {
 
                 <?php $hdrLangs = \App\Models\Language::active(); ?>
                 <?php if (count($hdrLangs) > 1): ?>
-                    <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--admin-border,#e2e8f0);">
-                        <label class="form-label" style="font-weight:700;">Логотипы по языкам</label>
+                    <div class="u-inline-c90ff0dd8c">
+                        <label class="form-label u-inline-758a887326">Логотипы по языкам</label>
                         <?php foreach ($hdrLangs as $hlang): $hc = htmlspecialchars((string) $hlang['code'], ENT_QUOTES); ?>
-                            <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--admin-border,#e2e8f0);">
-                                <div style="font-weight:600; margin-bottom:8px;"><?= htmlspecialchars((string) $hlang['name'], ENT_QUOTES) ?> (<?= $hc ?>)</div>
+                            <div class="u-inline-43a8ae377d">
+                                <div class="u-inline-78a7b9be58"><?= htmlspecialchars((string) $hlang['name'], ENT_QUOTES) ?> (<?= $hc ?>)</div>
                                 <div class="hb-inline-grid">
                                     <?= AdminUi::imageField('logo_lang_' . $hc, (string) ($config['logo_by_lang'][$hlang['code']] ?? ''), [
                                         'label' => 'Логотип',
@@ -843,12 +635,12 @@ $heightSelect = function (string $name, string $current): string {
 
         <!-- MODULE 5: COLORS & UTILITIES -->
         <div class="admin-tab-content" id="tab-hdr-styles">
-            <div class="header-builder__group form-card" style="padding:20px;">
-                <h3 style="margin:0 0 4px; font-size:1.1rem; color:var(--admin-text,#0f172a);">
+            <div class="header-builder__group form-card u-inline-8cddc29a69">
+                <h3 class="u-inline-0e0c39e056">
                     Цветовая палитра полос и границы
                 </h3>
 
-                <div class="hb-inline-grid" style="margin-top:16px;">
+                <div class="hb-inline-grid u-inline-8a359a76eb">
                     <div class="form-field">
                         <label>Фон верхней полосы (Topbar)</label>
                         <div class="color-picker-group">
@@ -886,7 +678,7 @@ $heightSelect = function (string $name, string $current): string {
                     </div>
                 </div>
 
-                <div class="form-field hb-divider-field" style="margin-top:20px; padding-top:16px; border-top:1px solid var(--admin-border,#e2e8f0);">
+                <div class="form-field hb-divider-field u-inline-c90ff0dd8c">
                     <label for="borders">Разделительные линии секций</label>
                     <select id="borders" name="borders">
                         <option value="full" <?= ($config['borders'] ?? 'full') === 'full' ? 'selected' : '' ?>>Во всю ширину экрана</option>
@@ -897,11 +689,11 @@ $heightSelect = function (string $name, string $current): string {
             </div>
 
             <!-- Contacts & Snippet -->
-            <div class="header-builder__group form-card" style="margin-top:20px; padding:20px;">
-                <h3 style="margin:0 0 4px; font-size:1.1rem; color:var(--admin-text,#0f172a);">
+            <div class="header-builder__group form-card u-inline-d40eaf045d">
+                <h3 class="u-inline-0e0c39e056">
                     Контакты и Произвольный HTML-сниппет
                 </h3>
-                <div class="hb-inline-grid" style="margin-top:16px;">
+                <div class="hb-inline-grid u-inline-8a359a76eb">
                     <div class="form-field">
                         <label for="contact_phone">Телефон шапки</label>
                         <input id="contact_phone" name="contact_phone" type="text" value="<?= htmlspecialchars($config['contacts']['phone'] ?? '', ENT_QUOTES) ?>">
@@ -912,15 +704,15 @@ $heightSelect = function (string $name, string $current): string {
                     </div>
                 </div>
 
-                <div class="form-field" style="margin-top:16px;">
+                <div class="form-field u-inline-8a359a76eb">
                     <label for="snippet">Произвольный HTML-сниппет (отображается в утилитах)</label>
-                    <textarea id="snippet" name="snippet" rows="3" class="form-control" style="font-family:monospace;"><?= htmlspecialchars($config['snippet'] ?? '', ENT_QUOTES) ?></textarea>
+                    <textarea id="snippet" name="snippet" rows="3" class="form-control u-inline-8ff9961267"><?= htmlspecialchars($config['snippet'] ?? '', ENT_QUOTES) ?></textarea>
                 </div>
             </div>
         </div>
 
-        <div class="form-actions form-actions--sticky" style="margin-top:24px;">
-            <button type="submit" class="btn btn--primary btn--large" style="padding:12px 28px; font-weight:700; font-size:1rem;">
+        <div class="form-actions form-actions--sticky u-inline-3343fd6464">
+            <button type="submit" class="btn btn--primary btn--large u-inline-b3b6c6d715">
                 <?= AdminUi::icon('save') ?> Сохранить всю конфигурацию шапки
             </button>
         </div>

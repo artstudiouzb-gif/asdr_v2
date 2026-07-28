@@ -70,7 +70,7 @@ $fields = $form['fields'] ?? [];
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="form-field" data-field-options-container style="display:none;">
+                        <div class="form-field u-inline-c8be1ccba6" data-field-options-container>
                             <label>Варианты выбора (через запятую)</label>
                             <input type="text" name="fields[<?= $i ?>][options]" value="<?= htmlspecialchars($field['options'] ?? '', ENT_QUOTES) ?>" placeholder="Вариант 1, Вариант 2, Вариант 3">
                         </div>
@@ -80,7 +80,7 @@ $fields = $form['fields'] ?? [];
                         </div>
                         <div class="form-field">
                             <label>Условие показа (необязательно)</label>
-                            <div style="display:flex;gap:8px;">
+                            <div class="u-inline-b9bbe540d3">
                                 <input type="text" name="fields[<?= $i ?>][condition_field]" placeholder="имя другого поля" value="<?= htmlspecialchars($field['condition']['field'] ?? '', ENT_QUOTES) ?>">
                                 <input type="text" name="fields[<?= $i ?>][condition_value]" placeholder="= значение" value="<?= htmlspecialchars($field['condition']['value'] ?? '', ENT_QUOTES) ?>">
                             </div>
@@ -114,7 +114,7 @@ $fields = $form['fields'] ?? [];
                         <option value="date">Дата</option>
                     </select>
                 </div>
-                <div class="form-field" data-field-options-container style="display:none;">
+                <div class="form-field u-inline-c8be1ccba6" data-field-options-container>
                     <label>Варианты выбора (через запятую)</label>
                     <input type="text" name="fields[__INDEX__][options]" placeholder="Вариант 1, Вариант 2, Вариант 3">
                 </div>
@@ -124,7 +124,7 @@ $fields = $form['fields'] ?? [];
                 </div>
                 <div class="form-field">
                     <label>Условие показа (необязательно)</label>
-                    <div style="display:flex;gap:8px;">
+                    <div class="u-inline-b9bbe540d3">
                         <input type="text" name="fields[__INDEX__][condition_field]" placeholder="имя другого поля">
                         <input type="text" name="fields[__INDEX__][condition_value]" placeholder="= значение">
                     </div>

@@ -14,8 +14,8 @@ $langMap = \App\Models\Video::availableLangsForIds(array_map(static fn ($i): int
 ?>
 <p class="form-hint">Видео можно выводить на главной в блоке «Медиа» (источник «Видео») — отмеченные галочкой «Показать на главной» подтягиваются автоматически.</p>
 
-<div class="form-card" style="margin-bottom:20px;">
-    <h2 style="margin-top:0;">Новое видео</h2>
+<div class="form-card u-inline-7dde5e56b3">
+    <h2 class="u-inline-291b7bbb01">Новое видео</h2>
     <form method="post" action="/admin/videos/create" class="form-grid">
         <?= Csrf::field() ?>
         <div class="form-field">
@@ -39,7 +39,7 @@ $langMap = \App\Models\Video::availableLangsForIds(array_map(static fn ($i): int
             <?php foreach ($items as $item): ?>
                 <tr>
                     <td><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></td>
-                    <td style="white-space:nowrap;"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? []]) ?></td>
+                    <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? []]) ?></td>
                     <td><?= htmlspecialchars((string) ($item['duration'] ?? ''), ENT_QUOTES) ?></td>
                     <td>
                         <?php if ((int) $item['is_published'] === 1): ?>
@@ -49,10 +49,10 @@ $langMap = \App\Models\Video::availableLangsForIds(array_map(static fn ($i): int
                         <?php endif; ?>
                         <?php if (!empty($item['is_featured'])): ?><span class="badge badge--success" title="Показывается в блоке «Медиа» на главной">★ на главной</span><?php endif; ?>
                     </td>
-                    <td style="white-space:nowrap;"><?= htmlspecialchars((string) $item['created_at'], ENT_QUOTES) ?></td>
+                    <td class="u-inline-a9efa5449f"><?= htmlspecialchars((string) $item['created_at'], ENT_QUOTES) ?></td>
                     <td class="data-table__actions">
                         <a href="/admin/videos/<?= (int) $item['id'] ?>/edit" class="btn btn--small btn--icon" title="Редактировать" aria-label="Редактировать"><?= \App\Core\AdminUi::icon('edit') ?></a>
-                        <form method="post" action="/admin/videos/<?= (int) $item['id'] ?>/delete" style="display:inline;" data-confirm="Удалить видео «<?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?>»?">
+                        <form class="u-inline-0cd28ce9ba" method="post" action="/admin/videos/<?= (int) $item['id'] ?>/delete" data-confirm="Удалить видео «<?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?>»?">
                             <?= Csrf::field() ?>
                             <button type="submit" class="btn btn--small btn--icon btn--danger" title="Удалить" aria-label="Удалить"><?= \App\Core\AdminUi::icon('trash') ?></button>
                         </form>

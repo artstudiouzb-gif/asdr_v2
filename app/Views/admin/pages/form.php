@@ -32,12 +32,12 @@ foreach ($blocks as $b) {
 ?>
 <?php if ($error): ?><div class="alert alert--error"><?= htmlspecialchars($error, ENT_QUOTES) ?></div><?php endif; ?>
 <?php if ($isEdit): ?>
-    <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div class="u-inline-c9fab0a7e2">
         <a class="btn btn--small" href="/admin/revisions/page/<?= (int) $page['id'] ?>">История версий</a>
         <?php if (\App\Models\Page::isHomePage($page)): ?>
-            <span class="badge badge--success" style="font-size:0.88rem;padding:6px 12px;">★ Эта страница назначена Главной страницей сайта</span>
+            <span class="badge badge--success u-inline-371a921b3b">★ Эта страница назначена Главной страницей сайта</span>
         <?php else: ?>
-            <form method="post" action="/admin/pages/<?= (int) $page['id'] ?>/make-home" style="display:inline;">
+            <form class="u-inline-0cd28ce9ba" method="post" action="/admin/pages/<?= (int) $page['id'] ?>/make-home">
                 <?= Csrf::field() ?>
                 <button type="submit" class="btn btn--small btn--warning">🏠 Назначить этой странице статус «Главная»</button>
             </form>
@@ -58,13 +58,13 @@ foreach ($blocks as $b) {
             <div class="form-card">
                 <?= \App\Core\AdminUi::cardHeader('1. Основная информация', 'document') ?>
 
-                <div class="form-field" style="margin-bottom:16px;">
-                    <label style="font-weight:600;margin-bottom:6px;display:block;">Заголовок страницы <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="title" value="<?= htmlspecialchars($page['title'] ?? '', ENT_QUOTES) ?>" placeholder="Введите название страницы" required style="font-size:1.05rem;font-weight:600;">
+                <div class="form-field u-inline-79a1c5a5db">
+                    <label class="u-inline-e925a44577">Заголовок страницы <span class="u-inline-9dd1207e58">*</span></label>
+                    <input class="u-inline-bc64d2d1e3" type="text" name="title" value="<?= htmlspecialchars($page['title'] ?? '', ENT_QUOTES) ?>" placeholder="Введите название страницы" required>
                 </div>
 
                 <div class="form-field">
-                    <label style="font-weight:600;margin-bottom:6px;display:block;">Описание / лид (подзаголовок)</label>
+                    <label class="u-inline-e925a44577">Описание / лид (подзаголовок)</label>
                     <textarea name="lead" rows="2" placeholder="Короткое описание страницы"><?= htmlspecialchars($page['lead'] ?? '', ENT_QUOTES) ?></textarea>
                     <span class="form-hint">Показывается в начале страницы под заголовком (если нет Hero-блока).</span>
                 </div>
@@ -74,13 +74,13 @@ foreach ($blocks as $b) {
             <div class="form-card">
                 <?= \App\Core\AdminUi::cardHeader('2. SEO Оптимизация', 'seo', 'var(--admin-success)') ?>
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="form-grid-2col">
+                <div class="form-grid-2col u-inline-001013efee">
                     <div class="form-field">
-                        <label style="font-weight:600;margin-bottom:6px;display:block;">SEO: Meta Title</label>
+                        <label class="u-inline-e925a44577">SEO: Meta Title</label>
                         <input type="text" name="meta_title" value="<?= htmlspecialchars($page['meta_title'] ?? '', ENT_QUOTES) ?>" placeholder="SEO Заголовок для поисковиков">
                     </div>
                     <div class="form-field">
-                        <label style="font-weight:600;margin-bottom:6px;display:block;">SEO: Meta Description</label>
+                        <label class="u-inline-e925a44577">SEO: Meta Description</label>
                         <textarea name="meta_description" rows="2" placeholder="SEO Краткое описание для поисковиков"><?= htmlspecialchars($page['meta_description'] ?? '', ENT_QUOTES) ?></textarea>
                     </div>
                 </div>
@@ -95,13 +95,13 @@ foreach ($blocks as $b) {
 </form>
 
 <?php if ($isEdit): ?>
-    <h2 style="margin-top:40px;">Блоки страницы</h2>
+    <h2 class="u-inline-9f7cb1fbb6">Блоки страницы</h2>
     <p class="form-hint">У каждого языка свой независимый стек блоков. Если стек языка пуст, на сайте показывается стек основного языка.</p>
 
     <?php if (!empty($usingFallback)): ?>
-        <div class="alert alert--info" style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div class="alert alert--info u-inline-f83af69e78">
             <span>ℹ️ На языке <strong><?= strtoupper(htmlspecialchars($blockLang, ENT_QUOTES)) ?></strong> ещё нет собственных блоков. Ниже пока отображаются блоки основного языка (<strong><?= strtoupper(htmlspecialchars($defaultCode, ENT_QUOTES)) ?></strong>).</span>
-            <form method="post" action="/admin/pages/<?= (int) $page['id'] ?>/copy-language-blocks" style="display:inline;">
+            <form class="u-inline-0cd28ce9ba" method="post" action="/admin/pages/<?= (int) $page['id'] ?>/copy-language-blocks">
                 <?= Csrf::field() ?>
                 <input type="hidden" name="from_lang" value="<?= htmlspecialchars($defaultCode, ENT_QUOTES) ?>">
                 <input type="hidden" name="to_lang" value="<?= htmlspecialchars($blockLang, ENT_QUOTES) ?>">
@@ -173,7 +173,7 @@ foreach ($blocks as $b) {
             if ($colCount < 2 || $colCount > 4) { $colCount = 2; }
             $kids = $columnsChildren[(int) $block['id']] ?? [];
         ?>
-        <div class="columns-editor" style="margin:4px 0 16px 32px;">
+        <div class="columns-editor u-inline-8bccce3cd1">
             <div class="columns-editor__grid columns-editor__grid--<?= $colCount ?>">
                 <?php for ($ci = 0; $ci < $colCount; $ci++): ?>
                     <div class="columns-editor__col">
@@ -219,11 +219,11 @@ foreach ($blocks as $b) {
     // поэтому карточки раскрыты; на заполненной странице секция свёрнута.
     $presets = \App\Core\PagePresets::all();
     ?>
-    <details class="form-card preset-picker" style="margin-top:16px;"<?= empty($blocks) ? ' open' : '' ?>>
+    <details class="form-card preset-picker u-inline-8a359a76eb"<?= empty($blocks) ? ' open' : '' ?>>
         <summary><strong>Собрать страницу из готовой сборки</strong>
             <span class="form-hint">— <?= count($presets) ?> вариантов с готовой вёрсткой</span>
         </summary>
-        <p class="form-hint" style="margin:10px 0 14px;">
+        <p class="form-hint u-inline-ceb7346533">
             Блоки добавятся с расставленными отступами, фонами и текстами-заготовками —
             останется заменить содержимое своим. Оформление берётся из настроек дизайна сайта.
             Режим «Заменить всё» перед удалением сам сохранит текущие блоки в шаблон
@@ -266,13 +266,13 @@ foreach ($blocks as $b) {
     }
     ?>
     <?php if ($snippets === null): ?>
-    <div class="form-card" style="margin-top:16px;">
-        <h3 style="margin-top:0;">Шаблоны страницы</h3>
+    <div class="form-card u-inline-8a359a76eb">
+        <h3 class="u-inline-291b7bbb01">Шаблоны страницы</h3>
         <p class="form-hint">Раздел недоступен: не применена миграция базы данных. Выполните <code>php database/migrate.php</code> на сервере.</p>
     </div>
     <?php else: ?>
-    <div class="form-card" style="margin-top:16px;">
-        <h3 style="margin-top:0;">Шаблоны страницы</h3>
+    <div class="form-card u-inline-8a359a76eb">
+        <h3 class="u-inline-291b7bbb01">Шаблоны страницы</h3>
         <p class="form-hint">Шаблон сохраняет все блоки этого языка, включая содержимое колонок. Его можно применить к любой странице: добавить к текущим блокам или полностью заменить их. Перед заменой прежние блоки автоматически сохраняются как «Автокопия: …» — хранятся последние 5.</p>
         <div class="snippet-tools">
             <form method="post" action="/admin/pages/<?= (int) $page['id'] ?>/snippets/save" class="snippet-tools__row">
@@ -305,7 +305,7 @@ foreach ($blocks as $b) {
     </div>
     <?php endif; ?>
 
-    <div class="form-card" style="margin-top:20px;">
+    <div class="form-card u-inline-9eb125f52f">
         <form method="post" action="/admin/pages/<?= (int) $page['id'] ?>/blocks/add" class="form-grid">
             <?= Csrf::field() ?>
             <input type="hidden" name="block_lang" value="<?= htmlspecialchars($blockLang, ENT_QUOTES) ?>">
@@ -333,11 +333,11 @@ foreach ($blocks as $b) {
 <div class="form-actions form-actions--sticky">
     <div class="form-actions-left">
         <?php $pStatus = $page['status'] ?? 'draft'; ?>
-        <span class="badge badge--<?= $pStatus === 'published' ? 'success' : 'draft' ?>" style="font-size:0.84rem;padding:6px 12px;display:inline-flex;align-items:center;gap:6px;font-weight:600;">
-            <span style="width:8px;height:8px;border-radius:50%;background:<?= $pStatus === 'published' ? '#10b981' : '#f59e0b' ?>;"></span>
+        <span class="badge badge--<?= $pStatus === 'published' ? 'success' : 'draft' ?> u-inline-ec08abfabe">
+            <span class="publication-status-dot publication-status-dot--<?= $pStatus === 'published' ? 'published' : 'draft' ?>"></span>
             <?= $pStatus === 'published' ? 'Опубликовано' : 'Черновик' ?>
         </span>
-        <span style="font-size:0.82rem;font-weight:600;color:var(--admin-text-muted,#64748b);display:inline-flex;align-items:center;gap:6px;background:var(--admin-surface-soft,#f8fafc);padding:5px 10px;border-radius:6px;border:1px solid var(--admin-border,#e2e8f0);">
+        <span class="u-inline-c1de996030">
             <?= \App\Core\AdminUi::icon('globe', 14) ?>
             Язык контента: <strong><?= strtoupper(htmlspecialchars($blockLang, ENT_QUOTES)) ?></strong>
         </span>

@@ -20,12 +20,12 @@ foreach ($siteLangs as $code):
     $on = ($targetId !== null);
     ?>
     <?php if ($on): ?>
-        <a href="/admin/<?= urlencode($module) ?>/<?= $targetId ?>/edit"
+        <a class="u-inline-da0ab63f64" href="/admin/<?= urlencode($module) ?>/<?= $targetId ?>/edit"
            title="Редактировать перевод на язык <?= htmlspecialchars(strtoupper($code), ENT_QUOTES) ?> (#<?= $targetId ?>)"
-           style="display:inline-block;margin-right:4px;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase;text-decoration:none;background:#e6f4ea;color:#1e7e34;border:1px solid #a8dab5;transition:all .15s ease;"><?= htmlspecialchars($code, ENT_QUOTES) ?></a>
+          ><?= htmlspecialchars($code, ENT_QUOTES) ?></a>
     <?php else: ?>
-        <a href="<?= $origId > 0 ? '/admin/' . urlencode($module) . '/' . $origId . '/create-translation?target_lang=' . urlencode($code) : '#' ?>"
+        <a class="u-inline-7fca5bade1" href="<?= $origId > 0 ? '/admin/' . urlencode($module) . '/' . $origId . '/create-translation?target_lang=' . urlencode($code) : '#' ?>"
            title="Создать перевод на язык <?= htmlspecialchars(strtoupper($code), ENT_QUOTES) ?>"
-           style="display:inline-block;margin-right:4px;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase;text-decoration:none;background:#f1f2f4;color:#9aa0a6;border:1px solid #dadce0;transition:all .15s ease;">+<?= htmlspecialchars($code, ENT_QUOTES) ?></a>
+          >+<?= htmlspecialchars($code, ENT_QUOTES) ?></a>
     <?php endif; ?>
 <?php endforeach; ?>

@@ -8,15 +8,11 @@
         function showSuccess() {
             if (btnEl) {
                 const oldHtml = btnEl.innerHTML;
-                const oldColor = btnEl.style.color;
-                const oldBorder = btnEl.style.borderColor;
                 btnEl.innerHTML = '✓ Скопировано!';
-                btnEl.style.color = '#10b981';
-                btnEl.style.borderColor = '#10b981';
+                btnEl.classList.add('is-copy-success');
                 setTimeout(function () {
                     btnEl.innerHTML = oldHtml;
-                    btnEl.style.color = oldColor;
-                    btnEl.style.borderColor = oldBorder;
+                    btnEl.classList.remove('is-copy-success');
                 }, 2000);
             }
         }
@@ -36,9 +32,7 @@
         try {
             var textarea = document.createElement('textarea');
             textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.left = '-9999px';
-            textarea.style.top = '-9999px';
+            textarea.className = 'clipboard-fallback';
             textarea.setAttribute('readonly', '');
             document.body.appendChild(textarea);
             textarea.focus();
@@ -57,6 +51,20 @@
     }
 
     window.copyToClipboard = copyToClipboard;
+
+    document.querySelectorAll('[data-swatch-color]').forEach(function (element) {
+        element.style.setProperty('--swatch-color', element.getAttribute('data-swatch-color'));
+    });
+    document.querySelectorAll('[data-font-family]').forEach(function (element) {
+        element.style.setProperty('font-family', element.getAttribute('data-font-family'));
+    });
+    document.querySelectorAll('[data-font-size]').forEach(function (element) {
+        element.style.setProperty('--preview-font-size', element.getAttribute('data-font-size'));
+    });
+    document.querySelectorAll('[data-progress-width]').forEach(function (element) {
+        var value = Math.max(0, Math.min(100, Number(element.getAttribute('data-progress-width')) || 0));
+        element.style.setProperty('--progress-width', value + '%');
+    });
 
     document.addEventListener('click', function (event) {
         const copyBtn = event.target.closest('[data-copy-link], [data-copy-text]');
@@ -117,7 +125,7 @@
                 + '</div>';
             overlay.querySelector('.admin-modal__msg').textContent = message;
             document.body.appendChild(overlay);
-            document.body.style.overflow = 'hidden';
+            document.body.classList.add('has-modal-open');
             requestAnimationFrame(function () { overlay.classList.add('is-open'); });
 
             var okBtn = overlay.querySelector('.admin-modal__ok');
@@ -127,7 +135,7 @@
             function close(result) {
                 overlay.classList.remove('is-open');
                 document.removeEventListener('keydown', onKey);
-                document.body.style.overflow = '';
+                document.body.classList.remove('has-modal-open');
                 setTimeout(function () { overlay.remove(); }, 150);
                 resolve(result);
             }
@@ -463,13 +471,13 @@
                 t.classList.toggle('is-active', t.getAttribute('data-media-tab') === tabName);
             });
             if (tabName === 'upload') {
-                if (uploadBox) uploadBox.style.display = 'block';
-                if (toolbar) toolbar.style.display = 'none';
-                if (grid) grid.style.display = 'none';
+                if (uploadBox) uploadBox.classList.remove('is-hidden');
+                if (toolbar) toolbar.classList.add('is-hidden');
+                if (grid) grid.classList.add('is-hidden');
             } else {
-                if (uploadBox) uploadBox.style.display = 'none';
-                if (toolbar) toolbar.style.display = 'block';
-                if (grid) grid.style.display = 'grid';
+                if (uploadBox) uploadBox.classList.add('is-hidden');
+                if (toolbar) toolbar.classList.remove('is-hidden');
+                if (grid) grid.classList.remove('is-hidden');
             }
         }
 
@@ -764,19 +772,19 @@
             var y = isNaN(yVal) ? 50 : Math.max(0, Math.min(100, yVal));
 
             if (pin) {
-                pin.style.left = x + '%';
-                pin.style.top = y + '%';
+                pin.style.setProperty('--focal-x', x + '%');
+                pin.style.setProperty('--focal-y', y + '%');
             }
 
             if (imgInput && imgEl) {
                 var src = imgInput.value.trim();
                 if (src) {
                     imgEl.src = src;
-                    imgEl.style.display = 'block';
-                    if (placeholder) { placeholder.style.display = 'none'; }
+                    imgEl.classList.remove('is-hidden');
+                    if (placeholder) { placeholder.classList.add('is-hidden'); }
                 } else {
-                    imgEl.style.display = 'none';
-                    if (placeholder) { placeholder.style.display = 'flex'; }
+                    imgEl.classList.add('is-hidden');
+                    if (placeholder) { placeholder.classList.remove('is-hidden'); }
                 }
             }
 
@@ -1376,7 +1384,7 @@
         // Селект типа виджета показывает поля выбранного типа.
         if (el.matches && el.matches('select[data-widget-type-select]')) {
             document.querySelectorAll('[data-wtype]').forEach(function (block) {
-                block.style.display = block.getAttribute('data-wtype') === el.value ? 'flex' : 'none';
+                block.classList.toggle('is-hidden', block.getAttribute('data-wtype') !== el.value);
             });
         }
     });
@@ -1564,11 +1572,11 @@
 
             var toast = document.createElement('div');
             toast.className = 'admin-toast-notification admin-toast--' + (type || 'warning');
-            toast.innerHTML = '<div style="display:flex;align-items:center;gap:10px;">'
-                + '<span style="font-size:18px;">' + (type === 'error' ? '🚫' : '⚠️') + '</span>'
-                + '<span style="font-weight:600;font-size:14px;">' + msg + '</span>'
+            toast.innerHTML = '<div class="u-inline-7e30d285d2">'
+                + '<span class="u-inline-4f1925a8a6">' + (type === 'error' ? '🚫' : '⚠️') + '</span>'
+                + '<span class="u-inline-94c3db5540">' + msg + '</span>'
                 + '</div>'
-                + '<button type="button" style="background:none;border:none;color:currentColor;cursor:pointer;font-size:18px;margin-left:12px;" onclick="this.parentNode.remove()">✕</button>';
+                + '<button class="u-inline-d8c73d8aa0" type="button" onclick="this.parentNode.remove()">✕</button>';
             document.body.appendChild(toast);
             requestAnimationFrame(function () { toast.classList.add('is-visible'); });
             setTimeout(function () {
@@ -1643,7 +1651,7 @@
                 btn.classList.toggle('is-active', btn === tabBtn);
             });
             container.querySelectorAll('[data-seo-panel]').forEach(function (panel) {
-                panel.style.display = panel.getAttribute('data-seo-panel') === tabName ? 'block' : 'none';
+                panel.hidden = panel.getAttribute('data-seo-panel') !== tabName;
             });
         });
 
@@ -1679,21 +1687,23 @@
 
                 if (tCount) {
                     tCount.textContent = titleVal.length;
-                    tCount.style.color = titleVal.length > 65 ? '#ef4444' : (titleVal.length >= 30 ? '#10b981' : '#64748b');
+                    tCount.classList.toggle('is-invalid', titleVal.length > 65);
+                    tCount.classList.toggle('is-valid', titleVal.length >= 30 && titleVal.length <= 65);
                 }
                 if (dCount) {
                     dCount.textContent = descVal.length;
-                    dCount.style.color = descVal.length > 160 ? '#ef4444' : (descVal.length >= 70 ? '#10b981' : '#64748b');
+                    dCount.classList.toggle('is-invalid', descVal.length > 160);
+                    dCount.classList.toggle('is-valid', descVal.length >= 70 && descVal.length <= 160);
                 }
 
                 if (sImg && sNoImg) {
                     if (imgVal !== '') {
                         sImg.src = imgVal;
-                        sImg.style.display = 'block';
-                        sNoImg.style.display = 'none';
+                        sImg.classList.remove('is-hidden');
+                        sNoImg.classList.add('is-hidden');
                     } else {
-                        sImg.style.display = 'none';
-                        sNoImg.style.display = 'inline-block';
+                        sImg.classList.add('is-hidden');
+                        sNoImg.classList.remove('is-hidden');
                     }
                 }
             });
@@ -1706,16 +1716,16 @@
 
     // --- Универсальная командная палитра (Ctrl + K / Cmd + K) ---
     (function () {
-        var paletteHtml = '<div class="admin-cmd-palette-overlay" data-cmd-overlay style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99999;align-items:flex-start;justify-content:center;padding-top:10vh;">'
-            + '<div class="admin-cmd-palette-modal" style="width:100%;max-width:580px;background:#ffffff;border-radius:14px;box-shadow:0 20px 40px rgba(0,0,0,0.25);overflow:hidden;border:1px solid #cbd5e1;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
-            + '<div style="display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid #e2e8f0;gap:12px;background:#f8fafc;">'
+        var paletteHtml = '<div class="admin-cmd-palette-overlay u-inline-58d7c6be2b" data-cmd-overlay>'
+            + '<div class="admin-cmd-palette-modal u-inline-27aa68da7d">'
+            + '<div class="u-inline-907d56949b">'
             + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
-            + '<input type="text" data-cmd-input placeholder="Введите название раздела, страницы или действие..." style="width:100%;border:none;background:transparent;outline:none;font-size:1.05rem;font-weight:500;color:#0f172a;">'
-            + '<kbd style="background:#e2e8f0;border-radius:4px;padding:2px 6px;font-size:0.75rem;color:#475569;font-weight:600;">ESC</kbd>'
+            + '<input class="u-inline-7180243890" type="text" data-cmd-input placeholder="Введите название раздела, страницы или действие...">'
+            + '<kbd class="u-inline-8d83117354">ESC</kbd>'
             + '</div>'
-            + '<div class="admin-cmd-results" data-cmd-results style="max-height:380px;overflow-y:auto;padding:8px 0;">'
+            + '<div class="admin-cmd-results u-inline-afdf6b2045" data-cmd-results>'
             + '</div>'
-            + '<div style="padding:10px 18px;background:#f1f5f9;border-top:1px solid #e2e8f0;font-size:0.78rem;color:#64748b;display:flex;gap:16px;">'
+            + '<div class="u-inline-a650a7522f">'
             + '<span>↑↓ Выбор</span><span>↵ Переход</span><span>ESC Закрыть</span>'
             + '</div>'
             + '</div>'
@@ -1750,18 +1760,18 @@
             });
 
             if (!matched.length) {
-                resultsContainer.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:0.9rem;">Ничего не найдено</div>';
+                resultsContainer.innerHTML = '<div class="u-inline-f16ce3d7a8">Ничего не найдено</div>';
                 return;
             }
 
             var html = '';
             matched.forEach(function (c, idx) {
                 var isSel = idx === selectedIdx;
-                html += '<a href="' + c.url + '" class="admin-cmd-item" style="display:flex;align-items:center;gap:12px;padding:10px 18px;text-decoration:none;background:' + (isSel ? '#eff6ff' : 'transparent') + ';border-left:3px solid ' + (isSel ? '#2563eb' : 'transparent') + ';">'
-                    + '<span style="font-size:1.2rem;">' + c.icon + '</span>'
+                html += '<a href="' + c.url + '" class="admin-cmd-item u-inline-9e9c073f14">'
+                    + '<span class="u-inline-da71aab0cc">' + c.icon + '</span>'
                     + '<div>'
-                    + '<div style="font-weight:600;font-size:0.95rem;color:#0f172a;">' + c.title + '</div>'
-                    + '<div style="font-size:0.8rem;color:#64748b;">' + c.desc + '</div>'
+                    + '<div class="u-inline-3f7fce4b31">' + c.title + '</div>'
+                    + '<div class="u-inline-afa3d0ea3b">' + c.desc + '</div>'
                     + '</div>'
                     + '</a>';
             });
@@ -1769,7 +1779,7 @@
         }
 
         function openPalette() {
-            overlay.style.display = 'flex';
+            overlay.classList.add('is-open');
             input.value = '';
             selectedIdx = 0;
             renderResults('');
@@ -1777,15 +1787,15 @@
         }
 
         function closePalette() {
-            overlay.style.display = 'none';
+            overlay.classList.remove('is-open');
         }
 
         document.addEventListener('keydown', function (e) {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
                 e.preventDefault();
-                if (overlay.style.display === 'flex') { closePalette(); } else { openPalette(); }
+                if (overlay.classList.contains('is-open')) { closePalette(); } else { openPalette(); }
             }
-            if (e.key === 'Escape' && overlay.style.display === 'flex') {
+            if (e.key === 'Escape' && overlay.classList.contains('is-open')) {
                 closePalette();
             }
         });
@@ -1879,4 +1889,3 @@
         });
     });
 })();
-

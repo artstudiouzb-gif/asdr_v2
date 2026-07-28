@@ -28,11 +28,11 @@ $colorVars = $cvar('bg_color', '--banner-bg') . $cvar('text_color', '--banner-te
             <a class="block-banner__button" href="<?= htmlspecialchars($btnUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($btnText, ENT_QUOTES) ?></a>
         <?php endif; ?>
     </div>
-    <?php if ($image !== ''): ?><span class="block-banner__photo" style="background-image:url('<?= htmlspecialchars($image, ENT_QUOTES) ?>')"></span><?php endif; ?>
+    <?php if ($image !== ''): ?><span class="block-banner__photo" style="--block-banner-image:url('<?= htmlspecialchars($image, ENT_QUOTES) ?>')"></span><?php endif; ?>
 </div>
 <?php else: ?>
 <?php
-$bgImg = $image !== '' ? 'background-image:linear-gradient(rgba(15,23,42,.55),rgba(15,23,42,.55)),url(' . htmlspecialchars($image, ENT_QUOTES) . ');' : '';
+$bgImg = $image !== '' ? '--block-banner-image:linear-gradient(rgba(15,23,42,.55),rgba(15,23,42,.55)),url(' . htmlspecialchars($image, ENT_QUOTES) . ');' : '';
 $style = ($bgImg . $colorVars) !== '' ? ' style="' . $bgImg . $colorVars . '"' : '';
 ?>
 <div class="block-banner<?= $image !== '' ? ' block-banner--image' : '' ?>"<?= $style ?>>

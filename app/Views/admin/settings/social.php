@@ -79,8 +79,8 @@ $tokenGuides = [
     <form method="post" action="/admin/social" class="form-grid">
         <?= Csrf::field() ?>
         <?php foreach ($config as $net => $c): ?>
-            <fieldset style="border:1px solid var(--admin-border);border-radius:8px;padding:16px;margin-bottom:8px;">
-                <legend style="padding:0 8px;font-weight:600;">
+            <fieldset class="u-inline-a9961251f2">
+                <legend class="u-inline-1204c3c3eb">
                     <?= htmlspecialchars($labels[$net] ?? $net, ENT_QUOTES) ?>
                     <?php if ($c['enabled'] && !$c['ready']): ?>
                         <span class="badge badge--draft">не заполнено</span>
@@ -96,8 +96,8 @@ $tokenGuides = [
                     <div class="form-field">
                         <label for="<?= $net ?>_<?= $field ?>"><?= htmlspecialchars($fieldLabels[$field] ?? $field, ENT_QUOTES) ?></label>
                         <?php if (in_array($field, \App\Core\SocialSettings::TEXTAREA_FIELDS, true)): ?>
-                            <textarea id="<?= $net ?>_<?= $field ?>" name="<?= $net ?>[<?= $field ?>]" rows="3"
-                                       style="font-family:monospace;"><?= htmlspecialchars((string) $value, ENT_QUOTES) ?></textarea>
+                            <textarea class="u-inline-8ff9961267" id="<?= $net ?>_<?= $field ?>" name="<?= $net ?>[<?= $field ?>]" rows="3"
+                                      ><?= htmlspecialchars((string) $value, ENT_QUOTES) ?></textarea>
                             <?php if (!empty($signatureHints[$net])): ?>
                                 <span class="form-hint"><?= $signatureHints[$net] ?></span>
                             <?php endif; ?>
@@ -115,13 +115,13 @@ $tokenGuides = [
                 <?php endforeach; ?>
 
                 <?php if (!empty($tokenGuides[$net])): ?>
-                    <details style="margin-top:14px;background:var(--admin-surface-soft, #f8fafc);border:1px solid var(--admin-border, #e2e8f0);border-radius:6px;padding:10px 14px;">
-                        <summary style="cursor:pointer;font-weight:600;color:var(--admin-primary, #0284c7);user-select:none;">
+                    <details class="u-inline-c2c51f8917">
+                        <summary class="u-inline-8c07d779a6">
                             <?= $tokenGuides[$net]['title'] ?>
                         </summary>
-                        <ol style="margin:10px 0 2px 20px;padding:0;font-size:0.875rem;line-height:1.65;color:var(--admin-text, #334155);">
+                        <ol class="u-inline-8e39c37b7b">
                             <?php foreach ($tokenGuides[$net]['steps'] as $step): ?>
-                                <li style="margin-bottom:6px;"><?= $step ?></li>
+                                <li class="u-inline-6c002e2180"><?= $step ?></li>
                             <?php endforeach; ?>
                         </ol>
                     </details>
@@ -134,7 +134,7 @@ $tokenGuides = [
     </form>
 
     <?php // Telegram настраивается в своём разделе — вместе с ботом и кодами входа. ?>
-    <div class="form-hint" style="margin-top:16px;border:1px solid var(--admin-border);border-radius:var(--admin-radius);padding:12px;">
+    <div class="form-hint u-inline-1456117e38">
         <strong>Telegram-канал</strong>
         <?php if (!empty($telegramReady)): ?>
             <span class="badge badge--published">публикуется</span>
@@ -143,7 +143,7 @@ $tokenGuides = [
         <?php else: ?>
             <span class="badge badge--draft">выключен</span>
         <?php endif; ?>
-        <div style="margin-top:6px;">
+        <div class="u-inline-2fd7789b39">
             Настраивается в разделе <a href="/admin/telegram">Telegram</a> — там же бот, коды входа
             в панель и проверка прав бота в канале.
         </div>
@@ -182,11 +182,11 @@ $statusMap = [
 $appRoot = defined('APP_ROOT') ? APP_ROOT : '/path/to/site';
 $cronBroken = $workerStatus !== null && ($workerStatus['last'] === null || !empty($workerStatus['stale']));
 ?>
-<div class="form-card" style="margin-top:24px;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+<div class="form-card u-inline-3343fd6464">
+    <div class="u-inline-b741d381f1">
         <div>
-            <h2 style="margin-top:0;">Очередь публикаций и воркер</h2>
-            <p class="form-hint" style="margin:0;">
+            <h2 class="u-inline-291b7bbb01">Очередь публикаций и воркер</h2>
+            <p class="form-hint u-inline-1da9facb4d">
                 Публикации отправляет фоновый воркер по Cron (каждые ~5 минут). Здесь
                 видно, что он делает; кнопкой можно обработать очередь вручную,
                 не дожидаясь расписания.
@@ -199,21 +199,21 @@ $cronBroken = $workerStatus !== null && ($workerStatus['last'] === null || !empt
         </form>
     </div>
 
-    <div style="display:flex;gap:28px;flex-wrap:wrap;margin:18px 0 4px;">
+    <div class="u-inline-1755fec80e">
         <div>
-            <div class="form-hint" style="margin-bottom:4px;">Последний запуск воркера</div>
+            <div class="form-hint u-inline-d982937dda">Последний запуск воркера</div>
             <?php if ($workerStatus === null || $workerStatus['last'] === null): ?>
                 <span class="badge badge--draft">ни разу не запускался</span>
             <?php elseif (!empty($workerStatus['stale'])): ?>
                 <span class="badge badge--danger">молчит</span>
-                <span style="color:var(--admin-muted);"><?= htmlspecialchars(date('d.m.Y H:i', (int) $workerStatus['last']), ENT_QUOTES) ?> · <?= $fmtAge($workerStatus['age']) ?></span>
+                <span class="u-inline-b9071a39d3"><?= htmlspecialchars(date('d.m.Y H:i', (int) $workerStatus['last']), ENT_QUOTES) ?> · <?= $fmtAge($workerStatus['age']) ?></span>
             <?php else: ?>
                 <span class="badge badge--success">активен</span>
-                <span style="color:var(--admin-muted);"><?= htmlspecialchars(date('d.m.Y H:i', (int) $workerStatus['last']), ENT_QUOTES) ?> · <?= $fmtAge($workerStatus['age']) ?></span>
+                <span class="u-inline-b9071a39d3"><?= htmlspecialchars(date('d.m.Y H:i', (int) $workerStatus['last']), ENT_QUOTES) ?> · <?= $fmtAge($workerStatus['age']) ?></span>
             <?php endif; ?>
         </div>
         <div>
-            <div class="form-hint" style="margin-bottom:4px;">Очередь</div>
+            <div class="form-hint u-inline-d982937dda">Очередь</div>
             <span class="badge badge--draft">в очереди: <?= (int) $queueCounts['pending'] ?></span>
             <span class="badge badge--success">отправлено: <?= (int) $queueCounts['sent'] ?></span>
             <span class="badge badge--danger">ошибок: <?= (int) $queueCounts['failed'] ?></span>
@@ -221,14 +221,14 @@ $cronBroken = $workerStatus !== null && ($workerStatus['last'] === null || !empt
     </div>
 
     <?php if ($cronBroken): ?>
-        <p class="form-hint" style="background:var(--admin-danger-soft);border:1px solid var(--admin-danger-border);border-radius:var(--admin-radius);padding:10px 12px;margin-top:12px;">
+        <p class="form-hint u-inline-1138a90be7">
             Похоже, Cron не настроен или воркер остановлен. Добавьте задание на хостинге (каждые 5 минут):<br>
             <code>*/5 * * * * php <?= htmlspecialchars($appRoot, ENT_QUOTES) ?>/app/Console/social_worker.php &gt;&gt; <?= htmlspecialchars($appRoot, ENT_QUOTES) ?>/storage/logs/social_worker.log 2&gt;&amp;1</code><br>
             Пока Cron нет — публикуйте и жмите «Запустить отправку сейчас».
         </p>
     <?php endif; ?>
 
-    <h3 style="margin:20px 0 8px;">Журнал очереди</h3>
+    <h3 class="u-inline-a8712c9256">Журнал очереди</h3>
     <table class="data-table">
         <thead><tr><th>Новость</th><th>Сеть</th><th>Статус</th><th>Попыток</th><th>Обновлено</th><th>Ошибка</th></tr></thead>
         <tbody>
@@ -246,8 +246,8 @@ $cronBroken = $workerStatus !== null && ($workerStatus['last'] === null || !empt
                     <td><?= htmlspecialchars((string) $row['network'], ENT_QUOTES) ?></td>
                     <td><span class="badge badge--<?= $cls ?>"><?= htmlspecialchars($label, ENT_QUOTES) ?></span></td>
                     <td><?= (int) ($row['attempts'] ?? 0) ?></td>
-                    <td style="white-space:nowrap;color:var(--admin-muted);"><?= $when ? htmlspecialchars((string) $when, ENT_QUOTES) : '—' ?></td>
-                    <td style="color:var(--admin-danger);"><?= htmlspecialchars((string) ($row['last_error'] ?? ''), ENT_QUOTES) ?></td>
+                    <td class="u-inline-d442f29d01"><?= $when ? htmlspecialchars((string) $when, ENT_QUOTES) : '—' ?></td>
+                    <td class="u-inline-e129d41383"><?= htmlspecialchars((string) ($row['last_error'] ?? ''), ENT_QUOTES) ?></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>

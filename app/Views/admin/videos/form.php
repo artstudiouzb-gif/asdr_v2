@@ -20,7 +20,7 @@ $translationLangs = array_values(array_filter(
 <p><a href="/admin/videos" class="btn btn--small">← Все видео</a></p>
 
 <div class="form-card">
-    <h2 style="margin-top:0;">Свойства видео</h2>
+    <h2 class="u-inline-291b7bbb01">Свойства видео</h2>
     <form method="post" action="/admin/videos/<?= (int) $video['id'] ?>/update" class="form-grid">
         <?= Csrf::field() ?>
         <div class="form-field">

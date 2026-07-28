@@ -28,16 +28,16 @@ $shortFile = static function (string $file): string {
     return str_replace([$root, '\\'], ['', '/'], str_replace('\\', '/', $file));
 };
 ?>
-<div style="display:flex;gap:8px;margin-bottom:14px;">
+<div class="u-inline-f94566b02a">
     <a class="btn btn--small" href="/admin/audit">Действия администраторов</a>
     <a class="btn btn--small btn--primary" href="/admin/audit/errors">Ошибки сайта</a>
 </div>
 
 <p class="form-hint">Ошибки, перехваченные на сайте и в панели: что случилось, где и почему — понятным языком. Технические детали раскрываются по клику. Записи старше <?= (int) \App\Models\ErrorLog::RETENTION_DAYS ?> дней удаляются автоматически, либо очистите журнал вручную.</p>
 
-<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:space-between;margin-bottom:18px;">
-    <form method="get" action="/admin/audit/errors" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
-        <div class="form-field" style="margin:0;">
+<div class="u-inline-f45a3bfb9e">
+    <form class="u-inline-c971a09486" method="get" action="/admin/audit/errors">
+        <div class="form-field u-inline-1da9facb4d">
             <label for="f_level">Уровень</label>
             <select id="f_level" name="level">
                 <option value="">— все —</option>
@@ -46,17 +46,17 @@ $shortFile = static function (string $file): string {
                 <?php endforeach; ?>
             </select>
         </div>
-        <div class="form-field" style="margin:0;">
+        <div class="form-field u-inline-1da9facb4d">
             <label for="f_q">Текст, файл или адрес содержит</label>
             <input type="text" id="f_q" name="q" value="<?= htmlspecialchars($filters['q'], ENT_QUOTES) ?>" placeholder="например: SQLSTATE или /news">
         </div>
-        <div class="form-actions" style="margin:0;">
+        <div class="form-actions u-inline-1da9facb4d">
             <button type="submit" class="btn btn--primary"><?= \App\Core\AdminUi::icon('filter') ?>Фильтровать</button>
             <a href="/admin/audit/errors" class="btn"><?= \App\Core\AdminUi::icon('reset') ?>Сбросить</a>
         </div>
     </form>
     <?php if ($total > 0): ?>
-        <form method="post" action="/admin/audit/errors/clear" style="margin:0;" data-confirm="Очистить журнал ошибок полностью?">
+        <form class="u-inline-1da9facb4d" method="post" action="/admin/audit/errors/clear" data-confirm="Очистить журнал ошибок полностью?">
             <?= Csrf::field() ?>
             <button type="submit" class="btn btn--danger">Очистить журнал</button>
         </form>
@@ -75,26 +75,26 @@ $shortFile = static function (string $file): string {
         <tbody>
             <?php foreach ($items as $item): ?>
                 <tr>
-                    <td style="white-space:nowrap;vertical-align:top;"><?= htmlspecialchars((string) $item['created_at'], ENT_QUOTES) ?></td>
-                    <td style="vertical-align:top;">
+                    <td class="u-inline-df7cae6aa0"><?= htmlspecialchars((string) $item['created_at'], ENT_QUOTES) ?></td>
+                    <td class="u-inline-060dc9f317">
                         <?php $critical = strtoupper((string) $item['level']) === 'CRITICAL'; ?>
-                        <span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;<?= $critical ? 'background:#fde8e8;color:#b42318;' : 'background:#fef0c7;color:#93540b;' ?>">
+                        <span class="audit-severity <?= $critical ? 'audit-severity--critical' : 'audit-severity--warning' ?>">
                             <?= $critical ? 'Критическая' : 'Ошибка' ?>
                         </span>
                     </td>
-                    <td style="vertical-align:top;">
+                    <td class="u-inline-060dc9f317">
                         <?= htmlspecialchars((string) $item['human'], ENT_QUOTES) ?>
-                        <details style="margin-top:6px;">
-                            <summary style="cursor:pointer;font-size:12px;color:#666;">Технические детали</summary>
-                            <code style="display:block;margin-top:6px;font-size:12px;white-space:pre-wrap;word-break:break-word;"><?= htmlspecialchars((string) $item['message'], ENT_QUOTES) ?></code>
+                        <details class="u-inline-2fd7789b39">
+                            <summary class="u-inline-bbb9c7d040">Технические детали</summary>
+                            <code class="u-inline-0dfd020469"><?= htmlspecialchars((string) $item['message'], ENT_QUOTES) ?></code>
                         </details>
                     </td>
-                    <td style="vertical-align:top;font-size:12px;">
+                    <td class="u-inline-6c1edda8b7">
                         <?php if ((string) $item['file'] !== ''): ?>
-                            <code style="font-size:12px;word-break:break-all;"><?= htmlspecialchars($shortFile((string) $item['file']) . ':' . (int) $item['line'], ENT_QUOTES) ?></code><br>
+                            <code class="u-inline-1d77e476f8"><?= htmlspecialchars($shortFile((string) $item['file']) . ':' . (int) $item['line'], ENT_QUOTES) ?></code><br>
                         <?php endif; ?>
-                        <span style="color:#666;">Страница: <?= htmlspecialchars((string) $item['url'], ENT_QUOTES) ?></span>
-                        <?php if (!empty($item['ip'])): ?><br><span style="color:#666;">IP: <?= htmlspecialchars((string) $item['ip'], ENT_QUOTES) ?></span><?php endif; ?>
+                        <span class="u-inline-6a8c41db55">Страница: <?= htmlspecialchars((string) $item['url'], ENT_QUOTES) ?></span>
+                        <?php if (!empty($item['ip'])): ?><br><span class="u-inline-6a8c41db55">IP: <?= htmlspecialchars((string) $item['ip'], ENT_QUOTES) ?></span><?php endif; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -102,7 +102,7 @@ $shortFile = static function (string $file): string {
     </table>
 
     <?php if ($pages > 1): ?>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:16px;">
+        <div class="u-inline-d2576ac843">
             <?php if ($page > 1): ?><a class="btn btn--small" href="<?= htmlspecialchars($qs($page - 1), ENT_QUOTES) ?>">← Новее</a><?php endif; ?>
             <span class="form-hint">Страница <?= (int) $page ?> из <?= (int) $pages ?></span>
             <?php if ($page < $pages): ?><a class="btn btn--small" href="<?= htmlspecialchars($qs($page + 1), ENT_QUOTES) ?>">Старее →</a><?php endif; ?>

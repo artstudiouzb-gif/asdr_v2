@@ -1460,7 +1460,7 @@ body.reader-mode-active { overflow: hidden !important; }
 }
 .reader-mode-overlay[data-reader-theme="dark"] .reader-mode-bar { border-bottom-color: rgba(255, 255, 255, 0.1); }
 
-.reader-mode-bar__progress { width: 0; height: 3px; background: var(--gov-teal, #0d9488); transition: width 0.1s linear; }
+.reader-mode-bar__progress { width: var(--reader-progress, 0%); height: 3px; background: var(--gov-teal, #0d9488); transition: width 0.1s linear; }
 .reader-mode-bar__inner {
     max-width: 900px; margin: 0 auto; padding: 10px 20px;
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
@@ -1694,6 +1694,8 @@ body.lightbox-active { overflow: hidden !important; }
 
 /* 1. Всплывающий тулбар шеринга цитаты */
 .quote-share-popover {
+    top: var(--quote-popover-top);
+    left: var(--quote-popover-left);
     position: absolute; z-index: 1000; transform: translateX(-50%);
     display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 12px;
     background: #1e293b; color: #ffffff; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3);
@@ -2336,7 +2338,7 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 
 /* Премиум-новость: полноэкранный тёмный hero, галерея сбоку, оглавление. */
 .newsdetail--premium { margin-top: -1px; }
-.newsdetail-phero { position: relative; left: calc(50% - 50vw); width: 100vw; min-height: 480px; display: flex; align-items: center; background: var(--gov-navy) center/cover no-repeat; color: #fff; }
+.newsdetail-phero { position: relative; left: calc(50% - 50vw); width: 100vw; min-height: 480px; display: flex; align-items: center; background: var(--news-cover-image, var(--gov-navy)) center/cover no-repeat; color: #fff; }
 .newsdetail-phero__overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(9,22,42,.93) 20%, rgba(9,22,42,.55) 55%, rgba(9,22,42,.25) 100%); }
 .newsdetail-phero__body { position: relative; width: 100%; max-width: var(--container-max); margin: 0 auto; padding: clamp(40px, 6vw, 72px) 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
 /* Крошки внутри премиум-hero (вместо серой полосы над ним) — светлые на тёмном фоне.
@@ -2409,7 +2411,8 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     background-color: var(--gov-teal);
     box-shadow: 0 8px 20px rgba(23, 153, 155, 0.35);
 }
-.block-banner__photo { 
+.block-banner__photo {
+    background-image: var(--block-banner-image);
     position: relative; height: 100%; min-height: 320px; background: center/cover no-repeat; 
     -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%); 
     mask-image: linear-gradient(90deg, transparent 0, #000 22%); 
@@ -2490,7 +2493,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .block-map__title { font-size: clamp(1.4rem, 2.4vw, 1.9rem); margin: 0 0 20px; }
 .block-map__canvas { position: relative; border-radius: var(--radius); overflow: hidden; min-height: 380px; background: color-mix(in srgb, var(--gov-navy) 6%, var(--gov-bg)); }
 .block-map__frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-.block-map__image { position: absolute; inset: 0; background: center/cover no-repeat; }
+.block-map__image { position: absolute; inset: 0; background: var(--block-map-image) center/cover no-repeat; }
 .block-map__image--empty { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)), color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)) 14px, color-mix(in srgb, var(--gov-navy) 8%, var(--gov-bg)) 14px, color-mix(in srgb, var(--gov-navy) 8%, var(--gov-bg)) 28px) ; }
 .block-map__pin { 
     position: absolute; left: 50%; top: 50%; transform: translate(-50%, -100%); 
@@ -2833,7 +2836,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 
 /* Hero со своим цветом фона (без фото): текст и элементы — светлые, как на
    медиа-hero, чтобы читались на цветном градиенте. */
-.block-hero--bgcolor { position: relative; }
+.block-hero--bgcolor { position: relative; background: var(--hero-background); }
 .block-hero--bgcolor .block-hero__title { color: var(--hero-text, #fff); }
 .block-hero--bgcolor .block-hero__subtitle { color: var(--hero-text, rgba(255,255,255,.85)); }
 .block-hero--bgcolor .content-crumbs--on-hero a,
@@ -2847,7 +2850,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .block-hero--pos-right .block-hero__eyebrow { justify-content: flex-start; }
 
 /* Подложка под текстом (цвет и прозрачность задаются инлайн из настроек). */
-.block-hero__text--panel { padding: clamp(22px, 3vw, 38px); border-radius: 16px; backdrop-filter: blur(3px); }
+.block-hero__text--panel { padding: clamp(22px, 3vw, 38px); border-radius: 16px; background: var(--hero-panel-bg); backdrop-filter: blur(3px); }
 .block-hero--pos-center .block-hero__text--panel { display: inline-block; }
 
 /* Hero как шапка страницы: убираем верхний отступ контента, чтобы hero стоял
@@ -3176,7 +3179,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .timeline-item:hover .timeline-item__text { color: var(--gov-title); }
 .timeline-card__button { display: inline-block; margin-top: 24px; padding: 11px 22px; border: 1px solid var(--gov-navy); border-radius: var(--btn-radius, 8px); color: var(--gov-title); font-weight: 700; font-size: .9rem; text-decoration: none; transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease; }
 .timeline-card__button:hover { background: var(--gov-teal); border-color: var(--gov-teal); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(23,153,155, 0.25); }
-.timeline-cta { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--gov-navy) center/cover no-repeat; display: flex; align-items: flex-start; min-height: 320px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.timeline-cta { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--timeline-cta-image, var(--gov-navy)) center/cover no-repeat; display: flex; align-items: flex-start; min-height: 320px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .timeline-cta__overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(15,33,60,.92) 25%, rgba(15,33,60,.55) 100%); }
 .timeline-cta__body { position: relative; padding: 36px; color: #fff; display: flex; flex-direction: column; gap: 14px; max-width: 480px; }
 .timeline-cta__title { font-size: clamp(1.3rem, 2vw, 1.7rem); margin: 0; color: #fff; }
@@ -4342,7 +4345,7 @@ body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__moon {
 }
 .site-scroll-progress__bar {
     height: 100%;
-    width: 0%;
+    width: var(--scroll-progress, 0%);
     background: linear-gradient(90deg, var(--gov-teal), var(--color-accent, #3fc1c0));
     box-shadow: 0 0 10px var(--gov-teal);
     transition: width 0.1s linear;

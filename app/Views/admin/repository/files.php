@@ -24,7 +24,7 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
     return $html . '</select>';
 };
 ?>
-<div style="display:flex;gap:8px;margin-bottom:16px;">
+<div class="u-inline-f1b7a56d35">
     <a href="/admin/repository" class="btn btn--small btn--primary">Файлы</a>
     <a href="/admin/repository/categories" class="btn btn--small">Категории</a>
     <a href="/admin/repository/users" class="btn btn--small">Пользователи портала</a>
@@ -33,8 +33,8 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
 
 <?php /** @var array $pending */ ?>
 <?php if (!empty($pending)): ?>
-<div class="form-card" style="margin-bottom:24px;border-left:4px solid #d97706;">
-    <h2 style="margin-top:0;">На модерации (<?= count($pending) ?>)</h2>
+<div class="form-card u-inline-837a4c07e9">
+    <h2 class="u-inline-291b7bbb01">На модерации (<?= count($pending) ?>)</h2>
     <table class="data-table">
         <thead>
             <tr><th>Название</th><th>Категория</th><th>Файл</th><th>Размер</th><th>От кого</th><th>Прислан</th><th></th></tr>
@@ -68,8 +68,8 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
 </div>
 <?php endif; ?>
 
-<div class="form-card" style="margin-bottom:24px;">
-    <h2 style="margin-top:0;">Загрузить файл</h2>
+<div class="form-card u-inline-8b9688e6e0">
+    <h2 class="u-inline-291b7bbb01">Загрузить файл</h2>
     <form method="post" action="/admin/repository/upload" enctype="multipart/form-data" class="form-grid">
         <?= Csrf::field() ?>
         <div class="form-field">
@@ -93,8 +93,8 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
     </form>
 </div>
 
-<div class="form-card" style="margin-bottom:24px;max-width:520px;">
-    <h2 style="margin-top:0;">Оформление портала</h2>
+<div class="form-card u-inline-2d22144f96">
+    <h2 class="u-inline-291b7bbb01">Оформление портала</h2>
     <form method="post" action="/admin/repository/settings" enctype="multipart/form-data" class="form-grid">
         <?= Csrf::field() ?>
         <?= \App\Core\AdminUi::imageField('repo_logo', (string) ($repoLogo ?? ''), [
@@ -106,8 +106,8 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
     </form>
 </div>
 
-<form method="get" action="/admin/repository" style="margin-bottom:16px;display:flex;gap:8px;max-width:420px;">
-    <input type="text" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES) ?>" placeholder="Поиск по файлам" style="flex:1;">
+<form class="u-inline-a9a523b9ef" method="get" action="/admin/repository">
+    <input class="u-inline-7623f05545" type="text" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES) ?>" placeholder="Поиск по файлам">
     <button type="submit" class="btn btn--small">Найти</button>
     <?php if ($query !== ''): ?><a href="/admin/repository" class="btn btn--small">Сброс</a><?php endif; ?>
 </form>
@@ -118,7 +118,7 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
     </thead>
     <tbody>
         <?php if (empty($files)): ?>
-            <tr><td colspan="7" style="text-align:center;color:#888;padding:24px;">Файлов пока нет.</td></tr>
+            <tr><td class="u-inline-0e883e39e4" colspan="7">Файлов пока нет.</td></tr>
         <?php else: ?>
             <?php foreach ($files as $f): ?>
                 <tr>
@@ -132,9 +132,9 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
                     <td><?= (int) $f['download_count'] ?></td>
                     <td><?= htmlspecialchars(date('d.m.Y', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></td>
                     <td class="data-table__actions">
-                        <details style="position:relative;display:inline-block;">
-                            <summary class="btn btn--small" style="list-style:none;cursor:pointer;">Изменить</summary>
-                            <form method="post" action="/admin/repository/<?= (int) $f['id'] ?>/update" class="form-card" style="position:absolute;right:0;z-index:10;width:320px;padding:12px;text-align:left;box-shadow:0 8px 24px rgba(16,24,40,.18);">
+                        <details class="u-inline-39e79eb52f">
+                            <summary class="btn btn--small u-inline-5e798cd9db">Изменить</summary>
+                            <form method="post" action="/admin/repository/<?= (int) $f['id'] ?>/update" class="form-card u-inline-8f95f51649">
                                 <?= Csrf::field() ?>
                                 <div class="form-field">
                                     <label>Название</label>

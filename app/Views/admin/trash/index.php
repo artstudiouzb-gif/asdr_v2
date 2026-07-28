@@ -30,8 +30,8 @@ $sections = [
 <p class="form-hint">Удалённые элементы хранятся здесь. Их можно восстановить или удалить навсегда.</p>
 
 <?php foreach ($sections as $section): ?>
-    <h2 style="margin-top:28px;"><?= htmlspecialchars($section['label'], ENT_QUOTES) ?></h2>
-    <table class="data-table" style="margin-bottom:10px;">
+    <h2 class="u-inline-f0778f9dce"><?= htmlspecialchars($section['label'], ENT_QUOTES) ?></h2>
+    <table class="data-table u-inline-af3fee87a1">
         <thead>
             <tr><th>Название</th><th>Удалено</th><th></th></tr>
         </thead>

@@ -18,7 +18,7 @@
                     counterEl.textContent = len;
                     var parent = counterEl.parentElement;
                     if (parent) {
-                        parent.style.color = (len >= maxLen * 0.9) ? '#e63946' : 'var(--text-muted, #718096)';
+                        parent.classList.toggle('is-near-limit', len >= maxLen * 0.9);
                     }
                 }
             };
@@ -106,8 +106,7 @@
                 .then(function (res) {
                     if (res.ok) {
                         // Успех: плавно скрываем форму, показываем благодарность.
-                        form.style.transition = 'opacity .4s ease';
-                        form.style.opacity = '0';
+                        form.classList.add('is-submitted');
                         setTimeout(function () {
                             var done = document.createElement('div');
                             done.className = 'block-form__thanks';

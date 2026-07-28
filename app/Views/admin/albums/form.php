@@ -20,8 +20,8 @@ $translationLangs = array_values(array_filter(
 <p><a href="/admin/albums" class="btn btn--small">← Все альбомы</a>
    <a href="/albums/<?= htmlspecialchars((string) $album['slug'], ENT_QUOTES) ?>" class="btn btn--small" target="_blank" rel="noopener">Открыть на сайте</a></p>
 
-<div class="form-card" style="margin-bottom:20px;">
-    <h2 style="margin-top:0;">Свойства альбома</h2>
+<div class="form-card u-inline-7dde5e56b3">
+    <h2 class="u-inline-291b7bbb01">Свойства альбома</h2>
     <form method="post" action="/admin/albums/<?= (int) $album['id'] ?>/update" class="form-grid">
         <?= Csrf::field() ?>
         <div class="form-field">
@@ -52,8 +52,8 @@ $translationLangs = array_values(array_filter(
     </form>
 </div>
 
-<div class="form-card" style="margin-bottom:20px;">
-    <h2 style="margin-top:0;">Добавить фото</h2>
+<div class="form-card u-inline-7dde5e56b3">
+    <h2 class="u-inline-291b7bbb01">Добавить фото</h2>
     <form method="post" action="/admin/albums/<?= (int) $album['id'] ?>/images/add" class="form-grid">
         <?= Csrf::field() ?>
         <div class="form-field">
@@ -75,14 +75,14 @@ $translationLangs = array_values(array_filter(
 <?php if (empty($images)): ?>
     <p class="form-hint">В альбоме пока нет фотографий.</p>
 <?php else: ?>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;">
+    <div class="u-inline-34f05f7385">
         <?php foreach ($images as $img): ?>
-            <div class="form-card" style="padding:10px;">
-                <img src="<?= htmlspecialchars((string) $img['image_url'], ENT_QUOTES) ?>" alt="<?= htmlspecialchars((string) $img['caption'], ENT_QUOTES) ?>" style="width:100%;height:120px;object-fit:cover;border-radius:8px;" loading="lazy">
+            <div class="form-card u-inline-481ed7e754">
+                <img class="u-inline-0021310c98" src="<?= htmlspecialchars((string) $img['image_url'], ENT_QUOTES) ?>" alt="<?= htmlspecialchars((string) $img['caption'], ENT_QUOTES) ?>" loading="lazy">
                 <?php if ($img['caption'] !== ''): ?>
-                    <p class="form-hint" style="margin:8px 0 0;"><?= htmlspecialchars((string) $img['caption'], ENT_QUOTES) ?></p>
+                    <p class="form-hint u-inline-41724d9228"><?= htmlspecialchars((string) $img['caption'], ENT_QUOTES) ?></p>
                 <?php endif; ?>
-                <form method="post" action="/admin/albums/<?= (int) $album['id'] ?>/images/<?= (int) $img['id'] ?>/delete" style="margin-top:8px;">
+                <form class="u-inline-b1ecc496e0" method="post" action="/admin/albums/<?= (int) $album['id'] ?>/images/<?= (int) $img['id'] ?>/delete">
                     <?= Csrf::field() ?>
                     <button type="submit" class="btn btn--small btn--danger"><?= \App\Core\AdminUi::icon('trash') ?>Убрать</button>
                 </form>

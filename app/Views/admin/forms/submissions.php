@@ -10,7 +10,7 @@ $pageTitle = 'Заявки: ' . $form['name'];
 $activeNav = 'forms';
 require __DIR__ . '/../layout/header.php';
 ?>
-<a href="/admin/forms" class="btn btn--small" style="margin-bottom:16px;">&larr; Все формы</a>
+<a href="/admin/forms" class="btn btn--small u-inline-79a1c5a5db">&larr; Все формы</a>
 
 <table class="data-table">
     <thead>

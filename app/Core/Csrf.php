@@ -50,7 +50,7 @@ final class Csrf
     {
         $ts = (string) time();
 
-        return '<div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">'
+        return '<div class="csrf-honeypot" aria-hidden="true">'
             . '<label>Не заполняйте это поле<input type="text" name="hp_website" tabindex="-1" autocomplete="off" value=""></label>'
             . '</div>'
             . '<input type="hidden" name="hp_ts" value="' . htmlspecialchars($ts, ENT_QUOTES) . '">';

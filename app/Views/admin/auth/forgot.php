@@ -47,7 +47,7 @@ use App\Core\Csrf;
             Если такой e-mail зарегистрирован, мы отправили на него ссылку для сброса пароля.
             Ссылка действительна 30 минут.
         </div>
-        <p style="text-align:center;margin-top:16px;"><a href="/admin/login" class="auth-forgot-link">← Вернуться ко входу</a></p>
+        <p class="u-inline-b7a1536112"><a href="/admin/login" class="auth-forgot-link">← Вернуться ко входу</a></p>
     <?php else: ?>
         <form method="post" action="/admin/forgot" class="auth-form">
             <?= Csrf::field() ?>

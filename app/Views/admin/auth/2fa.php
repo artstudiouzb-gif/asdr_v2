@@ -61,9 +61,9 @@ use App\Core\Csrf;
         </button>
     </form>
 
-    <form method="post" action="/admin/login/2fa/resend" style="margin-top:16px;text-align:center;">
+    <form class="u-inline-3f5e202c68" method="post" action="/admin/login/2fa/resend">
         <?= Csrf::field() ?>
-        <button type="submit" class="btn btn--small" style="width:auto;background:transparent;border:1px solid #cbd5e1;color:#475569;">Отправить код повторно</button>
+        <button type="submit" class="btn btn--small u-inline-8233e9f287">Отправить код повторно</button>
     </form>
 </div>
 </body>

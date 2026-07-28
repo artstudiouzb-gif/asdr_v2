@@ -27,7 +27,7 @@ require __DIR__ . '/../layout/header.php';
     </div>
 </div>
 
-<div class="form-card" style="margin-bottom:28px;">
+<div class="form-card u-inline-1e1a9b09bf">
     <h2>Журнал аудита действий (Audit Logs)</h2>
     <div class="table-responsive">
         <table class="table">

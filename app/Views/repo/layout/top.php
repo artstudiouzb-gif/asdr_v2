@@ -46,7 +46,7 @@ $a11y = [
             <span class="repo-topbar__user"><?= htmlspecialchars((string) ($repoUser['full_name'] ?: $repoUser['username']), ENT_QUOTES) ?></span>
             <a href="/repo">Файлы</a>
             <a href="/repo/security">Безопасность</a>
-            <form method="post" action="/repo/logout" style="display:inline;margin:0;">
+            <form class="u-inline-1654353117" method="post" action="/repo/logout">
                 <?= Csrf::field() ?>
                 <button type="submit">Выйти</button>
             </form>

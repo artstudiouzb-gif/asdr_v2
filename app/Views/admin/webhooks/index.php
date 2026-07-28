@@ -11,7 +11,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var array $events */
 ?>
 <div class="form-card">
-    <h2 style="margin-top:0;">Добавить вебхук</h2>
+    <h2 class="u-inline-291b7bbb01">Добавить вебхук</h2>
     <p class="form-hint">Внешний URL получит <code>POST</code> с JSON события. Если задан секрет —
        тело подписывается заголовком <code>X-ArtStudio-Signature: sha256=…</code> (HMAC).
        Доставка асинхронна воркером с ретраями.</p>
@@ -41,14 +41,14 @@ require __DIR__ . '/../layout/header.php';
     </form>
 </div>
 
-<table class="data-table" style="margin-top:20px;">
+<table class="data-table u-inline-9eb125f52f">
     <thead><tr><th>Событие</th><th>URL</th><th>Секрет</th><th>Активен</th><th></th></tr></thead>
     <tbody>
         <?php if (empty($items)): ?><tr><td colspan="5" class="data-table__empty">Вебхуков пока нет.</td></tr><?php endif; ?>
         <?php foreach ($items as $w): ?>
             <tr>
                 <td><code><?= htmlspecialchars((string) $w['event_type'], ENT_QUOTES) ?></code></td>
-                <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;"><?= htmlspecialchars((string) $w['url'], ENT_QUOTES) ?></td>
+                <td class="u-inline-254c3eade8"><?= htmlspecialchars((string) $w['url'], ENT_QUOTES) ?></td>
                 <td><?= !empty($w['secret']) ? '✓' : '—' ?></td>
                 <td><?= (int) $w['is_active'] === 1 ? 'да' : 'нет' ?></td>
                 <td class="data-table__actions">
@@ -62,10 +62,10 @@ require __DIR__ . '/../layout/header.php';
     </tbody>
 </table>
 
-<div class="form-card" style="margin-top:24px;">
-    <h2 style="margin-top:0;">Журнал доставок</h2>
+<div class="form-card u-inline-3343fd6464">
+    <h2 class="u-inline-291b7bbb01">Журнал доставок</h2>
     <?php $sf = $statusFilter ?? ''; ?>
-    <div class="filter-tabs" style="margin-bottom:12px;">
+    <div class="filter-tabs u-inline-3ef1fa1aa1">
         <a class="btn btn--small <?= $sf === '' ? 'btn--primary' : '' ?>" href="/admin/webhooks">Все</a>
         <a class="btn btn--small <?= $sf === 'failed' ? 'btn--primary' : '' ?>" href="/admin/webhooks?status=failed">Проблемные (failed)</a>
         <a class="btn btn--small <?= $sf === 'pending' ? 'btn--primary' : '' ?>" href="/admin/webhooks?status=pending">В очереди</a>
@@ -79,11 +79,11 @@ require __DIR__ . '/../layout/header.php';
                 <tr>
                     <td><?= htmlspecialchars((string) $d['created_at'], ENT_QUOTES) ?></td>
                     <td><code><?= htmlspecialchars((string) $d['event_type'], ENT_QUOTES) ?></code></td>
-                    <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;"><?= htmlspecialchars((string) ($d['webhook_url'] ?? ''), ENT_QUOTES) ?></td>
+                    <td class="u-inline-6581ac980a"><?= htmlspecialchars((string) ($d['webhook_url'] ?? ''), ENT_QUOTES) ?></td>
                     <td><span class="badge badge--<?= $d['status'] === 'sent' ? 'published' : 'draft' ?>"><?= htmlspecialchars((string) $d['status'], ENT_QUOTES) ?></span></td>
                     <td><?= $d['response_code'] !== null ? (int) $d['response_code'] : '—' ?></td>
                     <td><?= (int) $d['attempts'] ?></td>
-                    <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;"><?= htmlspecialchars((string) ($d['last_error'] ?? ''), ENT_QUOTES) ?></td>
+                    <td class="u-inline-6581ac980a"><?= htmlspecialchars((string) ($d['last_error'] ?? ''), ENT_QUOTES) ?></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>

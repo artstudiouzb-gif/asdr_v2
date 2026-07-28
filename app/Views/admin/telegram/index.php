@@ -34,125 +34,6 @@ $mark = static function (bool $done, bool $started = true): string {
         : '<span class="badge badge--danger">' . AdminUi::icon('warning', 12) . ' требует внимания</span>';
 };
 ?>
-
-<style>
-/* Стили для Telegram Dashboard */
-.tg-summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.tg-summary-card {
-    background: var(--admin-surface, #ffffff);
-    border: 1px solid var(--admin-border, #e2e8f0);
-    border-radius: var(--admin-radius-lg, 12px);
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.tg-summary-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-}
-
-.tg-summary-card__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--admin-text-muted, #64748b);
-}
-
-.tg-summary-card__title {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.tg-summary-card__value {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--admin-text, #0f172a);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.tg-code-box {
-    background: rgba(59, 130, 246, 0.06);
-    border: 1px dashed rgba(59, 130, 246, 0.3);
-    border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin: 12px 0 16px;
-}
-
-.tg-code-val {
-    font-family: var(--font-mono, monospace);
-    font-size: 1.35rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--admin-accent, #2563eb);
-}
-
-.tg-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
-    background: var(--admin-bg, #f8fafc);
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--admin-border, #e2e8f0);
-}
-
-.tg-toolbar__title {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--admin-text-muted, #64748b);
-    margin-right: 6px;
-}
-
-.tg-tag-btn {
-    background: var(--admin-surface, #ffffff);
-    border: 1px solid var(--admin-border, #cbd5e1);
-    border-radius: 6px;
-    padding: 4px 10px;
-    font-size: 0.82rem;
-    font-family: inherit;
-    color: var(--admin-text, #334155);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.15s ease;
-}
-
-.tg-tag-btn:hover {
-    background: var(--admin-accent-soft, #eff6ff);
-    border-color: var(--admin-accent, #2563eb);
-    color: var(--admin-accent, #2563eb);
-}
-
-.tg-tag-btn code {
-    font-family: monospace;
-    background: rgba(0,0,0,0.05);
-    padding: 1px 4px;
-    border-radius: 3px;
-}
-</style>
-
 <?php // ── Верхняя сводная панель статусов Telegram с SVG-иконками ────────── ?>
 <div class="tg-summary-grid">
     <div class="tg-summary-card">
@@ -164,7 +45,7 @@ $mark = static function (bool $done, bool $started = true): string {
             <?php if ($botOk && $botUsername !== ''): ?>
                 <span>@<?= htmlspecialchars($botUsername, ENT_QUOTES) ?></span>
             <?php else: ?>
-                <span style="color:var(--admin-text-muted);">Не подключен</span>
+                <span class="u-inline-594b8be61b">Не подключен</span>
             <?php endif; ?>
         </div>
     </div>
@@ -176,9 +57,9 @@ $mark = static function (bool $done, bool $started = true): string {
         </div>
         <div class="tg-summary-card__value">
             <?php if ($linked): ?>
-                <span>Привязан <small style="font-weight:normal;font-size:0.85em;color:var(--admin-text-muted);">(Chat ID: <?= (int) $myChatId ?>)</small></span>
+                <span>Привязан <small class="u-inline-8001b29eb4">(Chat ID: <?= (int) $myChatId ?>)</small></span>
             <?php else: ?>
-                <span style="color:var(--admin-text-muted);">Не привязан</span>
+                <span class="u-inline-594b8be61b">Не привязан</span>
             <?php endif; ?>
         </div>
     </div>
@@ -192,7 +73,7 @@ $mark = static function (bool $done, bool $started = true): string {
             <?php if ($channelReady): ?>
                 <span><?= htmlspecialchars((string) ($channel['chat_id'] ?? ''), ENT_QUOTES) ?></span>
             <?php else: ?>
-                <span style="color:var(--admin-text-muted);">Отключено</span>
+                <span class="u-inline-594b8be61b">Отключено</span>
             <?php endif; ?>
         </div>
     </div>
@@ -206,7 +87,7 @@ $mark = static function (bool $done, bool $started = true): string {
             <?php if ($notifyCount > 0): ?>
                 <span><?= $notifyCount ?> получател<?= $notifyCount === 1 ? 'ь' : ($notifyCount < 5 ? 'я' : 'ей') ?></span>
             <?php else: ?>
-                <span style="color:var(--admin-text-muted);">Выключены</span>
+                <span class="u-inline-594b8be61b">Выключены</span>
             <?php endif; ?>
         </div>
     </div>
@@ -214,7 +95,7 @@ $mark = static function (bool $done, bool $started = true): string {
 
 <?php // ── Шаг 1. Бот ───────────────────────────────────────────────────── ?>
 <div class="form-card">
-    <h2 style="margin-top:0;display:flex;align-items:center;gap:8px;">
+    <h2 class="u-inline-8981e56111">
         <?= AdminUi::icon('telegram', 20) ?> 1. Настройка Telegram-бота <?= $mark($botOk, $botConfigured) ?>
     </h2>
     <p class="form-hint">
@@ -236,7 +117,7 @@ $mark = static function (bool $done, bool $started = true): string {
                 <label class="form-hint"><input type="checkbox" name="clear_telegram_bot_token" value="1"> Удалить сохранённый токен</label>
             <?php endif; ?>
         </div>
-        <div class="form-actions" style="margin-top:12px;display:flex;gap:12px;align-items:center;">
+        <div class="form-actions u-inline-df20dd0984">
             <button type="submit" class="btn btn--primary"><?= AdminUi::icon('save') ?>Сохранить токен</button>
             <?php if ($botConfigured): ?>
                 <button type="submit" formaction="/admin/telegram/bot/check" class="btn btn--outline">
@@ -248,8 +129,8 @@ $mark = static function (bool $done, bool $started = true): string {
 </div>
 
 <?php // ── Шаг 2. Привязка администратора ───────────────────────────────── ?>
-<div class="form-card" style="margin-top:20px;">
-    <h2 style="margin-top:0;display:flex;align-items:center;gap:8px;">
+<div class="form-card u-inline-9eb125f52f">
+    <h2 class="u-inline-8981e56111">
         <?= AdminUi::icon('lock', 20) ?> 2. Коды входа и двухфакторка (2FA) <?= $mark($linked, $botConfigured) ?>
     </h2>
     <?php if (!$botConfigured): ?>
@@ -261,7 +142,7 @@ $mark = static function (bool $done, bool $started = true): string {
         </p>
     <?php else: ?>
         <p class="form-hint">Инструкция по привязке аккаунта:</p>
-        <ol class="form-hint" style="margin:0 0 12px 18px;padding:0;">
+        <ol class="form-hint u-inline-f60258483c">
             <li>Откройте бота
                 <?php if ($botUsername !== ''): ?>
                     <a href="https://t.me/<?= htmlspecialchars($botUsername, ENT_QUOTES) ?>" target="_blank" rel="noopener"><strong>@<?= htmlspecialchars($botUsername, ENT_QUOTES) ?></strong></a>
@@ -275,7 +156,7 @@ $mark = static function (bool $done, bool $started = true): string {
 
         <div class="tg-code-box">
             <div>
-                <div style="font-size:0.8rem;color:var(--admin-text-muted);margin-bottom:2px;">Код привязки</div>
+                <div class="u-inline-afaed7b4de">Код привязки</div>
                 <div class="tg-code-val" id="tg_link_code_val"><?= htmlspecialchars((string) $linkCode, ENT_QUOTES) ?></div>
             </div>
             <button type="button" class="btn btn--small btn--outline" onclick="copyTgCode(this)">
@@ -291,7 +172,7 @@ $mark = static function (bool $done, bool $started = true): string {
 </div>
 
 <?php // ── Шаг 3. Канал ─────────────────────────────────────────────────── ?>
-<div class="form-card" style="margin-top:20px;">
+<div class="form-card u-inline-9eb125f52f">
     <?php
     $chatIdVal = trim((string) ($channel['chat_id'] ?? ''));
     $channelBadge = '';
@@ -303,7 +184,7 @@ $mark = static function (bool $done, bool $started = true): string {
         $channelBadge = '<span class="badge badge--warning">' . AdminUi::icon('pause', 12) . ' сохранен (' . htmlspecialchars($chatIdVal, ENT_QUOTES) . '), выключен</span>';
     }
     ?>
-    <h2 style="margin-top:0;display:flex;align-items:center;gap:8px;">
+    <h2 class="u-inline-8981e56111">
         <?= AdminUi::icon('send', 20) ?> 3. Публикация новостей в Telegram-канал <?= $channelBadge ?>
     </h2>
     <p class="form-hint">
@@ -340,7 +221,7 @@ $mark = static function (bool $done, bool $started = true): string {
                 <button type="button" class="tg-tag-btn" onclick="insertTgTag('<a href=&quot;https://example.com&quot;>', '</a>')"><?= AdminUi::icon('external', 13) ?> Ссылка</button>
             </div>
 
-            <textarea id="tg_signature" name="signature" rows="3" style="font-family:monospace;"><?= htmlspecialchars((string) ($channel['signature'] ?? ''), ENT_QUOTES) ?></textarea>
+            <textarea class="u-inline-8ff9961267" id="tg_signature" name="signature" rows="3"><?= htmlspecialchars((string) ($channel['signature'] ?? ''), ENT_QUOTES) ?></textarea>
             <span class="form-hint">
                 Поддерживаются HTML-теги Telegram: <code>&lt;b&gt;</code>, <code>&lt;i&gt;</code>, <code>&lt;code&gt;</code> (автокопирование по клику), <code>&lt;blockquote&gt;</code>, <code>&lt;tg-spoiler&gt;</code>, <code>&lt;a href="..."&gt;</code>.
             </span>
@@ -365,7 +246,7 @@ $mark = static function (bool $done, bool $started = true): string {
             </div>
         </details>
 
-        <div class="form-actions" style="margin-top:12px;display:flex;gap:12px;align-items:center;">
+        <div class="form-actions u-inline-df20dd0984">
             <button type="submit" class="btn btn--primary"><?= AdminUi::icon('save') ?>Сохранить канал</button>
             <button type="submit" formaction="/admin/telegram/channel/check" class="btn btn--outline">
                 <?= AdminUi::icon('check') ?>Проверить канал и права бота
@@ -375,18 +256,18 @@ $mark = static function (bool $done, bool $started = true): string {
 </div>
 
 <?php // ── Шаг 4. Дополнительно (Заявки и Gateway) ───────────────────────── ?>
-<div class="form-card" style="margin-top:20px;margin-bottom:30px;">
-    <h2 style="margin-top:0;display:flex;align-items:center;gap:8px;">
+<div class="form-card u-inline-d8a0156797">
+    <h2 class="u-inline-8981e56111">
         <?= AdminUi::icon('settings', 20) ?> 4. Уведомления о заявках с сайта и Telegram Gateway
     </h2>
     <form method="post" action="/admin/telegram/extras" class="form-grid">
         <?= Csrf::field() ?>
         <div class="form-field">
             <label for="telegram_notify_chat_ids">Уведомления о заявках с форм: chat_id получателей</label>
-            <div style="display:flex;gap:8px;align-items:center;">
-                <input type="text" id="telegram_notify_chat_ids" name="telegram_notify_chat_ids"
+            <div class="u-inline-78cead6503">
+                <input class="u-inline-7623f05545" type="text" id="telegram_notify_chat_ids" name="telegram_notify_chat_ids"
                        value="<?= htmlspecialchars($notifyChatIds, ENT_QUOTES) ?>"
-                       placeholder="123456789, -1001234567890" autocomplete="off" spellcheck="false" style="flex:1;">
+                       placeholder="123456789, -1001234567890" autocomplete="off" spellcheck="false">
                 <?php if ($linked && $myChatId > 0): ?>
                     <button type="button" class="btn btn--small btn--outline" onclick="addMyChatId(<?= (int) $myChatId ?>)" title="Добавить мой Chat ID">
                         + Добавить мой ID (<?= (int) $myChatId ?>)

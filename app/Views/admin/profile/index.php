@@ -32,9 +32,9 @@ function ua_short(?string $ua): string
 ?>
 
 <div class="form-card">
-    <h2 style="margin-top:0;">Язык интерфейса по умолчанию</h2>
+    <h2 class="u-inline-291b7bbb01">Язык интерфейса по умолчанию</h2>
     <p class="form-hint">Выберите ваш персональный язык для работы в панели управления. Он будет использоваться при каждом входе.</p>
-    <form method="post" action="/admin/profile/admin-lang" class="form-grid" style="max-width:480px;">
+    <form method="post" action="/admin/profile/admin-lang" class="form-grid u-inline-6add97efa7">
         <?= Csrf::field() ?>
         <div class="form-field">
             <label for="profile_admin_lang">Язык админ-панели</label>
@@ -101,41 +101,41 @@ $themeList = [
 ];
 ?>
 
-<div class="form-card" style="margin-top:24px;">
-    <h2 style="margin-top:0;display:flex;align-items:center;gap:10px;">
+<div class="form-card u-inline-3343fd6464">
+    <h2 class="u-inline-1bff6ebf4f">
         🎨 Цветовая схема админ-панели
     </h2>
-    <p class="form-hint" style="margin-bottom:18px;">
+    <p class="form-hint u-inline-5b6aad9a3f">
         Выберите персональное цветовое оформление интерфейса. Нажимая на варианты ниже, вы можете <strong>в реальном времени мгновенно примерять темы</strong> перед сохранением!
     </p>
 
     <form method="post" action="/admin/profile/admin-theme">
         <?= Csrf::field() ?>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:20px;">
+        <div class="u-inline-5429e4728e">
             <?php foreach ($themeList as $tKey => $tInfo): ?>
                 <?php $isAct = $tKey === $currentTheme; ?>
-                <label style="border:2px solid <?= $isAct ? 'var(--admin-primary,#0284c7)' : 'var(--admin-border,#cbd5e1)' ?>;border-radius:12px;padding:16px;background:var(--admin-card-bg,#fff);cursor:pointer;display:flex;flex-direction:column;gap:10px;transition:all .15s ease;box-shadow:<?= $isAct ? '0 4px 14px rgba(2,132,199,0.15)' : 'none' ?>;"
+                <label class="admin-theme-card<?= $isAct ? ' is-active' : '' ?>"
                        onclick="document.documentElement.setAttribute('data-admin-theme', '<?= $tKey ?>');">
-                    <div style="display:flex;align-items:center;justify-content:space-between;">
-                        <span style="font-weight:700;font-size:0.95rem;display:flex;align-items:center;gap:8px;">
-                            <input type="radio" name="admin_theme" value="<?= $tKey ?>" <?= $isAct ? 'checked' : '' ?> style="margin:0;">
+                    <div class="u-inline-e02c6d0480">
+                        <span class="u-inline-0b08752dae">
+                            <input class="u-inline-1da9facb4d" type="radio" name="admin_theme" value="<?= $tKey ?>" <?= $isAct ? 'checked' : '' ?>>
                             <?= htmlspecialchars($tInfo['name'], ENT_QUOTES) ?>
                         </span>
                         <?php if ($isAct): ?>
-                            <span class="badge badge--success" style="font-size:0.75rem;">Активна</span>
+                            <span class="badge badge--success u-inline-07bbf13a37">Активна</span>
                         <?php endif; ?>
                     </div>
                     
-                    <div style="display:flex;align-items:center;gap:8px;background:var(--admin-surface-soft,#f8fafc);padding:8px 12px;border-radius:8px;border:1px solid var(--admin-border,#e2e8f0);">
-                        <span style="font-size:0.78rem;color:var(--admin-text-muted,#64748b);font-weight:600;">Палитра:</span>
-                        <div style="display:flex;gap:6px;margin-left:auto;">
-                            <span style="width:20px;height:20px;border-radius:50%;background:<?= $tInfo['topbar'] ?>;border:1px solid rgba(0,0,0,0.15);" title="Топбар: <?= $tInfo['topbar'] ?>"></span>
-                            <span style="width:20px;height:20px;border-radius:50%;background:<?= $tInfo['sidebar'] ?>;border:1px solid rgba(0,0,0,0.15);" title="Сайдбар: <?= $tInfo['sidebar'] ?>"></span>
-                            <span style="width:20px;height:20px;border-radius:50%;background:<?= $tInfo['accent'] ?>;border:1px solid rgba(0,0,0,0.15);" title="Акцент: <?= $tInfo['accent'] ?>"></span>
+                    <div class="u-inline-cec5a863d9">
+                        <span class="u-inline-93e9461c0d">Палитра:</span>
+                        <div class="u-inline-06d0ddb422">
+                            <span class="admin-theme-swatch" data-swatch-color="<?= htmlspecialchars($tInfo['topbar'], ENT_QUOTES) ?>" title="Топбар: <?= htmlspecialchars($tInfo['topbar'], ENT_QUOTES) ?>"></span>
+                            <span class="admin-theme-swatch" data-swatch-color="<?= htmlspecialchars($tInfo['sidebar'], ENT_QUOTES) ?>" title="Сайдбар: <?= htmlspecialchars($tInfo['sidebar'], ENT_QUOTES) ?>"></span>
+                            <span class="admin-theme-swatch" data-swatch-color="<?= htmlspecialchars($tInfo['accent'], ENT_QUOTES) ?>" title="Акцент: <?= htmlspecialchars($tInfo['accent'], ENT_QUOTES) ?>"></span>
                         </div>
                     </div>
 
-                    <p style="margin:0;font-size:0.82rem;color:var(--admin-text-muted,#64748b);line-height:1.4;">
+                    <p class="u-inline-934ef2d866">
                         <?= htmlspecialchars($tInfo['desc'], ENT_QUOTES) ?>
                     </p>
                 </label>
@@ -148,9 +148,9 @@ $themeList = [
     </form>
 </div>
 
-<div class="form-card" style="margin-top:24px;">
-    <h2 style="margin-top:0;">Смена пароля</h2>
-    <form method="post" action="/admin/profile/password" class="form-grid" style="max-width:480px;">
+<div class="form-card u-inline-3343fd6464">
+    <h2 class="u-inline-291b7bbb01">Смена пароля</h2>
+    <form method="post" action="/admin/profile/password" class="form-grid u-inline-6add97efa7">
         <?= Csrf::field() ?>
         <div class="form-field">
             <label for="current_password">Текущий пароль</label>
@@ -171,8 +171,8 @@ $themeList = [
     </form>
 </div>
 
-<div class="form-card" style="margin-top:24px;">
-    <h2 style="margin-top:0;">Код входа через Telegram-бота (бесплатно)</h2>
+<div class="form-card u-inline-3343fd6464">
+    <h2 class="u-inline-291b7bbb01">Код входа через Telegram-бота (бесплатно)</h2>
     <?php if (!($botConfigured ?? false)): ?>
         <p class="form-hint">
             Бот не настроен. Создайте бота у <strong>@BotFather</strong> (бесплатно) и укажите токен
@@ -181,7 +181,7 @@ $themeList = [
     <?php elseif ($botLinked ?? false): ?>
         <p><span class="badge badge--success">Привязан</span> Коды входа приходят вам в Telegram от бота.</p>
         <p class="form-hint">Ваш chat_id: <code><?= (int) ($profileUser['telegram_chat_id'] ?? 0) ?></code> — укажите его в разделе <a href="/admin/telegram">Telegram</a>, чтобы получать уведомления о заявках с форм.</p>
-        <form method="post" action="/admin/profile/telegram/unlink" class="form-grid" style="max-width:480px;">
+        <form method="post" action="/admin/profile/telegram/unlink" class="form-grid u-inline-6add97efa7">
             <?= Csrf::field() ?>
             <div class="form-field">
                 <label for="tg_password">Подтвердите паролем, чтобы отвязать</label>
@@ -191,9 +191,9 @@ $themeList = [
         </form>
     <?php else: ?>
         <p class="form-hint">Привяжите свой Telegram — и коды входа будут приходить от бота бесплатно (без QR-кодов и секретов на экране):</p>
-        <ol style="margin:0 0 14px 18px;line-height:1.8;">
+        <ol class="u-inline-d40243f2ec">
             <li>Откройте бота<?php if (!empty($botUsername)): ?> <a href="https://t.me/<?= htmlspecialchars($botUsername, ENT_QUOTES) ?>" target="_blank" rel="noopener">@<?= htmlspecialchars($botUsername, ENT_QUOTES) ?></a><?php endif; ?> и нажмите <strong>Start</strong>.</li>
-            <li>Отправьте боту код: <code style="font-size:15px;padding:3px 8px;background:var(--admin-accent-soft,#eef0fe);border-radius:6px;"><?= htmlspecialchars((string) ($linkCode ?? ''), ENT_QUOTES) ?></code></li>
+            <li>Отправьте боту код: <code class="u-inline-e906946788"><?= htmlspecialchars((string) ($linkCode ?? ''), ENT_QUOTES) ?></code></li>
             <li>Нажмите кнопку ниже.</li>
         </ol>
         <form method="post" action="/admin/profile/telegram/link">
@@ -203,12 +203,12 @@ $themeList = [
     <?php endif; ?>
 </div>
 
-<div class="form-card" style="margin-top:24px;">
-    <h2 style="margin-top:0;">Резервный канал: телефон (платный шлюз)</h2>
+<div class="form-card u-inline-3343fd6464">
+    <h2 class="u-inline-291b7bbb01">Резервный канал: телефон (платный шлюз)</h2>
     <p class="form-hint">Код входа приходит в Telegram от официального канала
        <strong>Verification&nbsp;Codes</strong> (t.me/VerificationCodes) на номер, привязанный к вашему
        Telegram-аккаунту. Без телефона вход выполняется только по паролю.</p>
-    <form method="post" action="/admin/profile/phone" class="form-grid" style="max-width:480px;">
+    <form method="post" action="/admin/profile/phone" class="form-grid u-inline-6add97efa7">
         <?= Csrf::field() ?>
         <div class="form-field">
             <label for="phone">Телефон (международный формат)</label>
@@ -225,8 +225,8 @@ $themeList = [
     </form>
 </div>
 
-<div class="form-card" style="margin-top:24px;">
-    <h2 style="margin-top:0;">Активные сессии</h2>
+<div class="form-card u-inline-3343fd6464">
+    <h2 class="u-inline-291b7bbb01">Активные сессии</h2>
     <p class="form-hint">Список устройств, где выполнен вход. Отзыв сессии мгновенно завершает её на сервере.</p>
     <table class="data-table">
         <thead>
@@ -254,7 +254,7 @@ $themeList = [
         <?php endforeach; ?>
         </tbody>
     </table>
-    <form method="post" action="/admin/profile/sessions/revoke-others" style="margin-top:16px;">
+    <form class="u-inline-8a359a76eb" method="post" action="/admin/profile/sessions/revoke-others">
         <?= Csrf::field() ?>
         <button type="submit" class="btn">Выйти на всех других устройствах</button>
     </form>

@@ -41,7 +41,7 @@ if ($embedUrl !== '' && (str_contains($embedUrl, 'google.com/maps') || str_conta
         <?php if ($embedUrl !== ''): ?>
             <iframe class="block-map__frame" src="<?= htmlspecialchars($embedUrl, ENT_QUOTES) ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="<?= htmlspecialchars($title !== '' ? $title : 'Карта', ENT_QUOTES) ?>"></iframe>
         <?php elseif ($image !== ''): ?>
-            <span class="block-map__image" style="background-image:url('<?= htmlspecialchars($image, ENT_QUOTES) ?>')"></span>
+            <span class="block-map__image" style="--block-map-image:url('<?= htmlspecialchars($image, ENT_QUOTES) ?>')"></span>
         <?php else: ?>
             <span class="block-map__image block-map__image--empty"></span>
         <?php endif; ?>

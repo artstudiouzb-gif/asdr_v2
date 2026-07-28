@@ -30,7 +30,7 @@ $ctaBtnUrl = trim((string) ($data['cta_button_url'] ?? ''));
         <?php endif; ?>
     </div>
     <?php if ($hasCta): ?>
-        <div class="timeline-cta"<?= $ctaImage !== '' ? ' style="background-image:url(\'' . htmlspecialchars($ctaImage, ENT_QUOTES) . '\')"' : '' ?>>
+        <div class="timeline-cta"<?= $ctaImage !== '' ? ' style="--timeline-cta-image:url(\'' . htmlspecialchars($ctaImage, ENT_QUOTES) . '\')"' : '' ?>>
             <span class="timeline-cta__overlay"></span>
             <div class="timeline-cta__body">
                 <h3 class="timeline-cta__title"><?= htmlspecialchars($ctaTitle, ENT_QUOTES) ?></h3>

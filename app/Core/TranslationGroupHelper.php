@@ -343,30 +343,30 @@ final class TranslationGroupHelper
 
         ob_start();
         ?>
-        <div class="form-card multilang-group-card" style="border:1px solid var(--admin-border,#e2e8f0);border-radius:12px;padding:18px;margin-bottom:20px;background:var(--admin-card-bg,#ffffff);box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+        <div class="form-card multilang-group-card u-inline-c18e1e5580">
             <input type="hidden" name="lang" value="<?= htmlspecialchars($currentLang, ENT_QUOTES) ?>">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <h3 style="margin:0;font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:8px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19" style="color:var(--admin-primary,#0284c7);"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <div class="u-inline-342ce139a0">
+                <h3 class="u-inline-7defd547d2">
+                    <svg class="u-inline-aa5e5b184d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                     Язык и переводы
                 </h3>
             </div>
 
             <!-- Верхняя выделенная плашка с текущим редактируемым языком -->
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:color-mix(in srgb, var(--admin-primary, #0284c7) 10%, #ffffff);border:1.5px solid var(--admin-primary, #0284c7);border-radius:8px;margin-bottom:14px;">
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:0.82rem;color:var(--admin-text-muted,#475569);font-weight:500;">Редактируется:</span>
-                    <strong style="font-size:0.92rem;color:var(--admin-primary-dark,#0369a1);font-weight:700;text-transform:uppercase;"><?= htmlspecialchars($currentLang, ENT_QUOTES) ?></strong>
-                    <span style="font-size:0.85rem;color:var(--admin-text,#1e293b);font-weight:600;">(<?= htmlspecialchars($currentLangName, ENT_QUOTES) ?>)</span>
+            <div class="u-inline-8b8ad782a0">
+                <div class="u-inline-e3f61041ef">
+                    <span class="u-inline-7c3cfec592">Редактируется:</span>
+                    <strong class="u-inline-0d175b7d93"><?= htmlspecialchars($currentLang, ENT_QUOTES) ?></strong>
+                    <span class="u-inline-72088eb607">(<?= htmlspecialchars($currentLangName, ENT_QUOTES) ?>)</span>
                 </div>
                 <?php if ($currentLang === $defaultCode): ?>
-                    <span style="background:#0284c7;color:#ffffff;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;letter-spacing:0.02em;">Основной</span>
+                    <span class="u-inline-3159a647e8">Основной</span>
                 <?php else: ?>
-                    <span style="background:#0ea5e9;color:#ffffff;padding:2px 8px;border-radius:12px;font-size:0.72rem;font-weight:700;">Перевод</span>
+                    <span class="u-inline-4488ac4e31">Перевод</span>
                 <?php endif; ?>
             </div>
 
-            <div class="multilang-translation-list" style="display:flex;flex-direction:column;gap:8px;">
+            <div class="multilang-translation-list u-inline-f67b86e0fb">
                 <?php foreach ($languages as $lang): ?>
                     <?php
                     $code = (string) $lang['code'];
@@ -374,38 +374,38 @@ final class TranslationGroupHelper
                     $isSelf = ($code === $currentLang);
                     ?>
                     <?php if ($isSelf): ?>
-                        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;background:color-mix(in srgb, #0284c7 8%, #ffffff);border:1.5px solid #0284c7;box-shadow:0 2px 6px rgba(2,132,199,0.12);">
-                            <div style="display:flex;align-items:center;gap:8px;">
-                                <span style="width:8px;height:8px;border-radius:50%;background:#0284c7;display:inline-block;box-shadow:0 0 0 3px rgba(2,132,199,0.25);"></span>
-                                <span style="font-weight:700;font-size:0.9rem;color:#0369a1;"><?= htmlspecialchars($lang['name'], ENT_QUOTES) ?></span>
+                        <div class="u-inline-9da576af61">
+                            <div class="u-inline-e3f61041ef">
+                                <span class="u-inline-26c741d857"></span>
+                                <span class="u-inline-9ec672a78d"><?= htmlspecialchars($lang['name'], ENT_QUOTES) ?></span>
                                 <?php if ($code === $defaultCode): ?>
-                                    <span style="font-size:0.72rem;color:#64748b;font-weight:600;">(оригинал)</span>
+                                    <span class="u-inline-c23eb2f888">(оригинал)</span>
                                 <?php endif; ?>
                             </div>
-                            <span style="background:#0284c7;color:#ffffff;font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:14px;display:inline-flex;align-items:center;gap:4px;">
+                            <span class="u-inline-419b2840c7">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                                 Текущий пост
                             </span>
                         </div>
                     <?php else: ?>
-                        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:8px;background:var(--gov-bg, #f8fafc);border:1px solid var(--admin-border, #e2e8f0);">
-                            <div style="display:flex;align-items:center;gap:8px;">
-                                <span style="font-weight:600;font-size:0.88rem;color:var(--admin-text, #334155);"><?= htmlspecialchars($lang['name'], ENT_QUOTES) ?></span>
+                        <div class="u-inline-0fc66a2344">
+                            <div class="u-inline-e3f61041ef">
+                                <span class="u-inline-3b3157a26b"><?= htmlspecialchars($lang['name'], ENT_QUOTES) ?></span>
                                 <?php if ($code === $defaultCode): ?>
-                                    <span style="font-size:0.72rem;color:#64748b;">(оригинал)</span>
+                                    <span class="u-inline-71577fef0b">(оригинал)</span>
                                 <?php endif; ?>
                             </div>
                             <div>
                                 <?php if ($tRecord !== null): ?>
-                                    <a href="/admin/<?= $module ?>/<?= (int) $tRecord['id'] ?>/edit" class="btn btn--small btn--secondary" style="padding:4px 10px;font-size:0.78rem;font-weight:600;display:inline-flex;align-items:center;gap:4px;">
+                                    <a href="/admin/<?= $module ?>/<?= (int) $tRecord['id'] ?>/edit" class="btn btn--small btn--secondary u-inline-30b9f76a48">
                                         ✏ Редактировать (#<?= (int) $tRecord['id'] ?>)
                                     </a>
                                 <?php elseif ($recordId > 0): ?>
-                                    <a href="/admin/<?= $module ?>/<?= $recordId ?>/create-translation?target_lang=<?= $code ?>" class="btn btn--small btn--primary" style="padding:4px 10px;font-size:0.78rem;font-weight:600;background:#10b981;border-color:#10b981;color:#ffffff;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+                                    <a href="/admin/<?= $module ?>/<?= $recordId ?>/create-translation?target_lang=<?= $code ?>" class="btn btn--small btn--primary u-inline-64c12efe40">
                                         ➕ Создать перевод
                                     </a>
                                 <?php else: ?>
-                                    <span style="font-size:0.78rem;color:#94a3b8;font-style:italic;">Сначала сохраните запись</span>
+                                    <span class="u-inline-d716a45428">Сначала сохраните запись</span>
                                 <?php endif; ?>
                             </div>
                         </div>

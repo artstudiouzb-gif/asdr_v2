@@ -11,7 +11,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var array $allTypes */
 $ftypes = ['text' => 'Текст', 'textarea' => 'Многострочный', 'number' => 'Число', 'date' => 'Дата', 'image' => 'Изображение', 'file' => 'Файл', 'relation' => 'Связь'];
 ?>
-<a href="/admin/content-types" class="btn btn--small" style="margin-bottom:16px;">&larr; Все типы</a>
+<a href="/admin/content-types" class="btn btn--small u-inline-79a1c5a5db">&larr; Все типы</a>
 <div class="form-card">
     <form method="post" action="/admin/content-types/<?= (int) $type['id'] ?>/fields" class="form-grid">
         <?= Csrf::field() ?>
