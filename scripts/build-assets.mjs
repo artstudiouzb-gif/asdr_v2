@@ -36,7 +36,8 @@ const checkOnly = process.argv.includes('--check');
 async function readSources(paths) {
     return Promise.all(paths.map(async (path) => ({
         path,
-        content: await readFile(path, 'utf8'),
+        // Keep fingerprints and generated artifacts identical on Windows and Linux.
+        content: (await readFile(path, 'utf8')).replace(/\r\n?/g, '\n'),
     })));
 }
 
