@@ -48,6 +48,59 @@ if (stickyActions.length) {
         actions.classList.remove('is-context-hidden');
     });
 }
+
+/* Обратная связь при сохранении контента: сразу показываем процесс у нажатой
+   кнопки, а после серверного redirect дублируем success-flash заметным toast. */
+document.querySelectorAll('form[data-content-draft]').forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+        var submitter = event.submitter;
+        window.setTimeout(function () {
+            if (event.defaultPrevented || !submitter) { return; }
+            submitter.dataset.originalHtml = submitter.innerHTML;
+            submitter.classList.add('is-loading');
+            submitter.setAttribute('aria-busy', 'true');
+            submitter.textContent = 'Сохранение…';
+
+            window.setTimeout(function () {
+                if (!document.body.contains(submitter)) { return; }
+                submitter.classList.remove('is-loading');
+                submitter.removeAttribute('aria-busy');
+                if (submitter.dataset.originalHtml) {
+                    submitter.innerHTML = submitter.dataset.originalHtml;
+                    delete submitter.dataset.originalHtml;
+                }
+            }, 15000);
+        }, 0);
+    });
+});
+
+window.addEventListener('DOMContentLoaded', function () {
+    var success = document.querySelector('.admin-main > .alert--success');
+    if (!success) { return; }
+
+    var message = (success.textContent || '').trim();
+    if (!message) { return; }
+
+    var toast = document.createElement('div');
+    toast.className = 'admin-toast-notification admin-toast--success';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    toast.innerHTML = '<div class="u-inline-7e30d285d2">'
+        + '<span class="u-inline-4f1925a8a6" aria-hidden="true">✓</span>'
+        + '<span class="u-inline-94c3db5540"></span>'
+        + '</div>'
+        + '<button class="u-inline-d8c73d8aa0" type="button" aria-label="Закрыть уведомление">✕</button>';
+    toast.querySelector('.u-inline-94c3db5540').textContent = message;
+    toast.querySelector('button').addEventListener('click', function () { toast.remove(); });
+    document.body.appendChild(toast);
+    success.remove();
+
+    window.requestAnimationFrame(function () { toast.classList.add('is-visible'); });
+    window.setTimeout(function () {
+        toast.classList.remove('is-visible');
+        window.setTimeout(function () { toast.remove(); }, 300);
+    }, 5000);
+});
 /* Навигация админки: мобильная панель и запоминаемое сворачивание на десктопе. */
 (function () {
     var t = document.querySelector('[data-sidebar-toggle]');
