@@ -4,6 +4,10 @@
 /** @var array $languages */
 /** @var bool $isEdit */
 /** @var string $blockLang */
+/** @var array $parentOptions */
+$parentOptions = $parentOptions ?? [];
+$selectedParentId = (int) ($page['parent_id'] ?? 0);
+$isHomePage = \App\Models\Page::isHomePage($page ?? []);
 ?>
 <div class="form-card page-settings-sidebar u-inline-c1563b7411">
     <h3 class="u-inline-3e8ce2fc5a">Параметры страницы</h3>
@@ -24,6 +28,21 @@
         </div>
 
         <div class="form-field">
+            <label class="u-inline-0b87e9e0af" for="parent_id">Родительская страница</label>
+            <select id="parent_id" name="parent_id" <?= $isHomePage ? 'disabled' : '' ?>>
+                <option value="">Нет — верхний уровень</option>
+                <?php foreach ($parentOptions as $option): ?>
+                    <option value="<?= (int) $option['id'] ?>" <?= $selectedParentId === (int) $option['id'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars((string) $option['label'], ENT_QUOTES) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <span class="form-hint"><?= $isHomePage
+                ? 'Главная страница всегда находится на верхнем уровне.'
+                : 'Используется для структуры и хлебных крошек. URL останется коротким: /' . htmlspecialchars((string) ($page['slug'] ?? 'slug'), ENT_QUOTES) ?></span>
+        </div>
+
+        <div class="form-field">
             <label class="u-inline-0b87e9e0af" for="layout_type">Макет страницы</label>
             <select id="layout_type" name="layout_type">
                 <option value="no_sidebar" <?= ($page['layout_type'] ?? 'no_sidebar') === 'no_sidebar' ? 'selected' : '' ?>>Без сайдбара</option>
@@ -35,7 +54,7 @@
 
         <div class="page-settings-sidebar__options u-inline-d498835cbd">
             <div class="form-field form-field--checkbox">
-                <input type="checkbox" id="is_home" name="is_home" value="1" <?= (\App\Models\Page::isHomePage($page ?? [])) ? 'checked' : '' ?>>
+                <input type="checkbox" id="is_home" name="is_home" value="1" <?= $isHomePage ? 'checked' : '' ?>>
                 <label class="u-inline-d76ba0dbd2" for="is_home">Сделать главной страницей</label>
             </div>
 

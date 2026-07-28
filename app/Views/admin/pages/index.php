@@ -50,6 +50,7 @@ $langs = Language::active();
         <tr>
             <th class="u-inline-5aec6ffae3"><input type="checkbox" data-select-all aria-label="Выбрать все"></th>
             <th>Заголовок</th>
+            <th>Родитель</th>
             <th>URL</th>
             <th>Языки</th>
             <th>Статус</th>
@@ -58,7 +59,7 @@ $langs = Language::active();
     </thead>
     <tbody>
         <?php if (empty($items)): ?>
-            <tr><td colspan="6" class="data-table__empty">Страниц не найдено.</td></tr>
+            <tr><td colspan="7" class="data-table__empty">Страниц не найдено.</td></tr>
         <?php endif; ?>
         <?php
         // Языки контента для всех строк одним запросом (без N+1) и список
@@ -88,6 +89,15 @@ $langs = Language::active();
                         <div class="u-inline-85b4085512">
                             <?= implode(' &nbsp;•&nbsp; ', $otherTitles) ?>
                         </div>
+                    <?php endif; ?>
+                </td>
+                <td>
+                    <?php if (!empty($item['parent_title'])): ?>
+                        <a href="/admin/pages/<?= (int) $item['parent_id'] ?>/edit">
+                            <?= htmlspecialchars((string) $item['parent_title'], ENT_QUOTES) ?>
+                        </a>
+                    <?php else: ?>
+                        <span class="form-hint">Верхний уровень</span>
                     <?php endif; ?>
                 </td>
                 <td>/<?= htmlspecialchars($item['slug'], ENT_QUOTES) ?></td>

@@ -181,8 +181,11 @@ CREATE TABLE IF NOT EXISTS pages (
     deleted_at      DATETIME NULL COMMENT 'мягкое удаление (корзина)',
     lang            VARCHAR(8) NOT NULL DEFAULT 'ru',
     translation_group_id INT UNSIGNED NULL,
+    parent_id       INT UNSIGNED NULL COMMENT 'родительская страница; URL страницы остаётся плоским',
     UNIQUE KEY uq_pages_slug_lang (slug, lang),
-    KEY idx_pages_lang_group (translation_group_id, lang)
+    KEY idx_pages_lang_group (translation_group_id, lang),
+    KEY idx_pages_parent (parent_id),
+    CONSTRAINT fk_pages_parent FOREIGN KEY (parent_id) REFERENCES pages(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Гарантия, что домашней может быть только одна страница обеспечивается на уровне приложения
@@ -995,7 +998,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_07_25_news_views.sql'),
     ('2026_07_25_menu_badge_pos.sql'),
     ('2026_07_26_menu_language_isolation.sql'),
-    ('2026_07_28_menu_hide_title.sql')
+    ('2026_07_28_menu_hide_title.sql'),
+    ('2026_07_29_page_hierarchy.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

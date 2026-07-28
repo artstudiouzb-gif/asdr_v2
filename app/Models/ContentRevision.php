@@ -17,7 +17,7 @@ final class ContentRevision
     private const TYPES = [
         'page' => [
             'table' => 'pages',
-            'columns' => ['title', 'slug', 'meta_title', 'meta_description', 'lead', 'status', 'is_home', 'layout_type', 'hide_chrome', 'transparent_header'],
+            'columns' => ['title', 'slug', 'meta_title', 'meta_description', 'lead', 'status', 'is_home', 'layout_type', 'hide_chrome', 'transparent_header', 'parent_id'],
             'children' => [
                 ['table' => 'page_translations', 'fk' => 'page_id', 'columns' => ['lang', 'title', 'meta_title', 'meta_description', 'lead']],
             ],
@@ -176,6 +176,24 @@ final class ContentRevision
         $pdo = Database::pdo();
         $pdo->beginTransaction();
         try {
+            if ($type === 'page') {
+                $lockCurrent = $pdo->prepare('SELECT id FROM pages WHERE id = :id FOR UPDATE');
+                $lockCurrent->execute([':id' => $entityId]);
+                if ($lockCurrent->fetchColumn() === false) {
+                    throw new \DomainException('Страница для восстановления не найдена.');
+                }
+                if (!empty($snapshot['entity']['is_home'])) {
+                    $snapshot['entity']['parent_id'] = null;
+                }
+                $parentId = !empty($snapshot['entity']['parent_id'])
+                    ? (int) $snapshot['entity']['parent_id']
+                    : null;
+                $parentError = Page::validateParent($parentId, $entityId, true);
+                if ($parentError !== null) {
+                    throw new \DomainException('Нельзя восстановить иерархию страницы: ' . $parentError);
+                }
+            }
+
             // Снимок текущего состояния делает восстановление обратимым.
             self::capture($type, $entityId, $userId);
 

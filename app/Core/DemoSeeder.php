@@ -200,6 +200,26 @@ final class DemoSeeder
             if ($homeCount !== 1) {
                 $issues[] = "главных страниц: {$homeCount}, ожидалась 1";
             }
+
+            $parentedCount = (int) $pdo->query(
+                'SELECT COUNT(*) FROM pages WHERE parent_id IS NOT NULL AND deleted_at IS NULL'
+            )->fetchColumn();
+            if ($parentedCount < 8) {
+                $issues[] = "иерархия страниц: {$parentedCount} связей, ожидалось не менее 8";
+            }
+
+            $parentedPages = $pdo->query(
+                'SELECT id, parent_id FROM pages WHERE parent_id IS NOT NULL AND deleted_at IS NULL'
+            )->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            foreach ($parentedPages as $parentedPage) {
+                $hierarchyError = \App\Models\Page::validateParent(
+                    (int) $parentedPage['parent_id'],
+                    (int) $parentedPage['id']
+                );
+                if ($hierarchyError !== null) {
+                    $issues[] = 'страница #' . (int) $parentedPage['id'] . ': ' . $hierarchyError;
+                }
+            }
         }
 
         if (self::tableExists($pdo, 'blocks')) {
@@ -1230,6 +1250,7 @@ final class DemoSeeder
              VALUES (:pid, :lang, :ty, :ti, :d, :so, 1, NOW())'
         );
 
+        $createdPageSlugs = [];
         foreach ($pages as $slug => $langData) {
             if (!is_array($langData)) {
                 continue;
@@ -1244,7 +1265,11 @@ final class DemoSeeder
                 ':lead' => 'Стратегические инициативы, результаты и актуальные материалы Агентства.',
                 ':s2' => $slug,
             ]);
-            $c['pages'] += $pageIns->rowCount();
+            $pageCreated = $pageIns->rowCount();
+            $c['pages'] += $pageCreated;
+            if ($pageCreated > 0) {
+                $createdPageSlugs[] = (string) $slug;
+            }
             $pid = self::pageId($pdo, $slug);
             if ($pid === null) {
                 continue;
@@ -1322,6 +1347,38 @@ final class DemoSeeder
                     }
                 }
             }
+        }
+
+        // Иерархия влияет на дерево и хлебные крошки, но не меняет URL.
+        // При обычном идемпотентном запуске не переназначаем родителя у
+        // существующих редакционных страниц — связываем только что созданные.
+        $hierarchy = [
+            'rukovodstvo' => 'o-nas',
+            'struktura' => 'o-nas',
+            'direktor' => 'rukovodstvo',
+            'antikorrupciya' => 'o-nas',
+            'strategiya-2030' => 'napravleniya',
+            'ustoychivyy-ekonomicheskiy-rost' => 'napravleniya',
+            'analitika' => 'napravleniya',
+            'meropriyatiya' => 'press-centr',
+        ];
+        $setParent = $pdo->prepare(
+            'UPDATE pages child
+             INNER JOIN pages parent ON parent.slug = :parent_slug AND parent.lang = child.lang
+             SET child.parent_id = parent.id
+             WHERE child.slug = :child_slug
+               AND child.parent_id IS NULL
+               AND child.deleted_at IS NULL
+               AND parent.deleted_at IS NULL'
+        );
+        foreach ($hierarchy as $childSlug => $parentSlug) {
+            if (!in_array($childSlug, $createdPageSlugs, true)) {
+                continue;
+            }
+            $setParent->execute([
+                ':child_slug' => $childSlug,
+                ':parent_slug' => $parentSlug,
+            ]);
         }
     }
 

@@ -60,7 +60,12 @@ final class PageController
     public function create(): void
     {
         Auth::requireLogin();
-        View::render('admin/pages/form', ['page' => null, 'translations' => [], 'error' => null]);
+        View::render('admin/pages/form', [
+            'page' => null,
+            'translations' => [],
+            'parentOptions' => Page::parentOptions(),
+            'error' => null,
+        ]);
     }
 
     public function store(): void
@@ -71,16 +76,31 @@ final class PageController
         [$data, $error] = $this->collectInput(null);
 
         if ($error !== null) {
-            View::render('admin/pages/form', ['page' => $data, 'translations' => [], 'error' => $error]);
+            View::render('admin/pages/form', [
+                'page' => $data,
+                'translations' => [],
+                'parentOptions' => Page::parentOptions(),
+                'error' => $error,
+            ]);
             return;
         }
 
-        $id = Database::transaction(function (\PDO $_pdo) use ($data): int {
-            $id = Page::create($data);
-            $this->saveTranslations($id);
+        try {
+            $id = Database::transaction(function (\PDO $_pdo) use ($data): int {
+                $id = Page::create($data);
+                $this->saveTranslations($id);
 
-            return $id;
-        });
+                return $id;
+            });
+        } catch (\DomainException $e) {
+            View::render('admin/pages/form', [
+                'page' => $data,
+                'translations' => [],
+                'parentOptions' => Page::parentOptions(),
+                'error' => $e->getMessage(),
+            ]);
+            return;
+        }
 
         Flash::success('Страница создана. Теперь добавьте блоки контента.');
         header('Location: /admin/pages/' . $id . '/edit?draft_saved=page%3Anew');
@@ -114,6 +134,7 @@ final class PageController
             'blocks' => $blocks,
             'blockLang' => $blockLang,
             'usingFallback' => $usingFallback,
+            'parentOptions' => Page::parentOptions((int) $page['id']),
             'error' => null,
         ]);
     }
@@ -229,6 +250,7 @@ final class PageController
                 'error' => 'Страница уже была изменена в другой вкладке или другим пользователем. Текущие данные перезагружены; восстановите локальный черновик и проверьте изменения.',
                 'blocks' => Block::forPage($id, $blockLang),
                 'blockLang' => $blockLang,
+                'parentOptions' => Page::parentOptions($id),
             ]);
             return;
         }
@@ -243,6 +265,7 @@ final class PageController
                 'error' => $error,
                 'blocks' => Block::forPage($id, $blockLang),
                 'blockLang' => $blockLang,
+                'parentOptions' => Page::parentOptions($id),
             ]);
             return;
         }
@@ -263,6 +286,19 @@ final class PageController
                 'error' => 'Страница уже была изменена в другой вкладке или другим пользователем. Текущие данные перезагружены; восстановите локальный черновик и проверьте изменения.',
                 'blocks' => Block::forPage($id, $blockLang),
                 'blockLang' => $blockLang,
+                'parentOptions' => Page::parentOptions($id),
+            ]);
+            return;
+        } catch (\DomainException $e) {
+            $page = Page::findById($id) ?? $page;
+            $blockLang = $this->resolveBlockLang();
+            View::render('admin/pages/form', [
+                'page' => array_merge($page, $data),
+                'translations' => PageTranslation::forPage($id),
+                'error' => $e->getMessage(),
+                'blocks' => Block::forPage($id, $blockLang),
+                'blockLang' => $blockLang,
+                'parentOptions' => Page::parentOptions($id),
             ]);
             return;
         }
@@ -301,7 +337,7 @@ final class PageController
 
         Database::transaction(static function (\PDO $pdo) use ($id): void {
             $pdo->exec('UPDATE pages SET is_home = 0');
-            $pdo->exec("UPDATE pages SET is_home = 1, status = 'published' WHERE id = " . (int) $id);
+            $pdo->exec("UPDATE pages SET is_home = 1, parent_id = NULL, status = 'published' WHERE id = " . (int) $id);
         });
 
         Cache::flush();
@@ -362,16 +398,45 @@ final class PageController
         $lead = trim((string) ($_POST['lead'] ?? ''));
         $status = (isset($_POST['publish_action']) || ($_POST['status'] ?? 'draft') === 'published') ? 'published' : 'draft';
         $isHome = !empty($_POST['is_home']);
+        $parentRaw = trim((string) ($_POST['parent_id'] ?? ''));
+        $parentId = $parentRaw !== '' && $parentRaw !== '0' ? (int) $parentRaw : null;
 
         // Главная страница сайта ни при каких обстоятельствах не должна слетать в черновик или терять статус is_home при сохранении формы.
         if ($existing !== null && (!empty($existing['is_home']) || (string) ($existing['slug'] ?? '') === 'home' || $slugInput === 'home')) {
             $isHome = true;
             $status = 'published';
         }
+        if ($isHome) {
+            $parentId = null;
+        }
         $layoutType = 'no_sidebar';
 
         if ($title === '') {
-            return [['title' => $title, 'slug' => $slugInput, 'status' => $status], 'Укажите заголовок страницы.'];
+            return [[
+                'title' => $title,
+                'slug' => $slugInput,
+                'status' => $status,
+                'parent_id' => $parentId,
+            ], 'Укажите заголовок страницы.'];
+        }
+
+        if ($parentRaw !== '' && $parentRaw !== '0' && (!ctype_digit($parentRaw) || $parentId === null || $parentId <= 0)) {
+            return [[
+                'title' => $title,
+                'slug' => $slugInput,
+                'status' => $status,
+                'parent_id' => null,
+            ], 'Выбрана некорректная родительская страница.'];
+        }
+
+        $parentError = Page::validateParent($parentId, $id);
+        if ($parentError !== null) {
+            return [[
+                'title' => $title,
+                'slug' => $slugInput,
+                'status' => $status,
+                'parent_id' => $parentId,
+            ], $parentError];
         }
 
         $lang = (string) ($_POST['lang'] ?? $_GET['lang'] ?? Language::defaultCode());
@@ -394,6 +459,7 @@ final class PageController
             'hide_chrome' => !empty($_POST['hide_chrome']), // лендинг (группа 6)
             'transparent_header' => !empty($_POST['transparent_header']),
             'lang' => $lang,
+            'parent_id' => $parentId,
         ];
 
         return [$data, null];

@@ -30,8 +30,20 @@ if ($isHome) {
 if (!$isHome && !$hideChrome) {
     $crumbs = [
         ['label' => \App\Core\Lang::t('Главная'), 'url' => \App\Core\Locale::url('/')],
-        ['label' => (string) ($page['title'] ?? '')],
     ];
+    foreach (\App\Models\Page::ancestorTrail($page, \App\Core\Locale::current()) as $ancestor) {
+        if (!empty($ancestor['is_home']) || (string) ($ancestor['slug'] ?? '') === 'home') {
+            continue;
+        }
+        if ((string) ($ancestor['status'] ?? '') !== 'published') {
+            continue;
+        }
+        $crumbs[] = [
+            'label' => (string) ($ancestor['title'] ?? ''),
+            'url' => \App\Core\Locale::url('/' . ltrim((string) ($ancestor['slug'] ?? ''), '/')),
+        ];
+    }
+    $crumbs[] = ['label' => (string) ($page['title'] ?? '')];
     // Если первый блок страницы — hero (шапка-герой), крошки встраиваем внутрь
     // hero (поверх фона, сверху), а не отдельной серой полосой над ним.
     if ($firstIsHero) {

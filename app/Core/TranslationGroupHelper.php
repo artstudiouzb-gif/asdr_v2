@@ -223,8 +223,8 @@ final class TranslationGroupHelper
             ]);
         } elseif ($table === 'pages') {
             $ins = Database::pdo()->prepare(
-                "INSERT INTO pages (title, slug, meta_title, meta_description, `lead`, status, is_home, layout_type, hide_chrome, transparent_header, lang, translation_group_id, created_at)
-                 VALUES (:t, :s, :mt, :md, :l, 'draft', 0, :lt, :hc, :th, :lang, :gid, NOW())"
+                "INSERT INTO pages (title, slug, meta_title, meta_description, `lead`, status, is_home, layout_type, hide_chrome, transparent_header, lang, translation_group_id, parent_id, created_at)
+                 VALUES (:t, :s, :mt, :md, :l, 'draft', 0, :lt, :hc, :th, :lang, :gid, :parent_id, NOW())"
             );
             $ins->execute([
                 ':t' => ($orig['title'] ?? '') . ' (' . strtoupper($targetLang) . ')',
@@ -237,6 +237,7 @@ final class TranslationGroupHelper
                 ':th' => $orig['transparent_header'] ?? 0,
                 ':lang' => $targetLang,
                 ':gid' => $groupId,
+                ':parent_id' => !empty($orig['parent_id']) ? (int) $orig['parent_id'] : null,
             ]);
         } elseif ($table === 'projects') {
             $ins = Database::pdo()->prepare(

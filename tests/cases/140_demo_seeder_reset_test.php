@@ -29,6 +29,15 @@ test('DemoSeeder RESET полностью заменяет контент эта
     assert_true($c['meropriyatiya'] >= 3, 'Созданы мероприятия');
     assert_same([], DemoSeeder::verify($pdo), 'Встроенная проверка не обнаружила конфликтов');
 
+    $directorParent = $pdo->query(
+        "SELECT parent.slug
+         FROM pages child
+         INNER JOIN pages parent ON parent.id = child.parent_id
+         WHERE child.slug = 'direktor' AND child.lang = 'ru'
+         LIMIT 1"
+    )->fetchColumn();
+    assert_same('rukovodstvo', (string) $directorParent, 'Демо-страницы имеют актуальную иерархию');
+
     $secondRun = DemoSeeder::run($pdo);
     assert_same(0, array_sum($secondRun), 'Повторный запуск полностью идемпотентен');
 
