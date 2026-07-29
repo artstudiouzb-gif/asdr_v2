@@ -10,6 +10,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var array $files */
 /** @var string $query */
 /** @var list<array{id:int, parent_id:?int, label:string}> $categories */
+/** @var array{total_files:int, pending_files:int, total_categories:int, total_users:int} $stats */
 
 // Селект категории: корни и подкатегории (с отступом), общий для форм страницы.
 $categorySelect = static function (string $name, ?int $selected) use ($categories): string {
@@ -24,17 +25,51 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
     return $html . '</select>';
 };
 ?>
-<div class="u-inline-f1b7a56d35">
-    <a href="/admin/repository" class="btn btn--small btn--primary">Файлы</a>
-    <a href="/admin/repository/categories" class="btn btn--small">Категории</a>
-    <a href="/admin/repository/users" class="btn btn--small">Пользователи портала</a>
+<div class="repo-subnav">
+    <a href="/admin/repository" class="repo-subnav__item is-active"><?= \App\Core\AdminUi::icon('file', 16) ?> Файлы</a>
+    <a href="/admin/repository/categories" class="repo-subnav__item"><?= \App\Core\AdminUi::icon('folder', 16) ?> Категории</a>
+    <a href="/admin/repository/users" class="repo-subnav__item"><?= \App\Core\AdminUi::icon('users', 16) ?> Пользователи портала</a>
 </div>
+
 <p class="form-hint">Защищённое файловое хранилище с отдельной авторизацией (портал <code>/repo</code>). Файлы видят все активные пользователи портала; они также могут предлагать файлы — такие публикуются после одобрения ниже.</p>
+
+<?php if (!empty($stats)): ?>
+<div class="repo-stats">
+    <div class="repo-stat-card">
+        <div class="repo-stat-card__icon"><?= \App\Core\AdminUi::icon('file', 20) ?></div>
+        <div>
+            <div class="repo-stat-card__val"><?= (int) ($stats['total_files'] ?? 0) ?></div>
+            <div class="repo-stat-card__label">Всего файлов</div>
+        </div>
+    </div>
+    <div class="repo-stat-card<?= !empty($stats['pending_files']) ? ' repo-stat-card--warning' : '' ?>">
+        <div class="repo-stat-card__icon"><?= \App\Core\AdminUi::icon('clock', 20) ?></div>
+        <div>
+            <div class="repo-stat-card__val"><?= (int) ($stats['pending_files'] ?? 0) ?></div>
+            <div class="repo-stat-card__label">На модерации</div>
+        </div>
+    </div>
+    <div class="repo-stat-card">
+        <div class="repo-stat-card__icon"><?= \App\Core\AdminUi::icon('folder', 20) ?></div>
+        <div>
+            <div class="repo-stat-card__val"><?= (int) ($stats['total_categories'] ?? 0) ?></div>
+            <div class="repo-stat-card__label">Категорий</div>
+        </div>
+    </div>
+    <div class="repo-stat-card">
+        <div class="repo-stat-card__icon"><?= \App\Core\AdminUi::icon('users', 20) ?></div>
+        <div>
+            <div class="repo-stat-card__val"><?= (int) ($stats['total_users'] ?? 0) ?></div>
+            <div class="repo-stat-card__label">Пользователей</div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <?php /** @var array $pending */ ?>
 <?php if (!empty($pending)): ?>
-<div class="form-card u-inline-837a4c07e9">
-    <h2 class="u-inline-291b7bbb01">На модерации (<?= count($pending) ?>)</h2>
+<div class="form-card mb-4">
+    <h2>На модерации (<?= count($pending) ?>)</h2>
     <table class="data-table">
         <thead>
             <tr><th>Название</th><th>Категория</th><th>Файл</th><th>Размер</th><th>От кого</th><th>Прислан</th><th></th></tr>
@@ -68,13 +103,13 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
 </div>
 <?php endif; ?>
 
-<div class="form-card u-inline-8b9688e6e0">
-    <h2 class="u-inline-291b7bbb01">Загрузить файл</h2>
+<div class="form-card mb-4">
+    <h2>Загрузить файл</h2>
     <form method="post" action="/admin/repository/upload" enctype="multipart/form-data" class="form-grid">
         <?= Csrf::field() ?>
         <div class="form-field">
             <label for="title">Название</label>
-            <input type="text" id="title" name="title" required>
+            <input type="text" id="title" name="title" required placeholder="напр. Регламент проведения тендеров">
         </div>
         <div class="form-field">
             <label for="category_id">Категория (необязательно)</label>
@@ -83,18 +118,18 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
         </div>
         <div class="form-field">
             <label for="description">Описание (необязательно)</label>
-            <textarea id="description" name="description" rows="2"></textarea>
+            <textarea id="description" name="description" rows="2" placeholder="Краткая аннотация или примечания к документу..."></textarea>
         </div>
         <div class="form-field">
             <label for="file">Файл (PDF, Office, изображения, ZIP — до 100 МБ)</label>
             <input type="file" id="file" name="file" required>
         </div>
-        <div class="form-actions"><button type="submit" class="btn btn--primary">Загрузить</button></div>
+        <div class="form-actions"><button type="submit" class="btn btn--primary"><?= \App\Core\AdminUi::icon('upload') ?>Загрузить файл</button></div>
     </form>
 </div>
 
-<div class="form-card u-inline-2d22144f96">
-    <h2 class="u-inline-291b7bbb01">Оформление портала</h2>
+<div class="form-card mb-4">
+    <h2>Оформление портала</h2>
     <form method="post" action="/admin/repository/settings" enctype="multipart/form-data" class="form-grid">
         <?= Csrf::field() ?>
         <?= \App\Core\AdminUi::imageField('repo_logo', (string) ($repoLogo ?? ''), [
@@ -102,15 +137,17 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
             'file' => 'repo_logo_file',
             'hint' => 'Пусто — стандартная иконка-щит. Лучше светлый/белый логотип: шапка портала тёмная.',
         ]) ?>
-        <div class="form-actions"><button type="submit" class="btn btn--primary"><?= \App\Core\AdminUi::icon('save') ?>Сохранить</button></div>
+        <div class="form-actions"><button type="submit" class="btn btn--primary"><?= \App\Core\AdminUi::icon('save') ?>Сохранить логотип</button></div>
     </form>
 </div>
 
-<form class="u-inline-a9a523b9ef" method="get" action="/admin/repository">
-    <input class="u-inline-7623f05545" type="text" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES) ?>" placeholder="Поиск по файлам">
-    <button type="submit" class="btn btn--small">Найти</button>
-    <?php if ($query !== ''): ?><a href="/admin/repository" class="btn btn--small">Сброс</a><?php endif; ?>
-</form>
+<div class="repo-toolbar">
+    <form class="repo-search-form" method="get" action="/admin/repository">
+        <input type="text" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES) ?>" placeholder="Поиск по файлам...">
+        <button type="submit" class="btn btn--small btn--primary"><?= \App\Core\AdminUi::icon('search') ?>Найти</button>
+        <?php if ($query !== ''): ?><a href="/admin/repository" class="btn btn--small">Сброс</a><?php endif; ?>
+    </form>
+</div>
 
 <table class="data-table">
     <thead>
@@ -118,7 +155,7 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
     </thead>
     <tbody>
         <?php if (empty($files)): ?>
-            <tr><td class="u-inline-0e883e39e4" colspan="7">Файлов пока нет.</td></tr>
+            <tr><td class="text-center text-muted" colspan="7">Файлов пока нет.</td></tr>
         <?php else: ?>
             <?php foreach ($files as $f): ?>
                 <tr>
@@ -132,25 +169,29 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
                     <td><?= (int) $f['download_count'] ?></td>
                     <td><?= htmlspecialchars(date('d.m.Y', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></td>
                     <td class="data-table__actions">
-                        <details class="u-inline-39e79eb52f">
-                            <summary class="btn btn--small u-inline-5e798cd9db">Изменить</summary>
-                            <form method="post" action="/admin/repository/<?= (int) $f['id'] ?>/update" class="form-card u-inline-8f95f51649">
-                                <?= Csrf::field() ?>
-                                <div class="form-field">
-                                    <label>Название</label>
-                                    <input type="text" name="title" required value="<?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?>">
+                        <div class="repo-popover">
+                            <details>
+                                <summary class="btn btn--small">Изменить</summary>
+                                <div class="repo-popover__panel">
+                                    <form method="post" action="/admin/repository/<?= (int) $f['id'] ?>/update">
+                                        <?= Csrf::field() ?>
+                                        <div class="form-field mb-2">
+                                            <label>Название</label>
+                                            <input type="text" name="title" required value="<?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?>">
+                                        </div>
+                                        <div class="form-field mb-2">
+                                            <label>Категория</label>
+                                            <?= $categorySelect('category_id', $f['category_id'] !== null ? (int) $f['category_id'] : null) ?>
+                                        </div>
+                                        <div class="form-field mb-2">
+                                            <label>Описание</label>
+                                            <textarea name="description" rows="2"><?= htmlspecialchars((string) ($f['description'] ?? ''), ENT_QUOTES) ?></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn--small btn--primary">Сохранить</button>
+                                    </form>
                                 </div>
-                                <div class="form-field">
-                                    <label>Категория</label>
-                                    <?= $categorySelect('category_id', $f['category_id'] !== null ? (int) $f['category_id'] : null) ?>
-                                </div>
-                                <div class="form-field">
-                                    <label>Описание</label>
-                                    <textarea name="description" rows="2"><?= htmlspecialchars((string) ($f['description'] ?? ''), ENT_QUOTES) ?></textarea>
-                                </div>
-                                <button type="submit" class="btn btn--small btn--primary">Сохранить</button>
-                            </form>
-                        </details>
+                            </details>
+                        </div>
                         <form method="post" action="/admin/repository/<?= (int) $f['id'] ?>/delete" data-confirm="Удалить файл «<?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?>»?">
                             <?= Csrf::field() ?>
                             <button type="submit" class="btn btn--small btn--danger"><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
@@ -162,3 +203,4 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
     </tbody>
 </table>
 <?php require __DIR__ . '/../layout/footer.php'; ?>
+
