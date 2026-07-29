@@ -11,11 +11,11 @@
       "/assets/css/rich-content.css",
       "/assets/css/a11y.css"
     ],
-    "sourceSha256": "32563182f8ed0da591628545b9f43a458edcbc478bac6348dee46d93999cc3e6",
-    "sha256": "21ee05054125c7617aaaeec4decfeb38951b1e32812200a44c55c6b817e6d501",
-    "raw": 304095,
-    "gzip": 50707,
-    "brotli": 40350
+    "sourceSha256": "ac4418a1345c2f8046aca4a1f3c060a99583e6cc83c34002d4649bcc040622c5",
+    "sha256": "02c28d7a5ba4f2e6efb78a5777a719e3b3c2bdc9ca7afc50b3c554b1a1901a9e",
+    "raw": 304126,
+    "gzip": 50709,
+    "brotli": 40412
   },
   "js": {
     "path": "/assets/js/public.min.js",

@@ -1998,6 +1998,14 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 
 /* Ряд полей выбора цвета (фон/текст/кнопка) в конструкторе блоков. */
 .colorfield-row { display: flex; flex-wrap: wrap; gap: 16px; margin: 6px 0 14px; }
+.hero-visual-settings {
+    margin: -4px 0 18px;
+    padding: 16px 18px 2px;
+    border: 1px solid var(--admin-border, #dce2ea);
+    border-left: 3px solid var(--admin-accent, #2271b1);
+    border-radius: var(--admin-radius-sm, 8px);
+    background: var(--admin-surface-soft, #f8fafc);
+}
 .colorfield { min-width: 150px; }
 .colorfield input[type="color"] { width: 100%; height: 38px; padding: 2px; cursor: pointer; }
 .colorfield__off { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-weight: 400; font-size: 12px; color: var(--admin-muted); }
@@ -3273,8 +3281,10 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     display: flex;
 }
 
-/* Инспекционная модальная панель (Media Details Modal Drawer) */
-.media-modal {
+/* Инспекционная панель только на странице /admin/files.
+   Не оставлять эти селекторы глобальными: общая медиабиблиотека в footer.php
+   использует те же media-modal__* классы для выбора файлов в формах. */
+#media_modal {
     position: fixed;
     inset: 0;
     background: rgba(15, 23, 42, 0.6);
@@ -3286,7 +3296,7 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     padding: 20px;
 }
 
-.media-modal.is-open {
+#media_modal.is-open {
     display: flex;
     animation: media-fade-in 0.25s ease;
 }
@@ -3296,7 +3306,7 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     to { opacity: 1; }
 }
 
-.media-modal__dialog {
+#media_modal .media-modal__dialog {
     position: relative;
     display: flex;
     width: 100%;
@@ -3309,14 +3319,14 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
 }
 
 @media (max-width: 800px) {
-    .media-modal__dialog {
+    #media_modal .media-modal__dialog {
         flex-direction: column;
         max-height: 94vh;
         overflow-y: auto;
     }
 }
 
-.media-modal__preview-side {
+#media_modal .media-modal__preview-side {
     flex: 1.3;
     background: #0f172a;
     display: flex;
@@ -3327,8 +3337,8 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     min-height: 320px;
 }
 
-.media-modal__preview-side img,
-.media-modal__preview-side video {
+#media_modal .media-modal__preview-side img,
+#media_modal .media-modal__preview-side video {
     max-width: 100%;
     max-height: 70vh;
     object-fit: contain;
@@ -3336,7 +3346,7 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
-.media-modal__details-side {
+#media_modal .media-modal__details-side {
     flex: 1;
     padding: 28px;
     display: flex;
@@ -3346,7 +3356,7 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     background: #ffffff;
 }
 
-.media-modal__close {
+#media_modal .media-modal__close {
     position: absolute;
     top: 14px;
     right: 14px;
@@ -3364,11 +3374,11 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     transition: background 0.2s ease;
 }
 
-.media-modal__close:hover {
+#media_modal .media-modal__close:hover {
     background: rgba(255, 255, 255, 0.4);
 }
 
-.media-modal__title {
+#media_modal .media-modal__title {
     font-size: 16px;
     font-weight: 700;
     color: var(--admin-ink, #0f172a);
@@ -3376,7 +3386,7 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     word-break: break-all;
 }
 
-.media-modal__meta-list {
+#media_modal .media-modal__meta-list {
     font-size: 13px;
     color: var(--admin-muted, #64748b);
     display: flex;
@@ -3386,13 +3396,13 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     border-bottom: 1px solid var(--admin-border, #e2e8f0);
 }
 
-.media-modal__field {
+#media_modal .media-modal__field {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.media-modal__field label {
+#media_modal .media-modal__field label {
     font-size: 11px;
     font-weight: 700;
     color: var(--admin-muted, #64748b);
@@ -3400,12 +3410,12 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     letter-spacing: 0.04em;
 }
 
-.media-modal__input-group {
+#media_modal .media-modal__input-group {
     display: flex;
     gap: 8px;
 }
 
-.media-modal__input-group input {
+#media_modal .media-modal__input-group input {
     flex: 1;
     padding: 8px 12px;
     font-size: 13px;
@@ -4421,4 +4431,3 @@ body.auth-page {
     border-color: #334155;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
-

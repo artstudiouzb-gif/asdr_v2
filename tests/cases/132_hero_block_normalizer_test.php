@@ -17,6 +17,7 @@ test('Hero normalizer: формирует прежний JSON-контракт �
         'image' => '/uploads/public/hero.jpg',
         'video_url' => '',
         'youtube_url' => '',
+        'overlay_enabled' => '1',
         'overlay_direction' => '90deg;background:red',
         'overlay_color' => '#ABCDEF',
         'overlay_end_color' => 'bad',
@@ -50,6 +51,7 @@ test('Hero normalizer: формирует прежний JSON-контракт �
         'image' => '/uploads/public/hero.jpg',
         'video_url' => '',
         'youtube_url' => '',
+        'overlay_enabled' => true,
         'overlay_direction' => 'auto',
         'overlay_color' => '#abcdef',
         'overlay_end_color' => '#0b1a30',
@@ -69,6 +71,14 @@ test('Hero normalizer: формирует прежний JSON-контракт �
         'video_button_text' => 'Видео',
         'video_button_url' => 'https://example.com/video',
     ], $data);
+});
+
+test('Hero normalizer: наложение и подложка по умолчанию выключены', function () {
+    $data = HeroBlockNormalizer::normalize([]);
+
+    assert_same(false, $data['overlay_enabled']);
+    assert_same(35, $data['overlay_opacity']);
+    assert_same(false, $data['panel_enabled']);
 });
 
 test('Hero normalizer: приоритет фонового медиа не изменился', function () {

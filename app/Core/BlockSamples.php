@@ -118,7 +118,8 @@ final class BlockSamples
                 'height' => 'regular',
                 'width' => 'full',
                 'text_position' => 'left',
-                'overlay_opacity' => 55,
+                'overlay_enabled' => false,
+                'overlay_opacity' => 35,
             ],
             'categories_grid' => ['title' => 'Направления', 'items' => [
                 ['title' => 'Название направления', 'label' => 'Название направления', 'url' => $news, 'icon_svg' => ''],

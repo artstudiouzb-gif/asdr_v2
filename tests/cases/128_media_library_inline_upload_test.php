@@ -27,3 +27,16 @@ test('После чанковой загрузки сервер возвраща
     assert_contains("'mime_type' =>", $controller);
 });
 
+test('Стили инспектора файлов не скрывают общую медиабиблиотеку в формах', function () {
+    $root = dirname(__DIR__, 2);
+    $css = (string) file_get_contents($root . '/public/assets/css/admin.css');
+
+    assert_same(
+        1,
+        substr_count($css, "\n.media-modal {"),
+        'глобальный контейнер медиабиблиотеки должен иметь только одно определение'
+    );
+    assert_contains('#media_modal {', $css);
+    assert_contains('#media_modal .media-modal__dialog', $css);
+    assert_contains('#media_modal .media-modal__close', $css);
+});

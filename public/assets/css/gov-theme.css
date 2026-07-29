@@ -2741,12 +2741,17 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .block-hero__scrim {
     position: absolute; inset: 0;
     background: linear-gradient(var(--hero-scrim-direction, 90deg),
-        rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 1.31)) 0%,
-        rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.87)) 45%,
-        rgba(var(--hero-scrim-end-rgb, var(--hero-scrim-rgb)), calc(var(--hero-scrim-a) * 0.29)) 100%);
+        rgba(var(--hero-scrim-rgb), var(--hero-scrim-a)) 0%,
+        rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.55)) 45%,
+        rgba(var(--hero-scrim-end-rgb, var(--hero-scrim-rgb)), 0) 100%);
     z-index: 2;
 }
 .block-hero__scrim--solid { background: rgba(var(--hero-scrim-rgb), var(--hero-scrim-a)); }
+@media (max-width: 720px) {
+    /* frontend.css приглушает старый боковой Hero до opacity:.16.
+       Полноэкранный медиа-Hero сохраняет исходные цвета и на телефоне. */
+    .block-hero--media .block-hero__media { opacity: 1; }
+}
 .block-hero--media .block-hero__inner { position: relative; width: 100%; max-width: var(--container-max); margin: 0 auto; padding: 0 20px; z-index: 3; }
 .block-hero--media .block-hero__text { max-width: var(--hero-text-width, 620px); }
 .block-hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; color: var(--gov-teal-text); font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; font-size: 0.8125rem; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 18px; }

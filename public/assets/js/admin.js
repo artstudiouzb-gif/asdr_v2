@@ -738,6 +738,25 @@
         if (out) { out.textContent = input.value; }
     });
 
+    // --- Hero: отдельное управление затемнением изображения и подложкой текста. ---
+    (function () {
+        var toggles = document.querySelectorAll('[data-hero-visual-toggle]');
+        if (!toggles.length) { return; }
+
+        function sync(toggle) {
+            var id = toggle.getAttribute('data-hero-visual-toggle');
+            var panel = id ? document.getElementById(id) : null;
+            if (!panel) { return; }
+            panel.hidden = !toggle.checked;
+            toggle.setAttribute('aria-expanded', toggle.checked ? 'true' : 'false');
+        }
+
+        toggles.forEach(function (toggle) {
+            toggle.addEventListener('change', function () { sync(toggle); });
+            sync(toggle);
+        });
+    })();
+
     // --- Hero: произвольная высота с единицей измерения. ---
     (function () {
         var mode = document.querySelector('[data-hero-height]');
