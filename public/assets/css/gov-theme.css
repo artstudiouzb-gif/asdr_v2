@@ -2953,20 +2953,18 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 22px !important;
-    background: color-mix(in srgb, var(--gov-surface) 68%, transparent);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid color-mix(in srgb, var(--gov-border) 45%, transparent);
+    padding: 24px !important;
+    background: var(--gov-surface);
+    border: 1px solid var(--gov-border);
     border-radius: var(--radius);
     text-decoration: none;
     color: var(--gov-ink);
-    box-shadow: 0 1px 3px rgba(15, 27, 45, 0.01), 0 8px 24px -16px rgba(15, 27, 45, 0.06);
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s ease;
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+    transition: transform 0.35s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.35s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.3s ease;
 }
 .feature-card:hover {
-    background: color-mix(in srgb, var(--gov-surface) 88%, transparent);
-    box-shadow: 0 16px 36px rgba(19, 42, 92, 0.09);
+    background: var(--gov-surface);
+    box-shadow: 0 16px 32px -8px rgba(37, 99, 235, 0.14), 0 4px 12px -4px rgba(15, 23, 42, 0.06);
     transform: translateY(-4px);
     border-color: var(--color-accent, var(--gov-teal));
 }
@@ -3905,22 +3903,28 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .feature-card::after {
     content: "0" counter(cards-counter) !important;
     position: absolute;
-    top: 20px;
+    top: 18px;
     right: 20px;
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: color-mix(in srgb, var(--gov-teal) 15%, transparent);
-    font-family: 'Manrope', sans-serif;
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: var(--color-accent, var(--gov-teal));
+    opacity: 0.35;
+    font-family: 'Inter', system-ui, sans-serif;
     line-height: 1;
     pointer-events: none;
     z-index: 2;
+    transition: all 0.3s ease;
 }
 .feature-card:hover {
-    background: color-mix(in srgb, var(--gov-surface) 88%, transparent);
-    box-shadow: 0 16px 36px rgba(19, 42, 92, 0.12);
-    transform: translateY(-8px);
+    background: var(--gov-surface);
+    box-shadow: 0 16px 36px rgba(37, 99, 235, 0.15);
+    transform: translateY(-6px);
     border-color: var(--color-accent, var(--gov-teal));
     border-bottom-color: var(--color-accent, var(--gov-teal)) !important;
+}
+.feature-card:hover::after {
+    opacity: 0.9;
+    transform: scale(1.08);
 }
 .feature-card__title::after {
     content: " →";
