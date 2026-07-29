@@ -26,7 +26,7 @@ $getFallbackIcon = static function (string $cardTitle): ?string {
         <h2 class="block-contact-cards__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2>
     <?php endif; ?>
     <?php if (empty($items)): ?>
-        <p class="block-contact-cards__empty">Контактные карточки ещё не добавлены.</p>
+        <p class="block-contact-cards__empty"><?= htmlspecialchars(t('Контактные карточки ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <div class="contact-cards">
             <?php foreach ($items as $item): ?>

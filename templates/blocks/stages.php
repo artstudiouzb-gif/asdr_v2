@@ -4,7 +4,7 @@ $title = trim((string) ($data['title'] ?? ''));
 $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
 $items = $data['items'] ?? [];
-$statusLabels = ['done' => 'Завершён', 'active' => 'В процессе', 'planned' => 'Запланирован'];
+$statusLabels = ['done' => t('Завершён'), 'active' => t('В процессе'), 'planned' => t('Запланирован')];
 ?>
 <div class="block-stages">
     <div class="section-head">
@@ -12,7 +12,7 @@ $statusLabels = ['done' => 'Завершён', 'active' => 'В процессе'
         <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
     </div>
     <?php if (empty($items)): ?>
-        <p class="block-stages__empty">Этапы ещё не добавлены.</p>
+        <p class="block-stages__empty"><?= htmlspecialchars(t('Этапы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <ol class="stages">
             <?php foreach ($items as $item): ?>

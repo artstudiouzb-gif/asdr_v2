@@ -6,11 +6,17 @@ $projects = $data['projects'] ?? [];
 <div class="block-projects">
     <?php if ($title !== ''): ?><h2 class="block-projects__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
     <?php if (empty($projects)): ?>
-        <p class="block-projects__empty">Проекты пока не добавлены.</p>
+        <p class="block-projects__empty"><?= htmlspecialchars(t('Проекты пока не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <div class="block-projects__grid">
             <?php foreach ($projects as $p): ?>
-                <div class="project-card">
+                <?php
+                $projectUrl = !empty($p['slug'])
+                    ? \App\Core\Locale::url('projects/' . (string) $p['slug'])
+                    : '';
+                $projectTag = $projectUrl !== '' ? 'a' : 'div';
+                ?>
+                <<?= $projectTag ?> class="project-card"<?= $projectUrl !== '' ? ' href="' . htmlspecialchars($projectUrl, ENT_QUOTES) . '"' : '' ?>>
                     <?php if (!empty($p['cover_image'])): ?>
                         <?= \App\Core\Media::picture((string) $p['cover_image'], (string) ($p['title'] ?? ''), null, null, 'project-card__cover', true, '(max-width: 700px) 100vw, 33vw') ?>
                     <?php endif; ?>
@@ -18,7 +24,7 @@ $projects = $data['projects'] ?? [];
                     <?php if (!empty($p['description'])): ?>
                         <p class="project-card__desc"><?= htmlspecialchars(excerpt((string) $p['description'], 160), ENT_QUOTES) ?></p>
                     <?php endif; ?>
-                </div>
+                </<?= $projectTag ?>>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>

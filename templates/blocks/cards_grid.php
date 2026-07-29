@@ -34,7 +34,7 @@ $cardClasses .= $cardsText !== '' ? ' block-cards--custom-text' : '';
         </div>
     <?php endif; ?>
     <?php if (empty($items)): ?>
-        <p class="block-cards__empty">Пункты ещё не добавлены.</p>
+        <p class="block-cards__empty"><?= htmlspecialchars(t('Пункты ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <div class="cards-grid">
             <?php foreach ($items as $item): ?>

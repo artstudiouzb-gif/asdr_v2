@@ -307,7 +307,7 @@
                     return;
                 }
                 event.preventDefault();
-                adminConfirm('Заменить все текущие блоки этого языка блоками из шаблона? Действие необратимо.').then(function (ok) {
+                adminConfirm('Заменить все текущие блоки этого языка блоками из шаблона? Перед заменой будет создана автокопия. Другие языки не изменятся.').then(function (ok) {
                     if (ok) {
                         form.dataset.confirmed = '1';
                         if (typeof form.requestSubmit === 'function') { form.requestSubmit(); }

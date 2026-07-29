@@ -27,7 +27,7 @@ $badge = static fn (array $i): string => trim((string) ($i['badge'] ?? ''));
     </div>
 
     <?php if ($featured === null): ?>
-        <p class="block-newsfeat__empty">Новостей пока нет.</p>
+        <p class="block-newsfeat__empty"><?= htmlspecialchars(t('Новостей пока нет.'), ENT_QUOTES) ?></p>
     <?php else: ?>
     <div class="newsfeat-grid">
         <a class="newsfeat-lead" href="<?= htmlspecialchars((string) $featured['url'], ENT_QUOTES) ?>">

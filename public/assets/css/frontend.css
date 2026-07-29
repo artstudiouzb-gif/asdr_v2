@@ -216,6 +216,10 @@ summary:focus-visible {
    САМ JS — без JS (или при reduced-motion) карточки просто видны. */
 .anim-card { opacity: 0; transform: translateY(18px) scale(.99); transition: opacity .65s ease var(--card-reveal-delay, 0ms), transform .7s cubic-bezier(.22, 1, .36, 1) var(--card-reveal-delay, 0ms); }
 .anim-card.is-inview { opacity: 1; transform: none; }
+[data-reveal-items]:not(.is-motion-ready) .anim-card {
+    opacity: 1;
+    transform: none;
+}
 /* У новостного блока крупные колонки проявляются почти на месте: так движение
    читается как мягкое появление, а не как резкий прыжок всего макета. */
 .newsfeat-grid > .anim-card {
@@ -313,6 +317,37 @@ summary:focus-visible {
     width: 36px;
     height: 36px;
     cursor: pointer;
+}
+.block-slider__dots {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 14px;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    pointer-events: none;
+}
+.block-slider__dot {
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, .9);
+    border-radius: 50%;
+    background: rgba(15, 23, 42, .45);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .22);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: width .2s ease, border-radius .2s ease, background-color .2s ease;
+}
+.block-slider__dot.is-active {
+    width: 26px;
+    border-radius: 999px;
+    background: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+    .block-slider__dot { transition: none; }
 }
 
 .block-gallery__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
@@ -2222,6 +2257,23 @@ input[type="text"], input[type="email"], input[type="password"], input[type="sea
 input[type="text"]:hover, input[type="email"]:hover, input[type="password"]:hover, input[type="search"]:hover, textarea:hover, select:hover,
 input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="search"]:focus, textarea:focus, select:focus {
     background-image: radial-gradient(180px circle at var(--mouse-x, 0) var(--mouse-y, 0), color-mix(in srgb, var(--color-accent, #2f6fed) 6%, transparent), transparent 100%) !important;
+}
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+    .cat-tile::before, .contact-card::before, .project-card::before, .team-card::before,
+    .feature-card::before, .news-card::before, .person-card::before, .album-card::before,
+    .doc-card::before, .catcard::before, .testimonial::before,
+    .block-advantages__item::before, .mediacard::before, .imgcard::before,
+    .faq-item::before, .stage::before, .timeline-item::before,
+    .btn::before, .block-cta__button::before, .btn-cta::before,
+    .block-hero__button::before, .timeline-card__button::before,
+    .timeline-cta__button::before, .a11y-toggle::before,
+    .site-theme-toggle::before, .site-search-toggle::before {
+        display: none;
+    }
+    input[type="text"], input[type="email"], input[type="password"],
+    input[type="search"], textarea, select {
+        background-image: none !important;
+    }
 }
 /* Предложение открыть материал на доступном языке без скрытого fallback. */
 .translation-notice {

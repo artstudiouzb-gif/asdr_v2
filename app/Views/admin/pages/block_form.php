@@ -1147,6 +1147,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             'slide-left' => 'Выезд слева',
             'slide-right' => 'Выезд справа',
             'zoom-in' => 'Увеличение',
+            'stagger' => 'Карточки по очереди',
         ];
         ?>
         <div class="form-field">

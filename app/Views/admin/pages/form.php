@@ -217,7 +217,7 @@ foreach ($blocks as $b) {
     // Готовые сборки: страница собирается одним нажатием, с уже расставленными
     // фонами и отступами. Когда блоков ещё нет — это основной сценарий старта,
     // поэтому карточки раскрыты; на заполненной странице секция свёрнута.
-    $presets = \App\Core\PagePresets::all();
+    $presets = \App\Core\PagePresets::all($blockLang);
     ?>
     <details class="form-card preset-picker u-inline-8a359a76eb"<?= empty($blocks) ? ' open' : '' ?>>
         <summary><strong>Собрать страницу из готовой сборки</strong>
@@ -226,7 +226,7 @@ foreach ($blocks as $b) {
         <p class="form-hint u-inline-ceb7346533">
             Блоки добавятся с расставленными отступами, фонами и текстами-заготовками —
             останется заменить содержимое своим. Оформление берётся из настроек дизайна сайта.
-            Режим «Заменить всё» перед удалением сам сохранит текущие блоки в шаблон
+            Режим «Заменить блоки этого языка» перед удалением сам сохранит текущие блоки в шаблон
             «Автокопия: …» — вернуть страницу можно через список шаблонов ниже.
         </p>
         <div class="preset-grid">
@@ -246,7 +246,7 @@ foreach ($blocks as $b) {
                     <div class="preset-card__foot">
                         <select name="mode" aria-label="Как применить сборку">
                             <option value="append">Добавить к текущим</option>
-                            <option value="replace">Заменить всё</option>
+                            <option value="replace">Заменить блоки <?= strtoupper(htmlspecialchars($blockLang, ENT_QUOTES)) ?></option>
                         </select>
                         <button type="submit" class="btn btn--small btn--primary">Применить</button>
                     </div>

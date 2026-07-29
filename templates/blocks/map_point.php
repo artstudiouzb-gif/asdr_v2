@@ -47,7 +47,7 @@ $templateCss = $embedUrl === '' && $imageCss !== ''
     <?php if ($title !== ''): ?><h2 class="block-map__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
     <div class="block-map__canvas">
         <?php if ($embedUrl !== ''): ?>
-            <iframe class="block-map__frame" src="<?= htmlspecialchars($embedUrl, ENT_QUOTES) ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="<?= htmlspecialchars($title !== '' ? $title : 'Карта', ENT_QUOTES) ?>"></iframe>
+            <iframe class="block-map__frame" src="<?= htmlspecialchars($embedUrl, ENT_QUOTES) ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="<?= htmlspecialchars($title !== '' ? $title : t('Карта'), ENT_QUOTES) ?>"></iframe>
         <?php elseif ($image !== ''): ?>
             <span class="block-map__image"></span>
         <?php else: ?>

@@ -21,7 +21,7 @@ $items = $data['items'] ?? [];
                 // всплывающей подсказке.
                 $img = $logo !== ''
                     ? \App\Core\Media::picture($logo, $nameRaw, null, null, 'block-partners__logo', true, '180px')
-                    : '<span class="block-partners__name">' . ($name !== '' ? $name : 'Партнёр') . '</span>';
+                    : '<span class="block-partners__name">' . ($name !== '' ? $name : htmlspecialchars(t('Партнёр'), ENT_QUOTES)) . '</span>';
                 ?>
                 <?php if ($url !== ''): ?>
                     <a class="block-partners__item" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>" target="_blank" rel="noopener" title="<?= $name ?>"><?= $img ?></a>

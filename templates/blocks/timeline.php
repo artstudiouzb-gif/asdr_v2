@@ -21,7 +21,7 @@ $templateCss = $ctaImageCss !== ''
     <div class="timeline-card">
         <?php if ($title !== ''): ?><h2 class="timeline-card__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
         <?php if (empty($items)): ?>
-            <p class="block-timeline__empty">События ещё не добавлены.</p>
+            <p class="block-timeline__empty"><?= htmlspecialchars(t('События ещё не добавлены.'), ENT_QUOTES) ?></p>
         <?php else: ?>
             <ol class="timeline-list">
                 <?php foreach ($items as $item): ?>

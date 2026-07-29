@@ -17,15 +17,15 @@ $showTabs = $hasVideo && $hasPhoto;
     <div class="section-head">
         <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
         <?php if ($showTabs): ?>
-            <div class="media-tabs" role="group" aria-label="Фильтр медиа">
-                <button type="button" class="media-tabs__tab is-active" data-media-tab="video" aria-pressed="true">Видео</button>
-                <button type="button" class="media-tabs__tab" data-media-tab="photo" aria-pressed="false">Фото</button>
+            <div class="media-tabs" role="group" aria-label="<?= htmlspecialchars(t('Фильтр медиа'), ENT_QUOTES) ?>">
+                <button type="button" class="media-tabs__tab is-active" data-media-tab="video" aria-pressed="true"><?= htmlspecialchars(t('Видео'), ENT_QUOTES) ?></button>
+                <button type="button" class="media-tabs__tab" data-media-tab="photo" aria-pressed="false"><?= htmlspecialchars(t('Фото'), ENT_QUOTES) ?></button>
             </div>
         <?php endif; ?>
         <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
     </div>
     <?php if (empty($items)): ?>
-        <p class="block-mediagallery__empty">Материалы ещё не добавлены.</p>
+        <p class="block-mediagallery__empty"><?= htmlspecialchars(t('Материалы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <div class="mediagallery-grid">
             <?php foreach ($items as $item): ?>

@@ -4907,4 +4907,20 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .sit
     .site-submenu__link {
         transition: none;
     }
+
+    .block-hero__button::after,
+    .block-hero__play-icon,
+    .block-map__pin-svg,
+    .block-map__pin-dot,
+    .block-map__pin::after,
+    .block-map__pin-ripple,
+    .block-form__submit.is-loading,
+    .timeline-list::before {
+        animation: none !important;
+    }
+
+    .block-hero__button:hover,
+    .block-hero__play:hover .block-hero__play-icon {
+        transform: none !important;
+    }
 }

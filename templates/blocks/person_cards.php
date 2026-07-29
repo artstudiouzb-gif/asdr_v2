@@ -11,7 +11,7 @@ $items = $data['items'] ?? [];
         <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
     </div>
     <?php if (empty($items)): ?>
-        <p class="block-persons__empty">Карточки ещё не добавлены.</p>
+        <p class="block-persons__empty"><?= htmlspecialchars(t('Карточки ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <div class="persons-grid">
             <?php foreach ($items as $item): ?>
@@ -23,11 +23,11 @@ $items = $data['items'] ?? [];
                 ?>
                 <div class="person-card<?= $vacant ? ' person-card--vacant' : '' ?>">
                     <?php if ($photo !== ''): ?>
-                        <?= \App\Core\Media::picture($photo, $name !== '' ? $name : 'Фото', null, null, 'person-card__photo', true, '(max-width: 700px) 100vw, 25vw') ?>
+                        <?= \App\Core\Media::picture($photo, $name !== '' ? $name : t('Фото'), null, null, 'person-card__photo', true, '(max-width: 700px) 100vw, 25vw') ?>
                     <?php else: ?>
                         <span class="person-card__placeholder">
                             <?= \App\Core\Icon::render('user', 34, 'person-card__placeholder-icon', 1.5) ?>
-                            <span class="person-card__vacant">Вакантно</span>
+                            <span class="person-card__vacant"><?= htmlspecialchars(t('Вакантно'), ENT_QUOTES) ?></span>
                         </span>
                     <?php endif; ?>
                     <span class="person-card__body">

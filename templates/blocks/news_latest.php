@@ -12,7 +12,7 @@ $allUrl = $data['all_url'] ?? '/news';
         </div>
     <?php endif; ?>
     <?php if (empty($news)): ?>
-        <p class="block-news__empty">Новостей пока нет.</p>
+        <p class="block-news__empty"><?= htmlspecialchars(t('Новостей пока нет.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <div class="block-news__grid">
             <?php foreach ($news as $item): ?>

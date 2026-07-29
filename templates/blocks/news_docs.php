@@ -15,7 +15,7 @@ $fmt = static fn (string $d): string => DateFormatter::short($d);
             <?php if (!empty($data['news_all_text']) && !empty($data['news_all_url'])): ?><a class="section-head__all" href="<?= htmlspecialchars((string) $data['news_all_url'], ENT_QUOTES) ?>"><?= htmlspecialchars((string) $data['news_all_text'], ENT_QUOTES) ?> →</a><?php endif; ?>
         </div>
         <?php if (empty($news)): ?>
-            <p class="block-newsdocs__empty">Новостей пока нет.</p>
+            <p class="block-newsdocs__empty"><?= htmlspecialchars(t('Новостей пока нет.'), ENT_QUOTES) ?></p>
         <?php else: ?>
             <div class="newsdocs-news">
                 <?php foreach ($news as $item): ?>
@@ -40,7 +40,7 @@ $fmt = static fn (string $d): string => DateFormatter::short($d);
             <?php if (!empty($data['docs_all_text']) && !empty($data['docs_all_url'])): ?><a class="section-head__all" href="<?= htmlspecialchars((string) $data['docs_all_url'], ENT_QUOTES) ?>"><?= htmlspecialchars((string) $data['docs_all_text'], ENT_QUOTES) ?> →</a><?php endif; ?>
         </div>
         <?php if (empty($docs)): ?>
-            <p class="block-newsdocs__empty">Документы ещё не добавлены.</p>
+            <p class="block-newsdocs__empty"><?= htmlspecialchars(t('Документы ещё не добавлены.'), ENT_QUOTES) ?></p>
         <?php else: ?>
             <div class="newsdocs-docs">
                 <?php foreach ($docs as $doc): ?>

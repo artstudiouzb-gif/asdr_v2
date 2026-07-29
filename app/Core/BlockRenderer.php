@@ -187,7 +187,7 @@ final class BlockRenderer
             $revealOn = !empty($revealRaw);
             $revealType = 'fade';
         }
-        if (!in_array($revealType, ['fade', 'slide-up', 'slide-left', 'slide-right', 'zoom-in'], true)) {
+        if (!in_array($revealType, ['fade', 'slide-up', 'slide-left', 'slide-right', 'zoom-in', 'stagger'], true)) {
             $revealType = 'fade';
         }
         // Фон секции, полноширинная подложка и независимые отступы сверху/снизу.
@@ -229,8 +229,12 @@ final class BlockRenderer
             'data-block-type="' . htmlspecialchars($type, ENT_QUOTES) . '"',
         ];
         if ($revealOn) {
-            $sectionAttributes[] = 'data-reveal';
-            $sectionAttributes[] = 'data-reveal-type="' . htmlspecialchars($revealType, ENT_QUOTES) . '"';
+            if ($revealType === 'stagger') {
+                $sectionAttributes[] = 'data-reveal-items';
+            } else {
+                $sectionAttributes[] = 'data-reveal';
+                $sectionAttributes[] = 'data-reveal-type="' . htmlspecialchars($revealType, ENT_QUOTES) . '"';
+            }
         }
 
         $wrapped = "<section\n    "

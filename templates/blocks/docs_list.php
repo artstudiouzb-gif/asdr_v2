@@ -13,7 +13,7 @@ $templateCss = '#block-' . $blockId . ' .docslist-grid{--docs-cols:' . $cols . '
         <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
     </div>
     <?php if (empty($items)): ?>
-        <p class="block-docslist__empty">Документы ещё не добавлены.</p>
+        <p class="block-docslist__empty"><?= htmlspecialchars(t('Документы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <div class="docslist-grid">
             <?php foreach ($items as $doc): ?>

@@ -52,6 +52,12 @@ final class PagePresets
         $looks = [];
         $previousBg = 'none';
         $tintTurn = false;
+        $cardTypes = [
+            'advantages', 'cards_grid', 'categories_grid', 'contact_cards',
+            'counters', 'docs_list', 'image_cards', 'media_gallery',
+            'news_feature', 'news_latest', 'partners', 'person_cards',
+            'projects_list', 'team_list', 'testimonials',
+        ];
 
         foreach (array_values($types) as $index => $type) {
             // Первый блок — обложка: максимум воздуха и без анимации.
@@ -75,7 +81,10 @@ final class PagePresets
                 $bg = $tintTurn ? 'tint' : 'light';
                 $tintTurn = !$tintTurn;
             }
-            $looks[] = self::look($bg, 'premium', $bg === 'none' ? 'fade' : 'slide-up');
+            $reveal = in_array($type, $cardTypes, true)
+                ? 'stagger'
+                : ($bg === 'none' ? 'fade' : 'slide-up');
+            $looks[] = self::look($bg, 'premium', $reveal);
             $previousBg = $bg;
         }
 
@@ -85,10 +94,12 @@ final class PagePresets
     /**
      * @return array<string, array{name:string, description:string, outline:list<string>, blocks:list<array<string,mixed>>}>
      */
-    public static function all(): array
+    public static function all(?string $lang = null): array
     {
+        $lang = $lang ?? Locale::current();
+
         return [
-            'home' => self::home(),
+            'home' => self::home($lang),
             'department' => self::department(),
             'service' => self::service(),
             'about' => self::about(),
@@ -99,15 +110,16 @@ final class PagePresets
     }
 
     /** @return array{name:string, description:string, outline:list<string>, blocks:list<array<string,mixed>>}|null */
-    public static function find(string $id): ?array
+    public static function find(string $id, ?string $lang = null): ?array
     {
-        return self::all()[$id] ?? null;
+        return self::all($lang)[$id] ?? null;
     }
 
     /** Готовая сборка: Главная страница (эталонный макет из демо-комплекта). */
-    private static function home(): array
+    private static function home(string $lang = 'ru'): array
     {
-        $fixture = dirname(__DIR__, 2) . '/database/demo_assets/home_blocks.json';
+        $fixtureName = $lang === 'uz' ? 'home_blocks_uz.json' : 'home_blocks.json';
+        $fixture = dirname(__DIR__, 2) . '/database/demo_assets/' . $fixtureName;
         $blocks = [];
         if (is_file($fixture)) {
             $raw = json_decode((string) file_get_contents($fixture), true);
@@ -172,7 +184,7 @@ final class PagePresets
                     ], self::look('light', 'premium', 'slide-up')),
                 ],
                 [
-                    'type' => 'news_list',
+                    'type' => 'news_feature',
                     'title' => 'Новости и события',
                     'data' => array_merge([
                         'title' => 'Новости и аналитика',

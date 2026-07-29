@@ -6,16 +6,16 @@ $items = $data['items'] ?? [];
 <div class="block-categories">
     <?php if ($title !== ''): ?><h2 class="block-categories__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
     <?php if (empty($items)): ?>
-        <p class="block-categories__empty">Категории ещё не добавлены.</p>
+        <p class="block-categories__empty"><?= htmlspecialchars(t('Категории ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <div class="cat-grid">
-            <?php foreach ($items as $i => $item): ?>
+            <?php foreach ($items as $item): ?>
                 <?php
                 $url = trim((string) ($item['url'] ?? ''));
                 $tag = $url !== '' ? 'a' : 'span';
                 $href = $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"' : '';
                 ?>
-                <<?= $tag ?> class="cat-tile<?= $i === 0 ? ' is-active' : '' ?>"<?= $href ?>>
+                <<?= $tag ?> class="cat-tile"<?= $href ?>>
                     <?php if (!empty($item['icon_svg'])): ?>
                         <span class="cat-tile__icon" aria-hidden="true"><?= \App\Core\Icon::render($item['icon_svg'], 28) ?></span>
                     <?php endif; ?>

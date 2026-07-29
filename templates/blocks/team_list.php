@@ -6,7 +6,7 @@ $members = $data['members'] ?? [];
 <div class="block-team">
     <?php if ($title !== ''): ?><h2 class="block-team__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
     <?php if (empty($members)): ?>
-        <p class="block-team__empty">Раздел команды пока пуст.</p>
+        <p class="block-team__empty"><?= htmlspecialchars(t('Раздел команды пока пуст.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <div class="block-team__grid">
             <?php foreach ($members as $m): ?>

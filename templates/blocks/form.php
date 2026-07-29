@@ -37,7 +37,7 @@ $getFieldIcon = static function (string $fieldType, string $fieldName, string $f
 ?>
 <div class="block-form">
     <?php if ($form === null): ?>
-        <p class="block-form__missing">Форма не найдена или ещё не выбрана в настройках блока.</p>
+        <p class="block-form__missing"><?= htmlspecialchars(t('Форма не найдена или ещё не выбрана в настройках блока.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <?php if (!empty($form['name'])): ?><h2><?= htmlspecialchars($form['name'], ENT_QUOTES) ?></h2><?php endif; ?>
         <?php $hasFile = false; foreach ($form['fields'] as $f) { if (($f['type'] ?? '') === 'file') { $hasFile = true; break; } } ?>
@@ -94,13 +94,13 @@ $getFieldIcon = static function (string $fieldType, string $fieldName, string $f
                             <input type="file" id="<?= $inputId ?>" name="<?= $fieldName ?>"
                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" <?= $required ?>>
                         </div>
-                        <span class="form-hint">PDF, DOC, DOCX, JPG или PNG; до 20 МБ.</span>
+                        <span class="form-hint"><?= htmlspecialchars(t('PDF, DOC, DOCX, JPG или PNG; до 20 МБ.'), ENT_QUOTES) ?></span>
                     <?php elseif ($fieldType === 'select'): ?>
                         <?php $opts = array_map('trim', explode(',', (string) ($field['options'] ?? ''))); ?>
                         <div class="block-form__input-wrapper<?= $iconSvg !== null ? ' has-icon' : '' ?>">
                             <?php if ($iconSvg !== null): ?><span class="block-form__input-icon" aria-hidden="true"><?= $iconSvg ?></span><?php endif; ?>
                             <select id="<?= $inputId ?>" name="<?= $fieldName ?>" <?= $required ?>>
-                                <option value="">Выберите...</option>
+                                <option value=""><?= htmlspecialchars(t('Выберите...'), ENT_QUOTES) ?></option>
                                 <?php foreach ($opts as $opt): ?>
                                     <?php if ($opt !== ''): ?>
                                         <option value="<?= htmlspecialchars($opt, ENT_QUOTES) ?>"><?= htmlspecialchars($opt, ENT_QUOTES) ?></option>
@@ -169,7 +169,7 @@ $getFieldIcon = static function (string $fieldType, string $fieldName, string $f
             // Согласие на обработку персональных данных (глобальная настройка).
             $consentOn = \App\Models\Setting::get('form_consent_enabled', '0') === '1';
             if ($consentOn):
-                $consentText = (string) \App\Models\Setting::get('form_consent_text', 'Я согласен на обработку персональных данных');
+                $consentText = (string) \App\Models\Setting::get('form_consent_text', t('Я согласен на обработку персональных данных'));
                 // Ссылка на политику конфиденциальности, если задана страница.
                 $ppId = (int) \App\Models\Setting::get('privacy_policy_page_id', '');
                 $ppUrl = '';
@@ -185,7 +185,7 @@ $getFieldIcon = static function (string $fieldType, string $fieldName, string $f
                     <input type="checkbox" id="<?= $consentId ?>" name="_consent" value="1" required>
                     <label for="<?= $consentId ?>">
                         <?= htmlspecialchars($consentText, ENT_QUOTES) ?><?php if ($ppUrl !== ''): ?>
-                            (<a href="<?= htmlspecialchars($ppUrl, ENT_QUOTES) ?>" target="_blank" rel="noopener">политика конфиденциальности</a>)
+                            (<a href="<?= htmlspecialchars($ppUrl, ENT_QUOTES) ?>" target="_blank" rel="noopener"><?= htmlspecialchars(t('Политика конфиденциальности'), ENT_QUOTES) ?></a>)
                         <?php endif; ?>
                     </label>
                 </div>

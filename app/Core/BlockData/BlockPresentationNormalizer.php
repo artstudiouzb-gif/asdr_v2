@@ -15,7 +15,7 @@ final class BlockPresentationNormalizer
     private const SPACING = ['none', 'small', 'premium', 'max'];
 
     /** @var list<string> */
-    private const REVEAL_TYPES = ['fade', 'slide-up', 'slide-left', 'slide-right', 'zoom-in'];
+    private const REVEAL_TYPES = ['fade', 'slide-up', 'slide-left', 'slide-right', 'zoom-in', 'stagger'];
 
     /** @var list<string> */
     private const BACKGROUNDS = ['none', 'light', 'tint', 'navy'];

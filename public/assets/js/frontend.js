@@ -55,8 +55,16 @@
     (function () {
         var videos = document.querySelectorAll('[data-hero-background-video]');
         if (!videos.length) { return; }
+        var reduceMotion = window.matchMedia
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         videos.forEach(function (video) {
+            if (reduceMotion) {
+                video.pause();
+                video.removeAttribute('autoplay');
+                video.setAttribute('preload', 'none');
+                return;
+            }
             var resume = function () {
                 video.controls = false;
                 video.muted = true;
@@ -103,8 +111,14 @@
     (function () {
         var frames = document.querySelectorAll('[data-hero-youtube-background]');
         if (!frames.length) { return; }
+        var reduceMotion = window.matchMedia
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         frames.forEach(function (frame) {
+            if (reduceMotion) {
+                frame.removeAttribute('data-src');
+                return;
+            }
             var container = frame.closest('[data-hero-youtube-container]');
             var loaded = false;
             var readyTimer = null;
@@ -524,14 +538,6 @@
         });
     })();
 
-    // Автоматический скролл-ревил для всех секций, кроме Hero
-    document.querySelectorAll('.cms-block:not(.cms-block--hero)').forEach(function (block) {
-        if (!block.hasAttribute('data-reveal')) {
-            block.setAttribute('data-reveal', '');
-            block.setAttribute('data-reveal-type', 'slide-up');
-        }
-    });
-
     // Микро-движок анимаций появления при скролле на Intersection Observer.
     (function () {
         var reveals = document.querySelectorAll('[data-reveal]');
@@ -551,7 +557,6 @@
             }
         }
     })();
-})();
 
     // Медиа-галерея: переключатели «Видео / Фото».
     document.querySelectorAll('[data-media-gallery]').forEach(function (gallery) {
@@ -568,6 +573,48 @@
         };
         tabs.forEach(function (t) { t.addEventListener('click', function () { apply(t.getAttribute('data-media-tab')); }); });
         apply('video');
+    });
+
+    // Якорная навигация: активный пункт следует за видимым разделом,
+    // а не остаётся навсегда на первом элементе.
+    document.querySelectorAll('.block-anchornav').forEach(function (nav) {
+        var links = Array.prototype.filter.call(nav.querySelectorAll('a[href^="#"]'), function (link) {
+            var id = decodeURIComponent((link.getAttribute('href') || '').slice(1));
+            return id !== '' && document.getElementById(id);
+        });
+        if (!links.length) { return; }
+
+        var activate = function (activeLink) {
+            links.forEach(function (link) {
+                var active = link === activeLink;
+                link.classList.toggle('is-active', active);
+                if (active) { link.setAttribute('aria-current', 'location'); }
+                else { link.removeAttribute('aria-current'); }
+            });
+        };
+        links.forEach(function (link) {
+            link.addEventListener('click', function () { activate(link); });
+        });
+
+        var hashLink = links.find(function (link) {
+            return link.getAttribute('href') === window.location.hash;
+        });
+        activate(hashLink || links[0]);
+
+        if (!('IntersectionObserver' in window)) { return; }
+        var targets = new Map();
+        links.forEach(function (link) {
+            var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+            if (target) { targets.set(target, link); }
+        });
+        var observer = new IntersectionObserver(function (entries) {
+            var visible = entries.filter(function (entry) { return entry.isIntersecting; })
+                .sort(function (a, b) { return a.boundingClientRect.top - b.boundingClientRect.top; });
+            if (visible.length && targets.has(visible[0].target)) {
+                activate(targets.get(visible[0].target));
+            }
+        }, { rootMargin: '-20% 0px -65% 0px', threshold: 0 });
+        targets.forEach(function (_link, target) { observer.observe(target); });
     });
 
     // Карусель проектов: прокрутка трека кнопками ‹ ›.
@@ -902,8 +949,8 @@
         'use strict';
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
         if (!('IntersectionObserver' in window)) { return; }
-        var GRIDS = '.imgcards-grid, .newsfeat-grid, .mediagallery-grid, .albums-grid, .persons-grid, .cards-grid, .cat-grid';
-        var grids = document.querySelectorAll(GRIDS);
+        var GRIDS = '.imgcards-grid, .newsfeat-grid, .mediagallery-grid, .albums-grid, .persons-grid, .cards-grid, .cat-grid, .block-news__grid, .block-advantages__grid, .block-counters__grid, .docslist-grid, .contact-cards, .block-partners__grid, .block-team__grid, .block-projects__grid, .block-gallery__grid, .block-faq__list, .stages, .timeline-list, .featband, .media-list, .newsdocs-news, .newsdocs-docs';
+        var grids = document.querySelectorAll('[data-reveal-items] ' + GRIDS.split(', ').join(', [data-reveal-items] '));
         if (!grids.length) { return; }
         var io = new IntersectionObserver(function (entries, obs) {
             entries.forEach(function (entry) {
@@ -916,10 +963,10 @@
             });
         }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
         grids.forEach(function (grid) {
-            // Не дублируем анимацию, если блок уже проявляется через data-reveal.
-            if (grid.closest('[data-reveal]')) { return; }
             var cards = Array.prototype.filter.call(grid.children, function (c) { return c.nodeType === 1; });
             if (cards.length < 2) { return; }
+            var section = grid.closest('[data-reveal-items]');
+            if (section) { section.classList.add('is-motion-ready'); }
             cards.forEach(function (c) { c.classList.add('anim-card'); });
             grid.__animCards = cards;
             io.observe(grid);
@@ -1181,21 +1228,37 @@
         });
     })();
 
-    // Интерактивный «прожектор» (Spotlight) для карточек, кнопок и полей ввода
-    document.addEventListener('mousemove', function (e) {
-        var el = e.target.closest(
-            '.cat-tile, .contact-card, .project-card, .team-card, .feature-card, .news-card, .person-card, .album-card, .doc-card, .catcard, .testimonial, .block-advantages__item, .mediacard, .imgcard, .faq-item, .stage, .timeline-item, ' +
-            '.btn, .block-cta__button, .btn-cta, .block-hero__button, .timeline-card__button, .timeline-cta__button, ' +
-            '.a11y-toggle, .site-theme-toggle, .site-search-toggle, ' +
-            'input[type="text"], input[type="email"], input[type="password"], input[type="search"]:not(.site-search input), textarea, select'
-        );
-        if (!el) { return; }
-        var rect = el.getBoundingClientRect();
-        var x = e.clientX - rect.left;
-        var y = e.clientY - rect.top;
-        el.style.setProperty('--mouse-x', x + 'px');
-        el.style.setProperty('--mouse-y', y + 'px');
-    });
+    // Интерактивный «прожектор» нужен только точному указателю. Обновление
+    // ограничено одним разом за кадр, чтобы mousemove не перегружал страницу.
+    (function () {
+        if (!window.matchMedia
+            || !window.matchMedia('(hover: hover) and (pointer: fine)').matches
+            || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return;
+        }
+        var pending = false;
+        var lastEvent = null;
+        document.addEventListener('mousemove', function (event) {
+            lastEvent = event;
+            if (pending) { return; }
+            pending = true;
+            window.requestAnimationFrame(function () {
+                pending = false;
+                var e = lastEvent;
+                if (!e || !e.target || !e.target.closest) { return; }
+                var el = e.target.closest(
+                    '.cat-tile, .contact-card, .project-card, .team-card, .feature-card, .news-card, .person-card, .album-card, .doc-card, .catcard, .testimonial, .block-advantages__item, .mediacard, .imgcard, .faq-item, .stage, .timeline-item, ' +
+                    '.btn, .block-cta__button, .btn-cta, .block-hero__button, .timeline-card__button, .timeline-cta__button, ' +
+                    '.a11y-toggle, .site-theme-toggle, .site-search-toggle, ' +
+                    'input[type="text"], input[type="email"], input[type="password"], input[type="search"]:not(.site-search input), textarea, select'
+                );
+                if (!el) { return; }
+                var rect = el.getBoundingClientRect();
+                el.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+                el.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+            });
+        }, { passive: true });
+    })();
 
     // Индикатор прогресса прокрутки страницы
     (function () {
@@ -1754,12 +1817,4 @@
             });
         });
     });
-
-    /* ==========================================================================
-       3. Кнопка Печать / Экспорт в PDF
-       ========================================================================== */
-    document.querySelectorAll('[data-print-page]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            window.print();
-        });
-    });
+})();

@@ -6,7 +6,7 @@ $items = $data['items'] ?? [];
 <div class="block-featband">
     <?php if ($title !== ''): ?><h2 class="block-featband__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
     <?php if (empty($items)): ?>
-        <p class="block-featband__empty">Элементы ещё не добавлены.</p>
+        <p class="block-featband__empty"><?= htmlspecialchars(t('Элементы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <div class="featband">
             <?php foreach ($items as $item): ?>

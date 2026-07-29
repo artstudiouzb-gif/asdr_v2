@@ -13,14 +13,14 @@ $items = $data['items'] ?? [];
             <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
             <?php if ($carousel): ?>
                 <span class="carousel-nav">
-                    <button type="button" class="carousel-nav__btn" data-carousel-prev aria-label="<?= htmlspecialchars(t('Назад'), ENT_QUOTES) ?>">‹</button>
-                    <button type="button" class="carousel-nav__btn" data-carousel-next aria-label="Вперёд">›</button>
+                    <button type="button" class="carousel-nav__btn" data-carousel-prev aria-label="<?= htmlspecialchars(t('Назад'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('chevron-left', 18) ?></button>
+                    <button type="button" class="carousel-nav__btn" data-carousel-next aria-label="<?= htmlspecialchars(t('Вперёд'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('chevron-right', 18) ?></button>
                 </span>
             <?php endif; ?>
         </div>
     </div>
     <?php if (empty($items)): ?>
-        <p class="block-imgcards__empty">Карточки ещё не добавлены.</p>
+        <p class="block-imgcards__empty"><?= htmlspecialchars(t('Карточки ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <?php // В режиме карусели полоса прокручивается вбок — делаем её
               // доступной с клавиатуры и подписываем для экранного диктора. ?>

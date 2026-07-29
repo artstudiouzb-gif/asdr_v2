@@ -17,8 +17,8 @@ use App\Core\Csrf;
             <?= Csrf::field() ?>
             <?= Csrf::honeypotField() ?>
             <label class="visually-hidden" for="subscribe-email-<?= (int) $blockId ?>">Email</label>
-            <input type="email" id="subscribe-email-<?= (int) $blockId ?>" name="email" placeholder="Ваш email" required>
-            <button type="submit" class="btn btn--primary"><?= htmlspecialchars((string) ($data['button_text'] ?: 'Подписаться'), ENT_QUOTES) ?></button>
+            <input type="email" id="subscribe-email-<?= (int) $blockId ?>" name="email" placeholder="<?= htmlspecialchars(t('Ваш e-mail'), ENT_QUOTES) ?>" required>
+            <button type="submit" class="btn btn--primary"><?= htmlspecialchars((string) ($data['button_text'] ?: t('Подписаться')), ENT_QUOTES) ?></button>
         </form>
     </div>
 </div>

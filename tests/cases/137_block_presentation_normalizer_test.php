@@ -67,6 +67,12 @@ test('Block presentation normalizer: ограничивает неизвестн
     assert_same('', $data['_visible_device']);
 });
 
+test('Block presentation normalizer: поддерживает каскад карточек', function (): void {
+    $data = BlockPresentationNormalizer::normalize(['reveal_type' => 'stagger']);
+
+    assert_same(['enabled' => true, 'type' => 'stagger'], $data['_reveal']);
+});
+
 test('Block presentation normalizer: обнаруживает перевёрнутое окно показа', function (): void {
     assert_true(BlockPresentationNormalizer::hasInvalidVisibilityWindow([
         '_visible_from' => '2026-07-25 10:00',

@@ -166,8 +166,9 @@ final class BlockSnippet
     }
 
     /**
-     * Применяет шаблон к странице. $replace = true — сначала удаляет все
-     * текущие блоки этого языка (дочерние уходят каскадом по FK). Блоки
+     * Применяет шаблон к странице. $replace = true — сначала удаляет только
+     * текущие блоки выбранного языка этой страницы (дочерние уходят каскадом
+     * по FK). Другие переводы не затрагиваются. Блоки
      * получают новые id (важно для изоляции custom_css по #block-{id}).
      *
      * @param array<int, mixed> $blocks
@@ -177,16 +178,12 @@ final class BlockSnippet
     {
         if ($replace) {
             $pdo = Database::pdo();
-            $stmtGroup = $pdo->prepare("SELECT id FROM pages WHERE (id = :id OR translation_group_id = :gid OR id = (SELECT translation_group_id FROM pages WHERE id = :id2)) AND deleted_at IS NULL");
-            $stmtGroup->execute([':id' => $pageId, ':gid' => $pageId, ':id2' => $pageId]);
-            $groupPageIds = $stmtGroup->fetchAll(\PDO::FETCH_COLUMN);
-            if (!empty($groupPageIds)) {
-                $in = implode(',', array_fill(0, count($groupPageIds), '?'));
-                $stmtOld = $pdo->prepare("SELECT id FROM blocks WHERE page_id IN ($in)");
-                $stmtOld->execute($groupPageIds);
-                foreach ($stmtOld->fetchAll(\PDO::FETCH_COLUMN) as $oldId) {
-                    Block::delete((int) $oldId);
-                }
+            $stmtOld = $pdo->prepare(
+                'SELECT id FROM blocks WHERE page_id = :page_id AND lang = :lang ORDER BY parent_block_id IS NULL DESC'
+            );
+            $stmtOld->execute([':page_id' => $pageId, ':lang' => $lang]);
+            foreach ($stmtOld->fetchAll(\PDO::FETCH_COLUMN) as $oldId) {
+                Block::delete((int) $oldId);
             }
         }
 

@@ -6,7 +6,7 @@ $items = $data['items'] ?? [];
 <div class="block-media">
     <?php if ($title !== ''): ?><h2 class="block-media__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
     <?php if (empty($items)): ?>
-        <p class="block-media__empty">Медиаматериалы ещё не добавлены.</p>
+        <p class="block-media__empty"><?= htmlspecialchars(t('Медиаматериалы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <div class="media-list">
             <?php foreach ($items as $item): ?>

@@ -118,7 +118,7 @@ final class SnippetController
         }
 
         $lang = $this->resolveLang();
-        $preset = \App\Core\PagePresets::find((string) ($_POST['preset'] ?? ''));
+        $preset = \App\Core\PagePresets::find((string) ($_POST['preset'] ?? ''), $lang);
         if ($preset === null) {
             Flash::error('Сборка не найдена.');
             $this->back($pageId, $lang);

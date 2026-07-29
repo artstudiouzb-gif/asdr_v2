@@ -6,7 +6,7 @@ use App\Models\Block;
 use App\Models\BlockSnippet;
 use App\Models\Page;
 
-test('BlockSnippet::applyToPage с replace=true полностью вычищает старые блоки с любыми языками', function (): void {
+test('BlockSnippet::applyToPage с replace=true заменяет только выбранный язык', function (): void {
     ensure_test_db();
 
     $pageId = Page::create([
@@ -31,5 +31,6 @@ test('BlockSnippet::applyToPage с replace=true полностью вычища�
     assert_true(count($remainingRu) > 0, 'Созданы новые блоки');
 
     $allBlocksAfter = Block::forPage($pageId, 'uz');
-    assert_equals(0, count($allBlocksAfter), 'Старый узбекский блок зачищен');
+    assert_equals(1, count($allBlocksAfter), 'Узбекские блоки не затронуты');
+    assert_same('Old 2', (string) (json_decode((string) $allBlocksAfter[0]['data'], true)['content'] ?? ''));
 });
