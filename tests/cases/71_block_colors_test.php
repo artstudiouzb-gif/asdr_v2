@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 use App\Core\BlockRenderer;
 
-// Настраиваемые цвета блоков CTA, баннер, направления, CTA-полоса
-// (через CSS-переменные в инлайн-стиле).
+// Настраиваемые цвета блоков CTA, баннер, направления, CTA-полоса:
+// CSS-переменные публикуются в scoped CSS, а не в style-атрибутах.
 
 function render_color_block(string $type, array $data): string
 {
-    return BlockRenderer::render(['id' => 1, 'type' => $type, 'custom_css' => null, 'data' => json_encode($data)])['html'];
+    $rendered = BlockRenderer::render(['id' => 1, 'type' => $type, 'custom_css' => null, 'data' => json_encode($data)]);
+    assert_not_contains(' style="', $rendered['html'], "{$type}: CSS-переменные не должны попадать в HTML");
+
+    return $rendered['html'] . "\n" . $rendered['css'];
 }
 
 test('CTA: цвета фона/текста/кнопки отдаются переменными', function () {

@@ -14,6 +14,9 @@ $sideItems = array_values(array_filter(array_map('trim', explode("\n", (string) 
 $branches = is_array($data['branches'] ?? null) ? $data['branches'] : [];
 $footnote = trim((string) ($data['footnote'] ?? ''));
 $headTag = $headUrl !== '' ? 'a' : 'div';
+$templateCss = $branches !== []
+    ? '#block-' . $blockId . ' .orgstruct__branches{--orgstruct-branches:' . count($branches) . '}'
+    : '';
 ?>
 <div class="block-orgstruct">
     <?php if ($title !== ''): ?>
@@ -36,7 +39,7 @@ $headTag = $headUrl !== '' ? 'a' : 'div';
         </div>
 
         <?php if ($branches !== []): ?>
-            <div class="orgstruct__branches" style="--orgstruct-branches: <?= count($branches) ?>;">
+            <div class="orgstruct__branches">
                 <?php foreach ($branches as $branch): ?>
                     <?php
                     $bTitle = trim((string) ($branch['title'] ?? ''));

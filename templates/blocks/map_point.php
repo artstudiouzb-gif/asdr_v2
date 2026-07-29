@@ -8,6 +8,10 @@ $address = trim((string) ($data['address'] ?? ''));
 $btnText = trim((string) ($data['button_text'] ?? ''));
 $btnUrl = trim((string) ($data['button_url'] ?? ''));
 
+if ($image !== '' && !\App\Core\UrlGuard::isSafeMedia($image)) {
+    $image = '';
+}
+
 if (preg_match('/src=["\'](https:\/\/[^"\']+)["\']/i', $embedUrl, $m)) {
     $embedUrl = $m[1];
 }
@@ -34,6 +38,10 @@ if ($embedUrl !== '' && (str_contains($embedUrl, 'google.com/maps') || str_conta
         $embedUrl .= (str_contains($embedUrl, '?') ? '&' : '?') . 'iwloc=near';
     }
 }
+$imageCss = str_replace(["\\", "'"], ["\\\\", "\\'"], $image);
+$templateCss = $embedUrl === '' && $imageCss !== ''
+    ? '#block-' . $blockId . " .block-map__image{--block-map-image:url('" . $imageCss . "')}"
+    : '';
 ?>
 <div class="block-map">
     <?php if ($title !== ''): ?><h2 class="block-map__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
@@ -41,7 +49,7 @@ if ($embedUrl !== '' && (str_contains($embedUrl, 'google.com/maps') || str_conta
         <?php if ($embedUrl !== ''): ?>
             <iframe class="block-map__frame" src="<?= htmlspecialchars($embedUrl, ENT_QUOTES) ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="<?= htmlspecialchars($title !== '' ? $title : 'Карта', ENT_QUOTES) ?>"></iframe>
         <?php elseif ($image !== ''): ?>
-            <span class="block-map__image" style="--block-map-image:url('<?= htmlspecialchars($image, ENT_QUOTES) ?>')"></span>
+            <span class="block-map__image"></span>
         <?php else: ?>
             <span class="block-map__image block-map__image--empty"></span>
         <?php endif; ?>

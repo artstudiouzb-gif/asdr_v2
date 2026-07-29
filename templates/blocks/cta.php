@@ -9,8 +9,9 @@ $cvar = static function (string $key, string $var) use ($data): string {
     return preg_match('/^#[0-9a-f]{6}$/i', $v) ? $var . ':' . $v . ';' : '';
 };
 $style = $cvar('bg_color', '--cta-bg') . $cvar('text_color', '--cta-text') . $cvar('button_color', '--cta-btn');
+$templateCss = $style !== '' ? '#block-' . $blockId . ' .block-cta{' . $style . '}' : '';
 ?>
-<div class="block-cta"<?= $style !== '' ? ' style="' . $style . '"' : '' ?>>
+<div class="block-cta">
     <?php if ($title !== ''): ?><h2><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
     <?php if ($text !== ''): ?><p><?= htmlspecialchars($text, ENT_QUOTES) ?></p><?php endif; ?>
     <?php if ($buttonText !== ''): ?>

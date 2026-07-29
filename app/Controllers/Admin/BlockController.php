@@ -389,17 +389,17 @@ final class BlockController
             case 'text':
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'content' => TextProcessor::process((string) ($_POST['content'] ?? ''), $locale),
+                    'content' => TextProcessor::process(
+                        \App\Core\HtmlSanitizer::sanitizeText((string) ($_POST['content'] ?? '')),
+                        $locale
+                    ),
                 ];
             case 'html':
-                // Супер-администратор — доверенный источник (сырой HTML).
-                // Роль editor: контент проходит строгий allowlist-санитайзер,
-                // вырезающий <script>, обработчики on* и опасные URI.
+                // Даже супер-администратор сохраняет только безопасную
+                // разметку: скрипты, inline-стили, on* и опасные URI запрещены.
                 $rawHtml = (string) ($_POST['html'] ?? '');
                 return [
-                    'html' => Auth::isSuperAdmin()
-                        ? $rawHtml
-                        : \App\Core\HtmlSanitizer::sanitize($rawHtml),
+                    'html' => \App\Core\HtmlSanitizer::sanitize($rawHtml),
                 ];
             case 'cta':
                 return CtaBlockNormalizer::normalize($_POST, $locale);

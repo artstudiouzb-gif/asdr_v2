@@ -20,18 +20,20 @@ test('Блок person_cards: персона с фото и вакантная к
 });
 
 test('Блок timeline: события, кнопка и CTA-карточка', function () {
-    $out = BlockRenderer::render(['id' => 41, 'type' => 'timeline', 'custom_css' => null, 'data' => json_encode([
+    $rendered = BlockRenderer::render(['id' => 41, 'type' => 'timeline', 'custom_css' => null, 'data' => json_encode([
         'title' => 'История Агентства',
         'items' => [['year' => '2017', 'text' => 'Создан центр'], ['year' => '2023+', 'text' => 'Расширение функций']],
         'button_text' => 'Вся история', 'button_url' => '/o-nas',
         'cta_title' => 'Работаем для целей развития', 'cta_text' => 'Экспертиза и данные',
         'cta_button_text' => 'Стратегия', 'cta_button_url' => '/strategy', 'cta_image' => '/uploads/public/t.jpg',
-    ])])['html'];
+    ])]);
+    $out = $rendered['html'] . "\n" . $rendered['css'];
     assert_contains('block-timeline--with-cta', $out);
     assert_contains('timeline-item__year', $out);
     assert_contains('2023+', $out);
     assert_contains('timeline-cta__title', $out);
     assert_contains("url('/uploads/public/t.jpg')", $out);
+    assert_not_contains(' style="', $rendered['html']);
 
     // Без CTA-заголовка карточка не выводится.
     $solo = BlockRenderer::render(['id' => 42, 'type' => 'timeline', 'custom_css' => null, 'data' => json_encode([

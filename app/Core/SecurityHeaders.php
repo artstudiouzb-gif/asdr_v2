@@ -186,10 +186,9 @@ final class SecurityHeaders
     }
 
     /**
-     * Добавляет nonce всем <script>-тегам без него в готовом HTML. Нужен для
-     * закэшированных блоков страниц: HTML в кэше общий, а nonce — на запрос.
-     * Контент доверенный (сырые <script> в блоках может сохранять только
-     * супер-админ; для editor всё режет HtmlSanitizer).
+     * Добавляет nonce всем <script>-тегам без него в готовом доверенном HTML.
+     * Нужен для закэшированных виджетов и legacy-фрагментов: HTML в кэше
+     * общий, а nonce — на запрос. Обычные блоки script не пропускают.
      */
     public static function injectScriptNonce(string $html, ?string $nonce = null): string
     {

@@ -205,7 +205,44 @@ for (const group of groups) {
   process.stdout.write(`${group.css}: ${styles.size} attributes and ${styleBlocks.length} blocks extracted from ${changedFiles} files\n`);
 }
 
+if (checkOnly) {
+  let dynamicInlineStyles = 0;
+  let inlineScripts = 0;
+  for (const relativeFile of walk('templates/blocks')) {
+    const source = fs.readFileSync(path.join(root, relativeFile), 'utf8');
+    // Статические style уже учитывает extractor выше. Здесь остаются PHP-
+    // выражения, которые автоматическая механическая замена выполнять не
+    // должна: их нужно явно вынести в scoped $templateCss.
+    const withoutStaticStyles = extractFromSource(source, new Map());
+    const styleMatches = withoutStaticStyles.match(/(?:\s|["'])style\s*=/gi) ?? [];
+    const scriptMatches = source.match(/<script\b/gi) ?? [];
+    if (styleMatches.length > 0) {
+      dynamicInlineStyles += styleMatches.length;
+      process.stderr.write(`${relativeFile}: ${styleMatches.length} dynamic inline style attribute(s).\n`);
+    }
+    if (scriptMatches.length > 0) {
+      inlineScripts += scriptMatches.length;
+      process.stderr.write(`${relativeFile}: ${scriptMatches.length} inline script tag(s).\n`);
+    }
+  }
+  violationCount += dynamicInlineStyles + inlineScripts;
+
+  const demoDirectory = path.join(root, 'database/demo_assets');
+  if (fs.existsSync(demoDirectory)) {
+    for (const filename of fs.readdirSync(demoDirectory).filter((name) => name.endsWith('.json'))) {
+      const source = fs.readFileSync(path.join(demoDirectory, filename), 'utf8');
+      const forbidden = source.match(
+        /<\s*(?:script|style)\b|(?:\s|["'])style\s*=|\bon[a-z]+\s*=|javascript\s*:/gi,
+      ) ?? [];
+      if (forbidden.length > 0) {
+        violationCount += forbidden.length;
+        process.stderr.write(`database/demo_assets/${filename}: ${forbidden.length} forbidden inline marker(s).\n`);
+      }
+    }
+  }
+}
+
 if (checkOnly && violationCount > 0) {
-  process.stderr.write(`Found ${violationCount} static inline style declaration(s).\n`);
+  process.stderr.write(`Found ${violationCount} forbidden inline declaration(s).\n`);
   process.exitCode = 1;
 }

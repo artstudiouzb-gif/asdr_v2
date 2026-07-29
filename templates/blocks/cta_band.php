@@ -10,8 +10,9 @@ $cvar = static function (string $key, string $var) use ($data): string {
     return preg_match('/^#[0-9a-f]{6}$/i', $v) ? $var . ':' . $v . ';' : '';
 };
 $style = $cvar('bg_color', '--ctaband-bg') . $cvar('text_color', '--ctaband-text') . $cvar('button_color', '--ctaband-btn');
+$templateCss = $style !== '' ? '#block-' . $blockId . ' .block-ctaband{' . $style . '}' : '';
 ?>
-<div class="block-ctaband"<?= $style !== '' ? ' style="' . $style . '"' : '' ?>>
+<div class="block-ctaband">
     <div class="ctaband__lead">
         <span class="ctaband__icon">
             <?php if ($iconSvg !== ''): ?>

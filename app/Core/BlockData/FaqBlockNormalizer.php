@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\BlockData;
 
+use App\Core\HtmlSanitizer;
 use App\Core\TextProcessor;
 
 final class FaqBlockNormalizer
@@ -28,7 +29,7 @@ final class FaqBlockNormalizer
 
             $items[] = [
                 'question' => TextProcessor::typographPlain($question, $locale),
-                'answer' => TextProcessor::process($answer, $locale),
+                'answer' => TextProcessor::process(HtmlSanitizer::sanitizeText($answer), $locale),
             ];
         }
 

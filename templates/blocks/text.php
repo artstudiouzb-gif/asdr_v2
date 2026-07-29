@@ -1,7 +1,7 @@
 <?php
 /** @var array $data */
 $title = $data['title'] ?? '';
-$content = $data['content'] ?? '';
+$content = \App\Core\HtmlSanitizer::sanitizeText((string) ($data['content'] ?? ''));
 ?>
 <div class="block-text">
     <?php if ($title !== ''): ?>

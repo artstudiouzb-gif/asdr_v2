@@ -5,8 +5,9 @@ $items = $data['items'] ?? [];
 $cardBg = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['card_bg'] ?? '')) ? $data['card_bg'] : '';
 $textColor = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['text_color'] ?? '')) ? $data['text_color'] : '';
 $cstyle = ($cardBg !== '' ? '--counters-bg:' . $cardBg . ';' : '') . ($textColor !== '' ? '--counters-text:' . $textColor . ';' : '');
+$templateCss = $cstyle !== '' ? '#block-' . $blockId . ' .block-counters{' . $cstyle . '}' : '';
 ?>
-<div class="block-counters"<?= $cstyle !== '' ? ' style="' . $cstyle . '"' : '' ?>>
+<div class="block-counters">
     <?php if ($title !== ''): ?><h2 class="block-counters__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
     <div class="block-counters__grid">
         <?php foreach ($items as $item):

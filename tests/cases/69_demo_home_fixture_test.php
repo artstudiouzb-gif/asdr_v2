@@ -49,6 +49,16 @@ test('Демо: все изображения фикстуры бандлятс�
     }
 });
 
+test('Демо: данные не содержат inline style и script', function () {
+    foreach (['home_blocks.json', 'home_blocks_uz.json', 'prototype_pages.json'] as $fixture) {
+        $source = (string) file_get_contents(APP_ROOT . '/database/demo_assets/' . $fixture);
+        assert_false(
+            preg_match('/<\s*(?:script|style)\b|(?:\s|[\'"])style\s*=|\bon[a-z]+\s*=|javascript\s*:/i', $source) === 1,
+            "{$fixture}: найдена исполняемая или inline-разметка"
+        );
+    }
+});
+
 test('Демо: прототипные госстраницы собраны из зарегистрированных блоков', function () {
     $path = APP_ROOT . '/database/demo_assets/prototype_pages.json';
     assert_true(is_file($path), 'файл прототипных страниц существует');

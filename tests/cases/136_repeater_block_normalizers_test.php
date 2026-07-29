@@ -58,7 +58,10 @@ test('FAQ normalizer: сохраняет HTML-ответ и удаляет по�
     $data = FaqBlockNormalizer::normalize([
         'title_field' => ' Вопросы ',
         'items' => [
-            ['question' => ' Как начать? ', 'answer' => ' <p>Откройте форму</p> '],
+            [
+                'question' => ' Как начать? ',
+                'answer' => ' <p style="color:red" onclick="alert(1)">Откройте форму</p><script>alert(2)</script> ',
+            ],
             ['question' => ' ', 'answer' => ' '],
         ],
     ]);
@@ -67,6 +70,9 @@ test('FAQ normalizer: сохраняет HTML-ответ и удаляет по�
     assert_same(1, count($data['items']));
     assert_same("Как\u{00A0}начать?", $data['items'][0]['question']);
     assert_contains('<p>Откройте форму</p>', $data['items'][0]['answer']);
+    assert_not_contains('style=', $data['items'][0]['answer']);
+    assert_not_contains('onclick', $data['items'][0]['answer']);
+    assert_not_contains('<script', $data['items'][0]['answer']);
 });
 
 test('Contact cards normalizer и рендерер блокируют опасные ссылки', function (): void {

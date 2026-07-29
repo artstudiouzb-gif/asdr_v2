@@ -5,6 +5,7 @@ $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
 $items = $data['items'] ?? [];
 $cols = max(1, min(4, (int) ($data['columns'] ?? 4)));
+$templateCss = '#block-' . $blockId . ' .docslist-grid{--docs-cols:' . $cols . '}';
 ?>
 <div class="block-docslist">
     <div class="section-head">
@@ -14,7 +15,7 @@ $cols = max(1, min(4, (int) ($data['columns'] ?? 4)));
     <?php if (empty($items)): ?>
         <p class="block-docslist__empty">Документы ещё не добавлены.</p>
     <?php else: ?>
-        <div class="docslist-grid" style="--docs-cols:<?= $cols ?>">
+        <div class="docslist-grid">
             <?php foreach ($items as $doc): ?>
                 <?php $url = trim((string) ($doc['url'] ?? '')); $tag = $url !== '' ? 'a' : 'div'; ?>
                 <<?= $tag ?> class="doc-card"<?= $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '" download' : '' ?>>

@@ -9,6 +9,13 @@ $hasCta = $ctaTitle !== '';
 $ctaImage = trim((string) ($data['cta_image'] ?? ''));
 $ctaBtnText = trim((string) ($data['cta_button_text'] ?? ''));
 $ctaBtnUrl = trim((string) ($data['cta_button_url'] ?? ''));
+if ($ctaImage !== '' && !\App\Core\UrlGuard::isSafeMedia($ctaImage)) {
+    $ctaImage = '';
+}
+$ctaImageCss = str_replace(["\\", "'"], ["\\\\", "\\'"], $ctaImage);
+$templateCss = $ctaImageCss !== ''
+    ? '#block-' . $blockId . " .timeline-cta{--timeline-cta-image:url('" . $ctaImageCss . "')}"
+    : '';
 ?>
 <div class="block-timeline<?= $hasCta ? ' block-timeline--with-cta' : '' ?>">
     <div class="timeline-card">
@@ -30,7 +37,7 @@ $ctaBtnUrl = trim((string) ($data['cta_button_url'] ?? ''));
         <?php endif; ?>
     </div>
     <?php if ($hasCta): ?>
-        <div class="timeline-cta"<?= $ctaImage !== '' ? ' style="--timeline-cta-image:url(\'' . htmlspecialchars($ctaImage, ENT_QUOTES) . '\')"' : '' ?>>
+        <div class="timeline-cta">
             <span class="timeline-cta__overlay"></span>
             <div class="timeline-cta__body">
                 <h3 class="timeline-cta__title"><?= htmlspecialchars($ctaTitle, ENT_QUOTES) ?></h3>

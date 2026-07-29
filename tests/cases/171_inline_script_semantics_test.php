@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Core\BlockRenderer;
+
 test('public chrome avoids first-party executable inline scripts', function (): void {
     $header = (string) file_get_contents(APP_ROOT . '/app/Views/site/_header.php');
     $footer = (string) file_get_contents(APP_ROOT . '/app/Views/site/_footer.php');
@@ -33,6 +35,42 @@ test('public landmarks and builder blocks use semantic markup without style attr
     assert_contains('<p class="feature-card__text">', $cards);
     assert_not_contains(' style="', $hero);
     assert_not_contains(' style="', $cards);
+});
+
+test('all public block templates forbid inline style and script markup', function (): void {
+    foreach (glob(APP_ROOT . '/templates/blocks/*.php') ?: [] as $file) {
+        $source = (string) file_get_contents($file);
+        assert_false(
+            preg_match('/(?:\s|[\'"])style\s*=/i', $source) === 1,
+            basename($file) . ': найден inline style'
+        );
+        assert_not_contains('<script', strtolower($source), basename($file) . ': найден inline script');
+    }
+});
+
+test('dynamic block presentation is emitted as scoped CSS, not style attributes', function (): void {
+    $cases = [
+        'cta' => ['title' => 'CTA', 'bg_color' => '#112233'],
+        'cta_band' => ['title' => 'Band', 'text_color' => '#ffffff'],
+        'banner' => ['title' => 'Banner', 'image' => '/uploads/public/banner.jpg'],
+        'counters' => ['card_bg' => '#112233', 'items' => [['value' => 1, 'label' => 'Один']]],
+        'docs_list' => ['title' => 'Docs', 'columns' => 3, 'items' => [['title' => 'Документ']]],
+        'org_structure' => ['head_title' => 'Директор', 'branches' => [['title' => 'Заместитель']]],
+        'map_point' => ['title' => 'Карта', 'image' => '/uploads/public/map.jpg'],
+        'timeline' => ['title' => 'Этапы', 'cta_title' => 'Подробнее', 'cta_image' => '/uploads/public/timeline.jpg'],
+    ];
+
+    $id = 1710;
+    foreach ($cases as $type => $data) {
+        $rendered = BlockRenderer::render([
+            'id' => $id++,
+            'type' => $type,
+            'custom_css' => null,
+            'data' => json_encode($data),
+        ]);
+        assert_not_contains(' style=', $rendered['html'], "{$type}: inline style попал в HTML");
+        assert_contains('#block-', $rendered['css'], "{$type}: нет scoped CSS");
+    }
 });
 
 test('organization JSON-LD is emitted once by the site chrome', function (): void {

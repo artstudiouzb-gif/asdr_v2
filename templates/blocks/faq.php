@@ -9,8 +9,8 @@ $items = $data['items'] ?? [];
         <?php foreach ($items as $item): ?>
             <details class="faq-item">
                 <summary class="faq-item__q"><?= htmlspecialchars($item['question'] ?? '', ENT_QUOTES) ?></summary>
-                <?php // Ответ уже прошёл TextProcessor (типограф + санитайзер) при сохранении. ?>
-                <div class="faq-item__a rich-content"><?= $item['answer'] ?? '' ?></div>
+                <?php // Повторная очистка защищает ответы, сохранённые до строгого allowlist. ?>
+                <div class="faq-item__a rich-content"><?= \App\Core\HtmlSanitizer::sanitizeText((string) ($item['answer'] ?? '')) ?></div>
             </details>
         <?php endforeach; ?>
     </div>

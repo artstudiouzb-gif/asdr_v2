@@ -24,7 +24,8 @@ test('Блок banner рендерит фон, текст и кнопку; чи�
         'data' => json_encode(['title' => 'Приём', 'text' => 'Онлайн', 'image' => '/bg.jpg', 'button_text' => 'Подать', 'button_url' => '/catalog/documenty']),
     ]);
     assert_contains('block-banner--image', $ok['html']);
-    assert_contains('/bg.jpg', $ok['html']);
+    assert_contains("url('/bg.jpg')", $ok['css']);
+    assert_not_contains(' style="', $ok['html']);
     assert_contains('href="/catalog/documenty"', $ok['html']);
 
     $bad = BlockRenderer::render([

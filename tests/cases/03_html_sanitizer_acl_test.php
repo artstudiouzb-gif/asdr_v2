@@ -3,9 +3,10 @@
 declare(strict_types=1);
 
 use App\Core\HtmlSanitizer;
+use App\Core\BlockRenderer;
 
-// ACL роли editor: сырой HTML editor'а всегда проходит через HtmlSanitizer,
-// поэтому <script>/on*/javascript: не могут быть внедрены.
+// HTML любого автора проходит через HtmlSanitizer, поэтому
+// <script>/style/on*/javascript: не могут быть внедрены.
 test('HtmlSanitizer: вырезает <script>', function () {
     $out = HtmlSanitizer::sanitize('<p>Привет</p><script>alert(1)</script>');
     assert_not_contains('<script', $out);
@@ -29,6 +30,12 @@ test('HtmlSanitizer: сохраняет разрешённое форматир�
     assert_contains('<em>', $out);
 });
 
+test('HtmlSanitizer: удаляет inline-стили', function () {
+    $out = HtmlSanitizer::sanitize('<p style="color:red">Текст</p>');
+    assert_not_contains('style=', $out);
+    assert_contains('<p>Текст</p>', $out);
+});
+
 test('HtmlSanitizer: разворачивает запрещённые теги, сохраняя текст', function () {
     $out = HtmlSanitizer::sanitize('<iframe src="//evil">видимый текст</iframe>');
     assert_not_contains('<iframe', $out);
@@ -50,3 +57,34 @@ test('HtmlSanitizer: вырезает скрипты, вложенные в за
     assert_not_contains('alert', $out2);
 });
 
+test('HTML-блок повторно очищает старые сохранённые script и style', function () {
+    $rendered = BlockRenderer::render([
+        'id' => 303,
+        'type' => 'html',
+        'custom_css' => null,
+        'data' => json_encode([
+            'html' => '<p style="color:red" onclick="alert(1)">Текст</p><script>alert(2)</script>',
+        ]),
+    ]);
+
+    assert_contains('<p>Текст</p>', $rendered['html']);
+    assert_not_contains(' style=', $rendered['html']);
+    assert_not_contains('onclick', $rendered['html']);
+    assert_not_contains('<script', $rendered['html']);
+});
+
+test('Текстовый блок очищает script и style в старом rich text', function () {
+    $rendered = BlockRenderer::render([
+        'id' => 304,
+        'type' => 'text',
+        'custom_css' => null,
+        'data' => json_encode([
+            'title' => 'Текст',
+            'content' => '<p style="color:red">Абзац</p><script>alert(1)</script>',
+        ]),
+    ]);
+
+    assert_contains('<p>Абзац</p>', $rendered['html']);
+    assert_not_contains(' style=', $rendered['html']);
+    assert_not_contains('<script', $rendered['html']);
+});

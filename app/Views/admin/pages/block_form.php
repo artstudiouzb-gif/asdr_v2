@@ -47,7 +47,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <div class="form-field">
                 <label for="html">HTML-код блока</label>
                 <textarea class="u-inline-6650b8308c" id="html" name="html"><?= htmlspecialchars($data['html'] ?? '', ENT_QUOTES) ?></textarea>
-                <span class="form-hint">Выполняется как есть — используйте только доверенный код (виджеты карт, встраиваемые видео и т.п.).</span>
+                <span class="form-hint">Разрешена безопасная разметка без script, style, обработчиков on* и iframe. Для карт и видео используйте специальные блоки.</span>
             </div>
         <?php endif; ?>
 

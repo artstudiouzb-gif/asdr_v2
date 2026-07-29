@@ -6,11 +6,9 @@ namespace App\Core;
 
 /**
  * Строгий allowlist-санитайзер HTML на нативном DOMDocument (без сторонних
- * библиотек). Используется, когда HTML вводит роль `editor` (блок типа `html`):
- * разрешён только безопасный форматирующий разметочный набор, любые скрипты,
- * обработчики on*, javascript:/data:-URI и опасные теги вырезаются.
- *
- * Супер-администратор вводит HTML без санитизации (доверенный источник).
+ * библиотек). Разрешён только безопасный форматирующий набор; скрипты,
+ * inline-стили, обработчики on*, javascript:/data:-URI и опасные теги
+ * вырезаются независимо от роли автора.
  */
 final class HtmlSanitizer
 {
@@ -26,7 +24,7 @@ final class HtmlSanitizer
 
     /** Разрешённые атрибуты по тегам. */
     private const ALLOWED_ATTRS = [
-        '*' => ['class', 'id', 'title', 'style'],
+        '*' => ['class', 'id', 'title'],
         'a' => ['href', 'target', 'rel'],
         'img' => ['src', 'alt', 'width', 'height', 'loading'],
         'td' => ['colspan', 'rowspan'],
@@ -164,14 +162,6 @@ final class HtmlSanitizer
                 }
             }
 
-            // style: вырезаем выражения и внешние ссылки.
-            if ($name === 'style'
-                && (stripos($value, 'javascript:') !== false
-                    || stripos($value, 'expression') !== false
-                    || stripos($value, 'url(') !== false)) {
-                $el->removeAttribute($attr->nodeName);
-                continue;
-            }
         }
 
         // Внешние ссылки делаем безопасными.
