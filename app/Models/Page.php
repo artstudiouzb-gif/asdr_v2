@@ -100,9 +100,6 @@ final class Page
             $params[':lang_pt'] = $langFilter;
             $params[':lang_b'] = $langFilter;
             $params[':lang_p2'] = $langFilter;
-        } else {
-            $where[] = '(p.translation_group_id IS NULL OR p.translation_group_id = 0 OR p.translation_group_id = p.id'
-                . ' OR NOT EXISTS (SELECT 1 FROM pages p_parent WHERE p_parent.id = p.translation_group_id AND p_parent.deleted_at IS NULL AND p_parent.id <> p.id))';
         }
 
         if (in_array($filters['status'] ?? '', ['published', 'draft'], true)) {
@@ -889,12 +886,7 @@ final class Page
     public static function langCounts(): array
     {
         $pdo = Database::pdo();
-        $totalAll = (int) $pdo->query(
-            "SELECT COUNT(*) FROM pages p
-             WHERE p.deleted_at IS NULL
-               AND (p.translation_group_id IS NULL OR p.translation_group_id = 0 OR p.translation_group_id = p.id
-                    OR NOT EXISTS (SELECT 1 FROM pages p_parent WHERE p_parent.id = p.translation_group_id AND p_parent.deleted_at IS NULL AND p_parent.id <> p.id))"
-        )->fetchColumn();
+        $totalAll = (int) $pdo->query("SELECT COUNT(*) FROM pages WHERE deleted_at IS NULL")->fetchColumn();
 
         $counts = ['all' => $totalAll];
         foreach (Language::active() as $l) {
