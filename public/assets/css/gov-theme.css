@@ -2742,7 +2742,8 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     position: absolute; inset: 0;
     background: linear-gradient(var(--hero-scrim-direction, 90deg),
         rgba(var(--hero-scrim-rgb), var(--hero-scrim-a)) 0%,
-        rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.55)) 45%,
+        rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.62)) 28%,
+        rgba(var(--hero-scrim-rgb), 0) 68%,
         rgba(var(--hero-scrim-rgb), 0) 100%);
     z-index: 2;
 }

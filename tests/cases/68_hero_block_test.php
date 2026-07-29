@@ -171,6 +171,18 @@ test('Hero: мобильное фото сохраняет исходную не
     assert_not_contains('calc(var(--hero-scrim-a) * 1.31)', $css);
 });
 
+test('Hero: градиент начинается у края и исчезает до противоположного края', function () {
+    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $form = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/admin/pages/block_form.php');
+
+    assert_contains('rgba(var(--hero-scrim-rgb), var(--hero-scrim-a)) 0%', $css);
+    assert_contains('rgba(var(--hero-scrim-rgb), 0) 68%', $css);
+    assert_contains('rgba(var(--hero-scrim-rgb), 0) 100%', $css);
+    assert_contains('Градиентное от края', $form);
+    assert_contains('От левого края', $form);
+    assert_contains('От правого края', $form);
+});
+
 test('Hero: контроллер передаёт данные формы отдельному нормализатору', function () {
     $controller = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Controllers/Admin/BlockController.php');
 

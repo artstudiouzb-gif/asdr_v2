@@ -18,16 +18,23 @@ const files = [
 
 const checkOnly = process.argv.includes('--check');
 
+async function readText(path) {
+    return (await readFile(path, 'utf8')).replace(/\r\n?/g, '\n');
+}
+
 for (const file of files) {
-    const expected = await readFile(file.source);
+    // npm-пакеты могут содержать CRLF, а Git нормализует отслеживаемые
+    // текстовые файлы в LF. Сравниваем и записываем канонический LF, чтобы
+    // check:vendor давал одинаковый результат локально и в GitHub Actions.
+    const expected = await readText(file.source);
     if (checkOnly) {
         let current;
         try {
-            current = await readFile(file.target);
+            current = await readText(file.target);
         } catch {
             throw new Error(`${file.target} is missing. Run npm run build:vendor.`);
         }
-        if (!current.equals(expected)) {
+        if (current !== expected) {
             throw new Error(`${file.target} is stale. Run npm run build:vendor.`);
         }
         continue;

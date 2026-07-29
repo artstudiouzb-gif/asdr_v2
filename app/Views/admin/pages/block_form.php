@@ -534,7 +534,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <label class="hero-overlay-mode__option">
                         <input type="radio" name="overlay_mode" value="gradient" data-hero-overlay-mode
                                <?= $overlayMode === 'gradient' ? 'checked' : '' ?>>
-                        <span><strong>Градиентное</strong><small>Плотнее около текста и плавно прозрачнее к краю.</small></span>
+                        <span><strong>Градиентное от края</strong><small>Начинается у края Hero и плавно исчезает к центру блока.</small></span>
                     </label>
                 </div>
             </fieldset>
@@ -542,19 +542,19 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <input type="color" id="overlay_color" name="overlay_color" value="<?= htmlspecialchars($data['overlay_color'] ?? '#0b1a30', ENT_QUOTES) ?>">
             </div>
             <div data-hero-overlay-gradient<?= $overlayMode === 'gradient' ? '' : ' hidden' ?>>
-            <div class="form-field"><label for="overlay_direction">Направление градиента</label>
+            <div class="form-field"><label for="overlay_direction">Край, от которого начинается затемнение</label>
                 <select id="overlay_direction" name="overlay_direction">
-                    <option value="auto" <?= $overlayDirection === 'auto' ? 'selected' : '' ?>>Автоматически — от текста к краю</option>
-                    <option value="to_right" <?= $overlayDirection === 'to_right' ? 'selected' : '' ?>>Слева направо →</option>
-                    <option value="to_left" <?= $overlayDirection === 'to_left' ? 'selected' : '' ?>>Справа налево ←</option>
-                    <option value="to_bottom" <?= $overlayDirection === 'to_bottom' ? 'selected' : '' ?>>Сверху вниз ↓</option>
-                    <option value="to_top" <?= $overlayDirection === 'to_top' ? 'selected' : '' ?>>Снизу вверх ↑</option>
-                    <option value="to_bottom_right" <?= $overlayDirection === 'to_bottom_right' ? 'selected' : '' ?>>По диагонали вправо вниз ↘</option>
-                    <option value="to_bottom_left" <?= $overlayDirection === 'to_bottom_left' ? 'selected' : '' ?>>По диагонали влево вниз ↙</option>
-                    <option value="to_top_right" <?= $overlayDirection === 'to_top_right' ? 'selected' : '' ?>>По диагонали вправо вверх ↗</option>
-                    <option value="to_top_left" <?= $overlayDirection === 'to_top_left' ? 'selected' : '' ?>>По диагонали влево вверх ↖</option>
+                    <option value="auto" <?= $overlayDirection === 'auto' ? 'selected' : '' ?>>Авто — ближайший к тексту край</option>
+                    <option value="to_right" <?= $overlayDirection === 'to_right' ? 'selected' : '' ?>>От левого края →</option>
+                    <option value="to_left" <?= $overlayDirection === 'to_left' ? 'selected' : '' ?>>От правого края ←</option>
+                    <option value="to_bottom" <?= $overlayDirection === 'to_bottom' ? 'selected' : '' ?>>От верхнего края ↓</option>
+                    <option value="to_top" <?= $overlayDirection === 'to_top' ? 'selected' : '' ?>>От нижнего края ↑</option>
+                    <option value="to_bottom_right" <?= $overlayDirection === 'to_bottom_right' ? 'selected' : '' ?>>От левого верхнего угла ↘</option>
+                    <option value="to_bottom_left" <?= $overlayDirection === 'to_bottom_left' ? 'selected' : '' ?>>От правого верхнего угла ↙</option>
+                    <option value="to_top_right" <?= $overlayDirection === 'to_top_right' ? 'selected' : '' ?>>От левого нижнего угла ↗</option>
+                    <option value="to_top_left" <?= $overlayDirection === 'to_top_left' ? 'selected' : '' ?>>От правого нижнего угла ↖</option>
                 </select>
-                <span class="form-hint">Авто определяет направление по положению текста. Градиент всегда плавно уходит в прозрачность и не меняет оттенок фотографии на противоположном краю.</span>
+                <span class="form-hint">Затемнение имеет максимальную плотность непосредственно у выбранного края и полностью исчезает примерно к двум третям ширины или высоты Hero. Для текста по центру режим «Авто» использует нижний край.</span>
             </div>
             </div>
             <div class="form-field"><label for="overlay_opacity">Плотность затемнения: <output data-range-output="overlay_opacity"><?= (int) ($data['overlay_opacity'] ?? 35) ?></output>%</label>
