@@ -1771,37 +1771,37 @@ body.design-header-dark .site-nav { border-top-color: rgba(255, 255, 255, .14); 
     background: var(--menu-divider-color, color-mix(in srgb, currentColor 35%, transparent));
 }
 
-/* Настройки «Разделители меню» применяются ко всем верхнеуровневым пунктам.
-   Псевдоэлемент не меняет ширину пункта и остаётся между соседними ссылками. */
-.site-menu > .site-menu__link:not(:first-child)::before,
-.site-menu > .site-menu__item:not(:first-child)::before {
+/* Настройки «Разделители меню» применяются только при включенной опции (.site-menu--with-item-dividers).
+   Псевдоэлемент позиционируется на правой границе каждого пункта (кроме последнего). */
+.site-menu--with-item-dividers > .site-menu__link:not(:last-child)::before,
+.site-menu--with-item-dividers > .site-menu__item:not(:last-child)::before {
     content: '';
     position: absolute;
     top: 50%;
-    left: -14px;
+    right: 0;
     width: var(--menu-divider-width, 1px);
-    height: var(--menu-divider-height, 18px);
+    height: var(--menu-divider-height, 16px);
     transform: translateY(-50%);
     background: var(--menu-divider-color, color-mix(in srgb, currentColor 35%, transparent));
 }
 
 /* Разделители НЕ должны окрашиваться в активный цвет (teal) при наведении на пункт меню */
-.site-menu > .site-menu__link:hover::before,
-.site-menu > .site-menu__link:focus-visible::before,
-.site-menu > .site-menu__link.is-active::before,
-.site-menu > .site-menu__item:hover::before,
-.site-menu > .site-menu__item:focus-within::before,
-.site-menu > .site-menu__item.is-active::before {
+.site-menu--with-item-dividers > .site-menu__link:hover::before,
+.site-menu--with-item-dividers > .site-menu__link:focus-visible::before,
+.site-menu--with-item-dividers > .site-menu__link.is-active::before,
+.site-menu--with-item-dividers > .site-menu__item:hover::before,
+.site-menu--with-item-dividers > .site-menu__item:focus-within::before,
+.site-menu--with-item-dividers > .site-menu__item.is-active::before {
     background: var(--menu-divider-color, color-mix(in srgb, currentColor 35%, transparent)) !important;
 }
 
 :root[data-theme="dark"] .site-menu__divider,
-:root[data-theme="dark"] .site-menu > .site-menu__link:not(:first-child)::before,
-:root[data-theme="dark"] .site-menu > .site-menu__item:not(:first-child)::before,
+:root[data-theme="dark"] .site-menu--with-item-dividers > .site-menu__link:not(:last-child)::before,
+:root[data-theme="dark"] .site-menu--with-item-dividers > .site-menu__item:not(:last-child)::before,
 .site-header--transparent:not(.is-scrolled) .site-menu__divider,
-.site-header--transparent:not(.is-scrolled) .site-menu > .site-menu__link:not(:first-child)::before,
-.site-header--transparent:not(.is-scrolled) .site-menu > .site-menu__item:not(:first-child)::before {
-    background: var(--menu-divider-color, rgba(255, 255, 255, 0.25)) !important;
+.site-header--transparent:not(.is-scrolled) .site-menu--with-item-dividers > .site-menu__link:not(:last-child)::before,
+.site-header--transparent:not(.is-scrolled) .site-menu--with-item-dividers > .site-menu__item:not(:last-child)::before {
+    background: var(--menu-divider-color, rgba(255, 255, 255, 0.45)) !important;
 }
 
 /* Ручной разделитель уже рисует линию сам, поэтому следующему пункту дубликат не нужен. */
