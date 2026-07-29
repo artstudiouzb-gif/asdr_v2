@@ -44,14 +44,23 @@ final class Project
     {
         [$where, $params] = self::adminListWhere($filters);
         $orders = [
-            'manual' => 'sort_order ASC, created_at DESC, id DESC',
-            'newest' => 'created_at DESC, id DESC',
-            'oldest' => 'created_at ASC, id ASC',
-            'title_asc' => 'title ASC, id ASC',
-            'title_desc' => 'title DESC, id DESC',
+            'manual' => 'p.sort_order ASC, p.created_at DESC, p.id DESC',
+            'newest' => 'p.created_at DESC, p.id DESC',
+            'oldest' => 'p.created_at ASC, p.id ASC',
+            'title_asc' => 'title ASC, p.id ASC',
+            'title_desc' => 'title DESC, p.id DESC',
         ];
         $order = $orders[$filters['sort'] ?? 'manual'] ?? $orders['manual'];
-        $stmt = Database::pdo()->prepare("SELECT * FROM projects {$where} ORDER BY {$order} LIMIT :limit OFFSET :offset");
+        $langFilter = (string) ($filters['lang'] ?? '');
+        $titleSelect = 'p.title';
+        $joinTranslation = '';
+        if ($langFilter !== '' && $langFilter !== 'all') {
+            $joinTranslation = ' LEFT JOIN project_translations pt_title ON pt_title.project_id = p.id AND pt_title.lang = :lang_select';
+            $titleSelect = 'COALESCE(NULLIF(pt_title.title, \'\'), p.title)';
+            $params[':lang_select'] = $langFilter;
+        }
+
+        $stmt = Database::pdo()->prepare("SELECT p.*, {$titleSelect} AS title FROM projects p {$joinTranslation} {$where} ORDER BY {$order} LIMIT :limit OFFSET :offset");
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
         }
@@ -62,10 +71,10 @@ final class Project
         return $stmt->fetchAll();
     }
 
-    public static function adminCount(array $filters): int
+    public static function adminCount(array $filters): array|int
     {
         [$where, $params] = self::adminListWhere($filters);
-        $stmt = Database::pdo()->prepare("SELECT COUNT(*) FROM projects {$where}");
+        $stmt = Database::pdo()->prepare("SELECT COUNT(*) FROM projects p {$where}");
         $stmt->execute($params);
 
         return (int) $stmt->fetchColumn();

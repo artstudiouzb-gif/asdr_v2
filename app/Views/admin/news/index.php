@@ -57,7 +57,7 @@ $langs = Language::active();
 <table class="data-table">
     <thead>
         <tr>
-            <th class="u-inline-5aec6ffae3"><input type="checkbox" data-select-all aria-label="Выбрать все"></th>
+            <th class="u-inline-5aec6ffae3"><input type="checkbox" data-select-all form="bulkform" aria-label="Выбрать все"></th>
             <th>Заголовок</th>
             <th>Языки</th>
             <th>Статус</th>
@@ -83,7 +83,7 @@ $langs = Language::active();
         ?>
         <?php foreach ($items as $item): ?>
             <tr>
-                <td class="u-inline-5aec6ffae3"><input type="checkbox" name="ids[]" value="<?= (int) $item['id'] ?>" data-bulk-checkbox aria-label="Выбрать новость"></td>
+                <td class="u-inline-5aec6ffae3"><input type="checkbox" name="ids[]" value="<?= (int) $item['id'] ?>" form="bulkform" data-bulk-item aria-label="Выбрать новость"></td>
                 <td class="data-table__flex">
                     <div>
                         <a class="data-table__primary" href="/admin/news/<?= (int) $item['id'] ?>/edit"><?= htmlspecialchars($item['title'], ENT_QUOTES) ?></a>

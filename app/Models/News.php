@@ -99,12 +99,21 @@ final class News
         $orders = [
             'newest' => 'n.created_at DESC, n.id DESC',
             'oldest' => 'n.created_at ASC, n.id ASC',
-            'title_asc' => 'n.title ASC, n.id ASC',
-            'title_desc' => 'n.title DESC, n.id DESC',
+            'title_asc' => 'title ASC, n.id ASC',
+            'title_desc' => 'title DESC, n.id DESC',
             'published_desc' => 'n.published_at DESC, n.id DESC',
         ];
         $order = $orders[$filters['sort'] ?? 'newest'] ?? $orders['newest'];
-        $sql = "SELECT n.* {$from} ORDER BY {$order} LIMIT :limit OFFSET :offset";
+        $langFilter = (string) ($filters['lang'] ?? '');
+        $titleSelect = 'n.title';
+        $joinTranslation = '';
+        if ($langFilter !== '' && $langFilter !== 'all') {
+            $joinTranslation = ' LEFT JOIN news_translations nt_title ON nt_title.news_id = n.id AND nt_title.lang = :lang_select';
+            $titleSelect = 'COALESCE(NULLIF(nt_title.title, \'\'), n.title)';
+            $params[':lang_select'] = $langFilter;
+        }
+
+        $sql = "SELECT n.*, {$titleSelect} AS title {$from} {$joinTranslation} ORDER BY {$order} LIMIT :limit OFFSET :offset";
         $stmt = Database::pdo()->prepare($sql);
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
