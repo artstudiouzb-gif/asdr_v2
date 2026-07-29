@@ -23,12 +23,15 @@ final class Icon
      * @var array<string,string>
      */
     private const ALIASES = [
+        'albums' => 'album',
+        'audit' => 'clipboard-list',
         'block' => 'layout-grid',
         'button' => 'rectangle',
         'columns' => 'columns-3',
         'content_types' => 'stack-2',
         'copy' => 'copy',
         'dashboard' => 'layout-dashboard',
+        'design' => 'palette',
         'divider' => 'separator-vertical',
         'document' => 'file-text',
         'edit' => 'edit',
@@ -55,6 +58,8 @@ final class Icon
         'performance' => 'bolt',
         'pause' => 'player-pause',
         'projects' => 'briefcase',
+        'profile' => 'user-circle',
+        'redirects' => 'route-alt-right',
         'repository' => 'database',
         'reset' => 'refresh',
         'save' => 'device-floppy',
@@ -65,6 +70,7 @@ final class Icon
         'space' => 'spacing-horizontal',
         'spacer' => 'arrows-horizontal',
         'stats' => 'chart-bar',
+        'subscribers' => 'address-book',
         'telegram' => 'brand-telegram',
         'tender' => 'building-bank',
         'theme' => 'moon',
@@ -72,6 +78,7 @@ final class Icon
         'type' => 'typography',
         'videos' => 'video',
         'warning' => 'alert-triangle',
+        'webhooks' => 'webhook',
         'widgets' => 'layout-grid',
     ];
 
