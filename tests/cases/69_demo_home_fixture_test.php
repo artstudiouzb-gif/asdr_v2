@@ -17,6 +17,16 @@ test('Демо: фикстура главной валидна и содержи
         foreach (['hero', 'counters', 'cards_grid', 'image_cards', 'news_feature', 'media_gallery'] as $need) {
             assert_true(in_array($need, $types, true), "в {$lang} есть блок {$need}");
         }
+
+        foreach ($blocks as $block) {
+            if (($block['type'] ?? '') !== 'hero') {
+                continue;
+            }
+            $data = $block['data'] ?? [];
+            assert_same(true, $data['overlay_enabled'] ?? null, "у Hero {$lang} явно включено затемнение");
+            assert_same('gradient', $data['overlay_mode'] ?? null, "у Hero {$lang} выбран градиент");
+            assert_same('auto', $data['overlay_direction'] ?? null, "у Hero {$lang} задано направление");
+        }
     }
 });
 
@@ -48,10 +58,19 @@ test('Демо: прототипные госстраницы собраны и�
     foreach (['napravleniya', 'ustoychivyy-ekonomicheskiy-rost', 'analitika', 'press-centr', 'meropriyatiya', 'karera', 'kontakty', 'strategiya-2030'] as $slug) {
         assert_true(isset($pages[$slug]['ru']['blocks']), "есть страница $slug");
     }
-    foreach ($pages as $page) {
-        foreach ($page['ru']['blocks'] ?? [] as $block) {
-            $type = (string) ($block[0] ?? '');
-            assert_true(\App\Core\BlockRenderer::defaultsFor($type) !== [], "тип блока $type зарегистрирован");
+    foreach ($pages as $slug => $page) {
+        foreach (['ru', 'uz'] as $lang) {
+            foreach ($page[$lang]['blocks'] ?? [] as $block) {
+                $type = (string) ($block[0] ?? '');
+                assert_true(\App\Core\BlockRenderer::defaultsFor($type) !== [], "тип блока $type зарегистрирован");
+                if ($type !== 'hero') {
+                    continue;
+                }
+                $data = $block[2] ?? [];
+                assert_same(true, $data['overlay_enabled'] ?? null, "{$slug}/{$lang}: затемнение Hero включено явно");
+                assert_same('gradient', $data['overlay_mode'] ?? null, "{$slug}/{$lang}: режим Hero задан явно");
+                assert_same('auto', $data['overlay_direction'] ?? null, "{$slug}/{$lang}: направление Hero задано явно");
+            }
         }
     }
 });

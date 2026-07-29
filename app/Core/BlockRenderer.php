@@ -113,6 +113,14 @@ final class BlockRenderer
             $data = [];
         }
 
+        // До появления явного переключателя overlay старые Hero сохраняли
+        // только цвет и прозрачность затемнения. Если сразу подмешать новые
+        // дефолты, overlay_enabled=false незаметно отключит затемнение на уже
+        // созданных страницах и в установленном демо-контенте.
+        if ($type === 'hero') {
+            $data = self::upgradeLegacyHeroOverlay($data);
+        }
+
         // Смердживание с дефолтами по типу блока — устойчивость к старым/
         // неполным JSON-данным.
         $data = array_merge(self::defaultsFor($type), $data);
@@ -246,6 +254,34 @@ final class BlockRenderer
         }
 
         return ['html' => $wrapped, 'css' => $scopedCss, 'preload_image' => $preloadImage];
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    private static function upgradeLegacyHeroOverlay(array $data): array
+    {
+        if (array_key_exists('overlay_enabled', $data)) {
+            return $data;
+        }
+
+        $hasLegacyOverlay = array_key_exists('overlay_color', $data)
+            || array_key_exists('overlay_opacity', $data)
+            || array_key_exists('overlay_end_color', $data)
+            || array_key_exists('overlay_mode', $data)
+            || (($data['overlay_direction'] ?? null) === 'solid');
+        if (!$hasLegacyOverlay) {
+            return $data;
+        }
+
+        $legacyDirection = (string) ($data['overlay_direction'] ?? 'auto');
+        $legacyMode = (string) ($data['overlay_mode'] ?? ($legacyDirection === 'solid' ? 'solid' : 'gradient'));
+        $data['overlay_enabled'] = true;
+        $data['overlay_mode'] = in_array($legacyMode, ['solid', 'gradient'], true) ? $legacyMode : 'gradient';
+        $data['overlay_direction'] = $legacyDirection === 'solid' ? 'auto' : $legacyDirection;
+
+        return $data;
     }
 
     /**

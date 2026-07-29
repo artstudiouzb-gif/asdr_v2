@@ -142,6 +142,28 @@ test('Hero: overlay по умолчанию не выводится и не за
     assert_not_contains('--hero-scrim-', $html);
 });
 
+test('Hero: старое затемнение без переключателя остаётся включённым', function () {
+    $gradient = render_hero([
+        'title' => 'X', 'bg_type' => 'image', 'image' => '/uploads/public/x.jpg',
+        'overlay_color' => '#123456', 'overlay_opacity' => 55,
+    ]);
+    assert_contains('block-hero__scrim', $gradient);
+    assert_contains('--hero-scrim-rgb:18,52,86', $gradient);
+    assert_not_contains('block-hero__scrim--solid', $gradient);
+
+    $solid = render_hero([
+        'title' => 'X', 'bg_type' => 'image', 'image' => '/uploads/public/x.jpg',
+        'overlay_color' => '#123456', 'overlay_direction' => 'solid',
+    ]);
+    assert_contains('block-hero__scrim--solid', $solid);
+
+    $disabled = render_hero([
+        'title' => 'X', 'bg_type' => 'image', 'image' => '/uploads/public/x.jpg',
+        'overlay_enabled' => false, 'overlay_color' => '#123456', 'overlay_opacity' => 55,
+    ]);
+    assert_not_contains('block-hero__scrim', $disabled);
+});
+
 test('Hero: форма и сохранение содержат два явных режима затемнения', function () {
     $root = dirname(__DIR__, 2);
     $form = (string) file_get_contents($root . '/app/Views/admin/pages/block_form.php');

@@ -60,6 +60,9 @@ test('Сборки страниц: ритм фонов и отступов вы�
         assert_same('hero', $first['type'], "{$id}: сборка должна начинаться с обложки");
         assert_same('max', (string) ($first['data']['_spacing'] ?? ''), "{$id}: у обложки максимальные отступы");
         assert_false(!empty($first['data']['_reveal']['enabled']), "{$id}: обложку не анимируем");
+        assert_same(true, $first['data']['overlay_enabled'] ?? null, "{$id}: затемнение Hero включено явно");
+        assert_same('gradient', $first['data']['overlay_mode'] ?? null, "{$id}: режим Hero задан явно");
+        assert_same('auto', $first['data']['overlay_direction'] ?? null, "{$id}: направление Hero задано явно");
     }
 });
 
