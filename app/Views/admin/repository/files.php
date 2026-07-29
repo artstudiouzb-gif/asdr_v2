@@ -203,4 +203,3 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
     </tbody>
 </table>
 <?php require __DIR__ . '/../layout/footer.php'; ?>
-

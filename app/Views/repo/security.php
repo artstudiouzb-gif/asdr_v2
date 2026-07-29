@@ -92,4 +92,3 @@ require __DIR__ . '/layout/top.php';
     <?php endif; ?>
 </div>
 <?php require __DIR__ . '/layout/bottom.php'; ?>
-

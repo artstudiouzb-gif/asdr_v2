@@ -100,4 +100,3 @@ require __DIR__ . '/../layout/header.php';
     </form>
 </div>
 <?php require __DIR__ . '/../layout/footer.php'; ?>
-

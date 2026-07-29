@@ -89,4 +89,3 @@ $row = static function (array $cat, bool $isChild): void {
     </tbody>
 </table>
 <?php require __DIR__ . '/../layout/footer.php'; ?>
-
