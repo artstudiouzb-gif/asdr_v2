@@ -1998,6 +1998,14 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 
 /* Ряд полей выбора цвета (фон/текст/кнопка) в конструкторе блоков. */
 .colorfield-row { display: flex; flex-wrap: wrap; gap: 16px; margin: 6px 0 14px; }
+.hero-visual-settings {
+    margin: -4px 0 18px;
+    padding: 16px 18px 2px;
+    border: 1px solid var(--admin-border, #dce2ea);
+    border-left: 3px solid var(--admin-accent, #2271b1);
+    border-radius: var(--admin-radius-sm, 8px);
+    background: var(--admin-surface-soft, #f8fafc);
+}
 .colorfield { min-width: 150px; }
 .colorfield input[type="color"] { width: 100%; height: 38px; padding: 2px; cursor: pointer; }
 .colorfield__off { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-weight: 400; font-size: 12px; color: var(--admin-muted); }
@@ -4421,4 +4429,3 @@ body.auth-page {
     border-color: #334155;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
-

@@ -40,7 +40,8 @@ $hex2rgb = static function (string $hex): string {
 };
 $ovColor = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['overlay_color'] ?? '')) ? $data['overlay_color'] : '#0b1a30';
 $ovEndColor = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['overlay_end_color'] ?? '')) ? $data['overlay_end_color'] : '#0b1a30';
-$ovOpacity = max(0, min(100, (int) ($data['overlay_opacity'] ?? 55))) / 100;
+$overlayEnabled = !empty($data['overlay_enabled']);
+$ovOpacity = max(0, min(100, (int) ($data['overlay_opacity'] ?? 35))) / 100;
 $panelOn = !empty($data['panel_enabled']);
 $panelColor = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['panel_color'] ?? '')) ? $data['panel_color'] : '#0b1a30';
 $panelOpacity = max(0, min(100, (int) ($data['panel_opacity'] ?? 40))) / 100;
@@ -124,7 +125,7 @@ $scrimStyle = '--hero-scrim-rgb:' . $hex2rgb($ovColor)
     . ';--hero-scrim-a:' . $ovOpacity
     . ';--hero-scrim-direction:' . $overlayAngle . ';';
 $templateCss = ($heroRootStyle !== '' ? '#block-' . $blockId . ' .block-hero{' . $heroRootStyle . '}' : '')
-    . ($hasMedia ? "\n#block-" . $blockId . ' .block-hero__scrim{' . $scrimStyle . '}' : '')
+    . ($hasMedia && $overlayEnabled ? "\n#block-" . $blockId . ' .block-hero__scrim{' . $scrimStyle . '}' : '')
     . ($textStyle !== '' ? "\n#block-" . $blockId . ' .block-hero__text{' . $textStyle . '}' : '');
 
 $youtubeEmbedUrl = '';
@@ -183,7 +184,7 @@ if ($bgType === 'youtube' && $youtubeId !== null) {
     <?php elseif ($bgType === 'image' && $image !== ''): ?>
         <?= Media::picture($image, '', null, null, 'block-hero__image', false, '100vw', true, 'block-hero__media') ?>
     <?php endif; ?>
-    <?php if ($hasMedia): ?><div class="block-hero__scrim<?= $overlaySolid ? ' block-hero__scrim--solid' : '' ?>" aria-hidden="true"></div><?php endif; ?>
+    <?php if ($hasMedia && $overlayEnabled): ?><div class="block-hero__scrim<?= $overlaySolid ? ' block-hero__scrim--solid' : '' ?>" aria-hidden="true"></div><?php endif; ?>
     <div class="block-hero__inner">
         <div class="block-hero__text<?= $panelOn ? ' block-hero__text--panel' : '' ?>">
             <?php if ($eyebrow !== ''): ?><span class="block-hero__eyebrow"><?= htmlspecialchars($eyebrow, ENT_QUOTES) ?></span><?php endif; ?>

@@ -501,11 +501,25 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <span class="form-hint">После вставки корректной ссылки фон автоматически переключается на YouTube. Ролик проигрывается без звука и зациклено.</span>
             </div>
             <?php
+            $overlayEnabled = !empty($data['overlay_enabled']);
             $overlayDirection = (string) ($data['overlay_direction'] ?? 'auto');
             $overlayDirection = in_array($overlayDirection, ['auto', 'solid', 'to_right', 'to_left', 'to_bottom', 'to_top', 'to_bottom_right', 'to_bottom_left', 'to_top_right', 'to_top_left'], true)
                 ? $overlayDirection
                 : 'auto';
             ?>
+            <div class="form-field">
+                <label class="hb-switch">
+                    <input type="checkbox" name="overlay_enabled" value="1"
+                           data-hero-visual-toggle="hero_overlay_settings"
+                           aria-controls="hero_overlay_settings"
+                           aria-expanded="<?= $overlayEnabled ? 'true' : 'false' ?>"
+                           <?= $overlayEnabled ? 'checked' : '' ?>>
+                    <span class="hb-switch__track"></span>
+                    Затемнение изображения
+                </label>
+                <span class="form-hint">По умолчанию выключено: фото и видео показываются без цветного наложения. Включайте только когда текст теряется на светлом или пёстром фоне.</span>
+            </div>
+            <div id="hero_overlay_settings" class="hero-visual-settings" data-hero-visual-panel<?= $overlayEnabled ? '' : ' hidden' ?>>
             <div class="form-field"><label for="overlay_direction">Направление градиента overlay</label>
                 <select id="overlay_direction" name="overlay_direction">
                     <option value="auto" <?= $overlayDirection === 'auto' ? 'selected' : '' ?>>Автоматически — от текста к краю</option>
@@ -529,14 +543,15 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <input type="color" id="overlay_end_color" name="overlay_end_color" value="<?= htmlspecialchars($data['overlay_end_color'] ?? '#0b1a30', ENT_QUOTES) ?>">
                 </div>
             </div>
-            <div class="form-field"><label for="overlay_opacity">Прозрачность overlay: <output data-range-output="overlay_opacity"><?= (int) ($data['overlay_opacity'] ?? 55) ?></output>%</label>
-                <input type="range" min="0" max="100" id="overlay_opacity" name="overlay_opacity" value="<?= (int) ($data['overlay_opacity'] ?? 55) ?>" data-range-input="overlay_opacity">
-                <span class="form-hint">0% — overlay отключён, 100% — максимальная плотность. Помогает читаемости текста.</span>
+            <div class="form-field"><label for="overlay_opacity">Плотность затемнения: <output data-range-output="overlay_opacity"><?= (int) ($data['overlay_opacity'] ?? 35) ?></output>%</label>
+                <input type="range" min="0" max="100" id="overlay_opacity" name="overlay_opacity" value="<?= (int) ($data['overlay_opacity'] ?? 35) ?>" data-range-input="overlay_opacity">
+                <span class="form-hint">Указанное значение теперь является реальной максимальной плотностью без скрытого усиления.</span>
+            </div>
             </div>
             <div class="colorfield-row">
-                <?= \App\Core\AdminUi::colorField('bg_color', $data['bg_color'] ?? '', 'Цвет фона под текстом (градиент)', '#0b1a30', 'Нет (по теме)') ?>
+                <?= \App\Core\AdminUi::colorField('bg_color', $data['bg_color'] ?? '', 'Фон Hero без фото/видео', '#0b1a30', 'Нет (по теме)') ?>
             </div>
-            <span class="form-hint u-inline-1e51bacc25">Полупрозрачный градиент выбранного цвета под текстом — не зависит от светлой/тёмной темы. Полезно для героя без фото: иначе фон берётся из темы (светло-серый / тёмно-синий).</span>
+            <span class="form-hint u-inline-1e51bacc25">Используется только как самостоятельный фон Hero без медиа. Это не наложение поверх фотографии или видео.</span>
             <div class="form-field"><label for="text_position">Положение текста</label>
                 <select id="text_position" name="text_position">
                     <?php $tp = $data['text_position'] ?? 'left'; ?>
@@ -567,15 +582,26 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <?= \App\Core\AdminUi::colorField('button_color', $data['button_color'] ?? '', 'Цвет фона основной кнопки', '#173a63', 'По умолчанию') ?>
             </div>
             <span class="form-hint u-inline-1e51bacc25">Применяется к первой кнопке Hero. Вторая кнопка остаётся прозрачной и контурной.</span>
+            <?php $panelEnabled = !empty($data['panel_enabled']); ?>
             <div class="form-field">
-                <label class="hb-switch"><input type="checkbox" name="panel_enabled" value="1" <?= !empty($data['panel_enabled']) ? 'checked' : '' ?>><span class="hb-switch__track"></span> Подложка под текстом</label>
+                <label class="hb-switch">
+                    <input type="checkbox" name="panel_enabled" value="1"
+                           data-hero-visual-toggle="hero_panel_settings"
+                           aria-controls="hero_panel_settings"
+                           aria-expanded="<?= $panelEnabled ? 'true' : 'false' ?>"
+                           <?= $panelEnabled ? 'checked' : '' ?>>
+                    <span class="hb-switch__track"></span>
+                    Подложка под текстом
+                </label>
                 <span class="form-hint">Цветная полупрозрачная плашка под заголовком — для читаемости на пёстром фоне. Если делаете светлую подложку — задайте тёмный цвет текста выше.</span>
             </div>
+            <div id="hero_panel_settings" class="hero-visual-settings" data-hero-visual-panel<?= $panelEnabled ? '' : ' hidden' ?>>
             <div class="form-field"><label for="panel_color">Цвет подложки</label>
                 <input type="color" id="panel_color" name="panel_color" value="<?= htmlspecialchars($data['panel_color'] ?? '#0b1a30', ENT_QUOTES) ?>">
             </div>
             <div class="form-field"><label for="panel_opacity">Прозрачность подложки: <output data-range-output="panel_opacity"><?= (int) ($data['panel_opacity'] ?? 40) ?></output>%</label>
                 <input type="range" min="0" max="100" id="panel_opacity" name="panel_opacity" value="<?= (int) ($data['panel_opacity'] ?? 40) ?>" data-range-input="panel_opacity">
+            </div>
             </div>
             <div class="form-field"><label for="button_text">Кнопка 1 — текст</label><input type="text" id="button_text" name="button_text" value="<?= htmlspecialchars($data['button_text'] ?? '', ENT_QUOTES) ?>"></div>
             <div class="form-field"><label for="button_url">Кнопка 1 — ссылка</label><input type="text" id="button_url" name="button_url" value="<?= htmlspecialchars($data['button_url'] ?? '', ENT_QUOTES) ?>" placeholder="/o-nas"></div>
