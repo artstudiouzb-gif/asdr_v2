@@ -25,7 +25,9 @@ $a11y = [
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title><?= htmlspecialchars($pageTitle ?? 'Файловый портал', ENT_QUOTES) ?> — <?= $repoName ?></title>
-    <link rel="stylesheet" href="/assets/css/repo.css">
+    <link rel="stylesheet" href="/assets/css/fonts.css">
+    <link rel="stylesheet" href="/assets/css/gov-theme.css?v=<?= file_exists(dirname(__DIR__, 3) . '/public/assets/css/gov-theme.css') ? filemtime(dirname(__DIR__, 3) . '/public/assets/css/gov-theme.css') : '2.0.1' ?>">
+    <link rel="stylesheet" href="/assets/css/repo.css?v=<?= file_exists(dirname(__DIR__, 3) . '/public/assets/css/repo.css') ? filemtime(dirname(__DIR__, 3) . '/public/assets/css/repo.css') : '2.0.1' ?>">
     <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body>
