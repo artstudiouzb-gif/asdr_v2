@@ -502,8 +502,11 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
             <?php
             $overlayEnabled = !empty($data['overlay_enabled']);
-            $overlayDirection = (string) ($data['overlay_direction'] ?? 'auto');
-            $overlayDirection = in_array($overlayDirection, ['auto', 'solid', 'to_right', 'to_left', 'to_bottom', 'to_top', 'to_bottom_right', 'to_bottom_left', 'to_top_right', 'to_top_left'], true)
+            $rawOverlayDirection = (string) ($data['overlay_direction'] ?? 'auto');
+            $overlayMode = (string) ($data['overlay_mode'] ?? ($rawOverlayDirection === 'solid' ? 'solid' : 'gradient'));
+            $overlayMode = in_array($overlayMode, ['solid', 'gradient'], true) ? $overlayMode : 'gradient';
+            $overlayDirection = $rawOverlayDirection === 'solid' ? 'auto' : $rawOverlayDirection;
+            $overlayDirection = in_array($overlayDirection, ['auto', 'to_right', 'to_left', 'to_bottom', 'to_top', 'to_bottom_right', 'to_bottom_left', 'to_top_right', 'to_top_left'], true)
                 ? $overlayDirection
                 : 'auto';
             ?>
@@ -517,13 +520,31 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <span class="hb-switch__track"></span>
                     Затемнение изображения
                 </label>
-                <span class="form-hint">По умолчанию выключено: фото и видео показываются без цветного наложения. Включайте только когда текст теряется на светлом или пёстром фоне.</span>
+                <span class="form-hint">По умолчанию выключено: фото и видео показываются без наложения. Включайте только когда текст теряется на светлом или пёстром фоне.</span>
             </div>
             <div id="hero_overlay_settings" class="hero-visual-settings" data-hero-visual-panel<?= $overlayEnabled ? '' : ' hidden' ?>>
-            <div class="form-field"><label for="overlay_direction">Направление градиента overlay</label>
+            <fieldset class="hero-overlay-mode">
+                <legend>Режим затемнения</legend>
+                <div class="hero-overlay-mode__options">
+                    <label class="hero-overlay-mode__option">
+                        <input type="radio" name="overlay_mode" value="solid" data-hero-overlay-mode
+                               <?= $overlayMode === 'solid' ? 'checked' : '' ?>>
+                        <span><strong>Равномерное</strong><small>Одинаковая плотность по всей фотографии или видео.</small></span>
+                    </label>
+                    <label class="hero-overlay-mode__option">
+                        <input type="radio" name="overlay_mode" value="gradient" data-hero-overlay-mode
+                               <?= $overlayMode === 'gradient' ? 'checked' : '' ?>>
+                        <span><strong>Градиентное</strong><small>Плотнее около текста и плавно прозрачнее к краю.</small></span>
+                    </label>
+                </div>
+            </fieldset>
+            <div class="form-field"><label for="overlay_color">Цвет затемнения</label>
+                <input type="color" id="overlay_color" name="overlay_color" value="<?= htmlspecialchars($data['overlay_color'] ?? '#0b1a30', ENT_QUOTES) ?>">
+            </div>
+            <div data-hero-overlay-gradient<?= $overlayMode === 'gradient' ? '' : ' hidden' ?>>
+            <div class="form-field"><label for="overlay_direction">Направление градиента</label>
                 <select id="overlay_direction" name="overlay_direction">
                     <option value="auto" <?= $overlayDirection === 'auto' ? 'selected' : '' ?>>Автоматически — от текста к краю</option>
-                    <option value="solid" <?= $overlayDirection === 'solid' ? 'selected' : '' ?>>Без градиента — сплошной overlay</option>
                     <option value="to_right" <?= $overlayDirection === 'to_right' ? 'selected' : '' ?>>Слева направо →</option>
                     <option value="to_left" <?= $overlayDirection === 'to_left' ? 'selected' : '' ?>>Справа налево ←</option>
                     <option value="to_bottom" <?= $overlayDirection === 'to_bottom' ? 'selected' : '' ?>>Сверху вниз ↓</option>
@@ -533,15 +554,8 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <option value="to_top_right" <?= $overlayDirection === 'to_top_right' ? 'selected' : '' ?>>По диагонали вправо вверх ↗</option>
                     <option value="to_top_left" <?= $overlayDirection === 'to_top_left' ? 'selected' : '' ?>>По диагонали влево вверх ↖</option>
                 </select>
-                <span class="form-hint">Автоматический режим сохраняет прежнее поведение: затемнение начинается со стороны текста. В режиме без градиента используется только начальный цвет.</span>
+                <span class="form-hint">Авто определяет направление по положению текста. Градиент всегда плавно уходит в прозрачность и не меняет оттенок фотографии на противоположном краю.</span>
             </div>
-            <div class="colorfield-row">
-                <div class="form-field"><label for="overlay_color">Начальный цвет overlay</label>
-                    <input type="color" id="overlay_color" name="overlay_color" value="<?= htmlspecialchars($data['overlay_color'] ?? '#0b1a30', ENT_QUOTES) ?>">
-                </div>
-                <div class="form-field"><label for="overlay_end_color">Конечный цвет overlay</label>
-                    <input type="color" id="overlay_end_color" name="overlay_end_color" value="<?= htmlspecialchars($data['overlay_end_color'] ?? '#0b1a30', ENT_QUOTES) ?>">
-                </div>
             </div>
             <div class="form-field"><label for="overlay_opacity">Плотность затемнения: <output data-range-output="overlay_opacity"><?= (int) ($data['overlay_opacity'] ?? 35) ?></output>%</label>
                 <input type="range" min="0" max="100" id="overlay_opacity" name="overlay_opacity" value="<?= (int) ($data['overlay_opacity'] ?? 35) ?>" data-range-input="overlay_opacity">

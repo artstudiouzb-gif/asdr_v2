@@ -2,13 +2,16 @@
   "name": "asdr-browser-tests",
   "private": true,
   "scripts": {
-    "build:assets": "node scripts/build-assets.mjs",
-    "check:assets": "node scripts/build-assets.mjs --check",
+    "build:vendor": "node scripts/sync-vendor-assets.mjs",
+    "check:vendor": "node scripts/sync-vendor-assets.mjs --check",
+    "build:assets": "npm run build:vendor && node scripts/build-assets.mjs",
+    "check:assets": "npm run check:vendor && node scripts/build-assets.mjs --check",
     "check:security": "node scripts/security-scan.mjs",
     "check:styles": "node scripts/extract-static-inline-styles.mjs --check",
     "test:browser": "playwright test"
   },
   "devDependencies": {
+    "@melloware/coloris": "0.25.0",
     "@playwright/test": "1.62.0",
     "clean-css": "5.3.3",
     "terser": "5.49.0"

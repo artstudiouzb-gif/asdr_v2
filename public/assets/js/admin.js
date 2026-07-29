@@ -1,6 +1,72 @@
 (function () {
     'use strict';
 
+    // --- Единая система выбора цвета во всей админке. ---
+    // В HTML остаётся нативный input[type=color] как рабочий fallback без JS.
+    // До DOMContentLoaded он превращается в текстовое HEX-поле и подключается
+    // к локально размещённому Coloris.
+    (function () {
+        var colorInputs = document.querySelectorAll('input[type="color"]');
+        if (!colorInputs.length) { return; }
+
+        colorInputs.forEach(function (input) {
+            input.type = 'text';
+            input.setAttribute('data-coloris', '');
+            input.setAttribute('inputmode', 'text');
+            input.setAttribute('autocomplete', 'off');
+            input.setAttribute('spellcheck', 'false');
+            input.setAttribute('maxlength', '7');
+            input.setAttribute('pattern', '#[0-9a-fA-F]{6}');
+            input.setAttribute('placeholder', '#17375E');
+        });
+
+        if (window.Coloris) {
+            window.Coloris({
+                el: '[data-coloris]',
+                theme: 'large',
+                themeMode: document.documentElement.getAttribute('data-admin-theme') === 'dark_emerald' ? 'dark' : 'light',
+                format: 'hex',
+                formatToggle: false,
+                alpha: false,
+                focusInput: true,
+                selectInput: true,
+                closeButton: true,
+                closeLabel: 'Готово',
+                clearButton: false,
+                swatches: [
+                    '#17375e', '#214d84', '#5e7fa6', '#a8b7c9',
+                    '#6cb9b1', '#a8dad4', '#ffffff', '#0b1a30', '#000000'
+                ],
+                a11y: {
+                    open: 'Открыть выбор цвета',
+                    close: 'Закрыть выбор цвета',
+                    clear: 'Очистить цвет',
+                    marker: 'Насыщенность: {s}. Яркость: {v}.',
+                    hueSlider: 'Оттенок',
+                    alphaSlider: 'Прозрачность',
+                    input: 'Значение цвета',
+                    format: 'Формат цвета',
+                    swatch: 'Образец цвета',
+                    instruction: 'Выбор насыщенности и яркости. Используйте клавиши со стрелками.'
+                }
+            });
+        }
+
+        document.querySelectorAll('.colorfield').forEach(function (group) {
+            var off = group.querySelector('.colorfield__off input[type="checkbox"]');
+            var color = group.querySelector('[data-coloris]');
+            if (!off || !color) { return; }
+
+            function syncDefaultState() {
+                color.disabled = off.checked;
+                group.classList.toggle('is-default', off.checked);
+            }
+
+            off.addEventListener('change', syncDefaultState);
+            syncDefaultState();
+        });
+    })();
+
     // Универсальная функция копирования в буфер обмена (работает по HTTPS и HTTP с фаллбэком)
     function copyToClipboard(text, btnEl) {
         if (!text) { return Promise.reject(new Error('Empty text')); }
@@ -741,20 +807,34 @@
     // --- Hero: отдельное управление затемнением изображения и подложкой текста. ---
     (function () {
         var toggles = document.querySelectorAll('[data-hero-visual-toggle]');
-        if (!toggles.length) { return; }
+        if (toggles.length) {
+            function sync(toggle) {
+                var id = toggle.getAttribute('data-hero-visual-toggle');
+                var panel = id ? document.getElementById(id) : null;
+                if (!panel) { return; }
+                panel.hidden = !toggle.checked;
+                toggle.setAttribute('aria-expanded', toggle.checked ? 'true' : 'false');
+            }
 
-        function sync(toggle) {
-            var id = toggle.getAttribute('data-hero-visual-toggle');
-            var panel = id ? document.getElementById(id) : null;
-            if (!panel) { return; }
-            panel.hidden = !toggle.checked;
-            toggle.setAttribute('aria-expanded', toggle.checked ? 'true' : 'false');
+            toggles.forEach(function (toggle) {
+                toggle.addEventListener('change', function () { sync(toggle); });
+                sync(toggle);
+            });
         }
 
-        toggles.forEach(function (toggle) {
-            toggle.addEventListener('change', function () { sync(toggle); });
-            sync(toggle);
+        var overlayModes = document.querySelectorAll('[data-hero-overlay-mode]');
+        var gradientSettings = document.querySelector('[data-hero-overlay-gradient]');
+        if (!overlayModes.length || !gradientSettings) { return; }
+
+        function syncOverlayMode() {
+            var selected = document.querySelector('[data-hero-overlay-mode]:checked');
+            gradientSettings.hidden = !selected || selected.value !== 'gradient';
+        }
+
+        overlayModes.forEach(function (mode) {
+            mode.addEventListener('change', syncOverlayMode);
         });
+        syncOverlayMode();
     })();
 
     // --- Hero: произвольная высота с единицей измерения. ---

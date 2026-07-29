@@ -238,9 +238,57 @@ input[type="file"]::file-selector-button {
     font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
 }
 input[type="file"]::file-selector-button:hover { background: #f6f7f9; }
-/* Выбор цвета: без явной высоты общий input делает из него тонкую полоску.
-   Задаём аккуратную «плашку»-образец (в .colorfield ниже — во всю ширину). */
+/* Нативный fallback выбора цвета. При JavaScript поле улучшает локальный Coloris. */
 input[type="color"] { width: 60px; min-width: 60px; height: 40px; padding: 3px; cursor: pointer; vertical-align: middle; }
+.clr-field {
+    width: min(100%, 240px);
+    max-width: 100%;
+    color: var(--admin-accent, #214d84);
+}
+.clr-field input[data-coloris] {
+    width: 100%;
+    min-height: 40px;
+    padding-right: 52px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 13px;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+.clr-field button {
+    width: 42px;
+    height: calc(100% - 8px);
+    right: 4px;
+    border-radius: 7px;
+}
+.clr-field button::after {
+    border-radius: 7px;
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .16);
+}
+.clr-picker {
+    z-index: 10050;
+    border: 1px solid var(--admin-border, #dce2ea);
+    box-shadow: 0 18px 46px rgba(15, 31, 55, .22);
+}
+.clr-picker.clr-large {
+    width: min(350px, calc(100vw - 24px));
+}
+.clr-picker .clr-close {
+    background: var(--admin-accent, #214d84);
+}
+.clr-picker .clr-swatches button {
+    width: 24px;
+    height: 24px;
+}
+[data-admin-theme="dark_emerald"] .clr-picker {
+    color: #f8fafc;
+    border-color: #334155;
+    background: #172033;
+}
+[data-admin-theme="dark_emerald"] .clr-picker input.clr-color {
+    color: #f8fafc;
+    border-color: #475569;
+    background: #0f172a;
+}
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--admin-accent);
@@ -2008,8 +2056,60 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 }
 .colorfield { min-width: 150px; }
 .colorfield input[type="color"] { width: 100%; height: 38px; padding: 2px; cursor: pointer; }
+.colorfield .clr-field { width: 100%; }
+.colorfield.is-default .clr-field { opacity: .5; }
 .colorfield__off { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-weight: 400; font-size: 12px; color: var(--admin-muted); }
 .colorfield__off input { width: auto; }
+.hero-overlay-mode {
+    margin-bottom: 16px;
+    padding: 0;
+    border: 0;
+}
+.hero-overlay-mode legend {
+    padding: 0;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+.hero-overlay-mode__options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+.hero-overlay-mode__option {
+    position: relative;
+    display: block;
+    cursor: pointer;
+}
+.hero-overlay-mode__option input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+.hero-overlay-mode__option span {
+    display: grid;
+    gap: 4px;
+    height: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--admin-border, #dce2ea);
+    border-radius: var(--admin-radius-sm, 8px);
+    background: var(--admin-surface, #fff);
+    transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+.hero-overlay-mode__option strong { font-size: 13px; color: var(--admin-text, #1f2b3d); }
+.hero-overlay-mode__option small { font-size: 12px; line-height: 1.4; color: var(--admin-muted, #64748b); }
+.hero-overlay-mode__option input:checked + span {
+    border-color: var(--admin-accent, #214d84);
+    background: color-mix(in srgb, var(--admin-accent, #214d84) 8%, #fff);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--admin-accent, #214d84) 18%, transparent);
+}
+.hero-overlay-mode__option input:focus-visible + span {
+    outline: 2px solid var(--admin-accent, #214d84);
+    outline-offset: 2px;
+}
+@media (max-width: 640px) {
+    .hero-overlay-mode__options { grid-template-columns: 1fr; }
+}
 
 /* ============================================================================
    Dark Mode Support (Автоматический темный режим под тему ОС)

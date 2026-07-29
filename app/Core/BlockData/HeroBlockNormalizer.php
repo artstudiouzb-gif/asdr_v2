@@ -45,9 +45,11 @@ final class HeroBlockNormalizer
             : ($heightUnit === 'rem' ? [10.0, 120.0] : [20.0, 150.0]);
         $heightValue = max($heightLimits[0], min($heightLimits[1], $heightValue));
 
-        $overlayDirection = (string) ($input['overlay_direction'] ?? 'auto');
-        $overlayDirections = ['auto', 'solid', 'to_right', 'to_left', 'to_bottom', 'to_top', 'to_bottom_right', 'to_bottom_left', 'to_top_right', 'to_top_left'];
-        $overlayDirection = in_array($overlayDirection, $overlayDirections, true) ? $overlayDirection : 'auto';
+        $rawOverlayDirection = (string) ($input['overlay_direction'] ?? 'auto');
+        $overlayMode = (string) ($input['overlay_mode'] ?? ($rawOverlayDirection === 'solid' ? 'solid' : 'gradient'));
+        $overlayMode = in_array($overlayMode, ['solid', 'gradient'], true) ? $overlayMode : 'gradient';
+        $overlayDirections = ['auto', 'to_right', 'to_left', 'to_bottom', 'to_top', 'to_bottom_right', 'to_bottom_left', 'to_top_right', 'to_top_left'];
+        $overlayDirection = in_array($rawOverlayDirection, $overlayDirections, true) ? $rawOverlayDirection : 'auto';
 
         $textWidth = '';
         if (is_numeric($input['text_width_value'] ?? null)) {
@@ -72,9 +74,9 @@ final class HeroBlockNormalizer
             'video_url' => $videoUrl,
             'youtube_url' => $youtubeUrl,
             'overlay_enabled' => !empty($input['overlay_enabled']),
+            'overlay_mode' => $overlayMode,
             'overlay_direction' => $overlayDirection,
             'overlay_color' => self::hexOrDefault($input['overlay_color'] ?? '', '#0b1a30'),
-            'overlay_end_color' => self::hexOrDefault($input['overlay_end_color'] ?? '', '#0b1a30'),
             'overlay_opacity' => self::percentage($input['overlay_opacity'] ?? null, 35),
             'text_position' => in_array($textPosition, ['left', 'center', 'right'], true) ? $textPosition : 'left',
             'text_width' => $textWidth,

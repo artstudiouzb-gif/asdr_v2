@@ -99,6 +99,7 @@ $navAdminTheme = $_SESSION['admin_theme'] ?? (\App\Models\Setting::get('admin_th
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($pageTitle, ENT_QUOTES) ?> — <?= htmlspecialchars(\App\Core\AdminBrand::name(), ENT_QUOTES) ?></title>
+<link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/vendor/coloris/coloris.min.css'), ENT_QUOTES) ?>">
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/css/admin.css'), ENT_QUOTES) ?>">
 <?= \App\Core\AdminBrand::styleTag() ?>
 <?= \App\Core\AdminBrand::faviconHtml() ?>

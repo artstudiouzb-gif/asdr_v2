@@ -18,9 +18,9 @@ test('Hero normalizer: формирует прежний JSON-контракт �
         'video_url' => '',
         'youtube_url' => '',
         'overlay_enabled' => '1',
+        'overlay_mode' => 'invalid',
         'overlay_direction' => '90deg;background:red',
         'overlay_color' => '#ABCDEF',
-        'overlay_end_color' => 'bad',
         'overlay_opacity' => '150',
         'text_position' => 'outside',
         'text_width_value' => '5',
@@ -52,9 +52,9 @@ test('Hero normalizer: формирует прежний JSON-контракт �
         'video_url' => '',
         'youtube_url' => '',
         'overlay_enabled' => true,
+        'overlay_mode' => 'gradient',
         'overlay_direction' => 'auto',
         'overlay_color' => '#abcdef',
-        'overlay_end_color' => '#0b1a30',
         'overlay_opacity' => 100,
         'text_position' => 'left',
         'text_width' => '10%',
@@ -77,8 +77,18 @@ test('Hero normalizer: наложение и подложка по умолча�
     $data = HeroBlockNormalizer::normalize([]);
 
     assert_same(false, $data['overlay_enabled']);
+    assert_same('gradient', $data['overlay_mode']);
     assert_same(35, $data['overlay_opacity']);
     assert_same(false, $data['panel_enabled']);
+});
+
+test('Hero normalizer: старый solid в направлении переносится в отдельный режим', function () {
+    $data = HeroBlockNormalizer::normalize([
+        'overlay_direction' => 'solid',
+    ]);
+
+    assert_same('solid', $data['overlay_mode']);
+    assert_same('auto', $data['overlay_direction']);
 });
 
 test('Hero normalizer: приоритет фонового медиа не изменился', function () {

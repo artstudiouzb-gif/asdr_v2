@@ -302,7 +302,8 @@ final class AdminUi
     /**
      * Поле выбора цвета с галочкой «по умолчанию». Значение читается
      * контроллером через BlockController::color() — при включённой галочке
-     * $name_off цвет сбрасывается (color-input всегда шлёт значение).
+     * $name_off цвет сбрасывается. JavaScript дополнительно блокирует поле,
+     * а без JavaScript работает нативный input[type=color].
      */
     public static function colorField(string $name, ?string $value, string $label, string $defaultHex = '#173a63', string $offLabel = 'По умолчанию'): string
     {

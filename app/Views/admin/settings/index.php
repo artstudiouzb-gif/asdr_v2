@@ -247,7 +247,7 @@ require __DIR__ . '/../layout/header.php';
             </div>
             <div class="form-field">
                 <label for="theme_color">Theme Color (HEX)</label>
-                <input type="text" id="theme_color" name="theme_color" value="<?= htmlspecialchars($settings['theme_color'] ?? '#1a1a1a', ENT_QUOTES) ?>" placeholder="#1a1a1a">
+                <input type="color" id="theme_color" name="theme_color" value="<?= htmlspecialchars($settings['theme_color'] ?? '#1a1a1a', ENT_QUOTES) ?>">
             </div>
         </fieldset>
 

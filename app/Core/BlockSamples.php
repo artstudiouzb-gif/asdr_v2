@@ -119,6 +119,7 @@ final class BlockSamples
                 'width' => 'full',
                 'text_position' => 'left',
                 'overlay_enabled' => false,
+                'overlay_mode' => 'gradient',
                 'overlay_opacity' => 35,
             ],
             'categories_grid' => ['title' => 'Направления', 'items' => [

@@ -88,18 +88,18 @@ test('Hero: сохранённый MP4 включает фон даже при �
     assert_contains("frame.getAttribute('data-src')", $js);
 });
 
-test('Hero: overlay использует начальный и конечный цвета, направление и прозрачность', function () {
+test('Hero: градиентное затемнение использует цвет, направление и прозрачность', function () {
     $html = render_hero([
         'title' => 'X', 'bg_type' => 'image', 'image' => '/uploads/public/x.jpg',
         'overlay_enabled' => true,
-        'overlay_color' => '#123456', 'overlay_end_color' => '#abcdef',
+        'overlay_mode' => 'gradient', 'overlay_color' => '#123456',
         'overlay_direction' => 'to_bottom_right', 'overlay_opacity' => 80,
     ]);
-    // #123456 = rgb(18,52,86), #abcdef = rgb(171,205,239), 80% => 0.8
+    // #123456 = rgb(18,52,86), 80% => 0.8
     assert_true(str_contains($html, '--hero-scrim-rgb:18,52,86'), 'overlay RGB из цвета');
-    assert_true(str_contains($html, '--hero-scrim-end-rgb:171,205,239'), 'конечный RGB overlay');
     assert_true(str_contains($html, '--hero-scrim-a:0.8'), 'overlay alpha из прозрачности');
     assert_true(str_contains($html, '--hero-scrim-direction:135deg'), 'направление градиента');
+    assert_not_contains('--hero-scrim-end-rgb', $html);
     assert_not_contains(' style="', $html, 'Динамические параметры hero публикуются как scoped CSS');
 });
 
@@ -107,7 +107,7 @@ test('Hero: overlay поддерживает сплошную заливку б�
     $html = render_hero([
         'title' => 'X', 'bg_type' => 'image', 'image' => '/uploads/public/x.jpg',
         'overlay_enabled' => true,
-        'overlay_direction' => 'solid', 'overlay_color' => '#123456',
+        'overlay_mode' => 'solid', 'overlay_color' => '#123456',
     ]);
 
     assert_contains('block-hero__scrim--solid', $html);
@@ -142,24 +142,26 @@ test('Hero: overlay по умолчанию не выводится и не за
     assert_not_contains('--hero-scrim-', $html);
 });
 
-test('Hero: форма и сохранение содержат настройки градиента overlay', function () {
+test('Hero: форма и сохранение содержат два явных режима затемнения', function () {
     $root = dirname(__DIR__, 2);
     $form = (string) file_get_contents($root . '/app/Views/admin/pages/block_form.php');
     assert_contains('name="overlay_enabled"', $form);
     assert_contains('data-hero-visual-toggle="hero_overlay_settings"', $form);
+    assert_contains('name="overlay_mode" value="solid"', $form);
+    assert_contains('name="overlay_mode" value="gradient"', $form);
+    assert_contains('data-hero-overlay-gradient', $form);
     assert_contains('name="overlay_direction"', $form);
-    assert_contains('value="solid"', $form);
-    assert_contains('name="overlay_end_color"', $form);
+    assert_not_contains('name="overlay_end_color"', $form);
 
     $normalizer = (string) file_get_contents($root . '/app/Core/BlockData/HeroBlockNormalizer.php');
     assert_contains("'overlay_enabled' => !empty", $normalizer);
+    assert_contains("'overlay_mode' => \$overlayMode", $normalizer);
     assert_contains("'overlay_direction' => \$overlayDirection", $normalizer);
-    assert_contains("'overlay_end_color' => self::hexOrDefault", $normalizer);
 
     assert_same(false, BlockRenderer::DEFAULTS['hero']['overlay_enabled']);
     assert_same(35, BlockRenderer::DEFAULTS['hero']['overlay_opacity']);
+    assert_same('gradient', BlockRenderer::DEFAULTS['hero']['overlay_mode']);
     assert_same('auto', BlockRenderer::DEFAULTS['hero']['overlay_direction']);
-    assert_same('#0b1a30', BlockRenderer::DEFAULTS['hero']['overlay_end_color']);
 });
 
 test('Hero: мобильное фото сохраняет исходную непрозрачность', function () {

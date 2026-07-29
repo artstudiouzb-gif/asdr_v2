@@ -2743,7 +2743,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     background: linear-gradient(var(--hero-scrim-direction, 90deg),
         rgba(var(--hero-scrim-rgb), var(--hero-scrim-a)) 0%,
         rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.55)) 45%,
-        rgba(var(--hero-scrim-end-rgb, var(--hero-scrim-rgb)), 0) 100%);
+        rgba(var(--hero-scrim-rgb), 0) 100%);
     z-index: 2;
 }
 .block-hero__scrim--solid { background: rgba(var(--hero-scrim-rgb), var(--hero-scrim-a)); }

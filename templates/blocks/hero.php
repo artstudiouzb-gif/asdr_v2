@@ -39,7 +39,6 @@ $hex2rgb = static function (string $hex): string {
     return (int) hexdec(substr($hex, 0, 2)) . ',' . (int) hexdec(substr($hex, 2, 2)) . ',' . (int) hexdec(substr($hex, 4, 2));
 };
 $ovColor = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['overlay_color'] ?? '')) ? $data['overlay_color'] : '#0b1a30';
-$ovEndColor = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['overlay_end_color'] ?? '')) ? $data['overlay_end_color'] : '#0b1a30';
 $overlayEnabled = !empty($data['overlay_enabled']);
 $ovOpacity = max(0, min(100, (int) ($data['overlay_opacity'] ?? 35))) / 100;
 $panelOn = !empty($data['panel_enabled']);
@@ -48,7 +47,10 @@ $panelOpacity = max(0, min(100, (int) ($data['panel_opacity'] ?? 40))) / 100;
 $textPos = in_array($data['text_position'] ?? 'left', ['left', 'center', 'right'], true) ? $data['text_position'] : 'left';
 $heroText = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['text_color'] ?? '')) ? $data['text_color'] : '';
 $heroBtn = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['button_color'] ?? '')) ? $data['button_color'] : '';
-$overlayDirection = (string) ($data['overlay_direction'] ?? 'auto');
+$rawOverlayDirection = (string) ($data['overlay_direction'] ?? 'auto');
+$overlayMode = (string) ($data['overlay_mode'] ?? ($rawOverlayDirection === 'solid' ? 'solid' : 'gradient'));
+$overlayMode = in_array($overlayMode, ['solid', 'gradient'], true) ? $overlayMode : 'gradient';
+$overlayDirection = $rawOverlayDirection === 'solid' ? 'auto' : $rawOverlayDirection;
 $overlayAngles = [
     'to_right' => '90deg',
     'to_left' => '270deg',
@@ -59,7 +61,7 @@ $overlayAngles = [
     'to_top_right' => '45deg',
     'to_top_left' => '315deg',
 ];
-$overlaySolid = $overlayDirection === 'solid';
+$overlaySolid = $overlayMode === 'solid';
 if ($overlayDirection === 'auto' || !isset($overlayAngles[$overlayDirection])) {
     $overlayAngle = $textPos === 'right' ? '270deg' : ($textPos === 'center' ? '0deg' : '90deg');
 } else {
@@ -121,7 +123,6 @@ if ($heroHeight === 'custom' && preg_match('/^(\d+(?:\.\d+)?)(px|vh|dvh|rem)$/',
     $heroRootStyle .= '--hero-custom-height:' . $heightNumber . $heightUnit . ';';
 }
 $scrimStyle = '--hero-scrim-rgb:' . $hex2rgb($ovColor)
-    . ';--hero-scrim-end-rgb:' . $hex2rgb($ovEndColor)
     . ';--hero-scrim-a:' . $ovOpacity
     . ';--hero-scrim-direction:' . $overlayAngle . ';';
 $templateCss = ($heroRootStyle !== '' ? '#block-' . $blockId . ' .block-hero{' . $heroRootStyle . '}' : '')
