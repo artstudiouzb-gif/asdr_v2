@@ -269,8 +269,40 @@ final class TranslationGroupHelper
     {
         $pdo = Database::pdo();
         try {
-            $stmt = $pdo->prepare("SELECT * FROM blocks WHERE page_id = :pid AND parent_block_id IS NULL ORDER BY sort_order ASC, id ASC");
-            $stmt->execute([':pid' => $origPageId]);
+            $pageLangStmt = $pdo->prepare('SELECT lang FROM pages WHERE id = :id LIMIT 1');
+            $pageLangStmt->execute([':id' => $origPageId]);
+            $originalLang = (string) ($pageLangStmt->fetchColumn() ?: Language::defaultCode());
+
+            // В старых данных RU и UZ могли лежать в одном page_id. Если там
+            // уже есть стек целевого языка, переносим именно его; иначе берём
+            // стек исходной страницы и назначаем копии новый язык.
+            $sourceLang = null;
+            $countByLang = $pdo->prepare(
+                'SELECT COUNT(*) FROM blocks WHERE page_id = :page_id AND lang = :lang'
+            );
+            foreach (array_values(array_unique([$targetLang, $originalLang, ''])) as $candidateLang) {
+                $countByLang->execute([
+                    ':page_id' => $origPageId,
+                    ':lang' => $candidateLang,
+                ]);
+                if ((int) $countByLang->fetchColumn() > 0) {
+                    $sourceLang = $candidateLang;
+                    break;
+                }
+            }
+            if ($sourceLang === null) {
+                return;
+            }
+
+            $stmt = $pdo->prepare(
+                'SELECT *
+                 FROM blocks
+                 WHERE page_id = :pid
+                   AND lang = :source_lang
+                   AND parent_block_id IS NULL
+                 ORDER BY sort_order ASC, id ASC'
+            );
+            $stmt->execute([':pid' => $origPageId, ':source_lang' => $sourceLang]);
             $topBlocks = $stmt->fetchAll();
 
             foreach ($topBlocks as $b) {

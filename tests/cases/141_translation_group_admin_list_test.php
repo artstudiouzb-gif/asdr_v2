@@ -56,6 +56,52 @@ test('Админка: группы переводов не дублируют с
     Page::forceDelete($origId);
 });
 
+test('Создание перевода страницы не смешивает RU- и UZ-блоки из старого общего стека', function (): void {
+    ensure_test_db();
+
+    TranslationGroupHelper::ensureSchema();
+    $pdo = \App\Core\Database::pdo();
+    $slug = 'legacy-mixed-page-' . bin2hex(random_bytes(3));
+    $origId = Page::create([
+        'title' => 'Старая смешанная страница',
+        'slug' => $slug,
+        'status' => 'published',
+        'lang' => 'ru',
+    ]);
+
+    $insertBlock = $pdo->prepare(
+        "INSERT INTO blocks
+            (page_id, lang, type, title, data, sort_order, is_active, created_at)
+         VALUES (:page_id, :lang, 'text', :title, :data, 1, 1, NOW())"
+    );
+    $insertBlock->execute([
+        ':page_id' => $origId,
+        ':lang' => 'ru',
+        ':title' => 'RU-блок',
+        ':data' => '{"content":"RU"}',
+    ]);
+    $insertBlock->execute([
+        ':page_id' => $origId,
+        ':lang' => 'uz',
+        ':title' => 'UZ-блок',
+        ':data' => '{"content":"UZ"}',
+    ]);
+
+    $uzId = TranslationGroupHelper::createTranslation('pages', $origId, 'uz');
+    $targetBlocks = $pdo->prepare(
+        'SELECT lang, title FROM blocks WHERE page_id = :page_id ORDER BY id'
+    );
+    $targetBlocks->execute([':page_id' => $uzId]);
+    $copied = $targetBlocks->fetchAll(PDO::FETCH_ASSOC);
+
+    assert_same(1, count($copied), 'В новую языковую страницу скопирован один целевой стек');
+    assert_same('uz', (string) $copied[0]['lang'], 'Скопированный блок получил целевой язык');
+    assert_same('UZ-блок', (string) $copied[0]['title'], 'Выбран существующий UZ-блок, а не RU-блок');
+
+    Page::forceDelete($uzId);
+    Page::forceDelete($origId);
+});
+
 test('Связывание переводов: findHome("uz") возвращает переведённую страницу и autoLink связывает неручные записи', function (): void {
     ensure_test_db();
 

@@ -161,7 +161,8 @@ ON DUPLICATE KEY UPDATE code = code;
 
 -- ---------------------------------------------------------------------------
 -- Страницы (статические, собираются из блоков)
--- Базовая строка = контент на языке по умолчанию; переводы в page_translations.
+-- Каждый язык = отдельная строка pages; версии связаны translation_group_id.
+-- page_translations оставлена только для совместимости со старыми установками.
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS pages (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -188,10 +189,10 @@ CREATE TABLE IF NOT EXISTS pages (
     CONSTRAINT fk_pages_parent FOREIGN KEY (parent_id) REFERENCES pages(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Гарантия, что домашней может быть только одна страница обеспечивается на уровне приложения
--- (перед установкой is_home = 1 остальные страницы сбрасываются в транзакции).
+-- is_home = 1 хранится у канонической страницы; её языковые версии находятся
+-- по translation_group_id и общему slug.
 
--- Переводы страниц (заголовок и мета для НЕ-дефолтных языков)
+-- Устаревшее хранилище переводов заголовка/мета для совместимости.
 CREATE TABLE IF NOT EXISTS page_translations (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     page_id         INT UNSIGNED NOT NULL,

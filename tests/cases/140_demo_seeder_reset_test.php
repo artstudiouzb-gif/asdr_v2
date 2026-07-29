@@ -42,5 +42,5 @@ test('DemoSeeder RESET полностью заменяет контент эта
     assert_same(0, array_sum($secondRun), 'Повторный запуск полностью идемпотентен');
 
     $version = $pdo->query("SELECT `value` FROM settings WHERE `key` = 'demo_data_version' LIMIT 1")->fetchColumn();
-    assert_same('2026.07-v2', (string) $version, 'Версия демо-комплекта сохранена');
+    assert_same('2026.07-v3', (string) $version, 'Версия демо-комплекта сохранена');
 });

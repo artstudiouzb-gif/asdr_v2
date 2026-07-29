@@ -14,7 +14,7 @@ use PDO;
  */
 final class DemoSeeder
 {
-    private const DEMO_VERSION = '2026.07-v2';
+    private const DEMO_VERSION = '2026.07-v3';
 
     /** @return array<string,int> счётчики добавленного по разделам */
     public static function run(PDO $pdo): array
@@ -201,6 +201,23 @@ final class DemoSeeder
                 $issues[] = "главных страниц: {$homeCount}, ожидалась 1";
             }
 
+            $unlinkedPages = (int) $pdo->query(
+                'SELECT COUNT(*)
+                 FROM pages p
+                 LEFT JOIN pages root
+                   ON root.id = p.translation_group_id
+                  AND root.deleted_at IS NULL
+                 WHERE p.deleted_at IS NULL
+                   AND (
+                       p.translation_group_id IS NULL
+                       OR p.translation_group_id = 0
+                       OR root.id IS NULL
+                   )'
+            )->fetchColumn();
+            if ($unlinkedPages > 0) {
+                $issues[] = "страницы без корректной группы переводов: {$unlinkedPages}";
+            }
+
             $parentedCount = (int) $pdo->query(
                 'SELECT COUNT(*) FROM pages WHERE parent_id IS NOT NULL AND deleted_at IS NULL'
             )->fetchColumn();
@@ -231,11 +248,26 @@ final class DemoSeeder
                 }
             }
 
+            $mixedPageBlocks = (int) $pdo->query(
+                'SELECT COUNT(*)
+                 FROM blocks b
+                 INNER JOIN pages p ON p.id = b.page_id
+                 WHERE p.deleted_at IS NULL
+                   AND b.lang <> \'\'
+                   AND b.lang <> p.lang'
+            )->fetchColumn();
+            if ($mixedPageBlocks > 0) {
+                $issues[] = "блоки привязаны к странице другого языка: {$mixedPageBlocks}";
+            }
+
             $homeStacks = $pdo->query(
                 'SELECT b.lang, COUNT(*) AS total
                  FROM blocks b
-                 INNER JOIN pages p ON p.id = b.page_id AND p.is_home = 1
-                 WHERE b.parent_block_id IS NULL
+                 INNER JOIN pages p ON p.id = b.page_id
+                 WHERE p.slug = \'home\'
+                   AND p.deleted_at IS NULL
+                   AND b.lang = p.lang
+                   AND b.parent_block_id IS NULL
                  GROUP BY b.lang'
             )->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
             foreach (['ru', 'uz'] as $lang) {
@@ -252,6 +284,7 @@ final class DemoSeeder
                  LEFT JOIN pages p
                    ON mi.url_type = 'page'
                   AND p.slug = mi.url_value
+                  AND p.lang = mi.lang
                   AND p.status = 'published'
                   AND p.deleted_at IS NULL
                  WHERE mi.url_type = 'page' AND p.id IS NULL"
@@ -365,53 +398,147 @@ final class DemoSeeder
             return;
         }
 
-        // Есть ли уже главная страница сайта?
-        $homeId = $pdo->query('SELECT id FROM pages WHERE is_home = 1 LIMIT 1')->fetchColumn();
-        if ($homeId === false) {
-            // Не переносим главную у существующего сайта — создаём, только если её нет.
-            $pdo->prepare(
-                "INSERT INTO pages (title, slug, status, is_home, layout_type, transparent_header, created_at)
-                 SELECT 'Главная', 'home', 'published', 1, 'no_sidebar', 1, NOW()
-                 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM pages WHERE slug = 'home')"
-            )->execute();
-            $homeId = $pdo->query('SELECT id FROM pages WHERE is_home = 1 LIMIT 1')->fetchColumn();
-            if ($homeId === false) {
-                $homeId = $pdo->query("SELECT id FROM pages WHERE slug = 'home' LIMIT 1")->fetchColumn();
-            }
-            $c['pages'] += $homeId !== false ? 1 : 0;
+        // Главная хранится так же, как остальные переводы: отдельная запись на
+        // каждый язык и общая translation_group_id. is_home остаётся только у
+        // основной записи, а языковые версии распознаются по общей группе/slug.
+        $findDefaultHome = $pdo->prepare(
+            "SELECT id, slug, translation_group_id
+             FROM pages
+             WHERE lang = 'ru'
+               AND (is_home = 1 OR slug = 'home')
+               AND deleted_at IS NULL
+             ORDER BY is_home DESC, id ASC
+             LIMIT 1"
+        );
+        $findDefaultHome->execute();
+        $defaultHome = $findDefaultHome->fetch(PDO::FETCH_ASSOC);
+        if (!$defaultHome) {
+            $insertDefaultHome = $pdo->prepare(
+                "INSERT INTO pages
+                    (title, slug, meta_title, meta_description, `lead`, status, is_home,
+                     layout_type, transparent_header, lang, translation_group_id, created_at)
+                 SELECT :title, 'home', :meta_title, :meta_description, :lead, 'published', 1,
+                        'no_sidebar', 1, 'ru', NULL, NOW()
+                 FROM DUAL
+                 WHERE NOT EXISTS (
+                     SELECT 1 FROM pages WHERE slug = 'home' AND lang = 'ru'
+                 )"
+            );
+            $insertDefaultHome->execute([
+                ':title' => 'Главная',
+                ':meta_title' => 'Агентство стратегического развития и реформ',
+                ':meta_description' => 'Стратегические инициативы, проекты, новости и аналитические материалы Агентства.',
+                ':lead' => 'Стратегия. Реформы. Развитие.',
+            ]);
+            $c['pages'] += $insertDefaultHome->rowCount();
+            $findDefaultHome->execute();
+            $defaultHome = $findDefaultHome->fetch(PDO::FETCH_ASSOC);
         }
-        if ($homeId === false) {
+        if (!$defaultHome) {
             return;
         }
-        $homeId = (int) $homeId;
 
-        // Наполняем демо-главную, только если она пуста или содержит нетронутую
-        // «стартовую» вёрстку из schema.sql (cta+columns+news_latest). Если
-        // редактор уже менял главную — не трогаем, чтобы не стереть работу.
-        $count = (int) $pdo->query('SELECT COUNT(*) FROM blocks WHERE page_id = ' . $homeId)->fetchColumn();
-        if ($count > 0) {
-            if (!self::isUntouchedStarterHome($pdo, $homeId)) {
-                return;
+        $homeId = (int) $defaultHome['id'];
+        $homeSlug = (string) ($defaultHome['slug'] ?: 'home');
+        $pdo->prepare(
+            'UPDATE pages
+             SET translation_group_id = id
+             WHERE id = :id
+               AND (translation_group_id IS NULL OR translation_group_id = 0)'
+        )->execute([':id' => $homeId]);
+
+        $homeIds = ['ru' => $homeId];
+        if (isset($localizedBlocks['uz'])) {
+            $findUzHome = $pdo->prepare(
+                "SELECT id
+                 FROM pages
+                 WHERE lang = 'uz'
+                   AND deleted_at IS NULL
+                   AND (translation_group_id = :group_id OR slug = :slug)
+                 ORDER BY (translation_group_id = :group_id_order) DESC, id ASC
+                 LIMIT 1"
+            );
+            $findUzHome->execute([
+                ':group_id' => $homeId,
+                ':slug' => $homeSlug,
+                ':group_id_order' => $homeId,
+            ]);
+            $uzHomeId = $findUzHome->fetchColumn();
+            if ($uzHomeId === false) {
+                $insertUzHome = $pdo->prepare(
+                    "INSERT INTO pages
+                        (title, slug, meta_title, meta_description, `lead`, status, is_home,
+                         layout_type, transparent_header, lang, translation_group_id, created_at)
+                     SELECT :title, :slug, :meta_title, :meta_description, :lead, 'published', 0,
+                            'no_sidebar', 1, 'uz', :group_id, NOW()
+                     FROM DUAL
+                     WHERE NOT EXISTS (
+                         SELECT 1 FROM pages WHERE slug = :slug_check AND lang = 'uz'
+                     )"
+                );
+                $insertUzHome->execute([
+                    ':title' => 'Bosh sahifa',
+                    ':slug' => $homeSlug,
+                    ':meta_title' => 'Strategik rivojlanish va islohotlar agentligi',
+                    ':meta_description' => 'Agentlikning strategik tashabbuslari, loyihalari, yangiliklari va tahliliy materiallari.',
+                    ':lead' => 'Strategiya. Islohotlar. Taraqqiyot.',
+                    ':group_id' => $homeId,
+                    ':slug_check' => $homeSlug,
+                ]);
+                $c['pages'] += $insertUzHome->rowCount();
+                $findUzHome->execute([
+                    ':group_id' => $homeId,
+                    ':slug' => $homeSlug,
+                    ':group_id_order' => $homeId,
+                ]);
+                $uzHomeId = $findUzHome->fetchColumn();
             }
-            $pdo->exec('DELETE FROM blocks WHERE page_id = ' . $homeId);
+            if ($uzHomeId !== false) {
+                $uzHomeId = (int) $uzHomeId;
+                $pdo->prepare(
+                    'UPDATE pages
+                     SET translation_group_id = :group_id
+                     WHERE id = :id
+                       AND (translation_group_id IS NULL OR translation_group_id = 0 OR translation_group_id = id)'
+                )->execute([':group_id' => $homeId, ':id' => $uzHomeId]);
+                $homeIds['uz'] = $uzHomeId;
+            }
         }
-
-        // Демо-главной нужна прозрачная шапка поверх hero.
-        $pdo->prepare('UPDATE pages SET transparent_header = 1, layout_type = ? WHERE id = ?')
-            ->execute(['no_sidebar', $homeId]);
 
         $ins = $pdo->prepare(
             'INSERT INTO blocks (page_id, lang, type, title, data, sort_order, is_active, created_at)
              VALUES (:pid, :lang, :ty, :ti, :d, :so, 1, NOW())'
         );
         foreach ($localizedBlocks as $lang => $blocks) {
+            $localizedHomeId = $homeIds[$lang] ?? null;
+            if ($localizedHomeId === null) {
+                continue;
+            }
+
+            // Не перезаписываем редакторский контент. Исключение — нетронутая
+            // стартовая RU-главная из schema.sql, которую демо-комплект заменяет.
+            $countStmt = $pdo->prepare('SELECT COUNT(*) FROM blocks WHERE page_id = :page_id');
+            $countStmt->execute([':page_id' => $localizedHomeId]);
+            $count = (int) $countStmt->fetchColumn();
+            if ($count > 0) {
+                if ($lang !== 'ru' || !self::isUntouchedStarterHome($pdo, $localizedHomeId)) {
+                    continue;
+                }
+                $deleteStarter = $pdo->prepare('DELETE FROM blocks WHERE page_id = :page_id');
+                $deleteStarter->execute([':page_id' => $localizedHomeId]);
+            }
+
+            // Демо-главной нужна прозрачная шапка поверх hero.
+            $pdo->prepare('UPDATE pages SET transparent_header = 1, layout_type = ? WHERE id = ?')
+                ->execute(['no_sidebar', $localizedHomeId]);
+
             $order = 1;
             foreach ($blocks as $b) {
                 if (!isset($b['type'])) {
                     continue;
                 }
                 $ins->execute([
-                    ':pid' => $homeId,
+                    ':pid' => $localizedHomeId,
                     ':lang' => $lang,
                     ':ty' => (string) $b['type'],
                     ':ti' => (string) ($b['title'] ?? ''),
@@ -1234,9 +1361,15 @@ final class DemoSeeder
         }
 
         $pageIns = $pdo->prepare(
-            "INSERT INTO pages (title, slug, meta_title, meta_description, `lead`, status, is_home, layout_type, lang, created_at)
-             SELECT :t, :s, :mt, :md, :lead, 'published', 0, 'no_sidebar', 'ru', NOW()
-             FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM pages WHERE slug = :s2)"
+            "INSERT INTO pages
+                (title, slug, meta_title, meta_description, `lead`, status, is_home,
+                 layout_type, lang, translation_group_id, created_at)
+             SELECT :t, :s, :mt, :md, :lead, 'published', 0,
+                    'no_sidebar', :lang, :group_id, NOW()
+             FROM DUAL
+             WHERE NOT EXISTS (
+                 SELECT 1 FROM pages WHERE slug = :s2 AND lang = :lang2
+             )"
         );
 
         $transIns = $pdo->prepare(
@@ -1255,51 +1388,98 @@ final class DemoSeeder
             if (!is_array($langData)) {
                 continue;
             }
-            $ruData = $langData['ru'] ?? [];
-            $defaultTitle = is_array($ruData) ? (string) ($ruData['title'] ?? '') : '';
-            $pageIns->execute([
-                ':t' => $defaultTitle,
-                ':s' => $slug,
-                ':mt' => $defaultTitle . ' — Агентство стратегического развития и реформ',
-                ':md' => 'Официальная информация раздела «' . $defaultTitle . '».',
-                ':lead' => 'Стратегические инициативы, результаты и актуальные материалы Агентства.',
-                ':s2' => $slug,
-            ]);
-            $pageCreated = $pageIns->rowCount();
-            $c['pages'] += $pageCreated;
-            if ($pageCreated > 0) {
-                $createdPageSlugs[] = (string) $slug;
-            }
-            $pid = self::pageId($pdo, $slug);
-            if ($pid === null) {
+            $ruData = $langData['ru'] ?? null;
+            if (!is_array($ruData)) {
                 continue;
             }
 
-            $hasBlocks = (int) $pdo->query('SELECT COUNT(*) FROM blocks WHERE page_id = ' . $pid)->fetchColumn() > 0;
-
-            foreach ($langData as $lang => $data) {
+            // Основная версия создаётся первой и становится корнем группы.
+            // Благодаря UNIQUE(slug, lang) языковые версии используют один URL,
+            // но в редакторе являются самостоятельными страницами.
+            $orderedLangData = ['ru' => $ruData] + $langData;
+            $groupId = null;
+            foreach ($orderedLangData as $lang => $data) {
                 if (!is_array($data)) {
                     continue;
                 }
+                $lang = (string) $lang;
                 $title = (string) ($data['title'] ?? '');
                 $blocks = $data['blocks'] ?? [];
+                $metaTitle = $title . ($lang === 'uz'
+                    ? ' — Strategik rivojlanish va islohotlar agentligi'
+                    : ' — Агентство стратегического развития и реформ');
+                $metaDescription = $lang === 'uz'
+                    ? '«' . $title . '» bo‘limining rasmiy ma’lumotlari.'
+                    : 'Официальная информация раздела «' . $title . '».';
+                $lead = $lang === 'uz'
+                    ? 'Agentlikning strategik tashabbuslari, natijalari va dolzarb materiallari.'
+                    : 'Стратегические инициативы, результаты и актуальные материалы Агентства.';
 
-                // Вставляем перевод страницы
+                if ($lang !== 'ru' && $groupId === null) {
+                    continue;
+                }
+                $pageIns->execute([
+                    ':t' => $title,
+                    ':s' => $slug,
+                    ':mt' => $metaTitle,
+                    ':md' => $metaDescription,
+                    ':lead' => $lead,
+                    ':lang' => $lang,
+                    ':group_id' => $lang === 'ru' ? null : $groupId,
+                    ':s2' => $slug,
+                    ':lang2' => $lang,
+                ]);
+                $pageCreated = $pageIns->rowCount();
+                $c['pages'] += $pageCreated;
+                if ($pageCreated > 0) {
+                    $createdPageSlugs[] = (string) $slug;
+                }
+
+                $pid = self::pageIdForLang($pdo, (string) $slug, $lang);
+                if ($pid === null) {
+                    continue;
+                }
+                if ($lang === 'ru') {
+                    $pdo->prepare(
+                        'UPDATE pages
+                         SET translation_group_id = id
+                         WHERE id = :id
+                           AND (translation_group_id IS NULL OR translation_group_id = 0)'
+                    )->execute([':id' => $pid]);
+                    $groupStmt = $pdo->prepare(
+                        'SELECT translation_group_id FROM pages WHERE id = :id LIMIT 1'
+                    );
+                    $groupStmt->execute([':id' => $pid]);
+                    $storedGroupId = $groupStmt->fetchColumn();
+                    $groupId = $storedGroupId !== false && (int) $storedGroupId > 0
+                        ? (int) $storedGroupId
+                        : $pid;
+                } else {
+                    $pdo->prepare(
+                        'UPDATE pages
+                         SET translation_group_id = :group_id
+                         WHERE id = :id
+                           AND (translation_group_id IS NULL OR translation_group_id = 0 OR translation_group_id = id)'
+                    )->execute([':group_id' => $groupId, ':id' => $pid]);
+                }
+
+                // Сохраняем старую таблицу метаданных как совместимый fallback.
                 $transIns->execute([
-                    ':pid' => $pid,
+                    ':pid' => $groupId,
                     ':lang' => $lang,
                     ':title' => $title,
-                    ':meta_title' => $title . ($lang === 'uz' ? ' — Strategik rivojlanish va islohotlar agentligi' : ' — Агентство стратегического развития и реформ'),
-                    ':meta_description' => $lang === 'uz'
-                        ? '«' . $title . '» bo‘limining rasmiy ma’lumotlari.'
-                        : 'Официальная информация раздела «' . $title . '».',
-                    ':lead' => $lang === 'uz'
-                        ? 'Agentlikning strategik tashabbuslari, natijalari va dolzarb materiallari.'
-                        : 'Стратегические инициативы, результаты и актуальные материалы Агентства.',
-                    ':pid2' => $pid,
+                    ':meta_title' => $metaTitle,
+                    ':meta_description' => $metaDescription,
+                    ':lead' => $lead,
+                    ':pid2' => $groupId,
                     ':lang2' => $lang
                 ]);
 
+                $hasBlocksStmt = $pdo->prepare(
+                    'SELECT COUNT(*) FROM blocks WHERE page_id = :page_id'
+                );
+                $hasBlocksStmt->execute([':page_id' => $pid]);
+                $hasBlocks = (int) $hasBlocksStmt->fetchColumn() > 0;
                 if (!$hasBlocks && is_array($blocks)) {
                     $order = 1;
                     // Оформление секций (фоны, отступы, появление) — по общим
@@ -1584,10 +1764,16 @@ final class DemoSeeder
         return true;
     }
 
-    private static function pageId(PDO $pdo, string $slug): ?int
+    private static function pageIdForLang(PDO $pdo, string $slug, string $lang): ?int
     {
-        $stmt = $pdo->prepare('SELECT id FROM pages WHERE slug = :s LIMIT 1');
-        $stmt->execute([':s' => $slug]);
+        $stmt = $pdo->prepare(
+            'SELECT id
+             FROM pages
+             WHERE slug = :slug AND lang = :lang AND deleted_at IS NULL
+             ORDER BY id ASC
+             LIMIT 1'
+        );
+        $stmt->execute([':slug' => $slug, ':lang' => $lang]);
         $id = $stmt->fetchColumn();
 
         return $id !== false ? (int) $id : null;
