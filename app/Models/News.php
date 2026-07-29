@@ -135,9 +135,11 @@ final class News
         $langFilter = (string) ($filters['lang'] ?? '');
         if ($langFilter !== '' && $langFilter !== 'all') {
             $where[] = '(n.lang = :lang'
-                . ' OR EXISTS (SELECT 1 FROM news_translations nt WHERE nt.news_id = n.id AND nt.lang = :lang_nt AND TRIM(COALESCE(nt.title, \'\')) <> \'\')'
-                . ' OR EXISTS (SELECT 1 FROM news n2 WHERE (n2.translation_group_id = COALESCE(NULLIF(n.translation_group_id, 0), n.id) OR n2.id = COALESCE(NULLIF(n.translation_group_id, 0), n.id)) AND n2.lang = :lang_n2 AND n2.deleted_at IS NULL AND n2.id <> n.id))';
+                . ' OR (n.lang <> :lang_neq'
+                . '     AND EXISTS (SELECT 1 FROM news_translations nt WHERE nt.news_id = n.id AND nt.lang = :lang_nt AND TRIM(COALESCE(nt.title, \'\')) <> \'\')'
+                . '     AND NOT EXISTS (SELECT 1 FROM news n2 WHERE (n2.translation_group_id = COALESCE(NULLIF(n.translation_group_id, 0), n.id) OR n2.id = COALESCE(NULLIF(n.translation_group_id, 0), n.id)) AND n2.lang = :lang_n2 AND n2.deleted_at IS NULL AND n2.id <> n.id)))';
             $params[':lang'] = $langFilter;
+            $params[':lang_neq'] = $langFilter;
             $params[':lang_nt'] = $langFilter;
             $params[':lang_n2'] = $langFilter;
         }
@@ -775,11 +777,13 @@ final class News
                 "SELECT COUNT(*) FROM news n
                  WHERE n.deleted_at IS NULL
                    AND (n.lang = :code
-                     OR EXISTS (SELECT 1 FROM news_translations nt WHERE nt.news_id = n.id AND nt.lang = :code_nt AND TRIM(COALESCE(nt.title, '')) <> '')
-                     OR EXISTS (SELECT 1 FROM news n2 WHERE (n2.translation_group_id = COALESCE(NULLIF(n.translation_group_id, 0), n.id) OR n2.id = COALESCE(NULLIF(n.translation_group_id, 0), n.id)) AND n2.lang = :code_n2 AND n2.deleted_at IS NULL AND n2.id <> n.id))"
+                     OR (n.lang <> :code_neq
+                         AND EXISTS (SELECT 1 FROM news_translations nt WHERE nt.news_id = n.id AND nt.lang = :code_nt AND TRIM(COALESCE(nt.title, '')) <> '')
+                         AND NOT EXISTS (SELECT 1 FROM news n2 WHERE (n2.translation_group_id = COALESCE(NULLIF(n.translation_group_id, 0), n.id) OR n2.id = COALESCE(NULLIF(n.translation_group_id, 0), n.id)) AND n2.lang = :code_n2 AND n2.deleted_at IS NULL AND n2.id <> n.id)))"
             );
             $stmt->execute([
                 ':code' => $code,
+                ':code_neq' => $code,
                 ':code_nt' => $code,
                 ':code_n2' => $code,
             ]);

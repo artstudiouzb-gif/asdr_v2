@@ -80,9 +80,11 @@ final class Project
         $langFilter = (string) ($filters['lang'] ?? '');
         if ($langFilter !== '' && $langFilter !== 'all') {
             $where[] = '(p.lang = :lang'
-                . ' OR EXISTS (SELECT 1 FROM project_translations pt WHERE pt.project_id = p.id AND pt.lang = :lang_pt AND TRIM(COALESCE(pt.title, \'\')) <> \'\')'
-                . ' OR EXISTS (SELECT 1 FROM projects p2 WHERE (p2.translation_group_id = COALESCE(NULLIF(p.translation_group_id, 0), p.id) OR p2.id = COALESCE(NULLIF(p.translation_group_id, 0), p.id)) AND p2.lang = :lang_p2 AND p2.deleted_at IS NULL AND p2.id <> p.id))';
+                . ' OR (p.lang <> :lang_neq'
+                . '     AND EXISTS (SELECT 1 FROM project_translations pt WHERE pt.project_id = p.id AND pt.lang = :lang_pt AND TRIM(COALESCE(pt.title, \'\')) <> \'\')'
+                . '     AND NOT EXISTS (SELECT 1 FROM projects p2 WHERE (p2.translation_group_id = COALESCE(NULLIF(p.translation_group_id, 0), p.id) OR p2.id = COALESCE(NULLIF(p.translation_group_id, 0), p.id)) AND p2.lang = :lang_p2 AND p2.deleted_at IS NULL AND p2.id <> p.id)))';
             $params[':lang'] = $langFilter;
+            $params[':lang_neq'] = $langFilter;
             $params[':lang_pt'] = $langFilter;
             $params[':lang_p2'] = $langFilter;
         }
@@ -563,11 +565,13 @@ final class Project
                 "SELECT COUNT(*) FROM projects p
                  WHERE p.deleted_at IS NULL
                    AND (p.lang = :code
-                     OR EXISTS (SELECT 1 FROM project_translations pt WHERE pt.project_id = p.id AND pt.lang = :code_pt AND TRIM(COALESCE(pt.title, '')) <> '')
-                     OR EXISTS (SELECT 1 FROM projects p2 WHERE (p2.translation_group_id = COALESCE(NULLIF(p.translation_group_id, 0), p.id) OR p2.id = COALESCE(NULLIF(p.translation_group_id, 0), p.id)) AND p2.lang = :code_p2 AND p2.deleted_at IS NULL AND p2.id <> p.id))"
+                     OR (p.lang <> :code_neq
+                         AND EXISTS (SELECT 1 FROM project_translations pt WHERE pt.project_id = p.id AND pt.lang = :code_pt AND TRIM(COALESCE(pt.title, '')) <> '')
+                         AND NOT EXISTS (SELECT 1 FROM projects p2 WHERE (p2.translation_group_id = COALESCE(NULLIF(p.translation_group_id, 0), p.id) OR p2.id = COALESCE(NULLIF(p.translation_group_id, 0), p.id)) AND p2.lang = :code_p2 AND p2.deleted_at IS NULL AND p2.id <> p.id)))"
             );
             $stmt->execute([
                 ':code' => $code,
+                ':code_neq' => $code,
                 ':code_pt' => $code,
                 ':code_p2' => $code,
             ]);
