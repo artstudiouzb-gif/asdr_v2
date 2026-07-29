@@ -27,6 +27,16 @@ test('Админка: группы переводов не дублируют с
 
     // Переводим на UZ
     $uzId = TranslationGroupHelper::createTranslation('pages', $origId, 'uz');
+    assert_same(
+        $uzId,
+        TranslationGroupHelper::createTranslation('pages', $origId, 'uz'),
+        'Повторный запрос с исходной записи возвращает уже созданный перевод'
+    );
+    assert_same(
+        $uzId,
+        TranslationGroupHelper::createTranslation('pages', $uzId, 'uz'),
+        'Повторный запрос с языковой версии не создаёт дубль'
+    );
 
     // Проверяем список без фильтра по языку (общий стандарт: выводит все записи)
     $adminList = Page::adminList(['lang' => '', 'status' => '', 'q' => 'test-page-ru', 'sort' => 'newest', 'per_page' => 20, 'offset' => 0]);
@@ -71,22 +81,45 @@ test('Создание перевода страницы не смешивает
 
     $insertBlock = $pdo->prepare(
         "INSERT INTO blocks
-            (page_id, lang, type, title, data, sort_order, is_active, created_at)
-         VALUES (:page_id, :lang, 'text', :title, :data, 1, 1, NOW())"
+            (page_id, parent_block_id, lang, type, title, data, sort_order, is_active, created_at)
+         VALUES (:page_id, :parent_block_id, :lang, 'text', :title, :data, :sort_order, 1, NOW())"
     );
     $insertBlock->execute([
         ':page_id' => $origId,
+        ':parent_block_id' => null,
         ':lang' => 'ru',
         ':title' => 'RU-блок',
         ':data' => '{"content":"RU"}',
+        ':sort_order' => 1,
     ]);
     $insertBlock->execute([
         ':page_id' => $origId,
+        ':parent_block_id' => null,
         ':lang' => 'uz',
         ':title' => 'UZ-блок',
         ':data' => '{"content":"UZ"}',
+        ':sort_order' => 1,
+    ]);
+    $uzParentId = (int) $pdo->lastInsertId();
+    $insertBlock->execute([
+        ':page_id' => $origId,
+        ':parent_block_id' => $uzParentId,
+        ':lang' => 'ru',
+        ':title' => 'Ошибочный RU-дочерний блок',
+        ':data' => '{"content":"RU child"}',
+        ':sort_order' => 1,
+    ]);
+    $insertBlock->execute([
+        ':page_id' => $origId,
+        ':parent_block_id' => $uzParentId,
+        ':lang' => 'uz',
+        ':title' => 'UZ-дочерний блок',
+        ':data' => '{"content":"UZ child"}',
+        ':sort_order' => 2,
     ]);
 
+    $pdo->prepare('UPDATE pages SET translation_group_id = 0 WHERE id = :id')
+        ->execute([':id' => $origId]);
     $uzId = TranslationGroupHelper::createTranslation('pages', $origId, 'uz');
     $targetBlocks = $pdo->prepare(
         'SELECT lang, title FROM blocks WHERE page_id = :page_id ORDER BY id'
@@ -94,9 +127,21 @@ test('Создание перевода страницы не смешивает
     $targetBlocks->execute([':page_id' => $uzId]);
     $copied = $targetBlocks->fetchAll(PDO::FETCH_ASSOC);
 
-    assert_same(1, count($copied), 'В новую языковую страницу скопирован один целевой стек');
+    assert_same(2, count($copied), 'В новую языковую страницу скопирован только целевой стек');
     assert_same('uz', (string) $copied[0]['lang'], 'Скопированный блок получил целевой язык');
     assert_same('UZ-блок', (string) $copied[0]['title'], 'Выбран существующий UZ-блок, а не RU-блок');
+    assert_same('uz', (string) $copied[1]['lang'], 'Дочерний блок получил целевой язык');
+    assert_same('UZ-дочерний блок', (string) $copied[1]['title'], 'RU-дочерний блок отфильтрован');
+    assert_same(
+        $origId,
+        (int) Page::findById($origId)['translation_group_id'],
+        'Нулевая группа исходной страницы восстановлена'
+    );
+    assert_same(
+        $origId,
+        (int) Page::findById($uzId)['translation_group_id'],
+        'Перевод привязан к восстановленной группе'
+    );
 
     Page::forceDelete($uzId);
     Page::forceDelete($origId);

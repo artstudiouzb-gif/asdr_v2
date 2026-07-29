@@ -123,7 +123,7 @@ $router->post('/admin/news/ai-summary', [AdminNewsController::class, 'generateAi
 $router->get('/admin/news/{id}/preview', [AdminNewsController::class, 'preview']);
 $router->post('/admin/news/{id}/edit', [AdminNewsController::class, 'update']);
 $router->post('/admin/news/{id}/delete', [AdminNewsController::class, 'destroy']);
-$router->get('/admin/news/{id}/create-translation', [AdminNewsController::class, 'createTranslation']);
+$router->post('/admin/news/{id}/create-translation', [AdminNewsController::class, 'createTranslation']);
 $router->post('/admin/news/{id}/duplicate', [AdminNewsController::class, 'duplicate']);
 $router->post('/admin/news/{id}/social', [AdminNewsController::class, 'pushSocial']);
 
@@ -137,7 +137,7 @@ $router->post('/admin/pages/{id}/edit', [AdminPageController::class, 'update']);
 $router->post('/admin/pages/{id}/delete', [AdminPageController::class, 'destroy']);
 $router->post('/admin/pages/{id}/make-home', [AdminPageController::class, 'makeHome']);
 $router->post('/admin/pages/{id}/copy-language-blocks', [AdminPageController::class, 'copyLanguageBlocks']);
-$router->get('/admin/pages/{id}/create-translation', [AdminPageController::class, 'createTranslation']);
+$router->post('/admin/pages/{id}/create-translation', [AdminPageController::class, 'createTranslation']);
 $router->post('/admin/pages/{id}/duplicate', [AdminPageController::class, 'duplicate']);
 $router->post('/admin/pages/{id}/blocks/add', [AdminBlockController::class, 'store']);
 
@@ -163,7 +163,7 @@ $router->post('/admin/projects/create', [AdminProjectController::class, 'store']
 $router->get('/admin/projects/{id}/edit', [AdminProjectController::class, 'edit']);
 $router->post('/admin/projects/{id}/edit', [AdminProjectController::class, 'update']);
 $router->post('/admin/projects/{id}/delete', [AdminProjectController::class, 'destroy']);
-$router->get('/admin/projects/{id}/create-translation', [AdminProjectController::class, 'createTranslation']);
+$router->post('/admin/projects/{id}/create-translation', [AdminProjectController::class, 'createTranslation']);
 $router->post('/admin/projects/{id}/duplicate', [AdminProjectController::class, 'duplicate']);
 
 // --- Admin: команда ---

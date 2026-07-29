@@ -901,6 +901,15 @@ INSERT INTO blocks (page_id, lang, type, title, data, sort_order, is_active, cre
 SELECT @home, 'ru', 'news_latest', 'Последние новости', '{"title":"Последние новости","limit":3,"_spacing":"premium"}', 3, 1, NOW()
 FROM DUAL WHERE @seed = 1;
 
+-- Корень каждой независимой языковой группы должен быть ненулевым уже после
+-- чистой установки, до первого открытия редактора.
+UPDATE news SET translation_group_id = id
+WHERE translation_group_id IS NULL OR translation_group_id = 0;
+UPDATE pages SET translation_group_id = id
+WHERE translation_group_id IS NULL OR translation_group_id = 0;
+UPDATE projects SET translation_group_id = id
+WHERE translation_group_id IS NULL OR translation_group_id = 0;
+
 -- ---------------------------------------------------------------------------
 -- Применённые миграции (для CLI database/migrate.php)
 -- ---------------------------------------------------------------------------
@@ -1000,7 +1009,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_07_25_menu_badge_pos.sql'),
     ('2026_07_26_menu_language_isolation.sql'),
     ('2026_07_28_menu_hide_title.sql'),
-    ('2026_07_29_page_hierarchy.sql')
+    ('2026_07_29_page_hierarchy.sql'),
+    ('2026_07_29_translation_group_integrity.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

@@ -23,9 +23,15 @@ foreach ($siteLangs as $code):
         <a class="u-inline-da0ab63f64" href="/admin/<?= urlencode($module) ?>/<?= $targetId ?>/edit"
            title="Редактировать перевод на язык <?= htmlspecialchars(strtoupper($code), ENT_QUOTES) ?> (#<?= $targetId ?>)"
           ><?= htmlspecialchars($code, ENT_QUOTES) ?></a>
+    <?php elseif ($origId > 0): ?>
+        <form method="post" action="/admin/<?= rawurlencode($module) ?>/<?= $origId ?>/create-translation" class="translation-create-form">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Core\Csrf::token(), ENT_QUOTES) ?>">
+            <input type="hidden" name="target_lang" value="<?= htmlspecialchars($code, ENT_QUOTES) ?>">
+            <button type="submit" class="u-inline-7fca5bade1"
+                    title="Создать перевод на язык <?= htmlspecialchars(strtoupper($code), ENT_QUOTES) ?>"
+                   >+<?= htmlspecialchars($code, ENT_QUOTES) ?></button>
+        </form>
     <?php else: ?>
-        <a class="u-inline-7fca5bade1" href="<?= $origId > 0 ? '/admin/' . urlencode($module) . '/' . $origId . '/create-translation?target_lang=' . urlencode($code) : '#' ?>"
-           title="Создать перевод на язык <?= htmlspecialchars(strtoupper($code), ENT_QUOTES) ?>"
-          >+<?= htmlspecialchars($code, ENT_QUOTES) ?></a>
+        <span class="u-inline-7fca5bade1" title="Сначала сохраните запись">+<?= htmlspecialchars($code, ENT_QUOTES) ?></span>
     <?php endif; ?>
 <?php endforeach; ?>

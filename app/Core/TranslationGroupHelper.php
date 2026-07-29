@@ -155,198 +155,274 @@ final class TranslationGroupHelper
     {
         self::ensureSchema();
 
-        $stmt = Database::pdo()->prepare("SELECT * FROM {$table} WHERE id = :id LIMIT 1");
-        $stmt->execute([':id' => $originalId]);
-        $orig = $stmt->fetch();
-        if (!$orig) {
-            throw new \InvalidArgumentException("Запись #{$originalId} не найдена в таблице {$table}");
-        }
-
-        $groupId = (int) ($orig['translation_group_id'] ?? $originalId);
-        if ((int) $orig['translation_group_id'] === 0) {
-            Database::pdo()->prepare("UPDATE {$table} SET translation_group_id = :gid WHERE id = :id")
-                ->execute([':gid' => $originalId, ':id' => $originalId]);
-        }
-
-        // Есть ли уже перевод на данный язык?
-        $stmtExist = Database::pdo()->prepare(
-            "SELECT id FROM {$table} WHERE translation_group_id = :gid AND lang = :lang AND deleted_at IS NULL LIMIT 1"
-        );
-        $stmtExist->execute([':gid' => $groupId, ':lang' => $targetLang]);
-        $existingId = $stmtExist->fetchColumn();
-        if ($existingId !== false) {
-            return (int) $existingId;
-        }
-
-        $newSlug = Slug::unique(
-            (string) ($orig['slug'] ?? 'item') . '-' . $targetLang,
-            static function (string $candidate, ?int $_excludeId) use ($table, $targetLang): bool {
-                $check = Database::pdo()->prepare(
-                    "SELECT COUNT(*) FROM {$table} WHERE slug = :slug AND lang = :lang AND deleted_at IS NULL"
-                );
-                $check->execute([':slug' => $candidate, ':lang' => $targetLang]);
-                return (int) $check->fetchColumn() > 0;
-            }
-        );
-        if ($table === 'news') {
-            $ins = Database::pdo()->prepare(
-                "INSERT INTO news (title, slug, excerpt, badge, content, image, video_url, audio_url, audio_title, hashtags, press_release_url, key_points, event_meta, timeline_json, docs, source_note, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
-                 VALUES (:t, :s, :e, :b, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, 'draft', NOW(), :auth, :lang, :gid, NOW())"
-            );
-            $ins->execute([
-                ':t' => ($orig['title'] ?? '') . ' (' . strtoupper($targetLang) . ')',
-                ':s' => $newSlug,
-                ':e' => $orig['excerpt'] ?? null,
-                ':b' => $orig['badge'] ?? null,
-                ':c' => $orig['content'] ?? null,
-                ':img' => $orig['image'] ?? null,
-                ':v' => $orig['video_url'] ?? null,
-                ':a' => $orig['audio_url'] ?? null,
-                ':at' => $orig['audio_title'] ?? null,
-                ':h' => $orig['hashtags'] ?? null,
-                ':pr' => $orig['press_release_url'] ?? null,
-                ':kp' => $orig['key_points'] ?? null,
-                ':em' => $orig['event_meta'] ?? null,
-                ':tj' => $orig['timeline_json'] ?? null,
-                ':dc' => $orig['docs'] ?? null,
-                ':sn' => $orig['source_note'] ?? null,
-                ':lt' => $orig['layout_type'] ?? 'standard',
-                ':sl' => $orig['sidebar_layout'] ?? 'right_sidebar',
-                ':fx' => $orig['focal_x'] ?? null,
-                ':fy' => $orig['focal_y'] ?? null,
-                ':mt' => $orig['meta_title'] ?? null,
-                ':md' => $orig['meta_description'] ?? null,
-                ':auth' => $orig['author_id'] ?? null,
-                ':lang' => $targetLang,
-                ':gid' => $groupId,
-            ]);
-        } elseif ($table === 'pages') {
-            $ins = Database::pdo()->prepare(
-                "INSERT INTO pages (title, slug, meta_title, meta_description, `lead`, status, is_home, layout_type, hide_chrome, transparent_header, lang, translation_group_id, parent_id, created_at)
-                 VALUES (:t, :s, :mt, :md, :l, 'draft', 0, :lt, :hc, :th, :lang, :gid, :parent_id, NOW())"
-            );
-            $ins->execute([
-                ':t' => ($orig['title'] ?? '') . ' (' . strtoupper($targetLang) . ')',
-                ':s' => $newSlug,
-                ':mt' => $orig['meta_title'] ?? null,
-                ':md' => $orig['meta_description'] ?? null,
-                ':l' => $orig['lead'] ?? null,
-                ':lt' => $orig['layout_type'] ?? 'no_sidebar',
-                ':hc' => $orig['hide_chrome'] ?? 0,
-                ':th' => $orig['transparent_header'] ?? 0,
-                ':lang' => $targetLang,
-                ':gid' => $groupId,
-                ':parent_id' => !empty($orig['parent_id']) ? (int) $orig['parent_id'] : null,
-            ]);
-        } elseif ($table === 'projects') {
-            $ins = Database::pdo()->prepare(
-                "INSERT INTO projects (title, slug, description, cover_image, status, is_featured, sort_order, lang, translation_group_id, created_at)
-                 VALUES (:t, :s, :d, :ci, 'draft', :if, :so, :lang, :gid, NOW())"
-            );
-            $ins->execute([
-                ':t' => ($orig['title'] ?? '') . ' (' . strtoupper($targetLang) . ')',
-                ':s' => $newSlug,
-                ':d' => $orig['description'] ?? null,
-                ':ci' => $orig['cover_image'] ?? null,
-                ':if' => $orig['is_featured'] ?? 0,
-                ':so' => $orig['sort_order'] ?? 0,
-                ':lang' => $targetLang,
-                ':gid' => $groupId,
-            ]);
-        } else {
+        if (!in_array($table, ['news', 'pages', 'projects'], true)) {
             throw new \InvalidArgumentException("Неподдерживаемая таблица {$table}");
         }
 
-        $newId = (int) Database::pdo()->lastInsertId();
-        if ($table === 'pages' && $newId > 0) {
-            self::copyBlocksForTranslation($originalId, $newId, $targetLang);
+        $pdo = Database::pdo();
+        $ownsTransaction = !$pdo->inTransaction();
+        if ($ownsTransaction) {
+            $pdo->beginTransaction();
         }
 
-        return $newId;
-    }
-
-    private static function copyBlocksForTranslation(int $origPageId, int $newPageId, string $targetLang): void
-    {
-        $pdo = Database::pdo();
         try {
-            $pageLangStmt = $pdo->prepare('SELECT lang FROM pages WHERE id = :id LIMIT 1');
-            $pageLangStmt->execute([':id' => $origPageId]);
-            $originalLang = (string) ($pageLangStmt->fetchColumn() ?: Language::defaultCode());
-
-            // В старых данных RU и UZ могли лежать в одном page_id. Если там
-            // уже есть стек целевого языка, переносим именно его; иначе берём
-            // стек исходной страницы и назначаем копии новый язык.
-            $sourceLang = null;
-            $countByLang = $pdo->prepare(
-                'SELECT COUNT(*) FROM blocks WHERE page_id = :page_id AND lang = :lang'
+            $groupStmt = $pdo->prepare(
+                "SELECT COALESCE(NULLIF(translation_group_id, 0), id)
+                 FROM {$table}
+                 WHERE id = :id AND deleted_at IS NULL
+                 LIMIT 1"
             );
-            foreach (array_values(array_unique([$targetLang, $originalLang, ''])) as $candidateLang) {
-                $countByLang->execute([
-                    ':page_id' => $origPageId,
-                    ':lang' => $candidateLang,
-                ]);
-                if ((int) $countByLang->fetchColumn() > 0) {
-                    $sourceLang = $candidateLang;
-                    break;
-                }
+            $groupStmt->execute([':id' => $originalId]);
+            $groupId = $groupStmt->fetchColumn();
+            if ($groupId === false) {
+                throw new \InvalidArgumentException("Запись #{$originalId} не найдена в таблице {$table}");
             }
-            if ($sourceLang === null) {
-                return;
+            $groupId = (int) $groupId;
+
+            // Все запросы одной языковой группы блокируют один и тот же набор
+            // строк в стабильном порядке. Это сериализует создание перевода,
+            // даже если запросы пришли с разных языковых версий или старый
+            // числовой идентификатор корня больше не существует.
+            $groupLock = $pdo->prepare(
+                "SELECT id
+                 FROM {$table}
+                 WHERE id = :id OR translation_group_id = :id2
+                 ORDER BY id
+                 FOR UPDATE"
+            );
+            $groupLock->execute([':id' => $groupId, ':id2' => $groupId]);
+            if ($groupLock->fetchAll(PDO::FETCH_COLUMN) === []) {
+                throw new \RuntimeException("Не удалось заблокировать группу перевода #{$groupId}");
             }
 
             $stmt = $pdo->prepare(
-                'SELECT *
-                 FROM blocks
-                 WHERE page_id = :pid
-                   AND lang = :source_lang
-                   AND parent_block_id IS NULL
-                 ORDER BY sort_order ASC, id ASC'
+                "SELECT *
+                 FROM {$table}
+                 WHERE id = :id AND deleted_at IS NULL
+                 LIMIT 1
+                 FOR UPDATE"
             );
-            $stmt->execute([':pid' => $origPageId, ':source_lang' => $sourceLang]);
-            $topBlocks = $stmt->fetchAll();
+            $stmt->execute([':id' => $originalId]);
+            $orig = $stmt->fetch();
+            if (!$orig) {
+                throw new \InvalidArgumentException("Запись #{$originalId} не найдена в таблице {$table}");
+            }
 
-            foreach ($topBlocks as $b) {
+            if ((int) ($orig['translation_group_id'] ?? 0) !== $groupId) {
+                $pdo->prepare("UPDATE {$table} SET translation_group_id = :gid WHERE id = :id")
+                    ->execute([':gid' => $groupId, ':id' => $originalId]);
+            }
+
+            // После блокировки корня повторно проверяем наличие целевого языка.
+            $stmtExist = $pdo->prepare(
+                "SELECT id
+                 FROM {$table}
+                 WHERE translation_group_id = :gid
+                   AND lang = :lang
+                   AND deleted_at IS NULL
+                 LIMIT 1
+                 FOR UPDATE"
+            );
+            $stmtExist->execute([':gid' => $groupId, ':lang' => $targetLang]);
+            $existingId = $stmtExist->fetchColumn();
+            if ($existingId !== false) {
+                if ($ownsTransaction) {
+                    $pdo->commit();
+                }
+
+                return (int) $existingId;
+            }
+
+            $newSlug = Slug::unique(
+                (string) ($orig['slug'] ?? 'item') . '-' . $targetLang,
+                static function (string $candidate, ?int $_excludeId) use ($pdo, $table, $targetLang): bool {
+                    $check = $pdo->prepare(
+                        "SELECT COUNT(*) FROM {$table} WHERE slug = :slug AND lang = :lang AND deleted_at IS NULL"
+                    );
+                    $check->execute([':slug' => $candidate, ':lang' => $targetLang]);
+                    return (int) $check->fetchColumn() > 0;
+                }
+            );
+            if ($table === 'news') {
                 $ins = $pdo->prepare(
-                    "INSERT INTO blocks (page_id, parent_block_id, column_index, lang, type, title, data, custom_css, sort_order, is_active, created_at)
-                     VALUES (:pid, NULL, :ci, :lang, :type, :title, :data, :css, :so, :act, NOW())"
+                    "INSERT INTO news (title, slug, excerpt, badge, content, image, video_url, audio_url, audio_title, hashtags, press_release_url, key_points, event_meta, timeline_json, docs, source_note, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
+                     VALUES (:t, :s, :e, :b, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, 'draft', NOW(), :auth, :lang, :gid, NOW())"
                 );
                 $ins->execute([
-                    ':pid' => $newPageId,
-                    ':ci' => $b['column_index'] ?? 0,
+                    ':t' => ($orig['title'] ?? '') . ' (' . strtoupper($targetLang) . ')',
+                    ':s' => $newSlug,
+                    ':e' => $orig['excerpt'] ?? null,
+                    ':b' => $orig['badge'] ?? null,
+                    ':c' => $orig['content'] ?? null,
+                    ':img' => $orig['image'] ?? null,
+                    ':v' => $orig['video_url'] ?? null,
+                    ':a' => $orig['audio_url'] ?? null,
+                    ':at' => $orig['audio_title'] ?? null,
+                    ':h' => $orig['hashtags'] ?? null,
+                    ':pr' => $orig['press_release_url'] ?? null,
+                    ':kp' => $orig['key_points'] ?? null,
+                    ':em' => $orig['event_meta'] ?? null,
+                    ':tj' => $orig['timeline_json'] ?? null,
+                    ':dc' => $orig['docs'] ?? null,
+                    ':sn' => $orig['source_note'] ?? null,
+                    ':lt' => $orig['layout_type'] ?? 'standard',
+                    ':sl' => $orig['sidebar_layout'] ?? 'right_sidebar',
+                    ':fx' => $orig['focal_x'] ?? null,
+                    ':fy' => $orig['focal_y'] ?? null,
+                    ':mt' => $orig['meta_title'] ?? null,
+                    ':md' => $orig['meta_description'] ?? null,
+                    ':auth' => $orig['author_id'] ?? null,
                     ':lang' => $targetLang,
-                    ':type' => $b['type'],
-                    ':title' => $b['title'],
-                    ':data' => $b['data'],
-                    ':css' => $b['custom_css'] ?? null,
-                    ':so' => $b['sort_order'],
-                    ':act' => $b['is_active'] ?? 1,
+                    ':gid' => $groupId,
                 ]);
-                $newParentId = (int) $pdo->lastInsertId();
-
-                $stmtKids = $pdo->prepare("SELECT * FROM blocks WHERE parent_block_id = :pbid ORDER BY sort_order ASC, id ASC");
-                $stmtKids->execute([':pbid' => $b['id']]);
-                $kids = $stmtKids->fetchAll();
-
-                foreach ($kids as $k) {
-                    $insKid = $pdo->prepare(
-                        "INSERT INTO blocks (page_id, parent_block_id, column_index, lang, type, title, data, custom_css, sort_order, is_active, created_at)
-                         VALUES (:pid, :pbid, :ci, :lang, :type, :title, :data, :css, :so, :act, NOW())"
-                    );
-                    $insKid->execute([
-                        ':pid' => $newPageId,
-                        ':pbid' => $newParentId,
-                        ':ci' => $k['column_index'] ?? 0,
-                        ':lang' => $targetLang,
-                        ':type' => $k['type'],
-                        ':title' => $k['title'],
-                        ':data' => $k['data'],
-                        ':css' => $k['custom_css'] ?? null,
-                        ':so' => $k['sort_order'],
-                        ':act' => $k['is_active'] ?? 1,
-                    ]);
-                }
+            } elseif ($table === 'pages') {
+                $ins = $pdo->prepare(
+                    "INSERT INTO pages (title, slug, meta_title, meta_description, `lead`, status, is_home, layout_type, hide_chrome, transparent_header, lang, translation_group_id, parent_id, created_at)
+                     VALUES (:t, :s, :mt, :md, :l, 'draft', 0, :lt, :hc, :th, :lang, :gid, :parent_id, NOW())"
+                );
+                $ins->execute([
+                    ':t' => ($orig['title'] ?? '') . ' (' . strtoupper($targetLang) . ')',
+                    ':s' => $newSlug,
+                    ':mt' => $orig['meta_title'] ?? null,
+                    ':md' => $orig['meta_description'] ?? null,
+                    ':l' => $orig['lead'] ?? null,
+                    ':lt' => $orig['layout_type'] ?? 'no_sidebar',
+                    ':hc' => $orig['hide_chrome'] ?? 0,
+                    ':th' => $orig['transparent_header'] ?? 0,
+                    ':lang' => $targetLang,
+                    ':gid' => $groupId,
+                    ':parent_id' => !empty($orig['parent_id']) ? (int) $orig['parent_id'] : null,
+                ]);
+            } else {
+                $ins = $pdo->prepare(
+                    "INSERT INTO projects (title, slug, description, cover_image, status, is_featured, sort_order, lang, translation_group_id, created_at)
+                     VALUES (:t, :s, :d, :ci, 'draft', :if, :so, :lang, :gid, NOW())"
+                );
+                $ins->execute([
+                    ':t' => ($orig['title'] ?? '') . ' (' . strtoupper($targetLang) . ')',
+                    ':s' => $newSlug,
+                    ':d' => $orig['description'] ?? null,
+                    ':ci' => $orig['cover_image'] ?? null,
+                    ':if' => $orig['is_featured'] ?? 0,
+                    ':so' => $orig['sort_order'] ?? 0,
+                    ':lang' => $targetLang,
+                    ':gid' => $groupId,
+                ]);
             }
-        } catch (\Throwable) {}
+
+            $newId = (int) $pdo->lastInsertId();
+            if ($table === 'pages' && $newId > 0) {
+                self::copyBlocksForTranslation($pdo, $originalId, $newId, $targetLang);
+            }
+
+            if ($ownsTransaction) {
+                $pdo->commit();
+            }
+
+            return $newId;
+        } catch (\Throwable $e) {
+            if ($ownsTransaction && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    private static function copyBlocksForTranslation(
+        PDO $pdo,
+        int $origPageId,
+        int $newPageId,
+        string $targetLang
+    ): void
+    {
+        $pageLangStmt = $pdo->prepare('SELECT lang FROM pages WHERE id = :id LIMIT 1');
+        $pageLangStmt->execute([':id' => $origPageId]);
+        $originalLang = (string) ($pageLangStmt->fetchColumn() ?: Language::defaultCode());
+
+        // В старых данных RU и UZ могли лежать в одном page_id. Если там
+        // уже есть стек целевого языка, переносим именно его; иначе берём
+        // стек исходной страницы и назначаем копии новый язык.
+        $sourceLang = null;
+        $countByLang = $pdo->prepare(
+            'SELECT COUNT(*) FROM blocks WHERE page_id = :page_id AND lang = :lang'
+        );
+        foreach (array_values(array_unique([$targetLang, $originalLang, ''])) as $candidateLang) {
+            $countByLang->execute([
+                ':page_id' => $origPageId,
+                ':lang' => $candidateLang,
+            ]);
+            if ((int) $countByLang->fetchColumn() > 0) {
+                $sourceLang = $candidateLang;
+                break;
+            }
+        }
+        if ($sourceLang === null) {
+            return;
+        }
+
+        $stmt = $pdo->prepare(
+            'SELECT *
+             FROM blocks
+             WHERE page_id = :pid
+               AND lang = :source_lang
+               AND parent_block_id IS NULL
+             ORDER BY sort_order ASC, id ASC'
+        );
+        $stmt->execute([':pid' => $origPageId, ':source_lang' => $sourceLang]);
+        $topBlocks = $stmt->fetchAll();
+
+        foreach ($topBlocks as $b) {
+            $ins = $pdo->prepare(
+                "INSERT INTO blocks (page_id, parent_block_id, column_index, lang, type, title, data, custom_css, sort_order, is_active, created_at)
+                 VALUES (:pid, NULL, :ci, :lang, :type, :title, :data, :css, :so, :act, NOW())"
+            );
+            $ins->execute([
+                ':pid' => $newPageId,
+                ':ci' => $b['column_index'] ?? 0,
+                ':lang' => $targetLang,
+                ':type' => $b['type'],
+                ':title' => $b['title'],
+                ':data' => $b['data'],
+                ':css' => $b['custom_css'] ?? null,
+                ':so' => $b['sort_order'],
+                ':act' => $b['is_active'] ?? 1,
+            ]);
+            $newParentId = (int) $pdo->lastInsertId();
+
+            $stmtKids = $pdo->prepare(
+                'SELECT *
+                 FROM blocks
+                 WHERE page_id = :page_id
+                   AND parent_block_id = :parent_block_id
+                   AND lang = :source_lang
+                 ORDER BY sort_order ASC, id ASC'
+            );
+            $stmtKids->execute([
+                ':page_id' => $origPageId,
+                ':parent_block_id' => $b['id'],
+                ':source_lang' => $sourceLang,
+            ]);
+            $kids = $stmtKids->fetchAll();
+
+            foreach ($kids as $k) {
+                $insKid = $pdo->prepare(
+                    "INSERT INTO blocks (page_id, parent_block_id, column_index, lang, type, title, data, custom_css, sort_order, is_active, created_at)
+                     VALUES (:pid, :pbid, :ci, :lang, :type, :title, :data, :css, :so, :act, NOW())"
+                );
+                $insKid->execute([
+                    ':pid' => $newPageId,
+                    ':pbid' => $newParentId,
+                    ':ci' => $k['column_index'] ?? 0,
+                    ':lang' => $targetLang,
+                    ':type' => $k['type'],
+                    ':title' => $k['title'],
+                    ':data' => $k['data'],
+                    ':css' => $k['custom_css'] ?? null,
+                    ':so' => $k['sort_order'],
+                    ':act' => $k['is_active'] ?? 1,
+                ]);
+            }
+        }
     }
 
     /**
@@ -433,9 +509,15 @@ final class TranslationGroupHelper
                                         ✏ Редактировать (#<?= (int) $tRecord['id'] ?>)
                                     </a>
                                 <?php elseif ($recordId > 0): ?>
-                                    <a href="/admin/<?= $module ?>/<?= $recordId ?>/create-translation?target_lang=<?= $code ?>" class="btn btn--small btn--primary u-inline-64c12efe40">
+                                    <button type="submit"
+                                            name="target_lang"
+                                            value="<?= htmlspecialchars($code, ENT_QUOTES) ?>"
+                                            formaction="/admin/<?= rawurlencode($module) ?>/<?= $recordId ?>/create-translation"
+                                            formmethod="post"
+                                            formnovalidate
+                                            class="btn btn--small btn--primary u-inline-64c12efe40">
                                         ➕ Создать перевод
-                                    </a>
+                                    </button>
                                 <?php else: ?>
                                     <span class="u-inline-d716a45428">Сначала сохраните запись</span>
                                 <?php endif; ?>

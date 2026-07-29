@@ -159,8 +159,9 @@ final class PageController
     public function createTranslation(array $params): void
     {
         Auth::requireLogin();
+        Csrf::verifyRequest();
         $id = (int) $params['id'];
-        $targetLang = trim((string) ($_GET['target_lang'] ?? ''));
+        $targetLang = trim((string) ($_POST['target_lang'] ?? ''));
         if ($targetLang === '' || !Language::isActive($targetLang)) {
             Flash::error('Указан некорректный язык перевода.');
             header('Location: /admin/pages/' . $id . '/edit');
