@@ -26,12 +26,23 @@ final class RepositoryController
         Auth::requireSuperAdmin();
 
         $query = trim((string) ($_GET['q'] ?? ''));
+        $files = RepoFile::all($query);
+        $pending = RepoFile::pending();
+        $categories = RepoCategory::flatOptions();
+        $users = RepoUser::all();
+
         View::render('admin/repository/files', [
-            'files' => RepoFile::all($query),
-            'pending' => RepoFile::pending(),
+            'files' => $files,
+            'pending' => $pending,
             'query' => $query,
-            'categories' => RepoCategory::flatOptions(),
+            'categories' => $categories,
             'repoLogo' => (string) Setting::get('repo_logo', ''),
+            'stats' => [
+                'total_files' => count($query === '' ? $files : RepoFile::all('')),
+                'pending_files' => count($pending),
+                'total_categories' => count($categories),
+                'total_users' => count($users),
+            ],
         ]);
     }
 

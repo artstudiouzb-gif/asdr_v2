@@ -49,7 +49,7 @@ root@127.0.0.1 без пароля. Если админ-пароль неизв�
 
 ## Проверки (вместо ручного клика)
 ```bash
-# Полный прогон: все 609 сценариев; без TEST_DB_* DB-сценарии пропускаются
+# Полный прогон: все 652 сценария; без TEST_DB_* DB-сценарии пропускаются
 TEST_DB_HOST=127.0.0.1 TEST_DB_DATABASE=artstudio_test TEST_DB_USERNAME=root TEST_DB_PASSWORD= php tests/run.php
 
 # Smoke-обход всего сайта (HTTP+PHP-фаталы), RU+UZ, публичка и вся админка

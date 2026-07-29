@@ -195,17 +195,56 @@
     })();
 
     // Переключатели главного меню: бургер (мобильные / макет «боковая панель»),
-    // а также фон и кнопка закрытия off-canvas панели.
+    // а также фон и кнопка закрытия off-canvas панели с полной поддержкой доступности (a11y).
+    var lastBurgerTrigger = null;
+
+    var setBackgroundInert = function (isInert) {
+        var targets = document.querySelectorAll('header.site-header, main.site-content, footer.site-footer');
+        targets.forEach(function (el) {
+            if (isInert) {
+                el.setAttribute('aria-hidden', 'true');
+                if ('inert' in el) { el.inert = true; }
+            } else {
+                el.removeAttribute('aria-hidden');
+                if ('inert' in el) { el.inert = false; }
+            }
+        });
+    };
+
     var updateMobileMenuState = function (open) {
+        var drawer = document.querySelector('[data-drawer]');
         if (open) {
             document.body.classList.add('mobile-menu-open');
+            if (drawer) {
+                drawer.removeAttribute('aria-hidden');
+                drawer.setAttribute('aria-modal', 'true');
+            }
+            setBackgroundInert(true);
         } else {
             document.body.classList.remove('mobile-menu-open');
+            if (drawer) {
+                drawer.setAttribute('aria-hidden', 'true');
+                drawer.removeAttribute('aria-modal');
+            }
+            setBackgroundInert(false);
         }
+
         var state = open ? 'true' : 'false';
         document.querySelectorAll('[data-mobile-menu-toggle], .site-burger').forEach(function (el) {
             el.setAttribute('aria-expanded', state);
         });
+
+        if (open && drawer) {
+            var closeBtn = drawer.querySelector('.site-drawer__close');
+            var firstFocusable = closeBtn || drawer.querySelector('a[href], button:not([disabled])');
+            if (firstFocusable) {
+                setTimeout(function () {
+                    firstFocusable.focus();
+                }, 50);
+            }
+        } else if (!open && lastBurgerTrigger) {
+            try { lastBurgerTrigger.focus(); } catch (err) {}
+        }
     };
 
     var handleToggleClick = function (e) {
@@ -213,18 +252,43 @@
         if (!toggle) { return; }
         e.preventDefault();
         var open = !document.body.classList.contains('mobile-menu-open');
+        if (open && toggle.classList.contains('site-burger')) {
+            lastBurgerTrigger = toggle;
+        }
         updateMobileMenuState(open);
     };
 
     document.addEventListener('click', handleToggleClick);
 
-    var handleEscapeMenu = function (e) {
+    var handleMenuKeydown = function (e) {
+        if (!document.body.classList.contains('mobile-menu-open')) { return; }
+
         var isEscape = e.key === 'Escape' || e.key === 'Esc' || e.code === 'Escape' || e.keyCode === 27;
-        if (isEscape && document.body.classList.contains('mobile-menu-open')) {
+        if (isEscape) {
+            e.preventDefault();
             updateMobileMenuState(false);
+            return;
+        }
+
+        if (e.key === 'Tab' || e.keyCode === 9) {
+            var drawer = document.querySelector('[data-drawer]');
+            if (!drawer) { return; }
+            var focusables = drawer.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+            if (!focusables.length) { return; }
+
+            var firstEl = focusables[0];
+            var lastEl = focusables[focusables.length - 1];
+
+            if (e.shiftKey && document.activeElement === firstEl) {
+                e.preventDefault();
+                lastEl.focus();
+            } else if (!e.shiftKey && document.activeElement === lastEl) {
+                e.preventDefault();
+                firstEl.focus();
+            }
         }
     };
-    document.addEventListener('keydown', handleEscapeMenu);
+    document.addEventListener('keydown', handleMenuKeydown);
 
     document.querySelectorAll('.site-drawer__panel .site-menu__link').forEach(function (link) {
         link.addEventListener('click', function () {

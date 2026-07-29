@@ -401,8 +401,9 @@ $searchHtml = $searchType === 'overlay' ? $overlaySearchHtml : $inlineSearchHtml
 
 // --- Бургер для мобильного меню ---
 $burgerHtml = $menuHtml !== ''
-    ? '<button type="button" class="site-burger" data-mobile-menu-toggle aria-label="' . $et('Меню') . '" aria-expanded="false"><span></span><span></span><span></span></button>'
+    ? '<button type="button" class="site-burger" data-mobile-menu-toggle aria-label="' . $et('Меню') . '" aria-controls="site-drawer" aria-expanded="false"><span></span><span></span><span></span></button>'
     : '';
+
 
 // --- Макет шапки: 4 варианта ---
 // stacked  — верхний ряд + полноширинная навигационная полоса под ним;
@@ -739,7 +740,7 @@ $headerClasses = implode(' ', array_filter($headerClasses));
 <?php if ($drawerMenu !== ''): ?>
 <?php // Off-canvas меню вынесено за пределы <header>, чтобы position:fixed не
       // зависел от containing block шапки (sticky/трансформации). ?>
-<div class="site-drawer" data-drawer>
+<div class="site-drawer" id="site-drawer" data-drawer aria-hidden="true">
     <button type="button" class="site-drawer__backdrop" data-mobile-menu-toggle aria-label="<?= $et('Закрыть меню') ?>" tabindex="-1"></button>
     <div class="site-drawer__panel" role="dialog" aria-label="<?= $et('Меню') ?>" aria-modal="true">
         <button type="button" class="site-drawer__close" data-mobile-menu-toggle aria-label="<?= $et('Закрыть меню') ?>" aria-expanded="false">&times;</button>

@@ -1715,12 +1715,13 @@
     })();
 
     // --- Универсальная командная палитра (Ctrl + K / Cmd + K) ---
+    // --- Универсальная командная палитра (Ctrl + K / Cmd + K) ---
     (function () {
         var paletteHtml = '<div class="admin-cmd-palette-overlay u-inline-58d7c6be2b" data-cmd-overlay>'
-            + '<div class="admin-cmd-palette-modal u-inline-27aa68da7d">'
+            + '<div class="admin-cmd-palette-modal u-inline-27aa68da7d" role="dialog" aria-modal="true" aria-label="Командная палитра">'
             + '<div class="u-inline-907d56949b">'
             + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
-            + '<input class="u-inline-7180243890" type="text" data-cmd-input placeholder="Введите название раздела, страницы или действие...">'
+            + '<input class="u-inline-7180243890" type="text" data-cmd-input placeholder="Введите название раздела, страницы или действие..." aria-label="Поиск по разделу или действию">'
             + '<kbd class="u-inline-8d83117354">ESC</kbd>'
             + '</div>'
             + '<div class="admin-cmd-results u-inline-afdf6b2045" data-cmd-results>'
@@ -1737,8 +1738,11 @@
         var input = document.querySelector('[data-cmd-input]');
         var resultsContainer = document.querySelector('[data-cmd-results]');
         var selectedIdx = 0;
+        var matchedItems = [];
+        var lastActiveElement = null;
+        var searchTimer = null;
 
-        var commands = [
+        var allCommands = [
             { icon: '📝', title: 'Новости', desc: 'Управление публикациями и новостями', url: '/admin/news' },
             { icon: '➕', title: 'Добавить новую новость', desc: 'Создать статью или анонс', url: '/admin/news/create' },
             { icon: '📄', title: 'Страницы', desc: 'Структура и разделы сайта', url: '/admin/pages' },
@@ -1753,32 +1757,99 @@
             { icon: '🌐', title: 'Перейти на сайт', desc: 'Открыть публичный сайт', url: '/' }
         ];
 
-        function renderResults(filter) {
+        function isUrlAccessible(url) {
+            if (url === '/' || url === '/admin' || url === '/admin/profile') { return true; }
+            var sidebarLinks = document.querySelectorAll('.admin-nav-item[href], .admin-sidebar a[href]');
+            if (!sidebarLinks.length) { return true; }
+            for (var i = 0; i < sidebarLinks.length; i++) {
+                var href = sidebarLinks[i].getAttribute('href');
+                if (href && (href === url || url.indexOf(href) === 0)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function getAccessibleCommands() {
+            return allCommands.filter(function (c) {
+                return isUrlAccessible(c.url);
+            });
+        }
+
+        function updateSelectionVisual() {
+            var links = resultsContainer.querySelectorAll('.admin-cmd-item');
+            for (var i = 0; i < links.length; i++) {
+                if (i === selectedIdx) {
+                    links[i].classList.add('is-selected');
+                    links[i].setAttribute('aria-selected', 'true');
+                    links[i].scrollIntoView({ block: 'nearest' });
+                } else {
+                    links[i].classList.remove('is-selected');
+                    links[i].removeAttribute('aria-selected');
+                }
+            }
+        }
+
+        function renderResults(filter, serverResults) {
             filter = (filter || '').toLowerCase().trim();
-            var matched = commands.filter(function (c) {
-                return c.title.toLowerCase().indexOf(filter) !== -1 || c.desc.toLowerCase().indexOf(filter) !== -1;
+            var availableCmds = getAccessibleCommands();
+            var matchedCmds = availableCmds.filter(function (c) {
+                return !filter || c.title.toLowerCase().indexOf(filter) !== -1 || c.desc.toLowerCase().indexOf(filter) !== -1;
             });
 
-            if (!matched.length) {
+            matchedItems = matchedCmds.map(function (c) {
+                return { icon: c.icon, title: c.title, desc: c.desc, url: c.url, type: 'Раздел' };
+            });
+
+            if (serverResults && serverResults.length) {
+                serverResults.forEach(function (r) {
+                    matchedItems.push({
+                        icon: '🔍',
+                        title: r.title,
+                        desc: r.type || 'Объект',
+                        url: r.url,
+                        type: r.type || 'Объект'
+                    });
+                });
+            }
+
+            if (!matchedItems.length) {
                 resultsContainer.innerHTML = '<div class="u-inline-f16ce3d7a8">Ничего не найдено</div>';
                 return;
             }
 
+            if (selectedIdx >= matchedItems.length) {
+                selectedIdx = 0;
+            }
+
             var html = '';
-            matched.forEach(function (c, idx) {
+            matchedItems.forEach(function (c, idx) {
                 var isSel = idx === selectedIdx;
-                html += '<a href="' + c.url + '" class="admin-cmd-item u-inline-9e9c073f14">'
+                html += '<a href="' + c.url + '" class="admin-cmd-item u-inline-9e9c073f14' + (isSel ? ' is-selected' : '') + '" data-cmd-index="' + idx + '">'
                     + '<span class="u-inline-da71aab0cc">' + c.icon + '</span>'
                     + '<div>'
-                    + '<div class="u-inline-3f7fce4b31">' + c.title + '</div>'
-                    + '<div class="u-inline-afa3d0ea3b">' + c.desc + '</div>'
+                    + '<div class="u-inline-3f7fce4b31"></div>'
+                    + '<div class="u-inline-afa3d0ea3b"></div>'
                     + '</div>'
                     + '</a>';
             });
             resultsContainer.innerHTML = html;
+
+            var itemElems = resultsContainer.querySelectorAll('.admin-cmd-item');
+            matchedItems.forEach(function (c, idx) {
+                if (itemElems[idx]) {
+                    var titleEl = itemElems[idx].querySelector('.u-inline-3f7fce4b31');
+                    var descEl = itemElems[idx].querySelector('.u-inline-afa3d0ea3b');
+                    if (titleEl) { titleEl.textContent = c.title; }
+                    if (descEl) { descEl.textContent = c.desc; }
+                }
+            });
+
+            updateSelectionVisual();
         }
 
         function openPalette() {
+            lastActiveElement = document.activeElement;
             overlay.classList.add('is-open');
             input.value = '';
             selectedIdx = 0;
@@ -1788,15 +1859,45 @@
 
         function closePalette() {
             overlay.classList.remove('is-open');
+            if (lastActiveElement && typeof lastActiveElement.focus === 'function') {
+                try { lastActiveElement.focus(); } catch (err) {}
+            }
         }
 
         document.addEventListener('keydown', function (e) {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+            var isK = (e.key === 'k' || e.key === 'K' || e.keyCode === 75);
+            if ((e.ctrlKey || e.metaKey) && isK) {
                 e.preventDefault();
-                if (overlay.classList.contains('is-open')) { closePalette(); } else { openPalette(); }
+                if (overlay.classList.contains('is-open')) {
+                    closePalette();
+                } else {
+                    openPalette();
+                }
+                return;
             }
-            if (e.key === 'Escape' && overlay.classList.contains('is-open')) {
+
+            if (!overlay.classList.contains('is-open')) { return; }
+
+            if (e.key === 'Escape') {
+                e.preventDefault();
                 closePalette();
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (matchedItems.length > 0) {
+                    selectedIdx = (selectedIdx + 1) % matchedItems.length;
+                    updateSelectionVisual();
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (matchedItems.length > 0) {
+                    selectedIdx = (selectedIdx - 1 + matchedItems.length) % matchedItems.length;
+                    updateSelectionVisual();
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (matchedItems[selectedIdx]) {
+                    window.location.href = matchedItems[selectedIdx].url;
+                }
             }
         });
 
@@ -1810,13 +1911,39 @@
             }
         });
 
+        resultsContainer.addEventListener('mouseover', function (e) {
+            var item = e.target.closest('.admin-cmd-item');
+            if (!item) { return; }
+            var idx = parseInt(item.getAttribute('data-cmd-index'), 10);
+            if (!isNaN(idx) && idx !== selectedIdx) {
+                selectedIdx = idx;
+                updateSelectionVisual();
+            }
+        });
+
         if (input) {
             input.addEventListener('input', function () {
                 selectedIdx = 0;
-                renderResults(input.value);
+                var q = input.value.trim();
+                renderResults(q);
+
+                clearTimeout(searchTimer);
+                if (q.length >= 2) {
+                    searchTimer = setTimeout(function () {
+                        fetch('/admin/search?q=' + encodeURIComponent(q), { credentials: 'same-origin' })
+                            .then(function (r) { return r.json(); })
+                            .then(function (data) {
+                                if (overlay.classList.contains('is-open') && input.value.trim() === q) {
+                                    renderResults(q, data.results || []);
+                                }
+                            })
+                            .catch(function () {});
+                    }, 200);
+                }
             });
         }
     })();
+
 
     // --- Глобальная обработка кнопки ИИ-Аннотации ---
     document.addEventListener('click', function (e) {

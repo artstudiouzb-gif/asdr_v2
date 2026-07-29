@@ -144,7 +144,47 @@ body[data-admin-theme="dark_emerald"] {
     --admin-muted: #94a3b8;
     --admin-border: #334155;
     --admin-surface-soft: #1e293b;
+    --admin-input-bg: #0f172a;
+    --admin-input-border: #334155;
+    --admin-input-text: #f8fafc;
+    color-scheme: dark;
 }
+
+[data-admin-theme="dark_emerald"] .admin-card,
+[data-admin-theme="dark_emerald"] .admin-box,
+[data-admin-theme="dark_emerald"] .admin-panel,
+[data-admin-theme="dark_emerald"] .admin-cmd-palette-modal,
+[data-admin-theme="dark_emerald"] .admin-table-wrap,
+[data-admin-theme="dark_emerald"] .admin-filter-bar,
+[data-admin-theme="dark_emerald"] .admin-modal__content {
+    background-color: var(--admin-card-bg, #1e293b);
+    color: var(--admin-text, #f8fafc);
+    border-color: var(--admin-border, #334155);
+}
+
+[data-admin-theme="dark_emerald"] input[type="text"],
+[data-admin-theme="dark_emerald"] input[type="search"],
+[data-admin-theme="dark_emerald"] input[type="email"],
+[data-admin-theme="dark_emerald"] input[type="password"],
+[data-admin-theme="dark_emerald"] input[type="url"],
+[data-admin-theme="dark_emerald"] input[type="number"],
+[data-admin-theme="dark_emerald"] textarea,
+[data-admin-theme="dark_emerald"] select {
+    background-color: #0f172a;
+    color: #f8fafc;
+    border-color: #334155;
+}
+
+[data-admin-theme="dark_emerald"] .admin-cmd-item {
+    color: #f8fafc;
+}
+
+[data-admin-theme="dark_emerald"] .admin-cmd-item.is-selected,
+[data-admin-theme="dark_emerald"] .admin-cmd-item:hover {
+    background-color: #334155;
+    color: #34d399;
+}
+
 
 * { box-sizing: border-box; }
 
@@ -4215,3 +4255,160 @@ body.auth-page {
 [hidden] {
     display: none !important;
 }
+
+/* ============================================================================
+   РАЗДЕЛ: Файловый репозиторий (/admin/repository)
+   ============================================================================ */
+
+.repo-subnav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--admin-border, #e2e8f0);
+}
+
+.repo-subnav__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    color: var(--admin-text-muted, #64748b);
+    font-weight: 500;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.repo-subnav__item:hover {
+    color: var(--admin-primary, #2563eb);
+    background: var(--admin-hover-bg, #f1f5f9);
+}
+
+.repo-subnav__item.is-active {
+    color: var(--admin-primary, #2563eb);
+    background: color-mix(in srgb, var(--admin-primary, #2563eb) 12%, transparent);
+    font-weight: 600;
+}
+
+.repo-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.repo-stat-card {
+    background: var(--admin-card-bg, #ffffff);
+    border: 1px solid var(--admin-border, #e2e8f0);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.repo-stat-card__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--admin-primary, #2563eb) 10%, transparent);
+    color: var(--admin-primary, #2563eb);
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.repo-stat-card--warning .repo-stat-card__icon {
+    background: color-mix(in srgb, #f59e0b 15%, transparent);
+    color: #d97706;
+}
+
+.repo-stat-card__val {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--admin-text, #0f172a);
+}
+
+.repo-stat-card__label {
+    font-size: 13px;
+    color: var(--admin-text-muted, #64748b);
+    margin-top: 2px;
+}
+
+.repo-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.repo-search-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    max-width: 480px;
+}
+
+.repo-search-form input {
+    flex: 1;
+}
+
+.repo-popover {
+    position: relative;
+    display: inline-block;
+}
+
+.repo-popover__panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 999;
+    width: 320px;
+    padding: 16px;
+    background: var(--admin-card-bg, #ffffff);
+    border: 1px solid var(--admin-border, #e2e8f0);
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+}
+
+.repo-category-indent {
+    display: inline-block;
+    width: 20px;
+    color: var(--admin-text-muted, #94a3b8);
+    font-family: monospace;
+}
+
+[data-admin-theme="dark_emerald"] .repo-subnav__item {
+    color: #94a3b8;
+}
+[data-admin-theme="dark_emerald"] .repo-subnav__item:hover {
+    color: #34d399;
+    background: #1e293b;
+}
+[data-admin-theme="dark_emerald"] .repo-subnav__item.is-active {
+    color: #34d399;
+    background: color-mix(in srgb, #10b981 18%, transparent);
+}
+[data-admin-theme="dark_emerald"] .repo-stat-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-admin-theme="dark_emerald"] .repo-stat-card__val {
+    color: #f8fafc;
+}
+[data-admin-theme="dark_emerald"] .repo-popover__panel {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+

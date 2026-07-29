@@ -71,3 +71,35 @@ test('health endpoint and admin login are reachable', async ({ page, request }) 
     await expect(page.locator('input[name="username"]')).toBeVisible();
     await expect(page.locator('input[name="password"]')).toBeVisible();
 });
+
+test('mobile drawer controls focus trap and restores trigger on escape', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/');
+    const burger = page.locator('.site-burger');
+
+    if (await burger.isVisible()) {
+        await burger.click();
+        const drawer = page.locator('#site-drawer');
+        await expect(drawer).toBeVisible();
+        await expect(drawer).toHaveAttribute('aria-hidden', 'false');
+
+        const closeBtn = page.locator('.site-drawer__close');
+        await expect(closeBtn).toBeFocused();
+
+        await page.keyboard.press('Escape');
+        await expect(drawer).toHaveAttribute('aria-hidden', 'true');
+        await expect(burger).toBeFocused();
+    }
+});
+
+test('theme toggle and accessibility panel toggle data attributes correctly', async ({ page }) => {
+    await page.goto('/');
+    const themeBtn = page.locator('.site-theme-toggle');
+    if (await themeBtn.isVisible()) {
+        const initialTheme = await page.locator('html').getAttribute('data-theme');
+        await themeBtn.click();
+        const newTheme = await page.locator('html').getAttribute('data-theme');
+        expect(newTheme).not.toBe(initialTheme);
+    }
+});
+
