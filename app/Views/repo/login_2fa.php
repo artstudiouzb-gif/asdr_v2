@@ -49,7 +49,7 @@ $hint = match (true) {
         <button type="submit" class="repo-btn">Подтвердить</button>
     </form>
     <?php if ($channels['telegram']): ?>
-        <form class="u-inline-9374e84210" method="post" action="/repo/login/2fa/resend">
+        <form class="repo-resend-form" method="post" action="/repo/login/2fa/resend">
             <?= Csrf::field() ?>
             <button type="submit" class="repo-btn repo-btn--ghost">Отправить код ещё раз</button>
         </form>

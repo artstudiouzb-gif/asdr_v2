@@ -18,12 +18,12 @@ require __DIR__ . '/layout/top.php';
 <?php endif; ?>
 
 <div class="repo-card">
-    <h2 class="u-inline-291b7bbb01">Двухфакторная аутентификация (2FA)</h2>
+    <h2 class="repo-card__title">Двухфакторная аутентификация (2FA)</h2>
     <?php if ($enabled): ?>
         <p><span class="repo-badge repo-badge--ok">Включена</span> Вход в портал защищён одноразовым кодом из приложения-аутентификатора.</p>
         <form method="post" action="/repo/security/2fa/disable" onsubmit="return confirm('Отключить двухфакторную аутентификацию?');">
             <?= Csrf::field() ?>
-            <div class="repo-field u-inline-51d6a2673c">
+            <div class="repo-field repo-field--narrow">
                 <label for="disable_totp_password">Текущий пароль</label>
                 <input type="password" id="disable_totp_password" name="password" autocomplete="current-password" required>
             </div>
@@ -46,9 +46,9 @@ require __DIR__ . '/layout/top.php';
                 <p>1. <?= $qrSvg !== '' ? 'Отсканируйте QR-код приложением (Google Authenticator, Aegis, 1Password и т.п.).' : 'Добавьте ключ в приложение-аутентификатор (Google Authenticator, Aegis, 1Password и т.п.).' ?></p>
                 <p>2. <?= $qrSvg !== '' ? 'Или введите ключ вручную:' : 'Ключ для ручного ввода:' ?> <span class="repo-secret"><?= htmlspecialchars((string) $setupSecret, ENT_QUOTES) ?></span></p>
                 <p>3. Введите текущий 6-значный код для подтверждения:</p>
-                <form class="u-inline-57f8c58df6" method="post" action="/repo/security/2fa/enable">
+                <form class="repo-form-narrow" method="post" action="/repo/security/2fa/enable">
                     <?= Csrf::field() ?>
-                    <div class="repo-field u-inline-3ef1fa1aa1">
+                    <div class="repo-field mb-2">
                         <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]*" maxlength="7" placeholder="000000" required>
                     </div>
                     <button type="submit" class="repo-btn">Включить 2FA</button>
@@ -59,14 +59,14 @@ require __DIR__ . '/layout/top.php';
 </div>
 
 <div class="repo-card">
-    <h2 class="u-inline-291b7bbb01">Вход с подтверждением в Telegram</h2>
+    <h2 class="repo-card__title">Вход с подтверждением в Telegram</h2>
     <?php if (empty($telegramConfigured)): ?>
         <p class="repo-hint">Недоступно: на сайте не настроен Telegram-бот. Обратитесь к администратору.</p>
     <?php elseif (!empty($telegramLinked)): ?>
         <p><span class="repo-badge repo-badge--ok">Подключено</span> При входе в портал одноразовый код будет отправляться в ваш Telegram.</p>
         <form method="post" action="/repo/security/telegram/disable" onsubmit="return confirm('Отвязать Telegram? Вход по коду из Telegram отключится.');">
             <?= Csrf::field() ?>
-            <div class="repo-field u-inline-51d6a2673c">
+            <div class="repo-field repo-field--narrow">
                 <label for="disable_telegram_password">Текущий пароль</label>
                 <input type="password" id="disable_telegram_password" name="password" autocomplete="current-password" required>
             </div>
@@ -74,7 +74,7 @@ require __DIR__ . '/layout/top.php';
         </form>
     <?php else: ?>
         <p><span class="repo-badge repo-badge--muted">Не подключено</span> Одноразовые коды входа можно получать в Telegram — вместо или вместе с приложением-аутентификатором.</p>
-        <ol class="u-inline-2606fe626d">
+        <ol class="repo-instruction-list">
             <li>
                 <?php if (!empty($telegramBotUsername)): ?>
                     Откройте бота <a href="https://t.me/<?= htmlspecialchars((string) $telegramBotUsername, ENT_QUOTES) ?>?start=<?= htmlspecialchars((string) ($telegramLinkCode ?? ''), ENT_QUOTES) ?>" target="_blank" rel="noopener">@<?= htmlspecialchars((string) $telegramBotUsername, ENT_QUOTES) ?></a> и нажмите «Start».
@@ -92,3 +92,4 @@ require __DIR__ . '/layout/top.php';
     <?php endif; ?>
 </div>
 <?php require __DIR__ . '/layout/bottom.php'; ?>
+
