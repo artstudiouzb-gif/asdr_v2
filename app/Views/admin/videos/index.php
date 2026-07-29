@@ -47,7 +47,7 @@ $langMap = \App\Models\Video::availableLangsForIds(array_map(static fn ($i): int
                         <?php else: ?>
                             <span class="badge">Черновик</span>
                         <?php endif; ?>
-                        <?php if (!empty($item['is_featured'])): ?><span class="badge badge--success" title="Показывается в блоке «Медиа» на главной">★ на главной</span><?php endif; ?>
+                        <?php if (!empty($item['is_featured'])): ?><span class="badge badge--success" title="Показывается в блоке «Медиа» на главной"><?= \App\Core\AdminUi::icon('home', 13) ?> на главной</span><?php endif; ?>
                     </td>
                     <td class="u-inline-a9efa5449f"><?= htmlspecialchars((string) $item['created_at'], ENT_QUOTES) ?></td>
                     <td class="data-table__actions">

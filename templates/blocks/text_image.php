@@ -13,7 +13,7 @@ $items = $data['items'] ?? [];
             <div class="textimage__features">
                 <?php foreach ($items as $item): ?>
                     <span class="textimage__feature">
-                        <?php if (!empty($item['icon_svg'])): ?><span class="textimage__feature-icon"><?= $item['icon_svg'] /* очищено при сохранении */ ?></span><?php endif; ?>
+                        <?php if (!empty($item['icon_svg'])): ?><span class="textimage__feature-icon"><?= \App\Core\Icon::render($item['icon_svg'], 22) ?></span><?php endif; ?>
                         <span class="textimage__feature-label"><?= htmlspecialchars((string) ($item['label'] ?? ''), ENT_QUOTES) ?></span>
                     </span>
                 <?php endforeach; ?>

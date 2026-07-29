@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\BlockData;
 
-use App\Core\Uploader;
+use App\Core\Icon;
 
 final class ContactCardsBlockNormalizer
 {
@@ -26,10 +26,7 @@ final class ContactCardsBlockNormalizer
                 continue;
             }
 
-            $iconSvg = trim((string) ($item['icon_svg'] ?? ''));
-            if ($iconSvg !== '') {
-                $iconSvg = Uploader::sanitizeSvgString($iconSvg);
-            }
+            $iconSvg = Icon::cleanName($item['icon_svg'] ?? '');
 
             $items[] = [
                 'icon_svg' => $iconSvg,

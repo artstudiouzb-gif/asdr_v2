@@ -22,7 +22,7 @@ $latest = $latest ?? [];
 $pageTitle = 'Репозиторий документов';
 require __DIR__ . '/layout/top.php';
 
-$docIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>';
+$docIcon = \App\Core\Icon::render('file-text', 26, 'ui-icon', 1.5);
 $extBadge = static function (array $f): string {
     $ext = strtoupper((string) pathinfo((string) $f['original_name'], PATHINFO_EXTENSION));
     return $ext !== '' ? $ext : 'FILE';
@@ -31,13 +31,13 @@ $extBadge = static function (array $f): string {
 <div class="rd">
     <header class="rd-hero">
         <div class="rd-hero__info">
-            <div class="rd-hero__badge">🔒 Защищённый цифровой архив</div>
+            <div class="rd-hero__badge"><?= \App\Core\Icon::render('lock', 16) ?> Защищённый цифровой архив</div>
             <h1 class="rd-hero__title">Репозиторий документов</h1>
             <p class="rd-hero__lead">Единая база официальных документов, стратегий, отчётов, исследований и аналитических материалов Агентства.</p>
             <form method="get" action="/repo" class="rd-search" role="search">
                 <input type="search" name="q" value="<?= htmlspecialchars($query, ENT_QUOTES) ?>" placeholder="Поиск по названию, теме или ключевому слову…" aria-label="Поиск по документам">
                 <?php if ($category > 0): ?><input type="hidden" name="category" value="<?= (int) $category ?>"><?php endif; ?>
-                <button type="submit" aria-label="Найти"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+                <button type="submit" aria-label="Найти"><?= \App\Core\Icon::render('search', 18) ?></button>
             </form>
         </div>
         <div class="rd-hero__art" aria-hidden="true"><?= $docIcon ?></div>
@@ -46,7 +46,7 @@ $extBadge = static function (array $f): string {
     <div class="rd-stats">
         <div class="rd-stat rd-stat--blue">
             <div class="rd-stat__icon" aria-hidden="true">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                <?= \App\Core\Icon::render('file', 22) ?>
             </div>
             <div class="rd-stat__body">
                 <span class="rd-stat__num"><?= $totalCount ?></span>
@@ -55,7 +55,7 @@ $extBadge = static function (array $f): string {
         </div>
         <div class="rd-stat rd-stat--teal">
             <div class="rd-stat__icon" aria-hidden="true">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <?= \App\Core\Icon::render('folder', 22) ?>
             </div>
             <div class="rd-stat__body">
                 <span class="rd-stat__num"><?= count($categories) ?></span>
@@ -64,7 +64,7 @@ $extBadge = static function (array $f): string {
         </div>
         <div class="rd-stat rd-stat--emerald">
             <div class="rd-stat__icon" aria-hidden="true">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <?= \App\Core\Icon::render('download', 22) ?>
             </div>
             <div class="rd-stat__body">
                 <span class="rd-stat__num"><?= array_sum(array_map(static fn ($f) => (int) $f['download_count'], $popular)) ?></span>
@@ -73,7 +73,7 @@ $extBadge = static function (array $f): string {
         </div>
         <div class="rd-stat rd-stat--amber">
             <div class="rd-stat__icon" aria-hidden="true">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                <?= \App\Core\Icon::render('sparkles', 22) ?>
             </div>
             <div class="rd-stat__body">
                 <span class="rd-stat__num"><?= count($latest) ?></span>
@@ -128,16 +128,16 @@ $extBadge = static function (array $f): string {
             
             <div class="rd-view-options">
                 <?php if ($query !== '' || $category > 0 || $ext !== ''): ?>
-                    <a class="rd-reset" href="/repo">Сбросить фильтры ↺</a>
+                    <a class="rd-reset" href="/repo"><?= \App\Core\Icon::render('refresh', 15) ?> Сбросить фильтры</a>
                 <?php endif; ?>
 
                 <!-- Переключатель режима вида (Сетка / Таблица) -->
                 <div class="rd-view-toggle" role="group" aria-label="Вид отображения">
                     <button type="button" class="rd-view-btn is-active" data-view-mode="grid" title="Вид плиткой">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                        <?= \App\Core\Icon::render('layout-grid', 16) ?>
                     </button>
                     <button type="button" class="rd-view-btn" data-view-mode="table" title="Вид списком">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                        <?= \App\Core\Icon::render('list', 16) ?>
                     </button>
                 </div>
             </div>
@@ -190,9 +190,7 @@ $extBadge = static function (array $f): string {
         <?php if (empty($files)): ?>
             <div class="rd-empty-card">
                 <div class="rd-empty-card__icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="44" height="44">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M10 13h4"/><path d="M10 17h4"/>
-                    </svg>
+                    <?= \App\Core\Icon::render('file-off', 44, 'ui-icon', 1.5) ?>
                 </div>
                 <h3 class="rd-empty-card__title">
                     <?= ($query !== '' || $category > 0 || $ext !== '') ? 'Документы не найдены' : 'Хранилище документов пока пусто' ?>
@@ -205,7 +203,7 @@ $extBadge = static function (array $f): string {
                 <div class="rd-empty-card__actions">
                     <?php if ($query !== '' || $category > 0 || $ext !== ''): ?>
                         <a href="/repo" class="rd-btn rd-btn--primary">
-                            Сбросить фильтры ↺
+                            <?= \App\Core\Icon::render('refresh', 16) ?> Сбросить фильтры
                         </a>
                     <?php else: ?>
                         <button type="button" class="rd-btn rd-btn--primary" onclick="document.querySelector('.rd-upload')?.setAttribute('open', 'true');">
@@ -221,7 +219,7 @@ $extBadge = static function (array $f): string {
                 <div class="rd-batch-bar u-inline-f2892a2e8a" id="rd-batch-bar">
                     <span class="rd-batch-count">Выбрано файлов: <strong id="rd-selected-count">0</strong></span>
                     <button type="submit" class="rd-btn rd-btn--primary rd-btn--sm">
-                        📦 Скачать выбранные в ZIP
+                        <?= \App\Core\Icon::render('archive', 16) ?> Скачать выбранные в ZIP
                     </button>
                 </div>
 
@@ -271,24 +269,24 @@ $extBadge = static function (array $f): string {
                                         <div class="rd-table-actions">
                                             <?php if ($canPreview): ?>
                                                 <button type="button" class="rd-btn rd-btn--ghost rd-btn--sm rd-preview-btn" data-preview-id="<?= (int) $f['id'] ?>" data-preview-title="<?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?>" data-preview-ext="<?= mb_strtolower($extBadge($f)) ?>" title="Быстрый онлайн-просмотр">
-                                                    👁
+                                                    <?= \App\Core\Icon::render('eye', 16) ?>
                                                 </button>
                                             <?php endif; ?>
                                             <div class="rd-lang-pills">
                                                 <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать (RU)">
                                                     <span>RU</span>
-                                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                                                    <?= \App\Core\Icon::render('download', 11, 'ui-icon', 2.5) ?>
                                                 </a>
                                                 <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать (UZ)">
                                                     <span>UZ</span>
-                                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                                                    <?= \App\Core\Icon::render('download', 11, 'ui-icon', 2.5) ?>
                                                 </a>
                                                 <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Download (EN)">
                                                     <span>EN</span>
-                                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                                                    <?= \App\Core\Icon::render('download', 11, 'ui-icon', 2.5) ?>
                                                 </a>
                                             </div>
-                                            <button type="button" class="rd-btn rd-btn--ghost rd-btn--sm" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку">📋</button>
+                                            <button type="button" class="rd-btn rd-btn--ghost rd-btn--sm" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку"><?= \App\Core\Icon::render('copy', 16) ?></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -321,21 +319,21 @@ $extBadge = static function (array $f): string {
                             <div class="rd-doc__actions">
                                 <?php if ($canPreview): ?>
                                     <button type="button" class="rd-btn rd-btn--ghost rd-btn--sm rd-preview-btn" data-preview-id="<?= (int) $f['id'] ?>" data-preview-title="<?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?>" data-preview-ext="<?= mb_strtolower($extBadge($f)) ?>" title="Быстрый просмотр">
-                                        👁
+                                        <?= \App\Core\Icon::render('eye', 16) ?>
                                     </button>
                                 <?php endif; ?>
                                 <div class="rd-lang-pills">
                                     <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать (RU)">
-                                        <span>RU</span> ⤓
+                                        <span>RU</span> <?= \App\Core\Icon::render('download', 11, 'ui-icon', 2.5) ?>
                                     </a>
                                     <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать (UZ)">
-                                        <span>UZ</span> ⤓
+                                        <span>UZ</span> <?= \App\Core\Icon::render('download', 11, 'ui-icon', 2.5) ?>
                                     </a>
                                     <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Download (EN)">
-                                        <span>EN</span> ⤓
+                                        <span>EN</span> <?= \App\Core\Icon::render('download', 11, 'ui-icon', 2.5) ?>
                                     </a>
                                 </div>
-                                <button type="button" class="rd-btn rd-btn--ghost rd-btn--icon" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку">📋</button>
+                                <button type="button" class="rd-btn rd-btn--ghost rd-btn--icon" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку"><?= \App\Core\Icon::render('copy', 16) ?></button>
                             </div>
                         </article>
                     <?php endforeach; ?>
@@ -387,7 +385,7 @@ $extBadge = static function (array $f): string {
     <div class="rd-modal__card">
         <div class="rd-modal__head">
             <h3 id="rd-preview-title">Предпросмотр документа</h3>
-            <button type="button" class="rd-modal__close" onclick="document.getElementById('rd-preview-modal').close();">✕</button>
+            <button type="button" class="rd-modal__close" onclick="document.getElementById('rd-preview-modal').close();" aria-label="Закрыть"><?= \App\Core\Icon::render('x', 18) ?></button>
         </div>
         <div class="rd-modal__body" id="rd-preview-body">
             <div class="rd-preview-loader">Загрузка документа...</div>

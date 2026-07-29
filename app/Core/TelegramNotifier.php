@@ -15,11 +15,11 @@ final class TelegramNotifier
     private const RANK = ['INFO' => 10, 'WARNING' => 20, 'ERROR' => 30, 'CRITICAL' => 40];
 
     private const LABELS = [
-        'CRITICAL' => '🔴 КРИТИЧНО',
-        'ERROR' => '🟠 ОШИБКА',
-        'WARNING' => '🟡 ПРЕДУПРЕЖДЕНИЕ',
-        'SECURITY' => '🔵 БЕЗОПАСНОСТЬ',
-        'INFO' => '⚪ ИНФО',
+        'CRITICAL' => '[КРИТИЧНО]',
+        'ERROR' => '[ОШИБКА]',
+        'WARNING' => '[ПРЕДУПРЕЖДЕНИЕ]',
+        'SECURITY' => '[БЕЗОПАСНОСТЬ]',
+        'INFO' => '[ИНФО]',
     ];
 
     /** TTL троттлинга по уровню (секунды). CRITICAL — без троттлинга. */

@@ -77,15 +77,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <div data-repeater="items">
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
-                            <div class="form-field">
-                                <label>Иконка (эмодзи или короткий текст)</label>
-                                <input type="text" name="items[<?= $i ?>][icon]" value="<?= htmlspecialchars($item['icon'] ?? '', ENT_QUOTES) ?>">
-                            </div>
-                            <div class="form-field">
-                                <label>SVG-иконка кодом (необязательно; имеет приоритет)</label>
-                                <textarea name="items[<?= $i ?>][icon_svg]" placeholder="<svg ...>...</svg>"><?= htmlspecialchars($item['icon_svg'] ?? '', ENT_QUOTES) ?></textarea>
-                                <span class="form-hint">Опасное содержимое (&lt;script&gt;, on*-обработчики) вырезается при сохранении.</span>
-                            </div>
+                            <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
                             <div class="form-field">
                                 <label>Заголовок</label>
                                 <input type="text" name="items[<?= $i ?>][title]" value="<?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?>">
@@ -99,14 +91,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php endforeach; ?>
                 </div>
                 <template data-repeater-template="items">
-                    <div class="form-field">
-                        <label>Иконка (эмодзи или короткий текст)</label>
-                        <input type="text" name="items[__INDEX__][icon]">
-                    </div>
-                    <div class="form-field">
-                        <label>SVG-иконка кодом (необязательно; имеет приоритет)</label>
-                        <textarea name="items[__INDEX__][icon_svg]" placeholder="<svg ...>...</svg>"></textarea>
-                    </div>
+                    <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
                     <div class="form-field">
                         <label>Заголовок</label>
                         <input type="text" name="items[__INDEX__][title]">
@@ -282,7 +267,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <div data-repeater="items">
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
-                            <div class="form-field"><label>SVG-иконка (необязательно)</label><textarea name="items[<?= $i ?>][icon_svg]"><?= htmlspecialchars($item['icon_svg'] ?? '', ENT_QUOTES) ?></textarea></div>
+                            <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
                             <div class="form-field"><label>Число</label><input type="number" name="items[<?= $i ?>][value]" value="<?= (int) ($item['value'] ?? 0) ?>"></div>
                             <div class="form-field"><label>Суффикс (напр. + или %)</label><input type="text" name="items[<?= $i ?>][suffix]" value="<?= htmlspecialchars($item['suffix'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Подпись</label><input type="text" name="items[<?= $i ?>][label]" value="<?= htmlspecialchars($item['label'] ?? '', ENT_QUOTES) ?>"></div>
@@ -291,7 +276,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php endforeach; ?>
                 </div>
                 <template data-repeater-template="items">
-                    <div class="form-field"><label>SVG-иконка (необязательно)</label><textarea name="items[__INDEX__][icon_svg]"></textarea></div>
+                    <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
                     <div class="form-field"><label>Число</label><input type="number" name="items[__INDEX__][value]" value="0"></div>
                     <div class="form-field"><label>Суффикс (напр. + или %)</label><input type="text" name="items[__INDEX__][suffix]"></div>
                     <div class="form-field"><label>Подпись</label><input type="text" name="items[__INDEX__][label]"></div>
@@ -405,7 +390,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <div data-repeater="items">
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
-                            <div class="form-field"><label>SVG-иконка (необязательно)</label><textarea name="items[<?= $i ?>][icon_svg]" placeholder="<svg ...>...</svg>"><?= htmlspecialchars($item['icon_svg'] ?? '', ENT_QUOTES) ?></textarea><span class="form-hint">Опасное содержимое вырезается при сохранении.</span></div>
+                            <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
                             <div class="form-field"><label>Заголовок</label><input type="text" name="items[<?= $i ?>][title]" value="<?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?>" placeholder="напр. Телефон"></div>
                             <div class="form-field"><label>Строки (по одной на строку)</label><textarea name="items[<?= $i ?>][lines]" placeholder="+998 71 000-00-00&#10;info@example.uz"><?= htmlspecialchars($item['lines'] ?? '', ENT_QUOTES) ?></textarea></div>
                             <div class="form-field"><label>Ссылка (URL)</label><input type="text" name="items[<?= $i ?>][link_url]" value="<?= htmlspecialchars($item['link_url'] ?? '', ENT_QUOTES) ?>" placeholder="tel:+998710000000 / mailto: / https://"></div>
@@ -415,7 +400,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php endforeach; ?>
                 </div>
                 <template data-repeater-template="items">
-                    <div class="form-field"><label>SVG-иконка (необязательно)</label><textarea name="items[__INDEX__][icon_svg]" placeholder="<svg ...>...</svg>"></textarea></div>
+                    <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
                     <div class="form-field"><label>Заголовок</label><input type="text" name="items[__INDEX__][title]" placeholder="напр. Телефон"></div>
                     <div class="form-field"><label>Строки (по одной на строку)</label><textarea name="items[__INDEX__][lines]"></textarea></div>
                     <div class="form-field"><label>Ссылка (URL)</label><input type="text" name="items[__INDEX__][link_url]"></div>
@@ -670,7 +655,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
                             <?php if ($type === 'cards_grid'): ?>
-                                <div class="form-field"><label>SVG-иконка</label><textarea name="items[<?= $i ?>][icon_svg]"><?= htmlspecialchars($item['icon_svg'] ?? '', ENT_QUOTES) ?></textarea></div>
+                                <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
                             <?php else: ?>
                                 <div class="form-field"><label>Изображение (URL)</label><input type="text" name="items[<?= $i ?>][image]" value="<?= htmlspecialchars($item['image'] ?? '', ENT_QUOTES) ?>" placeholder="/uploads/public/..."></div>
                             <?php endif; ?>
@@ -689,7 +674,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </div>
                 <template data-repeater-template="items">
                     <?php if ($type === 'cards_grid'): ?>
-                        <div class="form-field"><label>SVG-иконка</label><textarea name="items[__INDEX__][icon_svg]"></textarea></div>
+                        <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
                     <?php else: ?>
                         <div class="form-field"><label>Изображение (URL)</label><input type="text" name="items[__INDEX__][image]"></div>
                     <?php endif; ?>
@@ -714,7 +699,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <div data-repeater="items">
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
-                            <div class="form-field"><label>SVG-иконка</label><textarea name="items[<?= $i ?>][icon_svg]" placeholder="<svg ...>...</svg>"><?= htmlspecialchars($item['icon_svg'] ?? '', ENT_QUOTES) ?></textarea></div>
+                            <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
                             <div class="form-field"><label>Название</label><input type="text" name="items[<?= $i ?>][label]" value="<?= htmlspecialchars($item['label'] ?? '', ENT_QUOTES) ?>"></div>
                             <?php if ($type === 'media_materials'): ?>
                                 <div class="form-field"><label>Действие (напр. «Смотреть»)</label><input type="text" name="items[<?= $i ?>][action]" value="<?= htmlspecialchars($item['action'] ?? '', ENT_QUOTES) ?>"></div>
@@ -725,7 +710,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php endforeach; ?>
                 </div>
                 <template data-repeater-template="items">
-                    <div class="form-field"><label>SVG-иконка</label><textarea name="items[__INDEX__][icon_svg]" placeholder="<svg ...>...</svg>"></textarea></div>
+                    <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
                     <div class="form-field"><label>Название</label><input type="text" name="items[__INDEX__][label]"></div>
                     <?php if ($type === 'media_materials'): ?>
                         <div class="form-field"><label>Действие</label><input type="text" name="items[__INDEX__][action]"></div>
@@ -838,7 +823,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
 
         <?php if ($type === 'cta_band'): ?>
             <div class="form-field"><label for="text">Текст</label><textarea id="text" name="text" rows="2"><?= htmlspecialchars($data['text'] ?? '', ENT_QUOTES) ?></textarea></div>
-            <div class="form-field"><label for="icon_svg">SVG-иконка (необязательно)</label><textarea id="icon_svg" name="icon_svg" placeholder="<svg ...>...</svg>"><?= htmlspecialchars($data['icon_svg'] ?? '', ENT_QUOTES) ?></textarea></div>
+            <?= \App\Core\AdminUi::iconField('icon_svg', $data['icon_svg'] ?? '', ['id' => 'icon_svg', 'label' => 'Иконка Tabler']) ?>
             <div class="form-field"><label for="button_text">Кнопка — текст</label><input type="text" id="button_text" name="button_text" value="<?= htmlspecialchars($data['button_text'] ?? '', ENT_QUOTES) ?>" placeholder="Связаться с нами"></div>
             <div class="form-field"><label for="button_url">Кнопка — ссылка</label><input type="text" id="button_url" name="button_url" value="<?= htmlspecialchars($data['button_url'] ?? '', ENT_QUOTES) ?>" placeholder="/kontakty"></div>
             <div class="colorfield-row">
@@ -867,7 +852,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <div data-repeater="items">
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
-                            <div class="form-field"><label>SVG-иконка</label><textarea name="items[<?= $i ?>][icon_svg]" placeholder="<svg ...>...</svg>"><?= htmlspecialchars($item['icon_svg'] ?? '', ENT_QUOTES) ?></textarea></div>
+                            <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
                             <div class="form-field"><label>Название</label><input type="text" name="items[<?= $i ?>][title]" value="<?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Текст</label><textarea name="items[<?= $i ?>][text]"><?= htmlspecialchars($item['text'] ?? '', ENT_QUOTES) ?></textarea></div>
                             <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
@@ -875,7 +860,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php endforeach; ?>
                 </div>
                 <template data-repeater-template="items">
-                    <div class="form-field"><label>SVG-иконка</label><textarea name="items[__INDEX__][icon_svg]" placeholder="<svg ...>...</svg>"></textarea></div>
+                    <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
                     <div class="form-field"><label>Название</label><input type="text" name="items[__INDEX__][title]"></div>
                     <div class="form-field"><label>Текст</label><textarea name="items[__INDEX__][text]"></textarea></div>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
@@ -997,14 +982,14 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <div data-repeater="items">
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
-                            <div class="form-field"><label>SVG-иконка</label><textarea name="items[<?= $i ?>][icon_svg]"><?= htmlspecialchars($item['icon_svg'] ?? '', ENT_QUOTES) ?></textarea></div>
+                            <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
                             <div class="form-field"><label>Подпись</label><input type="text" name="items[<?= $i ?>][label]" value="<?= htmlspecialchars($item['label'] ?? '', ENT_QUOTES) ?>"></div>
                             <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
                         </div>
                     <?php endforeach; ?>
                 </div>
                 <template data-repeater-template="items">
-                    <div class="form-field"><label>SVG-иконка</label><textarea name="items[__INDEX__][icon_svg]"></textarea></div>
+                    <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
                     <div class="form-field"><label>Подпись</label><input type="text" name="items[__INDEX__][label]"></div>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
                 </template>

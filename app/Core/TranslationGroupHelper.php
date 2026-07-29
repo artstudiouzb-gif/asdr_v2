@@ -455,7 +455,7 @@ final class TranslationGroupHelper
             <input type="hidden" name="lang" value="<?= htmlspecialchars($currentLang, ENT_QUOTES) ?>">
             <div class="u-inline-342ce139a0">
                 <h3 class="u-inline-7defd547d2">
-                    <svg class="u-inline-aa5e5b184d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <?= Icon::render('world', 19, 'u-inline-aa5e5b184d') ?>
                     Язык и переводы
                 </h3>
             </div>
@@ -491,7 +491,7 @@ final class TranslationGroupHelper
                                 <?php endif; ?>
                             </div>
                             <span class="u-inline-419b2840c7">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                <?= Icon::render('check', 12, 'translation-current-icon', 3) ?>
                                 Текущий пост
                             </span>
                         </div>
@@ -506,7 +506,7 @@ final class TranslationGroupHelper
                             <div>
                                 <?php if ($tRecord !== null): ?>
                                     <a href="/admin/<?= $module ?>/<?= (int) $tRecord['id'] ?>/edit" class="btn btn--small btn--secondary u-inline-30b9f76a48">
-                                        ✏ Редактировать (#<?= (int) $tRecord['id'] ?>)
+                                        <?= Icon::render('edit', 14) ?> Редактировать (#<?= (int) $tRecord['id'] ?>)
                                     </a>
                                 <?php elseif ($recordId > 0): ?>
                                     <button type="submit"
@@ -516,7 +516,7 @@ final class TranslationGroupHelper
                                             formmethod="post"
                                             formnovalidate
                                             class="btn btn--small btn--primary u-inline-64c12efe40">
-                                        ➕ Создать перевод
+                                        <?= Icon::render('plus', 14) ?> Создать перевод
                                     </button>
                                 <?php else: ?>
                                     <span class="u-inline-d716a45428">Сначала сохраните запись</span>

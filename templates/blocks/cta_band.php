@@ -16,9 +16,9 @@ $templateCss = $style !== '' ? '#block-' . $blockId . ' .block-ctaband{' . $styl
     <div class="ctaband__lead">
         <span class="ctaband__icon">
             <?php if ($iconSvg !== ''): ?>
-                <?= $iconSvg /* очищено при сохранении */ ?>
+                <?= \App\Core\Icon::render($iconSvg, 40) ?>
             <?php else: ?>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+                <?= \App\Core\Icon::render('mail', 40, 'cta-band__icon-svg', 1.5) ?>
             <?php endif; ?>
         </span>
         <span class="ctaband__body">

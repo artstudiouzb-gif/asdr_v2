@@ -423,7 +423,7 @@ CREATE TABLE IF NOT EXISTS menu_items (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     lang            VARCHAR(8) NOT NULL DEFAULT '' COMMENT 'код языка; пусто только для старых данных',
     title           VARCHAR(190) NOT NULL,
-    icon_svg        TEXT NULL COMMENT 'инлайновая SVG-иконка пункта',
+    icon_svg        TEXT NULL COMMENT 'ключ локальной иконки Tabler',
     badge_text      VARCHAR(100) NULL COMMENT 'текст бейджа/плашки (напр. АКТУАЛЬНО!, NEW)',
     badge_color     VARCHAR(30) NULL DEFAULT 'red' COMMENT 'цвет бейджа (red, green, blue, orange, purple)',
     badge_pos       VARCHAR(20) NOT NULL DEFAULT 'right' COMMENT 'позиция бейджа (right, left, center)',

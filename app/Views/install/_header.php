@@ -23,7 +23,7 @@ $stepNumber = (int) $step;
 <div class="install-wrapper">
     <div class="install-brand">
         <div class="install-brand__logo">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <?= \App\Core\Icon::render('layers-subtract', 22, 'install-brand__icon', 2.5) ?>
             <span class="install-brand__name">ASDR CMS</span>
             <span class="install-brand__badge">v2.0</span>
         </div>
@@ -39,7 +39,7 @@ $stepNumber = (int) $step;
                 ?>
                 <div class="install-step-item <?= $isDone ? 'is-done' : '' ?> <?= $isActive ? 'is-active' : '' ?>">
                     <div class="install-step-badge">
-                        <?= $isDone ? '✓' : $n ?>
+                        <?= $isDone ? \App\Core\Icon::render('check', 15, 'install-step-check', 2.5) : $n ?>
                     </div>
                     <span class="install-step-title"><?= htmlspecialchars($info['title'], ENT_QUOTES) ?></span>
                 </div>

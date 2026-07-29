@@ -28,8 +28,9 @@
     var LABELS = config.labels || {};
     var LABEL_ON = LABELS.on || 'Уведомления включены';
     var LABEL_OFF = LABELS.off || 'Уведомления о новостях';
-    var BELL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>';
-    var CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
+    var renderIcon = window.asdrPublicIcon || function () { return ''; };
+    var BELL_ICON = renderIcon('bell', 20);
+    var CHECK_ICON = renderIcon('check', 18);
 
     function escapeHtml(s) {
         return String(s).replace(/[&<>"']/g, function (c) {
@@ -53,7 +54,7 @@
     promptCard.hidden = true;
     promptCard.innerHTML =
         '<div class="push-prompt-card__header">' +
-            '<span class="push-prompt-card__icon">🔔</span>' +
+            '<span class="push-prompt-card__icon">' + BELL_ICON + '</span>' +
             '<span class="push-prompt-card__title">' + escapeHtml(LABEL_OFF) + '</span>' +
         '</div>' +
         '<p class="push-prompt-card__text">Будьте в курсе главных событий! Подпишитесь на мгновенные push-уведомления о новых публикациях.</p>' +

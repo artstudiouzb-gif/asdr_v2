@@ -12,7 +12,7 @@ $items = $data['items'] ?? [];
             <?php foreach ($items as $item): ?>
                 <div class="featband__item">
                     <?php if (!empty($item['icon_svg'])): ?>
-                        <span class="featband__icon"><?= $item['icon_svg'] /* очищено при сохранении */ ?></span>
+                        <span class="featband__icon"><?= \App\Core\Icon::render($item['icon_svg'], 28) ?></span>
                     <?php endif; ?>
                     <span class="featband__name"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></span>
                     <?php if (!empty($item['text'])): ?><span class="featband__text"><?= htmlspecialchars((string) $item['text'], ENT_QUOTES) ?></span><?php endif; ?>

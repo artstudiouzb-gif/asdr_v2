@@ -34,25 +34,25 @@
             "title": "",
             "items": [
                 {
-                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><path d=\"M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6\"\/><\/svg>",
+                    "icon_svg": "building",
                     "value": "100",
                     "suffix": "+",
                     "label": "стратегических инициатив реализовано"
                 },
                 {
-                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><circle cx=\"9\" cy=\"8\" r=\"3\"\/><path d=\"M3 20c0-3 3-5 6-5s6 2 6 5\"\/><path d=\"M17 8a3 3 0 0 1 0 6\"\/><\/svg>",
+                    "icon_svg": "users",
                     "value": "20",
                     "suffix": "+",
                     "label": "проектов в ключевых отраслях"
                 },
                 {
-                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><path d=\"M4 20V10M10 20V4M16 20v-8M22 20H2\"\/><\/svg>",
+                    "icon_svg": "chart-bar",
                     "value": "30",
                     "suffix": "+",
                     "label": "аналитических исследований ежегодно"
                 },
                 {
-                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><circle cx=\"12\" cy=\"12\" r=\"9\"\/><path d=\"M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18\"\/><\/svg>",
+                    "icon_svg": "world",
                     "value": "10",
                     "suffix": "+",
                     "label": "международных партнёров и организаций"
@@ -70,31 +70,31 @@
             "columns": 5,
             "items": [
                 {
-                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><path d=\"M3 17l6-6 4 4 8-8M21 7v6M15 7h6\"\/><\/svg>",
+                    "icon_svg": "trending-up",
                     "title": "Устойчивый экономический рост",
                     "text": "Создание благоприятных условий для бизнеса и инвестиций",
                     "url": "\/ustoychivyy-ekonomicheskiy-rost"
                 },
                 {
-                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><circle cx=\"9\" cy=\"8\" r=\"3\"\/><path d=\"M3 20c0-3 3-5 6-5s6 2 6 5\"\/><path d=\"M17 8a3 3 0 0 1 0 6\"\/><\/svg>",
+                    "icon_svg": "users",
                     "title": "Человеческий капитал",
                     "text": "Развитие образования, здравоохранения и навыков будущего",
                     "url": "\/analitika"
                 },
                 {
-                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><path d=\"M3 21h18M5 21V8l7-5 7 5v13\"\/><\/svg>",
+                    "icon_svg": "building",
                     "title": "Эффективное государство",
                     "text": "Совершенствование институтов и повышение качества управления",
                     "url": "\/strategiya-2030"
                 },
                 {
-                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><path d=\"M12 3c-4 4-4 10 0 18 4-8 4-14 0-18zM12 8c-3 0-5 2-5 5\"\/><\/svg>",
+                    "icon_svg": "leaf",
                     "title": "«Зелёная» экономика",
                     "text": "Переход к низкоуглеродной модели и рациональное использование ресурсов",
                     "url": "\/projects\/zelenaya-energetika"
                 },
                 {
-                    "icon_svg": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><circle cx=\"6\" cy=\"12\" r=\"2\"\/><circle cx=\"18\" cy=\"6\" r=\"2\"\/><circle cx=\"18\" cy=\"18\" r=\"2\"\/><path d=\"M8 11l8-4M8 13l8 4\"\/><\/svg>",
+                    "icon_svg": "route",
                     "title": "Региональное развитие",
                     "text": "Сбалансированное развитие регионов и улучшение инфраструктуры",
                     "url": "\/projects\/transportnaya-infrastruktura"

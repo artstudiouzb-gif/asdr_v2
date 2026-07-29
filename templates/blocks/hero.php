@@ -202,7 +202,7 @@ if ($bgType === 'youtube' && $youtubeId !== null) {
                 <?php if ($vBtnText !== ''): ?>
                     <?php $vSafe = $vBtnUrl !== '' && UrlGuard::isSafeLink($vBtnUrl); ?>
                     <<?= $vSafe ? 'a' : 'span' ?> class="block-hero__play"<?= $vSafe ? ' href="' . htmlspecialchars($vBtnUrl, ENT_QUOTES) . '"' : '' ?>>
-                        <span class="block-hero__play-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                        <span class="block-hero__play-icon" aria-hidden="true"><?= \App\Core\Icon::render('player-play', 24) ?></span>
                         <span class="block-hero__play-label"><?= htmlspecialchars($vBtnText, ENT_QUOTES) ?></span>
                     </<?= $vSafe ? 'a' : 'span' ?>>
                 <?php endif; ?>

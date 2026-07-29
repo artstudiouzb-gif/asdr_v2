@@ -86,19 +86,14 @@ if ($logo !== '') {
 $logoHtml .= '</a>';
 
 // --- Меню ---
-// Инлайновая SVG-иконка пункта или имя иконки из AdminUi (напр. 'home', 'document', 'news').
-$renderMenuIcon = static function (mixed $svg): string {
-    $raw = trim((string) $svg);
-    if ($raw === '') {
+// В меню хранится только имя иконки Tabler (напр. home, file-text, news).
+$renderMenuIcon = static function (mixed $iconName): string {
+    $name = \App\Core\Icon::cleanName($iconName);
+    if ($name === '') {
         return '';
     }
-    if (!str_contains($raw, '<svg')) {
-        $uiSvg = \App\Core\AdminUi::icon($raw, 18, 'site-menu__svg');
-        if ($uiSvg !== '') {
-            return '<span class="site-menu__icon" aria-hidden="true">' . $uiSvg . '</span>';
-        }
-    }
-    return '<span class="site-menu__icon" aria-hidden="true">' . $raw . '</span>';
+    return '<span class="site-menu__icon" aria-hidden="true">'
+        . \App\Core\Icon::render($name, 18, 'site-menu__svg') . '</span>';
 };
 // --- Определение активного пункта меню по URL ---
 $currentReqUri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
@@ -230,8 +225,7 @@ if (!empty($menuItems)) {
         $menuHtml .= '<a class="site-menu__link' . $parentActiveClass . $iconOnlyClass . '" href="' . htmlspecialchars($url, ENT_QUOTES) . '"' . $parentAriaCurrent . $titleAttr . '>'
             . $label . '</a>';
         $menuHtml .= '<button type="button" class="site-menu__toggle" aria-expanded="false" aria-label="' . $et('Открыть подменю') . '">'
-            . '<svg class="site-menu__toggle-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">'
-            . '<path d="m6 9 6 6 6-6"/></svg></button>';
+            . \App\Core\Icon::render('chevron-down', 12, 'site-menu__toggle-icon', 2.5) . '</button>';
         $menuHtml .= $megaCols > 0
             ? '<div class="site-submenu site-submenu--mega site-submenu--cols-' . $megaCols . '">'
             : '<div class="site-submenu">';
@@ -291,13 +285,13 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
             default => strtoupper($currentCode),
         };
 
-        $globeSvg = '<svg class="site-lang-dropdown__globe" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>';
+        $globeSvg = \App\Core\Icon::render('world', 15, 'site-lang-dropdown__globe');
 
         $langHtml = '<details class="site-lang-dropdown" data-lang-dropdown>';
         $langHtml .= '<summary class="site-lang-dropdown__trigger" aria-label="' . htmlspecialchars(t('Выбрать язык'), ENT_QUOTES) . '">';
         $langHtml .= $globeSvg;
         $langHtml .= '<span class="site-lang-dropdown__current">' . htmlspecialchars((string) $triggerLabel, ENT_QUOTES) . '</span>';
-        $langHtml .= '<svg class="site-lang-dropdown__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+        $langHtml .= \App\Core\Icon::render('chevron-down', 12, 'site-lang-dropdown__arrow', 2.5);
         $langHtml .= '</summary>';
 
         $langHtml .= '<div class="site-lang-dropdown__menu" role="menu">';
@@ -310,7 +304,7 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
             $langHtml .= '<a class="site-lang-dropdown__item' . ($isActive ? ' is-active' : '') . '" href="' . htmlspecialchars($href, ENT_QUOTES) . '" role="menuitem">';
             $langHtml .= '<span class="site-lang-dropdown__item-name">' . htmlspecialchars($name, ENT_QUOTES) . '</span>';
             if ($isActive) {
-                $langHtml .= '<svg class="site-lang-dropdown__check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+                $langHtml .= \App\Core\Icon::render('check', 14, 'site-lang-dropdown__check', 3);
             }
             $langHtml .= '</a>';
         }
@@ -337,14 +331,15 @@ $ctaHtml = '';
 if ($hcfg['cta']['enabled'] && $hcfg['cta']['text'] !== '') {
     $ctaIconSvg = '';
     $iconType = $hcfg['cta']['icon'] ?? 'none';
-    if ($iconType === 'phone') {
-        $ctaIconSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>';
-    } elseif ($iconType === 'calendar') {
-        $ctaIconSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
-    } elseif ($iconType === 'send') {
-        $ctaIconSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
-    } elseif ($iconType === 'arrow') {
-        $ctaIconSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+    $ctaIconName = match ($iconType) {
+        'phone' => 'phone',
+        'calendar' => 'calendar',
+        'send' => 'send',
+        'arrow' => 'arrow-right',
+        default => '',
+    };
+    if ($ctaIconName !== '') {
+        $ctaIconSvg = \App\Core\Icon::render($ctaIconName, 15);
     }
 
     $ctaHtml = '<a class="site-cta site-cta--' . htmlspecialchars($hcfg['cta']['style'], ENT_QUOTES) . '" href="'
@@ -355,15 +350,8 @@ if ($hcfg['cta']['enabled'] && $hcfg['cta']['text'] !== '') {
 // --- Переключатель темы (Светлая / Тёмная), анимированные иконки ---
 $themeToggle = '<button type="button" class="site-theme-toggle" aria-label="' . $et('Сменить тему') . '" title="' . $et('Светлая/тёмная тема') . '">'
     . '<span class="site-theme-toggle__inner" aria-hidden="true">'
-    . '<svg class="site-theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-    . '<circle cx="12" cy="12" r="4.5" fill="currentColor"/>'
-    . '<path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77"/>'
-    . '</svg>'
-    . '<svg class="site-theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-    . '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>'
-    . '<circle cx="17.5" cy="6.5" r="1" fill="currentColor" class="theme-star theme-star--1"/>'
-    . '<circle cx="19.5" cy="11.5" r="0.75" fill="currentColor" class="theme-star theme-star--2"/>'
-    . '</svg>'
+    . \App\Core\Icon::render('sun', 24, 'site-theme-toggle__sun')
+    . \App\Core\Icon::render('moon', 24, 'site-theme-toggle__moon')
     . '</span></button>';
 
 // --- Версия для слабовидящих: состояние из cookie (без JS-мигания) ---
@@ -377,7 +365,7 @@ $a11y = [
     'images' => ($a11yParts[2] ?? '') === 'off' ? 'off' : 'on',
 ];
 $a11yToggle = '<button type="button" class="a11y-toggle" aria-label="' . $et('Версия для слабовидящих') . '" title="' . $et('Версия для слабовидящих') . '" aria-controls="a11y-panel" aria-expanded="' . ($a11y['on'] ? 'true' : 'false') . '">'
-    . '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>'
+    . \App\Core\Icon::render('eye', 18)
     . '<span>' . $et('Для слабовидящих') . '</span></button>';
 
 // --- Тема-билдер: значения дизайна + классы для <body> ---
@@ -387,8 +375,8 @@ $searchType = ($designVals['search_type'] ?? 'inline') === 'overlay' ? 'overlay'
 
 // --- Поиск по сайту: безрамочная иконка-лупа с плавно выезжающим полем ввода ---
 $searchAction = htmlspecialchars(Locale::url('search', $currentLang), ENT_QUOTES);
-$searchIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
-$searchCloseIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+$searchIcon = \App\Core\Icon::render('search', 20);
+$searchCloseIcon = \App\Core\Icon::render('x', 16);
 
 $inlineSearchHtml = '<div class="site-search-wrap">'
     . '<button type="button" class="site-search-toggle" aria-label="' . $et('Открыть поиск') . '" aria-expanded="false" data-search-toggle>' . $searchIcon . '</button>'
@@ -428,12 +416,12 @@ $phoneVal = trim((string) ($hcfg['contacts']['phone'] ?? ''));
 $emailVal = trim((string) ($hcfg['contacts']['email'] ?? ''));
 $phoneHtml = $phoneVal !== ''
     ? '<a class="hdr-contact" href="tel:' . htmlspecialchars(preg_replace('/[^+\d]/', '', $phoneVal) ?? '', ENT_QUOTES) . '">'
-        . '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>'
+        . \App\Core\Icon::render('phone', 15, 'ui-icon', 1.8)
         . htmlspecialchars($phoneVal, ENT_QUOTES) . '</a>'
     : '';
 $emailHtml = $emailVal !== ''
     ? '<a class="hdr-contact" href="mailto:' . htmlspecialchars($emailVal, ENT_QUOTES) . '">'
-        . '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>'
+        . \App\Core\Icon::render('mail', 15, 'ui-icon', 1.8)
         . htmlspecialchars($emailVal, ENT_QUOTES) . '</a>'
     : '';
 $snippetHtml = (string) ($hcfg['snippet'] ?? ''); // очищен санитайзером при сохранении
@@ -566,6 +554,7 @@ if ($pageTitleText === '') {
 }
 ?>
 <title><?= htmlspecialchars($fullTitle, ENT_QUOTES) ?></title>
+<?= \App\Core\Icon::browserConfigHtml() ?>
 <?php if (!empty($robotsNoindex)): ?>
 <meta name="robots" content="noindex, nofollow">
 <?php endif; ?>
@@ -664,7 +653,7 @@ foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
 <a href="#main-content" class="skip-link"><?= $et('Перейти к содержимому') ?></a>
 <?php if (!empty($previewNotice)): ?>
 <div class="preview-bar" role="status">
-    👁 <?= $et('Режим предпросмотра — эта версия не опубликована и закрыта от индексации.') ?>
+    <?= \App\Core\Icon::render('eye', 18) ?> <?= $et('Режим предпросмотра — эта версия не опубликована и закрыта от индексации.') ?>
 </div>
 <?php endif; ?>
 <?php if (empty($hideChrome)): // лендинг (группа 6) скрывает шапку сайта ?>
@@ -747,7 +736,7 @@ $headerClasses = implode(' ', array_filter($headerClasses));
 <div class="site-drawer" id="site-drawer" data-drawer aria-hidden="true">
     <button type="button" class="site-drawer__backdrop" data-mobile-menu-toggle aria-label="<?= $et('Закрыть меню') ?>" tabindex="-1"></button>
     <div class="site-drawer__panel" role="dialog" aria-label="<?= $et('Меню') ?>" aria-modal="true">
-        <button type="button" class="site-drawer__close" data-mobile-menu-toggle aria-label="<?= $et('Закрыть меню') ?>" aria-expanded="false">&times;</button>
+        <button type="button" class="site-drawer__close" data-mobile-menu-toggle aria-label="<?= $et('Закрыть меню') ?>" aria-expanded="false"><?= \App\Core\Icon::render('x', 20) ?></button>
         <?= $drawerMenu ?>
     </div>
 </div>
@@ -757,7 +746,7 @@ $headerClasses = implode(' ', array_filter($headerClasses));
     <form class="site-search-overlay__form" method="get" action="<?= $searchAction ?>" role="search">
         <input type="search" name="q" minlength="2" required autocomplete="off" placeholder="<?= htmlspecialchars(t('Введите запрос…'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Поиск по сайту'), ENT_QUOTES) ?>" data-search-input>
         <button type="submit" class="site-search-overlay__submit"><?= $et('Найти') ?></button>
-        <button type="button" class="site-search-overlay__close" aria-label="<?= $et('Закрыть поиск') ?>" data-search-close>&times;</button>
+        <button type="button" class="site-search-overlay__close" aria-label="<?= $et('Закрыть поиск') ?>" data-search-close><?= \App\Core\Icon::render('x', 20) ?></button>
     </form>
 </div>
 <?php endif; ?>
@@ -770,7 +759,7 @@ $headerClasses = implode(' ', array_filter($headerClasses));
             <span class="site-quick-search__icon" aria-hidden="true"><?= $searchIcon ?></span>
             <input type="search" name="q" class="site-quick-search__input" id="site-quick-search-input" minlength="2" required autocomplete="off" placeholder="<?= htmlspecialchars(t('Быстрый поиск по сайту (Ctrl + K)…'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Поиск по сайту'), ENT_QUOTES) ?>">
             <span class="site-quick-search__badge" aria-hidden="true">ESC</span>
-            <button type="button" class="site-quick-search__close" aria-label="<?= $et('Закрыть') ?>" data-quick-search-close>&times;</button>
+            <button type="button" class="site-quick-search__close" aria-label="<?= $et('Закрыть') ?>" data-quick-search-close><?= \App\Core\Icon::render('x', 20) ?></button>
         </form>
         <div class="site-quick-search__hint">
             <span><kbd>Ctrl</kbd> + <kbd>K</kbd> <?= $et('открыть') ?></span>

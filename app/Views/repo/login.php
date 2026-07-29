@@ -11,6 +11,7 @@ $repoLogo = trim((string) \App\Models\Setting::get('repo_logo', ''));
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
+    <?= \App\Core\Icon::browserConfigHtml() ?>
     <title>Вход — Защищённое хранилище</title>
     <link rel="stylesheet" href="/assets/css/repo.css">
 </head>
@@ -20,7 +21,7 @@ $repoLogo = trim((string) \App\Models\Setting::get('repo_logo', ''));
         <?php if ($repoLogo !== ''): ?>
             <img src="<?= htmlspecialchars($repoLogo, ENT_QUOTES) ?>" alt="<?= $repoName ?>" class="repo-auth__logo">
         <?php else: ?>
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.4 7.7 8 10 4.6-2.3 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg>
+            <?= \App\Core\Icon::render('shield-check', 26) ?>
         <?php endif; ?>
         <span>Защищённое хранилище</span>
     </div>

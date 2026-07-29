@@ -34,7 +34,7 @@ final class TelegramBot
     public static function sendLoginCode(int $chatId, string $code): bool
     {
         $safeCode = htmlspecialchars($code, ENT_QUOTES);
-        $text = "<b>🔑 Код входа в панель управления</b>\n\n"
+        $text = "<b>Код входа в панель управления</b>\n\n"
             . "Код: <code>{$safeCode}</code>\n\n"
             . "⏱ <i>Действует 5 минут. Никому не сообщайте этот код.</i>";
 

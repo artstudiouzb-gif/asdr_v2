@@ -18,8 +18,8 @@ $slides = $data['slides'] ?? [];
     </div>
     <?php if (count($slides) > 1): ?>
         <div class="block-slider__nav">
-            <button type="button" class="block-slider__prev" aria-label="Предыдущий слайд">&#10094;</button>
-            <button type="button" class="block-slider__next" aria-label="Следующий слайд">&#10095;</button>
+            <button type="button" class="block-slider__prev" aria-label="Предыдущий слайд"><?= \App\Core\Icon::render('chevron-left', 22) ?></button>
+            <button type="button" class="block-slider__next" aria-label="Следующий слайд"><?= \App\Core\Icon::render('chevron-right', 22) ?></button>
         </div>
     <?php endif; ?>
 </div>

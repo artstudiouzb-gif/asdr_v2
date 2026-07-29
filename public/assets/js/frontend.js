@@ -13,6 +13,21 @@
     var label = function (key, fallback) {
         return typeof labels[key] === 'string' && labels[key] !== '' ? labels[key] : fallback;
     };
+    var iconSpriteNode = document.querySelector('meta[name="asdr-icon-sprite"]');
+    var iconSprite = iconSpriteNode
+        ? iconSpriteNode.getAttribute('content')
+        : '/assets/vendor/tabler/tabler-sprite.svg';
+    var asdrIcon = function (name, size, className) {
+        name = String(name || '').trim().toLowerCase().replace(/^tabler-/, '');
+        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) { return ''; }
+        size = Math.max(8, Math.min(160, Number(size) || 18));
+        className = className || 'ui-icon';
+        return '<svg class="icon icon-tabler ' + className + '" width="' + size + '" height="' + size
+            + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+            + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'
+            + '<use href="' + iconSprite + '#tabler-' + name + '"></use></svg>';
+    };
+    window.asdrPublicIcon = asdrIcon;
 
     // Same-origin page hints belong to the shared frontend bundle, not to
     // executable snippets injected into every response.
@@ -759,10 +774,10 @@
             box.setAttribute('aria-modal', 'true');
             box.setAttribute('aria-label', label('mediaViewer', 'Просмотр медиа'));
             box.innerHTML =
-                '<button type="button" class="cms-lightbox__close" aria-label="' + label('close', 'Закрыть') + '">&times;</button>' +
-                '<button type="button" class="cms-lightbox__nav cms-lightbox__nav--prev" aria-label="' + label('previous', 'Предыдущее') + '">&#10094;</button>' +
+                '<button type="button" class="cms-lightbox__close" aria-label="' + label('close', 'Закрыть') + '">' + asdrIcon('x', 20) + '</button>' +
+                '<button type="button" class="cms-lightbox__nav cms-lightbox__nav--prev" aria-label="' + label('previous', 'Предыдущее') + '">' + asdrIcon('chevron-left', 24) + '</button>' +
                 '<div class="cms-lightbox__stage"></div>' +
-                '<button type="button" class="cms-lightbox__nav cms-lightbox__nav--next" aria-label="' + label('next', 'Следующее') + '">&#10095;</button>' +
+                '<button type="button" class="cms-lightbox__nav cms-lightbox__nav--next" aria-label="' + label('next', 'Следующее') + '">' + asdrIcon('chevron-right', 24) + '</button>' +
                 '<div class="cms-lightbox__caption"></div>';
             document.body.appendChild(box);
             stage = box.querySelector('.cms-lightbox__stage');
@@ -1209,9 +1224,9 @@
         var toast = document.createElement('div');
         toast.className = 'site-toast site-toast--' + type;
         
-        var icon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>';
+        var icon = asdrIcon('circle-check', 18);
         if (type === 'error') {
-            icon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>';
+            icon = asdrIcon('circle-x', 18);
         }
 
         toast.innerHTML = icon;
@@ -1433,18 +1448,18 @@
                 '<span class="rich-lightbox-counter" data-lightbox-counter>1 / 1</span>' +
                 '<div class="rich-lightbox-actions">' +
                     '<a class="rich-lightbox-btn" data-lightbox-download download target="_blank" rel="noopener" title="' + label('downloadPhoto', 'Скачать фото') + '" aria-label="' + label('download', 'Скачать') + '">' +
-                        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+                        asdrIcon('download', 18) +
                     '</a>' +
-                    '<button type="button" class="rich-lightbox-btn" data-lightbox-close aria-label="' + label('close', 'Закрыть') + '">&times;</button>' +
+                    '<button type="button" class="rich-lightbox-btn" data-lightbox-close aria-label="' + label('close', 'Закрыть') + '">' + asdrIcon('x', 18) + '</button>' +
                 '</div>' +
             '</div>' +
             '<div class="rich-lightbox-stage">' +
-                '<button type="button" class="rich-lightbox-nav rich-lightbox-nav--prev" data-lightbox-prev aria-label="' + label('previousPhoto', 'Предыдущее фото') + '">&#10094;</button>' +
+                '<button type="button" class="rich-lightbox-nav rich-lightbox-nav--prev" data-lightbox-prev aria-label="' + label('previousPhoto', 'Предыдущее фото') + '">' + asdrIcon('chevron-left', 24) + '</button>' +
                 '<div class="rich-lightbox-content">' +
                     '<img class="rich-lightbox-img" data-lightbox-img src="" alt="">' +
                     '<div class="rich-lightbox-caption" data-lightbox-caption></div>' +
                 '</div>' +
-                '<button type="button" class="rich-lightbox-nav rich-lightbox-nav--next" data-lightbox-next aria-label="' + label('nextPhoto', 'Следующее фото') + '">&#10095;</button>' +
+                '<button type="button" class="rich-lightbox-nav rich-lightbox-nav--next" data-lightbox-next aria-label="' + label('nextPhoto', 'Следующее фото') + '">' + asdrIcon('chevron-right', 24) + '</button>' +
             '</div>';
 
         document.body.appendChild(modal);
@@ -1588,10 +1603,10 @@
         popover.hidden = true;
         popover.innerHTML =
             '<button type="button" class="quote-share-btn" data-action="tg">' +
-                '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M21.9 4.6 19 19.3c-.2 1-.8 1.2-1.6.8l-4.5-3.3-2.2 2.1c-.2.2-.4.4-.9.4l.3-4.6 8.4-7.6c.4-.3-.1-.5-.6-.2L7.6 13.4l-4.5-1.4c-1-.3-1-1 .2-1.4l17.3-6.7c.8-.3 1.5.2 1.3 1.3z"/></svg> Telegram' +
+                asdrIcon('brand-telegram', 14) + ' Telegram' +
             '</button>' +
             '<button type="button" class="quote-share-btn" data-action="copy">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> ' + label('copy', 'Копировать') +
+                asdrIcon('copy', 14) + ' ' + label('copy', 'Копировать') +
             '</button>';
         document.body.appendChild(popover);
 
@@ -1638,9 +1653,9 @@
             } else if (action === 'copy') {
                 var copyText = '«' + currentSelectedText + '» — ' + window.location.href;
                 navigator.clipboard.writeText(copyText).then(function () {
-                    btn.textContent = '✓ ' + label('copied', 'Скопировано');
+                    btn.innerHTML = asdrIcon('check', 14) + ' ' + label('copied', 'Скопировано');
                     setTimeout(function () {
-                        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> '
+                        btn.innerHTML = asdrIcon('copy', 14) + ' '
                             + label('copy', 'Копировать');
                     }, 2000);
                 });

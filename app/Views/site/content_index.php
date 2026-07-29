@@ -34,7 +34,7 @@ $baseUrl = Locale::url('catalog/' . $type['slug']);
 
     <form class="catlist-toolbar" method="get" action="<?= htmlspecialchars($baseUrl, ENT_QUOTES) ?>" role="search" data-listing-form>
         <div class="catlist-toolbar__search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <?= \App\Core\Icon::render('search', 17) ?>
             <input type="search" name="q" value="<?= htmlspecialchars($q, ENT_QUOTES) ?>" placeholder="<?= htmlspecialchars(t('Поиск в разделе'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Поиск в разделе'), ENT_QUOTES) ?>">
         </div>
         <select class="catlist-toolbar__sort" name="sort" data-auto-submit aria-label="<?= htmlspecialchars(t('Сортировка'), ENT_QUOTES) ?>">
@@ -43,7 +43,7 @@ $baseUrl = Locale::url('catalog/' . $type['slug']);
             <option value="title" <?= $sort === 'title' ? 'selected' : '' ?>><?= htmlspecialchars(t('По алфавиту'), ENT_QUOTES) ?></option>
         </select>
         <button class="catlist-toolbar__btn" type="submit"><?= htmlspecialchars(t('Найти'), ENT_QUOTES) ?></button>
-        <a class="catlist-toolbar__reset" href="<?= htmlspecialchars($baseUrl, ENT_QUOTES) ?>" data-listing-reset<?= $q === '' ? ' hidden' : '' ?>><?= htmlspecialchars(t('Сбросить'), ENT_QUOTES) ?> ↺</a>
+        <a class="catlist-toolbar__reset" href="<?= htmlspecialchars($baseUrl, ENT_QUOTES) ?>" data-listing-reset<?= $q === '' ? ' hidden' : '' ?>><?= htmlspecialchars(t('Сбросить'), ENT_QUOTES) ?> <?= \App\Core\Icon::render('refresh', 15) ?></a>
     </form>
 
     <?php // Область результатов: её же отдаёт контроллер как фрагмент при

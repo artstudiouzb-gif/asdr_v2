@@ -101,6 +101,7 @@ $navAdminTheme = $_SESSION['admin_theme'] ?? (\App\Models\Setting::get('admin_th
 <title><?= htmlspecialchars($pageTitle, ENT_QUOTES) ?> — <?= htmlspecialchars(\App\Core\AdminBrand::name(), ENT_QUOTES) ?></title>
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/vendor/coloris/coloris.min.css'), ENT_QUOTES) ?>">
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/css/admin.css'), ENT_QUOTES) ?>">
+<?= \App\Core\Icon::browserConfigHtml() ?>
 <?= \App\Core\AdminBrand::styleTag() ?>
 <?= \App\Core\AdminBrand::faviconHtml() ?>
 <script nonce="<?= \App\Core\SecurityHeaders::nonce() ?>">

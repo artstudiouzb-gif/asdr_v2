@@ -35,11 +35,11 @@ foreach ($blocks as $b) {
     <div class="u-inline-c9fab0a7e2">
         <a class="btn btn--small" href="/admin/revisions/page/<?= (int) $page['id'] ?>">История версий</a>
         <?php if (\App\Models\Page::isHomePage($page)): ?>
-            <span class="badge badge--success u-inline-371a921b3b">★ Эта страница назначена Главной страницей сайта</span>
+            <span class="badge badge--success u-inline-371a921b3b"><?= \App\Core\AdminUi::icon('home', 14) ?> Эта страница назначена Главной страницей сайта</span>
         <?php else: ?>
             <form class="u-inline-0cd28ce9ba" method="post" action="/admin/pages/<?= (int) $page['id'] ?>/make-home">
                 <?= Csrf::field() ?>
-                <button type="submit" class="btn btn--small btn--warning">🏠 Назначить этой странице статус «Главная»</button>
+                <button type="submit" class="btn btn--small btn--warning"><?= \App\Core\AdminUi::icon('home', 15) ?> Назначить этой странице статус «Главная»</button>
             </form>
         <?php endif; ?>
     </div>
@@ -105,7 +105,7 @@ foreach ($blocks as $b) {
                 <?= Csrf::field() ?>
                 <input type="hidden" name="from_lang" value="<?= htmlspecialchars($defaultCode, ENT_QUOTES) ?>">
                 <input type="hidden" name="to_lang" value="<?= htmlspecialchars($blockLang, ENT_QUOTES) ?>">
-                <button type="submit" class="btn btn--small btn--primary">📋 Скопировать блоки из <?= strtoupper(htmlspecialchars($defaultCode, ENT_QUOTES)) ?> для перевода на <?= strtoupper(htmlspecialchars($blockLang, ENT_QUOTES)) ?></button>
+                <button type="submit" class="btn btn--small btn--primary"><?= \App\Core\AdminUi::icon('copy', 15) ?> Скопировать блоки из <?= strtoupper(htmlspecialchars($defaultCode, ENT_QUOTES)) ?> для перевода на <?= strtoupper(htmlspecialchars($blockLang, ENT_QUOTES)) ?></button>
             </form>
         </div>
     <?php endif; ?>

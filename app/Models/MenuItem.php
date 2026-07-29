@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use App\Core\Icon;
 use App\Core\Lang;
 use App\Core\Locale;
 
@@ -179,29 +180,12 @@ final class MenuItem
         return $columns >= 2 && $columns <= 4 ? $columns : 0;
     }
 
-    /**
-     * Принимает ключ встроенной AdminUI-иконки или безопасный SVG. Ключ
-     * хранится компактно и рендерится через единый каталог; произвольный SVG
-     * проходит строгий санитайзер.
-     */
+    /** В БД хранится только безопасный ключ Tabler Icons, без SVG-разметки. */
     private static function cleanIcon(mixed $svg): ?string
     {
-        $svg = trim((string) $svg);
-        if ($svg === '') {
-            return null;
-        }
-        $iconCatalog = \App\Core\AdminUi::iconCatalog();
-        if (isset($iconCatalog[$svg])) {
-            return $svg;
-        }
-        if (mb_stripos($svg, '<svg') === false) {
-            return null;
-        }
-        if (mb_strlen($svg) > 20000) {
-            return null;
-        }
+        $name = Icon::cleanName($svg);
 
-        return \App\Core\Uploader::sanitizeSvgString($svg);
+        return $name !== '' ? $name : null;
     }
 
     /**

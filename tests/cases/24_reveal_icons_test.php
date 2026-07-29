@@ -57,14 +57,12 @@ test('SVG-санитайзер: XXE-сущности не разворачива
     assert_contains('<rect', Uploader::sanitizeSvgString($plain), 'легитимный SVG с DOCTYPE сохраняет содержимое');
 });
 
-test('Блок advantages рендерит инлайновый SVG-икон приоритетнее текстовой иконки (группа 4.3)', function () {
-    $svg = Uploader::sanitizeSvgString('<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10"/></svg>');
+test('Блок advantages рендерит ключ локальной Tabler-иконки', function () {
     $html = render_block('advantages', [
         'title' => 'Плюсы',
-        'items' => [['icon' => '★', 'icon_svg' => $svg, 'title' => 'Скорость', 'text' => 'быстро']],
+        'items' => [['icon_svg' => 'bolt', 'title' => 'Скорость', 'text' => 'быстро']],
     ]);
     assert_contains('block-advantages__icon--svg', $html);
-    assert_contains('<rect', $html, 'инлайновый SVG отрисован');
-    // Текстовая иконка не выводится, когда есть SVG.
-    assert_true(!str_contains($html, '>★<'), 'при наличии SVG текстовая иконка не показывается');
+    assert_contains('/assets/vendor/tabler/tabler-sprite.svg#tabler-bolt', $html);
+    assert_not_contains('<rect', $html, 'собственная SVG-геометрия не хранится в данных блока');
 });

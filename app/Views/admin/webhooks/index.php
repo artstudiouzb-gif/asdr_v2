@@ -49,7 +49,7 @@ require __DIR__ . '/../layout/header.php';
             <tr>
                 <td><code><?= htmlspecialchars((string) $w['event_type'], ENT_QUOTES) ?></code></td>
                 <td class="u-inline-254c3eade8"><?= htmlspecialchars((string) $w['url'], ENT_QUOTES) ?></td>
-                <td><?= !empty($w['secret']) ? '✓' : '—' ?></td>
+                <td><?= \App\Core\AdminUi::icon(!empty($w['secret']) ? 'check' : 'minus', 14) ?></td>
                 <td><?= (int) $w['is_active'] === 1 ? 'да' : 'нет' ?></td>
                 <td class="data-table__actions">
                     <form method="post" action="/admin/webhooks/<?= (int) $w['id'] ?>/delete" data-confirm="Удалить вебхук?">

@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var oldTitle = btn.getAttribute('title');
             btn.setAttribute('title', 'Скопировано!');
             var oldText = btn.innerHTML;
-            btn.innerHTML = '✓';
+            btn.innerHTML = <?= json_encode(\App\Core\Icon::render('check', 16), JSON_UNESCAPED_SLASHES) ?>;
             setTimeout(function () {
                 btn.setAttribute('title', oldTitle);
                 btn.innerHTML = oldText;

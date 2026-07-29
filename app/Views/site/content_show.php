@@ -75,7 +75,7 @@ $sideFields = array_values(array_filter($fields, static fn ($f) => !in_array($f[
                 <?php foreach ($sideFields as $f): ?>
                     <?php if ($f['field_type'] === 'file' && !empty($entry['data'][$f['name']])): ?>
                         <a class="catdetail__download" href="<?= htmlspecialchars((string) $entry['data'][$f['name']], ENT_QUOTES) ?>" target="_blank" rel="noopener" download>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16" aria-hidden="true"><path d="M12 4v11m0 0 4-4m-4 4-4-4"/><path d="M5 19h14"/></svg>
+                            <?= \App\Core\Icon::render('download', 16, 'ui-icon', 1.8) ?>
                             <?= htmlspecialchars(t((string) $f['label']), ENT_QUOTES) ?>
                         </a>
                     <?php endif; ?>

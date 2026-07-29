@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Core\BlockData\CountersBlockNormalizer;
 
-test('Counters normalizer: сохраняет числа, подписи, цвета и безопасный SVG', function (): void {
+test('Counters normalizer: сохраняет числа, подписи, цвета и ключ Tabler', function (): void {
     $data = CountersBlockNormalizer::normalize([
         'title_field' => ' Наши результаты ',
         'card_bg' => '#AABBCC',
@@ -14,9 +14,9 @@ test('Counters normalizer: сохраняет числа, подписи, цве
                 'value' => ' 1 250+ ',
                 'suffix' => ' + ',
                 'label' => ' реализованных проектов ',
-                'icon_svg' => '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(1)</script><circle cx="1" cy="1" r="1"/></svg>',
+                'icon_svg' => 'chart-bar',
             ],
-            ['value' => '', 'label' => '', 'suffix' => '%', 'icon_svg' => '<svg/>'],
+            ['value' => '', 'label' => '', 'suffix' => '%', 'icon_svg' => 'percentage'],
             'unexpected',
         ],
     ]);
@@ -28,8 +28,7 @@ test('Counters normalizer: сохраняет числа, подписи, цве
     assert_same(1250, $data['items'][0]['value']);
     assert_same('+', $data['items'][0]['suffix']);
     assert_same('реализованных проектов', $data['items'][0]['label']);
-    assert_not_contains('<script', $data['items'][0]['icon_svg']);
-    assert_not_contains('onload=', $data['items'][0]['icon_svg']);
+    assert_same('chart-bar', $data['items'][0]['icon_svg']);
 });
 
 test('Counters normalizer: цвета по умолчанию и повреждённые поля не вызывают предупреждений', function (): void {

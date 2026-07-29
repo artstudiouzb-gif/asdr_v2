@@ -60,7 +60,7 @@ final class FormNotifier
      */
     public static function formatSubmission(string $formName, array $fields): string
     {
-        $lines = ["<b>📩 Новая заявка: " . htmlspecialchars($formName, ENT_QUOTES) . "</b>\n"];
+        $lines = ["<b>Новая заявка: " . htmlspecialchars($formName, ENT_QUOTES) . "</b>\n"];
         foreach ($fields as $key => $value) {
             $value = trim((string) $value);
             if (mb_strlen($value) > self::MAX_FIELD) {

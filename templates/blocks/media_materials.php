@@ -17,7 +17,7 @@ $items = $data['items'] ?? [];
                 ?>
                 <<?= $tag ?> class="media-item"<?= $href ?>>
                     <?php if (!empty($item['icon_svg'])): ?>
-                        <span class="media-item__icon" aria-hidden="true"><?= $item['icon_svg'] ?></span>
+                        <span class="media-item__icon" aria-hidden="true"><?= \App\Core\Icon::render($item['icon_svg'], 24) ?></span>
                     <?php endif; ?>
                     <span class="media-item__body">
                         <span class="media-item__label"><?= htmlspecialchars((string) $item['label'], ENT_QUOTES) ?></span>

@@ -13,14 +13,14 @@ require __DIR__ . '/_header.php';
 <div class="check-grid-2col">
     <div class="check-card-group">
         <div class="check-card-group__title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            <?= \App\Core\Icon::render('server', 16, 'check-card-group__icon', 2.5) ?>
             Параметры PHP и модули
         </div>
         <?php foreach ($requirements as $check): ?>
             <div class="check-item">
                 <div class="check-item__info">
                     <div class="check-item__icon <?= $check['ok'] ? 'ok' : 'fail' ?>">
-                        <?= $check['ok'] ? '✓' : '✕' ?>
+                        <?= \App\Core\Icon::render($check['ok'] ? 'check' : 'x', 15, 'check-item__status-icon', 2.5) ?>
                     </div>
                     <div>
                         <div class="check-item__label"><?= htmlspecialchars($check['label'], ENT_QUOTES) ?></div>
@@ -38,14 +38,14 @@ require __DIR__ . '/_header.php';
 
     <div class="check-card-group">
         <div class="check-card-group__title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <?= \App\Core\Icon::render('folder', 16, 'check-card-group__icon', 2.5) ?>
             Права доступа к директориям
         </div>
         <?php foreach ($permissions as $check): ?>
             <div class="check-item">
                 <div class="check-item__info">
                     <div class="check-item__icon <?= $check['ok'] ? 'ok' : 'fail' ?>">
-                        <?= $check['ok'] ? '✓' : '✕' ?>
+                        <?= \App\Core\Icon::render($check['ok'] ? 'check' : 'x', 15, 'check-item__status-icon', 2.5) ?>
                     </div>
                     <div>
                         <div class="check-item__label"><?= htmlspecialchars($check['label'], ENT_QUOTES) ?></div>
@@ -66,11 +66,11 @@ require __DIR__ . '/_header.php';
     <?php if ($allPassed): ?>
         <a href="/install/step2" class="btn btn--primary">
             Продолжить к настройке БД
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            <?= \App\Core\Icon::render('chevron-right', 18, 'btn__icon', 2.5) ?>
         </a>
     <?php else: ?>
         <a href="/install" class="btn btn--secondary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <?= \App\Core\Icon::render('refresh', 16, 'btn__icon', 2.5) ?>
             Проверить снова
         </a>
         <span class="form-hint u-inline-30739594c7">Исправьте ошибки выше для продолжения.</span>

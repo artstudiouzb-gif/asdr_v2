@@ -85,15 +85,13 @@ $shareTitle = rawurlencode((string) $news['title']);
 $shareUrl = rawurlencode($pageUrl);
 
 // Общие мини-иконки (событие: календарь, место, участники, теги — по кругу).
-$eventIcons = [
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 10h16"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><path d="M12 21s-6-5.2-6-10a6 6 0 1 1 12 0c0 4.8-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><circle cx="9" cy="8" r="3"/><path d="M3 19c0-3 2.7-4.5 6-4.5s6 1.5 6 4.5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.7c2.6.3 5 1.7 5 4.3"/></svg>',
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><path d="M4 11V5a1 1 0 0 1 1-1h6l9 9-7 7-9-9z"/><circle cx="8.5" cy="8.5" r="1.3"/></svg>',
-];
-$pointIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="22" height="22"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.3 2.3 4.7-4.8"/></svg>';
-$docIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>';
-$dlIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M12 4v11m0 0 4-4m-4 4-4-4"/><path d="M5 19h14"/></svg>';
+$eventIcons = array_map(
+    static fn (string $name): string => \App\Core\Icon::render($name, 18, 'ui-icon', 1.6),
+    ['calendar', 'map-pin', 'users', 'tag']
+);
+$pointIcon = \App\Core\Icon::render('circle-check', 22, 'ui-icon', 1.6);
+$docIcon = \App\Core\Icon::render('file-text', 22, 'ui-icon', 1.5);
+$dlIcon = \App\Core\Icon::render('download', 17, 'ui-icon', 1.8);
 ?>
 <?php
 // Тип отображения (выбирается в админке): standard — только обложка,
@@ -143,12 +141,12 @@ $shareBlock = static function (string $extraClass) use ($shareUrl, $shareTitle, 
             <div class="newsdetail-share no-print<?= $extraClass ?>">
                 <h2 class="newsdetail-share__title"><?= htmlspecialchars(t('Поделиться'), ENT_QUOTES) ?></h2>
                 <div class="newsdetail-share__row">
-                    <a class="newsdetail-share__btn" href="https://t.me/share/url?url=<?= $shareUrl ?>&text=<?= $shareTitle ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в Telegram'), ENT_QUOTES) ?>"><svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17"><path d="M21.9 4.6 19 19.3c-.2 1-.8 1.2-1.6.8l-4.5-3.3-2.2 2.1c-.2.2-.4.4-.9.4l.3-4.6 8.4-7.6c.4-.3-.1-.5-.6-.2L7.6 13.4l-4.5-1.4c-1-.3-1-1 .2-1.4l17.3-6.7c.8-.3 1.5.2 1.3 1.3z"/></svg></a>
-                    <a class="newsdetail-share__btn" href="https://www.facebook.com/sharer/sharer.php?u=<?= $shareUrl ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в Facebook'), ENT_QUOTES) ?>"><svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17"><path d="M14 8h3V5h-3c-2.2 0-4 1.8-4 4v2H7v3h3v7h3v-7h3l1-3h-4V9c0-.6.4-1 1-1z"/></svg></a>
-                    <a class="newsdetail-share__btn" href="https://x.com/intent/post?url=<?= $shareUrl ?>&text=<?= $shareTitle ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в X'), ENT_QUOTES) ?>"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.7 3H21l-7.1 8.2L22 21h-6.6l-5.1-6.1L4.5 21H1.2l7.6-8.7L1 3h6.8l4.6 5.6L17.7 3zm-1.2 16h1.8L6.9 4.9H5L16.5 19z"/></svg></a>
-                    <a class="newsdetail-share__btn" href="https://www.linkedin.com/sharing/share-offsite/?url=<?= $shareUrl ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в LinkedIn'), ENT_QUOTES) ?>"><svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17"><path d="M6.5 8.8H3.6V21h2.9V8.8zM5 7.4a1.7 1.7 0 1 0 0-3.4 1.7 1.7 0 0 0 0 3.4zM21 14.2c0-3.2-1.7-4.7-4-4.7-1.8 0-2.6 1-3.1 1.7V8.8H11V21h2.9v-6.5c0-1.7.8-2.7 2.2-2.7 1.3 0 2 .9 2 2.7V21H21v-6.8z"/></svg></a>
-                    <button type="button" class="newsdetail-share__btn" data-copy-link="<?= htmlspecialchars($pageUrl, ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Скопировать ссылку'), ENT_QUOTES) ?>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 1 0-6.4-6.4L11.6 6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 1 0 6.4 6.4l1.6-1.6"/></svg></button>
-                    <button type="button" class="newsdetail-share__btn" data-print-page aria-label="<?= htmlspecialchars(t('Распечатать'), ENT_QUOTES) ?>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2m-12 0v4h8v-4m-8 0h8"/></svg></button>
+                    <a class="newsdetail-share__btn" href="https://t.me/share/url?url=<?= $shareUrl ?>&text=<?= $shareTitle ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в Telegram'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('brand-telegram', 17) ?></a>
+                    <a class="newsdetail-share__btn" href="https://www.facebook.com/sharer/sharer.php?u=<?= $shareUrl ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в Facebook'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('brand-facebook', 17) ?></a>
+                    <a class="newsdetail-share__btn" href="https://x.com/intent/post?url=<?= $shareUrl ?>&text=<?= $shareTitle ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в X'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('brand-x', 16) ?></a>
+                    <a class="newsdetail-share__btn" href="https://www.linkedin.com/sharing/share-offsite/?url=<?= $shareUrl ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в LinkedIn'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('brand-linkedin', 17) ?></a>
+                    <button type="button" class="newsdetail-share__btn" data-copy-link="<?= htmlspecialchars($pageUrl, ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Скопировать ссылку'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('link', 17, 'ui-icon', 1.8) ?></button>
+                    <button type="button" class="newsdetail-share__btn" data-print-page aria-label="<?= htmlspecialchars(t('Распечатать'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('printer', 17, 'ui-icon', 1.8) ?></button>
                 </div>
             </div>
 <?php };
@@ -173,9 +171,9 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <?php if ($dateLong !== ''): ?>
                     <span class="newsdetail__meta-item"><?= $eventIcons[0] ?><time datetime="<?= htmlspecialchars(substr($date, 0, 10), ENT_QUOTES) ?>"><?= htmlspecialchars($dateLong, ENT_QUOTES) ?></time></span>
                 <?php endif; ?>
-                <span class="newsdetail__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><?= $readMin ?> <?= htmlspecialchars(t('мин.'), ENT_QUOTES) ?></span>
+                <span class="newsdetail__meta-item"><?= \App\Core\Icon::render('clock', 18, 'ui-icon', 1.6) ?><?= $readMin ?> <?= htmlspecialchars(t('мин.'), ENT_QUOTES) ?></span>
                 <?php if ($views > 0): ?>
-                    <span class="newsdetail__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><?= htmlspecialchars(trim(number_format($views, 0, '', ' ') . ' ' . t('просмотров')), ENT_QUOTES) ?></span>
+                    <span class="newsdetail__meta-item"><?= \App\Core\Icon::render('eye', 18, 'ui-icon', 1.6) ?><?= htmlspecialchars(trim(number_format($views, 0, '', ' ') . ' ' . t('просмотров')), ENT_QUOTES) ?></span>
                 <?php endif; ?>
             </div>
             <h1 class="newsdetail-phero__title"><?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?></h1>
@@ -187,7 +185,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             <?php endif; ?>
             <?php if ($videoUrl !== ''): ?>
                 <a class="newsdetail-phero__video" href="<?= htmlspecialchars($videoUrl, ENT_QUOTES) ?>" target="_blank" rel="noopener">
-                    <span class="newsdetail-phero__play"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+                    <span class="newsdetail-phero__play"><?= \App\Core\Icon::render('player-play', 16) ?></span>
                     <?= htmlspecialchars(t('Смотреть видео'), ENT_QUOTES) ?>
                 </a>
             <?php endif; ?>
@@ -203,12 +201,12 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <?php if ($dateLong !== ''): ?>
                     <span class="newsdetail__meta-item"><?= $eventIcons[0] ?><time datetime="<?= htmlspecialchars(substr($date, 0, 10), ENT_QUOTES) ?>"><?= htmlspecialchars($dateLong, ENT_QUOTES) ?></time></span>
                 <?php endif; ?>
-                <span class="newsdetail__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><?= $readMin ?> <?= htmlspecialchars(t('мин.'), ENT_QUOTES) ?></span>
+                <span class="newsdetail__meta-item"><?= \App\Core\Icon::render('clock', 18, 'ui-icon', 1.6) ?><?= $readMin ?> <?= htmlspecialchars(t('мин.'), ENT_QUOTES) ?></span>
                 <?php if ($views > 0): ?>
-                    <span class="newsdetail__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><?= htmlspecialchars(trim(number_format($views, 0, '', ' ') . ' ' . t('просмотров')), ENT_QUOTES) ?></span>
+                    <span class="newsdetail__meta-item"><?= \App\Core\Icon::render('eye', 18, 'ui-icon', 1.6) ?><?= htmlspecialchars(trim(number_format($views, 0, '', ' ') . ' ' . t('просмотров')), ENT_QUOTES) ?></span>
                 <?php endif; ?>
                 <button type="button" class="newsdetail__reader-btn" data-reader-mode-toggle aria-label="<?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?>" title="<?= htmlspecialchars(t('Открыть режим чтения'), ENT_QUOTES) ?>">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    <?= \App\Core\Icon::render('book', 17, 'ui-icon', 1.8) ?>
                     <span><?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?></span>
                 </button>
             </div>
@@ -222,7 +220,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             <?php if ($videoUrl !== ''): ?>
                 <div class="newsdetail__actions">
                     <a class="newsdetail__btn newsdetail__btn--primary" href="<?= htmlspecialchars($videoUrl, ENT_QUOTES) ?>" target="_blank" rel="noopener">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5.5v13l11-6.5z"/></svg>
+                        <?= \App\Core\Icon::render('player-play', 16) ?>
                         <?= htmlspecialchars(t('Смотреть видео'), ENT_QUOTES) ?>
                     </a>
                 </div>
@@ -286,11 +284,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             <?php if ($audioUrl !== ''): ?>
                 <div class="news-audio-player" data-audio-player>
                     <div class="news-audio-player__icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                            <path d="M9 18V5l12-2v13"></path>
-                            <circle cx="6" cy="18" r="3"></circle>
-                            <circle cx="18" cy="16" r="3"></circle>
-                        </svg>
+                        <?= \App\Core\Icon::render('music', 24) ?>
                     </div>
                     <div class="news-audio-player__info">
                         <span class="news-audio-player__badge"><?= htmlspecialchars(t('Аудиозапись'), ENT_QUOTES) ?></span>
@@ -318,7 +312,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <?php if (is_array($tEvents) && $tEvents !== []): ?>
                     <div class="newsdetail-timeline">
                         <h3 class="newsdetail-timeline__title">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <?= \App\Core\Icon::render('clock', 20) ?>
                             <?= htmlspecialchars(t('Хронология событий'), ENT_QUOTES) ?>
                         </h3>
                         <div class="newsdetail-timeline__list">
@@ -602,15 +596,15 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             <div class="reader-mode-bar__title"><?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?></div>
             <div class="reader-mode-controls">
                 <div class="reader-mode-themes">
-                    <button type="button" class="reader-theme-btn reader-theme-btn--light is-active" data-reader-theme="light" title="<?= htmlspecialchars(t('Светлая тема'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Светлая тема'), ENT_QUOTES) ?>" aria-pressed="true">☀️</button>
-                    <button type="button" class="reader-theme-btn reader-theme-btn--sepia" data-reader-theme="sepia" title="<?= htmlspecialchars(t('Сепия'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Сепия'), ENT_QUOTES) ?>" aria-pressed="false">📜</button>
-                    <button type="button" class="reader-theme-btn reader-theme-btn--dark" data-reader-theme="dark" title="<?= htmlspecialchars(t('Тёмная тема'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Тёмная тема'), ENT_QUOTES) ?>" aria-pressed="false">🌙</button>
+                    <button type="button" class="reader-theme-btn reader-theme-btn--light is-active" data-reader-theme="light" title="<?= htmlspecialchars(t('Светлая тема'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Светлая тема'), ENT_QUOTES) ?>" aria-pressed="true"><?= \App\Core\Icon::render('sun', 18) ?></button>
+                    <button type="button" class="reader-theme-btn reader-theme-btn--sepia" data-reader-theme="sepia" title="<?= htmlspecialchars(t('Сепия'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Сепия'), ENT_QUOTES) ?>" aria-pressed="false"><?= \App\Core\Icon::render('book', 18) ?></button>
+                    <button type="button" class="reader-theme-btn reader-theme-btn--dark" data-reader-theme="dark" title="<?= htmlspecialchars(t('Тёмная тема'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Тёмная тема'), ENT_QUOTES) ?>" aria-pressed="false"><?= \App\Core\Icon::render('moon', 18) ?></button>
                 </div>
                 <div class="reader-mode-fonts">
                     <button type="button" class="reader-font-btn" data-reader-font="dec" title="<?= htmlspecialchars(t('Уменьшить шрифт'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Уменьшить шрифт'), ENT_QUOTES) ?>">A-</button>
                     <button type="button" class="reader-font-btn" data-reader-font="inc" title="<?= htmlspecialchars(t('Увеличить шрифт'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Увеличить шрифт'), ENT_QUOTES) ?>">A+</button>
                 </div>
-                <button type="button" class="reader-mode-close" data-reader-close aria-label="<?= htmlspecialchars(t('Закрыть режим чтения'), ENT_QUOTES) ?>">&times;</button>
+                <button type="button" class="reader-mode-close" data-reader-close aria-label="<?= htmlspecialchars(t('Закрыть режим чтения'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('x', 20) ?></button>
             </div>
         </div>
     </div>

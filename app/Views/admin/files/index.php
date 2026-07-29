@@ -220,7 +220,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
 <!-- Модальная инспекционная панель свойств медиафайла -->
 <div class="media-modal" id="media_modal">
     <div class="media-modal__dialog">
-        <button type="button" class="media-modal__close" id="media_modal_close" aria-label="Закрыть">✕</button>
+        <button type="button" class="media-modal__close" id="media_modal_close" aria-label="Закрыть"><?= \App\Core\AdminUi::icon('x', 18) ?></button>
         <div class="media-modal__preview-side" id="modal_preview_container">
             <!-- Превью картинка/видео вставляется JS -->
         </div>

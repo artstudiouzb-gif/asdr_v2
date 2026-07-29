@@ -103,7 +103,7 @@ $themeList = [
 
 <div class="form-card u-inline-3343fd6464">
     <h2 class="u-inline-1bff6ebf4f">
-        🎨 Цветовая схема админ-панели
+        <?= \App\Core\AdminUi::icon('palette', 18) ?> Цветовая схема админ-панели
     </h2>
     <p class="form-hint u-inline-5b6aad9a3f">
         Выберите персональное цветовое оформление интерфейса. Нажимая на варианты ниже, вы можете <strong>в реальном времени мгновенно примерять темы</strong> перед сохранением!

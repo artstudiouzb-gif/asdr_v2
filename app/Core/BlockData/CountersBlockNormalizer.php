@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\BlockData;
 
-use App\Core\Uploader;
+use App\Core\Icon;
 
 final class CountersBlockNormalizer
 {
@@ -26,10 +26,7 @@ final class CountersBlockNormalizer
                 continue;
             }
 
-            $iconSvg = BlockDataInput::trimmed($item, 'icon_svg');
-            if ($iconSvg !== '') {
-                $iconSvg = Uploader::sanitizeSvgString($iconSvg);
-            }
+            $iconSvg = Icon::cleanName($item['icon_svg'] ?? '');
 
             $digits = preg_replace('/\D+/', '', $value) ?? '';
             $items[] = [

@@ -98,20 +98,19 @@ test('HeaderConfig: нормализует show_border и расширенные
     assert_same('#2563eb', $cfg['styles']['nav_pill_bg']);
 });
 
-test('MenuItem: SVG-иконка санируется при сохранении, разделитель сохраняется (БД)', function () {
+test('MenuItem: хранит только ключ Tabler-иконки, разделитель сохраняется (БД)', function () {
     ensure_test_db();
     $pdo = Database::pdo();
     $pdo->exec('DELETE FROM menu_items');
 
-    // Иконка со скриптом — script вырезается, безопасная разметка остаётся.
+    // Пользовательская SVG-разметка больше не хранится.
     $dirtyIcon = '<svg viewBox="0 0 24 24"><script>alert(1)</script><path d="M3 3h18"/></svg>';
     $id = MenuItem::create([
         'title' => 'Раздел', 'lang' => 'ru', 'url_type' => 'custom', 'url_value' => '/x',
         'is_active' => 1, 'icon_svg' => $dirtyIcon,
     ]);
     $row = MenuItem::findById($id);
-    assert_true(!str_contains((string) $row['icon_svg'], '<script'), 'скрипт вырезан из иконки');
-    assert_contains('<path', (string) $row['icon_svg'], 'безопасная разметка иконки сохранена');
+    assert_same(null, $row['icon_svg'], 'инлайновая SVG-разметка отклонена');
 
     // Не-SVG в поле иконки → null.
     $id2 = MenuItem::create([
@@ -137,7 +136,7 @@ test('MenuItem: SVG-иконка санируется при сохранени�
     // Обновление снимает разделитель и меняет иконку, а также добавляет плашку.
     MenuItem::update($id3, [
         'title' => 'Теперь ссылка', 'lang' => 'ru', 'url_type' => 'custom', 'url_value' => '/z',
-        'is_active' => 1, 'is_divider' => false, 'icon_svg' => '<svg><circle cx="5" cy="5" r="4"/></svg>',
+        'is_active' => 1, 'is_divider' => false, 'icon_svg' => 'circle',
         'badge_text' => ' АКТУАЛЬНО! ', 'badge_color' => 'red', 'badge_pos' => 'right',
     ]);
     $upd = MenuItem::findById($id3);
@@ -145,6 +144,6 @@ test('MenuItem: SVG-иконка санируется при сохранени�
     assert_same('АКТУАЛЬНО!', $upd['badge_text'], 'текст бейджа очищен и сохранён');
     assert_same('red', $upd['badge_color'], 'цвет бейджа сохранён');
     assert_same('right', $upd['badge_pos'], 'позиция бейджа сохранена');
-    assert_contains('<circle', (string) $upd['icon_svg']);
+    assert_same('circle', $upd['icon_svg']);
     $pdo->exec('DELETE FROM menu_items');
 });

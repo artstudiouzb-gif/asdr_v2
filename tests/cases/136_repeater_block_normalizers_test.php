@@ -8,28 +8,25 @@ use App\Core\BlockData\FaqBlockNormalizer;
 use App\Core\BlockData\TestimonialsBlockNormalizer;
 use App\Core\BlockRenderer;
 
-test('Advantages normalizer: очищает SVG, типографит и пропускает пустые строки', function (): void {
+test('Advantages normalizer: принимает ключ Tabler, типографит и пропускает пустые строки', function (): void {
     $data = AdvantagesBlockNormalizer::normalize([
         'title_field' => ' Преимущества ',
         'items' => [
             [
-                'icon' => '★',
-                'icon_svg' => '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(1)</script><path d="M0 0"/></svg>',
+                'icon_svg' => 'bolt',
                 'title' => ' Скорость ',
                 'text' => ' Быстро ',
             ],
-            ['icon' => '!', 'title' => ' ', 'text' => ' '],
+            ['icon_svg' => 'alert-circle', 'title' => ' ', 'text' => ' '],
             'unexpected',
         ],
     ]);
 
     assert_same('Преимущества', $data['title']);
     assert_same(1, count($data['items']));
-    assert_same('★', $data['items'][0]['icon']);
+    assert_same('bolt', $data['items'][0]['icon_svg']);
     assert_same('Скорость', $data['items'][0]['title']);
     assert_same('Быстро', $data['items'][0]['text']);
-    assert_not_contains('<script', $data['items'][0]['icon_svg']);
-    assert_not_contains('onload=', $data['items'][0]['icon_svg']);
 });
 
 test('Testimonials normalizer: сохраняет контракт и отбрасывает опасное фото', function (): void {
@@ -80,7 +77,7 @@ test('Contact cards normalizer и рендерер блокируют опасн
         'title_field' => ' Контакты ',
         'items' => [
             [
-                'icon_svg' => '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><circle cx="1" cy="1" r="1"/></svg>',
+                'icon_svg' => 'mail',
                 'title' => ' E-mail ',
                 'lines' => " info@example.uz\npress@example.uz ",
                 'link_url' => ' javascript:alert(1) ',
@@ -94,7 +91,7 @@ test('Contact cards normalizer и рендерер блокируют опасн
     assert_same(1, count($data['items']));
     assert_same('', $data['items'][0]['link_url']);
     assert_same("info@example.uz\npress@example.uz", $data['items'][0]['lines']);
-    assert_not_contains('<script', $data['items'][0]['icon_svg']);
+    assert_same('mail', $data['items'][0]['icon_svg']);
 
     $legacy = $data;
     $legacy['items'][0]['link_url'] = 'javascript:alert(1)';

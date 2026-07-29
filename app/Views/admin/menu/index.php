@@ -29,7 +29,6 @@ foreach ($items as $menuItem) {
         $hasChildrenById[(int) $menuItem['parent_id']] = true;
     }
 }
-$iconCatalog = AdminUi::iconCatalog();
 
 /**
  * Поля создания и редактирования. Основные настройки остаются на виду,
@@ -37,8 +36,7 @@ $iconCatalog = AdminUi::iconCatalog();
  */
 $renderFields = static function (?array $item, bool $isCreate = false) use (
     $pages,
-    $parentCandidates,
-    $iconCatalog
+    $parentCandidates
 ): string {
     $item ??= [];
     $id = isset($item['id']) ? (int) $item['id'] : 0;
@@ -49,7 +47,7 @@ $renderFields = static function (?array $item, bool $isCreate = false) use (
     $parentId = isset($item['parent_id']) ? (int) $item['parent_id'] : 0;
     $isDivider = !empty($item['is_divider']);
     $iconValue = trim((string) ($item['icon_svg'] ?? ''));
-    $selectedIconKey = isset($iconCatalog[$iconValue]) ? $iconValue : '';
+    $selectedIconKey = \App\Core\Icon::cleanName($iconValue);
     $badgeColor = (string) ($item['badge_color'] ?? 'red');
     $badgePos = (string) ($item['badge_pos'] ?? 'right');
     $mega = (int) ($item['mega_columns'] ?? 0);
@@ -160,38 +158,11 @@ $renderFields = static function (?array $item, bool $isCreate = false) use (
                     </select>
                 </div>
 
-                <div class="form-field menu-icon-picker-field">
-                    <label for="<?= $prefix ?>_icon_select">Иконка</label>
-                    <div class="menu-icon-picker">
-                        <select id="<?= $prefix ?>_icon_select" data-icon-select="<?= $prefix ?>_icon">
-                            <option value="">Без иконки</option>
-                            <?php foreach ($iconCatalog as $iconKey => $iconLabel): ?>
-                                <option value="<?= htmlspecialchars($iconKey, ENT_QUOTES) ?>"
-                                    <?= $selectedIconKey === $iconKey ? ' selected' : '' ?>>
-                                    <?= htmlspecialchars($iconLabel, ENT_QUOTES) ?>
-                                </option>
-                            <?php endforeach; ?>
-                            <option value="custom" <?= $iconValue !== '' && $selectedIconKey === '' ? 'selected' : '' ?>>
-                                Свой SVG-код…
-                            </option>
-                        </select>
-                        <span class="menu-icon-preview" id="<?= $prefix ?>_icon_preview" aria-hidden="true">
-                            <?php if ($selectedIconKey !== ''): ?>
-                                <?= AdminUi::icon($selectedIconKey, 20) ?>
-                            <?php elseif (str_contains($iconValue, '<svg')): ?>
-                                <?= $iconValue ?>
-                            <?php else: ?>
-                                <?= AdminUi::icon('x', 18) ?>
-                            <?php endif; ?>
-                        </span>
-                    </div>
-                    <div class="menu-icon-custom-box<?= $selectedIconKey !== '' || $iconValue === '' ? ' is-hidden' : '' ?>"
-                         id="<?= $prefix ?>_icon_custom_box">
-                        <textarea id="<?= $prefix ?>_icon" name="icon_svg" rows="3"
-                                  placeholder="<svg viewBox=&quot;0 0 24 24&quot;>…</svg>"><?= htmlspecialchars($iconValue, ENT_QUOTES) ?></textarea>
-                        <span class="form-hint">Можно сохранить имя встроенной иконки или безопасный SVG.</span>
-                    </div>
-                </div>
+                <?= AdminUi::iconField('icon_svg', $selectedIconKey, [
+                    'id' => $prefix . '_icon',
+                    'label' => 'Иконка',
+                    'hint' => 'Полный локальный каталог Tabler Icons. В базе сохраняется только имя.',
+                ]) ?>
 
                 <div class="form-field form-field--checkbox">
                     <input type="checkbox" id="<?= $prefix ?>_hide_title" name="hide_title" value="1"
@@ -254,7 +225,7 @@ $renderNode = static function (array $item) use ($urlTypeLabels): string {
                 <?php if ($isDivider): ?>
                     <?= AdminUi::icon('divider', 18) ?>
                 <?php elseif ($rawIcon !== ''): ?>
-                    <?= str_contains($rawIcon, '<svg') ? $rawIcon : AdminUi::icon($rawIcon, 18) ?>
+                    <?= AdminUi::icon($rawIcon, 18) ?>
                 <?php else: ?>
                     <?= AdminUi::icon((string) $item['url_type'] === 'page' ? 'pages' : 'external', 18) ?>
                 <?php endif; ?>
@@ -494,15 +465,6 @@ foreach ($groups as $group) {
             <?php endforeach; ?>
         </aside>
     </div>
-</div>
-
-<div data-menu-icon-catalog hidden aria-hidden="true">
-    <span data-menu-icon-key=""><?= AdminUi::icon('x', 18) ?></span>
-    <?php foreach ($iconCatalog as $iconKey => $_iconLabel): ?>
-        <span data-menu-icon-key="<?= htmlspecialchars($iconKey, ENT_QUOTES) ?>">
-            <?= AdminUi::icon($iconKey, 20) ?>
-        </span>
-    <?php endforeach; ?>
 </div>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

@@ -23,7 +23,7 @@ require __DIR__ . '/../layout/header.php';
 $channelReady = $channelEnabled && trim((string) ($channel['chat_id'] ?? '')) !== '';
 $notifyCount = count(\App\Core\FormNotifier::parseChatIds($notifyChatIds));
 
-// Значок шага через вектоные SVG-иконки
+// Значок шага через единый локальный набор Tabler Icons.
 $mark = static function (bool $done, bool $started = true): string {
     if (!$started) {
         return '<span class="badge badge--draft">' . AdminUi::icon('info', 12) . ' не настроено</span>';
@@ -34,7 +34,7 @@ $mark = static function (bool $done, bool $started = true): string {
         : '<span class="badge badge--danger">' . AdminUi::icon('warning', 12) . ' требует внимания</span>';
 };
 ?>
-<?php // ── Верхняя сводная панель статусов Telegram с SVG-иконками ────────── ?>
+<?php // ── Верхняя сводная панель статусов Telegram с Tabler Icons ───────── ?>
 <div class="tg-summary-grid">
     <div class="tg-summary-card">
         <div class="tg-summary-card__header">
@@ -216,8 +216,8 @@ $mark = static function (bool $done, bool $started = true): string {
                 <button type="button" class="tg-tag-btn" onclick="insertTgTag('<b>', '</b>')"><b>B</b> Жирный</button>
                 <button type="button" class="tg-tag-btn" onclick="insertTgTag('<i>', '</i>')"><i>I</i> Курсив</button>
                 <button type="button" class="tg-tag-btn" onclick="insertTgTag('<code>', '</code>')"><?= AdminUi::icon('code', 13) ?> <code>Код (копирование)</code></button>
-                <button type="button" class="tg-tag-btn" onclick="insertTgTag('<blockquote>', '</blockquote>')">💬 Цитата</button>
-                <button type="button" class="tg-tag-btn" onclick="insertTgTag('<tg-spoiler>', '</tg-spoiler>')">👁 Спойлер</button>
+                <button type="button" class="tg-tag-btn" onclick="insertTgTag('<blockquote>', '</blockquote>')"><?= \App\Core\AdminUi::icon('message', 15) ?> Цитата</button>
+                <button type="button" class="tg-tag-btn" onclick="insertTgTag('<tg-spoiler>', '</tg-spoiler>')"><?= \App\Core\AdminUi::icon('eye', 15) ?> Спойлер</button>
                 <button type="button" class="tg-tag-btn" onclick="insertTgTag('<a href=&quot;https://example.com&quot;>', '</a>')"><?= AdminUi::icon('external', 13) ?> Ссылка</button>
             </div>
 

@@ -22,7 +22,7 @@ $subText = !empty($data['text']) ? (string) $data['text'] : t('Eng muhim yangili
             <label class="visually-hidden" for="w-sub-email"><?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?></label>
             <input id="w-sub-email" type="email" name="email" required placeholder="<?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?>" autocomplete="email">
             <button type="submit" aria-label="<?= htmlspecialchars(t('Obuna bo\'lish'), ENT_QUOTES) ?>">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                <?= \App\Core\Icon::render('arrow-right', 16, 'subscribe-widget__submit-icon', 2.5) ?>
             </button>
         </div>
         <?php if (Setting::get('form_consent_enabled', '0') === '1'): ?>

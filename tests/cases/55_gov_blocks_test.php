@@ -27,7 +27,7 @@ test('Блок hero: титул, подзаголовок, фон-фото, бе
 test('Блок categories_grid: плитки, первая активна', function () {
     $out = BlockRenderer::render(['id' => 22, 'type' => 'categories_grid', 'custom_css' => null, 'data' => json_encode([
         'title' => 'Категории', 'items' => [
-            ['icon_svg' => '<svg><rect/></svg>', 'label' => 'Новости', 'url' => '/news'],
+            ['icon_svg' => 'news', 'label' => 'Новости', 'url' => '/news'],
             ['icon_svg' => '', 'label' => 'Видео', 'url' => ''],
         ],
     ])])['html'];
@@ -70,7 +70,7 @@ test('Блок hero: видео-фон и надзаголовок; безопа
 test('Блоки cards_grid / image_cards / media_gallery: обёртки и содержимое', function () {
     $cards = BlockRenderer::render(['id' => 26, 'type' => 'cards_grid', 'custom_css' => null, 'data' => json_encode([
         'title' => 'Направления', 'all_text' => 'Все', 'all_url' => '/news', 'columns' => 5,
-        'items' => [['icon_svg' => '<svg><path/></svg>', 'title' => 'Рост', 'text' => 'описание', 'url' => '/news']],
+        'items' => [['icon_svg' => 'trending-up', 'title' => 'Рост', 'text' => 'описание', 'url' => '/news']],
     ])])['html'];
     assert_contains('cms-block--cards_grid', $cards);
     assert_contains('feature-card', $cards);

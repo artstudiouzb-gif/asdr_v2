@@ -69,7 +69,7 @@ $langs = Language::active();
                 <td><input type="checkbox" name="ids[]" value="<?= (int) $item['id'] ?>" form="bulkform" data-bulk-item></td>
                 <td>
                     <a class="data-table__primary" href="/admin/projects/<?= (int) $item['id'] ?>/edit"><?= htmlspecialchars($item['title'], ENT_QUOTES) ?></a>
-                    <?php if (!empty($item['is_featured'])): ?><span class="badge badge--success" title="Показывается в блоке «Проекты» на главной">★ на главной</span><?php endif; ?>
+                    <?php if (!empty($item['is_featured'])): ?><span class="badge badge--success" title="Показывается в блоке «Проекты» на главной"><?= \App\Core\AdminUi::icon('home', 13) ?> на главной</span><?php endif; ?>
                 </td>
                 <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? [], 'module' => 'projects', 'origId' => (int) $item['id']]) ?></td>
                 <td>

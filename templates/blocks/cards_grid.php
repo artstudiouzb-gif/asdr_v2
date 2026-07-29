@@ -46,7 +46,7 @@ $cardClasses .= $cardsText !== '' ? ' block-cards--custom-text' : '';
                 <?php endif; ?>
                     <?php if (!empty($item['icon_svg'])): ?>
                         <span class="feature-card__icon" aria-hidden="true">
-                            <?= $item['icon_svg'] ?>
+                            <?= \App\Core\Icon::render($item['icon_svg'], 32) ?>
                         </span>
                     <?php endif; ?>
                     <h3 class="feature-card__title">

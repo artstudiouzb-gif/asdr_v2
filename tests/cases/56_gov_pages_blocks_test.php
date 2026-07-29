@@ -68,7 +68,7 @@ test('Блок person_profile: фото, контакты, кнопка', functi
 test('Блок feature_band: элементы с иконками', function () {
     $out = BlockRenderer::render(['id' => 45, 'type' => 'feature_band', 'custom_css' => null, 'data' => json_encode([
         'items' => [
-            ['icon_svg' => '<svg><path/></svg>', 'title' => 'Стратегическое управление', 'text' => 'Определение приоритетов'],
+            ['icon_svg' => 'target-arrow', 'title' => 'Стратегическое управление', 'text' => 'Определение приоритетов'],
             ['icon_svg' => '', 'title' => 'Координация реформ', 'text' => ''],
         ],
     ])])['html'];

@@ -15,7 +15,7 @@ $templateCss = $cstyle !== '' ? '#block-' . $blockId . ' .block-counters{' . $cs
         ?>
             <div class="counter">
                 <?php if (!empty($item['icon_svg'])): ?>
-                    <span class="counter__icon" aria-hidden="true"><?= $item['icon_svg'] ?></span>
+                    <span class="counter__icon" aria-hidden="true"><?= \App\Core\Icon::render($item['icon_svg'], 28) ?></span>
                 <?php endif; ?>
                 <div class="counter__body">
                     <div class="counter__num">

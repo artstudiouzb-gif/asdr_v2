@@ -222,7 +222,7 @@ foreach ($options as $key => $opt) {
                 </div>
 
                 <div class="design-code-preview u-inline-50f7d15eb8">
-                    <div class="u-inline-b5b5b4c4bc">💻 Полное дерево выводимых CSS-переменных (:root)</div>
+                    <div class="u-inline-b5b5b4c4bc"><?= \App\Core\AdminUi::icon('code', 16) ?> Полное дерево выводимых CSS-переменных (:root)</div>
                     <div class="u-inline-b9f96fe18b">Все указанные выше 7 основных цветов и производные алиасы автоматически транслируются в следующий блок переменных:</div>
                     <pre class="u-inline-aad4dde478">:root {
     --color-primary: <?= htmlspecialchars($primary, ENT_QUOTES) ?>;

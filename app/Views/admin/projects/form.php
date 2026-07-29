@@ -118,7 +118,7 @@ foreach ($groupedFields as $f) {
                                 <div class="form-field u-inline-1da9facb4d">
                                     <input type="text" name="gallery[<?= $i ?>][caption]" value="<?= htmlspecialchars($image['caption'] ?? '', ENT_QUOTES) ?>" placeholder="Подпись к фото">
                                 </div>
-                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -133,7 +133,7 @@ foreach ($groupedFields as $f) {
                             <div class="form-field u-inline-1da9facb4d">
                                 <input type="text" name="gallery[__INDEX__][caption]" placeholder="Подпись к фото">
                             </div>
-                            <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                         </div>
                     </template>
                     <div class="repeater-actions u-inline-d8a81eac84">
@@ -157,7 +157,7 @@ foreach ($groupedFields as $f) {
                             <input type="text" name="custom_fields[team_<?= $i ?>][key]" value="<?= htmlspecialchars($tf['field_key'] ?? '', ENT_QUOTES) ?>" placeholder="Должность">
                             <input type="text" name="custom_fields[team_<?= $i ?>][value]" value="<?= htmlspecialchars($tf['field_value'] ?? '', ENT_QUOTES) ?>" placeholder="ФИО (RU)">
                             <input type="text" name="custom_fields[team_<?= $i ?>][value_uz]" value="<?= htmlspecialchars($tf['field_value_uz'] ?? '', ENT_QUOTES) ?>" placeholder="ФИО (UZ Перевод)">
-                            <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -166,7 +166,7 @@ foreach ($groupedFields as $f) {
                         <input type="text" name="custom_fields[team___INDEX__][key]" value="Команда: " placeholder="Должность">
                         <input type="text" name="custom_fields[team___INDEX__][value]" placeholder="ФИО участника (RU)">
                         <input type="text" name="custom_fields[team___INDEX__][value_uz]" placeholder="Перевод (UZ)">
-                        <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                     </div>
                 </template>
                 <span class="form-hint">Укажите ключевых специалистов и их переводы.</span>
@@ -187,7 +187,7 @@ foreach ($groupedFields as $f) {
                             <input type="text" name="custom_fields[vac_<?= $i ?>][key]" value="<?= htmlspecialchars($vf['field_key'] ?? '', ENT_QUOTES) ?>" placeholder="Название вакансии">
                             <input type="text" name="custom_fields[vac_<?= $i ?>][value]" value="<?= htmlspecialchars($vf['field_value'] ?? '', ENT_QUOTES) ?>" placeholder="Условия (RU)">
                             <input type="text" name="custom_fields[vac_<?= $i ?>][value_uz]" value="<?= htmlspecialchars($vf['field_value_uz'] ?? '', ENT_QUOTES) ?>" placeholder="Условия (UZ Перевод)">
-                            <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -196,7 +196,7 @@ foreach ($groupedFields as $f) {
                         <input type="text" name="custom_fields[vac___INDEX__][key]" value="Вакансия: " placeholder="Вакансия">
                         <input type="text" name="custom_fields[vac___INDEX__][value]" placeholder="Требования (RU)">
                         <input type="text" name="custom_fields[vac___INDEX__][value_uz]" placeholder="Перевод (UZ)">
-                        <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                     </div>
                 </template>
                 <span class="form-hint">Открытые вакансии проекта.</span>
@@ -220,7 +220,7 @@ foreach ($groupedFields as $f) {
                                 <button type="button" class="btn btn--small btn--secondary" data-media-pick data-media-target="[name='custom_fields[doc_<?= $i ?>][value]']" data-media-type="all_files">Файл</button>
                             </div>
                             <input type="text" name="custom_fields[doc_<?= $i ?>][value_uz]" value="<?= htmlspecialchars($df['field_value_uz'] ?? '', ENT_QUOTES) ?>" placeholder="Ссылка (UZ)">
-                            <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -232,7 +232,7 @@ foreach ($groupedFields as $f) {
                             <button type="button" class="btn btn--small btn--secondary" data-media-pick data-media-target="[name='custom_fields[doc___INDEX__][value]']" data-media-type="all_files">Файл</button>
                         </div>
                         <input type="text" name="custom_fields[doc___INDEX__][value_uz]" placeholder="Ссылка / Название (UZ)">
-                        <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                     </div>
                 </template>
                 <span class="form-hint">Прикрепляемые нормативные акты, справки и паспорта.</span>
@@ -253,7 +253,7 @@ foreach ($groupedFields as $f) {
                             <input type="text" name="custom_fields[evt_<?= $i ?>][key]" value="<?= htmlspecialchars($ef['field_key'] ?? '', ENT_QUOTES) ?>" placeholder="Название">
                             <input type="text" name="custom_fields[evt_<?= $i ?>][value]" value="<?= htmlspecialchars($ef['field_value'] ?? '', ENT_QUOTES) ?>" placeholder="Дата и место (RU)">
                             <input type="text" name="custom_fields[evt_<?= $i ?>][value_uz]" value="<?= htmlspecialchars($ef['field_value_uz'] ?? '', ENT_QUOTES) ?>" placeholder="Перевод (UZ)">
-                            <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -262,7 +262,7 @@ foreach ($groupedFields as $f) {
                         <input type="text" name="custom_fields[evt___INDEX__][key]" value="Мероприятие: " placeholder="Название события">
                         <input type="text" name="custom_fields[evt___INDEX__][value]" placeholder="Дата и место (RU)">
                         <input type="text" name="custom_fields[evt___INDEX__][value_uz]" placeholder="Перевод (UZ)">
-                        <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                     </div>
                 </template>
                 <span class="form-hint">Запланированные форумы и открытия.</span>
@@ -283,7 +283,7 @@ foreach ($groupedFields as $f) {
                             <input type="text" name="custom_fields[tnd_<?= $i ?>][key]" value="<?= htmlspecialchars($tnd['field_key'] ?? '', ENT_QUOTES) ?>" placeholder="Название тендера">
                             <input type="text" name="custom_fields[tnd_<?= $i ?>][value]" value="<?= htmlspecialchars($tnd['field_value'] ?? '', ENT_QUOTES) ?>" placeholder="Условия (RU)">
                             <input type="text" name="custom_fields[tnd_<?= $i ?>][value_uz]" value="<?= htmlspecialchars($tnd['field_value_uz'] ?? '', ENT_QUOTES) ?>" placeholder="Перевод (UZ)">
-                            <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -292,7 +292,7 @@ foreach ($groupedFields as $f) {
                         <input type="text" name="custom_fields[tnd___INDEX__][key]" value="Тендер: " placeholder="Номер тендера">
                         <input type="text" name="custom_fields[tnd___INDEX__][value]" placeholder="Бюджет и сроки (RU)">
                         <input type="text" name="custom_fields[tnd___INDEX__][value_uz]" placeholder="Перевод (UZ)">
-                        <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                     </div>
                 </template>
                 <span class="form-hint">Закупки и подряды проекта.</span>
@@ -313,7 +313,7 @@ foreach ($groupedFields as $f) {
                             <input type="text" name="custom_fields[cf_<?= $i ?>][key]" value="<?= htmlspecialchars($cf['field_key'] ?? '', ENT_QUOTES) ?>" placeholder="Ключ">
                             <input type="text" name="custom_fields[cf_<?= $i ?>][value]" value="<?= htmlspecialchars($cf['field_value'] ?? '', ENT_QUOTES) ?>" placeholder="Значение (RU)">
                             <input type="text" name="custom_fields[cf_<?= $i ?>][value_uz]" value="<?= htmlspecialchars($cf['field_value_uz'] ?? '', ENT_QUOTES) ?>" placeholder="Значение (UZ)">
-                            <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -322,7 +322,7 @@ foreach ($groupedFields as $f) {
                         <input type="text" name="custom_fields[cf___INDEX__][key]" placeholder="Название поля">
                         <input type="text" name="custom_fields[cf___INDEX__][value]" placeholder="Значение (RU)">
                         <input type="text" name="custom_fields[cf___INDEX__][value_uz]" placeholder="Перевод (UZ)">
-                        <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove>✕</button>
+                                <button type="button" class="btn btn--small btn--danger repeater-row__remove u-inline-22ca54a87e" data-repeater-remove><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                     </div>
                 </template>
                 <span class="form-hint">Заказчик, год реализации, площадь объекта и др.</span>

@@ -34,21 +34,25 @@
       "title": "",
       "items": [
         {
+          "icon_svg": "building",
           "value": "100",
           "suffix": "+",
           "label": "strategik tashabbus amalga oshirildi"
         },
         {
+          "icon_svg": "users",
           "value": "20",
           "suffix": "+",
           "label": "ustuvor tarmoqlardagi loyiha"
         },
         {
+          "icon_svg": "chart-bar",
           "value": "30",
           "suffix": "+",
           "label": "har yili tayyorlanadigan tahliliy tadqiqot"
         },
         {
+          "icon_svg": "world",
           "value": "10",
           "suffix": "+",
           "label": "xalqaro hamkor va tashkilot"
@@ -66,26 +70,31 @@
       "columns": 5,
       "items": [
         {
+          "icon_svg": "trending-up",
           "title": "Barqaror iqtisodiy o‘sish",
           "text": "Biznes va investitsiyalar uchun qulay sharoit yaratish",
           "url": "/ustoychivyy-ekonomicheskiy-rost"
         },
         {
+          "icon_svg": "users",
           "title": "Inson kapitali",
           "text": "Ta’lim, sog‘liqni saqlash va kelajak ko‘nikmalarini rivojlantirish",
           "url": "/analitika"
         },
         {
+          "icon_svg": "building",
           "title": "Samarali davlat",
           "text": "Institutlarni takomillashtirish va boshqaruv sifatini oshirish",
           "url": "/strategiya-2030"
         },
         {
+          "icon_svg": "leaf",
           "title": "Yashil iqtisodiyot",
           "text": "Kam uglerodli modelga o‘tish va resurslardan oqilona foydalanish",
           "url": "/projects/zelenaya-energetika"
         },
         {
+          "icon_svg": "route",
           "title": "Hududiy rivojlanish",
           "text": "Hududlarni muvozanatli rivojlantirish va infratuzilmani yaxshilash",
           "url": "/projects/transportnaya-infrastruktura"

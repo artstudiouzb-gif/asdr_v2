@@ -505,10 +505,7 @@ final class BlockController
                     if ($url !== '' && !\App\Core\UrlGuard::isSafeLink($url)) {
                         $url = '';
                     }
-                    $iconSvg = trim((string) ($item['icon_svg'] ?? ''));
-                    if ($iconSvg !== '') {
-                        $iconSvg = \App\Core\Uploader::sanitizeSvgString($iconSvg);
-                    }
+                    $iconSvg = \App\Core\Icon::cleanName($item['icon_svg'] ?? '');
                     $items[] = [
                         'icon_svg' => $iconSvg,
                         'image' => trim((string) ($item['image'] ?? '')),
@@ -558,10 +555,7 @@ final class BlockController
                     if ($url !== '' && !\App\Core\UrlGuard::isSafeLink($url)) {
                         $url = '';
                     }
-                    $iconSvg = trim((string) ($item['icon_svg'] ?? ''));
-                    if ($iconSvg !== '') {
-                        $iconSvg = \App\Core\Uploader::sanitizeSvgString($iconSvg);
-                    }
+                    $iconSvg = \App\Core\Icon::cleanName($item['icon_svg'] ?? '');
                     $items[] = [
                         'icon_svg' => $iconSvg,
                         'label' => TextProcessor::typographPlain($label, $locale),
@@ -583,10 +577,7 @@ final class BlockController
                     if ($url !== '' && !\App\Core\UrlGuard::isSafeLink($url)) {
                         $url = '';
                     }
-                    $iconSvg = trim((string) ($item['icon_svg'] ?? ''));
-                    if ($iconSvg !== '') {
-                        $iconSvg = \App\Core\Uploader::sanitizeSvgString($iconSvg);
-                    }
+                    $iconSvg = \App\Core\Icon::cleanName($item['icon_svg'] ?? '');
                     $items[] = [
                         'icon_svg' => $iconSvg,
                         'label' => TextProcessor::typographPlain($label, $locale),
@@ -675,10 +666,7 @@ final class BlockController
                     'docs' => $docs,
                 ];
             case 'cta_band':
-                $iconSvg = trim((string) ($_POST['icon_svg'] ?? ''));
-                if ($iconSvg !== '') {
-                    $iconSvg = \App\Core\Uploader::sanitizeSvgString($iconSvg);
-                }
+                $iconSvg = \App\Core\Icon::cleanName($_POST['icon_svg'] ?? '');
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'text' => TextProcessor::typographPlain(trim((string) ($_POST['text'] ?? '')), $locale),
@@ -709,10 +697,7 @@ final class BlockController
                     if ($itemTitle === '') {
                         continue;
                     }
-                    $iconSvg = trim((string) ($item['icon_svg'] ?? ''));
-                    if ($iconSvg !== '') {
-                        $iconSvg = \App\Core\Uploader::sanitizeSvgString($iconSvg);
-                    }
+                    $iconSvg = \App\Core\Icon::cleanName($item['icon_svg'] ?? '');
                     $items[] = [
                         'icon_svg' => $iconSvg,
                         'title' => TextProcessor::typographPlain($itemTitle, $locale),
@@ -798,10 +783,7 @@ final class BlockController
                     if ($label === '') {
                         continue;
                     }
-                    $iconSvg = trim((string) ($item['icon_svg'] ?? ''));
-                    if ($iconSvg !== '') {
-                        $iconSvg = \App\Core\Uploader::sanitizeSvgString($iconSvg);
-                    }
+                    $iconSvg = \App\Core\Icon::cleanName($item['icon_svg'] ?? '');
                     $items[] = ['icon_svg' => $iconSvg, 'label' => TextProcessor::typographPlain($label, $locale)];
                 }
                 return [

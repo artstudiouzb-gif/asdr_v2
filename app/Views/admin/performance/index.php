@@ -107,8 +107,8 @@ $size = static function (mixed $bytes): string {
                 </div>
                 <div class="u-inline-4f738c4fe1">
                     <strong>Передача сервером:</strong>
-                    Brotli <?= !empty($assetStatus['brotliConfigured']) ? '✓' : '—' ?> ·
-                    gzip <?= !empty($assetStatus['gzipConfigured']) ? '✓' : '—' ?>
+                    Brotli <?= \App\Core\AdminUi::icon(!empty($assetStatus['brotliConfigured']) ? 'check' : 'minus', 13) ?> ·
+                    gzip <?= \App\Core\AdminUi::icon(!empty($assetStatus['gzipConfigured']) ? 'check' : 'minus', 13) ?>
                 </div>
             </div>
             <div class="u-inline-d0698c48c3">

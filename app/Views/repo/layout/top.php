@@ -24,6 +24,7 @@ $a11y = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
+    <?= \App\Core\Icon::browserConfigHtml() ?>
     <title><?= htmlspecialchars($pageTitle ?? 'Файловый портал', ENT_QUOTES) ?> — <?= $repoName ?></title>
     <link rel="stylesheet" href="/assets/css/fonts.css">
     <link rel="stylesheet" href="/assets/css/gov-theme.css?v=<?= file_exists(dirname(__DIR__, 3) . '/public/assets/css/gov-theme.css') ? filemtime(dirname(__DIR__, 3) . '/public/assets/css/gov-theme.css') : '2.0.1' ?>">
@@ -36,13 +37,13 @@ $a11y = [
         <?php if ($repoLogo !== ''): ?>
             <img src="<?= htmlspecialchars($repoLogo, ENT_QUOTES) ?>" alt="<?= $repoName ?>" class="repo-topbar__logo">
         <?php else: ?>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.4 7.7 8 10 4.6-2.3 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg>
+            <?= \App\Core\Icon::render('shield-check', 24) ?>
         <?php endif; ?>
         <span>Защищённое хранилище</span>
     </a>
     <nav>
         <button type="button" class="a11y-toggle" aria-label="Версия для слабовидящих" title="Версия для слабовидящих" aria-controls="a11y-panel" aria-expanded="<?= $a11y['on'] ? 'true' : 'false' ?>">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <?= \App\Core\Icon::render('eye', 18) ?>
         </button>
         <?php if (!empty($repoUser)): ?>
             <span class="repo-topbar__user"><?= htmlspecialchars((string) ($repoUser['full_name'] ?: $repoUser['username']), ENT_QUOTES) ?></span>

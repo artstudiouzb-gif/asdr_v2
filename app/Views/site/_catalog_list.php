@@ -57,7 +57,7 @@ $qs = static function (array $overrides) use ($q, $sort): string {
                 <div class="catcard__main">
                     <div class="catcard__top">
                         <span class="catcard__doc-icon" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            <?= \App\Core\Icon::render('file-description', 18) ?>
                         </span>
                         <?php if ($hasDeadline): ?>
                             <span class="catcard__status<?= !empty($entry['is_archived']) ? ' catcard__status--off' : '' ?>"><?= htmlspecialchars(t(!empty($entry['is_archived']) ? 'Архив' : 'Приём открыт'), ENT_QUOTES) ?></span>
@@ -86,7 +86,7 @@ $qs = static function (array $overrides) use ($q, $sort): string {
                         <?php foreach ($fileFields as $f): ?>
                             <?php if (!empty($entry['data'][$f['name']])): ?>
                                 <span class="catcard__file">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/><path d="M12 11v6"/><path d="m9 14 3 3 3-3"/></svg>
+                                    <?= \App\Core\Icon::render('file-download', 15, 'ui-icon', 1.8) ?>
                                     <?= htmlspecialchars(t((string) $f['label']), ENT_QUOTES) ?>
                                 </span>
                                 <?php break; ?>

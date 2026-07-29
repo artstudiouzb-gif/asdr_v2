@@ -54,10 +54,7 @@ $templateCss = $embedUrl === '' && $imageCss !== ''
             <span class="block-map__image block-map__image--empty"></span>
         <?php endif; ?>
         <span class="block-map__pin" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="52" height="52" class="block-map__pin-svg">
-                <path d="M12 22s-7-6-7-11.5a7 7 0 1 1 14 0C19 16 12 22 12 22z"/>
-                <circle cx="12" cy="10.3" r="3.5" fill="#fff" class="block-map__pin-dot"/>
-            </svg>
+            <?= \App\Core\Icon::render('map-pin', 52, 'block-map__pin-svg', 1.8) ?>
             <span class="block-map__pin-ripple"></span>
         </span>
         <?php if ($cardTitle !== '' || $address !== ''): ?>

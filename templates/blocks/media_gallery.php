@@ -41,9 +41,9 @@ $showTabs = $hasVideo && $hasPhoto;
                         <?php if ($img !== ''): ?><?= \App\Core\Media::picture($img, (string) $item['title'], null, null, 'mediacard__img', true, '(max-width: 700px) 100vw, 33vw') ?><?php endif; ?>
                         <span class="mediacard__play mediacard__play--<?= $kind ?>" aria-hidden="true">
                             <?php if ($kind === 'photo'): ?>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M5 18l5-5 4 4 3-3 2 2"/></svg>
+                                <?= \App\Core\Icon::render('photo', 24) ?>
                             <?php else: ?>
-                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                <?= \App\Core\Icon::render('player-play', 24) ?>
                             <?php endif; ?>
                         </span>
                         <?php if ($duration !== ''): ?><span class="mediacard__duration"><?= htmlspecialchars($duration, ENT_QUOTES) ?></span><?php endif; ?>

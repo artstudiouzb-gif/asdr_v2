@@ -38,7 +38,7 @@ require __DIR__ . '/../layout/header.php';
                             <span class="badge badge--muted">Отключён</span>
                         <?php endif; ?>
                     </td>
-                    <td><?= (int) $u['totp_enabled'] === 1 ? '✓' : '—' ?></td>
+                    <td><?= \App\Core\AdminUi::icon((int) $u['totp_enabled'] === 1 ? 'check' : 'minus', 14) ?></td>
                     <td class="form-hint"><?= htmlspecialchars((string) ($u['last_login_at'] ?? '—'), ENT_QUOTES) ?></td>
                     <td class="data-table__actions">
                         <form method="post" action="/admin/repository/users/<?= (int) $u['id'] ?>/toggle">

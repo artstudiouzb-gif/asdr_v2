@@ -74,7 +74,7 @@
         function showSuccess() {
             if (btnEl) {
                 const oldHtml = btnEl.innerHTML;
-                btnEl.innerHTML = '✓ Скопировано!';
+                btnEl.innerHTML = (window.asdrTablerIcon ? window.asdrTablerIcon('check', 15) : '') + ' Скопировано!';
                 btnEl.classList.add('is-copy-success');
                 setTimeout(function () {
                     btnEl.innerHTML = oldHtml;
@@ -755,47 +755,6 @@
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { close(); } });
     })();
 
-    // --- Поля SVG-иконок: код вручную ИЛИ выбор файла из медиабиблиотеки ---
-    // К каждому textarea иконки добавляется панель с кнопкой «Выбрать из медиа»:
-    // выбранный SVG-файл подгружается и вставляется как код (инлайн). Так поле
-    // остаётся единым (icon_svg), а на сохранении код санитайзится сервером.
-    (function () {
-        function enhance(ta) {
-            if (ta.getAttribute('data-icon-enhanced')) { return; }
-            ta.setAttribute('data-icon-enhanced', '1');
-            var bar = document.createElement('div');
-            bar.className = 'icon-field__tools';
-            var pick = document.createElement('button');
-            pick.type = 'button'; pick.className = 'btn btn--small'; pick.textContent = 'Выбрать SVG из медиа';
-            var clear = document.createElement('button');
-            clear.type = 'button'; clear.className = 'btn btn--small'; clear.textContent = 'Очистить';
-            bar.appendChild(pick); bar.appendChild(clear);
-            ta.insertAdjacentElement('afterend', bar);
-
-            pick.addEventListener('click', function () {
-                if (!window.MediaPicker) { return; }
-                window.MediaPicker.pickSvg(function (url) {
-                    fetch(url, { credentials: 'same-origin' })
-                        .then(function (r) { return r.text(); })
-                        .then(function (txt) {
-                            ta.value = txt.trim();
-                            ta.dispatchEvent(new Event('input', { bubbles: true }));
-                        })
-                        .catch(function () { window.alert('Не удалось загрузить SVG-файл.'); });
-                });
-            });
-            clear.addEventListener('click', function () {
-                ta.value = '';
-                ta.dispatchEvent(new Event('input', { bubbles: true }));
-            });
-        }
-        function enhanceIn(root) {
-            (root || document).querySelectorAll('textarea[name$="[icon_svg]"], textarea[name="icon_svg"]').forEach(enhance);
-        }
-        window.__enhanceIconFields = enhanceIn;
-        enhanceIn(document);
-    })();
-
     // --- Живое значение ползунков прозрачности (overlay/подложка hero и др.) ---
     document.addEventListener('input', function (e) {
         var input = e.target.closest('input[type="range"][data-range-input]');
@@ -869,8 +828,7 @@
                 box.appendChild(img);
             } else {
                 box.innerHTML = '<span class="image-field__placeholder" aria-hidden="true">'
-                    + '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'
-                    + '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M5 18l5-5 4 4 3-3 2 2"/></svg></span>';
+                    + (window.asdrTablerIcon ? window.asdrTablerIcon('photo', 26) : '') + '</span>';
             }
         }
         // URL-инпут (в т.ч. установленный медиабиблиотекой — она шлёт change).
@@ -1081,7 +1039,7 @@
                     saving = false; saveBtn.disabled = false;
                     if (ok) {
                         dirty = false;
-                        statusEl.textContent = 'Порядок сохранён ✓';
+                        statusEl.textContent = 'Порядок сохранён';
                         hideTimer = window.setTimeout(function () { bar.setAttribute('hidden', ''); }, 1400);
                     } else {
                         statusEl.textContent = msg || 'Не удалось сохранить. Попробуйте ещё раз.';
@@ -1515,28 +1473,6 @@
             }
         });
 
-        document.addEventListener('change', function (e) {
-            if (!e.target.matches('[data-icon-select]')) { return; }
-            var targetId = e.target.getAttribute('data-icon-select');
-            var textarea = document.getElementById(targetId);
-            var prefix = targetId.replace(/_icon$/, '');
-            var customBox = document.getElementById(prefix + '_icon_custom_box');
-            var preview = document.getElementById(prefix + '_icon_preview');
-            var value = e.target.value;
-            if (customBox) { customBox.classList.toggle('is-hidden', value !== 'custom'); }
-            if (value === 'custom') {
-                if (textarea && textarea.value.indexOf('<svg') === -1) { textarea.value = ''; }
-                if (textarea) { textarea.focus(); }
-                return;
-            }
-            if (textarea) { textarea.value = value; }
-            if (preview) {
-                var catalogIcon = document.querySelector('[data-menu-icon-key="' + value + '"]');
-                var emptyIcon = document.querySelector('[data-menu-icon-key=""]');
-                preview.innerHTML = catalogIcon ? catalogIcon.innerHTML : (emptyIcon ? emptyIcon.innerHTML : '');
-            }
-        });
-
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') { closeInspector(); }
         });
@@ -1589,6 +1525,190 @@
             });
         });
     });
+})();
+
+/* Единый локальный выбор Tabler Icons для меню и конструкторов блоков. */
+(function () {
+    'use strict';
+
+    var spriteMeta = document.querySelector('meta[name="asdr-icon-sprite"]');
+    var catalogMeta = document.querySelector('meta[name="asdr-icon-catalog"]');
+    var sprite = spriteMeta ? spriteMeta.getAttribute('content') : '/assets/vendor/tabler/tabler-sprite.svg';
+    var catalogUrl = catalogMeta ? catalogMeta.getAttribute('content') : '/assets/vendor/tabler/tabler-icons.json';
+    var picker = document.querySelector('[data-icon-picker]');
+    var search = picker ? picker.querySelector('[data-icon-picker-search]') : null;
+    var results = picker ? picker.querySelector('[data-icon-picker-results]') : null;
+    var count = picker ? picker.querySelector('[data-icon-picker-count]') : null;
+    var activeField = null;
+    var iconNames = null;
+    var restoreFocus = null;
+
+    function cleanName(value) {
+        var name = String(value || '').trim().toLowerCase().replace(/^tabler-/, '');
+        return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name) && name.length <= 80 ? name : '';
+    }
+
+    function iconMarkup(name, size, className) {
+        name = cleanName(name);
+        if (!name) { return ''; }
+        size = Math.max(8, Math.min(160, Number(size) || 20));
+        className = className || 'ui-icon';
+        return '<svg class="icon icon-tabler ' + className + '" width="' + size + '" height="' + size
+            + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+            + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'
+            + '<use href="' + sprite + '#tabler-' + name + '"></use></svg>';
+    }
+
+    window.asdrTablerIcon = iconMarkup;
+    window.__enhanceIconFields = function (root) {
+        (root || document).querySelectorAll('[data-icon-field]').forEach(updatePreview);
+    };
+
+    function updatePreview(field) {
+        if (!field) { return; }
+        var input = field.querySelector('[data-icon-input]');
+        var preview = field.querySelector('[data-icon-preview]');
+        if (!input || !preview) { return; }
+        var name = cleanName(input.value);
+        if (input.value !== name) { input.value = name; }
+        preview.innerHTML = iconMarkup(name || 'photo-off', 22);
+        field.classList.toggle('has-icon', name !== '');
+    }
+
+    function closePicker() {
+        if (!picker) { return; }
+        picker.hidden = true;
+        document.body.classList.remove('has-icon-picker');
+        activeField = null;
+        if (restoreFocus) { restoreFocus.focus(); }
+        restoreFocus = null;
+    }
+
+    function choose(name) {
+        if (!activeField) { return; }
+        var input = activeField.querySelector('[data-icon-input]');
+        if (input) {
+            input.value = cleanName(name);
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        updatePreview(activeField);
+        closePicker();
+    }
+
+    function render(query) {
+        if (!results || !Array.isArray(iconNames)) { return; }
+        var normalized = cleanName(query) || String(query || '').trim().toLowerCase();
+        var filtered = iconNames.filter(function (name) {
+            return normalized === '' || name.indexOf(normalized) !== -1;
+        });
+        var visible = filtered.slice(0, 180);
+        results.innerHTML = '';
+        visible.forEach(function (name) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'tabler-picker__item';
+            button.setAttribute('data-icon-picker-value', name);
+            button.setAttribute('title', name);
+            button.innerHTML = iconMarkup(name, 24) + '<span></span>';
+            button.querySelector('span').textContent = name;
+            results.appendChild(button);
+        });
+        if (visible.length === 0) {
+            results.innerHTML = '<div class="tabler-picker__status">Иконки не найдены</div>';
+        }
+        if (count) {
+            count.textContent = filtered.length > visible.length
+                ? 'Показано ' + visible.length + ' из ' + filtered.length
+                : 'Найдено: ' + filtered.length;
+        }
+    }
+
+    function loadCatalog() {
+        if (Array.isArray(iconNames)) {
+            render(search ? search.value : '');
+            return Promise.resolve(iconNames);
+        }
+        return fetch(catalogUrl, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+            .then(function (response) {
+                if (!response.ok) { throw new Error('HTTP ' + response.status); }
+                return response.json();
+            })
+            .then(function (payload) {
+                iconNames = Array.isArray(payload.icons) ? payload.icons.filter(cleanName) : [];
+                render(search ? search.value : '');
+                return iconNames;
+            })
+            .catch(function () {
+                if (results) {
+                    results.innerHTML = '<div class="tabler-picker__status tabler-picker__status--error">'
+                        + 'Не удалось загрузить каталог. Можно ввести имя Tabler вручную.</div>';
+                }
+                return [];
+            });
+    }
+
+    function openPicker(button) {
+        if (!picker) { return; }
+        activeField = button.closest('[data-icon-field]');
+        if (!activeField) { return; }
+        restoreFocus = button;
+        picker.hidden = false;
+        document.body.classList.add('has-icon-picker');
+        var input = activeField.querySelector('[data-icon-input]');
+        if (search) {
+            search.value = input ? input.value : '';
+            search.focus();
+        }
+        loadCatalog();
+    }
+
+    document.addEventListener('input', function (event) {
+        if (event.target.matches('[data-icon-input]')) {
+            updatePreview(event.target.closest('[data-icon-field]'));
+        }
+        if (event.target.matches('[data-icon-picker-search]')) {
+            render(event.target.value);
+        }
+    });
+
+    document.addEventListener('click', function (event) {
+        var open = event.target.closest('[data-icon-picker-open]');
+        if (open) {
+            openPicker(open);
+            return;
+        }
+        var clear = event.target.closest('[data-icon-clear]');
+        if (clear) {
+            var field = clear.closest('[data-icon-field]');
+            var input = field ? field.querySelector('[data-icon-input]') : null;
+            if (input) {
+                input.value = '';
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            updatePreview(field);
+            return;
+        }
+        var choice = event.target.closest('[data-icon-picker-value]');
+        if (choice) {
+            choose(choice.getAttribute('data-icon-picker-value'));
+            return;
+        }
+        if (event.target.closest('[data-icon-picker-empty]')) {
+            choose('');
+            return;
+        }
+        if (event.target.closest('[data-icon-picker-close]') || event.target === picker) {
+            closePicker();
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && picker && !picker.hidden) {
+            closePicker();
+        }
+    });
+
+    document.querySelectorAll('[data-icon-field]').forEach(updatePreview);
 })();
 
 /* ==========================================================================
@@ -1952,11 +2072,15 @@
 
             var toast = document.createElement('div');
             toast.className = 'admin-toast-notification admin-toast--' + (type || 'warning');
+            var statusIcon = window.asdrTablerIcon
+                ? window.asdrTablerIcon(type === 'error' ? 'circle-x' : 'alert-triangle', 16)
+                : '';
+            var closeIcon = window.asdrTablerIcon ? window.asdrTablerIcon('x', 16) : '';
             toast.innerHTML = '<div class="u-inline-7e30d285d2">'
-                + '<span class="u-inline-4f1925a8a6">' + (type === 'error' ? '🚫' : '⚠️') + '</span>'
+                + '<span class="u-inline-4f1925a8a6">' + statusIcon + '</span>'
                 + '<span class="u-inline-94c3db5540">' + msg + '</span>'
                 + '</div>'
-                + '<button class="u-inline-d8c73d8aa0" type="button" onclick="this.parentNode.remove()">✕</button>';
+                + '<button class="u-inline-d8c73d8aa0" type="button" onclick="this.parentNode.remove()">' + closeIcon + '</button>';
             document.body.appendChild(toast);
             requestAnimationFrame(function () { toast.classList.add('is-visible'); });
             setTimeout(function () {
@@ -2100,7 +2224,7 @@
         var paletteHtml = '<div class="admin-cmd-palette-overlay u-inline-58d7c6be2b" data-cmd-overlay>'
             + '<div class="admin-cmd-palette-modal u-inline-27aa68da7d" role="dialog" aria-modal="true" aria-label="Командная палитра">'
             + '<div class="u-inline-907d56949b">'
-            + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
+            + (window.asdrTablerIcon ? window.asdrTablerIcon('search', 18) : '')
             + '<input class="u-inline-7180243890" type="text" data-cmd-input placeholder="Введите название раздела, страницы или действие..." aria-label="Поиск по разделу или действию">'
             + '<kbd class="u-inline-8d83117354">ESC</kbd>'
             + '</div>'
@@ -2123,18 +2247,18 @@
         var searchTimer = null;
 
         var allCommands = [
-            { icon: '📝', title: 'Новости', desc: 'Управление публикациями и новостями', url: '/admin/news' },
-            { icon: '➕', title: 'Добавить новую новость', desc: 'Создать статью или анонс', url: '/admin/news/create' },
-            { icon: '📄', title: 'Страницы', desc: 'Структура и разделы сайта', url: '/admin/pages' },
-            { icon: '➕', title: 'Добавить страницу', desc: 'Создать новую страницу', url: '/admin/pages/create' },
-            { icon: '📁', title: 'Проекты', desc: 'Реестр проектов и направлений', url: '/admin/projects' },
-            { icon: '🎨', title: 'Дизайн и Оформление', desc: 'Шрифты, цвета и пресеты', url: '/admin/design' },
-            { icon: '📌', title: 'Конструктор меню', desc: 'Навигация в шапке и подвале', url: '/admin/menu' },
-            { icon: '📂', title: 'Медиабиблиотека', desc: 'Загрузка изображений и документов', url: '/admin/files' },
-            { icon: '📱', title: 'Telegram Автопостинг', desc: 'Настройка социальных сетей', url: '/admin/telegram' },
-            { icon: '📋', title: 'Журнал действий', desc: 'Аудит системы и историй', url: '/admin/audit' },
-            { icon: '🔐', title: 'Безопасность & 2FA', desc: 'Управление доступом и сессиями', url: '/admin/security' },
-            { icon: '🌐', title: 'Перейти на сайт', desc: 'Открыть публичный сайт', url: '/' }
+            { icon: 'news', title: 'Новости', desc: 'Управление публикациями и новостями', url: '/admin/news' },
+            { icon: 'plus', title: 'Добавить новую новость', desc: 'Создать статью или анонс', url: '/admin/news/create' },
+            { icon: 'files', title: 'Страницы', desc: 'Структура и разделы сайта', url: '/admin/pages' },
+            { icon: 'plus', title: 'Добавить страницу', desc: 'Создать новую страницу', url: '/admin/pages/create' },
+            { icon: 'briefcase', title: 'Проекты', desc: 'Реестр проектов и направлений', url: '/admin/projects' },
+            { icon: 'palette', title: 'Дизайн и Оформление', desc: 'Шрифты, цвета и пресеты', url: '/admin/design' },
+            { icon: 'menu-2', title: 'Конструктор меню', desc: 'Навигация в шапке и подвале', url: '/admin/menu' },
+            { icon: 'photo', title: 'Медиабиблиотека', desc: 'Загрузка изображений и документов', url: '/admin/files' },
+            { icon: 'brand-telegram', title: 'Telegram Автопостинг', desc: 'Настройка социальных сетей', url: '/admin/telegram' },
+            { icon: 'clipboard-list', title: 'Журнал действий', desc: 'Аудит системы и историй', url: '/admin/audit' },
+            { icon: 'shield-lock', title: 'Безопасность & 2FA', desc: 'Управление доступом и сессиями', url: '/admin/security' },
+            { icon: 'world', title: 'Перейти на сайт', desc: 'Открыть публичный сайт', url: '/' }
         ];
 
         function isUrlAccessible(url) {
@@ -2184,7 +2308,7 @@
             if (serverResults && serverResults.length) {
                 serverResults.forEach(function (r) {
                     matchedItems.push({
-                        icon: '🔍',
+                        icon: 'search',
                         title: r.title,
                         desc: r.type || 'Объект',
                         url: r.url,
@@ -2206,7 +2330,7 @@
             matchedItems.forEach(function (c, idx) {
                 var isSel = idx === selectedIdx;
                 html += '<a href="' + c.url + '" class="admin-cmd-item u-inline-9e9c073f14' + (isSel ? ' is-selected' : '') + '" data-cmd-index="' + idx + '">'
-                    + '<span class="u-inline-da71aab0cc">' + c.icon + '</span>'
+                    + '<span class="u-inline-da71aab0cc">' + (window.asdrTablerIcon ? window.asdrTablerIcon(c.icon, 20) : '') + '</span>'
                     + '<div>'
                     + '<div class="u-inline-3f7fce4b31"></div>'
                     + '<div class="u-inline-afa3d0ea3b"></div>'

@@ -282,7 +282,7 @@ final class PortalController
         } else {
             RepoUser::setTelegramChatId((int) $user['id'], $chatId);
             unset($_SESSION['repo_tg_link_code']);
-            TelegramBot::sendMessage($chatId, '✅ Telegram привязан к файловому порталу. Теперь при входе сюда будет приходить одноразовый код.');
+            TelegramBot::sendMessage($chatId, 'Telegram привязан к файловому порталу. Теперь при входе сюда будет приходить одноразовый код.');
             Logger::security('Привязан Telegram для 2FA портала', ['user' => (string) $user['username']]);
             Flash::success('Telegram привязан. При входе будет приходить одноразовый код.');
         }

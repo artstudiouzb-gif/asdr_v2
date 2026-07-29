@@ -23,7 +23,7 @@ $fieldLabels = [
 ];
 $signatureHints = [
     'telegram' => 'Допустима HTML-разметка Telegram: &lt;b&gt;, &lt;i&gt;, &lt;a href="…"&gt;, &lt;blockquote expandable&gt;, &lt;tg-spoiler&gt;, &lt;code&gt;. '
-        . 'Например: 🌐 &lt;a href="https://asr.artstudio.uz"&gt;Сайт&lt;/a&gt; | 📘 &lt;a href="https://facebook.com/…"&gt;Facebook&lt;/a&gt;',
+        . 'Например: &lt;a href="https://asr.artstudio.uz"&gt;Сайт&lt;/a&gt; | &lt;a href="https://facebook.com/…"&gt;Facebook&lt;/a&gt;',
     'facebook' => 'Только обычный текст — HTML не поддерживается. Ссылки пишите голыми URL, Facebook сам сделает их кликабельными.',
     'linkedin' => 'Только обычный текст — HTML не поддерживается. Ссылки пишите голыми URL, LinkedIn сам сделает их кликабельными.',
     'instagram' => 'Только обычный текст. Ссылки в подписи Instagram НЕ кликабельны — здесь имеют смысл хештеги и @упоминания.',
@@ -31,7 +31,7 @@ $signatureHints = [
 
 $tokenGuides = [
     'telegram' => [
-        'title' => '📖 Инструкция: Как получить Токен бота и Chat ID для Telegram',
+        'title' => 'Инструкция: Как получить Токен бота и Chat ID для Telegram',
         'steps' => [
             'Откройте бота <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> в Telegram и отправьте команду <code>/newbot</code>.',
             'Задайте название и логин бота, затем скопируйте полученный <b>HTTP API Token</b> (например: <code>123456789:AAF...</code>).',
@@ -40,7 +40,7 @@ $tokenGuides = [
         ],
     ],
     'facebook' => [
-        'title' => '📖 Инструкция: Как получить Access Token и ID Страницы Facebook',
+        'title' => 'Инструкция: Как получить Access Token и ID Страницы Facebook',
         'steps' => [
             'Перейдите в инструмент разработчиков Meta: <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener">Graph API Explorer</a>.',
             'В поле <b>Meta App</b> выберите ваше приложение, а в выпадающем списке <b>User or Page</b> выберите <i>Маркер доступа страницы (Page Access Token)</i>.',
@@ -50,7 +50,7 @@ $tokenGuides = [
         ],
     ],
     'linkedin' => [
-        'title' => '📖 Инструкция: Как получить Access Token и Author URN для LinkedIn',
+        'title' => 'Инструкция: Как получить Access Token и Author URN для LinkedIn',
         'steps' => [
             'Зайдите в портал <a href="https://www.linkedin.com/developers/apps" target="_blank" rel="noopener">LinkedIn Developers</a> и создайте приложение (App).',
             'Во вкладке <b>Products</b> запросите доступ к <i>Share on LinkedIn</i> и <i>Community Management API</i>.',
@@ -59,7 +59,7 @@ $tokenGuides = [
         ],
     ],
     'instagram' => [
-        'title' => '📖 Инструкция: Как получить Access Token и IG User ID для Instagram',
+        'title' => 'Инструкция: Как получить Access Token и IG User ID для Instagram',
         'steps' => [
             'Аккаунт Instagram должен быть переведен в тип <b>Professional/Business</b> и привязан к вашей Странице Facebook.',
             'В <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener">Graph API Explorer Meta</a> выберите привязанную Страницу Facebook.',

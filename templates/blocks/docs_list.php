@@ -20,7 +20,7 @@ $templateCss = '#block-' . $blockId . ' .docslist-grid{--docs-cols:' . $cols . '
                 <?php $url = trim((string) ($doc['url'] ?? '')); $tag = $url !== '' ? 'a' : 'div'; ?>
                 <<?= $tag ?> class="doc-card"<?= $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '" download' : '' ?>>
                     <span class="doc-card__icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/></svg>
+                        <?= \App\Core\Icon::render('file-text', 24, 'doc-card__icon-svg', 1.5) ?>
                     </span>
                     <span class="doc-card__body">
                         <span class="doc-card__title"><?= htmlspecialchars((string) ($doc['title'] ?? ''), ENT_QUOTES) ?></span>
@@ -28,7 +28,7 @@ $templateCss = '#block-' . $blockId . ' .docslist-grid{--docs-cols:' . $cols . '
                     </span>
                     <?php if ($url !== ''): ?>
                         <span class="doc-card__dl">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M12 4v11m0 0 4-4m-4 4-4-4"/><path d="M5 19h14"/></svg>
+                            <?= \App\Core\Icon::render('download', 18, 'doc-card__download-icon', 1.8) ?>
                         </span>
                     <?php endif; ?>
                 </<?= $tag ?>>

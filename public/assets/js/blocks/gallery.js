@@ -8,7 +8,8 @@
         if (!overlay) {
             overlay = document.createElement('div');
             overlay.className = 'cms-lightbox';
-            overlay.innerHTML = '<img alt=""><button type="button" class="cms-lightbox__close" aria-label="Закрыть">&times;</button>';
+            var closeIcon = window.asdrPublicIcon ? window.asdrPublicIcon('x', 20) : 'Закрыть';
+            overlay.innerHTML = '<img alt=""><button type="button" class="cms-lightbox__close" aria-label="Закрыть">' + closeIcon + '</button>';
             overlay.addEventListener('click', function () { overlay.classList.remove('is-open'); });
             document.body.appendChild(overlay);
         }

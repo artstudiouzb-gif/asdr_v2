@@ -32,7 +32,8 @@ $renderChip = function (string $type) use ($elements, $elementIcons): string {
         . '<span class="hb-el__grip" aria-hidden="true">' . AdminUi::icon('grip', 14, 'hb-el__grip-icon', 0) . '</span>'
         . '<span class="hb-el__icon">' . ($elementIcons[$type] ?? '') . '</span>'
         . '<span class="hb-el__label">' . htmlspecialchars($label, ENT_QUOTES) . '</span>'
-        . '<button type="button" class="hb-el__remove hdr-chip__remove" aria-label="Убрать" title="Убрать">&times;</button>'
+        . '<button type="button" class="hb-el__remove hdr-chip__remove" aria-label="Убрать" title="Убрать">'
+        . \App\Core\Icon::render('x', 14) . '</button>'
         . '</span>';
 };
 

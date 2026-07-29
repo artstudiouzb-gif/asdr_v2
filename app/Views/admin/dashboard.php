@@ -86,12 +86,12 @@ require __DIR__ . '/layout/header.php';
             </div>
             <div class="u-inline-4588dc62ed">
                 <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('База данных'), ENT_QUOTES) ?></div>
-                <span class="badge badge--published u-inline-e48b05836a">✓ <?= htmlspecialchars(t('Подключена'), ENT_QUOTES) ?></span>
+                <span class="badge badge--published u-inline-e48b05836a"><?= \App\Core\AdminUi::icon('check', 13) ?> <?= htmlspecialchars(t('Подключена'), ENT_QUOTES) ?></span>
             </div>
             <div class="u-inline-4588dc62ed">
                 <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('Защита 2FA / Telegram'), ENT_QUOTES) ?></div>
                 <?php if (!empty($systemHealth['telegram_linked'])): ?>
-                    <span class="badge badge--published u-inline-e48b05836a">✓ <?= htmlspecialchars(t('Активна'), ENT_QUOTES) ?></span>
+                    <span class="badge badge--published u-inline-e48b05836a"><?= \App\Core\AdminUi::icon('check', 13) ?> <?= htmlspecialchars(t('Активна'), ENT_QUOTES) ?></span>
                 <?php else: ?>
                     <span class="badge badge--draft u-inline-e48b05836a"><?= htmlspecialchars(t('Не настроена'), ENT_QUOTES) ?></span>
                 <?php endif; ?>
@@ -190,7 +190,7 @@ require __DIR__ . '/layout/header.php';
                 </div>
                 <div>
                     <span class="badge badge--published u-inline-5888fddfc8">
-                        👁️ <?= number_format((int) ($n['period_views'] ?? 0), 0, '.', ' ') ?> <?= htmlspecialchars(t('просмотров'), ENT_QUOTES) ?>
+                        <?= \App\Core\AdminUi::icon('eye', 14) ?> <?= number_format((int) ($n['period_views'] ?? 0), 0, '.', ' ') ?> <?= htmlspecialchars(t('просмотров'), ENT_QUOTES) ?>
                     </span>
                 </div>
             </a>
@@ -315,7 +315,7 @@ $fillPointsStr = "$padding," . ($height - $padding) . " $pointsStr " . ($width -
 <?php if (!empty($topRepoDownloads)): ?>
 <div class="form-card u-inline-e6e3fab9a5">
     <div class="form-card__header">
-        <h3>📥 <?= htmlspecialchars(t('Популярные файлы репозитория'), ENT_QUOTES) ?></h3>
+        <h3><?= \App\Core\AdminUi::icon('download', 18) ?> <?= htmlspecialchars(t('Популярные файлы репозитория'), ENT_QUOTES) ?></h3>
         <a href="/admin/repository" class="btn btn--small"><?= htmlspecialchars(t('Перейти в репозиторий'), ENT_QUOTES) ?> →</a>
     </div>
     <div class="table-responsive">

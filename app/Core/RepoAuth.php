@@ -104,7 +104,7 @@ final class RepoAuth
         $_SESSION['repo_tg_code_expires'] = time() + 300;
 
         $safeCode = htmlspecialchars($code, ENT_QUOTES);
-        $text = "<b>🔐 Код входа в файловый портал</b>\n\n"
+        $text = "<b>Код входа в файловый портал</b>\n\n"
             . "Код: <code>{$safeCode}</code>\n\n"
             . "⏱ <i>Действует 5 минут. Никому не сообщайте этот код.</i>";
 

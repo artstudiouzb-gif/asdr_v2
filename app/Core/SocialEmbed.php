@@ -39,7 +39,7 @@ final class SocialEmbed
                 return '<div class="social-embed social-embed--telegram">'
                     . '<script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-post="' . htmlspecialchars($postRef, ENT_QUOTES) . '" data-width="100%"></script>'
                     . '<a class="social-embed-card social-embed-card--telegram" href="' . htmlspecialchars($fullUrl, ENT_QUOTES) . '" target="_blank" rel="noopener">'
-                    . '<span class="social-embed-card__icon">✈️</span>'
+                    . '<span class="social-embed-card__icon">' . Icon::render('brand-telegram', 22) . '</span>'
                     . '<span class="social-embed-card__body">'
                     . '<span class="social-embed-card__title">Пост в Telegram (@' . htmlspecialchars($channel, ENT_QUOTES) . ')</span>'
                     . '<span class="social-embed-card__url">' . htmlspecialchars($fullUrl, ENT_QUOTES) . '</span>'
@@ -62,7 +62,7 @@ final class SocialEmbed
 
                 return '<div class="social-embed social-embed--instagram">'
                     . '<a class="social-embed-card social-embed-card--instagram" href="' . htmlspecialchars($fullUrl, ENT_QUOTES) . '" target="_blank" rel="noopener">'
-                    . '<span class="social-embed-card__icon">📸</span>'
+                    . '<span class="social-embed-card__icon">' . Icon::render('brand-instagram', 22) . '</span>'
                     . '<span class="social-embed-card__body">'
                     . '<span class="social-embed-card__title">' . htmlspecialchars($label, ENT_QUOTES) . '</span>'
                     . '<span class="social-embed-card__url">' . htmlspecialchars($fullUrl, ENT_QUOTES) . '</span>'
@@ -77,4 +77,3 @@ final class SocialEmbed
         return $html;
     }
 }
-

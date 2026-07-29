@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 use App\Core\BlockRenderer;
 
-test('Блок contact_cards: модульный, карточки с ссылками, SVG санируется', function () {
+test('Блок contact_cards: модульный, карточки с ссылками и Tabler-иконками', function () {
     $data = [
         'title' => 'Наши контакты',
         'items' => [
             [
-                'icon_svg' => '<svg viewBox="0 0 24 24"><script>alert(1)</script><rect x="3" y="5" width="18" height="14"/></svg>',
+                'icon_svg' => 'mail',
                 'title' => 'E-mail',
                 'lines' => "info@example.uz\npress@example.uz",
                 'link_url' => 'mailto:info@example.uz',
@@ -30,9 +30,8 @@ test('Блок contact_cards: модульный, карточки с ссылк
     assert_contains('press@example.uz', $h);
     // Ссылка карточки.
     assert_contains('mailto:info@example.uz', $h);
-    // SVG в шаблоне выводится как есть (санитизация — на этапе сохранения в
-    // BlockController); проверяем, что структура карточки на месте.
     assert_contains('contact-card__icon', $h);
+    assert_contains('/assets/vendor/tabler/tabler-sprite.svg#tabler-mail', $h);
 });
 
 test('Блок contact_cards: пустой список — заглушка', function () {

@@ -162,7 +162,7 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
 <?php // Плавающая кнопка «Наверх» — видимостью управляет класс body.design-scrolltop
       // (тумблер в «Дизайн») и JS (появляется после прокрутки). ?>
 <button type="button" class="scroll-top" data-scroll-top aria-label="<?= htmlspecialchars(t('Наверх'), ENT_QUOTES) ?>" title="<?= htmlspecialchars(t('Наверх'), ENT_QUOTES) ?>">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+    <?= \App\Core\Icon::render('arrow-up', 20) ?>
 </button>
 <?php $cspNonce = \App\Core\SecurityHeaders::nonce(); ?>
 <script type="application/json" id="frontend-labels"><?= json_encode([

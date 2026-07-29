@@ -1,6 +1,31 @@
     </main>
 </div>
 
+<div class="tabler-picker" data-icon-picker hidden role="dialog" aria-modal="true" aria-labelledby="tabler-picker-title">
+    <div class="tabler-picker__dialog">
+        <div class="tabler-picker__head">
+            <div>
+                <strong id="tabler-picker-title">Tabler Icons</strong>
+                <span>Локальный каталог — без CDN</span>
+            </div>
+            <button type="button" class="btn btn--secondary" data-icon-picker-close aria-label="Закрыть">
+                <?= \App\Core\Icon::render('x', 18) ?>
+            </button>
+        </div>
+        <div class="tabler-picker__search">
+            <?= \App\Core\Icon::render('search', 18) ?>
+            <input type="search" data-icon-picker-search placeholder="Поиск: home, user, chart…" autocomplete="off">
+        </div>
+        <div class="tabler-picker__results" data-icon-picker-results aria-live="polite">
+            <div class="tabler-picker__status">Каталог загружается…</div>
+        </div>
+        <div class="tabler-picker__foot">
+            <span data-icon-picker-count></span>
+            <button type="button" class="btn btn--secondary" data-icon-picker-empty>Без иконки</button>
+        </div>
+    </div>
+</div>
+
 <div class="media-modal" data-media-modal hidden role="dialog" aria-modal="true" aria-labelledby="media-modal-title">
     <div class="media-modal__dialog">
         <div class="media-modal__head">
@@ -8,7 +33,7 @@
                 <button type="button" class="media-modal__tab is-active" data-media-tab="library">Библиотека файлов</button>
                 <button type="button" class="media-modal__tab" data-media-tab="upload">Загрузить файлы</button>
             </div>
-            <button type="button" class="media-modal__close" data-media-close aria-label="Закрыть">×</button>
+            <button type="button" class="media-modal__close" data-media-close aria-label="Закрыть"><?= \App\Core\Icon::render('x', 18) ?></button>
         </div>
         <div class="media-modal__toolbar" data-media-toolbar>
             <input type="search" class="media-modal__search" data-media-search placeholder="Поиск в медиабиблиотеке…">
@@ -85,11 +110,13 @@ window.addEventListener('DOMContentLoaded', function () {
     toast.className = 'admin-toast-notification admin-toast--success';
     toast.setAttribute('role', 'status');
     toast.setAttribute('aria-live', 'polite');
+    var toastOkIcon = <?= json_encode(\App\Core\Icon::render('check', 16), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    var toastCloseIcon = <?= json_encode(\App\Core\Icon::render('x', 16), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
     toast.innerHTML = '<div class="u-inline-7e30d285d2">'
-        + '<span class="u-inline-4f1925a8a6" aria-hidden="true">✓</span>'
+        + '<span class="u-inline-4f1925a8a6" aria-hidden="true">' + toastOkIcon + '</span>'
         + '<span class="u-inline-94c3db5540"></span>'
         + '</div>'
-        + '<button class="u-inline-d8c73d8aa0" type="button" aria-label="Закрыть уведомление">✕</button>';
+        + '<button class="u-inline-d8c73d8aa0" type="button" aria-label="Закрыть уведомление">' + toastCloseIcon + '</button>';
     toast.querySelector('.u-inline-94c3db5540').textContent = message;
     toast.querySelector('button').addEventListener('click', function () { toast.remove(); });
     document.body.appendChild(toast);
