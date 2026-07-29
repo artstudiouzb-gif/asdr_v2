@@ -252,7 +252,20 @@ $extBadge = static function (array $f): string {
                                 <td class="repo-meta"><?= htmlspecialchars(date('d.m.Y', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></td>
                                 <td>
                                     <div class="rd-table-actions">
-                                        <a class="rd-btn rd-btn--primary rd-btn--sm" href="/repo/download/<?= (int) $f['id'] ?>">Скачать</a>
+                                        <div class="rd-lang-pills">
+                                            <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать русскую версию">
+                                                <span>RU</span>
+                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                                            </a>
+                                            <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать узбекскую версию">
+                                                <span>UZ</span>
+                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                                            </a>
+                                            <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Download English version">
+                                                <span>EN</span>
+                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                                            </a>
+                                        </div>
                                         <button type="button" class="rd-btn rd-btn--ghost rd-btn--sm" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку">📋</button>
                                     </div>
                                 </td>
@@ -278,10 +291,17 @@ $extBadge = static function (array $f): string {
                             <p class="rd-doc__desc"><?= htmlspecialchars(mb_substr((string) $f['description'], 0, 120), ENT_QUOTES) ?></p>
                         <?php endif; ?>
                         <div class="rd-doc__actions">
-                            <a class="rd-btn rd-btn--primary rd-btn--full" href="/repo/download/<?= (int) $f['id'] ?>">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M12 4v11m0 0 4-4m-4 4-4-4"/><path d="M5 19h14"/></svg>
-                                Скачать
-                            </a>
+                            <div class="rd-lang-pills">
+                                <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать (RU)">
+                                    <span>RU</span> ⤓
+                                </a>
+                                <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать (UZ)">
+                                    <span>UZ</span> ⤓
+                                </a>
+                                <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Download (EN)">
+                                    <span>EN</span> ⤓
+                                </a>
+                            </div>
                             <button type="button" class="rd-btn rd-btn--ghost rd-btn--icon" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку">📋</button>
                         </div>
                     </article>

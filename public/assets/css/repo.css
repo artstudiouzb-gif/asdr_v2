@@ -333,15 +333,40 @@ a:hover { text-decoration: underline; }
 /* Цветовые акценты расширений файлов */
 .rd-doc__ext[data-ext="PDF"] { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
 .rd-doc__ext[data-ext="DOC"], .rd-doc__ext[data-ext="DOCX"] { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+.rd-doc__ext[data-ext="PPT"], .rd-doc__ext[data-ext="PPTX"] { background: #fff7ed; color: #ea580c; border-color: #ffedd5; }
 .rd-doc__ext[data-ext="XLS"], .rd-doc__ext[data-ext="XLSX"] { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
-.rd-doc__ext[data-ext="ZIP"], .rd-doc__ext[data-ext="RAR"], .rd-doc__ext[data-ext="7Z"] { background: #fffbeb; color: #d97706; border-color: #fde68a; }
+.rd-doc__ext[data-ext="ZIP"], .rd-doc__ext[data-ext="RAR"], .rd-doc__ext[data-ext="7Z"] { background: #faf5ff; color: #9333ea; border-color: #e9d5ff; }
+
+.rd-lang-pills { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.rd-lang-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    transition: all 0.15s ease;
+}
+.rd-lang-pill:hover {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
 
 .rd-doc__cat { color: var(--repo-teal); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
 .rd-doc__date { color: var(--repo-muted); font-size: 0.82rem; }
 .rd-doc__title { font-family: var(--font-heading, 'PT Serif', Georgia, serif); color: var(--repo-navy); font-size: 1.05rem; line-height: 1.38; margin: 0; flex: 1; font-weight: 700; }
 .rd-doc__meta { color: var(--repo-muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
 .rd-doc__desc { color: var(--repo-muted); font-size: 0.88rem; line-height: 1.5; margin: 0; }
-.rd-doc__actions { margin-top: 10px; }
+.rd-doc__actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
 .rd-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; text-decoration: none; transition: all 0.2s ease; }
 .rd-btn--primary { background: var(--repo-navy); color: #fff; }
 .rd-btn--primary:hover { background: var(--repo-teal); color: #fff; text-decoration: none; box-shadow: 0 6px 16px rgba(13, 148, 136, 0.25); }
