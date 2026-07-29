@@ -99,14 +99,16 @@ final class Search
 
         // Projects
         try {
-            $expr = "CONCAT_WS(' ', title, slug, description)";
+            $expr = "CONCAT_WS(' ', p.title, p.slug, p.description, t.title, t.description)";
             [$condition, $params] = self::condition($expr, $groups);
             $stmt = $pdo->prepare(
-                "SELECT title, slug, COALESCE(description, '') AS body, '' AS excerpt, created_at AS sort_date
-                 FROM projects WHERE deleted_at IS NULL AND status = 'published' AND {$condition}
-                 ORDER BY sort_order ASC, created_at DESC LIMIT ?"
+                "SELECT COALESCE(NULLIF(t.title, ''), p.title) AS title, p.slug,
+                        COALESCE(NULLIF(t.description, ''), p.description, '') AS body, '' AS excerpt, p.created_at AS sort_date
+                 FROM projects p LEFT JOIN project_translations t ON t.project_id = p.id AND t.lang = ?
+                 WHERE p.deleted_at IS NULL AND p.status = 'published' AND {$condition}
+                 ORDER BY p.sort_order ASC, p.created_at DESC LIMIT ?"
             );
-            self::bindSeq($stmt, [...$params, $candidateLimit]);
+            self::bindSeq($stmt, [$lang, ...$params, $candidateLimit]);
             $stmt->execute();
             foreach ($stmt->fetchAll() as $row) {
                 self::append($results, $term, 'Проект', $row, Locale::url('projects/' . $row['slug'], $lang));
