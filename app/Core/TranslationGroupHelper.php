@@ -178,18 +178,17 @@ final class TranslationGroupHelper
             return (int) $existingId;
         }
 
-        $newSlug = (string) ($orig['slug'] ?? 'item');
+        $newSlug = Slug::unique(
+            (string) ($orig['slug'] ?? 'item') . '-' . $targetLang,
+            static function (string $candidate, ?int $_excludeId) use ($table, $targetLang): bool {
+                $check = Database::pdo()->prepare(
+                    "SELECT COUNT(*) FROM {$table} WHERE slug = :slug AND lang = :lang AND deleted_at IS NULL"
+                );
+                $check->execute([':slug' => $candidate, ':lang' => $targetLang]);
+                return (int) $check->fetchColumn() > 0;
+            }
+        );
         if ($table === 'news') {
-            $newSlug = Slug::unique(
-                $newSlug . '-' . $targetLang,
-                static function (string $candidate, ?int $_excludeId) use ($targetLang): bool {
-                    $check = Database::pdo()->prepare(
-                        'SELECT COUNT(*) FROM news WHERE slug = :slug AND lang = :lang AND deleted_at IS NULL'
-                    );
-                    $check->execute([':slug' => $candidate, ':lang' => $targetLang]);
-                    return (int) $check->fetchColumn() > 0;
-                }
-            );
             $ins = Database::pdo()->prepare(
                 "INSERT INTO news (title, slug, excerpt, badge, content, image, video_url, audio_url, audio_title, hashtags, press_release_url, key_points, event_meta, timeline_json, docs, source_note, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
                  VALUES (:t, :s, :e, :b, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, 'draft', NOW(), :auth, :lang, :gid, NOW())"
