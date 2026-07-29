@@ -99,21 +99,12 @@ final class News
         $orders = [
             'newest' => 'n.created_at DESC, n.id DESC',
             'oldest' => 'n.created_at ASC, n.id ASC',
-            'title_asc' => 'title ASC, n.id ASC',
-            'title_desc' => 'title DESC, n.id DESC',
+            'title_asc' => 'n.title ASC, n.id ASC',
+            'title_desc' => 'n.title DESC, n.id DESC',
             'published_desc' => 'n.published_at DESC, n.id DESC',
         ];
         $order = $orders[$filters['sort'] ?? 'newest'] ?? $orders['newest'];
-        $langFilter = (string) ($filters['lang'] ?? '');
-        $titleSelect = 'n.title';
-        $joinTranslation = '';
-        if ($langFilter !== '' && $langFilter !== 'all') {
-            $joinTranslation = ' LEFT JOIN news_translations nt_title ON nt_title.news_id = n.id AND nt_title.lang = :lang_select';
-            $titleSelect = 'COALESCE(NULLIF(nt_title.title, \'\'), n.title)';
-            $params[':lang_select'] = $langFilter;
-        }
-
-        $sql = "SELECT n.*, {$titleSelect} AS title {$from} {$joinTranslation} ORDER BY {$order} LIMIT :limit OFFSET :offset";
+        $sql = "SELECT n.* {$from} ORDER BY {$order} LIMIT :limit OFFSET :offset";
         $stmt = Database::pdo()->prepare($sql);
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
@@ -122,7 +113,25 @@ final class News
         $stmt->bindValue(':offset', (int) $filters['offset'], \PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        $items = $stmt->fetchAll();
+        $langFilter = (string) ($filters['lang'] ?? '');
+        if ($langFilter !== '' && $langFilter !== 'all' && $items !== []) {
+            $ids = array_map(static fn ($item): int => (int) $item['id'], $items);
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $tStmt = Database::pdo()->prepare(
+                "SELECT news_id, title FROM news_translations WHERE news_id IN ({$placeholders}) AND lang = ? AND TRIM(COALESCE(title, '')) <> ''"
+            );
+            $tStmt->execute([...$ids, $langFilter]);
+            $transMap = $tStmt->fetchAll(\PDO::FETCH_KEY_PAIR);
+            foreach ($items as &$item) {
+                if (!empty($transMap[(int) $item['id']])) {
+                    $item['title'] = (string) $transMap[(int) $item['id']];
+                }
+            }
+            unset($item);
+        }
+
+        return $items;
     }
 
     public static function adminCount(array $filters): int

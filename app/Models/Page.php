@@ -50,24 +50,15 @@ final class Page
         $orders = [
             'newest' => 'p.created_at DESC, p.id DESC',
             'oldest' => 'p.created_at ASC, p.id ASC',
-            'title_asc' => 'title ASC, p.id ASC',
-            'title_desc' => 'title DESC, p.id DESC',
+            'title_asc' => 'p.title ASC, p.id ASC',
+            'title_desc' => 'p.title DESC, p.id DESC',
         ];
         $order = $orders[$filters['sort'] ?? 'newest'] ?? $orders['newest'];
-        $langFilter = (string) ($filters['lang'] ?? '');
-        $titleSelect = 'p.title';
-        $joinTranslation = '';
-        if ($langFilter !== '' && $langFilter !== 'all') {
-            $joinTranslation = ' LEFT JOIN page_translations pt_title ON pt_title.page_id = p.id AND pt_title.lang = :lang_select';
-            $titleSelect = 'COALESCE(NULLIF(pt_title.title, \'\'), p.title)';
-            $params[':lang_select'] = $langFilter;
-        }
-
         $stmt = Database::pdo()->prepare(
-            "SELECT p.*, {$titleSelect} AS title,
+            "SELECT p.*,
                     (SELECT parent.title FROM pages parent WHERE parent.id = p.parent_id AND parent.deleted_at IS NULL LIMIT 1) AS parent_title,
                     (SELECT parent.slug FROM pages parent WHERE parent.id = p.parent_id AND parent.deleted_at IS NULL LIMIT 1) AS parent_slug
-             {$from} {$joinTranslation}
+             {$from}
              ORDER BY {$order}
              LIMIT :limit OFFSET :offset"
         );
@@ -78,7 +69,25 @@ final class Page
         $stmt->bindValue(':offset', (int) $filters['offset'], \PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        $items = $stmt->fetchAll();
+        $langFilter = (string) ($filters['lang'] ?? '');
+        if ($langFilter !== '' && $langFilter !== 'all' && $items !== []) {
+            $ids = array_map(static fn ($item): int => (int) $item['id'], $items);
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $tStmt = Database::pdo()->prepare(
+                "SELECT page_id, title FROM page_translations WHERE page_id IN ({$placeholders}) AND lang = ? AND TRIM(COALESCE(title, '')) <> ''"
+            );
+            $tStmt->execute([...$ids, $langFilter]);
+            $transMap = $tStmt->fetchAll(\PDO::FETCH_KEY_PAIR);
+            foreach ($items as &$item) {
+                if (!empty($transMap[(int) $item['id']])) {
+                    $item['title'] = (string) $transMap[(int) $item['id']];
+                }
+            }
+            unset($item);
+        }
+
+        return $items;
     }
 
     public static function adminCount(array $filters): int
