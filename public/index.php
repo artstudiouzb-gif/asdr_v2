@@ -350,6 +350,8 @@ $router->post('/repo/logout', [\App\Controllers\Repo\AuthController::class, 'log
 $router->get('/repo', [\App\Controllers\Repo\PortalController::class, 'index']);
 $router->post('/repo/upload', [\App\Controllers\Repo\PortalController::class, 'upload']);
 $router->get('/repo/download/{id}', [\App\Controllers\Repo\PortalController::class, 'download']);
+$router->get('/repo/preview/{id}', [\App\Controllers\Repo\PortalController::class, 'preview']);
+$router->post('/repo/download-zip', [\App\Controllers\Repo\PortalController::class, 'downloadZip']);
 $router->get('/repo/security', [\App\Controllers\Repo\PortalController::class, 'security']);
 $router->post('/repo/security/2fa/enable', [\App\Controllers\Repo\PortalController::class, 'enableTotp']);
 $router->post('/repo/security/2fa/disable', [\App\Controllers\Repo\PortalController::class, 'disableTotp']);

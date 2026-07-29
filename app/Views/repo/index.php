@@ -215,98 +215,132 @@ $extBadge = static function (array $f): string {
                 </div>
             </div>
         <?php else: ?>
-            <!-- Табличный вид (скрыт по умолчанию, переключается кнопкой) -->
-            <div class="rd-table-wrapper" id="rd-table-view">
-                <table class="repo-table">
-                    <thead>
-                        <tr>
-                            <th>Формат</th>
-                            <th>Название документа</th>
-                            <th>Категория</th>
-                            <th>Размер</th>
-                            <th>Дата</th>
-                            <th>Действия</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($files as $f): ?>
-                            <?php $extName = htmlspecialchars($extBadge($f), ENT_QUOTES); ?>
-                            <tr>
-                                <td class="rd-table__ext-col">
-                                    <span class="rd-doc__ext" data-ext="<?= $extName ?>"><?= $extName ?></span>
-                                </td>
-                                <td>
-                                    <a class="repo-file-title" href="/repo/download/<?= (int) $f['id'] ?>" target="_blank"><?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?></a>
-                                    <?php if (!empty($f['description'])): ?>
-                                        <div class="repo-file-desc"><?= htmlspecialchars(mb_substr((string) $f['description'], 0, 100), ENT_QUOTES) ?></div>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php if (!empty($f['category'])): ?>
-                                        <span class="rd-doc__cat"><?= htmlspecialchars((string) $f['category'], ENT_QUOTES) ?></span>
-                                    <?php else: ?>
-                                        <span class="text-muted">—</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="repo-meta"><?= htmlspecialchars(Format::fileSize((int) $f['size']), ENT_QUOTES) ?></td>
-                                <td class="repo-meta"><?= htmlspecialchars(date('d.m.Y', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></td>
-                                <td>
-                                    <div class="rd-table-actions">
-                                        <div class="rd-lang-pills">
-                                            <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать русскую версию">
-                                                <span>RU</span>
-                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
-                                            </a>
-                                            <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать узбекскую версию">
-                                                <span>UZ</span>
-                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
-                                            </a>
-                                            <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Download English version">
-                                                <span>EN</span>
-                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
-                                            </a>
-                                        </div>
-                                        <button type="button" class="rd-btn rd-btn--ghost rd-btn--sm" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку">📋</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+            <!-- Панель пакетных действий -->
+            <form id="rd-batch-form" action="/repo/download-zip" method="POST">
+                <?= Csrf::field() ?>
+                <div class="rd-batch-bar u-inline-f2892a2e8a" id="rd-batch-bar">
+                    <span class="rd-batch-count">Выбрано файлов: <strong id="rd-selected-count">0</strong></span>
+                    <button type="submit" class="rd-btn rd-btn--primary rd-btn--sm">
+                        📦 Скачать выбранные в ZIP
+                    </button>
+                </div>
 
-            <!-- Вид плиткой (Grid) -->
-            <div class="rd-grid" id="rd-grid-view">
-                <?php foreach ($files as $f): ?>
-                    <article class="rd-doc">
-                        <div class="rd-doc__head">
-                            <?php $extName = htmlspecialchars($extBadge($f), ENT_QUOTES); ?>
-                            <span class="rd-doc__ext" data-ext="<?= $extName ?>"><?= $extName ?></span>
-                            <?php if (!empty($f['category'])): ?><span class="rd-doc__cat"><?= htmlspecialchars((string) $f['category'], ENT_QUOTES) ?></span><?php endif; ?>
-                        </div>
-                        <time class="rd-doc__date"><?= htmlspecialchars(date('d.m.Y', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></time>
-                        <h3 class="rd-doc__title"><?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?></h3>
-                        <div class="rd-doc__meta"><?= htmlspecialchars($extBadge($f) . ' · ' . Format::fileSize((int) $f['size']), ENT_QUOTES) ?><?= (int) $f['download_count'] > 0 ? ' · скачано ' . (int) $f['download_count'] : '' ?></div>
-                        <?php if (!empty($f['description'])): ?>
-                            <p class="rd-doc__desc"><?= htmlspecialchars(mb_substr((string) $f['description'], 0, 120), ENT_QUOTES) ?></p>
-                        <?php endif; ?>
-                        <div class="rd-doc__actions">
-                            <div class="rd-lang-pills">
-                                <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать (RU)">
-                                    <span>RU</span> ⤓
-                                </a>
-                                <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать (UZ)">
-                                    <span>UZ</span> ⤓
-                                </a>
-                                <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Download (EN)">
-                                    <span>EN</span> ⤓
-                                </a>
+                <!-- Табличный вид -->
+                <div class="rd-table-wrapper" id="rd-table-view">
+                    <table class="repo-table">
+                        <thead>
+                            <tr>
+                                <th width="40"><input type="checkbox" id="rd-select-all" title="Выбрать все"></th>
+                                <th>Формат</th>
+                                <th>Название документа</th>
+                                <th>Категория</th>
+                                <th>Размер</th>
+                                <th>Дата</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($files as $f): ?>
+                                <?php 
+                                $extName = htmlspecialchars($extBadge($f), ENT_QUOTES); 
+                                $canPreview = in_array(mb_strtolower($extBadge($f)), ['pdf', 'png', 'jpg', 'jpeg', 'txt', 'webp'], true);
+                                ?>
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="rd-file-check" name="ids[]" value="<?= (int) $f['id'] ?>">
+                                    </td>
+                                    <td class="rd-table__ext-col">
+                                        <span class="rd-doc__ext" data-ext="<?= $extName ?>"><?= $extName ?></span>
+                                    </td>
+                                    <td>
+                                        <a class="repo-file-title" href="/repo/download/<?= (int) $f['id'] ?>" target="_blank"><?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?></a>
+                                        <?php if (!empty($f['description'])): ?>
+                                            <div class="repo-file-desc"><?= htmlspecialchars(mb_substr((string) $f['description'], 0, 100), ENT_QUOTES) ?></div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($f['category'])): ?>
+                                            <span class="rd-doc__cat"><?= htmlspecialchars((string) $f['category'], ENT_QUOTES) ?></span>
+                                        <?php else: ?>
+                                            <span class="text-muted">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="repo-meta"><?= htmlspecialchars(Format::fileSize((int) $f['size']), ENT_QUOTES) ?></td>
+                                    <td class="repo-meta"><?= htmlspecialchars(date('d.m.Y', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></td>
+                                    <td>
+                                        <div class="rd-table-actions">
+                                            <?php if ($canPreview): ?>
+                                                <button type="button" class="rd-btn rd-btn--ghost rd-btn--sm rd-preview-btn" data-preview-id="<?= (int) $f['id'] ?>" data-preview-title="<?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?>" data-preview-ext="<?= mb_strtolower($extBadge($f)) ?>" title="Быстрый онлайн-просмотр">
+                                                    👁
+                                                </button>
+                                            <?php endif; ?>
+                                            <div class="rd-lang-pills">
+                                                <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать (RU)">
+                                                    <span>RU</span>
+                                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                                                </a>
+                                                <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать (UZ)">
+                                                    <span>UZ</span>
+                                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                                                </a>
+                                                <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Download (EN)">
+                                                    <span>EN</span>
+                                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                                                </a>
+                                            </div>
+                                            <button type="button" class="rd-btn rd-btn--ghost rd-btn--sm" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку">📋</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Вид плиткой (Grid) -->
+                <div class="rd-grid" id="rd-grid-view">
+                    <?php foreach ($files as $f): ?>
+                        <?php 
+                        $extName = htmlspecialchars($extBadge($f), ENT_QUOTES); 
+                        $canPreview = in_array(mb_strtolower($extBadge($f)), ['pdf', 'png', 'jpg', 'jpeg', 'txt', 'webp'], true);
+                        ?>
+                        <article class="rd-doc">
+                            <div class="rd-doc__head">
+                                <label class="rd-checkbox-label">
+                                    <input type="checkbox" class="rd-file-check" name="ids[]" value="<?= (int) $f['id'] ?>">
+                                    <span class="rd-doc__ext" data-ext="<?= $extName ?>"><?= $extName ?></span>
+                                </label>
+                                <?php if (!empty($f['category'])): ?><span class="rd-doc__cat"><?= htmlspecialchars((string) $f['category'], ENT_QUOTES) ?></span><?php endif; ?>
                             </div>
-                            <button type="button" class="rd-btn rd-btn--ghost rd-btn--icon" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку">📋</button>
-                        </div>
-                    </article>
-                <?php endforeach; ?>
-            </div>
+                            <time class="rd-doc__date"><?= htmlspecialchars(date('d.m.Y', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></time>
+                            <h3 class="rd-doc__title"><?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?></h3>
+                            <div class="rd-doc__meta"><?= htmlspecialchars($extBadge($f) . ' · ' . Format::fileSize((int) $f['size']), ENT_QUOTES) ?><?= (int) $f['download_count'] > 0 ? ' · скачано ' . (int) $f['download_count'] : '' ?></div>
+                            <?php if (!empty($f['description'])): ?>
+                                <p class="rd-doc__desc"><?= htmlspecialchars(mb_substr((string) $f['description'], 0, 120), ENT_QUOTES) ?></p>
+                            <?php endif; ?>
+                            <div class="rd-doc__actions">
+                                <?php if ($canPreview): ?>
+                                    <button type="button" class="rd-btn rd-btn--ghost rd-btn--sm rd-preview-btn" data-preview-id="<?= (int) $f['id'] ?>" data-preview-title="<?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?>" data-preview-ext="<?= mb_strtolower($extBadge($f)) ?>" title="Быстрый просмотр">
+                                        👁
+                                    </button>
+                                <?php endif; ?>
+                                <div class="rd-lang-pills">
+                                    <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать (RU)">
+                                        <span>RU</span> ⤓
+                                    </a>
+                                    <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Скачать (UZ)">
+                                        <span>UZ</span> ⤓
+                                    </a>
+                                    <a class="rd-lang-pill" href="/repo/download/<?= (int) $f['id'] ?>" title="Download (EN)">
+                                        <span>EN</span> ⤓
+                                    </a>
+                                </div>
+                                <button type="button" class="rd-btn rd-btn--ghost rd-btn--icon" data-copy-link="/repo/download/<?= (int) $f['id'] ?>" title="Копировать ссылку">📋</button>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+            </form>
         <?php endif; ?>
     </section>
 
@@ -347,4 +381,72 @@ $extBadge = static function (array $f): string {
         </div>
     <?php endif; ?>
 </div>
+
+<!-- Модальное окно предпросмотра документов -->
+<dialog class="rd-modal" id="rd-preview-modal">
+    <div class="rd-modal__card">
+        <div class="rd-modal__head">
+            <h3 id="rd-preview-title">Предпросмотр документа</h3>
+            <button type="button" class="rd-modal__close" onclick="document.getElementById('rd-preview-modal').close();">✕</button>
+        </div>
+        <div class="rd-modal__body" id="rd-preview-body">
+            <div class="rd-preview-loader">Загрузка документа...</div>
+        </div>
+    </div>
+</dialog>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var selectAll = document.getElementById('rd-select-all');
+    var fileChecks = document.querySelectorAll('.rd-file-check');
+    var batchBar = document.getElementById('rd-batch-bar');
+    var countEl = document.getElementById('rd-selected-count');
+
+    function updateBatchCount() {
+        var checked = document.querySelectorAll('.rd-file-check:checked');
+        var count = checked.length;
+        if (countEl) countEl.textContent = count;
+        if (batchBar) batchBar.style.display = count > 0 ? 'flex' : 'none';
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            fileChecks.forEach(function (cb) { cb.checked = selectAll.checked; });
+            updateBatchCount();
+        });
+    }
+
+    fileChecks.forEach(function (cb) {
+        cb.addEventListener('change', updateBatchCount);
+    });
+
+    var previewModal = document.getElementById('rd-preview-modal');
+    var previewTitle = document.getElementById('rd-preview-title');
+    var previewBody = document.getElementById('rd-preview-body');
+
+    document.querySelectorAll('.rd-preview-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id = btn.getAttribute('data-preview-id');
+            var title = btn.getAttribute('data-preview-title');
+            var ext = btn.getAttribute('data-preview-ext');
+            var url = '/repo/preview/' + id;
+
+            if (previewTitle) previewTitle.textContent = title;
+            if (previewBody) {
+                if (ext === 'pdf') {
+                    previewBody.innerHTML = '<iframe class="u-inline-e9ae41a1b8" src="' + url + '" width="100%" height="550"></iframe>';
+                } else if (['png', 'jpg', 'jpeg', 'webp'].indexOf(ext) !== -1) {
+                    previewBody.innerHTML = '<img class="u-inline-9635e07f50" src="' + url + '" alt="' + title + '">';
+                } else {
+                    previewBody.innerHTML = '<iframe class="u-inline-93420d7878" src="' + url + '" width="100%" height="400"></iframe>';
+                }
+            }
+            if (previewModal && typeof previewModal.showModal === 'function') {
+                previewModal.showModal();
+            }
+        });
+    });
+});
+</script>
+
 <?php require __DIR__ . '/layout/bottom.php'; ?>

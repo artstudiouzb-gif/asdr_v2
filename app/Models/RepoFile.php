@@ -127,6 +127,17 @@ final class RepoFile
         return $stmt->fetch() ?: null;
     }
 
+    /** @param array<int> $ids */
+    public static function findManyByIds(array $ids): array
+    {
+        $cleanIds = array_values(array_filter(array_map('intval', $ids), static fn ($id) => $id > 0));
+        if ($cleanIds === []) {
+            return [];
+        }
+        $in = implode(',', $cleanIds);
+        return Database::pdo()->query("SELECT * FROM repo_files WHERE id IN ($in) AND status = 'approved'")->fetchAll();
+    }
+
     /** Файлы, ждущие одобрения, с логином загрузившего пользователя портала. */
     public static function pending(): array
     {

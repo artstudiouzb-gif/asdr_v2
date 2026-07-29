@@ -63,6 +63,11 @@ require __DIR__ . '/layout/header.php';
         <span class="stat-card__value"><?= (int) ($systemHealth['active_langs_count'] ?? 1) ?></span>
         <span class="stat-card__label"><?= htmlspecialchars(t('Активные языки'), ENT_QUOTES) ?></span>
     </a>
+    <a href="/admin/repository" class="stat-card">
+        <span class="stat-card__value"><?= (int) ($counts['repo_downloads'] ?? 0) ?></span>
+        <span class="stat-card__label"><?= htmlspecialchars(t('Скачиваний репозитория'), ENT_QUOTES) ?></span>
+        <span class="form-hint u-inline-a3a5568692"><?= (int) ($counts['repo_files'] ?? 0) ?> <?= htmlspecialchars(t('файлов'), ENT_QUOTES) ?></span>
+    </a>
 </div>
 
 <div class="dashboard-grid u-inline-8b9688e6e0">
@@ -303,6 +308,42 @@ $fillPointsStr = "$padding," . ($height - $padding) . " $pointsStr " . ($width -
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if (!empty($topRepoDownloads)): ?>
+<div class="form-card u-inline-e6e3fab9a5">
+    <div class="form-card__header">
+        <h3>📥 <?= htmlspecialchars(t('Популярные файлы репозитория'), ENT_QUOTES) ?></h3>
+        <a href="/admin/repository" class="btn btn--small"><?= htmlspecialchars(t('Перейти в репозиторий'), ENT_QUOTES) ?> →</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th><?= htmlspecialchars(t('Название документа'), ENT_QUOTES) ?></th>
+                    <th><?= htmlspecialchars(t('Скачиваний'), ENT_QUOTES) ?></th>
+                    <th><?= htmlspecialchars(t('Дата публикации'), ENT_QUOTES) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($topRepoDownloads as $doc): ?>
+                    <tr>
+                        <td>
+                            <strong><a href="/repo/download/<?= (int) $doc['id'] ?>" target="_blank"><?= htmlspecialchars((string) $doc['title'], ENT_QUOTES) ?></a></strong>
+                            <br><small class="text-muted"><?= htmlspecialchars((string) $doc['original_name'], ENT_QUOTES) ?></small>
+                        </td>
+                        <td>
+                            <span class="badge badge--success"><?= (int) $doc['download_count'] ?></span>
+                        </td>
+                        <td class="text-muted">
+                            <?= date('d.m.Y', strtotime((string) $doc['created_at'])) ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </div>
 <?php endif; ?>

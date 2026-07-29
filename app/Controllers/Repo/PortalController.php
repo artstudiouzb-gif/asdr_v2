@@ -136,6 +136,83 @@ final class PortalController
         exit;
     }
 
+    public function preview(array $params): void
+    {
+        RepoAuth::requireLogin();
+
+        $id = (int) ($params['id'] ?? 0);
+        $file = RepoFile::findById($id);
+        if ($file === null || (($file['status'] ?? 'approved') !== 'approved')) {
+            http_response_code(404);
+            exit('Файл не найден.');
+        }
+
+        $expectedBase = realpath(RepoFile::basePath());
+        $fullPath = $expectedBase !== false ? realpath($expectedBase . '/' . $file['stored_name']) : false;
+
+        if ($fullPath === false || $expectedBase === false || !str_starts_with($fullPath, $expectedBase) || !is_file($fullPath)) {
+            http_response_code(404);
+            exit('Файл не найден.');
+        }
+
+        $mime = $file['mime_type'] !== '' ? $file['mime_type'] : 'application/octet-stream';
+        $downloadName = $file['original_name'] !== '' ? basename((string) $file['original_name']) : ('file-' . $id);
+
+        header('Content-Type: ' . $mime);
+        header('Content-Disposition: inline; filename="' . str_replace('"', '', $downloadName) . '"');
+        header('Content-Length: ' . (string) filesize($fullPath));
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: private, max-age=3600');
+
+        readfile($fullPath);
+        exit;
+    }
+
+    public function downloadZip(): void
+    {
+        RepoAuth::requireLogin();
+        Csrf::verifyRequest();
+
+        $ids = $_POST['ids'] ?? [];
+        if (!is_array($ids)) {
+            $ids = array_filter(explode(',', (string) $ids));
+        }
+        $files = RepoFile::findManyByIds($ids);
+
+        if ($files === []) {
+            Flash::error('Выберите файлы для скачивания.');
+            header('Location: /repo');
+            exit;
+        }
+
+        $tempZipPath = tempnam(sys_get_temp_dir(), 'repo_zip_');
+        $zip = new \ZipArchive();
+        if ($zip->open($tempZipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            Flash::error('Не удалось создать ZIP-архив.');
+            header('Location: /repo');
+            exit;
+        }
+
+        $expectedBase = realpath(RepoFile::basePath());
+        foreach ($files as $f) {
+            $fullPath = $expectedBase !== false ? realpath($expectedBase . '/' . $f['stored_name']) : false;
+            if ($fullPath !== false && $expectedBase !== false && str_starts_with($fullPath, $expectedBase) && is_file($fullPath)) {
+                $zip->addFile($fullPath, (string) ($f['original_name'] ?: 'file-' . $f['id']));
+                RepoFile::incrementDownload((int) $f['id']);
+            }
+        }
+        $zip->close();
+
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="repository-documents-' . date('Y-m-d') . '.zip"');
+        header('Content-Length: ' . (string) filesize($tempZipPath));
+        header('Cache-Control: private, max-age=0, must-revalidate');
+
+        readfile($tempZipPath);
+        @unlink($tempZipPath);
+        exit;
+    }
+
     public function security(): void
     {
         RepoAuth::requireLogin();
