@@ -64,7 +64,7 @@ require __DIR__ . '/_header.php';
                 Введённый пароль
             </div>
         </div>
-
+    </div>
 
     <div class="form-actions u-inline-9eb125f52f">
         <button type="submit" class="btn btn--primary u-inline-5b9236194b">

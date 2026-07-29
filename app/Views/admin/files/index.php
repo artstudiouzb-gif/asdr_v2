@@ -109,7 +109,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
         <form method="post" action="/admin/files/bulk-delete" id="bulk_delete_form">
             <?= Csrf::field() ?>
             <input type="hidden" name="ids" id="bulk_ids_input" value="[]">
-            <button type="submit" class="btn btn--small btn--danger" onclick="return confirm('Удалить выбранные файлы?')">Удалить выбранные</button>
+            <button type="submit" class="btn btn--small btn--danger" data-confirm="Удалить выбранные файлы?">Удалить выбранные</button>
         </form>
     </div>
 
@@ -242,7 +242,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
             </div>
 
             <div class="u-inline-ffed13198a">
-                <form method="post" action="" id="modal_delete_form" onsubmit="return confirm('Вы уверены, что хотите навсегда удалить этот медиафайл?')">
+                <form method="post" action="" id="modal_delete_form" data-confirm="Вы уверены, что хотите навсегда удалить этот медиафайл?">
                     <?= Csrf::field() ?>
                     <button type="submit" class="btn btn--danger">Удалить навсегда</button>
                 </form>

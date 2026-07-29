@@ -79,10 +79,12 @@ test('Конструктор шапки выводит и применяет н�
     }
 
     assert_contains('site-menu--submenu-', $header);
+    assert_contains('site-menu--submenu-transform-', $header);
     assert_contains('--submenu-width', $themeCss);
     assert_contains('--submenu-shadow', $themeCss);
     assert_contains('.site-menu--submenu-cards', $css);
     assert_contains('.site-menu--submenu-divider-none', $css);
+    assert_contains('.site-menu--submenu-transform-uppercase', $css);
     assert_contains(
         '.site-menu--style-underline .site-menu__item--has-children:hover > .site-menu__link::after',
         $css,

@@ -3914,6 +3914,9 @@ body.auth-page {
     outline: none;
     transition: all 0.2s ease;
 }
+.install-input-wrap input[type="password"] {
+    padding-right: 48px !important;
+}
 .install-input-wrap textarea {
     padding-top: 12px !important;
 }
@@ -4045,7 +4048,14 @@ body.auth-page {
 .install-check { display: none; }
 
 @media (max-width: 860px) {
-    .check-grid-2col { grid-template-columns: 1fr; gap: 16px; }
+    .check-grid-2col,
+    .form-grid-2col,
+    .u-inline-a0f0a7d9e5,
+    .u-inline-d4be37b0b9,
+    .u-inline-e6e3fab9a5 {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
     .install-card { padding: 32px 24px; }
 }
 

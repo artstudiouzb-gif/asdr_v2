@@ -77,8 +77,8 @@ summary:focus-visible {
 .site-header--logo-center .site-header__zone--right { margin-left: 0; }
 
 .site-menu { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
-.site-menu a, .site-menu__link { position: relative; text-decoration: none; color: var(--color-primary, #1a1a1a); font-weight: 600; padding: 10px 4px; background: transparent !important; background-color: transparent !important; transition: color 0.2s ease; }
-.site-menu a:hover, .site-menu__link:hover { color: var(--color-accent, #2f6fed); background: transparent !important; background-color: transparent !important; }
+.site-menu__link { position: relative; text-decoration: none; color: var(--color-primary, #1a1a1a); font-weight: 600; padding: 10px 4px; background: transparent !important; background-color: transparent !important; transition: color 0.2s ease; }
+.site-menu__link:hover { color: var(--color-accent, #2f6fed); background: transparent !important; background-color: transparent !important; }
 .site-menu__link.is-active { color: var(--color-accent, #2f6fed) !important; font-weight: 700; background: transparent !important; background-color: transparent !important; }
 .site-menu__link::after {
     content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
@@ -1696,7 +1696,6 @@ body.design-header-dark .site-nav { border-top-color: rgba(255, 255, 255, .14); 
    Пресеты «accent»/«dark» шапки имеют бОльшую специфичность и остаются белыми.
    ========================================================================== */
 :root[data-theme="dark"] .site-header__logo,
-:root[data-theme="dark"] .site-menu a,
 :root[data-theme="dark"] .site-menu__link,
 :root[data-theme="dark"] .site-lang-switcher__item.is-active,
 :root[data-theme="dark"] .widget-latest-news a,
@@ -1725,7 +1724,6 @@ body.design-header-dark .site-nav { border-top-color: rgba(255, 255, 255, .14); 
 }
 @media (prefers-color-scheme: dark) {
     :root[data-theme="auto"] .site-header__logo,
-    :root[data-theme="auto"] .site-menu a,
     :root[data-theme="auto"] .site-menu__link,
     :root[data-theme="auto"] .content-card__title a,
     :root[data-theme="auto"] .news-card__title,

@@ -134,6 +134,7 @@ if (!empty($menuItems)) {
     $navIconPos = in_array($st['nav_icon_pos'] ?? '', ['left', 'top'], true) ? $st['nav_icon_pos'] : 'left';
     $navDividers = !empty($st['nav_item_dividers']) ? ' site-menu--with-item-dividers' : '';
     $submenuStyle = in_array($st['submenu_style'] ?? '', ['lines', 'minimal', 'cards'], true) ? $st['submenu_style'] : 'lines';
+    $submenuTransform = in_array($st['submenu_transform'] ?? '', ['uppercase', 'capitalize', 'none'], true) ? $st['submenu_transform'] : 'none';
     $submenuDivider = in_array($st['submenu_divider'] ?? '', ['subtle', 'accent', 'none'], true) ? $st['submenu_divider'] : 'subtle';
 
     $menuClasses = 'site-menu'
@@ -144,6 +145,7 @@ if (!empty($menuItems)) {
         . ' site-menu--padding-' . $navPadding
         . ' site-menu--icon-' . $navIconPos
         . ' site-menu--submenu-' . $submenuStyle
+        . ' site-menu--submenu-transform-' . $submenuTransform
         . ' site-menu--submenu-divider-' . $submenuDivider
         . $navDividers;
 

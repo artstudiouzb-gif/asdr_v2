@@ -575,9 +575,8 @@ final class Project
     public static function langCounts(): array
     {
         $pdo = Database::pdo();
-        $totalAll = (int) $pdo->query("SELECT COUNT(*) FROM projects WHERE deleted_at IS NULL")->fetchColumn();
-
-        $counts = ['all' => $totalAll];
+        $counts = [];
+        $sum = 0;
         foreach (Language::active() as $l) {
             $code = (string) $l['code'];
             $stmt = $pdo->prepare(
@@ -594,8 +593,11 @@ final class Project
                 ':code_pt' => $code,
                 ':code_p2' => $code,
             ]);
-            $counts[$code] = (int) $stmt->fetchColumn();
+            $c = (int) $stmt->fetchColumn();
+            $counts[$code] = $c;
+            $sum += $c;
         }
+        $counts['all'] = $sum;
 
         return $counts;
     }

@@ -151,26 +151,103 @@
     }
     window.adminConfirm = adminConfirm;
 
-    document.querySelectorAll('[data-confirm]').forEach(function (form) {
-        form.addEventListener('submit', function (event) {
-            if (form.dataset.confirmed === '1') { return; } // уже подтверждено — пропускаем
-            event.preventDefault();
-            adminConfirm(form.getAttribute('data-confirm')).then(function (ok) {
-                if (!ok) { return; }
-                form.dataset.confirmed = '1';
-                if (typeof form.requestSubmit === 'function') { form.requestSubmit(); }
-                else { form.submit(); }
-            });
+    function adminAlert(message) {
+        return new Promise(function (resolve) {
+            var overlay = document.createElement('div');
+            overlay.className = 'admin-modal-overlay';
+            overlay.innerHTML =
+                '<div class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-modal-msg">'
+                + '<div class="admin-modal__body">'
+                + '<div class="admin-modal__icon" aria-hidden="true">ℹ</div>'
+                + '<p class="admin-modal__msg" id="admin-modal-msg"></p>'
+                + '</div>'
+                + '<div class="admin-modal__actions">'
+                + '<button type="button" class="btn btn--primary admin-modal__ok">ОК</button>'
+                + '</div>'
+                + '</div>';
+            overlay.querySelector('.admin-modal__msg').textContent = message;
+            document.body.appendChild(overlay);
+            document.body.classList.add('has-modal-open');
+            requestAnimationFrame(function () { overlay.classList.add('is-open'); });
+
+            var okBtn = overlay.querySelector('.admin-modal__ok');
+            okBtn.focus();
+
+            function close() {
+                overlay.classList.remove('is-open');
+                document.removeEventListener('keydown', onKey);
+                document.body.classList.remove('has-modal-open');
+                setTimeout(function () { overlay.remove(); }, 150);
+                resolve();
+            }
+            function onKey(e) {
+                if (e.key === 'Escape' || e.key === 'Enter') { close(); }
+            }
+            okBtn.addEventListener('click', close);
+            overlay.addEventListener('click', function (e) { if (e.target === overlay) { close(); } });
+            document.addEventListener('keydown', onKey);
         });
+    }
+    window.adminAlert = adminAlert;
+
+    document.querySelectorAll('[data-confirm]').forEach(function (element) {
+        if (element.tagName === 'FORM') {
+            element.addEventListener('submit', function (event) {
+                if (element.dataset.confirmed === '1') {
+                    element.dataset.confirmed = '0';
+                    return;
+                }
+                event.preventDefault();
+                adminConfirm(element.getAttribute('data-confirm')).then(function (ok) {
+                    if (!ok) { return; }
+                    element.dataset.confirmed = '1';
+                    if (typeof element.requestSubmit === 'function') { element.requestSubmit(); }
+                    else { element.submit(); }
+                });
+            });
+        } else {
+            element.addEventListener('click', function (event) {
+                if (element.dataset.confirmed === '1') {
+                    element.dataset.confirmed = '0';
+                    return;
+                }
+                event.preventDefault();
+                adminConfirm(element.getAttribute('data-confirm')).then(function (ok) {
+                    if (!ok) { return; }
+                    element.dataset.confirmed = '1';
+                    if (element.tagName === 'A') {
+                        window.location.href = element.href;
+                    } else if (element.type === 'submit' && element.form) {
+                        if (typeof element.form.requestSubmit === 'function') {
+                            element.form.requestSubmit(element);
+                        } else {
+                            element.form.submit();
+                        }
+                    } else {
+                        element.click();
+                    }
+                });
+            });
+        }
     });
 
     // Применение шаблона страницы: режим «заменить» требует подтверждения.
     document.querySelectorAll('[data-snippet-insert]').forEach(function (form) {
         form.addEventListener('submit', function (event) {
             var mode = form.querySelector('select[name=mode]');
-            if (mode && mode.value === 'replace'
-                && !window.confirm('Заменить все текущие блоки этого языка блоками из шаблона? Действие необратимо.')) {
+            if (mode && mode.value === 'replace') {
+                if (form.dataset.confirmed === '1') {
+                    form.dataset.confirmed = '0';
+                    return;
+                }
                 event.preventDefault();
+                adminConfirm('Заменить все текущие блоки этого языка блоками из шаблона? Действие необратимо.').then(function (ok) {
+                    if (ok) {
+                        form.dataset.confirmed = '1';
+                        if (typeof form.requestSubmit === 'function') { form.requestSubmit(); }
+                        else { form.submit(); }
+                    }
+                });
             }
         });
     });
@@ -258,17 +335,35 @@
     // Не отправлять bulk-форму без выбранного действия/записей.
     document.querySelectorAll('[data-bulk-form]').forEach(function (form) {
         form.addEventListener('submit', function (e) {
+            if (form.dataset.confirmed === '1') {
+                form.dataset.confirmed = '0';
+                return;
+            }
             var formId = form.id;
             var associated = Array.prototype.filter.call(document.querySelectorAll('[data-bulk-item]:checked'), function (item) {
                 return item.getAttribute('form') === formId;
             });
             var anyChecked = associated.length > 0;
             var action = form.querySelector('[name="bulk_action"]');
-            if (!anyChecked) { e.preventDefault(); alert('Выберите хотя бы одну запись.'); return; }
-            if (action && !action.value) { e.preventDefault(); alert('Выберите действие.'); return; }
-            if (action && action.value === 'trash'
-                && !window.confirm('Переместить выбранные записи в корзину?')) {
+            if (!anyChecked) {
                 e.preventDefault();
+                adminAlert('Выберите хотя бы одну запись.');
+                return;
+            }
+            if (action && !action.value) {
+                e.preventDefault();
+                adminAlert('Выберите действие.');
+                return;
+            }
+            if (action && action.value === 'trash') {
+                e.preventDefault();
+                adminConfirm('Переместить выбранные записи в корзину?').then(function (ok) {
+                    if (ok) {
+                        form.dataset.confirmed = '1';
+                        if (typeof form.requestSubmit === 'function') { form.requestSubmit(); }
+                        else { form.submit(); }
+                    }
+                });
             }
         });
     });
@@ -1971,7 +2066,7 @@
         }
 
         if (!title.trim() && !content.trim()) {
-            alert('Пожалуйста, введите заголовок или текст новости перед генерацией ИИ-аннотации.');
+            adminAlert('Пожалуйста, введите заголовок или текст новости перед генерацией ИИ-аннотации.');
             return;
         }
 
@@ -2007,12 +2102,12 @@
                     if (hashtagsField) { hashtagsField.value = data.hashtags; }
                 }
             } else if (data && data.error) {
-                alert(data.error);
+                adminAlert(data.error);
             }
         }).catch(function (err) {
             btn.disabled = false;
             btn.innerHTML = oldHtml;
-            alert('Ошибка при вызове ИИ: ' + (err.message || err));
+            adminAlert('Ошибка при вызове ИИ: ' + (err.message || err));
         });
     });
 })();
