@@ -25,14 +25,14 @@ use App\Controllers\Site\NewsController as SiteNewsController;
 use App\Controllers\Site\PageController as SitePageController;
 use App\Core\Router;
 
-// --- Веб-инсталлятор: пока система не установлена, весь трафик идёт в установщик ---
-if (!APP_INSTALLED) {
-    $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
-    if (!str_starts_with($requestPath, '/install')) {
-        header('Location: /install');
-        exit;
-    }
+// --- Веб-инсталлятор: обработка /install и редирект неустановленной системы ---
+$requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
+if (!APP_INSTALLED && !str_starts_with($requestPath, '/install')) {
+    header('Location: /install');
+    exit;
+}
 
+if (str_starts_with($requestPath, '/install')) {
     $installRouter = new Router();
     $installRouter->get('/install', [InstallController::class, 'step1']);
     $installRouter->get('/install/step2', [InstallController::class, 'step2']);

@@ -313,7 +313,13 @@ final class InstallController
 
     private function requireConfig(): void
     {
-        if (!is_file(APP_ROOT . '/config/config.php') || !Database::isConnected()) {
+        if (!is_file(APP_ROOT . '/config/config.php')) {
+            header('Location: /install/step2');
+            exit;
+        }
+        try {
+            Database::pdo();
+        } catch (\Throwable $e) {
             header('Location: /install/step2');
             exit;
         }
