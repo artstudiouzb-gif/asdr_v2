@@ -134,8 +134,12 @@ final class News
 
         $langFilter = (string) ($filters['lang'] ?? '');
         if ($langFilter !== '' && $langFilter !== 'all') {
-            $where[] = 'n.lang = :lang';
+            $where[] = '(n.lang = :lang'
+                . ' OR EXISTS (SELECT 1 FROM news_translations nt WHERE nt.news_id = n.id AND nt.lang = :lang_nt AND TRIM(COALESCE(nt.title, \'\')) <> \'\')'
+                . ' OR EXISTS (SELECT 1 FROM news n2 WHERE (n2.translation_group_id = COALESCE(NULLIF(n.translation_group_id, 0), n.id) OR n2.id = COALESCE(NULLIF(n.translation_group_id, 0), n.id)) AND n2.lang = :lang_n2 AND n2.deleted_at IS NULL AND n2.id <> n.id))';
             $params[':lang'] = $langFilter;
+            $params[':lang_nt'] = $langFilter;
+            $params[':lang_n2'] = $langFilter;
         }
 
         if (in_array($filters['status'] ?? '', ['published', 'draft'], true)) {
@@ -764,13 +768,22 @@ final class News
         $pdo = Database::pdo();
         $totalAll = (int) $pdo->query("SELECT COUNT(*) FROM news WHERE deleted_at IS NULL")->fetchColumn();
 
-        $stmt = $pdo->query("SELECT lang, COUNT(*) as cnt FROM news WHERE deleted_at IS NULL GROUP BY lang");
         $counts = ['all' => $totalAll];
         foreach (Language::active() as $l) {
-            $counts[$l['code']] = 0;
-        }
-        foreach ($stmt->fetchAll() as $row) {
-            $counts[(string) $row['lang']] = (int) $row['cnt'];
+            $code = (string) $l['code'];
+            $stmt = $pdo->prepare(
+                "SELECT COUNT(*) FROM news n
+                 WHERE n.deleted_at IS NULL
+                   AND (n.lang = :code
+                     OR EXISTS (SELECT 1 FROM news_translations nt WHERE nt.news_id = n.id AND nt.lang = :code_nt AND TRIM(COALESCE(nt.title, '')) <> '')
+                     OR EXISTS (SELECT 1 FROM news n2 WHERE (n2.translation_group_id = COALESCE(NULLIF(n.translation_group_id, 0), n.id) OR n2.id = COALESCE(NULLIF(n.translation_group_id, 0), n.id)) AND n2.lang = :code_n2 AND n2.deleted_at IS NULL AND n2.id <> n.id))"
+            );
+            $stmt->execute([
+                ':code' => $code,
+                ':code_nt' => $code,
+                ':code_n2' => $code,
+            ]);
+            $counts[$code] = (int) $stmt->fetchColumn();
         }
 
         return $counts;
