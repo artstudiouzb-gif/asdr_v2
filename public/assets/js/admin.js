@@ -1160,20 +1160,67 @@
         }
     });
 
-    // --- Меню: drag-and-drop сортировка + вложенность (задача 3, группа 3) ---
+    // --- Меню: визуальная сортировка и автосохранение вложенности ---
     document.querySelectorAll('[data-menu-sortable]').forEach(function (root) {
-        var dragged = null, startParent = null, startNext = null, moved = false;
+        var dragged = null, startParent = null, startNext = null, moved = false, saving = false;
+        var status = root.closest('[data-menu-builder]').querySelector('[data-menu-save-status]');
 
         function isChildList(list) { return list.hasAttribute('data-menu-children'); }
         function draggedHasChildren() {
             var kids = dragged.querySelector('[data-menu-children]');
             return kids && kids.querySelector('.menu-node');
         }
+        function setStatus(text, state) {
+            if (!status) { return; }
+            status.textContent = text;
+            status.classList.toggle('is-saving', state === 'saving');
+            status.classList.toggle('is-error', state === 'error');
+        }
+        function refreshPreview() {
+            var panel = root.closest('[data-menu-lang-panel]');
+            var viewport = panel ? panel.querySelector('[data-menu-preview]') : null;
+            if (!viewport) { return; }
+            viewport.replaceChildren();
+            root.querySelectorAll(':scope > .menu-node').forEach(function (top) {
+                if (top.getAttribute('data-menu-active') !== '1' || top.getAttribute('data-menu-divider') === '1') { return; }
+                var title = top.querySelector(':scope > .menu-node__row .menu-node__title');
+                var item = document.createElement('div');
+                item.className = 'menu-preview__item';
+                var label = document.createElement('span');
+                label.textContent = title ? title.textContent : '';
+                item.appendChild(label);
+                var submenu = document.createElement('div');
+                submenu.className = 'menu-preview__submenu';
+                var childList = top.querySelector(':scope > [data-menu-children]');
+                if (childList) {
+                    childList.querySelectorAll(':scope > .menu-node').forEach(function (child) {
+                        if (child.getAttribute('data-menu-active') !== '1' || child.getAttribute('data-menu-divider') === '1') { return; }
+                        var childTitle = child.querySelector(':scope > .menu-node__row .menu-node__title');
+                        var childLabel = document.createElement('span');
+                        childLabel.textContent = childTitle ? childTitle.textContent : '';
+                        submenu.appendChild(childLabel);
+                    });
+                }
+                if (submenu.childElementCount > 0) { item.appendChild(submenu); }
+                viewport.appendChild(item);
+            });
+        }
+        function restorePosition(parent, next, node) {
+            if (!parent || !node) { return; }
+            if (next && next.parentNode === parent) { parent.insertBefore(node, next); }
+            else { parent.appendChild(node); }
+            var restoredAsChild = isChildList(parent);
+            node.classList.toggle('menu-node--child', restoredAsChild);
+            var ownChildren = node.querySelector(':scope > [data-menu-children]');
+            if (restoredAsChild && ownChildren && !ownChildren.querySelector('.menu-node')) {
+                ownChildren.remove();
+            }
+        }
 
         root.addEventListener('dragstart', function (e) {
             var handle = e.target.closest('.menu-node__handle');
             var node = handle ? handle.closest('.menu-node') : null;
-            if (!node || node.getAttribute('data-menu-lang') !== root.getAttribute('data-menu-lang')) {
+            if (saving || !node || node.getAttribute('data-menu-lang') !== root.getAttribute('data-menu-lang')) {
                 e.preventDefault();
                 return;
             }
@@ -1186,19 +1233,37 @@
         });
 
         root.addEventListener('dragend', function () {
-            if (dragged) { dragged.classList.remove('is-dragging'); }
-            if (dragged && (moved || dragged.parentNode !== startParent || dragged.nextElementSibling !== startNext)) {
-                ReorderBar.markDirty(saveOrder);
-            }
+            var movedNode = dragged;
+            var previousParent = startParent;
+            var previousNext = startNext;
+            var changed = !!(movedNode && (moved || movedNode.parentNode !== previousParent || movedNode.nextElementSibling !== previousNext));
+            if (movedNode) { movedNode.classList.remove('is-dragging'); }
             dragged = null;
             startParent = null;
             startNext = null;
             moved = false;
+            if (changed) {
+                saving = true;
+                root.classList.add('is-saving');
+                setStatus('Сохранение порядка…', 'saving');
+                saveOrder(function (ok, message) {
+                    saving = false;
+                    root.classList.remove('is-saving');
+                    if (ok) {
+                        refreshPreview();
+                        setStatus('Порядок сохранён', 'success');
+                        window.setTimeout(function () { setStatus('Все изменения сохранены', 'success'); }, 1600);
+                    } else {
+                        restorePosition(previousParent, previousNext, movedNode);
+                        setStatus(message || 'Не удалось сохранить порядок', 'error');
+                    }
+                });
+            }
         });
 
-        // Разрешаем вставку в root и в любой children-список.
-        var lists = [root].concat(Array.prototype.slice.call(root.querySelectorAll('[data-menu-children]')));
-        lists.forEach(function (list) {
+        function bindDropList(list) {
+            if (list.dataset.menuDropBound === '1') { return; }
+            list.dataset.menuDropBound = '1';
             list.addEventListener('dragover', function (e) {
                 if (!dragged) { return; }
                 // Ограничение глубины 1: пункт со своими детьми нельзя вкладывать.
@@ -1216,10 +1281,26 @@
                 }
                 if (after == null) { list.appendChild(dragged); }
                 else { list.insertBefore(dragged, after); }
-                dragged.classList.toggle('menu-node--child', isChildList(list));
+                var movingToChild = isChildList(list);
+                dragged.classList.toggle('menu-node--child', movingToChild);
+                var ownChildren = dragged.querySelector(':scope > [data-menu-children]');
+                if (movingToChild && ownChildren && !ownChildren.querySelector('.menu-node')) {
+                    ownChildren.remove();
+                } else if (!movingToChild && !ownChildren && !dragged.classList.contains('menu-node--divider')) {
+                    ownChildren = document.createElement('ul');
+                    ownChildren.className = 'menu-node__children';
+                    ownChildren.setAttribute('data-menu-children', '');
+                    ownChildren.setAttribute('aria-label', 'Вложенные пункты');
+                    dragged.appendChild(ownChildren);
+                    bindDropList(ownChildren);
+                }
                 moved = true;
             });
-        });
+        }
+
+        // Разрешаем вставку в корень и в каждую область подменю.
+        bindDropList(root);
+        root.querySelectorAll('[data-menu-children]').forEach(bindDropList);
 
         function saveOrder(done) {
             var ids = [];
@@ -1250,21 +1331,34 @@
         }
     });
 
-    // --- Меню: языковые вкладки, редактор и зависимые поля ---
+    // --- Меню: языки, инспектор, быстрый тип элемента и зависимые поля ---
     (function () {
+        var builder = document.querySelector('[data-menu-builder]');
+        if (!builder) { return; }
+
+        function fieldValue(field) {
+            if (!field) { return ''; }
+            if (field.type === 'checkbox') { return field.checked ? field.value : ''; }
+            return field.value;
+        }
+
         function syncMenuForm(form) {
             var type = form.querySelector('[data-menu-url-type]');
             var divider = form.querySelector('[data-menu-divider]');
             var lang = form.querySelector('[data-menu-lang-select]');
-            var isDivider = !!(divider && divider.checked);
+            var typeValue = fieldValue(type);
+            var isDivider = fieldValue(divider) === '1';
             form.querySelectorAll('[data-menu-link-only]').forEach(function (field) {
                 field.hidden = isDivider;
             });
             form.querySelectorAll('[data-menu-url-field]').forEach(function (field) {
-                field.hidden = isDivider || !type || field.getAttribute('data-menu-url-field') !== type.value;
+                field.hidden = isDivider || field.getAttribute('data-menu-url-field') !== typeValue;
             });
             form.querySelectorAll('[data-menu-parent-field]').forEach(function (field) {
                 field.hidden = isDivider;
+            });
+            form.querySelectorAll('[data-menu-divider-title-hint]').forEach(function (hint) {
+                hint.hidden = !isDivider;
             });
 
             var parent = form.querySelector('[data-menu-parent-select]');
@@ -1288,12 +1382,69 @@
                     if (!matches && option.selected) { pageSelect.value = ''; }
                 });
             }
+            form.querySelectorAll('[data-menu-top-only]').forEach(function (field) {
+                field.hidden = !!(parent && parent.value !== '');
+            });
+        }
+
+        function applyCreateKind(select) {
+            var form = select.closest('[data-menu-link-form]');
+            if (!form) { return; }
+            var type = form.querySelector('[data-menu-url-type]');
+            var divider = form.querySelector('[data-menu-divider]');
+            var kind = select.value;
+            if (type) { type.value = kind === 'divider' ? 'custom' : kind; }
+            if (divider) { divider.value = kind === 'divider' ? '1' : '0'; }
+            var submit = form.closest('form').querySelector('[data-menu-create-submit]');
+            if (submit) {
+                var label = submit.querySelector('[data-menu-create-label]');
+                if (label) { label.textContent = kind === 'divider' ? 'Добавить разделитель' : 'Добавить пункт'; }
+            }
+            syncMenuForm(form);
+        }
+
+        function closeInspector() {
+            builder.querySelectorAll('[data-menu-inspector]').forEach(function (panel) {
+                panel.setAttribute('hidden', '');
+            });
+            builder.querySelectorAll('.menu-node.is-selected').forEach(function (node) {
+                node.classList.remove('is-selected');
+            });
+            var empty = builder.querySelector('[data-menu-inspector-empty]');
+            if (empty) { empty.removeAttribute('hidden'); }
+            var inspector = builder.querySelector('.menu-inspector');
+            if (inspector) { inspector.classList.remove('has-selection'); }
+        }
+
+        function openInspector(id, focusPanel) {
+            var panel = builder.querySelector('[data-menu-inspector="' + id + '"]');
+            var node = builder.querySelector('.menu-node[data-menu-id="' + id + '"]');
+            if (!panel || !node) { return; }
+            builder.querySelectorAll('[data-menu-inspector]').forEach(function (candidate) {
+                candidate.toggleAttribute('hidden', candidate !== panel);
+            });
+            builder.querySelectorAll('.menu-node.is-selected').forEach(function (candidate) {
+                candidate.classList.remove('is-selected');
+            });
+            node.classList.add('is-selected');
+            var empty = builder.querySelector('[data-menu-inspector-empty]');
+            if (empty) { empty.setAttribute('hidden', ''); }
+            var inspector = builder.querySelector('.menu-inspector');
+            if (inspector) {
+                inspector.classList.add('has-selection');
+                if (focusPanel && window.innerWidth <= 1280) { inspector.focus({preventScroll: true}); }
+            }
         }
 
         document.querySelectorAll('[data-menu-link-form]').forEach(syncMenuForm);
+        document.querySelectorAll('[data-menu-create-kind]').forEach(applyCreateKind);
 
         document.addEventListener('change', function (e) {
-            if (!e.target.matches('[data-menu-url-type], [data-menu-divider], [data-menu-lang-select]')) { return; }
+            if (e.target.matches('[data-menu-create-kind]')) {
+                applyCreateKind(e.target);
+                return;
+            }
+            if (!e.target.matches('[data-menu-url-type], [data-menu-divider], [data-menu-lang-select], [data-menu-parent-select]')) { return; }
             var form = e.target.closest('[data-menu-link-form]');
             if (form) syncMenuForm(form);
         });
@@ -1321,28 +1472,31 @@
         });
 
         document.addEventListener('click', function (e) {
-            var toggle = e.target.closest('[data-menu-edit-toggle]');
-            if (toggle) {
-                var panel = document.getElementById(toggle.getAttribute('aria-controls'));
-                if (!panel) { return; }
-                var opening = panel.hasAttribute('hidden');
-                panel.toggleAttribute('hidden', !opening);
-                toggle.setAttribute('aria-expanded', opening ? 'true' : 'false');
-                if (opening) {
-                    var first = panel.querySelector('input:not([type="hidden"]), select, textarea');
-                    if (first) first.focus();
+            var inspect = e.target.closest('[data-menu-inspect]');
+            if (inspect) {
+                openInspector(inspect.getAttribute('data-menu-inspect'), true);
+                return;
+            }
+
+            if (e.target.closest('[data-menu-inspector-close]')) {
+                closeInspector();
+                return;
+            }
+
+            var previewMode = e.target.closest('[data-menu-preview-mode]');
+            if (previewMode) {
+                var preview = previewMode.closest('.menu-preview');
+                if (!preview) { return; }
+                preview.querySelectorAll('[data-menu-preview-mode]').forEach(function (button) {
+                    button.classList.toggle('is-active', button === previewMode);
+                });
+                var viewport = preview.querySelector('[data-menu-preview]');
+                if (viewport) {
+                    viewport.classList.toggle('is-mobile', previewMode.getAttribute('data-menu-preview-mode') === 'mobile');
                 }
                 return;
             }
-            var close = e.target.closest('[data-menu-edit-close]');
-            if (close) {
-                var editPanel = close.closest('[data-menu-edit-panel]');
-                if (!editPanel) { return; }
-                editPanel.setAttribute('hidden', '');
-                var editToggle = document.querySelector('[aria-controls="' + editPanel.id + '"]');
-                if (editToggle) { editToggle.setAttribute('aria-expanded', 'false'); editToggle.focus(); }
-                return;
-            }
+
             var tab = e.target.closest('[data-menu-lang-tab]');
             if (tab) {
                 var code = tab.getAttribute('data-menu-lang-tab');
@@ -1357,17 +1511,49 @@
                 });
                 var createLang = document.querySelector('#menu-add [data-menu-lang-select]');
                 if (createLang) { createLang.value = code; syncMenuForm(createLang.closest('[data-menu-link-form]')); }
+                closeInspector();
             }
         });
 
+        document.addEventListener('change', function (e) {
+            if (!e.target.matches('[data-icon-select]')) { return; }
+            var targetId = e.target.getAttribute('data-icon-select');
+            var textarea = document.getElementById(targetId);
+            var prefix = targetId.replace(/_icon$/, '');
+            var customBox = document.getElementById(prefix + '_icon_custom_box');
+            var preview = document.getElementById(prefix + '_icon_preview');
+            var value = e.target.value;
+            if (customBox) { customBox.classList.toggle('is-hidden', value !== 'custom'); }
+            if (value === 'custom') {
+                if (textarea && textarea.value.indexOf('<svg') === -1) { textarea.value = ''; }
+                if (textarea) { textarea.focus(); }
+                return;
+            }
+            if (textarea) { textarea.value = value; }
+            if (preview) {
+                var catalogIcon = document.querySelector('[data-menu-icon-key="' + value + '"]');
+                var emptyIcon = document.querySelector('[data-menu-icon-key=""]');
+                preview.innerHTML = catalogIcon ? catalogIcon.innerHTML : (emptyIcon ? emptyIcon.innerHTML : '');
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { closeInspector(); }
+        });
+
         try {
+            var query = new URLSearchParams(window.location.search);
+            var queryLang = query.get('lang');
             var savedMenuLang = localStorage.getItem('artstudio:admin-menu-lang');
-            if (savedMenuLang !== null) {
+            var preferredLang = queryLang || savedMenuLang;
+            if (preferredLang !== null) {
                 var savedTab = Array.prototype.find.call(document.querySelectorAll('[data-menu-lang-tab]'), function (button) {
-                    return button.getAttribute('data-menu-lang-tab') === savedMenuLang;
+                    return button.getAttribute('data-menu-lang-tab') === preferredLang;
                 });
                 if (savedTab) savedTab.click();
             }
+            var selectedId = query.get('selected');
+            if (selectedId) { openInspector(selectedId, false); }
         } catch (e) {}
     })();
 

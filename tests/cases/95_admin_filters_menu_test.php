@@ -44,12 +44,14 @@ test('AdminListQuery нормализует фильтры и безопасны
     assert_same('/admin/news?q=test&status=draft', $return);
 });
 
-test('редактор меню сохраняет родителя и предоставляет управление без drag-and-drop', function (): void {
+test('конструктор меню использует дерево, быстрый ввод, инспектор и доступное управление', function (): void {
     $view = file_get_contents(dirname(__DIR__, 2) . '/app/Views/admin/menu/index.php');
     $js = file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/admin.js');
+    $controller = file_get_contents(dirname(__DIR__, 2) . '/app/Controllers/Admin/MenuController.php');
 
     assert_true(is_string($view));
     assert_true(is_string($js));
+    assert_true(is_string($controller));
     assert_contains('name="parent_id"', $view);
     assert_contains('name="page_slug"', $view);
     assert_contains('data-menu-lang-tab', $view);
@@ -57,11 +59,22 @@ test('редактор меню сохраняет родителя и пред�
     assert_contains('name="source_lang"', $view);
     assert_contains('name="target_lang"', $view);
     assert_contains('data-lang=', $view);
+    assert_contains('data-menu-builder', $view);
+    assert_contains('data-menu-create-kind', $view);
+    assert_contains('data-menu-inspector=', $view);
+    assert_contains('data-menu-save-status', $view);
+    assert_contains('data-menu-preview-mode="desktop"', $view);
+    assert_contains('data-menu-preview-mode="mobile"', $view);
     assert_contains('name="direction" value="up"', $view);
     assert_contains('name="direction" value="down"', $view);
+    assert_not_contains('<script', $view, 'логика конструктора вынесена из шаблона');
     assert_contains("e.target.closest('.menu-node__handle')", $js);
     assert_contains("option.getAttribute('data-lang') === lang.value", $js);
+    assert_contains("openInspector(inspect.getAttribute('data-menu-inspect')", $js);
+    assert_contains("setStatus('Сохранение порядка…', 'saving')", $js);
     assert_contains('res.error', $js);
+    assert_contains("'badge_pos' => \$badgePos", $controller);
+    assert_contains('redirectToMenu', $controller);
 });
 
 test('основные списки используют поиск, пагинацию и возврат фильтров', function (): void {

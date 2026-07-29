@@ -120,6 +120,13 @@ test('MenuItem: SVG-иконка санируется при сохранени�
     ]);
     assert_same(null, MenuItem::findById($id2)['icon_svg']);
 
+    // Ключ встроенной AdminUI-иконки хранится компактно и не теряется.
+    $idBuiltIn = MenuItem::create([
+        'title' => 'Встроенная иконка', 'lang' => 'ru', 'url_type' => 'custom', 'url_value' => '/icon',
+        'is_active' => 1, 'icon_svg' => 'home',
+    ]);
+    assert_same('home', MenuItem::findById($idBuiltIn)['icon_svg']);
+
     // Разделитель.
     $id3 = MenuItem::create([
         'title' => '—', 'lang' => 'ru', 'url_type' => 'custom', 'url_value' => null,
@@ -139,4 +146,5 @@ test('MenuItem: SVG-иконка санируется при сохранени�
     assert_same('red', $upd['badge_color'], 'цвет бейджа сохранён');
     assert_same('right', $upd['badge_pos'], 'позиция бейджа сохранена');
     assert_contains('<circle', (string) $upd['icon_svg']);
+    $pdo->exec('DELETE FROM menu_items');
 });

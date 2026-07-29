@@ -180,15 +180,21 @@ final class MenuItem
     }
 
     /**
-     * Очистка инлайновой SVG-иконки перед сохранением: пусто → null; иначе
-     * прогоняем через строгий санитайзер (тот же, что для загружаемых SVG —
-     * вырезает скрипты, обработчики событий, внешние ссылки и XXE). Слишком
-     * крупные строки отбрасываем (иконка должна быть компактной).
+     * Принимает ключ встроенной AdminUI-иконки или безопасный SVG. Ключ
+     * хранится компактно и рендерится через единый каталог; произвольный SVG
+     * проходит строгий санитайзер.
      */
     private static function cleanIcon(mixed $svg): ?string
     {
         $svg = trim((string) $svg);
-        if ($svg === '' || mb_stripos($svg, '<svg') === false) {
+        if ($svg === '') {
+            return null;
+        }
+        $iconCatalog = \App\Core\AdminUi::iconCatalog();
+        if (isset($iconCatalog[$svg])) {
+            return $svg;
+        }
+        if (mb_stripos($svg, '<svg') === false) {
             return null;
         }
         if (mb_strlen($svg) > 20000) {
@@ -592,16 +598,17 @@ final class MenuItem
     ): int {
         $stmt = $pdo->prepare(
             'INSERT INTO menu_items
-             (lang, title, icon_svg, badge_text, badge_color, badge_pos, is_divider,
+             (lang, title, icon_svg, hide_title, badge_text, badge_color, badge_pos, is_divider,
               url_type, url_value, parent_id, mega_columns, sort_order, is_active, created_at)
              VALUES
-             (:lang, :title, :icon_svg, :badge_text, :badge_color, :badge_pos, :is_divider,
+             (:lang, :title, :icon_svg, :hide_title, :badge_text, :badge_color, :badge_pos, :is_divider,
               :url_type, :url_value, :parent_id, :mega_columns, :sort_order, :is_active, NOW())'
         );
         $stmt->execute([
             ':lang' => $item['lang'],
             ':title' => $item['title'],
             ':icon_svg' => $item['icon_svg'] ?? null,
+            ':hide_title' => !empty($item['hide_title']) ? 1 : 0,
             ':badge_text' => $item['badge_text'] ?? null,
             ':badge_color' => $item['badge_color'] ?? 'red',
             ':badge_pos' => $item['badge_pos'] ?? 'right',

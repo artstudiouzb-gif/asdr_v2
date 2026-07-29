@@ -33,21 +33,18 @@ final class MenuController
         [$data, $error] = $this->collectInput();
         if ($error !== null) {
             Flash::error($error);
-            header('Location: /admin/menu');
-            exit;
+            $this->redirectToMenu((string) ($_POST['lang'] ?? ''));
         }
 
         $parentError = MenuItem::validateParent($data['parent_id'], null, $data['lang']);
         if ($parentError !== null) {
             Flash::error($parentError);
-            header('Location: /admin/menu');
-            exit;
+            $this->redirectToMenu((string) $data['lang']);
         }
 
-        MenuItem::create($data);
+        $id = MenuItem::create($data);
         Flash::success('Пункт меню добавлен.');
-        header('Location: /admin/menu');
-        exit;
+        $this->redirectToMenu((string) $data['lang'], $id);
     }
 
     public function update(array $params): void
@@ -65,21 +62,18 @@ final class MenuController
         [$data, $error] = $this->collectInput();
         if ($error !== null) {
             Flash::error($error);
-            header('Location: /admin/menu');
-            exit;
+            $this->redirectToMenu((string) $item['lang'], (int) $item['id']);
         }
 
         $parentError = MenuItem::validateParent($data['parent_id'], (int) $item['id'], $data['lang']);
         if ($parentError !== null) {
             Flash::error($parentError);
-            header('Location: /admin/menu');
-            exit;
+            $this->redirectToMenu((string) $data['lang'], (int) $item['id']);
         }
 
         MenuItem::update((int) $item['id'], $data);
         Flash::success('Пункт меню обновлён.');
-        header('Location: /admin/menu');
-        exit;
+        $this->redirectToMenu((string) $data['lang'], (int) $item['id']);
     }
 
     /**
@@ -149,8 +143,7 @@ final class MenuController
             Flash::error('Не удалось синхронизировать меню. Проверьте структуру и повторите попытку.');
         }
 
-        header('Location: /admin/menu');
-        exit;
+        $this->redirectToMenu($targetLang);
     }
 
     public function destroy(array $params): void
@@ -158,10 +151,11 @@ final class MenuController
         Auth::requireSuperAdmin();
         Csrf::verifyRequest();
 
-        MenuItem::delete((int) $params['id']);
+        $id = (int) $params['id'];
+        $item = MenuItem::findById($id);
+        MenuItem::delete($id);
         Flash::success('Пункт меню удалён.');
-        header('Location: /admin/menu');
-        exit;
+        $this->redirectToMenu((string) ($item['lang'] ?? ''));
     }
 
     public function move(array $params): void
@@ -169,10 +163,11 @@ final class MenuController
         Auth::requireSuperAdmin();
         Csrf::verifyRequest();
 
+        $id = (int) $params['id'];
+        $item = MenuItem::findById($id);
         $direction = ($_POST['direction'] ?? '') === 'up' ? 'up' : 'down';
-        MenuItem::move((int) $params['id'], $direction);
-        header('Location: /admin/menu');
-        exit;
+        MenuItem::move($id, $direction);
+        $this->redirectToMenu((string) ($item['lang'] ?? ''), $id);
     }
 
     /**
@@ -237,6 +232,7 @@ final class MenuController
         $parentId = ($parentRaw === '' || $parentRaw === '0') ? null : (int) $parentRaw;
         $badgeText = trim((string) ($_POST['badge_text'] ?? ''));
         $badgeColor = trim((string) ($_POST['badge_color'] ?? 'red'));
+        $badgePos = trim((string) ($_POST['badge_pos'] ?? 'right'));
 
         return [[
             'title' => $title,
@@ -245,6 +241,7 @@ final class MenuController
             'hide_title' => !empty($_POST['hide_title']),
             'badge_text' => $badgeText !== '' ? $badgeText : null,
             'badge_color' => $badgeColor,
+            'badge_pos' => $badgePos,
             'is_divider' => false,
             'url_type' => $urlType,
             'url_value' => $urlValue !== '' ? $urlValue : null,
@@ -253,5 +250,16 @@ final class MenuController
             'mega_columns' => \App\Models\MenuItem::megaColumns($_POST['mega_columns'] ?? 0, $parentId),
             'is_active' => !empty($_POST['is_active']),
         ], null];
+    }
+
+    private function redirectToMenu(string $lang = '', ?int $selectedId = null): never
+    {
+        $lang = Language::isActive($lang) ? $lang : Language::defaultCode();
+        $query = ['lang' => $lang];
+        if ($selectedId !== null && $selectedId > 0) {
+            $query['selected'] = $selectedId;
+        }
+        header('Location: /admin/menu?' . http_build_query($query));
+        exit;
     }
 }

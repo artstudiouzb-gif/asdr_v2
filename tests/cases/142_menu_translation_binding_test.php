@@ -144,6 +144,10 @@ test('Синхронизация меню сохраняет переведён�
             'lang' => 'ru',
             'url_type' => 'custom',
             'url_value' => '/catalog',
+            'icon_svg' => 'home',
+            'hide_title' => 1,
+            'badge_text' => 'TOP',
+            'badge_pos' => 'left',
             'is_active' => 1,
         ]);
         MenuItem::create([
@@ -194,6 +198,9 @@ test('Синхронизация меню сохраняет переведён�
         assert_same(2, count($uzTree), 'в UZ-меню два пункта верхнего уровня');
         assert_same('Katalog', (string) $uzTree[0]['title'], 'существующий UZ-заголовок сохранён');
         assert_same('/uz/catalog', (string) $uzTree[0]['url_value'], 'внутренний раздел сохранён в UZ-локали');
+        assert_same('home', (string) $uzTree[0]['icon_svg'], 'встроенная иконка синхронизирована');
+        assert_same(1, (int) $uzTree[0]['hide_title'], 'режим «только иконка» синхронизирован');
+        assert_same('left', (string) $uzTree[0]['badge_pos'], 'позиция бейджа синхронизирована');
         assert_same('/uz/catalog', MenuItem::resolveUrl($uzTree[0], 'uz'));
         assert_same(1, count($uzTree[0]['children']), 'вложенность синхронизирована');
         assert_same('Aloqa', (string) $uzTree[0]['children'][0]['title'], 'взято название UZ-страницы');
