@@ -321,7 +321,7 @@ body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-
 
 .site-menu--submenu-transform-uppercase .site-submenu__link { text-transform: uppercase; }
 .site-menu--submenu-transform-capitalize .site-submenu__link { text-transform: capitalize; }
-.site-menu--submenu-transform-none .site-submenu__link { text-transform: none; }
+.site-menu--submenu-transform-none .site-submenu__link { text-transform: none; text-decoration: none; }
 
 /* Letter Spacing Modifiers */
 .site-menu--spacing-normal .site-menu__link { letter-spacing: 0; }

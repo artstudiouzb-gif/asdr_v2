@@ -31,6 +31,7 @@ $extBadge = static function (array $f): string {
 <div class="rd">
     <header class="rd-hero">
         <div class="rd-hero__info">
+            <div class="rd-hero__badge">🔒 Защищённый цифровой архив</div>
             <h1 class="rd-hero__title">Репозиторий документов</h1>
             <p class="rd-hero__lead">Единая база официальных документов, стратегий, отчётов, исследований и аналитических материалов Агентства.</p>
             <form method="get" action="/repo" class="rd-search" role="search">
@@ -43,10 +44,42 @@ $extBadge = static function (array $f): string {
     </header>
 
     <div class="rd-stats">
-        <div class="rd-stat"><span class="rd-stat__num"><?= $totalCount ?></span><span class="rd-stat__label">документов в базе</span></div>
-        <div class="rd-stat"><span class="rd-stat__num"><?= count($categories) ?></span><span class="rd-stat__label">категорий</span></div>
-        <div class="rd-stat"><span class="rd-stat__num"><?= array_sum(array_map(static fn ($f) => (int) $f['download_count'], $popular)) ?></span><span class="rd-stat__label">скачиваний популярных</span></div>
-        <div class="rd-stat"><span class="rd-stat__num"><?= count($latest) ?></span><span class="rd-stat__label">новых публикаций</span></div>
+        <div class="rd-stat rd-stat--blue">
+            <div class="rd-stat__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <div class="rd-stat__body">
+                <span class="rd-stat__num"><?= $totalCount ?></span>
+                <span class="rd-stat__label">документов в базе</span>
+            </div>
+        </div>
+        <div class="rd-stat rd-stat--teal">
+            <div class="rd-stat__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="rd-stat__body">
+                <span class="rd-stat__num"><?= count($categories) ?></span>
+                <span class="rd-stat__label">категорий</span>
+            </div>
+        </div>
+        <div class="rd-stat rd-stat--emerald">
+            <div class="rd-stat__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <div class="rd-stat__body">
+                <span class="rd-stat__num"><?= array_sum(array_map(static fn ($f) => (int) $f['download_count'], $popular)) ?></span>
+                <span class="rd-stat__label">скачиваний популярных</span>
+            </div>
+        </div>
+        <div class="rd-stat rd-stat--amber">
+            <div class="rd-stat__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            </div>
+            <div class="rd-stat__body">
+                <span class="rd-stat__num"><?= count($latest) ?></span>
+                <span class="rd-stat__label">новых публикаций</span>
+            </div>
+        </div>
     </div>
 
     <details class="rd-upload">
@@ -155,7 +188,32 @@ $extBadge = static function (array $f): string {
         </div>
 
         <?php if (empty($files)): ?>
-            <div class="rd-empty"><?= ($query !== '' || $category > 0) ? 'По вашему запросу ничего не найдено.' : 'В хранилище пока нет файлов.' ?></div>
+            <div class="rd-empty-card">
+                <div class="rd-empty-card__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="44" height="44">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M10 13h4"/><path d="M10 17h4"/>
+                    </svg>
+                </div>
+                <h3 class="rd-empty-card__title">
+                    <?= ($query !== '' || $category > 0 || $ext !== '') ? 'Документы не найдены' : 'Хранилище документов пока пусто' ?>
+                </h3>
+                <p class="rd-empty-card__desc">
+                    <?= ($query !== '' || $category > 0 || $ext !== '') 
+                        ? 'По вашим критериям фильтрации или поисковому запросу не найдено ни одного файла. Попробуйте сбросить параметры.' 
+                        : 'В защищённом репозитории агентства пока нет опубликованных файлов. Вы можете предложить первый документ на модерацию.' ?>
+                </p>
+                <div class="rd-empty-card__actions">
+                    <?php if ($query !== '' || $category > 0 || $ext !== ''): ?>
+                        <a href="/repo" class="rd-btn rd-btn--primary">
+                            Сбросить фильтры ↺
+                        </a>
+                    <?php else: ?>
+                        <button type="button" class="rd-btn rd-btn--primary" onclick="document.querySelector('.rd-upload')?.setAttribute('open', 'true');">
+                            + Предложить документ
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
         <?php else: ?>
             <!-- Табличный вид (скрыт по умолчанию, переключается кнопкой) -->
             <div class="rd-table-wrapper" id="rd-table-view">
