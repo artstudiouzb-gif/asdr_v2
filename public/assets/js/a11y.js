@@ -57,6 +57,63 @@
         });
     }
 
+    function createDynamicPanel() {
+        var panel = document.createElement('section');
+        panel.className = 'a11y-panel';
+        panel.id = 'a11y-panel';
+        panel.setAttribute('aria-label', 'Настройки версии для слабовидящих');
+        panel.innerHTML =
+            '<div class="a11y-panel__group">' +
+                '<b>Цвет:</b>' +
+                '<button type="button" data-a11y-set="scheme:cw" title="Чёрным по белому">A</button>' +
+                '<button type="button" data-a11y-set="scheme:wc" title="Белым по чёрному">A</button>' +
+                '<button type="button" data-a11y-set="scheme:bb" title="Тёмно-синим по голубому">A</button>' +
+            '</div>' +
+            '<div class="a11y-panel__group">' +
+                '<b>Размер:</b>' +
+                '<button type="button" class="a11y-panel__size-a1" data-a11y-set="size:m" title="Обычный">A</button>' +
+                '<button type="button" class="a11y-panel__size-a2" data-a11y-set="size:l" title="Крупный">A</button>' +
+                '<button type="button" class="a11y-panel__size-a3" data-a11y-set="size:xl" title="Очень крупный">A</button>' +
+            '</div>' +
+            '<div class="a11y-panel__group">' +
+                '<b>Изображения:</b>' +
+                '<button type="button" data-a11y-set="images:on" title="Показывать">Вкл</button>' +
+                '<button type="button" data-a11y-set="images:off" title="Скрыть">Выкл</button>' +
+            '</div>' +
+            '<a href="#" class="a11y-panel__off">Обычная версия</a>';
+
+        var target = document.querySelector('.site-header') || document.querySelector('.repo-topbar') || document.body;
+        if (target.parentNode) {
+            target.parentNode.insertBefore(panel, target);
+        } else {
+            document.body.insertBefore(panel, document.body.firstChild);
+        }
+        bindPanelEvents(panel);
+        return panel;
+    }
+
+    function bindPanelEvents(panelEl) {
+        if (!panelEl) return;
+        panelEl.querySelectorAll('[data-a11y-set]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var spec = btn.getAttribute('data-a11y-set').split(':');
+                state[spec[0]] = spec[1];
+                state.on = true;
+                apply();
+            });
+        });
+
+        var off = panelEl.querySelector('.a11y-panel__off');
+        if (off) {
+            off.addEventListener('click', function (e) {
+                e.preventDefault();
+                state.on = false;
+                apply();
+                panelEl.classList.remove('is-open');
+            });
+        }
+    }
+
     function onReady() {
         var toggles = document.querySelectorAll('.a11y-toggle');
         var panel = document.querySelector('.a11y-panel');
@@ -70,10 +127,18 @@
             window.dispatchEvent(new CustomEvent('a11y:panelchange', { detail: { open: open } }));
             if (restoreFocus && lastToggle) { lastToggle.focus(); }
         };
-        if (toggles.length && panel) {
+
+        if (panel) {
+            bindPanelEvents(panel);
+        }
+
+        if (toggles.length) {
             toggles.forEach(function (toggle) {
                 toggle.addEventListener('click', function () {
                     lastToggle = toggle;
+                    if (!panel) {
+                        panel = createDynamicPanel();
+                    }
                     var willOpen = !panel.classList.contains('is-open');
                     if (willOpen && !state.on) {
                         state.on = true;
@@ -83,28 +148,9 @@
                 });
             });
             document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && panel.classList.contains('is-open')) {
+                if (e.key === 'Escape' && panel && panel.classList.contains('is-open')) {
                     setPanelOpen(false, true);
                 }
-            });
-        }
-
-        document.querySelectorAll('[data-a11y-set]').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var spec = btn.getAttribute('data-a11y-set').split(':');
-                state[spec[0]] = spec[1];
-                state.on = true;
-                apply();
-            });
-        });
-
-        var off = document.querySelector('.a11y-panel__off');
-        if (off) {
-            off.addEventListener('click', function (e) {
-                e.preventDefault();
-                state.on = false;
-                apply();
-                setPanelOpen(false, true);
             });
         }
 

@@ -668,7 +668,8 @@ foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
 </div>
 <?php endif; ?>
 <?php if (empty($hideChrome)): // лендинг (группа 6) скрывает шапку сайта ?>
-<section class="a11y-panel<?= $a11y['on'] ? ' is-open' : '' ?>" id="a11y-panel" aria-label="<?= $et('Настройки версии для слабовидящих') ?>">
+<?php if ($a11y['on']): ?>
+<section class="a11y-panel is-open" id="a11y-panel" aria-label="<?= $et('Настройки версии для слабовидящих') ?>">
     <div class="a11y-panel__group">
         <b><?= $et('Цвет:') ?></b>
         <button type="button" data-a11y-set="scheme:cw" title="<?= $et('Чёрным по белому') ?>">A</button>
@@ -688,6 +689,7 @@ foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
     </div>
     <a href="#" class="a11y-panel__off"><?= $et('Обычная версия') ?></a>
 </section>
+<?php endif; ?>
 <?= $topbarHtml ?>
 <?php
 $hasHeaderContent = trim($zones['left'] . $zones['center'] . $zones['right'] . $topbarHtml . $navBarHtml) !== '';

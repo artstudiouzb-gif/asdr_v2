@@ -55,7 +55,8 @@ $a11y = [
         <?php endif; ?>
     </nav>
 </header>
-<div class="a11y-panel<?= $a11y['on'] ? ' is-open' : '' ?>" id="a11y-panel" role="region" aria-label="Настройки версии для слабовидящих">
+<?php if ($a11y['on']): ?>
+<div class="a11y-panel is-open" id="a11y-panel" role="region" aria-label="Настройки версии для слабовидящих">
     <div class="a11y-panel__group">
         <b>Цвет:</b>
         <button type="button" data-a11y-set="scheme:cw" title="Чёрным по белому">Ч</button>
@@ -75,6 +76,7 @@ $a11y = [
     </div>
     <a href="#" class="a11y-panel__off">Обычная версия</a>
 </div>
+<?php endif; ?>
 <main class="repo-main">
     <?php foreach (Flash::pull() as $flash): ?>
         <div class="repo-alert repo-alert--<?= $flash['type'] === 'success' ? 'success' : 'error' ?>"
