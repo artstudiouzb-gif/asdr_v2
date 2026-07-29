@@ -76,20 +76,6 @@ $langs = Language::active();
                     <?php if ($isItemHome): ?>
                         <span class="badge badge--accent badge--home" title="<?= htmlspecialchars(t('Главная страница'), ENT_QUOTES) ?>"><?= AdminUi::icon('home', 14) ?></span>
                     <?php endif; ?>
-                    <?php
-                    $transGroup = \App\Core\TranslationGroupHelper::getTranslations('pages', (int) $item['id']);
-                    $otherTitles = [];
-                    foreach ($transGroup as $tCode => $tRow) {
-                        if ((int) $tRow['id'] !== (int) $item['id'] && !empty($tRow['title'])) {
-                            $otherTitles[] = '<span class="u-inline-b6c72f2984">' . strtoupper($tCode) . ':</span> ' . htmlspecialchars((string) $tRow['title'], ENT_QUOTES);
-                        }
-                    }
-                    ?>
-                    <?php if ($otherTitles !== []): ?>
-                        <div class="u-inline-85b4085512">
-                            <?= implode(' &nbsp;•&nbsp; ', $otherTitles) ?>
-                        </div>
-                    <?php endif; ?>
                 </td>
                 <td>
                     <?php if (!empty($item['parent_title'])): ?>

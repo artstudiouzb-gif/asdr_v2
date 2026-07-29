@@ -87,20 +87,6 @@ $langs = Language::active();
                 <td class="data-table__flex">
                     <div>
                         <a class="data-table__primary" href="/admin/news/<?= (int) $item['id'] ?>/edit"><?= htmlspecialchars($item['title'], ENT_QUOTES) ?></a>
-                        <?php
-                        $transGroup = \App\Core\TranslationGroupHelper::getTranslations('news', (int) $item['id']);
-                        $otherTitles = [];
-                        foreach ($transGroup as $tCode => $tRow) {
-                            if ((int) $tRow['id'] !== (int) $item['id'] && !empty($tRow['title'])) {
-                                $otherTitles[] = '<span class="u-inline-b6c72f2984">' . strtoupper($tCode) . ':</span> ' . htmlspecialchars((string) $tRow['title'], ENT_QUOTES);
-                            }
-                        }
-                        ?>
-                        <?php if ($otherTitles !== []): ?>
-                            <div class="u-inline-85b4085512">
-                                <?= implode(' &nbsp;•&nbsp; ', $otherTitles) ?>
-                            </div>
-                        <?php endif; ?>
                     </div>
                 </td>
                 <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? [], 'module' => 'news', 'origId' => (int) $item['id']]) ?></td>

@@ -142,6 +142,9 @@ final class News
             $params[':lang_neq'] = $langFilter;
             $params[':lang_nt'] = $langFilter;
             $params[':lang_n2'] = $langFilter;
+        } else {
+            $where[] = '(n.translation_group_id IS NULL OR n.translation_group_id = 0 OR n.translation_group_id = n.id'
+                . ' OR NOT EXISTS (SELECT 1 FROM news n_parent WHERE n_parent.id = n.translation_group_id AND n_parent.deleted_at IS NULL AND n_parent.id <> n.id))';
         }
 
         if (in_array($filters['status'] ?? '', ['published', 'draft'], true)) {
@@ -768,7 +771,12 @@ final class News
     public static function langCounts(): array
     {
         $pdo = Database::pdo();
-        $totalAll = (int) $pdo->query("SELECT COUNT(*) FROM news WHERE deleted_at IS NULL")->fetchColumn();
+        $totalAll = (int) $pdo->query(
+            "SELECT COUNT(*) FROM news n
+             WHERE n.deleted_at IS NULL
+               AND (n.translation_group_id IS NULL OR n.translation_group_id = 0 OR n.translation_group_id = n.id
+                    OR NOT EXISTS (SELECT 1 FROM news n_parent WHERE n_parent.id = n.translation_group_id AND n_parent.deleted_at IS NULL AND n_parent.id <> n.id))"
+        )->fetchColumn();
 
         $counts = ['all' => $totalAll];
         foreach (Language::active() as $l) {
