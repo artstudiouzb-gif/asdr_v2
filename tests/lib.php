@@ -21,6 +21,18 @@ final class TestRunner
     public static int $skipped = 0;
     /** @var array<int, string> */
     public static array $failures = [];
+
+    /**
+     * Имя выполняющегося сейчас теста. Нужно обработчику завершения в run.php:
+     * если продуктовый код внутри теста вызовет exit, только эта запись
+     * покажет, на чём именно оборвался прогон.
+     */
+    public static string $current = '';
+
+    public static function currentTestName(): string
+    {
+        return self::$current !== '' ? self::$current : '(до первого теста)';
+    }
 }
 
 final class SkipTest extends \RuntimeException
@@ -96,6 +108,7 @@ function assert_not_contains(string $needle, string $haystack, string $message =
 function run_tests(): int
 {
     foreach (TestRunner::$tests as $t) {
+        TestRunner::$current = $t['name'];
         try {
             ($t['fn'])();
             TestRunner::$passed++;
