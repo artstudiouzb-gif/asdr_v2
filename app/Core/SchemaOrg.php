@@ -63,7 +63,14 @@ final class SchemaOrg
     }
 
     /** @return array<string, mixed> */
-    public static function event(string $title, string $url, string $startDate, string $location = '', string $description = ''): array
+    public static function event(
+        string $title,
+        string $url,
+        string $startDate,
+        string $location = '',
+        string $description = '',
+        string $image = ''
+    ): array
     {
         $data = [
             '@context' => 'https://schema.org',
@@ -80,6 +87,9 @@ final class SchemaOrg
         }
         if ($description !== '') {
             $data['description'] = mb_substr($description, 0, 300);
+        }
+        if ($image !== '') {
+            $data['image'] = [$image];
         }
 
         return $data;

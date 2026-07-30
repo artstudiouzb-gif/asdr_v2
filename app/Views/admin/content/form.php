@@ -46,6 +46,9 @@ $hasTr = (int) $type['has_translations'] === 1;
                 <?php foreach ($fields as $field): ?>
                     <div class="u-inline-79a1c5a5db">
                         <?= ContentFields::renderInput($field, $data[$field['name']] ?? '', 'f_') ?>
+                        <?php if ($field['name'] === 'banner_image' && $type['slug'] === 'meropriyatiya'): ?>
+                            <p class="form-hint">Необязательно. Показывается в карточке, календаре, на странице мероприятия и в Open Graph. Без баннера останется компактная карточка с датой.</p>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>

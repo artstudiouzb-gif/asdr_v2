@@ -3914,10 +3914,20 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 
 /* Мероприятия: плитка даты слева. */
 .catlist--events .catcard { align-items: flex-start; }
+.catlist--events .catcard--with-image { display: grid; grid-template-columns: 74px minmax(0, 1fr); align-items: start; }
+.catcard__event-media { display: block; grid-column: 1 / -1; width: 100%; height: 190px; overflow: hidden; border-radius: 12px; background: var(--gov-bg); }
+.catcard__event-media picture { display: block; width: 100%; height: 100%; }
+.catcard__event-image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--media-object-position, center); transition: transform .35s ease; }
+.catcard:hover .catcard__event-image { transform: scale(1.035); }
+.catcard--with-image .catcard__datebox { grid-column: 1; }
+.catcard--with-image .catcard__main { grid-column: 2; }
 .catcard__datebox { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 74px; min-height: 84px; padding: 10px 6px; border-radius: 12px; background: var(--gov-navy); color: #fff; text-align: center; }
 .catcard__datebox b { font-family: var(--font-heading, 'PT Serif', serif); font-size: 1.7rem; line-height: 1; }
 .catcard__datebox i { font-style: normal; font-size: .72rem; font-weight: 700; letter-spacing: .08em; margin-top: 4px; }
 .catcard__datebox em { font-style: normal; font-size: .72rem; opacity: .75; }
+@media (max-width: 560px) {
+    .catcard__event-media { height: 180px; }
+}
 
 /* Анимация фокуса для фильтров, поиска и полей ввода */
 .catlist-toolbar__search input, .catlist-toolbar__sort, .site-search input {
@@ -4104,6 +4114,9 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .catdetail__eyebrow { display: inline-block; color: var(--gov-teal-text); font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .catdetail__title { margin: 12px 0 10px; font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.15; color: var(--gov-title); }
 .catdetail__date { color: var(--gov-muted); font-size: .9rem; }
+.catdetail__event-banner { width: 100%; margin: 0; overflow: hidden; border-radius: clamp(14px, 2vw, 22px); aspect-ratio: 16 / 7; background: var(--gov-bg); box-shadow: var(--card-shadow); }
+.catdetail__event-banner picture { display: block; width: 100%; height: 100%; }
+.catdetail__event-image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--media-object-position, center); }
 .catdetail__grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: clamp(24px, 3.4vw, 48px); align-items: start; }
 @media (max-width: 900px) { .catdetail__grid { grid-template-columns: 1fr; } }
 .catdetail__body { display: flex; flex-direction: column; gap: 26px; max-width: 76ch; }
@@ -4141,13 +4154,21 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 .gcal-list { display: flex; flex-direction: column; gap: 14px; }
 .gcal-list__title { margin: 0; font-size: 1.3rem; color: var(--gov-title); }
 .gcal-list__items { display: flex; flex-direction: column; gap: 0; margin: 0; padding: 0; list-style: none; border: 1px solid var(--gov-border); border-radius: 14px; background: var(--gov-surface); overflow: hidden; }
-.gcal-list__item { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 16px 22px; }
+.gcal-list__item { display: flex; align-items: center; gap: 14px; padding: 16px 22px; }
 .gcal-list__item + .gcal-list__item { border-top: 1px solid var(--gov-border); }
+.gcal-list__media { display: block; flex: 0 0 96px; height: 68px; overflow: hidden; border-radius: 9px; background: var(--gov-bg); }
+.gcal-list__media picture { display: block; width: 100%; height: 100%; }
+.gcal-list__image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--media-object-position, center); }
+.gcal-list__body { display: flex; flex: 1; min-width: 0; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
 .gcal-list__date { font-weight: 700; color: var(--gov-title); font-variant-numeric: tabular-nums; }
 .gcal-list__time { color: var(--gov-teal-text); font-weight: 700; font-size: .88rem; }
 .gcal-list__link { color: var(--gov-title); font-weight: 600; text-decoration: none; }
 .gcal-list__link:hover { color: var(--gov-teal-text); }
 .gcal-list__loc { color: var(--gov-muted); font-size: .88rem; }
+@media (max-width: 560px) {
+    .gcal-list__item { align-items: flex-start; padding: 14px; }
+    .gcal-list__media { flex-basis: 78px; height: 60px; }
+}
 
 /* ============================================================================
    Настраиваемые цвета блоков (CTA, баннер, направления, CTA-полоса).
@@ -4204,11 +4225,13 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 .site-footer__logo { max-height: 80px; width: auto; object-fit: contain; margin-bottom: 14px; display: block; }
 
 /* --- Форма подписки в подвале --- */
-.footer-subscribe { display: flex; margin-top: 12px; max-width: 320px; }
+.footer-subscribe { display: flex; flex-wrap: wrap; margin-top: 12px; max-width: 320px; }
 .footer-subscribe input[type=email] { flex: 1; min-width: 0; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff; border-radius: 8px 0 0 8px; padding: 11px 14px; }
 .footer-subscribe input[type=email]::placeholder { color: rgba(255,255,255,.55); }
 .footer-subscribe button { border: 0; background: var(--gov-teal); color: #fff; padding: 0 18px; border-radius: 0 8px 8px 0; cursor: pointer; font-size: 1.125rem; }
 .footer-subscribe button:hover { background: color-mix(in srgb, var(--gov-teal) 85%, #000); }
+.footer-subscribe__consent { display: flex; flex: 1 0 100%; align-items: flex-start; gap: 8px; margin-top: 10px; color: rgba(255,255,255,.72); font-size: .76rem; line-height: 1.45; cursor: pointer; }
+.footer-subscribe__consent input { flex: 0 0 auto; margin-top: 2px; accent-color: var(--gov-teal); }
 .site-footer--columns .site-footer__col--subscribe .site-footer__line { color: rgba(255,255,255,.72); }
 
 /* ===== Оформление виджетов сайдбара (панель «Оформление» в админке) ===== */

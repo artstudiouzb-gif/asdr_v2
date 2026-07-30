@@ -30,6 +30,7 @@ if ($workerLock === null) {
 
 use App\Core\Mailer;
 use App\Models\MailQueue;
+use App\Models\Subscriber;
 
 if (!Mailer::isConfigured()) {
     fwrite(STDERR, 'SMTP не настроен (config[mail][host] пуст). Нечего отправлять.' . PHP_EOL);
@@ -45,9 +46,19 @@ if ($batch === []) {
 $mailer = new Mailer();
 $sent = 0;
 $failed = 0;
+$cancelled = 0;
 
 foreach ($batch as $item) {
     $id = (int) $item['id'];
+    if (($item['purpose'] ?? '') === 'digest') {
+        $subscriberId = (int) ($item['subscriber_id'] ?? 0);
+        if ($subscriberId <= 0 || !Subscriber::isActive($subscriberId)) {
+            MailQueue::markCancelled($id, 'Получатель отписан или удалён до отправки');
+            $cancelled++;
+            continue;
+        }
+    }
+
     $ok = $mailer->send(
         (string) $item['to_email'],
         (string) $item['subject'],
@@ -66,4 +77,10 @@ foreach ($batch as $item) {
     }
 }
 
-fwrite(STDOUT, sprintf('Обработано: отправлено %d, ошибок %d.%s', $sent, $failed, PHP_EOL));
+fwrite(STDOUT, sprintf(
+    'Обработано: отправлено %d, ошибок %d, отменено %d.%s',
+    $sent,
+    $failed,
+    $cancelled,
+    PHP_EOL
+));

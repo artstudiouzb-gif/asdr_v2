@@ -236,6 +236,7 @@ $router->get('/admin/audit', [\App\Controllers\Admin\AuditController::class, 'in
 $router->get('/admin/audit/errors', [\App\Controllers\Admin\AuditController::class, 'errors']);
 $router->post('/admin/audit/errors/clear', [\App\Controllers\Admin\AuditController::class, 'errorsClear']);
 $router->get('/admin/subscribers', [\App\Controllers\Admin\SubscriberController::class, 'index']);
+$router->post('/admin/subscribers/send-digest', [\App\Controllers\Admin\SubscriberController::class, 'sendDigest']);
 $router->post('/admin/subscribers/{id}/delete', [\App\Controllers\Admin\SubscriberController::class, 'destroy']);
 $router->get('/admin/albums', [\App\Controllers\Admin\AlbumController::class, 'index']);
 $router->post('/admin/albums/create', [\App\Controllers\Admin\AlbumController::class, 'store']);

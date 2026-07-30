@@ -83,14 +83,23 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
             return $h . '</div>';
         case 'subscribe':
             // Форма подписки в подвале (постит в /subscribe, как и блок).
-            $ts = (string) time();
+            $footerConsent = '';
+            if (\App\Models\Setting::get('form_consent_enabled', '0') === '1') {
+                $footerConsent = '<label class="footer-subscribe__consent">'
+                    . '<input type="checkbox" name="consent" value="1" required>'
+                    . '<span>' . htmlspecialchars((string) \App\Models\Setting::get(
+                        'form_consent_text',
+                        t('Я даю согласие на обработку персональных данных')
+                    ), ENT_QUOTES) . '</span></label>';
+            }
             return '<p class="site-footer__line">' . htmlspecialchars(t('Будьте в курсе наших новостей и аналитических материалов.'), ENT_QUOTES) . '</p>'
-                . '<form class="footer-subscribe" method="post" action="/subscribe">'
+                . '<form class="footer-subscribe" method="post" action="' . htmlspecialchars(\App\Core\Locale::url('subscribe', $footerLang), ENT_QUOTES) . '">'
                 . \App\Core\Csrf::field()
-                . '<div class="form-honeypot" aria-hidden="true"><input type="text" name="hp_website" tabindex="-1" autocomplete="off"></div>'
-                . '<input type="hidden" name="hp_ts" value="' . htmlspecialchars($ts, ENT_QUOTES) . '">'
-                . '<input type="email" name="email" placeholder="' . htmlspecialchars(t('Ваш e-mail'), ENT_QUOTES) . '" aria-label="E-mail" required>'
+                . \App\Core\Csrf::honeypotField()
+                . '<input type="hidden" name="source" value="footer">'
+                . '<input type="email" name="email" placeholder="' . htmlspecialchars(t('Ваш e-mail'), ENT_QUOTES) . '" aria-label="E-mail" autocomplete="email" required>'
                 . '<button type="submit" aria-label="' . htmlspecialchars(t('Подписаться'), ENT_QUOTES) . '">&rarr;</button>'
+                . $footerConsent
                 . '</form>'
                 . '<div data-push-optin></div>'; // сюда push.js добавляет кнопку уведомлений
         case 'text':

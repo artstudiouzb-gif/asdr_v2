@@ -19,14 +19,9 @@ require __DIR__ . '/../Core/Cli.php';
 
 require __DIR__ . '/../Core/bootstrap.php';
 
-use App\Core\AppUrl;
-use App\Core\Digest;
+use App\Core\DigestDispatcher;
 use App\Core\Logger;
 use App\Core\ProcessLock;
-use App\Models\MailQueue;
-use App\Models\News;
-use App\Models\Setting;
-use App\Models\Subscriber;
 
 $lock = ProcessLock::acquire('digest_worker');
 if ($lock === null) {
@@ -35,45 +30,28 @@ if ($lock === null) {
 }
 
 try {
-    if (!\App\Core\Mailer::isConfigured()) {
-        fwrite(STDOUT, 'SMTP не настроен — дайджест пропущен.' . PHP_EOL);
+    $result = DigestDispatcher::queueWeekly();
+    if ($result['recipients'] === 0) {
+        fwrite(STDOUT, 'Активных подписчиков нет — дайджест не формируется.' . PHP_EOL);
         exit(0);
     }
-
-    // Новости за последние 7 дней (свежие сверху).
-    $weekAgo = date('Y-m-d H:i:s', time() - 7 * 86400);
-    $items = array_values(array_filter(
-        News::published(50),
-        static fn (array $n): bool => (string) ($n['published_at'] ?? '') >= $weekAgo
-    ));
-    if ($items === []) {
+    if ($result['news'] === 0) {
         fwrite(STDOUT, 'За неделю новостей нет — дайджест не отправляется.' . PHP_EOL);
         exit(0);
     }
-
-    $subscribers = Subscriber::all();
-    if ($subscribers === []) {
-        fwrite(STDOUT, 'Подписчиков нет — дайджест не отправляется.' . PHP_EOL);
+    if ($result['queued'] === 0 && $result['duplicates'] > 0) {
+        fwrite(STDOUT, 'Дайджест за период ' . $result['period'] . ' уже поставлен в очередь.' . PHP_EOL);
         exit(0);
     }
 
-    $siteName = Setting::get('site_name', '');
-    $baseUrl = AppUrl::base();
-    $subject = Digest::buildSubject($siteName, date('d.m.Y'));
-    $body = Digest::buildBody($items, $siteName, $baseUrl);
-
-    $queued = 0;
-    foreach ($subscribers as $sub) {
-        MailQueue::enqueue(
-            (string) $sub['email'],
-            $subject,
-            $body . "\n" . Digest::buildFooter($baseUrl, (string) $sub['token'])
-        );
-        $queued++;
-    }
-
-    Logger::info('Дайджест поставлен в очередь', ['news' => count($items), 'recipients' => $queued]);
-    fwrite(STDOUT, sprintf('OK: %d новостей, %d получателей поставлено в очередь.%s', count($items), $queued, PHP_EOL));
+    Logger::info('Дайджест поставлен в очередь', $result);
+    fwrite(STDOUT, sprintf(
+        'OK: %d новостей, %d писем поставлено в очередь, %d дублей пропущено.%s',
+        $result['news'],
+        $result['queued'],
+        $result['duplicates'],
+        PHP_EOL
+    ));
     exit(0);
 } catch (\Throwable $e) {
     Logger::warning('Дайджест: ошибка', ['error' => $e->getMessage()]);

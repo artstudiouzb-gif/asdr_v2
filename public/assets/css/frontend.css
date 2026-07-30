@@ -1408,6 +1408,19 @@ body.design-header-dark .site-burger, body.design-header-accent .site-burger { c
     transform: translateY(-1px) scale(1.02);
     box-shadow: 0 6px 16px rgba(230, 57, 70, 0.2);
 }
+.subscribe-block__consent {
+    display: flex;
+    flex: 1 0 100%;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px;
+    max-width: 680px;
+    margin: 4px auto 0;
+    font-size: .82rem;
+    line-height: 1.45;
+    text-align: left;
+}
+.subscribe-block__consent input { flex: 0 0 auto; margin-top: 3px; }
 
 /* ============================================================
    DESIGN 2.0 — качественный дефолтный облик (слой поверх базы).

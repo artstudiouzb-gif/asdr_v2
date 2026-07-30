@@ -6,7 +6,9 @@ namespace App\Controllers\Site;
 
 use App\Core\Csrf;
 use App\Core\Flash;
+use App\Core\Locale;
 use App\Core\RateLimiter;
+use App\Models\Setting;
 use App\Models\Subscriber;
 
 /** Публичная подписка на email-дайджест новостей и отписка по токену. */
@@ -15,28 +17,39 @@ final class SubscribeController
     public function subscribe(): void
     {
         if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
-            Flash::error('Сессия устарела, обновите страницу и попробуйте снова.');
+            Flash::error(t('Сессия устарела, обновите страницу и попробуйте снова.'));
             $this->back();
         }
 
         // Анти-флуд: не более 5 подписок с одного IP за 10 минут.
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         if (!RateLimiter::throttle('subscribe', $ip, 5, 10)) {
-            Flash::error('Слишком много попыток. Пожалуйста, попробуйте позже.');
+            Flash::error(t('Слишком много попыток. Пожалуйста, попробуйте позже.'));
             $this->back();
         }
 
         // Honeypot: боту тихо показываем «успех».
         if (Csrf::isSpam()) {
-            Flash::success('Вы подписаны на дайджест новостей.');
+            Flash::success(t('Вы подписаны на дайджест новостей.'));
             $this->back();
         }
 
-        $result = Subscriber::subscribe((string) ($_POST['email'] ?? ''));
+        $consent = !empty($_POST['consent']);
+        if (Setting::get('form_consent_enabled', '0') === '1' && !$consent) {
+            Flash::error(t('Подтвердите согласие на обработку персональных данных.'));
+            $this->back();
+        }
+
+        $result = Subscriber::subscribe(
+            (string) ($_POST['email'] ?? ''),
+            Locale::current(),
+            (string) ($_POST['source'] ?? 'website'),
+            $consent
+        );
         match ($result) {
-            'ok' => Flash::success('Вы подписаны на дайджест новостей.'),
-            'exists' => Flash::success('Этот адрес уже подписан на дайджест.'),
-            default => Flash::error('Укажите корректный email.'),
+            'ok' => Flash::success(t('Вы подписаны на дайджест новостей.')),
+            'exists' => Flash::success(t('Этот адрес уже подписан на дайджест.')),
+            default => Flash::error(t('Укажите корректный email.')),
         };
         $this->back();
     }
@@ -44,11 +57,11 @@ final class SubscribeController
     public function unsubscribe(): void
     {
         if (Subscriber::unsubscribeByToken((string) ($_GET['token'] ?? ''))) {
-            Flash::success('Вы отписаны от дайджеста. Спасибо, что были с нами!');
+            Flash::success(t('Вы отписаны от дайджеста. Спасибо, что были с нами!'));
         } else {
-            Flash::error('Ссылка отписки недействительна или уже использована.');
+            Flash::error(t('Ссылка отписки недействительна или уже использована.'));
         }
-        header('Location: /');
+        header('Location: ' . Locale::url('', Locale::current()));
         exit;
     }
 

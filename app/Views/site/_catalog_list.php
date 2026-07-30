@@ -22,6 +22,10 @@ use App\Core\Locale;
 $shortFields = array_values(array_filter($fields, static fn ($f) => in_array($f['field_type'], ['text', 'number', 'date'], true)));
 $longFields = array_values(array_filter($fields, static fn ($f) => $f['field_type'] === 'textarea'));
 $fileFields = array_values(array_filter($fields, static fn ($f) => $f['field_type'] === 'file'));
+$bannerField = array_values(array_filter(
+    $fields,
+    static fn ($f) => $f['name'] === 'banner_image' && $f['field_type'] === 'image'
+))[0] ?? null;
 // Типы с датой проведения (мероприятия) получают карточку с датой-плиткой.
 $isEvents = array_filter($fields, static fn ($f) => $f['name'] === 'event_date' && $f['field_type'] === 'date') !== [];
 $months = match (Locale::current()) {
@@ -44,8 +48,19 @@ $qs = static function (array $overrides) use ($q, $sort): string {
     <p class="catlist-count"><?= htmlspecialchars(t('Найдено:'), ENT_QUOTES) ?> <b><?= (int) $total ?></b></p>
     <div class="catlist<?= $isEvents ? ' catlist--events' : '' ?>">
         <?php foreach ($entries as $entry): ?>
-            <?php $url = Locale::url('catalog/' . $type['slug'] . '/' . $entry['slug']); ?>
-            <article class="catcard<?= !empty($entry['is_archived']) ? ' catcard--archived' : '' ?>">
+            <?php
+            $url = Locale::url('catalog/' . $type['slug'] . '/' . $entry['slug']);
+            $banner = $bannerField !== null ? trim((string) ($entry['data']['banner_image'] ?? '')) : '';
+            if ($banner !== '' && !\App\Core\UrlGuard::isSafeMedia($banner)) {
+                $banner = '';
+            }
+            ?>
+            <article class="catcard<?= !empty($entry['is_archived']) ? ' catcard--archived' : '' ?><?= $banner !== '' ? ' catcard--with-image' : '' ?>">
+                <?php if ($isEvents && $banner !== ''): ?>
+                    <a class="catcard__event-media" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>" tabindex="-1" aria-hidden="true">
+                        <?= \App\Core\Media::picture($banner, '', null, null, 'catcard__event-image', true, '(max-width: 560px) 100vw, 180px') ?>
+                    </a>
+                <?php endif; ?>
                 <?php if ($isEvents && !empty($entry['data']['event_date'])): ?>
                     <?php $ts = (int) strtotime((string) $entry['data']['event_date']); ?>
                     <span class="catcard__datebox" aria-hidden="true">
@@ -57,7 +72,7 @@ $qs = static function (array $overrides) use ($q, $sort): string {
                 <div class="catcard__main">
                     <div class="catcard__top">
                         <span class="catcard__doc-icon" aria-hidden="true">
-                            <?= \App\Core\Icon::render('file-description', 18) ?>
+                            <?= \App\Core\Icon::render($isEvents ? 'calendar' : 'file-description', 18) ?>
                         </span>
                         <?php if ($hasDeadline): ?>
                             <span class="catcard__status<?= !empty($entry['is_archived']) ? ' catcard__status--off' : '' ?>"><?= htmlspecialchars(t(!empty($entry['is_archived']) ? 'Архив' : 'Приём открыт'), ENT_QUOTES) ?></span>

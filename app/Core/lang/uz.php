@@ -336,4 +336,12 @@ return [
     'Адрес скопирован' => 'Manzil nusxalandi',
     'Скопировать адрес' => 'Manzilni nusxalash',
     'Показать подразделения' => 'Bo‘linmalarni ko‘rsatish',
+    'Сессия устарела, обновите страницу и попробуйте снова.' => 'Sessiya eskirgan, sahifani yangilang va qayta urinib ko‘ring.',
+    'Слишком много попыток. Пожалуйста, попробуйте позже.' => 'Juda ko‘p urinish. Iltimos, keyinroq qayta urinib ko‘ring.',
+    'Вы подписаны на дайджест новостей.' => 'Siz yangiliklar dayjestiga obuna bo‘ldingiz.',
+    'Этот адрес уже подписан на дайджест.' => 'Bu manzil allaqachon dayjestga obuna qilingan.',
+    'Укажите корректный email.' => 'To‘g‘ri email manzilini kiriting.',
+    'Подтвердите согласие на обработку персональных данных.' => 'Shaxsiy ma’lumotlarni qayta ishlashga rozilikni tasdiqlang.',
+    'Вы отписаны от дайджеста. Спасибо, что были с нами!' => 'Dayjest obunasi bekor qilindi. Biz bilan bo‘lganingiz uchun rahmat!',
+    'Ссылка отписки недействительна или уже использована.' => 'Obunani bekor qilish havolasi yaroqsiz yoki avval ishlatilgan.',
 ];

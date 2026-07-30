@@ -46,17 +46,44 @@ test('Digest: тема, тело со ссылками и обрезкой, по
         ['title' => 'Вторая', 'slug' => 'vtoraya', 'excerpt' => str_repeat('х', 300)],
     ], 'АСДР', 'https://site.uz/');
 
-    assert_true(str_contains($body, '• Первая новость'));
+    assert_true(str_contains($body, '>Первая новость</a>'));
     assert_true(str_contains($body, 'https://site.uz/news/pervaya'), 'ссылка без двойного слэша');
     assert_true(str_contains($body, '…'), 'длинный анонс обрезан');
     assert_false(str_contains($body, str_repeat('х', 250)), 'анонс не попал целиком');
 
     $footer = Digest::buildFooter('https://site.uz', 'abc123');
     assert_true(str_contains($footer, '/unsubscribe?token=abc123'));
+    assert_true(str_contains($footer, 'Отписаться'));
+
+    $uzSubject = Digest::buildSubject('ASDR', '12.07.2026', 'uz');
+    assert_same('Yangiliklar dayjesti — ASDR (12.07.2026)', $uzSubject);
+    $uzBody = Digest::buildBody([
+        ['title' => 'Yangilik', 'slug' => 'yangilik', 'excerpt' => 'Qisqacha'],
+    ], 'ASDR', 'https://site.uz', 'uz', '/uz');
+    assert_true(str_contains($uzBody, 'https://site.uz/uz/news/yangilik'));
+    assert_same('2026-W29', Digest::periodKey(new \DateTimeImmutable('2026-07-13')));
 });
 
 test('Блок subscribe зарегистрирован: дефолты и шаблон на месте', function () {
     $defaults = \App\Core\BlockRenderer::defaultsFor('subscribe');
     assert_true(isset($defaults['title'], $defaults['text'], $defaults['button_text']));
     assert_true(is_file(APP_ROOT . '/templates/blocks/subscribe.php'), 'шаблон блока существует');
+});
+
+test('Подписка: все публичные формы используют единый honeypot, источник и согласие', function () {
+    $files = [
+        'templates/blocks/subscribe.php' => 'block',
+        'templates/widgets/subscribe.php' => 'widget',
+        'app/Views/site/news_show.php' => 'news',
+        'app/Views/site/_footer.php' => 'footer',
+    ];
+    foreach ($files as $path => $source) {
+        $template = (string) file_get_contents(APP_ROOT . '/' . $path);
+        assert_contains('honeypotField()', $template, $path);
+        assert_contains('name="source" value="' . $source . '"', $template, $path);
+    }
+
+    $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Site/SubscribeController.php');
+    assert_contains("form_consent_enabled", $controller);
+    assert_contains('Locale::current()', $controller);
 });

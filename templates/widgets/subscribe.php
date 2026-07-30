@@ -17,7 +17,8 @@ $subText = !empty($data['text']) ? (string) $data['text'] : t('Eng muhim yangili
     <p class="newsdetail-subscribe__text"><?= htmlspecialchars(t($subText), ENT_QUOTES) ?></p>
     <form class="newsdetail-subscribe__form" method="post" action="<?= htmlspecialchars(Locale::url('subscribe', $lang), ENT_QUOTES) ?>">
         <?= Csrf::field() ?>
-        <input class="form-honeypot" type="text" name="website" value="" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <?= Csrf::honeypotField() ?>
+        <input type="hidden" name="source" value="widget">
         <div class="newsdetail-subscribe__row">
             <label class="visually-hidden" for="w-sub-email"><?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?></label>
             <input id="w-sub-email" type="email" name="email" required placeholder="<?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?>" autocomplete="email">

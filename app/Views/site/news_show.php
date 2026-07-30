@@ -470,7 +470,8 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                     <p class="newsdetail-subscribe__text"><?= htmlspecialchars(t('Eng muhim yangiliklar va tahliliy materiallarni pochtangizga oling.'), ENT_QUOTES) ?></p>
                     <form class="newsdetail-subscribe__form" method="post" action="<?= htmlspecialchars(Locale::url('subscribe', $lang), ENT_QUOTES) ?>">
                         <?= \App\Core\Csrf::field() ?>
-                        <input class="form-honeypot" type="text" name="website" value="" tabindex="-1" autocomplete="off" aria-hidden="true">
+                        <?= \App\Core\Csrf::honeypotField() ?>
+                        <input type="hidden" name="source" value="news">
                         <div class="newsdetail-subscribe__row">
                             <label class="visually-hidden" for="nd-sub-email"><?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?></label>
                             <input id="nd-sub-email" type="email" name="email" required placeholder="<?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?>" autocomplete="email">

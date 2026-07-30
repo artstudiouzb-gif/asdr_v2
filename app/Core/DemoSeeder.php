@@ -865,9 +865,9 @@ final class DemoSeeder
                 ['Организация международного экспертного форума', 'ekspertnyy-forum', ['tender_number' => 'T-2026-038', 'budget' => 'по итогам конкурса', 'start_date' => '2026-07-25', 'deadline' => '2026-09-15', 'summary' => 'Организационное и техническое сопровождение экспертного форума.', 'file' => '/catalog/tendery/ekspertnyy-forum']],
             ],
             'meropriyatiya' => [
-                ['Открытая презентация системы мониторинга Стратегии', 'prezentaciya-monitoringa-strategii', ['event_date' => '2026-09-12', 'event_time' => '10:00', 'location' => 'Ташкент, конференц-зал Агентства', 'summary' => 'Презентация цифровой системы мониторинга целей и показателей Стратегии «Узбекистан–2030».']],
-                ['Экспертный диалог по региональному развитию', 'dialog-regionalnoe-razvitie', ['event_date' => '2026-10-03', 'event_time' => '15:00', 'location' => 'Гибридный формат', 'summary' => 'Обсуждение новых подходов к развитию регионов и оценке качества государственных программ.']],
-                ['Форум стратегических инициатив', 'forum-strategicheskih-iniciativ', ['event_date' => '2026-11-18', 'event_time' => '09:30', 'location' => 'Ташкент', 'summary' => 'Площадка для обмена опытом между государственными органами, экспертами и международными партнёрами.']],
+                ['Открытая презентация системы мониторинга Стратегии', 'prezentaciya-monitoringa-strategii', ['event_date' => '2026-09-12', 'event_time' => '10:00', 'location' => 'Ташкент, конференц-зал Агентства', 'banner_image' => '/uploads/public/demo-strategy-meeting.jpg', 'summary' => 'Презентация цифровой системы мониторинга целей и показателей Стратегии «Узбекистан–2030».']],
+                ['Экспертный диалог по региональному развитию', 'dialog-regionalnoe-razvitie', ['event_date' => '2026-10-03', 'event_time' => '15:00', 'location' => 'Гибридный формат', 'banner_image' => '/uploads/public/demo-urban-development.jpg', 'summary' => 'Обсуждение новых подходов к развитию регионов и оценке качества государственных программ.']],
+                ['Форум стратегических инициатив', 'forum-strategicheskih-iniciativ', ['event_date' => '2026-11-18', 'event_time' => '09:30', 'location' => 'Ташкент', 'banner_image' => '/uploads/public/demo-agency-hero.jpg', 'summary' => 'Площадка для обмена опытом между государственными органами, экспертами и международными партнёрами.']],
             ],
         ];
         $translations = [

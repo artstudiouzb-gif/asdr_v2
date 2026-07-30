@@ -81,6 +81,26 @@ $entryUrl = static fn (array $e): string => Locale::url('catalog/' . $type['slug
                 <?php foreach ($byDate as $date => $events): ?>
                     <?php foreach ($events as $event): ?>
                         <li class="gcal-list__item">
+                            <?php
+                            $calendarBanner = trim((string) ($event['data']['banner_image'] ?? ''));
+                            if ($calendarBanner !== '' && !\App\Core\UrlGuard::isSafeMedia($calendarBanner)) {
+                                $calendarBanner = '';
+                            }
+                            ?>
+                            <?php if ($calendarBanner !== ''): ?>
+                                <a class="gcal-list__media" href="<?= htmlspecialchars($entryUrl($event), ENT_QUOTES) ?>" tabindex="-1" aria-hidden="true">
+                                    <?= \App\Core\Media::picture(
+                                        $calendarBanner,
+                                        '',
+                                        null,
+                                        null,
+                                        'gcal-list__image',
+                                        true,
+                                        '96px'
+                                    ) ?>
+                                </a>
+                            <?php endif; ?>
+                            <div class="gcal-list__body">
                             <time datetime="<?= htmlspecialchars((string) $date, ENT_QUOTES) ?>" class="gcal-list__date"><?= htmlspecialchars(date('d.m.Y', (int) strtotime((string) $date)), ENT_QUOTES) ?></time>
                             <?php if (!empty($event['data']['event_time'])): ?>
                                 <span class="gcal-list__time"><?= htmlspecialchars((string) $event['data']['event_time'], ENT_QUOTES) ?></span>
@@ -89,6 +109,7 @@ $entryUrl = static fn (array $e): string => Locale::url('catalog/' . $type['slug
                             <?php if (!empty($event['data']['location'])): ?>
                                 <span class="gcal-list__loc"><?= htmlspecialchars((string) $event['data']['location'], ENT_QUOTES) ?></span>
                             <?php endif; ?>
+                            </div>
                         </li>
                     <?php endforeach; ?>
                 <?php endforeach; ?>

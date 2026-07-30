@@ -336,4 +336,12 @@ return [
     'Адрес скопирован' => 'Address copied',
     'Скопировать адрес' => 'Copy address',
     'Показать подразделения' => 'Show departments',
+    'Сессия устарела, обновите страницу и попробуйте снова.' => 'Your session expired. Refresh the page and try again.',
+    'Слишком много попыток. Пожалуйста, попробуйте позже.' => 'Too many attempts. Please try again later.',
+    'Вы подписаны на дайджест новостей.' => 'You are subscribed to the news digest.',
+    'Этот адрес уже подписан на дайджест.' => 'This address is already subscribed to the digest.',
+    'Укажите корректный email.' => 'Enter a valid email address.',
+    'Подтвердите согласие на обработку персональных данных.' => 'Confirm your consent to personal data processing.',
+    'Вы отписаны от дайджеста. Спасибо, что были с нами!' => 'You have unsubscribed from the digest. Thank you for being with us!',
+    'Ссылка отписки недействительна или уже использована.' => 'The unsubscribe link is invalid or has already been used.',
 ];

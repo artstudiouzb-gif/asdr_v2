@@ -9,6 +9,14 @@ use App\Core\Locale;
 
 $metaTitle = (string) $entry['title'];
 $metaDescription = '';
+$isEvent = (string) ($type['slug'] ?? '') === 'meropriyatiya';
+$eventBanner = $isEvent ? trim((string) ($entry['data']['banner_image'] ?? '')) : '';
+if ($eventBanner !== '' && !\App\Core\UrlGuard::isSafeMedia($eventBanner)) {
+    $eventBanner = '';
+}
+if ($eventBanner !== '') {
+    $ogImage = $eventBanner;
+}
 // Мета-описание из первого текстового поля, если есть.
 foreach ($fields as $f) {
     if (in_array($f['field_type'], ['textarea', 'text'], true)) {
@@ -31,8 +39,14 @@ require __DIR__ . '/_crumbs.php';
 // Длинные поля (текст/изображение) — в основную колонку, короткие и файлы —
 // в боковую карточку «Сведения».
 $mainTypes = ['textarea', 'image'];
-$mainFields = array_values(array_filter($fields, static fn ($f) => in_array($f['field_type'], $mainTypes, true)));
-$sideFields = array_values(array_filter($fields, static fn ($f) => !in_array($f['field_type'], $mainTypes, true)));
+$mainFields = array_values(array_filter(
+    $fields,
+    static fn ($f) => in_array($f['field_type'], $mainTypes, true) && $f['name'] !== 'banner_image'
+));
+$sideFields = array_values(array_filter(
+    $fields,
+    static fn ($f) => !in_array($f['field_type'], $mainTypes, true) && $f['name'] !== 'banner_image'
+));
 ?>
 <article class="catdetail">
     <header class="catdetail__head">
@@ -40,6 +54,21 @@ $sideFields = array_values(array_filter($fields, static fn ($f) => !in_array($f[
         <h1 class="catdetail__title"><?= htmlspecialchars((string) $entry['title'], ENT_QUOTES) ?></h1>
         <time class="catdetail__date"><?= htmlspecialchars(t('Опубликовано'), ENT_QUOTES) ?> <?= htmlspecialchars(date('d.m.Y', strtotime((string) $entry['created_at'])), ENT_QUOTES) ?></time>
     </header>
+
+    <?php if ($eventBanner !== ''): ?>
+        <figure class="catdetail__event-banner">
+            <?= \App\Core\Media::picture(
+                $eventBanner,
+                (string) $entry['title'],
+                null,
+                null,
+                'catdetail__event-image',
+                false,
+                '(max-width: 900px) 100vw, 1200px',
+                true
+            ) ?>
+        </figure>
+    <?php endif; ?>
 
     <div class="catdetail__grid">
         <div class="catdetail__body">
@@ -89,13 +118,22 @@ $sideFields = array_values(array_filter($fields, static fn ($f) => !in_array($f[
 <?php
 $schemaBase = \App\Core\AppUrl::base();
 $schemaUrl = static fn (string $p): string => $schemaBase . \App\Core\Locale::url($p);
-if ((string) $type['slug'] === 'meropriyatiya') {
+if ($isEvent) {
+    $eventStart = (string) ($entry['data']['event_date'] ?? '');
+    if ($eventStart !== '' && !empty($entry['data']['event_time'])) {
+        $eventStart .= 'T' . (string) $entry['data']['event_time'];
+    }
+    $schemaImage = $eventBanner;
+    if ($schemaImage !== '' && !preg_match('#^https?://#i', $schemaImage)) {
+        $schemaImage = $schemaBase . '/' . ltrim($schemaImage, '/');
+    }
     echo \App\Core\SchemaOrg::render(\App\Core\SchemaOrg::event(
         (string) $entry['title'],
         $schemaUrl('catalog/' . $type['slug'] . '/' . $entry['slug']),
-        (string) ($entry['data']['event_date'] ?? ''),
+        $eventStart,
         (string) ($entry['data']['location'] ?? ''),
-        strip_tags((string) ($entry['data']['summary'] ?? ''))
+        strip_tags((string) ($entry['data']['summary'] ?? '')),
+        $schemaImage
     )), "\n";
 }
 ?>

@@ -462,21 +462,47 @@ CREATE TABLE IF NOT EXISTS widgets (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
+-- Подписчики email-дайджеста новостей
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS subscribers (
+    id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    email           VARCHAR(190) NOT NULL,
+    token           VARCHAR(64) NOT NULL,
+    status          ENUM('active', 'unsubscribed') NOT NULL DEFAULT 'active',
+    lang            VARCHAR(8) NOT NULL DEFAULT 'ru',
+    source          VARCHAR(32) NOT NULL DEFAULT 'website',
+    consent_at      DATETIME NULL,
+    unsubscribed_at DATETIME NULL,
+    last_digest_at  DATETIME NULL,
+    created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_subscribers_email (email),
+    UNIQUE KEY uniq_subscribers_token (token),
+    KEY idx_subscribers_status_lang (status, lang, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
 -- Очередь исходящих писем (обрабатывается CLI-воркером по Cron)
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS mail_queue (
     id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     to_email        VARCHAR(190) NOT NULL,
     to_name         VARCHAR(190) NULL,
+    subscriber_id   INT UNSIGNED NULL,
+    purpose         VARCHAR(30) NOT NULL DEFAULT 'transactional',
+    dedupe_key      VARCHAR(190) NULL,
     subject         VARCHAR(255) NOT NULL,
     body            LONGTEXT NOT NULL,
-    status          ENUM('pending', 'sent', 'failed') NOT NULL DEFAULT 'pending',
+    status          ENUM('pending', 'sent', 'failed', 'cancelled') NOT NULL DEFAULT 'pending',
     attempts        INT UNSIGNED NOT NULL DEFAULT 0,
     locked_until    DATETIME NULL,
     last_error      VARCHAR(500) NULL,
     created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     sent_at         DATETIME NULL,
-    KEY idx_mail_queue_status (status, created_at)
+    KEY idx_mail_queue_status (status, created_at),
+    KEY idx_mail_queue_subscriber (subscriber_id, purpose, status),
+    UNIQUE KEY uq_mail_queue_dedupe (dedupe_key),
+    CONSTRAINT fk_mail_queue_subscriber FOREIGN KEY (subscriber_id) REFERENCES subscribers(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
@@ -691,18 +717,6 @@ CREATE TABLE IF NOT EXISTS video_translations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
--- Подписчики email-дайджеста новостей
--- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS subscribers (
-    id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    email      VARCHAR(190) NOT NULL,
-    token      VARCHAR(64) NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uniq_subscribers_email (email),
-    UNIQUE KEY uniq_subscribers_token (token)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ---------------------------------------------------------------------------
 -- 404-трекер: кандидаты в 301-редиректы (страница «Редиректы»)
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS not_found_log (
@@ -812,7 +826,8 @@ JOIN (
     SELECT 'meropriyatiya' AS slug, 'event_date' AS name, 'Дата проведения' AS label, 'date' AS field_type, 1 AS required, 0 AS sort_order
     UNION ALL SELECT 'meropriyatiya', 'event_time', 'Время',            'text',     0, 1
     UNION ALL SELECT 'meropriyatiya', 'location',   'Место проведения', 'text',     0, 2
-    UNION ALL SELECT 'meropriyatiya', 'summary',    'Описание',         'textarea', 0, 3
+    UNION ALL SELECT 'meropriyatiya', 'banner_image','Баннер мероприятия','image',   0, 3
+    UNION ALL SELECT 'meropriyatiya', 'summary',    'Описание',         'textarea', 0, 4
 ) f ON f.slug = t.slug
 WHERE NOT EXISTS (SELECT 1 FROM content_type_fields x WHERE x.type_id = t.id);
 
@@ -1015,7 +1030,9 @@ INSERT INTO migrations (filename) VALUES
     ('2026_07_29_page_hierarchy.sql'),
     ('2026_07_29_tabler_icon_keys.sql'),
     ('2026_07_29_translation_group_integrity.sql'),
-    ('2026_07_30_database_integrity.sql')
+    ('2026_07_30_database_integrity.sql'),
+    ('2026_07_30_digest_subscriber_lifecycle.sql'),
+    ('2026_07_30_event_banner.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (
