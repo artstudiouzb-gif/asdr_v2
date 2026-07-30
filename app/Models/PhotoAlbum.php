@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Core\Database;
 use App\Core\Slug;
+use App\Core\Logger;
 
 /**
  * Фотоальбомы: галереи изображений с обложкой. Изображения хранятся ссылками
@@ -128,7 +129,9 @@ final class PhotoAlbum
                     $map[$id][] = $default;
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('PhotoAlbum::availableLangsForIds: не удалось прочитать базовые записи', $e);
+        }
 
         try {
             $stmtTrans = Database::pdo()->prepare(
@@ -144,7 +147,9 @@ final class PhotoAlbum
                     $map[$id][] = $lang;
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('PhotoAlbum::availableLangsForIds: не удалось прочитать photo_album_translations', $e);
+        }
 
         foreach ($ids as $id) {
             if (empty($map[$id])) {

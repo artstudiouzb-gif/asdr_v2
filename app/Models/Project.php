@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Core\ConcurrencyException;
 use App\Core\Database;
+use App\Core\Logger;
 
 final class Project
 {
@@ -528,7 +529,9 @@ final class Project
                     $map[$refId][$lang] = $targetId;
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('Project::availableLangsForIds: не удалось прочитать группы переводов', $e);
+        }
 
         try {
             $stmtLegacy = $pdo->prepare(
@@ -544,7 +547,9 @@ final class Project
                     $map[$id][$lang] = $id;
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('Project::availableLangsForIds: не удалось прочитать project_translations', $e);
+        }
 
         foreach ($ids as $id) {
             if (empty($map[$id])) {

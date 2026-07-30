@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Core\Database;
 use App\Core\Slug;
+use App\Core\Logger;
 
 /**
  * Видеозаписи: обложка + ссылка на видео (YouTube/внешнее). Блок «Медиа» на
@@ -99,7 +100,9 @@ final class Video
                     $map[$id][] = $default;
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('Video::availableLangsForIds: не удалось прочитать базовые записи', $e);
+        }
 
         try {
             $stmtTrans = Database::pdo()->prepare(
@@ -115,7 +118,9 @@ final class Video
                     $map[$id][] = $lang;
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('Video::availableLangsForIds: не удалось прочитать video_translations', $e);
+        }
 
         foreach ($ids as $id) {
             if (empty($map[$id])) {

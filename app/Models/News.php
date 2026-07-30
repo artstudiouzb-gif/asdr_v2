@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Core\ConcurrencyException;
 use App\Core\Database;
 use App\Core\Video;
+use App\Core\Logger;
 
 final class News
 {
@@ -685,7 +686,9 @@ final class News
                     $map[$refId][$lang] = $targetId;
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('News::availableLangsForIds: не удалось прочитать группы переводов', $e);
+        }
 
         try {
             $stmtLegacy = $pdo->prepare(
@@ -701,7 +704,9 @@ final class News
                     $map[$id][$lang] = $id;
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('News::availableLangsForIds: не удалось прочитать news_translations', $e);
+        }
 
         foreach ($ids as $id) {
             if (empty($map[$id])) {

@@ -34,7 +34,13 @@ $email = Setting::get('contact_email', '');
 $address = Setting::get('contact_address', '');
 $footerLang = \App\Core\Locale::current();
 $footerMenu = [];
-try { $footerMenu = \App\Models\MenuItem::activeForLang($footerLang); } catch (\Throwable $e) {}
+try {
+    $footerMenu = \App\Models\MenuItem::activeForLang($footerLang);
+} catch (\Throwable $e) {
+    // Подвал не должен ронять страницу из-за меню, но исчезнувшая навигация
+    // без единой записи в логе ничем не объясняется.
+    \App\Core\Logger::swallowed('Подвал: не удалось загрузить меню для языка ' . $footerLang, $e);
+}
 $footerSocial = $hcfg['social_buttons'] ?? [];
 $footerBottom = \App\Core\FooterConfig::renderBottom($footerCfg['bottom'], $siteName);
 

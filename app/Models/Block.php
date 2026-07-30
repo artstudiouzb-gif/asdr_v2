@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Core\ConcurrencyException;
 use App\Core\Database;
+use App\Core\Logger;
 
 final class Block
 {
@@ -84,7 +85,9 @@ final class Block
 
                 return self::forPage($groupId, Language::defaultCode(), true, true);
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('Block::forPageLocalized: фолбэк на страницу группы переводов не сработал', $e);
+        }
 
         return [];
     }

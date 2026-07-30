@@ -36,7 +36,8 @@ if ($dbOn) {
         if (mb_strlen($guess) >= 2 && class_exists(Search::class)) {
             $suggest = array_slice(Search::site($guess, 6), 0, 5);
         }
-    } catch (\Throwable) {
+    } catch (\Throwable $e) {
+        \App\Core\Logger::swallowed('Страница 404: не удалось подобрать похожие материалы', $e);
     }
     try {
         if (class_exists(\App\Models\News::class)) {
@@ -44,7 +45,8 @@ if ($dbOn) {
                 $latest[] = ['title' => (string) $n['title'], 'url' => Locale::url('news/' . $n['slug'], $lang)];
             }
         }
-    } catch (\Throwable) {
+    } catch (\Throwable $e) {
+        \App\Core\Logger::swallowed('Страница 404: не удалось загрузить последние новости', $e);
     }
     try {
         if (class_exists(\App\Models\MenuItem::class)) {
@@ -58,7 +60,8 @@ if ($dbOn) {
                 }
             }
         }
-    } catch (\Throwable) {
+    } catch (\Throwable $e) {
+        \App\Core\Logger::swallowed('Страница 404: не удалось загрузить разделы меню', $e);
     }
 }
 

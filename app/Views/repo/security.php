@@ -37,7 +37,8 @@ require __DIR__ . '/layout/top.php';
         $qrSvg = '';
         try {
             $qrSvg = QrCode::svg((string) $otpauthUri, 4);
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            \App\Core\Logger::swallowed('Портал репозитория: не удалось построить QR-код для двухфакторной настройки', $e);
         }
         ?>
         <div class="repo-qr">

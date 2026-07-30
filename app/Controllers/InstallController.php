@@ -292,7 +292,9 @@ final class InstallController
                     'email' => $email,
                     'ip' => $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
                 ]);
-            } catch (\Throwable) {}
+            } catch (\Throwable $e) {
+                \App\Core\Logger::swallowed('InstallController: не удалось записать в журнал завершение установки', $e);
+            }
 
             unset($_SESSION['install_db'], $_SESSION['install_site']);
 

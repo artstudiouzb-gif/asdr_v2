@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use App\Core\Logger;
 
 final class TeamMember
 {
@@ -111,7 +112,9 @@ final class TeamMember
                     $map[$id][] = $default;
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('TeamMember::availableLangsForIds: не удалось прочитать базовые записи', $e);
+        }
 
         try {
             $stmtTrans = Database::pdo()->prepare(
@@ -127,7 +130,9 @@ final class TeamMember
                     $map[$id][] = $lang;
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('TeamMember::availableLangsForIds: не удалось прочитать team_member_translations', $e);
+        }
 
         foreach ($ids as $id) {
             if (empty($map[$id])) {

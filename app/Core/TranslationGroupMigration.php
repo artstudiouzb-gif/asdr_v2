@@ -97,7 +97,9 @@ final class TranslationGroupMigration
                     ]);
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('TranslationGroupMigration: перенос news_translations в отдельные записи не завершён', $e);
+        }
 
         // 3. Миграция page_translations в независимые строки таблицы pages
         try {
@@ -145,7 +147,9 @@ final class TranslationGroupMigration
                     ]);
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('TranslationGroupMigration: перенос page_translations в отдельные записи не завершён', $e);
+        }
 
         // 4. Миграция project_translations в независимые строки таблицы projects
         try {
@@ -191,7 +195,9 @@ final class TranslationGroupMigration
                     ]);
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('TranslationGroupMigration: перенос project_translations в отдельные записи не завершён', $e);
+        }
 
         self::$migrated = true;
     }

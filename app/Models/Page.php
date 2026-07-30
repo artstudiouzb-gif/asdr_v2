@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Core\Database;
 use App\Core\ConcurrencyException;
+use App\Core\Logger;
 
 final class Page
 {
@@ -707,7 +708,9 @@ final class Page
                     $map[$refId][$lang] = $targetId;
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('Page::availableLangsForIds: не удалось прочитать группы переводов', $e);
+        }
 
         try {
             $stmtLegacy = $pdo->prepare(
@@ -724,7 +727,9 @@ final class Page
                     $map[$id][$lang] = $id;
                 }
             }
-        } catch (\Throwable) {}
+        } catch (\Throwable $e) {
+            Logger::swallowed('Page::availableLangsForIds: не удалось прочитать page_translations', $e);
+        }
 
         foreach ($ids as $id) {
             if (empty($map[$id])) {
