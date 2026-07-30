@@ -4990,6 +4990,26 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .sit
     color: #9fe3e4 !important;
 }
 
+/* Панель «Ещё» имеет собственный непрозрачный фон, поэтому её ссылки
+   не должны наследовать белый текст основной навигации поверх Hero. */
+body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__link,
+body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__item > .site-menu__link {
+    color: var(--submenu-color, var(--gov-title)) !important;
+}
+body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__link:hover,
+body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__link:focus-visible,
+body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__link.is-active,
+body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__link[aria-current="page"],
+body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__item:hover > .site-menu__link,
+body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__item:focus-within > .site-menu__link,
+body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__item.is-open > .site-menu__link {
+    color: var(--submenu-hover, var(--menu-hover-color, var(--gov-teal))) !important;
+}
+body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__item > .site-menu__toggle {
+    color: var(--submenu-color, var(--gov-title)) !important;
+    background: transparent !important;
+}
+
 .site-submenu {
     background: var(--submenu-bg, var(--gov-surface));
     border-radius: var(--submenu-radius, 10px);

@@ -51,3 +51,20 @@ test('Прозрачная шапка использует компактный 
     assert_contains('background: transparent;', $css);
     assert_contains('box-shadow: none;', $css);
 });
+
+test('Ссылки панели «Ещё» контрастны на прозрачной шапке', function (): void {
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+
+    assert_contains(
+        'body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__link,',
+        $css
+    );
+    assert_contains(
+        'color: var(--submenu-color, var(--gov-title)) !important;',
+        $css
+    );
+    assert_contains(
+        'color: var(--submenu-hover, var(--menu-hover-color, var(--gov-teal))) !important;',
+        $css
+    );
+});
