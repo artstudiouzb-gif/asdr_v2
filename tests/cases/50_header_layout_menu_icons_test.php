@@ -27,6 +27,11 @@ test('HeaderConfig: макет валидируется, мусор → stacked'
     foreach (['stacked', 'inline', 'centered', 'drawer'] as $l) {
         assert_same($l, HeaderConfig::normalize(['layout' => $l])['layout']);
     }
+
+    foreach (['left', 'center', 'right'] as $alignment) {
+        assert_same($alignment, HeaderConfig::normalize(['menu_position' => $alignment])['menu_position']);
+    }
+    assert_same('center', HeaderConfig::normalize(['menu_position' => 'unknown'])['menu_position']);
 });
 
 test('HeaderConfig: конструктор зон — мусор отброшен, дубли уникальны, разделитель повторяем', function () {
@@ -115,6 +120,7 @@ test('Дизайн шапки показывает настройки gap, divid
     $view = file_get_contents(dirname(__DIR__, 2) . '/app/Views/admin/header/index.php');
     assert_true(is_string($view));
     foreach ([
+        'menu_position',
         'styles_nav_gap',
         'styles_nav_overflow',
         'styles_nav_item_dividers',
@@ -125,6 +131,57 @@ test('Дизайн шапки показывает настройки gap, divid
     ] as $field) {
         assert_contains($field, $view);
     }
+});
+
+test('Выравнивание меню применяется к меню в любой desktop-зоне', function (): void {
+    $template = file_get_contents(dirname(__DIR__, 2) . '/app/Views/site/_header.php');
+    $css = file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/frontend.css');
+    assert_true(is_string($template) && is_string($css));
+
+    assert_contains("' site-menu--align-' . \$menuAlignment", $template);
+    assert_contains('$navAlign = $menuAlignment', $template);
+    foreach (['left', 'center', 'right'] as $alignment) {
+        assert_contains('.site-header .site-menu.site-menu--align-' . $alignment, $css);
+        assert_contains('.site-topbar .site-menu.site-menu--align-' . $alignment, $css);
+    }
+});
+
+test('Форма шапки не теряет настройки, которые сохраняет контроллер', function (): void {
+    $view = (string) file_get_contents(APP_ROOT . '/app/Views/admin/header/index.php');
+
+    foreach ([
+        'name="layout"',
+        "'elements_mobile'",
+        'name="topbar_style"',
+        'name="topbar_mobile"',
+        'name="middlebar_bg"',
+        'name="middlebar_bg_use"',
+        'name="bottombar_bg"',
+        'name="bottombar_bg_use"',
+        'name="header_shadow"',
+        'name="header_shadow_size"',
+        'name="styles_nav_pill_bg"',
+        'name="styles_nav_pill_bg_use"',
+        'name="styles_border_color"',
+        'name="styles_border_color_use"',
+        'name="styles_border_width"',
+        'name="social[',
+    ] as $field) {
+        assert_contains($field, $view, "поле {$field} присутствует в форме");
+    }
+});
+
+test('Конструктор шапки разделяет desktop и mobile и доступен с клавиатуры', function (): void {
+    $view = (string) file_get_contents(APP_ROOT . '/app/Views/admin/header/index.php');
+    $adminScript = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin.js');
+
+    assert_contains('data-hdr-tab="desktop"', $view);
+    assert_contains('data-hdr-tab="mobile"', $view);
+    assert_contains('data-hdr-panel="mobile"', $view);
+    assert_contains('role="tablist"', $view);
+    assert_contains('aria-selected="true"', $view);
+    assert_contains("event.key !== 'ArrowLeft'", $view);
+    assert_contains("t.setAttribute('aria-selected'", $adminScript);
 });
 
 test('HeaderConfig ограничивает опасные размеры меню', function (): void {

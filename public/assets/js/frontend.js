@@ -385,14 +385,18 @@
             var outsideBoundary = menuRect.left < boundaryRect.left - 1
                 || menuRect.right > boundaryRect.right + 1
                 || menuRect.width > boundaryRect.width + 1;
+            var itemOutsideMenu = items.some(function (item) {
+                var itemRect = item.getBoundingClientRect();
+                return itemRect.left < menuRect.left - 1 || itemRect.right > menuRect.right + 1;
+            });
             if (items.length < 2) {
-                return outsideBoundary || menu.scrollWidth > menu.clientWidth + 1;
+                return outsideBoundary || itemOutsideMenu || menu.scrollWidth > menu.clientWidth + 1;
             }
             var firstTop = items[0].offsetTop;
             var wrapped = items.some(function (item) {
                 return Math.abs(item.offsetTop - firstTop) > 2;
             });
-            return outsideBoundary || wrapped || menu.scrollWidth > menu.clientWidth + 1;
+            return outsideBoundary || itemOutsideMenu || wrapped || menu.scrollWidth > menu.clientWidth + 1;
         };
         var fitMenu = function (header, menu) {
             var parts = menuParts(menu);

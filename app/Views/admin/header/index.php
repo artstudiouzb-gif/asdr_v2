@@ -43,7 +43,8 @@ $renderZones = function (array $placed, string $inputName) use ($renderChip): st
         <?php foreach (['left' => 'Слева', 'center' => 'Центр', 'right' => 'Справа'] as $zone => $zoneLabel): ?>
             <div class="hb-zone">
                 <div class="hb-zone__label"><?= $zoneLabel ?></div>
-                <div class="hb-zone__drop hdr-builder__dropzone" data-hdr-zone="<?= $zone ?>">
+                <div class="hb-zone__drop hdr-builder__dropzone" data-hdr-zone="<?= $zone ?>"
+                     role="group" tabindex="0" aria-label="Зона: <?= $zoneLabel ?>">
                     <?php foreach ($placed[$zone] ?? [] as $type): ?>
                         <?= $renderChip($type) ?>
                     <?php endforeach; ?>
@@ -70,10 +71,10 @@ $heightSelect = function (string $name, string $current): string {
     <div class="hdr-workspace-header">
         <div>
             <h2 class="hdr-workspace-header__title">
-                <?= AdminUi::icon('sliders', 24) ?> Центр управления шапкой сайта Pro Max
+                <?= AdminUi::icon('sliders', 24) ?> Дизайн и структура шапки
             </h2>
             <p class="hdr-workspace-header__desc">
-                Настройте геометрию, Парящее стекло (Floating Glass), неоновые индикаторы активных ссылок и зоны элементов.
+                Настройте структуру, меню, элементы, цвета и поведение шапки на разных устройствах.
             </p>
         </div>
         <div>
@@ -86,8 +87,8 @@ $heightSelect = function (string $name, string $current): string {
     <!-- Live Header Preview Bar -->
     <div class="hdr-live-preview">
         <div class="hdr-live-preview__head">
-            <span><?= AdminUi::icon('eye', 16) ?> Интерактивный предпросмотр структуры шапки</span>
-            <span class="u-inline-2921120983">Изменения отображаются мгновенно</span>
+            <span><?= AdminUi::icon('eye', 16) ?> Схематичный предпросмотр шапки</span>
+            <span class="u-inline-2921120983">Основные параметры обновляются без сохранения</span>
         </div>
         <div class="hdr-live-preview__box">
             <div class="hdr-live-preview__top" id="prevTopbar">
@@ -97,34 +98,40 @@ $heightSelect = function (string $name, string $current): string {
             <div class="hdr-live-preview__main" id="prevMiddlebar">
                 <span class="hdr-live-preview__logo">ЛОГОТИП САЙТА</span>
                 <div class="hdr-live-preview__nav">
-                    <a href="#" class="hdr-live-preview__nav-item is-active"><?= htmlspecialchars(t('Главная'), ENT_QUOTES) ?></a>
-                    <a href="#" class="hdr-live-preview__nav-item">Новости</a>
-                    <a href="#" class="hdr-live-preview__nav-item">Проекты</a>
-                    <a href="#" class="hdr-live-preview__nav-item">Контакты</a>
+                    <span class="hdr-live-preview__nav-item is-active"><?= htmlspecialchars(t('Главная'), ENT_QUOTES) ?></span>
+                    <span class="hdr-live-preview__nav-item">Новости</span>
+                    <span class="hdr-live-preview__nav-item">Проекты</span>
+                    <span class="hdr-live-preview__nav-item">Контакты</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modular Tab Bar -->
-    <div class="hdr-tabs-nav" role="tablist">
-        <button type="button" class="hdr-tab-btn is-active" data-hdr-tab-target="tab-hdr-arch">
-            Геометрия и Стекло
+    <!-- Навигация по разделам конструктора -->
+    <div class="hdr-tabs-nav" role="tablist" aria-label="Разделы настройки шапки">
+        <button type="button" class="hdr-tab-btn is-active" id="hdr-tab-builder" role="tab"
+                aria-selected="true" aria-controls="tab-hdr-builder" data-hdr-tab-target="tab-hdr-builder">
+            Структура и зоны
         </button>
-        <button type="button" class="hdr-tab-btn" data-hdr-tab-target="tab-hdr-menu">
-            Дизайн Меню
+        <button type="button" class="hdr-tab-btn" id="hdr-tab-menu" role="tab"
+                aria-selected="false" aria-controls="tab-hdr-menu" data-hdr-tab-target="tab-hdr-menu">
+            Главное меню
         </button>
-        <button type="button" class="hdr-tab-btn" data-hdr-tab-target="tab-hdr-builder">
-            Конструктор Зон
+        <button type="button" class="hdr-tab-btn" id="hdr-tab-elements" role="tab"
+                aria-selected="false" aria-controls="tab-hdr-elements" data-hdr-tab-target="tab-hdr-elements">
+            Элементы
         </button>
-        <button type="button" class="hdr-tab-btn" data-hdr-tab-target="tab-hdr-elements">
-            Элементы и Кнопки
+        <button type="button" class="hdr-tab-btn" id="hdr-tab-logos" role="tab"
+                aria-selected="false" aria-controls="tab-hdr-logos" data-hdr-tab-target="tab-hdr-logos">
+            Логотипы
         </button>
-        <button type="button" class="hdr-tab-btn" data-hdr-tab-target="tab-hdr-logos">
-            Логотипы и Брендинг
+        <button type="button" class="hdr-tab-btn" id="hdr-tab-styles" role="tab"
+                aria-selected="false" aria-controls="tab-hdr-styles" data-hdr-tab-target="tab-hdr-styles">
+            Цвета и контакты
         </button>
-        <button type="button" class="hdr-tab-btn" data-hdr-tab-target="tab-hdr-styles">
-            Цвета и Стили
+        <button type="button" class="hdr-tab-btn" id="hdr-tab-arch" role="tab"
+                aria-selected="false" aria-controls="tab-hdr-arch" data-hdr-tab-target="tab-hdr-arch">
+            Поведение и эффекты
         </button>
     </div>
 
@@ -132,11 +139,11 @@ $heightSelect = function (string $name, string $current): string {
         <?= Csrf::field() ?>
 
         <!-- MODULE 1: ARCHITECTURE & GLASSMORPHISM -->
-        <div class="admin-tab-content is-active" id="tab-hdr-arch">
+        <div class="admin-tab-content" id="tab-hdr-arch" role="tabpanel" aria-labelledby="hdr-tab-arch">
             <!-- Container Mode Card Selector -->
             <div class="header-builder__group form-card u-inline-8cddc29a69">
                 <h3 class="u-inline-0e0c39e056">
-                    1. Форма и Режим Контейнера Шапки (Container Mode)
+                    1. Ширина и форма контейнера
                 </h3>
                 <p class="form-hint u-inline-291b7bbb01">Выберите архитектуру отображения шапки относительно краев экрана.</p>
 
@@ -144,28 +151,28 @@ $heightSelect = function (string $name, string $current): string {
                     <?php $cmode = $config['container_mode'] ?? 'full'; ?>
                     <label class="hdr-select-card <?= $cmode === 'full' ? 'is-selected' : '' ?>">
                         <input type="radio" name="container_mode" value="full" <?= $cmode === 'full' ? 'checked' : '' ?>>
-                        <span class="hdr-select-card__title">Обычная (Full Width)</span>
+                        <span class="hdr-select-card__title">На всю ширину</span>
                         <span class="hdr-select-card__desc">Шапка и фоны растягиваются на 100% ширины экрана. Элементы выровнены по сетке.</span>
                     </label>
 
                     <label class="hdr-select-card <?= $cmode === 'container' ? 'is-selected' : '' ?>">
                         <input type="radio" name="container_mode" value="container" <?= $cmode === 'container' ? 'checked' : '' ?>>
-                        <span class="hdr-select-card__title">По ширине контента (Boxed)</span>
+                        <span class="hdr-select-card__title">По ширине контента</span>
                         <span class="hdr-select-card__desc">Вся шапка с фоном ограничена рамкой контента (1280px) и центрируется на странице.</span>
                     </label>
 
                     <label class="hdr-select-card <?= $cmode === 'floating' ? 'is-selected' : '' ?>">
                         <input type="radio" name="container_mode" value="floating" <?= $cmode === 'floating' ? 'checked' : '' ?>>
-                        <span class="hdr-select-card__title">Парящее стекло (Floating Glass)</span>
+                        <span class="hdr-select-card__title">Парящая шапка</span>
                         <span class="hdr-select-card__desc">Парящая стеклянная капсула над контентом с размытием фона и эффектом Glassmorphism.</span>
                     </label>
                 </div>
             </div>
 
             <!-- Glassmorphic Engine Controls -->
-            <div class="header-builder__group form-card u-inline-108a780011">
+            <div class="header-builder__group form-card u-inline-108a780011" data-hdr-container-only="floating">
                 <h3 class="u-inline-39a35c5e86">
-                    <?= AdminUi::icon('sliders', 20, 'text-primary') ?> 2. Движок парящего стекла (Glassmorphism Engine)
+                    <?= AdminUi::icon('sliders', 20, 'text-primary') ?> 2. Эффект парящей шапки
                 </h3>
                 <p class="form-hint u-inline-291b7bbb01">Настройте прозрачность, скругление, матовость и направление градиента парящей капсулы.</p>
 
@@ -226,7 +233,7 @@ $heightSelect = function (string $name, string $current): string {
             <!-- Scroll Behavior Switches -->
             <div class="header-builder__group form-card u-inline-d40eaf045d">
                 <h3 class="u-inline-0e0c39e056">
-                    3. Поведение при прокрутке и Прозрачность
+                    3. Поведение при прокрутке
                 </h3>
                 <div class="hb-behavior__options u-inline-9374e84210">
                     <label class="hb-behavior-card">
@@ -255,13 +262,30 @@ $heightSelect = function (string $name, string $current): string {
                         </span>
                         <span class="hb-behavior-card__hint">Накладывается поверх первого экрана/слайдера на главной странице.</span>
                     </label>
+
+                    <label class="hb-behavior-card">
+                        <span class="hb-switch">
+                            <input type="checkbox" name="header_shadow" value="1" <?= !empty($config['shadow']['enabled']) ? 'checked' : '' ?>>
+                            <span class="hb-switch__track"></span>
+                            <span class="hb-behavior-card__title">Тень под шапкой</span>
+                        </span>
+                        <span class="hb-behavior-card__hint">Отделяет шапку от контента на светлом фоне.</span>
+                    </label>
+                </div>
+
+                <div class="hb-inline-grid">
+                    <div class="form-field">
+                        <label for="header_shadow_size">Мягкость тени, px</label>
+                        <input id="header_shadow_size" name="header_shadow_size" type="number" min="2" max="60" step="1"
+                               value="<?= (int) ($config['shadow']['size'] ?? 14) ?>">
+                    </div>
                 </div>
             </div>
 
             <!-- Element Spacing Density Control -->
             <div class="header-builder__group form-card u-inline-d40eaf045d">
                 <h3 class="u-inline-39a35c5e86">
-                    <?= AdminUi::icon('maximize', 20, 'text-primary') ?> 4. Плотность и расстояния между элементами (Element Spacing)
+                    <?= AdminUi::icon('maximize', 20, 'text-primary') ?> 4. Расстояния между элементами
                 </h3>
                 <p class="form-hint u-inline-291b7bbb01">Управляйте отступами между логотипом, элементами, поиском и кнопками в зонах шапки.</p>
 
@@ -282,15 +306,25 @@ $heightSelect = function (string $name, string $current): string {
         </div>
 
         <!-- MODULE 2: MENU & INDICATORS -->
-        <div class="admin-tab-content" id="tab-hdr-menu">
+        <div class="admin-tab-content" id="tab-hdr-menu" role="tabpanel" aria-labelledby="hdr-tab-menu">
             <div class="header-builder__group form-card u-inline-8cddc29a69">
                 <h3 class="u-inline-0e0c39e056">
-                    Стили подсветки и Адаптивность Главного Меню
+                    Вид и адаптивность главного меню
                 </h3>
                 <p class="form-hint u-inline-291b7bbb01">Выберите стиль индикации активного раздела, иконок и разделителей.</p>
 
                 <?php $st = $config['styles'] ?? []; ?>
                 <div class="hb-inline-grid u-inline-8a359a76eb">
+                    <div class="form-field">
+                        <label for="menu_position">Выравнивание пунктов меню</label>
+                        <select id="menu_position" name="menu_position">
+                            <option value="left" <?= ($config['menu_position'] ?? 'center') === 'left' ? 'selected' : '' ?>>Слева</option>
+                            <option value="center" <?= ($config['menu_position'] ?? 'center') === 'center' ? 'selected' : '' ?>>По центру</option>
+                            <option value="right" <?= ($config['menu_position'] ?? 'center') === 'right' ? 'selected' : '' ?>>Справа</option>
+                        </select>
+                        <small class="form-hint">Выравнивает пункты внутри доступной ширины зоны. Саму зону меню можно изменить в конструкторе шапки.</small>
+                    </div>
+
                     <div class="form-field">
                         <label for="styles_nav_style_type">Индикатор активности / наведения</label>
                         <select id="styles_nav_style_type" name="styles_nav_style_type">
@@ -308,6 +342,16 @@ $heightSelect = function (string $name, string $current): string {
                             <option value="left" <?= ($st['nav_icon_pos'] ?? 'left') === 'left' ? 'selected' : '' ?>>Слева от текста (Горизонтально)</option>
                             <option value="top" <?= ($st['nav_icon_pos'] ?? 'left') === 'top' ? 'selected' : '' ?>>Сверху над текстом (Вертикально)</option>
                         </select>
+                    </div>
+
+                    <div class="form-field" data-hdr-nav-style-only="pill">
+                        <label for="styles_nav_pill_bg">Фон активной плашки</label>
+                        <div class="color-picker-group">
+                            <input type="color" id="styles_nav_pill_bg" name="styles_nav_pill_bg"
+                                   value="<?= htmlspecialchars($st['nav_pill_bg'] ?: '#2563eb', ENT_QUOTES) ?>">
+                            <label><input type="checkbox" name="styles_nav_pill_bg_use" value="1" <?= $st['nav_pill_bg'] !== '' ? 'checked' : '' ?>> Свой цвет</label>
+                        </div>
+                        <small class="form-hint">Используется для варианта индикатора «Залитая плашка».</small>
                     </div>
                 </div>
 
@@ -366,7 +410,7 @@ $heightSelect = function (string $name, string $current): string {
                 </div>
 
                 <!-- Настройки неоновой линии подчеркивания меню (Hoverline) -->
-                <div class="u-inline-d4e35c613b">
+                <div class="u-inline-d4e35c613b" data-hdr-nav-style-only="underline">
                     <h4 class="u-inline-2e67dd3b15">
                         Параметры линии подчеркивания меню (Hoverline)
                     </h4>
@@ -560,16 +604,39 @@ $heightSelect = function (string $name, string $current): string {
         </div>
 
         <!-- MODULE 3: VISUAL ZONE BUILDER -->
-        <div class="admin-tab-content" id="tab-hdr-builder">
+        <div class="admin-tab-content is-active" id="tab-hdr-builder" role="tabpanel" aria-labelledby="hdr-tab-builder">
             <div class="header-builder__group form-card u-inline-8cddc29a69">
-                <h3 class="u-inline-0e0c39e056">
-                    Интерактивный конструктор элементов по зонам
-                </h3>
-                <p class="form-hint u-inline-291b7bbb01">Перетаскивайте элемент <code>Главное меню</code>, <code>Логотип</code>, Поиск и утилиты из палитры в нужные зоны шапки.</p>
+                <h3 class="u-inline-0e0c39e056">1. Макет шапки</h3>
+                <p class="form-hint u-inline-291b7bbb01">Выберите базовую геометрию. Затем распределите элементы по зонам для компьютера и мобильной версии.</p>
+
+                <?php $layoutValue = $config['layout'] ?? 'stacked'; ?>
+                <div class="header-layout-picker" data-header-layout-picker>
+                    <?php foreach ([
+                        'stacked' => ['Полосами', 'Логотип и утилиты сверху, навигация отдельной строкой.'],
+                        'inline' => ['В одну строку', 'Логотип, меню и утилиты располагаются рядом.'],
+                        'centered' => ['Центрированный', 'Логотип и навигация образуют симметричную композицию.'],
+                        'drawer' => ['Боковая панель', 'Навигация открывается по кнопке на всех ширинах.'],
+                    ] as $layoutKey => [$layoutLabel, $layoutHint]): ?>
+                        <label class="header-layout-picker__option <?= $layoutValue === $layoutKey ? 'is-selected' : '' ?>">
+                            <input type="radio" name="layout" value="<?= $layoutKey ?>" <?= $layoutValue === $layoutKey ? 'checked' : '' ?>>
+                            <span class="header-layout-picker__preview header-layout-picker__preview--<?= $layoutKey ?>" aria-hidden="true">
+                                <span class="hlp-logo"></span>
+                                <span class="hlp-nav"></span>
+                            </span>
+                            <span class="header-layout-picker__label"><?= $layoutLabel ?></span>
+                            <span class="header-layout-picker__desc"><?= $layoutHint ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <div class="header-builder__group form-card u-inline-8cddc29a69">
+                <h3 class="u-inline-0e0c39e056">2. Элементы по зонам</h3>
+                <p class="form-hint u-inline-291b7bbb01">Перетащите элемент из палитры или выберите зону и нажмите нужный элемент. Для удаления используйте крестик на карточке.</p>
 
                 <!-- Palette of available elements -->
                 <div class="hb-palette u-inline-8a359a76eb">
-                    <div class="hb-palette__title">Доступные элементы (перетащите в нужную зону):</div>
+                    <div class="hb-palette__title">Доступные элементы</div>
                     <div class="hb-palette__items hdr-builder__palette" data-hdr-zone="palette">
                         <?php foreach (array_keys($elements) as $type): ?>
                             <?= $renderChip($type) ?>
@@ -577,45 +644,84 @@ $heightSelect = function (string $name, string $current): string {
                     </div>
                 </div>
 
-                <!-- Main Middlebar Zone Editor -->
-                <div class="hb-section u-inline-9eb125f52f" data-hdr-builder>
-                    <div class="hb-section__head">
-                        <div class="hb-section__title">Основная секция (Middlebar)</div>
-                        <div class="hb-section__height">Высота: <?= $heightSelect('middlebar_height', $config['middlebar']['height'] ?? 'normal') ?></div>
-                    </div>
-                    <?= $renderZones($config['elements'], 'elements') ?>
+                <div class="hdr-tabs" data-hdr-tabs role="tablist" aria-label="Версия шапки">
+                    <button type="button" class="hdr-tabs__tab is-active" role="tab" aria-selected="true" data-hdr-tab="desktop">Компьютер</button>
+                    <button type="button" class="hdr-tabs__tab" role="tab" aria-selected="false" data-hdr-tab="mobile">Телефон и планшет</button>
                 </div>
 
-                <!-- Topbar Zone Editor -->
-                <div class="hb-section u-inline-9eb125f52f" data-hdr-builder>
-                    <div class="hb-section__head">
-                        <div class="hb-section__title">Верхняя полоса (Topbar)</div>
-                        <div class="u-inline-138b28c6d0">
-                            <label><input type="checkbox" name="topbar_enabled" value="1" <?= !empty($config['topbar']['enabled']) ? 'checked' : '' ?>> Включить Topbar</label>
-                            <label><input type="checkbox" name="topbar_border" value="1" <?= !empty($config['topbar']['show_border']) ? 'checked' : '' ?>> Граница</label>
-                            <div class="hb-section__height">Высота: <?= $heightSelect('topbar_height', $config['topbar']['height'] ?? 'normal') ?></div>
+                <div class="hdr-tabs__panel is-active" data-hdr-panel="desktop">
+                    <!-- Main Middlebar Zone Editor -->
+                    <div class="hb-section u-inline-9eb125f52f" data-hdr-builder>
+                        <div class="hb-section__head">
+                            <div class="hb-section__title">Основная секция</div>
+                            <div class="hb-section__controls">
+                                <label class="hb-color-control">
+                                    <input type="checkbox" name="middlebar_bg_use" value="1" <?= ($config['middlebar']['bg'] ?? '') !== '' ? 'checked' : '' ?>>
+                                    Свой фон
+                                </label>
+                                <input type="color" name="middlebar_bg" aria-label="Фон основной секции"
+                                       value="<?= htmlspecialchars(($config['middlebar']['bg'] ?? '') ?: '#ffffff', ENT_QUOTES) ?>">
+                                <div class="hb-section__height">Высота: <?= $heightSelect('middlebar_height', $config['middlebar']['height'] ?? 'normal') ?></div>
+                            </div>
                         </div>
+                        <?= $renderZones($config['elements'], 'elements') ?>
                     </div>
-                    <?= $renderZones($config['topbar']['zones'] ?? [], 'topbar_zones') ?>
+
+                    <!-- Topbar Zone Editor -->
+                    <div class="hb-section u-inline-9eb125f52f" data-hdr-builder>
+                        <div class="hb-section__head">
+                            <div class="hb-section__title">Верхняя полоса</div>
+                            <div class="hb-section__controls">
+                                <label><input type="checkbox" name="topbar_enabled" value="1" <?= !empty($config['topbar']['enabled']) ? 'checked' : '' ?>> Включить</label>
+                                <label><input type="checkbox" name="topbar_mobile" value="1" <?= !empty($config['topbar']['show_mobile']) ? 'checked' : '' ?>> Показывать на мобильных</label>
+                                <label><input type="checkbox" name="topbar_border" value="1" <?= !empty($config['topbar']['show_border']) ? 'checked' : '' ?>> Граница</label>
+                                <select name="topbar_style" class="hb-select" aria-label="Стиль верхней полосы">
+                                    <?php foreach (['navy' => 'Тёмно-синяя', 'light' => 'Светлая', 'teal' => 'Бирюзовая'] as $barStyle => $barLabel): ?>
+                                        <option value="<?= $barStyle ?>" <?= ($config['topbar']['style'] ?? 'navy') === $barStyle ? 'selected' : '' ?>><?= $barLabel ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="hb-section__height">Высота: <?= $heightSelect('topbar_height', $config['topbar']['height'] ?? 'normal') ?></div>
+                            </div>
+                        </div>
+                        <?= $renderZones($config['topbar']['zones'] ?? [], 'topbar_zones') ?>
+                    </div>
+
+                    <!-- Bottombar Zone Editor -->
+                    <div class="hb-section u-inline-9eb125f52f" data-hdr-builder>
+                        <div class="hb-section__head">
+                            <div class="hb-section__title">Нижняя полоса</div>
+                            <div class="hb-section__controls">
+                                <label class="hb-color-control">
+                                    <input type="checkbox" name="bottombar_bg_use" value="1" <?= ($config['bottombar']['bg'] ?? '') !== '' ? 'checked' : '' ?>>
+                                    Свой фон
+                                </label>
+                                <input type="color" name="bottombar_bg" aria-label="Фон нижней полосы"
+                                       value="<?= htmlspecialchars(($config['bottombar']['bg'] ?? '') ?: '#ffffff', ENT_QUOTES) ?>">
+                                <div class="hb-section__height">Высота: <?= $heightSelect('bottombar_height', $config['bottombar']['height'] ?? 'normal') ?></div>
+                            </div>
+                        </div>
+                        <?= $renderZones($config['bottombar']['zones'] ?? [], 'bottombar_zones') ?>
+                    </div>
                 </div>
 
-                <!-- Bottombar Zone Editor -->
-                <div class="hb-section u-inline-9eb125f52f" data-hdr-builder>
-                    <div class="hb-section__head">
-                        <div class="hb-section__title">Нижняя полоса (Bottombar)</div>
-                        <div class="hb-section__height">Высота: <?= $heightSelect('bottombar_height', $config['bottombar']['height'] ?? 'normal') ?></div>
+                <div class="hdr-tabs__panel" data-hdr-panel="mobile" hidden>
+                    <p class="hb-note">Мобильная раскладка управляет компактной строкой шапки. Полное меню открывается отдельной кнопкой.</p>
+                    <div class="hb-section u-inline-9eb125f52f" data-hdr-builder>
+                        <div class="hb-section__head">
+                            <div class="hb-section__title">Мобильная строка</div>
+                        </div>
+                        <?= $renderZones($config['elements_mobile'] ?? [], 'elements_mobile') ?>
                     </div>
-                    <?= $renderZones($config['bottombar']['zones'] ?? [], 'bottombar_zones') ?>
                 </div>
             </div>
         </div>
 
         <!-- MODULE 4: ELEMENT CONTROLS & TOOLS SETUP -->
-        <div class="admin-tab-content" id="tab-hdr-elements">
+        <div class="admin-tab-content" id="tab-hdr-elements" role="tabpanel" aria-labelledby="hdr-tab-elements">
             <!-- 1. Language Switcher Controls -->
             <div class="header-builder__group form-card u-inline-8cddc29a69">
                 <h3 class="u-inline-39a35c5e86">
-                    <?= AdminUi::icon('globe', 20, 'text-primary') ?> 1. Настройка Переключателя Языков
+                    <?= AdminUi::icon('globe', 20, 'text-primary') ?> 1. Переключатель языков
                 </h3>
                 <p class="form-hint u-inline-291b7bbb01">Управляйте видом, форматом и поведением отображения переключателя языков в шапке.</p>
 
@@ -664,7 +770,7 @@ $heightSelect = function (string $name, string $current): string {
             <!-- 2. CTA Button Controls -->
             <div class="header-builder__group form-card u-inline-d40eaf045d">
                 <h3 class="u-inline-0e0c39e056">
-                    2. Кнопка призыва к действию (CTA Button)
+                    2. Акцентная кнопка
                 </h3>
                 <p class="form-hint u-inline-291b7bbb01">Настройте текст, ссылку, стиль и иконку яркой кнопки в шапке.</p>
 
@@ -717,7 +823,7 @@ $heightSelect = function (string $name, string $current): string {
             <!-- 3. Search & Social Controls -->
             <div class="header-builder__group form-card u-inline-d40eaf045d">
                 <h3 class="u-inline-0e0c39e056">
-                    3. Поиск по сайту и Социальные сети
+                    3. Поиск и социальные сети
                 </h3>
 
                 <?php $srchCfg = $config['search'] ?? []; ?>
@@ -744,14 +850,59 @@ $heightSelect = function (string $name, string $current): string {
                         </select>
                     </div>
                 </div>
+
+                <div class="u-inline-c90ff0dd8c">
+                    <h4 class="u-inline-2e67dd3b15">Ссылки на социальные сети</h4>
+                    <p class="form-hint">Ссылки отображаются, если элемент «Соцсети» размещён в одной из зон.</p>
+                    <div data-repeater="header-social" data-repeater-next-index="<?= count($config['social_buttons'] ?? []) ?>" class="hb-social-list">
+                        <?php foreach (($config['social_buttons'] ?? []) as $socialIndex => $socialButton): ?>
+                            <div class="repeater-row hb-social-row">
+                                <div class="form-field">
+                                    <label>Сеть</label>
+                                    <select name="social[<?= (int) $socialIndex ?>][network]">
+                                        <?php foreach ($networks as $networkKey => $networkLabel): ?>
+                                            <option value="<?= $networkKey ?>" <?= ($socialButton['network'] ?? '') === $networkKey ? 'selected' : '' ?>><?= $networkLabel ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="form-field hb-social-row__url">
+                                    <label>Ссылка</label>
+                                    <input type="url" name="social[<?= (int) $socialIndex ?>][url]"
+                                           value="<?= htmlspecialchars($socialButton['url'] ?? '', ENT_QUOTES) ?>" placeholder="https://">
+                                </div>
+                                <button type="button" class="btn btn--small btn--danger" data-repeater-remove>Удалить</button>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <template data-repeater-template="header-social">
+                        <div class="form-field">
+                            <label>Сеть</label>
+                            <select name="social[__INDEX__][network]">
+                                <?php foreach ($networks as $networkKey => $networkLabel): ?>
+                                    <option value="<?= $networkKey ?>"><?= $networkLabel ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-field hb-social-row__url">
+                            <label>Ссылка</label>
+                            <input type="url" name="social[__INDEX__][url]" placeholder="https://">
+                        </div>
+                        <button type="button" class="btn btn--small btn--danger" data-repeater-remove>Удалить</button>
+                    </template>
+                    <div class="repeater-actions">
+                        <button type="button" class="btn btn--small btn--secondary" data-repeater-add="header-social">
+                            <?= AdminUi::icon('plus') ?> Добавить ссылку
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- MODULE 5: LOGOS & BRANDING -->
-        <div class="admin-tab-content" id="tab-hdr-logos">
+        <div class="admin-tab-content" id="tab-hdr-logos" role="tabpanel" aria-labelledby="hdr-tab-logos">
             <div class="header-builder__group form-card u-inline-8cddc29a69">
                 <h3 class="u-inline-0e0c39e056">
-                    Логотипы и Мультиязычный Брендинг
+                    Логотипы
                 </h3>
 
                 <div class="hb-inline-grid u-inline-8a359a76eb">
@@ -804,10 +955,10 @@ $heightSelect = function (string $name, string $current): string {
         </div>
 
         <!-- MODULE 5: COLORS & UTILITIES -->
-        <div class="admin-tab-content" id="tab-hdr-styles">
+        <div class="admin-tab-content" id="tab-hdr-styles" role="tabpanel" aria-labelledby="hdr-tab-styles">
             <div class="header-builder__group form-card u-inline-8cddc29a69">
                 <h3 class="u-inline-0e0c39e056">
-                    Цветовая палитра полос и границы
+                    Цвета меню, полос и границ
                 </h3>
 
                 <div class="hb-inline-grid u-inline-8a359a76eb">
@@ -856,12 +1007,32 @@ $heightSelect = function (string $name, string $current): string {
                         <option value="none" <?= ($config['borders'] ?? '') === 'none' ? 'selected' : '' ?>>Без линий</option>
                     </select>
                 </div>
+
+                <div class="hb-inline-grid">
+                    <div class="form-field">
+                        <label for="styles_border_width">Толщина линий</label>
+                        <select id="styles_border_width" name="styles_border_width">
+                            <option value="" <?= ($st['border_width'] ?? '') === '' ? 'selected' : '' ?>>По умолчанию</option>
+                            <option value="none" <?= ($st['border_width'] ?? '') === 'none' ? 'selected' : '' ?>>Без линии</option>
+                            <option value="thin" <?= ($st['border_width'] ?? '') === 'thin' ? 'selected' : '' ?>>Тонкая</option>
+                            <option value="thick" <?= ($st['border_width'] ?? '') === 'thick' ? 'selected' : '' ?>>Выраженная</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="styles_border_color">Цвет линий</label>
+                        <div class="color-picker-group">
+                            <input type="color" id="styles_border_color" name="styles_border_color"
+                                   value="<?= htmlspecialchars($st['border_color'] ?: '#e2e8f0', ENT_QUOTES) ?>">
+                            <label><input type="checkbox" name="styles_border_color_use" value="1" <?= $st['border_color'] !== '' ? 'checked' : '' ?>> Свой цвет</label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Contacts & Snippet -->
             <div class="header-builder__group form-card u-inline-d40eaf045d">
                 <h3 class="u-inline-0e0c39e056">
-                    Контакты и Произвольный HTML-сниппет
+                    Контакты и дополнительный HTML
                 </h3>
                 <div class="hb-inline-grid u-inline-8a359a76eb">
                     <div class="form-field">
@@ -892,55 +1063,130 @@ $heightSelect = function (string $name, string $current): string {
 <script nonce="<?= \App\Core\SecurityHeaders::nonce() ?>">
 (function () {
     'use strict';
-    
-    // Header Tab switching for 5 modular tabs
+
+    // Доступные вкладки с сохранением последнего открытого раздела.
     var hdrTabs = document.querySelectorAll('[data-hdr-tab-target]');
+    var hdrPanels = document.querySelectorAll('.admin-tab-content');
+    var activateTab = function (btn, remember) {
+        if (!btn) { return; }
+        var targetId = btn.getAttribute('data-hdr-tab-target');
+        hdrTabs.forEach(function (item) {
+            var active = item === btn;
+            item.classList.toggle('is-active', active);
+            item.setAttribute('aria-selected', active ? 'true' : 'false');
+            item.tabIndex = active ? 0 : -1;
+        });
+        hdrPanels.forEach(function (panel) {
+            var active = panel.id === targetId;
+            panel.classList.toggle('is-active', active);
+            panel.hidden = !active;
+        });
+        if (remember) {
+            try { localStorage.setItem('asdr-header-active-tab', targetId); } catch (error) {}
+        }
+    };
+
     hdrTabs.forEach(function (btn) {
         btn.addEventListener('click', function () {
-            hdrTabs.forEach(function (b) { b.classList.remove('is-active'); });
-            document.querySelectorAll('.admin-tab-content').forEach(function (c) { c.classList.remove('is-active'); });
-            btn.classList.add('is-active');
-            var target = document.getElementById(btn.getAttribute('data-hdr-tab-target'));
-            if (target) { target.classList.add('is-active'); }
+            activateTab(btn, true);
+        });
+        btn.addEventListener('keydown', function (event) {
+            if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') { return; }
+            event.preventDefault();
+            var list = Array.prototype.slice.call(hdrTabs);
+            var index = list.indexOf(btn);
+            var next = event.key === 'ArrowRight'
+                ? (index + 1) % list.length
+                : (index - 1 + list.length) % list.length;
+            activateTab(list[next], true);
+            list[next].focus();
         });
     });
 
-    // Container Mode Radio Cards state sync
-    var modeRadios = document.querySelectorAll('input[name="container_mode"]');
-    modeRadios.forEach(function (radio) {
+    var savedTab = '';
+    try { savedTab = localStorage.getItem('asdr-header-active-tab') || ''; } catch (error) {}
+    var savedTabButton = savedTab
+        ? document.querySelector('[data-hdr-tab-target="' + savedTab + '"]')
+        : null;
+    activateTab(savedTabButton || document.querySelector('[data-hdr-tab-target].is-active'), false);
+
+    // Состояние карточек выбора контейнера и макета.
+    document.querySelectorAll('input[name="container_mode"], input[name="layout"]').forEach(function (radio) {
         radio.addEventListener('change', function () {
-            document.querySelectorAll('.hdr-select-card').forEach(function (opt) {
-                opt.classList.remove('is-selected');
+            var selector = radio.name === 'layout'
+                ? '.header-layout-picker__option'
+                : '.hdr-select-card';
+            document.querySelectorAll(selector).forEach(function (option) {
+                var optionInput = option.querySelector('input[type="radio"]');
+                option.classList.toggle('is-selected', !!optionInput && optionInput.checked);
             });
-            if (radio.checked) {
-                radio.closest('.hdr-select-card')?.classList.add('is-selected');
-            }
         });
     });
 
-    // Live Header Preview sync
+    // Схематичный предпросмотр ключевых параметров.
     function updateHdrPreview() {
-        var topbarBg = document.querySelector('input[name="styles_topbar_bg"]')?.value || '#173a63';
-        var topbarText = document.querySelector('input[name="styles_topbar_text"]')?.value || '#ffffff';
-        var navColor = document.querySelector('input[name="styles_nav_color"]')?.value || '#1e293b';
-        var navActive = document.querySelector('input[name="styles_nav_active"]')?.value || '#0284c7';
-        
+        var valueOf = function (selector, fallback) {
+            var field = document.querySelector(selector);
+            return field ? field.value : fallback;
+        };
+        var checked = function (selector) {
+            var field = document.querySelector(selector);
+            return !!field && field.checked;
+        };
+        var customColor = function (name, fallback) {
+            return checked('input[name="' + name + '_use"]')
+                ? valueOf('input[name="' + name + '"]', fallback)
+                : fallback;
+        };
+
+        var topbarBg = customColor('styles_topbar_bg', '#173a63');
+        var topbarText = customColor('styles_topbar_text', '#ffffff');
+        var navColor = customColor('styles_nav_color', '#1e293b');
+        var navActive = customColor('styles_nav_active', '#0284c7');
+        var middlebarBg = customColor('middlebar_bg', '#ffffff');
+        var menuPosition = valueOf('select[name="menu_position"]', 'center');
+        var navGap = valueOf('input[name="styles_nav_gap"]', '18');
+        var navStyle = valueOf('select[name="styles_nav_style_type"]', 'underline');
+        var layout = valueOf('input[name="layout"]:checked', 'stacked');
+        var containerMode = valueOf('input[name="container_mode"]:checked', 'full');
+
+        document.querySelectorAll('[data-hdr-container-only]').forEach(function (section) {
+            section.hidden = section.getAttribute('data-hdr-container-only') !== containerMode;
+        });
+        document.querySelectorAll('[data-hdr-nav-style-only]').forEach(function (section) {
+            section.hidden = section.getAttribute('data-hdr-nav-style-only') !== navStyle;
+        });
+
+        var previewBox = document.querySelector('.hdr-live-preview__box');
         var prevTop = document.getElementById('prevTopbar');
         var prevMain = document.getElementById('prevMiddlebar');
-        
+
         if (prevTop) {
+            prevTop.hidden = !checked('input[name="topbar_enabled"]');
             prevTop.style.background = topbarBg;
             prevTop.style.color = topbarText;
         }
         if (prevMain) {
+            prevMain.style.background = middlebarBg;
             prevMain.style.setProperty('--prev-nav-color', navColor);
             prevMain.style.setProperty('--prev-nav-active', navActive);
         }
+        if (previewBox) {
+            previewBox.setAttribute('data-preview-layout', layout);
+            previewBox.setAttribute('data-preview-container', containerMode);
+        }
+        var previewNav = document.querySelector('.hdr-live-preview__nav');
+        if (previewNav) {
+            previewNav.style.justifyContent = menuPosition === 'right'
+                ? 'flex-end'
+                : (menuPosition === 'left' ? 'flex-start' : 'center');
+            previewNav.style.gap = Math.max(0, Math.min(64, Number(navGap) || 18)) + 'px';
+        }
     }
 
-    document.querySelectorAll('input[name^="styles_"]').forEach(function (input) {
-        input.addEventListener('input', updateHdrPreview);
-        input.addEventListener('change', updateHdrPreview);
+    document.querySelectorAll('input, select').forEach(function (field) {
+        field.addEventListener('input', updateHdrPreview);
+        field.addEventListener('change', updateHdrPreview);
     });
     updateHdrPreview();
 })();

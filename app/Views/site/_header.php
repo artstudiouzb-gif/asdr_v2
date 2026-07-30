@@ -118,6 +118,9 @@ $isNavUrlActive = static function (string $targetUrl) use ($currentReqPath): boo
 
 $menuHtml = '';
 $et = static fn (string $text): string => htmlspecialchars(t($text), ENT_QUOTES);
+$menuAlignment = in_array($hcfg['menu_position'] ?? '', ['left', 'center', 'right'], true)
+    ? $hcfg['menu_position']
+    : HeaderConfig::DEFAULTS['menu_position'];
 $menuItems = MenuItem::activeForLang($currentLang);
 if (!empty($menuItems)) {
     $st = $hcfg['styles'] ?? [];
@@ -142,6 +145,7 @@ if (!empty($menuItems)) {
         . ' site-menu--submenu-' . $submenuStyle
         . ' site-menu--submenu-transform-' . $submenuTransform
         . ' site-menu--submenu-divider-' . $submenuDivider
+        . ' site-menu--align-' . $menuAlignment
         . $navDividers;
 
     $menuHtml = '<nav class="' . $menuClasses . '" aria-label="' . $et('Основное меню') . '">';
@@ -406,8 +410,7 @@ $transparentOn = !empty($hcfg['transparent']) && !empty($transparentHeader ?? nu
 $layout = in_array($hcfg['layout'] ?? 'stacked', HeaderConfig::LAYOUTS, true) ? $hcfg['layout'] : 'stacked';
 // Центрированный макет всегда ставит логотип по центру.
 $logoPos = $layout === 'centered' ? 'center' : $hcfg['logo_position'];
-$navAlign = $layout === 'centered' ? 'center'
-    : (in_array($hcfg['menu_position'], ['left', 'center', 'right'], true) ? $hcfg['menu_position'] : 'left');
+$navAlign = $menuAlignment;
 
 // В адаптивном desktop-режиме основное меню остаётся горизонтальным.
 // JS переносит в этот контейнер только последние пункты, которым не хватило

@@ -2117,6 +2117,18 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
     padding: 8px 2px;
 }
 @media (min-width: 721px) {
+    .site-header .site-menu.site-menu--align-left,
+    .site-topbar .site-menu.site-menu--align-left {
+        justify-content: flex-start;
+    }
+    .site-header .site-menu.site-menu--align-center,
+    .site-topbar .site-menu.site-menu--align-center {
+        justify-content: center;
+    }
+    .site-header .site-menu.site-menu--align-right,
+    .site-topbar .site-menu.site-menu--align-right {
+        justify-content: flex-end;
+    }
     .site-header__zone:has([data-priority-menu]),
     .site-topbar__zone:has([data-priority-menu]),
     .site-nav__inner:has([data-priority-menu]) {

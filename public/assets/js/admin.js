@@ -152,7 +152,14 @@
             if (!container || !template) {
                 return;
             }
-            const index = container.children.length;
+            const hasStoredIndex = container.hasAttribute('data-repeater-next-index');
+            const storedIndex = Number(container.getAttribute('data-repeater-next-index'));
+            const index = hasStoredIndex && Number.isFinite(storedIndex) && storedIndex >= 0
+                ? storedIndex
+                : container.children.length;
+            if (hasStoredIndex) {
+                container.setAttribute('data-repeater-next-index', String(index + 1));
+            }
             const html = template.innerHTML.replace(/__INDEX__/g, String(index));
             const wrapper = document.createElement('div');
             wrapper.className = 'repeater-row';
@@ -1727,6 +1734,7 @@
     var palette = document.querySelector('[data-hdr-zone="palette"]');
     var dragged = null;       // перетаскиваемый чип (клон или размещённый)
     var fromPalette = false;  // тянем из палитры (клонировать)
+    var selectedZone = null;  // выбранная зона для добавления по клику/касанию
 
     function serializeAll() {
         builders.forEach(function (builder) {
@@ -1755,6 +1763,25 @@
         return chip;
     }
 
+    function selectZone(zone) {
+        if (!zone || zone.getAttribute('data-hdr-zone') === 'palette') { return; }
+        document.querySelectorAll('[data-hdr-zone].is-selected').forEach(function (item) {
+            item.classList.remove('is-selected');
+        });
+        selectedZone = zone;
+        selectedZone.classList.add('is-selected');
+    }
+
+    function visibleSelectedZone() {
+        if (selectedZone && selectedZone.offsetParent) { return selectedZone; }
+        var zones = Array.prototype.slice.call(document.querySelectorAll(
+            '[data-hdr-zone]:not([data-hdr-zone="palette"])'
+        ));
+        var visible = zones.find(function (zone) { return !!zone.offsetParent; }) || null;
+        if (visible) { selectZone(visible); }
+        return visible;
+    }
+
     function bindChip(chip) {
         chip.addEventListener('dragstart', function (e) {
             fromPalette = !!chip.closest('[data-hdr-zone="palette"]');
@@ -1781,6 +1808,20 @@
                 serializeAll();
             });
         }
+        if (chip.closest('[data-hdr-zone="palette"]')) {
+            chip.addEventListener('click', function () {
+                var zone = visibleSelectedZone();
+                if (!zone) { return; }
+                var builder = zone.closest('[data-hdr-builder]');
+                var type = chip.getAttribute('data-el');
+                if (!builder || !type) { return; }
+                if (REPEATABLE.indexOf(type) === -1 && sectionHasType(builder, type)) { return; }
+                var placed = makeChip(type);
+                if (!placed) { return; }
+                zone.appendChild(placed);
+                serializeAll();
+            });
+        }
     }
 
     function afterElement(zone, x, y) {
@@ -1799,6 +1840,14 @@
 
     document.querySelectorAll('[data-hdr-zone]').forEach(function (zone) {
         var isPalette = zone.getAttribute('data-hdr-zone') === 'palette';
+        if (!isPalette) {
+            zone.addEventListener('click', function () { selectZone(zone); });
+            zone.addEventListener('keydown', function (event) {
+                if (event.key !== 'Enter' && event.key !== ' ') { return; }
+                event.preventDefault();
+                selectZone(zone);
+            });
+        }
         zone.addEventListener('dragover', function (e) {
             if (!dragged) { return; }
             e.preventDefault();
@@ -1831,6 +1880,7 @@
     });
 
     document.querySelectorAll('.hdr-chip').forEach(bindChip);
+    visibleSelectedZone();
     serializeAll();
 })();
 
@@ -1843,10 +1893,14 @@
             tab.addEventListener('click', function () {
                 var name = tab.getAttribute('data-hdr-tab');
                 tabs.querySelectorAll('[data-hdr-tab]').forEach(function (t) {
-                    t.classList.toggle('is-active', t === tab);
+                    var active = t === tab;
+                    t.classList.toggle('is-active', active);
+                    t.setAttribute('aria-selected', active ? 'true' : 'false');
                 });
                 group.querySelectorAll('[data-hdr-panel]').forEach(function (p) {
-                    p.classList.toggle('is-active', p.getAttribute('data-hdr-panel') === name);
+                    var active = p.getAttribute('data-hdr-panel') === name;
+                    p.classList.toggle('is-active', active);
+                    p.hidden = !active;
                 });
             });
         });
