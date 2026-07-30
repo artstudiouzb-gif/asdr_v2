@@ -309,6 +309,9 @@ $router->get('/admin/webhooks', [\App\Controllers\Admin\WebhookController::class
 $router->post('/admin/webhooks/create', [\App\Controllers\Admin\WebhookController::class, 'store']);
 $router->post('/admin/webhooks/{id}/edit', [\App\Controllers\Admin\WebhookController::class, 'update']);
 $router->post('/admin/webhooks/{id}/delete', [\App\Controllers\Admin\WebhookController::class, 'destroy']);
+$router->post('/admin/webhooks/{id}/test', [\App\Controllers\Admin\WebhookController::class, 'test']);
+$router->post('/admin/webhooks/deliveries/{id}/retry', [\App\Controllers\Admin\WebhookController::class, 'retry']);
+$router->post('/admin/webhooks/run', [\App\Controllers\Admin\WebhookController::class, 'runNow']);
 
 // --- Admin: Центр безопасности ---
 $router->get('/admin/security', [\App\Controllers\Admin\SecurityController::class, 'index']);

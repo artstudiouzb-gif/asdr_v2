@@ -18,7 +18,12 @@ final class Webhook
     /** @return array<int, array<string, mixed>> */
     public static function all(): array
     {
-        return array_map([self::class, 'decryptSecrets'], Database::pdo()->query('SELECT * FROM webhooks ORDER BY created_at DESC')->fetchAll());
+        // Список в админке не должен без необходимости расшифровывать секреты.
+        return Database::pdo()->query(
+            "SELECT id, event_type, url, is_active, created_at,
+                    IF(secret IS NULL OR secret = '', 0, 1) AS secret_configured
+             FROM webhooks ORDER BY created_at DESC"
+        )->fetchAll();
     }
 
     /** @return array<int, array<string, mixed>> активные вебхуки события */

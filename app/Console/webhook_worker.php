@@ -18,46 +18,22 @@ require __DIR__ . '/../Core/Cli.php';
 
 require __DIR__ . '/../Core/bootstrap.php';
 
-\App\Core\Heartbeat::touch('webhook'); // группа 2.1
+use App\Core\Heartbeat;
+use App\Core\WebhookDispatcher;
 
-$workerLock = \App\Core\ProcessLock::acquire('webhook_worker'); // группа 6
-if ($workerLock === null) {
+$result = WebhookDispatcher::processQueue(30);
+if ($result['busy']) {
     fwrite(STDERR, 'webhook_worker уже выполняется — пропуск запуска.' . PHP_EOL);
     exit(0);
 }
-
-use App\Core\WebhookDispatcher;
-use App\Models\Webhook;
-use App\Models\WebhookDelivery;
-
-$batch = WebhookDelivery::pendingBatch(30);
-if ($batch === []) {
+Heartbeat::touch('webhook'); // отмечаем только реально выполненный запуск
+if ($result['taken'] === 0) {
     fwrite(STDOUT, 'Очередь вебхуков пуста.' . PHP_EOL);
     exit(0);
 }
 
-$sent = 0;
-$failed = 0;
-
-foreach ($batch as $delivery) {
-    $id = (int) $delivery['id'];
-    $webhook = Webhook::findById((int) $delivery['webhook_id']);
-    if ($webhook === null || (int) $webhook['is_active'] !== 1) {
-        WebhookDelivery::markFailed($id, 0, 'Вебхук удалён или отключён.');
-        $failed++;
-        continue;
-    }
-
-    $result = WebhookDispatcher::deliver($delivery, $webhook);
-    if ($result['ok']) {
-        WebhookDelivery::markSent($id, $result['code']);
-        $sent++;
-        fwrite(STDOUT, sprintf("OK #%d -> %s (%d)\n", $id, (string) $webhook['url'], $result['code']));
-    } else {
-        WebhookDelivery::markFailed($id, $result['code'], $result['error']);
-        $failed++;
-    }
-}
-
-fwrite(STDOUT, sprintf('Готово: доставлено %d, ошибок %d.%s', $sent, $failed, PHP_EOL));
+fwrite(
+    STDOUT,
+    sprintf('Готово: доставлено %d, ошибок %d.%s', $result['sent'], $result['failed'], PHP_EOL)
+);
 exit(0);

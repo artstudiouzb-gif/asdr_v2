@@ -54,6 +54,14 @@ test('Dead-letter: вебхук помечается failed после исче�
     $sentOnly = WebhookDelivery::recent(30, 'sent');
     assert_same(0, count($sentOnly), 'среди sent записи нет');
 
+    assert_true(WebhookDelivery::retryFailed($delId), 'failed-доставка возвращается в очередь');
+    $retried = WebhookDelivery::find($delId);
+    assert_same('pending', (string) $retried['status']);
+    assert_same(0, (int) $retried['attempts']);
+    assert_same(null, $retried['response_code']);
+    assert_same(null, $retried['last_error']);
+    assert_false(WebhookDelivery::retryFailed($delId), 'pending-доставка повторно не изменяется');
+
     $pdo->exec('DELETE FROM webhook_deliveries');
     $pdo->exec('DELETE FROM webhooks');
 });

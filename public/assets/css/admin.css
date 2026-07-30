@@ -1360,16 +1360,138 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .tg-step[id],
 .performance-section[id],
 .social-section[id],
+.webhook-section[id],
 #demo-section,
 #backup-section { scroll-margin-top: calc(var(--admin-topbar-h) + 64px); }
 .performance-settings-card > .form-grid { gap: 22px; }
 .performance-settings-card .header-builder__group { margin: 0; }
 .social-section.settings-group { margin: 0; }
 #social-queue td form { margin: 0; }
+.webhook-flow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+}
+.webhook-flow__step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 16px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    background: var(--admin-surface-soft);
+}
+.webhook-flow__step p { margin: 5px 0 0; }
+.webhook-flow__number {
+    display: grid;
+    place-items: center;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--admin-primary);
+    font-size: 13px;
+    font-weight: 800;
+}
+.webhook-tech-details {
+    margin-top: 16px;
+    border-top: 1px solid var(--admin-border);
+    padding-top: 14px;
+}
+.webhook-tech-details summary,
+.webhook-delivery-details summary,
+.webhook-edit > summary { cursor: pointer; font-weight: 700; }
+.webhook-tech-details__body { margin-top: 12px; }
+.webhook-tech-details pre,
+.webhook-delivery-details pre {
+    max-width: 100%;
+    overflow: auto;
+    padding: 12px;
+    border-radius: var(--admin-radius-md);
+    background: var(--admin-surface-soft);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.webhook-section__heading,
+.webhook-endpoint,
+.webhook-endpoint__actions,
+.webhook-endpoint__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.webhook-section__heading { justify-content: space-between; align-items: flex-start; }
+.webhook-endpoint-list { display: grid; gap: 12px; margin-top: 16px; }
+.webhook-endpoint {
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+}
+.webhook-endpoint__main { min-width: 0; }
+.webhook-endpoint__title { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.webhook-endpoint__url {
+    margin: 7px 0 10px;
+    color: var(--admin-text-muted);
+    overflow-wrap: anywhere;
+}
+.webhook-endpoint__actions { flex-wrap: wrap; justify-content: flex-end; }
+.webhook-endpoint__actions form { margin: 0; }
+.webhook-edit { position: relative; }
+.webhook-edit > summary { list-style: none; }
+.webhook-edit > summary::-webkit-details-marker { display: none; }
+.webhook-edit[open] > form {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(560px, calc(100vw - 48px));
+    padding: 18px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    background: var(--admin-surface);
+    box-shadow: var(--admin-shadow-lg);
+}
+.webhook-status-grid {
+    display: grid;
+    grid-template-columns: 2fr repeat(3, minmax(110px, 1fr));
+    gap: 12px;
+    margin: 18px 0;
+}
+.webhook-status-grid > div {
+    display: grid;
+    gap: 5px;
+    padding: 14px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    background: var(--admin-surface-soft);
+}
+.webhook-status-grid strong { font-size: 18px; }
+.webhook-delivery-details { min-width: 90px; }
+.webhook-delivery-details[open] { min-width: 320px; }
+.webhook-error { color: var(--admin-danger); font-weight: 600; }
+#webhook-log td form { margin: 0; }
 @media (max-width: 720px) {
     .settings-group { padding: 16px; }
     .settings-jump-nav { top: calc(var(--admin-topbar-h) + 6px); margin-inline: -4px; }
     .performance-settings-card { padding: 16px; }
+    .webhook-flow,
+    .webhook-status-grid { grid-template-columns: 1fr; }
+    .webhook-section__heading,
+    .webhook-endpoint { flex-direction: column; align-items: stretch; }
+    .webhook-endpoint__actions { justify-content: flex-start; }
+    .webhook-edit[open] > form {
+        position: fixed;
+        top: calc(var(--admin-topbar-h) + 12px);
+        right: 12px;
+        left: 12px;
+        width: auto;
+        max-height: calc(100vh - var(--admin-topbar-h) - 24px);
+        overflow: auto;
+    }
 }
 
 /* ============================================================================
