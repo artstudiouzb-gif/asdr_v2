@@ -405,7 +405,9 @@
 
             parts.overflow.hidden = false;
             var items = directMenuItems(menu);
-            while (items.length && doesNotFit(header, menu, parts)) {
+            // Даже в самой узкой desktop-зоне первый основной пункт остаётся
+            // видимым; «Ещё» продолжает горизонтальную строку, а не заменяет её.
+            while (items.length > 1 && doesNotFit(header, menu, parts)) {
                 var item = items[items.length - 1];
                 // prepend сохраняет исходный порядок при переносе с конца.
                 parts.panel.insertBefore(item, parts.panel.firstChild);

@@ -16,6 +16,7 @@ test('Desktop priority navigation сохраняет порядок пункто
 
     assert_contains("panel.insertBefore(item, panel.firstChild)", $script);
     assert_contains("menu.insertBefore(parts.panel.firstElementChild, parts.overflow)", $script);
+    assert_contains("while (items.length > 1 && doesNotFit(header, menu, parts))", $script);
     assert_contains("toggle.setAttribute('aria-expanded'", $script);
     assert_contains("desktop.matches", $script);
 });
@@ -25,6 +26,10 @@ test('Priority-бургер является последним элементо
 
     assert_contains('.site-menu__overflow {', $css);
     assert_contains('.site-menu__overflow-panel {', $css);
+    assert_contains('.hdr-util:has(> [data-priority-menu])', $css);
+    assert_contains('flex-wrap: nowrap !important', $css);
+    assert_contains('.site-menu__overflow.is-open .site-menu__overflow-toggle span:nth-child(1)', $css);
+    assert_contains('transform: translateY(6px) rotate(45deg)', $css);
     assert_contains('@media (max-width: 720px)', $css);
     assert_contains('[data-priority-overflow]', $css);
 });
