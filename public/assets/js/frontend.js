@@ -325,54 +325,109 @@
         });
     });
 
-    // Длинные названия и большое количество пунктов не должны разрывать
-    // шапку. На desktop сначала включаем компактную плотность, затем
-    // используем уже существующий drawer. При отключённом JS остаётся
-    // безопасный CSS-перенос строк.
+    // Priority navigation для desktop: горизонтальное меню сохраняется,
+    // а только последние не поместившиеся пункты переносятся в «Ещё».
+    // Полный drawer остаётся отдельным мобильным меню.
     (function () {
-        var headers = document.querySelectorAll('[data-header-menu-adaptive]');
-        if (!headers.length) { return; }
+        var menus = document.querySelectorAll('[data-priority-menu]');
+        if (!menus.length) { return; }
         var desktop = window.matchMedia('(min-width: 721px)');
         var frame = 0;
 
-        var topLevelItems = function (menu) {
+        var isMenuItem = function (item) {
+            return item.classList.contains('site-menu__link')
+                || item.classList.contains('site-menu__item')
+                || item.classList.contains('site-menu__divider');
+        };
+        var directMenuItems = function (menu) {
             return Array.prototype.filter.call(menu.children, function (item) {
-                return item.classList.contains('site-menu__link')
-                    || item.classList.contains('site-menu__item')
-                    || item.classList.contains('site-menu__divider');
+                return isMenuItem(item);
             });
         };
-        var doesNotFit = function (header) {
-            var menus = header.querySelectorAll('.site-menu');
-            var headerRect = header.getBoundingClientRect();
-            return Array.prototype.some.call(menus, function (menu) {
-                if (!menu.offsetParent) { return false; }
-                var items = topLevelItems(menu);
-                var menuRect = menu.getBoundingClientRect();
-                var outsideHeader = menuRect.left < headerRect.left - 1
-                    || menuRect.right > headerRect.right + 1;
-                if (items.length < 2) {
-                    return outsideHeader || menu.scrollWidth > menu.clientWidth + 1;
-                }
-                var firstTop = items[0].offsetTop;
-                var wrapped = items.some(function (item) {
-                    return Math.abs(item.offsetTop - firstTop) > 2;
-                });
-                return outsideHeader || wrapped || menu.scrollWidth > menu.clientWidth + 1;
+        var menuParts = function (menu) {
+            var overflow = Array.prototype.find.call(menu.children, function (item) {
+                return item.hasAttribute('data-priority-overflow');
             });
+            return {
+                overflow: overflow,
+                toggle: overflow ? overflow.querySelector('[data-priority-overflow-toggle]') : null,
+                panel: overflow ? overflow.querySelector('[data-priority-overflow-panel]') : null
+            };
+        };
+        var setOverflowOpen = function (parts, open) {
+            if (!parts.overflow || !parts.toggle || !parts.panel) { return; }
+            parts.panel.hidden = !open;
+            parts.overflow.classList.toggle('is-open', open);
+            parts.toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        };
+        var restoreItems = function (menu, parts) {
+            if (!parts.overflow || !parts.panel) { return; }
+            setOverflowOpen(parts, false);
+            while (parts.panel.firstElementChild) {
+                menu.insertBefore(parts.panel.firstElementChild, parts.overflow);
+            }
+            parts.overflow.classList.remove('is-active');
+            parts.overflow.hidden = true;
+        };
+        var lineItems = function (menu, parts) {
+            var items = directMenuItems(menu);
+            if (parts.overflow && !parts.overflow.hidden) {
+                items.push(parts.overflow);
+            }
+            return items;
+        };
+        var doesNotFit = function (header, menu, parts) {
+            if (!menu.offsetParent) { return false; }
+            var items = lineItems(menu, parts);
+            var boundary = menu.closest('.site-header__zone, .site-nav__inner, .site-topbar__zone') || header;
+            var boundaryRect = boundary.getBoundingClientRect();
+            var menuRect = menu.getBoundingClientRect();
+            var outsideBoundary = menuRect.left < boundaryRect.left - 1
+                || menuRect.right > boundaryRect.right + 1
+                || menuRect.width > boundaryRect.width + 1;
+            if (items.length < 2) {
+                return outsideBoundary || menu.scrollWidth > menu.clientWidth + 1;
+            }
+            var firstTop = items[0].offsetTop;
+            var wrapped = items.some(function (item) {
+                return Math.abs(item.offsetTop - firstTop) > 2;
+            });
+            return outsideBoundary || wrapped || menu.scrollWidth > menu.clientWidth + 1;
+        };
+        var fitMenu = function (header, menu) {
+            var parts = menuParts(menu);
+            if (!parts.overflow || !parts.toggle || !parts.panel) { return; }
+
+            restoreItems(menu, parts);
+            if (!desktop.matches || !menu.offsetParent || !doesNotFit(header, menu, parts)) {
+                return;
+            }
+
+            parts.overflow.hidden = false;
+            var items = directMenuItems(menu);
+            while (items.length && doesNotFit(header, menu, parts)) {
+                var item = items[items.length - 1];
+                // prepend сохраняет исходный порядок при переносе с конца.
+                parts.panel.insertBefore(item, parts.panel.firstChild);
+                items = directMenuItems(menu);
+            }
+
+            if (!parts.panel.children.length) {
+                parts.overflow.hidden = true;
+                return;
+            }
+            parts.overflow.classList.toggle(
+                'is-active',
+                !!parts.panel.querySelector('.is-active, [aria-current="page"]')
+            );
         };
         var measure = function () {
             frame = 0;
-            headers.forEach(function (header) {
-                header.classList.remove('site-header--menu-compact', 'site-header--menu-collapsed');
-                if (!desktop.matches || !doesNotFit(header)) { return; }
-                header.classList.add('site-header--menu-compact');
-                // Чтение геометрии после смены класса синхронно применяет
-                // компактную раскладку перед второй проверкой.
-                void header.offsetWidth;
-                if (doesNotFit(header)) {
-                    header.classList.add('site-header--menu-collapsed');
-                }
+            menus.forEach(function (menu) {
+                var header = menu.closest('[data-header-menu-adaptive]')
+                    || menu.closest('.site-topbar')
+                    || document.documentElement;
+                fitMenu(header, menu);
             });
         };
         var schedule = function () {
@@ -385,6 +440,46 @@
         if (document.fonts && document.fonts.ready) {
             document.fonts.ready.then(schedule).catch(function () {});
         }
+
+        document.addEventListener('click', function (e) {
+            var toggle = e.target.closest('[data-priority-overflow-toggle]');
+            if (toggle) {
+                e.preventDefault();
+                e.stopPropagation();
+                var wrapper = toggle.closest('[data-priority-overflow]');
+                if (!wrapper || !wrapper.parentElement) { return; }
+                var parts = menuParts(wrapper.parentElement);
+                var open = parts.panel ? parts.panel.hidden : false;
+                menus.forEach(function (menu) {
+                    var other = menuParts(menu);
+                    if (other.overflow !== parts.overflow) { setOverflowOpen(other, false); }
+                });
+                setOverflowOpen(parts, open);
+                return;
+            }
+
+            menus.forEach(function (menu) {
+                var parts = menuParts(menu);
+                if (!parts.overflow || parts.overflow.contains(e.target)) {
+                    if (parts.panel && parts.panel.contains(e.target) && e.target.closest('.site-menu__link')) {
+                        setOverflowOpen(parts, false);
+                    }
+                    return;
+                }
+                setOverflowOpen(parts, false);
+            });
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Escape' && e.key !== 'Esc') { return; }
+            menus.forEach(function (menu) {
+                var parts = menuParts(menu);
+                if (!parts.panel || parts.panel.hidden) { return; }
+                setOverflowOpen(parts, false);
+                if (parts.toggle) { parts.toggle.focus(); }
+            });
+        });
+
         schedule();
     })();
 

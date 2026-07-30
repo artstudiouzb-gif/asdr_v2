@@ -22,7 +22,10 @@ test('Блок person_cards: персона с фото и вакантная к
 test('Блок timeline: события, кнопка и CTA-карточка', function () {
     $rendered = BlockRenderer::render(['id' => 41, 'type' => 'timeline', 'custom_css' => null, 'data' => json_encode([
         'title' => 'История Агентства',
-        'items' => [['year' => '2017', 'text' => 'Создан центр'], ['year' => '2023+', 'text' => 'Расширение функций']],
+        'items' => [
+            ['year' => '2017', 'text' => 'Создан центр', 'status' => 'done'],
+            ['year' => '2023+', 'text' => 'Расширение функций', 'status' => 'active'],
+        ],
         'button_text' => 'Вся история', 'button_url' => '/o-nas',
         'cta_title' => 'Работаем для целей развития', 'cta_text' => 'Экспертиза и данные',
         'cta_button_text' => 'Стратегия', 'cta_button_url' => '/strategy', 'cta_image' => '/uploads/public/t.jpg',
@@ -30,6 +33,8 @@ test('Блок timeline: события, кнопка и CTA-карточка', 
     $out = $rendered['html'] . "\n" . $rendered['css'];
     assert_contains('block-timeline--with-cta', $out);
     assert_contains('timeline-item__year', $out);
+    assert_contains('timeline-item--done timeline-item--next-active', $out);
+    assert_contains('timeline-item--active', $out);
     assert_contains('2023+', $out);
     assert_contains('timeline-cta__title', $out);
     assert_contains("url('/uploads/public/t.jpg')", $out);
@@ -40,6 +45,7 @@ test('Блок timeline: события, кнопка и CTA-карточка', 
         'title' => 'История', 'items' => [['year' => '2017', 'text' => 'x']],
     ])])['html'];
     assert_true(!str_contains($solo, 'timeline-cta'), 'CTA-карточка скрыта без заголовка');
+    assert_contains('timeline-item--active', $solo);
 });
 
 test('CTA-полоса: заголовок, текст, кнопка; иконка по умолчанию', function () {

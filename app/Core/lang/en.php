@@ -183,6 +183,7 @@ return [
     'Открыть поиск' => 'Open search',
     'Закрыть поиск' => 'Close search',
     'Меню' => 'Menu',
+    'Ещё разделы' => 'More sections',
     'Закрыть меню' => 'Close menu',
     'Перейти к содержимому' => 'Skip to content',
     'Режим предпросмотра — эта версия не опубликована и закрыта от индексации.' => 'Preview mode — this version is unpublished and excluded from indexing.',

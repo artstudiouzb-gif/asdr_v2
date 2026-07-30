@@ -331,10 +331,10 @@ $heightSelect = function (string $name, string $current): string {
                         <div class="form-field">
                             <label for="styles_nav_overflow">Если пункты не помещаются</label>
                             <select id="styles_nav_overflow" name="styles_nav_overflow">
-                                <option value="adaptive" <?= ($st['nav_overflow'] ?? 'adaptive') === 'adaptive' ? 'selected' : '' ?>>Сначала уплотнить, затем свернуть в меню</option>
+                                <option value="adaptive" <?= ($st['nav_overflow'] ?? 'adaptive') === 'adaptive' ? 'selected' : '' ?>>Лишние пункты перенести в меню «Ещё»</option>
                                 <option value="wrap" <?= ($st['nav_overflow'] ?? 'adaptive') === 'wrap' ? 'selected' : '' ?>>Перенести пункты на следующую строку</option>
                             </select>
-                            <small class="form-hint">Адаптивный режим защищает шапку при большом количестве пунктов и длинных названиях.</small>
+                            <small class="form-hint">Основные пункты остаются горизонтальными, а меню «Ещё» появляется последним пунктом строки.</small>
                         </div>
 
                         <div class="form-field">

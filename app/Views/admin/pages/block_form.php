@@ -691,13 +691,34 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'timeline'): ?>
+            <?php
+            $timelineItems = is_array($data['items'] ?? null) ? $data['items'] : [];
+            $timelineHasStatuses = false;
+            foreach ($timelineItems as $timelineItem) {
+                if (in_array($timelineItem['status'] ?? '', ['done', 'active', 'planned'], true)) {
+                    $timelineHasStatuses = true;
+                    break;
+                }
+            }
+            $timelineLastIndex = count($timelineItems) - 1;
+            ?>
             <div>
-                <label>События (год + описание)</label>
+                <label>События (год + описание + статус)</label>
                 <div data-repeater="items">
-                    <?php foreach (($data['items'] ?? []) as $i => $item): ?>
+                    <?php foreach ($timelineItems as $i => $item): ?>
+                        <?php
+                        $timelineStatus = in_array($item['status'] ?? '', ['done', 'active', 'planned'], true)
+                            ? (string) $item['status']
+                            : (!$timelineHasStatuses ? ($i === $timelineLastIndex ? 'active' : 'done') : 'planned');
+                        ?>
                         <div class="repeater-row">
                             <div class="form-field"><label>Год</label><input type="text" name="items[<?= $i ?>][year]" value="<?= htmlspecialchars($item['year'] ?? '', ENT_QUOTES) ?>" placeholder="2023+"></div>
                             <div class="form-field"><label>Текст</label><textarea name="items[<?= $i ?>][text]"><?= htmlspecialchars($item['text'] ?? '', ENT_QUOTES) ?></textarea></div>
+                            <div class="form-field"><label>Статус</label><select name="items[<?= $i ?>][status]">
+                                <?php foreach (['done' => 'Завершён', 'active' => 'В процессе', 'planned' => 'Запланирован'] as $statusValue => $statusLabel): ?>
+                                    <option value="<?= $statusValue ?>" <?= $timelineStatus === $statusValue ? 'selected' : '' ?>><?= $statusLabel ?></option>
+                                <?php endforeach; ?>
+                            </select></div>
                             <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
                         </div>
                     <?php endforeach; ?>
@@ -705,6 +726,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <template data-repeater-template="items">
                     <div class="form-field"><label>Год</label><input type="text" name="items[__INDEX__][year]"></div>
                     <div class="form-field"><label>Текст</label><textarea name="items[__INDEX__][text]"></textarea></div>
+                    <div class="form-field"><label>Статус</label><select name="items[__INDEX__][status]"><option value="done">Завершён</option><option value="active">В процессе</option><option value="planned" selected>Запланирован</option></select></div>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить событие</button></div>

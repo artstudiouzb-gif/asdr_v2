@@ -1,7 +1,29 @@
 <?php
 /** @var array $data */
 $title = $data['title'] ?? '';
-$items = $data['items'] ?? [];
+$items = is_array($data['items'] ?? null) ? array_values($data['items']) : [];
+$allowedStatuses = ['done', 'active', 'planned'];
+$hasExplicitStatuses = false;
+foreach ($items as $item) {
+    if (is_array($item) && in_array($item['status'] ?? '', $allowedStatuses, true)) {
+        $hasExplicitStatuses = true;
+        break;
+    }
+}
+$statuses = [];
+$lastItemIndex = count($items) - 1;
+foreach ($items as $index => $item) {
+    $savedStatus = is_array($item) ? ($item['status'] ?? '') : '';
+    if (in_array($savedStatus, $allowedStatuses, true)) {
+        $statuses[] = (string) $savedStatus;
+    } elseif (!$hasExplicitStatuses) {
+        // Старые записи не содержали статуса: предыдущие события считаются
+        // завершёнными, последнее — текущим.
+        $statuses[] = $index === $lastItemIndex ? 'active' : 'done';
+    } else {
+        $statuses[] = 'planned';
+    }
+}
 $btnText = trim((string) ($data['button_text'] ?? ''));
 $btnUrl = trim((string) ($data['button_url'] ?? ''));
 $ctaTitle = trim((string) ($data['cta_title'] ?? ''));
@@ -24,8 +46,12 @@ $templateCss = $ctaImageCss !== ''
             <p class="block-timeline__empty"><?= htmlspecialchars(t('События ещё не добавлены.'), ENT_QUOTES) ?></p>
         <?php else: ?>
             <ol class="timeline-list">
-                <?php foreach ($items as $item): ?>
-                    <li class="timeline-item">
+                <?php foreach ($items as $index => $item): ?>
+                    <?php
+                    $status = $statuses[$index];
+                    $nextStatus = $statuses[$index + 1] ?? '';
+                    ?>
+                    <li class="timeline-item timeline-item--<?= $status ?><?= $nextStatus !== '' ? ' timeline-item--next-' . $nextStatus : '' ?>">
                         <span class="timeline-item__year"><?= htmlspecialchars((string) ($item['year'] ?? ''), ENT_QUOTES) ?></span>
                         <span class="timeline-item__text"><?= htmlspecialchars((string) ($item['text'] ?? ''), ENT_QUOTES) ?></span>
                     </li>

@@ -183,6 +183,7 @@ return [
     'Открыть поиск' => 'Qidiruvni ochish',
     'Закрыть поиск' => 'Qidiruvni yopish',
     'Меню' => 'Menyu',
+    'Ещё разделы' => 'Yana bo‘limlar',
     'Закрыть меню' => 'Menyuni yopish',
     'Перейти к содержимому' => 'Asosiy mazmunga o‘tish',
     'Режим предпросмотра — эта версия не опубликована и закрыта от индексации.' => 'Ko‘rib chiqish rejimi — bu versiya e’lon qilinmagan va indekslanmaydi.',

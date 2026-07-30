@@ -409,6 +409,34 @@ $logoPos = $layout === 'centered' ? 'center' : $hcfg['logo_position'];
 $navAlign = $layout === 'centered' ? 'center'
     : (in_array($hcfg['menu_position'], ['left', 'center', 'right'], true) ? $hcfg['menu_position'] : 'left');
 
+// В адаптивном desktop-режиме основное меню остаётся горизонтальным.
+// JS переносит в этот контейнер только последние пункты, которым не хватило
+// места. Полная копия $menuHtml по-прежнему используется в mobile drawer.
+$priorityMenuHtml = $menuHtml;
+if (
+    $priorityMenuHtml !== ''
+    && ($hcfg['styles']['nav_overflow'] ?? 'adaptive') === 'adaptive'
+    && $layout !== 'drawer'
+) {
+    $priorityMenuHtml = preg_replace(
+        '/<nav class="([^"]*)"/',
+        '<nav class="$1" data-priority-menu',
+        $priorityMenuHtml,
+        1
+    ) ?? $priorityMenuHtml;
+
+    $priorityControl = '<div class="site-menu__overflow" data-priority-overflow hidden>'
+        . '<button type="button" class="site-menu__overflow-toggle" data-priority-overflow-toggle'
+        . ' aria-label="' . $et('Ещё разделы') . '" aria-haspopup="true" aria-expanded="false">'
+        . '<span></span><span></span><span></span></button>'
+        . '<div class="site-menu__overflow-panel" data-priority-overflow-panel hidden></div>'
+        . '</div>';
+
+    if (str_ends_with($priorityMenuHtml, '</nav>')) {
+        $priorityMenuHtml = substr($priorityMenuHtml, 0, -6) . $priorityControl . '</nav>';
+    }
+}
+
 // --- Раскладка по зонам верхнего ряда ---
 // Конструктор: элементы-«кирпичики» расставляются по зонам согласно
 // header_config.elements. Логотип и бургер размещаются отдельно.
@@ -427,7 +455,7 @@ $emailHtml = $emailVal !== ''
 $snippetHtml = (string) ($hcfg['snippet'] ?? ''); // очищен санитайзером при сохранении
 $fragments = [
     'logo' => $logoHtml,
-    'menu' => $menuHtml,
+    'menu' => $priorityMenuHtml,
     'search' => $searchHtml,
     'language' => $langHtml,
     'social' => $socialHtml,

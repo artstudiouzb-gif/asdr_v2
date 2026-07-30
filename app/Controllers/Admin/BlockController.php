@@ -573,6 +573,9 @@ final class BlockController
                     $items[] = [
                         'year' => $year,
                         'text' => TextProcessor::typographPlain($text, $locale),
+                        'status' => in_array($item['status'] ?? '', ['done', 'active', 'planned'], true)
+                            ? $item['status']
+                            : 'planned',
                     ];
                 }
                 return [

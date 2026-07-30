@@ -160,15 +160,19 @@ test('CSS шапки получает точные переменные gap и d
     assert_contains('--menu-divider-color-transparent:#f8fafc', $css);
 });
 
-test('Длинное меню автоматически уплотняется и переходит в drawer', function (): void {
+test('Длинное desktop-меню переносит только лишние пункты в меню «Ещё»', function (): void {
     $template = file_get_contents(dirname(__DIR__, 2) . '/app/Views/site/_header.php');
     $script = file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/frontend.js');
     $css = file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/frontend.css');
     assert_true(is_string($template) && is_string($script) && is_string($css));
     assert_contains('data-header-menu-adaptive', $template);
-    assert_contains('site-header--menu-compact', $script);
-    assert_contains('site-header--menu-collapsed', $script);
-    assert_contains('.site-header--menu-collapsed .site-burger', $css);
+    assert_contains('data-priority-menu', $template);
+    assert_contains('data-priority-overflow-panel', $template);
+    assert_contains('fitMenu', $script);
+    assert_contains('menu.insertBefore', $script);
+    assert_contains('.site-menu__overflow-toggle', $css);
+    assert_true(!str_contains($script, 'site-header--menu-collapsed'), 'desktop-меню не должно скрываться целиком');
+    assert_true(!str_contains($css, '.site-header--menu-collapsed'), 'desktop-бургер не заменяет всё меню');
 });
 
 test('MenuItem: хранит только ключ Tabler-иконки, разделитель сохраняется (БД)', function () {

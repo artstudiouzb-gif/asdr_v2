@@ -735,6 +735,7 @@ body .site-header--transparent:not(.is-scrolled) .a11y-toggle,
 body .site-header--transparent:not(.is-scrolled) .site-theme-toggle,
 body .site-header--transparent:not(.is-scrolled) .site-search-toggle,
 body .site-header--transparent:not(.is-scrolled) .site-burger,
+body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle,
 body .site-header--transparent:not(.is-scrolled) .hdr-contact { color: #fff; }
 body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__trigger:hover { background: rgba(255, 255, 255, 0.16); }
 /* Отдельный (светлый) логотип для прозрачного режима.
@@ -745,7 +746,12 @@ body .site-header--transparent:not(.is-scrolled) .site-header__logo-light { disp
 body .site-header--transparent:not(.is-scrolled) .site-header__logo:has(.site-header__logo-light) img.site-header__logo-std { display: none; }
 .site-header--transparent:not(.is-scrolled) .site-header__logo:not(:has(img))::before { background: #fff; }
 .site-header--transparent:not(.is-scrolled) .site-menu__link:hover,
-.site-header--transparent:not(.is-scrolled) .site-menu__link:focus-visible { color: #9fe3e4 !important; }
+.site-header--transparent:not(.is-scrolled) .site-menu__link:focus-visible,
+.site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle:hover,
+.site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle:focus-visible,
+.site-header--transparent:not(.is-scrolled) .site-menu__overflow.is-open .site-menu__overflow-toggle {
+    color: #9fe3e4 !important;
+}
 /* Линия подчеркивания активного и наведенного пункта меню с настройками длины, высоты и толщины */
 .site-menu--style-underline .site-menu__link::after {
     content: '' !important;
@@ -2455,7 +2461,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     content: ''; position: absolute; top: 5px; left: 0; right: 0; height: 2px; 
     background: var(--gov-border);
 }
-.stage--done:not(:last-child)::before {
+.stage:not(:last-child)::before {
     content: '';
     position: absolute;
     z-index: 1;
@@ -2463,12 +2469,17 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     left: 0;
     width: calc(100% + var(--stages-gap));
     height: 2px;
-    background: var(--gov-teal);
+    background: var(--gov-border);
     pointer-events: none;
 }
+.stage--done.stage--next-done::before { background: var(--gov-teal); }
+.stage--done.stage--next-active::before {
+    background: linear-gradient(90deg, var(--gov-teal) 0%, #2f80ed 100%);
+}
+.stage--active.stage--next-active::before { background: #2f80ed; }
 @media (max-width: 1000px) and (min-width: 561px) {
     .stages:not(.stages--carousel)::before,
-    .stages:not(.stages--carousel) .stage--done:not(:last-child)::before { display: none; }
+    .stages:not(.stages--carousel) .stage:not(:last-child)::before { display: none; }
 }
 .stages--carousel::before { display: none; }
 @media (max-width: 560px) {
@@ -3287,28 +3298,24 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .timeline-card { background: color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)); border-radius: var(--radius); padding: 30px; }
 .timeline-card__title { font-size: 1.4rem; margin: 0 0 22px; }
 .timeline-list { list-style: none; margin: 0; padding: 0; position: relative; }
-.timeline-list::before { 
-    content: ''; 
-    position: absolute; 
-    left: 5px; 
-    top: 8px; 
-    bottom: 8px; 
-    width: 2px; 
-    background: linear-gradient(to bottom, 
-        color-mix(in srgb, var(--gov-navy) 18%, transparent) 0%, 
-        color-mix(in srgb, var(--gov-navy) 18%, transparent) 35%, 
-        var(--gov-teal) 50%, 
-        color-mix(in srgb, var(--gov-navy) 18%, transparent) 65%, 
-        color-mix(in srgb, var(--gov-navy) 18%, transparent) 100%);
-    background-size: 100% 200%;
-    animation: timeline-flow 3.5s linear infinite;
-}
-@keyframes timeline-flow {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 0% -200%; }
-}
 .timeline-item { position: relative; display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 0 0 22px 28px; cursor: default; }
 .timeline-item:last-child { padding-bottom: 0; }
+.timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    left: 5px;
+    top: 16px;
+    bottom: -6px;
+    width: 2px;
+    background: var(--gov-border);
+    pointer-events: none;
+}
+.timeline-item--done.timeline-item--next-done::after { background: var(--gov-teal); }
+.timeline-item--done.timeline-item--next-active::after {
+    background: linear-gradient(180deg, var(--gov-teal) 0%, #2f80ed 100%);
+}
+.timeline-item--active.timeline-item--next-active::after { background: #2f80ed; }
 .timeline-item::before {
     content: '';
     position: absolute;
@@ -3318,17 +3325,30 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     height: 10px;
     border-radius: 50%;
     background: var(--gov-bg);
-    border: 3px solid var(--gov-teal);
-    box-shadow: 0 0 0 0 rgba(23,153,155, 0.4);
+    border: 2px solid var(--gov-border);
+    box-shadow: 0 0 0 3px var(--gov-bg);
     transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     z-index: 2;
 }
-.timeline-item:hover::before {
-    transform: scale(1.3);
+.timeline-item--done::before {
     background: var(--gov-teal);
     border-color: var(--gov-teal);
-    box-shadow: 0 0 0 6px rgba(23,153,155, 0.2);
 }
+.timeline-item--active::before {
+    background: var(--gov-bg);
+    border-color: #2f80ed;
+    box-shadow: 0 0 0 4px color-mix(in srgb, #2f80ed 18%, transparent);
+}
+.timeline-item--planned::before {
+    background: var(--gov-bg);
+    border-color: color-mix(in srgb, var(--gov-muted) 48%, var(--gov-border));
+}
+.timeline-item:hover::before {
+    transform: scale(1.3);
+}
+.timeline-item--done:hover::before { box-shadow: 0 0 0 5px color-mix(in srgb, var(--gov-teal) 20%, transparent); }
+.timeline-item--active:hover::before { box-shadow: 0 0 0 6px color-mix(in srgb, #2f80ed 20%, transparent); }
+.timeline-item--planned:hover::before { border-color: var(--gov-muted); }
 .timeline-item__year { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; color: var(--gov-title); transition: color 0.25s ease; }
 .timeline-item:hover .timeline-item__year { color: var(--gov-teal-text); }
 .timeline-item__text { color: var(--gov-muted); font-size: .93rem; line-height: 1.5; transition: color 0.25s ease; }

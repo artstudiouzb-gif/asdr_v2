@@ -1958,32 +1958,152 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
     background: var(--border-color);
 }
 
-/* На широком экране адаптивное меню сначала уплотняется. Если даже после
-   этого пункты не помещаются в одну строку, JS включает уже существующий
-   доступный drawer и показывает бургер. Без JS меню остаётся многострочным. */
+/* Priority navigation: на desktop основное меню остаётся горизонтальным,
+   а непоместившиеся последние пункты переходят в «Ещё». */
+.site-menu__overflow {
+    position: relative;
+    flex: 0 0 auto;
+    align-self: stretch;
+    display: inline-flex;
+    align-items: center;
+}
+.site-menu__overflow[hidden],
+.site-menu__overflow-panel[hidden] { display: none !important; }
+.site-menu__overflow-toggle {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 40px;
+    min-height: 38px;
+    padding: 8px 9px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--menu-text-color, var(--text-main));
+    cursor: pointer;
+    transition: color .18s ease, background-color .18s ease;
+}
+.site-menu__overflow-toggle span {
+    display: block;
+    width: 19px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+}
+.site-menu__overflow-toggle:hover,
+.site-menu__overflow-toggle:focus-visible,
+.site-menu__overflow.is-open .site-menu__overflow-toggle {
+    color: var(--menu-hover-color, var(--color-accent));
+    background: color-mix(in srgb, currentColor 7%, transparent);
+}
+.site-menu__overflow.is-active .site-menu__overflow-toggle {
+    color: var(--menu-active-color, var(--color-accent));
+}
+.site-menu__overflow.is-active .site-menu__overflow-toggle::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 3px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+}
+.site-menu__overflow-panel {
+    position: absolute;
+    z-index: 90;
+    top: calc(100% + 6px);
+    right: 0;
+    width: max-content;
+    min-width: 260px;
+    max-width: min(360px, calc(100vw - 32px));
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 8px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--submenu-radius, 10px);
+    background: var(--submenu-bg, var(--bg-surface));
+    box-shadow: var(--submenu-shadow, 0 18px 42px rgba(15, 23, 42, .11));
+}
+.site-menu__overflow-panel > .site-menu__link,
+.site-menu__overflow-panel > .site-menu__item > .site-menu__link {
+    flex: 1;
+    width: 100%;
+    min-height: 40px;
+    justify-content: flex-start;
+    padding: 10px 2px;
+    border-bottom: 1px solid var(--submenu-divider-color, var(--border-color));
+    color: var(--submenu-color, var(--text-main));
+    white-space: normal;
+}
+.site-menu__overflow-panel > :last-child > .site-menu__link,
+.site-menu__overflow-panel > .site-menu__link:last-child { border-bottom-color: transparent; }
+.site-menu__overflow-panel .site-menu__link::after,
+.site-menu__overflow-panel .site-menu__link::before { content: none !important; }
+.site-menu__overflow-panel > .site-menu__item {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.site-menu__overflow-panel > .site-menu__item > .site-menu__toggle {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+}
+.site-menu__overflow-panel > .site-menu__divider {
+    width: 100%;
+    height: 1px;
+    margin: 6px 0;
+    background: var(--border-color);
+}
+.site-menu__overflow-panel > .site-menu__divider:first-child { display: none; }
+.site-menu__overflow-panel .site-submenu,
+.site-menu__overflow-panel .site-submenu--mega {
+    position: static;
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 2px 0 8px 14px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    display: none !important;
+}
+.site-menu__overflow-panel .site-menu__item:hover > .site-submenu,
+.site-menu__overflow-panel .site-menu__item:focus-within > .site-submenu,
+.site-menu__overflow-panel .site-menu__item.is-open > .site-submenu {
+    display: flex !important;
+}
+.site-menu__overflow-panel .site-submenu::before,
+.site-menu__overflow-panel .site-submenu::after { content: none; }
+.site-menu__overflow-panel .site-submenu__link {
+    width: 100%;
+    padding: 8px 2px;
+}
 @media (min-width: 721px) {
-    [data-header-menu-adaptive] .site-menu > .site-menu__link .site-menu__text,
-    [data-header-menu-adaptive] .site-menu > .site-menu__item > .site-menu__link .site-menu__text {
+    [data-priority-menu] > .site-menu__link .site-menu__text,
+    [data-priority-menu] > .site-menu__item > .site-menu__link .site-menu__text {
         white-space: nowrap;
         overflow-wrap: normal;
-    }
-    .site-header--menu-compact .site-menu {
-        --menu-gap-current: min(var(--menu-gap, 18px), 8px);
-    }
-    .site-header--menu-compact .site-menu__link {
-        padding-inline: 6px;
-        font-size: min(0.75rem, var(--base-font-size, 16px));
-    }
-    .site-header--menu-collapsed .site-menu {
-        display: none !important;
-    }
-    .site-header--menu-collapsed .site-burger {
-        display: inline-flex;
     }
 }
 
 /* --- Мобильные (≤720): все макеты кроме drawer сворачиваются в бургер --- */
 @media (max-width: 720px) {
+    [data-priority-overflow] { display: none !important; }
     .site-header:not(.site-header--layout-drawer) .site-burger { display: inline-flex; }
     /* В выпадающем мобильном меню пункты — блочные, но с отступом под иконку. */
     body.design-mmenu-burger .site-menu__link { display: flex; align-items: center; gap: 8px; }

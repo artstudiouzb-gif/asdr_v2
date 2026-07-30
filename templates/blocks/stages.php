@@ -5,10 +5,16 @@ use App\Core\Icon;
 $title = trim((string) ($data['title'] ?? ''));
 $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
-$items = is_array($data['items'] ?? null) ? $data['items'] : [];
+$items = is_array($data['items'] ?? null) ? array_values($data['items']) : [];
 $carousel = count($items) > 1;
 $desktopCarousel = count($items) > 5;
 $statusLabels = ['done' => t('Завершён'), 'active' => t('В процессе'), 'planned' => t('Запланирован')];
+$statuses = array_map(
+    static fn ($item): string => is_array($item) && in_array($item['status'] ?? '', ['done', 'active', 'planned'], true)
+        ? (string) $item['status']
+        : 'planned',
+    $items
+);
 ?>
 <div class="block-stages"<?= $carousel ? ' data-carousel' : '' ?>>
     <div class="section-head">
@@ -28,9 +34,12 @@ $statusLabels = ['done' => t('Завершён'), 'active' => t('В процес
         <p class="block-stages__empty"><?= htmlspecialchars(t('Этапы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <ol class="stages<?= $desktopCarousel ? ' stages--carousel' : '' ?>"<?= $carousel ? ' data-carousel-track tabindex="0" role="group" aria-label="' . htmlspecialchars(t('Этапы — прокрутка вбок'), ENT_QUOTES) . '"' : '' ?>>
-            <?php foreach ($items as $item): ?>
-                <?php $status = in_array($item['status'] ?? '', ['done', 'active', 'planned'], true) ? $item['status'] : 'planned'; ?>
-                <li class="stage stage--<?= $status ?>"<?= $carousel ? ' data-carousel-item' : '' ?>>
+            <?php foreach ($items as $index => $item): ?>
+                <?php
+                $status = $statuses[$index];
+                $nextStatus = $statuses[$index + 1] ?? '';
+                ?>
+                <li class="stage stage--<?= $status ?><?= $nextStatus !== '' ? ' stage--next-' . $nextStatus : '' ?>"<?= $carousel ? ' data-carousel-item' : '' ?>>
                     <span class="stage__dot"></span>
                     <span class="stage__year"><?= htmlspecialchars((string) ($item['year'] ?? ''), ENT_QUOTES) ?></span>
                     <?php if (!empty($item['stage'])): ?><span class="stage__label"><?= htmlspecialchars((string) $item['stage'], ENT_QUOTES) ?></span><?php endif; ?>
