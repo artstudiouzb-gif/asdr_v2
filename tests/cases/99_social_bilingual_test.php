@@ -217,12 +217,25 @@ test('SocialSettings::buildPost отдаёт языковые блоки; без
     assert_same(1, count($post['langs']), 'без перевода — один язык');
     assert_same('ru', $post['langs'][0]['code']);
 
-    // Добавляем узбекский перевод — он должен встать первым.
+    // Добавляем узбекский перевод — в посте появляются оба языка.
     \App\Models\NewsTranslation::upsert($id, 'uz', ['title' => 'Uzbek sarlavha', 'excerpt' => 'Uzbek anons', 'content' => 'matn']);
     $post = SocialSettings::buildPost(\App\Models\News::findById($id));
     assert_same(2, count($post['langs']), 'с переводом — два языка');
-    assert_same('uz', $post['langs'][0]['code'], 'узбекский первым');
-    assert_same('Uzbek sarlavha', $post['langs'][0]['title']);
-    assert_same('ru', $post['langs'][1]['code']);
-    assert_contains('/uz/news/', $post['langs'][0]['link']);
+
+    // Первым идёт основной язык сайта, а не жёстко узбекский: порядок задаётся
+    // Language::defaultCode(), и на стенде с русским основным ожидание «uz
+    // первым» было неверным.
+    $default = \App\Models\Language::defaultCode();
+    assert_same($default, $post['langs'][0]['code'], 'первым идёт основной язык сайта');
+
+    $codes = array_map(static fn (array $b): string => (string) $b['code'], $post['langs']);
+    sort($codes);
+    assert_same(['ru', 'uz'], $codes, 'в посте оба языка');
+
+    $byCode = [];
+    foreach ($post['langs'] as $block) {
+        $byCode[(string) $block['code']] = $block;
+    }
+    assert_same('Uzbek sarlavha', $byCode['uz']['title']);
+    assert_contains('/uz/news/', $byCode['uz']['link']);
 });

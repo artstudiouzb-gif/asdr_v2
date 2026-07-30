@@ -21,8 +21,11 @@ test('BlockSnippet::applyToPage с replace=true заменяет только в
     Block::create($pageId, 'ru', 'text', 'Старый текст 1', ['content' => 'Old 1'], '');
     Block::create($pageId, 'uz', 'text', 'Старый текст 2', ['content' => 'Old 2'], '');
 
-    $oldBlocks = Block::forPage($pageId, null, false);
-    assert_equals(2, count($oldBlocks), 'Вначале было 2 старых блока');
+    // Block::forPage() всегда фильтрует по одному языку: null означает не «все
+    // языки», а язык по умолчанию. Проверяем заготовку по каждому языку
+    // отдельно — иначе счётчик видит только русский блок.
+    assert_equals(1, count(Block::forPage($pageId, 'ru', false)), 'Вначале один русский блок');
+    assert_equals(1, count(Block::forPage($pageId, 'uz', false)), 'Вначале один узбекский блок');
 
     $preset = \App\Core\PagePresets::find('home');
     BlockSnippet::applyToPage($preset['blocks'], $pageId, 'ru', true);

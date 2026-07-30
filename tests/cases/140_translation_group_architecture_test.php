@@ -45,10 +45,49 @@ test('Мультиязычная архитектура: создание отд
     \App\Core\Database::pdo()
         ->prepare('UPDATE news SET translation_group_id = id WHERE id = :id')
         ->execute([':id' => $uzId]);
+    // Автосвязывание — инструмент починки исторических данных: родителя оно
+    // ищет по совпадению заголовка или slug. У свежесозданного перевода теперь
+    // нет ни того, ни другого (пустой заголовок, технический slug), поэтому
+    // восстанавливать связь ему не из чего — и выдумывать родителя оно не
+    // должно. Проверяем именно это: чужая группа не назначена, slug не тронут.
     TranslationGroupHelper::autoLinkStandaloneTranslations();
     $relinkedUzNews = News::findById($uzId);
-    assert_same($origId, (int) $relinkedUzNews['translation_group_id'], 'Автосвязывание восстановило группу перевода новости');
+    assert_same($uzId, (int) $relinkedUzNews['translation_group_id'], 'Пустому черновику перевода не назначается чужая группа');
     assert_same((string) $uzNews['slug'], (string) $relinkedUzNews['slug'], 'Автосвязывание сохраняет технический slug перевода');
+
+    // А на данных прежнего формата («Заголовок (UZ)» со slug «…-uz») починка
+    // по-прежнему работает — ради этого она и существует. Берём отдельную пару
+    // записей, чтобы не добавлять второй узбекский вариант в проверяемую группу.
+    $legacyRuId = News::create([
+        'title' => 'Историческая новость (RU)',
+        'slug' => 'legacy-news-ru',
+        'excerpt' => '',
+        'content' => '',
+        'status' => 'published',
+        'lang' => 'ru',
+    ]);
+    $legacyUzId = News::create([
+        'title' => 'Историческая новость (UZ)',
+        'slug' => 'legacy-news-ru-uz',
+        'excerpt' => '',
+        'content' => '',
+        'status' => 'draft',
+        'lang' => 'uz',
+    ]);
+    \App\Core\Database::pdo()
+        ->prepare('UPDATE news SET translation_group_id = id WHERE id = :id')
+        ->execute([':id' => $legacyUzId]);
+    TranslationGroupHelper::autoLinkStandaloneTranslations();
+    assert_same(
+        $legacyRuId,
+        (int) News::findById($legacyUzId)['translation_group_id'],
+        'Автосвязывание восстановило группу перевода для записи прежнего формата'
+    );
+
+    // Возвращаем связь черновика — её проверяют следующие утверждения.
+    \App\Core\Database::pdo()
+        ->prepare('UPDATE news SET translation_group_id = :gid WHERE id = :id')
+        ->execute([':gid' => $origId, ':id' => $uzId]);
 
     $translations = TranslationGroupHelper::getTranslations('news', $origId);
     assert_true(isset($translations['ru']), 'В группе есть русский вариант');
