@@ -152,7 +152,15 @@ final class HeaderController
                 'nav_style_type' => (string) ($_POST['styles_nav_style_type'] ?? 'underline'),
                 'nav_padding' => (string) ($_POST['styles_nav_padding'] ?? 'normal'),
                 'nav_icon_pos' => (string) ($_POST['styles_nav_icon_pos'] ?? 'left'),
+                'nav_gap' => (string) ($_POST['styles_nav_gap'] ?? '18'),
+                'nav_overflow' => (string) ($_POST['styles_nav_overflow'] ?? 'adaptive'),
                 'nav_item_dividers' => !empty($_POST['styles_nav_item_dividers']),
+                'nav_divider_color' => !empty($_POST['styles_nav_divider_color_use'])
+                    ? (string) ($_POST['styles_nav_divider_color'] ?? '') : '',
+                'nav_divider_color_transparent' => !empty($_POST['styles_nav_divider_color_transparent_use'])
+                    ? (string) ($_POST['styles_nav_divider_color_transparent'] ?? '') : '',
+                'nav_divider_width' => (string) ($_POST['styles_nav_divider_width'] ?? '1'),
+                'nav_divider_height' => (string) ($_POST['styles_nav_divider_height'] ?? '18'),
                 'hoverline_length' => (string) ($_POST['styles_hoverline_length'] ?? 'normal'),
                 'hoverline_offset' => (string) ($_POST['styles_hoverline_offset'] ?? 'normal'),
                 'hoverline_thickness' => (string) ($_POST['styles_hoverline_thickness'] ?? '2px'),

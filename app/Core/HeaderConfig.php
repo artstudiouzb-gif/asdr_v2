@@ -139,7 +139,13 @@ final class HeaderConfig
             'nav_style_type' => 'underline',
             'nav_padding' => 'normal',
             'nav_icon_pos' => 'left',
+            'nav_gap' => 18,
+            'nav_overflow' => 'adaptive',
             'nav_item_dividers' => false,
+            'nav_divider_color' => '',
+            'nav_divider_color_transparent' => '',
+            'nav_divider_width' => 1,
+            'nav_divider_height' => 18,
             'hoverline_length' => 'normal',
             'hoverline_offset' => 'normal',
             'hoverline_thickness' => '2px',
@@ -159,6 +165,7 @@ final class HeaderConfig
             'topbar_text' => '',
             'border_color' => '',
             'border_width' => '',
+            'elements_gap' => 'normal',
             'floating_radius' => 18,
             'floating_opacity' => 25,
             'floating_gradient_angle' => 135,
@@ -397,6 +404,13 @@ final class HeaderConfig
         $result['snippet'] = $snippet !== '' ? HtmlSanitizer::sanitize($snippet) : '';
 
         $styles = (array) ($config['styles'] ?? []);
+        $boundedInt = static function (mixed $value, int $default, int $min, int $max): int {
+            if (!is_scalar($value) || !preg_match('/^\d+$/', trim((string) $value))) {
+                return $default;
+            }
+
+            return max($min, min($max, (int) $value));
+        };
         $result['styles'] = [
             'nav_color' => $hexOrEmpty($styles['nav_color'] ?? ''),
             'nav_hover' => $hexOrEmpty($styles['nav_hover'] ?? ''),
@@ -408,7 +422,14 @@ final class HeaderConfig
             'nav_style_type' => in_array($styles['nav_style_type'] ?? '', ['underline', 'dot', 'pill', 'glow', 'minimal'], true) ? $styles['nav_style_type'] : 'underline',
             'nav_padding' => in_array($styles['nav_padding'] ?? '', ['compact', 'normal', 'spacious'], true) ? $styles['nav_padding'] : 'normal',
             'nav_icon_pos' => in_array($styles['nav_icon_pos'] ?? '', ['left', 'top'], true) ? $styles['nav_icon_pos'] : 'left',
+            'nav_gap' => $boundedInt($styles['nav_gap'] ?? null, 18, 0, 64),
+            'nav_overflow' => in_array($styles['nav_overflow'] ?? '', ['adaptive', 'wrap'], true)
+                ? $styles['nav_overflow'] : 'adaptive',
             'nav_item_dividers' => !empty($styles['nav_item_dividers']),
+            'nav_divider_color' => $hexOrEmpty($styles['nav_divider_color'] ?? ''),
+            'nav_divider_color_transparent' => $hexOrEmpty($styles['nav_divider_color_transparent'] ?? ''),
+            'nav_divider_width' => $boundedInt($styles['nav_divider_width'] ?? null, 1, 1, 10),
+            'nav_divider_height' => $boundedInt($styles['nav_divider_height'] ?? null, 18, 4, 64),
             'hoverline_length' => in_array($styles['hoverline_length'] ?? '', ['compact', 'normal', 'full', '12px', '8px', '0px'], true) ? $styles['hoverline_length'] : 'normal',
             'hoverline_offset' => in_array($styles['hoverline_offset'] ?? '', ['close', 'normal', 'far', '1px', '2px', '4px', '8px'], true) ? $styles['hoverline_offset'] : 'normal',
             'hoverline_thickness' => in_array($styles['hoverline_thickness'] ?? '', ['thin', 'normal', 'thick', 'heavy', '1px', '2px', '3px', '4px', '5px', '6px', '8px'], true) ? $styles['hoverline_thickness'] : '2px',

@@ -175,7 +175,7 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
 .site-nav { border-top: 1px solid var(--gov-border); position: relative; }
 body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-top-color: var(--gov-border); }
 
-.site-menu { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+.site-menu { display: flex; gap: var(--menu-gap-current, var(--menu-gap, 18px)); flex-wrap: wrap; align-items: center; }
 
 .site-menu__link {
     text-transform: uppercase; font-size: 0.8125rem; letter-spacing: .04em; font-weight: 700;
@@ -251,7 +251,7 @@ body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-
 
 /* === Topbar Menu Contextual Adaptability === */
 .site-topbar .site-menu {
-    gap: 12px;
+    gap: var(--menu-gap-current, var(--menu-gap, 18px));
 }
 .site-topbar .site-menu__link {
     font-size: 0.78rem;
@@ -403,22 +403,22 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-dot .site-men
 
 /* === Menu Item Dividers (Вариант 3) === */
 .site-menu--with-item-dividers {
-    gap: 0 !important;
+    gap: var(--menu-gap-current, var(--menu-gap, 18px)) !important;
 }
 .site-menu--with-item-dividers > .site-menu__link,
 .site-menu--with-item-dividers > .site-menu__item {
     position: relative;
-    padding-inline: 16px;
 }
 .site-menu--with-item-dividers > .site-menu__link:not(:last-child)::before,
 .site-menu--with-item-dividers > .site-menu__item:not(:last-child)::before {
     content: "";
     position: absolute;
-    right: 0;
+    right: auto;
+    inset-inline-end: calc(var(--menu-gap-current, var(--menu-gap, 18px)) / -2);
     top: 50%;
     transform: translateY(-50%);
-    height: 16px;
-    width: 1px;
+    height: var(--menu-divider-height, 18px);
+    width: var(--menu-divider-width, 1px);
     background: var(--menu-divider-color, rgba(148, 163, 184, 0.35));
 }
 

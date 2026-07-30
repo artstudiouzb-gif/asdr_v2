@@ -121,7 +121,19 @@ final class SiteThemeCss
     /** @param array<string, mixed> $styles */
     private static function headerRules(array $styles): string
     {
-        $rules = '';
+        $navGap = max(0, min(64, (int) ($styles['nav_gap'] ?? 18)));
+        $dividerWidth = max(1, min(10, (int) ($styles['nav_divider_width'] ?? 1)));
+        $dividerHeight = max(4, min(64, (int) ($styles['nav_divider_height'] ?? 18)));
+        $dividerColor = preg_match('/^#[0-9a-fA-F]{6}$/', (string) ($styles['nav_divider_color'] ?? ''))
+            ? strtolower((string) $styles['nav_divider_color'])
+            : 'color-mix(in srgb,currentColor 35%,transparent)';
+        $transparentDividerColor = preg_match(
+            '/^#[0-9a-fA-F]{6}$/',
+            (string) ($styles['nav_divider_color_transparent'] ?? '')
+        ) ? strtolower((string) $styles['nav_divider_color_transparent']) : 'rgba(255,255,255,.45)';
+        $rules = ':root{--menu-gap:' . $navGap . 'px;--menu-divider-width:' . $dividerWidth
+            . 'px;--menu-divider-height:' . $dividerHeight . 'px;--menu-divider-color:'
+            . $dividerColor . ';--menu-divider-color-transparent:' . $transparentDividerColor . ";}\n";
         foreach ([
             'nav_color' => '.site-menu__link{color:%s !important;}',
             'nav_hover' => '.site-menu__link:hover{color:%s !important;}',

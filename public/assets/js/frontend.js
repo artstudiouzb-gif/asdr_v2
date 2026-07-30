@@ -325,6 +325,69 @@
         });
     });
 
+    // Длинные названия и большое количество пунктов не должны разрывать
+    // шапку. На desktop сначала включаем компактную плотность, затем
+    // используем уже существующий drawer. При отключённом JS остаётся
+    // безопасный CSS-перенос строк.
+    (function () {
+        var headers = document.querySelectorAll('[data-header-menu-adaptive]');
+        if (!headers.length) { return; }
+        var desktop = window.matchMedia('(min-width: 721px)');
+        var frame = 0;
+
+        var topLevelItems = function (menu) {
+            return Array.prototype.filter.call(menu.children, function (item) {
+                return item.classList.contains('site-menu__link')
+                    || item.classList.contains('site-menu__item')
+                    || item.classList.contains('site-menu__divider');
+            });
+        };
+        var doesNotFit = function (header) {
+            var menus = header.querySelectorAll('.site-menu');
+            var headerRect = header.getBoundingClientRect();
+            return Array.prototype.some.call(menus, function (menu) {
+                if (!menu.offsetParent) { return false; }
+                var items = topLevelItems(menu);
+                var menuRect = menu.getBoundingClientRect();
+                var outsideHeader = menuRect.left < headerRect.left - 1
+                    || menuRect.right > headerRect.right + 1;
+                if (items.length < 2) {
+                    return outsideHeader || menu.scrollWidth > menu.clientWidth + 1;
+                }
+                var firstTop = items[0].offsetTop;
+                var wrapped = items.some(function (item) {
+                    return Math.abs(item.offsetTop - firstTop) > 2;
+                });
+                return outsideHeader || wrapped || menu.scrollWidth > menu.clientWidth + 1;
+            });
+        };
+        var measure = function () {
+            frame = 0;
+            headers.forEach(function (header) {
+                header.classList.remove('site-header--menu-compact', 'site-header--menu-collapsed');
+                if (!desktop.matches || !doesNotFit(header)) { return; }
+                header.classList.add('site-header--menu-compact');
+                // Чтение геометрии после смены класса синхронно применяет
+                // компактную раскладку перед второй проверкой.
+                void header.offsetWidth;
+                if (doesNotFit(header)) {
+                    header.classList.add('site-header--menu-collapsed');
+                }
+            });
+        };
+        var schedule = function () {
+            if (frame) { window.cancelAnimationFrame(frame); }
+            frame = window.requestAnimationFrame(measure);
+        };
+
+        window.addEventListener('resize', schedule, { passive: true });
+        if (desktop.addEventListener) { desktop.addEventListener('change', schedule); }
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(schedule).catch(function () {});
+        }
+        schedule();
+    })();
+
     // Плавное раскрытие/сворачивание поля поиска при клике на безрамочную иконку
     var searchToggles = document.querySelectorAll('[data-search-toggle]');
     var searchOverlay = document.querySelector('[data-search-overlay]');

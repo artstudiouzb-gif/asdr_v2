@@ -311,6 +311,60 @@ $heightSelect = function (string $name, string $current): string {
                     </div>
                 </div>
 
+                <div class="u-inline-d4e35c613b">
+                    <h4 class="u-inline-2e67dd3b15">Расстояния и разделители главного меню</h4>
+                    <p class="form-hint">Настройки применяются к верхнему уровню меню. На мобильном разделители скрываются, а пункты остаются удобными для касания.</p>
+
+                    <label class="form-field form-field--checkbox">
+                        <input type="checkbox" name="styles_nav_item_dividers" value="1" <?= !empty($st['nav_item_dividers']) ? 'checked' : '' ?>>
+                        <span>Показывать вертикальные разделители между пунктами</span>
+                    </label>
+
+                    <div class="hb-inline-grid">
+                        <div class="form-field">
+                            <label for="styles_nav_gap">Расстояние между пунктами, px</label>
+                            <input type="number" id="styles_nav_gap" name="styles_nav_gap" min="0" max="64" step="1"
+                                   value="<?= (int) ($st['nav_gap'] ?? 18) ?>" inputmode="numeric">
+                            <small class="form-hint">0–64 px. При включённых разделителях линия располагается по центру этого промежутка.</small>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_nav_overflow">Если пункты не помещаются</label>
+                            <select id="styles_nav_overflow" name="styles_nav_overflow">
+                                <option value="adaptive" <?= ($st['nav_overflow'] ?? 'adaptive') === 'adaptive' ? 'selected' : '' ?>>Сначала уплотнить, затем свернуть в меню</option>
+                                <option value="wrap" <?= ($st['nav_overflow'] ?? 'adaptive') === 'wrap' ? 'selected' : '' ?>>Перенести пункты на следующую строку</option>
+                            </select>
+                            <small class="form-hint">Адаптивный режим защищает шапку при большом количестве пунктов и длинных названиях.</small>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_nav_divider_width">Толщина разделителя, px</label>
+                            <input type="number" id="styles_nav_divider_width" name="styles_nav_divider_width" min="1" max="10" step="1"
+                                   value="<?= (int) ($st['nav_divider_width'] ?? 1) ?>" inputmode="numeric">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_nav_divider_height">Высота разделителя, px</label>
+                            <input type="number" id="styles_nav_divider_height" name="styles_nav_divider_height" min="4" max="64" step="1"
+                                   value="<?= (int) ($st['nav_divider_height'] ?? 18) ?>" inputmode="numeric">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_nav_divider_color">Цвет в обычной шапке</label>
+                            <input type="color" id="styles_nav_divider_color" name="styles_nav_divider_color"
+                                   value="<?= htmlspecialchars($st['nav_divider_color'] ?: '#94a3b8', ENT_QUOTES) ?>">
+                            <label><input type="checkbox" name="styles_nav_divider_color_use" value="1" <?= $st['nav_divider_color'] !== '' ? 'checked' : '' ?>> Свой цвет</label>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_nav_divider_color_transparent">Цвет в прозрачной шапке</label>
+                            <input type="color" id="styles_nav_divider_color_transparent" name="styles_nav_divider_color_transparent"
+                                   value="<?= htmlspecialchars($st['nav_divider_color_transparent'] ?: '#ffffff', ENT_QUOTES) ?>">
+                            <label><input type="checkbox" name="styles_nav_divider_color_transparent_use" value="1" <?= $st['nav_divider_color_transparent'] !== '' ? 'checked' : '' ?>> Свой цвет</label>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Настройки неоновой линии подчеркивания меню (Hoverline) -->
                 <div class="u-inline-d4e35c613b">
                     <h4 class="u-inline-2e67dd3b15">

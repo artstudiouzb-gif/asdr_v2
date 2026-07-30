@@ -76,7 +76,13 @@ summary:focus-visible {
 .site-header--logo-center .site-header__zone--right { flex: 1; }
 .site-header--logo-center .site-header__zone--right { margin-left: 0; }
 
-.site-menu { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+.site-menu {
+    --menu-gap-current: var(--menu-gap, 18px);
+    display: flex;
+    gap: var(--menu-gap-current);
+    flex-wrap: wrap;
+    align-items: center;
+}
 .site-menu__link { position: relative; text-decoration: none; color: var(--color-primary, #1a1a1a); font-weight: 600; padding: 10px 4px; background: transparent !important; background-color: transparent !important; transition: color 0.2s ease; }
 .site-menu__link:hover { color: var(--color-accent, #2f6fed); background: transparent !important; background-color: transparent !important; }
 .site-menu__link.is-active { color: var(--color-accent, #2f6fed) !important; font-weight: 700; background: transparent !important; background-color: transparent !important; }
@@ -1621,7 +1627,13 @@ body.design-header-dark .site-header { box-shadow: 0 1px 0 rgba(255,255,255,.06)
     margin: 0 auto; padding: 0 20px;
     display: flex;
 }
-.site-nav .site-menu { width: 100%; flex-wrap: wrap; gap: 0 28px; align-items: stretch; }
+.site-nav .site-menu {
+    width: 100%;
+    flex-wrap: wrap;
+    row-gap: 0;
+    column-gap: var(--menu-gap-current, var(--menu-gap, 18px));
+    align-items: stretch;
+}
 .site-nav--align-center .site-menu { justify-content: center; }
 .site-nav--align-right .site-menu { justify-content: flex-end; }
 .site-nav .site-menu__link { padding: 13px 2px; }
@@ -1787,7 +1799,8 @@ body.design-header-dark .site-nav { border-top-color: rgba(255, 255, 255, .14); 
     content: '';
     position: absolute;
     top: 50%;
-    right: 0;
+    right: auto;
+    inset-inline-end: calc(var(--menu-gap-current, var(--menu-gap, 18px)) / -2);
     width: var(--menu-divider-width, 1px);
     height: var(--menu-divider-height, 16px);
     transform: translateY(-50%);
@@ -1810,7 +1823,7 @@ body.design-header-dark .site-nav { border-top-color: rgba(255, 255, 255, .14); 
 .site-header--transparent:not(.is-scrolled) .site-menu__divider,
 .site-header--transparent:not(.is-scrolled) .site-menu--with-item-dividers > .site-menu__link:not(:last-child)::before,
 .site-header--transparent:not(.is-scrolled) .site-menu--with-item-dividers > .site-menu__item:not(:last-child)::before {
-    background: var(--menu-divider-color, rgba(255, 255, 255, 0.45)) !important;
+    background: var(--menu-divider-color-transparent, rgba(255, 255, 255, 0.45)) !important;
 }
 
 /* Ручной разделитель уже рисует линию сам, поэтому следующему пункту дубликат не нужен. */
@@ -1831,7 +1844,7 @@ body.design-header-dark .site-nav { border-top-color: rgba(255, 255, 255, .14); 
 
 /* --- Макет «В одну строку»: меню в центральной зоне верхнего ряда --- */
 .site-header--layout-inline .site-header__zone--center .site-menu {
-    display: flex; flex-wrap: wrap; gap: 4px 22px; justify-content: center;
+    display: flex; flex-wrap: wrap; row-gap: 4px; column-gap: var(--menu-gap-current); justify-content: center;
 }
 .site-header--layout-inline .site-header__zone--center { flex: 1 1 auto; }
 
@@ -1914,6 +1927,30 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .site-drawer .site-menu__divider {
     width: 100%; height: 1px; margin: 8px 0;
     background: var(--border-color);
+}
+
+/* На широком экране адаптивное меню сначала уплотняется. Если даже после
+   этого пункты не помещаются в одну строку, JS включает уже существующий
+   доступный drawer и показывает бургер. Без JS меню остаётся многострочным. */
+@media (min-width: 721px) {
+    [data-header-menu-adaptive] .site-menu > .site-menu__link .site-menu__text,
+    [data-header-menu-adaptive] .site-menu > .site-menu__item > .site-menu__link .site-menu__text {
+        white-space: nowrap;
+        overflow-wrap: normal;
+    }
+    .site-header--menu-compact .site-menu {
+        --menu-gap-current: min(var(--menu-gap, 18px), 8px);
+    }
+    .site-header--menu-compact .site-menu__link {
+        padding-inline: 6px;
+        font-size: min(0.75rem, var(--base-font-size, 16px));
+    }
+    .site-header--menu-collapsed .site-menu {
+        display: none !important;
+    }
+    .site-header--menu-collapsed .site-burger {
+        display: inline-flex;
+    }
 }
 
 /* --- Мобильные (≤720): все макеты кроме drawer сворачиваются в бургер --- */

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Core\Database;
 use App\Core\HeaderConfig;
+use App\Core\SiteThemeCss;
 use App\Models\MenuItem;
 
 test('Разделители дизайна применяются между пунктами главного меню', function (): void {
@@ -82,7 +83,13 @@ test('HeaderConfig: нормализует show_border и расширенные
             'nav_style_type' => 'dot',
             'nav_padding' => 'compact',
             'nav_icon_pos' => 'top',
+            'nav_gap' => 30,
+            'nav_overflow' => 'wrap',
             'nav_item_dividers' => true,
+            'nav_divider_color' => '#CBD5E1',
+            'nav_divider_color_transparent' => '#FFFFFF',
+            'nav_divider_width' => 2,
+            'nav_divider_height' => 24,
             'nav_pill_bg' => '#2563EB',
         ],
     ]);
@@ -94,8 +101,74 @@ test('HeaderConfig: нормализует show_border и расширенные
     assert_same('dot', $cfg['styles']['nav_style_type']);
     assert_same('compact', $cfg['styles']['nav_padding']);
     assert_same('top', $cfg['styles']['nav_icon_pos']);
+    assert_same(30, $cfg['styles']['nav_gap']);
+    assert_same('wrap', $cfg['styles']['nav_overflow']);
     assert_true($cfg['styles']['nav_item_dividers']);
+    assert_same('#cbd5e1', $cfg['styles']['nav_divider_color']);
+    assert_same('#ffffff', $cfg['styles']['nav_divider_color_transparent']);
+    assert_same(2, $cfg['styles']['nav_divider_width']);
+    assert_same(24, $cfg['styles']['nav_divider_height']);
     assert_same('#2563eb', $cfg['styles']['nav_pill_bg']);
+});
+
+test('Дизайн шапки показывает настройки gap, divider и переполнения меню', function (): void {
+    $view = file_get_contents(dirname(__DIR__, 2) . '/app/Views/admin/header/index.php');
+    assert_true(is_string($view));
+    foreach ([
+        'styles_nav_gap',
+        'styles_nav_overflow',
+        'styles_nav_item_dividers',
+        'styles_nav_divider_width',
+        'styles_nav_divider_height',
+        'styles_nav_divider_color',
+        'styles_nav_divider_color_transparent',
+    ] as $field) {
+        assert_contains($field, $view);
+    }
+});
+
+test('HeaderConfig ограничивает опасные размеры меню', function (): void {
+    $cfg = HeaderConfig::normalize(['styles' => [
+        'nav_gap' => '999',
+        'nav_overflow' => 'unknown',
+        'nav_divider_width' => '0',
+        'nav_divider_height' => '999',
+        'nav_divider_color' => 'red',
+    ]]);
+    assert_same(64, $cfg['styles']['nav_gap']);
+    assert_same('adaptive', $cfg['styles']['nav_overflow']);
+    assert_same(1, $cfg['styles']['nav_divider_width']);
+    assert_same(64, $cfg['styles']['nav_divider_height']);
+    assert_same('', $cfg['styles']['nav_divider_color']);
+});
+
+test('CSS шапки получает точные переменные gap и divider', function (): void {
+    ensure_test_db();
+    $css = SiteThemeCss::build([], HeaderConfig::normalize([
+        'styles' => [
+            'nav_gap' => 26,
+            'nav_divider_color' => '#334155',
+            'nav_divider_color_transparent' => '#F8FAFC',
+            'nav_divider_width' => 3,
+            'nav_divider_height' => 28,
+        ],
+    ]), false);
+    assert_contains('--menu-gap:26px', $css);
+    assert_contains('--menu-divider-width:3px', $css);
+    assert_contains('--menu-divider-height:28px', $css);
+    assert_contains('--menu-divider-color:#334155', $css);
+    assert_contains('--menu-divider-color-transparent:#f8fafc', $css);
+});
+
+test('Длинное меню автоматически уплотняется и переходит в drawer', function (): void {
+    $template = file_get_contents(dirname(__DIR__, 2) . '/app/Views/site/_header.php');
+    $script = file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/frontend.js');
+    $css = file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/frontend.css');
+    assert_true(is_string($template) && is_string($script) && is_string($css));
+    assert_contains('data-header-menu-adaptive', $template);
+    assert_contains('site-header--menu-compact', $script);
+    assert_contains('site-header--menu-collapsed', $script);
+    assert_contains('.site-header--menu-collapsed .site-burger', $css);
 });
 
 test('MenuItem: хранит только ключ Tabler-иконки, разделитель сохраняется (БД)', function () {

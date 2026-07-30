@@ -709,6 +709,9 @@ $headerClasses = implode(' ', array_filter($headerClasses));
 <?php if ($hasHeaderContent): ?>
 <header
     class="<?= htmlspecialchars($headerClasses, ENT_QUOTES) ?>"
+    <?php if (($hcfg['styles']['nav_overflow'] ?? 'adaptive') === 'adaptive' && $layout !== 'drawer'): ?>
+        data-header-menu-adaptive
+    <?php endif; ?>
     <?php if (!empty($hcfg['sticky']) || $transparentOn): ?>
         data-header-scroll
     <?php endif; ?>
