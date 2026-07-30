@@ -16,8 +16,9 @@ test('Block::copyLanguageBlocks копирует все блоки с основ
         'lang' => 'ru',
     ]);
 
-    Block::create($pageId, 'ru', 'hero', 'Обложка RU', ['title' => 'Заголовок']);
-    Block::create($pageId, 'ru', 'cta', 'Призыв RU', ['variant' => 'band', 'title' => 'Призыв']);
+    // Шестой аргумент — customCss, в Block::create() он обязательный.
+    Block::create($pageId, 'ru', 'hero', 'Обложка RU', ['title' => 'Заголовок'], '');
+    Block::create($pageId, 'ru', 'cta', 'Призыв RU', ['variant' => 'band', 'title' => 'Призыв'], '');
 
     $ruBlocks = Block::forPage($pageId, 'ru');
     assert_equals(2, count($ruBlocks), 'В RU создано 2 блока');

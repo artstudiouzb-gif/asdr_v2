@@ -102,9 +102,12 @@ test('Палитра материализуется в color_primary/color_accen
     \App\Models\Setting::set('color_accent', '#020202');
 
     // Применяем палитру gov_blue — цвета перезаписаны.
+    // Ожидание берём из самого определения палитры: проверяется перенос цветов
+    // в настройки, а не конкретные оттенки, которые дизайн вправе менять.
+    [, $govPrimary, $govAccent] = DesignSettings::PALETTES['gov_blue'];
     DesignSettings::save(['palette' => 'gov_blue', 'font_style' => 'serif']);
-    assert_same('#173a63', \App\Models\Setting::get('color_primary'));
-    assert_same('#17999b', \App\Models\Setting::get('color_accent'));
+    assert_same($govPrimary, \App\Models\Setting::get('color_primary'));
+    assert_same($govAccent, \App\Models\Setting::get('color_accent'));
     assert_contains('Georgia', \App\Models\Setting::get('font_family'));
 
     // Возврат на custom: ставим ручные значения — save их не перетирает.
@@ -139,7 +142,7 @@ test('Пользовательские конфигурации: сохрани�
 
     // Меняем всё, затем применяем пресет — опции и ручные цвета вернулись.
     DesignSettings::save(['palette' => 'gov_blue', 'container' => 'wide']);
-    assert_same('#173a63', \App\Models\Setting::get('color_primary'));
+    assert_same(DesignSettings::PALETTES['gov_blue'][1], \App\Models\Setting::get('color_primary'));
 
     assert_true(DesignSettings::applyPreset('user:' . $slug));
     $cur = DesignSettings::current();
