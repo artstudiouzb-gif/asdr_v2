@@ -19,13 +19,12 @@ require __DIR__ . '/../Core/Cli.php';
 
 require __DIR__ . '/../Core/bootstrap.php';
 
-\App\Core\Heartbeat::touch('social'); // группа 2.1
-
 $workerLock = \App\Core\ProcessLock::acquire('social_worker'); // группа 6
 if ($workerLock === null) {
     fwrite(STDERR, 'social_worker уже выполняется — пропуск запуска.' . PHP_EOL);
     exit(0);
 }
+\App\Core\Heartbeat::touch('social'); // отмечаем только реально начавший работу процесс
 
 use App\Core\Logger;
 use App\Core\SocialPublisher;
@@ -35,6 +34,7 @@ use App\Models\SocialPost;
 $batch = SocialPost::pendingBatch(20);
 if ($batch === []) {
     fwrite(STDOUT, 'Очередь публикаций пуста.' . PHP_EOL);
+    \App\Core\ProcessLock::release($workerLock);
     exit(0);
 }
 
@@ -60,4 +60,5 @@ if ($sent > 0) {
 }
 
 fwrite(STDOUT, sprintf('Готово: опубликовано %d, ошибок %d.%s', $sent, $failed, PHP_EOL));
+\App\Core\ProcessLock::release($workerLock);
 exit(0);

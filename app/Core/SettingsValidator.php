@@ -45,6 +45,21 @@ final class SettingsValidator
         return ctype_digit($value) ? (int) $value : $default;
     }
 
+    /** Целое число в заданном диапазоне; пустое поле получает default. */
+    public static function boundedInt(string $value, int $min, int $max, int $default): ?int
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return max($min, min($max, $default));
+        }
+        if (!ctype_digit($value)) {
+            return null;
+        }
+        $number = (int) $value;
+
+        return $number >= $min && $number <= $max ? $number : null;
+    }
+
     /** Однострочный текст без управляющих символов, ограниченный по длине. */
     public static function plainText(string $value, int $maxLength = 255): string
     {
@@ -106,6 +121,33 @@ final class SettingsValidator
         }
 
         return $value;
+    }
+
+    /**
+     * Публичная база CDN: http(s), обязательный хост, без логина, query и
+     * fragment. Путь допустим, чтобы поддержать CDN с префиксом каталога.
+     */
+    public static function publicBaseUrl(string $value): ?string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return '';
+        }
+        if (strlen($value) > 500 || preg_match('/[\x00-\x20\x7F]/', $value) === 1) {
+            return null;
+        }
+        $parts = parse_url($value);
+        if (!is_array($parts)
+            || !in_array(strtolower((string) ($parts['scheme'] ?? '')), ['http', 'https'], true)
+            || trim((string) ($parts['host'] ?? '')) === ''
+            || isset($parts['user'])
+            || isset($parts['pass'])
+            || isset($parts['query'])
+            || isset($parts['fragment'])) {
+            return null;
+        }
+
+        return rtrim($value, '/');
     }
 
     /** Безопасное значение CSS (например, clamp(), px, rem). */

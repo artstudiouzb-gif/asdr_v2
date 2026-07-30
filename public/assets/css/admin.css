@@ -1358,11 +1358,18 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 }
 .settings-group[id],
 .tg-step[id],
+.performance-section[id],
+.social-section[id],
 #demo-section,
 #backup-section { scroll-margin-top: calc(var(--admin-topbar-h) + 64px); }
+.performance-settings-card > .form-grid { gap: 22px; }
+.performance-settings-card .header-builder__group { margin: 0; }
+.social-section.settings-group { margin: 0; }
+#social-queue td form { margin: 0; }
 @media (max-width: 720px) {
     .settings-group { padding: 16px; }
     .settings-jump-nav { top: calc(var(--admin-topbar-h) + 6px); margin-inline: -4px; }
+    .performance-settings-card { padding: 16px; }
 }
 
 /* ============================================================================

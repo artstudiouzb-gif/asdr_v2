@@ -166,9 +166,23 @@ final class Cache
 
     public static function flush(): void
     {
-        self::removeRecursive(self::dir());
-        if (function_exists('opcache_reset')) {
-            @opcache_reset();
+        $dir = self::dir();
+        if (!is_dir($dir)) {
+            return;
+        }
+        foreach (scandir($dir) ?: [] as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+            // Эти файлы — не кэш контента: удаление блокировок допускает
+            // параллельный запуск воркеров/бэкапа, rate-limit защищает вход,
+            // chunks содержит незавершённые загрузки.
+            if (in_array($item, ['rate-limits', 'chunks', '.gitkeep', 'README.md'], true)
+                || str_ends_with($item, '.lock')
+                || str_starts_with($item, 'worker_heartbeat_')) {
+                continue;
+            }
+            self::removeRecursive($dir . '/' . $item);
         }
     }
 

@@ -314,7 +314,9 @@ final class NewsController
             // Пытаемся отправить сразу. Что не ушло — остаётся в очереди,
             // и воркер дошлёт по расписанию.
             $res = \App\Core\SocialSettings::dispatchPendingForNews((int) $news['id'], $only);
-            if ($res['sent'] > 0 && $res['failed'] === 0) {
+            if (!empty($res['busy'])) {
+                Flash::success("Поставлено в очередь публикации: {$count}. Воркер уже занят и отправит её по расписанию.");
+            } elseif ($res['sent'] > 0 && $res['failed'] === 0) {
                 Flash::success("Опубликовано в соцсети: {$res['sent']}.");
             } elseif ($res['sent'] > 0) {
                 Flash::success("Опубликовано: {$res['sent']}, не удалось: {$res['failed']} — оставлено в очереди. " . implode('; ', $res['errors']));

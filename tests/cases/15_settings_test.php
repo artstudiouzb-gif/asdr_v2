@@ -66,6 +66,20 @@ test('SettingsValidator: текст, email и SMTP-поля нормализую
     assert_true(SettingsValidator::smtpHost('bad host') === null);
 });
 
+test('SettingsValidator: диапазоны и публичный CDN URL проверяются без тихой подмены', function () {
+    assert_same(60, SettingsValidator::boundedInt('', 0, 3600, 60));
+    assert_same(0, SettingsValidator::boundedInt('0', 0, 3600, 60));
+    assert_same(3600, SettingsValidator::boundedInt('3600', 0, 3600, 60));
+    assert_true(SettingsValidator::boundedInt('-1', 0, 3600, 60) === null);
+    assert_true(SettingsValidator::boundedInt('3601', 0, 3600, 60) === null);
+
+    assert_same('https://cdn.example.uz/assets', SettingsValidator::publicBaseUrl(' https://cdn.example.uz/assets/ '));
+    assert_same('', SettingsValidator::publicBaseUrl(''));
+    assert_true(SettingsValidator::publicBaseUrl('https://user:pass@cdn.example.uz') === null);
+    assert_true(SettingsValidator::publicBaseUrl('https://cdn.example.uz/?v=1') === null);
+    assert_true(SettingsValidator::publicBaseUrl('javascript:alert(1)') === null);
+});
+
 test('Analytics: скрипт строится из ID без сырого JS', function () {
     $s = Analytics::buildScript('G-TEST1234', '99887766');
     assert_contains('G-TEST1234', $s);

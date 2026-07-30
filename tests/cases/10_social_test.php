@@ -72,6 +72,26 @@ test('SocialSettings::buildPost собирает message/link/абсолютны
     assert_same('http://localhost/uploads/public/c.jpg', $post['image_url']);
 });
 
+test('SocialSettings: конфигурация платформ проверяет ID, URN и длину подписи', function () {
+    assert_same('123456789', SocialSettings::normalizeConfigField('facebook', 'page_id', ' 123456789 '));
+    assert_true(SocialSettings::normalizeConfigField('facebook', 'page_id', 'page-name') === null);
+    assert_same(
+        'urn:li:organization:123',
+        SocialSettings::normalizeConfigField('linkedin', 'author', 'urn:li:organization:123')
+    );
+    assert_true(SocialSettings::normalizeConfigField('linkedin', 'author', 'organization:123') === null);
+    assert_same('987654321', SocialSettings::normalizeConfigField('instagram', 'user_id', '987654321'));
+    assert_true(SocialSettings::normalizeConfigField('instagram', 'user_id', 'IG-1') === null);
+    assert_true(SocialSettings::normalizeConfigField('instagram', 'signature', str_repeat('x', 2001)) === null);
+
+    $errors = SocialSettings::configurationErrors('facebook', [
+        'token' => '',
+        'page_id' => 'not-id',
+        'signature' => '',
+    ]);
+    assert_true(count($errors) >= 2, 'должны быть ошибки обязательного токена и Page ID');
+});
+
 // --- Очередь (нужна тестовая БД) ---
 
 test('SocialPost: очередь — enqueue/pending/markSent/markFailed', function () {

@@ -78,6 +78,13 @@ test('Dead-letter: соц-публикация помечается failed и п
     assert_same(1, count($failed), 'провалившаяся публикация в списке dead-letter');
     assert_same('facebook', (string) $failed[0]['network']);
 
+    assert_true(SocialPost::retryFailed($spId), 'failed-запись возвращается в очередь');
+    $retried = SocialPost::forNews($newsId);
+    assert_same('pending', (string) $retried[0]['status']);
+    assert_same(0, (int) $retried[0]['attempts']);
+    assert_same('', (string) ($retried[0]['last_error'] ?? ''));
+    assert_false(SocialPost::retryFailed($spId), 'pending-запись повторно не изменяется');
+
     $pdo->exec('DELETE FROM social_posts');
     $pdo->exec('DELETE FROM news');
 });

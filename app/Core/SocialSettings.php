@@ -63,6 +63,80 @@ final class SocialSettings
         return $cfg;
     }
 
+    /**
+     * Нормализация одного поля конфигурации. null означает ошибку формата,
+     * пустая строка допустима, пока сеть выключена.
+     */
+    public static function normalizeConfigField(string $network, string $field, string $value): ?string
+    {
+        if (!in_array($field, self::FIELDS[$network] ?? [], true)) {
+            return null;
+        }
+        $value = trim(str_replace("\r\n", "\n", $value));
+        if ($field === 'token') {
+            return strlen($value) <= 10000 && preg_match('/[\x00-\x1F\x7F]/', $value) === 0
+                ? $value
+                : null;
+        }
+        if ($field === 'signature') {
+            return mb_strlen($value) <= 2000
+                && preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', $value) === 0
+                    ? $value
+                    : null;
+        }
+        if ($field === 'chat_id') {
+            return self::normalizeTelegramChatId($value);
+        }
+        if (in_array($field, ['page_id', 'user_id'], true)) {
+            return $value === '' || preg_match('/^\d{3,30}$/', $value) === 1 ? $value : null;
+        }
+        if ($field === 'author') {
+            return $value === ''
+                || preg_match('/^urn:li:(?:organization:\d{1,30}|person:[A-Za-z0-9_-]{3,100})$/', $value) === 1
+                    ? $value
+                    : null;
+        }
+
+        return mb_strlen($value) <= 500 ? $value : null;
+    }
+
+    /**
+     * @param array<string,string> $cfg
+     * @return list<string>
+     */
+    public static function configurationErrors(string $network, array $cfg, bool $requireFields = true): array
+    {
+        $errors = [];
+        foreach (self::FIELDS[$network] ?? [] as $field) {
+            $value = (string) ($cfg[$field] ?? '');
+            if (self::normalizeConfigField($network, $field, $value) === null) {
+                $errors[] = match ($field) {
+                    'token' => 'Access Token слишком длинный или содержит управляющие символы.',
+                    'page_id' => 'Facebook Page ID должен состоять только из цифр.',
+                    'user_id' => 'Instagram User ID должен состоять только из цифр.',
+                    'author' => 'LinkedIn Author URN должен иметь вид urn:li:organization:123 или urn:li:person:ID.',
+                    'signature' => 'Подпись должна быть не длиннее 2000 символов.',
+                    default => 'Поле ' . $field . ' заполнено неверно.',
+                };
+            }
+        }
+        if ($network === 'telegram') {
+            $signatureError = self::telegramSignatureError((string) ($cfg['signature'] ?? ''));
+            if ($signatureError !== null) {
+                $errors[] = $signatureError;
+            }
+        }
+        if ($requireFields) {
+            foreach (self::REQUIRED[$network] ?? [] as $field) {
+                if (trim((string) ($cfg[$field] ?? '')) === '') {
+                    $errors[] = 'Не заполнено обязательное поле ' . $field . '.';
+                }
+            }
+        }
+
+        return array_values(array_unique($errors));
+    }
+
     /** Сеть включена и все обязательные поля заполнены. */
     public static function isReady(string $network): bool
     {
@@ -70,13 +144,8 @@ final class SocialSettings
             return false;
         }
         $cfg = self::configFor($network);
-        foreach (self::REQUIRED[$network] ?? [] as $field) {
-            if (trim((string) ($cfg[$field] ?? '')) === '') {
-                return false;
-            }
-        }
 
-        return true;
+        return self::configurationErrors($network, $cfg, true) === [];
     }
 
     /**
@@ -335,28 +404,41 @@ final class SocialSettings
      * забирает порцию pending и отправляет. Используется и кнопкой «запустить
      * сейчас» в админке, и CLI-воркером.
      *
-     * @return array{sent: int, failed: int, taken: int}
+     * @return array{sent: int, failed: int, taken: int, busy: bool}
      */
     public static function dispatchQueue(int $limit = 20): array
     {
-        $batch = SocialPost::pendingBatch($limit);
-        if ($batch === []) {
-            return ['sent' => 0, 'failed' => 0, 'taken' => 0];
+        $lock = ProcessLock::acquire('social_worker');
+        if ($lock === null) {
+            return ['sent' => 0, 'failed' => 0, 'taken' => 0, 'busy' => true];
         }
-
-        $publisher = new SocialPublisher();
-        $sent = 0;
-        $failed = 0;
-        foreach ($batch as $row) {
-            $res = self::dispatchRow($row, $publisher);
-            if ($res['ok']) {
-                $sent++;
-            } else {
-                $failed++;
+        try {
+            $batch = SocialPost::pendingBatch(max(1, min(50, $limit)));
+            if ($batch === []) {
+                return ['sent' => 0, 'failed' => 0, 'taken' => 0, 'busy' => false];
             }
-        }
 
-        return ['sent' => $sent, 'failed' => $failed, 'taken' => count($batch)];
+            $publisher = new SocialPublisher();
+            $sent = 0;
+            $failed = 0;
+            foreach ($batch as $row) {
+                $res = self::dispatchRow($row, $publisher);
+                if ($res['ok']) {
+                    $sent++;
+                } else {
+                    $failed++;
+                }
+            }
+
+            return [
+                'sent' => $sent,
+                'failed' => $failed,
+                'taken' => count($batch),
+                'busy' => false,
+            ];
+        } finally {
+            ProcessLock::release($lock);
+        }
     }
 
     /**
@@ -364,31 +446,39 @@ final class SocialSettings
      * Что не удалось — остаётся в очереди (status pending) и будет дослано
      * воркером по расписанию.
      *
-     * @return array{sent: int, failed: int, errors: array<int, string>}
+     * @return array{sent: int, failed: int, errors: array<int, string>, busy: bool}
      */
     public static function dispatchPendingForNews(int $newsId, ?string $only = null): array
     {
+        $lock = ProcessLock::acquire('social_worker');
+        if ($lock === null) {
+            return ['sent' => 0, 'failed' => 0, 'errors' => [], 'busy' => true];
+        }
         $sent = 0;
         $failed = 0;
         $errors = [];
         $publisher = new SocialPublisher();
 
-        foreach (SocialPost::forNews($newsId) as $row) {
-            if ((string) ($row['status'] ?? '') !== 'pending') {
-                continue;
+        try {
+            foreach (SocialPost::forNews($newsId) as $row) {
+                if ((string) ($row['status'] ?? '') !== 'pending') {
+                    continue;
+                }
+                if ($only !== null && (string) ($row['network'] ?? '') !== $only) {
+                    continue;
+                }
+                $res = self::dispatchRow($row, $publisher);
+                if ($res['ok']) {
+                    $sent++;
+                } else {
+                    $failed++;
+                    $errors[] = (string) ($row['network'] ?? '') . ': ' . (string) $res['error'];
+                }
             }
-            if ($only !== null && (string) ($row['network'] ?? '') !== $only) {
-                continue;
-            }
-            $res = self::dispatchRow($row, $publisher);
-            if ($res['ok']) {
-                $sent++;
-            } else {
-                $failed++;
-                $errors[] = (string) ($row['network'] ?? '') . ': ' . (string) $res['error'];
-            }
+        } finally {
+            ProcessLock::release($lock);
         }
 
-        return ['sent' => $sent, 'failed' => $failed, 'errors' => $errors];
+        return ['sent' => $sent, 'failed' => $failed, 'errors' => $errors, 'busy' => false];
     }
 }

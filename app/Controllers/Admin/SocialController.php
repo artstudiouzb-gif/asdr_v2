@@ -62,8 +62,12 @@ final class SocialController
         Auth::requireSuperAdmin();
         Csrf::verifyRequest();
 
-        $res = SocialSettings::dispatchQueue(50);
-        if ($res['taken'] === 0) {
+        // В HTTP-запросе берём небольшую пачку, чтобы медленные API соцсетей
+        // не упёрлись в лимит времени веб-сервера. Cron продолжает брать по 20.
+        $res = SocialSettings::dispatchQueue(5);
+        if (!empty($res['busy'])) {
+            Flash::error('Воркер уже выполняется. Очередь не запущена повторно.');
+        } elseif ($res['taken'] === 0) {
             Flash::success('Очередь пуста — отправлять нечего.');
         } elseif ($res['failed'] === 0) {
             Flash::success("Отправлено: {$res['sent']}.");
@@ -73,7 +77,7 @@ final class SocialController
             Flash::success("Отправлено: {$res['sent']}, с ошибкой: {$res['failed']} (см. журнал).");
         }
 
-        header('Location: /admin/social');
+        header('Location: /admin/social#social-queue');
         exit;
     }
 
@@ -82,26 +86,74 @@ final class SocialController
         Auth::requireSuperAdmin();
         Csrf::verifyRequest();
 
-        // Telegram сознательно исключён: его настройки в своём разделе, и
-        // пустой POST отсюда обнулил бы их.
+        $prepared = [];
+        $errors = [];
+        // Сначала проверяем всю форму и только потом записываем: ошибка в одной
+        // сети не должна наполовину сохранить остальные.
         foreach (self::formNetworks() as $net) {
-            Setting::set('social_' . $net . '_enabled', !empty($_POST[$net]['enabled']) ? '1' : '0');
+            $enabled = !empty($_POST[$net]['enabled']);
+            $current = SocialSettings::configFor($net);
+            $candidate = [];
+            $writeToken = false;
             foreach (SocialSettings::FIELDS[$net] as $field) {
                 $value = trim((string) ($_POST[$net][$field] ?? ''));
                 if ($field === 'token') {
                     if (!empty($_POST[$net]['clear_token'])) {
-                        Setting::set('social_' . $net . '_token', '');
+                        $value = '';
+                        $writeToken = true;
                     } elseif ($value !== '') {
-                        Setting::set('social_' . $net . '_token', $value);
+                        $writeToken = true;
+                    } else {
+                        $value = (string) ($current['token'] ?? '');
                     }
+                }
+                $normalized = SocialSettings::normalizeConfigField($net, $field, $value);
+                $candidate[$field] = $normalized ?? $value;
+            }
+            foreach (SocialSettings::configurationErrors($net, $candidate, $enabled) as $error) {
+                $errors[] = ucfirst($net) . ': ' . $error;
+            }
+            $prepared[$net] = [
+                'enabled' => $enabled,
+                'fields' => $candidate,
+                'writeToken' => $writeToken,
+            ];
+        }
+        if ($errors !== []) {
+            Flash::error(implode(' ', $errors));
+            header('Location: /admin/social#social-settings');
+            exit;
+        }
+
+        // Telegram сознательно исключён: его настройки в своём разделе.
+        foreach ($prepared as $net => $data) {
+            Setting::set('social_' . $net . '_enabled', $data['enabled'] ? '1' : '0');
+            foreach ($data['fields'] as $field => $value) {
+                if ($field === 'token' && !$data['writeToken']) {
                     continue;
                 }
-                Setting::set('social_' . $net . '_' . $field, $value);
+                Setting::set('social_' . $net . '_' . $field, (string) $value);
             }
         }
 
         Flash::success('Настройки соцсетей сохранены.');
-        header('Location: /admin/social');
+        header('Location: /admin/social#social-settings');
+        exit;
+    }
+
+    /** Повторить одну публикацию, завершившуюся ошибкой. */
+    public function retry(): void
+    {
+        Auth::requireSuperAdmin();
+        Csrf::verifyRequest();
+
+        $id = (int) ($_POST['id'] ?? 0);
+        if ($id > 0 && SocialPost::retryFailed($id)) {
+            Flash::success('Публикация возвращена в очередь.');
+        } else {
+            Flash::error('Не удалось вернуть публикацию в очередь: запись не найдена или уже обрабатывается.');
+        }
+        header('Location: /admin/social#social-queue');
         exit;
     }
 

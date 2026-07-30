@@ -29,12 +29,16 @@ final class SocialPost
             $force
                 ? "INSERT INTO social_posts (news_id, network, status, created_at)
                    VALUES (:nid, :net, 'pending', NOW())
-                   ON DUPLICATE KEY UPDATE status = 'pending', attempts = 0, last_error = NULL"
+                   ON DUPLICATE KEY UPDATE status = 'pending', attempts = 0,
+                      remote_id = NULL, last_error = NULL, sent_at = NULL,
+                      locked_until = NULL, created_at = NOW()"
                 : "INSERT INTO social_posts (news_id, network, status, created_at)
                    VALUES (:nid, :net, 'pending', NOW())
                    ON DUPLICATE KEY UPDATE
                       status = IF(status = 'sent', 'sent', 'pending'),
-                      attempts = IF(status = 'sent', attempts, 0)"
+                      attempts = IF(status = 'sent', attempts, 0),
+                      last_error = IF(status = 'sent', last_error, NULL),
+                      locked_until = IF(status = 'sent', locked_until, NULL)"
         );
         $stmt->execute([':nid' => $newsId, ':net' => $network]);
     }
@@ -51,7 +55,7 @@ final class SocialPost
     {
         $stmt = Database::pdo()->prepare(
             "UPDATE social_posts SET status = 'sent', sent_at = NOW(), attempts = attempts + 1,
-                    remote_id = :rid, last_error = NULL WHERE id = :id"
+                    remote_id = :rid, last_error = NULL, locked_until = NULL WHERE id = :id"
         );
         $stmt->execute([':rid' => $remoteId, ':id' => $id]);
     }
@@ -83,6 +87,19 @@ final class SocialPost
                 'error' => mb_substr($error, 0, 200),
             ]);
         }
+    }
+
+    /** Возвращает dead-letter запись в очередь для ручной повторной попытки. */
+    public static function retryFailed(int $id): bool
+    {
+        $stmt = Database::pdo()->prepare(
+            "UPDATE social_posts
+             SET status = 'pending', attempts = 0, last_error = NULL, locked_until = NULL
+             WHERE id = :id AND status = 'failed'"
+        );
+        $stmt->execute([':id' => $id]);
+
+        return $stmt->rowCount() === 1;
     }
 
     /** @return array<int, array<string, mixed>> статусы публикаций новости */

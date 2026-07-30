@@ -69,17 +69,27 @@ $tokenGuides = [
     ],
 ];
 ?>
-<div class="form-card">
+<p class="form-hint admin-section-intro">
+    Новость ставится в очередь после публикации и отправляется фоновым воркером.
+    Здесь настраиваются Facebook, LinkedIn и Instagram; Telegram управляется отдельно.
+</p>
+<nav class="settings-jump-nav" aria-label="Разделы авто-публикации">
+    <a href="#social-facebook"><?= \App\Core\AdminUi::icon('facebook', 16) ?>Facebook</a>
+    <a href="#social-linkedin"><?= \App\Core\AdminUi::icon('linkedin', 16) ?>LinkedIn</a>
+    <a href="#social-instagram"><?= \App\Core\AdminUi::icon('instagram', 16) ?>Instagram</a>
+    <a href="/admin/telegram#telegram-channel"><?= \App\Core\AdminUi::icon('telegram', 16) ?>Telegram</a>
+    <a href="#social-queue"><?= \App\Core\AdminUi::icon('performance', 16) ?>Очередь</a>
+</nav>
+
+<div class="form-card" id="social-settings">
     <p class="form-hint">
-        При публикации новости она автоматически ставится в очередь и
-        отправляется в включённые сети CLI-воркером
-        (<code>app/Console/social_worker.php</code> по Cron). Ниже приведены раскрывающиеся
-        пошаговые шпаргалки для получения токенов и ID каждой платформы.
+        Включайте сеть только после заполнения обязательных полей. Настройки
+        проверяются до сохранения; токены не отображаются повторно.
     </p>
     <form method="post" action="/admin/social" class="form-grid">
         <?= Csrf::field() ?>
         <?php foreach ($config as $net => $c): ?>
-            <fieldset class="u-inline-a9961251f2">
+            <fieldset class="u-inline-a9961251f2 settings-group social-section" id="social-<?= $net ?>">
                 <legend class="u-inline-1204c3c3eb">
                     <?= htmlspecialchars($labels[$net] ?? $net, ENT_QUOTES) ?>
                     <?php if ($c['enabled'] && !$c['ready']): ?>
@@ -97,6 +107,7 @@ $tokenGuides = [
                         <label for="<?= $net ?>_<?= $field ?>"><?= htmlspecialchars($fieldLabels[$field] ?? $field, ENT_QUOTES) ?></label>
                         <?php if (in_array($field, \App\Core\SocialSettings::TEXTAREA_FIELDS, true)): ?>
                             <textarea class="u-inline-8ff9961267" id="<?= $net ?>_<?= $field ?>" name="<?= $net ?>[<?= $field ?>]" rows="3"
+                                      maxlength="2000"
                                       ><?= htmlspecialchars((string) $value, ENT_QUOTES) ?></textarea>
                             <?php if (!empty($signatureHints[$net])): ?>
                                 <span class="form-hint"><?= $signatureHints[$net] ?></span>
@@ -105,8 +116,11 @@ $tokenGuides = [
                             <input type="<?= $field === 'token' ? 'password' : 'text' ?>" id="<?= $net ?>_<?= $field ?>"
                                    name="<?= $net ?>[<?= $field ?>]" value="<?= htmlspecialchars((string) $value, ENT_QUOTES) ?>"
                                    <?= $field === 'token'
-                                       ? 'placeholder="' . (!empty($c['tokenConfigured']) ? 'Сохранён — оставьте пустым без изменений' : 'Введите Access Token') . '" autocomplete="new-password"'
-                                       : 'autocomplete="off"' ?>>
+                                       ? 'maxlength="10000" placeholder="' . (!empty($c['tokenConfigured']) ? 'Сохранён — оставьте пустым без изменений' : 'Введите Access Token') . '" autocomplete="new-password"'
+                                       : 'maxlength="150" autocomplete="off"' ?>
+                                   <?= in_array($field, ['page_id', 'user_id'], true)
+                                       ? 'inputmode="numeric" pattern="[0-9]{3,30}"'
+                                       : '' ?>>
                             <?php if ($field === 'token' && !empty($c['tokenConfigured'])): ?>
                                 <label class="form-hint"><input type="checkbox" name="<?= $net ?>[clear_token]" value="1"> Удалить сохранённый токен</label>
                             <?php endif; ?>
@@ -182,14 +196,14 @@ $statusMap = [
 $appRoot = defined('APP_ROOT') ? APP_ROOT : '/path/to/site';
 $cronBroken = $workerStatus !== null && ($workerStatus['last'] === null || !empty($workerStatus['stale']));
 ?>
-<div class="form-card u-inline-3343fd6464">
+<div class="form-card u-inline-3343fd6464 social-section" id="social-queue">
     <div class="u-inline-b741d381f1">
         <div>
             <h2 class="u-inline-291b7bbb01">Очередь публикаций и воркер</h2>
             <p class="form-hint u-inline-1da9facb4d">
                 Публикации отправляет фоновый воркер по Cron (каждые ~5 минут). Здесь
-                видно, что он делает; кнопкой можно обработать очередь вручную,
-                не дожидаясь расписания.
+                видно, что он делает; кнопкой можно обработать до 5 публикаций
+                вручную, не дожидаясь расписания.
             </p>
         </div>
         <form method="post" action="/admin/social/run"
@@ -230,10 +244,10 @@ $cronBroken = $workerStatus !== null && ($workerStatus['last'] === null || !empt
 
     <h3 class="u-inline-a8712c9256">Журнал очереди</h3>
     <table class="data-table">
-        <thead><tr><th>Новость</th><th>Сеть</th><th>Статус</th><th>Попыток</th><th>Обновлено</th><th>Ошибка</th></tr></thead>
+        <thead><tr><th>Новость</th><th>Сеть</th><th>Статус</th><th>Попыток</th><th>Дата</th><th>Ошибка</th><th>Действие</th></tr></thead>
         <tbody>
             <?php if (empty($queueLog)): ?>
-                <tr><td colspan="6" class="data-table__empty">Публикаций пока не было.</td></tr>
+                <tr><td colspan="7" class="data-table__empty">Публикаций пока не было.</td></tr>
             <?php endif; ?>
             <?php foreach ($queueLog as $row): ?>
                 <?php
@@ -248,6 +262,19 @@ $cronBroken = $workerStatus !== null && ($workerStatus['last'] === null || !empt
                     <td><?= (int) ($row['attempts'] ?? 0) ?></td>
                     <td class="u-inline-d442f29d01"><?= $when ? htmlspecialchars((string) $when, ENT_QUOTES) : '—' ?></td>
                     <td class="u-inline-e129d41383"><?= htmlspecialchars((string) ($row['last_error'] ?? ''), ENT_QUOTES) ?></td>
+                    <td>
+                        <?php if ($st === 'failed'): ?>
+                            <form method="post" action="/admin/social/retry">
+                                <?= Csrf::field() ?>
+                                <input type="hidden" name="id" value="<?= (int) $row['id'] ?>">
+                                <button type="submit" class="btn btn--small btn--outline">
+                                    <?= \App\Core\AdminUi::icon('reset', 14) ?>Повторить
+                                </button>
+                            </form>
+                        <?php else: ?>
+                            —
+                        <?php endif; ?>
+                    </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>

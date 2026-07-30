@@ -15,7 +15,20 @@ $size = static function (mixed $bytes): string {
     return is_numeric($bytes) ? number_format((float) $bytes / 1024, 1, ',', ' ') . ' КиБ' : '—';
 };
 ?>
-<div class="form-card u-inline-7dde5e56b3">
+<p class="form-hint admin-section-intro">
+    Управление публичным кэшем, оптимизированными ресурсами, изображениями и CDN.
+    Изменения применяются к новым ответам сразу после сохранения.
+</p>
+<nav class="settings-jump-nav" aria-label="Разделы производительности">
+    <a href="#perf-status"><?= \App\Core\AdminUi::icon('performance', 16) ?>Статус</a>
+    <a href="#perf-pages"><?= \App\Core\AdminUi::icon('files', 16) ?>Кэш страниц</a>
+    <a href="#perf-assets"><?= \App\Core\AdminUi::icon('code', 16) ?>CSS и JS</a>
+    <a href="#perf-images"><?= \App\Core\AdminUi::icon('image', 16) ?>Изображения</a>
+    <a href="#perf-cdn"><?= \App\Core\AdminUi::icon('world', 16) ?>CDN</a>
+    <a href="#perf-cloudflare"><?= \App\Core\AdminUi::icon('cloud', 16) ?>Cloudflare</a>
+</nav>
+
+<div class="form-card u-inline-7dde5e56b3 performance-section" id="perf-status">
     <div class="header-builder__group u-inline-76084ee4e5">
         <h3>Статус PHP OPcache и системного кеша</h3>
         <p class="form-hint u-inline-291b7bbb01">
@@ -41,12 +54,14 @@ $size = static function (mixed $bytes): string {
             <?php endif; ?>
         </div>
         <div class="u-inline-1e90930a6f">
-            <form method="post" action="/admin/performance/clear-cache">
+            <form method="post" action="/admin/performance/clear-cache"
+                  data-confirm="Очистить файловый кэш сайта, Cloudflare и OPcache?">
                 <?= Csrf::field() ?>
                 <button type="submit" class="btn btn--primary">Очистить весь кэш (файлы + Cloudflare + OPcache)</button>
             </form>
             <?php if (!empty($opcacheInfo['enabled'])): ?>
-                <form method="post" action="/admin/performance/reset-opcache">
+                <form method="post" action="/admin/performance/reset-opcache"
+                      data-confirm="Сбросить PHP OPcache?">
                     <?= Csrf::field() ?>
                     <button type="submit" class="btn btn--outline">Сбросить только PHP OPcache</button>
                 </form>
@@ -55,10 +70,11 @@ $size = static function (mixed $bytes): string {
     </div>
 </div>
 
+<div class="form-card performance-settings-card">
     <form method="post" action="/admin/performance" class="form-grid">
         <?= Csrf::field() ?>
 
-        <div class="header-builder__group">
+        <div class="header-builder__group performance-section" id="perf-pages">
             <h3>Кэширование страниц</h3>
             <div class="form-field form-field--checkbox">
                 <input type="checkbox" id="perf_page_cache" name="perf_page_cache" value="1" <?= $on('perf_page_cache', '1') ? 'checked' : '' ?>>
@@ -66,7 +82,7 @@ $size = static function (mixed $bytes): string {
             </div>
             <div class="form-field">
                 <label for="perf_cache_ttl">Время жизни кэша, секунд (0 — до следующей правки контента)</label>
-                <input type="number" id="perf_cache_ttl" name="perf_cache_ttl" min="0" value="<?= $val('perf_cache_ttl', '0') ?>">
+                <input type="number" id="perf_cache_ttl" name="perf_cache_ttl" min="0" max="31536000" value="<?= $val('perf_cache_ttl', '0') ?>">
                 <span class="form-hint">Например, 3600 — пересобирать страницы не чаще раза в час.</span>
             </div>
             <div class="form-field">
@@ -81,7 +97,7 @@ $size = static function (mixed $bytes): string {
             </div>
         </div>
 
-        <div class="header-builder__group">
+        <div class="header-builder__group performance-section" id="perf-assets">
             <h3>Сжатие CSS и JavaScript</h3>
             <div class="form-field form-field--checkbox">
                 <input type="checkbox" id="perf_asset_bundle" name="perf_asset_bundle" value="1" <?= $on('perf_asset_bundle', '1') ? 'checked' : '' ?>>
@@ -139,7 +155,7 @@ $size = static function (mixed $bytes): string {
             <?php endif; ?>
         </div>
 
-        <div class="header-builder__group">
+        <div class="header-builder__group performance-section" id="perf-images">
             <h3>Изображения</h3>
             <div class="form-field">
                 <label for="perf_webp_quality">Качество WebP (40–95)</label>
@@ -157,11 +173,12 @@ $size = static function (mixed $bytes): string {
             </div>
         </div>
 
-        <div class="header-builder__group">
+        <div class="header-builder__group performance-section" id="perf-cdn">
             <h3>CDN для статики и загрузок</h3>
             <div class="form-field">
                 <label for="perf_cdn_url">Базовый URL CDN (необязательно)</label>
-                <input type="text" id="perf_cdn_url" name="perf_cdn_url" value="<?= $val('perf_cdn_url') ?>" placeholder="https://xxxxx.b-cdn.net">
+                <input type="url" id="perf_cdn_url" name="perf_cdn_url" maxlength="500"
+                       value="<?= $val('perf_cdn_url') ?>" placeholder="https://xxxxx.b-cdn.net">
                 <span class="form-hint">
                     Ссылки на <code>/assets</code> (CSS/JS) и <code>/uploads/public</code> (картинки, видео)
                     будут отдаваться с этого хоста. <b>Домен переносить в Cloudflare не нужно</b> —
@@ -173,7 +190,7 @@ $size = static function (mixed $bytes): string {
             </div>
         </div>
 
-        <div class="header-builder__group">
+        <div class="header-builder__group performance-section" id="perf-cloudflare">
             <h3>Cloudflare (очистка кэша по API)</h3>
             <p class="form-hint u-inline-291b7bbb01">
                 Нужно только если сайт или его поддомен <b>проксируется через Cloudflare</b>
@@ -187,6 +204,7 @@ $size = static function (mixed $bytes): string {
             <div class="form-field">
                 <label for="cf_api_token">API-токен</label>
                 <input type="password" id="cf_api_token" name="cf_api_token" value=""
+                       maxlength="5000"
                        placeholder="<?= $cfTokenConfigured ? 'Сохранён — оставьте пустым без изменений' : 'cf_xxx' ?>"
                        autocomplete="new-password">
                 <?php if ($cfTokenConfigured): ?>
@@ -195,7 +213,9 @@ $size = static function (mixed $bytes): string {
             </div>
             <div class="form-field">
                 <label for="cf_zone_id">Zone ID</label>
-                <input type="text" id="cf_zone_id" name="cf_zone_id" value="<?= $val('cf_zone_id') ?>" placeholder="напр. 023e105f4ecef8ad9ca31a8372d0c353">
+                <input type="text" id="cf_zone_id" name="cf_zone_id" maxlength="32"
+                       pattern="[A-Fa-f0-9]{32}" value="<?= $val('cf_zone_id') ?>"
+                       placeholder="напр. 023e105f4ecef8ad9ca31a8372d0c353">
                 <span class="form-hint">Zone ID — на странице обзора домена в панели Cloudflare (справа).</span>
             </div>
         </div>
@@ -215,7 +235,8 @@ $size = static function (mixed $bytes): string {
                 </form>
                 <form class="u-inline-1da9facb4d" method="post" action="/admin/cloudflare/purge">
                     <?= \App\Core\Csrf::field() ?>
-                    <button type="submit" class="btn btn--primary">Очистить кэш Cloudflare</button>
+                    <button type="submit" class="btn btn--primary"
+                            data-confirm="Очистить весь кэш выбранной зоны Cloudflare?">Очистить кэш Cloudflare</button>
                 </form>
             </div>
         </div>

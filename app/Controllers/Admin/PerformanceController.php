@@ -72,37 +72,104 @@ final class PerformanceController
         Auth::requireSuperAdmin();
         Csrf::verifyRequest();
 
+        $cacheTtl = SettingsValidator::boundedInt(
+            (string) ($_POST['perf_cache_ttl'] ?? ''),
+            0,
+            31536000,
+            0
+        );
+        $publicTtl = SettingsValidator::boundedInt(
+            (string) ($_POST['perf_public_cache_ttl'] ?? ''),
+            0,
+            3600,
+            60
+        );
+        $sharedTtl = SettingsValidator::boundedInt(
+            (string) ($_POST['perf_shared_cache_ttl'] ?? ''),
+            0,
+            86400,
+            300
+        );
+        $quality = SettingsValidator::boundedInt(
+            (string) ($_POST['perf_webp_quality'] ?? ''),
+            40,
+            95,
+            82
+        );
+        $imgMaxW = SettingsValidator::boundedInt(
+            (string) ($_POST['perf_image_max_width'] ?? ''),
+            1200,
+            4000,
+            2560
+        );
+        $cdn = SettingsValidator::publicBaseUrl((string) ($_POST['perf_cdn_url'] ?? ''));
+        $zone = strtolower(trim((string) ($_POST['cf_zone_id'] ?? '')));
+        $cfToken = trim((string) ($_POST['cf_api_token'] ?? ''));
+        $cfEnabled = !empty($_POST['cf_enabled']);
+        $clearCfToken = !empty($_POST['clear_cf_api_token']);
+        $effectiveCfToken = $clearCfToken
+            ? ''
+            : ($cfToken !== '' ? $cfToken : trim((string) Setting::get('cf_api_token', '')));
+
+        $errors = [];
+        if ($cacheTtl === null) {
+            $errors[] = 'TTL файлового кэша должен быть от 0 до 31536000 секунд.';
+        }
+        if ($publicTtl === null) {
+            $errors[] = 'TTL браузера должен быть от 0 до 3600 секунд.';
+        }
+        if ($sharedTtl === null) {
+            $errors[] = 'TTL CDN должен быть от 0 до 86400 секунд.';
+        }
+        if ($quality === null) {
+            $errors[] = 'Качество WebP должно быть от 40 до 95.';
+        }
+        if ($imgMaxW === null) {
+            $errors[] = 'Максимальная ширина изображения должна быть от 1200 до 4000 px.';
+        }
+        if ($cdn === null) {
+            $errors[] = 'CDN URL должен быть полным http(s)-адресом без логина, query и fragment.';
+        }
+        if ($zone !== '' && preg_match('/^[a-f0-9]{32}$/', $zone) !== 1) {
+            $errors[] = 'Cloudflare Zone ID должен содержать ровно 32 шестнадцатеричных символа.';
+        }
+        if (strlen($cfToken) > 5000
+            || preg_match('/[\x00-\x1F\x7F]/', $cfToken) === 1
+            || ($cfEnabled && (
+                strlen($effectiveCfToken) > 5000
+                || preg_match('/[\x00-\x1F\x7F]/', $effectiveCfToken) === 1
+            ))) {
+            $errors[] = 'Cloudflare API-токен имеет недопустимый формат.';
+        }
+        if ($cfEnabled && ($effectiveCfToken === '' || $zone === '')) {
+            $errors[] = 'Для включения Cloudflare укажите API-токен и Zone ID.';
+        }
+        if ($errors !== []) {
+            Flash::error(implode(' ', $errors));
+            header('Location: /admin/performance');
+            exit;
+        }
+
         Setting::set('perf_page_cache', !empty($_POST['perf_page_cache']) ? '1' : '0');
         Setting::set('perf_asset_bundle', !empty($_POST['perf_asset_bundle']) ? '1' : '0');
-        Setting::set('perf_cache_ttl', (string) SettingsValidator::nonNegativeInt((string) ($_POST['perf_cache_ttl'] ?? ''), 0));
-        Setting::set('perf_public_cache_ttl', (string) min(3600, SettingsValidator::nonNegativeInt((string) ($_POST['perf_public_cache_ttl'] ?? ''), 60)));
-        Setting::set('perf_shared_cache_ttl', (string) min(86400, SettingsValidator::nonNegativeInt((string) ($_POST['perf_shared_cache_ttl'] ?? ''), 300)));
+        Setting::set('perf_cache_ttl', (string) $cacheTtl);
+        Setting::set('perf_public_cache_ttl', (string) $publicTtl);
+        Setting::set('perf_shared_cache_ttl', (string) $sharedTtl);
         Setting::set('perf_lazy_load', !empty($_POST['perf_lazy_load']) ? '1' : '0');
-
-        $quality = SettingsValidator::nonNegativeInt((string) ($_POST['perf_webp_quality'] ?? ''), 82);
-        Setting::set('perf_webp_quality', (string) max(40, min(95, $quality)));
-
-        $imgMaxW = SettingsValidator::nonNegativeInt((string) ($_POST['perf_image_max_width'] ?? ''), 2560);
-        Setting::set('perf_image_max_width', (string) max(1200, min(4000, $imgMaxW)));
-
-        // CDN base: только http(s)-URL без хвостового слэша, иначе пусто.
-        $cdn = trim((string) ($_POST['perf_cdn_url'] ?? ''));
-        if ($cdn !== '' && preg_match('#^https?://[^\s]+$#i', $cdn) !== 1) {
-            $cdn = '';
-        }
-        Setting::set('perf_cdn_url', rtrim($cdn, '/'));
+        Setting::set('perf_webp_quality', (string) $quality);
+        Setting::set('perf_image_max_width', (string) $imgMaxW);
+        Setting::set('perf_cdn_url', (string) $cdn);
 
         // Cloudflare (очистка кэша по API).
-        Setting::set('cf_enabled', !empty($_POST['cf_enabled']) ? '1' : '0');
-        $cfToken = trim((string) ($_POST['cf_api_token'] ?? ''));
-        if (!empty($_POST['clear_cf_api_token'])) {
+        Setting::set('cf_enabled', $cfEnabled ? '1' : '0');
+        if ($clearCfToken) {
             Setting::set('cf_api_token', '');
         } elseif ($cfToken !== '') {
             Setting::set('cf_api_token', $cfToken);
         }
-        $zone = trim((string) ($_POST['cf_zone_id'] ?? ''));
-        Setting::set('cf_zone_id', preg_match('/^[a-f0-9]{0,64}$/i', $zone) === 1 ? $zone : '');
+        Setting::set('cf_zone_id', $zone);
 
+        Cache::forgetPrefix('page:');
         Flash::success('Настройки производительности сохранены.');
         header('Location: /admin/performance');
         exit;
@@ -154,12 +221,20 @@ final class PerformanceController
         Auth::requireSuperAdmin();
         Csrf::verifyRequest();
 
+        $cfEnabled = \App\Core\Cloudflare::enabled();
         Cache::flush();
-        \App\Core\Cloudflare::purgeSite();
-        if (function_exists('opcache_reset')) {
-            @opcache_reset();
-        }
-        Flash::success('Весь кэш (файлы, Cloudflare, OPcache) успешно очищен.');
+        $cfOk = $cfEnabled ? \App\Core\Cloudflare::purgeEverything() : null;
+        $opcacheOk = function_exists('opcache_reset') ? @opcache_reset() : null;
+
+        $parts = ['Файловый кэш очищен'];
+        $parts[] = $cfOk === true
+            ? 'Cloudflare очищен'
+            : ($cfOk === false ? 'Cloudflare: ошибка очистки' : 'Cloudflare не настроен');
+        $parts[] = $opcacheOk === true
+            ? 'OPcache сброшен'
+            : ($opcacheOk === false ? 'OPcache: сброс недоступен' : 'OPcache отключен');
+        $message = implode(' · ', $parts) . '.';
+        $cfOk === false ? Flash::error($message) : Flash::success($message);
 
         // Возврат на страницу, откуда нажали (только локальные /admin-пути).
         $back = (string) ($_POST['redirect'] ?? '');

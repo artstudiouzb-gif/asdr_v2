@@ -89,7 +89,10 @@ test('Повторная публикация: кнопка в админке о
     $newsId = (int) $pdo->lastInsertId();
 
     $status = static function (int $newsId) use ($pdo): array {
-        $st = $pdo->prepare('SELECT status, attempts FROM social_posts WHERE news_id = :n AND network = :net');
+        $st = $pdo->prepare(
+            'SELECT status, attempts, remote_id, last_error, sent_at, locked_until
+             FROM social_posts WHERE news_id = :n AND network = :net'
+        );
         $st->execute([':n' => $newsId, ':net' => 'telegram']);
         return $st->fetch() ?: [];
     };
@@ -99,7 +102,12 @@ test('Повторная публикация: кнопка в админке о
 
     // Отправлено — обычная постановка в очередь больше не трогает запись,
     // иначе правка новости плодила бы посты в канале.
-    $pdo->exec("UPDATE social_posts SET status = 'sent', sent_at = NOW(), attempts = 1 WHERE news_id = {$newsId}");
+    $pdo->exec(
+        "UPDATE social_posts SET status = 'sent', sent_at = NOW(), attempts = 1,
+                remote_id = 'old-message', last_error = 'old-error',
+                locked_until = DATE_ADD(NOW(), INTERVAL 5 MINUTE)
+         WHERE news_id = {$newsId}"
+    );
     SocialPost::enqueue($newsId, 'telegram');
     assert_same('sent', $status($newsId)['status'], 'автопубликация не переотправляет');
 
@@ -108,6 +116,10 @@ test('Повторная публикация: кнопка в админке о
     $row = $status($newsId);
     assert_same('pending', $row['status'], 'кнопка публикации отправляет повторно');
     assert_same(0, (int) $row['attempts'], 'счётчик попыток сбрасывается');
+    assert_same(null, $row['remote_id'], 'ID старого сообщения очищается');
+    assert_same(null, $row['last_error'], 'старая ошибка очищается');
+    assert_same(null, $row['sent_at'], 'дата старой отправки очищается');
+    assert_same(null, $row['locked_until'], 'аренда старой попытки очищается');
 
     $pdo->exec("DELETE FROM social_posts WHERE news_id = {$newsId}");
     $pdo->exec("DELETE FROM news WHERE id = {$newsId}");
