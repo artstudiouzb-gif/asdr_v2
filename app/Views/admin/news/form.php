@@ -1,6 +1,7 @@
 <?php
 
 use App\Core\Csrf;
+use App\Core\TranslationGroupHelper;
 use App\Models\Language;
 
 $isEdit = !empty($news['id']);
@@ -26,6 +27,10 @@ if (!empty($news['published_at'])) {
     $publishedAtValue = str_replace(' ', 'T', substr((string) $news['published_at'], 0, 16));
 }
 $defaultCode = Language::defaultCode();
+$slugValue = (string) ($news['slug'] ?? '');
+if (TranslationGroupHelper::isProvisionalNewsSlug($slugValue)) {
+    $slugValue = '';
+}
 
 $keyPoints = (string) ($news['key_points'] ?? '');
 $eventMeta = (string) ($news['event_meta'] ?? '');
@@ -456,7 +461,7 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                     </div>
                     <div class="form-field">
                         <label class="u-inline-0b87e9e0af" for="slug">ЧПУ (slug)</label>
-                        <input type="text" id="slug" name="slug" value="<?= htmlspecialchars($news['slug'] ?? '', ENT_QUOTES) ?>" placeholder="оставьте пустым для автогенерации">
+                        <input type="text" id="slug" name="slug" value="<?= htmlspecialchars($slugValue, ENT_QUOTES) ?>" placeholder="сформируется из заголовка при сохранении">
                     </div>
                 </div>
             </div>
@@ -646,8 +651,8 @@ document.addEventListener('click', function(e) {
             <button type="submit" form="news_edit_form" class="btn btn--primary"><?= \App\Core\AdminUi::icon('save') ?>Сохранить изменения</button>
         <?php endif; ?>
         <a href="/admin/news" class="btn">Отмена</a>
-        <?php if ($isEdit && !empty($news['slug'])): ?>
-            <a href="/news/<?= htmlspecialchars((string) $news['slug'], ENT_QUOTES) ?>" class="btn btn--outline u-inline-a512aee2ba" target="_blank" rel="noopener">
+        <?php if ($isEdit && $slugValue !== ''): ?>
+            <a href="/news/<?= htmlspecialchars($slugValue, ENT_QUOTES) ?>" class="btn btn--outline u-inline-a512aee2ba" target="_blank" rel="noopener">
                 <?= \App\Core\AdminUi::icon('eye', 14) ?>
                 Предпросмотр ↗
             </a>

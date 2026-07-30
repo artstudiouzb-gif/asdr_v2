@@ -22,6 +22,9 @@ final class Slug
     public static function make(string $text): string
     {
         $text = mb_strtolower(trim($text));
+        // Апострофы являются частью узбекской орфографии, но не должны
+        // разрывать слово в URL: O‘zbekiston -> ozbekiston, g‘alaba -> galaba.
+        $text = str_replace(["'", '’', '‘', 'ʻ', 'ʼ', '`', '´'], '', $text);
         $transliterated = strtr($text, self::TRANSLIT);
         $ascii = preg_replace('/[^a-z0-9]+/u', '-', $transliterated) ?? '';
         $ascii = trim($ascii, '-');

@@ -9,7 +9,17 @@ use PDO;
 
 final class TranslationGroupHelper
 {
+    private const NEWS_TRANSLATION_DRAFT_SLUG_PREFIX = 'news-translation-draft-';
+
     private static bool $schemaEnsured = false;
+
+    public static function isProvisionalNewsSlug(string $slug): bool
+    {
+        return preg_match(
+            '/^' . preg_quote(self::NEWS_TRANSLATION_DRAFT_SLUG_PREFIX, '/') . '[a-f0-9]{12}(?:-\d+)?$/',
+            $slug
+        ) === 1;
+    }
 
     public static function ensureSchema(): void
     {
@@ -241,8 +251,11 @@ final class TranslationGroupHelper
                 return (int) $existingId;
             }
 
+            $slugBase = $table === 'news'
+                ? self::NEWS_TRANSLATION_DRAFT_SLUG_PREFIX . bin2hex(random_bytes(6))
+                : (string) ($orig['slug'] ?? 'item') . '-' . $targetLang;
             $newSlug = Slug::unique(
-                (string) ($orig['slug'] ?? 'item') . '-' . $targetLang,
+                $slugBase,
                 static function (string $candidate, ?int $_excludeId) use ($pdo, $table, $targetLang): bool {
                     $check = $pdo->prepare(
                         "SELECT COUNT(*) FROM {$table} WHERE slug = :slug AND lang = :lang AND deleted_at IS NULL"
@@ -257,28 +270,28 @@ final class TranslationGroupHelper
                      VALUES (:t, :s, :e, :b, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, 'draft', NOW(), :auth, :lang, :gid, NOW())"
                 );
                 $ins->execute([
-                    ':t' => ($orig['title'] ?? '') . ' (' . strtoupper($targetLang) . ')',
+                    ':t' => '',
                     ':s' => $newSlug,
-                    ':e' => $orig['excerpt'] ?? null,
-                    ':b' => $orig['badge'] ?? null,
-                    ':c' => $orig['content'] ?? null,
+                    ':e' => null,
+                    ':b' => null,
+                    ':c' => null,
                     ':img' => $orig['image'] ?? null,
                     ':v' => $orig['video_url'] ?? null,
                     ':a' => $orig['audio_url'] ?? null,
-                    ':at' => $orig['audio_title'] ?? null,
-                    ':h' => $orig['hashtags'] ?? null,
-                    ':pr' => $orig['press_release_url'] ?? null,
-                    ':kp' => $orig['key_points'] ?? null,
-                    ':em' => $orig['event_meta'] ?? null,
-                    ':tj' => $orig['timeline_json'] ?? null,
-                    ':dc' => $orig['docs'] ?? null,
-                    ':sn' => $orig['source_note'] ?? null,
+                    ':at' => null,
+                    ':h' => null,
+                    ':pr' => null,
+                    ':kp' => null,
+                    ':em' => null,
+                    ':tj' => null,
+                    ':dc' => null,
+                    ':sn' => null,
                     ':lt' => $orig['layout_type'] ?? 'standard',
                     ':sl' => $orig['sidebar_layout'] ?? 'right_sidebar',
                     ':fx' => $orig['focal_x'] ?? null,
                     ':fy' => $orig['focal_y'] ?? null,
-                    ':mt' => $orig['meta_title'] ?? null,
-                    ':md' => $orig['meta_description'] ?? null,
+                    ':mt' => null,
+                    ':md' => null,
                     ':auth' => $orig['author_id'] ?? null,
                     ':lang' => $targetLang,
                     ':gid' => $groupId,

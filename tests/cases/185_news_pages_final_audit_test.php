@@ -40,6 +40,39 @@ test('Расширенные переводы новостей обновляю�
     }
 });
 
+test('Новый перевод новости открывается без текста оригинала, а slug строится из нового заголовка', function (): void {
+    $helper = (string) file_get_contents(APP_ROOT . '/app/Core/TranslationGroupHelper.php');
+    $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/NewsController.php');
+    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/news/form.php');
+
+    assert_contains(
+        'NEWS_TRANSLATION_DRAFT_SLUG_PREFIX',
+        $helper,
+        'новая языковая версия получает отдельный технический slug до первого сохранения'
+    );
+    assert_contains('bin2hex(random_bytes(6))', $helper, 'технические slug нескольких черновиков не конфликтуют');
+    assert_contains("':t' => ''", $helper, 'заголовок перевода новости не копируется');
+    assert_contains("':e' => null", $helper, 'лид перевода новости не копируется');
+    assert_contains("':c' => null", $helper, 'текст перевода новости не копируется');
+    assert_contains("':mt' => null", $helper, 'SEO-заголовок перевода новости не копируется');
+    assert_contains("':md' => null", $helper, 'SEO-описание перевода новости не копируется');
+    assert_contains(
+        'TranslationGroupHelper::isProvisionalNewsSlug($existingSlug)',
+        $controller,
+        'при первом сохранении технический slug игнорируется'
+    );
+    assert_contains(
+        "\$rawSlug = \$slugInput !== '' ? \$slugInput : \$title",
+        $controller,
+        'пустой slug формируется из заголовка на языке перевода'
+    );
+    assert_contains(
+        'TranslationGroupHelper::isProvisionalNewsSlug($slugValue)',
+        $form,
+        'технический slug не показывается редактору'
+    );
+});
+
 test('Новости валидируют медиа, локализуют webhook и сохраняют полную историю', function (): void {
     $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/NewsController.php');
     $view = (string) file_get_contents(APP_ROOT . '/app/Views/site/news_show.php');

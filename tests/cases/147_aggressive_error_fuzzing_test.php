@@ -122,6 +122,8 @@ test('Aggressive Error & Fuzzing Test: роутинг, модель бейдже
     assert_same('goliblar', Slug::make('Ғолиблар'));
     assert_same('chora-tadbirlar', Slug::make('Чора-тадбирлар'));
     assert_same('sharhlar', Slug::make('Шарҳлар'));
+    assert_same('ozbekiston-taraqqiyoti', Slug::make('O‘zbekiston taraqqiyoti'));
+    assert_same('galaba-va-ozgarish', Slug::make('G‘alaba va o‘zgarish'));
 
     // 4. Агрессивный фаззинг поиска (SearchQuery & Search::query)
     $fuzzSearchQueries = [

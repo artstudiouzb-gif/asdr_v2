@@ -31,7 +31,16 @@ test('Мультиязычная архитектура: создание отд
     assert_same('uz', $uzNews['lang'], 'Узбекская новость имеет lang=uz');
     assert_same($origId, (int) $uzNews['translation_group_id'], 'Узбекская новость привязана к группе перевода оригинала');
     assert_same('original-news-ru', (string) News::findById($origId)['slug'], 'Slug оригинала не меняется при создании перевода');
-    assert_same('original-news-ru-uz', (string) $uzNews['slug'], 'Перевод получает свой slug');
+    assert_true(
+        TranslationGroupHelper::isProvisionalNewsSlug((string) $uzNews['slug']),
+        'До первого сохранения перевод получает внутренний технический slug'
+    );
+    assert_not_contains('-uz', (string) $uzNews['slug'], 'Технический slug не строится из slug исходного языка');
+    assert_same('', (string) $uzNews['title'], 'Заголовок перевода создаётся пустым');
+    assert_same('', (string) ($uzNews['excerpt'] ?? ''), 'Лид исходного языка не копируется');
+    assert_same('', (string) ($uzNews['content'] ?? ''), 'Текст исходного языка не копируется');
+    assert_same('', (string) ($uzNews['meta_title'] ?? ''), 'SEO-заголовок исходного языка не копируется');
+    assert_same('', (string) ($uzNews['meta_description'] ?? ''), 'SEO-описание исходного языка не копируется');
 
     \App\Core\Database::pdo()
         ->prepare('UPDATE news SET translation_group_id = id WHERE id = :id')
@@ -39,7 +48,7 @@ test('Мультиязычная архитектура: создание отд
     TranslationGroupHelper::autoLinkStandaloneTranslations();
     $relinkedUzNews = News::findById($uzId);
     assert_same($origId, (int) $relinkedUzNews['translation_group_id'], 'Автосвязывание восстановило группу перевода новости');
-    assert_same('original-news-ru-uz', (string) $relinkedUzNews['slug'], 'Автосвязывание не перезаписывает slug перевода');
+    assert_same((string) $uzNews['slug'], (string) $relinkedUzNews['slug'], 'Автосвязывание сохраняет технический slug перевода');
 
     $translations = TranslationGroupHelper::getTranslations('news', $origId);
     assert_true(isset($translations['ru']), 'В группе есть русский вариант');

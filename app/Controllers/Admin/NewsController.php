@@ -17,6 +17,7 @@ use App\Core\Locale;
 use App\Core\RateLimiter;
 use App\Core\Slug;
 use App\Core\TextProcessor;
+use App\Core\TranslationGroupHelper;
 use App\Core\View;
 use App\Models\Language;
 use App\Models\News;
@@ -533,6 +534,11 @@ final class NewsController
             ];
         }
 
+        $existingSlug = trim((string) ($existing['slug'] ?? ''));
+        if (TranslationGroupHelper::isProvisionalNewsSlug($existingSlug)
+            && ($slugInput === '' || $slugInput === $existingSlug)) {
+            $slugInput = '';
+        }
         $rawSlug = $slugInput !== '' ? $slugInput : $title;
         $slug = Slug::unique(
             $rawSlug,
