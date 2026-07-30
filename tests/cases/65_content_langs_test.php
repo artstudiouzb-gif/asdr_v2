@@ -217,6 +217,12 @@ test('Вью списков альбомов и видео: колонка «Я�
         assert_contains('<th>Языки</th>', $view);
         assert_contains('availableLangsForIds', $view);
         assert_contains('admin/layout/lang_badges', $view);
+        assert_contains("'translationEditUrl'", $view);
+
+        $form = (string) file_get_contents(dirname(__DIR__, 2) . "/app/Views/admin/{$section}/form.php");
+        assert_contains('id="translations"', $form);
+        assert_contains('translations[<?= htmlspecialchars($code, ENT_QUOTES) ?>][title]', $form);
+        assert_contains('translations[<?= htmlspecialchars($code, ENT_QUOTES) ?>][description]', $form);
     }
 });
 

@@ -73,5 +73,6 @@ final class PhotoAlbumTranslation
             ':title' => $data['title'] ?? null,
             ':description' => $data['description'] ?? null,
         ]);
+        \App\Core\Cache::forgetPrefix('page:');
     }
 }

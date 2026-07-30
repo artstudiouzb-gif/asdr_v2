@@ -2,12 +2,16 @@
 
 // Индикаторы языков контента для строки списка.
 // $siteLangs — активные языки сайта (коды); $has — языки, где контент есть (массив кодов или [langCode => targetId]).
+// Для модулей с переводами внутри одной формы translationEditUrl ведёт на
+// редактор записи, а недостающий язык — на якорь #translations.
 /** @var array<int, string> $siteLangs */
 $siteLangs = $siteLangs ?? [];
 /** @var array<string, int>|array<int, string> $has */
 $has = $has ?? [];
 $module = $module ?? 'pages';
 $origId = (int) ($origId ?? 0);
+$translationEditUrl = trim((string) ($translationEditUrl ?? ''));
+$translationDefaultCode = (string) ($translationDefaultCode ?? '');
 
 foreach ($siteLangs as $code):
     $targetId = null;
@@ -19,7 +23,13 @@ foreach ($siteLangs as $code):
 
     $on = ($targetId !== null);
     ?>
-    <?php if ($on): ?>
+    <?php if ($translationEditUrl !== ''): ?>
+        <?php $inlineEditUrl = $translationEditUrl . ($code !== $translationDefaultCode ? '#translations' : ''); ?>
+        <a class="<?= $on ? 'u-inline-da0ab63f64' : 'u-inline-7fca5bade1' ?>"
+           href="<?= htmlspecialchars($inlineEditUrl, ENT_QUOTES) ?>"
+           title="<?= $on ? 'Редактировать' : 'Добавить' ?> перевод на язык <?= htmlspecialchars(strtoupper($code), ENT_QUOTES) ?>"
+          ><?= $on ? '' : '+' ?><?= htmlspecialchars($code, ENT_QUOTES) ?></a>
+    <?php elseif ($on): ?>
         <a class="u-inline-da0ab63f64" href="/admin/<?= urlencode($module) ?>/<?= $targetId ?>/edit"
            title="Редактировать перевод на язык <?= htmlspecialchars(strtoupper($code), ENT_QUOTES) ?> (#<?= $targetId ?>)"
           ><?= htmlspecialchars($code, ENT_QUOTES) ?></a>

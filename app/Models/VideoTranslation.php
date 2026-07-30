@@ -73,5 +73,6 @@ final class VideoTranslation
             ':title' => $data['title'] ?? null,
             ':description' => $data['description'] ?? null,
         ]);
+        \App\Core\Cache::forgetPrefix('page:');
     }
 }

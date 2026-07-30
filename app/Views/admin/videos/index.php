@@ -39,7 +39,12 @@ $langMap = \App\Models\Video::availableLangsForIds(array_map(static fn ($i): int
             <?php foreach ($items as $item): ?>
                 <tr>
                     <td><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></td>
-                    <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? []]) ?></td>
+                    <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', [
+                        'siteLangs' => $siteLangs,
+                        'has' => $langMap[(int) $item['id']] ?? [],
+                        'translationEditUrl' => '/admin/videos/' . (int) $item['id'] . '/edit',
+                        'translationDefaultCode' => Language::defaultCode(),
+                    ]) ?></td>
                     <td><?= htmlspecialchars((string) ($item['duration'] ?? ''), ENT_QUOTES) ?></td>
                     <td>
                         <?php if ((int) $item['is_published'] === 1): ?>

@@ -180,6 +180,7 @@ final class PhotoAlbum
             ':c' => mb_substr(trim($coverUrl), 0, 500),
             ':p' => $published ? 1 : 0,
         ]);
+        self::bustPageCache();
 
         return (int) Database::pdo()->lastInsertId();
     }
@@ -197,6 +198,7 @@ final class PhotoAlbum
             ':f' => $featured ? 1 : 0,
             ':id' => $id,
         ]);
+        self::bustPageCache();
     }
 
     /**
@@ -233,6 +235,7 @@ final class PhotoAlbum
     public static function delete(int $id): void
     {
         Database::pdo()->prepare('DELETE FROM photo_albums WHERE id = :id')->execute([':id' => $id]);
+        self::bustPageCache();
     }
 
     public static function slugExists(string $slug): bool
@@ -277,6 +280,7 @@ final class PhotoAlbum
             ':c' => mb_substr(trim($caption), 0, 255),
             ':o' => $next,
         ]);
+        self::bustPageCache();
 
         return (int) Database::pdo()->lastInsertId();
     }
@@ -284,6 +288,7 @@ final class PhotoAlbum
     public static function deleteImage(int $imageId): void
     {
         Database::pdo()->prepare('DELETE FROM photo_album_images WHERE id = :id')->execute([':id' => $imageId]);
+        self::bustPageCache();
     }
 
     /** Обложка альбома: заданная вручную или первое фото. */
@@ -299,5 +304,10 @@ final class PhotoAlbum
         $stmt->execute([':a' => (int) $album['id']]);
 
         return (string) ($stmt->fetchColumn() ?: '');
+    }
+
+    private static function bustPageCache(): void
+    {
+        \App\Core\Cache::forgetPrefix('page:');
     }
 }

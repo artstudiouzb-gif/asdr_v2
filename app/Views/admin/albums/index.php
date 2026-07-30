@@ -40,7 +40,12 @@ $langMap = \App\Models\PhotoAlbum::availableLangsForIds(array_map(static fn ($i)
                 <tr>
                     <td><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></td>
                     <td><code class="u-inline-e71ae94b55">/albums/<?= htmlspecialchars((string) $item['slug'], ENT_QUOTES) ?></code></td>
-                    <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? []]) ?></td>
+                    <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', [
+                        'siteLangs' => $siteLangs,
+                        'has' => $langMap[(int) $item['id']] ?? [],
+                        'translationEditUrl' => '/admin/albums/' . (int) $item['id'] . '/edit',
+                        'translationDefaultCode' => Language::defaultCode(),
+                    ]) ?></td>
                     <td><?= (int) $item['images_count'] ?></td>
                     <td>
                         <?php if ((int) $item['is_published'] === 1): ?>

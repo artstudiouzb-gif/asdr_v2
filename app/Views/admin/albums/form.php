@@ -25,11 +25,11 @@ $translationLangs = array_values(array_filter(
     <form method="post" action="/admin/albums/<?= (int) $album['id'] ?>/update" class="form-grid">
         <?= Csrf::field() ?>
         <div class="form-field">
-            <label for="title">Название</label>
+            <label for="title">Название (<?= htmlspecialchars(strtoupper($defaultCode), ENT_QUOTES) ?> — основной язык)</label>
             <input type="text" id="title" name="title" value="<?= htmlspecialchars((string) $album['title'], ENT_QUOTES) ?>" required>
         </div>
         <div class="form-field">
-            <label for="description">Описание (необязательно)</label>
+            <label for="description">Описание (<?= htmlspecialchars(strtoupper($defaultCode), ENT_QUOTES) ?>, необязательно)</label>
             <textarea id="description" name="description" rows="3"><?= htmlspecialchars((string) ($album['description'] ?? ''), ENT_QUOTES) ?></textarea>
         </div>
         <div class="form-field">
@@ -46,6 +46,45 @@ $translationLangs = array_values(array_filter(
             <input type="checkbox" id="is_featured" name="is_featured" value="1" <?= (int) ($album['is_featured'] ?? 0) === 1 ? 'checked' : '' ?>>
             <label for="is_featured">Показать на главной (блок «Медиа»)</label>
         </div>
+        <?php if ($translationLangs !== []): ?>
+            <section id="translations" class="u-inline-d31dcf37c0">
+                <h3 class="u-inline-c35d85373e">
+                    <?= \App\Core\AdminUi::icon('globe') ?> Переводы альбома
+                </h3>
+                <p class="form-hint">Заполните название и описание для других активных языков. Пустое поле использует текст основного языка.</p>
+                <?php foreach ($translationLangs as $language): ?>
+                    <?php
+                    $code = (string) $language['code'];
+                    $translation = $translations[$code] ?? [];
+                    ?>
+                    <div class="form-card u-inline-7dde5e56b3">
+                        <h4 class="u-inline-c35d85373e">
+                            <?= htmlspecialchars((string) $language['name'], ENT_QUOTES) ?>
+                            (<?= htmlspecialchars(strtoupper($code), ENT_QUOTES) ?>)
+                        </h4>
+                        <div class="form-field">
+                            <label for="album-title-<?= htmlspecialchars($code, ENT_QUOTES) ?>">Название (<?= htmlspecialchars(strtoupper($code), ENT_QUOTES) ?>)</label>
+                            <input
+                                type="text"
+                                id="album-title-<?= htmlspecialchars($code, ENT_QUOTES) ?>"
+                                name="translations[<?= htmlspecialchars($code, ENT_QUOTES) ?>][title]"
+                                value="<?= htmlspecialchars((string) ($translation['title'] ?? ''), ENT_QUOTES) ?>"
+                                placeholder="Перевод названия на <?= htmlspecialchars((string) $language['name'], ENT_QUOTES) ?>"
+                            >
+                        </div>
+                        <div class="form-field">
+                            <label for="album-description-<?= htmlspecialchars($code, ENT_QUOTES) ?>">Описание (<?= htmlspecialchars(strtoupper($code), ENT_QUOTES) ?>)</label>
+                            <textarea
+                                id="album-description-<?= htmlspecialchars($code, ENT_QUOTES) ?>"
+                                name="translations[<?= htmlspecialchars($code, ENT_QUOTES) ?>][description]"
+                                rows="3"
+                                placeholder="Перевод описания на <?= htmlspecialchars((string) $language['name'], ENT_QUOTES) ?>"
+                            ><?= htmlspecialchars((string) ($translation['description'] ?? ''), ENT_QUOTES) ?></textarea>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </section>
+        <?php endif; ?>
         <div class="form-actions">
             <button type="submit" class="btn btn--primary"><?= \App\Core\AdminUi::icon('save') ?>Сохранить</button>
         </div>
