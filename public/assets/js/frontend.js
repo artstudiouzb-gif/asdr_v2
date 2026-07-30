@@ -332,6 +332,10 @@
         var menus = document.querySelectorAll('[data-priority-menu]');
         if (!menus.length) { return; }
         var desktop = window.matchMedia('(min-width: 721px)');
+        // Небольшой запас поглощает субпиксельное округление шрифтов и flex.
+        // Реальное переполнение определяем по геометрии видимых пунктов:
+        // scrollWidth меню может включать скрытые абсолютные подменю.
+        var fitTolerance = 4;
         var frame = 0;
 
         var isMenuItem = function (item) {
@@ -382,21 +386,22 @@
             var boundary = menu.closest('.site-header__zone, .site-nav__inner, .site-topbar__zone') || header;
             var boundaryRect = boundary.getBoundingClientRect();
             var menuRect = menu.getBoundingClientRect();
-            var outsideBoundary = menuRect.left < boundaryRect.left - 1
-                || menuRect.right > boundaryRect.right + 1
-                || menuRect.width > boundaryRect.width + 1;
+            var outsideBoundary = menuRect.left < boundaryRect.left - fitTolerance
+                || menuRect.right > boundaryRect.right + fitTolerance
+                || menuRect.width > boundaryRect.width + fitTolerance;
             var itemOutsideMenu = items.some(function (item) {
                 var itemRect = item.getBoundingClientRect();
-                return itemRect.left < menuRect.left - 1 || itemRect.right > menuRect.right + 1;
+                return itemRect.left < menuRect.left - fitTolerance
+                    || itemRect.right > menuRect.right + fitTolerance;
             });
             if (items.length < 2) {
-                return outsideBoundary || itemOutsideMenu || menu.scrollWidth > menu.clientWidth + 1;
+                return outsideBoundary || itemOutsideMenu;
             }
             var firstTop = items[0].offsetTop;
             var wrapped = items.some(function (item) {
                 return Math.abs(item.offsetTop - firstTop) > 2;
             });
-            return outsideBoundary || itemOutsideMenu || wrapped || menu.scrollWidth > menu.clientWidth + 1;
+            return outsideBoundary || itemOutsideMenu || wrapped;
         };
         var fitMenu = function (header, menu) {
             var parts = menuParts(menu);

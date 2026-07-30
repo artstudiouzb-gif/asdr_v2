@@ -21,6 +21,8 @@ test('Desktop priority navigation сохраняет порядок пункто
     assert_contains("while (items.length > 1 && doesNotFit(header, menu, parts))", $script);
     assert_contains('itemRect.left < menuRect.left', $script);
     assert_contains('itemRect.right > menuRect.right', $script);
+    assert_contains('var fitTolerance = 4;', $script);
+    assert_not_contains('menu.scrollWidth > menu.clientWidth', $script);
     assert_contains("toggle.setAttribute('aria-expanded'", $script);
     assert_contains("desktop.matches", $script);
 });

@@ -24,10 +24,10 @@
       "/assets/js/frontend.js",
       "/assets/js/forms.js"
     ],
-    "sourceSha256": "194034770b296a0684570b2021b251dfa93763cab712fe5dfa1ceca255ac4196",
-    "sha256": "48cb46ea96a850db05045363c234a87a252bbbe78d09aa386d245aee18975c10",
-    "raw": 55758,
-    "gzip": 14784,
-    "brotli": 12944
+    "sourceSha256": "35b7889adc18a69ed3c0d180b3d560d99b99258cbc89cef9fe45aebb7f72bcb5",
+    "sha256": "3afbe162fafe791a5cdc8ae40a53f2bfb7485b8e2b081d786f57e62c9edcf677",
+    "raw": 55696,
+    "gzip": 14773,
+    "brotli": 12902
   }
 }
