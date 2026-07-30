@@ -29,6 +29,7 @@ $shortFile = static function (string $file): string {
 };
 ?>
 <div class="u-inline-f94566b02a">
+    <a class="btn btn--small" href="/admin/security">Центр безопасности</a>
     <a class="btn btn--small" href="/admin/audit">Действия администраторов</a>
     <a class="btn btn--small btn--primary" href="/admin/audit/errors">Ошибки сайта</a>
 </div>

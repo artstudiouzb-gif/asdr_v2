@@ -83,7 +83,6 @@ $router->post('/admin/login', [AdminAuthController::class, 'login']);
 $router->get('/admin/login/2fa', [AdminAuthController::class, 'showTwoFactor']);
 $router->post('/admin/login/2fa', [AdminAuthController::class, 'verifyTwoFactor']);
 $router->post('/admin/login/2fa/resend', [AdminAuthController::class, 'resendCode']);
-$router->get('/admin/logout', [AdminAuthController::class, 'logout']);
 $router->post('/admin/logout', [AdminAuthController::class, 'logout']);
 
 // --- Admin: восстановление пароля (без требования логина) ---

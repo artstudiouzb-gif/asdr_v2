@@ -312,7 +312,12 @@ $fillPointsStr = "$padding," . ($height - $padding) . " $pointsStr " . ($width -
                         <div class="activity-item__desc">
                             <?php $m = strtoupper((string) ($log['method'] ?? '')); ?>
                             <span class="activity-item__badge activity-item__badge--<?= strtolower($m) ?>"><?= htmlspecialchars($m, ENT_QUOTES) ?></span>
-                            <code><?= htmlspecialchars((string) ($log['path'] ?? ''), ENT_QUOTES) ?></code>
+                            <?php if ($m === 'AUTH'): ?>
+                                <?php $authMeta = \App\Models\AuditLog::authEventMeta((string) ($log['path'] ?? '')); ?>
+                                <span><?= htmlspecialchars($authMeta['label'], ENT_QUOTES) ?></span>
+                            <?php else: ?>
+                                <code><?= htmlspecialchars((string) ($log['path'] ?? ''), ENT_QUOTES) ?></code>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>

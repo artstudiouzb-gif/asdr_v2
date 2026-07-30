@@ -8,6 +8,7 @@ use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\Flash;
 use App\Core\View;
+use App\Models\User;
 
 /**
  * Вход в админку: пароль + одноразовый код, который приходит в Telegram от
@@ -47,6 +48,7 @@ final class AuthController
                 header('Location: /admin');
                 exit;
             case 'setup_required':
+                \App\Models\AuditLog::auth('login.setup-required', (int) ($_SESSION['user_id'] ?? 0) ?: null, $username);
                 \App\Core\Flash::error('Для доступа к панели сначала настройте код входа через Telegram.');
                 header('Location: /admin/profile');
                 exit;
@@ -55,6 +57,7 @@ final class AuthController
                 header('Location: /admin/login/2fa');
                 exit;
             case 'send_failed':
+                \App\Models\AuditLog::auth('login.send-failed', null, $username);
                 View::render('admin/auth/login', [
                     'error' => 'Не удалось отправить код в Telegram. Проверьте токен шлюза в настройках и телефон пользователя, либо повторите позже.',
                 ]);
@@ -93,13 +96,15 @@ final class AuthController
 
         $code = trim((string) ($_POST['code'] ?? ''));
         $pendingId = (int) ($_SESSION['pending_user_id'] ?? 0) ?: null;
+        $pendingUser = $pendingId ? User::findById($pendingId) : null;
+        $pendingUsername = (string) ($pendingUser['username'] ?? '');
 
         if (Auth::completeTwoFactor($code)) {
             \App\Models\AuditLog::auth('2fa', (int) ($_SESSION['user_id'] ?? 0) ?: null, (string) ($_SESSION['username'] ?? ''));
             header('Location: /admin');
             exit;
         }
-        \App\Models\AuditLog::auth('2fa.failed', $pendingId, '');
+        \App\Models\AuditLog::auth('2fa.failed', $pendingId, $pendingUsername);
 
         // Просроченный/сброшенный pending уводит на логин, неверный код — ошибка.
         if (empty($_SESSION['pending_user_id'])) {
@@ -121,9 +126,18 @@ final class AuthController
             exit;
         }
 
+        $pendingId = (int) ($_SESSION['pending_user_id'] ?? 0) ?: null;
+        $pendingUser = $pendingId ? User::findById($pendingId) : null;
+        $resent = Auth::resendCode();
+        \App\Models\AuditLog::auth(
+            $resent ? '2fa.resent' : '2fa.resend-failed',
+            $pendingId,
+            (string) ($pendingUser['username'] ?? '')
+        );
+
         View::render('admin/auth/2fa', [
             'error' => null,
-            'notice' => Auth::resendCode()
+            'notice' => $resent
                 ? 'Новый код отправлен в Telegram.'
                 : 'Не удалось отправить код (превышен лимит или шлюз недоступен). Подождите и попробуйте снова.',
         ]);
@@ -131,9 +145,7 @@ final class AuthController
 
     public function logout(): void
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            Csrf::verifyRequest();
-        }
+        Csrf::verifyRequest();
         \App\Models\AuditLog::auth('logout', (int) ($_SESSION['user_id'] ?? 0) ?: null, (string) ($_SESSION['username'] ?? ''));
         Auth::logout();
         header('Location: /admin/login');

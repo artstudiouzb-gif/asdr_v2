@@ -70,6 +70,9 @@ $e = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES);
             <?= $e($username) ?> (<?= $e($role) ?>)
         </span>
         <a href="/admin/profile" class="app-admin-bar__btn">Профиль</a>
-        <a href="/admin/logout" class="app-admin-bar__btn">Выйти</a>
+        <form class="u-inline-1654353117" method="post" action="/admin/logout">
+            <input type="hidden" name="csrf_token" value="<?= $e($csrfToken) ?>">
+            <button type="submit" class="app-admin-bar__btn">Выйти</button>
+        </form>
     </div>
 </aside>

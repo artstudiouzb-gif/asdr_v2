@@ -13,6 +13,8 @@ require __DIR__ . '/../layout/header.php';
 
 // Человекочитаемая метка раздела панели по началу пути.
 $sectionLabels = [
+    '/admin/settings/demo-content' => 'Демо-контент',
+    '/admin/forms/submissions' => 'Заявки форм',
     '/admin/pages' => 'Страницы',
     '/admin/news' => 'Новости',
     '/admin/projects' => 'Проекты',
@@ -24,20 +26,28 @@ $sectionLabels = [
     '/admin/menu' => 'Меню',
     '/admin/widgets' => 'Виджеты',
     '/admin/header' => 'Шапка сайта',
+    '/admin/footer' => 'Подвал сайта',
     '/admin/languages' => 'Языки',
     '/admin/content-types' => 'Типы контента',
     '/admin/content' => 'Контент',
     '/admin/social' => 'Соцсети',
+    '/admin/telegram' => 'Telegram',
     '/admin/webhooks' => 'Вебхуки',
+    '/admin/redirects' => 'Редиректы',
+    '/admin/performance' => 'Производительность',
+    '/admin/security' => 'Безопасность',
+    '/admin/audit' => 'Журналы',
     '/admin/settings' => 'Настройки',
     '/admin/users' => 'Пользователи',
     '/admin/profile' => 'Профиль',
     '/admin/repository' => 'Хранилище',
     '/admin/backup' => 'Бэкапы',
-    '/admin/settings/demo-content' => 'Демо-контент',
     '/admin/logout' => 'Выход',
 ];
 $sectionOf = static function (string $path) use ($sectionLabels): string {
+    if (str_starts_with($path, 'auth/')) {
+        return 'Вход и защита';
+    }
     foreach ($sectionLabels as $prefix => $label) {
         if (str_starts_with($path, $prefix)) {
             return $label;
@@ -50,6 +60,7 @@ $sectionOf = static function (string $path) use ($sectionLabels): string {
 $qs = static function (int $p) use ($filters): string {
     $params = array_filter([
         'user_id' => $filters['user_id'] ?: null,
+        'method' => $filters['method'] !== '' ? $filters['method'] : null,
         'q' => $filters['q'] !== '' ? $filters['q'] : null,
         'from' => $filters['from'] !== '' ? $filters['from'] : null,
         'to' => $filters['to'] !== '' ? $filters['to'] : null,
@@ -59,11 +70,12 @@ $qs = static function (int $p) use ($filters): string {
 };
 ?>
 <div class="u-inline-f94566b02a">
+    <a class="btn btn--small" href="/admin/security">Центр безопасности</a>
     <a class="btn btn--small btn--primary" href="/admin/audit">Действия администраторов</a>
     <a class="btn btn--small" href="/admin/audit/errors">Ошибки сайта</a>
 </div>
 
-<p class="form-hint">Все изменяющие действия администраторов в панели: кто, что, когда и с какого IP. Входы/выходы и события безопасности дополнительно пишутся в security-лог. Записи старше 180 дней удаляются автоматически.</p>
+<p class="form-hint">Изменения в панели и события входа: кто, что, когда и с какого IP. Тела форм, пароли и токены не сохраняются. Записи старше <?= (int) \App\Models\AuditLog::RETENTION_DAYS ?> дней удаляются автоматически.</p>
 
 <form method="get" action="/admin/audit" class="form-grid form-grid--inline u-inline-6f145d537e">
     <div class="form-field u-inline-1da9facb4d">
@@ -78,8 +90,19 @@ $qs = static function (int $p) use ($filters): string {
         </select>
     </div>
     <div class="form-field u-inline-1da9facb4d">
-        <label for="f_q">Путь содержит</label>
-        <input type="text" id="f_q" name="q" value="<?= htmlspecialchars($filters['q'], ENT_QUOTES) ?>" placeholder="например: pages">
+        <label for="f_method">Тип события</label>
+        <select id="f_method" name="method">
+            <option value="">— все —</option>
+            <?php foreach (['AUTH' => 'Вход и защита', 'POST' => 'Изменение', 'PUT' => 'Обновление', 'PATCH' => 'Частичное обновление', 'DELETE' => 'Удаление'] as $method => $methodLabel): ?>
+                <option value="<?= $method ?>" <?= $filters['method'] === $method ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($methodLabel, ENT_QUOTES) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <div class="form-field u-inline-1da9facb4d">
+        <label for="f_q">Адрес или событие содержит</label>
+        <input type="text" id="f_q" name="q" maxlength="200" value="<?= htmlspecialchars($filters['q'], ENT_QUOTES) ?>" placeholder="например: pages или login">
     </div>
     <div class="form-field u-inline-1da9facb4d">
         <label for="f_from">С даты</label>
@@ -106,11 +129,31 @@ $qs = static function (int $p) use ($filters): string {
         </thead>
         <tbody>
             <?php foreach ($items as $item): ?>
+                <?php
+                $method = strtoupper((string) ($item['method'] ?? ''));
+                $path = (string) ($item['path'] ?? '');
+                $authMeta = $method === 'AUTH' ? \App\Models\AuditLog::authEventMeta($path) : null;
+                $actionLabels = [
+                    'POST' => 'Изменение данных',
+                    'PUT' => 'Обновление данных',
+                    'PATCH' => 'Частичное обновление',
+                    'DELETE' => 'Удаление данных',
+                ];
+                ?>
                 <tr>
                     <td class="u-inline-a9efa5449f"><?= htmlspecialchars((string) $item['created_at'], ENT_QUOTES) ?></td>
-                    <td><?= htmlspecialchars((string) $item['username'], ENT_QUOTES) ?></td>
-                    <td><?= htmlspecialchars($sectionOf((string) $item['path']), ENT_QUOTES) ?></td>
-                    <td><code class="u-inline-e71ae94b55"><?= htmlspecialchars($item['method'] . ' ' . $item['path'], ENT_QUOTES) ?></code></td>
+                    <td><?= htmlspecialchars((string) ($item['username'] ?: 'Не определён'), ENT_QUOTES) ?></td>
+                    <td><?= htmlspecialchars($sectionOf($path), ENT_QUOTES) ?></td>
+                    <td>
+                        <?php if ($authMeta !== null): ?>
+                            <span class="status-badge status-badge--<?= htmlspecialchars($authMeta['tone'], ENT_QUOTES) ?>">
+                                <?= htmlspecialchars($authMeta['label'], ENT_QUOTES) ?>
+                            </span>
+                        <?php else: ?>
+                            <strong><?= htmlspecialchars($actionLabels[$method] ?? $method, ENT_QUOTES) ?></strong>
+                        <?php endif; ?>
+                        <br><code class="u-inline-e71ae94b55"><?= htmlspecialchars($method . ' ' . $path, ENT_QUOTES) ?></code>
+                    </td>
                     <td><?= htmlspecialchars((string) ($item['ip'] ?? '—'), ENT_QUOTES) ?></td>
                 </tr>
             <?php endforeach; ?>

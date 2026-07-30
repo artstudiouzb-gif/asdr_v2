@@ -6,7 +6,11 @@ namespace App\Controllers\Admin;
 
 use App\Core\Auth;
 use App\Core\Database;
+use App\Core\TelegramBot;
+use App\Core\TelegramGateway;
 use App\Core\View;
+use App\Models\AuditLog;
+use App\Models\SessionRegistry;
 
 final class SecurityController
 {
@@ -14,27 +18,48 @@ final class SecurityController
     {
         Auth::requireSuperAdmin();
 
-        $auditLogs = [];
+        $currentUser = Auth::user();
+        $authEvents = [];
+        $authSummary = [
+            'total' => 0,
+            'successful' => 0,
+            'failed' => 0,
+            'locked' => 0,
+            'delivery_failed' => 0,
+        ];
+        $activeSessions = 0;
         if (Database::isConnected()) {
             try {
-                $stmt = Database::pdo()->query("SELECT * FROM audit_log ORDER BY id DESC LIMIT 50");
-                $auditLogs = $stmt ? $stmt->fetchAll() : [];
+                $authEvents = AuditLog::recentAuthEvents(50);
+                $authSummary = AuditLog::authSummary(24);
+                $activeSessions = $currentUser
+                    ? count(SessionRegistry::forUser((int) $currentUser['id']))
+                    : 0;
             } catch (\Throwable) {
-                $auditLogs = [];
+                $authEvents = [];
             }
         }
 
         $logFile = APP_ROOT . "/storage/logs/security.log";
-        $securityEvents = [];
+        $technicalEvents = [];
         if (is_file($logFile)) {
             $lines = array_reverse(file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: []);
-            $securityEvents = array_slice($lines, 0, 30);
+            $technicalEvents = array_slice($lines, 0, 30);
         }
 
+        $botLinked = TelegramBot::isConfigured()
+            && (int) ($currentUser['telegram_chat_id'] ?? 0) > 0;
+        $gatewayLinked = TelegramGateway::isConfigured()
+            && trim((string) ($currentUser['phone'] ?? '')) !== '';
+
         View::render("admin/security/index", [
-            "auditLogs" => $auditLogs,
-            "securityEvents" => $securityEvents,
-            "currentUser" => Auth::user(),
+            "authEvents" => $authEvents,
+            "authSummary" => $authSummary,
+            "technicalEvents" => $technicalEvents,
+            "currentUser" => $currentUser,
+            "activeSessions" => $activeSessions,
+            "botLinked" => $botLinked,
+            "gatewayLinked" => $gatewayLinked,
         ]);
     }
 }

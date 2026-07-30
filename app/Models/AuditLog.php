@@ -18,6 +18,31 @@ final class AuditLog
     public const RETENTION_DAYS = 180;
 
     /**
+     * Понятное представление служебного auth/<event> для интерфейса.
+     *
+     * @return array{label:string,tone:string}
+     */
+    public static function authEventMeta(string $path): array
+    {
+        $event = str_starts_with($path, 'auth/') ? substr($path, 5) : $path;
+        $events = [
+            'login' => ['label' => 'Вход выполнен', 'tone' => 'success'],
+            'login.pending-2fa' => ['label' => 'Пароль принят, ожидается код', 'tone' => 'info'],
+            'login.setup-required' => ['label' => 'Вход ограничен до настройки 2FA', 'tone' => 'warning'],
+            'login.send-failed' => ['label' => 'Не удалось отправить код входа', 'tone' => 'danger'],
+            'login.locked' => ['label' => 'Вход временно заблокирован', 'tone' => 'danger'],
+            'login.failed' => ['label' => 'Неверный логин или пароль', 'tone' => 'danger'],
+            '2fa' => ['label' => 'Код входа подтверждён', 'tone' => 'success'],
+            '2fa.failed' => ['label' => 'Неверный или просроченный код', 'tone' => 'danger'],
+            '2fa.resent' => ['label' => 'Код входа отправлен повторно', 'tone' => 'info'],
+            '2fa.resend-failed' => ['label' => 'Повторная отправка кода отклонена', 'tone' => 'warning'],
+            'logout' => ['label' => 'Выход из панели', 'tone' => 'info'],
+        ];
+
+        return $events[$event] ?? ['label' => 'Событие аутентификации', 'tone' => 'info'];
+    }
+
+    /**
      * Изредка (в среднем 1 запись из 50) подчищает старьё прямо при записи —
      * чтобы журнал был самоограничен даже без Cron (gdpr_cleanup). Дублирует
      * ежесуточную очистку, но не полагается на неё. Тихо глотает ошибки.
@@ -45,8 +70,10 @@ final class AuditLog
         }
 
         $path = (string) (parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH) ?: '');
-        if (!str_starts_with($path, '/admin') || str_starts_with($path, '/admin/login')) {
-            return; // не панель или ещё не аутентифицирован (вход журналируется security-логом)
+        if (!str_starts_with($path, '/admin')
+            || str_starts_with($path, '/admin/login')
+            || $path === '/admin/logout') {
+            return; // вход и выход журналируются отдельно как понятные AUTH-события
         }
         if (empty($_SESSION['user_id'])) {
             return;
@@ -99,7 +126,7 @@ final class AuditLog
     /**
      * Поиск с фильтрами и пагинацией.
      *
-     * @param array{user_id?: int, q?: string, from?: string, to?: string} $filters
+     * @param array{user_id?: int, method?: string, q?: string, from?: string, to?: string} $filters
      * @return array{items: array<int, array<string, mixed>>, total: int}
      */
     public static function search(array $filters = [], int $page = 1, int $perPage = 50): array
@@ -109,6 +136,11 @@ final class AuditLog
         if (!empty($filters['user_id'])) {
             $where[] = 'user_id = :uid';
             $params[':uid'] = (int) $filters['user_id'];
+        }
+        $method = strtoupper((string) ($filters['method'] ?? ''));
+        if (in_array($method, ['AUTH', 'POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+            $where[] = 'method = :method';
+            $params[':method'] = $method;
         }
         if (!empty($filters['q'])) {
             $where[] = 'path LIKE :q';
@@ -140,6 +172,46 @@ final class AuditLog
         $stmt->execute($params);
 
         return ['items' => $stmt->fetchAll(), 'total' => $total];
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public static function recentAuthEvents(int $limit = 50): array
+    {
+        $limit = max(1, min(200, $limit));
+
+        return Database::pdo()->query(
+            "SELECT * FROM audit_log WHERE method = 'AUTH' ORDER BY id DESC LIMIT {$limit}"
+        )->fetchAll();
+    }
+
+    /**
+     * Сводка событий входа за последние N часов.
+     *
+     * @return array{total:int,successful:int,failed:int,locked:int,delivery_failed:int}
+     */
+    public static function authSummary(int $hours = 24): array
+    {
+        $hours = max(1, min(24 * 30, $hours));
+        $stmt = Database::pdo()->query(
+            "SELECT
+                COUNT(*) AS total,
+                COALESCE(SUM(path IN ('auth/login', 'auth/2fa')), 0) AS successful,
+                COALESCE(SUM(path IN ('auth/login.failed', 'auth/2fa.failed')), 0) AS failed,
+                COALESCE(SUM(path = 'auth/login.locked'), 0) AS locked,
+                COALESCE(SUM(path = 'auth/login.send-failed'), 0) AS delivery_failed
+             FROM audit_log
+             WHERE method = 'AUTH'
+               AND created_at >= DATE_SUB(NOW(), INTERVAL {$hours} HOUR)"
+        );
+        $row = $stmt->fetch() ?: [];
+
+        return [
+            'total' => (int) ($row['total'] ?? 0),
+            'successful' => (int) ($row['successful'] ?? 0),
+            'failed' => (int) ($row['failed'] ?? 0),
+            'locked' => (int) ($row['locked'] ?? 0),
+            'delivery_failed' => (int) ($row['delivery_failed'] ?? 0),
+        ];
     }
 
     /**
