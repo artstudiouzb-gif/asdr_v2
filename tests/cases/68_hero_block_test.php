@@ -46,31 +46,31 @@ test('Hero: YouTube использует изображение как poster д
         'image' => '/uploads/public/hero-poster.jpg',
     ]);
 
-    assert_contains('class="block-hero__youtube-poster"', $html);
+    assert_contains('class="block-hero__youtube-poster media-position--center-center', $html);
     assert_contains('src="/uploads/public/hero-poster.jpg"', $html);
     assert_contains('fetchpriority="high"', $html);
 });
 
-test('Hero: сохранённая ссылка YouTube включает фон даже при старом bg_type none', function () {
+test('Hero: режим без фона не активирует сохранённый YouTube URL', function () {
     $html = render_hero([
         'title' => 'Заголовок',
         'bg_type' => 'none',
         'youtube_url' => 'https://www.youtube.com/watch?v=s_lKTkRGKc8',
     ]);
 
-    assert_contains('youtube-nocookie.com/embed/s_lKTkRGKc8', $html);
-    assert_contains('block-hero--video', $html);
-    assert_not_contains('block-hero--plain', $html);
+    assert_not_contains('youtube-nocookie.com/embed/s_lKTkRGKc8', $html);
+    assert_not_contains('block-hero--video', $html);
+    assert_contains('block-hero--plain', $html);
 });
 
-test('Hero: сохранённый MP4 включает фон даже при старом bg_type none', function () {
+test('Hero: выбранный MP4 рендерится как безопасный фоновый ролик', function () {
     $html = render_hero([
         'title' => 'Заголовок',
-        'bg_type' => 'none',
+        'bg_type' => 'video',
         'video_url' => '/uploads/public/hero.mp4',
     ]);
 
-    assert_contains('<video class="block-hero__video" data-hero-background-video autoplay muted loop playsinline webkit-playsinline preload="metadata"', $html);
+    assert_contains('<video class="block-hero__video media-position--center-center media-position-mobile--center-center"', $html);
     assert_contains('<source src="/uploads/public/hero.mp4" type="video/mp4">', $html);
     assert_not_contains(' controls ', $html);
     assert_contains('block-hero--video', $html);
@@ -142,9 +142,10 @@ test('Hero: overlay по умолчанию не выводится и не за
     assert_not_contains('--hero-scrim-', $html);
 });
 
-test('Hero: старое затемнение без переключателя остаётся включённым', function () {
+test('Hero: затемнение включается явно и поддерживает два режима', function () {
     $gradient = render_hero([
         'title' => 'X', 'bg_type' => 'image', 'image' => '/uploads/public/x.jpg',
+        'overlay_enabled' => true, 'overlay_mode' => 'gradient',
         'overlay_color' => '#123456', 'overlay_opacity' => 55,
     ]);
     assert_contains('block-hero__scrim', $gradient);
@@ -153,7 +154,8 @@ test('Hero: старое затемнение без переключателя 
 
     $solid = render_hero([
         'title' => 'X', 'bg_type' => 'image', 'image' => '/uploads/public/x.jpg',
-        'overlay_color' => '#123456', 'overlay_direction' => 'solid',
+        'overlay_enabled' => true, 'overlay_mode' => 'solid',
+        'overlay_color' => '#123456', 'overlay_direction' => 'auto',
     ]);
     assert_contains('block-hero__scrim--solid', $solid);
 
@@ -239,10 +241,11 @@ test('Hero: свой цвет фона под текстом — не завис
     assert_true(str_contains($html, 'linear-gradient(90deg, rgba(18,58,107'), 'градиент выбранного цвета');
 });
 
-test('Hero: без bg_type определяет тип по заполненным полям (обратная совместимость)', function () {
+test('Hero: без выбранного типа не показывает случайно заполненное медиа', function () {
     $html = render_hero(['title' => 'X', 'image' => '/uploads/public/x.jpg']);
-    assert_true(str_contains($html, 'block-hero--media'), 'старый блок с картинкой = медиа-герой');
-    assert_true(!str_contains($html, 'block-hero--video'), 'без видео нет video-класса');
+    assert_not_contains('block-hero--media', $html);
+    assert_not_contains('/uploads/public/x.jpg', $html);
+    assert_contains('block-hero--plain', $html);
 });
 
 test('Hero: небезопасная произвольная высота не попадает в style', function () {

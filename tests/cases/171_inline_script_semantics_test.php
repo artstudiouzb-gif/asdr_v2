@@ -51,8 +51,8 @@ test('all public block templates forbid inline style and script markup', functio
 test('dynamic block presentation is emitted as scoped CSS, not style attributes', function (): void {
     $cases = [
         'cta' => ['title' => 'CTA', 'bg_color' => '#112233'],
-        'cta_band' => ['title' => 'Band', 'text_color' => '#ffffff'],
-        'banner' => ['title' => 'Banner', 'image' => '/uploads/public/banner.jpg'],
+        'cta-band' => ['variant' => 'band', 'title' => 'Band', 'text_color' => '#ffffff'],
+        'cta-media' => ['variant' => 'media-dark', 'title' => 'Banner', 'image' => '/uploads/public/banner.jpg'],
         'counters' => ['card_bg' => '#112233', 'items' => [['value' => 1, 'label' => 'Один']]],
         'docs_list' => ['title' => 'Docs', 'columns' => 3, 'items' => [['title' => 'Документ']]],
         'org_structure' => ['head_title' => 'Директор', 'branches' => [['title' => 'Заместитель']]],
@@ -61,7 +61,8 @@ test('dynamic block presentation is emitted as scoped CSS, not style attributes'
     ];
 
     $id = 1710;
-    foreach ($cases as $type => $data) {
+    foreach ($cases as $case => $data) {
+        $type = str_starts_with($case, 'cta-') ? 'cta' : $case;
         $rendered = BlockRenderer::render([
             'id' => $id++,
             'type' => $type,

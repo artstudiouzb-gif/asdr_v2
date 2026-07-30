@@ -14,6 +14,7 @@ test('map_point: парсинг и нормализация карт Google/Ян
         'data' => json_encode([
             'embed_url' => $iframeHtml,
             'title' => 'Наш офис',
+            'load_mode' => 'immediate',
         ]),
     ]);
     assert_contains(
@@ -30,6 +31,7 @@ test('map_point: парсинг и нормализация карт Google/Ян
         'data' => json_encode([
             'embed_url' => $rawGoogleUrl,
             'title' => 'Наш офис 2',
+            'load_mode' => 'immediate',
         ]),
     ]);
     // 3. Прямая ссылка на место /maps/place/ автоматически преобразуется в чистый iframe по координатам
@@ -41,8 +43,21 @@ test('map_point: парсинг и нормализация карт Google/Ян
         'data' => json_encode([
             'embed_url' => $placeUrl,
             'title' => 'Администрация',
+            'load_mode' => 'immediate',
         ]),
     ]);
     assert_contains('ll=41.3142864,69.2657056', $rendered3['html']);
     assert_contains('output=embed', $rendered3['html']);
+
+    $blocked = BlockRenderer::render([
+        'id' => 1654,
+        'type' => 'map_point',
+        'custom_css' => '',
+        'data' => json_encode([
+            'embed_url' => 'https://example.com/fake-map',
+            'load_mode' => 'immediate',
+        ]),
+    ]);
+    assert_not_contains('example.com', $blocked['html']);
+    assert_not_contains('<iframe', $blocked['html']);
 });

@@ -53,11 +53,12 @@ test('Обложка: с фото рендерится медиа-вариант
     ]);
     assert_not_contains('cover.jpg', $explicitNone['html']);
 
-    // Блоки без bg_type (старый формат) определяют фон по заполненным полям.
-    $legacy = BlockRenderer::render([
+    // На чистой схеме отсутствующий тип равен «Без фона»: скрытое поле
+    // изображения не должно неожиданно менять внешний вид.
+    $withoutType = BlockRenderer::render([
         'id' => 962, 'type' => 'hero', 'custom_css' => '',
         'data' => json_encode(['title' => 'Заголовок', 'image' => '/uploads/public/cover.jpg']),
     ]);
-    assert_contains('cover.jpg', $legacy['html'], 'старый блок без bg_type должен показывать фото');
-    assert_contains('block-hero--media', $legacy['html']);
+    assert_not_contains('cover.jpg', $withoutType['html']);
+    assert_not_contains('block-hero--media', $withoutType['html']);
 });

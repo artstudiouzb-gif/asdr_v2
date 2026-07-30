@@ -10,7 +10,7 @@ use App\Core\Media;
  * @param array<string,mixed> $post
  * @return array<string,mixed>
  */
-function collect_gallery_data(array $post): array
+function collect_media_gallery_data(array $post): array
 {
     $previousPost = $_POST;
     try {
@@ -18,7 +18,7 @@ function collect_gallery_data(array $post): array
         $method = new ReflectionMethod(BlockController::class, 'collectData');
 
         /** @var array<string,mixed> $data */
-        $data = $method->invoke(new BlockController(), 'gallery', 'ru');
+        $data = $method->invoke(new BlockController(), 'media_gallery', 'ru');
 
         return $data;
     } finally {
@@ -26,33 +26,35 @@ function collect_gallery_data(array $post): array
     }
 }
 
-test('Gallery: при сохранении отбрасывает опасные схемы медиа-URL', function () {
-    $data = collect_gallery_data([
+test('Медиа-галерея: при сохранении отбрасывает опасные схемы медиа-URL', function () {
+    $data = collect_media_gallery_data([
         'title_field' => 'Галерея',
-        'images' => [
-            ['url' => 'javascript:alert(1)', 'caption' => 'JS'],
-            ['url' => 'data:image/svg+xml,<svg></svg>', 'caption' => 'Data'],
-            ['url' => 'mailto:editor@example.com', 'caption' => 'Mail'],
-            ['url' => '/uploads/public/local.jpg', 'caption' => 'Local'],
-            ['url' => 'https://cdn.example.com/remote.jpg', 'caption' => 'Remote'],
+        'items' => [
+            ['image' => 'javascript:alert(1)', 'title' => 'JS', 'kind' => 'photo'],
+            ['image' => 'data:image/svg+xml,<svg></svg>', 'title' => 'Data', 'kind' => 'photo'],
+            ['image' => 'mailto:editor@example.com', 'title' => 'Mail', 'kind' => 'photo'],
+            ['image' => '/uploads/public/local.jpg', 'title' => 'Local', 'kind' => 'photo'],
+            ['image' => 'https://cdn.example.com/remote.jpg', 'title' => 'Remote', 'kind' => 'photo'],
         ],
     ]);
 
-    assert_same(2, count($data['images']));
-    assert_same('/uploads/public/local.jpg', $data['images'][0]['url']);
-    assert_same('https://cdn.example.com/remote.jpg', $data['images'][1]['url']);
+    assert_same('', $data['items'][0]['image']);
+    assert_same('', $data['items'][1]['image']);
+    assert_same('', $data['items'][2]['image']);
+    assert_same('/uploads/public/local.jpg', $data['items'][3]['image']);
+    assert_same('https://cdn.example.com/remote.jpg', $data['items'][4]['image']);
 });
 
-test('Gallery: старые опасные JSON-данные не попадают в публичную разметку', function () {
+test('Медиа-галерея: опасные JSON-данные не попадают в публичную разметку', function () {
     $rendered = BlockRenderer::render([
         'id' => 1300,
-        'type' => 'gallery',
+        'type' => 'media_gallery',
         'custom_css' => '',
         'data' => json_encode([
             'title' => 'Галерея',
-            'images' => [
-                ['url' => 'javascript:alert(1)', 'caption' => 'JS'],
-                ['url' => '/uploads/public/safe.jpg', 'caption' => 'Safe'],
+            'items' => [
+                ['image' => 'javascript:alert(1)', 'title' => 'JS', 'kind' => 'photo'],
+                ['image' => '/uploads/public/safe.jpg', 'title' => 'Safe', 'kind' => 'photo'],
             ],
         ], JSON_UNESCAPED_UNICODE),
     ]);

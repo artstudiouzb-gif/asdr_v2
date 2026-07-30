@@ -103,9 +103,10 @@
     }
   },
   {
-    "type": "image_cards",
+    "type": "cards_grid",
     "title": "",
     "data": {
+      "variant": "image",
       "title": "Loyihalar va tashabbuslar",
       "all_text": "Barcha loyihalar",
       "all_url": "/projects",

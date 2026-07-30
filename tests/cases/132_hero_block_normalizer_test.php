@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Core\BlockData\HeroBlockNormalizer;
 
-test('Hero normalizer: формирует прежний JSON-контракт и ограничивает значения', function () {
+test('Hero normalizer: формирует стабильный JSON-контракт и ограничивает значения', function () {
     $data = HeroBlockNormalizer::normalize([
         'title_field' => '  Заголовок  ',
         'hero_width' => 'standard',
@@ -49,6 +49,8 @@ test('Hero normalizer: формирует прежний JSON-контракт �
         'subtitle' => 'Подзаголовок',
         'bg_type' => 'image',
         'image' => '/uploads/public/hero.jpg',
+        'image_position' => 'center-center',
+        'image_position_mobile' => 'center-center',
         'video_url' => '',
         'youtube_url' => '',
         'overlay_enabled' => true,
@@ -82,12 +84,12 @@ test('Hero normalizer: наложение и подложка по умолча�
     assert_same(false, $data['panel_enabled']);
 });
 
-test('Hero normalizer: старый solid в направлении переносится в отдельный режим', function () {
+test('Hero normalizer: неверное направление не меняет режим затемнения', function () {
     $data = HeroBlockNormalizer::normalize([
         'overlay_direction' => 'solid',
     ]);
 
-    assert_same('solid', $data['overlay_mode']);
+    assert_same('gradient', $data['overlay_mode']);
     assert_same('auto', $data['overlay_direction']);
 });
 

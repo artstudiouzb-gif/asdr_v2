@@ -103,9 +103,10 @@
         }
     },
     {
-        "type": "image_cards",
+        "type": "cards_grid",
         "title": "",
         "data": {
+            "variant": "image",
             "title": "Проекты и инициативы",
             "all_text": "Все проекты",
             "all_url": "\/projects",

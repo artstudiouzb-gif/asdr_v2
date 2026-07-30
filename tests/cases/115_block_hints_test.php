@@ -5,20 +5,21 @@ declare(strict_types=1);
 use App\Core\BlockHints;
 
 test('Подсказки блока: кнопка без ссылки не молчит', function () {
-    $hints = BlockHints::forBlock('banner', ['title' => 'Баннер', 'button_text' => 'Подробнее', 'button_url' => '']);
+    $hints = BlockHints::forBlock('cta', ['variant' => 'media-dark', 'title' => 'Баннер', 'button_text' => 'Подробнее', 'button_url' => '']);
     assert_same(1, count($hints));
     assert_contains('не указана ссылка', $hints[0]);
 
     // Полностью заполненная кнопка вопросов не вызывает.
-    assert_same([], BlockHints::forBlock('banner', ['button_text' => 'Подробнее', 'button_url' => '/news']));
+    assert_same([], BlockHints::forBlock('cta', ['button_text' => 'Подробнее', 'button_url' => '/news']));
     // Пустая пара — редактор просто не пользуется кнопкой.
-    assert_same([], BlockHints::forBlock('banner', ['button_text' => '', 'button_url' => '']));
+    assert_same([], BlockHints::forBlock('cta', ['button_text' => '', 'button_url' => '']));
     // Ссылка без подписи — тоже нормально: у блоков есть подписи по умолчанию.
-    assert_same([], BlockHints::forBlock('banner', ['button_text' => '', 'button_url' => '/news']));
+    assert_same([], BlockHints::forBlock('cta', ['button_text' => '', 'button_url' => '/news']));
 });
 
 test('Подсказки блока: автоисточник прячет ручные карточки', function () {
-    $hints = BlockHints::forBlock('image_cards', [
+    $hints = BlockHints::forBlock('cards_grid', [
+        'variant' => 'image',
         'source' => 'projects',
         'items' => [['title' => 'Раз'], ['title' => 'Два']],
     ]);
@@ -27,9 +28,9 @@ test('Подсказки блока: автоисточник прячет ру�
     assert_contains('Вручную', $hints[0], 'сказано, как починить');
 
     // Ручной источник — ничего не теряется.
-    assert_same([], BlockHints::forBlock('image_cards', ['source' => 'manual', 'items' => [['title' => 'Раз']]]));
+    assert_same([], BlockHints::forBlock('cards_grid', ['variant' => 'image', 'source' => 'manual', 'items' => [['title' => 'Раз']]]));
     // Автоисточник без ручных элементов — обычный сценарий.
-    assert_same([], BlockHints::forBlock('image_cards', ['source' => 'projects', 'items' => []]));
+    assert_same([], BlockHints::forBlock('cards_grid', ['variant' => 'image', 'source' => 'projects', 'items' => []]));
 });
 
 test('Подсказки блока: слайд без фото и форма без формы', function () {
@@ -65,10 +66,10 @@ test('Подсказки блока: ложных срабатываний не�
     // Блоки-обёртки сами подставляют ссылку на раздел, когда поле пустое.
     assert_same([], BlockHints::forBlock('news_feature', ['all_text' => 'Все новости', 'all_url' => '']));
     assert_same([], BlockHints::forBlock('news_latest', ['all_text' => 'Все новости', 'all_url' => '']));
-    assert_same([], BlockHints::forBlock('image_cards', ['source' => 'projects', 'all_text' => 'Все проекты', 'all_url' => '']));
+    assert_same([], BlockHints::forBlock('cards_grid', ['variant' => 'image', 'source' => 'projects', 'all_text' => 'Все проекты', 'all_url' => '']));
 
     // А вот у ручного источника ссылку подставлять некому — предупреждаем.
-    $manual = BlockHints::forBlock('image_cards', ['source' => 'manual', 'all_text' => 'Все проекты', 'all_url' => '']);
+    $manual = BlockHints::forBlock('cards_grid', ['variant' => 'image', 'source' => 'manual', 'all_text' => 'Все проекты', 'all_url' => '']);
     assert_same(1, count($manual));
 });
 

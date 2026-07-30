@@ -23,8 +23,8 @@ test('Hero отдаёт responsive picture и LCP preload для head', function
         ]]);
 
         assert_true(($rendered['preload_images'] ?? []) === [$url], 'Hero передаёт один preload-кандидат в head');
-        assert_contains('<picture class="block-hero__media">', (string) $rendered['html']);
-        assert_contains('class="block-hero__image"', (string) $rendered['html']);
+        assert_contains('<picture class="block-hero__media media-position--center-center', (string) $rendered['html']);
+        assert_contains('class="block-hero__image media-position--center-center', (string) $rendered['html']);
         assert_contains('loading="eager"', (string) $rendered['html']);
         assert_contains('fetchpriority="high"', (string) $rendered['html']);
         assert_contains('srcset="/uploads/public/' . $name . '-800.webp 800w', (string) $rendered['html']);

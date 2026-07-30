@@ -6,7 +6,7 @@ use App\Core\BlockRenderer;
 
 test('Пустой блок: на сайте не выводится, в предпросмотре — заметка', function () {
     $blocks = [
-        ['id' => 801, 'type' => 'gallery', 'data' => '{}', 'custom_css' => ''],
+        ['id' => 801, 'type' => 'slider', 'data' => '{}', 'custom_css' => ''],
         ['id' => 802, 'type' => 'faq', 'data' => '{}', 'custom_css' => ''],
         ['id' => 803, 'type' => 'text', 'data' => json_encode(['title' => 'Заголовок', 'content' => '<p>Текст</p>']), 'custom_css' => ''],
     ];
@@ -21,7 +21,7 @@ test('Пустой блок: на сайте не выводится, в пре�
     $preview = BlockRenderer::renderPage($blocks);
     BlockRenderer::setPreviewMode(false);
     assert_same(3, substr_count($preview['html'], '<section'));
-    assert_contains('Блок «Галерея» пока пуст', $preview['html']);
+    assert_contains('Блок «Слайдер» пока пуст', $preview['html']);
     assert_contains('Блок «Вопросы и ответы» пока пуст', $preview['html']);
     assert_contains('/admin/blocks/801/edit', $preview['html'], 'из заметки можно перейти к заполнению');
 

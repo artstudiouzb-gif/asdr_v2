@@ -36,6 +36,7 @@ final class AdvantagesBlockNormalizer
         }
 
         return [
+            'variant' => ($input['variant'] ?? 'grid') === 'band' ? 'band' : 'grid',
             'title' => BlockDataInput::plain($input, 'title_field', $locale),
             'items' => $items,
         ];

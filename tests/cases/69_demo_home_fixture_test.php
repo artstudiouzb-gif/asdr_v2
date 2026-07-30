@@ -14,9 +14,15 @@ test('Демо: фикстура главной валидна и содержи
         assert_true(is_array($blocks) && count($blocks) >= 6, "минимум 6 блоков главной {$lang}");
 
         $types = array_map(static fn ($b) => $b['type'] ?? '', $blocks);
-        foreach (['hero', 'counters', 'cards_grid', 'image_cards', 'news_feature', 'media_gallery'] as $need) {
+        foreach (['hero', 'counters', 'cards_grid', 'news_feature', 'media_gallery'] as $need) {
             assert_true(in_array($need, $types, true), "в {$lang} есть блок {$need}");
         }
+        assert_true(
+            count(array_filter($blocks, static fn (array $block): bool =>
+                ($block['type'] ?? '') === 'cards_grid' && ($block['data']['variant'] ?? '') === 'image'
+            )) >= 1,
+            "в {$lang} есть карточки с изображениями"
+        );
 
         foreach ($blocks as $block) {
             if (($block['type'] ?? '') !== 'hero') {

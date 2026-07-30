@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\BlockData;
 
+use App\Core\MediaPosition;
 use App\Core\Video;
 
 /**
@@ -20,11 +21,11 @@ final class HeroBlockNormalizer
      */
     public static function normalize(array $input, string $locale = 'ru'): array
     {
-        $bgType = (string) ($input['bg_type'] ?? 'image');
-        $bgType = in_array($bgType, ['none', 'image', 'video', 'youtube'], true) ? $bgType : 'image';
+        $bgType = (string) ($input['bg_type'] ?? 'none');
+        $bgType = in_array($bgType, ['none', 'image', 'video', 'youtube'], true) ? $bgType : 'none';
         $youtubeUrl = trim((string) ($input['youtube_url'] ?? ''));
-        $videoUrl = trim((string) ($input['video_url'] ?? ''));
-        $image = trim((string) ($input['image'] ?? ''));
+        $videoUrl = BlockDataInput::safeMedia($input['video_url'] ?? '');
+        $image = BlockDataInput::safeMedia($input['image'] ?? '');
 
         // Заполненное медиа — явное намерение редактора, даже если список
         // «Фон секции» остался в положении «Без фона».
@@ -46,7 +47,7 @@ final class HeroBlockNormalizer
         $heightValue = max($heightLimits[0], min($heightLimits[1], $heightValue));
 
         $rawOverlayDirection = (string) ($input['overlay_direction'] ?? 'auto');
-        $overlayMode = (string) ($input['overlay_mode'] ?? ($rawOverlayDirection === 'solid' ? 'solid' : 'gradient'));
+        $overlayMode = (string) ($input['overlay_mode'] ?? 'gradient');
         $overlayMode = in_array($overlayMode, ['solid', 'gradient'], true) ? $overlayMode : 'gradient';
         $overlayDirections = ['auto', 'to_right', 'to_left', 'to_bottom', 'to_top', 'to_bottom_right', 'to_bottom_left', 'to_top_right', 'to_top_left'];
         $overlayDirection = in_array($rawOverlayDirection, $overlayDirections, true) ? $rawOverlayDirection : 'auto';
@@ -71,6 +72,8 @@ final class HeroBlockNormalizer
             'subtitle' => BlockDataInput::plain($input, 'subtitle', $locale),
             'bg_type' => $bgType,
             'image' => $image,
+            'image_position' => MediaPosition::normalize($input['image_position'] ?? null),
+            'image_position_mobile' => MediaPosition::normalize($input['image_position_mobile'] ?? null),
             'video_url' => $videoUrl,
             'youtube_url' => $youtubeUrl,
             'overlay_enabled' => !empty($input['overlay_enabled']),

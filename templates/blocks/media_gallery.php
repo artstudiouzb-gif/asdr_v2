@@ -32,9 +32,20 @@ $showTabs = $hasVideo && $hasPhoto;
                 <?php
                 $url = trim((string) ($item['url'] ?? ''));
                 $img = trim((string) ($item['image'] ?? ''));
-                $tag = $url !== '' ? 'a' : 'div';
                 $duration = trim((string) ($item['meta'] ?? ''));
                 $kind = ($item['kind'] ?? 'video') === 'photo' ? 'photo' : 'video';
+                if ($img !== '' && !\App\Core\UrlGuard::isSafeMedia($img)) {
+                    $img = '';
+                }
+                if ($url !== '' && !\App\Core\UrlGuard::isSafeLink($url)) {
+                    $url = '';
+                }
+                // Ручная фотография без отдельной ссылки открывает сам файл
+                // в общем lightbox — отдельный тип «Галерея» больше не нужен.
+                if ($kind === 'photo' && $url === '' && $img !== '') {
+                    $url = $img;
+                }
+                $tag = $url !== '' ? 'a' : 'div';
                 ?>
                 <<?= $tag ?> class="mediacard mediacard--<?= $kind ?>" data-media-kind="<?= $kind ?>"<?= $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"' : '' ?>>
                     <span class="mediacard__media">

@@ -6,7 +6,6 @@ namespace App\Controllers\Admin;
 
 use App\Core\Auth;
 use App\Core\BlockData\AdvantagesBlockNormalizer;
-use App\Core\BlockData\BannerBlockNormalizer;
 use App\Core\BlockData\BlockPresentationNormalizer;
 use App\Core\BlockData\ContactCardsBlockNormalizer;
 use App\Core\BlockData\CountersBlockNormalizer;
@@ -419,22 +418,6 @@ final class BlockController
                     ];
                 }
                 return ['slides' => $slides];
-            case 'gallery':
-                $images = [];
-                foreach ((array) ($_POST['images'] ?? []) as $image) {
-                    $url = trim((string) ($image['url'] ?? ''));
-                    if ($url === '' || !\App\Core\UrlGuard::isSafeMedia($url)) {
-                        continue;
-                    }
-                    $images[] = [
-                        'url' => $url,
-                        'caption' => trim((string) ($image['caption'] ?? '')),
-                    ];
-                }
-                return [
-                    'title' => trim((string) ($_POST['title_field'] ?? '')),
-                    'images' => $images,
-                ];
             case 'form':
                 $formId = (int) ($_POST['form_id'] ?? 0);
                 $layout = in_array($_POST['layout'] ?? '1col', ['1col', '2col'], true) ? (string) $_POST['layout'] : '1col';
@@ -484,8 +467,6 @@ final class BlockController
                 ];
             case 'subscribe':
                 return SubscribeBlockNormalizer::normalize($_POST, $locale);
-            case 'banner':
-                return BannerBlockNormalizer::normalize($_POST, $locale);
             case 'faq':
                 return FaqBlockNormalizer::normalize($_POST, $locale);
             case 'contact_cards':
@@ -493,12 +474,15 @@ final class BlockController
             case 'hero':
                 return HeroBlockNormalizer::normalize($_POST, $locale);
             case 'cards_grid':
-            case 'image_cards':
             case 'media_gallery':
                 $items = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
                     $label = trim((string) ($item['title'] ?? $item['label'] ?? ''));
-                    if ($label === '') {
+                    $image = trim((string) ($item['image'] ?? ''));
+                    if ($image !== '' && !\App\Core\UrlGuard::isSafeMedia($image)) {
+                        $image = '';
+                    }
+                    if ($label === '' && ($type !== 'media_gallery' || $image === '')) {
                         continue;
                     }
                     $url = trim((string) ($item['url'] ?? ''));
@@ -508,7 +492,7 @@ final class BlockController
                     $iconSvg = \App\Core\Icon::cleanName($item['icon_svg'] ?? '');
                     $items[] = [
                         'icon_svg' => $iconSvg,
-                        'image' => trim((string) ($item['image'] ?? '')),
+                        'image' => $image,
                         'title' => TextProcessor::typographPlain($label, $locale),
                         'text' => TextProcessor::typographPlain(trim((string) ($item['text'] ?? '')), $locale),
                         'meta' => TextProcessor::typographPlain(trim((string) ($item['meta'] ?? '')), $locale),
@@ -517,16 +501,23 @@ final class BlockController
                     ];
                 }
                 $cols = (int) ($_POST['columns'] ?? 5);
-                // Источник данных: «Проекты» (image_cards) или «Фотоальбомы»
+                // Источник данных: «Проекты» (cards_grid с фото) или «Фотоальбомы»
                 // (media_gallery) собирают карточки из отмеченных «на главной»
                 // записей автоматически; иначе — ручной список items.
                 $source = 'manual';
-                if ($type === 'image_cards' && ($_POST['source'] ?? '') === 'projects') {
+                if ($type === 'cards_grid' && ($_POST['source'] ?? '') === 'projects') {
                     $source = 'projects';
                 } elseif ($type === 'media_gallery' && in_array($_POST['source'] ?? '', ['albums', 'videos', 'media'], true)) {
                     $source = (string) $_POST['source'];
                 }
+                $variant = $type === 'cards_grid' && in_array($_POST['variant'] ?? 'icon', ['icon', 'compact', 'image'], true)
+                    ? (string) $_POST['variant']
+                    : 'icon';
+                if ($source === 'projects') {
+                    $variant = 'image';
+                }
                 return [
+                    'variant' => $variant,
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => (trim((string) ($_POST['all_url'] ?? '')) !== '' && \App\Core\UrlGuard::isSafeLink(trim((string) ($_POST['all_url'] ?? '')))) ? trim((string) ($_POST['all_url'] ?? '')) : '',
@@ -535,6 +526,8 @@ final class BlockController
                     'text_color' => self::color('text_color'),
                     'source' => $source,
                     'limit' => max(2, min(24, (int) ($_POST['limit'] ?? 6))),
+                    'image_position' => \App\Core\MediaPosition::normalize($_POST['image_position'] ?? null),
+                    'image_position_mobile' => \App\Core\MediaPosition::normalize($_POST['image_position_mobile'] ?? null),
                     'items' => $items,
                 ];
             case 'news_feature':
@@ -543,51 +536,6 @@ final class BlockController
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => (trim((string) ($_POST['all_url'] ?? '')) !== '' && \App\Core\UrlGuard::isSafeLink(trim((string) ($_POST['all_url'] ?? '')))) ? trim((string) ($_POST['all_url'] ?? '')) : '',
                     'limit' => max(2, min(12, (int) ($_POST['limit'] ?? 6))),
-                ];
-            case 'categories_grid':
-                $items = [];
-                foreach ((array) ($_POST['items'] ?? []) as $item) {
-                    $label = trim((string) ($item['label'] ?? ''));
-                    if ($label === '') {
-                        continue;
-                    }
-                    $url = trim((string) ($item['url'] ?? ''));
-                    if ($url !== '' && !\App\Core\UrlGuard::isSafeLink($url)) {
-                        $url = '';
-                    }
-                    $iconSvg = \App\Core\Icon::cleanName($item['icon_svg'] ?? '');
-                    $items[] = [
-                        'icon_svg' => $iconSvg,
-                        'label' => TextProcessor::typographPlain($label, $locale),
-                        'url' => $url,
-                    ];
-                }
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'items' => $items,
-                ];
-            case 'media_materials':
-                $items = [];
-                foreach ((array) ($_POST['items'] ?? []) as $item) {
-                    $label = trim((string) ($item['label'] ?? ''));
-                    if ($label === '') {
-                        continue;
-                    }
-                    $url = trim((string) ($item['url'] ?? ''));
-                    if ($url !== '' && !\App\Core\UrlGuard::isSafeLink($url)) {
-                        $url = '';
-                    }
-                    $iconSvg = \App\Core\Icon::cleanName($item['icon_svg'] ?? '');
-                    $items[] = [
-                        'icon_svg' => $iconSvg,
-                        'label' => TextProcessor::typographPlain($label, $locale),
-                        'action' => TextProcessor::typographPlain(trim((string) ($item['action'] ?? '')), $locale),
-                        'url' => $url,
-                    ];
-                }
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'items' => $items,
                 ];
             case 'person_cards':
                 $items = [];
@@ -665,18 +613,6 @@ final class BlockController
                     'docs_all_url' => $this->safeUrlField('docs_all_url'),
                     'docs' => $docs,
                 ];
-            case 'cta_band':
-                $iconSvg = \App\Core\Icon::cleanName($_POST['icon_svg'] ?? '');
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'text' => TextProcessor::typographPlain(trim((string) ($_POST['text'] ?? '')), $locale),
-                    'icon_svg' => $iconSvg,
-                    'button_text' => trim((string) ($_POST['button_text'] ?? '')),
-                    'button_url' => $this->safeUrlField('button_url'),
-                    'bg_color' => self::color('bg_color'),
-                    'text_color' => self::color('text_color'),
-                    'button_color' => self::color('button_color'),
-                ];
             case 'person_profile':
                 return [
                     'photo' => trim((string) ($_POST['photo'] ?? '')),
@@ -689,24 +625,6 @@ final class BlockController
                     'email_label' => trim((string) ($_POST['email_label'] ?? 'E-mail:')),
                     'button_text' => trim((string) ($_POST['button_text'] ?? '')),
                     'button_url' => $this->safeUrlField('button_url'),
-                ];
-            case 'feature_band':
-                $items = [];
-                foreach ((array) ($_POST['items'] ?? []) as $item) {
-                    $itemTitle = trim((string) ($item['title'] ?? ''));
-                    if ($itemTitle === '') {
-                        continue;
-                    }
-                    $iconSvg = \App\Core\Icon::cleanName($item['icon_svg'] ?? '');
-                    $items[] = [
-                        'icon_svg' => $iconSvg,
-                        'title' => TextProcessor::typographPlain($itemTitle, $locale),
-                        'text' => TextProcessor::typographPlain(trim((string) ($item['text'] ?? '')), $locale),
-                    ];
-                }
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'items' => $items,
                 ];
             case 'bio_education':
                 $collect = static function (string $key, array $fields) use ($locale): array {
@@ -789,7 +707,12 @@ final class BlockController
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'text' => TextProcessor::typographPlain(trim((string) ($_POST['text'] ?? '')), $locale),
-                    'image' => trim((string) ($_POST['image'] ?? '')),
+                    'image' => \App\Core\UrlGuard::isSafeMedia(trim((string) ($_POST['image'] ?? '')))
+                        ? trim((string) ($_POST['image'] ?? ''))
+                        : '',
+                    'image_position' => \App\Core\MediaPosition::normalize($_POST['image_position'] ?? null),
+                    'image_position_mobile' => \App\Core\MediaPosition::normalize($_POST['image_position_mobile'] ?? null),
+                    'image_side' => ($_POST['image_side'] ?? 'right') === 'left' ? 'left' : 'right',
                     'items' => $items,
                 ];
             case 'docs_list':
@@ -810,49 +733,28 @@ final class BlockController
                     ];
                 }
                 return [
+                    'variant' => ($_POST['variant'] ?? 'grid') === 'links' ? 'links' : 'grid',
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => $this->safeUrlField('all_url'),
                     'columns' => max(1, min(4, (int) ($_POST['columns'] ?? 4))),
+                    'search_enabled' => !empty($_POST['search_enabled']),
                     'items' => $items,
                 ];
             case 'map_point':
-                $embed = trim((string) ($_POST['embed_url'] ?? ''));
-                if (preg_match('/src=["\'](https:\/\/[^"\']+)["\']/i', $embed, $matches)) {
-                    $embed = $matches[1];
-                }
-                if ($embed !== '' && (str_contains($embed, 'google.com/maps') || str_contains($embed, 'maps.google.com'))) {
-                    if (str_contains($embed, '/maps/place/')) {
-                        $lat = null;
-                        $lng = null;
-                        if (preg_match('/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/', $embed, $m)) {
-                            $lat = $m[1];
-                            $lng = $m[2];
-                        } elseif (preg_match('/@(-?\d+\.\d+),(-?\d+\.\d+)/', $embed, $m)) {
-                            $lat = $m[1];
-                            $lng = $m[2];
-                        }
-                        if ($lat !== null && $lng !== null) {
-                            $embed = 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng . '&z=18&output=embed';
-                        }
-                    }
-                    if (!str_contains($embed, 'output=embed') && !str_contains($embed, '/embed')) {
-                        $embed .= (str_contains($embed, '?') ? '&' : '?') . 'output=embed';
-                    }
-                    if (!str_contains($embed, 'iwloc=')) {
-                        $embed .= (str_contains($embed, '?') ? '&' : '?') . 'iwloc=near';
-                    }
-                }
-                // Только https-iframe (карты Google/Яндекс/OSM/2GIS).
-                if ($embed !== '' && !str_starts_with($embed, 'https://')) {
-                    $embed = '';
+                $embed = \App\Core\MapEmbedUrl::normalize($_POST['embed_url'] ?? '');
+                $mapImage = trim((string) ($_POST['image'] ?? ''));
+                if ($mapImage !== '' && !\App\Core\UrlGuard::isSafeMedia($mapImage)) {
+                    $mapImage = '';
                 }
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'image' => trim((string) ($_POST['image'] ?? '')),
+                    'image' => $mapImage,
                     'embed_url' => $embed,
+                    'load_mode' => ($_POST['load_mode'] ?? 'click') === 'immediate' ? 'immediate' : 'click',
                     'card_title' => TextProcessor::typographPlain(trim((string) ($_POST['card_title'] ?? '')), $locale),
                     'address' => trim((string) ($_POST['address'] ?? '')),
+                    'copy_enabled' => !empty($_POST['copy_enabled']),
                     'button_text' => trim((string) ($_POST['button_text'] ?? '')),
                     'button_url' => $this->safeUrlField('button_url'),
                 ];
@@ -866,9 +768,14 @@ final class BlockController
                     if ($bTitle === '' && $bName === '' && $bUnits === '') {
                         continue;
                     }
+                    $branchUrl = trim((string) ($branch['url'] ?? ''));
+                    if ($branchUrl !== '' && !\App\Core\UrlGuard::isSafeLink($branchUrl)) {
+                        $branchUrl = '';
+                    }
                     $branches[] = [
                         'title' => TextProcessor::typographPlain($bTitle, $locale),
                         'name' => trim($bName),
+                        'url' => $branchUrl,
                         'units' => $bUnits,
                     ];
                 }

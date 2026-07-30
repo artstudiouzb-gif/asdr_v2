@@ -790,11 +790,11 @@
         });
     })();
 
-    // Лайтбокс: фото (альбомы, блок-галерея, фотолента новости, медиа-карточки)
+    // Лайтбокс: фото (альбомы, медиагалерея, фотолента новости)
     // и видео YouTube (карточки на главной/страницах, «Смотреть видео» в новостях).
     (function () {
         var IMG_RE = /\.(jpe?g|png|gif|webp|avif)(\?.*)?$/i;
-        var PHOTO_SCOPES = '.album-photos, .block-gallery__grid, .newsdetail-photos__grid, .mediagallery-grid';
+        var PHOTO_SCOPES = '.album-photos, .newsdetail-photos__grid, .mediagallery-grid';
 
         function ytId(url) {
             var patterns = [
@@ -949,7 +949,7 @@
         'use strict';
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
         if (!('IntersectionObserver' in window)) { return; }
-        var GRIDS = '.imgcards-grid, .newsfeat-grid, .mediagallery-grid, .albums-grid, .persons-grid, .cards-grid, .cat-grid, .block-news__grid, .block-advantages__grid, .block-counters__grid, .docslist-grid, .contact-cards, .block-partners__grid, .block-team__grid, .block-projects__grid, .block-gallery__grid, .block-faq__list, .stages, .timeline-list, .featband, .media-list, .newsdocs-news, .newsdocs-docs';
+        var GRIDS = '.imgcards-grid, .newsfeat-grid, .mediagallery-grid, .albums-grid, .persons-grid, .cards-grid, .cat-grid, .block-news__grid, .block-advantages__grid, .block-counters__grid, .docslist-grid, .contact-cards, .block-partners__grid, .block-team__grid, .block-projects__grid, .block-faq__list, .stages, .timeline-list, .featband, .media-list, .newsdocs-news, .newsdocs-docs';
         var grids = document.querySelectorAll('[data-reveal-items] ' + GRIDS.split(', ').join(', [data-reveal-items] '));
         if (!grids.length) { return; }
         var io = new IntersectionObserver(function (entries, obs) {
@@ -1816,5 +1816,150 @@
                 }
             });
         });
+    });
+
+    // Документы: локальный поиск и фильтр форматов без сетевого запроса.
+    document.querySelectorAll('[data-document-list]').forEach(function (list) {
+        var query = list.querySelector('[data-document-query]');
+        var kind = list.querySelector('[data-document-kind-filter]');
+        var cards = Array.prototype.slice.call(list.querySelectorAll('[data-document-card]'));
+        var empty = list.querySelector('[data-document-empty]');
+        var count = list.querySelector('[data-document-count]');
+        if (!cards.length || (!query && !kind)) { return; }
+
+        var apply = function () {
+            var needle = query ? query.value.trim().toLocaleLowerCase() : '';
+            var selectedKind = kind ? kind.value : '';
+            var visible = 0;
+            cards.forEach(function (card) {
+                var matchesText = needle === '' || (card.getAttribute('data-document-search') || '').indexOf(needle) !== -1;
+                var matchesKind = selectedKind === '' || card.getAttribute('data-document-kind') === selectedKind;
+                card.hidden = !(matchesText && matchesKind);
+                if (!card.hidden) { visible++; }
+            });
+            if (empty) { empty.hidden = visible !== 0; }
+            if (count) { count.textContent = visible + ' / ' + cards.length; }
+        };
+        if (query) { query.addEventListener('input', apply); }
+        if (kind) { kind.addEventListener('change', apply); }
+        apply();
+    });
+
+    // FAQ: поиск, категории, одиночный режим и прямые ссылки на ответы.
+    document.querySelectorAll('[data-faq-list]').forEach(function (list) {
+        var query = list.querySelector('[data-faq-query]');
+        var category = list.querySelector('[data-faq-category]');
+        var items = Array.prototype.slice.call(list.querySelectorAll('[data-faq-item]'));
+        var empty = list.querySelector('[data-faq-empty]');
+
+        var apply = function () {
+            var needle = query ? query.value.trim().toLocaleLowerCase() : '';
+            var selectedCategory = category ? category.value : '';
+            var visible = 0;
+            items.forEach(function (item) {
+                var matchesText = needle === '' || (item.getAttribute('data-faq-search') || '').indexOf(needle) !== -1;
+                var matchesCategory = selectedCategory === '' || item.getAttribute('data-faq-category-value') === selectedCategory;
+                item.hidden = !(matchesText && matchesCategory);
+                if (!item.hidden) { visible++; }
+            });
+            if (empty) { empty.hidden = visible !== 0; }
+        };
+        if (query) { query.addEventListener('input', apply); }
+        if (category) { category.addEventListener('change', apply); }
+
+        items.forEach(function (item) {
+            item.addEventListener('toggle', function () {
+                if (!item.open) { return; }
+                if (list.hasAttribute('data-faq-single')) {
+                    items.forEach(function (other) {
+                        if (other !== item) { other.open = false; }
+                    });
+                }
+                if (item.id && window.history && window.history.replaceState) {
+                    window.history.replaceState(null, '', '#' + item.id);
+                }
+            });
+        });
+
+        if (window.location.hash) {
+            var target = null;
+            try {
+                target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+            } catch (e) {
+                target = null;
+            }
+            if (target && list.contains(target) && target.matches('[data-faq-item]')) { target.open = true; }
+        }
+        apply();
+    });
+
+    // Карта по нажатию: внешний iframe не получает запрос до согласия.
+    document.querySelectorAll('[data-map-embed]').forEach(function (container) {
+        var button = container.querySelector('[data-map-load]');
+        var src = container.getAttribute('data-map-src') || '';
+        if (!button || !src) { return; }
+        button.addEventListener('click', function () {
+            var frame = document.createElement('iframe');
+            frame.className = 'block-map__frame';
+            frame.src = src;
+            frame.loading = 'lazy';
+            frame.referrerPolicy = 'no-referrer-when-downgrade';
+            frame.title = button.textContent.trim();
+            container.replaceChildren(frame);
+        });
+    });
+
+    var copyWithFallback = function (value, done) {
+        var input = document.createElement('textarea');
+        input.value = value;
+        input.setAttribute('readonly', '');
+        input.className = 'clipboard-copy-proxy';
+        document.body.appendChild(input);
+        input.select();
+        var copied = false;
+        try {
+            copied = document.execCommand('copy');
+        } catch (e) {
+            copied = false;
+        }
+        input.remove();
+        if (copied) { done(); }
+    };
+
+    document.querySelectorAll('[data-copy-text]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var value = button.getAttribute('data-copy-text') || '';
+            var done = function () {
+                if (window.showToast) { window.showToast(button.getAttribute('data-copy-success') || value, 'success'); }
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(value).then(done).catch(function () {
+                    copyWithFallback(value, done);
+                });
+            } else {
+                copyWithFallback(value, done);
+            }
+        });
+    });
+
+    // Оргструктура остаётся полной на desktop и становится аккордеоном на
+    // узком экране. Без JavaScript все подразделения по-прежнему видны.
+    document.querySelectorAll('[data-org-branch]').forEach(function (branch, index) {
+        var button = branch.querySelector('[data-org-toggle]');
+        var units = branch.querySelector('[data-org-units]');
+        if (!button || !units) { return; }
+        var mobile = window.matchMedia('(max-width: 700px)');
+        var expanded = index === 0;
+        var sync = function () {
+            var collapse = mobile.matches;
+            units.hidden = collapse && !expanded;
+            button.setAttribute('aria-expanded', String(!collapse || expanded));
+        };
+        button.addEventListener('click', function () {
+            expanded = !expanded;
+            sync();
+        });
+        if (mobile.addEventListener) { mobile.addEventListener('change', sync); }
+        sync();
     });
 })();

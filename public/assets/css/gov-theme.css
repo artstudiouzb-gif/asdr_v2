@@ -76,7 +76,7 @@ h1, h2, h3, h4, h5, h6,
 .orgstruct__head-name, .person-card__name, .timeline-item__year, .ctaband__title,
 .profile__position, .featband__name, .bio-quote__mark, .widget__title, .bio-extra__title,
 .block-hero__title, .news-index__title, .content-list__head h1,
-.block-news__title, .block-categories__title, .block-media__title,
+.block-news__title, .block-categories__title,
 .block-contact-cards__title, .site-footer__name, .newsdetail-toc__title,
 .newslist-lead__title, .relnews-card__title, .adjnews__title, .album-card__title, .block-banner__title {
     font-family: var(--font-heading, var(--font-family));
@@ -1352,7 +1352,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 /* Только действительно кликабельные карточки получают одинаковую реакцию. */
 :where(
     .news-card__link, .newsfeat-lead, .newsfeat-mini, .newsfeat-text,
-    .newsdocs-item, .doc-card, .album-card, .cat-tile, .media-item, .mediacard
+    .newsdocs-item, .doc-card, .album-card, .cat-tile, .mediacard
 ) {
     transition: transform .18s ease, box-shadow .18s ease,
         border-color .18s ease, background-color .18s ease, color .18s ease;
@@ -1367,7 +1367,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 :where(
     .news-card__link, .newsfeat-lead, .newsfeat-mini, .newsfeat-text,
-    .newsdocs-item, .doc-card, .album-card, .cat-tile, .media-item, .mediacard
+    .newsdocs-item, .doc-card, .album-card, .cat-tile, .mediacard
 ):focus-visible {
     outline: 3px solid color-mix(in srgb, var(--gov-teal) 72%, #fff);
     outline-offset: 3px;
@@ -1839,22 +1839,21 @@ body.lightbox-active { overflow: hidden !important; }
         transform: translateY(-2px);
     }
     :where(.news-card__link, .newsfeat-lead, .newsfeat-mini, .newsfeat-text,
-        .newsdocs-item, .doc-card, .album-card, .cat-tile, .media-item,
+        .newsdocs-item, .doc-card, .album-card, .cat-tile,
         .mediacard):hover :where(.newsfeat__more,
-        .doc-card__dl, .media-item__action, .news-card__more) {
+        .doc-card__dl, .news-card__more) {
         transform: translateX(3px);
     }
 }
 
 :where(
     .news-card__link, .newsfeat-lead, .newsfeat-mini, .newsfeat-text,
-    .newsdocs-item, .doc-card, .album-card, .cat-tile, .media-item, .mediacard
+    .newsdocs-item, .doc-card, .album-card, .cat-tile, .mediacard
 ):active {
     transform: translateY(0);
 }
 
-:where(.newsfeat__more, .doc-card__dl,
-    .media-item__action, .news-card__more) {
+:where(.newsfeat__more, .doc-card__dl, .news-card__more) {
     transition: transform .18s ease, color .18s ease;
 }
 
@@ -1949,7 +1948,7 @@ body.lightbox-active { overflow: hidden !important; }
 @media (prefers-reduced-motion: reduce) {
     :where(
         .news-card__link, .newsfeat-lead, .newsfeat-mini, .newsfeat-text,
-        .newsdocs-item, .doc-card, .album-card, .cat-tile, .media-item, .mediacard
+        .newsdocs-item, .doc-card, .album-card, .cat-tile, .mediacard
     ) {
         transition: none;
     }
@@ -2138,7 +2137,6 @@ body.design-type-static .news-index__title { font-size: 2.5rem; }
 body.design-type-static .news-single h1 { font-size: 2.6rem; }
 body.design-type-static .block-contact-cards__title { font-size: 2rem; }
 body.design-type-static .block-categories__title { font-size: 2rem; }
-body.design-type-static .block-media__title { font-size: 1.8rem; }
 body.design-type-static .block-counters__title,
 body.design-type-static .block-team__title,
 body.design-type-static .block-projects__title,
@@ -2178,7 +2176,6 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
     body.design-type-static .news-single h1 { font-size: 1.7rem; }
     body.design-type-static .block-contact-cards__title { font-size: 1.5rem; }
     body.design-type-static .block-categories__title { font-size: 1.4rem; }
-    body.design-type-static .block-media__title { font-size: 1.3rem; }
     body.design-type-static .block-counters__title,
     body.design-type-static .block-team__title,
     body.design-type-static .block-projects__title,
@@ -2677,7 +2674,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 
 /* --- Секции: серифные заголовки с teal-акцентом --- */
 .block-news__head::after, .news-index__head::after { background: var(--gov-teal); }
-.block-news__all, .content-card__more, .news-card__more, .media-item__action { color: var(--gov-teal-text); }
+.block-news__all, .content-card__more, .news-card__more { color: var(--gov-teal-text); }
 .news-card__date, .content-badge--active { background: color-mix(in srgb, var(--gov-teal) 12%, transparent); color: var(--gov-title); }
 
 /* --- Hero: плоский, светлый; серифный титул --- */
@@ -3423,7 +3420,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 /* --- Сетка категорий: активная плитка teal --- */
 .cat-tile.is-active { background: color-mix(in srgb, var(--gov-teal) 10%, var(--gov-surface)); border-color: var(--gov-teal); }
 .cat-tile.is-active .cat-tile__icon { background: color-mix(in srgb, var(--gov-teal) 16%, transparent); color: var(--gov-teal); }
-.cat-tile__icon, .media-item__icon, .contact-card__icon { background: color-mix(in srgb, var(--gov-navy) 7%, transparent); color: var(--gov-title); }
+.cat-tile__icon, .contact-card__icon { background: color-mix(in srgb, var(--gov-navy) 7%, transparent); color: var(--gov-title); }
 
 /* --- Блок «Новости и аналитика»: крупная + список (по эскизу) --- */
 .newsfeat-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; }
@@ -4126,7 +4123,6 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
     .imgcard__more,
     .content-card__more,
     .news-card__more,
-    .media-item__action,
     .catcard__more,
     .search-suggest__all {
         display: inline-flex;

@@ -30,11 +30,14 @@ final class FaqBlockNormalizer
             $items[] = [
                 'question' => TextProcessor::typographPlain($question, $locale),
                 'answer' => TextProcessor::process(HtmlSanitizer::sanitizeText($answer), $locale),
+                'category' => TextProcessor::typographPlain(trim((string) ($item['category'] ?? '')), $locale),
             ];
         }
 
         return [
             'title' => BlockDataInput::plain($input, 'title_field', $locale),
+            'search_enabled' => !empty($input['search_enabled']),
+            'single_open' => !empty($input['single_open']),
             'items' => $items,
         ];
     }

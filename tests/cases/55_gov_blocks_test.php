@@ -12,7 +12,7 @@ test('Блок hero: титул, подзаголовок, фон-фото, бе
     assert_contains('cms-block cms-block--hero', $out);
     assert_contains('block-hero--media', $out);
     assert_contains('Пресс-центр', $out);
-    assert_contains('<picture class="block-hero__media">', $out);
+    assert_contains('<picture class="block-hero__media media-position--center-center', $out);
     assert_contains('src="/uploads/public/x.jpg"', $out);
     assert_contains('fetchpriority="high"', $out);
     assert_contains('href="/news"', $out);
@@ -24,30 +24,30 @@ test('Блок hero: титул, подзаголовок, фон-фото, бе
     assert_true(!str_contains($bad, 'block-hero__button'), 'javascript: кнопка не рендерится');
 });
 
-test('Блок categories_grid: плитки, первая активна', function () {
-    $out = BlockRenderer::render(['id' => 22, 'type' => 'categories_grid', 'custom_css' => null, 'data' => json_encode([
-        'title' => 'Категории', 'items' => [
-            ['icon_svg' => 'news', 'label' => 'Новости', 'url' => '/news'],
-            ['icon_svg' => '', 'label' => 'Видео', 'url' => ''],
+test('Компактные карточки: плитки, первая активна', function () {
+    $out = BlockRenderer::render(['id' => 22, 'type' => 'cards_grid', 'custom_css' => null, 'data' => json_encode([
+        'variant' => 'compact', 'title' => 'Категории', 'items' => [
+            ['icon_svg' => 'news', 'title' => 'Новости', 'url' => '/news'],
+            ['icon_svg' => '', 'title' => 'Видео', 'url' => ''],
         ],
     ])])['html'];
-    assert_contains('cms-block--categories_grid', $out);
+    assert_contains('cms-block--cards_grid', $out);
     assert_contains('cat-tile is-active', $out);
     assert_contains('href="/news"', $out);
     // Пункт без URL — span, не ссылка.
     assert_contains('<span class="cat-tile"', $out);
 });
 
-test('Блок media_materials: элементы с действием и заглушка', function () {
-    $out = BlockRenderer::render(['id' => 23, 'type' => 'media_materials', 'custom_css' => null, 'data' => json_encode([
-        'title' => 'Медиа', 'items' => [['icon_svg' => '', 'label' => 'Фото', 'action' => 'Смотреть', 'url' => '/albums']],
+test('Список документов-ссылок: элементы и заглушка', function () {
+    $out = BlockRenderer::render(['id' => 23, 'type' => 'docs_list', 'custom_css' => null, 'data' => json_encode([
+        'variant' => 'links', 'title' => 'Материалы', 'items' => [['title' => 'Фотоальбомы', 'url' => '/albums']],
     ])])['html'];
-    assert_contains('cms-block--media_materials', $out);
-    assert_contains('media-item__action', $out);
-    assert_contains('Смотреть', $out);
+    assert_contains('cms-block--docs_list', $out);
+    assert_contains('doc-card--compact', $out);
+    assert_contains('Фотоальбомы', $out);
 
-    $empty = BlockRenderer::render(['id' => 24, 'type' => 'media_materials', 'custom_css' => null, 'data' => json_encode(['title' => '', 'items' => []])])['html'];
-    assert_contains('block-media__empty', $empty);
+    $empty = BlockRenderer::render(['id' => 24, 'type' => 'docs_list', 'custom_css' => null, 'data' => json_encode(['title' => '', 'items' => []])])['html'];
+    assert_contains('block-docslist__empty', $empty);
 });
 
 test('Блок hero: видео-фон и надзаголовок; безопасность кнопок', function () {
@@ -67,7 +67,7 @@ test('Блок hero: видео-фон и надзаголовок; безопа
     assert_true(!str_contains($out, 'block-hero__button--ghost'), 'javascript: вторая кнопка отсеяна');
 });
 
-test('Блоки cards_grid / image_cards / media_gallery: обёртки и содержимое', function () {
+test('Варианты cards_grid и media_gallery: обёртки и содержимое', function () {
     $cards = BlockRenderer::render(['id' => 26, 'type' => 'cards_grid', 'custom_css' => null, 'data' => json_encode([
         'title' => 'Направления', 'all_text' => 'Все', 'all_url' => '/news', 'columns' => 5,
         'items' => [['icon_svg' => 'trending-up', 'title' => 'Рост', 'text' => 'описание', 'url' => '/news']],
@@ -76,8 +76,8 @@ test('Блоки cards_grid / image_cards / media_gallery: обёртки и с�
     assert_contains('feature-card', $cards);
     assert_contains('section-head__all', $cards);
 
-    $imgs = BlockRenderer::render(['id' => 27, 'type' => 'image_cards', 'custom_css' => null, 'data' => json_encode([
-        'title' => 'Проекты', 'items' => [['image' => '/uploads/public/p.jpg', 'title' => 'Проект', 'url' => '/news']],
+    $imgs = BlockRenderer::render(['id' => 27, 'type' => 'cards_grid', 'custom_css' => null, 'data' => json_encode([
+        'variant' => 'image', 'title' => 'Проекты', 'items' => [['image' => '/uploads/public/p.jpg', 'title' => 'Проект', 'url' => '/news']],
     ])])['html'];
     assert_contains('imgcard', $imgs);
     assert_contains('/uploads/public/p.jpg', $imgs);

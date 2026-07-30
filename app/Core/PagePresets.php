@@ -53,8 +53,8 @@ final class PagePresets
         $previousBg = 'none';
         $tintTurn = false;
         $cardTypes = [
-            'advantages', 'cards_grid', 'categories_grid', 'contact_cards',
-            'counters', 'docs_list', 'image_cards', 'media_gallery',
+            'advantages', 'cards_grid', 'contact_cards',
+            'counters', 'docs_list', 'media_gallery',
             'news_feature', 'news_latest', 'partners', 'person_cards',
             'projects_list', 'team_list', 'testimonials',
         ];
@@ -68,7 +68,7 @@ final class PagePresets
             }
 
             // Призыв к действию — единственная тёмная секция.
-            if ($type === 'cta_band') {
+            if ($type === 'cta') {
                 $looks[] = self::look('navy', 'premium', 'fade');
                 $previousBg = 'navy';
                 continue;
@@ -192,10 +192,11 @@ final class PagePresets
                     ], self::look('none', 'premium', 'fade')),
                 ],
                 [
-                    'type' => 'image_cards',
+                    'type' => 'cards_grid',
                     'title' => 'Проекты и инициативы',
                     'data' => array_merge([
                         'title' => 'Проекты и инициативы',
+                        'variant' => 'image',
                         'source' => 'projects',
                         'limit' => 6,
                     ], self::look('light', 'premium', 'slide-up')),
@@ -417,10 +418,11 @@ final class PagePresets
                     ], self::look('light', 'premium', 'slide-up')),
                 ],
                 [
-                    'type' => 'feature_band',
+                    'type' => 'advantages',
                     'title' => 'Направления работы',
                     'data' => array_merge([
                         'title' => 'Основные направления',
+                        'variant' => 'band',
                         'items' => [
                             ['title' => 'Первое направление', 'text' => 'Короткое пояснение в одну-две строки.', 'icon_svg' => ''],
                             ['title' => 'Второе направление', 'text' => 'Короткое пояснение в одну-две строки.', 'icon_svg' => ''],
@@ -647,13 +649,14 @@ final class PagePresets
     private static function ctaBand(string $title, string $text, string $buttonText = 'Написать обращение'): array
     {
         return [
-            'type' => 'cta_band',
+            'type' => 'cta',
             // Название блока в редакторе подсказывает недостающий шаг: кнопка
             // без ссылки на сайте не появится.
             'title' => 'Призыв к действию — укажите ссылку кнопки',
             'data' => array_merge([
                 'title' => $title,
                 'text' => $text,
+                'variant' => 'band',
                 'button_text' => $buttonText,
                 'button_url' => '',
                 'icon_svg' => '',

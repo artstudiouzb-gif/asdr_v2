@@ -13,7 +13,7 @@ test('Автокопия: замена блоков обратима — сни�
     $pageId = (int) $pdo->lastInsertId();
 
     Block::create($pageId, 'ru', 'text', 'Первый', ['title' => 'Было', 'content' => 'исходный текст'], '');
-    Block::create($pageId, 'ru', 'cta_band', 'Второй', ['title' => 'Призыв'], '');
+    Block::create($pageId, 'ru', 'cta', 'Второй', ['variant' => 'band', 'title' => 'Призыв'], '');
 
     $name = BlockSnippet::autoBackup($pageId, 'ru', 'Автокопия');
     assert_true($name !== null, 'копия должна создаться');
@@ -43,7 +43,7 @@ test('Автокопия: замена блоков обратима — сни�
     assert_same(2, count($restored), 'вернулись оба блока');
     assert_same('text', (string) $restored[0]['type']);
     assert_contains('исходный текст', (string) $restored[0]['data']);
-    assert_same('cta_band', (string) $restored[1]['type']);
+    assert_same('cta', (string) $restored[1]['type']);
 
     $pdo->exec("DELETE FROM block_snippets WHERE name LIKE '" . BlockSnippet::AUTO_PREFIX . "%'");
     $pdo->exec("DELETE FROM pages WHERE id = {$pageId}");

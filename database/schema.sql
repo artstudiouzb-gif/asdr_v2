@@ -215,7 +215,7 @@ CREATE TABLE IF NOT EXISTS blocks (
     parent_block_id INT UNSIGNED NULL COMMENT 'родительский блок columns (группа 4.1); NULL = верхний уровень',
     column_index    INT NOT NULL DEFAULT 0 COMMENT 'номер колонки внутри родителя columns',
     lang            VARCHAR(8) NOT NULL DEFAULT '' COMMENT 'код языка стека блоков',
-    type            VARCHAR(60) NOT NULL COMMENT 'text, slider, advantages, cta, gallery, form, html, columns, testimonials, counters, team_list, projects_list',
+    type            VARCHAR(60) NOT NULL COMMENT 'Block type registered in App\\Core\\BlockTypeRegistry',
     title           VARCHAR(255) NULL COMMENT 'внутреннее название блока для админки',
     data            JSON NOT NULL COMMENT 'структурированные данные блока',
     custom_css      TEXT NULL COMMENT 'CSS блока, изолируется при рендере через #block-{id}',

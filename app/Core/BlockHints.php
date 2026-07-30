@@ -46,7 +46,7 @@ final class BlockHints
         }
 
         // Автоматический источник подменяет ручной список целиком.
-        if (in_array($type, ['image_cards', 'media_gallery'], true)) {
+        if (in_array($type, ['cards_grid', 'media_gallery'], true)) {
             $source = (string) ($data['source'] ?? 'manual');
             $items = is_array($data['items'] ?? null) ? $data['items'] : [];
             if ($source !== 'manual' && $items !== []) {
@@ -89,7 +89,7 @@ final class BlockHints
         }
         $source = (string) ($data['source'] ?? 'manual');
 
-        return ($type === 'image_cards' && $source === 'projects')
+        return ($type === 'cards_grid' && ($data['variant'] ?? 'icon') === 'image' && $source === 'projects')
             || ($type === 'media_gallery' && $source === 'albums');
     }
 

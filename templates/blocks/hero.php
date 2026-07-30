@@ -4,30 +4,20 @@ use App\Core\UrlGuard;
 use App\Core\Video;
 use App\Core\Media;
 use App\Core\AppUrl;
+use App\Core\MediaPosition;
 
 /** @var array $data */
 $title = $data['title'] ?? '';
 $eyebrow = trim((string) ($data['eyebrow'] ?? ''));
 $subtitle = $data['subtitle'] ?? '';
 $image = trim((string) ($data['image'] ?? ''));
+$mediaPositionClasses = MediaPosition::classes($data['image_position'] ?? null, $data['image_position_mobile'] ?? null);
 
-// Тип фона: none | image | video | youtube. Старые блоки без bg_type
-// определяются по заполненным полям (обратная совместимость).
-$bgType = (string) ($data['bg_type'] ?? '');
+// Тип фона: none | image | video | youtube.
+$bgType = (string) ($data['bg_type'] ?? 'none');
+$bgType = in_array($bgType, ['none', 'image', 'video', 'youtube'], true) ? $bgType : 'none';
 $videoFile = trim((string) ($data['video_url'] ?? ''));
 $youtubeId = Video::youtubeId((string) ($data['youtube_url'] ?? ''));
-if ($bgType === '') {
-    $bgType = $youtubeId !== null ? 'youtube' : ($videoFile !== '' ? 'video' : ($image !== '' ? 'image' : 'none'));
-} elseif ($bgType === 'none') {
-    // Старые сохранения могли оставить режим «Без фона», хотя редактор уже
-    // вставил источник видео. Ссылка — явный источник фона. YouTube имеет
-    // тот же приоритет, что и при определении старого блока без bg_type.
-    if ($youtubeId !== null) {
-        $bgType = 'youtube';
-    } elseif ($videoFile !== '') {
-        $bgType = 'video';
-    }
-}
 
 $hasMedia = ($bgType === 'image' && $image !== '')
     || ($bgType === 'video' && $videoFile !== '')
@@ -48,9 +38,9 @@ $textPos = in_array($data['text_position'] ?? 'left', ['left', 'center', 'right'
 $heroText = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['text_color'] ?? '')) ? $data['text_color'] : '';
 $heroBtn = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['button_color'] ?? '')) ? $data['button_color'] : '';
 $rawOverlayDirection = (string) ($data['overlay_direction'] ?? 'auto');
-$overlayMode = (string) ($data['overlay_mode'] ?? ($rawOverlayDirection === 'solid' ? 'solid' : 'gradient'));
+$overlayMode = (string) ($data['overlay_mode'] ?? 'gradient');
 $overlayMode = in_array($overlayMode, ['solid', 'gradient'], true) ? $overlayMode : 'gradient';
-$overlayDirection = $rawOverlayDirection === 'solid' ? 'auto' : $rawOverlayDirection;
+$overlayDirection = $rawOverlayDirection;
 $overlayAngles = [
     'to_right' => '90deg',
     'to_left' => '270deg',
@@ -154,7 +144,7 @@ if ($bgType === 'youtube' && $youtubeId !== null) {
       // карточка с рамкой и подложкой в этой роли читается как чужой блок. ?>
 <div class="block-hero<?= $hasMedia ? ' block-hero--media' : '' ?><?= (!$hasMedia && $heroBg === '') ? ' block-hero--plain' : '' ?><?= $heroBg !== '' ? ' block-hero--bgcolor' : '' ?><?= ($bgType === 'video' || $bgType === 'youtube') ? ' block-hero--video' : '' ?> block-hero--w-<?= $heroWidth ?> block-hero--h-<?= $heroHeight ?> block-hero--pos-<?= $textPos ?>">
     <?php if ($bgType === 'video' && $videoFile !== ''): ?>
-        <video class="block-hero__video" data-hero-background-video autoplay muted loop playsinline webkit-playsinline preload="metadata"
+        <video class="block-hero__video <?= $mediaPositionClasses ?>" data-hero-background-video autoplay muted loop playsinline webkit-playsinline preload="metadata"
                disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
                tabindex="-1" <?= $image !== '' ? 'poster="' . htmlspecialchars($image, ENT_QUOTES) . '"' : '' ?> aria-hidden="true">
             <source src="<?= htmlspecialchars($videoFile, ENT_QUOTES) ?>" type="video/mp4">
@@ -162,7 +152,7 @@ if ($bgType === 'youtube' && $youtubeId !== null) {
     <?php elseif ($bgType === 'youtube' && $youtubeId !== null): ?>
         <?php if ($image !== '' && UrlGuard::isSafeMedia($image)): ?>
             <img
-                class="block-hero__youtube-poster"
+                class="block-hero__youtube-poster <?= $mediaPositionClasses ?>"
                 src="<?= htmlspecialchars($image, ENT_QUOTES) ?>"
                 alt=""
                 loading="eager"
@@ -183,7 +173,7 @@ if ($bgType === 'youtube' && $youtubeId !== null) {
             ></iframe>
         </div>
     <?php elseif ($bgType === 'image' && $image !== ''): ?>
-        <?= Media::picture($image, '', null, null, 'block-hero__image', false, '100vw', true, 'block-hero__media') ?>
+        <?= Media::picture($image, '', null, null, 'block-hero__image ' . $mediaPositionClasses, false, '100vw', true, 'block-hero__media ' . $mediaPositionClasses) ?>
     <?php endif; ?>
     <?php if ($hasMedia && $overlayEnabled): ?><div class="block-hero__scrim<?= $overlaySolid ? ' block-hero__scrim--solid' : '' ?>" aria-hidden="true"></div><?php endif; ?>
     <div class="block-hero__inner">

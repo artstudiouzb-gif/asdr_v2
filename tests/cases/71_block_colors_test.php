@@ -22,10 +22,10 @@ test('CTA: цвета фона/текста/кнопки отдаются пер
     assert_true(str_contains($h, '--cta-btn:#00aa88'), 'кнопка CTA');
 });
 
-test('Баннер: цвета отдаются переменными в обоих вариантах', function () {
-    $dark = render_color_block('banner', ['title' => 'T', 'style' => 'dark', 'bg_color' => '#0a0a0a', 'text_color' => '#ffffff']);
+test('CTA с медиа: цвета отдаются переменными в обоих вариантах', function () {
+    $dark = render_color_block('cta', ['variant' => 'media-dark', 'title' => 'T', 'bg_color' => '#0a0a0a', 'text_color' => '#ffffff']);
     assert_true(str_contains($dark, '--banner-bg:#0a0a0a') && str_contains($dark, '--banner-text:#ffffff'), 'тёмный баннер');
-    $light = render_color_block('banner', ['title' => 'T', 'style' => 'light', 'button_color' => '#123456', 'button_text' => 'Go', 'button_url' => '/x']);
+    $light = render_color_block('cta', ['variant' => 'media-light', 'title' => 'T', 'button_color' => '#123456', 'button_text' => 'Go', 'button_url' => '/x']);
     assert_true(str_contains($light, '--banner-btn:#123456'), 'светлый баннер кнопка');
 });
 
@@ -36,7 +36,7 @@ test('Направления: цвет карточек и текста отда
 });
 
 test('CTA-полоса: цвета отдаются переменными', function () {
-    $h = render_color_block('cta_band', ['title' => 'T', 'bg_color' => '#222222', 'text_color' => '#fafafa', 'button_color' => '#ffcc00', 'button_text' => 'X', 'button_url' => '/x']);
+    $h = render_color_block('cta', ['variant' => 'band', 'title' => 'T', 'bg_color' => '#222222', 'text_color' => '#fafafa', 'button_color' => '#ffcc00', 'button_text' => 'X', 'button_url' => '/x']);
     assert_true(str_contains($h, '--ctaband-bg:#222222') && str_contains($h, '--ctaband-text:#fafafa') && str_contains($h, '--ctaband-btn:#ffcc00'), 'цвета полосы');
 });
 

@@ -42,9 +42,9 @@ test('Блок timeline: события, кнопка и CTA-карточка', 
     assert_true(!str_contains($solo, 'timeline-cta'), 'CTA-карточка скрыта без заголовка');
 });
 
-test('Блок cta_band: заголовок, текст, кнопка; иконка по умолчанию', function () {
-    $out = BlockRenderer::render(['id' => 43, 'type' => 'cta_band', 'custom_css' => null, 'data' => json_encode([
-        'title' => 'Есть вопросы или предложения?', 'text' => 'Свяжитесь с нами',
+test('CTA-полоса: заголовок, текст, кнопка; иконка по умолчанию', function () {
+    $out = BlockRenderer::render(['id' => 43, 'type' => 'cta', 'custom_css' => null, 'data' => json_encode([
+        'variant' => 'band', 'title' => 'Есть вопросы или предложения?', 'text' => 'Свяжитесь с нами',
         'button_text' => 'Связаться с нами', 'button_url' => '/kontakty',
     ])])['html'];
     assert_contains('block-ctaband', $out);
@@ -65,9 +65,9 @@ test('Блок person_profile: фото, контакты, кнопка', functi
     assert_contains('profile__button', $out);
 });
 
-test('Блок feature_band: элементы с иконками', function () {
-    $out = BlockRenderer::render(['id' => 45, 'type' => 'feature_band', 'custom_css' => null, 'data' => json_encode([
-        'items' => [
+test('Преимущества-полоса: элементы с иконками', function () {
+    $out = BlockRenderer::render(['id' => 45, 'type' => 'advantages', 'custom_css' => null, 'data' => json_encode([
+        'variant' => 'band', 'items' => [
             ['icon_svg' => 'target-arrow', 'title' => 'Стратегическое управление', 'text' => 'Определение приоритетов'],
             ['icon_svg' => '', 'title' => 'Координация реформ', 'text' => ''],
         ],

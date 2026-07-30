@@ -389,7 +389,7 @@ final class DesignSettings
      */
     public const TYPO_SIZES = [
         'fs_h1' => ['Заголовок H1', 'h1, .block-hero__title, .content-pagehead__title, .projdetail__title, .newsdetail__title, .newsdetail-phero__title', '42'],
-        'fs_h2' => ['Заголовок H2', 'h2, .section-title, .block-title, .content-list__head h1, .block-news__title, .block-categories__title, .block-media__title, .block-contact-cards__title, .newsdetail-card__title, .section-head__title', '32'],
+        'fs_h2' => ['Заголовок H2', 'h2, .section-title, .block-title, .content-list__head h1, .block-news__title, .block-categories__title, .block-contact-cards__title, .newsdetail-card__title, .section-head__title', '32'],
         'fs_h3' => ['Заголовок H3', 'h3, .card__title, .feature-card__title, .imgcard__title, .catcard__title, .newsfeat-lead__title, .newsfeat-mini__title, .newsfeat-text__title, .catdetail__title, .gcal-list__title, .orgstruct__head-name, .person-card__name, .timeline-item__year, .ctaband__title, .profile__position, .featband__name, .bio-quote__mark, .widget__title, .bio-extra__title, .relnews-card__title, .adjnews__title, .album-card__title, .block-banner__title', '24'],
         'fs_h4' => ['Заголовок H4', 'h4', '20'],
         'fs_h5' => ['Заголовок H5', 'h5', '18'],

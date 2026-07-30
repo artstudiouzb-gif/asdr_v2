@@ -12,7 +12,7 @@ test('Заголовок первого уровня на странице ро�
     $blocks = [
         ['id' => 1, 'type' => 'hero', 'custom_css' => '', 'data' => json_encode(['title' => 'Обложка'])],
         ['id' => 2, 'type' => 'person_profile', 'custom_css' => '', 'data' => json_encode(['name' => 'Фамилия Имя'])],
-        ['id' => 3, 'type' => 'banner', 'custom_css' => '', 'data' => json_encode(['title' => 'Баннер', 'style' => 'light'])],
+        ['id' => 3, 'type' => 'cta', 'custom_css' => '', 'data' => json_encode(['variant' => 'media-light', 'title' => 'Баннер'])],
     ];
     $html = BlockRenderer::renderPage($blocks)['html'];
     assert_same(1, substr_count($html, '<h1'), 'h1 должен быть один');
@@ -42,7 +42,7 @@ test('Прокручиваемые полосы доступны с клавиа
     assert_contains('role="group"', $testimonials);
     assert_contains('aria-label', $testimonials);
 
-    $cards = (string) file_get_contents(dirname(__DIR__, 2) . '/templates/blocks/image_cards.php');
+    $cards = (string) file_get_contents(dirname(__DIR__, 2) . '/templates/blocks/cards_grid.php');
     assert_contains('tabindex="0"', $cards);
 
     // Подписи полос переводятся: UZ-версия не должна показывать русский текст.

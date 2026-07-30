@@ -32,15 +32,14 @@ final class BlockRenderer
 
     /**
      * Заголовок первого уровня на странице должен быть один: экранный диктор
-     * по нему понимает, о чём страница. Обложка, баннер и профиль персоны
-     * претендуют на h1 — первому из них он и достаётся, остальным h2.
+     * по нему понимает, о чём страница. Обложка и профиль персоны претендуют
+     * на h1 — первому из них он и достаётся, второму остаётся h2.
      */
     private static bool $h1Used = false;
 
     /**
-     * Типы, чей заголовок может быть заголовком страницы. Баннер сюда не
-     * входит: это рекламная врезка, и h1 ей не по чину (в тёмном варианте
-     * шаблона там и так всегда был h2).
+     * Типы, чей заголовок может быть заголовком страницы. CTA сюда не входит:
+     * это рекламная врезка и всегда использует h2.
      *
      * @var list<string>
      */
@@ -113,16 +112,7 @@ final class BlockRenderer
             $data = [];
         }
 
-        // До появления явного переключателя overlay старые Hero сохраняли
-        // только цвет и прозрачность затемнения. Если сразу подмешать новые
-        // дефолты, overlay_enabled=false незаметно отключит затемнение на уже
-        // созданных страницах и в установленном демо-контенте.
-        if ($type === 'hero') {
-            $data = self::upgradeLegacyHeroOverlay($data);
-        }
-
-        // Смердживание с дефолтами по типу блока — устойчивость к старым/
-        // неполным JSON-данным.
+        // Смердживание с дефолтами поддерживает частично заполненные формы.
         $data = array_merge(self::defaultsFor($type), $data);
 
         // Условия показа (расписание). Границу запоминаем до проверки: блок,
@@ -246,46 +236,13 @@ final class BlockRenderer
         $preloadImage = null;
         if ($type === 'hero') {
             $heroImage = trim((string) ($data['image'] ?? ''));
-            $heroBgType = (string) ($data['bg_type'] ?? '');
-            if ($heroBgType === '') {
-                $heroBgType = Video::youtubeId((string) ($data['youtube_url'] ?? '')) !== null
-                    ? 'youtube'
-                    : (trim((string) ($data['video_url'] ?? '')) !== '' ? 'video' : ($heroImage !== '' ? 'image' : 'none'));
-            }
+            $heroBgType = (string) ($data['bg_type'] ?? 'none');
             if (in_array($heroBgType, ['image', 'youtube'], true) && $heroImage !== '') {
                 $preloadImage = $heroImage;
             }
         }
 
         return ['html' => $wrapped, 'css' => $scopedCss, 'preload_image' => $preloadImage];
-    }
-
-    /**
-     * @param array<string, mixed> $data
-     * @return array<string, mixed>
-     */
-    private static function upgradeLegacyHeroOverlay(array $data): array
-    {
-        if (array_key_exists('overlay_enabled', $data)) {
-            return $data;
-        }
-
-        $hasLegacyOverlay = array_key_exists('overlay_color', $data)
-            || array_key_exists('overlay_opacity', $data)
-            || array_key_exists('overlay_end_color', $data)
-            || array_key_exists('overlay_mode', $data)
-            || (($data['overlay_direction'] ?? null) === 'solid');
-        if (!$hasLegacyOverlay) {
-            return $data;
-        }
-
-        $legacyDirection = (string) ($data['overlay_direction'] ?? 'auto');
-        $legacyMode = (string) ($data['overlay_mode'] ?? ($legacyDirection === 'solid' ? 'solid' : 'gradient'));
-        $data['overlay_enabled'] = true;
-        $data['overlay_mode'] = in_array($legacyMode, ['solid', 'gradient'], true) ? $legacyMode : 'gradient';
-        $data['overlay_direction'] = $legacyDirection === 'solid' ? 'auto' : $legacyDirection;
-
-        return $data;
     }
 
     /**
@@ -535,10 +492,10 @@ final class BlockRenderer
             }
         }
 
-        // Блок «Проекты» (image_cards) с источником «Проекты»: карточки
+        // Карточки с вариантом «Фото» и источником «Проекты»: данные
         // собираются автоматически из опубликованных проектов, помеченных
         // «показать на главном» — без ручного дублирования (задача 42).
-        if ($type === 'image_cards' && ($data['source'] ?? 'manual') === 'projects') {
+        if ($type === 'cards_grid' && ($data['variant'] ?? 'icon') === 'image' && ($data['source'] ?? 'manual') === 'projects') {
             $lang = Locale::current();
             $limit = (int) ($data['limit'] ?? 6);
             $items = [];

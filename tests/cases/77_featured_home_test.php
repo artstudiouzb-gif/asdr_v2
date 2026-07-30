@@ -7,7 +7,7 @@ use App\Core\Database;
 use App\Models\PhotoAlbum;
 use App\Models\Project;
 
-// «Показать на главном»: блоки image_cards/media_gallery с автоисточником
+// «Показать на главном»: блоки cards_grid/media_gallery с автоисточником
 // собирают карточки из отмеченных записей (проекты / фотоальбомы).
 
 test('Project::forHome отдаёт отмеченные «на главной», иначе — откат на последние', function () {
@@ -43,7 +43,7 @@ test('Project::forHome отдаёт отмеченные «на главной»
     Project::forceDelete($id);
 });
 
-test('image_cards с источником «projects» рендерит карточки проектов', function () {
+test('cards_grid с источником «projects» рендерит карточки проектов', function () {
     if (!Database::isConnected()) {
         return;
     }
@@ -58,7 +58,7 @@ test('image_cards с источником «projects» рендерит карт
         'sort_order' => 0,
     ]);
 
-    $block = ['id' => 0, 'type' => 'image_cards', 'data' => json_encode(['source' => 'projects', 'limit' => 6])];
+    $block = ['id' => 0, 'type' => 'cards_grid', 'data' => json_encode(['variant' => 'image', 'source' => 'projects', 'limit' => 6])];
     $html = BlockRenderer::render($block)['html'];
 
     assert_true(str_contains($html, 'Проект для главной'), 'заголовок проекта отрисован');
@@ -88,7 +88,8 @@ test('Ручной источник (manual) по-прежнему исполь�
     if (!Database::isConnected()) {
         return;
     }
-    $block = ['id' => 0, 'type' => 'image_cards', 'data' => json_encode([
+    $block = ['id' => 0, 'type' => 'cards_grid', 'data' => json_encode([
+        'variant' => 'image',
         'source' => 'manual',
         'items' => [['image' => '/x.jpg', 'title' => 'Ручная карточка', 'url' => '']],
     ])];

@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Core\BlockData\BannerBlockNormalizer;
 use App\Core\BlockData\CtaBlockNormalizer;
 use App\Core\BlockData\SubscribeBlockNormalizer;
 
@@ -19,8 +18,13 @@ test('CTA normalizer: сохраняет контракт, цвета и без�
     ]);
 
     assert_same([
+        'variant' => 'card',
         'title' => 'Заголовок',
         'text' => 'Описание',
+        'icon_svg' => '',
+        'image' => '',
+        'image_position' => 'center-center',
+        'image_position_mobile' => 'center-center',
         'button_text' => 'Подробнее',
         'button_url' => '',
         'bg_color' => '#aabbcc',
@@ -31,12 +35,14 @@ test('CTA normalizer: сохраняет контракт, цвета и без�
     assert_same('/about', CtaBlockNormalizer::normalize(['button_url' => ' /about '])['button_url']);
 });
 
-test('Banner normalizer: сохраняет контракт, стиль и безопасную ссылку', function () {
-    $data = BannerBlockNormalizer::normalize([
+test('CTA normalizer: сохраняет медиа-вариант, изображение и безопасную ссылку', function () {
+    $data = CtaBlockNormalizer::normalize([
+        'variant' => 'media-light',
         'title_field' => '  Баннер  ',
         'text' => '  Текст  ',
         'image' => ' /uploads/public/banner.jpg ',
-        'style' => 'light',
+        'image_position' => 'right-top',
+        'image_position_mobile' => 'center-bottom',
         'button_text' => ' Открыть ',
         'button_url' => ' https://example.com/page ',
         'bg_color' => '#010203',
@@ -46,10 +52,13 @@ test('Banner normalizer: сохраняет контракт, стиль и бе
     ]);
 
     assert_same([
+        'variant' => 'media-light',
         'title' => 'Баннер',
         'text' => 'Текст',
+        'icon_svg' => '',
         'image' => '/uploads/public/banner.jpg',
-        'style' => 'light',
+        'image_position' => 'right-top',
+        'image_position_mobile' => 'center-bottom',
         'button_text' => 'Открыть',
         'button_url' => 'https://example.com/page',
         'bg_color' => '#010203',
@@ -57,11 +66,11 @@ test('Banner normalizer: сохраняет контракт, стиль и бе
         'button_color' => '',
     ], $data);
 
-    $invalid = BannerBlockNormalizer::normalize([
-        'style' => 'unknown',
+    $invalid = CtaBlockNormalizer::normalize([
+        'variant' => 'unknown',
         'button_url' => "https://example.com/\njavascript:alert(1)",
     ]);
-    assert_same('dark', $invalid['style']);
+    assert_same('card', $invalid['variant']);
     assert_same('', $invalid['button_url']);
 });
 
@@ -81,7 +90,6 @@ test('Контроллер делегирует простые блоки отд
     $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/BlockController.php');
 
     assert_contains('CtaBlockNormalizer::normalize($_POST, $locale)', $controller);
-    assert_contains('BannerBlockNormalizer::normalize($_POST, $locale)', $controller);
     assert_contains('SubscribeBlockNormalizer::normalize($_POST, $locale)', $controller);
-    assert_not_contains('$bannerUrl = trim', $controller);
+    assert_not_contains('BannerBlockNormalizer', $controller);
 });

@@ -62,7 +62,6 @@ final class BlockSamples
             // строку-образец не подставляем: она исчезла бы при первом
             // сохранении и только запутала бы.
             'slider' => ['slides' => []],
-            'gallery' => ['title' => 'Фотогалерея', 'images' => []],
             'form' => ['form_id' => null],
             'columns' => ['columns' => 2, 'gap' => 'medium'],
             'testimonials' => ['title' => 'Отзывы', 'items' => [
@@ -91,13 +90,6 @@ final class BlockSamples
                 ['name' => 'Название организации', 'logo' => '', 'url' => ''],
                 ['name' => 'Вторая организация', 'logo' => '', 'url' => ''],
             ]],
-            'banner' => [
-                'title' => 'Заголовок баннера',
-                'text' => self::LEAD,
-                'image' => '',
-                'button_text' => 'Подробнее',
-                'button_url' => $news,
-            ],
             'subscribe' => [
                 'title' => 'Подписка на новости',
                 'text' => 'Получайте дайджест новостей на почту раз в неделю.',
@@ -117,28 +109,16 @@ final class BlockSamples
                 'subtitle' => 'Одно предложение о содержании страницы.',
                 'height' => 'regular',
                 'width' => 'full',
+                'bg_type' => 'none',
                 'text_position' => 'left',
                 'overlay_enabled' => false,
                 'overlay_mode' => 'gradient',
                 'overlay_opacity' => 35,
             ],
-            'categories_grid' => ['title' => 'Направления', 'items' => [
-                ['title' => 'Название направления', 'label' => 'Название направления', 'url' => $news, 'icon_svg' => ''],
-                ['title' => 'Второе направление', 'label' => 'Второе направление', 'url' => $news, 'icon_svg' => ''],
-                ['title' => 'Третье направление', 'label' => 'Третье направление', 'url' => $news, 'icon_svg' => ''],
-            ]],
-            'media_materials' => ['title' => 'Медиаматериалы', 'items' => [
-                ['label' => 'Пресс-релиз', 'action' => 'Скачать', 'url' => $news, 'icon_svg' => ''],
-                ['label' => 'Фотоматериалы', 'action' => 'Открыть', 'url' => $news, 'icon_svg' => ''],
-            ]],
             'cards_grid' => ['title' => 'Разделы', 'columns' => 3, 'items' => [
                 ['title' => 'Название карточки', 'text' => self::LEAD, 'url' => $news, 'icon_svg' => ''],
                 ['title' => 'Вторая карточка', 'text' => self::LEAD, 'url' => $news, 'icon_svg' => ''],
                 ['title' => 'Третья карточка', 'text' => self::LEAD, 'url' => $news, 'icon_svg' => ''],
-            ]],
-            'image_cards' => ['title' => 'Карточки с фото', 'source' => 'manual', 'limit' => 6, 'items' => [
-                ['title' => 'Название карточки', 'image' => '', 'url' => $news],
-                ['title' => 'Вторая карточка', 'image' => '', 'url' => $news],
             ]],
             'media_gallery' => ['title' => 'Медиа', 'source' => 'manual', 'limit' => 8, 'items' => [
                 ['kind' => 'photo', 'title' => 'Название материала', 'image' => '', 'url' => $news, 'meta' => '', 'text' => ''],
@@ -152,13 +132,6 @@ final class BlockSamples
                 ['year' => '2025', 'text' => 'Следующий этап.'],
                 ['year' => '2026', 'text' => 'Текущий этап.'],
             ]],
-            'cta_band' => [
-                'title' => 'Заголовок призыва',
-                'text' => self::LEAD,
-                'button_text' => 'Перейти к новостям',
-                'button_url' => $news,
-                'icon_svg' => '',
-            ],
             'person_profile' => [
                 'photo' => '', 'name' => 'Фамилия Имя Отчество', 'position' => 'Должность',
                 'text' => self::LEAD,
@@ -166,11 +139,6 @@ final class BlockSamples
                 'email' => 'info@example.uz', 'email_label' => 'E-mail:',
                 'button_text' => '', 'button_url' => '',
             ],
-            'feature_band' => ['title' => 'Основные направления', 'items' => [
-                ['title' => 'Первое направление', 'text' => self::LEAD, 'icon_svg' => ''],
-                ['title' => 'Второе направление', 'text' => self::LEAD, 'icon_svg' => ''],
-                ['title' => 'Третье направление', 'text' => self::LEAD, 'icon_svg' => ''],
-            ]],
             'bio_education' => [
                 'bio_title' => 'Биография',
                 'bio_text' => self::LEAD,

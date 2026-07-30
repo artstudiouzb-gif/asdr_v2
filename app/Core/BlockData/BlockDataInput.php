@@ -30,6 +30,13 @@ final class BlockDataInput
         return $url !== '' && UrlGuard::isSafeLink($url) ? $url : '';
     }
 
+    public static function safeMedia(mixed $value): string
+    {
+        $url = trim(self::scalarString($value));
+
+        return $url !== '' && UrlGuard::isSafeMedia($url) ? $url : '';
+    }
+
     /** @param array<string, mixed> $input */
     public static function optionalColor(array $input, string $field): string
     {

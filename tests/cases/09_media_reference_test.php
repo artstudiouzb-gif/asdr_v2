@@ -17,7 +17,7 @@ test('MediaCleaner::referenceCount учитывает разные таблиц�
     $pid = $pdo->query("INSERT INTO pages (title,slug,status) VALUES ('P','refp-" . bin2hex(random_bytes(3)) . "','draft')") !== false
         ? (int) $pdo->lastInsertId() : 0;
     $pdo->prepare('INSERT INTO blocks (page_id,lang,type,data,sort_order) VALUES (?,?,?,?,0)')
-        ->execute([$pid, 'ru', 'gallery', json_encode(['images' => [['url' => $url]]])]);
+        ->execute([$pid, 'ru', 'media_gallery', json_encode(['items' => [['image' => $url, 'title' => 'Фото', 'kind' => 'photo']]])]);
 
     $nid = $pdo->query("INSERT INTO news (title,slug,status,image) VALUES ('N','refn-" . bin2hex(random_bytes(3)) . "','draft'," . $pdo->quote($url) . ")") !== false
         ? (int) $pdo->lastInsertId() : 0;

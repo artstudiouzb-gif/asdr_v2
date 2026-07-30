@@ -44,21 +44,7 @@ $fmt = static fn (string $d): string => DateFormatter::short($d);
         <?php else: ?>
             <div class="newsdocs-docs">
                 <?php foreach ($docs as $doc): ?>
-                    <?php $url = trim((string) ($doc['url'] ?? '')); $tag = $url !== '' ? 'a' : 'div'; ?>
-                    <<?= $tag ?> class="doc-card"<?= $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"' : '' ?>>
-                        <span class="doc-card__icon">
-                            <?= \App\Core\Icon::render('file-text', 24, 'doc-card__icon-svg', 1.5) ?>
-                        </span>
-                        <span class="doc-card__body">
-                            <span class="doc-card__title"><?= htmlspecialchars((string) $doc['title'], ENT_QUOTES) ?></span>
-                            <?php if (!empty($doc['meta'])): ?><span class="doc-card__meta"><?= htmlspecialchars((string) $doc['meta'], ENT_QUOTES) ?></span><?php endif; ?>
-                        </span>
-                        <?php if ($url !== ''): ?>
-                            <span class="doc-card__dl">
-                                <?= \App\Core\Icon::render('download', 18, 'doc-card__download-icon', 1.8) ?>
-                            </span>
-                        <?php endif; ?>
-                    </<?= $tag ?>>
+                    <?php $compact = true; include __DIR__ . '/partials/document_card.php'; ?>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>

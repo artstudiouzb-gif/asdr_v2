@@ -350,29 +350,6 @@ summary:focus-visible {
     .block-slider__dot { transition: none; }
 }
 
-.block-gallery__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
-.block-gallery__item {
-    display: block;
-    overflow: hidden;
-    border-radius: var(--radius, 12px);
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
-}
-.block-gallery__item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(19, 42, 92, 0.08);
-}
-.block-gallery__item img { 
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: var(--radius, 12px); 
-    transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-.block-gallery__item:hover img {
-    transform: scale(1.05);
-}
-
 .block-form__consent { display: flex; align-items: flex-start; gap: 8px; margin: 4px 0 16px; font-size: .92rem; color: var(--text-muted); }
 .block-form__consent input { margin-top: 3px; flex-shrink: 0; }
 .block-form__consent a { color: var(--color-accent, #5b52e5); }
@@ -951,7 +928,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 /* Скругления карточек/полей */
 .content-card, .news-card, .site-search-results__item,
 .block-cta, .block-form, .block-testimonials__item, .widget,
-.content-detail, .block-slider, .block-gallery__item img { border-radius: var(--radius); }
+.content-detail, .block-slider { border-radius: var(--radius); }
 
 /* Форма кнопок */
 .site-cta, .content-toolbar button, .site-search-page__form button,
@@ -1428,7 +1405,6 @@ h6 { font-size: 0.95rem; line-height: 1.35; margin: 1rem 0 0.5rem; }
 /* Унификация размеров всех заголовков блоков на главной и внутренних страницах */
 .block-news__title,
 .block-categories__title,
-.block-media__title,
 .block-contact-cards__title,
 .block-testimonials__title,
 .block-counters__title,
@@ -2115,18 +2091,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .cat-tile.is-active .cat-tile__icon { background-color: var(--color-accent, #2f6fed); color: #fff; }
 .cat-tile__label { font-weight: 600; font-size: .96rem; }
 
-/* Медиаматериалы: список ссылок с иконкой-подложкой и действием. */
-.block-media__title { font-size: clamp(1.3rem, 2.4vw, 1.8rem); margin: 0 0 16px; }
-.block-media__empty { color: var(--text-muted); }
 .media-list { display: flex; flex-direction: column; }
-.media-item { display: flex; align-items: center; gap: 14px; padding: 14px 6px; border-bottom: 1px solid var(--border-color); text-decoration: none; color: var(--text-main); transition: background .15s ease; }
-.media-item:last-child { border-bottom: 0; }
-.media-item:hover { background: color-mix(in srgb, var(--color-primary, #223d79) 4%, transparent); }
-.media-item__icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0; background: color-mix(in srgb, var(--color-primary, #223d79) 9%, transparent); color: var(--color-primary, #223d79); }
-.media-item__icon svg { width: 20px; height: 20px; }
-.media-item__body { display: flex; flex-direction: column; gap: 2px; }
-.media-item__label { font-weight: 600; }
-.media-item__action { color: var(--color-accent, #2f6fed); font-size: .85rem; font-weight: 600; }
 
 /* --- Улучшенное оформление кнопок-утилит (Поиск, Тема, Версия для слабовидящих) --- */
 .site-search-toggle,
@@ -2387,6 +2352,167 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
 
 [hidden] {
     display: none !important;
+}
+
+.clipboard-copy-proxy {
+    position: fixed;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+/* Единые пресеты кадрирования медиа в блоках. */
+.media-position--left-top { object-position: left top; background-position: left top; }
+.media-position--center-top { object-position: center top; background-position: center top; }
+.media-position--right-top { object-position: right top; background-position: right top; }
+.media-position--left-center { object-position: left center; background-position: left center; }
+.media-position--center-center { object-position: center center; background-position: center center; }
+.media-position--right-center { object-position: right center; background-position: right center; }
+.media-position--left-bottom { object-position: left bottom; background-position: left bottom; }
+.media-position--center-bottom { object-position: center bottom; background-position: center bottom; }
+.media-position--right-bottom { object-position: right bottom; background-position: right bottom; }
+
+@media (max-width: 700px) {
+    .media-position-mobile--left-top { object-position: left top; background-position: left top; }
+    .media-position-mobile--center-top { object-position: center top; background-position: center top; }
+    .media-position-mobile--right-top { object-position: right top; background-position: right top; }
+    .media-position-mobile--left-center { object-position: left center; background-position: left center; }
+    .media-position-mobile--center-center { object-position: center center; background-position: center center; }
+    .media-position-mobile--right-center { object-position: right center; background-position: right center; }
+    .media-position-mobile--left-bottom { object-position: left bottom; background-position: left bottom; }
+    .media-position-mobile--center-bottom { object-position: center bottom; background-position: center bottom; }
+    .media-position-mobile--right-bottom { object-position: right bottom; background-position: right bottom; }
+}
+
+/* Поиск по документам и FAQ. */
+.document-tools,
+.faq-tools {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 22px;
+    flex-wrap: wrap;
+}
+
+.document-tools__search,
+.faq-tools__search {
+    position: relative;
+    flex: 1 1 280px;
+}
+
+.document-tools__search-icon,
+.faq-tools__search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--gov-muted);
+}
+
+.document-tools input,
+.faq-tools input,
+.document-tools select,
+.faq-tools select {
+    min-height: 44px;
+    border: 1px solid var(--gov-border);
+    border-radius: 10px;
+    background: var(--gov-surface);
+    color: var(--gov-title);
+}
+
+.document-tools input,
+.faq-tools input {
+    width: 100%;
+    padding: 9px 14px 9px 42px;
+}
+
+.document-tools select,
+.faq-tools select { padding: 9px 34px 9px 12px; }
+.document-tools__count { color: var(--gov-muted); font-size: .875rem; }
+.doc-card[hidden], .faq-item[hidden] { display: none !important; }
+.doc-card__action { font-size: .78rem; color: var(--gov-teal-text); }
+
+.faq-item__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.faq-item__category {
+    flex: 0 0 auto;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--gov-teal) 12%, transparent);
+    color: var(--gov-teal-text);
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+/* Карта загружается только после осознанного действия пользователя. */
+.block-map__embed { position: absolute; inset: 0; }
+.block-map__load {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 46px;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--gov-navy);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 12px 30px rgba(9, 30, 54, .22);
+}
+.block-map__load:hover { transform: translate(-50%, -50%) translateY(-2px); }
+.block-map__card-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+button.block-map__card-link { border: 0; padding: 0; background: none; font: inherit; cursor: pointer; }
+.block-map__card-link { display: inline-flex; align-items: center; gap: 5px; }
+
+.orgstruct__deputy { position: relative; }
+.orgstruct__deputy-link { display: flex; flex-direction: column; color: inherit; text-decoration: none; }
+.orgstruct__toggle { display: none; }
+
+.textimage__visual { min-width: 0; }
+.textimage__visual .textimage__media { height: 100%; }
+.block-textimage--image-left .textimage__info { order: 2; }
+.block-textimage--image-left .textimage__visual { order: 1; }
+
+@media (max-width: 700px) {
+    .document-tools,
+    .faq-tools { align-items: stretch; }
+    .document-tools__filter select,
+    .faq-tools__category select { width: 100%; }
+    .faq-item__category { display: none; }
+    .block-map__card { max-width: calc(100% - 24px); }
+    .orgstruct__toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        width: 36px;
+        height: 36px;
+        transform: translateY(-50%);
+        border: 0;
+        border-radius: 50%;
+        background: color-mix(in srgb, var(--gov-teal) 12%, transparent);
+        color: var(--gov-title);
+        cursor: pointer;
+    }
+    .orgstruct__toggle[aria-expanded="false"] svg { transform: rotate(-90deg); }
+    .block-textimage--image-left .textimage__info,
+    .block-textimage--image-left .textimage__visual { order: initial; }
 }
 
 /* generated:embedded-styles:start */

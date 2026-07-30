@@ -40,22 +40,32 @@ $templateCss = $branches !== []
 
         <?php if ($branches !== []): ?>
             <div class="orgstruct__branches">
-                <?php foreach ($branches as $branch): ?>
+                <?php foreach ($branches as $index => $branch): ?>
                     <?php
                     $bTitle = trim((string) ($branch['title'] ?? ''));
                     $bName = trim((string) ($branch['name'] ?? ''));
+                    $bUrl = trim((string) ($branch['url'] ?? ''));
                     $units = array_values(array_filter(array_map('trim', explode("\n", (string) ($branch['units'] ?? '')))));
                     if ($bTitle === '' && $bName === '' && $units === []) {
                         continue;
                     }
                     ?>
-                    <div class="orgstruct__branch">
+                    <?php $branchId = 'org-branch-' . (int) $blockId . '-' . ((int) $index + 1); ?>
+                    <div class="orgstruct__branch" data-org-branch>
                         <div class="orgstruct__deputy">
-                            <?php if ($bTitle !== ''): ?><span class="orgstruct__deputy-role"><?= htmlspecialchars($bTitle, ENT_QUOTES) ?></span><?php endif; ?>
-                            <?php if ($bName !== ''): ?><span class="orgstruct__deputy-name"><?= htmlspecialchars($bName, ENT_QUOTES) ?></span><?php endif; ?>
+                            <?php if ($bUrl !== ''): ?><a class="orgstruct__deputy-link" href="<?= htmlspecialchars($bUrl, ENT_QUOTES) ?>"><?php endif; ?>
+                                <?php if ($bTitle !== ''): ?><span class="orgstruct__deputy-role"><?= htmlspecialchars($bTitle, ENT_QUOTES) ?></span><?php endif; ?>
+                                <?php if ($bName !== ''): ?><span class="orgstruct__deputy-name"><?= htmlspecialchars($bName, ENT_QUOTES) ?></span><?php endif; ?>
+                            <?php if ($bUrl !== ''): ?></a><?php endif; ?>
+                            <?php if ($units !== []): ?>
+                                <button type="button" class="orgstruct__toggle" data-org-toggle aria-expanded="true" aria-controls="<?= $branchId ?>">
+                                    <span class="visually-hidden"><?= htmlspecialchars(t('Показать подразделения'), ENT_QUOTES) ?></span>
+                                    <?= \App\Core\Icon::render('chevron-down', 18, '', 2) ?>
+                                </button>
+                            <?php endif; ?>
                         </div>
                         <?php if ($units !== []): ?>
-                            <ul class="orgstruct__units" role="list">
+                            <ul class="orgstruct__units" id="<?= $branchId ?>" data-org-units role="list">
                                 <?php foreach ($units as $unit): ?>
                                     <li class="orgstruct__unit"><?= htmlspecialchars($unit, ENT_QUOTES) ?></li>
                                 <?php endforeach; ?>

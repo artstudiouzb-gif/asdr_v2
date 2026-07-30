@@ -23,7 +23,6 @@ final class AdminUi
             'cta' => 'send',
             'advantages' => 'check',
             'slider' => 'media',
-            'gallery' => 'media',
             'form' => 'send',
             'columns' => 'columns',
             'testimonials' => 'info',
@@ -32,22 +31,16 @@ final class AdminUi
             'projects_list' => 'briefcase',
             'news_latest' => 'document',
             'partners' => 'shield',
-            'banner' => 'layout',
             'subscribe' => 'send',
             'faq' => 'info',
             'contact_cards' => 'user',
-            'categories_grid' => 'grid',
-            'media_materials' => 'media',
             'cards_grid' => 'grid',
-            'image_cards' => 'media',
             'media_gallery' => 'media',
             'news_feature' => 'document',
             'person_cards' => 'users',
             'timeline' => 'calendar',
             'news_docs' => 'document',
-            'cta_band' => 'send',
             'person_profile' => 'user',
-            'feature_band' => 'check',
             'bio_education' => 'user',
             'anchor_nav' => 'list',
             'stages' => 'calendar',
@@ -233,6 +226,40 @@ final class AdminUi
         $html .= '</div></div></div>';
 
         return $html;
+    }
+
+    /**
+     * Два одинаковых набора пресетов кадрирования: для широкого и мобильного
+     * экрана. Произвольный CSS не принимается.
+     */
+    public static function mediaPositionFields(string $desktop = 'center-center', string $mobile = 'center-center'): string
+    {
+        $desktop = MediaPosition::normalize($desktop);
+        $mobile = MediaPosition::normalize($mobile);
+        $labels = [
+            'left-top' => 'Слева сверху',
+            'center-top' => 'По центру сверху',
+            'right-top' => 'Справа сверху',
+            'left-center' => 'Слева',
+            'center-center' => 'По центру',
+            'right-center' => 'Справа',
+            'left-bottom' => 'Слева снизу',
+            'center-bottom' => 'По центру снизу',
+            'right-bottom' => 'Справа снизу',
+        ];
+        $select = static function (string $name, string $label, string $selected) use ($labels): string {
+            $html = '<div class="form-field"><label for="' . $name . '">' . $label . '</label><select id="' . $name . '" name="' . $name . '">';
+            foreach ($labels as $value => $option) {
+                $html .= '<option value="' . $value . '"' . ($selected === $value ? ' selected' : '') . '>' . $option . '</option>';
+            }
+
+            return $html . '</select></div>';
+        };
+
+        return '<div class="media-position-fields">'
+            . $select('image_position', 'Кадрирование на широком экране', $desktop)
+            . $select('image_position_mobile', 'Кадрирование на телефоне', $mobile)
+            . '</div>';
     }
 
     /**

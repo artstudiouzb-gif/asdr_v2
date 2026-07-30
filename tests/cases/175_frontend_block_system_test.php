@@ -44,7 +44,7 @@ test('Галерея использует единый lightbox из общег�
     $frontend = (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js');
 
     assert_not_contains('/assets/js/blocks/gallery.js', $collector);
-    assert_contains("var PHOTO_SCOPES = '.album-photos, .block-gallery__grid", $frontend);
+    assert_contains("var PHOTO_SCOPES = '.album-photos, .newsdetail-photos__grid, .mediagallery-grid'", $frontend);
     assert_true(str_ends_with(trim($frontend), '})();'), 'общий IIFE должен закрываться в конце bundle');
     assert_same(1, substr_count($frontend, "\n})();"), 'frontend helpers не должны выпадать из общего scope');
 });
