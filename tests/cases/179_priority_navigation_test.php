@@ -30,10 +30,24 @@ test('Priority-бургер является последним элементо
 
     assert_contains('.site-menu__overflow {', $css);
     assert_contains('.site-menu__overflow-panel {', $css);
+    assert_contains('.site-header__inner:has([data-priority-menu]) > .site-header__zone:has([data-priority-menu])', $css);
+    assert_contains('.site-header__zone--center:not(:has([data-priority-menu]))', $css);
     assert_contains('.hdr-util:has(> [data-priority-menu])', $css);
+    assert_contains('flex: 1 1 0;', $css);
     assert_contains('flex-wrap: nowrap !important', $css);
     assert_contains('.site-menu__overflow.is-open .site-menu__overflow-toggle span:nth-child(1)', $css);
     assert_contains('transform: translateY(6px) rotate(45deg)', $css);
     assert_contains('@media (max-width: 720px)', $css);
     assert_contains('[data-priority-overflow]', $css);
+});
+
+test('Прозрачная шапка использует компактный hamburger без белой карточки', function (): void {
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+
+    assert_contains('body .site-header--transparent:not(.is-scrolled) .site-burger,', $css);
+    assert_contains('body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle {', $css);
+    assert_contains('width: 36px;', $css);
+    assert_contains('border-radius: 6px;', $css);
+    assert_contains('background: transparent;', $css);
+    assert_contains('box-shadow: none;', $css);
 });

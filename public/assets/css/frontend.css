@@ -2129,8 +2129,21 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
     .site-nav__inner:has([data-priority-menu]) {
         min-width: 0;
     }
+    /* Зона с desktop-навигацией должна получать всё свободное место строки.
+       Иначе её ширина вычисляется по содержимому, и priority-menu ошибочно
+       переносит пункты в «Ещё» даже на широком экране. */
+    .site-header__inner:has([data-priority-menu]) > .site-header__zone:has([data-priority-menu]),
+    .site-topbar__inner:has([data-priority-menu]) > .site-topbar__zone:has([data-priority-menu]) {
+        flex: 1 1 0;
+    }
+    .site-header__inner:has([data-priority-menu]) > .site-header__zone--center:not(:has([data-priority-menu])) {
+        flex: 0 1 auto;
+    }
+    .site-header__inner:has([data-priority-menu]) > .site-header__zone--right:has([data-priority-menu]) {
+        margin-left: 0;
+    }
     .hdr-util:has(> [data-priority-menu]) {
-        flex: 1 1 auto;
+        flex: 1 1 0;
         width: 100%;
         min-width: 0;
         max-width: 100%;
