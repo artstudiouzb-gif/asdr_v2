@@ -106,6 +106,35 @@ test('Усиление системы: AI Assistant metadata extraction', functi
     assert_true(mb_strlen($desc) <= 160, 'Meta description ограничен 160 символами');
 });
 
+test('ИИ-редактор: локальный резерв анализирует весь текст и соблюдает SEO-лимиты', function (): void {
+    $fields = AiAssistantService::generateLocalNewsFields(
+        'Агентство запустило программу цифровизации регионов',
+        'Пресс-служба сообщает о состоявшемся мероприятии. '
+        . 'В обсуждении приняли участие представители разных организаций. '
+        . 'Программа цифровизации регионов охватит 12 областей и создаст 40 новых электронных услуг для жителей.'
+    );
+
+    assert_contains('12 областей', $fields['excerpt'], 'В анонс попадает ключевой факт из всего материала');
+    assert_not_contains('Пресс-служба сообщает', $fields['excerpt'], 'Анонс не копирует служебное начало');
+    assert_true(mb_strlen($fields['meta_title']) <= 60, 'Meta Title не превышает 60 символов');
+    assert_true(mb_strlen($fields['meta_description']) <= 160, 'Meta Description не превышает 160 символов');
+    assert_true(substr_count($fields['hashtags'], '#') >= 3, 'Локальный резерв формирует тематические хештеги');
+});
+
+test('ИИ-редактор: форма содержит отдельные действия и не дублирует HTTP-запрос', function (): void {
+    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/news/form.php');
+    $adminJs = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin.js');
+    $service = (string) file_get_contents(APP_ROOT . '/app/Core/AiAssistantService.php');
+
+    assert_contains('data-ai-generate="summary"', $form, 'Есть генерация аннотации');
+    assert_contains('data-ai-generate="meta_title"', $form, 'Есть генерация Meta Title');
+    assert_contains('data-ai-generate="meta_description"', $form, 'Есть генерация Meta Description');
+    assert_not_contains("fetch('/admin/news/ai-summary'", $form, 'Во вью нет второго обработчика запроса');
+    assert_same(1, substr_count($adminJs, "fetch('/admin/news/ai-summary'"), 'Запрос выполняет единый глобальный обработчик');
+    assert_contains("'responseJsonSchema' =>", $service, 'Gemini получает строгую JSON-схему ответа');
+    assert_not_contains(':generateContent?key=', $service, 'API-ключ не передаётся в URL');
+});
+
 test('Усиление системы: RBAC права доступа', function (): void {
     assert_true(RbacGuard::roleCan('admin', 'manage_users'), 'Администратор может управлять пользователями');
     assert_true(RbacGuard::roleCan('admin', 'publish_content'), 'Администратор может публиковать контент');

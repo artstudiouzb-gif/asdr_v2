@@ -104,7 +104,7 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                 <div class="form-field u-inline-79a1c5a5db">
                     <div class="u-inline-a42388f688">
                         <label class="u-inline-2e190aa086">Краткий лид (анонс)</label>
-                        <button type="button" class="btn btn--sm btn--secondary" data-ai-generate-summary><?= \App\Core\AdminUi::icon('sparkles') ?>ИИ-Аннотация</button>
+                        <button type="button" class="btn btn--sm btn--secondary" data-ai-generate-summary data-ai-generate="summary"><?= \App\Core\AdminUi::icon('sparkles') ?>ИИ-Аннотация</button>
                     </div>
                     <textarea name="excerpt" rows="3" placeholder="Кратко опишите суть новости"><?= htmlspecialchars($news['excerpt'] ?? '', ENT_QUOTES) ?></textarea>
                 </div>
@@ -291,12 +291,18 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                 <?= \App\Core\AdminUi::cardHeader('6. SEO Оптимизация', 'seo', 'var(--admin-success)') ?>
                 <div class="form-grid-2col u-inline-001013efee">
                     <div class="form-field">
-                        <label class="u-inline-e925a44577">SEO: Meta Title</label>
-                        <input type="text" name="meta_title" value="<?= htmlspecialchars($news['meta_title'] ?? '', ENT_QUOTES) ?>" placeholder="SEO Заголовок для поисковиков">
+                        <div class="u-inline-a42388f688">
+                            <label class="u-inline-e925a44577">SEO: Meta Title</label>
+                            <button type="button" class="btn btn--sm btn--secondary" data-ai-generate="meta_title"><?= \App\Core\AdminUi::icon('sparkles') ?>ИИ-заголовок</button>
+                        </div>
+                        <input type="text" name="meta_title" maxlength="60" value="<?= htmlspecialchars($news['meta_title'] ?? '', ENT_QUOTES) ?>" placeholder="SEO Заголовок для поисковиков">
                     </div>
                     <div class="form-field">
-                        <label class="u-inline-e925a44577">SEO: Meta Description</label>
-                        <input type="text" name="meta_description" value="<?= htmlspecialchars($news['meta_description'] ?? '', ENT_QUOTES) ?>" placeholder="SEO Краткое описание для поисковиков">
+                        <div class="u-inline-a42388f688">
+                            <label class="u-inline-e925a44577">SEO: Meta Description</label>
+                            <button type="button" class="btn btn--sm btn--secondary" data-ai-generate="meta_description"><?= \App\Core\AdminUi::icon('sparkles') ?>ИИ-описание</button>
+                        </div>
+                        <input type="text" name="meta_description" maxlength="160" value="<?= htmlspecialchars($news['meta_description'] ?? '', ENT_QUOTES) ?>" placeholder="SEO Краткое описание для поисковиков">
                     </div>
                 </div>
 
@@ -528,76 +534,6 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
 <?php endif; ?>
 
 <script>
-document.addEventListener('click', function (e) {
-    var btn = e.target.closest('[data-ai-generate-summary]');
-    if (!btn) return;
-
-    e.preventDefault();
-    var form = btn.closest('form');
-    if (!form) return;
-
-    var titleInput = form.querySelector('[name="title"]');
-    var title = titleInput ? titleInput.value : '';
-
-    var content = '';
-    if (window.tinymce) {
-        if (tinymce.activeEditor) {
-            content = tinymce.activeEditor.getContent();
-        } else if (tinymce.get(0)) {
-            content = tinymce.get(0).getContent();
-        }
-    }
-    if (!content) {
-        var contentField = form.querySelector('[name="content"]');
-        if (contentField) { content = contentField.value; }
-    }
-
-    if (!title.trim() && !content.trim()) {
-        alert('Пожалуйста, введите заголовок или текст новости перед генерацией ИИ-аннотации.');
-        return;
-    }
-
-    var oldHtml = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '⌛ ИИ думает...';
-
-    var body = new URLSearchParams();
-    body.append('title', title);
-    body.append('content', content);
-
-    var csrfInput = form.querySelector('[name="csrf_token"]');
-    if (csrfInput) {
-        body.append('csrf_token', csrfInput.value);
-    }
-
-    fetch('/admin/news/ai-summary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body.toString()
-    }).then(function (res) {
-        return res.json();
-    }).then(function (data) {
-        btn.disabled = false;
-        btn.innerHTML = oldHtml;
-        if (data && data.ok) {
-            if (data.excerpt) {
-                var excerptField = form.querySelector('[name="excerpt"]');
-                if (excerptField) { excerptField.value = data.excerpt; }
-            }
-            if (data.hashtags) {
-                var hashtagsField = form.querySelector('[name="hashtags"]');
-                if (hashtagsField) { hashtagsField.value = data.hashtags; }
-            }
-        } else if (data && data.error) {
-            alert(data.error);
-        }
-    }).catch(function (err) {
-        btn.disabled = false;
-        btn.innerHTML = oldHtml;
-        alert('Ошибка при генерации ИИ: ' + (err.message || err));
-    });
-});
-
 document.addEventListener('click', function(e) {
     var btn = e.target.closest('[data-add-doc-row]');
     if (btn) {

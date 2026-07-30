@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 
 use App\Core\Auth;
 use App\Core\AdminListQuery;
+use App\Core\AiAssistantService;
 use App\Core\AppUrl;
 use App\Core\Cache;
 use App\Core\ConcurrencyException;
@@ -23,7 +24,6 @@ use App\Models\Language;
 use App\Models\News;
 use App\Models\NewsTranslation;
 use App\Models\ContentRevision;
-use App\Models\Setting;
 
 final class NewsController
 {
@@ -700,108 +700,41 @@ final class NewsController
 
         $content = trim((string) ($_POST['content'] ?? ''));
         $title = trim((string) ($_POST['title'] ?? ''));
+        $target = trim((string) ($_POST['target'] ?? 'summary'));
+        if (!in_array($target, ['summary', 'meta_title', 'meta_description'], true)) {
+            $target = 'summary';
+        }
 
         \App\Models\ErrorLog::record(
             'INFO',
-            'ИИ-Аннотация: Запрос получен. Заголовок: "' . mb_substr($title, 0, 60) . '...", Длина текста: ' . mb_strlen($content) . ' симв.',
+            'ИИ-редактор: запрос "' . $target . '". Заголовок: "' . mb_substr($title, 0, 60) . '...", Длина текста: ' . mb_strlen($content) . ' симв.',
             __FILE__,
             __LINE__
         );
 
         if ($content === '' && $title === '') {
-            \App\Models\ErrorLog::record('WARNING', 'ИИ-Аннотация: Заголовок и текст новости пустые.', __FILE__, __LINE__);
+            \App\Models\ErrorLog::record('WARNING', 'ИИ-редактор: заголовок и текст новости пустые.', __FILE__, __LINE__);
             echo json_encode(['ok' => false, 'error' => 'Текст новости и заголовок пустые.'], JSON_UNESCAPED_UNICODE);
             return;
         }
 
-        $cleanText = strip_tags($content);
-        $cleanText = html_entity_decode($cleanText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $cleanText = (string) preg_replace('/\s+/u', ' ', $cleanText);
-
-        // Если задан ключ API Google Gemini — используем ИИ Gemini
-        $apiKey = Setting::get('ai_api_key', '');
-
-        if ($apiKey !== '') {
-            $models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
-            $prompt = "Проанализируй текст новости. Сделай краткое аннотированное резюме на том же языке новости (1-2 предложения, максимум 250 символов) и выдели 5 тематических хештегов (#тег1 #тег2).\n\nЗаголовок: {$title}\nТекст: {$cleanText}\n\nВерни ответ строго в формате JSON без разметки markdown:\n{\"excerpt\": \"...\", \"hashtags\": \"...\"}";
-
-            foreach ($models as $model) {
-                foreach (['v1beta', 'v1'] as $apiVersion) {
-                    $url = 'https://generativelanguage.googleapis.com/' . $apiVersion . '/models/' . $model . ':generateContent?key=' . rawurlencode($apiKey);
-                    $res = \App\Core\Http::postJson($url, [
-                        'contents' => [
-                            ['parts' => [['text' => $prompt]]]
-                        ]
-                    ], [], 15);
-
-                    if ($res['status'] === 200 && !empty($res['body'])) {
-                        $geminiData = json_decode((string) $res['body'], true);
-                        $rawResponse = (string) ($geminiData['candidates'][0]['content']['parts'][0]['text'] ?? '');
-                        
-                        $cleanJson = preg_replace('/```(?:json)?/i', '', $rawResponse);
-                        $cleanJson = str_replace('```', '', (string) $cleanJson);
-                        $cleanJson = trim($cleanJson);
-
-                        if (preg_match('/\{[\s\S]*\}/', $cleanJson, $match)) {
-                            $parsed = json_decode($match[0], true);
-                            if (is_array($parsed) && (!empty($parsed['excerpt']) || !empty($parsed['hashtags']))) {
-                                \App\Models\ErrorLog::record(
-                                    'INFO',
-                                    'ИИ-Аннотация: Успешно сгенерировано через Gemini API (' . $model . '). Резюме: ' . mb_strlen((string) ($parsed['excerpt'] ?? '')) . ' симв.',
-                                    __FILE__,
-                                    __LINE__
-                                );
-
-                                echo json_encode([
-                                    'ok' => true,
-                                    'excerpt' => trim((string) ($parsed['excerpt'] ?? '')),
-                                    'hashtags' => trim((string) ($parsed['hashtags'] ?? '')),
-                                ], JSON_UNESCAPED_UNICODE);
-                                return;
-                            }
-                        }
-                    } else {
-                        $errObj = json_decode((string) ($res['body'] ?? ''), true);
-                        $errMsg = $errObj['error']['message'] ?? ($res['error'] ?: ('HTTP Code ' . $res['status']));
-                        \App\Models\ErrorLog::record(
-                            'WARNING',
-                            'ИИ-Аннотация [Gemini API ' . $apiVersion . ' Error] ' . $model . ': ' . $errMsg,
-                            __FILE__,
-                            __LINE__
-                        );
-                    }
-                }
-            }
-        } else {
-            \App\Models\ErrorLog::record('INFO', 'ИИ-Аннотация: Ключ Gemini API не задан. Используется локальный генератор NLP.', __FILE__, __LINE__);
-        }
-
-        // Локальный алгоритм-фолбэк (NLP)
-        $sentences = array_values(array_filter(array_map('trim', (array) preg_split('/(?<=[.!?])\s+/u', $cleanText)), static fn ($s) => mb_strlen($s) > 15));
-        $excerpt = implode(' ', array_slice($sentences, 0, 2));
-        if (mb_strlen($excerpt) > 280) {
-            $excerpt = mb_substr($excerpt, 0, 277) . '...';
-        }
-
-        $words = (array) preg_split('/[^\p{L}\p{N}]+/u', mb_strtolower($title . ' ' . $cleanText));
-        $stopwords = ['и', 'в', 'на', 'с', 'по', 'для', 'о', 'об', 'из', 'к', 'от', 'за', 'при', 'до', 'без', 'что', 'как', 'это', 'был', 'была', 'были', 'быть', 'будет', 'года', 'году', 'узбекистан', 'ташкент'];
-        $freq = [];
-        foreach ($words as $w) {
-            $w = (string) $w;
-            if (mb_strlen($w) >= 4 && !in_array($w, $stopwords, true)) {
-                $freq[$w] = ($freq[$w] ?? 0) + 1;
-            }
-        }
-        arsort($freq);
-        $topWords = array_slice(array_keys($freq), 0, 5);
-        $hashtags = implode(' ', array_map(static fn ($w) => '#' . $w, $topWords));
-
-        \App\Models\ErrorLog::record('INFO', 'ИИ-Аннотация: Сгенерировано локальным NLP-алгоритмом.', __FILE__, __LINE__);
+        $result = AiAssistantService::generateNewsField($title, $content, $target);
+        \App\Models\ErrorLog::record(
+            'INFO',
+            'ИИ-редактор: поле "' . $target . '" сформировано через ' . $result['provider']
+                . ($result['model'] !== '' ? ' (' . $result['model'] . ')' : '') . '.',
+            __FILE__,
+            __LINE__
+        );
 
         echo json_encode([
             'ok' => true,
-            'excerpt' => $excerpt,
-            'hashtags' => $hashtags,
+            'excerpt' => $result['excerpt'],
+            'hashtags' => $result['hashtags'],
+            'meta_title' => $result['meta_title'],
+            'meta_description' => $result['meta_description'],
+            'provider' => $result['provider'],
+            'notice' => $result['notice'],
         ], JSON_UNESCAPED_UNICODE);
     }
 }

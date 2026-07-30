@@ -2830,9 +2830,9 @@
     })();
 
 
-    // --- Глобальная обработка кнопки ИИ-Аннотации ---
+    // --- ИИ-редактор новости: аннотация и SEO ---
     document.addEventListener('click', function (e) {
-        var btn = e.target.closest('[data-ai-generate-summary]');
+        var btn = e.target.closest('[data-ai-generate]');
         if (!btn) return;
 
         e.preventDefault();
@@ -2841,6 +2841,7 @@
 
         var titleInput = form.querySelector('[name="title"]');
         var title = titleInput ? titleInput.value : '';
+        var target = btn.getAttribute('data-ai-generate') || 'summary';
 
         var content = '';
         if (window.tinymce) {
@@ -2856,7 +2857,7 @@
         }
 
         if (!title.trim() && !content.trim()) {
-            adminAlert('Пожалуйста, введите заголовок или текст новости перед генерацией ИИ-аннотации.');
+            adminAlert('Пожалуйста, введите заголовок или текст новости перед генерацией.');
             return;
         }
 
@@ -2867,6 +2868,7 @@
         var body = new URLSearchParams();
         body.append('title', title);
         body.append('content', content);
+        body.append('target', target);
 
         var csrfInput = form.querySelector('[name="csrf_token"]');
         if (csrfInput) {
@@ -2878,18 +2880,36 @@
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: body.toString()
         }).then(function (res) {
-            return res.json();
+            return res.json().catch(function () {
+                throw new Error('Сервер вернул некорректный ответ.');
+            }).then(function (data) {
+                if (!res.ok) {
+                    throw new Error(data.error || ('HTTP ' + res.status));
+                }
+                return data;
+            });
         }).then(function (data) {
             btn.disabled = false;
             btn.innerHTML = oldHtml;
             if (data && data.ok) {
-                if (data.excerpt) {
+                if (target === 'summary' && data.excerpt) {
                     var excerptField = form.querySelector('[name="excerpt"]');
                     if (excerptField) { excerptField.value = data.excerpt; }
                 }
-                if (data.hashtags) {
+                if (target === 'summary' && data.hashtags) {
                     var hashtagsField = form.querySelector('[name="hashtags"]');
                     if (hashtagsField) { hashtagsField.value = data.hashtags; }
+                }
+                if (target === 'meta_title' && data.meta_title) {
+                    var metaTitleField = form.querySelector('[name="meta_title"]');
+                    if (metaTitleField) { metaTitleField.value = data.meta_title; }
+                }
+                if (target === 'meta_description' && data.meta_description) {
+                    var metaDescriptionField = form.querySelector('[name="meta_description"]');
+                    if (metaDescriptionField) { metaDescriptionField.value = data.meta_description; }
+                }
+                if (data.notice) {
+                    adminAlert(data.notice);
                 }
             } else if (data && data.error) {
                 adminAlert(data.error);

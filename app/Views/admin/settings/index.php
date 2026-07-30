@@ -246,7 +246,7 @@ require __DIR__ . '/../layout/header.php';
                 <?php if (!empty($settings['ai_api_key'])): ?>
                     <label class="form-hint"><input type="checkbox" name="clear_ai_api_key" value="1"> Удалить сохранённый ключ</label>
                 <?php endif; ?>
-                <span class="form-hint">Вставьте ключ из <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>. CMS использует доступную модель Gemini Flash для генерации аннотаций и хештегов; при сбое переключается на резервную модель. Если поле пустое — используется встроенный локальный алгоритм.</span>
+                <span class="form-hint">Вставьте ключ из <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>. CMS использует Gemini Flash для самостоятельной генерации аннотаций, хештегов, Meta Title и Meta Description. Без ключа или при сбое API включается локальный анализ ключевых фактов без полноценной переформулировки.</span>
             </div>
         </fieldset>
 
