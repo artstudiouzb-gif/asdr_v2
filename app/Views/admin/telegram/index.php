@@ -9,6 +9,7 @@ require __DIR__ . '/../layout/header.php';
 
 /** @var bool $botConfigured */
 /** @var string $botUsername */
+/** @var string $botVerifiedAt */
 /** @var bool $botOk */
 /** @var bool $linked */
 /** @var int $myChatId */
@@ -20,7 +21,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var bool $gatewayConfigured */
 /** @var bool $setupRestricted */
 
-$channelReady = $channelEnabled && trim((string) ($channel['chat_id'] ?? '')) !== '';
+$channelReady = \App\Core\SocialSettings::isReady('telegram');
 $notifyCount = count(\App\Core\FormNotifier::parseChatIds($notifyChatIds));
 
 // Значок шага через единый локальный набор Tabler Icons.
@@ -34,6 +35,17 @@ $mark = static function (bool $done, bool $started = true): string {
         : '<span class="badge badge--danger">' . AdminUi::icon('warning', 12) . ' требует внимания</span>';
 };
 ?>
+<p class="form-hint admin-section-intro">
+    Единая настройка Telegram: сначала подключите бота, затем привяжите администратора,
+    укажите канал публикаций и получателей заявок.
+</p>
+<nav class="settings-jump-nav" aria-label="Шаги настройки Telegram">
+    <a href="#telegram-bot"><?= AdminUi::icon('telegram', 16) ?>1. Бот</a>
+    <a href="#telegram-link"><?= AdminUi::icon('lock', 16) ?>2. Двухфакторка</a>
+    <a href="#telegram-channel"><?= AdminUi::icon('send', 16) ?>3. Канал</a>
+    <a href="#telegram-extras"><?= AdminUi::icon('bell', 16) ?>4. Уведомления</a>
+</nav>
+
 <?php // ── Верхняя сводная панель статусов Telegram с Tabler Icons ───────── ?>
 <div class="tg-summary-grid">
     <div class="tg-summary-card">
@@ -44,6 +56,8 @@ $mark = static function (bool $done, bool $started = true): string {
         <div class="tg-summary-card__value">
             <?php if ($botOk && $botUsername !== ''): ?>
                 <span>@<?= htmlspecialchars($botUsername, ENT_QUOTES) ?></span>
+            <?php elseif ($botConfigured): ?>
+                <span class="tg-status-pending">Токен сохранён — требуется проверка</span>
             <?php else: ?>
                 <span class="u-inline-594b8be61b">Не подключен</span>
             <?php endif; ?>
@@ -94,7 +108,7 @@ $mark = static function (bool $done, bool $started = true): string {
 </div>
 
 <?php // ── Шаг 1. Бот ───────────────────────────────────────────────────── ?>
-<div class="form-card">
+<div class="form-card tg-step" id="telegram-bot">
     <h2 class="u-inline-8981e56111">
         <?= AdminUi::icon('telegram', 20) ?> 1. Настройка Telegram-бота <?= $mark($botOk, $botConfigured) ?>
     </h2>
@@ -108,28 +122,39 @@ $mark = static function (bool $done, bool $started = true): string {
             <label for="telegram_bot_token">Токен бота (Bot API Token)</label>
             <input type="password" id="telegram_bot_token" name="telegram_bot_token"
                    value=""
+                   maxlength="256"
                    placeholder="<?= $botConfigured ? 'Сохранён — оставьте пустым без изменений' : '1234567890:AAH…' ?>"
                    autocomplete="new-password" spellcheck="false">
             <span class="form-hint">
                 Формат: цифры, двоеточие, ключ. Без слова «bot» в начале. Этот токен используется для кодов входа и публикаций.
             </span>
             <?php if ($botConfigured && !$setupRestricted): ?>
-                <label class="form-hint"><input type="checkbox" name="clear_telegram_bot_token" value="1"> Удалить сохранённый токен</label>
+                <label class="form-hint tg-danger-check">
+                    <input type="checkbox" name="clear_telegram_bot_token" value="1" data-tg-clear-token>
+                    Удалить сохранённый токен
+                </label>
+                <div class="tg-clear-confirm" data-tg-clear-confirm hidden>
+                    <label for="confirm_clear_bot">Введите <code>REMOVE</code>, чтобы подтвердить удаление</label>
+                    <input type="text" id="confirm_clear_bot" name="confirm_clear_bot" maxlength="6"
+                           autocomplete="off" autocapitalize="characters" spellcheck="false">
+                    <span class="form-hint">Удаление остановит доставку кодов входа всем привязанным администраторам.</span>
+                </div>
             <?php endif; ?>
         </div>
         <div class="form-actions u-inline-df20dd0984">
             <button type="submit" class="btn btn--primary"><?= AdminUi::icon('save') ?>Сохранить токен</button>
-            <?php if ($botConfigured): ?>
-                <button type="submit" formaction="/admin/telegram/bot/check" class="btn btn--outline">
-                    <?= AdminUi::icon('check') ?>Проверить бота
-                </button>
-            <?php endif; ?>
+            <button type="submit" formaction="/admin/telegram/bot/check" class="btn btn--outline">
+                <?= AdminUi::icon('check') ?>Проверить бота
+            </button>
         </div>
+        <?php if ($botOk && $botVerifiedAt !== ''): ?>
+            <span class="form-hint">Последняя успешная проверка: <?= htmlspecialchars($botVerifiedAt, ENT_QUOTES) ?></span>
+        <?php endif; ?>
     </form>
 </div>
 
 <?php // ── Шаг 2. Привязка администратора ───────────────────────────────── ?>
-<div class="form-card u-inline-9eb125f52f">
+<div class="form-card u-inline-9eb125f52f tg-step" id="telegram-link">
     <h2 class="u-inline-8981e56111">
         <?= AdminUi::icon('lock', 20) ?> 2. Коды входа и двухфакторка (2FA) <?= $mark($linked, $botConfigured) ?>
     </h2>
@@ -159,7 +184,7 @@ $mark = static function (bool $done, bool $started = true): string {
                 <div class="u-inline-afaed7b4de">Код привязки</div>
                 <div class="tg-code-val" id="tg_link_code_val"><?= htmlspecialchars((string) $linkCode, ENT_QUOTES) ?></div>
             </div>
-            <button type="button" class="btn btn--small btn--outline" onclick="copyTgCode(this)">
+            <button type="button" class="btn btn--small btn--outline" data-tg-copy-code>
                 <?= AdminUi::icon('copy') ?>Скопировать код
             </button>
         </div>
@@ -172,7 +197,7 @@ $mark = static function (bool $done, bool $started = true): string {
 </div>
 
 <?php // ── Шаг 3. Канал ─────────────────────────────────────────────────── ?>
-<div class="form-card u-inline-9eb125f52f">
+<div class="form-card u-inline-9eb125f52f tg-step" id="telegram-channel">
     <?php
     $chatIdVal = trim((string) ($channel['chat_id'] ?? ''));
     $channelBadge = '';
@@ -201,6 +226,7 @@ $mark = static function (bool $done, bool $started = true): string {
             <label for="tg_chat_id">Канал</label>
             <input type="text" id="tg_chat_id" name="chat_id"
                    value="<?= htmlspecialchars((string) ($channel['chat_id'] ?? ''), ENT_QUOTES) ?>"
+                   maxlength="40"
                    placeholder="@имя_канала или -1001234567890" autocomplete="off" spellcheck="false">
             <span class="form-hint">
                 Публичный канал — <code>@имя_канала</code>, приватный — <code>-100…</code>.
@@ -213,17 +239,19 @@ $mark = static function (bool $done, bool $started = true): string {
             <?php // Интерактивная панель вставки HTML-тегов для Telegram ?>
             <div class="tg-toolbar">
                 <span class="tg-toolbar__title">Вставить HTML-тег:</span>
-                <button type="button" class="tg-tag-btn" onclick="insertTgTag('<b>', '</b>')"><b>B</b> Жирный</button>
-                <button type="button" class="tg-tag-btn" onclick="insertTgTag('<i>', '</i>')"><i>I</i> Курсив</button>
-                <button type="button" class="tg-tag-btn" onclick="insertTgTag('<code>', '</code>')"><?= AdminUi::icon('code', 13) ?> <code>Код (копирование)</code></button>
-                <button type="button" class="tg-tag-btn" onclick="insertTgTag('<blockquote>', '</blockquote>')"><?= \App\Core\AdminUi::icon('message', 15) ?> Цитата</button>
-                <button type="button" class="tg-tag-btn" onclick="insertTgTag('<tg-spoiler>', '</tg-spoiler>')"><?= \App\Core\AdminUi::icon('eye', 15) ?> Спойлер</button>
-                <button type="button" class="tg-tag-btn" onclick="insertTgTag('<a href=&quot;https://example.com&quot;>', '</a>')"><?= AdminUi::icon('external', 13) ?> Ссылка</button>
+                <button type="button" class="tg-tag-btn" data-tg-tag-start="&lt;b&gt;" data-tg-tag-end="&lt;/b&gt;"><b>B</b> Жирный</button>
+                <button type="button" class="tg-tag-btn" data-tg-tag-start="&lt;i&gt;" data-tg-tag-end="&lt;/i&gt;"><i>I</i> Курсив</button>
+                <button type="button" class="tg-tag-btn" data-tg-tag-start="&lt;code&gt;" data-tg-tag-end="&lt;/code&gt;"><?= AdminUi::icon('code', 13) ?> <code>Код</code></button>
+                <button type="button" class="tg-tag-btn" data-tg-tag-start="&lt;blockquote&gt;" data-tg-tag-end="&lt;/blockquote&gt;"><?= \App\Core\AdminUi::icon('message', 15) ?> Цитата</button>
+                <button type="button" class="tg-tag-btn" data-tg-tag-start="&lt;tg-spoiler&gt;" data-tg-tag-end="&lt;/tg-spoiler&gt;"><?= \App\Core\AdminUi::icon('eye', 15) ?> Спойлер</button>
+                <button type="button" class="tg-tag-btn" data-tg-tag-start="&lt;a href=&quot;https://example.com&quot;&gt;" data-tg-tag-end="&lt;/a&gt;"><?= AdminUi::icon('external', 13) ?> Ссылка</button>
             </div>
 
-            <textarea class="u-inline-8ff9961267" id="tg_signature" name="signature" rows="3"><?= htmlspecialchars((string) ($channel['signature'] ?? ''), ENT_QUOTES) ?></textarea>
+            <textarea class="u-inline-8ff9961267" id="tg_signature" name="signature" rows="3"
+                      data-tg-signature maxlength="2000"><?= htmlspecialchars((string) ($channel['signature'] ?? ''), ENT_QUOTES) ?></textarea>
             <span class="form-hint">
                 Поддерживаются HTML-теги Telegram: <code>&lt;b&gt;</code>, <code>&lt;i&gt;</code>, <code>&lt;code&gt;</code> (автокопирование по клику), <code>&lt;blockquote&gt;</code>, <code>&lt;tg-spoiler&gt;</code>, <code>&lt;a href="..."&gt;</code>.
+                Видимый текст — не более 500 символов. <span data-tg-signature-count></span>
             </span>
         </div>
 
@@ -234,6 +262,7 @@ $mark = static function (bool $done, bool $started = true): string {
                     <label for="tg_own_token">Токен бота-публикатора</label>
                     <input type="password" id="tg_own_token" name="own_token"
                            value=""
+                           maxlength="256"
                            placeholder="<?= $channelOwnTokenConfigured ? 'Сохранён — оставьте пустым без изменений' : 'Пусто — использовать основного бота' ?>"
                            autocomplete="new-password" spellcheck="false">
                     <span class="form-hint">
@@ -256,7 +285,7 @@ $mark = static function (bool $done, bool $started = true): string {
 </div>
 
 <?php // ── Шаг 4. Дополнительно (Заявки и Gateway) ───────────────────────── ?>
-<div class="form-card u-inline-d8a0156797">
+<div class="form-card u-inline-d8a0156797 tg-step" id="telegram-extras">
     <h2 class="u-inline-8981e56111">
         <?= AdminUi::icon('settings', 20) ?> 4. Уведомления о заявках с сайта и Telegram Gateway
     </h2>
@@ -267,9 +296,10 @@ $mark = static function (bool $done, bool $started = true): string {
             <div class="u-inline-78cead6503">
                 <input class="u-inline-7623f05545" type="text" id="telegram_notify_chat_ids" name="telegram_notify_chat_ids"
                        value="<?= htmlspecialchars($notifyChatIds, ENT_QUOTES) ?>"
+                       maxlength="5000"
                        placeholder="123456789, -1001234567890" autocomplete="off" spellcheck="false">
                 <?php if ($linked && $myChatId > 0): ?>
-                    <button type="button" class="btn btn--small btn--outline" onclick="addMyChatId(<?= (int) $myChatId ?>)" title="Добавить мой Chat ID">
+                    <button type="button" class="btn btn--small btn--outline" data-tg-add-chat-id="<?= (int) $myChatId ?>" title="Добавить мой Chat ID">
                         + Добавить мой ID (<?= (int) $myChatId ?>)
                     </button>
                 <?php endif; ?>
@@ -283,6 +313,7 @@ $mark = static function (bool $done, bool $started = true): string {
             <label for="telegram_gateway_token">Токен Telegram Gateway API (платный резервный SMS-сервис)</label>
             <input type="password" id="telegram_gateway_token" name="telegram_gateway_token"
                    value=""
+                   maxlength="10000"
                    placeholder="<?= $gatewayConfigured ? 'Сохранён — оставьте пустым без изменений' : 'Введите токен Gateway' ?>"
                    autocomplete="new-password" spellcheck="false">
             <?php if ($gatewayConfigured): ?>
@@ -295,50 +326,11 @@ $mark = static function (bool $done, bool $started = true): string {
 
         <div class="form-actions form-actions--sticky">
             <button type="submit" class="btn btn--primary"><?= AdminUi::icon('save') ?>Сохранить настройки Telegram</button>
+            <button type="submit" formaction="/admin/telegram/extras/check" class="btn btn--outline">
+                <?= AdminUi::icon('send') ?>Отправить тест
+            </button>
         </div>
     </form>
 </div>
-
-<script>
-// Вставка HTML-тегов Telegram в поле подписи
-function insertTgTag(startTag, endTag) {
-    const textarea = document.getElementById('tg_signature');
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = textarea.value;
-
-    const selectedText = text.substring(start, end);
-    const replacement = startTag + selectedText + endTag;
-
-    textarea.value = text.substring(0, start) + replacement + text.substring(end);
-    textarea.focus();
-    textarea.selectionStart = start + startTag.length;
-    textarea.selectionEnd = start + startTag.length + selectedText.length;
-}
-
-// Скопировать код привязки (работает по HTTPS и HTTP с фаллбэком)
-function copyTgCode(btnEl) {
-    const codeEl = document.getElementById('tg_link_code_val');
-    if (!codeEl) return;
-    const text = codeEl.innerText.trim();
-    if (window.copyToClipboard) {
-        window.copyToClipboard(text, btnEl);
-    }
-}
-
-// Быстрое добавление Chat ID администратора
-function addMyChatId(chatId) {
-    const input = document.getElementById('telegram_notify_chat_ids');
-    if (!input) return;
-    let val = input.value.trim();
-    if (val === '') {
-        input.value = chatId;
-    } else if (!val.includes(String(chatId))) {
-        input.value = val + ', ' + chatId;
-    }
-}
-</script>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

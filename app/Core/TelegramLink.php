@@ -17,13 +17,17 @@ use App\Models\User;
 final class TelegramLink
 {
     private const SESSION_KEY = 'tg_link_code';
+    private const SESSION_EXPIRES_KEY = 'tg_link_code_expires';
+    private const CODE_TTL_SECONDS = 600;
 
     /** Код привязки текущей сессии; создаётся при первом обращении. */
     public static function code(): string
     {
         Session::start();
-        if (empty($_SESSION[self::SESSION_KEY])) {
+        $expires = (int) ($_SESSION[self::SESSION_EXPIRES_KEY] ?? 0);
+        if (empty($_SESSION[self::SESSION_KEY]) || $expires <= time()) {
             $_SESSION[self::SESSION_KEY] = 'link-' . bin2hex(random_bytes(4));
+            $_SESSION[self::SESSION_EXPIRES_KEY] = time() + self::CODE_TTL_SECONDS;
         }
 
         return (string) $_SESSION[self::SESSION_KEY];
@@ -31,6 +35,12 @@ final class TelegramLink
 
     public static function currentCode(): ?string
     {
+        Session::start();
+        if ((int) ($_SESSION[self::SESSION_EXPIRES_KEY] ?? 0) <= time()) {
+            unset($_SESSION[self::SESSION_KEY], $_SESSION[self::SESSION_EXPIRES_KEY]);
+            return null;
+        }
+
         return isset($_SESSION[self::SESSION_KEY]) ? (string) $_SESSION[self::SESSION_KEY] : null;
     }
 
@@ -67,7 +77,7 @@ final class TelegramLink
 
         User::updateTelegramChatId($userId, $chatId);
         Auth::completeTwoFactorSetup();
-        unset($_SESSION[self::SESSION_KEY]);
+        unset($_SESSION[self::SESSION_KEY], $_SESSION[self::SESSION_EXPIRES_KEY]);
         Logger::security('Привязан Telegram для кодов входа', [
             'user' => (string) ($_SESSION['username'] ?? ''),
             'ip' => $_SERVER['REMOTE_ADDR'] ?? '',

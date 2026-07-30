@@ -30,6 +30,14 @@ final class TelegramBot
         return is_array($res) ? $res : null;
     }
 
+    /** Проверяет ещё не сохранённый токен, не меняя настройки CMS. */
+    public static function getMeWithToken(string $token): ?array
+    {
+        $res = self::request('getMe', [], trim($token));
+
+        return is_array($res) ? $res : null;
+    }
+
     /** Отправляет одноразовый код входа в админку привязанному аккаунту с авто-копированием по клику. */
     public static function sendLoginCode(int $chatId, string $code): bool
     {
@@ -104,7 +112,17 @@ final class TelegramBot
             }
             $text = trim((string) ($msg['text'] ?? ''));
             if ($text === $code || $text === '/start ' . $code) {
-                $chatId = $msg['chat']['id'] ?? null;
+                $chat = $msg['chat'] ?? null;
+                if (!is_array($chat)) {
+                    continue;
+                }
+                // Коды 2FA нельзя привязывать к группе/каналу: иначе их будут
+                // видеть все участники. Старые ответы без type считаем private
+                // только ради совместимости с ранними Bot API fixtures.
+                if (isset($chat['type']) && $chat['type'] !== 'private') {
+                    continue;
+                }
+                $chatId = $chat['id'] ?? null;
                 if (is_int($chatId) || (is_string($chatId) && ctype_digit($chatId))) {
                     return (int) $chatId;
                 }
@@ -119,9 +137,11 @@ final class TelegramBot
      *
      * @param array<string,mixed> $params
      */
-    private static function request(string $method, array $params): mixed
+    private static function request(string $method, array $params, ?string $tokenOverride = null): mixed
     {
-        $token = trim(Setting::get('telegram_bot_token', ''));
+        $token = $tokenOverride !== null
+            ? trim($tokenOverride)
+            : trim(Setting::get('telegram_bot_token', ''));
         if ($token === '') {
             return null;
         }

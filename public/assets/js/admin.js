@@ -386,6 +386,79 @@
         }
     })();
 
+    // --- Telegram: toolbar, безопасное удаление токена и быстрые действия. ---
+    (function initTelegramAdmin() {
+        var signature = document.querySelector('[data-tg-signature]');
+        var signatureCount = document.querySelector('[data-tg-signature-count]');
+
+        function updateSignatureCount() {
+            if (!signature || !signatureCount) { return; }
+            var decoder = document.createElement('textarea');
+            decoder.innerHTML = signature.value.replace(/<[^>]*>/g, '');
+            var length = decoder.value.length;
+            signatureCount.textContent = length + ' / 500';
+            signatureCount.classList.toggle('is-over-limit', length > 500);
+        }
+
+        if (signature) {
+            signature.addEventListener('input', updateSignatureCount);
+            updateSignatureCount();
+        }
+
+        var clearToken = document.querySelector('[data-tg-clear-token]');
+        var clearConfirm = document.querySelector('[data-tg-clear-confirm]');
+        function syncClearToken() {
+            if (!clearToken || !clearConfirm) { return; }
+            clearConfirm.hidden = !clearToken.checked;
+            var input = clearConfirm.querySelector('input');
+            if (input) {
+                input.required = clearToken.checked;
+                if (!clearToken.checked) { input.value = ''; }
+            }
+        }
+        if (clearToken) {
+            clearToken.addEventListener('change', syncClearToken);
+            syncClearToken();
+        }
+
+        document.addEventListener('click', function (event) {
+            var tagButton = event.target.closest('[data-tg-tag-start]');
+            if (tagButton && signature) {
+                event.preventDefault();
+                var startTag = tagButton.getAttribute('data-tg-tag-start') || '';
+                var endTag = tagButton.getAttribute('data-tg-tag-end') || '';
+                var start = signature.selectionStart;
+                var end = signature.selectionEnd;
+                var selected = signature.value.substring(start, end);
+                signature.setRangeText(startTag + selected + endTag, start, end, 'end');
+                signature.focus();
+                signature.setSelectionRange(start + startTag.length, start + startTag.length + selected.length);
+                updateSignatureCount();
+                return;
+            }
+
+            var copyButton = event.target.closest('[data-tg-copy-code]');
+            if (copyButton) {
+                event.preventDefault();
+                var code = document.getElementById('tg_link_code_val');
+                if (code) { copyToClipboard(code.textContent.trim(), copyButton); }
+                return;
+            }
+
+            var addButton = event.target.closest('[data-tg-add-chat-id]');
+            if (addButton) {
+                event.preventDefault();
+                var input = document.getElementById('telegram_notify_chat_ids');
+                var chatId = addButton.getAttribute('data-tg-add-chat-id') || '';
+                if (!input || chatId === '') { return; }
+                var values = input.value.split(/[\s,;]+/).filter(Boolean);
+                if (values.indexOf(chatId) === -1) { values.push(chatId); }
+                input.value = values.join(', ');
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+    })();
+
     document.addEventListener('click', function (event) {
         const copyBtn = event.target.closest('[data-copy-link], [data-copy-text]');
         if (copyBtn) {

@@ -10,6 +10,7 @@ test('FormNotifier::parseChatIds разбирает списки и отбрас
     assert_same([123, 456], FormNotifier::parseChatIds(' 123   456  '));
     assert_same([], FormNotifier::parseChatIds(''));
     assert_same([], FormNotifier::parseChatIds('abc, 12e3, --5, +7'));
+    assert_same([], FormNotifier::parseChatIds('0, 99999999999999999999'));
     assert_same([42], FormNotifier::parseChatIds('42, 42, 42'));
 });
 

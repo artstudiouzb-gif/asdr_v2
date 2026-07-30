@@ -1318,6 +1318,52 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 
 .settings-group { border: 1px solid var(--admin-border); border-radius: var(--admin-radius-lg); padding: 22px; margin: 20px 0; background: var(--admin-surface-soft); }
 .settings-group > legend { padding: 0 10px; font-size: 14px; font-weight: 700; color: var(--admin-text); }
+.admin-section-intro { margin: -4px 0 16px; max-width: 900px; }
+.settings-jump-nav {
+    position: sticky;
+    top: calc(var(--admin-topbar-h) + 8px);
+    z-index: 18;
+    display: flex;
+    gap: 6px;
+    margin: 0 0 22px;
+    padding: 7px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--admin-surface) 94%, transparent);
+    box-shadow: var(--admin-shadow);
+    backdrop-filter: blur(12px);
+}
+.settings-jump-nav a {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 7px 11px;
+    border-radius: 8px;
+    color: var(--admin-muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.settings-jump-nav a:hover,
+.settings-jump-nav a:focus-visible {
+    background: var(--admin-accent-soft);
+    color: var(--admin-accent);
+    text-decoration: none;
+}
+.settings-group[id],
+.tg-step[id],
+#demo-section,
+#backup-section { scroll-margin-top: calc(var(--admin-topbar-h) + 64px); }
+@media (max-width: 720px) {
+    .settings-group { padding: 16px; }
+    .settings-jump-nav { top: calc(var(--admin-topbar-h) + 6px); margin-inline: -4px; }
+}
 
 /* ============================================================================
    Фильтры и массовые действия
@@ -4239,6 +4285,32 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     gap: 8px;
 }
 
+.tg-status-pending {
+    color: var(--admin-warning, #b45309);
+    font-size: .92rem;
+    line-height: 1.35;
+}
+
+.tg-step {
+    border-left: 3px solid color-mix(in srgb, #229ed9 68%, var(--admin-border));
+}
+
+.tg-danger-check {
+    color: var(--admin-danger, #dc2626);
+}
+
+.tg-clear-confirm {
+    max-width: 520px;
+    margin-top: 8px;
+    padding: 12px 14px;
+    border: 1px solid color-mix(in srgb, var(--admin-danger, #dc2626) 34%, var(--admin-border));
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--admin-danger, #dc2626) 6%, var(--admin-surface));
+}
+.tg-clear-confirm[hidden] { display: none; }
+.tg-clear-confirm label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 600; }
+.tg-clear-confirm input { max-width: 180px; text-transform: uppercase; }
+
 .tg-code-box {
     background: rgba(59, 130, 246, 0.06);
     border: 1px dashed rgba(59, 130, 246, 0.3);
@@ -4304,6 +4376,20 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     background: rgba(0,0,0,0.05);
     padding: 1px 4px;
     border-radius: 3px;
+}
+
+[data-tg-signature-count] { font-variant-numeric: tabular-nums; font-weight: 600; }
+[data-tg-signature-count].is-over-limit { color: var(--admin-danger, #dc2626); }
+
+@media (max-width: 640px) {
+    .tg-summary-grid { grid-template-columns: 1fr; gap: 10px; }
+    .tg-summary-card { padding: 14px 16px; }
+    .tg-code-box { align-items: stretch; flex-direction: column; }
+    .tg-code-box .btn { width: 100%; justify-content: center; }
+    .tg-code-val { overflow-wrap: anywhere; font-size: 1.1rem; letter-spacing: 1px; }
+    .tg-toolbar { align-items: stretch; }
+    .tg-toolbar__title { flex: 1 0 100%; }
+    .tg-tag-btn { flex: 1 1 auto; justify-content: center; }
 }
 
 /* UI/UX Pro Max Installer Styling - Responsive 1080px Layout */

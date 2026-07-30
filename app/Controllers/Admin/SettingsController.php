@@ -49,14 +49,50 @@ final class SettingsController
         Csrf::verifyRequest();
 
         $activeLangs = \App\Models\Language::active();
-
+        $normalized = [];
+        $errors = [];
         foreach (self::TEXT_KEYS as $key) {
-            Setting::set($key, trim((string) ($_POST[$key] ?? '')));
+            $raw = (string) ($_POST[$key] ?? '');
+            $normalized[$key] = match ($key) {
+                'site_name' => SettingsValidator::plainText($raw, 160),
+                'contact_phone' => SettingsValidator::plainText($raw, 80),
+                'contact_address' => SettingsValidator::plainText($raw, 500),
+                'default_meta_description' => SettingsValidator::plainText($raw, 320),
+                'smtp_host' => SettingsValidator::smtpHost($raw),
+                'smtp_port' => ($port = SettingsValidator::port($raw, 587)) === null
+                    ? null
+                    : (string) $port,
+                'smtp_encryption' => in_array($raw, ['tls', 'ssl', 'none'], true) ? $raw : 'tls',
+                'smtp_username' => SettingsValidator::plainText($raw, 254),
+                'smtp_from_name' => SettingsValidator::plainText($raw, 120),
+                'contact_email', 'smtp_from_email' => SettingsValidator::optionalEmail($raw),
+                default => SettingsValidator::plainText($raw),
+            };
+            if ($normalized[$key] === null) {
+                $errors[] = match ($key) {
+                    'smtp_host' => 'SMTP-сервер указан неверно: введите только имя хоста без https:// и номера порта.',
+                    'smtp_port' => 'Порт SMTP должен быть целым числом от 1 до 65535.',
+                    'contact_email' => 'Контактный email указан неверно.',
+                    'smtp_from_email' => 'Email отправителя SMTP указан неверно.',
+                    default => 'Проверьте значение поля «' . $key . '».',
+                };
+            }
+        }
+        if ($errors !== []) {
+            Flash::error(implode(' ', $errors));
+            header('Location: /admin/settings');
+            exit;
+        }
+        foreach ($normalized as $key => $value) {
+            Setting::set($key, (string) $value);
             foreach ($activeLangs as $lang) {
-                $code = (string) $lang['code'];
+                $code = strtolower((string) $lang['code']);
                 $locKey = $key . '_' . $code;
                 if (isset($_POST[$locKey])) {
-                    Setting::set($locKey, trim((string) $_POST[$locKey]));
+                    Setting::set($locKey, SettingsValidator::plainText(
+                        (string) $_POST[$locKey],
+                        $key === 'site_name' ? 160 : ($key === 'contact_address' ? 500 : 320)
+                    ));
                 }
             }
         }
@@ -65,7 +101,7 @@ final class SettingsController
                 Setting::set($key, '');
                 continue;
             }
-            $newValue = trim((string) ($_POST[$key] ?? ''));
+            $newValue = mb_substr(trim((string) ($_POST[$key] ?? '')), 0, 10000);
             if ($newValue !== '') {
                 Setting::set($key, $newValue);
             }
@@ -121,15 +157,16 @@ final class SettingsController
 
         // Режим обслуживания.
         Setting::set('maintenance_mode', !empty($_POST['maintenance_mode']) ? '1' : '0');
-        Setting::set('maintenance_message', trim((string) ($_POST['maintenance_message'] ?? '')));
+        Setting::set('maintenance_message', SettingsValidator::plainText((string) ($_POST['maintenance_message'] ?? ''), 500));
 
         // Глобальный произвольный CSS/JS вне блоков (группа 6). Доступ уже
         // ограничен супер-администратором (requireSuperAdmin выше) — хранится
         // как есть (доверенный источник), выводится на фронте один раз.
-        Setting::set('custom_css_global', (string) ($_POST['custom_css_global'] ?? ''));
-        Setting::set('custom_js_global', (string) ($_POST['custom_js_global'] ?? ''));
-        Setting::set('footer_counters', (string) ($_POST['footer_counters'] ?? ''));
+        Setting::set('custom_css_global', mb_substr((string) ($_POST['custom_css_global'] ?? ''), 0, 200000));
+        Setting::set('custom_js_global', mb_substr((string) ($_POST['custom_js_global'] ?? ''), 0, 200000));
+        Setting::set('footer_counters', mb_substr((string) ($_POST['footer_counters'] ?? ''), 0, 100000));
 
+        Cache::forgetPrefix('page:');
         Flash::success('Настройки сохранены.');
         header('Location: /admin/settings');
         exit;

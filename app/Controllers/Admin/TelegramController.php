@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\Flash;
+use App\Core\FormNotifier;
 use App\Core\SocialPublisher;
 use App\Core\SocialSettings;
 use App\Core\TelegramBot;
@@ -32,13 +33,17 @@ final class TelegramController
         Auth::requireSuperAdmin();
 
         $botConfigured = trim((string) Setting::get('telegram_bot_token', '')) !== '';
-        $me = $botConfigured ? TelegramBot::getMe() : null;
+        $botUsername = trim((string) Setting::get('telegram_bot_username', ''));
+        $botVerifiedAt = trim((string) Setting::get('telegram_bot_verified_at', ''));
         $user = User::findById((int) Auth::id());
 
         View::render('admin/telegram/index', [
             'botConfigured' => $botConfigured,
-            'botUsername' => is_array($me) ? (string) ($me['username'] ?? '') : '',
-            'botOk' => is_array($me),
+            'botUsername' => $botUsername,
+            'botVerifiedAt' => $botVerifiedAt,
+            // Страница не должна зависать до 10 секунд при каждом открытии:
+            // внешний API вызывается только явной кнопкой «Проверить».
+            'botOk' => $botConfigured && $botVerifiedAt !== '',
             'linked' => (int) ($user['telegram_chat_id'] ?? 0) > 0,
             'myChatId' => (int) ($user['telegram_chat_id'] ?? 0),
             // Код показываем только пока не привязан — иначе он лишний шум.
@@ -74,21 +79,33 @@ final class TelegramController
         }
 
         if ($clear) {
+            if (!hash_equals('REMOVE', strtoupper(trim((string) ($_POST['confirm_clear_bot'] ?? ''))))) {
+                Flash::error('Токен не удалён: введите REMOVE в поле подтверждения.');
+                header('Location: /admin/telegram#telegram-bot');
+                exit;
+            }
             Setting::set('telegram_bot_token', '');
+            Setting::set('telegram_bot_username', '');
+            Setting::set('telegram_bot_verified_at', '');
         } elseif ($token !== '') {
+            if (!self::looksLikeToken($token)) {
+                Flash::error(
+                    'Токен не сохранён: ожидается вид 1234567890:AA… '
+                    . 'Без слова «bot» в начале, пробелов и имени бота.'
+                );
+                header('Location: /admin/telegram#telegram-bot');
+                exit;
+            }
             Setting::set('telegram_bot_token', $token);
+            Setting::set('telegram_bot_username', '');
+            Setting::set('telegram_bot_verified_at', '');
         }
 
-        if ($token !== '' && !self::looksLikeToken($token)) {
-            Flash::error(
-                'Токен сохранён, но выглядит непривычно: ожидается вид 1234567890:AA… '
-                . 'Часто копируют слово «bot» в начале или имя бота вместо токена.'
-            );
-        } else {
-            Flash::success($token === '' && !$clear ? 'Сохранённый токен не изменён.' : 'Токен бота сохранён.');
-        }
+        Flash::success($token === '' && !$clear
+            ? 'Сохранённый токен не изменён.'
+            : ($clear ? 'Токен бота удалён.' : 'Токен сохранён. Теперь нажмите «Проверить бота».'));
 
-        header('Location: /admin/telegram');
+        header('Location: /admin/telegram#telegram-bot');
         exit;
     }
 
@@ -98,17 +115,35 @@ final class TelegramController
         Auth::requireSuperAdmin();
         Csrf::verifyRequest();
 
-        $me = TelegramBot::getMe();
+        $candidate = trim((string) ($_POST['telegram_bot_token'] ?? ''));
+        if ($candidate !== '' && !self::looksLikeToken($candidate)) {
+            Flash::error('Токен выглядит неверно и не отправлен на проверку.');
+            header('Location: /admin/telegram#telegram-bot');
+            exit;
+        }
+
+        $checkingStored = $candidate === '';
+        $me = $checkingStored ? TelegramBot::getMe() : TelegramBot::getMeWithToken($candidate);
         if (is_array($me)) {
-            Flash::success('Бот отвечает: @' . (string) ($me['username'] ?? '') . '.');
+            $username = (string) ($me['username'] ?? '');
+            if ($checkingStored) {
+                Setting::set('telegram_bot_username', $username);
+                Setting::set('telegram_bot_verified_at', date('Y-m-d H:i:s'));
+            }
+            Flash::success('Бот отвечает: @' . $username . '.'
+                . ($checkingStored ? '' : ' Проверенный токен ещё не сохранён.'));
         } else {
+            if ($checkingStored) {
+                Setting::set('telegram_bot_username', '');
+                Setting::set('telegram_bot_verified_at', '');
+            }
             Flash::error(
                 'Бот не отвечает. Telegram отклоняет токен («Not Found» приходит именно на неверный токен). '
                 . 'Возьмите токен у @BotFather: /mybots → ваш бот → API Token.'
             );
         }
 
-        header('Location: /admin/telegram');
+        header('Location: /admin/telegram#telegram-bot');
         exit;
     }
 
@@ -136,19 +171,26 @@ final class TelegramController
         Csrf::verifyRequest();
         self::requireCompletedTwoFactorSetup();
 
-        $chatId = trim((string) ($_POST['chat_id'] ?? ''));
+        $chatId = SocialSettings::normalizeTelegramChatId((string) ($_POST['chat_id'] ?? ''));
         $signature = trim((string) ($_POST['signature'] ?? ''));
         $ownToken = trim((string) ($_POST['own_token'] ?? ''));
-        $prevChatId = trim((string) Setting::get('social_telegram_chat_id', ''));
-
-        // Если канал впервые указывается и не был пуст — автоматически включаем публикацию.
-        // Если чекбокс передан явно — используем значение чекбокса.
-        $enabled = !empty($_POST['enabled']) ? '1' : '0';
-        if ($chatId !== '' && $prevChatId === '' && empty($_POST['enabled']) && !isset($_POST['channel_submitted'])) {
-            $enabled = '1';
-        } elseif ($chatId !== '' && empty($_POST['enabled']) && $prevChatId === '') {
-            $enabled = '1';
+        if ($chatId === null) {
+            Flash::error('Канал указан неверно: используйте @имя_канала или ID вида -1001234567890.');
+            header('Location: /admin/telegram#telegram-channel');
+            exit;
         }
+        $signatureError = SocialSettings::telegramSignatureError($signature);
+        if ($signatureError !== null) {
+            Flash::error($signatureError);
+            header('Location: /admin/telegram#telegram-channel');
+            exit;
+        }
+        if ($ownToken !== '' && !self::looksLikeToken($ownToken)) {
+            Flash::error('Отдельный токен публикации не сохранён: ожидается вид 1234567890:AA…');
+            header('Location: /admin/telegram#telegram-channel');
+            exit;
+        }
+        $enabled = !empty($_POST['enabled']) ? '1' : '0';
 
         Setting::set('social_telegram_chat_id', $chatId);
         Setting::set('social_telegram_signature', $signature);
@@ -157,10 +199,6 @@ final class TelegramController
             Setting::set('social_telegram_token', '');
         } elseif ($ownToken !== '') {
             Setting::set('social_telegram_token', $ownToken);
-        }
-
-        if ($ownToken !== '' && !self::looksLikeToken($ownToken)) {
-            Flash::error('Отдельный токен публикации выглядит непривычно: ожидается вид 1234567890:AA…');
         }
 
         if ($chatId !== '') {
@@ -173,7 +211,7 @@ final class TelegramController
             Flash::success('Настройки канала сохранены.');
         }
 
-        header('Location: /admin/telegram');
+        header('Location: /admin/telegram#telegram-channel');
         exit;
     }
 
@@ -184,7 +222,27 @@ final class TelegramController
         Csrf::verifyRequest();
         self::requireCompletedTwoFactorSetup();
 
-        $result = (new SocialPublisher())->checkTelegram(SocialSettings::configFor('telegram'));
+        $cfg = SocialSettings::configFor('telegram');
+        $submittedChatId = SocialSettings::normalizeTelegramChatId((string) ($_POST['chat_id'] ?? $cfg['chat_id'] ?? ''));
+        if ($submittedChatId === null) {
+            Flash::error('Канал указан неверно: используйте @имя_канала или ID вида -1001234567890.');
+            header('Location: /admin/telegram#telegram-channel');
+            exit;
+        }
+        $cfg['chat_id'] = $submittedChatId;
+        $ownToken = trim((string) ($_POST['own_token'] ?? ''));
+        if ($ownToken !== '') {
+            if (!self::looksLikeToken($ownToken)) {
+                Flash::error('Отдельный токен публикации выглядит неверно.');
+                header('Location: /admin/telegram#telegram-channel');
+                exit;
+            }
+            $cfg['token'] = $ownToken;
+        } elseif (!empty($_POST['clear_own_token'])) {
+            $cfg['token'] = trim((string) Setting::get('telegram_bot_token', ''));
+        }
+
+        $result = (new SocialPublisher())->checkTelegram($cfg);
         foreach ($result['steps'] as $step) {
             $line = $step['name'] . ': ' . $step['text'];
             if ($step['ok']) {
@@ -197,7 +255,7 @@ final class TelegramController
             Flash::success('Публикация настроена верно.');
         }
 
-        header('Location: /admin/telegram');
+        header('Location: /admin/telegram#telegram-channel');
         exit;
     }
 
@@ -208,8 +266,20 @@ final class TelegramController
         Csrf::verifyRequest();
         self::requireCompletedTwoFactorSetup();
 
-        Setting::set('telegram_notify_chat_ids', trim((string) ($_POST['telegram_notify_chat_ids'] ?? '')));
-        $gatewayToken = trim((string) ($_POST['telegram_gateway_token'] ?? ''));
+        $rawChatIds = trim((string) ($_POST['telegram_notify_chat_ids'] ?? ''));
+        if (mb_strlen($rawChatIds) > 5000) {
+            Flash::error('Список получателей слишком длинный.');
+            header('Location: /admin/telegram#telegram-extras');
+            exit;
+        }
+        $chatIds = FormNotifier::parseChatIds($rawChatIds);
+        if ($rawChatIds !== '' && $chatIds === []) {
+            Flash::error('Не найдено ни одного корректного chat_id получателя.');
+            header('Location: /admin/telegram#telegram-extras');
+            exit;
+        }
+        Setting::set('telegram_notify_chat_ids', implode(', ', $chatIds));
+        $gatewayToken = mb_substr(trim((string) ($_POST['telegram_gateway_token'] ?? '')), 0, 10000);
         if (!empty($_POST['clear_telegram_gateway_token'])) {
             Setting::set('telegram_gateway_token', '');
         } elseif ($gatewayToken !== '') {
@@ -217,14 +287,61 @@ final class TelegramController
         }
 
         Flash::success('Дополнительные настройки сохранены.');
-        header('Location: /admin/telegram');
+        header('Location: /admin/telegram#telegram-extras');
+        exit;
+    }
+
+    /** Проверка доставки уведомлений без сохранения введённого списка. */
+    public function checkExtras(): void
+    {
+        Auth::requireSuperAdmin();
+        Csrf::verifyRequest();
+        self::requireCompletedTwoFactorSetup();
+
+        if (!TelegramBot::isConfigured()) {
+            Flash::error('Сначала настройте и проверьте основного Telegram-бота.');
+            header('Location: /admin/telegram#telegram-extras');
+            exit;
+        }
+        $raw = trim((string) ($_POST['telegram_notify_chat_ids'] ?? ''));
+        if (mb_strlen($raw) > 5000) {
+            Flash::error('Список получателей слишком длинный.');
+            header('Location: /admin/telegram#telegram-extras');
+            exit;
+        }
+        $ids = FormNotifier::parseChatIds($raw);
+        if ($ids === []) {
+            Flash::error('Укажите хотя бы один корректный chat_id получателя.');
+            header('Location: /admin/telegram#telegram-extras');
+            exit;
+        }
+
+        $sent = 0;
+        foreach ($ids as $chatId) {
+            if (TelegramBot::sendMessage(
+                $chatId,
+                '<b>Проверка уведомлений ASDR CMS</b>' . "\n\n"
+                . 'Соединение с Telegram работает. Этот chat_id готов получать заявки с сайта.'
+            )) {
+                $sent++;
+            }
+        }
+        if ($sent === count($ids)) {
+            Flash::success('Тестовое уведомление доставлено всем получателям: ' . $sent . '.');
+        } else {
+            Flash::error('Доставлено ' . $sent . ' из ' . count($ids)
+                . '. Проверьте chat_id и убедитесь, что получатель запустил бота.');
+        }
+
+        header('Location: /admin/telegram#telegram-extras');
         exit;
     }
 
     /** Токен Bot API: цифры, двоеточие, ключ. */
     private static function looksLikeToken(string $token): bool
     {
-        return (bool) preg_match('/^\d{6,}:[A-Za-z0-9_-]{30,}$/', $token);
+        return strlen($token) <= 256
+            && (bool) preg_match('/^\d{6,}:[A-Za-z0-9_-]{30,}$/', $token);
     }
 
     private static function requireCompletedTwoFactorSetup(): void

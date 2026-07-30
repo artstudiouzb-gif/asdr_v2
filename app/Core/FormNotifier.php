@@ -43,8 +43,11 @@ final class FormNotifier
     {
         $ids = [];
         foreach (preg_split('/[\s,;]+/', trim($raw)) ?: [] as $part) {
-            if ($part !== '' && preg_match('/^-?\d{1,20}$/', $part) === 1) {
-                $ids[] = (int) $part;
+            if ($part !== '' && preg_match('/^-?\d{1,19}$/', $part) === 1) {
+                $id = filter_var($part, FILTER_VALIDATE_INT);
+                if ($id !== false && $id !== 0) {
+                    $ids[] = $id;
+                }
             }
         }
 

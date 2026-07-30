@@ -45,6 +45,69 @@ final class SettingsValidator
         return ctype_digit($value) ? (int) $value : $default;
     }
 
+    /** Однострочный текст без управляющих символов, ограниченный по длине. */
+    public static function plainText(string $value, int $maxLength = 255): string
+    {
+        $value = preg_replace('/[\x00-\x1F\x7F]+/u', ' ', trim($value)) ?? '';
+        $value = preg_replace('/\s{2,}/u', ' ', $value) ?? $value;
+
+        return mb_substr($value, 0, max(1, $maxLength));
+    }
+
+    /** Пустой или корректный email. Невалидный ввод возвращает null. */
+    public static function optionalEmail(string $value): ?string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return '';
+        }
+
+        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false
+            ? mb_substr($value, 0, 254)
+            : null;
+    }
+
+    /**
+     * SMTP-порт в диапазоне TCP/UDP.
+     * Пустое поле получает значение по умолчанию, неверное — null.
+     */
+    public static function port(string $value, int $default = 587): ?int
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return $default;
+        }
+        if (!ctype_digit($value)) {
+            return null;
+        }
+        $port = (int) $value;
+
+        return $port >= 1 && $port <= 65535 ? $port : null;
+    }
+
+    /**
+     * Имя SMTP-хоста без схемы, пути, порта и управляющих символов.
+     * Допускаются обычные DNS-имена, localhost и IP-адреса.
+     */
+    public static function smtpHost(string $value): ?string
+    {
+        $value = strtolower(trim($value));
+        if ($value === '') {
+            return '';
+        }
+        if (strlen($value) > 253 || preg_match('/[\s\/\\\\:@?#\x00-\x1F\x7F]/', $value)) {
+            return null;
+        }
+        if (filter_var($value, FILTER_VALIDATE_IP) !== false) {
+            return $value;
+        }
+        if (preg_match('/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/', $value) !== 1) {
+            return null;
+        }
+
+        return $value;
+    }
+
     /** Безопасное значение CSS (например, clamp(), px, rem). */
     public static function safeCssValue(string $value, string $default = ''): string
     {

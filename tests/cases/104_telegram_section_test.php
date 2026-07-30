@@ -79,6 +79,7 @@ test('Раздел Telegram: все шаги подключения на одн�
         '/admin/telegram/channel',        // 3. канал
         '/admin/telegram/channel/check',  // проверка канала и прав
         '/admin/telegram/extras',         // 4. уведомления и Gateway
+        '/admin/telegram/extras/check',   // тест доставки уведомлений
     ] as $action) {
         assert_contains($action, $view);
     }
@@ -89,4 +90,27 @@ test('Раздел Telegram: все шаги подключения на одн�
     // Старые точки входа из раздела соцсетей убраны — один путь, а не два.
     assert_not_contains('/admin/social/check-telegram', $routes);
     assert_not_contains('/admin/social/use-login-bot-token', $routes);
+});
+
+test('Telegram: канал, подпись и админская страница проходят защитные проверки', function () {
+    assert_same('', SocialSettings::normalizeTelegramChatId(''));
+    assert_same('@agency_news', SocialSettings::normalizeTelegramChatId(' @agency_news '));
+    assert_same('-1001234567890', SocialSettings::normalizeTelegramChatId('-1001234567890'));
+    assert_true(SocialSettings::normalizeTelegramChatId('@bad') === null);
+    assert_true(SocialSettings::normalizeTelegramChatId('123456') === null);
+
+    assert_true(SocialSettings::telegramSignatureError(
+        '<b>Новости</b> <blockquote expandable>Подробности</blockquote> '
+        . '<a href="https://example.uz/news">на сайте</a>'
+    ) === null);
+    assert_true(SocialSettings::telegramSignatureError('<b>Незакрытый тег') !== null);
+    assert_true(SocialSettings::telegramSignatureError('<script>alert(1)</script>') !== null);
+    assert_true(SocialSettings::telegramSignatureError('<a href="https://">ссылка</a>') !== null);
+
+    $view = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/admin/telegram/index.php');
+    assert_not_contains('<script', $view, 'нет inline-скрипта');
+    assert_not_contains('onclick=', $view, 'нет inline-обработчиков');
+    assert_contains('data-tg-clear-token', $view);
+    assert_contains('confirm_clear_bot', $view);
+    assert_contains('settings-jump-nav', $view);
 });

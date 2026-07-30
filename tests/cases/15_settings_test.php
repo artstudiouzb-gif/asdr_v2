@@ -46,6 +46,26 @@ test('SettingsValidator: неотрицательное целое', function ()
     assert_same(0, SettingsValidator::nonNegativeInt('abc', 0));
 });
 
+test('SettingsValidator: текст, email и SMTP-поля нормализуются строго', function () {
+    assert_same('Первая строка Вторая', SettingsValidator::plainText("  Первая строка\nВторая  ", 40));
+    assert_same('12345', SettingsValidator::plainText('123456789', 5));
+
+    assert_same('', SettingsValidator::optionalEmail(''));
+    assert_same('admin@example.uz', SettingsValidator::optionalEmail(' admin@example.uz '));
+    assert_true(SettingsValidator::optionalEmail('admin@') === null);
+
+    assert_same(587, SettingsValidator::port(''));
+    assert_same(465, SettingsValidator::port('465'));
+    assert_true(SettingsValidator::port('0') === null);
+    assert_true(SettingsValidator::port('70000') === null);
+    assert_true(SettingsValidator::port('587/tcp') === null);
+
+    assert_same('smtp.example.uz', SettingsValidator::smtpHost(' SMTP.Example.UZ '));
+    assert_same('127.0.0.1', SettingsValidator::smtpHost('127.0.0.1'));
+    assert_true(SettingsValidator::smtpHost('https://smtp.example.uz:587') === null);
+    assert_true(SettingsValidator::smtpHost('bad host') === null);
+});
+
 test('Analytics: скрипт строится из ID без сырого JS', function () {
     $s = Analytics::buildScript('G-TEST1234', '99887766');
     assert_contains('G-TEST1234', $s);

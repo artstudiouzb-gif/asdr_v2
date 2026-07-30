@@ -301,6 +301,7 @@ $router->post('/admin/telegram/link', [\App\Controllers\Admin\TelegramController
 $router->post('/admin/telegram/channel', [\App\Controllers\Admin\TelegramController::class, 'saveChannel']);
 $router->post('/admin/telegram/channel/check', [\App\Controllers\Admin\TelegramController::class, 'checkChannel']);
 $router->post('/admin/telegram/extras', [\App\Controllers\Admin\TelegramController::class, 'saveExtras']);
+$router->post('/admin/telegram/extras/check', [\App\Controllers\Admin\TelegramController::class, 'checkExtras']);
 
 // --- Admin: исходящие вебхуки (только супер-админ) ---
 $router->get('/admin/webhooks', [\App\Controllers\Admin\WebhookController::class, 'index']);

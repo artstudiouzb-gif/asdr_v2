@@ -9,12 +9,20 @@ require __DIR__ . '/../layout/header.php';
 
 /** @var array $settings */
 ?>
-<div class="u-inline-7de67ad799">
-    <a href="#settings-general" class="btn btn--small btn--outline"><?= AdminUi::icon('settings') ?>Основные настройки</a>
-    <a href="#smtp-section" class="btn btn--small btn--outline"><?= AdminUi::icon('email') ?>Почта (SMTP)</a>
-    <a href="#demo-section" class="btn btn--small btn--warning"><?= AdminUi::icon('performance') ?>Демо-контент и RESET</a>
-    <a href="#backup-section" class="btn btn--small btn--outline"><?= AdminUi::icon('save') ?>Бэкап (.zip)</a>
-</div>
+<p class="form-hint admin-section-intro">
+    Общие параметры сайта, интеграции и служебные инструменты. Дизайн, шапка,
+    подвал и Telegram управляются в собственных разделах.
+</p>
+<nav class="settings-jump-nav" aria-label="Разделы настроек">
+    <a href="#settings-site"><?= AdminUi::icon('settings', 16) ?>Сайт и контакты</a>
+    <a href="#smtp-section"><?= AdminUi::icon('email', 16) ?>Почта</a>
+    <a href="#settings-privacy"><?= AdminUi::icon('shield', 16) ?>Приватность</a>
+    <a href="#settings-integrations"><?= AdminUi::icon('plug', 16) ?>Интеграции</a>
+    <a href="#settings-maintenance"><?= AdminUi::icon('tools', 16) ?>Обслуживание</a>
+    <a href="#demo-section"><?= AdminUi::icon('database', 16) ?>Демо и RESET</a>
+    <a href="#backup-section"><?= AdminUi::icon('save', 16) ?>Бэкап</a>
+    <a href="/admin/telegram"><?= AdminUi::icon('telegram', 16) ?>Telegram</a>
+</nav>
 
 <div class="form-card" id="settings-general">
     <form method="post" action="/admin/settings" enctype="multipart/form-data" class="form-grid">
@@ -22,9 +30,11 @@ require __DIR__ . '/../layout/header.php';
 
         <?php $defaultLangCode = strtolower(\App\Models\Language::defaultCode()); ?>
 
+        <fieldset class="settings-group" id="settings-site">
+            <legend>Сайт и контактные данные</legend>
         <div class="form-field">
             <label for="site_name">Название сайта <span class="badge badge--small">Основное / <?= strtoupper($defaultLangCode) ?></span></label>
-            <input type="text" id="site_name" name="site_name" value="<?= htmlspecialchars($settings['site_name'] ?? '', ENT_QUOTES) ?>">
+            <input type="text" id="site_name" name="site_name" maxlength="160" value="<?= htmlspecialchars($settings['site_name'] ?? '', ENT_QUOTES) ?>">
         </div>
 
         <?php foreach (($languages ?? []) as $lang): ?>
@@ -36,7 +46,7 @@ require __DIR__ . '/../layout/header.php';
             ?>
             <div class="form-field">
                 <label for="site_name_<?= $code ?>">Название сайта <span class="badge badge--small"><?= htmlspecialchars($lang['name'], ENT_QUOTES) ?> (<?= strtoupper($code) ?>)</span></label>
-                <input type="text" id="site_name_<?= $code ?>" name="site_name_<?= $code ?>" value="<?= htmlspecialchars($settings['site_name_' . $code] ?? '', ENT_QUOTES) ?>" placeholder="Название на языке <?= htmlspecialchars($lang['name'], ENT_QUOTES) ?>">
+                <input type="text" id="site_name_<?= $code ?>" name="site_name_<?= $code ?>" maxlength="160" value="<?= htmlspecialchars($settings['site_name_' . $code] ?? '', ENT_QUOTES) ?>" placeholder="Название на языке <?= htmlspecialchars($lang['name'], ENT_QUOTES) ?>">
             </div>
         <?php endforeach; ?>
 
@@ -53,28 +63,34 @@ require __DIR__ . '/../layout/header.php';
 
         <div class="form-field">
             <label for="contact_phone">Телефон</label>
-            <input type="text" id="contact_phone" name="contact_phone" value="<?= htmlspecialchars($settings['contact_phone'] ?? '', ENT_QUOTES) ?>">
+            <input type="tel" id="contact_phone" name="contact_phone" maxlength="80" value="<?= htmlspecialchars($settings['contact_phone'] ?? '', ENT_QUOTES) ?>">
         </div>
 
         <div class="form-field">
             <label for="contact_email">Email</label>
-            <input type="email" id="contact_email" name="contact_email" value="<?= htmlspecialchars($settings['contact_email'] ?? '', ENT_QUOTES) ?>">
+            <input type="email" id="contact_email" name="contact_email" maxlength="254" value="<?= htmlspecialchars($settings['contact_email'] ?? '', ENT_QUOTES) ?>">
         </div>
 
         <div class="form-field">
-            <label for="contact_address">Адрес <span class="badge badge--small">Основной / RU</span></label>
-            <input type="text" id="contact_address" name="contact_address" value="<?= htmlspecialchars($settings['contact_address'] ?? '', ENT_QUOTES) ?>">
+            <label for="contact_address">Адрес <span class="badge badge--small">Основной / <?= strtoupper($defaultLangCode) ?></span></label>
+            <input type="text" id="contact_address" name="contact_address" maxlength="500" value="<?= htmlspecialchars($settings['contact_address'] ?? '', ENT_QUOTES) ?>">
         </div>
 
         <?php foreach (($languages ?? []) as $lang): ?>
-            <?php if ($lang['code'] === \App\Models\Language::defaultCode()) continue; ?>
+            <?php
+            $code = strtolower((string) ($lang['code'] ?? ''));
+            if ($code === $defaultLangCode) {
+                continue;
+            }
+            ?>
             <div class="form-field">
-                <label for="contact_address_<?= $lang['code'] ?>">Адрес <span class="badge badge--small"><?= htmlspecialchars($lang['name'], ENT_QUOTES) ?> (<?= strtoupper($lang['code']) ?>)</span></label>
-                <input type="text" id="contact_address_<?= $lang['code'] ?>" name="contact_address_<?= $lang['code'] ?>" value="<?= htmlspecialchars($settings['contact_address_' . $lang['code']] ?? '', ENT_QUOTES) ?>">
+                <label for="contact_address_<?= $code ?>">Адрес <span class="badge badge--small"><?= htmlspecialchars($lang['name'], ENT_QUOTES) ?> (<?= strtoupper($code) ?>)</span></label>
+                <input type="text" id="contact_address_<?= $code ?>" name="contact_address_<?= $code ?>" maxlength="500" value="<?= htmlspecialchars($settings['contact_address_' . $code] ?? '', ENT_QUOTES) ?>">
             </div>
         <?php endforeach; ?>
+        </fieldset>
 
-        <fieldset class="settings-group">
+        <fieldset class="settings-group" id="settings-brand">
             <legend>Брендинг панели управления</legend>
             <div class="form-field">
                 <label for="admin_brand_name">Название панели</label>
@@ -103,13 +119,13 @@ require __DIR__ . '/../layout/header.php';
             </p>
             <div class="form-field">
                 <label for="smtp_host">SMTP Сервер (Host)</label>
-                <input type="text" id="smtp_host" name="smtp_host"
+                <input type="text" id="smtp_host" name="smtp_host" maxlength="253"
                        value="<?= htmlspecialchars($settings['smtp_host'] ?? '', ENT_QUOTES) ?>"
                        placeholder="smtp.yandex.ru / smtp.gmail.com">
             </div>
             <div class="form-field">
                 <label for="smtp_port">Порт SMTP</label>
-                <input type="text" id="smtp_port" name="smtp_port"
+                <input type="number" id="smtp_port" name="smtp_port" min="1" max="65535" inputmode="numeric"
                        value="<?= htmlspecialchars($settings['smtp_port'] ?? '587', ENT_QUOTES) ?>"
                        placeholder="587 или 465">
             </div>
@@ -123,7 +139,7 @@ require __DIR__ . '/../layout/header.php';
             </div>
             <div class="form-field">
                 <label for="smtp_username">Логин SMTP (Email отправителя)</label>
-                <input type="text" id="smtp_username" name="smtp_username"
+                <input type="text" id="smtp_username" name="smtp_username" maxlength="254"
                        value="<?= htmlspecialchars($settings['smtp_username'] ?? '', ENT_QUOTES) ?>"
                        placeholder="no-reply@agency.gov.uz">
             </div>
@@ -138,19 +154,19 @@ require __DIR__ . '/../layout/header.php';
             </div>
             <div class="form-field">
                 <label for="smtp_from_email">Email отправителя (From Email)</label>
-                <input type="email" id="smtp_from_email" name="smtp_from_email"
+                <input type="email" id="smtp_from_email" name="smtp_from_email" maxlength="254"
                        value="<?= htmlspecialchars($settings['smtp_from_email'] ?? '', ENT_QUOTES) ?>"
                        placeholder="no-reply@agency.gov.uz">
             </div>
             <div class="form-field">
                 <label for="smtp_from_name">Имя отправителя (From Name)</label>
-                <input type="text" id="smtp_from_name" name="smtp_from_name"
+                <input type="text" id="smtp_from_name" name="smtp_from_name" maxlength="120"
                        value="<?= htmlspecialchars($settings['smtp_from_name'] ?? 'ASDR CMS', ENT_QUOTES) ?>"
                        placeholder="ASDR CMS">
             </div>
         </fieldset>
 
-        <fieldset class="settings-group">
+        <fieldset class="settings-group" id="settings-integrations">
             <legend>Push-уведомления в браузере</legend>
             <div class="form-field form-field--checkbox">
                 <input type="checkbox" id="webpush_enabled" name="webpush_enabled" value="1" <?= ($settings['webpush_enabled'] ?? '') === '1' ? 'checked' : '' ?>>
@@ -173,7 +189,7 @@ require __DIR__ . '/../layout/header.php';
             </span>
         </fieldset>
 
-        <fieldset class="settings-group">
+        <fieldset class="settings-group" id="settings-analytics">
             <legend>Веб-аналитика и трекинг</legend>
             <div class="form-field">
                 <label for="analytics_ga_id">Google Analytics ID</label>
@@ -186,7 +202,7 @@ require __DIR__ . '/../layout/header.php';
             </div>
         </fieldset>
 
-        <fieldset class="settings-group">
+        <fieldset class="settings-group" id="settings-privacy">
             <legend>Приватность и GDPR</legend>
             <div class="form-field form-field--checkbox">
                 <input type="checkbox" id="cookie_consent_enabled" name="cookie_consent_enabled" value="1" <?= ($settings['cookie_consent_enabled'] ?? '0') === '1' ? 'checked' : '' ?>>
@@ -221,7 +237,7 @@ require __DIR__ . '/../layout/header.php';
             </div>
         </fieldset>
 
-        <fieldset class="settings-group">
+        <fieldset class="settings-group" id="settings-ai">
             <legend><?= \App\Core\AdminUi::icon('seo') ?> ИИ-Интеграция (Google Gemini API / AI)</legend>
             <div class="form-field">
                 <label for="ai_api_key">Ключ API (Google Gemini API Key)</label>
@@ -230,11 +246,11 @@ require __DIR__ . '/../layout/header.php';
                 <?php if (!empty($settings['ai_api_key'])): ?>
                     <label class="form-hint"><input type="checkbox" name="clear_ai_api_key" value="1"> Удалить сохранённый ключ</label>
                 <?php endif; ?>
-                <span class="form-hint">Вставьте бесплатный ключ от <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>. Задействует нейросеть Gemini 1.5 Flash для генерации аннотаций и хештегов. Если поле пустое — используется встроенный локальный алгоритм.</span>
+                <span class="form-hint">Вставьте ключ из <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>. CMS использует доступную модель Gemini Flash для генерации аннотаций и хештегов; при сбое переключается на резервную модель. Если поле пустое — используется встроенный локальный алгоритм.</span>
             </div>
         </fieldset>
 
-        <fieldset class="settings-group">
+        <fieldset class="settings-group" id="settings-pwa">
             <legend>Favicon и PWA</legend>
             <?= \App\Core\AdminUi::imageField('favicon_url', $settings['favicon_url'] ?? '', [
                 'label' => 'Favicon (.svg/.png)',
@@ -251,11 +267,11 @@ require __DIR__ . '/../layout/header.php';
             </div>
         </fieldset>
 
-        <fieldset class="settings-group">
+        <fieldset class="settings-group" id="settings-seo">
             <legend>Глобальное SEO и соцсети</legend>
             <div class="form-field">
                 <label for="default_meta_description">Meta Description по умолчанию</label>
-                <input type="text" id="default_meta_description" name="default_meta_description" value="<?= htmlspecialchars($settings['default_meta_description'] ?? '', ENT_QUOTES) ?>">
+                <input type="text" id="default_meta_description" name="default_meta_description" maxlength="320" value="<?= htmlspecialchars($settings['default_meta_description'] ?? '', ENT_QUOTES) ?>">
             </div>
             <?= \App\Core\AdminUi::imageField('default_og_image', $settings['default_og_image'] ?? '', [
                 'label' => 'OG:Image по умолчанию',
@@ -264,16 +280,21 @@ require __DIR__ . '/../layout/header.php';
             <span class="form-hint">Ссылки на соцсети (Telegram/YouTube/VK/Instagram) настраиваются в разделе «Шапка сайта».</span>
         </fieldset>
 
-        <div class="form-field form-field--checkbox">
-            <input type="checkbox" id="maintenance_mode" name="maintenance_mode" value="1" <?= ($settings['maintenance_mode'] ?? '0') === '1' ? 'checked' : '' ?>>
-            <label for="maintenance_mode">Режим обслуживания (сайт закрыт для гостей, админам доступен)</label>
-        </div>
-        <div class="form-field">
-            <label for="maintenance_message">Сообщение на странице обслуживания</label>
-            <input type="text" id="maintenance_message" name="maintenance_message" value="<?= htmlspecialchars($settings['maintenance_message'] ?? '', ENT_QUOTES) ?>" placeholder="Сайт временно закрыт на техническое обслуживание.">
-        </div>
+        <fieldset class="settings-group" id="settings-maintenance">
+            <legend>Режим обслуживания</legend>
+            <div class="form-field form-field--checkbox">
+                <input type="checkbox" id="maintenance_mode" name="maintenance_mode" value="1" <?= ($settings['maintenance_mode'] ?? '0') === '1' ? 'checked' : '' ?>>
+                <label for="maintenance_mode">Закрыть публичный сайт для гостей, сохранив доступ администраторам</label>
+            </div>
+            <div class="form-field">
+                <label for="maintenance_message">Сообщение посетителям</label>
+                <input type="text" id="maintenance_message" name="maintenance_message" maxlength="500"
+                       value="<?= htmlspecialchars($settings['maintenance_message'] ?? '', ENT_QUOTES) ?>"
+                       placeholder="Сайт временно закрыт на техническое обслуживание.">
+            </div>
+        </fieldset>
 
-        <fieldset class="settings-group">
+        <fieldset class="settings-group" id="settings-code">
             <legend>Произвольный код сайта (группа 6)</legend>
             <p class="form-hint">Глобальные CSS/JS для всего сайта вне блоков. Доступно только супер-администратору; подключается один раз на каждой странице.</p>
             <div class="form-field">

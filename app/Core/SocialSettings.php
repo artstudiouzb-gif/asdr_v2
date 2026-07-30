@@ -79,6 +79,85 @@ final class SocialSettings
         return true;
     }
 
+    /**
+     * @username публичного канала или числовой id приватного канала -100….
+     * Пустая строка означает, что канал ещё не настроен; null — ошибка формата.
+     */
+    public static function normalizeTelegramChatId(string $value): ?string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return '';
+        }
+        if (preg_match('/^@[A-Za-z0-9_]{5,32}$/', $value) === 1) {
+            return $value;
+        }
+        if (preg_match('/^-100\d{5,17}$/', $value) === 1) {
+            return $value;
+        }
+
+        return null;
+    }
+
+    /**
+     * Проверяет подпись канала до обращения к Bot API.
+     *
+     * @return string|null null — подпись допустима, иначе текст ошибки
+     */
+    public static function telegramSignatureError(string $signature): ?string
+    {
+        $visible = html_entity_decode(strip_tags($signature), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (mb_strlen($signature) > 2000 || mb_strlen($visible) > 500) {
+            return 'Подпись слишком длинная: максимум 500 видимых символов.';
+        }
+
+        preg_match_all('/<[^>]*>/u', $signature, $matches);
+        $remainder = str_replace($matches[0] ?? [], '', $signature);
+        if (str_contains($remainder, '<') || str_contains($remainder, '>')) {
+            return 'В подписи найден незавершённый HTML-тег.';
+        }
+
+        $stack = [];
+        foreach ($matches[0] ?? [] as $tag) {
+            if (preg_match('/^<\\/(b|i|code|blockquote|tg-spoiler)>$/i', $tag, $m) === 1) {
+                $name = strtolower($m[1]);
+                if (array_pop($stack) !== $name) {
+                    return 'HTML-теги в подписи закрыты в неверном порядке.';
+                }
+                continue;
+            }
+            if (preg_match('/^<(b|i|code|tg-spoiler)>$/i', $tag, $m) === 1) {
+                $stack[] = strtolower($m[1]);
+                continue;
+            }
+            if (preg_match('/^<blockquote(?:\\s+expandable)?>$/i', $tag) === 1) {
+                $stack[] = 'blockquote';
+                continue;
+            }
+            if (preg_match('/^<a\\s+href="(https?:\\/\\/[^"]+)">$/i', $tag, $m) === 1) {
+                $host = parse_url($m[1], PHP_URL_HOST);
+                if (!is_string($host) || $host === '' || !UrlGuard::isSafeLink($m[1])) {
+                    return 'Ссылка в подписи имеет недопустимый адрес.';
+                }
+                $stack[] = 'a';
+                continue;
+            }
+            if (preg_match('/^<\\/a>$/i', $tag) === 1) {
+                if (array_pop($stack) !== 'a') {
+                    return 'HTML-теги в подписи закрыты в неверном порядке.';
+                }
+                continue;
+            }
+
+            return 'Поддерживаются только теги b, i, code, blockquote, blockquote expandable, tg-spoiler и ссылки a href="https://…".';
+        }
+        if ($stack !== []) {
+            return 'В подписи есть незакрытый HTML-тег.';
+        }
+
+        return null;
+    }
+
     /** @return array<int,string> сети, готовые к публикации */
     public static function readyNetworks(): array
     {
