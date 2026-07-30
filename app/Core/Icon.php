@@ -23,6 +23,7 @@ final class Icon
      * @var array<string,string>
      */
     private const ALIASES = [
+        'a11y' => 'accessible',
         'albums' => 'album',
         'audit' => 'clipboard-list',
         'block' => 'layout-grid',
@@ -66,6 +67,7 @@ final class Icon
         'send' => 'send',
         'seo' => 'world-search',
         'sliders' => 'adjustments-horizontal',
+        'snippet' => 'source-code',
         'social' => 'share-3',
         'space' => 'spacing-horizontal',
         'spacer' => 'arrows-horizontal',
@@ -95,7 +97,12 @@ final class Icon
             $name = substr($name, 7);
         }
 
-        if (preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', $name) !== 1) {
+        // Подчёркивание допустимо: короткие ключи разделов админки пишутся в
+        // snake_case («content_types»), а прежний набор символов отбраковывал
+        // такое имя ещё до обращения к ALIASES — псевдоним был недостижим, и
+        // раздел оставался без иконки. Итоговое имя всё равно сверяется с
+        // каталогом Tabler ниже, поэтому расширение набора безопасно.
+        if (preg_match('/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/D', $name) !== 1) {
             return '';
         }
 

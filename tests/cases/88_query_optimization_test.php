@@ -43,5 +43,19 @@ test('Сервер сжимает текст, а hero загружает мед�
     assert_contains('DEFLATE', $htaccess);
     assert_contains('preload="metadata"', $hero);
     assert_contains('loading="eager"', $hero);
-    assert_not_contains('loading="lazy"', $hero);
+    assert_contains('fetchpriority="high"', $hero);
+
+    // Фон hero — это первый экран, откладывать его нельзя. Проверяем именно
+    // теги <img>: YouTube-подложка подключается по data-src уже после клика,
+    // и `loading="lazy"` на её <iframe> — ожидаемое поведение, а не отложенная
+    // обложка. Прежний запрет подстроки во всём файле смешивал эти два случая.
+    if (preg_match_all('/<img\b[^>]*>/is', $hero, $images) > 0) {
+        foreach ($images[0] as $tag) {
+            assert_not_contains('loading="lazy"', $tag, 'обложка hero отложена до прокрутки');
+        }
+    }
+
+    // Фоновая картинка идёт через Media::picture с $lazy = false и
+    // $highPriority = true (аргументы 6 и 8).
+    assert_contains("'100vw', true", $hero);
 });

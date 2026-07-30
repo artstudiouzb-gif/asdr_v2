@@ -14,7 +14,9 @@ test('Priority navigation отделена от полного мобильно�
 test('Desktop priority navigation сохраняет порядок пунктов и доступность', function (): void {
     $script = (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js');
 
-    assert_contains("panel.insertBefore(item, panel.firstChild)", $script);
+    // Панель переполнения адресуется через parts.panel после рефакторинга;
+    // порядок вставки (в начало панели) остался тем же.
+    assert_contains("parts.panel.insertBefore(item, parts.panel.firstChild)", $script);
     assert_contains("menu.insertBefore(parts.panel.firstElementChild, parts.overflow)", $script);
     assert_contains("while (items.length > 1 && doesNotFit(header, menu, parts))", $script);
     assert_contains('itemRect.left < menuRect.left', $script);

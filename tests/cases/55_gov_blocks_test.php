@@ -6,7 +6,11 @@ use App\Core\BlockRenderer;
 
 test('Блок hero: титул, подзаголовок, фон-фото, безопасная кнопка', function () {
     $out = BlockRenderer::render(['id' => 20, 'type' => 'hero', 'custom_css' => null, 'data' => json_encode([
+        // bg_type задаётся явно: после редизайна отсутствие типа равно «Без
+        // фона», и оставшееся в поле фото фон не включает — контракт зафиксирован
+        // в 113_hero_bg_type_test.
         'title' => 'Пресс-центр', 'subtitle' => 'Оперативная информация',
+        'bg_type' => 'image',
         'image' => '/uploads/public/x.jpg', 'button_text' => 'Все новости', 'button_url' => '/news',
     ])])['html'];
     assert_contains('cms-block cms-block--hero', $out);
@@ -53,6 +57,7 @@ test('Список документов-ссылок: элементы и заг
 test('Блок hero: видео-фон и надзаголовок; безопасность кнопок', function () {
     $out = BlockRenderer::render(['id' => 25, 'type' => 'hero', 'custom_css' => null, 'data' => json_encode([
         'title' => 'Строим будущее', 'eyebrow' => 'Стратегия', 'image' => '/uploads/public/p.jpg',
+        'bg_type' => 'video',
         'video_url' => '/uploads/public/hero.mp4',
         'button_text' => 'Об агентстве', 'button_url' => '/o-nas',
         'button2_text' => 'Стратегия', 'button2_url' => 'javascript:alert(1)',

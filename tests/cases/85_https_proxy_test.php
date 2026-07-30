@@ -47,7 +47,6 @@ test('Канонический URL повышает http до https без см�
 test('Публичные SEO и машинные ответы используют единый канонический URL', function () {
     $files = [
         '/app/Views/site/_header.php',
-        '/app/Views/site/_footer.php',
         '/app/Views/site/content_show.php',
         '/app/Views/site/news_show.php',
         '/app/Controllers/Site/NewsController.php',
@@ -57,11 +56,23 @@ test('Публичные SEO и машинные ответы использую
         '/app/Controllers/Admin/PasswordResetController.php',
         '/app/Controllers/Admin/NewsController.php',
         '/app/Console/push_worker.php',
-        '/app/Console/digest_worker.php',
+        // Сборка ссылок дайджеста живёт в DigestDispatcher; digest_worker.php
+        // остался тонкой CLI-обёрткой и адресов больше не строит.
+        '/app/Core/DigestDispatcher.php',
     ];
 
     foreach ($files as $file) {
         $source = (string) file_get_contents(APP_ROOT . $file);
         assert_contains('AppUrl::base()', $source, $file);
     }
+
+    // Подвал больше не собирает адрес сам, а переиспользует $canonicalUrl из
+    // _header.php (там он и построен через AppUrl::base()). Требовать вызов
+    // именно в подвале смысла нет — важно, что своей сборки адреса там нет.
+    $footer = (string) file_get_contents(APP_ROOT . '/app/Views/site/_footer.php');
+    assert_contains('$canonicalUrl', $footer, 'подвал использует канонический URL страницы');
+    assert_false(
+        preg_match('#https?://#', $footer) === 1,
+        'в подвале не должно быть собственной сборки абсолютного адреса'
+    );
 });

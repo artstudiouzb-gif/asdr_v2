@@ -92,7 +92,14 @@ final class TranslationGroupHelper
                         mb_stripos($slug, 'home') !== false ||
                         mb_stripos($slug, 'bosh-sahifa') !== false
                     )) {
-                        $parentId = $pdo->query("SELECT id FROM pages WHERE (is_home = 1 OR slug = 'home' OR lang = '{$defaultLang}') AND deleted_at IS NULL ORDER BY is_home DESC, id ASC LIMIT 1")->fetchColumn();
+                        $homeStmt = $pdo->prepare(
+                            "SELECT id FROM pages
+                             WHERE (is_home = 1 OR slug = 'home' OR lang = :default_lang)
+                               AND deleted_at IS NULL
+                             ORDER BY is_home DESC, id ASC LIMIT 1"
+                        );
+                        $homeStmt->execute([':default_lang' => $defaultLang]);
+                        $parentId = $homeStmt->fetchColumn();
                     }
 
                     if ($parentId !== false && (int) $parentId > 0 && (int) $parentId !== $id) {
@@ -106,7 +113,17 @@ final class TranslationGroupHelper
                         }
                     }
                 }
-            } catch (\Throwable) {}
+            } catch (\Throwable $e) {
+                // Досвязывание — необязательная починка исторических данных, и
+                // сбой на одной таблице не должен ронять остальные. Но молча
+                // терять его нельзя: без записи в лог рассыпавшиеся группы
+                // переводов невозможно диагностировать.
+                Logger::error(sprintf(
+                    'TranslationGroupHelper: не удалось досвязать переводы в таблице %s: %s',
+                    $table,
+                    $e->getMessage()
+                ));
+            }
         }
     }
 

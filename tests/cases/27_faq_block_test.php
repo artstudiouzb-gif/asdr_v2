@@ -17,7 +17,9 @@ test('Блок FAQ рендерит нативный аккордеон details/
     ])['html'];
 
     assert_contains('block-faq', $out);
-    assert_contains('<details class="faq-item">', $out);
+    // Без закрывающего «>»: у <details> появились id и data-атрибуты поиска,
+    // проверять надо нативный элемент с классом, а не точную строку тега.
+    assert_contains('<details class="faq-item"', $out);
     assert_contains('<summary', $out);
     assert_contains('Как заказать?', $out);
     assert_contains('Через форму на сайте.', $out);

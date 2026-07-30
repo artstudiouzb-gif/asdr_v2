@@ -27,7 +27,13 @@ test('public landmarks and builder blocks use semantic markup without style attr
     $hero = (string) file_get_contents(APP_ROOT . '/templates/blocks/hero.php');
     $cards = (string) file_get_contents(APP_ROOT . '/templates/blocks/cards_grid.php');
 
-    assert_contains('<aside class="app-admin-bar"', $toolbar);
+    // Атрибуты бара администратора вынесены в многострочную запись (см. тест
+    // «admin toolbar is maintained as a readable partial component»), поэтому
+    // проверяем сам элемент, а не однострочный вариант тега.
+    assert_true(
+        preg_match('/<aside\s+[^>]*class="app-admin-bar"/', $toolbar) === 1,
+        'бар администратора — семантический <aside> с классом app-admin-bar'
+    );
     assert_contains('<section class="a11y-panel', $header);
     assert_contains('<header class="print-only print-header">', $header);
     assert_contains('<footer class="print-only print-footer">', $footer);

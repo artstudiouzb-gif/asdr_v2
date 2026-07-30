@@ -27,13 +27,25 @@ test('routine request limiter is atomic and does not require the database', func
 
 test('request guard and trusted proxy resolution run before database startup', function (): void {
     $bootstrap = (string) file_get_contents(APP_ROOT . '/app/Core/bootstrap.php');
-    $proxyPosition = strpos($bootstrap, 'ClientIp::applyTrustedProxy()');
-    $guardPosition = strpos($bootstrap, 'WafGuard::inspect()');
-    $databasePosition = strpos($bootstrap, 'Database::init()');
 
-    assert_true(is_int($proxyPosition) && is_int($guardPosition) && is_int($databasePosition));
-    assert_true($proxyPosition < $databasePosition);
-    assert_true($guardPosition < $databasePosition);
+    // Ищем вызовы по имени метода, а не по строке с пустыми скобками:
+    // `Database::init($config['db'])` принимает аргумент, и точное совпадение
+    // «Database::init()» не находилось — тест молча ничего не проверял.
+    $offsetOf = static function (string $call) use ($bootstrap): ?int {
+        return preg_match('/' . preg_quote($call, '/') . '\s*\(/', $bootstrap, $m, PREG_OFFSET_CAPTURE) === 1
+            ? (int) $m[0][1]
+            : null;
+    };
+
+    $proxyPosition = $offsetOf('ClientIp::applyTrustedProxy');
+    $guardPosition = $offsetOf('WafGuard::inspect');
+    $databasePosition = $offsetOf('Database::init');
+
+    assert_true($proxyPosition !== null, 'ClientIp::applyTrustedProxy не вызывается в bootstrap');
+    assert_true($guardPosition !== null, 'WafGuard::inspect не вызывается в bootstrap');
+    assert_true($databasePosition !== null, 'Database::init не вызывается в bootstrap');
+    assert_true($proxyPosition < $databasePosition, 'доверенный прокси разбирается до подключения к БД');
+    assert_true($guardPosition < $databasePosition, 'WAF проверяет запрос до подключения к БД');
     assert_contains("if (\$failedPath === '/health')", $bootstrap);
     assert_contains("'release' => \\App\\Core\\Release::id()", $bootstrap);
 });

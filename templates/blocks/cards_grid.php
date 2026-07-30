@@ -39,8 +39,12 @@ $cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '') . ($textColor !
         <?php else: ?>
             <div class="imgcards-grid<?= $desktopCarousel ? ' imgcards-grid--carousel' : ($carousel ? ' imgcards-grid--mobile-carousel' : '') ?>"<?= $carousel ? ' data-carousel-track tabindex="0" role="group" aria-label="' . htmlspecialchars(t('Карточки — прокрутка вбок'), ENT_QUOTES) . '"' : '' ?>>
                 <?php foreach ($items as $item): ?>
-                    <?php $url = trim((string) ($item['url'] ?? '')); $image = trim((string) ($item['image'] ?? '')); $tag = $url !== '' ? 'a' : 'div'; ?>
-                    <<?= $tag ?> class="imgcard"<?= $carousel ? ' data-carousel-item' : '' ?><?= $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"' : '' ?>>
+                    <?php $url = trim((string) ($item['url'] ?? '')); $image = trim((string) ($item['image'] ?? '')); ?>
+                    <?php if ($url !== ''): ?>
+                    <a class="imgcard"<?= $carousel ? ' data-carousel-item' : '' ?> href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                    <?php else: ?>
+                    <div class="imgcard"<?= $carousel ? ' data-carousel-item' : '' ?>>
+                    <?php endif; ?>
                         <?php if ($image !== ''): ?>
                             <?= Media::picture($image, (string) ($item['title'] ?? ''), null, null, 'imgcard__media ' . $mediaClasses, true, '(max-width: 700px) 100vw, 25vw') ?>
                         <?php else: ?>
@@ -52,7 +56,7 @@ $cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '') . ($textColor !
                             <?php if (!empty($item['text'])): ?><span class="imgcard__text"><?= htmlspecialchars((string) $item['text'], ENT_QUOTES) ?></span><?php endif; ?>
                             <?php if ($url !== ''): ?><span class="imgcard__more"><?= htmlspecialchars(t('Подробнее'), ENT_QUOTES) ?> →</span><?php endif; ?>
                         </span>
-                    </<?= $tag ?>>
+                    <?php if ($url !== ''): ?></a><?php else: ?></div><?php endif; ?>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
@@ -65,11 +69,15 @@ $cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '') . ($textColor !
         <?php else: ?>
             <div class="cat-grid">
                 <?php foreach ($items as $index => $item): ?>
-                    <?php $url = trim((string) ($item['url'] ?? '')); $tag = $url !== '' ? 'a' : 'span'; ?>
-                    <<?= $tag ?> class="cat-tile<?= $index === 0 ? ' is-active' : '' ?>"<?= $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"' : '' ?>>
+                    <?php $url = trim((string) ($item['url'] ?? '')); ?>
+                    <?php if ($url !== ''): ?>
+                    <a class="cat-tile<?= $index === 0 ? ' is-active' : '' ?>" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                    <?php else: ?>
+                    <span class="cat-tile<?= $index === 0 ? ' is-active' : '' ?>">
+                    <?php endif; ?>
                         <?php if (!empty($item['icon_svg'])): ?><span class="cat-tile__icon" aria-hidden="true"><?= Icon::render($item['icon_svg'], 28) ?></span><?php endif; ?>
                         <span class="cat-tile__label"><?= htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES) ?></span>
-                    </<?= $tag ?>>
+                    <?php if ($url !== ''): ?></a><?php else: ?></span><?php endif; ?>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
@@ -87,12 +95,16 @@ $cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '') . ($textColor !
         <?php else: ?>
             <div class="cards-grid">
                 <?php foreach ($items as $item): ?>
-                    <?php $url = trim((string) ($item['url'] ?? '')); $tag = $url !== '' ? 'a' : 'article'; ?>
-                    <<?= $tag ?> class="feature-card"<?= $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"' : '' ?>>
+                    <?php $url = trim((string) ($item['url'] ?? '')); ?>
+                    <?php if ($url !== ''): ?>
+                    <a class="feature-card" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                    <?php else: ?>
+                    <article class="feature-card">
+                    <?php endif; ?>
                         <?php if (!empty($item['icon_svg'])): ?><span class="feature-card__icon" aria-hidden="true"><?= Icon::render($item['icon_svg'], 32) ?></span><?php endif; ?>
                         <h3 class="feature-card__title"><?= htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES) ?></h3>
                         <?php if (!empty($item['text'])): ?><p class="feature-card__text"><?= htmlspecialchars((string) $item['text'], ENT_QUOTES) ?></p><?php endif; ?>
-                    </<?= $tag ?>>
+                    <?php if ($url !== ''): ?></a><?php else: ?></article><?php endif; ?>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>

@@ -7,7 +7,14 @@ test('Composer подключён только для инструментов �
     $data = json_decode((string) file_get_contents($path), true);
     assert_true(is_array($data), 'composer.json содержит валидный JSON');
     assert_same([], $data['require'] ?? null, 'production-зависимости отсутствуют');
-    assert_same('2.2.5', $data['require-dev']['phpstan/phpstan'] ?? null, 'версия PHPStan закреплена');
+    // Проверяем сам инвариант («версия закреплена»), а не конкретное число:
+    // штатное обновление PHPStan не должно ронять набор, а вот диапазон
+    // (^, ~, *, >=) сделает сборку невоспроизводимой и должен быть отклонён.
+    $phpstan = $data['require-dev']['phpstan/phpstan'] ?? null;
+    assert_true(
+        is_string($phpstan) && preg_match('/^\d+\.\d+(\.\d+)?$/', $phpstan) === 1,
+        'версия PHPStan закреплена точным номером, а не диапазоном'
+    );
     assert_false(isset($data['autoload']), 'production-автозагрузка Composer не включена');
 
     $gitignore = (string) file_get_contents(APP_ROOT . '/.gitignore');

@@ -6,10 +6,29 @@ use App\Core\BlockRenderer;
 use App\Core\BlockSamples;
 use App\Core\BlockTypeRegistry;
 
+/**
+ * Канонический состав библиотеки блоков. Задан явным списком, а не числом:
+ * при добавлении или удалении типа в diff видно, что именно изменилось.
+ * Редизайн «Redesign frontend block system for clean installs» свёл 38 типов
+ * к 31, объединив banner/cta_band/feature_band в `cta`,
+ * gallery/media_materials в `media_gallery`,
+ * categories_grid/image_cards в `cards_grid`.
+ */
+const EXPECTED_BLOCK_TYPES = [
+    'text', 'html', 'cta', 'advantages',
+    'slider', 'form', 'columns', 'testimonials',
+    'counters', 'team_list', 'projects_list', 'news_latest',
+    'partners', 'subscribe', 'faq', 'contact_cards',
+    'hero', 'cards_grid', 'media_gallery', 'news_feature',
+    'person_cards', 'timeline', 'news_docs', 'person_profile',
+    'bio_education', 'anchor_nav', 'stages', 'text_image',
+    'docs_list', 'map_point', 'org_structure',
+];
+
 test('Реестр блоков: все источники используют одинаковый набор типов', function () {
     $types = BlockTypeRegistry::types();
 
-    assert_same(38, count($types));
+    assert_same(EXPECTED_BLOCK_TYPES, $types);
     assert_same($types, array_keys(BlockTypeRegistry::TYPE_LABELS));
     assert_same($types, array_keys(BlockTypeRegistry::editorLabels()));
 

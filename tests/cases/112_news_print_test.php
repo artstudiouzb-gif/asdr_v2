@@ -7,13 +7,38 @@ test('Печать новости: служебные блоки помечен�
 
     // Пометка живёт в разметке: переименование CSS-классов при редизайне не
     // должно снова возвращать на печать подписку и «Другие новости».
+    //
+    // Проверяем сам инвариант: элемент с базовым классом служебного блока
+    // несёт `no-print` в том же атрибуте class. Раньше здесь искалось точное
+    // соседство «newsdetail-subscribe no-print», и добавление модификатора
+    // (`newsdetail-subscribe--fallback`) ломало тест, хотя разметка была верна.
+    // PHP-вставки внутри class="" (условные модификаторы) заменяем пробелом:
+    // в разметке они разворачиваются в отдельный класс с ведущим пробелом.
+    $markup = (string) preg_replace('/<\?.*?\?>/s', ' ', $view);
+
+    $classAttributes = [];
+    if (preg_match_all('/class="([^"]*)"/', $markup, $matches) > 0) {
+        $classAttributes = $matches[1];
+    }
+
     foreach ([
-        'newsdetail-share no-print' => 'кнопки «Поделиться»',
-        'newsdetail-subscribe no-print' => 'блок подписки',
-        'newsdetail-related no-print' => 'похожие новости',
-        'newsdetail-adjacent no-print' => 'предыдущая/следующая новость',
-    ] as $needle => $what) {
-        assert_contains($needle, $view, "на печать попадёт {$what}");
+        'newsdetail-share' => 'кнопки «Поделиться»',
+        'newsdetail-subscribe' => 'блок подписки',
+        'newsdetail-related' => 'похожие новости',
+        'newsdetail-adjacent' => 'предыдущая/следующая новость',
+    ] as $base => $what) {
+        $carriers = array_values(array_filter(
+            $classAttributes,
+            static fn (string $attr): bool => preg_match('/(^|\s)' . preg_quote($base, '/') . '(\s|$)/', $attr) === 1
+        ));
+
+        assert_true($carriers !== [], "в разметке нет блока {$base}");
+        foreach ($carriers as $attr) {
+            assert_true(
+                preg_match('/(^|\s)no-print(\s|$)/', $attr) === 1,
+                "на печать попадёт {$what}"
+            );
+        }
     }
 
     // Сама статья и её содержательные части не помечаются как непечатаемые.
