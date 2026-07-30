@@ -2227,13 +2227,17 @@ body.design-header-dark .a11y-toggle:hover,
 .cms-empty-notice__edit { margin-left: auto; font-weight: 600; white-space: nowrap; }
 
 /* --- Интерактивный Spotlight-блик при наведении --- */
-.cat-tile, .contact-card, .project-card, .team-card, .feature-card, .news-card, .person-card, .album-card, .doc-card, .catcard, .testimonial, .block-advantages__item, .mediacard, .imgcard, .faq-item, .stage, .timeline-item,
+.cat-tile, .contact-card, .project-card, .team-card, .feature-card, .news-card, .person-card, .album-card, .doc-card, .catcard, .testimonial, .block-advantages__item, .mediacard, .imgcard, .faq-item,
 .btn, .block-cta__button, .btn-cta, .block-hero__button, .timeline-card__button, .timeline-cta__button,
 .a11y-toggle, .site-theme-toggle, .site-search-toggle {
     position: relative;
     overflow: hidden;
 }
-.cat-tile::before, .contact-card::before, .project-card::before, .team-card::before, .feature-card::before, .news-card::before, .person-card::before, .album-card::before, .doc-card::before, .catcard::before, .testimonial::before, .block-advantages__item::before, .mediacard::before, .imgcard::before, .faq-item::before, .stage::before, .timeline-item::before,
+/* Линейные блоки используют собственные точки: их halo должен выходить за границы строки. */
+.stage, .timeline-item {
+    overflow: visible;
+}
+.cat-tile::before, .contact-card::before, .project-card::before, .team-card::before, .feature-card::before, .news-card::before, .person-card::before, .album-card::before, .doc-card::before, .catcard::before, .testimonial::before, .block-advantages__item::before, .mediacard::before, .imgcard::before, .faq-item::before,
 .btn::before, .block-cta__button::before, .btn-cta::before, .block-hero__button::before, .timeline-card__button::before, .timeline-cta__button::before,
 .a11y-toggle::before, .site-theme-toggle::before, .site-search-toggle::before {
     content: '';
@@ -2246,7 +2250,7 @@ body.design-header-dark .a11y-toggle:hover,
     pointer-events: none;
     z-index: 1;
 }
-.cat-tile:hover::before, .contact-card:hover::before, .project-card:hover::before, .team-card:hover::before, .feature-card:hover::before, .news-card:hover::before, .person-card:hover::before, .album-card:hover::before, .doc-card:hover::before, .catcard:hover::before, .testimonial:hover::before, .block-advantages__item:hover::before, .mediacard:hover::before, .imgcard:hover::before, .faq-item:hover::before, .stage:hover::before, .timeline-item:hover::before,
+.cat-tile:hover::before, .contact-card:hover::before, .project-card:hover::before, .team-card:hover::before, .feature-card:hover::before, .news-card:hover::before, .person-card:hover::before, .album-card:hover::before, .doc-card:hover::before, .catcard:hover::before, .testimonial:hover::before, .block-advantages__item:hover::before, .mediacard:hover::before, .imgcard:hover::before, .faq-item:hover::before,
 .btn:hover::before, .block-cta__button:hover::before, .btn-cta:hover::before, .block-hero__button:hover::before, .timeline-card__button:hover::before, .timeline-cta__button:hover::before,
 .a11y-toggle:hover::before, .site-theme-toggle:hover::before, .site-search-toggle:hover::before {
     opacity: 1;
@@ -2265,7 +2269,7 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
     .feature-card::before, .news-card::before, .person-card::before, .album-card::before,
     .doc-card::before, .catcard::before, .testimonial::before,
     .block-advantages__item::before, .mediacard::before, .imgcard::before,
-    .faq-item::before, .stage::before, .timeline-item::before,
+    .faq-item::before,
     .btn::before, .block-cta__button::before, .btn-cta::before,
     .block-hero__button::before, .timeline-card__button::before,
     .timeline-cta__button::before, .a11y-toggle::before,

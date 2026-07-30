@@ -49,6 +49,27 @@ test('Галерея использует единый lightbox из общег�
     assert_same(1, substr_count($frontend, "\n})();"), 'frontend helpers не должны выпадать из общего scope');
 });
 
+test('Точки хронологии и этапов не обрезаются карточным spotlight-эффектом', function (): void {
+    $frontend = (string) file_get_contents(APP_ROOT . '/public/assets/css/frontend.css');
+
+    assert_contains('.stage, .timeline-item {', $frontend);
+    assert_contains('overflow: visible;', $frontend);
+    assert_not_contains('.faq-item, .stage, .timeline-item,', $frontend);
+    assert_not_contains('.faq-item::before, .stage::before, .timeline-item::before,', $frontend);
+    assert_not_contains('.faq-item:hover::before, .stage:hover::before, .timeline-item:hover::before,', $frontend);
+});
+
+test('Цветовая цепочка этапов различает завершённый, текущий и запланированный статусы', function (): void {
+    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+
+    assert_contains('.stage--done:not(:last-child)::before {', $theme);
+    assert_contains('.stage--done .stage__dot { background: var(--gov-teal);', $theme);
+    assert_contains('.stage--active .stage__dot {', $theme);
+    assert_contains('border-color: #2f80ed;', $theme);
+    assert_contains('.stage--planned .stage__dot {', $theme);
+    assert_contains('.stage--planned .stage__status {', $theme);
+});
+
 test('Системные подписи блоков переведены на узбекский', function (): void {
     assert_same('Hozircha yangiliklar yo‘q.', Lang::t('Новостей пока нет.', 'uz'));
     assert_same('Media filtri', Lang::t('Фильтр медиа', 'uz'));
