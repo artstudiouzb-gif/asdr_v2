@@ -41,6 +41,14 @@ test('Пустота считается по содержимому, а не т�
     // А вот пустая обвязка — пустая.
     assert_true(BlockRenderer::isVisuallyEmpty('<div class="wrap"><div class="row"></div></div>'));
     assert_true(BlockRenderer::isVisuallyEmpty('   '));
+
+    // Заготовки состояний с атрибутом hidden браузер не рисует, содержимым они
+    // не считаются: иначе пустой блок FAQ «оживал» из-за скрытой подписи
+    // «Ничего не найдено» и оставлял на странице секцию с отступами.
+    assert_true(BlockRenderer::isVisuallyEmpty('<p class="block-faq__empty" data-faq-empty hidden>Ничего не найдено.</p>'));
+    assert_true(BlockRenderer::isVisuallyEmpty('<form hidden><input type="email"></form>'));
+    // Но соседний видимый текст пустоту снимает.
+    assert_false(BlockRenderer::isVisuallyEmpty('<div><p hidden>скрыто</p><p>видно</p></div>'));
 });
 
 test('Все типы блоков имеют русское название для сообщений редактору', function () {

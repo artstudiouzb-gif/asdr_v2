@@ -27,7 +27,11 @@ test('admin toolbar is maintained as a readable partial component', function ():
     assert_contains("View::renderPartial('site/components/admin_toolbar'", $core);
     assert_not_contains('<<<HTML', $core);
     assert_contains("<aside\n    class=\"app-admin-bar\"", $partial);
-    assert_contains("<svg\n", $partial);
+    // Иконки берутся из общего реестра Tabler, а не пишутся <svg> руками — того
+    // же требует тест «общая навигация не содержит локальных SVG-реестров».
+    // Прежняя проверка на литеральный «<svg» противоречила ему.
+    assert_contains('Icon::render(', $partial);
+    assert_not_contains('<path', $partial);
 });
 
 test('cards template does not generate element names or links through string concatenation', function (): void {

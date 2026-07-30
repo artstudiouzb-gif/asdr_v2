@@ -63,13 +63,25 @@ test('Cache stampede: remember генерирует один раз, ждущи�
     $cachePath = $dir . '/' . $safe . '.cache';
     $lockPath = $cachePath . '.lock';
 
+    // Подпроцесс сообщает о взятом lock файлом-маркером, а родитель ждёт этот
+    // маркер вместо фиксированного usleep: старт PHP в контейнере под нагрузкой
+    // легко превышал 150 мс, и тогда lock первым брал сам тест — падение было
+    // гонкой в тесте, а не в Cache::remember.
+    $readyPath = $cachePath . '.ready';
     $script = sprintf(
-        '$l=fopen(%s,"c");flock($l,LOCK_EX);usleep(400000);file_put_contents(%s,serialize("from-other"),LOCK_EX);flock($l,LOCK_UN);',
+        '$l=fopen(%s,"c");flock($l,LOCK_EX);touch(%s);usleep(400000);'
+        . 'file_put_contents(%s,serialize("from-other"),LOCK_EX);flock($l,LOCK_UN);',
         var_export($lockPath, true),
+        var_export($readyPath, true),
         var_export($cachePath, true)
     );
     $proc = proc_open([PHP_BINARY, '-r', $script], [], $pipes);
-    usleep(150000); // даём подпроцессу захватить lock
+
+    $deadline = microtime(true) + 10.0;
+    while (!is_file($readyPath) && microtime(true) < $deadline) {
+        usleep(5000);
+    }
+    assert_true(is_file($readyPath), 'подпроцесс не захватил lock за отведённое время');
 
     $raced = Cache::remember($key2, function () {
         return 'should-not-run';
@@ -77,6 +89,7 @@ test('Cache stampede: remember генерирует один раз, ждущи�
     assert_same('from-other', $raced, 'значение получено из чужой генерации');
 
     proc_close($proc);
+    @unlink($readyPath);
     Cache::forget($key2);
 });
 

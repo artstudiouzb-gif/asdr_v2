@@ -106,7 +106,10 @@ test('Блок hero: классы ширины и высоты секции', fu
 
     $custom = \App\Core\BlockRenderer::render(['id' => 62, 'type' => 'hero', 'custom_css' => null, 'data' => json_encode([
         'title' => 'T', 'image' => '/uploads/public/x.jpg', 'height' => 'custom', 'custom_height' => '68.5vh',
-    ])])['html'];
-    assert_contains('block-hero--h-custom', $custom);
-    assert_contains('--hero-custom-height:68.5vh', $custom);
+    ])]);
+    assert_contains('block-hero--h-custom', $custom['html']);
+    // Числовые параметры hero публикуются как scoped CSS блока, а не inline —
+    // этого требует тест «Динамические параметры hero публикуются как scoped CSS».
+    assert_contains('--hero-custom-height:68.5vh', $custom['css']);
+    assert_not_contains(' style="', $custom['html']);
 });

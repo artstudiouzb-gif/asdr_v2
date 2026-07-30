@@ -62,7 +62,11 @@ test('Точки хронологии и этапов не обрезаются 
 test('Цветовая цепочка этапов различает завершённый, текущий и запланированный статусы', function (): void {
     $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
 
-    assert_contains('.stage--done:not(:last-child)::before {', $theme);
+    // Соединительная линия завершённого этапа красится по состоянию следующего
+    // этапа (`stage--next-done` / `stage--next-active`), а не по
+    // `:not(:last-child)`. Точные правила проверяет 178_stage_timeline_status.
+    assert_contains('.stage--done.stage--next-done::before', $theme);
+    assert_contains('.stage--done.stage--next-active::before', $theme);
     assert_contains('.stage--done .stage__dot { background: var(--gov-teal);', $theme);
     assert_contains('.stage--active .stage__dot {', $theme);
     assert_contains('border-color: #2f80ed;', $theme);

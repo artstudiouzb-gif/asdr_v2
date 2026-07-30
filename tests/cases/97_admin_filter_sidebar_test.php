@@ -20,9 +20,15 @@ test('header settings group behavior controls into spacious responsive cards', f
 
     assert_true(is_string($view));
     assert_true(is_string($css));
-    assert_contains('class="hb-behavior__options"', $view);
-    assert_contains('class="hb-behavior-card"', $view);
-    assert_contains('class="hb-behavior__media"', $view);
+    // К классам блока может добавляться utility-класс, сгенерированный при
+    // выносе inline-стилей (`u-inline-…`), поэтому проверяем наличие класса в
+    // атрибуте, а не точное совпадение всей строки class="…".
+    foreach (['hb-behavior__options', 'hb-behavior-card', 'hb-behavior__media'] as $class) {
+        assert_true(
+            preg_match('/class="[^"]*\b' . preg_quote($class, '/') . '\b[^"]*"/', (string) $view) === 1,
+            "в конструкторе шапки нет элемента с классом {$class}"
+        );
+    }
     assert_contains('.hb-behavior__options { display: grid;', $css);
     assert_contains('@media (max-width: 720px)', $css);
 });
@@ -49,11 +55,16 @@ test('long admin editors expose a fixed save bar without covering their content'
 test('installer buttons have consistent states and prevent duplicate submission', function (): void {
     $header = file_get_contents(dirname(__DIR__, 2) . '/app/Views/install/_header.php');
     $footer = file_get_contents(dirname(__DIR__, 2) . '/app/Views/install/_footer.php');
+    $css = file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/admin.css');
 
     assert_true(is_string($header));
     assert_true(is_string($footer));
+    assert_true(is_string($css));
     assert_contains('install-card', $header);
-    assert_contains('.install-card .btn--primary:hover', $header);
+    // Стили установщика переехали из inline-<style> во вьюхе в admin.css —
+    // этого же требует проверка «Reject new static inline styles» в CI.
+    assert_contains('.install-card .btn--primary:hover', $css);
+    assert_not_contains('<style', (string) $header);
     assert_contains("button.setAttribute('aria-busy', 'true')", $footer);
     assert_contains("button.textContent = 'Подождите…'", $footer);
 });
@@ -84,9 +95,15 @@ test('repository source does not contain the retired external product name', fun
             continue;
         }
         $path = $file->getPathname();
-        if (str_contains($path, DIRECTORY_SEPARATOR . '.git' . DIRECTORY_SEPARATOR)
-            || str_contains($path, DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR)) {
-            continue;
+        // Проверяем только исходники репозитория. Каталоги зависимостей и
+        // артефактов перечислены в .gitignore и в поставку не входят: в наборе
+        // иконок Tabler, например, есть бренд-иконка с этим названием, из-за
+        // которой тест падал у любого, кто выполнил `npm ci` перед прогоном.
+        $skipped = ['.git', 'vendor', 'node_modules', 'storage', 'playwright-report', 'test-results', 'coverage'];
+        foreach ($skipped as $dir) {
+            if (str_contains($path, DIRECTORY_SEPARATOR . $dir . DIRECTORY_SEPARATOR)) {
+                continue 2;
+            }
         }
         $contents = file_get_contents($path);
         if (!is_string($contents)) {

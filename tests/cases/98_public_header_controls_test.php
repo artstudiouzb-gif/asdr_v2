@@ -36,7 +36,11 @@ test('dropdown search is anchored, constrained and restores focus', function ():
     assert_contains('width: min(620px, calc(100vw - 32px))', $css);
     assert_contains('body.design-search-inline .site-header .site-search { display: inline-flex; }', $themeCss);
     assert_contains('body.design-search-overlay .site-header .site-search-toggle { display: grid; }', $themeCss);
-    assert_contains("\$searchType = (\$designVals['search_type'] ?? 'inline') === 'overlay' ? 'overlay' : 'inline';", $header);
+    // Источником вида поиска стал конструктор шапки ($searchConfig['style'],
+    // где 'modal' = overlay) вместо настроек дизайна. Инвариант тот же: тип
+    // сводится строго к inline|overlay и попадает в класс body.
+    assert_contains("\$searchType = (\$searchConfig['style'] ?? 'inline') === 'modal' ? 'overlay' : 'inline';", $header);
+    assert_contains("\$designBodyClass .= ' design-search-' . \$searchType;", $header);
     assert_contains("\$searchHtml = \$searchType === 'overlay' ? \$overlaySearchHtml : \$inlineSearchHtml;", $header);
     assert_contains("<?php if (\$searchType === 'overlay'): ?>", $header);
     assert_contains('id="site-search-popover"', $header);
