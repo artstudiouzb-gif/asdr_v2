@@ -16,11 +16,11 @@ production-сервера и реального контента. Полный �
   `database/restore.php`.
 - Heartbeat воркеров, `/health`, статусы `failed`, ретраи и Telegram-алерты
   реализованы для фоновых очередей.
-- Вложенное меню, библиотека из 37 типов блоков, Columns, варианты reveal,
+- Вложенное меню, библиотека из 31 типа блоков, Columns, варианты reveal,
   SVG-иконки, ревизии блоков и предпросмотр черновиков реализованы.
 - CI выполняет четыре задачи: PHP 8.2–8.4 + MySQL 8 / MariaDB, PHPStan/Composer audit,
-  JavaScript syntax и browser smoke Chromium. Текущий объём — 505 unit-тестов
-  без БД и 652 теста в полном прогоне.
+  JavaScript syntax и browser smoke Chromium. Текущий объём — 607 сценариев без БД
+  (плюс 140 требуют TEST_DB_*).
 
 
 ## Обязательно перед открытием сайта
