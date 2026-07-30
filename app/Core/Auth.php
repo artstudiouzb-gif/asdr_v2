@@ -417,6 +417,14 @@ final class Auth
 
         $_SESSION = [];
 
+        // Всё, что ниже, имеет смысл только при живой сессии. Session::start()
+        // ничего не открывает в CLI, а без этой проверки session_destroy()
+        // писал в лог «Trying to destroy uninitialized session» — шум, за
+        // которым легко пропустить настоящую ошибку.
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            return;
+        }
+
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
             setcookie(session_name(), '', [

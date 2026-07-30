@@ -8,8 +8,40 @@ function establish_toolbar_test_session(string $username = 'editor_user', string
 {
     $_SERVER['HTTP_USER_AGENT'] = 'asdr-toolbar-test';
     $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+    $userId = 1;
+
+    // Сессия действительна, только пока её строка есть в реестре: Auth::check()
+    // сверяется с ним и иначе разлогинивает. С появлением мгновенного
+    // серверного отзыва сессий подделки массива $_SESSION стало недостаточно —
+    // регистрируем её так же, как это делает настоящий вход. У user_sessions
+    // есть внешний ключ на users, поэтому пользователь должен существовать:
+    // соседние тесты (демо-данные, очистка) вычищают таблицу, и жёсткий id = 1
+    // упирался в нарушение ограничения целостности.
+    //
+    // Без TEST_DB_* реестр недоступен; там Auth::check() ловит ошибку обращения
+    // к базе, логирует и продолжает по фингерпринту, поэтому тест работает и в
+    // прогоне без БД.
+    if (\App\Core\Database::isConnected()) {
+        $pdo = \App\Core\Database::pdo();
+        $pdo->prepare(
+            "INSERT INTO users (username, email, password_hash, role, created_at)
+             VALUES (:u, :e, :p, 'admin', NOW())
+             ON DUPLICATE KEY UPDATE username = VALUES(username)"
+        )->execute([
+            ':u' => 'toolbar_test_user',
+            ':e' => 'toolbar_test_user@example.test',
+            ':p' => password_hash('toolbar-test', PASSWORD_DEFAULT),
+        ]);
+
+        $found = $pdo->prepare('SELECT id FROM users WHERE username = :u LIMIT 1');
+        $found->execute([':u' => 'toolbar_test_user']);
+        $userId = (int) $found->fetchColumn();
+
+        \App\Models\SessionRegistry::register($userId, session_id(), '127.0.0.1', 'asdr-toolbar-test');
+    }
+
     $_SESSION = [
-        'user_id' => 1,
+        'user_id' => $userId,
         'username' => $username,
         'role' => $role,
         'fingerprint' => hash('sha256', 'asdr-toolbar-test|127.0'),
