@@ -112,7 +112,11 @@ test('News: frontend layout rendering with and without sidebar', function () {
     }
     $html = ob_get_clean();
 
-    assert_contains('layout layout--right', $html, 'Контейнер разметки с правым сайдбаром на месте');
+    // Обёртка-грид `layout layout--right` ушла при редизайне детальной новости:
+    // страница собирается из блоков newsdetail-*, а сайдбар выводится отдельным
+    // <aside class="newsdetail-side newsdetail-side--right">.
+    assert_contains('newsdetail-side newsdetail-side--right', $html, 'Правый сайдбар новости отрисован');
+    assert_contains('Контакты', $html, 'Виджет правого сайдбара попал в разметку');
     assert_contains('newsdetail-card--thesis-inline', $html, 'Тезисы отображаются инлайново при наличии сайдбара');
     assert_contains('Первый важный тезис', $html);
 
