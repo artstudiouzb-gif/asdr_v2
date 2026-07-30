@@ -15,10 +15,18 @@ final class CtaBlockNormalizer
      */
     public static function normalize(array $input, string $locale = 'ru'): array
     {
+        // Вариант разбираем отдельной переменной: раньше значение по умолчанию
+        // подставлялось только в условии (`?? 'card'`), а в положительной ветке
+        // читался `$input['variant']` напрямую. Если форма не присылала поле,
+        // условие проходило по дефолту, а чтение бросало «Undefined array key»
+        // и сохранение блока падало.
+        $variant = (string) ($input['variant'] ?? 'card');
+        if (!in_array($variant, ['card', 'band', 'media-dark', 'media-light'], true)) {
+            $variant = 'card';
+        }
+
         return [
-            'variant' => in_array($input['variant'] ?? 'card', ['card', 'band', 'media-dark', 'media-light'], true)
-                ? (string) $input['variant']
-                : 'card',
+            'variant' => $variant,
             'title' => BlockDataInput::plain($input, 'title_field', $locale),
             'text' => BlockDataInput::plain($input, 'text', $locale),
             'icon_svg' => Icon::cleanName($input['icon_svg'] ?? ''),

@@ -76,6 +76,18 @@ final class BlockRenderer
             '',
             $html
         ) ?? $html;
+
+        // Заготовки состояний («Ничего не найдено», пустые слоты фильтров)
+        // помечены атрибутом hidden и до действия пользователя не отображаются.
+        // Браузер их не рисует, значит для расчёта пустоты это не содержимое:
+        // иначе пустой блок FAQ считался бы заполненным из-за скрытой подписи
+        // и оставлял на странице секцию с отступами.
+        $withoutCode = preg_replace(
+            '#<([a-z][a-z0-9]*)\b[^>]*?\shidden(?:\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]*))?[^>]*>.*?</\1>#is',
+            '',
+            $withoutCode
+        ) ?? $withoutCode;
+
         $text = html_entity_decode(strip_tags($withoutCode), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         if (trim((string) preg_replace('/\x{00A0}|\s+/u', ' ', $text)) !== '') {
             return false;
