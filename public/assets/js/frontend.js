@@ -680,27 +680,172 @@
         targets.forEach(function (_link, target) { observer.observe(target); });
     });
 
-    // Карусель проектов: прокрутка трека кнопками ‹ ›.
+    // Единая адаптивная карусель для равноправных визуальных элементов.
+    // CSS решает, когда сетка становится полосой; JS показывает управление
+    // только при реальном переполнении. Без JS остаётся нативный touch-scroll.
     document.querySelectorAll('[data-carousel]').forEach(function (root) {
         var track = root.querySelector('[data-carousel-track]');
+        var nav = root.querySelector('[data-carousel-nav]');
         var prev = root.querySelector('[data-carousel-prev]');
         var next = root.querySelector('[data-carousel-next]');
-        if (!track || !prev || !next) { return; }
-        var step = function () {
-            var card = track.querySelector('.imgcard');
-            var gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || '20') || 20;
-            return card ? card.getBoundingClientRect().width + gap : track.clientWidth;
+        var dots = root.querySelector('[data-carousel-dots]');
+        var items = Array.prototype.slice.call(track ? track.querySelectorAll('[data-carousel-item]') : []);
+        if (!track || !nav || !prev || !next || items.length < 2) { return; }
+
+        var motionPreference = window.matchMedia
+            ? window.matchMedia('(prefers-reduced-motion: reduce)')
+            : { matches: false };
+        var positions = [0];
+        var renderedDotsKey = '';
+        var frame = null;
+        var MAX_PROGRESS_DOTS = 7;
+
+        var pagePositions = function () {
+            var max = Math.max(0, track.scrollWidth - track.clientWidth);
+            if (max < 2 || track.clientWidth < 1) { return [0]; }
+
+            var trackRect = track.getBoundingClientRect();
+            var candidates = items.map(function (item) {
+                var rect = item.getBoundingClientRect();
+                return Math.max(0, Math.min(max, rect.left - trackRect.left + track.scrollLeft));
+            });
+            var pages = [0];
+            var pageWidth = Math.max(1, track.clientWidth * 0.72);
+            candidates.forEach(function (candidate) {
+                if (candidate - pages[pages.length - 1] >= pageWidth) {
+                    pages.push(candidate);
+                }
+            });
+            if (max - pages[pages.length - 1] > 4) { pages.push(max); }
+            else { pages[pages.length - 1] = max; }
+            return pages;
         };
-        var sync = function () {
-            var max = track.scrollWidth - track.clientWidth - 1;
-            prev.disabled = track.scrollLeft <= 0;
-            next.disabled = track.scrollLeft >= max;
+
+        var closestPage = function () {
+            var current = 0;
+            var distance = Infinity;
+            positions.forEach(function (position, index) {
+                var candidateDistance = Math.abs(track.scrollLeft - position);
+                if (candidateDistance < distance) {
+                    current = index;
+                    distance = candidateDistance;
+                }
+            });
+            return current;
         };
-        prev.addEventListener('click', function () { track.scrollBy({ left: -step() * 2, behavior: 'smooth' }); });
-        next.addEventListener('click', function () { track.scrollBy({ left: step() * 2, behavior: 'smooth' }); });
-        track.addEventListener('scroll', sync, { passive: true });
-        window.addEventListener('resize', sync);
-        sync();
+
+        var progressDotIndexes = function () {
+            if (positions.length <= MAX_PROGRESS_DOTS) {
+                return positions.map(function (_position, index) { return index; });
+            }
+            return Array.from({ length: MAX_PROGRESS_DOTS }, function (_item, index) {
+                return Math.round(index * (positions.length - 1) / (MAX_PROGRESS_DOTS - 1));
+            });
+        };
+
+        var renderDots = function () {
+            if (!dots) { return []; }
+            var indexes = progressDotIndexes();
+            var key = indexes.join(',');
+            if (renderedDotsKey === key) { return indexes; }
+            renderedDotsKey = key;
+            dots.textContent = '';
+            indexes.forEach(function (positionIndex) {
+                var dot = document.createElement('button');
+                dot.type = 'button';
+                dot.className = 'carousel-nav__dot';
+                dot.setAttribute('aria-label', label('goToSlide', 'Перейти к слайду') + ' ' + (positionIndex + 1));
+                dot.addEventListener('click', function () {
+                    track.scrollTo({
+                        left: positions[positionIndex] || 0,
+                        behavior: motionPreference.matches ? 'auto' : 'smooth'
+                    });
+                });
+                dots.appendChild(dot);
+            });
+            return indexes;
+        };
+
+        var sync = function (remeasure) {
+            if (remeasure) { positions = pagePositions(); }
+            var active = positions.length > 1;
+            root.classList.toggle('is-carousel-active', active);
+            nav.hidden = !active;
+            if (!active) {
+                track.scrollLeft = 0;
+                return;
+            }
+            var dotIndexes = renderDots();
+            var current = closestPage();
+            prev.disabled = track.scrollLeft <= 2;
+            next.disabled = track.scrollLeft >= positions[positions.length - 1] - 2;
+            if (dots) {
+                var activeDot = 0;
+                var activeDistance = Infinity;
+                dotIndexes.forEach(function (positionIndex, dotIndex) {
+                    var candidateDistance = Math.abs(current - positionIndex);
+                    if (candidateDistance < activeDistance) {
+                        activeDot = dotIndex;
+                        activeDistance = candidateDistance;
+                    }
+                });
+                Array.prototype.forEach.call(dots.children, function (dot, index) {
+                    var selected = index === activeDot;
+                    dot.classList.toggle('is-active', selected);
+                    if (selected) { dot.setAttribute('aria-current', 'true'); }
+                    else { dot.removeAttribute('aria-current'); }
+                });
+            }
+        };
+
+        var go = function (direction) {
+            var current = closestPage();
+            var target = Math.max(0, Math.min(positions.length - 1, current + direction));
+            track.scrollTo({
+                left: positions[target] || 0,
+                behavior: motionPreference.matches ? 'auto' : 'smooth'
+            });
+        };
+
+        prev.addEventListener('click', function () { go(-1); });
+        next.addEventListener('click', function () { go(1); });
+        track.addEventListener('keydown', function (event) {
+            if (event.target !== track) { return; }
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                go(-1);
+            } else if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                go(1);
+            } else if (event.key === 'Home') {
+                event.preventDefault();
+                track.scrollTo({ left: 0, behavior: motionPreference.matches ? 'auto' : 'smooth' });
+            } else if (event.key === 'End') {
+                event.preventDefault();
+                track.scrollTo({
+                    left: positions[positions.length - 1] || 0,
+                    behavior: motionPreference.matches ? 'auto' : 'smooth'
+                });
+            }
+        });
+        track.addEventListener('scroll', function () {
+            if (frame !== null) { return; }
+            frame = window.requestAnimationFrame(function () {
+                frame = null;
+                sync(false);
+            });
+        }, { passive: true });
+
+        var measure = function () {
+            window.requestAnimationFrame(function () { sync(true); });
+        };
+        if ('ResizeObserver' in window) {
+            var resizeObserver = new ResizeObserver(measure);
+            resizeObserver.observe(track);
+        } else {
+            window.addEventListener('resize', measure);
+        }
+        sync(true);
     });
 
     // Детальная новость: слайдер медиа-модуля (главное фото + миниатюры + счётчик).

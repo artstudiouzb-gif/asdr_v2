@@ -223,6 +223,8 @@ return [
     'Наверх' => 'Yuqoriga',
     'Отзывы — прокрутка вбок' => 'Sharhlar — yon tomonga aylantirish',
     'Карточки — прокрутка вбок' => 'Kartochkalar — yon tomonga aylantirish',
+    'Этапы — прокрутка вбок' => 'Bosqichlar — yon tomonga aylantirish',
+    'Партнёры — прокрутка вбок' => 'Hamkorlar — yon tomonga aylantirish',
     'Перевод пока недоступен' => 'Tarjima hozircha mavjud emas',
     'Доступен на другом языке' => 'Boshqa tilda mavjud',
     'Этот материал ещё не переведён на выбранный язык.' => 'Ushbu material tanlangan tilga hali tarjima qilinmagan.',

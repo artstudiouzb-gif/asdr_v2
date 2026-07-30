@@ -172,6 +172,7 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
     'close' => t('Закрыть'),
     'previous' => t('Предыдущее'),
     'next' => t('Следующее'),
+    'goToSlide' => t('Перейти к слайду'),
     'video' => t('Видео'),
     'downloadPhoto' => t('Скачать фото'),
     'download' => t('Скачать'),

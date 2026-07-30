@@ -638,8 +638,9 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 }
 .block-testimonials__track {
     display: flex; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory;
-    padding: 10px 10px 20px; scrollbar-width: thin;
+    padding: 10px 10px 20px; scrollbar-width: none;
 }
+.block-testimonials__track::-webkit-scrollbar { display: none; }
 .block-testimonials__track:focus-visible {
     outline: 2px solid var(--gov-teal);
     outline-offset: 4px;
@@ -1000,6 +1001,34 @@ h1, h2 { letter-spacing: -.015em; }
 /* --- Блок «Партнёры» (логотипы) --- */
 .block-partners__title { text-align: center; margin: 0 0 28px; }
 .block-partners__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--card-gap, 24px); align-items: center; }
+.block-testimonials > .section-head,
+.block-partners > .section-head { margin-bottom: 28px; }
+.block-testimonials__title,
+.block-partners__title { text-align: left; margin: 0; }
+.block-partners__grid--carousel {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 8px 4px 18px;
+}
+.block-partners__grid--carousel .block-partners__item {
+    flex: 0 0 calc((100% - (4 * var(--card-gap, 24px))) / 5);
+    scroll-snap-align: start;
+}
+@media (max-width: 700px) {
+    .block-partners__grid[data-carousel-track] {
+        display: flex;
+        grid-template-columns: none;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding: 8px 4px 18px;
+    }
+    .block-partners__grid[data-carousel-track] .block-partners__item {
+        flex: 0 0 min(72vw, 240px);
+        scroll-snap-align: start;
+    }
+}
 .block-partners__item { 
     display: flex; 
     align-items: center; 

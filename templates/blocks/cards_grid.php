@@ -19,15 +19,16 @@ $templateCss = '#block-' . (int) $blockId . ' .block-cards{--cards-cols:' . $col
 $cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '') . ($textColor !== '' ? ' block-cards--custom-text' : '');
 ?>
 <?php if ($variant === 'image'): ?>
-    <?php $carousel = count($items) > 4; ?>
-    <div class="block-imgcards" data-carousel>
+    <?php $carousel = count($items) > 1; $desktopCarousel = count($items) > 4; ?>
+    <div class="block-imgcards"<?= $carousel ? ' data-carousel' : '' ?>>
         <div class="section-head">
             <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
             <div class="section-head__tools">
                 <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
                 <?php if ($carousel): ?>
-                    <span class="carousel-nav">
+                    <span class="carousel-nav" data-carousel-nav hidden>
                         <button type="button" class="carousel-nav__btn" data-carousel-prev aria-label="<?= htmlspecialchars(t('Назад'), ENT_QUOTES) ?>"><?= Icon::render('chevron-left', 18) ?></button>
+                        <span class="carousel-nav__dots" data-carousel-dots role="group" aria-label="<?= htmlspecialchars(t('Выбор слайда'), ENT_QUOTES) ?>"></span>
                         <button type="button" class="carousel-nav__btn" data-carousel-next aria-label="<?= htmlspecialchars(t('Вперёд'), ENT_QUOTES) ?>"><?= Icon::render('chevron-right', 18) ?></button>
                     </span>
                 <?php endif; ?>
@@ -36,10 +37,10 @@ $cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '') . ($textColor !
         <?php if ($items === []): ?>
             <p class="block-imgcards__empty"><?= htmlspecialchars(t('Карточки ещё не добавлены.'), ENT_QUOTES) ?></p>
         <?php else: ?>
-            <div class="imgcards-grid<?= $carousel ? ' imgcards-grid--carousel' : '' ?>" data-carousel-track<?= $carousel ? ' tabindex="0" role="group" aria-label="' . htmlspecialchars(t('Карточки — прокрутка вбок'), ENT_QUOTES) . '"' : '' ?>>
+            <div class="imgcards-grid<?= $desktopCarousel ? ' imgcards-grid--carousel' : ($carousel ? ' imgcards-grid--mobile-carousel' : '') ?>"<?= $carousel ? ' data-carousel-track tabindex="0" role="group" aria-label="' . htmlspecialchars(t('Карточки — прокрутка вбок'), ENT_QUOTES) . '"' : '' ?>>
                 <?php foreach ($items as $item): ?>
                     <?php $url = trim((string) ($item['url'] ?? '')); $image = trim((string) ($item['image'] ?? '')); $tag = $url !== '' ? 'a' : 'div'; ?>
-                    <<?= $tag ?> class="imgcard"<?= $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"' : '' ?>>
+                    <<?= $tag ?> class="imgcard"<?= $carousel ? ' data-carousel-item' : '' ?><?= $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"' : '' ?>>
                         <?php if ($image !== ''): ?>
                             <?= Media::picture($image, (string) ($item['title'] ?? ''), null, null, 'imgcard__media ' . $mediaClasses, true, '(max-width: 700px) 100vw, 25vw') ?>
                         <?php else: ?>
