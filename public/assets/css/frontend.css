@@ -1849,6 +1849,16 @@ body.design-header-dark .site-nav { border-top-color: rgba(255, 255, 255, .14); 
     background: var(--menu-divider-color, color-mix(in srgb, currentColor 35%, transparent));
 }
 
+/* Priority-контейнер «Ещё» технически остаётся последним дочерним элементом,
+   поэтому фактически последний пункт меню нельзя определять через :last-child. */
+[data-priority-menu].site-menu--with-item-dividers > .site-menu__link:has(+ [data-priority-overflow])::before,
+[data-priority-menu].site-menu--with-item-dividers > .site-menu__item:has(+ [data-priority-overflow])::before {
+    content: none !important;
+}
+[data-priority-menu] > .site-menu__divider:has(+ [data-priority-overflow]) {
+    display: none;
+}
+
 /* Разделители НЕ должны окрашиваться в активный цвет (teal) при наведении на пункт меню */
 .site-menu--with-item-dividers > .site-menu__link:hover::before,
 .site-menu--with-item-dividers > .site-menu__link:focus-visible::before,

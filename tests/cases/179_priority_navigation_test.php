@@ -37,6 +37,9 @@ test('Priority-бургер является последним элементо
     assert_contains('.hdr-util:has(> [data-priority-menu])', $css);
     assert_contains('flex: 1 1 0;', $css);
     assert_contains('flex-wrap: nowrap !important', $css);
+    assert_contains('.site-menu__link:has(+ [data-priority-overflow])::before', $css);
+    assert_contains('.site-menu__divider:has(+ [data-priority-overflow])', $css);
+    assert_contains('content: none !important;', $css);
     assert_contains('.site-menu__overflow.is-open .site-menu__overflow-toggle span:nth-child(1)', $css);
     assert_contains('transform: translateY(6px) rotate(45deg)', $css);
     assert_contains('@media (max-width: 720px)', $css);
