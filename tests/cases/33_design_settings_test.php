@@ -24,14 +24,14 @@ test('DesignSettings::cssVariables формирует корректные пе�
     assert_contains('--btn-radius:999px', $css);
 });
 
-test('DesignSettings::bodyClasses отражает макет каталога, шапку и фиксацию', function () {
+test('DesignSettings::bodyClasses отражает глобальный макет без настроек конструктора шапки', function () {
     $on = DesignSettings::bodyClasses([
         'container' => 'standard', 'radius' => 'small', 'card_gap' => 'sm', 'density' => 'standard',
         'button' => 'rounded', 'catalog_layout' => 'list', 'header_style' => 'dark', 'header_sticky' => 'on',
     ]);
     assert_contains('design-catalog-list', $on);
-    assert_contains('design-header-dark', $on);
-    assert_contains('design-header-sticky', $on);
+    assert_not_contains('design-header-dark', $on);
+    assert_not_contains('design-header-sticky', $on);
 
     $off = DesignSettings::bodyClasses([
         'container' => 'standard', 'radius' => 'small', 'card_gap' => 'sm', 'density' => 'standard',
@@ -41,18 +41,18 @@ test('DesignSettings::bodyClasses отражает макет каталога, 
     assert_contains('design-catalog-cards_sm', $off);
 });
 
-test('DesignSettings::bodyClasses включает тип поиска, шаблон детали и футер', function () {
+test('DesignSettings::bodyClasses включает глобальные компоненты без поиска и футера', function () {
     $cls = DesignSettings::bodyClasses(DesignSettings::PRESETS['modern']['values']);
-    assert_contains('design-search-overlay', $cls);
     assert_contains('design-detail-sidebar', $cls);
-    assert_contains('design-footer-columns', $cls);
     assert_contains('design-cards-elevated', $cls);
     assert_contains('design-sidebar-floating', $cls);
+    assert_not_contains('design-search-overlay', $cls);
+    assert_not_contains('design-footer-columns', $cls);
+    assert_contains('design-mmenu-burger', $cls);
 
     $min = DesignSettings::bodyClasses(DesignSettings::PRESETS['minimal']['values']);
-    assert_contains('design-search-overlay', $min);
     assert_contains('design-detail-plain', $min);
-    assert_contains('design-footer-minimal', $min);
+    assert_not_contains('design-footer-minimal', $min);
 });
 
 test('DesignSettings: масштаб заголовков — статичный режим даёт класс, плавающий нет', function () {
@@ -153,6 +153,55 @@ test('Пользовательские конфигурации: сохрани�
     assert_true(DesignSettings::deleteUserPreset($slug));
     assert_false(isset(DesignSettings::userPresets()[$slug]));
     assert_false(DesignSettings::applyPreset('user:' . $slug));
+});
+
+test('Частичное сохранение не сбрасывает отсутствующие настройки дизайна (БД)', function () {
+    ensure_test_db();
+    reset_design_state();
+    \App\Models\Setting::set('design_type_scale', 'static');
+    \App\Models\Setting::set('design_heading_line_height', 'relaxed');
+
+    DesignSettings::save([
+        'palette' => 'custom',
+        'color_primary' => '#102030',
+    ]);
+
+    $current = DesignSettings::current();
+    assert_same('static', $current['type_scale']);
+    assert_same('relaxed', $current['heading_line_height']);
+    reset_design_state();
+});
+
+test('Пользовательская конфигурация хранит отступы, точный интервал и уникальные Unicode-имена (БД)', function () {
+    ensure_test_db();
+    reset_design_state();
+    $backupPresets = \App\Models\Setting::get('design_user_presets', '');
+    \App\Models\Setting::set('design_user_presets', json_encode([]));
+
+    DesignSettings::save([
+        'space_small' => '15px',
+        'space_premium' => '35px',
+        'space_max' => '70px',
+        'heading_line_height_custom' => '1.18',
+    ]);
+    $first = DesignSettings::saveUserPreset('Основная тема');
+    $second = DesignSettings::saveUserPreset('Рабочая тема');
+    assert_true($first !== null && $second !== null && $first !== $second);
+
+    DesignSettings::save([
+        'space_small' => '20px',
+        'space_premium' => '40px',
+        'space_max' => '80px',
+        'heading_line_height_custom' => '1.4',
+    ]);
+    assert_true(DesignSettings::applyUserPreset((string) $first));
+    assert_same('15px', DesignSettings::semanticSpacings()['space_small']);
+    assert_same('35px', DesignSettings::semanticSpacings()['space_premium']);
+    assert_same('70px', DesignSettings::semanticSpacings()['space_max']);
+    assert_same('1.18', DesignSettings::headingLineHeightCustom());
+
+    \App\Models\Setting::set('design_user_presets', (string) $backupPresets);
+    reset_design_state();
 });
 
 test('Setting::overrideInMemory меняет значение только в памяти, БД не трогает (БД)', function () {

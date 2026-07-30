@@ -620,11 +620,18 @@ final class DesignSettings
             $input = array_merge($input, self::normalizeBodyFontChoice((string) $input['font_body_choice']));
         }
         foreach (self::OPTIONS as $key => $opt) {
-            $val = self::sanitize($key, (string) ($input[$key] ?? ''));
+            // Частичные формы и новые версии конструктора не должны
+            // сбрасывать отсутствующие параметры на defaults.
+            if (!array_key_exists($key, $input)) {
+                continue;
+            }
+            $val = self::sanitize($key, (string) $input[$key]);
             Setting::set('design_' . $key, (string) $val);
         }
         // Своя ширина контейнера — отдельное свободное поле (не из choices).
-        Setting::set('design_container_custom', self::normalizeWidth(trim((string) ($input['container_custom'] ?? ''))));
+        if (array_key_exists('container_custom', $input)) {
+            Setting::set('design_container_custom', self::normalizeWidth(trim((string) $input['container_custom'])));
+        }
         if (array_key_exists('font_size_custom', $input)) {
             Setting::set('design_font_size_custom', self::normalizeFontSize((string) $input['font_size_custom']));
         }
@@ -663,8 +670,6 @@ final class DesignSettings
         }
         if (array_key_exists('menu_divider_color_use', $input)) {
             Setting::set('design_menu_divider_color_use', (string) $input['menu_divider_color_use'] === '1' ? '1' : '0');
-        } else {
-            Setting::set('design_menu_divider_color_use', '0');
         }
         if (array_key_exists('menu_divider_thickness', $input)) {
             Setting::set('design_menu_divider_thickness', self::normalizePixelValue((string) $input['menu_divider_thickness'], 0, 10));
@@ -850,14 +855,24 @@ final class DesignSettings
         }
 
         $presets = self::userPresets();
-        $slug = preg_replace('/[^a-z0-9]+/', '-', mb_strtolower($name)) ?: 'preset';
-        $slug = trim($slug, '-') ?: 'preset';
+        // Сохраняем буквы любого языка: прежняя ASCII-регулярка превращала
+        // почти все русские/узбекские названия в один ключ "preset".
+        $baseSlug = preg_replace('/[^\p{L}\p{N}]+/u', '-', mb_strtolower($name)) ?: 'preset';
+        $baseSlug = trim($baseSlug, '-') ?: 'preset';
+        $slug = $baseSlug;
+        if (isset($presets[$slug]) && (string) ($presets[$slug]['label'] ?? '') !== $name) {
+            $suffix = 2;
+            do {
+                $slug = $baseSlug . '-' . $suffix++;
+            } while (isset($presets[$slug]));
+        }
         if (!isset($presets[$slug]) && count($presets) >= self::USER_PRESETS_MAX) {
             return null;
         }
 
         $custom = self::customAppearance();
         $semantic = self::semanticColors();
+        $spacings = self::semanticSpacings();
         $presets[$slug] = [
             'label' => $name,
             'values' => self::current(),
@@ -878,6 +893,7 @@ final class DesignSettings
                 'font_size_custom' => Setting::get('design_font_size_custom', ''),
                 'radius_custom' => Setting::get('design_radius_custom', ''),
                 'line_height_custom' => Setting::get('design_line_height_custom', ''),
+                'heading_line_height_custom' => Setting::get('design_heading_line_height_custom', ''),
                 'typo_scale' => self::typoScale(),
             ] + array_combine(
                 array_keys(self::TYPO_SIZES),
@@ -888,6 +904,9 @@ final class DesignSettings
                 'text_main' => $semantic['text_main'],
                 'text_muted' => $semantic['text_muted'],
                 'border_color' => $semantic['border_color'],
+                'space_small' => $spacings['space_small'],
+                'space_premium' => $spacings['space_premium'],
+                'space_max' => $spacings['space_max'],
             ],
         ];
         Setting::set(self::USER_PRESETS_KEY, json_encode($presets, JSON_UNESCAPED_UNICODE));
@@ -935,8 +954,10 @@ final class DesignSettings
         $appearanceInput = array_intersect_key($appearance, array_flip(array_merge([
             'color_primary', 'color_accent', 'font_family', 'font_face_name',
             'font_url', 'default_theme', 'font_google_heading', 'font_google_body',
-            'font_size_custom', 'radius_custom', 'line_height_custom', 'typo_scale',
+            'font_size_custom', 'radius_custom', 'line_height_custom',
+            'heading_line_height_custom', 'typo_scale',
             'bg_primary', 'bg_surface', 'text_main', 'text_muted', 'border_color',
+            'space_small', 'space_premium', 'space_max',
         ], array_keys(self::TYPO_SIZES))));
         // Старые пользовательские конфигурации не знали об этих полях: при
         // их применении сбрасываем текущие переопределения, а не наследуем их.
@@ -946,9 +967,14 @@ final class DesignSettings
             'font_size_custom' => '',
             'radius_custom' => '',
             'line_height_custom' => '',
+            'heading_line_height_custom' => '',
             // Конфигурации, сохранённые до появления шкалы, восстанавливают
             // поведение «как в теме», а не наследуют текущую шкалу.
             'typo_scale' => 'theme',
+            // Старые конфигурации не содержали семантические интервалы.
+            'space_small' => 'clamp(14px, 2.5vw, 24px)',
+            'space_premium' => 'clamp(28px, 4vw, 56px)',
+            'space_max' => 'clamp(40px, 5vw, 76px)',
         ], array_fill_keys(array_keys(self::TYPO_SIZES), ''), $appearanceInput);
         self::save(array_merge($values, $appearanceInput));
 
@@ -1075,22 +1101,26 @@ final class DesignSettings
         );
     }
 
-    /** Классы для <body>, включающие макет каталога и стиль шапки. @param array<string,string> $v */
+    /**
+     * Классы глобального дизайна для <body>.
+     *
+     * Шапка, поиск, мобильное меню и подвал имеют собственные конструкторы и
+     * больше не дублируются здесь: два источника истины давали конфликтующие
+     * sticky/search/footer режимы. Класс design-mmenu-burger остаётся
+     * постоянным совместимым переключателем адаптивного drawer-меню.
+     *
+     * @param array<string,string> $v
+     */
     public static function bodyClasses(array $v): string
     {
         return trim(sprintf(
-            'design-catalog-%s design-header-%s design-sidebar-%s design-cards-%s design-search-%s design-detail-%s design-footer-%s design-mmenu-%s design-mheader-%s%s',
+            'design-catalog-%s design-sidebar-%s design-cards-%s design-detail-%s',
             preg_replace('/[^a-z_]/', '', (string) ($v['catalog_layout'] ?? 'grid')),
-            preg_replace('/[^a-z]/', '', (string) ($v['header_style'] ?? 'standard')),
             preg_replace('/[^a-z]/', '', (string) ($v['sidebar_position'] ?? 'floating')),
             preg_replace('/[^a-z]/', '', (string) ($v['card_style'] ?? 'soft')),
-            preg_replace('/[^a-z]/', '', (string) ($v['search_type'] ?? 'inline')),
-            preg_replace('/[^a-z]/', '', (string) ($v['detail_layout'] ?? 'plain')),
-            preg_replace('/[^a-z]/', '', (string) ($v['footer_style'] ?? 'columns')),
-            preg_replace('/[^a-z]/', '', (string) ($v['mobile_menu'] ?? 'burger')),
-            preg_replace('/[^a-z]/', '', (string) ($v['mobile_header'] ?? 'fixed')),
-            ($v['header_sticky'] ?? '') === 'on' ? ' design-header-sticky' : ''
-        )) . (($v['type_scale'] ?? 'fluid') === 'static' ? ' design-type-static' : '')
+            preg_replace('/[^a-z]/', '', (string) ($v['detail_layout'] ?? 'plain'))
+        )) . ' design-mmenu-burger'
+          . (($v['type_scale'] ?? 'fluid') === 'static' ? ' design-type-static' : '')
           . (($v['scroll_top'] ?? 'on') === 'on' ? ' design-scrolltop' : '');
     }
 }

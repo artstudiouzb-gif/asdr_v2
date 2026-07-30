@@ -132,6 +132,260 @@
         element.style.setProperty('--progress-width', value + '%');
     });
 
+    // --- Раздел «Дизайн сайта»: доступные вкладки и честный live preview. ---
+    (function initDesignBuilder() {
+        var tabsRoot = document.querySelector('[data-design-tabs]');
+        if (!tabsRoot) { return; }
+
+        var tabs = Array.prototype.slice.call(tabsRoot.querySelectorAll('[role="tab"][data-tab-target]'));
+        var panels = tabs.map(function (tab) {
+            return document.getElementById(tab.getAttribute('data-tab-target'));
+        }).filter(Boolean);
+        var storageKey = 'artstudio:design-active-tab';
+
+        function activateTab(tab, shouldFocus, shouldPersist) {
+            if (!tab) { return; }
+            var targetId = tab.getAttribute('data-tab-target');
+            tabs.forEach(function (item) {
+                var active = item === tab;
+                item.classList.toggle('is-active', active);
+                item.setAttribute('aria-selected', active ? 'true' : 'false');
+                item.setAttribute('tabindex', active ? '0' : '-1');
+            });
+            panels.forEach(function (panel) {
+                var active = panel.id === targetId;
+                panel.classList.toggle('is-active', active);
+                panel.hidden = !active;
+            });
+            var saveActions = document.querySelector('[data-design-save-actions]');
+            if (saveActions) {
+                saveActions.hidden = targetId === 'tab-presets';
+            }
+            if (shouldPersist !== false) {
+                try { localStorage.setItem(storageKey, targetId); } catch (err) {}
+            }
+            if (shouldFocus) { tab.focus(); }
+        }
+
+        tabs.forEach(function (tab, index) {
+            tab.addEventListener('click', function () { activateTab(tab, false, true); });
+            tab.addEventListener('keydown', function (event) {
+                var nextIndex = null;
+                if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+                    nextIndex = (index + 1) % tabs.length;
+                } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+                    nextIndex = (index - 1 + tabs.length) % tabs.length;
+                } else if (event.key === 'Home') {
+                    nextIndex = 0;
+                } else if (event.key === 'End') {
+                    nextIndex = tabs.length - 1;
+                }
+                if (nextIndex !== null) {
+                    event.preventDefault();
+                    activateTab(tabs[nextIndex], true, true);
+                }
+            });
+        });
+
+        var initialTab = tabs.find(function (tab) { return tab.classList.contains('is-active'); }) || tabs[0];
+        try {
+            var savedTarget = localStorage.getItem(storageKey);
+            initialTab = tabs.find(function (tab) {
+                return tab.getAttribute('data-tab-target') === savedTarget;
+            }) || initialTab;
+        } catch (err) {}
+        activateTab(initialTab, false, false);
+
+        var form = document.querySelector('[data-design-form]');
+        var canvas = document.getElementById('liveDeckCanvas');
+        if (!form || !canvas) { return; }
+
+        function fieldValue(name, fallback) {
+            var control = form.elements.namedItem(name);
+            if (!control) { return fallback; }
+            var value = typeof control.value === 'string' ? control.value : '';
+            return value !== '' ? value : fallback;
+        }
+
+        function numericValue(name) {
+            var raw = fieldValue(name, '');
+            var value = parseFloat(String(raw).replace(',', '.'));
+            return Number.isFinite(value) ? value : null;
+        }
+
+        function selectedFont(select, fallback) {
+            if (!select || !select.options || select.selectedIndex < 0) { return fallback; }
+            return select.options[select.selectedIndex].getAttribute('data-font-family') || fallback;
+        }
+
+        function rounded(value) {
+            return Math.round(value * 10) / 10;
+        }
+
+        function setLive(name, value) {
+            canvas.style.setProperty(name, value);
+        }
+
+        function updateCodePreview(values) {
+            var output = document.querySelector('[data-design-code-preview]');
+            if (!output) { return; }
+            output.textContent = ':root {\n'
+                + '    --color-primary: ' + values.primary + ';\n'
+                + '    --color-accent: ' + values.accent + ';\n'
+                + '    --bg-primary: ' + values.bgPrimary + ';\n'
+                + '    --bg-surface: ' + values.bgSurface + ';\n'
+                + '    --text-main: ' + values.textMain + ';\n'
+                + '    --text-muted: ' + values.textMuted + ';\n'
+                + '    --border-color: ' + values.borderColor + ';\n'
+                + '    --space-small: ' + fieldValue('space_small', 'clamp(14px, 2.5vw, 24px)') + ';\n'
+                + '    --space-premium: ' + fieldValue('space_premium', 'clamp(28px, 4vw, 56px)') + ';\n'
+                + '    --space-max: ' + fieldValue('space_max', 'clamp(40px, 5vw, 76px)') + ';\n'
+                + '    --font-family: ' + values.bodyFont + ';\n'
+                + '    --font-heading: ' + values.headingFont + ';\n'
+                + '}';
+        }
+
+        function updateLiveDeck() {
+            var radiusMap = { none: 0, small: 8, medium: 14, large: 22 };
+            var gapMap = { xs: 8, sm: 16, md: 24, lg: 32 };
+            var densityMap = { compact: 16, standard: 24, spacious: 32 };
+            var sizeMap = { sm: 15, md: 16, lg: 17, xl: 18 };
+            var lineMap = { tight: 1.45, normal: 1.6, relaxed: 1.8 };
+            var headingLineMap = { tight: 1.15, normal: 1.25, relaxed: 1.35 };
+            var letterMap = { tight: '-0.03em', normal: '-0.02em', wide: '0em' };
+            var shadowMap = {
+                flat: 'none',
+                soft: '0 1px 3px rgba(16,24,40,.06), 0 6px 18px rgba(16,24,40,.05)',
+                elevated: '0 10px 30px rgba(16,24,40,.12)'
+            };
+            var ratioMap = { theme: 0, compact: 1.2, classic: 1.25, expressive: 1.333 };
+
+            var primary = fieldValue('color_primary', '#173a63');
+            var accent = fieldValue('color_accent', '#17999b');
+            var bgPrimary = fieldValue('bg_primary', '#f6f8fa');
+            var bgSurface = fieldValue('bg_surface', '#ffffff');
+            var textMain = fieldValue('text_main', '#1a1a1a');
+            var textMuted = fieldValue('text_muted', '#666666');
+            var borderColor = fieldValue('border_color', '#e1e3e8');
+
+            var customRadius = numericValue('radius_custom');
+            var radius = customRadius !== null ? customRadius : (radiusMap[fieldValue('radius', 'medium')] || 0);
+            var baseSize = numericValue('font_size_custom');
+            if (baseSize === null) { baseSize = sizeMap[fieldValue('font_size', 'md')] || 16; }
+            var lineHeight = numericValue('line_height_custom');
+            if (lineHeight === null) { lineHeight = lineMap[fieldValue('line_height', 'normal')] || 1.6; }
+            var headingLine = numericValue('heading_line_height_custom');
+            if (headingLine === null) { headingLine = headingLineMap[fieldValue('heading_line_height', 'normal')] || 1.25; }
+
+            var bodySelect = form.querySelector('[data-font-body-choice]');
+            var bodyFont = selectedFont(bodySelect, 'system-ui, sans-serif');
+            if (bodySelect && bodySelect.value === 'style:custom') {
+                bodyFont = fieldValue('font_family', bodyFont);
+            }
+            var headingSelect = form.elements.namedItem('font_google_heading');
+            var headingFont = headingSelect && headingSelect.value !== ''
+                ? selectedFont(headingSelect, bodyFont)
+                : bodyFont;
+
+            var defaults = { fs_h1: 32, fs_h2: 24, fs_h3: 18, fs_btn: 15 };
+            var scale = fieldValue('typo_scale', 'theme');
+            var ratio = ratioMap[scale] || 0;
+            var steps = { fs_h1: 5, fs_h2: 4, fs_h3: 3 };
+            Object.keys(steps).forEach(function (key) {
+                var manual = numericValue(key);
+                defaults[key] = manual !== null
+                    ? manual
+                    : (ratio > 1 ? rounded(baseSize * Math.pow(ratio, steps[key])) : defaults[key]);
+            });
+            var manualButton = numericValue('fs_btn');
+            if (manualButton !== null) { defaults.fs_btn = manualButton; }
+
+            var buttonStyle = fieldValue('button', 'rounded');
+            var buttonRadius = buttonStyle === 'pill' ? 999 : (buttonStyle === 'square' ? 0 : radius);
+
+            setLive('--live-color-primary', primary);
+            setLive('--live-color-accent', accent);
+            setLive('--live-bg-primary', bgPrimary);
+            setLive('--live-bg-surface', bgSurface);
+            setLive('--live-text-main', textMain);
+            setLive('--live-text-muted', textMuted);
+            setLive('--live-border-color', borderColor);
+            setLive('--live-radius', radius + 'px');
+            setLive('--live-btn-radius', buttonRadius + 'px');
+            setLive('--live-card-shadow', shadowMap[fieldValue('card_style', 'soft')] || shadowMap.soft);
+            setLive('--live-card-gap', (gapMap[fieldValue('card_gap', 'md')] || 24) + 'px');
+            setLive('--live-section-pad', (densityMap[fieldValue('density', 'standard')] || 24) + 'px');
+            setLive('--live-font-size', baseSize + 'px');
+            setLive('--live-line-height', String(lineHeight));
+            setLive('--live-heading-line-height', String(headingLine));
+            setLive('--live-heading-font-weight', fieldValue('heading_font_weight', '700'));
+            setLive('--live-heading-letter-spacing', letterMap[fieldValue('heading_letter_spacing', 'normal')] || '-0.02em');
+            setLive('--live-font-body', bodyFont);
+            setLive('--live-font-heading', headingFont);
+            setLive('--live-fs-h1', defaults.fs_h1 + 'px');
+            setLive('--live-fs-h2', defaults.fs_h2 + 'px');
+            setLive('--live-fs-h3', defaults.fs_h3 + 'px');
+            setLive('--live-fs-btn', defaults.fs_btn + 'px');
+
+            updateCodePreview({
+                primary: primary,
+                accent: accent,
+                bgPrimary: bgPrimary,
+                bgSurface: bgSurface,
+                textMain: textMain,
+                textMuted: textMuted,
+                borderColor: borderColor,
+                bodyFont: bodyFont,
+                headingFont: headingFont
+            });
+        }
+
+        var fontChoice = form.querySelector('[data-font-body-choice]');
+        var customFontFields = form.querySelector('[data-custom-font-fields]');
+        function syncCustomFontFields() {
+            if (fontChoice && customFontFields) {
+                customFontFields.hidden = fontChoice.value !== 'style:custom';
+            }
+        }
+
+        form.querySelectorAll('[data-design-preview-field]').forEach(function (element) {
+            element.addEventListener('input', updateLiveDeck);
+            element.addEventListener('change', function () {
+                syncCustomFontFields();
+                updateLiveDeck();
+            });
+        });
+        syncCustomFontFields();
+        updateLiveDeck();
+
+        var frame = document.querySelector('[data-design-page-preview]');
+        var widthButtons = document.querySelectorAll('[data-design-preview-width]');
+        widthButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                if (!frame) { return; }
+                frame.style.width = button.getAttribute('data-design-preview-width') || '100%';
+                widthButtons.forEach(function (item) {
+                    var active = item === button;
+                    item.classList.toggle('is-active', active);
+                    item.setAttribute('aria-pressed', active ? 'true' : 'false');
+                });
+            });
+        });
+
+        var refreshButton = document.querySelector('[data-design-preview-refresh]');
+        if (refreshButton && frame) {
+            refreshButton.addEventListener('click', function () {
+                var params = new URLSearchParams(new FormData(form));
+                params.delete('csrf_token');
+                var base = frame.getAttribute('data-preview-base') || '/admin/design/preview';
+                var url = base + '?' + params.toString();
+                frame.src = url;
+                var external = document.querySelector('.design-preview__bar a[target="_blank"]');
+                if (external) { external.href = url; }
+            });
+        }
+    })();
+
     document.addEventListener('click', function (event) {
         const copyBtn = event.target.closest('[data-copy-link], [data-copy-text]');
         if (copyBtn) {

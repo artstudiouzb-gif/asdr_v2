@@ -375,7 +375,13 @@ $a11yToggle = '<button type="button" class="a11y-toggle" aria-label="' . $et('В
 // --- Тема-билдер: значения дизайна + классы для <body> ---
 $designVals = \App\Core\DesignSettings::current();
 $designBodyClass = \App\Core\DesignSettings::bodyClasses($designVals);
-$searchType = ($designVals['search_type'] ?? 'inline') === 'overlay' ? 'overlay' : 'inline';
+$searchConfig = (array) ($hcfg['search'] ?? []);
+$searchType = ($searchConfig['style'] ?? 'inline') === 'modal' ? 'overlay' : 'inline';
+$designBodyClass .= ' design-search-' . $searchType;
+$searchPlaceholder = trim((string) ($searchConfig['placeholder'] ?? ''));
+if ($searchPlaceholder === '') {
+    $searchPlaceholder = t('Поиск по сайту…');
+}
 
 // --- Поиск по сайту: безрамочная иконка-лупа с плавно выезжающим полем ввода ---
 $searchAction = htmlspecialchars(Locale::url('search', $currentLang), ENT_QUOTES);
@@ -385,7 +391,7 @@ $searchCloseIcon = \App\Core\Icon::render('x', 16);
 $inlineSearchHtml = '<div class="site-search-wrap">'
     . '<button type="button" class="site-search-toggle" aria-label="' . $et('Открыть поиск') . '" aria-expanded="false" data-search-toggle>' . $searchIcon . '</button>'
     . '<form class="site-search" method="get" action="' . $searchAction . '" role="search">'
-    . '<input type="search" name="q" minlength="2" required autocomplete="off" placeholder="' . htmlspecialchars(t('Поиск по сайту…'), ENT_QUOTES) . '" aria-label="' . htmlspecialchars(t('Поиск по сайту'), ENT_QUOTES) . '">'
+    . '<input type="search" name="q" minlength="2" required autocomplete="off" placeholder="' . htmlspecialchars($searchPlaceholder, ENT_QUOTES) . '" aria-label="' . htmlspecialchars(t('Поиск по сайту'), ENT_QUOTES) . '">'
     . '<button type="submit" class="site-search__submit" aria-label="' . $et('Найти') . '">' . $searchIcon . '</button>'
     . '<button type="button" class="site-search__close" aria-label="' . $et('Закрыть') . '" data-search-close>' . $searchCloseIcon . '</button>'
     . '</form>'
@@ -778,7 +784,7 @@ $headerClasses = implode(' ', array_filter($headerClasses));
 <?php if ($searchType === 'overlay'): ?>
 <div class="site-search-overlay" id="site-search-popover" data-search-overlay hidden role="dialog" aria-modal="true" aria-label="<?= htmlspecialchars(t('Поиск по сайту'), ENT_QUOTES) ?>">
     <form class="site-search-overlay__form" method="get" action="<?= $searchAction ?>" role="search">
-        <input type="search" name="q" minlength="2" required autocomplete="off" placeholder="<?= htmlspecialchars(t('Введите запрос…'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Поиск по сайту'), ENT_QUOTES) ?>" data-search-input>
+        <input type="search" name="q" minlength="2" required autocomplete="off" placeholder="<?= htmlspecialchars($searchPlaceholder, ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Поиск по сайту'), ENT_QUOTES) ?>" data-search-input>
         <button type="submit" class="site-search-overlay__submit"><?= $et('Найти') ?></button>
         <button type="button" class="site-search-overlay__close" aria-label="<?= $et('Закрыть поиск') ?>" data-search-close><?= \App\Core\Icon::render('x', 20) ?></button>
     </form>

@@ -28,7 +28,7 @@ if ($privacyPageId > 0) {
 <?php if (empty($hideChrome)): // лендинг (группа 6) скрывает футер сайта ?>
 <?php
 $footerCfg = \App\Core\FooterConfig::get();
-$footerStyle = \App\Core\DesignSettings::current()['footer_style'] ?? ($footerCfg['style'] ?? 'columns');
+$footerStyle = $footerCfg['style'] ?? 'columns';
 $phone = Setting::get('contact_phone', '');
 $email = Setting::get('contact_email', '');
 $address = Setting::get('contact_address', '');

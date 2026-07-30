@@ -122,6 +122,14 @@ final class DesignController
                 );
             }
         }
+        foreach (DesignSettings::semanticSpacings() as $key => $current) {
+            if (array_key_exists($key, $preview)) {
+                Setting::overrideInMemory(
+                    'design_spacing_' . $key,
+                    \App\Core\SettingsValidator::safeCssValue((string) $preview[$key], $current)
+                );
+            }
+        }
 
         // Палитра/шрифт материализуются тоже только в памяти.
         $palette = Setting::get('design_palette', 'custom');

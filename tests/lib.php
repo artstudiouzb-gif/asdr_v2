@@ -139,10 +139,17 @@ function reset_design_state(): void
         'design_container_custom', 'design_font_google_body', 'design_font_google_heading',
         'design_custom_color_primary', 'design_custom_color_accent', 'design_custom_font_family',
         'design_typo_scale', 'design_font_style', 'design_preset',
+        'design_semantic_bg_primary', 'design_semantic_bg_surface',
+        'design_semantic_text_main', 'design_semantic_text_muted', 'design_semantic_border_color',
+        'design_spacing_space_small', 'design_spacing_space_premium', 'design_spacing_space_max',
     ];
+    foreach (array_keys(\App\Core\DesignSettings::OPTIONS) as $optionKey) {
+        $keys[] = 'design_' . $optionKey;
+    }
     foreach (array_keys(\App\Core\DesignSettings::TYPO_SIZES) as $fsKey) {
         $keys[] = 'design_' . $fsKey;
     }
+    $keys = array_values(array_unique($keys));
 
     // На тестовой БД строки удаляем, а не обнуляем: для части настроек пустое
     // значение и отсутствие ключа — разные вещи (design_custom_color_primary

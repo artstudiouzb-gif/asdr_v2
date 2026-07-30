@@ -18,16 +18,16 @@ foreach ($options as $key => $opt) {
     $grouped[$opt['group']][$key] = $opt;
 }
 ?>
-<p class="form-hint">Управление внешним видом сайта. Выберите готовую конфигурацию или настройте цвета, шрифты и параметры макета вручную.</p>
+<p class="form-hint">Глобальные цвета, типографика, сетка и компоненты сайта. Шапка и подвал настраиваются в собственных конструкторах и больше не конфликтуют с этим разделом.</p>
 
 <!-- Live Component Preview Deck -->
 <div class="live-deck">
     <div class="live-deck__head">
         <span class="live-deck__title">
             <?= \App\Core\AdminUi::icon('eye', 18) ?>
-            Интерактивный предпросмотр компонентов
+            Предпросмотр компонентов
         </span>
-        <span class="form-hint u-inline-abed5788ce">Изменения параметров мгновенно отображаются в карточках</span>
+        <span class="form-hint u-inline-abed5788ce">Цвета, шрифты, размеры, скругления и тени обновляются без сохранения</span>
     </div>
     <div class="live-deck__canvas" id="liveDeckCanvas">
         <div class="live-deck__grid">
@@ -53,27 +53,66 @@ foreach ($options as $key => $opt) {
     </div>
 </div>
 
+<details class="design-page-preview">
+    <summary>
+        <?= \App\Core\AdminUi::icon('browser', 18) ?>
+        <span>
+            <strong>Предпросмотр страницы</strong>
+            <small>Проверка текущих параметров на реальной главной странице без сохранения</small>
+        </span>
+    </summary>
+    <div class="design-preview" data-design-page-preview-shell>
+        <div class="design-preview__bar">
+            <div class="design-preview__sizes" role="group" aria-label="Ширина предпросмотра">
+                <button type="button" class="btn btn--small is-active" data-design-preview-width="100%" aria-pressed="true">Компьютер</button>
+                <button type="button" class="btn btn--small" data-design-preview-width="820px" aria-pressed="false">Планшет</button>
+                <button type="button" class="btn btn--small" data-design-preview-width="390px" aria-pressed="false">Телефон</button>
+            </div>
+            <button type="button" class="btn btn--small btn--primary design-preview__refresh" data-design-preview-refresh>
+                <?= \App\Core\AdminUi::icon('refresh', 16) ?>Обновить предпросмотр
+            </button>
+            <a class="btn btn--small" href="/admin/design/preview" target="_blank" rel="noopener">Открыть отдельно</a>
+        </div>
+        <div class="design-preview__stage">
+            <iframe
+                class="design-preview__frame"
+                data-design-page-preview
+                data-preview-base="/admin/design/preview"
+                src="/admin/design/preview"
+                title="Предпросмотр главной страницы"
+                loading="lazy"
+            ></iframe>
+        </div>
+    </div>
+</details>
+
 <!-- Tab Navigation -->
-<div class="admin-tab-nav" role="tablist">
-    <button type="button" class="admin-tab-btn is-active" data-tab-target="tab-presets">
+<div class="admin-tab-nav" role="tablist" aria-label="Разделы дизайна" data-design-tabs>
+    <button type="button" class="admin-tab-btn is-active" id="design-tab-presets" role="tab"
+            aria-selected="true" aria-controls="tab-presets" tabindex="0" data-tab-target="tab-presets">
         <?= \App\Core\AdminUi::icon('grid') ?>Конфигурации
     </button>
-    <button type="button" class="admin-tab-btn" data-tab-target="tab-layout">
-        <?= \App\Core\AdminUi::icon('layout') ?>Макет и Сетка
+    <button type="button" class="admin-tab-btn" id="design-tab-layout" role="tab"
+            aria-selected="false" aria-controls="tab-layout" tabindex="-1" data-tab-target="tab-layout">
+        <?= \App\Core\AdminUi::icon('layout') ?>Макет и сетка
     </button>
-    <button type="button" class="admin-tab-btn" data-tab-target="tab-colors">
-        <?= \App\Core\AdminUi::icon('palette') ?>Палитра и Цвета
+    <button type="button" class="admin-tab-btn" id="design-tab-colors" role="tab"
+            aria-selected="false" aria-controls="tab-colors" tabindex="-1" data-tab-target="tab-colors">
+        <?= \App\Core\AdminUi::icon('palette') ?>Цвета
     </button>
-    <button type="button" class="admin-tab-btn" data-tab-target="tab-typography">
+    <button type="button" class="admin-tab-btn" id="design-tab-typography" role="tab"
+            aria-selected="false" aria-controls="tab-typography" tabindex="-1" data-tab-target="tab-typography">
         <?= \App\Core\AdminUi::icon('type') ?>Типографика
     </button>
-    <button type="button" class="admin-tab-btn" data-tab-target="tab-components">
+    <button type="button" class="admin-tab-btn" id="design-tab-components" role="tab"
+            aria-selected="false" aria-controls="tab-components" tabindex="-1" data-tab-target="tab-components">
         <?= \App\Core\AdminUi::icon('sliders') ?>Компоненты
     </button>
 </div>
 
 <!-- TAB 1: PRESETS -->
-<div class="admin-tab-content is-active" id="tab-presets">
+<div class="admin-tab-content is-active" id="tab-presets" role="tabpanel"
+     aria-labelledby="design-tab-presets" tabindex="0">
     <section class="design-section" id="design-presets">
         <h2 class="design-section__title">Мои конфигурации</h2>
         <?php if (!empty($userPresets)): ?>
@@ -111,11 +150,13 @@ foreach ($options as $key => $opt) {
     </section>
 </div>
 
-<form method="post" action="/admin/design" class="design-fine">
+<form method="post" action="/admin/design" class="design-fine" data-design-form>
     <?= Csrf::field() ?>
+    <input type="hidden" name="palette" value="custom">
 
     <!-- TAB 2: LAYOUT -->
-    <div class="admin-tab-content" id="tab-layout">
+    <div class="admin-tab-content" id="tab-layout" role="tabpanel"
+         aria-labelledby="design-tab-layout" tabindex="0" hidden>
         <section class="design-section">
             <h2 class="design-section__title">Настройки макета и сетки</h2>
             <?php foreach ($grouped['Общие'] ?? [] as $key => $opt): ?>
@@ -128,7 +169,7 @@ foreach ($options as $key => $opt) {
                     <div class="design-opt__choices">
                         <?php foreach ($opt['choices'] as $val => $label): ?>
                             <label class="design-card">
-                                <input type="radio" name="<?= htmlspecialchars($key, ENT_QUOTES) ?>" value="<?= htmlspecialchars($val, ENT_QUOTES) ?>" <?= ($values[$key] ?? '') === $val ? 'checked' : '' ?>>
+                                <input type="radio" name="<?= htmlspecialchars($key, ENT_QUOTES) ?>" value="<?= htmlspecialchars($val, ENT_QUOTES) ?>" <?= ($values[$key] ?? '') === $val ? 'checked' : '' ?> data-design-preview-field>
                                 <span class="design-card__label"><?= htmlspecialchars($label, ENT_QUOTES) ?></span>
                             </label>
                         <?php endforeach; ?>
@@ -160,7 +201,8 @@ foreach ($options as $key => $opt) {
     </div>
 
     <!-- TAB 3: COLORS -->
-    <div class="admin-tab-content" id="tab-colors">
+    <div class="admin-tab-content" id="tab-colors" role="tabpanel"
+         aria-labelledby="design-tab-colors" tabindex="0" hidden>
         <section class="design-section">
             <h2 class="design-section__title">Цветовая система и темы</h2>
             <?php
@@ -224,7 +266,7 @@ foreach ($options as $key => $opt) {
                 <div class="design-code-preview u-inline-50f7d15eb8">
                     <div class="u-inline-b5b5b4c4bc"><?= \App\Core\AdminUi::icon('code', 16) ?> Полное дерево выводимых CSS-переменных (:root)</div>
                     <div class="u-inline-b9f96fe18b">Все указанные выше 7 основных цветов и производные алиасы автоматически транслируются в следующий блок переменных:</div>
-                    <pre class="u-inline-aad4dde478">:root {
+                    <pre class="u-inline-aad4dde478" data-design-code-preview>:root {
     --color-primary: <?= htmlspecialchars($primary, ENT_QUOTES) ?>;
     --color-accent: <?= htmlspecialchars($accent, ENT_QUOTES) ?>; /* Яркий фоновый акцент (кнопки, заливки) */
     --gov-navy: var(--color-primary);
@@ -248,7 +290,8 @@ foreach ($options as $key => $opt) {
     </div>
 
     <!-- TAB 4: TYPOGRAPHY -->
-    <div class="admin-tab-content" id="tab-typography">
+    <div class="admin-tab-content" id="tab-typography" role="tabpanel"
+         aria-labelledby="design-tab-typography" tabindex="0" hidden>
         <section class="design-section">
             <h2 class="design-section__title">Типографика и Шрифты</h2>
             <?php
@@ -261,6 +304,23 @@ foreach ($options as $key => $opt) {
             ?>
             <input type="hidden" name="font_size" value="<?= htmlspecialchars((string) ($values['font_size'] ?? 'md'), ENT_QUOTES) ?>">
             <input type="hidden" name="line_height" value="<?= htmlspecialchars((string) ($values['line_height'] ?? 'normal'), ENT_QUOTES) ?>">
+
+            <?php $typeScaleOption = $options['type_scale']; ?>
+            <div class="design-opt">
+                <div class="design-opt__label">
+                    <span><?= htmlspecialchars($typeScaleOption['label'], ENT_QUOTES) ?></span>
+                    <small><?= htmlspecialchars($typeScaleOption['hint'], ENT_QUOTES) ?></small>
+                </div>
+                <div class="design-opt__choices">
+                    <?php foreach ($typeScaleOption['choices'] as $val => $label): ?>
+                        <label class="design-card">
+                            <input type="radio" name="type_scale" value="<?= htmlspecialchars($val, ENT_QUOTES) ?>"
+                                   <?= ($values['type_scale'] ?? 'fluid') === $val ? 'checked' : '' ?> data-design-preview-field>
+                            <span class="design-card__label"><?= htmlspecialchars($label, ENT_QUOTES) ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+            </div>
 
             <div class="design-manual u-inline-7dde5e56b3">
                 <div class="design-manual__head">
@@ -281,11 +341,14 @@ foreach ($options as $key => $opt) {
                             <optgroup label="Google Fonts — грузятся с fonts.googleapis.com">
                                 <?php foreach (\App\Core\DesignSettings::GOOGLE_FONTS as $slug => $fontData): ?>
                                     <?php $choice = 'google:' . $slug; ?>
-                                    <option value="<?= htmlspecialchars($choice, ENT_QUOTES) ?>" <?= $bodyFontChoice === $choice ? 'selected' : '' ?>><?= htmlspecialchars($fontData[0], ENT_QUOTES) ?></option>
+                                    <option value="<?= htmlspecialchars($choice, ENT_QUOTES) ?>"
+                                            data-font-family="<?= htmlspecialchars($fontData[1], ENT_QUOTES) ?>"
+                                            <?= $bodyFontChoice === $choice ? 'selected' : '' ?>><?= htmlspecialchars($fontData[0], ENT_QUOTES) ?></option>
                                 <?php endforeach; ?>
                             </optgroup>
                             <optgroup label="Собственный шрифт">
-                                <option value="style:custom" <?= $bodyFontChoice === 'style:custom' ? 'selected' : '' ?>>Свой CSS-стек или файл (.woff2)</option>
+                                <option value="style:custom" data-font-family="<?= htmlspecialchars($customAppearance['font_family'], ENT_QUOTES) ?>"
+                                        <?= $bodyFontChoice === 'style:custom' ? 'selected' : '' ?>>Свой CSS-стек или файл (.woff2)</option>
                             </optgroup>
                         </select>
                         <small class="form-hint">
@@ -320,7 +383,9 @@ foreach ($options as $key => $opt) {
                             <option value="">Как у основного текста (без отдельного шрифта)</option>
                             <optgroup label="Google Fonts — грузятся с fonts.googleapis.com">
                                 <?php foreach (\App\Core\DesignSettings::GOOGLE_FONTS as $slug => $fontData): ?>
-                                    <option value="<?= htmlspecialchars($slug, ENT_QUOTES) ?>" <?= $gHeading === $slug ? 'selected' : '' ?>><?= htmlspecialchars($fontData[0], ENT_QUOTES) ?></option>
+                                    <option value="<?= htmlspecialchars($slug, ENT_QUOTES) ?>"
+                                            data-font-family="<?= htmlspecialchars($fontData[1], ENT_QUOTES) ?>"
+                                            <?= $gHeading === $slug ? 'selected' : '' ?>><?= htmlspecialchars($fontData[0], ENT_QUOTES) ?></option>
                                 <?php endforeach; ?>
                             </optgroup>
                         </select>
@@ -351,7 +416,20 @@ foreach ($options as $key => $opt) {
             <div class="design-opt">
                 <div class="design-opt__label">
                     <span>Межстрочный интервал заголовков</span>
-                    <small>Высота строки для H1–H6 и названий карточек (от 1.0 до 2.5). Пусто — стандарт.</small>
+                    <small>Базовая высота строки для H1–H6 и названий карточек.</small>
+                </div>
+                <div class="design-opt__choices">
+                    <select class="u-inline-e73ebf4146" name="heading_line_height" data-design-preview-field>
+                        <option value="tight" <?= ($values['heading_line_height'] ?? 'normal') === 'tight' ? 'selected' : '' ?>>Плотный (1.15)</option>
+                        <option value="normal" <?= ($values['heading_line_height'] ?? 'normal') === 'normal' ? 'selected' : '' ?>>Стандарт (1.25)</option>
+                        <option value="relaxed" <?= ($values['heading_line_height'] ?? 'normal') === 'relaxed' ? 'selected' : '' ?>>Просторный (1.35)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="design-opt">
+                <div class="design-opt__label">
+                    <span>Точное значение интервала заголовков</span>
+                    <small>От 1.0 до 2.5. Если заполнено, имеет приоритет над вариантом выше.</small>
                 </div>
                 <div class="design-opt__choices">
                     <?php $headingLineHeightCustom = \App\Core\DesignSettings::headingLineHeightCustom(); ?>
@@ -449,11 +527,24 @@ foreach ($options as $key => $opt) {
     </div>
 
     <!-- TAB 5: COMPONENTS -->
-    <div class="admin-tab-content" id="tab-components">
+    <div class="admin-tab-content" id="tab-components" role="tabpanel"
+         aria-labelledby="design-tab-components" tabindex="0" hidden>
         <section class="design-section">
             <h2 class="design-section__title">Настройки компонентов и страниц</h2>
+            <div class="design-destination-links">
+                <a href="/admin/header" class="design-destination-link">
+                    <?= \App\Core\AdminUi::icon('layout-navbar', 20) ?>
+                    <span><strong>Шапка и поиск</strong><small>Макет, фиксация, мобильные зоны и вид поиска</small></span>
+                    <?= \App\Core\AdminUi::icon('arrow-right', 16) ?>
+                </a>
+                <a href="/admin/footer" class="design-destination-link">
+                    <?= \App\Core\AdminUi::icon('layout-bottombar', 20) ?>
+                    <span><strong>Подвал сайта</strong><small>Стиль, колонки, виджеты и нижняя строка</small></span>
+                    <?= \App\Core\AdminUi::icon('arrow-right', 16) ?>
+                </a>
+            </div>
             <?php foreach ($grouped as $groupName => $groupOpts): ?>
-                <?php if (in_array($groupName, ['Общие', 'Типографика', 'Цвета и шрифт'], true)) { continue; } ?>
+                <?php if (in_array($groupName, ['Общие', 'Типографика', 'Цвета и шрифт', 'Шапка', 'Футер', 'Мобильная версия'], true)) { continue; } ?>
                 <?php foreach ($groupOpts as $key => $opt): ?>
                     <div class="design-opt">
                         <div class="design-opt__label">
@@ -463,7 +554,7 @@ foreach ($options as $key => $opt) {
                         <div class="design-opt__choices">
                             <?php foreach ($opt['choices'] as $val => $label): ?>
                                 <label class="design-card">
-                                    <input type="radio" name="<?= htmlspecialchars($key, ENT_QUOTES) ?>" value="<?= htmlspecialchars($val, ENT_QUOTES) ?>" <?= ($values[$key] ?? '') === $val ? 'checked' : '' ?>>
+                                    <input type="radio" name="<?= htmlspecialchars($key, ENT_QUOTES) ?>" value="<?= htmlspecialchars($val, ENT_QUOTES) ?>" <?= ($values[$key] ?? '') === $val ? 'checked' : '' ?> data-design-preview-field>
                                     <span class="design-card__label"><?= htmlspecialchars($label, ENT_QUOTES) ?></span>
                                 </label>
                             <?php endforeach; ?>
@@ -474,63 +565,9 @@ foreach ($options as $key => $opt) {
         </section>
     </div>
 
-    <div class="form-actions form-actions--sticky">
+    <div class="form-actions form-actions--sticky" data-design-save-actions hidden>
         <button type="submit" class="btn btn--primary"><?= \App\Core\AdminUi::icon('save') ?>Сохранить настройки дизайна</button>
     </div>
 </form>
 
-<script nonce="<?= \App\Core\SecurityHeaders::nonce() ?>">
-(function () {
-    'use strict';
-    
-    // Tab switching logic
-    var tabs = document.querySelectorAll('[data-tab-target]');
-    tabs.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            tabs.forEach(function (b) { b.classList.remove('is-active'); });
-            document.querySelectorAll('.admin-tab-content').forEach(function (c) { c.classList.remove('is-active'); });
-            btn.classList.add('is-active');
-            var target = document.getElementById(btn.getAttribute('data-tab-target'));
-            if (target) { target.classList.add('is-active'); }
-        });
-    });
-
-    // Live deck updates
-    function updateLiveDeck() {
-        var canvas = document.getElementById('liveDeckCanvas');
-        if (!canvas) return;
-        var p = document.getElementById('design_color_primary')?.value || '#173a63';
-        var a = document.getElementById('design_color_accent')?.value || '#17999b';
-        var bgP = document.getElementById('design_bg_primary')?.value || '#f6f8fa';
-        var bgS = document.getElementById('design_bg_surface')?.value || '#ffffff';
-        var tM = document.getElementById('design_text_main')?.value || '#1a1a1a';
-        var tMut = document.getElementById('design_text_muted')?.value || '#666666';
-        var bC = document.getElementById('design_border_color')?.value || '#e1e3e8';
-        
-        canvas.style.setProperty('--live-color-primary', p);
-        canvas.style.setProperty('--live-color-accent', a);
-        canvas.style.setProperty('--live-bg-primary', bgP);
-        canvas.style.setProperty('--live-bg-surface', bgS);
-        canvas.style.setProperty('--live-text-main', tM);
-        canvas.style.setProperty('--live-text-muted', tMut);
-        canvas.style.setProperty('--live-border-color', bC);
-    }
-
-    document.querySelectorAll('[data-design-preview-field]').forEach(function (el) {
-        el.addEventListener('input', updateLiveDeck);
-        el.addEventListener('change', updateLiveDeck);
-    });
-    updateLiveDeck();
-
-    var fontChoice = document.querySelector('[data-font-body-choice]');
-    var customFontFields = document.querySelector('[data-custom-font-fields]');
-    function syncCustomFontFields() {
-        if (fontChoice && customFontFields) {
-            customFontFields.hidden = fontChoice.value !== 'style:custom';
-        }
-    }
-    if (fontChoice) { fontChoice.addEventListener('change', syncCustomFontFields); }
-    syncCustomFontFields();
-})();
-</script>
 <?php require __DIR__ . '/../layout/footer.php'; ?>
