@@ -106,6 +106,7 @@ git archive --format=zip --prefix=asdr-cms/ --output=asdr-cms-release.zip HEAD
 # обновление существующей установки
 php database/migrate.php status   # какие миграции новые
 php database/migrate.php          # накатить
+php database/doctor.php           # read-only проверка структуры и целостности БД
 ```
 
 ## Cron

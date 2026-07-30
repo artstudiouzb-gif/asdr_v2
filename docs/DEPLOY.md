@@ -159,6 +159,7 @@ HTML/CSS/JS/JSON ужимаются в 3–5 раз. Для nginx строки `
 ```
 php database/migrate.php status   # какие миграции новые
 php database/migrate.php           # накатить новые миграции
+php database/doctor.php            # проверить структуру, ключи и целостность данных
 ```
 
 Для выпуска после загрузки новой версии используйте fail-fast сценарий:

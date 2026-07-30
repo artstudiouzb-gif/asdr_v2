@@ -21,9 +21,11 @@ test('Миграции: все файлы непусты и содержат SQL
 
 test('Миграции: schema.sql перечисляет их как применённые (консистентность)', function () {
     $schema = (string) file_get_contents(APP_ROOT . '/database/schema.sql');
+    preg_match_all("/\\('([^']+\\.sql)'\\)/", $schema, $matches);
+    $registered = array_count_values($matches[1] ?? []);
     foreach (glob(APP_ROOT . '/database/migrations/*.sql') ?: [] as $f) {
         $name = basename($f);
-        assert_contains($name, $schema, "schema.sql не отмечает {$name} как применённую");
+        assert_same(1, $registered[$name] ?? 0, "schema.sql должен отмечать {$name} ровно один раз");
     }
 });
 
@@ -45,8 +47,10 @@ test('Миграции: применение schema.sql + сверка табл�
     ]);
 
     $pdo = Database::pdo();
-    // Новые таблицы Блока 11 должны существовать (их создаёт schema.sql).
-    foreach (['password_resets', 'backup_codes', 'user_sessions', 'migrations'] as $table) {
+    // Все таблицы полной schema.sql должны существовать.
+    $schema = (string) file_get_contents(APP_ROOT . '/database/schema.sql');
+    preg_match_all('/CREATE TABLE IF NOT EXISTS\\s+`?([a-z0-9_]+)`?/i', $schema, $tableMatches);
+    foreach (array_unique($tableMatches[1] ?? []) as $table) {
         $stmt = $pdo->query("SHOW TABLES LIKE " . $pdo->quote($table));
         assert_true($stmt->fetchColumn() !== false, "таблица {$table} отсутствует");
     }

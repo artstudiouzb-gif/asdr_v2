@@ -119,14 +119,13 @@ final class PhotoAlbum
 
         try {
             $stmtBase = Database::pdo()->prepare(
-                "SELECT id, lang, title FROM photo_albums WHERE id IN ($in) AND deleted_at IS NULL"
+                "SELECT id, title FROM photo_albums WHERE id IN ($in)"
             );
             $stmtBase->execute($ids);
             foreach ($stmtBase->fetchAll() as $row) {
                 $id = (int) $row['id'];
-                $lang = (string) ($row['lang'] ?? $default);
-                if (trim((string) ($row['title'] ?? '')) !== '' && isset($map[$id]) && !in_array($lang, $map[$id], true)) {
-                    $map[$id][] = $lang;
+                if (trim((string) ($row['title'] ?? '')) !== '' && isset($map[$id])) {
+                    $map[$id][] = $default;
                 }
             }
         } catch (\Throwable) {}

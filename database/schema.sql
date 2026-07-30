@@ -243,7 +243,9 @@ CREATE TABLE IF NOT EXISTS block_revisions (
     created_by      INT UNSIGNED NULL COMMENT 'автор изменения (users.id), NULL если неизвестен',
     created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     KEY idx_block_revisions_block (block_id, id),
-    CONSTRAINT fk_block_revisions_block FOREIGN KEY (block_id) REFERENCES blocks(id) ON DELETE CASCADE
+    KEY idx_block_revisions_user (created_by),
+    CONSTRAINT fk_block_revisions_block FOREIGN KEY (block_id) REFERENCES blocks(id) ON DELETE CASCADE,
+    CONSTRAINT fk_block_revisions_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Полная история версий сущностей контента (страницы, новости, проекты).
@@ -939,7 +941,8 @@ CREATE TABLE IF NOT EXISTS webpush_queue (
     last_error VARCHAR(500) NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     sent_at    DATETIME NULL,
-    UNIQUE KEY uniq_webpush_queue_news (news_id)
+    UNIQUE KEY uniq_webpush_queue_news (news_id),
+    CONSTRAINT fk_webpush_queue_news FOREIGN KEY (news_id) REFERENCES news(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Этот schema.sql уже содержит структуру всех существующих миграций, поэтому
@@ -1010,7 +1013,9 @@ INSERT INTO migrations (filename) VALUES
     ('2026_07_26_menu_language_isolation.sql'),
     ('2026_07_28_menu_hide_title.sql'),
     ('2026_07_29_page_hierarchy.sql'),
-    ('2026_07_29_translation_group_integrity.sql')
+    ('2026_07_29_tabler_icon_keys.sql'),
+    ('2026_07_29_translation_group_integrity.sql'),
+    ('2026_07_30_database_integrity.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

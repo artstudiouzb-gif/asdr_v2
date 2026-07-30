@@ -134,6 +134,7 @@ test('TeamMember::availableLangsForIds + localize: перевод имени/д�
     \App\Models\TeamMemberTranslation::upsert($m1, 'uz', ['name' => 'Elyor Ganiev', 'position' => '']);
 
     $map = \App\Models\TeamMember::availableLangsForIds([$m1, $m2]);
+    assert_true(in_array($default, $map[$m1], true), 'm1: основной язык не теряется при наличии перевода');
     assert_true(in_array('uz', $map[$m1], true), 'm1: узбекский доступен');
     assert_same([$default], $map[$m2], 'm2: только основной');
 
@@ -170,6 +171,7 @@ test('PhotoAlbum::availableLangsForIds + localize: перевод с фолбэ�
     \App\Models\PhotoAlbumTranslation::upsert($a1, 'uz', ['title' => 'Albom UZ', 'description' => '']);
 
     $map = \App\Models\PhotoAlbum::availableLangsForIds([$a1, $a2]);
+    assert_true(in_array($default, $map[$a1], true), 'a1: основной язык не теряется при наличии перевода');
     assert_true(in_array('uz', $map[$a1], true), 'a1: узбекский доступен');
     assert_same([$default], $map[$a2], 'a2: только основной');
 
@@ -193,6 +195,7 @@ test('Video::availableLangsForIds + localize: перевод с фолбэком
     \App\Models\VideoTranslation::upsert($v1, 'uz', ['title' => 'Video UZ', 'description' => '']);
 
     $map = \App\Models\Video::availableLangsForIds([$v1, $v2]);
+    assert_true(in_array($default, $map[$v1], true), 'v1: основной язык не теряется при наличии перевода');
     assert_true(in_array('uz', $map[$v1], true), 'v1: узбекский доступен');
     assert_same([$default], $map[$v2], 'v2: только основной');
 

@@ -24,6 +24,7 @@ test('CLI-only скрипты вызывают assertCli первой строк
         'database/create_admin.php',
         'database/backup.php',
         'database/migrate.php',
+        'database/doctor.php',
         'app/Console/mail_worker.php',
         'app/Console/social_worker.php',
         'app/Console/webhook_worker.php',

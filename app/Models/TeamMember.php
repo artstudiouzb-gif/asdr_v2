@@ -102,14 +102,13 @@ final class TeamMember
 
         try {
             $stmtBase = Database::pdo()->prepare(
-                "SELECT id, lang, name FROM team_members WHERE id IN ($in)"
+                "SELECT id, name FROM team_members WHERE id IN ($in)"
             );
             $stmtBase->execute($ids);
             foreach ($stmtBase->fetchAll() as $row) {
                 $id = (int) $row['id'];
-                $lang = (string) ($row['lang'] ?? $default);
-                if (trim((string) ($row['name'] ?? '')) !== '' && isset($map[$id]) && !in_array($lang, $map[$id], true)) {
-                    $map[$id][] = $lang;
+                if (trim((string) ($row['name'] ?? '')) !== '' && isset($map[$id])) {
+                    $map[$id][] = $default;
                 }
             }
         } catch (\Throwable) {}
