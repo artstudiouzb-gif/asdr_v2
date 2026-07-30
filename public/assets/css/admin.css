@@ -2503,35 +2503,6 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     .design-destination-links { grid-template-columns: 1fr; }
 }
 
-/* Пикер макета шапки: карточки с мини-превью раскладки. */
-.header-layout-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
-.header-layout-picker__option {
-    position: relative; display: flex; flex-direction: column; gap: 6px;
-    border: 2px solid var(--admin-border); border-radius: 12px; padding: 12px; cursor: pointer;
-    background: #fff; transition: border-color .15s ease, box-shadow .15s ease;
-}
-.header-layout-picker__option:hover { border-color: color-mix(in srgb, var(--admin-accent, #5b52e5) 50%, var(--admin-border)); }
-.header-layout-picker__option.is-selected { border-color: var(--admin-accent, #5b52e5); box-shadow: 0 4px 14px color-mix(in srgb, var(--admin-accent) 15%, transparent); }
-.header-layout-picker__option input { position: absolute; opacity: 0; pointer-events: none; }
-.header-layout-picker__label { font-weight: 600; font-size: 14px; }
-.header-layout-picker__desc { font-size: 12px; color: var(--admin-muted, #667); line-height: 1.4; }
-/* Мини-превью раскладки шапки. */
-.header-layout-picker__preview {
-    display: block; height: 46px; border-radius: 8px; border: 1px solid var(--admin-border);
-    background: #f4f5f8; padding: 7px; position: relative;
-}
-.header-layout-picker__preview .hlp-logo,
-.header-layout-picker__preview .hlp-nav { display: block; background: color-mix(in srgb, var(--admin-accent, #5b52e5) 55%, #bcc); border-radius: 3px; }
-.header-layout-picker__preview .hlp-logo { width: 34%; height: 8px; margin-bottom: 6px; }
-.header-layout-picker__preview .hlp-nav { width: 100%; height: 8px; background: #ccd2df; }
-/* stacked: логотип сверху, полоса меню снизу (уже базовый вид). */
-.header-layout-picker__preview--inline .hlp-logo { position: absolute; left: 7px; top: 50%; transform: translateY(-50%); margin: 0; width: 26%; }
-.header-layout-picker__preview--inline .hlp-nav { margin-left: 32%; width: 66%; height: 8px; margin-top: 0; position: absolute; top: 50%; transform: translateY(-50%); right: 7px; }
-.header-layout-picker__preview--centered .hlp-logo { margin: 0 auto 6px; width: 40%; }
-.header-layout-picker__preview--centered .hlp-nav { width: 70%; margin: 0 auto; }
-.header-layout-picker__preview--drawer .hlp-logo { position: absolute; left: 7px; top: 50%; transform: translateY(-50%); margin: 0; width: 30%; }
-.header-layout-picker__preview--drawer .hlp-nav { width: 14px; height: 12px; background: #ccd2df; position: absolute; right: 7px; top: 50%; transform: translateY(-50%); }
-.header-layout-picker + .hb-inline-fields { margin-top: 20px; }
 .hb-divider-field { max-width: 360px; margin-top: 20px; }
 .hb-behavior { display: flex; flex-direction: column; gap: 16px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--admin-border); }
 .hb-behavior__options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
@@ -4318,34 +4289,6 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     border-radius: 18px;
     box-shadow: 0 14px 34px rgba(15, 23, 42, .14);
 }
-.hdr-live-preview__box[data-preview-layout="stacked"] .hdr-live-preview__main { flex-wrap: wrap; }
-.hdr-live-preview__box[data-preview-layout="stacked"] .hdr-live-preview__nav {
-    flex-basis: 100%;
-    margin-top: 10px;
-}
-.hdr-live-preview__box[data-preview-layout="centered"] .hdr-live-preview__main {
-    flex-direction: column;
-    gap: 10px;
-}
-.hdr-live-preview__box[data-preview-layout="drawer"] .hdr-live-preview__nav {
-    flex: 0 0 38px;
-    width: 38px;
-    height: 34px;
-    overflow: hidden;
-    font-size: 0;
-    border: 1px solid var(--admin-border, #e2e8f0);
-    border-radius: 9px;
-}
-.hdr-live-preview__box[data-preview-layout="drawer"] .hdr-live-preview__nav::before {
-    content: '☰';
-    display: grid;
-    place-items: center;
-    width: 100%;
-    height: 100%;
-    color: var(--prev-nav-color, #1e293b);
-    font-size: 20px;
-}
-
 /* Модульная панель навигации по вкладкам */
 .hdr-tabs-nav {
     display: flex;

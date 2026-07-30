@@ -14,9 +14,6 @@ use App\Models\Setting;
  */
 final class HeaderConfig
 {
-    /** Доступные макеты шапки (десктоп + мобильный). */
-    public const LAYOUTS = ['stacked', 'inline', 'centered', 'drawer'];
-
     /**
      * Элементы-«кирпичики» шапки для конструктора (расставляются по зонам
      * topbar/middlebar/bottombar). Логотип и меню также могут управляться
@@ -54,7 +51,6 @@ final class HeaderConfig
     private const REPEATABLE = ['divider', 'spacer', 'space'];
 
     public const DEFAULTS = [
-        'layout' => 'stacked',                // stacked | inline | centered | drawer
         'logo_position' => 'left',            // left | center
         'logo_width' => 240,                  // px, 40..600
         'logo_height' => 48,                  // px, 20..200
@@ -265,9 +261,6 @@ final class HeaderConfig
     private static function mergeDefaults(array $config): array
     {
         $result = self::DEFAULTS;
-
-        $result['layout'] = in_array($config['layout'] ?? '', self::LAYOUTS, true)
-            ? $config['layout'] : self::DEFAULTS['layout'];
 
         $result['logo_position'] = in_array($config['logo_position'] ?? '', ['left', 'center'], true)
             ? $config['logo_position'] : self::DEFAULTS['logo_position'];

@@ -606,32 +606,7 @@ $heightSelect = function (string $name, string $current): string {
         <!-- MODULE 3: VISUAL ZONE BUILDER -->
         <div class="admin-tab-content is-active" id="tab-hdr-builder" role="tabpanel" aria-labelledby="hdr-tab-builder">
             <div class="header-builder__group form-card u-inline-8cddc29a69">
-                <h3 class="u-inline-0e0c39e056">1. Макет шапки</h3>
-                <p class="form-hint u-inline-291b7bbb01">Выберите базовую геометрию. Затем распределите элементы по зонам для компьютера и мобильной версии.</p>
-
-                <?php $layoutValue = $config['layout'] ?? 'stacked'; ?>
-                <div class="header-layout-picker" data-header-layout-picker>
-                    <?php foreach ([
-                        'stacked' => ['Полосами', 'Логотип и утилиты сверху, навигация отдельной строкой.'],
-                        'inline' => ['В одну строку', 'Логотип, меню и утилиты располагаются рядом.'],
-                        'centered' => ['Центрированный', 'Логотип и навигация образуют симметричную композицию.'],
-                        'drawer' => ['Боковая панель', 'Навигация открывается по кнопке на всех ширинах.'],
-                    ] as $layoutKey => [$layoutLabel, $layoutHint]): ?>
-                        <label class="header-layout-picker__option <?= $layoutValue === $layoutKey ? 'is-selected' : '' ?>">
-                            <input type="radio" name="layout" value="<?= $layoutKey ?>" <?= $layoutValue === $layoutKey ? 'checked' : '' ?>>
-                            <span class="header-layout-picker__preview header-layout-picker__preview--<?= $layoutKey ?>" aria-hidden="true">
-                                <span class="hlp-logo"></span>
-                                <span class="hlp-nav"></span>
-                            </span>
-                            <span class="header-layout-picker__label"><?= $layoutLabel ?></span>
-                            <span class="header-layout-picker__desc"><?= $layoutHint ?></span>
-                        </label>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-
-            <div class="header-builder__group form-card u-inline-8cddc29a69">
-                <h3 class="u-inline-0e0c39e056">2. Элементы по зонам</h3>
+                <h3 class="u-inline-0e0c39e056">1. Элементы по зонам</h3>
                 <p class="form-hint u-inline-291b7bbb01">Перетащите элемент из палитры или выберите зону и нажмите нужный элемент. Для удаления используйте крестик на карточке.</p>
 
                 <!-- Palette of available elements -->
@@ -1110,13 +1085,10 @@ $heightSelect = function (string $name, string $current): string {
         : null;
     activateTab(savedTabButton || document.querySelector('[data-hdr-tab-target].is-active'), false);
 
-    // Состояние карточек выбора контейнера и макета.
-    document.querySelectorAll('input[name="container_mode"], input[name="layout"]').forEach(function (radio) {
+    // Состояние карточек выбора контейнера.
+    document.querySelectorAll('input[name="container_mode"]').forEach(function (radio) {
         radio.addEventListener('change', function () {
-            var selector = radio.name === 'layout'
-                ? '.header-layout-picker__option'
-                : '.hdr-select-card';
-            document.querySelectorAll(selector).forEach(function (option) {
+            document.querySelectorAll('.hdr-select-card').forEach(function (option) {
                 var optionInput = option.querySelector('input[type="radio"]');
                 option.classList.toggle('is-selected', !!optionInput && optionInput.checked);
             });
@@ -1147,7 +1119,6 @@ $heightSelect = function (string $name, string $current): string {
         var menuPosition = valueOf('select[name="menu_position"]', 'center');
         var navGap = valueOf('input[name="styles_nav_gap"]', '18');
         var navStyle = valueOf('select[name="styles_nav_style_type"]', 'underline');
-        var layout = valueOf('input[name="layout"]:checked', 'stacked');
         var containerMode = valueOf('input[name="container_mode"]:checked', 'full');
 
         document.querySelectorAll('[data-hdr-container-only]').forEach(function (section) {
@@ -1172,7 +1143,6 @@ $heightSelect = function (string $name, string $current): string {
             prevMain.style.setProperty('--prev-nav-active', navActive);
         }
         if (previewBox) {
-            previewBox.setAttribute('data-preview-layout', layout);
             previewBox.setAttribute('data-preview-container', containerMode);
         }
         var previewNav = document.querySelector('.hdr-live-preview__nav');

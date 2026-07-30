@@ -16,18 +16,9 @@ test('Разделители дизайна применяются между п
     assert_contains('var(--menu-divider-color, color-mix(in srgb, currentColor 35%, transparent))', $css);
 });
 
-test('HeaderConfig: макет валидируется, мусор → stacked', function () {
+test('HeaderConfig: выравнивание меню валидируется без устаревшего макета шапки', function () {
     $cfg = HeaderConfig::normalize(['layout' => 'drawer']);
-    assert_same('drawer', $cfg['layout']);
-
-    $cfg = HeaderConfig::normalize(['layout' => 'нечто']);
-    assert_same('stacked', $cfg['layout'], 'недопустимый макет откатывается к stacked');
-
-    // Все 4 макета допустимы.
-    foreach (['stacked', 'inline', 'centered', 'drawer'] as $l) {
-        assert_same($l, HeaderConfig::normalize(['layout' => $l])['layout']);
-    }
-
+    assert_false(array_key_exists('layout', $cfg), 'устаревший layout удаляется из конфигурации');
     foreach (['left', 'center', 'right'] as $alignment) {
         assert_same($alignment, HeaderConfig::normalize(['menu_position' => $alignment])['menu_position']);
     }
@@ -148,9 +139,9 @@ test('Выравнивание меню применяется к меню в л
 
 test('Форма шапки не теряет настройки, которые сохраняет контроллер', function (): void {
     $view = (string) file_get_contents(APP_ROOT . '/app/Views/admin/header/index.php');
+    $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/HeaderController.php');
 
     foreach ([
-        'name="layout"',
         "'elements_mobile'",
         'name="topbar_style"',
         'name="topbar_mobile"',
@@ -169,6 +160,18 @@ test('Форма шапки не теряет настройки, которые
     ] as $field) {
         assert_contains($field, $view, "поле {$field} присутствует в форме");
     }
+    assert_not_contains('name="layout"', $view, 'устаревший выбор макета удалён из формы');
+    assert_not_contains("\$_POST['layout']", $controller, 'контроллер больше не сохраняет устаревший макет');
+});
+
+test('Миграция удаляет сохранённый layout из конфигурации шапки', function (): void {
+    $migrationName = '2026_07_30_remove_header_layout.sql';
+    $migration = (string) file_get_contents(APP_ROOT . '/database/migrations/' . $migrationName);
+    $schema = (string) file_get_contents(APP_ROOT . '/database/schema.sql');
+
+    assert_contains("JSON_REMOVE(`value`, '$.layout')", $migration);
+    assert_contains("`key` = 'header_config'", $migration);
+    assert_contains($migrationName, $schema, 'чистая установка отмечает миграцию применённой');
 });
 
 test('Конструктор шапки разделяет desktop и mobile и доступен с клавиатуры', function (): void {

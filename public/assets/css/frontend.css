@@ -1877,27 +1877,9 @@ body.design-header-dark .site-nav { border-top-color: rgba(255, 255, 255, .14); 
     .site-menu > .site-menu__item:not(:first-child)::before { content: none; }
 }
 
-/* ==========================================================================
-   4 МАКЕТА ШАПКИ (десктоп + мобильный)
-   ========================================================================== */
-/* Бургер по умолчанию скрыт на десктопе (показывается только в мобильном
-   бургер-режиме, см. media-блок ниже, либо в макете «боковая панель»). */
+/* Мобильная навигация: бургер скрыт на десктопе и открывает общий drawer. */
 .site-burger { display: none; }
 
-/* --- Макет «В одну строку»: меню в центральной зоне верхнего ряда --- */
-.site-header--layout-inline .site-header__zone--center .site-menu {
-    display: flex; flex-wrap: wrap; row-gap: 4px; column-gap: var(--menu-gap-current); justify-content: center;
-}
-.site-header--layout-inline .site-header__zone--center { flex: 1 1 auto; }
-
-/* --- Макет «Центрированный»: логотип по центру, меню центрировано ниже --- */
-.site-header--layout-centered .site-header__inner { position: relative; }
-.site-header--layout-centered .site-header__zone--left,
-.site-header--layout-centered .site-header__zone--right { flex: 1; }
-.site-header--layout-centered .site-nav__inner { justify-content: center; }
-
-/* --- Макет «Боковая панель» (drawer): меню off-canvas, кнопка на всех экранах --- */
-.site-header--layout-drawer .site-burger { display: inline-flex; }
 .site-drawer {
     position: fixed; inset: 0; z-index: 1020;
     visibility: hidden; opacity: 0; transition: opacity .25s ease, visibility .25s ease;
@@ -2172,10 +2154,10 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
     }
 }
 
-/* --- Мобильные (≤720): все макеты кроме drawer сворачиваются в бургер --- */
+/* На мобильных устройствах навигация открывается через drawer. */
 @media (max-width: 720px) {
     [data-priority-overflow] { display: none !important; }
-    .site-header:not(.site-header--layout-drawer) .site-burger { display: inline-flex; }
+    .site-header .site-burger { display: inline-flex; }
     /* В выпадающем мобильном меню пункты — блочные, но с отступом под иконку. */
     body.design-mmenu-burger .site-menu__link { display: flex; align-items: center; gap: 8px; }
     /* Разделитель в любом вертикальном мобильном меню — горизонтальная черта. */
@@ -2183,24 +2165,6 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
         width: 100%; height: 1px; margin: 6px 0;
         background: color-mix(in srgb, var(--text-main) 18%, transparent);
     }
-    /* Инлайновое меню (центр. зона) на мобильном — выпадающая панель под шапкой. */
-    body.design-mmenu-burger .site-header--layout-inline .site-header__zone--center .site-menu,
-    body.design-mmenu-burger .site-header--layout-centered .site-nav .site-menu {
-        position: absolute; left: 0; right: 0; top: 100%; z-index: 55;
-        flex-direction: column; align-items: stretch; gap: 0; padding: 8px 12px 14px;
-        background: var(--bg-primary); border-bottom: 1px solid var(--border-color);
-        box-shadow: var(--shadow-lg); display: none;
-    }
-    body.design-mmenu-burger.mobile-menu-open .site-header--layout-inline .site-header__zone--center .site-menu,
-    body.design-mmenu-burger.mobile-menu-open .site-header--layout-centered .site-nav .site-menu { display: flex; }
-    body.design-mmenu-burger .site-header--layout-inline .site-menu__divider,
-    body.design-mmenu-burger .site-header--layout-centered .site-menu__divider {
-        width: 100%; height: 1px; margin: 6px 0;
-        background: color-mix(in srgb, var(--text-main) 18%, transparent);
-    }
-    /* Центрированный макет на мобильном — логотип слева для компактности. */
-    .site-header--layout-centered .site-header__zone--left,
-    .site-header--layout-centered .site-header__zone--right { flex: 0 0 auto; }
 }
 
 /* ==========================================================================

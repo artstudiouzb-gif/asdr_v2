@@ -405,17 +405,10 @@ $burgerHtml = $menuHtml !== ''
     : '';
 
 
-// --- Макет шапки: 4 варианта ---
-// stacked  — верхний ряд + полноширинная навигационная полоса под ним;
-// centered — логотип по центру, меню центрировано полосой ниже;
-// inline   — логотип, меню и утилиты в одном ряду;
-// drawer   — меню скрыто за кнопкой, выезжает off-canvas сбоку (все экраны).
 // Прозрачная шапка: глобальный режим применяется только на страницах,
 // где включён флаг «Прозрачная шапка» (переменная $transparentHeader из вью).
 $transparentOn = !empty($hcfg['transparent']) && !empty($transparentHeader ?? null);
-$layout = in_array($hcfg['layout'] ?? 'stacked', HeaderConfig::LAYOUTS, true) ? $hcfg['layout'] : 'stacked';
-// Центрированный макет всегда ставит логотип по центру.
-$logoPos = $layout === 'centered' ? 'center' : $hcfg['logo_position'];
+$logoPos = $hcfg['logo_position'];
 $navAlign = $menuAlignment;
 
 // В адаптивном desktop-режиме основное меню остаётся горизонтальным.
@@ -425,7 +418,6 @@ $priorityMenuHtml = $menuHtml;
 if (
     $priorityMenuHtml !== ''
     && ($hcfg['styles']['nav_overflow'] ?? 'adaptive') === 'adaptive'
-    && $layout !== 'drawer'
 ) {
     $priorityMenuHtml = preg_replace(
         '/<nav class="([^"]*)"/',
@@ -537,7 +529,6 @@ $zones['left'] .= $composed['left'];
 $zones['center'] .= $composed['center'];
 $zones['right'] .= $composed['right'];
 
-$inlineMenu = '';
 $navBarHtml = '';
 $drawerMenu = '';
 
@@ -722,7 +713,6 @@ $hasHeaderContent = trim($zones['left'] . $zones['center'] . $zones['right'] . $
 $containerMode = in_array($hcfg['container_mode'] ?? 'full', ['full', 'container', 'floating'], true) ? $hcfg['container_mode'] : 'full';
 $headerClasses = [
     'site-header',
-    'site-header--layout-' . $layout,
     'site-header--logo-' . $logoPos,
     'site-header--container-' . $containerMode,
     $navBarHtml !== '' ? 'site-header--has-nav' : '',
@@ -746,7 +736,7 @@ $headerClasses = implode(' ', array_filter($headerClasses));
 <?php if ($hasHeaderContent): ?>
 <header
     class="<?= htmlspecialchars($headerClasses, ENT_QUOTES) ?>"
-    <?php if (($hcfg['styles']['nav_overflow'] ?? 'adaptive') === 'adaptive' && $layout !== 'drawer'): ?>
+    <?php if (($hcfg['styles']['nav_overflow'] ?? 'adaptive') === 'adaptive'): ?>
         data-header-menu-adaptive
     <?php endif; ?>
     <?php if (!empty($hcfg['sticky']) || $transparentOn): ?>

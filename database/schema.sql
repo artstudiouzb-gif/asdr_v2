@@ -1034,6 +1034,7 @@ INSERT INTO migrations (filename) VALUES
     ('2026_07_30_digest_subscriber_lifecycle.sql'),
     ('2026_07_30_event_banner.sql'),
     ('2026_07_30_news_translation_details.sql'),
+    ('2026_07_30_remove_header_layout.sql'),
     ('2026_07_30_translation_group_indexes.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 

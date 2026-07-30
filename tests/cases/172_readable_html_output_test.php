@@ -49,5 +49,5 @@ test('document and site header attributes are maintained in multiline markup', f
     assert_contains("<html\n    lang=", $header);
     assert_contains("<header\n    class=", $header);
     assert_contains('$headerClasses = [', $header);
-    assert_not_contains('<header class="site-header site-header--layout-', $header);
+    assert_not_contains('site-header--layout-', $header);
 });
