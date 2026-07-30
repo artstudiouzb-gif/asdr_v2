@@ -133,7 +133,7 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                     <div class="form-field">
                         <label class="u-inline-1dcf0e84b2" for="video_url">
                             <?= \App\Core\AdminUi::icon('videos', 18) ?>
-                            Ссылка на видео (YouTube / Rutube)
+                            Ссылка на видео (YouTube)
                         </label>
                         <input type="text" id="video_url" name="video_url" value="<?= htmlspecialchars($news['video_url'] ?? '', ENT_QUOTES) ?>" placeholder="https://youtu.be/... или https://youtube.com/watch?v=...">
                         <span class="form-hint">Встраивает интерактивный видеоплеер в новость. При макете «Видео» плеер выводится на месте обложки.</span>

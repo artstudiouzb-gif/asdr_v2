@@ -62,6 +62,10 @@ $docs = json_decode((string) ($news['docs'] ?? '[]'), true);
 $docs = is_array($docs) ? $docs : [];
 $videoUrl = trim((string) ($news['video_url'] ?? ''));
 $audioUrl = trim((string) ($news['audio_url'] ?? ''));
+if ($audioUrl !== ''
+    && (str_starts_with($audioUrl, '//') || !\App\Core\UrlGuard::isSafeMedia($audioUrl))) {
+    $audioUrl = '';
+}
 $audioTitle = trim((string) ($news['audio_title'] ?? ''));
 $legacyPressUrl = trim((string) ($news['press_release_url'] ?? ''));
 if ($legacyPressUrl !== '') {

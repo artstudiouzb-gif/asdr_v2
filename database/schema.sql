@@ -1032,7 +1032,9 @@ INSERT INTO migrations (filename) VALUES
     ('2026_07_29_translation_group_integrity.sql'),
     ('2026_07_30_database_integrity.sql'),
     ('2026_07_30_digest_subscriber_lifecycle.sql'),
-    ('2026_07_30_event_banner.sql')
+    ('2026_07_30_event_banner.sql'),
+    ('2026_07_30_news_translation_details.sql'),
+    ('2026_07_30_translation_group_indexes.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

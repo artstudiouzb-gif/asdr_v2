@@ -209,17 +209,24 @@ final class News
         $pdo = Database::pdo();
         $pdo->beginTransaction();
         try {
+            $lang = (string) ($news['lang'] ?? Language::defaultCode());
             $newSlug = \App\Core\Duplicator::uniqueCopySlug(
                 (string) $news['slug'],
-                static fn (string $s) => self::slugExists($s)
+                static fn (string $s) => self::slugExists($s, null, $lang)
             );
             $newId = \App\Core\Duplicator::copyRow('news', $news, [
                 'slug' => $newSlug,
                 'status' => 'draft',
                 'deleted_at' => null,
+                'translation_group_id' => null,
             ]);
+            $pdo->prepare(
+                'UPDATE news SET translation_group_id = id
+                 WHERE id = :id AND (translation_group_id IS NULL OR translation_group_id = 0)'
+            )->execute([':id' => $newId]);
             \App\Core\Duplicator::copyChildren('news_translations', 'news_id', $id, $newId);
             \App\Core\Duplicator::copyChildren('news_images', 'news_id', $id, $newId);
+            \App\Core\Duplicator::copyChildren('news_polls', 'news_id', $id, $newId);
 
             $pdo->commit();
 

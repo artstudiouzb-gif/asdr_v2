@@ -7,11 +7,13 @@ namespace App\Controllers\Admin;
 use App\Core\Auth;
 use App\Core\AdminListQuery;
 use App\Core\AppUrl;
+use App\Core\Cache;
 use App\Core\ConcurrencyException;
 use App\Core\Csrf;
 use App\Core\Database;
 use App\Core\Flash;
 use App\Core\ImageField;
+use App\Core\Locale;
 use App\Core\RateLimiter;
 use App\Core\Slug;
 use App\Core\TextProcessor;
@@ -91,6 +93,7 @@ final class NewsController
         if ($purgeAfterCommit !== []) {
             \App\Core\MediaCleaner::purgeUnreferenced($purgeAfterCommit);
         }
+        Cache::forgetPrefix('page:');
 
         // Публикация в соцсети выполняется ТОЛЬКО при явном подтверждении админом (флажок publish_to_social).
         if ($data['status'] === 'published') {
@@ -253,6 +256,7 @@ final class NewsController
         if ($purgeAfterCommit !== []) {
             \App\Core\MediaCleaner::purgeUnreferenced($purgeAfterCommit);
         }
+        Cache::forgetPrefix('page:');
 
         // Публикация в соцсети выполняется ТОЛЬКО при явном подтверждении админом (флажок publish_to_social).
         if ($data['status'] === 'published') {
@@ -281,7 +285,11 @@ final class NewsController
             'id' => $id,
             'title' => (string) ($data['title'] ?? ''),
             'slug' => (string) ($data['slug'] ?? ''),
-            'url' => $base . '/news/' . rawurlencode((string) ($data['slug'] ?? '')),
+            'lang' => (string) ($data['lang'] ?? Language::defaultCode()),
+            'url' => $base . Locale::url(
+                'news/' . rawurlencode((string) ($data['slug'] ?? '')),
+                (string) ($data['lang'] ?? Language::defaultCode())
+            ),
         ]);
     }
 
@@ -517,6 +525,13 @@ final class NewsController
                 'Ссылка на видео должна быть YouTube-адресом (youtube.com/watch, youtu.be и т.п.).',
             ];
         }
+        if ($audioUrl !== ''
+            && (str_starts_with($audioUrl, '//') || !\App\Core\UrlGuard::isSafeMedia($audioUrl))) {
+            return [
+                ['title' => $title, 'slug' => $slugInput, 'excerpt' => $excerpt, 'content' => $content, 'status' => $status, 'audio_url' => $audioUrl, 'layout_type' => $layoutType, 'sidebar_layout' => $sidebarLayout],
+                'Ссылка на аудио должна быть локальным путём или HTTP(S)-адресом.',
+            ];
+        }
 
         $rawSlug = $slugInput !== '' ? $slugInput : $title;
         $slug = Slug::unique(
@@ -525,7 +540,20 @@ final class NewsController
             $id
         );
 
-        $publishedAt = $publishedAtInput !== '' ? str_replace('T', ' ', $publishedAtInput) . ':00' : date('Y-m-d H:i:s');
+        $publishedAt = date('Y-m-d H:i:s');
+        if ($publishedAtInput !== '') {
+            $publishedAtDate = \DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $publishedAtInput);
+            $publishedAtErrors = \DateTimeImmutable::getLastErrors();
+            if ($publishedAtDate === false
+                || ($publishedAtErrors !== false
+                    && ($publishedAtErrors['warning_count'] > 0 || $publishedAtErrors['error_count'] > 0))) {
+                return [
+                    ['title' => $title, 'slug' => $slugInput, 'excerpt' => $excerpt, 'content' => $content, 'status' => $status, 'published_at' => $publishedAtInput, 'layout_type' => $layoutType, 'sidebar_layout' => $sidebarLayout],
+                    'Укажите корректную дату и время публикации.',
+                ];
+            }
+            $publishedAt = $publishedAtDate->format('Y-m-d H:i:s');
+        }
 
         $image = ImageField::resolve('image_file', 'image_url', $existing['image'] ?? null, Auth::id());
 

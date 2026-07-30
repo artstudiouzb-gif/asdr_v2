@@ -19,29 +19,20 @@ final class TranslationGroupHelper
 
         $tables = ['news', 'pages', 'projects'];
         $pdo = Database::pdo();
-
+        $missing = [];
         foreach ($tables as $table) {
-            try {
-                $cols = $pdo->query("SHOW COLUMNS FROM {$table}")->fetchAll(PDO::FETCH_COLUMN) ?: [];
-                if (!in_array('lang', $cols, true)) {
-                    $pdo->exec("ALTER TABLE {$table} ADD COLUMN lang VARCHAR(8) NOT NULL DEFAULT 'ru'");
+            $cols = $pdo->query("SHOW COLUMNS FROM {$table}")->fetchAll(PDO::FETCH_COLUMN) ?: [];
+            foreach (['lang', 'translation_group_id'] as $column) {
+                if (!in_array($column, $cols, true)) {
+                    $missing[] = "{$table}.{$column}";
                 }
-                if (!in_array('translation_group_id', $cols, true)) {
-                    $pdo->exec("ALTER TABLE {$table} ADD COLUMN translation_group_id INT UNSIGNED NULL");
-                    $pdo->exec("UPDATE {$table} SET translation_group_id = id WHERE translation_group_id IS NULL");
-                    $pdo->exec("CREATE INDEX idx_{$table}_lang_group ON {$table} (translation_group_id, lang)");
-                }
-
-                // Переводим уникальный индекс со slug на (slug, lang)
-                $indexes = $pdo->query("SHOW INDEX FROM {$table}")->fetchAll() ?: [];
-                $indexNames = array_map(static fn($idx) => (string) ($idx['Key_name'] ?? ''), $indexes);
-                if (in_array("uq_{$table}_slug", $indexNames, true)) {
-                    $pdo->exec("ALTER TABLE {$table} DROP INDEX uq_{$table}_slug");
-                }
-                if (!in_array("uq_{$table}_slug_lang", $indexNames, true)) {
-                    $pdo->exec("CREATE UNIQUE INDEX uq_{$table}_slug_lang ON {$table} (slug, lang)");
-                }
-            } catch (\Throwable) {}
+            }
+        }
+        if ($missing !== []) {
+            throw new \RuntimeException(
+                'Схема переводов не обновлена (' . implode(', ', $missing)
+                . '). Выполните php database/migrate.php.'
+            );
         }
 
         self::$schemaEnsured = true;

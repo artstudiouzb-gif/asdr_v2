@@ -60,39 +60,8 @@ final class NewsTranslation
         return $result;
     }
 
-    private static bool $schemaEnsured = false;
-
-    public static function ensureSchema(): void
-    {
-        if (self::$schemaEnsured || !Database::isConnected()) {
-            return;
-        }
-
-        $cols = [
-            'key_points' => 'TEXT NULL',
-            'event_meta' => 'TEXT NULL',
-            'timeline_json' => 'JSON NULL',
-            'docs' => 'TEXT NULL',
-            'poll_question' => 'VARCHAR(255) NULL',
-            'poll_options_json' => 'JSON NULL',
-        ];
-
-        try {
-            $existing = Database::pdo()->query("SHOW COLUMNS FROM news_translations")->fetchAll(\PDO::FETCH_COLUMN) ?: [];
-            foreach ($cols as $col => $type) {
-                if (!in_array($col, $existing, true)) {
-                    Database::pdo()->exec("ALTER TABLE news_translations ADD COLUMN {$col} {$type}");
-                }
-            }
-        } catch (\Throwable) {}
-
-        self::$schemaEnsured = true;
-    }
-
     public static function upsert(int $newsId, string $lang, array $data): void
     {
-        self::ensureSchema();
-
         $timelineJson = null;
         if (isset($data['timeline_json'])) {
             $timelineJson = is_array($data['timeline_json']) ? json_encode($data['timeline_json'], JSON_UNESCAPED_UNICODE) : $data['timeline_json'];
@@ -133,5 +102,6 @@ final class NewsTranslation
             ':meta_title' => $data['meta_title'] ?? null,
             ':meta_description' => $data['meta_description'] ?? null,
         ]);
+        \App\Core\Cache::forgetPrefix('page:');
     }
 }

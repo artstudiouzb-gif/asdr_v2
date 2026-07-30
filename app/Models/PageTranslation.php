@@ -51,5 +51,6 @@ final class PageTranslation
             ':meta_description' => $data['meta_description'] ?? null,
             ':lead' => $data['lead'] ?? null,
         ]);
+        \App\Core\Cache::forgetPrefix('page:');
     }
 }

@@ -118,7 +118,7 @@ final class PageController
             return;
         }
 
-        $blockLang = $this->resolveBlockLang();
+        $blockLang = $this->resolveBlockLang((string) ($page['lang'] ?? Language::defaultCode()));
         $blocks = Block::forPage((int) $page['id'], $blockLang);
         $usingFallback = false;
         $defaultLang = Language::defaultCode();
@@ -147,6 +147,21 @@ final class PageController
         $id = (int) $params['id'];
         $fromLang = (string) ($_POST['from_lang'] ?? Language::defaultCode());
         $toLang = (string) ($_POST['to_lang'] ?? $this->resolveBlockLang());
+        if (!Page::findById($id)) {
+            http_response_code(404);
+            View::render('errors/404');
+            return;
+        }
+        if (!Language::isActive($fromLang) || !Language::isActive($toLang)) {
+            Flash::error('Выбран некорректный язык блоков.');
+            header('Location: /admin/pages/' . $id . '/edit');
+            exit;
+        }
+        if ($fromLang === $toLang) {
+            Flash::error('Исходный и целевой языки должны отличаться.');
+            header('Location: /admin/pages/' . $id . '/edit?block_lang=' . urlencode($toLang));
+            exit;
+        }
 
         $count = Block::copyLanguageBlocks($id, $fromLang, $toLang);
         Cache::forgetPrefix('page:' . $id);
@@ -196,7 +211,7 @@ final class PageController
             return;
         }
 
-        $lang = $this->resolveBlockLang();
+        $lang = $this->resolveBlockLang((string) ($page['lang'] ?? Language::defaultCode()));
         $page = Page::localize($page, $lang);
 
         // Рендерим блоки заново, минуя дисковый кэш (показываем актуальный черновик).
@@ -338,20 +353,30 @@ final class PageController
 
         Database::transaction(static function (\PDO $pdo) use ($id): void {
             $pdo->exec('UPDATE pages SET is_home = 0');
-            $pdo->exec("UPDATE pages SET is_home = 1, parent_id = NULL, status = 'published' WHERE id = " . (int) $id);
+            $pdo->exec("UPDATE pages SET is_home = 1, status = 'published', parent_id = NULL WHERE id = " . (int) $id);
         });
 
-        Cache::flush();
+        Cache::forgetPrefix('page:');
         Flash::success('Страница «' . htmlspecialchars((string) $page['title'], ENT_QUOTES) . '» назначена Главной страницей сайта.');
 
-        $referer = $_SERVER['HTTP_REFERER'] ?? '/admin/pages';
-        header('Location: ' . (str_starts_with($referer, '/') ? $referer : '/admin/pages'));
+        $referer = (string) ($_SERVER['HTTP_REFERER'] ?? '/admin/pages');
+        $returnPath = str_starts_with($referer, '/') && !str_starts_with($referer, '//')
+            ? $referer
+            : '/admin/pages';
+        header('Location: ' . $returnPath);
         exit;
     }
 
-    private function resolveBlockLang(): string
+    private function resolveBlockLang(?string $fallback = null): string
     {
-        $lang = (string) ($_GET['block_lang'] ?? $_POST['block_lang'] ?? $_GET['lang'] ?? $_POST['active_lang_tab'] ?? Language::defaultCode());
+        $lang = (string) (
+            $_GET['block_lang']
+            ?? $_POST['block_lang']
+            ?? $_GET['lang']
+            ?? $_POST['active_lang_tab']
+            ?? $fallback
+            ?? Language::defaultCode()
+        );
 
         return Language::isActive($lang) ? $lang : Language::defaultCode();
     }
@@ -359,22 +384,11 @@ final class PageController
     private function saveTranslations(int $pageId): void
     {
         $defaultCode = Language::defaultCode();
-        $activeLang = $this->resolveBlockLang();
         $input = (array) ($_POST['translations'] ?? []);
-
-        if ($activeLang !== '' && $activeLang !== $defaultCode) {
-            $t = $_POST;
-            PageTranslation::upsert($pageId, $activeLang, [
-                'title' => trim((string) ($t['title'] ?? '')),
-                'meta_title' => trim((string) ($t['meta_title'] ?? '')),
-                'meta_description' => trim((string) ($t['meta_description'] ?? '')),
-                'lead' => trim((string) ($t['lead'] ?? '')),
-            ]);
-        }
 
         foreach (Language::active() as $lang) {
             $code = (string) $lang['code'];
-            if ($code === $defaultCode || ($activeLang !== '' && $code === $activeLang) || !isset($input[$code])) {
+            if ($code === $defaultCode || !isset($input[$code])) {
                 continue;
             }
             $t = (array) $input[$code];
@@ -410,7 +424,11 @@ final class PageController
         if ($isHome) {
             $parentId = null;
         }
-        $layoutType = 'no_sidebar';
+        $layoutType = in_array(
+            $_POST['layout_type'] ?? 'no_sidebar',
+            ['no_sidebar', 'left_sidebar', 'right_sidebar'],
+            true
+        ) ? (string) $_POST['layout_type'] : 'no_sidebar';
 
         if ($title === '') {
             return [[

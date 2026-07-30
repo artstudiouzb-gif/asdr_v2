@@ -44,6 +44,11 @@ final class PageController
             return;
         }
 
+        $canonicalSlug = (string) ($page['slug'] ?? '');
+        if (($page['lang'] ?? '') === $lang && $canonicalSlug !== '' && $slug !== $canonicalSlug) {
+            header('Location: ' . Locale::url($canonicalSlug, $lang), true, 301);
+            exit;
+        }
 
         // Главная доступна по «/», а не «/{slug}» — со slug'ом это дубль
         // контента. Постоянный редирект на канонический корневой URL.

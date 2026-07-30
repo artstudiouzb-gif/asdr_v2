@@ -158,16 +158,22 @@ final class Page
         $pdo = Database::pdo();
         $pdo->beginTransaction();
         try {
+            $lang = (string) ($page['lang'] ?? Language::defaultCode());
             $newSlug = \App\Core\Duplicator::uniqueCopySlug(
                 (string) $page['slug'],
-                static fn (string $s) => self::slugExists($s)
+                static fn (string $s) => self::slugExists($s, null, $lang)
             );
             $newId = \App\Core\Duplicator::copyRow('pages', $page, [
                 'slug' => $newSlug,
                 'status' => 'draft',
                 'is_home' => 0,
                 'deleted_at' => null,
+                'translation_group_id' => null,
             ]);
+            $pdo->prepare(
+                'UPDATE pages SET translation_group_id = id
+                 WHERE id = :id AND (translation_group_id IS NULL OR translation_group_id = 0)'
+            )->execute([':id' => $newId]);
             \App\Core\Duplicator::copyChildren('blocks', 'page_id', $id, $newId);
             \App\Core\Duplicator::copyChildren('page_translations', 'page_id', $id, $newId);
 

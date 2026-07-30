@@ -62,7 +62,7 @@ final class ContentRevisionController
         }
 
         ContentRevision::restore($revisionId, Auth::id());
-        Cache::flush();
+        Cache::forgetPrefix('page:');
         Flash::success('Версия восстановлена. Предыдущее состояние также сохранено в истории.');
         header('Location: ' . sprintf(self::EDIT_PATHS[$type], $id));
         exit;
