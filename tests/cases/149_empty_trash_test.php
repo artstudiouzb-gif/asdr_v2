@@ -50,18 +50,20 @@ test('Корзина: очистка всех удалённых элемент�
     assert_true(count(News::trashed()) > 0, 'В корзине есть новости');
     assert_true(count(Project::trashed()) > 0, 'В корзине есть проекты');
 
-    // Симулируем вызов emptyAll
-    $_SERVER['REQUEST_METHOD'] = 'POST';
-    $_SESSION['admin_logged_in'] = true;
-    $_SESSION['csrf_token'] = 'test_token';
-    $_POST['csrf_token'] = 'test_token';
-
+    // Вызываем очистку напрямую, минуя HTTP-обвязку действия.
+    //
+    // Раньше тест звал emptyAll() и рассчитывал перехватить редирект через
+    // try/catch. Перехватить его нельзя: действие начинается с
+    // Auth::requireLogin(), а тот при неаутентифицированной сессии выполняет
+    // header() + exit. exit не является исключением, catch не срабатывал, и
+    // завершался весь процесс раннера — вместе с ним молча пропадали все
+    // тесты, зарегистрированные после этого файла.
     $controller = new TrashController();
+    $removed = $controller->purgeAll();
 
-    // Перехватываем редирект
-    try {
-        $controller->emptyAll();
-    } catch (\Throwable) {}
+    assert_true($removed['pages'] >= 1, 'Очистка отчиталась об удалённых страницах');
+    assert_true($removed['news'] >= 1, 'Очистка отчиталась об удалённых новостях');
+    assert_true($removed['projects'] >= 1, 'Очистка отчиталась об удалённых проектах');
 
     // Проверяем, что корзина пуста
     assert_same(0, count(Page::trashed()), 'Корзина страниц очищена');

@@ -89,6 +89,26 @@ final class TrashController
         Auth::requireLogin();
         Csrf::verifyRequest();
 
+        $this->purgeAll();
+
+        Flash::success('Корзина успешно очищена.');
+        header('Location: /admin/trash');
+        exit;
+    }
+
+    /**
+     * Окончательно удаляет всё содержимое корзины и подчищает медиа, на которые
+     * больше никто не ссылается.
+     *
+     * Вынесено из emptyAll() отдельным методом ради проверяемости: обработчик
+     * начинается с Auth::requireLogin() и заканчивается redirect + exit, а exit
+     * не является исключением и не перехватывается try/catch. Из-за этого вызов
+     * действия напрямую завершал процесс тест-раннера вместе со всем прогоном.
+     *
+     * @return array{pages: int, news: int, projects: int} сколько записей удалено
+     */
+    public function purgeAll(): array
+    {
         /** @var array<int, array<string, mixed>> $pages */
         $pages = Page::trashed();
         foreach ($pages as $p) {
@@ -114,8 +134,10 @@ final class TrashController
             Project::forceDelete($id);
         }
 
-        Flash::success('Корзина успешно очищена.');
-        header('Location: /admin/trash');
-        exit;
+        return [
+            'pages' => count($pages),
+            'news' => count($news),
+            'projects' => count($projects),
+        ];
     }
 }
