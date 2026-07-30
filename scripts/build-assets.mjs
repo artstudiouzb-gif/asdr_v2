@@ -72,7 +72,15 @@ function sourceFingerprint(sources) {
 async function buildCss(sources) {
     const input = sources.map(({ path, content }) => `/* ${path} */\n${content}`).join('\n');
     const result = new CleanCSS({
-        level: 1,
+        // Level 2 доводит оптимизацию до слияния и удаления дублирующихся
+        // правил (около 8 KiB на текущем наборе). Реструктуризацию отключаем
+        // осознанно: она переупорядочивает правила и при равной специфичности
+        // способна изменить победителя каскада — для темы с большим числом
+        // переопределений это неприемлемый риск ради нескольких байт.
+        level: {
+            1: {},
+            2: { restructureRules: false, mergeSemantically: false },
+        },
         rebase: false,
         returnPromise: false,
     }).minify(input);
