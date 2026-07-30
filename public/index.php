@@ -176,6 +176,8 @@ $router->post('/admin/team/{id}/delete', [AdminTeamController::class, 'destroy']
 
 // --- Admin: формы и заявки ---
 $router->get('/admin/forms', [AdminFormController::class, 'index']);
+$router->get('/admin/forms/submissions', [AdminFormController::class, 'allSubmissions']);
+$router->get('/admin/forms/submissions/{id}', [AdminFormController::class, 'submission']);
 $router->get('/admin/forms/create', [AdminFormController::class, 'create']);
 $router->post('/admin/forms/create', [AdminFormController::class, 'store']);
 $router->get('/admin/forms/{id}/edit', [AdminFormController::class, 'edit']);

@@ -14,8 +14,8 @@ final class DashboardController
     public function index(): void
     {
         Auth::requireLogin();
-        $canManageSensitive = RbacGuard::can('manage_submissions')
-            && RbacGuard::can('manage_audit');
+        $canManageSubmissions = RbacGuard::can('manage_submissions');
+        $canManageAudit = RbacGuard::can('manage_audit');
 
         $counts = [
             'news' => (int) Database::pdo()->query('SELECT COUNT(*) FROM news WHERE deleted_at IS NULL')->fetchColumn(),
@@ -24,7 +24,7 @@ final class DashboardController
             'projects' => (int) Database::pdo()->query('SELECT COUNT(*) FROM projects WHERE deleted_at IS NULL')->fetchColumn(),
             'team' => (int) Database::pdo()->query('SELECT COUNT(*) FROM team_members')->fetchColumn(),
             'forms' => (int) Database::pdo()->query('SELECT COUNT(*) FROM forms')->fetchColumn(),
-            'submissions_unread' => $canManageSensitive
+            'submissions_unread' => $canManageSubmissions
                 ? (int) Database::pdo()->query('SELECT COUNT(*) FROM form_submissions WHERE is_read = 0')->fetchColumn()
                 : 0,
             'files' => (int) Database::pdo()->query('SELECT COUNT(*) FROM files')->fetchColumn(),
@@ -42,7 +42,7 @@ final class DashboardController
         }
 
         // Получаем последние 5 действий из журнала аудита
-        $recentLogs = $canManageSensitive
+        $recentLogs = $canManageAudit
             ? \App\Models\AuditLog::search([], 1, 5)['items']
             : [];
 
@@ -61,10 +61,10 @@ final class DashboardController
 
         // Последние поступившие заявки с сайта
         $recentSubmissions = [];
-        if ($canManageSensitive) {
+        if ($canManageSubmissions) {
             try {
                 $recentSubmissions = Database::pdo()->query(
-                    'SELECT fs.id, fs.form_id, fs.data_json, fs.is_read, fs.created_at, f.title AS form_title
+                    'SELECT fs.id, fs.form_id, fs.data_json, fs.is_read, fs.created_at, f.name AS form_title
                      FROM form_submissions fs
                      LEFT JOIN forms f ON fs.form_id = f.id
                      ORDER BY fs.id DESC LIMIT 4'
@@ -88,7 +88,7 @@ final class DashboardController
             $date = date('Y-m-d', strtotime("-$i days"));
             $chartData[$date] = 0;
         }
-        if ($canManageSensitive) {
+        if ($canManageSubmissions) {
             try {
                 $stmt = Database::pdo()->query('SELECT DATE(created_at) as d, COUNT(*) as c FROM form_submissions WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) GROUP BY DATE(created_at)');
                 foreach ($stmt->fetchAll() as $row) {
@@ -118,7 +118,8 @@ final class DashboardController
             'topReadNews' => $topReadNews,
             'topRepoDownloads' => $topRepoDownloads,
             'chartData' => $chartData,
-            'canManageSensitive' => $canManageSensitive,
+            'canManageSubmissions' => $canManageSubmissions,
+            'canManageAudit' => $canManageAudit,
         ]);
     }
 }

@@ -20,14 +20,16 @@ final class FormController
         Auth::requireLogin();
         $canManageSubmissions = RbacGuard::can('manage_submissions');
         $items = FormDef::all();
+        $counts = $canManageSubmissions ? FormSubmission::countsByForm() : [];
         foreach ($items as &$item) {
-            $item['unread'] = $canManageSubmissions
-                ? FormSubmission::countUnread((int) $item['id'])
-                : 0;
+            $stats = $counts[(int) $item['id']] ?? ['total' => 0, 'unread' => 0];
+            $item['submissions_total'] = $canManageSubmissions ? (int) $stats['total'] : 0;
+            $item['unread'] = $canManageSubmissions ? (int) $stats['unread'] : 0;
         }
         View::render('admin/forms/index', [
             'items' => $items,
             'canManageSubmissions' => $canManageSubmissions,
+            'submissionSummary' => $canManageSubmissions ? FormSubmission::summary() : null,
         ]);
     }
 
@@ -98,6 +100,7 @@ final class FormController
     public function destroy(array $params): void
     {
         Auth::requireLogin();
+        RbacGuard::requirePermission('manage_submissions');
         Csrf::verifyRequest();
 
         FormDef::delete((int) $params['id']);
@@ -111,19 +114,44 @@ final class FormController
         Auth::requireLogin();
         RbacGuard::requirePermission('manage_submissions');
 
-        $form = FormDef::findById((int) $params['id']);
+        $form = FormDef::findById((int) ($params['id'] ?? 0));
         if (!$form) {
             http_response_code(404);
             View::render('errors/404');
             return;
         }
 
-        $submissions = FormSubmission::forForm((int) $form['id']);
-        foreach ($submissions as $submission) {
-            FormSubmission::markRead((int) $submission['id']);
-        }
+        $this->renderSubmissions((int) $form['id']);
+    }
 
-        View::render('admin/forms/submissions', ['form' => $form, 'submissions' => $submissions]);
+    /** Общий журнал заявок всех форм. */
+    public function allSubmissions(): void
+    {
+        Auth::requireLogin();
+        RbacGuard::requirePermission('manage_submissions');
+
+        $this->renderSubmissions(null);
+    }
+
+    /** Карточка одной заявки; только здесь она считается прочитанной. */
+    public function submission(array $params): void
+    {
+        Auth::requireLogin();
+        RbacGuard::requirePermission('manage_submissions');
+
+        $submission = FormSubmission::findWithForm((int) ($params['id'] ?? 0));
+        if ($submission === null) {
+            http_response_code(404);
+            View::render('errors/404');
+            return;
+        }
+        FormSubmission::markRead((int) $submission['id']);
+        $submission['is_read'] = 1;
+
+        View::render('admin/forms/submission', [
+            'submission' => $submission,
+            'returnQuery' => $this->cleanSubmissionQuery($_GET['return_query'] ?? ''),
+        ]);
     }
 
     public function deleteSubmission(array $params): void
@@ -132,10 +160,83 @@ final class FormController
         RbacGuard::requirePermission('manage_submissions');
         Csrf::verifyRequest();
 
-        FormSubmission::delete((int) $params['id']);
-        Flash::success('Заявка удалена.');
-        header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/admin/forms'));
+        $id = (int) ($params['id'] ?? 0);
+        if (FormSubmission::findWithForm($id) === null) {
+            Flash::error('Заявка не найдена.');
+        } else {
+            FormSubmission::delete($id);
+            Flash::success('Заявка удалена.');
+        }
+        $query = $this->cleanSubmissionQuery($_POST['return_query'] ?? '');
+        header('Location: /admin/forms/submissions' . ($query !== '' ? '?' . $query : ''));
         exit;
+    }
+
+    private function renderSubmissions(?int $fixedFormId): void
+    {
+        $forms = FormDef::all();
+        $formId = $fixedFormId ?? max(0, (int) ($_GET['form_id'] ?? 0));
+        $selectedForm = null;
+        if ($formId > 0) {
+            foreach ($forms as $form) {
+                if ((int) $form['id'] === $formId) {
+                    $selectedForm = $form;
+                    break;
+                }
+            }
+            if ($selectedForm === null) {
+                $formId = 0;
+            }
+        }
+        $status = (string) ($_GET['status'] ?? '');
+        $status = in_array($status, ['unread', 'read'], true) ? $status : '';
+        $filters = [
+            'form_id' => $formId,
+            'status' => $status,
+            'q' => mb_substr(trim((string) ($_GET['q'] ?? '')), 0, 120),
+        ];
+        $result = FormSubmission::search(
+            $filters,
+            max(1, (int) ($_GET['page'] ?? 1)),
+            20
+        );
+
+        View::render('admin/forms/submissions', [
+            'forms' => $forms,
+            'selectedForm' => $selectedForm,
+            'fixedForm' => $fixedFormId !== null,
+            'submissions' => $result['items'],
+            'summary' => FormSubmission::summary($formId > 0 ? $formId : null),
+            'filters' => $filters,
+            'total' => $result['total'],
+            'page' => $result['page'],
+            'pages' => $result['pages'],
+        ]);
+    }
+
+    /** Разрешённые параметры возврата из карточки/POST без доверия Referer. */
+    private function cleanSubmissionQuery(mixed $raw): string
+    {
+        parse_str(mb_substr((string) $raw, 0, 1000), $input);
+        $params = [];
+        $q = mb_substr(trim((string) ($input['q'] ?? '')), 0, 120);
+        if ($q !== '') {
+            $params['q'] = $q;
+        }
+        $status = (string) ($input['status'] ?? '');
+        if (in_array($status, ['unread', 'read'], true)) {
+            $params['status'] = $status;
+        }
+        $formId = max(0, (int) ($input['form_id'] ?? 0));
+        if ($formId > 0) {
+            $params['form_id'] = $formId;
+        }
+        $page = max(1, (int) ($input['page'] ?? 1));
+        if ($page > 1) {
+            $params['page'] = $page;
+        }
+
+        return http_build_query($params);
     }
 
     /**

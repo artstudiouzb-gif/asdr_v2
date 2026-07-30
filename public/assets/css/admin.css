@@ -1435,7 +1435,7 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .webhook-endpoint__title { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .webhook-endpoint__url {
     margin: 7px 0 10px;
-    color: var(--admin-text-muted);
+    color: var(--admin-muted);
     overflow-wrap: anywhere;
 }
 .webhook-endpoint__actions { flex-wrap: wrap; justify-content: flex-end; }
@@ -1474,6 +1474,89 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .webhook-delivery-details[open] { min-width: 320px; }
 .webhook-error { color: var(--admin-danger); font-weight: 600; }
 #webhook-log td form { margin: 0; }
+.submission-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+.submission-summary__card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 18px;
+    color: var(--admin-text);
+    text-decoration: none;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    background: var(--admin-surface);
+    box-shadow: var(--admin-shadow);
+}
+.submission-summary__card:hover {
+    border-color: var(--admin-accent);
+    transform: translateY(-1px);
+}
+.submission-summary__card span { color: var(--admin-muted); font-weight: 600; }
+.submission-summary__card strong { font-size: 24px; }
+.submission-summary__card--new {
+    border-color: color-mix(in srgb, var(--admin-danger) 32%, var(--admin-border));
+    background: color-mix(in srgb, var(--admin-danger) 5%, var(--admin-surface));
+}
+.forms-list-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.submission-count-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--admin-text);
+    text-decoration: none;
+}
+.submission-count-link > span:not(.badge) { color: var(--admin-muted); font-size: 13px; }
+.admin-filter-bar {
+    display: grid;
+    grid-template-columns: minmax(160px, .7fr) minmax(150px, .6fr) minmax(240px, 1.5fr) auto;
+    align-items: end;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+.admin-filter-bar .form-field { margin: 0; }
+.admin-filter-bar .form-actions { margin: 0; align-self: end; }
+.submission-row--unread td {
+    background: color-mix(in srgb, var(--admin-accent) 5%, var(--admin-surface));
+}
+.submission-row--unread td:first-child {
+    box-shadow: inset 3px 0 0 var(--admin-accent);
+}
+.submission-preview { max-width: 460px; color: var(--admin-muted); }
+.submission-detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+    gap: 18px;
+    align-items: start;
+}
+.submission-fields,
+.submission-meta dl { display: grid; gap: 0; margin: 0; }
+.submission-fields > div,
+.submission-meta dl > div {
+    display: grid;
+    grid-template-columns: minmax(150px, 32%) minmax(0, 1fr);
+    gap: 18px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--admin-border);
+}
+.submission-fields > div:last-child,
+.submission-meta dl > div:last-child { border-bottom: 0; }
+.submission-fields dt,
+.submission-meta dt { color: var(--admin-muted); font-size: 13px; font-weight: 700; }
+.submission-fields dd,
+.submission-meta dd { margin: 0; overflow-wrap: anywhere; }
+.submission-meta form { margin-top: 20px; }
 @media (max-width: 720px) {
     .settings-group { padding: 16px; }
     .settings-jump-nav { top: calc(var(--admin-topbar-h) + 6px); margin-inline: -4px; }
@@ -1492,6 +1575,12 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
         max-height: calc(100vh - var(--admin-topbar-h) - 24px);
         overflow: auto;
     }
+    .submission-summary,
+    .admin-filter-bar,
+    .submission-detail-layout { grid-template-columns: 1fr; }
+    .forms-list-heading { flex-direction: column; align-items: stretch; }
+    .submission-fields > div,
+    .submission-meta dl > div { grid-template-columns: 1fr; gap: 5px; }
 }
 
 /* ============================================================================

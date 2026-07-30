@@ -11,7 +11,8 @@ require __DIR__ . '/layout/header.php';
 /** @var array<int, array<string, mixed>> $recentItems */
 /** @var array<int, array<string, mixed>> $recentSubmissions */
 /** @var array<string, mixed> $systemHealth */
-/** @var bool $canManageSensitive */
+/** @var bool $canManageSubmissions */
+/** @var bool $canManageAudit */
 ?>
 <section class="admin-welcome" aria-labelledby="admin-welcome-title">
     <div>
@@ -49,8 +50,8 @@ require __DIR__ . '/layout/header.php';
         <span class="stat-card__value"><?= (int) $counts['forms'] ?></span>
         <span class="stat-card__label"><?= htmlspecialchars(t('Формы'), ENT_QUOTES) ?></span>
     </a>
-    <?php if ($canManageSensitive): ?>
-        <a href="/admin/forms" class="stat-card<?= $counts['submissions_unread'] > 0 ? ' stat-card--highlight' : '' ?>">
+    <?php if ($canManageSubmissions): ?>
+        <a href="/admin/forms/submissions?status=unread" class="stat-card<?= $counts['submissions_unread'] > 0 ? ' stat-card--highlight' : '' ?>">
             <span class="stat-card__value"><?= (int) $counts['submissions_unread'] ?></span>
             <span class="stat-card__label"><?= htmlspecialchars(t('Непрочитанные заявки'), ENT_QUOTES) ?></span>
         </a>
@@ -75,7 +76,7 @@ require __DIR__ . '/layout/header.php';
     <div class="form-card">
         <div class="u-inline-359c202582">
             <h3 class="u-inline-1da9facb4d"><?= htmlspecialchars(t('Статус системы'), ENT_QUOTES) ?></h3>
-            <?php if ($canManageSensitive): ?>
+            <?php if ($canManageAudit): ?>
                 <a href="/admin/security" class="btn btn--small u-inline-e71ae94b55"><?= htmlspecialchars(t('Безопасность'), ENT_QUOTES) ?> →</a>
             <?php endif; ?>
         </div>
@@ -107,12 +108,12 @@ require __DIR__ . '/layout/header.php';
         </div>
     </div>
 
-    <?php if ($canManageSensitive): ?>
+    <?php if ($canManageSubmissions): ?>
     <!-- Виджет: Последние поступившие заявки с сайта -->
     <div class="form-card">
         <div class="u-inline-359c202582">
             <h3 class="u-inline-1da9facb4d"><?= htmlspecialchars(t('Последние заявки'), ENT_QUOTES) ?></h3>
-            <a href="/admin/forms" class="btn btn--small u-inline-e71ae94b55"><?= htmlspecialchars(t('Все заявки'), ENT_QUOTES) ?> →</a>
+            <a href="/admin/forms/submissions" class="btn btn--small u-inline-e71ae94b55"><?= htmlspecialchars(t('Все заявки'), ENT_QUOTES) ?> →</a>
         </div>
         <?php if (empty($recentSubmissions)): ?>
             <p class="form-hint u-inline-45517d35ab"><?= htmlspecialchars(t('Заявок пока не поступало.'), ENT_QUOTES) ?></p>
@@ -122,9 +123,15 @@ require __DIR__ . '/layout/header.php';
                     <?php
                     $isUnread = (int) ($sub['is_read'] ?? 0) === 0;
                     $data = json_decode((string) ($sub['data_json'] ?? '{}'), true) ?: [];
-                    $previewText = implode(' • ', array_slice(array_values($data), 0, 2));
+                    $previewValues = array_map(
+                        static fn (mixed $value): string => is_array($value)
+                            ? implode(', ', array_map('strval', $value))
+                            : (string) $value,
+                        array_slice(array_values($data), 0, 2)
+                    );
+                    $previewText = implode(' • ', $previewValues);
                     ?>
-                    <div class="u-inline-729013516a">
+                    <a class="u-inline-729013516a" href="/admin/forms/submissions/<?= (int) $sub['id'] ?>">
                         <div class="u-inline-4e8f89004d">
                             <strong class="u-inline-ffcf89af9c"><?= htmlspecialchars((string) ($sub['form_title'] ?? t('Форма')), ENT_QUOTES) ?></strong>
                             <span class="form-hint u-inline-33d0b17b27"><?= htmlspecialchars($previewText !== '' ? $previewText : '—', ENT_QUOTES) ?></span>
@@ -135,7 +142,7 @@ require __DIR__ . '/layout/header.php';
                             <?php endif; ?>
                             <span class="form-hint u-inline-083bdc9269"><?= date('d.m H:i', strtotime((string) $sub['created_at'])) ?></span>
                         </div>
-                    </div>
+                    </a>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
@@ -221,7 +228,7 @@ require __DIR__ . '/layout/header.php';
 </div>
 <?php endif; ?>
 
-<?php if ($canManageSensitive): ?>
+<?php if ($canManageSubmissions || $canManageAudit): ?>
 <?php
 $maxVal = max(1, ...array_values($chartData));
 $width = 500;
@@ -243,6 +250,7 @@ $pointsStr = implode(' ', $points);
 $fillPointsStr = "$padding," . ($height - $padding) . " $pointsStr " . ($width - $padding) . "," . ($height - $padding);
 ?>
 <div class="dashboard-grid">
+    <?php if ($canManageSubmissions): ?>
     <div class="form-card">
         <h3 class="u-inline-291b7bbb01"><?= htmlspecialchars(t('Активность заявок'), ENT_QUOTES) ?></h3>
         <p class="form-hint"><?= htmlspecialchars(t('Число заполненных форм обратной связи за последние 7 дней.'), ENT_QUOTES) ?></p>
@@ -285,7 +293,9 @@ $fillPointsStr = "$padding," . ($height - $padding) . " $pointsStr " . ($width -
             </svg>
         </div>
     </div>
+    <?php endif; ?>
 
+    <?php if ($canManageAudit): ?>
     <div class="form-card">
         <h3 class="u-inline-291b7bbb01"><?= htmlspecialchars(t('Журнал действий'), ENT_QUOTES) ?></h3>
         <p class="form-hint"><?= htmlspecialchars(t('Последние действия администраторов в панели управления.'), ENT_QUOTES) ?></p>
@@ -309,6 +319,7 @@ $fillPointsStr = "$padding," . ($height - $padding) . " $pointsStr " . ($width -
             <?php endif; ?>
         </div>
     </div>
+    <?php endif; ?>
 </div>
 <?php endif; ?>
 
