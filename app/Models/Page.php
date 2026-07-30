@@ -791,11 +791,17 @@ final class Page
             if ($parentError !== null) {
                 throw new \DomainException($parentError);
             }
-            if (!empty($data['is_home'])) {
-                $pdo->exec('UPDATE pages SET is_home = 0');
-            }
-
             $lang = (string) ($data['lang'] ?? Language::defaultCode());
+
+            // Снимаем признак главной только у страниц ТОГО ЖЕ языка.
+            // Раньше сброс шёл по всей таблице, и создание главной на узбекском
+            // снимало флаг с русской главной: findHome('ru') переставал её
+            // находить и откатывался на первую попавшуюся страницу со slug
+            // 'home'. У каждого языка своя главная — это и проверяет findHome.
+            if (!empty($data['is_home'])) {
+                $pdo->prepare('UPDATE pages SET is_home = 0 WHERE lang = :lang')
+                    ->execute([':lang' => $lang]);
+            }
 
             $stmt = $pdo->prepare(
                 'INSERT INTO pages (title, slug, meta_title, meta_description, `lead`, status, is_home, layout_type, hide_chrome, transparent_header, lang, translation_group_id, parent_id, created_at)
@@ -836,17 +842,24 @@ final class Page
         $data['parent_id'] = $parentId;
 
         Database::transaction(static function (\PDO $pdo) use ($id, $data, $parentId, $expectedLockVersion): void {
-            $lockCurrent = $pdo->prepare('SELECT id FROM pages WHERE id = :id FOR UPDATE');
+            $lockCurrent = $pdo->prepare('SELECT id, lang FROM pages WHERE id = :id FOR UPDATE');
             $lockCurrent->execute([':id' => $id]);
-            if ($lockCurrent->fetchColumn() === false) {
+            $currentRow = $lockCurrent->fetch();
+            if ($currentRow === false) {
                 throw new \DomainException('Страница не найдена.');
             }
             $parentError = self::validateParent($parentId, $id, true);
             if ($parentError !== null) {
                 throw new \DomainException($parentError);
             }
+
+            // Признак главной снимаем только у страниц того же языка: у каждого
+            // языка своя главная. Сброс по всей таблице обнулял главную соседнего
+            // языка, и findHome() для него переставал её находить.
             if (!empty($data['is_home'])) {
-                $pdo->exec('UPDATE pages SET is_home = 0');
+                $targetLang = (string) ($data['lang'] ?? $currentRow['lang'] ?? Language::defaultCode());
+                $pdo->prepare('UPDATE pages SET is_home = 0 WHERE lang = :lang')
+                    ->execute([':lang' => $targetLang]);
             }
 
             $stmt = $pdo->prepare(
