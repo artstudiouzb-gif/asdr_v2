@@ -115,7 +115,7 @@ $themeList = [
             <?php foreach ($themeList as $tKey => $tInfo): ?>
                 <?php $isAct = $tKey === $currentTheme; ?>
                 <label class="admin-theme-card<?= $isAct ? ' is-active' : '' ?>"
-                       onclick="document.documentElement.setAttribute('data-admin-theme', '<?= $tKey ?>');">
+                       data-admin-theme-preview="<?= $tKey ?>">
                     <div class="u-inline-e02c6d0480">
                         <span class="u-inline-0b08752dae">
                             <input class="u-inline-1da9facb4d" type="radio" name="admin_theme" value="<?= $tKey ?>" <?= $isAct ? 'checked' : '' ?>>

@@ -26,7 +26,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
             <div class="media-dropzone__sub">или нажмите кнопку ниже для выбора на диске</div>
             <div class="u-inline-bea13c7a75">
                 <input class="u-inline-c8be1ccba6" type="file" id="media_file_input" name="file" required>
-                <button type="button" class="btn btn--primary" onclick="document.getElementById('media_file_input').click()">Выберите файлы</button>
+                <button type="button" class="btn btn--primary" data-file-pick="media_file_input">Выберите файлы</button>
                 <?php if ($canManageProtected): ?>
                     <select class="u-inline-732d6ab846" name="access_type">
                         <option value="public">Открытый доступ</option>
@@ -52,7 +52,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
             </button>
 
             <!-- Фильтр по типам медиафайлов -->
-            <select name="type" onchange="this.form.submit()">
+            <select name="type" data-autosubmit>
                 <option value="">Все медиафайлы</option>
                 <option value="image" <?= $selectedType === 'image' ? 'selected' : '' ?>>Изображения</option>
                 <option value="video" <?= $selectedType === 'video' ? 'selected' : '' ?>>Видео</option>
@@ -60,7 +60,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
             </select>
 
             <!-- Фильтр по дате создания -->
-            <select name="date" onchange="this.form.submit()">
+            <select name="date" data-autosubmit>
                 <option value="">Все даты</option>
                 <?php foreach (($availableDates ?? []) as $dVal): ?>
                     <?php 
@@ -86,7 +86,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
             <input type="search" name="q" value="<?= htmlspecialchars($searchQuery, ENT_QUOTES) ?>" placeholder="Поиск медиафайлов…" id="media_search_input">
 
             <!-- Сортировка -->
-            <select name="sort" onchange="this.form.submit()">
+            <select name="sort" data-autosubmit>
                 <option value="date_desc" <?= $selectedSort === 'date_desc' ? 'selected' : '' ?>>Сначала новые</option>
                 <option value="date_asc" <?= $selectedSort === 'date_asc' ? 'selected' : '' ?>>Сначала старые</option>
                 <option value="name_asc" <?= $selectedSort === 'name_asc' ? 'selected' : '' ?>>По имени (А-Я)</option>
@@ -246,7 +246,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
                     <?= Csrf::field() ?>
                     <button type="submit" class="btn btn--danger">Удалить навсегда</button>
                 </form>
-                <button type="button" class="btn" onclick="document.getElementById('media_modal').classList.remove('is-open')">Закрыть</button>
+                <button type="button" class="btn" data-close-target="media_modal">Закрыть</button>
             </div>
         </div>
     </div>
