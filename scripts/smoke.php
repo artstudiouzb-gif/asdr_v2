@@ -201,6 +201,13 @@ if ($adminCreds !== null) {
     } elseif (stripos($auth['final'], '/admin/login') !== false) {
         echo "  ✗ Не удалось войти (проверьте логин/пароль).\n";
         $fail++;
+    } elseif (stripos($auth['final'], '/admin/profile') !== false) {
+        // Сессия без подключённого второго фактора пускает только в профиль:
+        // все остальные адреса молча редиректятся туда же. Раньше обход
+        // засчитывал такие редиректы как успех и «проверял» один профиль.
+        echo "  ✗ Вход ограничен настройкой второго фактора — админка не проверена.\n";
+        echo "    Подключите Telegram выбранному пользователю или укажите другого админа.\n";
+        $fail++;
     } else {
         $adminRoutes = [
             '/admin', '/admin/news', '/admin/pages', '/admin/projects', '/admin/albums',
@@ -213,10 +220,18 @@ if ($adminCreds !== null) {
         echo "Обход админки:\n";
         foreach ($adminRoutes as $path) {
             $r = fetch($base . $path, $cookieJar);
-            // Если редиректнуло на логин — сессия слетела.
+            // Редирект на логин — сессия слетела; редирект на профиль с другого
+            // адреса означает ограниченную сессию, и страница не проверена.
             $bounced = stripos($r['final'], '/admin/login') !== false;
-            $errSig = (!$bounced && $r['status'] < 400) ? $checkBody($r['body']) : ($bounced ? 'сессия/доступ' : null);
-            $ok = !$bounced && $r['status'] > 0 && $r['status'] < 400 && $errSig === null;
+            $bouncedToProfile = !$bounced
+                && $path !== '/admin/profile'
+                && stripos($r['final'], '/admin/profile') !== false;
+            if ($bounced || $bouncedToProfile) {
+                $errSig = $bounced ? 'сессия/доступ' : 'редирект на профиль: доступ ограничен';
+            } else {
+                $errSig = $r['status'] < 400 ? $checkBody($r['body']) : null;
+            }
+            $ok = !$bounced && !$bouncedToProfile && $r['status'] > 0 && $r['status'] < 400 && $errSig === null;
             if (!$ok) {
                 $fail++;
             }

@@ -59,3 +59,21 @@ test('CSP: разметка медиабиблиотеки использует 
     // Форма загрузки осталась обычной multipart-формой.
     assert_contains('action="/admin/files/upload" enctype="multipart/form-data"', $view);
 });
+
+/**
+ * Обход админки в smoke раньше засчитывал редирект на профиль как успех:
+ * сессия без второго фактора пускает только туда, и все админ-страницы
+ * «проходили», хотя проверялся один и тот же профиль.
+ */
+test('Smoke: ограниченная сессия не выдаётся за пройденную админку', function () {
+    $smoke = (string) file_get_contents(dirname(__DIR__, 2) . '/scripts/smoke.php');
+
+    // Вход, который привёл в профиль, помечается провалом с подсказкой.
+    assert_contains("stripos(\$auth['final'], '/admin/profile') !== false", $smoke);
+    assert_contains('Вход ограничен настройкой второго фактора', $smoke);
+
+    // Отдельные страницы, редиректящие в профиль, тоже не считаются пройденными.
+    assert_contains('$bouncedToProfile', $smoke);
+    assert_contains("\$path !== '/admin/profile'", $smoke);
+    assert_contains('редирект на профиль: доступ ограничен', $smoke);
+});
