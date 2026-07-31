@@ -364,7 +364,6 @@ return [
     'Увеличенные' => 'Increased',
     'Максимальные' => 'Maximum',
     'Чтение без помех' => 'Distraction-free reading',
-    'Режим чтения' => 'Reading mode',
     'Скрыть картинки' => 'Hide images',
     'Остановить анимации' => 'Stop animations',
     'Подчёркивать ссылки' => 'Underline links',

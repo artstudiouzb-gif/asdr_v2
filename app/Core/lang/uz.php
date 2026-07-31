@@ -364,7 +364,6 @@ return [
     'Увеличенные' => 'Kattalashtirilgan',
     'Максимальные' => 'Eng katta',
     'Чтение без помех' => 'Xalaqitsiz o‘qish',
-    'Режим чтения' => 'O‘qish rejimi',
     'Скрыть картинки' => 'Rasmlarni yashirish',
     'Остановить анимации' => 'Animatsiyalarni to‘xtatish',
     'Подчёркивать ссылки' => 'Havolalarni tagiga chizish',
