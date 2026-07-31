@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Core\Database;
 use App\Models\TeamMember;
 
 /**
@@ -59,36 +60,56 @@ test('Команда: без секторов группировка возвр�
     assert_same('', $groups[0]['slug']);
 });
 
-test('Команда: блок выводит группы с якорями и подзаголовками отделов', function () {
-    // Блок обогащает данные из БД, поэтому рендер требует тестовую базу.
+test('Команда: блок выводит группы с якорями и фильтрует по сектору (БД)', function () {
+    // Состав блок берёт из БД, поэтому проверяем на реальных записях.
     ensure_test_db();
-    $rendered = \App\Core\BlockRenderer::render([
+    $pdo = Database::pdo();
+
+    $pdo->exec(
+        "INSERT INTO team_members (name, position, department, unit, status, sort_order)
+         VALUES ('Тестов Руководитель', 'Руководитель сектора', 'Сектор анализа и исследований', NULL, 'published', 901)"
+    );
+    $lead = (int) $pdo->lastInsertId();
+    $pdo->exec(
+        "INSERT INTO team_members (name, position, department, unit, status, sort_order)
+         VALUES ('Тестов Кадровик', 'Главный специалист', 'Сектор анализа и исследований', 'группа по работе с кадрами', 'published', 902)"
+    );
+    $staff = (int) $pdo->lastInsertId();
+    $pdo->exec(
+        "INSERT INTO team_members (name, position, department, unit, status, sort_order)
+         VALUES ('Тестов Пресс-секретарь', 'Специалист', 'Сектор по связям с общественностью', NULL, 'published', 903)"
+    );
+    $other = (int) $pdo->lastInsertId();
+
+    $render = static fn (array $data): array => \App\Core\BlockRenderer::render([
         'id' => 880,
         'type' => 'team_list',
         'custom_css' => '',
-        'data' => json_encode([
-            'title' => 'Команда',
-            'members' => [
-                ['name' => 'Каримов Б.', 'position' => 'Руководитель сектора'],
-                ['name' => 'Ражабов О.', 'position' => 'Главный специалист'],
-            ],
-            'groups' => [
-                [
-                    'name' => 'Сектор анализа и исследований',
-                    'slug' => 'sektor-analiza-i-issledovaniy',
-                    'members' => [['name' => 'Каримов Б.', 'position' => 'Руководитель сектора']],
-                    'units' => [
-                        ['name' => 'группа по работе с кадрами', 'members' => [['name' => 'Ражабов О.', 'position' => 'Главный специалист']]],
-                    ],
-                ],
-            ],
-        ]),
+        'data' => json_encode($data),
     ]);
 
-    assert_contains('id="team-sektor-analiza-i-issledovaniy"', $rendered['html']);
-    assert_contains('block-team__group-title', $rendered['html']);
-    assert_contains('группа по работе с кадрами', $rendered['html']);
-    assert_contains('Ражабов О.', $rendered['html']);
+    $grouped = $render(['title' => 'Команда', 'group_by_department' => true])['html'];
+    assert_contains('id="team-sektor-analiza-i-issledovaniy"', $grouped);
+    assert_contains('block-team__group-title', $grouped);
+    assert_contains('группа по работе с кадрами', $grouped);
+    assert_contains('Тестов Кадровик', $grouped);
+    assert_contains('Тестов Пресс-секретарь', $grouped);
+
+    // Фильтр по сектору: чужой сектор в блок не попадает.
+    $filtered = $render([
+        'title' => 'Команда',
+        'group_by_department' => true,
+        'department' => 'sektor-analiza-i-issledovaniy',
+    ])['html'];
+    assert_contains('Тестов Руководитель', $filtered);
+    assert_not_contains('Тестов Пресс-секретарь', $filtered);
+
+    // Без группировки якорей и заголовков секторов нет.
+    $plain = $render(['title' => 'Команда'])['html'];
+    assert_not_contains('block-team__group-title', $plain);
+    assert_contains('Тестов Руководитель', $plain);
+
+    $pdo->exec("DELETE FROM team_members WHERE id IN ({$lead}, {$staff}, {$other})");
 });
 
 test('Команда: сектор и отдел сохраняются формой и переводами', function () {
