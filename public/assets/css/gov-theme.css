@@ -2797,6 +2797,14 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 /* Боковые отступы задаёт контейнер страницы, поэтому у шапки раздела их нет:
    иначе заголовок уезжает вправо относительно остального контента. */
 .content-pagehead { padding: clamp(18px, 2.6vw, 32px) 0 clamp(6px, 1.4vw, 14px); }
+/* Шапка страницы уже отбила заголовок от контента: полный секционный отступ
+   первого блока добавлял к ней пустую полосу почти в сотню пикселей. */
+.content-pagehead + .cms-block,
+.content-pagehead + .layout .cms-block:first-child { padding-top: clamp(8px, 1.6vw, 20px); }
+
+/* Текстовый блок держит ту же меру строки, что и его содержимое, поэтому
+   заголовок не уезжает шире текста. */
+.block-text__title { max-width: var(--rich-measure, 72ch); }
 .content-pagehead__inner { max-width: var(--container-max); margin: 0 auto; }
 .content-pagehead__title { font-size: clamp(1.9rem, 3.4vw, 2.6rem); margin: 0 0 10px; color: var(--gov-title); }
 .content-pagehead__lead { color: var(--gov-muted); font-size: 1.05rem; line-height: 1.6; max-width: 70ch; margin: 0; }
