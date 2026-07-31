@@ -31,7 +31,7 @@ test('Блок contact_cards: модульный, карточки с ссылк
     // Ссылка карточки.
     assert_contains('mailto:info@example.uz', $h);
     assert_contains('contact-card__icon', $h);
-    assert_contains('/assets/vendor/tabler/tabler-sprite.svg#tabler-mail', $h);
+    assert_contains('#tabler-mail', $h);
 });
 
 test('Блок contact_cards: пустой список — заглушка', function () {

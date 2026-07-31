@@ -40,6 +40,6 @@ test('Все разделы боковой навигации админки и�
     foreach ($sections as $section) {
         $icon = AdminUi::navigationIcon($section);
         assert_true($icon !== '', 'Нет Tabler-иконки для раздела: ' . $section);
-        assert_contains('/assets/vendor/tabler/tabler-sprite.svg#tabler-', $icon);
+        assert_contains('#tabler-', $icon);
     }
 });

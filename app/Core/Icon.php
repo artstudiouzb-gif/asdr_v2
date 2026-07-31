@@ -14,6 +14,20 @@ namespace App\Core;
 final class Icon
 {
     public const SPRITE_PATH = '/assets/vendor/tabler/tabler-sprite.svg';
+
+    /**
+     * Иконки, которые публичный JS вставляет в уже отрисованную страницу
+     * (кнопки шаринга, копирования, навигация галереи). В исходном HTML их
+     * нет, поэтому геометрию встраиваем заранее — иначе после клика
+     * появлялась бы пустая рамка. Список сверяется тестом с frontend.js.
+     */
+    public const RUNTIME_ICONS = [
+        'brand-telegram', 'check', 'chevron-left', 'chevron-right',
+        'circle-check', 'circle-x', 'copy', 'download', 'x',
+    ];
+
+    /** @var array<string, array{0: int, 1: int}>|null индекс смещений спрайта */
+    private static ?array $spriteIndex = null;
     public const CATALOG_PATH = '/assets/vendor/tabler/tabler-icons.json';
 
     /**
@@ -157,7 +171,9 @@ final class Icon
         $stroke = rtrim(rtrim(number_format($strokeWidth, 2, '.', ''), '0'), '.');
         $class = trim($class);
         $classes = trim('icon icon-tabler ' . $class);
-        $href = self::SPRITE_PATH . '#tabler-' . $resolved;
+        // Ссылка на символ внутри документа: нужные <symbol> встраивает
+        // Icon::injectSprite(), поэтому спрайт целиком страница не грузит.
+        $href = '#tabler-' . $resolved;
 
         return '<svg class="' . htmlspecialchars($classes, ENT_QUOTES) . '" width="' . $size
             . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'
@@ -174,5 +190,102 @@ final class Icon
             . htmlspecialchars(self::SPRITE_PATH, ENT_QUOTES) . '">'
             . '<meta name="asdr-icon-catalog" content="'
             . htmlspecialchars(self::CATALOG_PATH, ENT_QUOTES) . '">';
+    }
+
+    /**
+     * Встраивает в HTML геометрию только тех иконок, что в нём встретились.
+     *
+     * Ключи берём из готовой разметки, а не из счётчика вызовов render():
+     * блоки страниц отдаются из кэша, и при попадании в кэш render() уже не
+     * вызывается — иконки остались бы без геометрии.
+     */
+    public static function injectSprite(string $html): string
+    {
+        if (!str_contains($html, 'tabler-')) {
+            return $html;
+        }
+        $bodyEnd = self::bodyTagEnd($html);
+        if ($bodyEnd === null) {
+            return $html;
+        }
+
+        preg_match_all('/href="#tabler-([a-z0-9-]+)"/', $html, $matches);
+        $names = array_values(array_unique(array_merge($matches[1] ?? [], self::RUNTIME_ICONS)));
+        if ($names === []) {
+            return $html;
+        }
+
+        $symbols = self::symbols($names);
+        if ($symbols === '') {
+            return $html;
+        }
+
+        $sprite = '<svg class="tabler-sprite" aria-hidden="true" focusable="false" width="0" height="0">'
+            . '<defs>' . $symbols . '</defs></svg>';
+
+        return substr($html, 0, $bodyEnd) . $sprite . substr($html, $bodyEnd);
+    }
+
+    /**
+     * Позиция сразу за открывающим тегом <body …>.
+     */
+    private static function bodyTagEnd(string $html): ?int
+    {
+        $bodyPos = stripos($html, '<body');
+        if ($bodyPos === false) {
+            return null;
+        }
+        $close = strpos($html, '>', $bodyPos);
+
+        return $close === false ? null : $close + 1;
+    }
+
+    /**
+     * Вырезает <symbol> из спрайта по индексу смещений (без разбора файла).
+     *
+     * @param list<string> $names
+     */
+    private static function symbols(array $names): string
+    {
+        $index = self::spriteIndex();
+        if ($index === []) {
+            return '';
+        }
+        $file = \dirname(__DIR__, 2) . '/public' . self::SPRITE_PATH;
+        $handle = @fopen($file, 'rb');
+        if ($handle === false) {
+            return '';
+        }
+
+        $out = '';
+        foreach ($names as $name) {
+            if (!isset($index[$name])) {
+                continue;
+            }
+            [$offset, $length] = $index[$name];
+            if (fseek($handle, $offset) !== 0) {
+                continue;
+            }
+            $chunk = fread($handle, $length);
+            if (is_string($chunk)) {
+                $out .= $chunk;
+            }
+        }
+        fclose($handle);
+
+        return $out;
+    }
+
+    /** @return array<string, array{0: int, 1: int}> */
+    private static function spriteIndex(): array
+    {
+        if (self::$spriteIndex !== null) {
+            return self::$spriteIndex;
+        }
+        $file = __DIR__ . '/data/tabler-sprite-index.php';
+        $index = is_file($file) ? require $file : [];
+        self::$spriteIndex = is_array($index) ? $index : [];
+
+        return self::$spriteIndex;
     }
 }

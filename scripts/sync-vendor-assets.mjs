@@ -79,4 +79,60 @@ if (checkOnly) {
     await writeFile(tablerCatalogTarget, tablerCatalog);
 }
 
-console.log(`Coloris and Tabler vendor assets ${checkOnly ? 'verified' : 'synced'}.`);
+// Индекс смещений символов в спрайте: публичные страницы и админка
+// встраивают только те иконки, что реально встретились в HTML, вместо
+// загрузки спрайта целиком (2 МБ на каждой странице).
+const spriteBuffer = Buffer.from(tablerSprite, 'utf8');
+const symbolOpen = Buffer.from('<symbol id="tabler-', 'utf8');
+const symbolClose = Buffer.from('</symbol>', 'utf8');
+const spriteIndex = [];
+let cursor = 0;
+while ((cursor = spriteBuffer.indexOf(symbolOpen, cursor)) !== -1) {
+    const nameStart = cursor + symbolOpen.length;
+    const nameEnd = spriteBuffer.indexOf(0x22, nameStart); // закрывающая кавычка id
+    const closeAt = spriteBuffer.indexOf(symbolClose, nameEnd);
+    if (nameEnd === -1 || closeAt === -1) {
+        break;
+    }
+    const end = closeAt + symbolClose.length;
+    spriteIndex.push([spriteBuffer.slice(nameStart, nameEnd).toString('utf8'), cursor, end - cursor]);
+    cursor = end;
+}
+
+const indexBody = spriteIndex
+    .map(([name, offset, length]) => `    '${name}' => [${offset}, ${length}],`)
+    .join('\n');
+const spriteIndexFile = `<?php
+
+declare(strict_types=1);
+
+/**
+ * Смещения символов в public/assets/vendor/tabler/tabler-sprite.svg:
+ * имя иконки => [позиция в байтах, длина].
+ *
+ * Генерируется командой \`npm run build:vendor\`, руками не правится.
+ * Позволяет вырезать нужные <symbol> без разбора двухмегабайтного спрайта.
+ */
+
+return [
+${indexBody}
+];
+`;
+const spriteIndexTarget = 'app/Core/data/tabler-sprite-index.php';
+
+if (checkOnly) {
+    let current;
+    try {
+        current = await readText(spriteIndexTarget);
+    } catch {
+        throw new Error(`${spriteIndexTarget} is missing. Run npm run build:vendor.`);
+    }
+    if (current !== spriteIndexFile) {
+        throw new Error(`${spriteIndexTarget} is stale. Run npm run build:vendor.`);
+    }
+} else {
+    await mkdir(spriteIndexTarget.slice(0, spriteIndexTarget.lastIndexOf('/')), { recursive: true });
+    await writeFile(spriteIndexTarget, spriteIndexFile);
+}
+
+console.log(`Coloris and Tabler vendor assets ${checkOnly ? 'verified' : 'synced'} (${spriteIndex.length} icons indexed).`);

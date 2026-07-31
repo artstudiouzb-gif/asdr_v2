@@ -105,6 +105,11 @@ test('repository source does not contain the retired external product name', fun
                 continue 2;
             }
         }
+        // Индекс спрайта — производная вендорного набора Tabler: там же лежит
+        // бренд-иконка с этим названием, а сам спрайт уже исключён как vendor.
+        if (basename($path) === 'tabler-sprite-index.php') {
+            continue;
+        }
         $contents = file_get_contents($path);
         if (!is_string($contents)) {
             continue;

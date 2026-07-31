@@ -1349,7 +1349,9 @@ body.design-header-dark .site-burger, body.design-header-accent .site-burger { c
 .album-card__cover { width: 100%; height: 170px; object-fit: cover; display: block; }
 .album-card__cover--empty { background: color-mix(in srgb, var(--color-primary, #1f4b8e) 12%, transparent); }
 .album-card__body { padding: 12px 14px 14px; display: grid; gap: 4px; }
-.album-card__title { font-weight: 600; line-height: 1.35; }
+/* Заголовок карточки — h2 (после h1 страницы), поэтому размер и отступы
+   задаём классом: с уровнем заголовка внешний вид меняться не должен. */
+.album-card__title { font-size: 1.55rem; font-weight: 600; line-height: 1.35; margin: 22.4px 0 12.8px; }
 .album-card__meta { font-size: 0.8125rem; color: var(--text-muted); }
 .album-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-top: 18px; }
 .album-photo { margin: 0; }

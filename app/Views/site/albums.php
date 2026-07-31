@@ -31,7 +31,7 @@ require __DIR__ . '/_header.php';
                         <span class="album-card__cover album-card__cover--empty" aria-hidden="true"></span>
                     <?php endif; ?>
                     <span class="album-card__body">
-                        <h3 class="album-card__title"><?= htmlspecialchars((string) $album['title'], ENT_QUOTES) ?></h3>
+                        <h2 class="album-card__title"><?= htmlspecialchars((string) $album['title'], ENT_QUOTES) ?></h2>
                         <span class="album-card__meta"><?= (int) $album['images_count'] ?> <?= htmlspecialchars(t('фото'), ENT_QUOTES) ?></span>
                     </span>
                 </a>

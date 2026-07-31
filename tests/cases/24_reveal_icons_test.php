@@ -63,6 +63,6 @@ test('Блок advantages рендерит ключ локальной Tabler-и
         'items' => [['icon_svg' => 'bolt', 'title' => 'Скорость', 'text' => 'быстро']],
     ]);
     assert_contains('block-advantages__icon--svg', $html);
-    assert_contains('/assets/vendor/tabler/tabler-sprite.svg#tabler-bolt', $html);
+    assert_contains('#tabler-bolt', $html);
     assert_not_contains('<rect', $html, 'собственная SVG-геометрия не хранится в данных блока');
 });

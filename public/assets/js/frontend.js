@@ -13,10 +13,9 @@
     var label = function (key, fallback) {
         return typeof labels[key] === 'string' && labels[key] !== '' ? labels[key] : fallback;
     };
-    var iconSpriteNode = document.querySelector('meta[name="asdr-icon-sprite"]');
-    var iconSprite = iconSpriteNode
-        ? iconSpriteNode.getAttribute('content')
-        : '/assets/vendor/tabler/tabler-sprite.svg';
+    // Геометрию иконок страница уже несёт инлайном (Icon::injectSprite),
+    // поэтому ссылаемся на символ внутри документа, а не на спрайт-файл:
+    // ради пары иконок незачем тянуть двухмегабайтный спрайт Tabler.
     var asdrIcon = function (name, size, className) {
         name = String(name || '').trim().toLowerCase().replace(/^tabler-/, '');
         if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) { return ''; }
@@ -25,7 +24,7 @@
         return '<svg class="icon icon-tabler ' + className + '" width="' + size + '" height="' + size
             + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
             + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'
-            + '<use href="' + iconSprite + '#tabler-' + name + '"></use></svg>';
+            + '<use href="#tabler-' + name + '"></use></svg>';
     };
     window.asdrPublicIcon = asdrIcon;
 
