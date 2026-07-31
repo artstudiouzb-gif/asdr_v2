@@ -1315,7 +1315,7 @@ final class DemoSeeder
                     'title' => 'Tuzilma',
                     'blocks' => [
                         ['org_structure', 'Tuzilma sxemasi', [
-                            'title' => 'Tashkiliy tuzilma',
+                            'title' => 'Oʻzbekiston Respublikasi Prezidenti huzuridagi Strategik rivojlanish va islohotlar agentligining tuzilmasi',
                             'layout' => 'tree',
                             'columns' => 4,
                             'council' => 'Muvofiqlashtiruvchi kengash',
