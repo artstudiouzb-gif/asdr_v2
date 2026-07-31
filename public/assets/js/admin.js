@@ -779,15 +779,26 @@
         function render(items) {
             if (!items.length) { results.innerHTML = '<div class="admin-search__empty">Ничего не найдено</div>'; }
             else {
-                results.innerHTML = items.map(function (r) {
-                    return '<a class="admin-search__item" href="' + r.url + '">' +
-                        '<span class="admin-search__type">' + r.type + '</span>' +
-                        '<span class="admin-search__title"></span></a>';
-                }).join('');
-                // Заголовки вставляем через textContent (без риска XSS).
-                var links = results.querySelectorAll('.admin-search__item');
-                items.forEach(function (r, i) {
-                    links[i].querySelector('.admin-search__title').textContent = r.title;
+                // Строки ответа собираем узлами: подстановка в HTML-строку
+                // позволяла бы выйти из атрибута href и вставить разметку.
+                results.textContent = '';
+                items.forEach(function (r) {
+                    var link = document.createElement('a');
+                    link.className = 'admin-search__item';
+                    // Только собственные адреса панели: чужая схема в href — XSS.
+                    link.setAttribute('href', /^\/(?!\/)/.test(String(r.url || '')) ? r.url : '#');
+
+                    var type = document.createElement('span');
+                    type.className = 'admin-search__type';
+                    type.textContent = r.type || '';
+
+                    var title = document.createElement('span');
+                    title.className = 'admin-search__title';
+                    title.textContent = r.title || '';
+
+                    link.appendChild(type);
+                    link.appendChild(title);
+                    results.appendChild(link);
                 });
             }
             results.hidden = false;
@@ -919,7 +930,9 @@
                     fig.querySelector('.media-modal__filename').textContent = it.name;
                 } else if (!isImage) {
                     fig.classList.add('media-modal__item--file');
-                    fig.innerHTML = '<span class="media-modal__fileicon">' + ext + '</span><span class="media-modal__filename"></span>';
+                    // Расширение берётся из имени файла — вставляем текстом.
+                    fig.innerHTML = '<span class="media-modal__fileicon"></span><span class="media-modal__filename"></span>';
+                    fig.querySelector('.media-modal__fileicon').textContent = ext;
                     fig.querySelector('.media-modal__filename').textContent = it.name;
                 } else {
                     var img = document.createElement('img');

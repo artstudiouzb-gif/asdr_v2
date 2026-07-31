@@ -77,3 +77,22 @@ test('Smoke: ограниченная сессия не выдаётся за п
     assert_contains("\$path !== '/admin/profile'", $smoke);
     assert_contains('редирект на профиль: доступ ограничен', $smoke);
 });
+
+/**
+ * Данные, пришедшие с сервера, не должны собираться в HTML-строку: имя файла
+ * или адрес записи может содержать кавычки и угловые скобки, и тогда строка
+ * перестаёт быть данными (CodeQL: DOM text reinterpreted as HTML).
+ */
+test('XSS: результаты поиска и карточки медиабиблиотеки строятся узлами', function () {
+    $js = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/admin.js');
+
+    // Быстрый поиск: ни адрес, ни тип записи не склеиваются с разметкой.
+    assert_not_contains("'<a class=\"admin-search__item\" href=\"' + r.url", $js);
+    assert_not_contains("'<span class=\"admin-search__type\">' + r.type", $js);
+    assert_contains("link.setAttribute('href'", $js);
+    assert_contains("type.textContent = r.type", $js);
+
+    // Медиабиблиотека: расширение файла подставляется текстом.
+    assert_not_contains("'<span class=\"media-modal__fileicon\">' + ext", $js);
+    assert_contains(".media-modal__fileicon').textContent = ext", $js);
+});
