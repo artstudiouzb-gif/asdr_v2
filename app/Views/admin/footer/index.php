@@ -43,7 +43,7 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
                 Для виджета «Текст / HTML» можно вставить произвольную разметку или сниппет
                 (скрипты и небезопасные теги вырезаются).
             </p>
-            <div data-repeater="footcol" class="fb-grid">
+            <div data-repeater="footcol" data-repeater-max="<?= FooterConfig::MAX_COLUMNS ?>" class="fb-grid">
                 <?php foreach ($config['columns'] as $i => $col): ?>
                     <div class="repeater-row footer-col fb-card">
                         <div class="fb-card__head">

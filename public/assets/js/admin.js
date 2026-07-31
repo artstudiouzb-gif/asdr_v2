@@ -498,6 +498,33 @@
     })();
 
     /**
+     * Номер для новой строки репитера: на единицу больше самого большого
+     * индекса в именах полей. Считать по числу строк нельзя — после удаления
+     * строки из середины номер повторится, и в POST останется только
+     * последняя из двух одноимённых строк (введённое молча пропадает).
+     */
+    function nextRepeaterIndex(container, template) {
+        // Образец имени берём из шаблона строки: у разных повторителей
+        // индекс стоит по-разному («columns[0][heading]», «custom_fields[cf_0][key]»).
+        var probe = template.content.querySelector('[name*="__INDEX__"]');
+        if (!probe) {
+            return container.children.length;
+        }
+
+        var escaped = probe.getAttribute('name').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        var pattern = new RegExp('^' + escaped.replace('__INDEX__', '(\\d+)') + '$');
+        var max = -1;
+        Array.prototype.forEach.call(container.querySelectorAll('[name]'), function (field) {
+            var match = pattern.exec(field.getAttribute('name') || '');
+            if (match) {
+                max = Math.max(max, Number(match[1]));
+            }
+        });
+
+        return max + 1;
+    }
+
+    /**
      * Разворачивает <template> репитера: клон содержимого с заменой
      * плейсхолдера __INDEX__ в атрибутах и текстовых узлах.
      */
@@ -543,11 +570,16 @@
             if (!container || !template) {
                 return;
             }
+            const maxRows = Number(container.getAttribute('data-repeater-max'));
+            if (Number.isFinite(maxRows) && maxRows > 0 && container.children.length >= maxRows) {
+                adminAlert('Максимум строк: ' + maxRows + '.');
+                return;
+            }
             const hasStoredIndex = container.hasAttribute('data-repeater-next-index');
             const storedIndex = Number(container.getAttribute('data-repeater-next-index'));
             const index = hasStoredIndex && Number.isFinite(storedIndex) && storedIndex >= 0
                 ? storedIndex
-                : container.children.length;
+                : nextRepeaterIndex(container, template);
             if (hasStoredIndex) {
                 container.setAttribute('data-repeater-next-index', String(index + 1));
             }
