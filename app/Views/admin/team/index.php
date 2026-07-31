@@ -17,6 +17,7 @@ $langs = Language::active();
         <tr>
             <th>Имя</th>
             <th>Должность</th>
+            <th>Подразделение</th>
             <th>Языки</th>
             <th>Статус</th>
             <th></th>
@@ -35,6 +36,12 @@ $langs = Language::active();
             <tr>
                 <td><?= htmlspecialchars($item['name'], ENT_QUOTES) ?></td>
                 <td><?= htmlspecialchars($item['position'] ?? '', ENT_QUOTES) ?></td>
+                <td>
+                    <?= htmlspecialchars($item['department'] ?? '', ENT_QUOTES) ?>
+                    <?php if (trim((string) ($item['unit'] ?? '')) !== ''): ?>
+                        <span class="text-muted">— <?= htmlspecialchars((string) $item['unit'], ENT_QUOTES) ?></span>
+                    <?php endif; ?>
+                </td>
                 <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? []]) ?></td>
                 <td>
                     <span class="badge badge--<?= $item['status'] ?>">

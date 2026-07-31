@@ -323,6 +323,8 @@ CREATE TABLE IF NOT EXISTS team_members (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name            VARCHAR(190) NOT NULL,
     position        VARCHAR(190) NULL,
+    department      VARCHAR(190) NULL COMMENT 'Сектор — верхний уровень группировки раздела «Команда»',
+    unit            VARCHAR(190) NULL COMMENT 'Отдел или группа внутри сектора',
     photo           VARCHAR(255) NULL,
     email           VARCHAR(190) NULL,
     phone           VARCHAR(60) NULL,
@@ -340,6 +342,8 @@ CREATE TABLE IF NOT EXISTS team_member_translations (
     lang        VARCHAR(8) NOT NULL,
     name        VARCHAR(190) NULL,
     position    VARCHAR(190) NULL,
+    department  VARCHAR(190) NULL,
+    unit        VARCHAR(190) NULL,
     UNIQUE KEY uq_team_member_translations (member_id, lang),
     CONSTRAINT fk_team_member_translations_member FOREIGN KEY (member_id) REFERENCES team_members(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1035,7 +1039,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_07_30_event_banner.sql'),
     ('2026_07_30_news_translation_details.sql'),
     ('2026_07_30_remove_header_layout.sql'),
-    ('2026_07_30_translation_group_indexes.sql')
+    ('2026_07_30_translation_group_indexes.sql'),
+    ('2026_07_31_team_departments.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

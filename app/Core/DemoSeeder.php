@@ -179,8 +179,8 @@ final class DemoSeeder
             'videos' => 3,
             'video_translations' => 3,
             'forms' => 3,
-            'team_members' => 4,
-            'team_member_translations' => 4,
+            'team_members' => 6,
+            'team_member_translations' => 6,
             'menu_items' => 40,
         ];
 
@@ -1206,19 +1206,50 @@ final class DemoSeeder
         if (!self::tableExists($pdo, 'team_members')) {
             return;
         }
+        // [ФИО, должность, ФИО (uz), должность (uz), сектор, отдел/группа,
+        //  сектор (uz), отдел/группа (uz)] — руководство идёт без сектора.
         $team = [
-            ['Нуриддинов Шерзод Бахтиярович', 'Директор', 'Nuriddinov Sherzod Baxtiyarovich', 'Direktor'],
-            ['Юлдашева Нилуфар Азизовна', 'Заместитель директора', 'Yuldasheva Nilufar Azizovna', 'Direktor o‘rinbosari'],
-            ['Каримов Бехзод Шухратович', 'Руководитель направления стратегического анализа', 'Karimov Behzod Shuhratovich', 'Strategik tahlil yo‘nalishi rahbari'],
-            ['Исмоилова Дилноза Фарходовна', 'Руководитель пресс-службы', 'Ismoilova Dilnoza Farhodovna', 'Matbuot xizmati rahbari'],
+            ['Нуриддинов Шерзод Бахтиярович', 'Директор', 'Nuriddinov Sherzod Baxtiyarovich', 'Direktor', '', '', '', ''],
+            ['Юлдашева Нилуфар Азизовна', 'Заместитель директора', 'Yuldasheva Nilufar Azizovna', 'Direktor o‘rinbosari', '', '', '', ''],
+            [
+                'Каримов Бехзод Шухратович', 'Руководитель сектора',
+                'Karimov Behzod Shuhratovich', 'Shoʻba rahbari',
+                'Сектор анализа и исследований', '',
+                'Tahlil va tadqiqotlar shoʻbasi', '',
+            ],
+            [
+                'Исмоилова Дилноза Фарходовна', 'Руководитель сектора',
+                'Ismoilova Dilnoza Farhodovna', 'Shoʻba rahbari',
+                'Сектор по связям с общественностью', '',
+                'Jamoatchilik bilan aloqalar shoʻbasi', '',
+            ],
+            [
+                'Ражабов Отабек Улугбекович', 'Главный специалист',
+                'Rajabov Otabek Ulugʻbekovich', 'Bosh mutaxassis',
+                'Информационно-аналитический и организационный сектор', 'группа по работе с кадрами',
+                'Axborot-tahlil va tashkiliy masalalar shoʻbasi', 'kadrlar bilan ishlash guruhi',
+            ],
+            [
+                'Хамидова Севара Рустамовна', 'Ведущий специалист',
+                'Hamidova Sevara Rustamovna', 'Yetakchi mutaxassis',
+                'Информационно-аналитический и организационный сектор', 'первый отдел',
+                'Axborot-tahlil va tashkiliy masalalar shoʻbasi', 'birinchi boʻlim',
+            ],
         ];
         $ins = $pdo->prepare(
-            "INSERT INTO team_members (name, position, status, sort_order, created_at)
-             SELECT :n, :p, 'published', :o, NOW()
+            "INSERT INTO team_members (name, position, department, unit, status, sort_order, created_at)
+             SELECT :n, :p, :d, :u, 'published', :o, NOW()
              FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM team_members WHERE name = :n2)"
         );
         foreach ($team as $i => $t) {
-            $ins->execute([':n' => $t[0], ':p' => $t[1], ':o' => $i, ':n2' => $t[0]]);
+            $ins->execute([
+                ':n' => $t[0],
+                ':p' => $t[1],
+                ':d' => $t[4] !== '' ? $t[4] : null,
+                ':u' => $t[5] !== '' ? $t[5] : null,
+                ':o' => $i,
+                ':n2' => $t[0],
+            ]);
             $c['team'] += $ins->rowCount();
 
             if (self::tableExists($pdo, 'team_member_translations')) {
@@ -1227,8 +1258,8 @@ final class DemoSeeder
                 $memberId = $memberStmt->fetchColumn();
                 if ($memberId !== false) {
                     $translationIns = $pdo->prepare(
-                        "INSERT INTO team_member_translations (member_id, lang, name, position)
-                         SELECT :member_id, 'uz', :name, :position
+                        "INSERT INTO team_member_translations (member_id, lang, name, position, department, unit)
+                         SELECT :member_id, 'uz', :name, :position, :department, :unit
                          FROM DUAL
                          WHERE NOT EXISTS (
                              SELECT 1 FROM team_member_translations
@@ -1239,6 +1270,8 @@ final class DemoSeeder
                         ':member_id' => (int) $memberId,
                         ':name' => $t[2],
                         ':position' => $t[3],
+                        ':department' => $t[6] !== '' ? $t[6] : null,
+                        ':unit' => $t[7] !== '' ? $t[7] : null,
                         ':member_id2' => (int) $memberId,
                     ]);
                 }
@@ -1275,7 +1308,7 @@ final class DemoSeeder
                     'title' => 'Руководство',
                     'blocks' => [
                         ['text', 'Введение', ['title' => 'Руководство', 'content' => '<p>Руководящий состав организации.</p>']],
-                        ['team_list', 'Команда', ['title' => 'Руководящий состав', 'limit' => 0]],
+                        ['team_list', 'Команда', ['title' => 'Руководящий состав', 'limit' => 0, 'group_by_department' => true]],
                         ['cta', 'Директор', ['variant' => 'band', 'title' => 'Директор Агентства', 'text' => 'Биография, приоритеты работы и публикации руководителя.', 'button_text' => 'Страница директора', 'button_url' => '/direktor', 'bg_color' => '#072b61', 'text_color' => '#ffffff']]
                     ]
                 ],
@@ -1283,7 +1316,7 @@ final class DemoSeeder
                     'title' => 'Rahbariyat',
                     'blocks' => [
                         ['text', 'Kirish', ['title' => 'Rahbariyat', 'content' => '<p>Tashkilotning rahbariyat tarkibi.</p>']],
-                        ['team_list', 'Jamoa', ['title' => 'Rahbariyat tarkibi', 'limit' => 0]]
+                        ['team_list', 'Jamoa', ['title' => 'Rahbariyat tarkibi', 'limit' => 0, 'group_by_department' => true]]
                     ]
                 ]
             ],
@@ -1301,10 +1334,10 @@ final class DemoSeeder
                             'head_url' => '/direktor',
                             'side_items' => 'Советник',
                             'branches' => [
-                                ['title' => 'Первый заместитель директора', 'name' => '', 'units' => "Сектор стратегического планирования и развития отраслей и сфер\nСектор анализа и исследований\nСектор организации деятельности Координационного совета\n* Проектные офисы по развитию отраслей"],
+                                ['title' => 'Первый заместитель директора', 'name' => '', 'units' => "Сектор стратегического планирования и развития отраслей и сфер\nСектор анализа и исследований | /rukovodstvo#team-sektor-analiza-i-issledovaniy\nСектор организации деятельности Координационного совета\n* Проектные офисы по развитию отраслей"],
                                 ['title' => 'Заместитель директора', 'name' => '', 'units' => "Сектор стратегического планирования и развития регионов\nСектор контроля за исполнением задач по стратегическому развитию\nСектор экспертизы проектов нормативно-правовых актов\n* Проектные офисы по развитию регионов"],
                                 ['title' => 'Заместитель директора', 'name' => '', 'units' => "Сектор изучения передового зарубежного опыта, результатов научно-исследовательской деятельности и практики\nСектор координации процессов привлечения иностранных экспертов, консультантов и советников\n* Проектные офисы по развитию международного сотрудничества"],
-                                ['title' => '', 'name' => '', 'units' => "Сектор координации системы стратегического планирования\nСектор мониторинга и оценки эффективности реформ\nИнформационно-аналитический и организационный сектор\n- группа по работе с кадрами\n- первый отдел\nФинансово-хозяйственный сектор (Главный бухгалтер)\n- группа материального обеспечения и хозяйственных дел\nСектор по связям с общественностью"],
+                                ['title' => '', 'name' => '', 'units' => "Сектор координации системы стратегического планирования\nСектор мониторинга и оценки эффективности реформ\nИнформационно-аналитический и организационный сектор | /rukovodstvo#team-informacionno-analiticheskiy-i-organizacionnyy-sektor\n- группа по работе с кадрами\n- первый отдел\nФинансово-хозяйственный сектор (Главный бухгалтер)\n- группа материального обеспечения и хозяйственных дел\nСектор по связям с общественностью | /rukovodstvo#team-sektor-po-svyazyam-s-obschestvennostyu"],
                             ],
                             'notes' => 'Секторы четвёртой колонки подчиняются директору напрямую.',
                             'footnote' => 'Структура утверждена в установленном порядке и может уточняться при изменении задач Агентства.',

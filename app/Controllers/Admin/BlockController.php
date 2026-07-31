@@ -131,6 +131,7 @@ final class BlockController
             'block' => $block,
             'data' => $data,
             'forms' => $block['type'] === 'form' ? FormDef::all() : [],
+            'departments' => self::departmentsFor((string) $block['type']),
         ]);
     }
 
@@ -178,6 +179,7 @@ final class BlockController
                 'block' => $block,
                 'data' => json_decode((string) $block['data'], true) ?: [],
                 'forms' => $block['type'] === 'form' ? FormDef::all() : [],
+                'departments' => self::departmentsFor((string) $block['type']),
                 'error' => 'Блок уже был изменён в другой вкладке или другим пользователем. Текущие данные перезагружены; восстановите локальный черновик и проверьте изменения.',
             ]);
             return;
@@ -438,6 +440,12 @@ final class BlockController
             case 'counters':
                 return CountersBlockNormalizer::normalize($_POST, $locale);
             case 'team_list':
+                return [
+                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    'limit' => max(0, (int) ($_POST['limit'] ?? 0)),
+                    'department' => trim((string) ($_POST['department'] ?? '')),
+                    'group_by_department' => !empty($_POST['group_by_department']),
+                ];
             case 'projects_list':
             case 'news_latest':
                 return [
@@ -803,6 +811,19 @@ final class BlockController
             default:
                 return [];
         }
+    }
+
+    /**
+     * Секторы команды нужны формам блоков «Команда» (фильтр) и «Оргструктура»
+     * (готовые якори для ссылок). Для остальных типов запрос не делаем.
+     *
+     * @return list<array{name: string, slug: string, count: int}>
+     */
+    private static function departmentsFor(string $type): array
+    {
+        return in_array($type, ['team_list', 'org_structure'], true)
+            ? \App\Models\TeamMember::departments()
+            : [];
     }
 
     /** Читает URL-поле из POST и отбрасывает небезопасные схемы (javascript: и т.п.). */

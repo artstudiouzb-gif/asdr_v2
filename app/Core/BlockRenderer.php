@@ -423,8 +423,21 @@ final class BlockRenderer
         // опубликованные записи команды/проектов, ограниченные limit (0 = все).
         if ($type === 'team_list') {
             $items = \App\Models\TeamMember::published(Locale::current());
+
+            // Фильтр по отделу задаётся якорем: он одинаков на всех языках.
+            $department = trim((string) ($data['department'] ?? ''));
+            if ($department !== '') {
+                $items = array_values(array_filter(
+                    $items,
+                    static fn (array $row): bool => \App\Models\TeamMember::departmentSlug($row) === $department
+                ));
+            }
+
             $limit = (int) ($data['limit'] ?? 0);
             $data['members'] = $limit > 0 ? array_slice($items, 0, $limit) : $items;
+            $data['groups'] = !empty($data['group_by_department'])
+                ? \App\Models\TeamMember::groupByDepartment($data['members'])
+                : [];
         }
         if ($type === 'projects_list') {
             $items = \App\Models\Project::published(Locale::current());

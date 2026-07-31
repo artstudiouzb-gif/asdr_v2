@@ -284,6 +284,34 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
         <?php endif; ?>
 
+        <?php if ($type === 'team_list'): ?>
+            <?php $teamDepartments = $departments ?? []; ?>
+            <div class="form-field">
+                <label for="department">Показывать только сотрудников сектора</label>
+                <select id="department" name="department">
+                    <option value="">Все сотрудники</option>
+                    <?php foreach ($teamDepartments as $dep): ?>
+                        <option value="<?= htmlspecialchars((string) $dep['slug'], ENT_QUOTES) ?>" <?= ($data['department'] ?? '') === $dep['slug'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars((string) $dep['name'], ENT_QUOTES) ?> (<?= (int) $dep['count'] ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">Сектор задаётся в карточке сотрудника (раздел «Команда»).</span>
+            </div>
+            <div class="form-field form-field--checkbox">
+                <input type="checkbox" id="group_by_department" name="group_by_department" value="1" <?= !empty($data['group_by_department']) ? 'checked' : '' ?>>
+                <label for="group_by_department">Группировать по секторам, а внутри — по отделам и группам</label>
+            </div>
+            <?php if ($teamDepartments !== []): ?>
+                <p class="form-hint">
+                    Якори для ссылок из схемы оргструктуры (работают при включённой группировке):
+                    <?php foreach ($teamDepartments as $dep): ?>
+                        <code>#team-<?= htmlspecialchars((string) $dep['slug'], ENT_QUOTES) ?></code>
+                    <?php endforeach; ?>
+                </p>
+            <?php endif; ?>
+        <?php endif; ?>
+
         <?php if ($type === 'partners'): ?>
             <div>
                 <label>Логотипы партнёров</label>
@@ -1010,6 +1038,14 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <code>* Название</code> — выделенный пункт (проектный офис),
                 <code>- Название</code> — вложенная группа внутри предыдущего пункта.
             </p>
+            <?php if (($departments ?? []) !== []): ?>
+                <p class="form-hint">
+                    Ссылки на состав сектора в разделе «Команда» — скопируйте адрес страницы команды и добавьте якорь:
+                    <?php foreach ($departments as $dep): ?>
+                        <code><?= htmlspecialchars((string) $dep['name'], ENT_QUOTES) ?> | /komanda#team-<?= htmlspecialchars((string) $dep['slug'], ENT_QUOTES) ?></code>
+                    <?php endforeach; ?>
+                </p>
+            <?php endif; ?>
             <div class="form-field">
                 <label for="layout">Макет схемы</label>
                 <select id="layout" name="layout">

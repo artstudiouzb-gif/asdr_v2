@@ -706,6 +706,15 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .project-card__desc { padding: 6px 14px 14px; margin: 0; color: var(--text-muted); font-size: 0.875rem; }
 .block-team__empty, .block-projects__empty { text-align: center; color: var(--text-muted); }
 
+/* Команда по подразделениям: сектор — заголовок с якорем, отделы и группы
+   внутри сектора — подзаголовок со своей сеткой карточек. */
+.block-team__group { scroll-margin-top: 90px; }
+.block-team__group + .block-team__group { margin-top: 40px; }
+.block-team__group-title { margin: 0 0 18px; font-size: 1.25rem; }
+.block-team__group:target .block-team__group-title { color: var(--color-accent, #e63946); }
+.block-team__unit { margin-top: 26px; }
+.block-team__unit-title { margin: 0 0 14px; font-size: 1rem; font-weight: 700; color: var(--text-muted); }
+
 /* SVG-иконка в блоке преимуществ (группа 4.3) */
 .block-advantages__icon--svg svg { width: 48px; height: 48px; display: block; margin: 0 auto; }
 .block-advantages__icon--svg svg [fill]:not([fill="none"]) { fill: currentColor; }
