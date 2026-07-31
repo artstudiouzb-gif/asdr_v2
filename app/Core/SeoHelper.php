@@ -143,14 +143,20 @@ final class SeoHelper
     }
 
     /**
-     * Подключает иконки устройств и веб-манифест.
+     * Подключает иконки устройств и веб-манифест. Ссылки на файлы иконок
+     * выводятся только если файлы действительно лежат в public/: иначе
+     * браузер на каждой странице получал три ответа 404. Загруженная в
+     * настройках фавиконка подключается отдельно (в шапке сайта), манифест
+     * собирается из настроек контроллером.
      */
     public static function faviconsHtml(string $appUrl): string
     {
-        return "<link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/apple-touch-icon.png\">\n"
-             . "<link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/favicon-32x32.png\">\n"
-             . "<link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/favicon-16x16.png\">\n"
-             . "<link rel=\"manifest\" href=\"/site.webmanifest\">\n";
+        $html = '';
+        foreach (Favicon::staticIcons() as $tag) {
+            $html .= $tag . "\n";
+        }
+
+        return $html . "<link rel=\"manifest\" href=\"/manifest.webmanifest\">\n";
     }
 }
 

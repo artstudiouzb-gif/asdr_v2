@@ -62,8 +62,15 @@ test('AdminBrand::badgeHtml: картинка при логотипе, букв�
 test('AdminBrand::faviconHtml: вывод стандартов и кастомной фавиконки', function () {
     Setting::set('favicon_url', '');
     $html = AdminBrand::faviconHtml();
-    assert_contains('href="/favicon-32x32.png"', $html);
-    assert_contains('href="/apple-touch-icon.png"', $html);
+    // Ссылка появляется только для файла, который лежит в public/: иначе
+    // админка на каждой странице получала 404.
+    foreach (['/apple-touch-icon.png', '/favicon-32x32.png', '/favicon-16x16.png'] as $icon) {
+        assert_same(
+            is_file(dirname(__DIR__, 2) . '/public' . $icon),
+            str_contains($html, 'href="' . $icon . '"'),
+            "ссылка на {$icon} без файла"
+        );
+    }
 
     Setting::set('favicon_url', '/uploads/public/custom-fav.svg');
     $htmlWithCustom = AdminBrand::faviconHtml();
