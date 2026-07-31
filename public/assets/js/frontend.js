@@ -2257,15 +2257,17 @@
     });
 
     // Оргструктура остаётся полной на desktop и становится аккордеоном на
-    // узком экране. Без JavaScript все подразделения по-прежнему видны.
+    // узком экране. Если в блоке включено сворачивание, аккордеон работает на
+    // любой ширине. Без JavaScript все подразделения по-прежнему видны.
     document.querySelectorAll('[data-org-branch]').forEach(function (branch, index) {
         var button = branch.querySelector('[data-org-toggle]');
         var units = branch.querySelector('[data-org-units]');
         if (!button || !units) { return; }
+        var always = branch.closest('[data-org-collapsible]') !== null;
         var mobile = window.matchMedia('(max-width: 700px)');
         var expanded = index === 0;
         var sync = function () {
-            var collapse = mobile.matches;
+            var collapse = always || mobile.matches;
             units.hidden = collapse && !expanded;
             button.setAttribute('aria-expanded', String(!collapse || expanded));
         };

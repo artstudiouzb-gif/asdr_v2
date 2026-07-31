@@ -1002,15 +1002,42 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'org_structure'): ?>
+            <?php $orgLayout = ($data['layout'] ?? 'tree') === 'spine' ? 'spine' : 'tree'; ?>
+            <?php $orgColumns = (int) ($data['columns'] ?? 4); ?>
+            <p class="form-hint">
+                В списках подразделений и органов работает разметка строк:
+                <code>Название | /ссылка</code> — пункт-ссылка,
+                <code>* Название</code> — выделенный пункт (проектный офис),
+                <code>- Название</code> — вложенная группа внутри предыдущего пункта.
+            </p>
+            <div class="form-field">
+                <label for="layout">Макет схемы</label>
+                <select id="layout" name="layout">
+                    <option value="tree" <?= $orgLayout === 'tree' ? 'selected' : '' ?>>Дерево (колонки с соединителями)</option>
+                    <option value="spine" <?= $orgLayout === 'spine' ? 'selected' : '' ?>>Компактный список (для больших структур)</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="columns">Колонок в ряду (для макета «Дерево»)</label>
+                <select id="columns" name="columns">
+                    <?php foreach ([2, 3, 4] as $c): ?><option value="<?= $c ?>" <?= $orgColumns === $c ? 'selected' : '' ?>><?= $c ?></option><?php endforeach; ?>
+                </select>
+                <span class="form-hint">Лишние ветки переносятся на следующий ряд со своим соединителем.</span>
+            </div>
+            <div class="form-field">
+                <label for="council">Коллегиальный орган над руководителем (по одному на строку)</label>
+                <textarea id="council" name="council" rows="2" placeholder="Координационный совет"><?= htmlspecialchars($data['council'] ?? '', ENT_QUOTES) ?></textarea>
+            </div>
             <div class="form-field"><label for="head_title">Руководитель — должность</label><input type="text" id="head_title" name="head_title" value="<?= htmlspecialchars($data['head_title'] ?? 'Директор', ENT_QUOTES) ?>"></div>
             <div class="form-field"><label for="head_name">Руководитель — Ф.И.О. (необязательно)</label><input type="text" id="head_name" name="head_name" value="<?= htmlspecialchars($data['head_name'] ?? '', ENT_QUOTES) ?>"></div>
             <div class="form-field"><label for="head_url">Руководитель — ссылка (напр. на страницу директора)</label><input type="text" id="head_url" name="head_url" value="<?= htmlspecialchars($data['head_url'] ?? '', ENT_QUOTES) ?>" placeholder="/direktor"></div>
             <div class="form-field">
-                <label for="side_items">Органы при руководителе (по одному на строку)</label>
-                <textarea id="side_items" name="side_items" rows="3" placeholder="Координационный совет&#10;Советник"><?= htmlspecialchars($data['side_items'] ?? '', ENT_QUOTES) ?></textarea>
+                <label for="side_items">Органы сбоку от руководителя (по одному на строку)</label>
+                <textarea id="side_items" name="side_items" rows="3" placeholder="Советник"><?= htmlspecialchars($data['side_items'] ?? '', ENT_QUOTES) ?></textarea>
             </div>
             <div>
                 <label>Ветки (заместители / блоки подразделений)</label>
+                <span class="form-hint">Ветку можно оставить без должности — тогда подразделения подчиняются руководителю напрямую.</span>
                 <div data-repeater="branches">
                     <?php foreach (($data['branches'] ?? []) as $i => $branch): ?>
                         <div class="repeater-row">
@@ -1030,6 +1057,14 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить ветку</button>
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="branches"><?= \App\Core\AdminUi::icon('plus') ?>Добавить ветку</button></div>
+            </div>
+            <div class="form-field form-field--checkbox">
+                <input type="checkbox" id="collapsible" name="collapsible" value="1" <?= !empty($data['collapsible']) ? 'checked' : '' ?>>
+                <label for="collapsible">Сворачивать подразделения на всех экранах (на телефоне схема сворачивается всегда)</label>
+            </div>
+            <div class="form-field">
+                <label for="notes">Примечания карточками под схемой (по одному на строку)</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Отделы четвёртой колонки подчиняются директору напрямую"><?= htmlspecialchars($data['notes'] ?? '', ENT_QUOTES) ?></textarea>
             </div>
             <div class="form-field"><label for="footnote">Примечание под схемой (необязательно)</label><input type="text" id="footnote" name="footnote" value="<?= htmlspecialchars($data['footnote'] ?? '', ENT_QUOTES) ?>" placeholder="Структура утверждена постановлением…"></div>
         <?php endif; ?>

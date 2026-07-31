@@ -1293,15 +1293,20 @@ final class DemoSeeder
                     'blocks' => [
                         ['org_structure', 'Оргсхема', [
                             'title' => 'Организационная структура',
+                            'layout' => 'tree',
+                            'columns' => 4,
+                            'council' => 'Координационный совет',
                             'head_title' => 'Директор',
-                            'head_name' => 'Нуриддинов Шерзод Бахтиярович',
+                            'head_name' => '',
                             'head_url' => '/direktor',
-                            'side_items' => "Координационный совет\nСоветник директора",
+                            'side_items' => 'Советник',
                             'branches' => [
-                                ['title' => 'Первый заместитель директора', 'name' => '', 'units' => "Отдел стратегического планирования\nОтдел макроэкономического анализа\nОтдел мониторинга реформ\nПроектный офис по развитию секторов экономики"],
-                                ['title' => 'Заместитель директора', 'name' => '', 'units' => "Отдел регионального развития\nОтдел инвестиционной политики\nПроектный офис по развитию территорий\nОтдел международного сотрудничества"],
-                                ['title' => 'Заместитель директора', 'name' => '', 'units' => "Юридический отдел\nОтдел управления персоналом\nОтдел финансов и бухгалтерского учёта\nПресс-служба и связи с общественностью\nОтдел цифровизации и информационных технологий"],
+                                ['title' => 'Первый заместитель директора', 'name' => '', 'units' => "Отдел стратегического планирования и развития отраслей и сфер\nОтдел анализа и исследований\nОтдел организации деятельности Координационного совета\n* Проектные офисы по развитию отраслей"],
+                                ['title' => 'Заместитель директора', 'name' => '', 'units' => "Отдел стратегического планирования и развития территорий\nОтдел контроля исполнения задач по стратегическому развитию\nОтдел экспертизы проектов нормативно-правовых актов\n* Проектные офисы по развитию территорий"],
+                                ['title' => 'Заместитель директора', 'name' => '', 'units' => "Отдел изучения передового зарубежного опыта, результатов научных исследований и практики\nОтдел координации процессов привлечения зарубежных экспертов, консультантов и советников\n* Проектные офисы по развитию международного сотрудничества"],
+                                ['title' => '', 'name' => '', 'units' => "Отдел координации системы стратегического планирования\nОтдел мониторинга и оценки эффективности реформ\nИнформационно-аналитический отдел и отдел организационных вопросов\n- группа по работе с кадрами\n- первый отдел\nФинансово-хозяйственный отдел (главный бухгалтер)\n- группа материального обеспечения и хозяйственных работ\nОтдел по связям с общественностью"],
                             ],
+                            'notes' => 'Отделы четвёртой колонки подчиняются директору напрямую.',
                             'footnote' => 'Структура утверждена в установленном порядке и может уточняться при изменении задач Агентства.',
                         ]]
                     ]
@@ -1311,16 +1316,21 @@ final class DemoSeeder
                     'blocks' => [
                         ['org_structure', 'Tuzilma sxemasi', [
                             'title' => 'Tashkiliy tuzilma',
+                            'layout' => 'tree',
+                            'columns' => 4,
+                            'council' => 'Muvofiqlashtiruvchi kengash',
                             'head_title' => 'Direktor',
-                            'head_name' => 'Nuriddinov Sherzod Baxtiyarovich',
+                            'head_name' => '',
                             'head_url' => '/direktor',
-                            'side_items' => "Muvofiqlashtiruvchi kengash\nDirektor maslahatchisi",
+                            'side_items' => 'Maslahatchi',
                             'branches' => [
-                                ['title' => 'Direktorning birinchi o‘rinbosari', 'name' => '', 'units' => "Strategik rejalashtirish bo‘limi\nMakroiqtisodiy tahlil bo‘limi\nIslohotlar monitoringi bo‘limi\nIqtisodiyot tarmoqlarini rivojlantirish loyihaviy ofisi"],
-                                ['title' => 'Direktor o‘rinbosari', 'name' => '', 'units' => "Hududiy rivojlanish bo‘limi\nInvestitsiya siyosati bo‘limi\nHududlarni rivojlantirish loyihaviy ofisi\nXalqaro hamkorlik bo‘limi"],
-                                ['title' => 'Direktor o‘rinbosari', 'name' => '', 'units' => "Yuridik bo‘lim\nPersonalni boshqarish bo‘limi\nMoliya va buxgalteriya hisobi bo‘limi\nMatbuot xizmati va jamoatchilik bilan aloqalar\nRaqamlashtirish va axborot texnologiyalari bo‘limi"],
+                                ['title' => 'Direktorning birinchi oʻrinbosari', 'name' => '', 'units' => "Soha va tarmoqlarni strategik rejalashtirish va rivojlantirish shoʻbasi\nTahlil va tadqiqotlar shoʻbasi\nMuvofiqlashtiruvchi kengash faoliyatini tashkil qilish shoʻbasi\n* Tarmoqlarni rivojlantirish boʻyicha loyiha ofislari"],
+                                ['title' => 'Direktor oʻrinbosari', 'name' => '', 'units' => "Hududlarni strategik rejalashtirish va rivojlantirish shoʻbasi\nStrategik rivojlanish boʻyicha vazifalar ijrosini nazorat qilish shoʻbasi\nMeʼyoriy-huquqiy hujjatlar loyihalarini ekspertiza qilish shoʻbasi\n* Hududlarni rivojlantirish boʻyicha loyiha ofislari"],
+                                ['title' => 'Direktor oʻrinbosari', 'name' => '', 'units' => "Ilgʻor xorijiy tajriba, ilmiy-tadqiqot va amaliyot natijalarini oʻrganish shoʻbasi\nXorijiy ekspertlar, konsultant va maslahatchilarni jalb etish jarayonlarini muvofiqlashtirish shoʻbasi\n* Xalqaro hamkorlikni rivojlantirish boʻyicha loyiha ofislari"],
+                                ['title' => '', 'name' => '', 'units' => "Strategik rejalashtirish tizimini muvofiqlashtirish shoʻbasi\nIslohotlar samaradorligini monitoring qilish va baholash shoʻbasi\nAxborot-tahlil va tashkiliy masalalar shoʻbasi\n- kadrlar bilan ishlash guruhi\n- birinchi boʻlim\nMoliya-xoʻjalik shoʻbasi (Bosh buxgalter)\n- moddiy taʼminot va xoʻjalik ishlari guruhi\nJamoatchilik bilan aloqalar shoʻbasi"],
                             ],
-                            'footnote' => 'Tuzilma belgilangan tartibda tasdiqlangan bo‘lib, Agentlik vazifalari o‘zgarganda aniqlashtirilishi mumkin.',
+                            'notes' => 'Toʻrtinchi ustundagi shoʻbalar bevosita direktorga boʻysunadi.',
+                            'footnote' => 'Tuzilma belgilangan tartibda tasdiqlangan boʻlib, Agentlik vazifalari oʻzgarganda aniqlashtirilishi mumkin.',
                         ]]
                     ]
                 ]
