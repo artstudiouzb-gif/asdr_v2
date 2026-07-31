@@ -594,8 +594,26 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
             <div class="form-field"><label for="button_text">Кнопка 1 — текст</label><input type="text" id="button_text" name="button_text" value="<?= htmlspecialchars($data['button_text'] ?? '', ENT_QUOTES) ?>"></div>
             <div class="form-field"><label for="button_url">Кнопка 1 — ссылка</label><input type="text" id="button_url" name="button_url" value="<?= htmlspecialchars($data['button_url'] ?? '', ENT_QUOTES) ?>" placeholder="/o-nas"></div>
+            <?= \App\Core\AdminUi::iconField('button_icon', $data['button_icon'] ?? '', [
+                'id' => 'button_icon',
+                'label' => 'Кнопка 1 — иконка из библиотеки',
+                'hint' => 'Необязательно. Своя иконка ниже важнее выбранной здесь.',
+            ]) ?>
+            <?= \App\Core\AdminUi::imageField('button_icon_image', $data['button_icon_image'] ?? '', [
+                'label' => 'Кнопка 1 — своя иконка (SVG или картинка)',
+                'hint' => 'Загруженный SVG очищается от скриптов. Показывается вместо иконки из библиотеки.',
+            ]) ?>
             <div class="form-field"><label for="button2_text">Кнопка 2 — текст (контурная)</label><input type="text" id="button2_text" name="button2_text" value="<?= htmlspecialchars($data['button2_text'] ?? '', ENT_QUOTES) ?>"></div>
             <div class="form-field"><label for="button2_url">Кнопка 2 — ссылка</label><input type="text" id="button2_url" name="button2_url" value="<?= htmlspecialchars($data['button2_url'] ?? '', ENT_QUOTES) ?>"></div>
+            <?= \App\Core\AdminUi::iconField('button2_icon', $data['button2_icon'] ?? '', [
+                'id' => 'button2_icon',
+                'label' => 'Кнопка 2 — иконка из библиотеки',
+                'hint' => 'Необязательно. Своя иконка ниже важнее выбранной здесь.',
+            ]) ?>
+            <?= \App\Core\AdminUi::imageField('button2_icon_image', $data['button2_icon_image'] ?? '', [
+                'label' => 'Кнопка 2 — своя иконка (SVG или картинка)',
+                'hint' => 'Загруженный SVG очищается от скриптов. Показывается вместо иконки из библиотеки.',
+            ]) ?>
             <div class="form-field"><label for="video_button_text">Кнопка «Смотреть видео» — текст</label><input type="text" id="video_button_text" name="video_button_text" value="<?= htmlspecialchars($data['video_button_text'] ?? '', ENT_QUOTES) ?>"></div>
             <div class="form-field"><label for="video_button_url">Кнопка «Смотреть видео» — ссылка</label><input type="text" id="video_button_url" name="video_button_url" value="<?= htmlspecialchars($data['video_button_url'] ?? '', ENT_QUOTES) ?>"></div>
         <?php endif; ?>
