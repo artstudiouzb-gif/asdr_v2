@@ -459,6 +459,32 @@
         });
     })();
 
+    /**
+     * Разворачивает <template> репитера: клон содержимого с заменой
+     * плейсхолдера __INDEX__ в атрибутах и текстовых узлах.
+     */
+    function instantiateRepeaterTemplate(template, index) {
+        const fragment = template.content.cloneNode(true);
+        const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+        const marker = /__INDEX__/g;
+        let node = walker.nextNode();
+
+        while (node) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                Array.prototype.forEach.call(node.attributes, function (attr) {
+                    if (attr.value.indexOf('__INDEX__') !== -1) {
+                        attr.value = attr.value.replace(marker, String(index));
+                    }
+                });
+            } else if (node.nodeValue && node.nodeValue.indexOf('__INDEX__') !== -1) {
+                node.nodeValue = node.nodeValue.replace(marker, String(index));
+            }
+            node = walker.nextNode();
+        }
+
+        return fragment;
+    }
+
     document.addEventListener('click', function (event) {
         const copyBtn = event.target.closest('[data-copy-link], [data-copy-text]');
         if (copyBtn) {
@@ -487,10 +513,12 @@
             if (hasStoredIndex) {
                 container.setAttribute('data-repeater-next-index', String(index + 1));
             }
-            const html = template.innerHTML.replace(/__INDEX__/g, String(index));
             const wrapper = document.createElement('div');
             wrapper.className = 'repeater-row';
-            wrapper.innerHTML = html;
+            // Клонируем содержимое <template> и подставляем номер строки в
+            // узлах: чтение innerHTML с обратной записью — это повторный
+            // разбор разметки, на котором данные становятся HTML.
+            wrapper.appendChild(instantiateRepeaterTemplate(template, index));
             container.appendChild(wrapper);
             if (window.__enhanceIconFields) { window.__enhanceIconFields(wrapper); }
             return;
