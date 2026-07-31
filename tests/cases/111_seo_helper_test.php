@@ -20,7 +20,12 @@ $crumbs = SeoHelper::breadcrumbSchema("https://example.com", [
 ]);
 assert_true(str_contains($crumbs, "BreadcrumbList"));
 
-// 4. Проверка фавиконов
+// 4. Иконки: ссылка только на существующий файл, манифест — собираемый из настроек
 $favs = SeoHelper::faviconsHtml("https://example.com");
-assert_true(str_contains($favs, "apple-touch-icon"));
+assert_contains('href="/manifest.webmanifest"', $favs);
+assert_not_contains('site.webmanifest', $favs);
+foreach (['/apple-touch-icon.png', '/favicon-32x32.png', '/favicon-16x16.png'] as $icon) {
+    $linked = str_contains($favs, 'href="' . $icon . '"');
+    assert_same(is_file(dirname(__DIR__, 2) . '/public' . $icon), $linked, "ссылка на {$icon} без файла = 404 на каждой странице");
+}
 });

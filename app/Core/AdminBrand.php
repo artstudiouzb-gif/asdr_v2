@@ -66,14 +66,16 @@ final class AdminBrand
      */
     public static function faviconHtml(): string
     {
-        $html = "<link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/apple-touch-icon.png\">\n"
-              . "<link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/favicon-32x32.png\">\n"
-              . "<link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/favicon-16x16.png\">\n";
+        // Ссылки только на существующие файлы: иначе каждая страница админки
+        // тянет три ответа 404.
+        $html = '';
+        foreach (Favicon::staticIcons() as $tag) {
+            $html .= $tag . "\n";
+        }
 
-        $favicon = trim(self::setting('favicon_url'));
-        if ($favicon !== '') {
-            $type = str_ends_with(strtolower($favicon), '.svg') ? 'image/svg+xml' : 'image/png';
-            $html .= '<link rel="icon" type="' . $type . '" href="' . htmlspecialchars($favicon, ENT_QUOTES) . "\">\n";
+        $settingTag = Favicon::settingTag(self::setting('favicon_url'));
+        if ($settingTag !== '') {
+            $html .= $settingTag . "\n";
         }
 
         return $html;

@@ -632,8 +632,10 @@ if (is_array($cdnParts) && in_array($cdnParts['scheme'] ?? '', ['http', 'https']
 <?php if ($fontUrl !== '' && $fontFaceName !== ''): ?>
 <link rel="preload" href="<?= htmlspecialchars($fontUrl, ENT_QUOTES) ?>" as="font" type="font/woff2" crossorigin>
 <?php endif; ?>
-<?php if ($faviconUrl !== ''): ?>
-<link rel="icon" href="<?= htmlspecialchars($faviconUrl, ENT_QUOTES) ?>">
+<?php $faviconTag = \App\Core\Favicon::settingTag($faviconUrl); ?>
+<?php if ($faviconTag !== ''): ?>
+<?= $faviconTag ?>
+
 <?php endif; ?>
 <?php if ($themeColor !== ''): ?>
 <meta name="theme-color" content="<?= htmlspecialchars($themeColor, ENT_QUOTES) ?>">
