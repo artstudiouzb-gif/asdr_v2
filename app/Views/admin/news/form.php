@@ -280,7 +280,7 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                                 <input type="text" name="docs[<?= $idx ?>][url]" value="<?= htmlspecialchars($doc['url'] ?? '', ENT_QUOTES) ?>" placeholder="/uploads/... или https://">
                                 <button type="button" class="btn btn--small btn--secondary" data-media-pick data-media-target="[name='docs[<?= $idx ?>][url]']" data-media-type="all_files">Выбрать</button>
                             </div>
-                            <button type="button" class="btn btn--small btn--danger u-inline-22ca54a87e" onclick="this.closest('.doc-item-row').remove();" title="Удалить"><?= \App\Core\AdminUi::icon('x', 14) ?></button>
+                            <button type="button" class="btn btn--small btn--danger u-inline-22ca54a87e" data-remove-closest=".doc-item-row" title="Удалить"><?= \App\Core\AdminUi::icon('x', 14) ?></button>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -549,7 +549,7 @@ document.addEventListener('click', function(e) {
             row.innerHTML = '<input type="text" name="' + namePrefix + '[title]" placeholder="Название документа">' +
                 '<input type="text" name="' + namePrefix + '[meta]" placeholder="PDF, 2.4 МБ">' +
                 '<div class="u-inline-1d8943fa86"><input type="text" name="' + namePrefix + '[url]" placeholder="/uploads/... или https://"><button type="button" class="btn btn--small btn--secondary" data-media-pick data-media-target="[name=\'' + namePrefix + '[url]\']" data-media-type="all_files">Выбрать</button></div>' +
-                '<button type="button" class="btn btn--small btn--danger u-inline-22ca54a87e" onclick="this.closest(\'.doc-item-row\').remove();" title="Удалить">Удалить</button>';
+                '<button type="button" class="btn btn--small btn--danger u-inline-22ca54a87e" data-remove-closest=".doc-item-row" title="Удалить">Удалить</button>';
             container.appendChild(row);
         }
     }

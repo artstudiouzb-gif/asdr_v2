@@ -1,0 +1,61 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * CSP админки и портала не разрешает inline-скрипты: script-src задаёт
+ * 'self' и nonce. Атрибуты вида onclick/onchange браузер отказывается
+ * выполнять — элемент выглядит рабочим, но не делает ничего. Так молча
+ * ломались выбор файла в медиабиблиотеке, фильтры и загрузка в /repo.
+ */
+
+test('CSP: шаблоны не используют inline-обработчики событий', function () {
+    $root = dirname(__DIR__, 2) . '/app/Views';
+    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS));
+
+    $offenders = [];
+    foreach ($iterator as $file) {
+        if (!$file->isFile() || $file->getExtension() !== 'php') {
+            continue;
+        }
+        $contents = (string) file_get_contents($file->getPathname());
+        if (preg_match('/\son(?:click|change|submit|input|load|error|focus|blur)\s*=\s*["\']/i', $contents) === 1) {
+            $offenders[] = str_replace($root . '/', '', $file->getPathname());
+        }
+    }
+
+    assert_same([], $offenders, 'inline-обработчики не выполняются при действующей CSP');
+});
+
+test('CSP: портал репозитория подключает скрипт файлом, а не инлайном', function () {
+    $bottom = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/repo/layout/bottom.php');
+
+    assert_contains('/assets/js/repo.js', $bottom);
+    // Инлайновый блок с логикой портала не должен вернуться.
+    assert_false(
+        (bool) preg_match('/<script(?![^>]*\ssrc=)[^>]*>\s*\S/', $bottom),
+        'исполняемый inline-скрипт в шаблоне портала'
+    );
+});
+
+test('CSP: заменённые действия обслуживаются скриптами', function () {
+    $admin = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/admin.js');
+    foreach (['data-file-pick', 'data-autosubmit', 'data-close-target', 'data-remove-closest', 'data-admin-theme-preview'] as $hook) {
+        assert_contains($hook, $admin, "admin.js не обрабатывает {$hook}");
+    }
+
+    $repo = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/repo.js');
+    foreach (['data-open-details', 'data-close-dialog', 'data-nav-select', 'data-confirm-submit', 'data-view-mode', 'data-copy-link'] as $hook) {
+        assert_contains($hook, $repo, "repo.js не обрабатывает {$hook}");
+    }
+});
+
+test('CSP: разметка медиабиблиотеки использует новые хуки', function () {
+    $view = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/admin/files/index.php');
+
+    assert_contains('data-file-pick="media_file_input"', $view);
+    assert_contains('data-close-target="media_modal"', $view);
+    assert_same(3, substr_count($view, 'data-autosubmit'), 'фильтры типа, даты и сортировки');
+    // Форма загрузки осталась обычной multipart-формой.
+    assert_contains('action="/admin/files/upload" enctype="multipart/form-data"', $view);
+});

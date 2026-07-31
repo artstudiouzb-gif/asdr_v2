@@ -169,7 +169,7 @@ $extBadge = static function (array $f): string {
             <!-- Сортировка -->
             <div class="rd-sort-group">
                 <span class="rd-filter-label">Сортировка:</span>
-                <select class="rd-sort-select" onchange="location = this.value;">
+                <select class="rd-sort-select" data-nav-select>
                     <?php
                     $sorts = [
                         'newest' => 'Сначала новые',
@@ -206,7 +206,7 @@ $extBadge = static function (array $f): string {
                             <?= \App\Core\Icon::render('refresh', 16) ?> Сбросить фильтры
                         </a>
                     <?php else: ?>
-                        <button type="button" class="rd-btn rd-btn--primary" onclick="document.querySelector('.rd-upload')?.setAttribute('open', 'true');">
+                        <button type="button" class="rd-btn rd-btn--primary" data-open-details=".rd-upload">
                             + Предложить документ
                         </button>
                     <?php endif; ?>
@@ -385,7 +385,7 @@ $extBadge = static function (array $f): string {
     <div class="rd-modal__card">
         <div class="rd-modal__head">
             <h3 id="rd-preview-title">Предпросмотр документа</h3>
-            <button type="button" class="rd-modal__close" onclick="document.getElementById('rd-preview-modal').close();" aria-label="Закрыть"><?= \App\Core\Icon::render('x', 18) ?></button>
+            <button type="button" class="rd-modal__close" data-close-dialog="rd-preview-modal" aria-label="Закрыть"><?= \App\Core\Icon::render('x', 18) ?></button>
         </div>
         <div class="rd-modal__body" id="rd-preview-body">
             <div class="rd-preview-loader">Загрузка документа...</div>

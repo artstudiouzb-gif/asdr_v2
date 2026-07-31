@@ -2921,3 +2921,50 @@
         });
     });
 })();
+
+/**
+ * Обработчики, заменившие inline-атрибуты (onclick/onchange) в шаблонах:
+ * CSP админки не разрешает inline-скрипты, поэтому такие атрибуты браузер
+ * молча не выполнял — не открывался выбор файла, не работали фильтры
+ * медиабиблиотеки и предпросмотр темы.
+ */
+(function () {
+    'use strict';
+
+    document.addEventListener('click', function (event) {
+        var picker = event.target.closest('[data-file-pick]');
+        if (picker) {
+            var input = document.getElementById(picker.getAttribute('data-file-pick'));
+            if (input) { input.click(); }
+            return;
+        }
+
+        var closer = event.target.closest('[data-close-target]');
+        if (closer) {
+            var box = document.getElementById(closer.getAttribute('data-close-target'));
+            if (box) { box.classList.remove('is-open'); }
+            return;
+        }
+
+        var remover = event.target.closest('[data-remove-closest]');
+        if (remover) {
+            var row = remover.closest(remover.getAttribute('data-remove-closest'));
+            if (row) { row.remove(); }
+            return;
+        }
+
+        var themePreview = event.target.closest('[data-admin-theme-preview]');
+        if (themePreview) {
+            document.documentElement.setAttribute(
+                'data-admin-theme',
+                themePreview.getAttribute('data-admin-theme-preview')
+            );
+        }
+    });
+
+    // Фильтры медиабиблиотеки отправляют форму сразу после выбора.
+    document.addEventListener('change', function (event) {
+        var select = event.target.closest('select[data-autosubmit]');
+        if (select && select.form) { select.form.submit(); }
+    });
+})();

@@ -21,7 +21,7 @@ require __DIR__ . '/layout/top.php';
     <h2 class="repo-card__title">Двухфакторная аутентификация (2FA)</h2>
     <?php if ($enabled): ?>
         <p><span class="repo-badge repo-badge--ok">Включена</span> Вход в портал защищён одноразовым кодом из приложения-аутентификатора.</p>
-        <form method="post" action="/repo/security/2fa/disable" onsubmit="return confirm('Отключить двухфакторную аутентификацию?');">
+        <form method="post" action="/repo/security/2fa/disable" data-confirm-submit="Отключить двухфакторную аутентификацию?">
             <?= Csrf::field() ?>
             <div class="repo-field repo-field--narrow">
                 <label for="disable_totp_password">Текущий пароль</label>
@@ -65,7 +65,7 @@ require __DIR__ . '/layout/top.php';
         <p class="repo-hint">Недоступно: на сайте не настроен Telegram-бот. Обратитесь к администратору.</p>
     <?php elseif (!empty($telegramLinked)): ?>
         <p><span class="repo-badge repo-badge--ok">Подключено</span> При входе в портал одноразовый код будет отправляться в ваш Telegram.</p>
-        <form method="post" action="/repo/security/telegram/disable" onsubmit="return confirm('Отвязать Telegram? Вход по коду из Telegram отключится.');">
+        <form method="post" action="/repo/security/telegram/disable" data-confirm-submit="Отвязать Telegram? Вход по коду из Telegram отключится.">
             <?= Csrf::field() ?>
             <div class="repo-field repo-field--narrow">
                 <label for="disable_telegram_password">Текущий пароль</label>
