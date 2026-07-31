@@ -126,6 +126,51 @@ test('Панель: разметка, стили и скрипт согласо�
     assert_not_contains('data-a11y-set="scheme:', $header);
 });
 
+test('Переключатель языков: кириллица стоит рядом с узбекским', function () {
+    $header = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/site/_header.php');
+
+    assert_contains("'Ўзбекча (кирилл)'", $header);
+    assert_contains("'/script/cyrl?to=' . rawurlencode(\$uzHref)", $header);
+    // На узбекский из кириллицы возвращаемся через тот же переключатель.
+    assert_contains("'/script/latn?to=' . rawurlencode(\$href)", $header);
+    // Названия языков остаются как написаны: «O‘zbekcha» не транслитерируется.
+    assert_contains('data-lang-dropdown data-no-translit', $header);
+    assert_contains('class="site-lang-switcher" data-no-translit', $header);
+});
+
+test('Переключатель письменности возвращает только на свои адреса', function () {
+    $safe = \App\Controllers\Site\ScriptController::safeRedirect(...);
+
+    assert_same('/uz/news?_lang=uz', $safe('/uz/news?_lang=uz'));
+    // Чужой адрес, протокол и обход через «//» — это открытый редирект.
+    assert_same('/', $safe('https://evil.example/'));
+    assert_same('/', $safe('//evil.example/'));
+    assert_same('/', $safe('/\\evil.example'));
+    assert_same('/', $safe(''));
+    // Перевод строки разорвал бы заголовок Location.
+    assert_same('/uz/news', $safe("/uz/news\r\nSet-Cookie: a=1"));
+});
+
+test('Письменность запоминается, не сбрасывая остальные настройки', function () {
+    $before = $_COOKIE[A11ySettings::COOKIE] ?? null;
+    $_COOKIE[A11ySettings::COOKIE] = 'size=150&contrast=mono';
+
+    A11ySettings::rememberScript('cyrl');
+    $saved = A11ySettings::fromCookie($_COOKIE[A11ySettings::COOKIE]);
+    assert_same('cyrl', $saved['script']);
+    assert_same(150, $saved['size'], 'размер текста не должен сбрасываться');
+    assert_same('mono', $saved['contrast']);
+
+    A11ySettings::rememberScript('чужое значение');
+    assert_same('latn', A11ySettings::fromCookie($_COOKIE[A11ySettings::COOKIE])['script']);
+
+    if ($before === null) {
+        unset($_COOKIE[A11ySettings::COOKIE]);
+    } else {
+        $_COOKIE[A11ySettings::COOKIE] = $before;
+    }
+});
+
 test('Кириллица применяется только к публичным страницам на узбекском', function () {
     $view = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Core/View.php');
 

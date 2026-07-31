@@ -127,6 +127,29 @@ final class A11ySettings
         return http_build_query(self::normalize($settings));
     }
 
+    /** Запоминает письменность, не трогая остальные настройки отображения. */
+    public static function rememberScript(string $script): void
+    {
+        $settings = self::fromCookie($_COOKIE[self::COOKIE] ?? null);
+        $settings['script'] = in_array($script, self::SCRIPTS, true) ? $script : 'latn';
+
+        $value = self::toCookie($settings);
+        $_COOKIE[self::COOKIE] = $value;
+        if (PHP_SAPI === 'cli') {
+            return;
+        }
+
+        setcookie(self::COOKIE, $value, [
+            'expires' => time() + 31536000,
+            'path' => '/',
+            'domain' => '',
+            'secure' => RequestUrl::isHttps(),
+            // Настройку читает и меняет скрипт панели, поэтому не httponly.
+            'httponly' => false,
+            'samesite' => 'Lax',
+        ]);
+    }
+
     private static function fromLegacy(string $raw): array
     {
         $parts = explode(':', $raw);

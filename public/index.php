@@ -377,6 +377,9 @@ $router->get('/rss.xml', [\App\Controllers\Site\SitemapController::class, 'rss']
 $router->get('/rss/{lang}', [\App\Controllers\Site\SitemapController::class, 'rss']);
 $router->get('/robots.txt', [\App\Controllers\Site\SitemapController::class, 'robots']);
 
+// --- Письменность узбекского текста (латиница ↔ кириллица) ---
+$router->get('/script/{code}', [\App\Controllers\Site\ScriptController::class, 'switch']);
+
 // --- Публичный сайт ---
 $router->get('/', [SitePageController::class, 'home']);
 $router->get('/news', [SiteNewsController::class, 'index']);

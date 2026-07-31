@@ -242,6 +242,16 @@ if (!empty($menuItems)) {
 // --- Переключатель языков ---
 // Переключатель всегда показывает все активные языки. Наличие перевода не
 // должно лишать посетителя возможности явно сменить язык интерфейса.
+// --- Настройки отображения: состояние из cookie (страница сразу приходит
+// в нужном виде, без мигания «обычная → крупная») ---
+$a11ySettings = \App\Core\A11ySettings::fromCookie($_COOKIE[\App\Core\A11ySettings::COOKIE] ?? null);
+$a11yActive = \App\Core\A11ySettings::isActive($a11ySettings);
+$a11yToggle = '<button type="button" class="a11y-toggle' . ($a11yActive ? ' is-active' : '') . '" data-a11y-open'
+    . ' aria-label="' . $et('Настройки отображения') . '" title="' . $et('Настройки отображения: размер текста, контраст, интервалы') . '"'
+    . ' aria-controls="a11y-panel" aria-expanded="false">'
+    . \App\Core\Icon::render('eye', 18)
+    . '<span>' . $et('Для слабовидящих') . '</span></button>';
+
 $langHtml = '';
 $activeLangs = Language::active();
 $hrefLangs = $activeLangs;
@@ -270,17 +280,50 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
     $currentCode = (string) $currentObj['code'];
     $currentName = (string) $currentObj['name'];
 
+    // Узбекская кириллица — не отдельный язык, а письменность: контент один,
+    // текст переводится транслитерацией. В списке она стоит рядом с узбекским,
+    // а ссылка ведёт на переключатель письменности.
+    $uzCyrillicOn = $currentLang === 'uz' && $a11ySettings['script'] === 'cyrl';
+    $langOptions = [];
+    foreach ($activeLangs as $l) {
+        $code = (string) $l['code'];
+        $href = Locale::url($path, $code) . '?' . \App\Core\LocalePreference::QUERY . '=' . rawurlencode($code);
+        if ($code === 'uz') {
+            // На узбекский всегда возвращаемся в латинице, даже из кириллицы.
+            $href = '/script/latn?to=' . rawurlencode($href);
+        }
+        $langOptions[] = [
+            'name' => (string) $l['name'],
+            'short' => strtoupper($code),
+            'href' => $href,
+            'active' => $code === $currentLang && !($code === 'uz' && $uzCyrillicOn),
+        ];
+
+        if ($code !== 'uz') {
+            continue;
+        }
+        $uzHref = Locale::url($path, 'uz') . '?' . \App\Core\LocalePreference::QUERY . '=uz';
+        $langOptions[] = [
+            'name' => 'Ўзбекча (кирилл)',
+            'short' => 'ЎЗ',
+            'href' => '/script/cyrl?to=' . rawurlencode($uzHref),
+            'active' => $uzCyrillicOn,
+        ];
+    }
+
+    if ($uzCyrillicOn) {
+        $currentName = 'Ўзбекча (кирилл)';
+        $currentCode = 'ЎЗ';
+    }
+
+    // Названия языков не переводятся транслитерацией: «O‘zbekcha» должно
+    // остаться латиницей и в кириллическом режиме.
     if ($style === 'pills') {
-        $langHtml = '<div class="site-lang-switcher">';
-        foreach ($activeLangs as $l) {
-            $code = (string) $l['code'];
-            $label = match ($format) {
-                'name' => (string) $l['name'],
-                default => strtoupper($code),
-            };
-            $href = Locale::url($path, $code) . '?' . \App\Core\LocalePreference::QUERY . '=' . rawurlencode($code);
-            $isActive = $code === $currentLang ? ' is-active' : '';
-            $langHtml .= '<a class="site-lang-switcher__item' . $isActive . '" href="' . htmlspecialchars($href, ENT_QUOTES) . '">' . htmlspecialchars((string) $label, ENT_QUOTES) . '</a>';
+        $langHtml = '<div class="site-lang-switcher" data-no-translit>';
+        foreach ($langOptions as $option) {
+            $label = $format === 'name' ? $option['name'] : $option['short'];
+            $isActive = $option['active'] ? ' is-active' : '';
+            $langHtml .= '<a class="site-lang-switcher__item' . $isActive . '" href="' . htmlspecialchars($option['href'], ENT_QUOTES) . '">' . htmlspecialchars($label, ENT_QUOTES) . '</a>';
         }
         $langHtml .= '</div>';
     } else {
@@ -291,7 +334,7 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
 
         $globeSvg = \App\Core\Icon::render('world', 15, 'site-lang-dropdown__globe');
 
-        $langHtml = '<details class="site-lang-dropdown" data-lang-dropdown>';
+        $langHtml = '<details class="site-lang-dropdown" data-lang-dropdown data-no-translit>';
         $langHtml .= '<summary class="site-lang-dropdown__trigger" aria-label="' . htmlspecialchars(t('Выбрать язык'), ENT_QUOTES) . '">';
         $langHtml .= $globeSvg;
         $langHtml .= '<span class="site-lang-dropdown__current">' . htmlspecialchars((string) $triggerLabel, ENT_QUOTES) . '</span>';
@@ -299,14 +342,11 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
         $langHtml .= '</summary>';
 
         $langHtml .= '<div class="site-lang-dropdown__menu" role="menu">';
-        foreach ($activeLangs as $l) {
-            $code = (string) $l['code'];
-            $name = (string) $l['name'];
-            $href = Locale::url($path, $code) . '?' . \App\Core\LocalePreference::QUERY . '=' . rawurlencode($code);
-            $isActive = $code === $currentLang;
+        foreach ($langOptions as $option) {
+            $isActive = $option['active'];
 
-            $langHtml .= '<a class="site-lang-dropdown__item' . ($isActive ? ' is-active' : '') . '" href="' . htmlspecialchars($href, ENT_QUOTES) . '" role="menuitem">';
-            $langHtml .= '<span class="site-lang-dropdown__item-name">' . htmlspecialchars($name, ENT_QUOTES) . '</span>';
+            $langHtml .= '<a class="site-lang-dropdown__item' . ($isActive ? ' is-active' : '') . '" href="' . htmlspecialchars($option['href'], ENT_QUOTES) . '" role="menuitem">';
+            $langHtml .= '<span class="site-lang-dropdown__item-name">' . htmlspecialchars($option['name'], ENT_QUOTES) . '</span>';
             if ($isActive) {
                 $langHtml .= \App\Core\Icon::render('check', 14, 'site-lang-dropdown__check', 3);
             }
@@ -357,16 +397,6 @@ $themeToggle = '<button type="button" class="site-theme-toggle" aria-label="' . 
     . \App\Core\Icon::render('sun', 24, 'site-theme-toggle__sun')
     . \App\Core\Icon::render('moon', 24, 'site-theme-toggle__moon')
     . '</span></button>';
-
-// --- Настройки отображения: состояние из cookie (страница сразу приходит
-// в нужном виде, без мигания «обычная → крупная») ---
-$a11ySettings = \App\Core\A11ySettings::fromCookie($_COOKIE[\App\Core\A11ySettings::COOKIE] ?? null);
-$a11yActive = \App\Core\A11ySettings::isActive($a11ySettings);
-$a11yToggle = '<button type="button" class="a11y-toggle' . ($a11yActive ? ' is-active' : '') . '" data-a11y-open'
-    . ' aria-label="' . $et('Настройки отображения') . '" title="' . $et('Настройки отображения: размер текста, контраст, интервалы') . '"'
-    . ' aria-controls="a11y-panel" aria-expanded="false">'
-    . \App\Core\Icon::render('eye', 18)
-    . '<span>' . $et('Для слабовидящих') . '</span></button>';
 
 // --- Тема-билдер: значения дизайна + классы для <body> ---
 $designVals = \App\Core\DesignSettings::current();
