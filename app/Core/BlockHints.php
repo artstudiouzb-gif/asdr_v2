@@ -136,11 +136,11 @@ final class BlockHints
     {
         try {
             $stmt = Database::pdo()->query(
-                // Значение приходит и как JSON true, и как 1 — сравниваем оба варианта.
+                // Значение приходит и как JSON true, и как 1. JSON_UNQUOTE вместо
+                // CAST(... AS JSON): CAST в такой форме не понимает MariaDB.
                 "SELECT COUNT(*) FROM blocks
                  WHERE type = 'team_list'
-                   AND JSON_EXTRACT(data, '$.group_by_department')
-                       IN (CAST('true' AS JSON), CAST('1' AS JSON))"
+                   AND JSON_UNQUOTE(JSON_EXTRACT(data, '$.group_by_department')) IN ('true', '1')"
             );
 
             return (int) $stmt->fetchColumn() > 0;

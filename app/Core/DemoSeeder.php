@@ -1381,6 +1381,22 @@ final class DemoSeeder
                         ['text', 'Korrupsiyaga qarshi kurashish', ['title' => 'Korrupsiyaga qarshi kurashish', 'content' => '<p>Tashkilotda korrupsiyaga qarshi kurashish bo‘yicha tizimli siyosat yuritiladi. Normativ hujjatlar bilan «Hujjatlar» bo‘limida tanishishingiz mumkin.</p><p>Korrupsiya holatlari haqida xabar berish uchun qayta aloqa shaklidan foydalanishingiz mumkin.</p>']]
                     ]
                 ]
+            ],
+            // Видео и фото живут в блоке «Медиагалерея»; отдельного маршрута
+            // /videos у публички нет, поэтому раздел — обычная страница.
+            'media' => [
+                'ru' => [
+                    'title' => 'Медиатека',
+                    'blocks' => [
+                        ['media_gallery', 'Медиатека', ['title' => 'Фото и видео', 'source' => 'media', 'limit' => 12]]
+                    ]
+                ],
+                'uz' => [
+                    'title' => 'Mediateka',
+                    'blocks' => [
+                        ['media_gallery', 'Mediateka', ['title' => 'Foto va video', 'source' => 'media', 'limit' => 12]]
+                    ]
+                ]
             ]
         ];
 
@@ -1633,7 +1649,7 @@ final class DemoSeeder
                     ['Новости', 'news_index', ''],
                     ['Мероприятия', 'page', 'meropriyatiya'],
                     ['Фотоальбомы', 'custom', '/albums'],
-                    ['Видеоматериалы', 'custom', '/videos'],
+                    ['Видеоматериалы', 'page', 'media'],
                 ]],
                 ['title' => 'Открытые данные', 'type' => 'custom', 'value' => '/catalog/documenty', 'mega' => 2, 'children' => [
                     ['Документы', 'custom', '/catalog/documenty'],
@@ -1661,7 +1677,7 @@ final class DemoSeeder
                     ['Yangiliklar', 'news_index', ''],
                     ['Tadbirlar', 'page', 'meropriyatiya'],
                     ['Fotoalbomlar', 'custom', '/albums'],
-                    ['Videomateriallar', 'custom', '/videos'],
+                    ['Videomateriallar', 'page', 'media'],
                 ]],
                 ['title' => 'Ochiq ma’lumotlar', 'type' => 'custom', 'value' => '/catalog/documenty', 'mega' => 2, 'children' => [
                     ['Hujjatlar', 'custom', '/catalog/documenty'],

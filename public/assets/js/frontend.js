@@ -672,7 +672,12 @@
         if (document.body) {
             document.body.setAttribute('data-theme', next);
         }
-        try { localStorage.setItem('theme', next); } catch (err) {}
+        try {
+            localStorage.setItem('theme', next);
+            // Помним, при какой серверной настройке сделан выбор: сменят её в
+            // админке — выбор посетителя сбросится (см. theme-init.js).
+            localStorage.setItem('theme-base', root.getAttribute('data-theme-base') || '');
+        } catch (err) {}
     });
 
     // Счётчики (группа 4): анимация инкремента числа при попадании в зону
