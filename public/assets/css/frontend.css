@@ -25,6 +25,13 @@
     --border-color: #2b303c;
 }
 
+/* Нативные контролы (поля ввода, скроллбары, выпадающие списки) браузер
+   красит по системному режиму, если не сказать иначе. Сайт со светлой темой
+   в тёмном режиме телефона получал тёмные поля и полосы прокрутки. */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="auto"] { color-scheme: light dark; }
+
 /* Авто-тема: следуем системным настройкам, если тема не задана явно. */
 @media (prefers-color-scheme: dark) {
     :root[data-theme="auto"] {
@@ -1289,6 +1296,15 @@ body.design-header-dark .site-burger, body.design-header-accent .site-burger { c
         box-shadow: var(--shadow-lg);
     }
     body.design-mmenu-burger.mobile-menu-open .site-menu { display: flex; }
+    /* Меню внутри off-canvas панели живёт по своим правилам. Раскрывающая
+       панель бургер-режима позиционируется от шапки (top: 100%), и в drawer
+       это выносило пункты за нижний край панели. */
+    body.design-mmenu-burger .site-drawer .site-menu {
+        display: flex; position: static;
+        padding: 0; background: transparent;
+        border-bottom: 0; box-shadow: none;
+        max-height: none; overflow: visible;
+    }
     body.design-mmenu-burger .site-menu__link { display: block; padding: 12px 8px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
     body.design-mmenu-burger .site-menu__item { width: 100%; }
     body.design-mmenu-burger .site-header { position: relative; }

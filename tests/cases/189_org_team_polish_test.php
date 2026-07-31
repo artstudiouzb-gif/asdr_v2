@@ -113,7 +113,7 @@ test('Подсказки: ссылка со схемы на якорь сект�
     $pdo->exec("UPDATE blocks SET data = '{\"group_by_department\":false}' WHERE id = {$blockId}");
     $others = (int) $pdo->query(
         "SELECT COUNT(*) FROM blocks WHERE type = 'team_list'
-           AND JSON_EXTRACT(data, '$.group_by_department') IN (CAST('true' AS JSON), CAST('1' AS JSON))"
+           AND JSON_UNQUOTE(JSON_EXTRACT(data, '$.group_by_department')) IN ('true', '1')"
     )->fetchColumn();
     if ($others === 0) {
         assert_true(BlockHints::forBlock('org_structure', $schemeWithLink) !== [], 'ссылка без группировки должна предупреждать');
