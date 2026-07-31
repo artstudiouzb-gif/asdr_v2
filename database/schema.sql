@@ -332,10 +332,11 @@ CREATE TABLE IF NOT EXISTS team_members (
     status          ENUM('draft', 'published') NOT NULL DEFAULT 'published',
     sort_order      INT NOT NULL DEFAULT 0,
     created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_team_members_listing (status, sort_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Переводы сотрудников команды (имя и должность на неосновных языках)
+-- Переводы сотрудников команды (имя, должность и подразделение на неосновных языках)
 CREATE TABLE IF NOT EXISTS team_member_translations (
     id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     member_id   INT UNSIGNED NOT NULL,

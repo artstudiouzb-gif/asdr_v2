@@ -138,11 +138,11 @@ $branchIndex = 0;
 
     <div class="orgstruct orgstruct--<?= $layout ?><?= $collapsible ? ' orgstruct--collapsible' : '' ?>"<?= $collapsible ? ' data-org-collapsible' : '' ?>>
         <?php if ($council !== []): ?>
-            <div class="orgstruct__council">
+            <ul class="orgstruct__council" role="list">
                 <?php foreach ($council as $item): ?>
-                    <div class="orgstruct__council-card"><?= $orgItemInner($item) ?></div>
+                    <li class="orgstruct__council-card"><?= $orgItemInner($item) ?></li>
                 <?php endforeach; ?>
-            </div>
+            </ul>
         <?php endif; ?>
 
         <div class="orgstruct__top">
@@ -164,14 +164,14 @@ $branchIndex = 0;
         <?php if ($branches !== []): ?>
             <div class="orgstruct__branches">
                 <?php foreach ($rows as $row): ?>
-                    <div class="orgstruct__row">
+                    <ul class="orgstruct__row" role="list">
                         <?php foreach ($row as $branch): ?>
                             <?php
                             $branchIndex++;
                             $branchId = 'org-branch-' . (int) $blockId . '-' . $branchIndex;
                             $hasHead = $branch['title'] !== '' || $branch['name'] !== '';
                             ?>
-                            <div class="orgstruct__branch<?= $hasHead ? '' : ' orgstruct__branch--headless' ?>" data-org-branch>
+                            <li class="orgstruct__branch<?= $hasHead ? '' : ' orgstruct__branch--headless' ?>" data-org-branch>
                                 <?php if ($hasHead): ?>
                                     <div class="orgstruct__deputy">
                                         <?php if ($branch['url'] !== ''): ?><a class="orgstruct__deputy-link" href="<?= htmlspecialchars($branch['url'], ENT_QUOTES) ?>"><?php endif; ?>
@@ -187,7 +187,7 @@ $branchIndex = 0;
                                     </div>
                                 <?php endif; ?>
                                 <?php if ($branch['units'] !== []): ?>
-                                    <ul class="orgstruct__units" id="<?= $branchId ?>" data-org-units role="list">
+                                    <ul class="orgstruct__units" id="<?= $branchId ?>" data-org-units role="list"<?= $hasHead ? ' aria-label="' . htmlspecialchars(trim($branch['title'] . ' ' . $branch['name']), ENT_QUOTES) . '"' : '' ?>>
                                         <?php foreach ($branch['units'] as $unit): ?>
                                             <li class="orgstruct__unit<?= $unit['accent'] ? ' orgstruct__unit--accent' : '' ?>">
                                                 <?= $orgItemInner($unit) ?>
@@ -202,20 +202,20 @@ $branchIndex = 0;
                                         <?php endforeach; ?>
                                     </ul>
                                 <?php endif; ?>
-                            </div>
+                            </li>
                         <?php endforeach; ?>
-                    </div>
+                    </ul>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
     </div>
 
     <?php if ($notes !== []): ?>
-        <div class="orgstruct__notes">
+        <ul class="orgstruct__notes" role="list">
             <?php foreach ($notes as $note): ?>
-                <div class="orgstruct__note"><?= $orgItemInner($note) ?></div>
+                <li class="orgstruct__note"><?= $orgItemInner($note) ?></li>
             <?php endforeach; ?>
-        </div>
+        </ul>
     <?php endif; ?>
 
     <?php if ($footnote !== ''): ?>

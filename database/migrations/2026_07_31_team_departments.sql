@@ -53,3 +53,17 @@ SET @asdr_sql := IF(
     'SELECT 1'
 );
 PREPARE asdr_stmt FROM @asdr_sql; EXECUTE asdr_stmt; DEALLOCATE PREPARE asdr_stmt;
+
+-- Список команды всегда читается как «опубликованные по порядку сортировки».
+SET @asdr_has_index := (
+    SELECT COUNT(*) FROM information_schema.STATISTICS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'team_members'
+      AND INDEX_NAME = 'idx_team_members_listing'
+);
+SET @asdr_sql := IF(
+    @asdr_has_index = 0,
+    'ALTER TABLE team_members ADD KEY idx_team_members_listing (status, sort_order)',
+    'SELECT 1'
+);
+PREPARE asdr_stmt FROM @asdr_sql; EXECUTE asdr_stmt; DEALLOCATE PREPARE asdr_stmt;
