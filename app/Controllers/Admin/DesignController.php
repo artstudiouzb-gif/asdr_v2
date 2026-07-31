@@ -108,11 +108,11 @@ final class DesignController
         // Они применяются только для соответствующих вариантов «Свои…».
         $customPrimary = \App\Core\SettingsValidator::hexColor(
             (string) ($preview['color_primary'] ?? ''),
-            (string) Setting::get('color_primary', '#173a63')
+            (string) Setting::get('color_primary', '#155182')
         );
         $customAccent = \App\Core\SettingsValidator::hexColor(
             (string) ($preview['color_accent'] ?? ''),
-            (string) Setting::get('color_accent', '#17999b')
+            (string) Setting::get('color_accent', '#00A0A6')
         );
         foreach (DesignSettings::semanticColors() as $key => $current) {
             if (array_key_exists($key, $preview)) {

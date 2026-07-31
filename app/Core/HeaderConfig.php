@@ -57,9 +57,9 @@ final class HeaderConfig
         'menu_position' => 'center',          // left | center | right
         // Поведение шапки: липкая (следует за прокруткой) и прозрачная
         // (накладывается на первый экран, при прокрутке становится сплошной).
-        'sticky' => false,
+        'sticky' => true,
         'sticky_full_width' => false,
-        'transparent' => false,
+        'transparent' => true,
         // Светлый (белый) вариант логотипа для прозрачной шапки.
         'logo_light' => '',
         // Логотип для конкретного языка (код => URL). Переопределяет общий
@@ -111,7 +111,7 @@ final class HeaderConfig
         ],
         // Тень под шапкой: вкл/выкл и размер (px, размытие). В прозрачном
         // режиме шапки тень не рисуется (до прокрутки).
-        'shadow' => ['enabled' => false, 'size' => 14],
+        'shadow' => ['enabled' => true, 'size' => 14],
         // Разделительные линии между секциями.
         'borders' => 'full',
         // Режим контейнера всей шапки: full (на всю ширину), container (в боксе), floating (парящее стекло).

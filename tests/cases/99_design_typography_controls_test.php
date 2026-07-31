@@ -65,7 +65,9 @@ test('точные размеры сохраняются и переопреде
         'fs_menu' => '15',
     ]);
 
-    $css = DesignSettings::cssVariables(DesignSettings::current());
+    // Точный радиус переносится на кнопки только при скруглённой форме:
+    // у «капсулы» своя геометрия, и подменять её значением карточек нельзя.
+    $css = DesignSettings::cssVariables(['button' => 'rounded'] + DesignSettings::current());
     assert_contains('--base-font-size:17.5px', $css);
     assert_contains('--base-line-height:1.35', $css);
     assert_contains('h1,', $css);

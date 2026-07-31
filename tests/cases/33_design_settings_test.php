@@ -6,7 +6,12 @@ use App\Core\DesignSettings;
 
 test('DesignSettings::sanitize отбрасывает неизвестные значения к дефолту', function () {
     assert_same('wide', DesignSettings::sanitize('container', 'wide'));
-    assert_same('standard', DesignSettings::sanitize('container', 'bogus')); // default
+    // Значение по умолчанию берём из описания опции: оно меняется вместе с
+    // оформлением сайта, а проверяем мы откат мусора, а не саму ширину.
+    assert_same(
+        DesignSettings::OPTIONS['container']['default'],
+        DesignSettings::sanitize('container', 'bogus')
+    );
     assert_true(DesignSettings::sanitize('nope', 'x') === null);
 });
 
