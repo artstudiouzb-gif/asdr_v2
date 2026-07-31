@@ -4150,6 +4150,99 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     overflow: hidden;
 }
 
+/* ===== Обложка со слайдами =====
+   Слайды лежат друг на друге: высоту задаёт самый высокий, поэтому при смене
+   слайда страница не прыгает. Видимость — через opacity + visibility, чтобы
+   невидимый слайд не ловил фокус и не читался скринридером. */
+/* Корень слайдера — грид: иначе правила «обложка с медиа» делают его флексом,
+   и слайды сжимаются по своему содержимому вместо высоты обложки. */
+.block-hero--slider { display: grid !important; grid-template-columns: 1fr; }
+.block-hero--slider .block-hero__slides { display: grid; min-height: inherit; }
+.block-hero__slide {
+    grid-area: 1 / 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: inherit;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .5s ease;
+}
+.block-hero__slide.is-active { opacity: 1; visibility: visible; }
+@media (prefers-reduced-motion: reduce) {
+    .block-hero__slide { transition: none; }
+}
+.block-hero--slider .block-hero__inner { position: relative; z-index: 2; width: 100%; }
+/* Картинка слайда ведёт себя как фон обложки: правила выше привязаны к
+   .block-hero--media > .block-hero__media, а здесь медиа лежит внутри слайда. */
+.block-hero__slide .block-hero__media,
+.block-hero__slide .block-hero__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-color: var(--gov-navy);
+}
+.block-hero__slide .block-hero__scrim { z-index: 1; }
+
+/* Ссылка-подложка: кликабелен весь слайд, кнопки поверх неё остаются
+   самостоятельными ссылками. */
+.block-hero__slide-cover { position: absolute; inset: 0; z-index: 1; }
+.block-hero__title-link { color: inherit; text-decoration: none; }
+.block-hero__title-link:hover { text-decoration: underline; }
+
+.block-hero__slider-nav {
+    position: absolute;
+    inset-inline: clamp(12px, 2vw, 28px);
+    top: 50%;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+.block-hero__slider-btn {
+    pointer-events: auto;
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: 50%;
+    background: rgba(11, 26, 48, .35);
+    color: #fff;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+}
+.block-hero__slider-btn:hover { background: rgba(11, 26, 48, .6); }
+.block-hero__slider-btn:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+.block-hero__dots {
+    position: absolute;
+    inset-inline: 0;
+    bottom: clamp(14px, 2vw, 26px);
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.block-hero__dot {
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, .7);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+}
+.block-hero__dot.is-active { background: #fff; }
+.block-hero__dot:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+@media (max-width: 700px) {
+    .block-hero__slider-nav { display: none; }
+}
+
 
 
 /* 2. Overlap layout for integrated counters (adjacent to Hero) */

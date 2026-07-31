@@ -15,6 +15,9 @@ use App\Core\Video;
  */
 final class HeroBlockNormalizer
 {
+    /** Больше десяти слайдов посетитель всё равно не досмотрит. */
+    public const MAX_SLIDES = 10;
+
     /**
      * @param array<string, mixed> $input
      * @return array<string, mixed>
@@ -99,7 +102,74 @@ final class HeroBlockNormalizer
             'button2_icon_image' => self::iconImage($input['button2_icon_image'] ?? ''),
             'video_button_text' => trim((string) ($input['video_button_text'] ?? '')),
             'video_button_url' => BlockDataInput::safeLink($input['video_button_url'] ?? ''),
+            'slides' => self::slides($input['slides'] ?? null),
+            'autoplay' => self::autoplay($input['autoplay'] ?? null),
         ];
+    }
+
+    /**
+     * Слайды обложки. Оформление (высота, фон, затемнение, панель) остаётся
+     * общим для всей обложки — у слайда своё только содержимое: текст,
+     * картинка, кнопки, ссылка и окно показа.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function slides(mixed $raw): array
+    {
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $slides = [];
+        foreach ($raw as $slide) {
+            if (!is_array($slide)) {
+                continue;
+            }
+
+            $normalized = [
+                'eyebrow' => trim((string) ($slide['eyebrow'] ?? '')),
+                'title' => trim((string) ($slide['title'] ?? '')),
+                'subtitle' => trim((string) ($slide['subtitle'] ?? '')),
+                'image' => BlockDataInput::safeMedia($slide['image'] ?? ''),
+                'image_position' => MediaPosition::normalize($slide['image_position'] ?? null),
+                'link_url' => BlockDataInput::safeLink($slide['link_url'] ?? ''),
+                'button_text' => trim((string) ($slide['button_text'] ?? '')),
+                'button_url' => BlockDataInput::safeLink($slide['button_url'] ?? ''),
+                'button_icon' => \App\Core\Icon::cleanName($slide['button_icon'] ?? ''),
+                'button2_text' => trim((string) ($slide['button2_text'] ?? '')),
+                'button2_url' => BlockDataInput::safeLink($slide['button2_url'] ?? ''),
+                'button2_icon' => \App\Core\Icon::cleanName($slide['button2_icon'] ?? ''),
+                'text_position' => in_array($slide['text_position'] ?? '', ['left', 'center', 'right'], true)
+                    ? (string) $slide['text_position']
+                    : '',
+                '_visible_from' => \App\Core\BlockVisibility::normalize($slide['_visible_from'] ?? ''),
+                '_visible_to' => \App\Core\BlockVisibility::normalize($slide['_visible_to'] ?? ''),
+            ];
+
+            // Пустая строка репитера (редактор добавил и не заполнил) в данные
+            // не попадает: иначе слайдер показывал бы чёрный кадр.
+            if ($normalized['title'] === '' && $normalized['subtitle'] === '' && $normalized['image'] === '') {
+                continue;
+            }
+
+            $slides[] = $normalized;
+            if (count($slides) >= self::MAX_SLIDES) {
+                break;
+            }
+        }
+
+        return $slides;
+    }
+
+    /** Пауза автопрокрутки в секундах; 0 — переключать только вручную. */
+    private static function autoplay(mixed $value): int
+    {
+        if (!is_numeric($value)) {
+            return 0;
+        }
+        $seconds = (int) $value;
+
+        return $seconds <= 0 ? 0 : max(3, min(30, $seconds));
     }
 
     private static function number(float $value): string

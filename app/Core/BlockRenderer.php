@@ -23,6 +23,18 @@ final class BlockRenderer
     private static ?int $nextBoundary = null;
 
     /**
+     * Ближайшая граница расписания на странице. Её сообщают и блоки целиком,
+     * и отдельные слайды обложки: кэш страницы обязан пережить свою же дату
+     * показа, иначе слайд «до 30 июля» останется висеть и 31-го.
+     */
+    public static function noteBoundary(?int $boundary): void
+    {
+        if ($boundary !== null && (self::$nextBoundary === null || $boundary < self::$nextBoundary)) {
+            self::$nextBoundary = $boundary;
+        }
+    }
+
+    /**
      * Режим предпросмотра в админке. На сайте незаполненный блок просто не
      * выводится (иначе на странице зияет пустая секция с отступами), а
      * редактору вместо него показывается заметка: блок добавлен, но пуст —
@@ -129,10 +141,7 @@ final class BlockRenderer
 
         // Условия показа (расписание). Границу запоминаем до проверки: блок,
         // который ещё не начался, тоже обязан разморозить кэш к своему старту.
-        $boundary = BlockVisibility::boundary($data);
-        if ($boundary !== null && (self::$nextBoundary === null || $boundary < self::$nextBoundary)) {
-            self::$nextBoundary = $boundary;
-        }
+        self::noteBoundary(BlockVisibility::boundary($data));
         if (!BlockVisibility::isVisible($data)) {
             return ['html' => '', 'css' => '', 'hidden' => true];
         }
@@ -291,6 +300,12 @@ final class BlockRenderer
             }
             $type = preg_replace('/[^a-z0-9_]/', '', strtolower((string) $block['type'])) ?? '';
             $assets[$type] = true;
+            // Обложка со слайдами использует общий скрипт слайдера. Смотрим на
+            // готовую разметку, а не на тип блока: обычной обложке этот скрипт
+            // не нужен, и грузить его всем подряд незачем.
+            if (str_contains($rendered['html'], 'data-hero-slider')) {
+                $assets['slider'] = true;
+            }
             if (!empty($rendered['preload_image']) && $preloadImages === []) {
                 // Одного LCP-кандидата достаточно: дополнительные high-priority
                 // preload конкурировали бы с CSS и шрифтами первого экрана.
