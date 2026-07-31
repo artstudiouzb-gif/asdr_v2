@@ -24,10 +24,22 @@
         }
     });
 
-    // Сортировка списка: значение опции — адрес страницы.
+    // Сортировка списка: значение опции — адрес страницы. Переходим только
+    // по собственным адресам: значение приходит из разметки, но переход по
+    // непроверенному адресу — это открытый редирект.
     document.addEventListener('change', function (event) {
         var select = event.target.closest('select[data-nav-select]');
-        if (select && select.value) { window.location.assign(select.value); }
+        if (!select || !select.value) { return; }
+
+        var target;
+        try {
+            target = new URL(select.value, window.location.origin);
+        } catch (err) {
+            return;
+        }
+        if (target.origin !== window.location.origin) { return; }
+
+        window.location.assign(target.pathname + target.search + target.hash);
     });
 
     // Необратимые действия (отключение 2FA, отвязка Telegram) спрашивают подтверждение.
