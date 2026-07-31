@@ -24,7 +24,12 @@ final class TeamController
     public function create(): void
     {
         Auth::requireLogin();
-        View::render('admin/team/form', ['member' => null, 'translations' => [], 'error' => null]);
+        View::render('admin/team/form', [
+            'member' => null,
+            'translations' => [],
+            'departments' => TeamMember::departments(),
+            'error' => null,
+        ]);
     }
 
     public function store(): void
@@ -36,7 +41,12 @@ final class TeamController
         $translations = $this->collectTranslations();
 
         if ($error !== null) {
-            View::render('admin/team/form', ['member' => $data, 'translations' => $translations, 'error' => $error]);
+            View::render('admin/team/form', [
+                'member' => $data,
+                'translations' => $translations,
+                'departments' => TeamMember::departments(),
+                'error' => $error,
+            ]);
             return;
         }
 
@@ -62,6 +72,7 @@ final class TeamController
         View::render('admin/team/form', [
             'member' => $member,
             'translations' => TeamMemberTranslation::forMember((int) $member['id']),
+            'departments' => TeamMember::departments(),
             'error' => null,
         ]);
     }
@@ -83,7 +94,12 @@ final class TeamController
         $translations = $this->collectTranslations();
 
         if ($error !== null) {
-            View::render('admin/team/form', ['member' => array_merge($member, $data), 'translations' => $translations, 'error' => $error]);
+            View::render('admin/team/form', [
+                'member' => array_merge($member, $data),
+                'translations' => $translations,
+                'departments' => TeamMember::departments(),
+                'error' => $error,
+            ]);
             return;
         }
 
@@ -112,13 +128,15 @@ final class TeamController
     {
         $name = trim((string) ($_POST['name'] ?? ''));
         $position = trim((string) ($_POST['position'] ?? ''));
+        $department = trim((string) ($_POST['department'] ?? ''));
+        $unit = trim((string) ($_POST['unit'] ?? ''));
         $email = trim((string) ($_POST['email'] ?? ''));
         $phone = trim((string) ($_POST['phone'] ?? ''));
         $status = ($_POST['status'] ?? 'published') === 'draft' ? 'draft' : 'published';
         $sortOrder = (int) ($_POST['sort_order'] ?? 0);
 
         if ($name === '') {
-            return [['name' => $name, 'position' => $position], 'Укажите имя сотрудника.'];
+            return [['name' => $name, 'position' => $position, 'department' => $department], 'Укажите имя сотрудника.'];
         }
 
         $photo = ImageField::resolve('photo_file', 'photo_url', $existing['photo'] ?? null, Auth::id());
@@ -134,6 +152,8 @@ final class TeamController
         $data = [
             'name' => $name,
             'position' => $position !== '' ? $position : null,
+            'department' => $department !== '' ? $department : null,
+            'unit' => $unit !== '' ? $unit : null,
             'photo' => $photo,
             'email' => $email !== '' ? $email : null,
             'phone' => $phone !== '' ? $phone : null,
@@ -146,10 +166,10 @@ final class TeamController
     }
 
     /**
-     * Переводы из полей translations[<lang>][name|position] для всех
-     * НЕ-основных активных языков. Ключ — код языка.
+     * Переводы из полей translations[<lang>][name|position|department|unit] для
+     * всех НЕ-основных активных языков. Ключ — код языка.
      *
-     * @return array<string, array{name: string, position: string}>
+     * @return array<string, array{name: string, position: string, department: string, unit: string}>
      */
     private function collectTranslations(): array
     {
@@ -165,6 +185,8 @@ final class TeamController
             $out[$code] = [
                 'name' => trim((string) ($t['name'] ?? '')),
                 'position' => trim((string) ($t['position'] ?? '')),
+                'department' => trim((string) ($t['department'] ?? '')),
+                'unit' => trim((string) ($t['unit'] ?? '')),
             ];
         }
 
@@ -172,7 +194,7 @@ final class TeamController
     }
 
     /**
-     * @param array<string, array{name: string, position: string}> $translations
+     * @param array<string, array{name: string, position: string, department: string, unit: string}> $translations
      */
     private function saveTranslations(int $memberId, array $translations): void
     {
@@ -180,6 +202,8 @@ final class TeamController
             TeamMemberTranslation::upsert($memberId, (string) $code, [
                 'name' => $t['name'] ?? '',
                 'position' => $t['position'] ?? '',
+                'department' => $t['department'] ?? '',
+                'unit' => $t['unit'] ?? '',
             ]);
         }
     }

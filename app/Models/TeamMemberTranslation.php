@@ -63,15 +63,18 @@ final class TeamMemberTranslation
     public static function upsert(int $memberId, string $lang, array $data): void
     {
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO team_member_translations (member_id, lang, name, position)
-             VALUES (:member_id, :lang, :name, :position)
-             ON DUPLICATE KEY UPDATE name = VALUES(name), position = VALUES(position)'
+            'INSERT INTO team_member_translations (member_id, lang, name, position, department, unit)
+             VALUES (:member_id, :lang, :name, :position, :department, :unit)
+             ON DUPLICATE KEY UPDATE name = VALUES(name), position = VALUES(position),
+                department = VALUES(department), unit = VALUES(unit)'
         );
         $stmt->execute([
             ':member_id' => $memberId,
             ':lang' => $lang,
             ':name' => $data['name'] ?? null,
             ':position' => $data['position'] ?? null,
+            ':department' => $data['department'] ?? null,
+            ':unit' => $data['unit'] ?? null,
         ]);
     }
 }

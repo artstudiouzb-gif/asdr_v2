@@ -24,7 +24,7 @@ final class BlockTypeRegistry
         'columns' => ['columns' => 2, 'gap' => 'medium'],
         'testimonials' => ['title' => '', 'items' => []],
         'counters' => ['title' => '', 'card_bg' => '', 'text_color' => '', 'items' => []],
-        'team_list' => ['title' => '', 'limit' => 0],
+        'team_list' => ['title' => '', 'limit' => 0, 'department' => '', 'group_by_department' => false],
         'projects_list' => ['title' => '', 'limit' => 3],
         'news_latest' => ['title' => 'Последние новости', 'limit' => 3],
         'partners' => ['title' => 'Партнёры', 'items' => []],

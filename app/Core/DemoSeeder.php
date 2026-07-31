@@ -179,8 +179,8 @@ final class DemoSeeder
             'videos' => 3,
             'video_translations' => 3,
             'forms' => 3,
-            'team_members' => 4,
-            'team_member_translations' => 4,
+            'team_members' => 6,
+            'team_member_translations' => 6,
             'menu_items' => 40,
         ];
 
@@ -1206,19 +1206,50 @@ final class DemoSeeder
         if (!self::tableExists($pdo, 'team_members')) {
             return;
         }
+        // [ФИО, должность, ФИО (uz), должность (uz), сектор, отдел/группа,
+        //  сектор (uz), отдел/группа (uz)] — руководство идёт без сектора.
         $team = [
-            ['Нуриддинов Шерзод Бахтиярович', 'Директор', 'Nuriddinov Sherzod Baxtiyarovich', 'Direktor'],
-            ['Юлдашева Нилуфар Азизовна', 'Заместитель директора', 'Yuldasheva Nilufar Azizovna', 'Direktor o‘rinbosari'],
-            ['Каримов Бехзод Шухратович', 'Руководитель направления стратегического анализа', 'Karimov Behzod Shuhratovich', 'Strategik tahlil yo‘nalishi rahbari'],
-            ['Исмоилова Дилноза Фарходовна', 'Руководитель пресс-службы', 'Ismoilova Dilnoza Farhodovna', 'Matbuot xizmati rahbari'],
+            ['Нуриддинов Шерзод Бахтиярович', 'Директор', 'Nuriddinov Sherzod Baxtiyarovich', 'Direktor', '', '', '', ''],
+            ['Юлдашева Нилуфар Азизовна', 'Заместитель директора', 'Yuldasheva Nilufar Azizovna', 'Direktor o‘rinbosari', '', '', '', ''],
+            [
+                'Каримов Бехзод Шухратович', 'Руководитель сектора',
+                'Karimov Behzod Shuhratovich', 'Shoʻba rahbari',
+                'Сектор анализа и исследований', '',
+                'Tahlil va tadqiqotlar shoʻbasi', '',
+            ],
+            [
+                'Исмоилова Дилноза Фарходовна', 'Руководитель сектора',
+                'Ismoilova Dilnoza Farhodovna', 'Shoʻba rahbari',
+                'Сектор по связям с общественностью', '',
+                'Jamoatchilik bilan aloqalar shoʻbasi', '',
+            ],
+            [
+                'Ражабов Отабек Улугбекович', 'Главный специалист',
+                'Rajabov Otabek Ulugʻbekovich', 'Bosh mutaxassis',
+                'Информационно-аналитический и организационный сектор', 'группа по работе с кадрами',
+                'Axborot-tahlil va tashkiliy masalalar shoʻbasi', 'kadrlar bilan ishlash guruhi',
+            ],
+            [
+                'Хамидова Севара Рустамовна', 'Ведущий специалист',
+                'Hamidova Sevara Rustamovna', 'Yetakchi mutaxassis',
+                'Информационно-аналитический и организационный сектор', 'первый отдел',
+                'Axborot-tahlil va tashkiliy masalalar shoʻbasi', 'birinchi boʻlim',
+            ],
         ];
         $ins = $pdo->prepare(
-            "INSERT INTO team_members (name, position, status, sort_order, created_at)
-             SELECT :n, :p, 'published', :o, NOW()
+            "INSERT INTO team_members (name, position, department, unit, status, sort_order, created_at)
+             SELECT :n, :p, :d, :u, 'published', :o, NOW()
              FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM team_members WHERE name = :n2)"
         );
         foreach ($team as $i => $t) {
-            $ins->execute([':n' => $t[0], ':p' => $t[1], ':o' => $i, ':n2' => $t[0]]);
+            $ins->execute([
+                ':n' => $t[0],
+                ':p' => $t[1],
+                ':d' => $t[4] !== '' ? $t[4] : null,
+                ':u' => $t[5] !== '' ? $t[5] : null,
+                ':o' => $i,
+                ':n2' => $t[0],
+            ]);
             $c['team'] += $ins->rowCount();
 
             if (self::tableExists($pdo, 'team_member_translations')) {
@@ -1227,8 +1258,8 @@ final class DemoSeeder
                 $memberId = $memberStmt->fetchColumn();
                 if ($memberId !== false) {
                     $translationIns = $pdo->prepare(
-                        "INSERT INTO team_member_translations (member_id, lang, name, position)
-                         SELECT :member_id, 'uz', :name, :position
+                        "INSERT INTO team_member_translations (member_id, lang, name, position, department, unit)
+                         SELECT :member_id, 'uz', :name, :position, :department, :unit
                          FROM DUAL
                          WHERE NOT EXISTS (
                              SELECT 1 FROM team_member_translations
@@ -1239,6 +1270,8 @@ final class DemoSeeder
                         ':member_id' => (int) $memberId,
                         ':name' => $t[2],
                         ':position' => $t[3],
+                        ':department' => $t[6] !== '' ? $t[6] : null,
+                        ':unit' => $t[7] !== '' ? $t[7] : null,
                         ':member_id2' => (int) $memberId,
                     ]);
                 }
@@ -1252,20 +1285,20 @@ final class DemoSeeder
         $pages = [
             'o-nas' => [
                 'ru' => [
-                    'title' => 'Об организации',
+                    'title' => 'Об Агентстве',
                     'blocks' => [
-                        ['text', 'О нас', [
-                            'title' => 'Правовой статус и законодательная основа деятельности',
-                            'content' => '<h3>Законодательная основа и правовой статус</h3><p>Деятельность Агентства стратегического планирования и развития осуществляется в строгом соответствии с Конституцией Республики Узбекистан, законами Республики Узбекистан, а также нормативно-правовыми актами Президента Республики Узбекистан, нацеленными на модернизацию системы государственного управления.</p><div class="gov-card u-inline-d65cd622b8"><h4 class="u-inline-14ed279e35">Ключевые нормативно-правовые акты Агентства:</h4><ul class="u-inline-f07251c396"><li><strong>Указ Президента Республики Узбекистан № УП-201 от 30 октября 2025 года</strong> «О мерах по внедрению системы стратегического планирования и развития» — заложил основу для системного прогнозирования развития отраслей и регионов страны.</li><li><strong>Постановление Президента Республики Узбекистан № ПП-394 от 29 декабря 2025 года</strong> «О мерах по организации и эффективному налаживанию системы стратегического планирования и развития на основе новых подходов» — регламентирует структуру, организацию деятельности, полномочия и порядок взаимодействия Агентства с другими министерствами и ведомствами.</li><li><strong>Указ Президента Республики Узбекистан № УП-21 от 16 февраля 2026 года</strong> «О дополнительных мерах по последовательному продолжению реформ и выведению их на новый этап в рамках приоритетных направлений развития страны до 2030 года» — определяет ключевые KPI развития отраслей и координирующую роль Агентства в мониторинге реализации реформ до 2030 года.</li></ul></div><h3>Основные задачи и функции</h3><p>В соответствии с Указами Президента, на Агентство возложены следующие стратегические задачи:</p><ul><li><strong>Стратегическое планирование:</strong> Координация разработки и мониторинга реализации долгосрочных стратегий развития отраслей экономики и регионов.</li><li><strong>Оценка реформ (KPI до 2030 года):</strong> Разработка и внедрение системы ключевых показателей эффективности (KPI) для оценки хода реформ на основе Указа Президента № УП-21.</li><li><strong>Анализ и прогнозирование:</strong> Мониторинг макроэкономических показателей, выявление системных проблем и барьеров на пути реформ с подготовкой аналитических отчетов руководству страны.</li><li><strong>Методологическое руководство:</strong> Внедрение новых подходов и передовых международных стандартов стратегического планирования в деятельность органов исполнительной власти.</li></ul><h3>Регламент и прозрачность деятельности</h3><p>В соответствии с Законом РУз «Об открытости деятельности органов государственной власти и управления», Агентство обеспечивает полную прозрачность процессов разработки и мониторинга стратегий развития. Вся информация о ходе выполнения приоритетных направлений до 2030 года регулярно публикуется на нашем портале для ознакомления граждан, инвесторов и внутренних партнеров.</p>'
+                        ['text', 'Об Агентстве', [
+                            'title' => 'Об Агентстве',
+                            'content' => '<h3>Правовой статус и полномочия</h3><p>Агентство стратегического развития и реформ при Президенте Республики Узбекистан — уполномоченный государственный орган в сфере стратегического планирования и развития страны.</p><p>Указом Президента Республики Узбекистан от 30 октября 2025 года № УП-201 <a href="https://lex.uz/uz/docs/7806484" target="_blank" rel="noopener">«Об организационных мерах по внедрению системы стратегического планирования и развития»</a> в стране создана единая и комплексная система стратегического планирования и развития.</p><p>В соответствии с данным Указом Агентство:</p><ul><li>является уполномоченным государственным органом по регулированию организации системы стратегического планирования и развития, разработке конкретных механизмов, направленных на её эффективное внедрение, а также подготовке проектов документов стратегического планирования;</li><li>координирует деятельность структурных подразделений министерств и ведомств по стратегическому планированию, а также информационно-аналитических групп Совета Министров Республики Каракалпакстан, хокимиятов областей и города Ташкента.</li></ul><p>Организация работы Агентства строится вокруг трёх направлений, закреплённых в его структуре: стратегическое планирование и развитие отраслей и сфер, стратегическое планирование и развитие регионов, а также изучение передового зарубежного опыта и международное сотрудничество. По каждому направлению действуют профильные секторы и проектные офисы.</p><p>Ознакомиться с распределением задач можно в разделе <a href="/struktura">«Структура»</a>, с составом подразделений — в разделе <a href="/rukovodstvo">«Руководство»</a>.</p><h3>Основные документы, касающиеся деятельности Агентства</h3><ul><li><a href="https://lex.uz/uz/docs/5520880" target="_blank" rel="noopener">«О мерах по созданию Агентства стратегического развития Республики Узбекистан»</a> — Указ Президента Республики Узбекистан от 19 июля 2021 года № УП-6264;</li><li><a href="https://lex.uz/uz/docs/6188707" target="_blank" rel="noopener">«О дополнительных мерах по ускорению стратегических реформ»</a> — Указ Президента Республики Узбекистан от 8 сентября 2022 года № УП-216;</li><li><a href="https://lex.uz/uz/docs/6656978" target="_blank" rel="noopener">«О мерах по дальнейшему совершенствованию деятельности Агентства стратегических реформ при Президенте Республики Узбекистан»</a> — Указ Президента Республики Узбекистан от 8 ноября 2023 года № УП-190;</li><li><a href="https://lex.uz/uz/docs/7806484" target="_blank" rel="noopener">«Об организационных мерах по внедрению системы стратегического планирования и развития»</a> — Указ Президента Республики Узбекистан от 30 октября 2025 года № УП-201.</li></ul><p>Полные тексты документов публикуются в Национальной базе данных законодательства Республики Узбекистан lex.uz.</p>'
                         ]]
                     ]
                 ],
                 'uz' => [
-                    'title' => 'Tashkilot haqida',
+                    'title' => 'Agentlik haqida',
                     'blocks' => [
-                        ['text', 'Tashkilot haqida', [
-                            'title' => 'Huquqiy maqom va faoliyatning qonuniy asoslari',
-                            'content' => '<h3>Qonunchilik asosi va huquqiy maqomi</h3><p>Strategik rejalashtirish va rivojlanish agentligi faoliyati O‘zbekiston Respublikasi Konstitutsiyasi, O‘zbekiston Respublikasi qonunlari, shuningdek, davlat boshqaruvi tizimini modernizatsiya qilishga qaratilgan O‘zbekiston Respublikasi Prezidentining normativ-huquqiy hujjatlariga qat’iy muvofiq ravishda amalga oshiriladi.</p><div class="gov-card u-inline-d65cd622b8"><h4 class="u-inline-14ed279e35">Agentlik faoliyatining asosiy normativ-huquqiy hujjatlari:</h4><ul class="u-inline-f07251c396"><li><strong>O‘zbekiston Respublikasi Prezidentining 2025-yil 30-oktabrdagi PF-201-son Farmoni</strong> «Strategik rejalashtirish va rivojlanish tizimini joriy etish bo‘yicha tashkiliy chora-tadbirlar to‘g‘risida» — tarmoqlar va hududlarni rivojlantirishni tizimli prognozlashtirish asosi etib belgilandi.</li><li><strong>O‘zbekiston Respublikasi Prezidentining 2025-yil 29-dekabrdagi PQ-394-son qarori</strong> «Strategik rejalashtirish va rivojlanish tizimini yangicha yondashuvlar asosida tashkil etish va samarali yo‘lga qo‘yish chora-tadbirlari to‘g‘risida» — Agentlikning tuzilmasini, faoliyatini tashkil etishni, vakolatlari va boshqa vazirliklar hamda idoralar bilan hamkorlik qilish tartibini belgilaydi.</li><li><strong>O‘zbekiston Respublikasi Prezidentining 2026-yil 16-fevraldagi PF-21-son Farmoni</strong> «Mamlakat taraqqiyotining 2030-yilgacha mo‘ljallangan ustuvor yo‘nalishlari doirasida islohotlarni izchil davom ettirish va yangi bosqichga olib chiqishning qo‘shimcha chora-tadbirlari to‘g‘risida» — islohotlar ijrosini monitoring qilishda Agentlikning muvofiqlashtiruvchi rolini hamda 2030-yilgacha bo‘lgan asosiy KPI ko‘rsatkichlarini belgilaydi.</li></ul></div><h3>Asosiy vazifalar va funksiyalar</h3><p>Prezident Farmonlariga muvofiq, Agentlik zimmasiga quyidagi strategik vazifalar yuklatilgan:</p><ul><li><strong>Strategik rejalashtirish:</strong> Iqtisodiyot tarmoqlari va hududlarni rivojlantirishning uzoq muddatli strategiyalarini ishlab chiqish va amalga oshirilishini muvofiqlashtirish.</li><li><strong>Islohotlarni baholash (2030-yilgacha bo‘lgan KPI):</strong> PF-21-son Farmoni asosida islohotlar ijrosini baholash uchun samaradorlik ko‘rsatkichlari (KPI) tizimini ishlab chiqish va joriy etish.</li><li><strong>Tahlil va prognozlash:</strong> Makroiqtisodiy ko‘rsatkichlarni monitoring qilish, tizimli muammolar va to‘siqlarni aniqlash, tahliliy hisobotlarni davlat rahbariyatiga taqdim etish.</li><li><strong>Metodologik rahbarlik:</strong> Davlat ijro etuvchi hokimiyat organlari faoliyatiga strategik rejalashtirishning yangi yondashuvlari va ilg‘or xalqaro standartlarini joriy etish.</li></ul><h3>Faoliyat reglamenti va shaffoflik</h3><p>O‘zbekiston Respublikasining «Davlat hokimiyati va boshqaruvi organlari faoliyatining ochiqligi to‘g‘risida»gi Qonuniga muvofiq, Agentlik rivojlanish strategiyalarini ishlab chiqish va monitoring qilish jarayonlarining to‘liq shaffofligini ta’minlaydi. 2030-yilgacha bo‘lgan ustuvor yo‘nalishlar ijrosi to‘g‘risidagi ma’lumotlar fuqarolar, investorlar va xalqaro hamkorlar uchun muntazam ravishda portalimizda e’lon qilib boriladi.</p>'
+                        ['text', 'Agentlik haqida', [
+                            'title' => 'Agentlik haqida',
+                            'content' => '<h3>Huquqiy maqom va vakolatlar</h3><p>Oʻzbekiston Respublikasi Prezidenti huzuridagi Strategik rivojlanish va islohotlar agentligi — mamlakatda strategik rejalashtirish va rivojlanish sohasidagi vakolatli davlat organi.</p><p>Oʻzbekiston Respublikasi Prezidentining 2025-yil 30-oktabrdagi PF-201-son <a href="https://lex.uz/uz/docs/7806484" target="_blank" rel="noopener">«Strategik rejalashtirish va rivojlanish tizimini joriy etish boʻyicha tashkiliy chora-tadbirlar toʻgʻrisida»</a>gi Farmoni bilan mamlakatda yagona va kompleks strategik rejalashtirish va rivojlanish tizimi yaratildi.</p><p>Ushbu Farmonga muvofiq Agentlik:</p><ul><li>strategik rejalashtirish va rivojlanish tizimini tashkil etishni tartibga solish, uni samarali joriy etishga qaratilgan aniq mexanizmlarni ishlab chiqish, shuningdek, strategik rejalashtirish hujjatlari loyihalarini tayyorlash boʻyicha vakolatli davlat organi hisoblanadi;</li><li>vazirlik va idoralarning strategik rejalashtirish boʻyicha tarkibiy boʻlinmalari, shuningdek, Qoraqalpogʻiston Respublikasi Vazirlar Kengashi, viloyatlar va Toshkent shahri hokimliklarining axborot-tahlil guruhlari faoliyatini muvofiqlashtiradi.</li></ul><p>Agentlik faoliyati uning tuzilmasida mustahkamlangan uch yoʻnalish atrofida tashkil etilgan: soha va tarmoqlarni strategik rejalashtirish va rivojlantirish, hududlarni strategik rejalashtirish va rivojlantirish, hamda ilgʻor xorijiy tajribani oʻrganish va xalqaro hamkorlik. Har bir yoʻnalish boʻyicha tegishli shoʻbalar va loyiha ofislari faoliyat yuritadi.</p><p>Vazifalar taqsimoti bilan <a href="/struktura">«Tuzilma»</a> boʻlimida, boʻlinmalar tarkibi bilan <a href="/rukovodstvo">«Rahbariyat»</a> boʻlimida tanishishingiz mumkin.</p><h3>Agentlik faoliyatiga oid asosiy hujjatlar</h3><ul><li><a href="https://lex.uz/uz/docs/5520880" target="_blank" rel="noopener">«Oʻzbekiston Respublikasi Strategik taraqqiyot agentligini tashkil etish chora-tadbirlari toʻgʻrisida»</a> — Oʻzbekiston Respublikasi Prezidentining 2021-yil 19-iyuldagi PF-6264-son Farmoni;</li><li><a href="https://lex.uz/uz/docs/6188707" target="_blank" rel="noopener">«Strategik islohotlarni jadallashtirish boʻyicha qoʻshimcha chora-tadbirlar toʻgʻrisida»</a> — Oʻzbekiston Respublikasi Prezidentining 2022-yil 8-sentyabrdagi PF-216-son Farmoni;</li><li><a href="https://lex.uz/uz/docs/6656978" target="_blank" rel="noopener">«Oʻzbekiston Respublikasi Prezidenti huzuridagi Strategik islohotlar agentligi faoliyatini yanada takomillashtirish chora-tadbirlari toʻgʻrisida»</a> — Oʻzbekiston Respublikasi Prezidentining 2023-yil 8-noyabrdagi PF-190-son Farmoni;</li><li><a href="https://lex.uz/uz/docs/7806484" target="_blank" rel="noopener">«Strategik rejalashtirish va rivojlanish tizimini joriy etish boʻyicha tashkiliy chora-tadbirlar toʻgʻrisida»</a> — Oʻzbekiston Respublikasi Prezidentining 2025-yil 30-oktabrdagi PF-201-son Farmoni.</li></ul><p>Hujjatlarning toʻliq matnlari Oʻzbekiston Respublikasi qonunchilik maʼlumotlari milliy bazasi lex.uz saytida eʼlon qilinadi.</p>'
                         ]]
                     ]
                 ]
@@ -1275,7 +1308,7 @@ final class DemoSeeder
                     'title' => 'Руководство',
                     'blocks' => [
                         ['text', 'Введение', ['title' => 'Руководство', 'content' => '<p>Руководящий состав организации.</p>']],
-                        ['team_list', 'Команда', ['title' => 'Руководящий состав', 'limit' => 0]],
+                        ['team_list', 'Команда', ['title' => 'Руководящий состав', 'limit' => 0, 'group_by_department' => true]],
                         ['cta', 'Директор', ['variant' => 'band', 'title' => 'Директор Агентства', 'text' => 'Биография, приоритеты работы и публикации руководителя.', 'button_text' => 'Страница директора', 'button_url' => '/direktor', 'bg_color' => '#072b61', 'text_color' => '#ffffff']]
                     ]
                 ],
@@ -1283,7 +1316,7 @@ final class DemoSeeder
                     'title' => 'Rahbariyat',
                     'blocks' => [
                         ['text', 'Kirish', ['title' => 'Rahbariyat', 'content' => '<p>Tashkilotning rahbariyat tarkibi.</p>']],
-                        ['team_list', 'Jamoa', ['title' => 'Rahbariyat tarkibi', 'limit' => 0]]
+                        ['team_list', 'Jamoa', ['title' => 'Rahbariyat tarkibi', 'limit' => 0, 'group_by_department' => true]]
                     ]
                 ]
             ],
@@ -1301,10 +1334,10 @@ final class DemoSeeder
                             'head_url' => '/direktor',
                             'side_items' => 'Советник',
                             'branches' => [
-                                ['title' => 'Первый заместитель директора', 'name' => '', 'units' => "Сектор стратегического планирования и развития отраслей и сфер\nСектор анализа и исследований\nСектор организации деятельности Координационного совета\n* Проектные офисы по развитию отраслей"],
+                                ['title' => 'Первый заместитель директора', 'name' => '', 'units' => "Сектор стратегического планирования и развития отраслей и сфер\nСектор анализа и исследований | /rukovodstvo#team-sektor-analiza-i-issledovaniy\nСектор организации деятельности Координационного совета\n* Проектные офисы по развитию отраслей"],
                                 ['title' => 'Заместитель директора', 'name' => '', 'units' => "Сектор стратегического планирования и развития регионов\nСектор контроля за исполнением задач по стратегическому развитию\nСектор экспертизы проектов нормативно-правовых актов\n* Проектные офисы по развитию регионов"],
                                 ['title' => 'Заместитель директора', 'name' => '', 'units' => "Сектор изучения передового зарубежного опыта, результатов научно-исследовательской деятельности и практики\nСектор координации процессов привлечения иностранных экспертов, консультантов и советников\n* Проектные офисы по развитию международного сотрудничества"],
-                                ['title' => '', 'name' => '', 'units' => "Сектор координации системы стратегического планирования\nСектор мониторинга и оценки эффективности реформ\nИнформационно-аналитический и организационный сектор\n- группа по работе с кадрами\n- первый отдел\nФинансово-хозяйственный сектор (Главный бухгалтер)\n- группа материального обеспечения и хозяйственных дел\nСектор по связям с общественностью"],
+                                ['title' => '', 'name' => '', 'units' => "Сектор координации системы стратегического планирования\nСектор мониторинга и оценки эффективности реформ\nИнформационно-аналитический и организационный сектор | /rukovodstvo#team-informacionno-analiticheskiy-i-organizacionnyy-sektor\n- группа по работе с кадрами\n- первый отдел\nФинансово-хозяйственный сектор (Главный бухгалтер)\n- группа материального обеспечения и хозяйственных дел\nСектор по связям с общественностью | /rukovodstvo#team-sektor-po-svyazyam-s-obschestvennostyu"],
                             ],
                             'notes' => 'Секторы четвёртой колонки подчиняются директору напрямую.',
                             'footnote' => 'Структура утверждена в установленном порядке и может уточняться при изменении задач Агентства.',

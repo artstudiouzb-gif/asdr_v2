@@ -41,6 +41,22 @@ $translationLangs = array_values(array_filter(
                     <input type="text" id="position" name="position" value="<?= htmlspecialchars($member['position'] ?? '', ENT_QUOTES) ?>" placeholder="например: Главный специалист / Руководитель отдела">
                 </div>
 
+                <div class="form-field u-inline-79a1c5a5db">
+                    <label class="u-inline-e925a44577">Сектор (на основном языке)</label>
+                    <input type="text" id="department" name="department" list="team-departments" value="<?= htmlspecialchars($member['department'] ?? '', ENT_QUOTES) ?>" placeholder="например: Сектор анализа и исследований">
+                    <datalist id="team-departments">
+                        <?php foreach (($departments ?? []) as $dep): ?>
+                            <option value="<?= htmlspecialchars((string) $dep['name'], ENT_QUOTES) ?>"></option>
+                        <?php endforeach; ?>
+                    </datalist>
+                    <span class="form-hint">Верхний уровень группировки команды. Из схемы оргструктуры на сектор можно сослаться якорем.</span>
+                </div>
+
+                <div class="form-field u-inline-79a1c5a5db">
+                    <label class="u-inline-e925a44577">Отдел или группа внутри сектора (необязательно)</label>
+                    <input type="text" id="unit" name="unit" value="<?= htmlspecialchars($member['unit'] ?? '', ENT_QUOTES) ?>" placeholder="например: первый отдел / группа по работе с кадрами">
+                </div>
+
                 <div class="u-inline-8a359a76eb">
                     <?= \App\Core\AdminUi::imageField('photo_url', $member['photo'] ?? '', [
                         'label' => 'Фотография сотрудника',
@@ -97,6 +113,14 @@ $translationLangs = array_values(array_filter(
                                 <div class="form-field">
                                     <label class="u-inline-0b87e9e0af">Должность (<?= strtoupper($code) ?>)</label>
                                     <input type="text" name="translations[<?= $code ?>][position]" value="<?= htmlspecialchars($tr['position'] ?? '', ENT_QUOTES) ?>" placeholder="Перевод должности на <?= htmlspecialchars($lang['name'], ENT_QUOTES) ?>">
+                                </div>
+                                <div class="form-field">
+                                    <label class="u-inline-0b87e9e0af">Сектор (<?= strtoupper($code) ?>)</label>
+                                    <input type="text" name="translations[<?= $code ?>][department]" value="<?= htmlspecialchars($tr['department'] ?? '', ENT_QUOTES) ?>" placeholder="Перевод названия сектора на <?= htmlspecialchars($lang['name'], ENT_QUOTES) ?>">
+                                </div>
+                                <div class="form-field">
+                                    <label class="u-inline-0b87e9e0af">Отдел / группа (<?= strtoupper($code) ?>)</label>
+                                    <input type="text" name="translations[<?= $code ?>][unit]" value="<?= htmlspecialchars($tr['unit'] ?? '', ENT_QUOTES) ?>" placeholder="Перевод названия отдела на <?= htmlspecialchars($lang['name'], ENT_QUOTES) ?>">
                                 </div>
                             </div>
                         </div>

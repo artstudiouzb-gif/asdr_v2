@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Core\Database;
 use App\Core\Logger;
+use App\Core\Slug;
 
 final class TeamMember
 {
@@ -66,12 +67,95 @@ final class TeamMember
         );
     }
 
+    /**
+     * Якорь отдела для ссылок из схемы оргструктуры. Считается от названия на
+     * основном языке, поэтому одна и та же ссылка работает на всех языках.
+     */
+    public static function departmentSlug(array $row): string
+    {
+        $base = trim((string) ($row['department_base'] ?? $row['department'] ?? ''));
+
+        return $base !== '' ? Slug::make($base) : '';
+    }
+
+    /**
+     * Отделы опубликованных сотрудников в порядке сортировки команды.
+     *
+     * @return list<array{name: string, slug: string, count: int}>
+     */
+    public static function departments(?string $lang = null): array
+    {
+        $groups = [];
+        foreach (self::published($lang) as $row) {
+            $name = trim((string) ($row['department'] ?? ''));
+            $slug = self::departmentSlug($row);
+            if ($name === '' || $slug === '') {
+                continue;
+            }
+            if (!isset($groups[$slug])) {
+                $groups[$slug] = ['name' => $name, 'slug' => $slug, 'count' => 0];
+            }
+            $groups[$slug]['count']++;
+        }
+
+        return array_values($groups);
+    }
+
+    /**
+     * Раскладывает сотрудников по секторам, а внутри сектора — по отделам и
+     * группам. Сотрудники без сектора уходят в последнюю группу с пустым
+     * названием — их не должно «потерять».
+     *
+     * @param array<int, array<string, mixed>> $rows
+     * @return list<array{name: string, slug: string, members: list<array<string, mixed>>, units: list<array{name: string, members: list<array<string, mixed>>}>}>
+     */
+    public static function groupByDepartment(array $rows): array
+    {
+        $groups = [];
+        $rest = [];
+        foreach ($rows as $row) {
+            $name = trim((string) ($row['department'] ?? ''));
+            $slug = self::departmentSlug($row);
+            if ($name === '' || $slug === '') {
+                $rest[] = $row;
+                continue;
+            }
+            if (!isset($groups[$slug])) {
+                $groups[$slug] = ['name' => $name, 'slug' => $slug, 'members' => [], 'units' => []];
+            }
+
+            $unit = trim((string) ($row['unit'] ?? ''));
+            if ($unit === '') {
+                $groups[$slug]['members'][] = $row;
+                continue;
+            }
+            if (!isset($groups[$slug]['units'][$unit])) {
+                $groups[$slug]['units'][$unit] = ['name' => $unit, 'members' => []];
+            }
+            $groups[$slug]['units'][$unit]['members'][] = $row;
+        }
+
+        $result = [];
+        foreach ($groups as $group) {
+            $group['units'] = array_values($group['units']);
+            $result[] = $group;
+        }
+        if ($rest !== []) {
+            $result[] = ['name' => '', 'slug' => '', 'members' => $rest, 'units' => []];
+        }
+
+        return $result;
+    }
+
     private static function applyTranslation(array $row, ?array $translation): array
     {
+        // Базовое название отдела сохраняем до наложения перевода: якорь
+        // ссылки не должен меняться вместе с языком страницы.
+        $row['department_base'] = (string) ($row['department'] ?? '');
         if ($translation === null) {
             return $row;
         }
-        foreach (['name', 'position'] as $field) {
+        foreach (['name', 'position', 'department', 'unit'] as $field) {
             if (isset($translation[$field]) && trim((string) $translation[$field]) !== '') {
                 $row[$field] = $translation[$field];
             }
@@ -155,12 +239,14 @@ final class TeamMember
     public static function create(array $data): int
     {
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO team_members (name, position, photo, email, phone, socials_json, status, sort_order, created_at)
-             VALUES (:name, :position, :photo, :email, :phone, :socials_json, :status, :sort_order, NOW())'
+            'INSERT INTO team_members (name, position, department, unit, photo, email, phone, socials_json, status, sort_order, created_at)
+             VALUES (:name, :position, :department, :unit, :photo, :email, :phone, :socials_json, :status, :sort_order, NOW())'
         );
         $stmt->execute([
             ':name' => $data['name'],
             ':position' => $data['position'],
+            ':department' => $data['department'] ?? null,
+            ':unit' => $data['unit'] ?? null,
             ':photo' => $data['photo'],
             ':email' => $data['email'],
             ':phone' => $data['phone'],
@@ -180,12 +266,15 @@ final class TeamMember
     public static function update(int $id, array $data): void
     {
         $stmt = Database::pdo()->prepare(
-            'UPDATE team_members SET name = :name, position = :position, photo = :photo, email = :email,
-             phone = :phone, socials_json = :socials_json, status = :status, sort_order = :sort_order WHERE id = :id'
+            'UPDATE team_members SET name = :name, position = :position, department = :department, unit = :unit,
+             photo = :photo, email = :email, phone = :phone, socials_json = :socials_json, status = :status,
+             sort_order = :sort_order WHERE id = :id'
         );
         $stmt->execute([
             ':name' => $data['name'],
             ':position' => $data['position'],
+            ':department' => $data['department'] ?? null,
+            ':unit' => $data['unit'] ?? null,
             ':photo' => $data['photo'],
             ':email' => $data['email'],
             ':phone' => $data['phone'],
