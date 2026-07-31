@@ -18,16 +18,18 @@ final class SiteThemeCss
      */
     public static function build(array $designValues, array $headerConfig, bool $transparentHeader): string
     {
-        $primary = (string) Setting::get('color_primary', '#173a63');
-        $accent = (string) Setting::get('color_accent', '#17999b');
+        $primary = (string) Setting::get('color_primary', '#155182');
+        $accent = (string) Setting::get('color_accent', '#00A0A6');
         $colors = DesignSettings::semanticColors();
         $spacings = DesignSettings::semanticSpacings();
         $font = self::fontValue((string) Setting::get(
             'font_family',
             "'PT Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
         ), 'system-ui, sans-serif');
-        $heading = (string) Setting::get('font_heading', '');
-        $heading = self::fontValue($heading !== '' ? $heading : $font, "'Montserrat', system-ui, sans-serif");
+        // Пара PT Serif + PT Sans нарисована одной командой и лежит локально:
+        // антиква в заголовках даёт официальный голос, гротеск — читаемый текст.
+        $heading = (string) Setting::get('font_heading', "'PT Serif', Georgia, serif");
+        $heading = self::fontValue($heading !== '' ? $heading : $font, "'PT Serif', Georgia, serif");
         $styles = (array) ($headerConfig['styles'] ?? []);
 
         $variables = [

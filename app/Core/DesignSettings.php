@@ -96,7 +96,7 @@ final class DesignSettings
             'hint' => 'Максимальная ширина основного содержимого. Ниже можно задать свою точную ширину.',
             'group' => 'Общие',
             'choices' => ['narrow' => 'Узкий', 'standard' => 'Стандарт', 'wide' => 'Широкий', 'ultra' => 'Очень широкий', 'full' => 'На всю ширину'],
-            'default' => 'standard',
+            'default' => 'ultra',
         ],
         'radius' => [
             'label' => 'Скругление углов',
@@ -173,7 +173,7 @@ final class DesignSettings
             'hint' => 'Стиль углов у кнопок и CTA.',
             'group' => 'Общие',
             'choices' => ['square' => 'Прямые', 'rounded' => 'Скруглённые', 'pill' => 'Капсула'],
-            'default' => 'rounded',
+            'default' => 'pill',
         ],
         'card_style' => [
             'label' => 'Стиль карточек',
@@ -554,11 +554,11 @@ final class DesignSettings
     {
         return [
             'color_primary' => SettingsValidator::hexColor(
-                (string) Setting::get('design_custom_color_primary', Setting::get('color_primary', '#173a63')),
+                (string) Setting::get('design_custom_color_primary', Setting::get('color_primary', '#155182')),
                 '#173a63'
             ),
             'color_accent' => SettingsValidator::hexColor(
-                (string) Setting::get('design_custom_color_accent', Setting::get('color_accent', '#17999b')),
+                (string) Setting::get('design_custom_color_accent', Setting::get('color_accent', '#00A0A6')),
                 '#17999b'
             ),
             'font_family' => (string) Setting::get(

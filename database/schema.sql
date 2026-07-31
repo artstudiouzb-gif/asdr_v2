@@ -391,9 +391,9 @@ CREATE TABLE IF NOT EXISTS settings (
 INSERT INTO settings (`key`, `value`) VALUES
     ('site_name', 'Агентство стратегического развития и реформ'),
     ('logo_url', ''),
-    ('color_primary', '#1a1a1a'),
-    ('color_accent', '#e63946'),
-    ('font_family', '''Inter'', sans-serif'),
+    -- Цвета и шрифты намеренно не сеются: пустое значение означает «взять
+    -- значение по умолчанию из кода» (SiteThemeCss), поэтому фирменная пара
+    -- задаётся в одном месте, а не дублируется в дампе схемы.
     ('contact_phone', ''),
     ('contact_email', ''),
     ('contact_address', ''),

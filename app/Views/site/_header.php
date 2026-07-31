@@ -25,7 +25,8 @@ if ($logo === '') {
 // Выбранные семейства нужны для точечного preload локальных файлов шрифтов;
 // сами CSS-переменные публикует SiteThemeCss.
 $font = Setting::get('font_family', "'PT Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif");
-$fontHeading = Setting::get('font_heading', '');
+// По умолчанию заголовки — PT Serif (пара к PT Sans, оба лежат локально).
+$fontHeading = Setting::get('font_heading', "'PT Serif', Georgia, serif");
 if (trim((string) $fontHeading) === '') {
     $fontHeading = $font;
 }
