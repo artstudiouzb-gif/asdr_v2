@@ -41,8 +41,33 @@ final class View
         // Геометрия иконок встраивается в готовую страницу: так браузер не
         // тянет двухмегабайтный спрайт Tabler ради десятка символов.
         $html = Icon::injectSprite($html);
+        // Узбекская кириллица — выбор посетителя в настройках отображения.
+        // Перевод делается здесь, на готовой странице: в базе остаётся один
+        // вариант текста, а кэш блоков не нужно множить на письменность.
+        if (self::isPublic($template) && self::wantsCyrillic()) {
+            $html = UzCyrillic::html($html);
+        }
         PublicResponseCache::apply($template);
         echo $html;
+    }
+
+    /** Публичные страницы: сайт и портал репозитория (в админке — только русский). */
+    private static function isPublic(string $template): bool
+    {
+        return str_starts_with($template, 'site/')
+            || str_starts_with($template, 'repo/')
+            || str_starts_with($template, 'errors/');
+    }
+
+    private static function wantsCyrillic(): bool
+    {
+        if (Locale::current() !== 'uz') {
+            return false;
+        }
+
+        $settings = A11ySettings::fromCookie($_COOKIE[A11ySettings::COOKIE] ?? null);
+
+        return $settings['script'] === 'cyrl';
     }
 
     public static function renderPartial(string $template, array $data = []): string

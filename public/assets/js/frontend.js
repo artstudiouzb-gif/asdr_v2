@@ -660,13 +660,10 @@
     });
 
     // Переключатель светлой/тёмной темы с сохранением выбора в localStorage.
-    document.addEventListener('click', function (e) {
-        var btn = e.target.closest('.site-theme-toggle');
-        if (!btn) { return; }
-        e.preventDefault();
+    // Тем же способом тему меняет панель настроек отображения, поэтому выбор
+    // темы живёт в одном месте, а не в двух похожих обработчиках.
+    window.asdrSetTheme = function (next) {
         var root = document.documentElement;
-        var current = root.getAttribute('data-theme');
-        var next = current === 'dark' ? 'light' : 'dark';
         root.setAttribute('data-theme', next);
         if (document.body) {
             document.body.setAttribute('data-theme', next);
@@ -677,6 +674,13 @@
             // админке — выбор посетителя сбросится (см. theme-init.js).
             localStorage.setItem('theme-base', root.getAttribute('data-theme-base') || '');
         } catch (err) {}
+    };
+
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.site-theme-toggle');
+        if (!btn) { return; }
+        e.preventDefault();
+        window.asdrSetTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     });
 
     // Счётчики (группа 4): анимация инкремента числа при попадании в зону

@@ -34,7 +34,8 @@ test('public landmarks and builder blocks use semantic markup without style attr
         preg_match('/<aside\s+[^>]*class="app-admin-bar"/', $toolbar) === 1,
         'бар администратора — семантический <aside> с классом app-admin-bar'
     );
-    assert_contains('<section class="a11y-panel', $header);
+    $a11yPanel = (string) file_get_contents(APP_ROOT . '/app/Views/site/_a11y_panel.php');
+    assert_contains('<aside class="a11y-drawer"', $a11yPanel);
     assert_contains('<header class="print-only print-header">', $header);
     assert_contains('<footer class="print-only print-footer">', $footer);
     assert_contains('<h3 class="feature-card__title">', $cards);

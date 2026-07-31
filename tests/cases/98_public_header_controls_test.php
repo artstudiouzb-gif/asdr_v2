@@ -2,24 +2,28 @@
 
 declare(strict_types=1);
 
-test('accessibility controls stay above the header and reflow without overlap', function (): void {
+test('accessibility controls open in a side drawer and stay above the page', function (): void {
     $css = file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/a11y.css');
     $header = file_get_contents(dirname(__DIR__, 2) . '/app/Views/site/_header.php');
+    $panel = file_get_contents(dirname(__DIR__, 2) . '/app/Views/site/_a11y_panel.php');
     $js = file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/a11y.js');
 
     assert_true(is_string($css));
     assert_true(is_string($header));
+    assert_true(is_string($panel));
     assert_true(is_string($js));
-    assert_contains('z-index: 600', $css);
-    assert_contains('position: sticky; top: 0;', $css);
-    assert_contains('width: calc(100% - 40px); max-width: var(--container-max, 1200px); margin: 0 auto;', $css);
-    assert_contains('width: calc(100% - 24px);', $css);
-    assert_contains('grid-template-columns: repeat(3, max-content)', $css);
-    assert_contains('@media (max-width: 560px)', $css);
-    assert_contains('id="a11y-panel"', $header);
+    // Панель выезжает справа поверх страницы и не двигает вёрстку.
+    assert_contains('.a11y-drawer {', $css);
+    assert_contains('position: fixed;', $css);
+    assert_contains('z-index: 901;', $css);
+    assert_contains('width: min(380px, 100vw);', $css);
+    // На узком экране занимает всю ширину.
+    assert_contains('@media (max-width: 480px)', $css);
+    assert_contains('width: 100vw;', $css);
+    assert_contains('id="a11y-panel"', $panel);
     assert_contains('aria-controls="a11y-panel"', $header);
     assert_contains("toggle.setAttribute('aria-expanded'", $js);
-    assert_contains("e.key === 'Escape'", $js);
+    assert_contains("event.key !== 'Escape'", $js);
 });
 
 test('dropdown search is anchored, constrained and restores focus', function (): void {
