@@ -24,22 +24,18 @@
         }
     });
 
-    // Сортировка списка: значение опции — адрес страницы. Переходим только
-    // по собственным адресам: значение приходит из разметки, но переход по
-    // непроверенному адресу — это открытый редирект.
+    // Сортировка списка: выбор отправляет свою GET-форму. Адрес страницы
+    // собирает браузер из action и полей формы — скрипт не берёт адрес из
+    // разметки и никуда по нему не переходит.
     document.addEventListener('change', function (event) {
-        var select = event.target.closest('select[data-nav-select]');
-        if (!select || !select.value) { return; }
+        var select = event.target.closest('[data-autosubmit]');
+        if (!select || !select.form) { return; }
 
-        var target;
-        try {
-            target = new URL(select.value, window.location.origin);
-        } catch (err) {
-            return;
+        if (typeof select.form.requestSubmit === 'function') {
+            select.form.requestSubmit();
+        } else {
+            select.form.submit();
         }
-        if (target.origin !== window.location.origin) { return; }
-
-        window.location.assign(target.pathname + target.search + target.hash);
     });
 
     // Необратимые действия (отключение 2FA, отвязка Telegram) спрашивают подтверждение.

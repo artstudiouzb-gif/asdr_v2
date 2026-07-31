@@ -45,9 +45,28 @@ test('CSP: заменённые действия обслуживаются ск
     }
 
     $repo = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/repo.js');
-    foreach (['data-open-details', 'data-close-dialog', 'data-nav-select', 'data-confirm-submit', 'data-view-mode', 'data-copy-link'] as $hook) {
+    foreach (['data-open-details', 'data-close-dialog', 'data-autosubmit', 'data-confirm-submit', 'data-view-mode', 'data-copy-link'] as $hook) {
         assert_contains($hook, $repo, "repo.js не обрабатывает {$hook}");
     }
+});
+
+/**
+ * Сортировка в портале — GET-форма. Скрипт не должен брать адрес перехода
+ * из разметки: значение элемента — это текст из DOM, и переход по нему
+ * CodeQL справедливо считает открытым редиректом (js/xss-through-dom).
+ */
+test('Портал: сортировка отправляет форму, а не переходит по адресу из option', function () {
+    $view = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/repo/index.php');
+    $repo = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/repo.js');
+
+    assert_contains('<form class="rd-sort-group" method="get" action="/repo">', $view);
+    assert_contains('<select class="rd-sort-select" name="sort" data-autosubmit>', $view);
+    // Без JS выбор всё равно применяется кнопкой.
+    assert_contains('<noscript>', $view);
+
+    assert_not_contains('data-nav-select', $repo);
+    assert_not_contains('window.location.assign', $repo);
+    assert_contains('select.form.requestSubmit()', $repo);
 });
 
 test('CSP: разметка медиабиблиотеки использует новые хуки', function () {
