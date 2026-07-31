@@ -463,8 +463,10 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 </div>
             <?php endif; ?>
             <?php
-            // Виджеты из «Настройки › Виджеты» (отображаем все активные виджеты системы)
-            $sidebarWidgets = trim(\App\Models\Widget::renderSidebar('right', $lang) . \App\Models\Widget::renderSidebar('left', $lang));
+            // Виджеты из «Настройки › Виджеты»: колонка выбрана в поле «Макет
+            // страницы с виджетами» у новости. Раньше здесь выводились обе
+            // колонки сразу, мимо этой настройки и мимо nonce для CSP.
+            $sidebarWidgets = trim((string) ($sidebar['html'] ?? ''));
             if ($sidebarWidgets !== '') {
                 echo $sidebarWidgets;
             } else {

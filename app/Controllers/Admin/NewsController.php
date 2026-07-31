@@ -183,6 +183,8 @@ final class NewsController
         View::render('site/news_show', [
             'news' => $news,
             'gallery' => \App\Models\NewsImage::forNews((int) $news['id']),
+            // Предпросмотр показывает ту же колонку виджетов, что и сайт.
+            'sidebar' => \App\Core\WidgetRenderer::sidebarFor($news['sidebar_layout'] ?? 'right_sidebar', $lang),
             'robotsNoindex' => true,
             'previewNotice' => true,
         ]);

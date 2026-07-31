@@ -226,12 +226,7 @@ final class PageController
         }
 
         $layoutType = $page['layout_type'] ?? 'no_sidebar';
-        $sidebar = null;
-        if ($layoutType === 'left_sidebar') {
-            $sidebar = ['position' => 'left', 'html' => \App\Models\Widget::renderSidebar('left', $lang)];
-        } elseif ($layoutType === 'right_sidebar') {
-            $sidebar = ['position' => 'right', 'html' => \App\Models\Widget::renderSidebar('right', $lang)];
-        }
+        $sidebar = \App\Core\WidgetRenderer::sidebarFor($layoutType, $lang);
 
         View::render('site/page', [
             'page' => $page,
