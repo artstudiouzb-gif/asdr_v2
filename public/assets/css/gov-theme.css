@@ -2794,7 +2794,9 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .listing__lead { color: var(--gov-muted); font-size: 1.02rem; line-height: 1.6; max-width: 60ch; margin: 0; }
 
 /* Заголовок + лид простой страницы (без hero-шапки). */
-.content-pagehead { padding: clamp(18px, 2.6vw, 32px) 20px clamp(6px, 1.4vw, 14px); }
+/* Боковые отступы задаёт контейнер страницы, поэтому у шапки раздела их нет:
+   иначе заголовок уезжает вправо относительно остального контента. */
+.content-pagehead { padding: clamp(18px, 2.6vw, 32px) 0 clamp(6px, 1.4vw, 14px); }
 .content-pagehead__inner { max-width: var(--container-max); margin: 0 auto; }
 .content-pagehead__title { font-size: clamp(1.9rem, 3.4vw, 2.6rem); margin: 0 0 10px; color: var(--gov-title); }
 .content-pagehead__lead { color: var(--gov-muted); font-size: 1.05rem; line-height: 1.6; max-width: 70ch; margin: 0; }

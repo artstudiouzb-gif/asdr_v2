@@ -55,7 +55,12 @@ body {
     transition: background-color .3s cubic-bezier(0.16, 1, 0.3, 1), color .3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-img { max-width: 100%; display: block; }
+img { max-width: 100%; display: block; height: auto; }
+
+/* Инлайн-спрайт иконок (Icon::injectSprite) стоит первым элементом body.
+   Как обычный inline-элемент он создавал бы пустую строку под админ-баром —
+   выносим его из потока. */
+.tabler-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 a { color: var(--color-accent, #e63946); }
 
 /* Доступность (задача 122): видимый фокус на всех интерактивных элементах. */
