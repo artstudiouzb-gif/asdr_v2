@@ -93,6 +93,15 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ
   (трекинг в таблице `migrations`). **`schema.sql` обязан совпадать**: при новой
   миграции добавь и колонки в CREATE TABLE, и файл в список
   `INSERT INTO migrations(...) VALUES` (иначе падает тест консистентности).
+- **Иконки**: `App\Core\Icon::render()` отдаёт `<use href="#tabler-…">`, а
+  `Icon::injectSprite()` (вызывается из `View::render`) вырезает нужные
+  `<symbol>` из вендорного спрайта по индексу
+  `app/Core/data/tabler-sprite-index.php` и встраивает их после `<body>`.
+  Ключи берутся из готового HTML, а не из счётчика вызовов — блоки приходят
+  из кэша. Иконки, которые вставляет JS уже после загрузки, перечислены в
+  `Icon::RUNTIME_ICONS` (сверяется тестом с `frontend.js`). Индекс
+  пересобирается `npm run build:vendor`. Полный спрайт (2 МБ) грузится только
+  пикером иконок в админке.
 - **CDN**: `App\Core\Asset` (версионирование `?v=hash` + префикс CDN),
   `Asset::rewriteMedia()` переписывает `/uploads/public` в HTML на CDN.
   Pull-zone CDN (BunnyCDN и т.п.) — без переноса домена. `App\Core\Cloudflare` —

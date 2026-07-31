@@ -13,7 +13,7 @@ test('Icon: валидирует ключи и рендерит локальны
 
     $html = Icon::render('home', 20, 'test-icon', 1.8);
     assert_contains('class="icon icon-tabler test-icon"', $html);
-    assert_contains('/assets/vendor/tabler/tabler-sprite.svg#tabler-home', $html);
+    assert_contains('#tabler-home', $html);
     assert_contains('stroke-width="1.8"', $html);
     assert_not_contains('<path', $html, 'геометрия иконки должна находиться только в спрайте');
 });

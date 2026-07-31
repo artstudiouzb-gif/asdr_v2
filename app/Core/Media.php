@@ -76,8 +76,15 @@ final class Media
             $styleAttr = ' style="--media-object-position:' . htmlspecialchars($focalPos, ENT_QUOTES) . '"';
         }
 
+        // Собственные размеры файла резервируют место под картинку: без них
+        // содержимое прыгает, пока изображения грузятся (CLS).
+        $dimensions = self::dimensions($url);
+        $sizeAttr = $dimensions !== null
+            ? ' width="' . $dimensions[0] . '" height="' . $dimensions[1] . '"'
+            : '';
+
         $img = '<img src="' . htmlspecialchars($url, ENT_QUOTES) . '" alt="' . $altAttr . '"'
-            . $classAttr . $loadingAttr . $priorityAttr . $styleAttr . '>';
+            . $classAttr . $sizeAttr . $loadingAttr . $priorityAttr . $styleAttr . '>';
 
         $variants = self::webpVariants($url);
         if ($variants === null) {
@@ -231,5 +238,47 @@ final class Media
         $path = $diskBase . $relative;
 
         return is_file($path) ? $path : null;
+    }
+
+    /** Ниже этого размера картинка считается заглушкой, а не изображением. */
+    private const MIN_DIMENSION = 8;
+
+    /**
+     * Собственные размеры локального изображения с кэшем по пути и mtime.
+     * Внешние адреса (CDN, чужие домены) пропускаем: файла рядом нет.
+     *
+     * @return array{0: int, 1: int}|null
+     */
+    public static function dimensions(string $url): ?array
+    {
+        if ($url === '' || !str_starts_with($url, '/') || str_starts_with($url, '//')) {
+            return null;
+        }
+        $path = \dirname(__DIR__, 2) . '/public' . explode('?', $url)[0];
+        if (!is_file($path)) {
+            return null;
+        }
+        // SVG размеров в пикселях может не иметь — атрибуты только навредят.
+        if (strtolower((string) pathinfo($path, PATHINFO_EXTENSION)) === 'svg') {
+            return null;
+        }
+
+        $key = 'media:dim:' . md5($path . ':' . (string) filemtime($path));
+        $cached = Cache::remember($key, static function () use ($path): array {
+            $size = @getimagesize($path);
+            if (!is_array($size)) {
+                return [];
+            }
+            [$width, $height] = [(int) $size[0], (int) $size[1]];
+
+            // Пиксельные заглушки (1×1 и прочая мелочь) размерами не
+            // описываются: их ставят как плейсхолдер, и атрибуты только
+            // навязали бы CSS-компоненту бессмысленные пропорции.
+            return $width >= self::MIN_DIMENSION && $height >= self::MIN_DIMENSION
+                ? [$width, $height]
+                : [];
+        }, 86400);
+
+        return is_array($cached) && count($cached) === 2 ? [(int) $cached[0], (int) $cached[1]] : null;
     }
 }
