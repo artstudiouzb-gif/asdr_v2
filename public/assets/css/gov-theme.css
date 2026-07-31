@@ -2427,10 +2427,20 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 .relnews-card:hover .relnews-card__media { transform: translateY(-4px) scale(1.02); box-shadow: 0 10px 24px rgba(19,42,92,.08); }
 .relnews-card__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
 .relnews-card__date { color: var(--gov-muted); font-size: .82rem; }
-.relnews-card__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: .96rem; }
-/* Лид прижат к низу карточки: у соседей по ряду заголовки разной длины,
-   и без этого нижние края текста гуляли. */
-.relnews-card__excerpt { margin-top: auto; }
+/* Ровный ряд собираем ограничением заголовка, а не растяжкой промежутка:
+   раньше лид прижимался к низу карточки (margin-top: auto), и расстояние
+   «заголовок → анонс» у соседей отличалось вдвое. */
+.relnews-card__title {
+    font-weight: 700;
+    color: var(--gov-title);
+    line-height: 1.35;
+    font-size: .96rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.relnews-card__excerpt { margin-top: 0; }
 .relnews-card:hover .relnews-card__title { color: var(--gov-teal); }
 
 /* --- Предыдущая / следующая --- */
@@ -2812,11 +2822,14 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 /* Крупная первая новость. */
 .newslist-lead { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(20px, 3vw, 40px); text-decoration: none; color: var(--gov-ink); background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius); overflow: hidden; }
 @media (max-width: 900px) { .newslist-lead { grid-template-columns: 1fr; } }
-.newslist-lead__media { display: block; min-height: 300px; background-color: var(--gov-navy); background-position: center; background-size: cover; background-repeat: no-repeat; width: 100%; height: 100%; object-fit: cover; }
+/* Пропорция вместо минимальной высоты: картинка перестаёт задавать блоку
+   высоту «с запасом», из-за которой под текстом оставалась пустая треть. */
+.newslist-lead__media { display: block; aspect-ratio: 16 / 10; min-height: 0; background-color: var(--gov-navy); background-position: center; background-size: cover; background-repeat: no-repeat; width: 100%; height: 100%; object-fit: cover; }
 .newslist-lead__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
-/* Текст по центру высоты: он короче картинки, и прижатый к верху оставлял
-   под собой пустую половину блока. */
-.newslist-lead__body { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; padding: clamp(20px, 3vw, 36px); }
+/* Текст от верхнего края — он читается первым и должен начинаться на одной
+   линии с картинкой. Высоту блока задаёт пропорция картинки, поэтому пустоты
+   под текстом остаётся немного. */
+.newslist-lead__body { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 12px; padding: clamp(20px, 3vw, 36px); }
 .newslist__date { color: var(--gov-muted); font-size: .85rem; }
 .newslist-lead__title { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: clamp(1.3rem, 2.2vw, 1.7rem); color: var(--gov-title); line-height: 1.25; }
 .newslist-lead__excerpt { color: var(--gov-muted); line-height: 1.6; }
@@ -3251,7 +3264,24 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .imgcard { position: relative; display: block; min-height: 240px; border-radius: var(--radius); overflow: hidden; text-decoration: none; color: #fff; isolation: isolate; }
 .imgcard__media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: var(--gov-navy) center/cover no-repeat; transform: scale(1.001); transition: transform .7s cubic-bezier(.22, 1, .36, 1); will-change: transform; }
 .imgcard:hover .imgcard__media { transform: scale(1.04); }
-.imgcard__overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,26,48,.1) 30%, rgba(11,26,48,.85) 100%); transition: opacity .5s ease; }
+/* Карточка без изображения: фирменная подложка с эмблемой вместо пустой
+   тёмной плашки. Материалы без картинки встречаются всегда, и выглядеть они
+   должны как решение, а не как недоработка. */
+span.imgcard__media {
+    background: linear-gradient(135deg, var(--gov-navy), color-mix(in srgb, var(--gov-navy) 62%, #000));
+}
+span.imgcard__media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    opacity: .1;
+    -webkit-mask: var(--gov-emblem) center / 58% no-repeat;
+    mask: var(--gov-emblem) center / 58% no-repeat;
+}
+/* Подложка под подписью. Прежний градиент рассчитывался на тёмные снимки: на
+   светлом фото (небо, снег, стекло) белый заголовок терял контраст. */
+.imgcard__overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,26,48,0) 22%, rgba(11,26,48,.55) 58%, rgba(11,26,48,.92) 100%); transition: opacity .5s ease; }
 .imgcard__body { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px; display: flex; flex-direction: column; gap: 10px; transform: translateY(2px); transition: transform .55s cubic-bezier(.22, 1, .36, 1); }
 .imgcard__title { margin: 0; font-family: var(--font-heading, var(--font-family)); font-weight: 700; font-size: 1.1rem; line-height: 1.25; color: #fff !important; }
 .imgcard__more { display: inline-flex; align-items: center; font-size: 0.85rem; font-weight: 700; color: rgba(255,255,255,.9); transition: color .3s ease, transform .45s cubic-bezier(.22, 1, .36, 1); }
@@ -3729,8 +3759,33 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .newsfeat-lead { display: block; min-width: 0; text-decoration: none; color: var(--gov-ink); }
 .newsfeat-lead__frame { position: relative; display: block; height: 100%; border-radius: var(--radius); overflow: hidden; }
 .newsfeat-lead__media { display: block; width: 100%; height: 100%; min-height: 260px; background: var(--gov-navy) center/cover no-repeat; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) !important; }
+
+/* Материал без изображения. Раньше место картинки заливалось сплошным цветом
+   и читалось как ошибка загрузки; теперь это фирменная подложка с эмблемой. */
+.newsfeat-lead__media--empty,
+.newsfeat-mini__media--empty,
+.newsdocs-item__media--empty,
+.newslist-lead__media--empty,
+.relnews-card__media--empty,
+.adjnews__media--empty {
+    position: relative;
+    background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface));
+}
+.newsfeat-lead__media--empty::after,
+.newsfeat-mini__media--empty::after,
+.newsdocs-item__media--empty::after,
+.newslist-lead__media--empty::after,
+.relnews-card__media--empty::after,
+.adjnews__media--empty::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--gov-navy);
+    opacity: .12;
+    -webkit-mask: var(--gov-emblem) center / 44% no-repeat;
+    mask: var(--gov-emblem) center / 44% no-repeat;
+}
 .newsfeat-lead:hover .newsfeat-lead__media { transform: scale(1.04) !important; }
-.newsfeat-lead__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 22%, var(--gov-surface)), var(--gov-surface)); }
 /* Подложка под текстом — затемнение снизу, чтобы белый читался на любом фото. */
 .newsfeat-lead__over {
     position: absolute; inset-inline: 0; bottom: 0; display: flex; flex-direction: column;
@@ -4215,12 +4270,14 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .feature-card::after {
     content: "0" counter(cards-counter) !important;
     position: absolute;
-    top: 18px;
-    right: 20px;
-    font-size: 2.6rem;
+    top: 16px;
+    right: 18px;
+    /* Номер — ориентир, а не заголовок: раньше он был вдвое крупнее названия
+       направления и первым перетягивал взгляд на себя. */
+    font-size: 1.6rem;
     font-weight: 800;
     color: var(--color-accent, var(--gov-teal));
-    opacity: 0.35;
+    opacity: 0.28;
     font-family: 'Inter', system-ui, sans-serif;
     line-height: 1;
     pointer-events: none;
@@ -4235,11 +4292,12 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     border-bottom-color: var(--color-accent, var(--gov-teal)) !important;
 }
 .feature-card:hover::after {
-    opacity: 0.9;
-    transform: scale(1.08);
+    opacity: 0.6;
 }
 .feature-card__title::after {
-    content: " →";
+    /* Неразрывный пробел: с обычным стрелка отрывалась от последнего слова и
+       падала на следующую строку вплотную к тексту — «…рост→». */
+    content: "\00a0→";
     display: inline-block;
     transition: transform 0.25s ease;
 }

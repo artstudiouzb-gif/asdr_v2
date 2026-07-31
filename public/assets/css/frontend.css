@@ -938,7 +938,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
    ========================================================================== */
 :root {
     --container-max: 1200px;
-    --radius: 14px;
+    --radius: 12px; /* совпадает с гос-темой: один радиус на весь сайт */
     --radius-sm: 9px;
     --card-gap: 24px;
     --section-pad: 68px;
@@ -1212,7 +1212,9 @@ body.design-detail-sidebar .content-detail__aside .content-detail__row dt { colo
 
 /* --- Футер колонками --- */
 .site-footer--columns { background: var(--bg-surface); color: var(--text-main); border-top: 1px solid var(--border-color); padding: 0; text-align: left; font-size: 0.9375rem; }
-.site-footer__inner { max-width: var(--container-max, 1200px); margin: 0 auto; padding: 48px 20px 32px; display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 40px; }
+/* Колонки растягиваются по фактическому количеству: жёсткая сетка в три
+   колонки оставляла пустую треть, когда в подвале настроены две. */
+.site-footer__inner { max-width: var(--container-max, 1200px); margin: 0 auto; padding: 48px 20px 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 40px; }
 .site-footer__logo { max-height: 80px; width: auto; object-fit: contain; margin-bottom: 14px; display: block; }
 .site-footer__name { font-weight: 700; font-size: 1.1875rem; margin-bottom: 12px; color: var(--color-primary, #1a1a1a); }
 .site-footer__heading { font-weight: 700; text-transform: uppercase; letter-spacing: .04em; font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 14px; }
