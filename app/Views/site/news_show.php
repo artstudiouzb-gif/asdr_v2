@@ -466,10 +466,13 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             // Виджеты из «Настройки › Виджеты»: колонка выбрана в поле «Макет
             // страницы с виджетами» у новости. Раньше здесь выводились обе
             // колонки сразу, мимо этой настройки и мимо nonce для CSP.
+            // Форма подписки — дефолт «из коробки»: она показывается, пока в
+            // выбранной колонке нет активных виджетов. При макете «Без
+            // сайдбара» колонки нет, поэтому нет и её.
             $sidebarWidgets = trim((string) ($sidebar['html'] ?? ''));
             if ($sidebarWidgets !== '') {
                 echo $sidebarWidgets;
-            } else {
+            } elseif ($sidebar !== null) {
             ?>
                 <div class="newsdetail-subscribe newsdetail-subscribe--fallback no-print">
                     <h2 class="newsdetail-subscribe__title"><?= htmlspecialchars(t('Agentlik yangiliklariga obuna bo\'ling'), ENT_QUOTES) ?></h2>
