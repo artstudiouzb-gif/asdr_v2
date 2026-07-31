@@ -782,13 +782,22 @@ final class BlockController
                         'units' => $bUnits,
                     ];
                 }
+                $orgColumns = (int) ($_POST['columns'] ?? 4);
+
+                // Построчные поля сохраняются как есть: типографика съела бы
+                // служебные маркеры разметки («- группа», «* проектный офис»).
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    'layout' => ($_POST['layout'] ?? 'tree') === 'spine' ? 'spine' : 'tree',
+                    'columns' => max(2, min(4, $orgColumns)),
+                    'council' => trim((string) ($_POST['council'] ?? '')),
                     'head_title' => TextProcessor::typographPlain(trim((string) ($_POST['head_title'] ?? '')), $locale),
                     'head_name' => trim((string) ($_POST['head_name'] ?? '')),
                     'head_url' => $this->safeUrlField('head_url'),
                     'side_items' => trim((string) ($_POST['side_items'] ?? '')),
                     'branches' => $branches,
+                    'collapsible' => !empty($_POST['collapsible']),
+                    'notes' => trim((string) ($_POST['notes'] ?? '')),
                     'footnote' => TextProcessor::typographPlain(trim((string) ($_POST['footnote'] ?? '')), $locale),
                 ];
             default:
