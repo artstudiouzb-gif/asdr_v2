@@ -75,17 +75,8 @@ $choice = static function (string $key, string $value, string $label, string $ex
             </div>
         </section>
 
-        <?php if (\App\Core\Locale::current() === 'uz'): ?>
-        <section class="a11y-group" data-no-translit>
-            <span class="a11y-group__title">Yozuv / Ёзув</span>
-            <div class="a11y-group__row">
-                <?= $choice('script', 'latn', 'Lotin') ?>
-                <?= $choice('script', 'cyrl', 'Кирилл') ?>
-            </div>
-            <p class="a11y-group__hint">Sahifa matni tanlangan yozuvda ko‘rsatiladi. / Саҳифа матни танланган ёзувда кўрсатилади.</p>
-        </section>
-        <?php endif; ?>
-
+        <?php // Письменность узбекского текста выбирается в переключателе
+              // языков («O‘zbekcha» / «Ўзбекча»): здесь — только внешний вид. ?>
         <section class="a11y-group">
             <span class="a11y-group__title"><?= htmlspecialchars(t('Чтение без помех'), ENT_QUOTES) ?></span>
             <div class="a11y-group__row a11y-group__row--toggles">
