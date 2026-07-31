@@ -91,8 +91,12 @@ final class HeroBlockNormalizer
             'panel_opacity' => self::percentage($input['panel_opacity'] ?? null, 40),
             'button_text' => trim((string) ($input['button_text'] ?? '')),
             'button_url' => BlockDataInput::safeLink($input['button_url'] ?? ''),
+            'button_icon' => \App\Core\Icon::cleanName($input['button_icon'] ?? ''),
+            'button_icon_image' => self::iconImage($input['button_icon_image'] ?? ''),
             'button2_text' => trim((string) ($input['button2_text'] ?? '')),
             'button2_url' => BlockDataInput::safeLink($input['button2_url'] ?? ''),
+            'button2_icon' => \App\Core\Icon::cleanName($input['button2_icon'] ?? ''),
+            'button2_icon_image' => self::iconImage($input['button2_icon_image'] ?? ''),
             'video_button_text' => trim((string) ($input['video_button_text'] ?? '')),
             'video_button_url' => BlockDataInput::safeLink($input['video_button_url'] ?? ''),
         ];
@@ -112,5 +116,13 @@ final class HeroBlockNormalizer
     {
         $value = trim((string) $value);
         return preg_match('/^#[0-9a-fA-F]{6}$/', $value) ? strtolower($value) : $default;
+    }
+
+    /** Своя иконка кнопки: принимаем только безопасный медиа-адрес. */
+    private static function iconImage(mixed $value): string
+    {
+        $url = trim((string) $value);
+
+        return $url !== '' && \App\Core\UrlGuard::isSafeMedia($url) ? $url : '';
     }
 }

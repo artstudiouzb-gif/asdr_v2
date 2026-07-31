@@ -2302,10 +2302,16 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
     /* Без margin-top: кнопки всегда внутри .block-hero__actions (flex,
        align-items:center) — собственный отступ ломал вертикальную центровку
        кнопки «Смотреть видео» рядом. Отступ сверху задаёт сам контейнер. */
-    display: inline-block; padding: 13px 28px; border-radius: var(--btn-radius, 10px);
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 13px 28px; border-radius: var(--btn-radius, 10px);
     background: var(--color-primary, #223d79); color: #fff; text-decoration: none; font-weight: 600;
     transition: transform .15s ease, box-shadow .15s ease;
 }
+/* Иконка кнопки: из библиотеки Tabler (наследует цвет текста) или своя
+   картинка/SVG из медиабиблиотеки (показывается как есть). */
+.block-hero__button-icon { display: inline-flex; flex: 0 0 auto; align-items: center; }
+.block-hero__button-icon svg { display: block; }
+img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
 .block-hero__button:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
 @keyframes hero-button-sheen {
     0%, 62% { transform: translateX(-320%) skewX(-20deg); opacity: 0; }

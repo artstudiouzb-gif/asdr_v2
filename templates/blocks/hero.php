@@ -86,6 +86,25 @@ $btnText = trim((string) ($data['button_text'] ?? ''));
 $btnUrl = trim((string) ($data['button_url'] ?? ''));
 $btn2Text = trim((string) ($data['button2_text'] ?? ''));
 $btn2Url = trim((string) ($data['button2_url'] ?? ''));
+/**
+ * Иконка кнопки: своя картинка (SVG из медиабиблиотеки) важнее ключа Tabler.
+ * Без иконки возвращается пустая строка — разметка кнопки не меняется.
+ */
+$heroButtonIcon = static function (string $iconName, string $iconImage): string {
+    $iconImage = trim($iconImage);
+    if ($iconImage !== '' && UrlGuard::isSafeMedia($iconImage)) {
+        return '<img class="block-hero__button-icon" src="' . htmlspecialchars($iconImage, ENT_QUOTES)
+            . '" alt="" aria-hidden="true" width="20" height="20">';
+    }
+    $iconName = \App\Core\Icon::cleanName($iconName);
+
+    return $iconName !== ''
+        ? '<span class="block-hero__button-icon" aria-hidden="true">' . \App\Core\Icon::render($iconName, 20, '', 2) . '</span>'
+        : '';
+};
+$btnIcon = $heroButtonIcon((string) ($data['button_icon'] ?? ''), (string) ($data['button_icon_image'] ?? ''));
+$btn2Icon = $heroButtonIcon((string) ($data['button2_icon'] ?? ''), (string) ($data['button2_icon_image'] ?? ''));
+
 $vBtnText = trim((string) ($data['video_button_text'] ?? ''));
 $vBtnUrl = trim((string) ($data['video_button_url'] ?? ''));
 
@@ -184,10 +203,10 @@ if ($bgType === 'youtube' && $youtubeId !== null) {
             <?php if (($btnText !== '' && $btnUrl !== '') || ($btn2Text !== '' && $btn2Url !== '') || ($vBtnText !== '')): ?>
             <div class="block-hero__actions">
                 <?php if ($btnText !== '' && $btnUrl !== '' && UrlGuard::isSafeLink($btnUrl)): ?>
-                    <a class="block-hero__button" href="<?= htmlspecialchars($btnUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($btnText, ENT_QUOTES) ?> →</a>
+                    <a class="block-hero__button" href="<?= htmlspecialchars($btnUrl, ENT_QUOTES) ?>"><?= $btnIcon ?><?= htmlspecialchars($btnText, ENT_QUOTES) ?> →</a>
                 <?php endif; ?>
                 <?php if ($btn2Text !== '' && $btn2Url !== '' && UrlGuard::isSafeLink($btn2Url)): ?>
-                    <a class="block-hero__button block-hero__button--ghost" href="<?= htmlspecialchars($btn2Url, ENT_QUOTES) ?>"><?= htmlspecialchars($btn2Text, ENT_QUOTES) ?> →</a>
+                    <a class="block-hero__button block-hero__button--ghost" href="<?= htmlspecialchars($btn2Url, ENT_QUOTES) ?>"><?= $btn2Icon ?><?= htmlspecialchars($btn2Text, ENT_QUOTES) ?> →</a>
                 <?php endif; ?>
                 <?php if ($vBtnText !== ''): ?>
                     <?php $vSafe = $vBtnUrl !== '' && UrlGuard::isSafeLink($vBtnUrl); ?>
