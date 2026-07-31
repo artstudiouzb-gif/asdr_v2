@@ -1,14 +1,21 @@
+/**
+ * Слайдеры: блок «Слайдер» (галерея изображений) и обложка со слайдами.
+ * Разметка у них разная, поведение — одно, поэтому логика общая: показ слайда,
+ * точки, стрелки, клавиатура, свайп и необязательная автопрокрутка.
+ */
 (function () {
     'use strict';
 
-    document.querySelectorAll('.block-slider').forEach(function (slider) {
-        var slides = slider.querySelectorAll('.block-slider__slide');
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function initSlider(root, options) {
+        var slides = root.querySelectorAll(options.slide);
         if (slides.length < 2) {
             return;
         }
         var current = 0;
-        var dots = slider.querySelectorAll('[data-slide-index]');
-        var status = slider.querySelector('[data-slider-status]');
+        var dots = root.querySelectorAll('[data-slide-index]');
+        var status = root.querySelector('[data-slider-status]');
 
         function show(index, announce) {
             slides[current].classList.remove('is-active');
@@ -26,51 +33,105 @@
             }
         }
 
-        var prev = slider.querySelector('.block-slider__prev');
-        var next = slider.querySelector('.block-slider__next');
+        var prev = root.querySelector(options.prev);
+        var next = root.querySelector(options.next);
         if (prev) {
-            prev.addEventListener('click', function () { show(current - 1, true); });
+            prev.addEventListener('click', function () { stopAuto(); show(current - 1, true); });
         }
         if (next) {
-            next.addEventListener('click', function () { show(current + 1, true); });
+            next.addEventListener('click', function () { stopAuto(); show(current + 1, true); });
         }
         dots.forEach(function (dot) {
             dot.addEventListener('click', function () {
+                stopAuto();
                 show(Number(dot.getAttribute('data-slide-index')) || 0, true);
             });
         });
 
-        slider.addEventListener('keydown', function (event) {
+        root.addEventListener('keydown', function (event) {
             if (event.key === 'ArrowLeft') {
                 event.preventDefault();
+                stopAuto();
                 show(current - 1, true);
             } else if (event.key === 'ArrowRight') {
                 event.preventDefault();
+                stopAuto();
                 show(current + 1, true);
             } else if (event.key === 'Home') {
                 event.preventDefault();
+                stopAuto();
                 show(0, true);
             } else if (event.key === 'End') {
                 event.preventDefault();
+                stopAuto();
                 show(slides.length - 1, true);
             }
         });
 
         var startX = null;
         var startY = null;
-        slider.addEventListener('pointerdown', function (event) {
+        root.addEventListener('pointerdown', function (event) {
             if (event.pointerType === 'mouse') { return; }
             startX = event.clientX;
             startY = event.clientY;
         }, { passive: true });
-        slider.addEventListener('pointerup', function (event) {
+        root.addEventListener('pointerup', function (event) {
             if (startX === null || startY === null) { return; }
             var dx = event.clientX - startX;
             var dy = event.clientY - startY;
             startX = null;
             startY = null;
             if (Math.abs(dx) < 40 || Math.abs(dx) <= Math.abs(dy)) { return; }
+            stopAuto();
             show(current + (dx < 0 ? 1 : -1), true);
         }, { passive: true });
+
+        // --- Автопрокрутка ---
+        // Выключена, если посетитель просил меньше движения: карусель, которая
+        // едет сама, для него — помеха, а не украшение.
+        var delay = Number(root.getAttribute('data-autoplay')) * 1000;
+        var timer = null;
+
+        function startAuto() {
+            if (timer !== null || !delay || reduceMotion || document.hidden) { return; }
+            timer = window.setInterval(function () { show(current + 1, false); }, delay);
+        }
+
+        function stopAuto() {
+            if (timer === null) { return; }
+            window.clearInterval(timer);
+            timer = null;
+        }
+
+        if (delay && !reduceMotion) {
+            // Пауза, пока посетитель читает слайд: курсор над ним, фокус внутри
+            // или вкладка ушла в фон.
+            root.addEventListener('mouseenter', stopAuto);
+            root.addEventListener('mouseleave', startAuto);
+            root.addEventListener('focusin', stopAuto);
+            root.addEventListener('focusout', function (event) {
+                if (!root.contains(event.relatedTarget)) { startAuto(); }
+            });
+            document.addEventListener('visibilitychange', function () {
+                if (document.hidden) { stopAuto(); } else { startAuto(); }
+            });
+            startAuto();
+        }
+    }
+
+    document.querySelectorAll('.block-slider').forEach(function (slider) {
+        initSlider(slider, {
+            slide: '.block-slider__slide',
+            prev: '.block-slider__prev',
+            next: '.block-slider__next'
+        });
+    });
+
+    document.querySelectorAll('[data-hero-slider]').forEach(function (hero) {
+        initSlider(hero, {
+            slide: '.block-hero__slide',
+            prev: '[data-hero-prev]',
+            next: '[data-hero-next]'
+        });
     });
 })();

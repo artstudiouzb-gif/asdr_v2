@@ -616,6 +616,94 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             ]) ?>
             <div class="form-field"><label for="video_button_text">Кнопка «Смотреть видео» — текст</label><input type="text" id="video_button_text" name="video_button_text" value="<?= htmlspecialchars($data['video_button_text'] ?? '', ENT_QUOTES) ?>"></div>
             <div class="form-field"><label for="video_button_url">Кнопка «Смотреть видео» — ссылка</label><input type="text" id="video_button_url" name="video_button_url" value="<?= htmlspecialchars($data['video_button_url'] ?? '', ENT_QUOTES) ?>"></div>
+
+            <?php
+            $heroSlides = is_array($data['slides'] ?? null) ? $data['slides'] : [];
+            $slideField = static function (int $index, string $key, string $label, string $value, string $type = 'text', string $hint = ''): string {
+                $id = 'slide_' . $index . '_' . $key;
+                return '<div class="form-field"><label for="' . $id . '">' . htmlspecialchars($label, ENT_QUOTES) . '</label>'
+                    . '<input type="' . $type . '" id="' . $id . '" name="slides[' . $index . '][' . $key . ']" value="' . htmlspecialchars($value, ENT_QUOTES) . '">'
+                    . ($hint !== '' ? '<span class="form-hint">' . htmlspecialchars($hint, ENT_QUOTES) . '</span>' : '')
+                    . '</div>';
+            };
+            ?>
+            <h3 class="form-subtitle">Слайды</h3>
+            <p class="form-hint u-inline-291b7bbb01">
+                Заполните слайды, чтобы обложка стала слайдером: до <?= \App\Core\BlockData\HeroBlockNormalizer::MAX_SLIDES ?> штук.
+                Оформление (высота, затемнение, подложка, цвета) остаётся общим, у слайда своё — текст, картинка,
+                кнопки, ссылка и срок показа. Пока слайдов нет, обложка работает как раньше.
+            </p>
+            <div class="form-field">
+                <label for="hero_autoplay">Автопрокрутка, секунд</label>
+                <input type="number" id="hero_autoplay" name="autoplay" min="0" max="30" value="<?= (int) ($data['autoplay'] ?? 0) ?>">
+                <span class="form-hint">0 — переключать только вручную. Прокрутка останавливается под курсором, при фокусе с клавиатуры и у посетителей, попросивших меньше движения.</span>
+            </div>
+            <div data-repeater="heroslides" data-repeater-max="<?= \App\Core\BlockData\HeroBlockNormalizer::MAX_SLIDES ?>" class="fb-grid">
+                <?php foreach ($heroSlides as $i => $slide): ?>
+                    <div class="repeater-row fb-card">
+                        <div class="fb-card__head">
+                            <span class="fb-card__badge">Слайд</span>
+                            <span class="fb-card__tools">
+                                <button type="button" class="fb-move" data-fb-move="up" aria-label="Выше" title="Переместить">↑</button>
+                                <button type="button" class="fb-move" data-fb-move="down" aria-label="Ниже" title="Переместить">↓</button>
+                            </span>
+                        </div>
+                        <?= $slideField($i, 'eyebrow', 'Надзаголовок', (string) ($slide['eyebrow'] ?? '')) ?>
+                        <?= $slideField($i, 'title', 'Заголовок', (string) ($slide['title'] ?? '')) ?>
+                        <?= $slideField($i, 'subtitle', 'Подзаголовок', (string) ($slide['subtitle'] ?? '')) ?>
+                        <?= \App\Core\AdminUi::imageField('slides[' . $i . '][image]', (string) ($slide['image'] ?? ''), ['label' => 'Изображение слайда']) ?>
+                        <?= $slideField($i, 'link_url', 'Ссылка со всего слайда', (string) ($slide['link_url'] ?? ''), 'text', 'Клик по слайду ведёт сюда. Кнопки при этом работают по своим ссылкам.') ?>
+                        <?= $slideField($i, 'button_text', 'Кнопка 1 — текст', (string) ($slide['button_text'] ?? '')) ?>
+                        <?= $slideField($i, 'button_url', 'Кнопка 1 — ссылка', (string) ($slide['button_url'] ?? '')) ?>
+                        <?= $slideField($i, 'button2_text', 'Кнопка 2 — текст', (string) ($slide['button2_text'] ?? '')) ?>
+                        <?= $slideField($i, 'button2_url', 'Кнопка 2 — ссылка', (string) ($slide['button2_url'] ?? '')) ?>
+                        <div class="form-field">
+                            <label for="slide_<?= $i ?>_text_position">Положение текста</label>
+                            <select id="slide_<?= $i ?>_text_position" name="slides[<?= $i ?>][text_position]">
+                                <?php foreach (['' => 'Как у обложки', 'left' => 'Слева', 'center' => 'По центру', 'right' => 'Справа'] as $val => $label): ?>
+                                    <option value="<?= $val ?>" <?= (string) ($slide['text_position'] ?? '') === (string) $val ? 'selected' : '' ?>><?= $label ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <?= $slideField($i, '_visible_from', 'Показывать с', \App\Core\BlockVisibility::forInput($slide['_visible_from'] ?? ''), 'datetime-local', 'Пусто — сразу.') ?>
+                        <?= $slideField($i, '_visible_to', 'Показывать до', \App\Core\BlockVisibility::forInput($slide['_visible_to'] ?? ''), 'datetime-local', 'Пусто — бессрочно. Слайд исчезнет сам, кэш страницы пересоберётся.') ?>
+                        <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить слайд</button>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <template data-repeater-template="heroslides">
+                <div class="fb-card__head">
+                    <span class="fb-card__badge">Слайд</span>
+                    <span class="fb-card__tools">
+                        <button type="button" class="fb-move" data-fb-move="up" aria-label="Выше" title="Переместить">↑</button>
+                        <button type="button" class="fb-move" data-fb-move="down" aria-label="Ниже" title="Переместить">↓</button>
+                    </span>
+                </div>
+                <div class="form-field"><label>Надзаголовок</label><input type="text" name="slides[__INDEX__][eyebrow]"></div>
+                <div class="form-field"><label>Заголовок</label><input type="text" name="slides[__INDEX__][title]"></div>
+                <div class="form-field"><label>Подзаголовок</label><input type="text" name="slides[__INDEX__][subtitle]"></div>
+                <?= \App\Core\AdminUi::imageField('slides[__INDEX__][image]', '', ['label' => 'Изображение слайда']) ?>
+                <div class="form-field"><label>Ссылка со всего слайда</label><input type="text" name="slides[__INDEX__][link_url]"></div>
+                <div class="form-field"><label>Кнопка 1 — текст</label><input type="text" name="slides[__INDEX__][button_text]"></div>
+                <div class="form-field"><label>Кнопка 1 — ссылка</label><input type="text" name="slides[__INDEX__][button_url]"></div>
+                <div class="form-field"><label>Кнопка 2 — текст</label><input type="text" name="slides[__INDEX__][button2_text]"></div>
+                <div class="form-field"><label>Кнопка 2 — ссылка</label><input type="text" name="slides[__INDEX__][button2_url]"></div>
+                <div class="form-field">
+                    <label>Положение текста</label>
+                    <select name="slides[__INDEX__][text_position]">
+                        <option value="">Как у обложки</option>
+                        <option value="left">Слева</option>
+                        <option value="center">По центру</option>
+                        <option value="right">Справа</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Показывать с</label><input type="datetime-local" name="slides[__INDEX__][_visible_from]"></div>
+                <div class="form-field"><label>Показывать до</label><input type="datetime-local" name="slides[__INDEX__][_visible_to]"></div>
+                <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить слайд</button>
+            </template>
+            <div class="repeater-actions">
+                <button type="button" class="btn btn--small" data-repeater-add="heroslides"><?= \App\Core\AdminUi::icon('plus') ?>Добавить слайд</button>
+            </div>
         <?php endif; ?>
 
         <?php if ($type === 'news_feature'): ?>

@@ -76,6 +76,10 @@ test('Hero normalizer: формирует стабильный JSON-контра
         'button2_icon_image' => '',
         'video_button_text' => 'Видео',
         'video_button_url' => 'https://example.com/video',
+        // Обложка без слайдов остаётся одиночной: пустой список и выключенная
+        // автопрокрутка — часть того же контракта.
+        'slides' => [],
+        'autoplay' => 0,
     ], $data);
 });
 

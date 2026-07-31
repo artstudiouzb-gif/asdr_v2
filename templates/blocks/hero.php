@@ -131,11 +131,28 @@ if ($heroHeight === 'custom' && preg_match('/^(\d+(?:\.\d+)?)(px|vh|dvh|rem)$/',
     $heightNumber = rtrim(rtrim(number_format($heightValue, 1, '.', ''), '0'), '.');
     $heroRootStyle .= '--hero-custom-height:' . $heightNumber . $heightUnit . ';';
 }
+// --- Слайды обложки ---
+// Оформление (высота, ширина, затемнение, панель, цвета) общее для всех
+// слайдов; у слайда своё содержимое, картинка, кнопки и окно показа.
+$slides = is_array($data['slides'] ?? null) ? $data['slides'] : [];
+$slides = array_values(array_filter($slides, static function ($slide): bool {
+    if (!is_array($slide)) {
+        return false;
+    }
+    // Границу расписания сообщаем до проверки: слайд, который ещё не начался,
+    // тоже обязан разморозить кэш страницы к своему старту.
+    \App\Core\BlockRenderer::noteBoundary(\App\Core\BlockVisibility::boundary($slide));
+
+    return \App\Core\BlockVisibility::isVisible($slide);
+}));
+$isSlider = $slides !== [];
+$autoplay = max(0, (int) ($data['autoplay'] ?? 0));
+
 $scrimStyle = '--hero-scrim-rgb:' . $hex2rgb($ovColor)
     . ';--hero-scrim-a:' . $ovOpacity
     . ';--hero-scrim-direction:' . $overlayAngle . ';';
 $templateCss = ($heroRootStyle !== '' ? '#block-' . $blockId . ' .block-hero{' . $heroRootStyle . '}' : '')
-    . ($hasMedia && $overlayEnabled ? "\n#block-" . $blockId . ' .block-hero__scrim{' . $scrimStyle . '}' : '')
+    . (($hasMedia || $isSlider) && $overlayEnabled ? "\n#block-" . $blockId . ' .block-hero__scrim{' . $scrimStyle . '}' : '')
     . ($textStyle !== '' ? "\n#block-" . $blockId . ' .block-hero__text{' . $textStyle . '}' : '');
 
 $youtubeEmbedUrl = '';
@@ -159,6 +176,87 @@ if ($bgType === 'youtube' && $youtubeId !== null) {
         . '?' . http_build_query($youtubeParams, '', '&', PHP_QUERY_RFC3986);
 }
 ?>
+<?php if ($isSlider): ?>
+<?php
+    $slideCount = count($slides);
+    $headingTag = $data['_heading_tag'] ?? 'h1';
+?>
+<div class="block-hero block-hero--media block-hero--slider block-hero--w-<?= $heroWidth ?> block-hero--h-<?= $heroHeight ?> block-hero--pos-<?= $textPos ?>"
+     data-hero-slider<?= $autoplay > 0 ? ' data-autoplay="' . $autoplay . '"' : '' ?>
+     role="region" aria-roledescription="<?= htmlspecialchars(t('Карусель'), ENT_QUOTES) ?>"
+     aria-label="<?= htmlspecialchars($title !== '' ? (string) $title : t('Обложка'), ENT_QUOTES) ?>"<?= $slideCount > 1 ? ' tabindex="0"' : '' ?>>
+    <div class="block-hero__slides">
+        <?php foreach ($slides as $index => $slide): ?>
+            <?php
+            $slideImage = trim((string) ($slide['image'] ?? ''));
+            $slidePos = in_array($slide['text_position'] ?? '', ['left', 'center', 'right'], true) ? $slide['text_position'] : $textPos;
+            $slideLink = trim((string) ($slide['link_url'] ?? ''));
+            $slideTitle = trim((string) ($slide['title'] ?? ''));
+            $slideMediaClasses = MediaPosition::classes($slide['image_position'] ?? null, $slide['image_position'] ?? null);
+            $slideBtnIcon = $heroButtonIcon((string) ($slide['button_icon'] ?? ''), '');
+            $slideBtn2Icon = $heroButtonIcon((string) ($slide['button2_icon'] ?? ''), '');
+            $slideBtnUrl = trim((string) ($slide['button_url'] ?? ''));
+            $slideBtn2Url = trim((string) ($slide['button2_url'] ?? ''));
+            ?>
+            <div class="block-hero__slide block-hero--pos-<?= $slidePos ?><?= $index === 0 ? ' is-active' : '' ?>"
+                 role="group" aria-roledescription="<?= htmlspecialchars(t('Слайд'), ENT_QUOTES) ?>"
+                 aria-label="<?= ($index + 1) . ' ' . htmlspecialchars(t('из'), ENT_QUOTES) . ' ' . $slideCount ?>"
+                 aria-hidden="<?= $index === 0 ? 'false' : 'true' ?>">
+                <?php if ($slideImage !== ''): ?>
+                    <?= Media::picture($slideImage, '', null, null, 'block-hero__image ' . $slideMediaClasses, $index !== 0, '100vw', true, 'block-hero__media ' . $slideMediaClasses) ?>
+                <?php endif; ?>
+                <?php if ($overlayEnabled): ?><div class="block-hero__scrim<?= $overlaySolid ? ' block-hero__scrim--solid' : '' ?>" aria-hidden="true"></div><?php endif; ?>
+                <?php if ($slideLink !== '' && UrlGuard::isSafeLink($slideLink)): ?>
+                    <?php // Ссылка-подложка: кликабелен весь слайд, при этом кнопки
+                          // остаются самостоятельными ссылками, а не вложенными. ?>
+                    <a class="block-hero__slide-cover" href="<?= htmlspecialchars($slideLink, ENT_QUOTES) ?>"
+                       tabindex="-1" aria-hidden="true"></a>
+                <?php endif; ?>
+                <div class="block-hero__inner">
+                    <div class="block-hero__text<?= $panelOn ? ' block-hero__text--panel' : '' ?>">
+                        <?php if (!empty($slide['eyebrow'])): ?><span class="block-hero__eyebrow"><?= htmlspecialchars((string) $slide['eyebrow'], ENT_QUOTES) ?></span><?php endif; ?>
+                        <?php if ($slideTitle !== ''): ?>
+                            <?php $tag = $index === 0 ? $headingTag : 'h2'; ?>
+                            <<?= $tag ?> class="block-hero__title">
+                                <?php if ($slideLink !== '' && UrlGuard::isSafeLink($slideLink)): ?>
+                                    <a class="block-hero__title-link" href="<?= htmlspecialchars($slideLink, ENT_QUOTES) ?>"><?= htmlspecialchars($slideTitle, ENT_QUOTES) ?></a>
+                                <?php else: ?>
+                                    <?= htmlspecialchars($slideTitle, ENT_QUOTES) ?>
+                                <?php endif; ?>
+                            </<?= $tag ?>>
+                        <?php endif; ?>
+                        <?php if (!empty($slide['subtitle'])): ?><p class="block-hero__subtitle"><?= htmlspecialchars((string) $slide['subtitle'], ENT_QUOTES) ?></p><?php endif; ?>
+                        <?php if (!empty($slide['button_text']) && $slideBtnUrl !== '' && UrlGuard::isSafeLink($slideBtnUrl) || !empty($slide['button2_text']) && $slideBtn2Url !== '' && UrlGuard::isSafeLink($slideBtn2Url)): ?>
+                        <div class="block-hero__actions">
+                            <?php if (!empty($slide['button_text']) && $slideBtnUrl !== '' && UrlGuard::isSafeLink($slideBtnUrl)): ?>
+                                <a class="block-hero__button" href="<?= htmlspecialchars($slideBtnUrl, ENT_QUOTES) ?>"><?= $slideBtnIcon ?><?= htmlspecialchars((string) $slide['button_text'], ENT_QUOTES) ?> →</a>
+                            <?php endif; ?>
+                            <?php if (!empty($slide['button2_text']) && $slideBtn2Url !== '' && UrlGuard::isSafeLink($slideBtn2Url)): ?>
+                                <a class="block-hero__button block-hero__button--ghost" href="<?= htmlspecialchars($slideBtn2Url, ENT_QUOTES) ?>"><?= $slideBtn2Icon ?><?= htmlspecialchars((string) $slide['button2_text'], ENT_QUOTES) ?> →</a>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    <?php if ($slideCount > 1): ?>
+        <div class="block-hero__slider-nav">
+            <button type="button" class="block-hero__slider-btn" data-hero-prev aria-label="<?= htmlspecialchars(t('Предыдущий слайд'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('chevron-left', 22) ?></button>
+            <button type="button" class="block-hero__slider-btn" data-hero-next aria-label="<?= htmlspecialchars(t('Следующий слайд'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('chevron-right', 22) ?></button>
+        </div>
+        <div class="block-hero__dots" role="group" aria-label="<?= htmlspecialchars(t('Выбор слайда'), ENT_QUOTES) ?>">
+            <?php foreach ($slides as $index => $_slide): ?>
+                <button type="button" class="block-hero__dot<?= $index === 0 ? ' is-active' : '' ?>" data-slide-index="<?= $index ?>"
+                        aria-label="<?= htmlspecialchars(t('Перейти к слайду'), ENT_QUOTES) . ' ' . ($index + 1) ?>"
+                        aria-current="<?= $index === 0 ? 'true' : 'false' ?>"></button>
+            <?php endforeach; ?>
+        </div>
+        <span class="visually-hidden" data-slider-status aria-live="polite"></span>
+    <?php endif; ?>
+</div>
+<?php else: ?>
 <?php // Без медиа и без своего фона hero — это просто шапка страницы:
       // карточка с рамкой и подложкой в этой роли читается как чужой блок. ?>
 <div class="block-hero<?= $hasMedia ? ' block-hero--media' : '' ?><?= (!$hasMedia && $heroBg === '') ? ' block-hero--plain' : '' ?><?= $heroBg !== '' ? ' block-hero--bgcolor' : '' ?><?= ($bgType === 'video' || $bgType === 'youtube') ? ' block-hero--video' : '' ?> block-hero--w-<?= $heroWidth ?> block-hero--h-<?= $heroHeight ?> block-hero--pos-<?= $textPos ?>">
@@ -220,3 +318,4 @@ if ($bgType === 'youtube' && $youtubeId !== null) {
         </div>
     </div>
 </div>
+<?php endif; ?>
