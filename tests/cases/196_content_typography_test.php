@@ -22,6 +22,18 @@ test('Контент: у текста задана мера строки', funct
     assert_contains('.block-text__title { max-width: var(--rich-measure, 72ch); }', $theme);
 });
 
+test('Контент: маркер списка — восьмиконечная звезда', function () {
+    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/rich-content.css');
+
+    // Руб-эль-Хизб: восемь внешних вершин на радиусе R и восемь внутренних на
+    // 0.765R. Форма держится от 10px, поэтому размер задан в пикселях.
+    assert_contains(':where(.rich-content) ul > li::before', $css);
+    assert_contains('50% 0%, 64.7% 14.6%, 85.4% 14.6%', $css);
+    assert_contains('width: 10px;', $css);
+    // Нумерованные списки остаются с обычными цифрами.
+    assert_contains(':where(.rich-content) ol li::marker', $css);
+});
+
 test('Контент: ссылки в тексте не полужирные', function () {
     $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/rich-content.css');
 

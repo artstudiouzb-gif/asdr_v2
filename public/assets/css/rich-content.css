@@ -81,7 +81,29 @@
 :where(.rich-content) ol { margin-block: 0 1.25em; padding-inline-start: 1.45em; }
 :where(.rich-content) li { padding-inline-start: .25em; }
 :where(.rich-content) li + li { margin-block-start: .42em; }
-:where(.rich-content) li::marker { color: var(--rich-accent); font-weight: 700; }
+:where(.rich-content) ol li::marker { color: var(--rich-accent); font-weight: 700; }
+
+/* Маркер маркированного списка — восьмиконечная звезда (руб-эль-Хизб, два
+   наложенных квадрата): та же геометрия, что в эмблеме Агентства. Форму
+   держит от 10px, поэтому размер фиксированный, а не в em. */
+:where(.rich-content) ul { list-style: none; }
+:where(.rich-content) ul > li { position: relative; }
+:where(.rich-content) ul > li::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: -1.15em;
+    inset-block-start: .58em;
+    width: 10px;
+    height: 10px;
+    background: var(--rich-accent);
+    /* Вершины: восемь внешних углов на радиусе R и восемь внутренних на
+       0.765R — это ровно контур двух наложенных квадратов. */
+    clip-path: polygon(
+        50% 0%, 64.7% 14.6%, 85.4% 14.6%, 85.4% 35.3%, 100% 50%, 85.4% 64.7%,
+        85.4% 85.4%, 64.7% 85.4%, 50% 100%, 35.3% 85.4%, 14.6% 85.4%, 14.6% 64.7%,
+        0% 50%, 14.6% 35.3%, 14.6% 14.6%, 35.3% 14.6%
+    );
+}
 :where(.rich-content) li > ul,
 :where(.rich-content) li > ol { margin-block: .5em 0; }
 
