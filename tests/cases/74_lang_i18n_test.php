@@ -29,6 +29,16 @@ test('Словари UZ и EN синхронны и не содержат пус
             assert_true(is_string($value) && trim($value) !== '', "{$lang}: перевод не пустой: {$key}");
         }
     }
+
+    // PHP молча оставляет из повторяющихся ключей последний, поэтому дубль
+    // виден только по исходнику: дважды добавленная строка тихо перебивает
+    // прежний перевод.
+    foreach (['uz', 'en'] as $lang) {
+        $source = (string) file_get_contents(APP_ROOT . '/app/Core/lang/' . $lang . '.php');
+        preg_match_all('/^\s{4}\'((?:[^\'\\\\]|\\\\.)*)\'\s*=>/mu', $source, $matches);
+        $duplicates = array_keys(array_filter(array_count_values($matches[1]), static fn (int $count): bool => $count > 1));
+        assert_same([], $duplicates, "{$lang}: повторяющиеся ключи словаря");
+    }
 });
 
 test('Публичная шапка переводит навигацию, поиск и панель доступности', function () {

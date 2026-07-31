@@ -358,17 +358,13 @@ $themeToggle = '<button type="button" class="site-theme-toggle" aria-label="' . 
     . \App\Core\Icon::render('moon', 24, 'site-theme-toggle__moon')
     . '</span></button>';
 
-// --- Версия для слабовидящих: состояние из cookie (без JS-мигания) ---
-$a11ySchemes = ['cw', 'wc', 'bb'];
-$a11ySizes = ['m', 'l', 'xl'];
-$a11yParts = explode(':', (string) ($_COOKIE['a11y'] ?? ''));
-$a11y = [
-    'on' => in_array($a11yParts[0] ?? '', $a11ySchemes, true),
-    'scheme' => in_array($a11yParts[0] ?? '', $a11ySchemes, true) ? $a11yParts[0] : 'cw',
-    'size' => in_array($a11yParts[1] ?? '', $a11ySizes, true) ? $a11yParts[1] : 'l',
-    'images' => ($a11yParts[2] ?? '') === 'off' ? 'off' : 'on',
-];
-$a11yToggle = '<button type="button" class="a11y-toggle" aria-label="' . $et('Версия для слабовидящих') . '" title="' . $et('Версия для слабовидящих') . '" aria-controls="a11y-panel" aria-expanded="' . ($a11y['on'] ? 'true' : 'false') . '">'
+// --- Настройки отображения: состояние из cookie (страница сразу приходит
+// в нужном виде, без мигания «обычная → крупная») ---
+$a11ySettings = \App\Core\A11ySettings::fromCookie($_COOKIE[\App\Core\A11ySettings::COOKIE] ?? null);
+$a11yActive = \App\Core\A11ySettings::isActive($a11ySettings);
+$a11yToggle = '<button type="button" class="a11y-toggle' . ($a11yActive ? ' is-active' : '') . '" data-a11y-open'
+    . ' aria-label="' . $et('Настройки отображения') . '" title="' . $et('Настройки отображения: размер текста, контраст, интервалы') . '"'
+    . ' aria-controls="a11y-panel" aria-expanded="false">'
     . \App\Core\Icon::render('eye', 18)
     . '<span>' . $et('Для слабовидящих') . '</span></button>';
 
@@ -559,12 +555,7 @@ if ($extraHeadCss !== '') {
 <html
     lang="<?= htmlspecialchars($currentLang, ENT_QUOTES) ?>"
     data-theme="<?= htmlspecialchars($defaultTheme, ENT_QUOTES) ?>"
-    <?php if ($a11y['on']): ?>
-        data-a11y="1"
-        data-a11y-scheme="<?= htmlspecialchars($a11y['scheme'], ENT_QUOTES) ?>"
-        data-a11y-size="<?= htmlspecialchars($a11y['size'], ENT_QUOTES) ?>"
-        data-a11y-images="<?= htmlspecialchars($a11y['images'], ENT_QUOTES) ?>"
-    <?php endif; ?>
+    <?= \App\Core\A11ySettings::htmlAttributes($a11ySettings) ?>
 >
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -687,28 +678,6 @@ foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
 </div>
 <?php endif; ?>
 <?php if (empty($hideChrome)): // лендинг (группа 6) скрывает шапку сайта ?>
-<?php if ($a11y['on']): ?>
-<section class="a11y-panel is-open" id="a11y-panel" aria-label="<?= $et('Настройки версии для слабовидящих') ?>">
-    <div class="a11y-panel__group">
-        <b><?= $et('Цвет:') ?></b>
-        <button type="button" data-a11y-set="scheme:cw" title="<?= $et('Чёрным по белому') ?>">A</button>
-        <button type="button" data-a11y-set="scheme:wc" title="<?= $et('Белым по чёрному') ?>">A</button>
-        <button type="button" data-a11y-set="scheme:bb" title="<?= $et('Тёмно-синим по голубому') ?>">A</button>
-    </div>
-    <div class="a11y-panel__group">
-        <b><?= $et('Размер:') ?></b>
-        <button type="button" class="a11y-panel__size-a1" data-a11y-set="size:m" title="<?= $et('Обычный') ?>">A</button>
-        <button type="button" class="a11y-panel__size-a2" data-a11y-set="size:l" title="<?= $et('Крупный') ?>">A</button>
-        <button type="button" class="a11y-panel__size-a3" data-a11y-set="size:xl" title="<?= $et('Очень крупный') ?>">A</button>
-    </div>
-    <div class="a11y-panel__group">
-        <b><?= $et('Изображения:') ?></b>
-        <button type="button" data-a11y-set="images:on" title="<?= $et('Показывать') ?>"><?= $et('Вкл') ?></button>
-        <button type="button" data-a11y-set="images:off" title="<?= $et('Скрыть') ?>"><?= $et('Выкл') ?></button>
-    </div>
-    <a href="#" class="a11y-panel__off"><?= $et('Обычная версия') ?></a>
-</section>
-<?php endif; ?>
 <?= $topbarHtml ?>
 <?php
 $hasHeaderContent = trim($zones['left'] . $zones['center'] . $zones['right'] . $topbarHtml . $navBarHtml) !== '';

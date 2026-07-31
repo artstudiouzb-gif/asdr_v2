@@ -173,6 +173,9 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
     </div>
 </footer>
 <?php endif; ?>
+<?php // Панель настроек отображения: её открывает кнопка «Для слабовидящих».
+      // $a11ySettings задаётся в _header.php (та же область видимости View). ?>
+<?php require __DIR__ . '/_a11y_panel.php'; ?>
 <?php endif; ?>
 <?php // Плавающая кнопка «Наверх» — видимостью управляет класс body.design-scrolltop
       // (тумблер в «Дизайн») и JS (появляется после прокрутки). ?>
