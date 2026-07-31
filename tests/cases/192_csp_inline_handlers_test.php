@@ -110,4 +110,10 @@ test('XSS: результаты поиска и карточки медиаби�
         (bool) preg_match('/=\s*\w+\.innerHTML\b/', $js),
         'чтение innerHTML с обратной записью — источник алерта CodeQL'
     );
+
+    // Теги вырезаются одним проходом по строке: одиночный replace оставляет
+    // «<script», если теги вложены друг в друга (CodeQL: incomplete
+    // multi-character sanitization).
+    assert_not_contains("replace(/<[^>]*>/g", $js);
+    assert_contains('function stripTags(', $js);
 });

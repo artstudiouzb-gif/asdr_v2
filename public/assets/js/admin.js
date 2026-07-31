@@ -395,25 +395,45 @@
         var signatureCount = document.querySelector('[data-tg-signature-count]');
 
         // Считаем длину так, как её увидит Telegram: без тегов и с раскрытыми
-        // сущностями. Раньше для раскрытия текст клали в innerHTML — то есть
-        // разбирали пользовательский ввод как разметку; делаем это строкой.
+        // сущностями. Разбирать ввод как разметку (innerHTML) нельзя, а
+        // вырезать теги одним replace недостаточно: после удаления пары
+        // «<…>» соседние куски складываются в новый тег («<scr<x>ipt>»).
+        // Поэтому идём по строке ровно один раз.
+        function stripTags(text) {
+            var out = '';
+            var tag = null;
+            for (var i = 0; i < text.length; i++) {
+                var ch = text.charAt(i);
+                if (tag === null) {
+                    if (ch === '<') { tag = ch; } else { out += ch; }
+                    continue;
+                }
+                tag += ch;
+                if (ch === '>') { tag = null; }
+            }
+            // Незакрытый «<» тегом не является — это обычный текст.
+            return tag === null ? out : out + tag;
+        }
+
+        var NAMED_ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: '\u00a0' };
+
+        // Один проход: раскрытая сущность повторно не разбирается, поэтому
+        // «&amp;lt;» остаётся текстом «&lt;», как и в самом Telegram.
         function decodeEntities(text) {
-            return text
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/&quot;/g, '"')
-                .replace(/&(?:apos|#0?39);/g, "'")
-                .replace(/&nbsp;/g, ' ')
-                .replace(/&#(\d{1,6});/g, function (match, code) {
-                    var number = Number(code);
-                    return number > 0 && number <= 0x10FFFF ? String.fromCodePoint(number) : match;
-                })
-                .replace(/&amp;/g, '&');
+            return text.replace(/&(#\d{1,7}|#x[0-9a-f]{1,6}|[a-z]+);/gi, function (match, body) {
+                if (body.charAt(0) === '#') {
+                    var hex = body.charAt(1) === 'x' || body.charAt(1) === 'X';
+                    var code = hex ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
+                    return code > 0 && code <= 0x10FFFF ? String.fromCodePoint(code) : match;
+                }
+                var name = body.toLowerCase();
+                return Object.prototype.hasOwnProperty.call(NAMED_ENTITIES, name) ? NAMED_ENTITIES[name] : match;
+            });
         }
 
         function updateSignatureCount() {
             if (!signature || !signatureCount) { return; }
-            var length = decodeEntities(signature.value.replace(/<[^>]*>/g, '')).length;
+            var length = decodeEntities(stripTags(signature.value)).length;
             signatureCount.textContent = length + ' / 500';
             signatureCount.classList.toggle('is-over-limit', length > 500);
         }
