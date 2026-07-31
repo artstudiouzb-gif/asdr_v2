@@ -174,16 +174,7 @@ final class NewsController
         Locale::setContentLangs($available);
         $adjacent = News::adjacent($news, $lang);
 
-        $sidebarLayout = $news['sidebar_layout'] ?? 'right_sidebar';
-        $sidebar = null;
-        if ($sidebarLayout === 'left_sidebar') {
-            $sidebar = ['position' => 'left', 'html' => \App\Models\Widget::renderSidebar('left', $lang)];
-        } elseif ($sidebarLayout === 'right_sidebar') {
-            $sidebar = ['position' => 'right', 'html' => \App\Models\Widget::renderSidebar('right', $lang)];
-        }
-        if ($sidebar !== null) {
-            $sidebar['html'] = \App\Core\SecurityHeaders::injectScriptNonce((string) $sidebar['html']);
-        }
+        $sidebar = \App\Core\WidgetRenderer::sidebarFor($news['sidebar_layout'] ?? 'right_sidebar', $lang);
 
         View::render('site/news_show', [
             'news' => $news,

@@ -8,6 +8,7 @@ use App\Models\News;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\TeamMember;
+use App\Models\Widget;
 
 /**
  * Модульный рендер виджетов сайдбара, по аналогии с BlockRenderer.
@@ -42,6 +43,31 @@ final class WidgetRenderer
             'style' => in_array($d['style'] ?? '', self::DESIGN_STYLES, true) ? (string) $d['style'] : 'default',
             'pad' => in_array($d['pad'] ?? '', self::DESIGN_PADS, true) ? (string) $d['pad'] : 'normal',
             'accent' => !empty($d['accent']),
+        ];
+    }
+
+    /**
+     * Колонка виджетов для выбранного макета страницы/новости. Всё, кроме
+     * left_sidebar/right_sidebar, означает «без виджетов». Inline-скрипты
+     * виджета «Произвольный HTML» получают nonce — без него CSP их не
+     * выполнит, и баннер молча ничего не делает.
+     *
+     * @return array{position:string, html:string}|null
+     */
+    public static function sidebarFor(?string $layout, string $lang): ?array
+    {
+        $position = match ($layout) {
+            'left_sidebar' => 'left',
+            'right_sidebar' => 'right',
+            default => null,
+        };
+        if ($position === null) {
+            return null;
+        }
+
+        return [
+            'position' => $position,
+            'html' => SecurityHeaders::injectScriptNonce(Widget::renderSidebar($position, $lang)),
         ];
     }
 

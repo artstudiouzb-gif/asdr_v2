@@ -10,7 +10,6 @@ use App\Core\Locale;
 use App\Core\View;
 use App\Models\Block;
 use App\Models\Page;
-use App\Models\Widget;
 
 final class PageController
 {
@@ -120,16 +119,8 @@ final class PageController
         }
 
         $layoutType = $page['layout_type'] ?? 'no_sidebar';
-        $sidebar = null;
-        if ($layoutType === 'left_sidebar') {
-            $sidebar = ['position' => 'left', 'html' => Widget::renderSidebar('left', $lang)];
-        } elseif ($layoutType === 'right_sidebar') {
-            $sidebar = ['position' => 'right', 'html' => Widget::renderSidebar('right', $lang)];
-        }
-        if ($sidebar !== null) {
-            // Виджет «произвольный HTML» супер-админа тоже может нести <script>.
-            $sidebar['html'] = \App\Core\SecurityHeaders::injectScriptNonce((string) $sidebar['html']);
-        }
+        // Виджеты собираются вне кэша блоков: правка виджета видна сразу.
+        $sidebar = \App\Core\WidgetRenderer::sidebarFor($layoutType, $lang);
 
         View::render('site/page', [
             'page' => $page,
