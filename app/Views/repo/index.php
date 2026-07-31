@@ -167,24 +167,34 @@ $extBadge = static function (array $f): string {
             </div>
 
             <!-- Сортировка -->
-            <div class="rd-sort-group">
+            <?php
+            // Сортировка — обычная GET-форма: адрес собирает браузер, а не JS.
+            // Раньше в option лежал готовый URL, и скрипт переходил по нему —
+            // переход по адресу из разметки это открытый редирект.
+            $sortKeep = array_filter([
+                'q' => $query,
+                'category' => $category > 0 ? $category : null,
+                'ext' => $ext !== '' ? $ext : null,
+            ]);
+            $sorts = [
+                'newest' => 'Сначала новые',
+                'popular' => 'Популярные (скачивания)',
+                'name' => 'По названию (А-Я)',
+                'size' => 'По размеру файла'
+            ];
+            ?>
+            <form class="rd-sort-group" method="get" action="/repo">
                 <span class="rd-filter-label">Сортировка:</span>
-                <select class="rd-sort-select" data-nav-select>
-                    <?php
-                    $sorts = [
-                        'newest' => 'Сначала новые',
-                        'popular' => 'Популярные (скачивания)',
-                        'name' => 'По названию (А-Я)',
-                        'size' => 'По размеру файла'
-                    ];
-                    foreach ($sorts as $sKey => $sLabel):
-                        $urlParams = array_filter(['q' => $query, 'category' => $category > 0 ? $category : null, 'ext' => $ext !== '' ? $ext : null, 'sort' => $sKey]);
-                        $url = '/repo' . (!empty($urlParams) ? '?' . http_build_query($urlParams) : '');
-                    ?>
-                        <option value="<?= htmlspecialchars($url, ENT_QUOTES) ?>"<?= $sort === $sKey ? ' selected' : '' ?>><?= $sLabel ?></option>
+                <?php foreach ($sortKeep as $keepKey => $keepValue): ?>
+                    <input type="hidden" name="<?= htmlspecialchars((string) $keepKey, ENT_QUOTES) ?>" value="<?= htmlspecialchars((string) $keepValue, ENT_QUOTES) ?>">
+                <?php endforeach; ?>
+                <select class="rd-sort-select" name="sort" data-autosubmit>
+                    <?php foreach ($sorts as $sKey => $sLabel): ?>
+                        <option value="<?= htmlspecialchars($sKey, ENT_QUOTES) ?>"<?= $sort === $sKey ? ' selected' : '' ?>><?= $sLabel ?></option>
                     <?php endforeach; ?>
                 </select>
-            </div>
+                <noscript><button type="submit" class="rd-pill">Применить</button></noscript>
+            </form>
         </div>
 
         <?php if (empty($files)): ?>

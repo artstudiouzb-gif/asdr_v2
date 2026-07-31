@@ -24,10 +24,18 @@
         }
     });
 
-    // Сортировка списка: значение опции — адрес страницы.
+    // Сортировка списка: выбор отправляет свою GET-форму. Адрес страницы
+    // собирает браузер из action и полей формы — скрипт не берёт адрес из
+    // разметки и никуда по нему не переходит.
     document.addEventListener('change', function (event) {
-        var select = event.target.closest('select[data-nav-select]');
-        if (select && select.value) { window.location.assign(select.value); }
+        var select = event.target.closest('[data-autosubmit]');
+        if (!select || !select.form) { return; }
+
+        if (typeof select.form.requestSubmit === 'function') {
+            select.form.requestSubmit();
+        } else {
+            select.form.submit();
+        }
     });
 
     // Необратимые действия (отключение 2FA, отвязка Telegram) спрашивают подтверждение.

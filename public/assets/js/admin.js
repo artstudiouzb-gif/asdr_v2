@@ -73,11 +73,14 @@
 
         function showSuccess() {
             if (btnEl) {
-                const oldHtml = btnEl.innerHTML;
-                btnEl.innerHTML = (window.asdrTablerIcon ? window.asdrTablerIcon('check', 15) : '') + ' Скопировано!';
+                // Прежнее содержимое сохраняем узлами: чтение innerHTML с
+                // обратной записью заново разбирает разметку кнопки.
+                const oldNodes = Array.prototype.slice.call(btnEl.childNodes);
+                btnEl.textContent = 'Скопировано!';
                 btnEl.classList.add('is-copy-success');
                 setTimeout(function () {
-                    btnEl.innerHTML = oldHtml;
+                    btnEl.textContent = '';
+                    oldNodes.forEach(function (node) { btnEl.appendChild(node); });
                     btnEl.classList.remove('is-copy-success');
                 }, 2000);
             }
@@ -391,11 +394,46 @@
         var signature = document.querySelector('[data-tg-signature]');
         var signatureCount = document.querySelector('[data-tg-signature-count]');
 
+        // Считаем длину так, как её увидит Telegram: без тегов и с раскрытыми
+        // сущностями. Разбирать ввод как разметку (innerHTML) нельзя, а
+        // вырезать теги одним replace недостаточно: после удаления пары
+        // «<…>» соседние куски складываются в новый тег («<scr<x>ipt>»).
+        // Поэтому идём по строке ровно один раз.
+        function stripTags(text) {
+            var out = '';
+            var tag = null;
+            for (var i = 0; i < text.length; i++) {
+                var ch = text.charAt(i);
+                if (tag === null) {
+                    if (ch === '<') { tag = ch; } else { out += ch; }
+                    continue;
+                }
+                tag += ch;
+                if (ch === '>') { tag = null; }
+            }
+            // Незакрытый «<» тегом не является — это обычный текст.
+            return tag === null ? out : out + tag;
+        }
+
+        var NAMED_ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: '\u00a0' };
+
+        // Один проход: раскрытая сущность повторно не разбирается, поэтому
+        // «&amp;lt;» остаётся текстом «&lt;», как и в самом Telegram.
+        function decodeEntities(text) {
+            return text.replace(/&(#\d{1,7}|#x[0-9a-f]{1,6}|[a-z]+);/gi, function (match, body) {
+                if (body.charAt(0) === '#') {
+                    var hex = body.charAt(1) === 'x' || body.charAt(1) === 'X';
+                    var code = hex ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
+                    return code > 0 && code <= 0x10FFFF ? String.fromCodePoint(code) : match;
+                }
+                var name = body.toLowerCase();
+                return Object.prototype.hasOwnProperty.call(NAMED_ENTITIES, name) ? NAMED_ENTITIES[name] : match;
+            });
+        }
+
         function updateSignatureCount() {
             if (!signature || !signatureCount) { return; }
-            var decoder = document.createElement('textarea');
-            decoder.innerHTML = signature.value.replace(/<[^>]*>/g, '');
-            var length = decoder.value.length;
+            var length = decodeEntities(stripTags(signature.value)).length;
             signatureCount.textContent = length + ' / 500';
             signatureCount.classList.toggle('is-over-limit', length > 500);
         }
@@ -459,6 +497,32 @@
         });
     })();
 
+    /**
+     * Разворачивает <template> репитера: клон содержимого с заменой
+     * плейсхолдера __INDEX__ в атрибутах и текстовых узлах.
+     */
+    function instantiateRepeaterTemplate(template, index) {
+        const fragment = template.content.cloneNode(true);
+        const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+        const marker = /__INDEX__/g;
+        let node = walker.nextNode();
+
+        while (node) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                Array.prototype.forEach.call(node.attributes, function (attr) {
+                    if (attr.value.indexOf('__INDEX__') !== -1) {
+                        attr.value = attr.value.replace(marker, String(index));
+                    }
+                });
+            } else if (node.nodeValue && node.nodeValue.indexOf('__INDEX__') !== -1) {
+                node.nodeValue = node.nodeValue.replace(marker, String(index));
+            }
+            node = walker.nextNode();
+        }
+
+        return fragment;
+    }
+
     document.addEventListener('click', function (event) {
         const copyBtn = event.target.closest('[data-copy-link], [data-copy-text]');
         if (copyBtn) {
@@ -487,10 +551,12 @@
             if (hasStoredIndex) {
                 container.setAttribute('data-repeater-next-index', String(index + 1));
             }
-            const html = template.innerHTML.replace(/__INDEX__/g, String(index));
             const wrapper = document.createElement('div');
             wrapper.className = 'repeater-row';
-            wrapper.innerHTML = html;
+            // Клонируем содержимое <template> и подставляем номер строки в
+            // узлах: чтение innerHTML с обратной записью — это повторный
+            // разбор разметки, на котором данные становятся HTML.
+            wrapper.appendChild(instantiateRepeaterTemplate(template, index));
             container.appendChild(wrapper);
             if (window.__enhanceIconFields) { window.__enhanceIconFields(wrapper); }
             return;
@@ -779,15 +845,26 @@
         function render(items) {
             if (!items.length) { results.innerHTML = '<div class="admin-search__empty">Ничего не найдено</div>'; }
             else {
-                results.innerHTML = items.map(function (r) {
-                    return '<a class="admin-search__item" href="' + r.url + '">' +
-                        '<span class="admin-search__type">' + r.type + '</span>' +
-                        '<span class="admin-search__title"></span></a>';
-                }).join('');
-                // Заголовки вставляем через textContent (без риска XSS).
-                var links = results.querySelectorAll('.admin-search__item');
-                items.forEach(function (r, i) {
-                    links[i].querySelector('.admin-search__title').textContent = r.title;
+                // Строки ответа собираем узлами: подстановка в HTML-строку
+                // позволяла бы выйти из атрибута href и вставить разметку.
+                results.textContent = '';
+                items.forEach(function (r) {
+                    var link = document.createElement('a');
+                    link.className = 'admin-search__item';
+                    // Только собственные адреса панели: чужая схема в href — XSS.
+                    link.setAttribute('href', /^\/(?!\/)/.test(String(r.url || '')) ? r.url : '#');
+
+                    var type = document.createElement('span');
+                    type.className = 'admin-search__type';
+                    type.textContent = r.type || '';
+
+                    var title = document.createElement('span');
+                    title.className = 'admin-search__title';
+                    title.textContent = r.title || '';
+
+                    link.appendChild(type);
+                    link.appendChild(title);
+                    results.appendChild(link);
                 });
             }
             results.hidden = false;
@@ -919,7 +996,9 @@
                     fig.querySelector('.media-modal__filename').textContent = it.name;
                 } else if (!isImage) {
                     fig.classList.add('media-modal__item--file');
-                    fig.innerHTML = '<span class="media-modal__fileicon">' + ext + '</span><span class="media-modal__filename"></span>';
+                    // Расширение берётся из имени файла — вставляем текстом.
+                    fig.innerHTML = '<span class="media-modal__fileicon"></span><span class="media-modal__filename"></span>';
+                    fig.querySelector('.media-modal__fileicon').textContent = ext;
                     fig.querySelector('.media-modal__filename').textContent = it.name;
                 } else {
                     var img = document.createElement('img');
@@ -2861,9 +2940,15 @@
             return;
         }
 
-        var oldHtml = btn.innerHTML;
+        // Содержимое кнопки возвращаем узлами: перезапись innerHTML заново
+        // разбирала бы разметку кнопки как HTML.
+        var oldNodes = Array.prototype.slice.call(btn.childNodes);
+        var restoreButton = function () {
+            btn.textContent = '';
+            oldNodes.forEach(function (node) { btn.appendChild(node); });
+        };
         btn.disabled = true;
-        btn.innerHTML = '⌛ ИИ думает...';
+        btn.textContent = '⌛ ИИ думает...';
 
         var body = new URLSearchParams();
         body.append('title', title);
@@ -2890,7 +2975,7 @@
             });
         }).then(function (data) {
             btn.disabled = false;
-            btn.innerHTML = oldHtml;
+            restoreButton();
             if (data && data.ok) {
                 if (target === 'summary' && data.excerpt) {
                     var excerptField = form.querySelector('[name="excerpt"]');
@@ -2916,7 +3001,7 @@
             }
         }).catch(function (err) {
             btn.disabled = false;
-            btn.innerHTML = oldHtml;
+            restoreButton();
             adminAlert('Ошибка при вызове ИИ: ' + (err.message || err));
         });
     });
