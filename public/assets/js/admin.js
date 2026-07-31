@@ -73,11 +73,14 @@
 
         function showSuccess() {
             if (btnEl) {
-                const oldHtml = btnEl.innerHTML;
-                btnEl.innerHTML = (window.asdrTablerIcon ? window.asdrTablerIcon('check', 15) : '') + ' Скопировано!';
+                // Прежнее содержимое сохраняем узлами: чтение innerHTML с
+                // обратной записью заново разбирает разметку кнопки.
+                const oldNodes = Array.prototype.slice.call(btnEl.childNodes);
+                btnEl.textContent = 'Скопировано!';
                 btnEl.classList.add('is-copy-success');
                 setTimeout(function () {
-                    btnEl.innerHTML = oldHtml;
+                    btnEl.textContent = '';
+                    oldNodes.forEach(function (node) { btnEl.appendChild(node); });
                     btnEl.classList.remove('is-copy-success');
                 }, 2000);
             }
@@ -391,11 +394,26 @@
         var signature = document.querySelector('[data-tg-signature]');
         var signatureCount = document.querySelector('[data-tg-signature-count]');
 
+        // Считаем длину так, как её увидит Telegram: без тегов и с раскрытыми
+        // сущностями. Раньше для раскрытия текст клали в innerHTML — то есть
+        // разбирали пользовательский ввод как разметку; делаем это строкой.
+        function decodeEntities(text) {
+            return text
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&(?:apos|#0?39);/g, "'")
+                .replace(/&nbsp;/g, ' ')
+                .replace(/&#(\d{1,6});/g, function (match, code) {
+                    var number = Number(code);
+                    return number > 0 && number <= 0x10FFFF ? String.fromCodePoint(number) : match;
+                })
+                .replace(/&amp;/g, '&');
+        }
+
         function updateSignatureCount() {
             if (!signature || !signatureCount) { return; }
-            var decoder = document.createElement('textarea');
-            decoder.innerHTML = signature.value.replace(/<[^>]*>/g, '');
-            var length = decoder.value.length;
+            var length = decodeEntities(signature.value.replace(/<[^>]*>/g, '')).length;
             signatureCount.textContent = length + ' / 500';
             signatureCount.classList.toggle('is-over-limit', length > 500);
         }
@@ -2902,9 +2920,15 @@
             return;
         }
 
-        var oldHtml = btn.innerHTML;
+        // Содержимое кнопки возвращаем узлами: перезапись innerHTML заново
+        // разбирала бы разметку кнопки как HTML.
+        var oldNodes = Array.prototype.slice.call(btn.childNodes);
+        var restoreButton = function () {
+            btn.textContent = '';
+            oldNodes.forEach(function (node) { btn.appendChild(node); });
+        };
         btn.disabled = true;
-        btn.innerHTML = '⌛ ИИ думает...';
+        btn.textContent = '⌛ ИИ думает...';
 
         var body = new URLSearchParams();
         body.append('title', title);
@@ -2931,7 +2955,7 @@
             });
         }).then(function (data) {
             btn.disabled = false;
-            btn.innerHTML = oldHtml;
+            restoreButton();
             if (data && data.ok) {
                 if (target === 'summary' && data.excerpt) {
                     var excerptField = form.querySelector('[name="excerpt"]');
@@ -2957,7 +2981,7 @@
             }
         }).catch(function (err) {
             btn.disabled = false;
-            btn.innerHTML = oldHtml;
+            restoreButton();
             adminAlert('Ошибка при вызове ИИ: ' + (err.message || err));
         });
     });

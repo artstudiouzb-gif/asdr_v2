@@ -101,4 +101,13 @@ test('XSS: результаты поиска и карточки медиаби�
     assert_not_contains('template.innerHTML.replace', $js);
     assert_contains('instantiateRepeaterTemplate', $js);
     assert_contains('template.content.cloneNode(true)', $js);
+
+    // Прочитанный из DOM текст не возвращается обратно как разметка: ни при
+    // подсчёте длины подписи, ни при восстановлении содержимого кнопок.
+    assert_not_contains('decoder.innerHTML', $js);
+    assert_contains('function decodeEntities(', $js);
+    assert_false(
+        (bool) preg_match('/=\s*\w+\.innerHTML\b/', $js),
+        'чтение innerHTML с обратной записью — источник алерта CodeQL'
+    );
 });
