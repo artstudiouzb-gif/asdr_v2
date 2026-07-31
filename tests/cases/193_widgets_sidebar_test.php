@@ -76,6 +76,10 @@ test('Новость: колонка виджетов берётся из нас
     assert_not_contains('Widget::renderSidebar', $view);
     assert_contains("\$sidebarWidgets = trim((string) (\$sidebar['html'] ?? ''))", $view);
 
+    // Форма подписки — запасной вариант для пустой колонки. При макете
+    // «Без сайдбара» колонки нет, значит нет и её.
+    assert_contains('} elseif ($sidebar !== null) {', $view);
+
     // Сайт и предпросмотр в админке показывают одну и ту же колонку.
     foreach (['app/Controllers/Site/NewsController.php', 'app/Controllers/Admin/NewsController.php'] as $file) {
         $src = (string) file_get_contents(dirname(__DIR__, 2) . '/' . $file);
