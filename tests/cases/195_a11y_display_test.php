@@ -129,7 +129,7 @@ test('Панель: разметка, стили и скрипт согласо�
 test('Переключатель языков: кириллица стоит рядом с узбекским', function () {
     $header = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/site/_header.php');
 
-    assert_contains("'Ўзбекча (кирилл)'", $header);
+    assert_contains("'Ўзбекча'", $header);
     assert_contains("'/script/cyrl?to=' . rawurlencode(\$uzHref)", $header);
     // На узбекский из кириллицы возвращаемся через тот же переключатель.
     assert_contains("'/script/latn?to=' . rawurlencode(\$href)", $header);

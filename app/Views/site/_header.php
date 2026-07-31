@@ -304,7 +304,7 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
         }
         $uzHref = Locale::url($path, 'uz') . '?' . \App\Core\LocalePreference::QUERY . '=uz';
         $langOptions[] = [
-            'name' => 'Ўзбекча (кирилл)',
+            'name' => 'Ўзбекча',
             'short' => 'ЎЗ',
             'href' => '/script/cyrl?to=' . rawurlencode($uzHref),
             'active' => $uzCyrillicOn,
@@ -312,7 +312,7 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
     }
 
     if ($uzCyrillicOn) {
-        $currentName = 'Ўзбекча (кирилл)';
+        $currentName = 'Ўзбекча';
         $currentCode = 'ЎЗ';
     }
 
