@@ -999,6 +999,14 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'anchor_nav'): ?>
+            <div class="form-field form-field--check">
+                <label><input type="checkbox" name="auto" value="1" <?= !empty($data['auto']) ? 'checked' : '' ?>> Собирать разделы автоматически</label>
+                <span class="form-hint">В навигацию попадут все блоки страницы, у которых заполнен заголовок — в том порядке, в каком они идут. Пункты ниже добавляются перед ними.</span>
+            </div>
+            <div class="form-field form-field--check">
+                <label><input type="checkbox" name="sticky" value="1" <?= !empty($data['sticky']) ? 'checked' : '' ?>> Закреплять при прокрутке</label>
+                <span class="form-hint">Полоса остаётся под шапкой и подсвечивает раздел, который сейчас на экране. Полезно на длинных страницах.</span>
+            </div>
             <div>
                 <label>Пункты навигации (якоря разделов или ссылки)</label>
                 <div data-repeater="items">
@@ -1085,8 +1093,9 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <select id="docs_variant" name="variant">
                     <option value="grid" <?= ($data['variant'] ?? 'grid') === 'grid' ? 'selected' : '' ?>>Карточки документов</option>
                     <option value="links" <?= ($data['variant'] ?? 'grid') === 'links' ? 'selected' : '' ?>>Компактный список ссылок</option>
+                    <option value="acts" <?= ($data['variant'] ?? 'grid') === 'acts' ? 'selected' : '' ?>>Правовые акты (номер и дата)</option>
                 </select>
-                <span class="form-hint">Компактный вариант подходит для короткого списка файлов и внешних материалов.</span>
+                <span class="form-hint">Компактный вариант подходит для короткого списка файлов и внешних материалов. «Правовые акты» показывают номер и дату из полей ниже.</span>
             </div>
             <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все документы"></div>
             <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
@@ -1102,6 +1111,8 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                         <div class="repeater-row">
                             <div class="form-field"><label>Название</label><input type="text" name="items[<?= $i ?>][title]" value="<?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Мета (необязательно)</label><input type="text" name="items[<?= $i ?>][meta]" value="<?= htmlspecialchars($item['meta'] ?? '', ENT_QUOTES) ?>"><span class="form-hint">Формат и размер локального файла определяются автоматически.</span></div>
+                            <div class="form-field"><label>Номер акта</label><input type="text" name="items[<?= $i ?>][number]" value="<?= htmlspecialchars($item['number'] ?? '', ENT_QUOTES) ?>" placeholder="ПФ-6079"><span class="form-hint">Показывается в варианте «Правовые акты».</span></div>
+                            <div class="form-field"><label>Дата акта</label><input type="text" name="items[<?= $i ?>][date]" value="<?= htmlspecialchars($item['date'] ?? '', ENT_QUOTES) ?>" placeholder="12 марта 2026 г."></div>
                             <div class="form-field">
                                 <label>Ссылка на файл</label>
                                 <div class="u-inline-b9bbe540d3">
@@ -1116,6 +1127,8 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <template data-repeater-template="items">
                     <div class="form-field"><label>Название</label><input type="text" name="items[__INDEX__][title]"></div>
                     <div class="form-field"><label>Мета</label><input type="text" name="items[__INDEX__][meta]"></div>
+                    <div class="form-field"><label>Номер акта</label><input type="text" name="items[__INDEX__][number]" placeholder="ПФ-6079"></div>
+                    <div class="form-field"><label>Дата акта</label><input type="text" name="items[__INDEX__][date]" placeholder="12 марта 2026 г."></div>
                     <div class="form-field">
                         <label>Ссылка на файл</label>
                         <div class="u-inline-b9bbe540d3">

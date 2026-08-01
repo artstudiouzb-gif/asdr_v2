@@ -20,6 +20,7 @@ final class AssetCollector
     /** Известные ассеты блоков: ключ -> путь к файлу. */
     private const JS_MAP = [
         'slider' => '/assets/js/blocks/slider.js',
+        'anchor_nav' => '/assets/js/blocks/anchor_nav.js',
         'news' => '/assets/js/news.js',
     ];
 
