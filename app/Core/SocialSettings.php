@@ -267,9 +267,17 @@ final class SocialSettings
         }
 
         $gallery = [];
+        $galleryMeta = [];
         if (!empty($news['id'])) {
             foreach (\App\Models\NewsImage::forNews((int) $news['id']) as $img) {
-                $gallery[] = $abs((string) $img['path']);
+                $url = $abs((string) $img['path']);
+                $gallery[] = $url;
+                // Подпись и автор снимка уходят в rich-пост Telegram
+                // (<figcaption> с <cite>) — редактор вводит их один раз на сайте.
+                $galleryMeta[$url] = [
+                    'caption' => trim((string) ($img['caption'] ?? '')),
+                    'credit' => trim((string) ($img['credit'] ?? '')),
+                ];
             }
         }
 
@@ -287,6 +295,7 @@ final class SocialSettings
             'category' => trim((string) ($news['badge'] ?? '')),
             'date' => $date,
             'gallery' => $gallery,
+            'gallery_meta' => $galleryMeta,
             'langs' => $langs,
         ];
     }

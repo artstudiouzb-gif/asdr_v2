@@ -34,8 +34,14 @@ $crumbs = [
                     <a href="<?= htmlspecialchars((string) $img['image_url'], ENT_QUOTES) ?>" target="_blank" rel="noopener">
                         <?= \App\Core\Media::picture((string) $img['image_url'], (string) ($img['caption'] ?: $album['title']), null, null, '', true, '(max-width: 700px) 100vw, 33vw') ?>
                     </a>
-                    <?php if ($img['caption'] !== ''): ?>
-                        <figcaption><?= htmlspecialchars((string) $img['caption'], ENT_QUOTES) ?></figcaption>
+                    <?php $imgCredit = trim((string) ($img['credit'] ?? '')); ?>
+                    <?php if ($img['caption'] !== '' || $imgCredit !== ''): ?>
+                        <figcaption class="media-caption">
+                            <?= htmlspecialchars((string) $img['caption'], ENT_QUOTES) ?>
+                            <?php if ($imgCredit !== ''): ?>
+                                <span class="media-caption__credit"><?= htmlspecialchars(t('Фото:'), ENT_QUOTES) ?> <?= htmlspecialchars($imgCredit, ENT_QUOTES) ?></span>
+                            <?php endif; ?>
+                        </figcaption>
                     <?php endif; ?>
                 </figure>
             <?php endforeach; ?>

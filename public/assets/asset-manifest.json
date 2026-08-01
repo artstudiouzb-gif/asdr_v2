@@ -11,11 +11,11 @@
       "/assets/css/rich-content.css",
       "/assets/css/a11y.css"
     ],
-    "sourceSha256": "9672b40d663e5fcf3df96950d9415ae0a9e73ae037641bcd7647315a51739027",
-    "sha256": "616cd80fbc36a702b50dc150b7d43fe43818295891c5f7daee902f8e59eedc29",
-    "raw": 326988,
-    "gzip": 55089,
-    "brotli": 43686
+    "sourceSha256": "3f484b5c45b529fad8f02c4f9b1e2babb5ef1cc90b159ab1f16d770b2cb6ab91",
+    "sha256": "a547e2fadb1aa04a4f57d5670d0c58187656bfe23c53685ec1155e920a202cdd",
+    "raw": 327663,
+    "gzip": 55221,
+    "brotli": 43820
   },
   "js": {
     "path": "/assets/js/public.min.js",
@@ -24,10 +24,10 @@
       "/assets/js/frontend.js",
       "/assets/js/forms.js"
     ],
-    "sourceSha256": "a86bbc74bff4159ae528f8def92d70234f0fa7d9d4a0d1d7672f397df9dc27a7",
-    "sha256": "503fe1da99b617dacb05125b7f98419ca0eaccbf85921cfe631039db3de51050",
-    "raw": 56250,
-    "gzip": 14870,
-    "brotli": 13029
+    "sourceSha256": "a7820e18e13a058d37df030218b2ee35d42c39a23d5160b26ccbc6cf5c7b6e16",
+    "sha256": "74a977a2569cadd115116055eeaea7e37945ef703eecce1c9cd4ec97257931a2",
+    "raw": 56667,
+    "gzip": 14995,
+    "brotli": 13148
   }
 }

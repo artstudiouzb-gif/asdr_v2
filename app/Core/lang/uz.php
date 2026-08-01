@@ -385,4 +385,5 @@ return [
     'Скачать архив ZIP' => 'ZIP arxivni yuklab olish',
     'Ничего не найдено' => 'Hech narsa topilmadi',
     'Все результаты' => 'Barcha natijalar',
+    'Фото:' => 'Surat:',
 ];

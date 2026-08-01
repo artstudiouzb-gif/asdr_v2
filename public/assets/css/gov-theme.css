@@ -5560,3 +5560,38 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     .act-card, .act-card__title, .act-card__action { transition: none; }
     .act-card:hover { transform: none; }
 }
+
+/* ==========================================================================
+   Подпись к фотографии — один компонент на галерею новости, фотоленту и
+   альбом. Раньше в каждом месте были свои размеры и капслок: на кириллице
+   «ФОТО: ПРЕСС-СЛУЖБА» кричит и спорит с самой подписью.
+   ========================================================================== */
+.media-caption {
+    margin: 10px 0 0;
+    /* Акцентная грань слева — тот же приём, что у карточек актов: подпись
+       читается как часть фирменного слоя, а не как случайная сноска. */
+    padding-inline-start: 12px;
+    border-inline-start: 2px solid color-mix(in srgb, var(--color-accent, var(--gov-teal)) 50%, transparent);
+    font-family: var(--font-family, 'PT Sans', sans-serif);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--gov-ink);
+}
+/* Автор отделён не размером, а цветом и разделителем: одинаковый кегль
+   держит строку ровной, а глаз всё равно видит границу. */
+.media-caption__credit { color: var(--gov-muted); }
+.media-caption__credit::before {
+    content: "·";
+    margin: 0 6px;
+    color: var(--gov-border);
+}
+/* Без подписи автор начинает строку — точка-разделитель тогда лишняя. */
+.media-caption__credit:first-child::before { content: none; }
+@media (max-width: 560px) {
+    /* На узком экране пара «подпись · автор» не помещается в строку. */
+    .media-caption__credit { display: block; }
+    .media-caption__credit::before { content: none; }
+}
+.newsdetail-photos__figure { margin: 0; }
+.newsdetail-photos__figure .media-caption { margin-top: 8px; }
+.album-photo .media-caption { margin-top: 8px; }
