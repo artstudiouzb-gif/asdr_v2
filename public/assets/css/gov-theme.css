@@ -5519,10 +5519,13 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     font-size: .82rem;
     letter-spacing: .08em;
     text-transform: uppercase;
-    color: var(--gov-teal-text);
+    /* Тёмный текст, а не акцентный: контрастный оттенок акцента рассчитан на
+       чистую поверхность, а на подложке плашки давал 4.18:1 — ниже нормы
+       WCAG AA для мелкого текста. Акцент остаётся в заливке и левой грани. */
+    color: var(--gov-title);
     padding: 4px 10px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 12%, transparent);
+    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 14%, transparent);
 }
 .act-card__date { color: var(--gov-muted); font-size: .84rem; }
 .act-card__title {

@@ -99,6 +99,8 @@ $router->post('/admin/profile/admin-lang', [\App\Controllers\Admin\ProfileContro
 $router->post('/admin/profile/admin-theme', [\App\Controllers\Admin\ProfileController::class, 'updateAdminTheme']);
 $router->post('/admin/profile/telegram/link', [\App\Controllers\Admin\ProfileController::class, 'linkTelegram']);
 $router->post('/admin/profile/telegram/unlink', [\App\Controllers\Admin\ProfileController::class, 'unlinkTelegram']);
+$router->post('/admin/profile/totp/enable', [\App\Controllers\Admin\ProfileController::class, 'enableTotp']);
+$router->post('/admin/profile/totp/disable', [\App\Controllers\Admin\ProfileController::class, 'disableTotp']);
 $router->post('/admin/profile/sessions/revoke-others', [\App\Controllers\Admin\ProfileController::class, 'revokeOthers']);
 $router->post('/admin/profile/sessions/{id}/revoke', [\App\Controllers\Admin\ProfileController::class, 'revokeSession']);
 
@@ -431,6 +433,9 @@ if (\App\Core\Session::hasCookie()
         '/admin/profile',
         '/admin/profile/phone',
         '/admin/profile/telegram/link',
+        // Без этого пункта админ без Telegram не смог бы подключить
+        // приложение-аутентификатор: ограниченная сессия не пускает дальше.
+        '/admin/profile/totp/enable',
         '/admin/telegram',
         '/admin/telegram/bot',
         '/admin/telegram/bot/check',

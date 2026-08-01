@@ -52,10 +52,13 @@ final class Auth
 
         session_regenerate_id(true);
 
-        if (!self::hasCodeChannel($user)) {
+        $totpOn = self::totpChannelAvailable($user);
+        $telegramOn = self::telegramChannelAvailable($user);
+
+        if (!$totpOn && !$telegramOn) {
             // Разрешаем только ограниченную onboarding-сессию: middleware во
             // front controller пропустит её лишь в профиль/настройки, пока
-            // пользователь не подключит Telegram. Админка не должна тихо
+            // пользователь не подключит второй фактор. Админка не должна тихо
             // деградировать до одного пароля.
             self::establishSession($user);
             $_SESSION['2fa_setup_required'] = true;
@@ -70,11 +73,18 @@ final class Auth
         $_SESSION['pending_user_id'] = (int) $user['id'];
         $_SESSION['pending_since'] = time();
 
-        if (!self::sendLoginCode($user)) {
+        // Код в Telegram отправляем, только если этот канал вообще подключён.
+        // Приложение-аутентификатор работает офлайн, поэтому недоступный
+        // Telegram больше не запирает вход.
+        $sent = $telegramOn && self::sendLoginCode($user);
+        if ($telegramOn && !$sent && !$totpOn) {
             self::clearPending();
 
             return ['status' => 'send_failed'];
         }
+
+        $_SESSION['pending_totp'] = $totpOn;
+        $_SESSION['pending_telegram'] = $sent;
 
         return ['status' => 'needs_code'];
     }
@@ -84,6 +94,21 @@ final class Auth
      * бот (telegram_chat_id) или платный шлюз Verification Codes (телефон).
      */
     private static function hasCodeChannel(array $user): bool
+    {
+        return self::totpChannelAvailable($user) || self::telegramChannelAvailable($user);
+    }
+
+    /**
+     * Приложение-аутентификатор: коды считаются на устройстве, поэтому канал
+     * работает без сети и не зависит от чужого сервиса.
+     */
+    private static function totpChannelAvailable(array $user): bool
+    {
+        return (int) ($user['totp_enabled'] ?? 0) === 1 && trim((string) ($user['totp_secret'] ?? '')) !== '';
+    }
+
+    /** Бесплатный бот (telegram_chat_id) или платный шлюз Verification Codes. */
+    private static function telegramChannelAvailable(array $user): bool
     {
         if (TelegramBot::isConfigured() && (int) ($user['telegram_chat_id'] ?? 0) > 0) {
             return true;
@@ -141,17 +166,25 @@ final class Auth
             return false;
         }
 
+        // Пересылать нечего, если код не отправляют, а считают в приложении.
         $user = User::findById((int) $userId);
-        if (!$user || !self::hasCodeChannel($user)) {
+        if (!$user || !self::telegramChannelAvailable($user)) {
             return false;
         }
 
-        return self::sendLoginCode($user);
+        if (!self::sendLoginCode($user)) {
+            return false;
+        }
+
+        $_SESSION['pending_telegram'] = true;
+
+        return true;
     }
 
     /**
-     * Проверка кода из Telegram: hash_equals с хэшем из сессии, срок жизни
-     * 5 минут, перебор ограничен RateLimiter.
+     * Проверка кода второго фактора: TOTP из приложения (считается на
+     * устройстве) или одноразовый код из Telegram (hash_equals с хэшем из
+     * сессии, срок жизни 5 минут). Перебор ограничен RateLimiter.
      */
     public static function completeTwoFactor(string $code): bool
     {
@@ -163,8 +196,7 @@ final class Auth
         }
 
         $user = User::findById((int) $userId);
-        $expectedHash = (string) ($_SESSION['pending_code_hash'] ?? '');
-        if (!$user || $expectedHash === '' || time() > (int) ($_SESSION['pending_code_expires'] ?? 0)) {
+        if (!$user) {
             self::clearPending();
             return false;
         }
@@ -174,9 +206,32 @@ final class Auth
             return false;
         }
 
+        // Принимается код любого включённого канала: из приложения-аутентифи-
+        // катора или одноразовый, отправленный в Telegram.
         $code = preg_replace('/\s+/', '', $code) ?? '';
-        if (!hash_equals($expectedHash, hash('sha256', $code))) {
+        $valid = false;
+        if (!empty($_SESSION['pending_totp']) && trim((string) ($user['totp_secret'] ?? '')) !== '') {
+            $valid = TOTP::verify((string) $user['totp_secret'], $code);
+        }
+        // Отправленный код проверяем и без метки канала: сессии, начатые до
+        // появления TOTP, метки не знают, а настоящий секрет здесь — сам хэш.
+        // Иначе обновление выбило бы всех, кто в этот момент вводил код.
+        $expectedHash = (string) ($_SESSION['pending_code_hash'] ?? '');
+        $codeExpired = $expectedHash !== '' && time() > (int) ($_SESSION['pending_code_expires'] ?? 0);
+        if (!$valid && $expectedHash !== '' && !$codeExpired) {
+            $valid = hash_equals($expectedHash, hash('sha256', $code));
+        }
+
+        if (!$valid) {
+            // Одноразовый код протух — вход начинают заново. У приложения
+            // срока годности нет, поэтому такой вход не сбрасываем.
+            if ($codeExpired && empty($_SESSION['pending_totp'])) {
+                self::clearPending();
+
+                return false;
+            }
             RateLimiter::recordAttempt($identifier, false);
+
             return false;
         }
 
@@ -253,7 +308,9 @@ final class Auth
             $_SESSION['pending_user_id'],
             $_SESSION['pending_since'],
             $_SESSION['pending_code_hash'],
-            $_SESSION['pending_code_expires']
+            $_SESSION['pending_code_expires'],
+            $_SESSION['pending_totp'],
+            $_SESSION['pending_telegram']
         );
     }
 
@@ -357,6 +414,22 @@ final class Auth
     {
         Session::start();
         return (string) ($_SESSION['role'] ?? 'editor');
+    }
+
+    /**
+     * Какими каналами можно подтвердить текущий вход. Нужно странице ввода
+     * кода: «код из Telegram» и «код из приложения» — разные инструкции.
+     *
+     * @return array{totp: bool, telegram: bool}
+     */
+    public static function pendingChannels(): array
+    {
+        Session::start();
+
+        return [
+            'totp' => !empty($_SESSION['pending_totp']),
+            'telegram' => !empty($_SESSION['pending_telegram']),
+        ];
     }
 
     public static function requiresTwoFactorSetup(): bool

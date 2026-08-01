@@ -370,4 +370,18 @@ return [
     'Режим чтения убирает баннеры и колонки: остаётся только текст страницы.' => 'Reading mode removes banners and columns, leaving only the page text.',
     'Сбросить настройки' => 'Reset settings',
     'Настройки сохраняются в этом браузере и действуют на всех страницах сайта.' => 'Settings are stored in this browser and apply across the site.',
+    // Публичные строки, найденные аудитом переводов.
+    'Открыть' => 'Open',
+    'Обложка' => 'Cover',
+    'Выбрать язык' => 'Choose language',
+    'Получайте главные новости и аналитику на почту.' => 'Get key news and analysis by email.',
+    'Аудиозапись' => 'Audio recording',
+    'Аудиоверсия новости' => 'Audio version of the article',
+    'Хронология событий' => 'Timeline of events',
+    'Опрос читателей' => 'Reader poll',
+    'Голосовать' => 'Vote',
+    'Скачать все фото архивом ZIP' => 'Download all photos as a ZIP archive',
+    'Скачать архив ZIP' => 'Download ZIP archive',
+    'Ничего не найдено' => 'Nothing found',
+    'Все результаты' => 'All results',
 ];
