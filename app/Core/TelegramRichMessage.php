@@ -24,8 +24,13 @@ final class TelegramRichMessage
     public const MEDIA_LIMIT = 50;
 
     /**
+     * Собирает пост. Возвращает html документа и список медиа: в разметке
+     * снимки указываются ссылками `tg://photo?id=…`, а сами файлы уходят
+     * отдельным полем `media` — так требует InputRichMessage.
+     *
      * @param list<array{code:string,label:string,title:string,excerpt:string,link:string,read_more:string}> $langs
      * @param list<string> $photos абсолютные https-адреса
+     * @return array{html:string, media:list<array{id:string,media:array{type:string,media:string}}>}
      */
     public static function build(
         array $langs,
@@ -34,9 +39,9 @@ final class TelegramRichMessage
         string $category = '',
         string $date = '',
         string $hashtags = ''
-    ): string {
+    ): array {
         if ($langs === []) {
-            return '';
+            return ['html' => '', 'media' => []];
         }
 
         $esc = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -53,8 +58,14 @@ final class TelegramRichMessage
             $html .= '<p><b>' . $esc(implode(' · ', $meta)) . '</b></p>';
         }
 
+        $media = [];
+        foreach ($photos as $i => $url) {
+            // Идентификатор — только A-Z, a-z, 0-9, _ и -, как требует API.
+            $media[] = ['id' => 'p' . ($i + 1), 'media' => ['type' => 'photo', 'media' => $url]];
+        }
+
         $html .= '<h1>' . $esc($first['title']) . '</h1>';
-        $html .= self::media($photos, $esc);
+        $html .= self::media($media, $esc);
         $html .= self::body($first, $esc);
 
         // Остальные языки — под «развернуть»: пост не растёт вдвое, но текст
@@ -77,27 +88,28 @@ final class TelegramRichMessage
                 . trim($signature) . '</footer>';
         }
 
-        return $html;
+        return ['html' => $html, 'media' => $media];
     }
 
     /**
-     * Одно фото — картинка с подписью, несколько — слайд-шоу: альбом из десяти
-     * снимков в ленте занимает экран, а слайд-шоу листается на месте.
+     * Одно фото — картинкой, несколько — слайд-шоу: альбом из десяти снимков
+     * занимает в ленте целый экран, а слайд-шоу листается на месте.
      *
-     * @param list<string> $photos
+     * @param list<array{id:string,media:array{type:string,media:string}}> $media
      */
-    private static function media(array $photos, callable $esc): string
+    private static function media(array $media, callable $esc): string
     {
-        if ($photos === []) {
+        if ($media === []) {
             return '';
         }
-        if (count($photos) === 1) {
-            return '<img src="' . $esc($photos[0]) . '">';
+        $img = static fn (array $item): string => '<img src="tg://photo?id=' . $esc($item['id']) . '">';
+        if (count($media) === 1) {
+            return $img($media[0]);
         }
 
         $items = '';
-        foreach ($photos as $url) {
-            $items .= '<img src="' . $esc($url) . '">';
+        foreach ($media as $item) {
+            $items .= $img($item);
         }
 
         return '<tg-slideshow>' . $items . '</tg-slideshow>';

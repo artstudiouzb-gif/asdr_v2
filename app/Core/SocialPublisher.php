@@ -226,7 +226,7 @@ final class SocialPublisher
             return null;
         }
 
-        $html = TelegramRichMessage::build(
+        $doc = TelegramRichMessage::build(
             $langs,
             $this->telegramPhotos($post),
             (string) ($cfg['signature'] ?? ''),
@@ -234,14 +234,24 @@ final class SocialPublisher
             (string) ($post['date'] ?? ''),
             (string) ($post['hashtags'] ?? '')
         );
-        if ($html === '' || !TelegramRichMessage::fits($html)) {
+        if ($doc['html'] === '' || !TelegramRichMessage::fits($doc['html'])) {
             return null;
         }
 
+        // Снимки в разметке — ссылками tg://photo?id=…, сами файлы уходят
+        // полем media: прямой https-адрес в <img> API не принимает.
+        $rich = ['html' => $doc['html']];
+        if ($doc['media'] !== []) {
+            $rich['media'] = $doc['media'];
+        }
         $payload = [
             'chat_id' => $cfg['chat_id'],
-            'rich_message' => ['html' => $html],
+            'rich_message' => $rich,
         ];
+        $buttons = self::telegramButtons($post);
+        if ($buttons !== []) {
+            $payload['reply_markup'] = ['inline_keyboard' => [$buttons]];
+        }
         if (!empty($cfg['silent'])) {
             $payload['disable_notification'] = true;
         }

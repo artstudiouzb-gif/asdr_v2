@@ -47,7 +47,18 @@ test('Rich: пост уходит одним sendRichMessage со всей вё�
     assert_same(1, count($calls), 'весь пост — одно сообщение');
     assert_contains('/sendRichMessage', (string) $calls[0]['url']);
 
-    $html = (string) $calls[0]['body']['rich_message']['html'];
+    $rich = $calls[0]['body']['rich_message'];
+    $html = (string) $rich['html'];
+    // Снимки в разметке — ссылками tg://photo?id=…, файлы отдельным полем.
+    assert_contains('<img src="tg://photo?id=p1">', $html);
+    assert_not_contains('<img src="https://', $html);
+    assert_same(3, count($rich['media']), 'обложка и два снимка галереи');
+    assert_same('p1', (string) $rich['media'][0]['id']);
+    assert_same('photo', (string) $rich['media'][0]['media']['type']);
+    assert_same('https://site.uz/cover.jpg', (string) $rich['media'][0]['media']['media']);
+    // sendRichMessage принимает reply_markup — кнопки есть и в новом формате.
+    $buttons = $calls[0]['body']['reply_markup']['inline_keyboard'][0] ?? [];
+    assert_same(2, count($buttons), 'по кнопке на язык');
     assert_contains('<h1>Sarlavha</h1>', $html);
     assert_contains('Мероприятия · 1 августа 2026', $html);
     // Второй язык — под «развернуть», а не вторым экраном текста.
@@ -97,7 +108,7 @@ test('Rich: тихая публикация не будит подписчико
 });
 
 test('Rich: разметка экранируется, чужой HTML внутрь не попадает', function () {
-    $html = TelegramRichMessage::build(
+    $doc = TelegramRichMessage::build(
         [['code' => 'ru', 'label' => 'Русский', 'title' => '<script>alert(1)</script>', 'excerpt' => 'Текст & «кавычки»',
           'link' => 'https://site.uz/news/x', 'read_more' => 'Читать']],
         ['https://site.uz/a.jpg'],
@@ -107,18 +118,18 @@ test('Rich: разметка экранируется, чужой HTML внут�
         ''
     );
 
-    assert_not_contains('<script>', $html);
-    assert_contains('&lt;script&gt;', $html);
-    assert_contains('&amp;', $html);
+    assert_not_contains('<script>', $doc['html']);
+    assert_contains('&lt;script&gt;', $doc['html']);
+    assert_contains('&amp;', $doc['html']);
 });
 
 test('Rich: без языковых блоков формат не применяется', function () {
-    assert_same('', TelegramRichMessage::build([], ['https://site.uz/a.jpg']));
+    assert_same('', TelegramRichMessage::build([], ['https://site.uz/a.jpg'])['html']);
 
     // Предел текста rich-сообщения — 32768 символов против 1024 у подписи.
     $long = TelegramRichMessage::build(
         [['code' => 'ru', 'label' => 'Русский', 'title' => 'T', 'excerpt' => str_repeat('я', 40000), 'link' => '', 'read_more' => '']],
         []
     );
-    assert_false(TelegramRichMessage::fits($long), 'слишком длинный текст откатится на прежний формат');
+    assert_false(TelegramRichMessage::fits($long['html']), 'слишком длинный текст откатится на прежний формат');
 });
