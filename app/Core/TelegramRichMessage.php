@@ -71,7 +71,7 @@ final class TelegramRichMessage
         // Остальные языки — под «развернуть»: пост не растёт вдвое, но текст
         // на месте, и его не нужно дописывать руками из админки.
         foreach ($rest as $lang) {
-            $html .= '<hr>';
+            $html .= '<hr/>';
             $label = trim((string) ($lang['label'] ?? '')) ?: mb_strtoupper((string) ($lang['code'] ?? ''));
             $html .= '<details><summary>' . $esc($label) . '</summary>'
                 . '<h2>' . $esc((string) $lang['title']) . '</h2>'
@@ -79,13 +79,15 @@ final class TelegramRichMessage
                 . '</details>';
         }
 
-        $footer = array_values(array_filter([trim($hashtags), trim($signature)], static fn (string $s): bool => $s !== ''));
-        if ($footer !== []) {
-            // Подпись редактор задаёт с HTML-тегами Telegram — не экранируем её,
-            // хештеги приходят простым текстом.
-            $html .= '<footer>' . $esc(trim($hashtags))
-                . (trim($hashtags) !== '' && trim($signature) !== '' ? '<br>' : '')
-                . trim($signature) . '</footer>';
+        // Хештеги — отдельным абзацем: Telegram сам делает их кликабельными.
+        if (trim($hashtags) !== '') {
+            $html .= '<p>' . $esc(trim($hashtags)) . '</p>';
+        }
+        // Подпись редактор задаёт с HTML-тегами Telegram — не экранируем её.
+        // Своим блоком, а не внутри абзаца: в подписи бывает и цитата, а
+        // <footer> принимает только строчное содержимое.
+        if (trim($signature) !== '') {
+            $html .= '<footer>' . trim($signature) . '</footer>';
         }
 
         return ['html' => $html, 'media' => $media];
@@ -102,7 +104,7 @@ final class TelegramRichMessage
         if ($media === []) {
             return '';
         }
-        $img = static fn (array $item): string => '<img src="tg://photo?id=' . $esc($item['id']) . '">';
+        $img = static fn (array $item): string => '<img src="tg://photo?id=' . $esc($item['id']) . '"/>';
         if (count($media) === 1) {
             return $img($media[0]);
         }

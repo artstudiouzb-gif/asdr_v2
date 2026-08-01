@@ -50,7 +50,7 @@ test('Rich: пост уходит одним sendRichMessage со всей вё�
     $rich = $calls[0]['body']['rich_message'];
     $html = (string) $rich['html'];
     // Снимки в разметке — ссылками tg://photo?id=…, файлы отдельным полем.
-    assert_contains('<img src="tg://photo?id=p1">', $html);
+    assert_contains('<img src="tg://photo?id=p1"/>', $html);
     assert_not_contains('<img src="https://', $html);
     assert_same(3, count($rich['media']), 'обложка и два снимка галереи');
     assert_same('p1', (string) $rich['media'][0]['id']);
@@ -66,8 +66,12 @@ test('Rich: пост уходит одним sendRichMessage со всей вё�
     assert_contains('Русский анонс.', $html);
     // Галерея — слайд-шоу: альбом из снимков занимал бы весь экран ленты.
     assert_contains('<tg-slideshow>', $html);
-    assert_contains('#реформы', $html);
-    assert_contains('<b>Агентство</b>', $html, 'подпись сохраняет свою разметку');
+    assert_contains('<p>#реформы</p>', $html, 'хештеги отдельным абзацем — Telegram сам их линкует');
+    // Подпись — своим блоком: редактор вставляет в неё и цитаты, а <footer>
+    // принимает только строчное содержимое.
+    assert_contains('<footer><b>Агентство</b></footer>', $html);
+    // Разделитель и медиа — в том виде, в каком их показывает документация.
+    assert_contains('<hr/>', $html);
 });
 
 test('Rich: отказ Telegram не срывает публикацию — работает прежний формат', function () {
