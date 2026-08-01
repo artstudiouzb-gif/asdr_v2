@@ -32,6 +32,7 @@ final class ProjectController
             return;
         }
         Locale::setContentLangs($available);
+        Locale::setAlternatePaths(\App\Core\TranslationGroupHelper::publishedPaths('projects', (int) $project['id'], 'projects/'));
 
         View::render('site/project_show', ['project' => $project]);
     }

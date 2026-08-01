@@ -68,6 +68,7 @@ final class PageController
         // Переключатель языков и hreflang показывают только языки, на которых
         // страница реально наполнена (перевод или собственный стек блоков).
         Locale::setContentLangs(Page::availableLangs((int) $page['id']));
+        Locale::setAlternatePaths(\App\Core\TranslationGroupHelper::publishedPaths('pages', (int) $page['id']));
 
         // Скомпилированные блоки (HTML + scoped CSS) кэшируются на диск и
         // сбрасываются при изменении страницы/блоков в админке. Кэш и его TTL
