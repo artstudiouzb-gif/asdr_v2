@@ -268,9 +268,13 @@ $mark = static function (bool $done, bool $started = true): string {
             <label for="tg_silent">Публиковать без звука</label>
         </div>
         <div class="form-field form-field--checkbox">
-            <input type="checkbox" id="tg_buttons" name="buttons" value="1" <?= (string) ($channel['buttons'] ?? '1') !== '0' ? 'checked' : '' ?>>
+            <input type="checkbox" id="tg_buttons" name="buttons" value="1" <?= (string) ($channel['buttons'] ?? '') === '1' ? 'checked' : '' ?>>
             <label for="tg_buttons">Кнопки со ссылкой под постом</label>
-            <span class="form-hint">Ссылка на каждую версию и так стоит в тексте своего блока.</span>
+            <span class="form-hint">
+                По умолчанию выключены: ссылка на каждую версию уже стоит в тексте своего блока,
+                а при двух языках кнопок становится две. К альбому Telegram кнопку не принимает —
+                в обычном формате они появлялись через раз.
+            </span>
         </div>
 
         <div class="form-field">

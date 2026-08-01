@@ -47,19 +47,19 @@ test('Второй язык: подряд по умолчанию, под «ра
     assert_contains('<details><summary>Русский</summary>', $details);
 });
 
-test('Кнопки под постом отключаются настройкой', function () {
+test('Кнопок под постом нет, пока их не включат настройкой', function () {
     $post = ['message' => 'Sarlavha', 'title' => 'Sarlavha', 'link' => 'https://site.uz/news/x',
              'image_url' => '', 'gallery' => [], 'langs' => meta_langs()];
     $seen = [];
     $http = function ($m, $u, $b, $h) use (&$seen) { $seen = json_decode($b, true); return ['status' => 200, 'body' => '{"ok":true,"result":{"message_id":5}}']; };
 
-    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'buttons' => '0'], $post);
-    assert_true(!isset($seen['reply_markup']), 'кнопок нет');
+    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c'], $post);
+    assert_true(!isset($seen['reply_markup']), 'по умолчанию кнопок нет');
     // Ссылки при этом остаются в тексте своих языковых блоков.
     assert_contains('https://site.uz/ru/news/x', (string) $seen['rich_message']['html']);
 
-    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c'], $post);
-    assert_same(2, count($seen['reply_markup']['inline_keyboard'][0] ?? []), 'по умолчанию кнопки на месте');
+    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'buttons' => '1'], $post);
+    assert_same(2, count($seen['reply_markup']['inline_keyboard'][0] ?? []), 'галочка возвращает кнопки');
 });
 
 test('Классический пост: дата над заголовком своего языка', function () {
