@@ -364,6 +364,27 @@ final class SocialSettings
     }
 
     /**
+     * Языки сайта, версии на которых в пост не попадут: перевод не заполнен.
+     * Считаем той же функцией, что собирает пост, — иначе подсказка редактору
+     * рано или поздно разойдётся с тем, что уходит в канал.
+     *
+     * @param array<string,mixed> $news
+     * @return list<string> коды языков
+     */
+    public static function missingPostLangs(array $news): array
+    {
+        if (!Database::isConnected() || empty($news['id'])) {
+            return [];
+        }
+        $present = array_column(self::languageBlocks($news, AppUrl::base()), 'code');
+
+        return array_values(array_filter(
+            Language::activeCodes(),
+            static fn (string $code): bool => !in_array($code, $present, true)
+        ));
+    }
+
+    /**
      * Ставит новость в очередь публикации в готовые сети. Если задан $only —
      * только в эту сеть (кнопка конкретной соцсети), иначе во все готовые.
      */
