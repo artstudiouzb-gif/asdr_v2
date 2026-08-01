@@ -322,13 +322,17 @@ final class SocialSettings
     private static function languageBlocks(array $news, string $base): array
     {
         $default = Language::defaultCode();
-        $slug = rawurlencode((string) $news['slug']);
         // Метки языков и надпись «читать дальше» на соответствующем языке.
         $meta = [
             'uz' => ['label' => "O‘zbekcha", 'read_more' => "Saytda o‘qish →"],
             'ru' => ['label' => 'Русский', 'read_more' => 'Читать на сайте →'],
             'en' => ['label' => 'English', 'read_more' => 'Read on site →'],
         ];
+
+        // Связанные записи группы переводов: у каждой свой slug и свой текст.
+        $siblings = (!empty($news['id']) && Database::isConnected())
+            ? News::groupRowsByLang((int) $news['id'])
+            : [];
 
         $activeCodes = Database::isConnected() ? Language::activeCodes() : ['uz', 'ru', 'en'];
         // Порядок языков в посте: сначала основной (узбекский), затем остальные
@@ -342,6 +346,8 @@ final class SocialSettings
         foreach ($activeCodes as $code) {
             if ($code === $default) {
                 $row = $news;
+            } elseif (isset($siblings[$code])) {
+                $row = $siblings[$code];
             } else {
                 // Черновая полезная нагрузка без id (например, предпросмотр
                 // или unit-тест) не имеет переводов в БД. Не обращаемся к
@@ -368,7 +374,10 @@ final class SocialSettings
                 'label' => $meta[$code]['label'] ?? mb_strtoupper($code),
                 'title' => $title,
                 'excerpt' => trim((string) ($row['excerpt'] ?? '')),
-                'link' => $base . ($code === $default ? '' : '/' . $code) . '/news/' . $slug,
+                // У связанной записи свой адрес — ведём на него, а не на
+                // перевод базового слага.
+                'link' => $base . ($code === $default ? '' : '/' . $code) . '/news/'
+                    . rawurlencode((string) ($row['slug'] ?? $news['slug'])),
                 'read_more' => $meta[$code]['read_more'] ?? ('Read (' . strtoupper($code) . ') →'),
                 'category' => trim((string) ($row['badge'] ?? '')),
                 'date' => $published !== '' ? DateFormatter::long($published, $code) : '',
@@ -405,6 +414,12 @@ final class SocialSettings
      */
     public static function enqueueForNews(int $newsId, ?string $only = null, bool $force = false): int
     {
+        // Публикуем от имени записи основного языка: у связанных переводов
+        // своя строка в news, и кнопка у русской версии ставила в очередь
+        // вторую задачу — в канал уходило два поста вместо одного.
+        if (Database::isConnected()) {
+            $newsId = News::socialPrimaryId($newsId);
+        }
         $count = 0;
         foreach (self::readyNetworks() as $network) {
             if ($only !== null && $network !== $only) {
