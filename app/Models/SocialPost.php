@@ -23,24 +23,29 @@ final class SocialPost
      * $force — явное «опубликовать заново» из админки: человек нажал кнопку
      * осознанно, и в канал уйдёт ещё одно сообщение.
      */
-    public static function enqueue(int $newsId, string $network, bool $force = false): void
+    /**
+     * @param string|null $scheduledAt «Y-m-d H:i:s» — не отправлять раньше
+     *     этого времени; null — при ближайшем запуске воркера.
+     */
+    public static function enqueue(int $newsId, string $network, bool $force = false, ?string $scheduledAt = null): void
     {
         $stmt = Database::pdo()->prepare(
             $force
-                ? "INSERT INTO social_posts (news_id, network, status, created_at)
-                   VALUES (:nid, :net, 'pending', NOW())
+                ? "INSERT INTO social_posts (news_id, network, status, scheduled_at, created_at)
+                   VALUES (:nid, :net, 'pending', :sched, NOW())
                    ON DUPLICATE KEY UPDATE status = 'pending', attempts = 0,
                       remote_id = NULL, last_error = NULL, sent_at = NULL,
-                      locked_until = NULL, created_at = NOW()"
-                : "INSERT INTO social_posts (news_id, network, status, created_at)
-                   VALUES (:nid, :net, 'pending', NOW())
+                      locked_until = NULL, scheduled_at = VALUES(scheduled_at), created_at = NOW()"
+                : "INSERT INTO social_posts (news_id, network, status, scheduled_at, created_at)
+                   VALUES (:nid, :net, 'pending', :sched, NOW())
                    ON DUPLICATE KEY UPDATE
                       status = IF(status = 'sent', 'sent', 'pending'),
                       attempts = IF(status = 'sent', attempts, 0),
                       last_error = IF(status = 'sent', last_error, NULL),
-                      locked_until = IF(status = 'sent', locked_until, NULL)"
+                      locked_until = IF(status = 'sent', locked_until, NULL),
+                      scheduled_at = IF(status = 'sent', scheduled_at, VALUES(scheduled_at))"
         );
-        $stmt->execute([':nid' => $newsId, ':net' => $network]);
+        $stmt->execute([':nid' => $newsId, ':net' => $network, ':sched' => $scheduledAt]);
     }
 
     /** @return array<int, array<string, mixed>> */
@@ -136,7 +141,7 @@ final class SocialPost
      * раз публиковалось и в какие сети.
      *
      * @param array<int, int> $newsIds
-     * @return array<int, array{sent:int, pending:int, failed:int, last_sent:?string, networks:array<int,string>}>
+     * @return array<int, array{sent:int, pending:int, failed:int, last_sent:?string, networks:array<int,string>, scheduled:?string}>
      */
     public static function statusForNewsIds(array $newsIds): array
     {
@@ -147,7 +152,7 @@ final class SocialPost
 
         $in = implode(',', array_fill(0, count($ids), '?'));
         $stmt = Database::pdo()->prepare(
-            "SELECT news_id, network, status, sent_at FROM social_posts
+            "SELECT news_id, network, status, sent_at, scheduled_at FROM social_posts
              WHERE news_id IN ($in)"
         );
         $stmt->execute($ids);
@@ -156,7 +161,7 @@ final class SocialPost
         foreach ($stmt->fetchAll() as $row) {
             $nid = (int) $row['news_id'];
             if (!isset($out[$nid])) {
-                $out[$nid] = ['sent' => 0, 'pending' => 0, 'failed' => 0, 'last_sent' => null, 'networks' => []];
+                $out[$nid] = ['sent' => 0, 'pending' => 0, 'failed' => 0, 'last_sent' => null, 'networks' => [], 'scheduled' => null];
             }
             $status = (string) $row['status'];
             if ($status === 'sent') {
@@ -170,6 +175,12 @@ final class SocialPost
                 $out[$nid]['failed']++;
             } else {
                 $out[$nid]['pending']++;
+                // Ближайшее запланированное время: редактор должен видеть в
+                // списке, что пост не «завис», а ждёт своего часа.
+                $scheduled = $row['scheduled_at'] ?? null;
+                if ($scheduled !== null && ($out[$nid]['scheduled'] === null || $scheduled < $out[$nid]['scheduled'])) {
+                    $out[$nid]['scheduled'] = (string) $scheduled;
+                }
             }
         }
 

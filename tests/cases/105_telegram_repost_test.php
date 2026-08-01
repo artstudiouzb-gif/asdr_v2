@@ -125,7 +125,11 @@ test('Повторная публикация: кнопка в админке о
 
 test('Кнопка публикации в админке вызывает enqueueForNews с force', function () {
     $src = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Controllers/Admin/NewsController.php');
-    assert_contains("enqueueForNews((int) \$news['id'], \$only, true)", $src);
-    // А автопубликация при сохранении новости — без force.
-    assert_contains('enqueueForNews($id);', $src);
+    assert_contains("enqueueForNews((int) \$news['id'], \$only, true, \$scheduledAt)", $src);
+    // А автопубликация при сохранении новости — без force: правки не должны
+    // плодить посты. Четвёртым аргументом идёт время отложенной отправки.
+    assert_contains('enqueueForNews(
+                    $id,
+                    null,
+                    false,', $src);
 });

@@ -131,6 +131,12 @@ $langs = Language::active();
                                     </form>
                                 <?php endforeach; ?>
                             </div>
+                            <?php if ($ss !== null && !empty($ss['scheduled'])): ?>
+                                <?php // Пост не завис — ждёт своего времени. ?>
+                                <span class="news-social__meta" title="Отложенная публикация">
+                                    ⏱ <?= htmlspecialchars(substr((string) $ss['scheduled'], 0, 16), ENT_QUOTES) ?>
+                                </span>
+                            <?php endif; ?>
                         <?php else: ?>
                             <span class="news-social__meta">не настроено</span>
                         <?php endif; ?>

@@ -458,10 +458,36 @@ final class SocialSettings
     }
 
     /**
+     * Время отложенной отправки из формы админки в формат БД.
+     * null — отправить при ближайшем запуске воркера. Прошедшее время тоже
+     * даёт null: «опубликовать вчера» означает «опубликовать сейчас», а не
+     * молча зависшую задачу.
+     */
+    public static function normalizeScheduleTime(string $raw, ?int $now = null): ?string
+    {
+        $raw = trim($raw);
+        if ($raw === '') {
+            return null;
+        }
+        // datetime-local отдаёт «2026-08-05T09:30», без секунд.
+        $ts = strtotime(str_replace('T', ' ', $raw));
+        $now = $now ?? time();
+        if ($ts === false || $ts <= $now) {
+            return null;
+        }
+        // Дальше года — почти наверняка опечатка в дате.
+        if ($ts > $now + 31536000) {
+            return null;
+        }
+
+        return date('Y-m-d H:i:s', $ts);
+    }
+
+    /**
      * Ставит новость в очередь публикации в готовые сети. Если задан $only —
      * только в эту сеть (кнопка конкретной соцсети), иначе во все готовые.
      */
-    public static function enqueueForNews(int $newsId, ?string $only = null, bool $force = false): int
+    public static function enqueueForNews(int $newsId, ?string $only = null, bool $force = false, ?string $scheduledAt = null): int
     {
         // Публикуем от имени записи основного языка: у связанных переводов
         // своя строка в news, и кнопка у русской версии ставила в очередь
@@ -474,7 +500,7 @@ final class SocialSettings
             if ($only !== null && $network !== $only) {
                 continue;
             }
-            SocialPost::enqueue($newsId, $network, $force);
+            SocialPost::enqueue($newsId, $network, $force, $scheduledAt);
             $count++;
         }
 

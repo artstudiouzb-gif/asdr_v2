@@ -609,6 +609,12 @@ document.addEventListener('click', function(e) {
                 <?= \App\Core\AdminUi::icon('send', 14) ?>
                 <span>Опубликовать в соцсетях</span>
             </label>
+            <label class="u-inline-7519b07094 news-schedule" title="Пусто — отправить при ближайшем запуске воркера">
+                <?= \App\Core\AdminUi::icon('clock', 14) ?>
+                <span>Отложить до</span>
+                <input type="datetime-local" name="schedule_at" form="news_edit_form"
+                       min="<?= htmlspecialchars(date('Y-m-d\TH:i'), ENT_QUOTES) ?>">
+            </label>
             <?php if ($isEdit): ?>
                 <a href="/admin/news/<?= (int) $news['id'] ?>/social-preview" class="btn btn--sm btn--secondary"
                    target="_blank" rel="noopener"
