@@ -326,6 +326,10 @@ final class TelegramController
             exit;
         }
         Setting::set('telegram_notify_chat_ids', implode(', ', $chatIds));
+        Setting::set(
+            \App\Core\WeeklyRoundup::ENABLED_KEY,
+            !empty($_POST['telegram_roundup']) ? '1' : '0'
+        );
         $gatewayToken = mb_substr(trim((string) ($_POST['telegram_gateway_token'] ?? '')), 0, 10000);
         if (!empty($_POST['clear_telegram_gateway_token'])) {
             Setting::set('telegram_gateway_token', '');

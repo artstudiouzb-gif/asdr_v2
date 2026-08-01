@@ -371,6 +371,27 @@ $mark = static function (bool $done, bool $started = true): string {
             </span>
         </div>
 
+        <div class="form-field form-field--checkbox">
+            <input type="checkbox" id="tg_roundup" name="telegram_roundup" value="1"
+                   <?= \App\Core\WeeklyRoundup::isEnabled() ? 'checked' : '' ?>>
+            <label for="tg_roundup">Итоги недели одним постом в канал</label>
+            <?php
+            $roundupItems = array_sum(array_map('count', \App\Core\WeeklyRoundup::collect()));
+            $roundupRoot = defined('APP_ROOT') ? APP_ROOT : dirname(__DIR__, 4);
+            ?>
+            <span class="form-hint">
+                Раз в неделю в канал уходит список новостей за семь дней со ссылками, на всех языках,
+                где они выходили. Пустую неделю пропускаем молча.
+                <?php if ($roundupItems > 0): ?>
+                    Сейчас в сводку попало бы <strong><?= (int) $roundupItems ?></strong> материал(ов).
+                <?php else: ?>
+                    Сейчас за неделю новостей нет — сводка не ушла бы.
+                <?php endif; ?>
+                <br>Задание в Cron (понедельник, 09:00):<br>
+                <code>0 9 * * 1 php <?= htmlspecialchars($roundupRoot, ENT_QUOTES) ?>/app/Console/weekly_roundup.php &gt;&gt; <?= htmlspecialchars($roundupRoot, ENT_QUOTES) ?>/storage/logs/weekly_roundup.log 2&gt;&amp;1</code>
+            </span>
+        </div>
+
         <div class="form-field">
             <label>Сторож тишины</label>
             <?php
