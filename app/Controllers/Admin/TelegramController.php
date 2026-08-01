@@ -190,6 +190,29 @@ final class TelegramController
         exit;
     }
 
+    /**
+     * Отправить итоги недели прямо сейчас. Кнопка, а не только расписание:
+     * редактор сам выбирает момент — например, дописав коллаж на обложку.
+     */
+    public function sendRoundup(): void
+    {
+        Auth::requireSuperAdmin();
+        Csrf::verifyRequest();
+
+        // Кнопку нажал человек — отправляем и повторно, и при выключенном
+        // расписании: это осознанное действие.
+        $res = \App\Core\WeeklyRoundup::send(null, null, true);
+
+        if ($res['sent']) {
+            Flash::success('Итоги недели отправлены в канал: материалов в сводке — ' . $res['items'] . '.');
+        } else {
+            Flash::error('Сводка не отправлена. ' . $res['reason']);
+        }
+
+        header('Location: /admin/telegram#telegram-extras');
+        exit;
+    }
+
     /** Шаг 2: подтверждение привязки своего аккаунта. */
     public function link(): void
     {
@@ -330,6 +353,17 @@ final class TelegramController
             \App\Core\WeeklyRoundup::ENABLED_KEY,
             !empty($_POST['telegram_roundup']) ? '1' : '0'
         );
+        // Обложка сводки: загрузка файла или адрес из медиабиблиотеки.
+        // Пустое присланное поле — явная очистка (кнопка «×»).
+        $cover = \App\Core\ImageField::resolve(
+            'telegram_roundup_image_file',
+            'telegram_roundup_image',
+            (string) Setting::get(\App\Core\WeeklyRoundup::COVER_KEY, ''),
+            (int) Auth::id()
+        );
+        if ($cover !== null) {
+            Setting::set(\App\Core\WeeklyRoundup::COVER_KEY, $cover);
+        }
         $gatewayToken = mb_substr(trim((string) ($_POST['telegram_gateway_token'] ?? '')), 0, 10000);
         if (!empty($_POST['clear_telegram_gateway_token'])) {
             Setting::set('telegram_gateway_token', '');
