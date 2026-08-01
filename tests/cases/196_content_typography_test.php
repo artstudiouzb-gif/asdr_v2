@@ -3,23 +3,43 @@
 declare(strict_types=1);
 
 /**
- * Типографика контентных страниц: мера строки и вес ссылок.
+ * Типографика контентных страниц: ширина текста и вес ссылок.
  *
- * Без ограничения ширины строка на широком экране уходит за 120 знаков при
- * норме 65–80, и глаз теряет начало следующей строки. Ограничение вешаем на
- * сам текст, а не на контейнер, чтобы картинки и таблицы оставались широкими.
+ * Мера строки в 65–80 знаков — типографская норма, но владелец выбрал полную
+ * ширину колонки: страницы агентства это в основном перечни и документы, и
+ * узкая колонка оставляла справа пустое поле. Токен --rich-measure остался у
+ * заголовка текстового блока.
  */
 
-test('Контент: у текста задана мера строки', function () {
+test('Контент: ширину текста новости не ограничиваем', function () {
     $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/rich-content.css');
 
-    assert_contains('--rich-measure:', $css);
-    assert_contains(':where(.rich-content) > :is(p, ul, ol, dl, h2, h3, h4, h5, h6, blockquote)', $css);
-    assert_contains('max-width: var(--rich-measure);', $css);
+    assert_not_contains(':where(.rich-content) > :is(p, ul, ol, dl, h2, h3, h4, h5, h6, blockquote)', $css);
 
-    // Заголовок текстового блока держит ту же ширину, что и текст под ним.
+    // Токен остаётся: им пользуется заголовок текстового блока.
+    assert_contains('--rich-measure:', $css);
     $theme = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
     assert_contains('.block-text__title { max-width: var(--rich-measure, 72ch); }', $theme);
+});
+
+test('Лид новости набран как текст статьи и занимает контейнер', function () {
+    $theme = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $pos = (int) strpos($theme, '.newsdetail__lead {');
+    assert_true($pos > 0, 'правило лида на месте');
+    $rule = substr($theme, $pos, 460);
+
+    // Ширина — по контейнеру: раньше лид обрывался на 52ch и выглядел вдвое
+    // уже текста под ним.
+    assert_not_contains('max-width', $rule);
+    assert_contains('font-size: 1.025rem;', $rule);
+    assert_contains('line-height: 1.6;', $rule);
+
+    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/rich-content.css');
+    // Первый абзац больше не набирается «вводкой»: лид у новости уже есть в
+    // шапке, и один и тот же текст выглядел на странице дважды и по-разному.
+    assert_not_contains('.newsdetail-article__content.rich-content > p:first-child {', $css);
+    // Полужирный — выделение, а не смена цвета.
+    assert_contains(':where(.rich-content) strong { color: inherit;', $css);
 });
 
 test('Контент: маркер списка — восьмиконечная звезда', function () {

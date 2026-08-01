@@ -90,7 +90,7 @@ final class SocialPublisher
             : ($photos !== []
                 ? self::telegramCaption($post, (string) ($cfg['signature'] ?? ''), self::TG_CAPTION_LIMIT, $esc)
                 : $full);
-        $buttons = self::telegramButtons($post);
+        $buttons = self::telegramButtons($post, $cfg);
 
         // Токен используется в URL как есть: rawurlencode ломал бы двоеточие
         // (12345:AAH… → 12345%3AAAH…), и Bot API отвечал бы 404 «Not Found».
@@ -194,8 +194,15 @@ final class SocialPublisher
      * @param array<string,mixed> $post
      * @return list<array{text:string,url:string}>
      */
-    private static function telegramButtons(array $post): array
+    private static function telegramButtons(array $post, array $cfg = []): array
     {
+        // Ссылка на каждую версию уже стоит в тексте своего языкового блока,
+        // поэтому кнопки можно отключить: в посте, который редактор потом
+        // дорабатывает руками, они лишний ряд.
+        if ((string) ($cfg['buttons'] ?? '1') === '0') {
+            return [];
+        }
+
         $buttons = [];
         foreach ((array) ($post['langs'] ?? []) as $lang) {
             $url = trim((string) ($lang['link'] ?? ''));
@@ -233,7 +240,8 @@ final class SocialPublisher
             (string) ($post['category'] ?? ''),
             (string) ($post['date'] ?? ''),
             (string) ($post['hashtags'] ?? ''),
-            (array) ($post['gallery_meta'] ?? [])
+            (array) ($post['gallery_meta'] ?? []),
+            (string) ($cfg['second_lang'] ?? '') === 'details' ? 'details' : 'inline'
         );
         if ($doc['html'] === '' || !TelegramRichMessage::fits($doc['html'])) {
             return null;
@@ -249,7 +257,7 @@ final class SocialPublisher
             'chat_id' => $cfg['chat_id'],
             'rich_message' => $rich,
         ];
-        $buttons = self::telegramButtons($post);
+        $buttons = self::telegramButtons($post, $cfg);
         if ($buttons !== []) {
             $payload['reply_markup'] = ['inline_keyboard' => [$buttons]];
         }
@@ -466,25 +474,28 @@ final class SocialPublisher
                 ? "\n\n" . '<a href="' . $esc((string) $l['link']) . '">' . $esc((string) $l['read_more']) . '</a>'
                 : '';
         };
-        // Рубрика и дата — служебной строкой сверху, хештеги — в самом низу.
-        $head = '';
-        $meta = array_values(array_filter([
-            trim((string) ($post['category'] ?? '')),
-            trim((string) ($post['date'] ?? '')),
-        ], static fn (string $v): bool => $v !== ''));
-        if ($meta !== []) {
-            $head = '<b>' . $esc(implode(' · ', $meta)) . '</b>' . "\n\n";
-        }
+        // Рубрика и дата — служебной строкой над заголовком своего языка:
+        // они переводятся, и под русским заголовком не должно стоять
+        // «1-avgust, 2026-yil». Хештеги — в самом низу, они общие.
+        $metaFor = static function (array $l) use ($esc, $post): string {
+            $meta = array_values(array_filter([
+                trim((string) ($l['category'] ?? $post['category'] ?? '')),
+                trim((string) ($l['date'] ?? $post['date'] ?? '')),
+            ], static fn (string $v): bool => $v !== ''));
+
+            return $meta === [] ? '' : '<b>' . $esc(implode(' · ', $meta)) . '</b>' . "\n\n";
+        };
         $hashtags = trim((string) ($post['hashtags'] ?? ''));
         $tail = ($hashtags !== '' ? "\n\n" . $esc($hashtags) : '')
             . ($signature !== '' ? "\n\n" . $signature : '');
 
         // Считаем фиксированную часть: заголовки, ссылки, разделители, подпись.
-        $fixed = mb_strlen(strip_tags($head)) + mb_strlen(strip_tags($tail))
+        $fixed = mb_strlen(strip_tags($tail))
             + (count($langs) - 1) * mb_strlen(strip_tags($sep));
         foreach ($langs as $l) {
             $fixed += mb_strlen((string) $l['title']) + 2; // +2 — перенос строки после заголовка
             $fixed += mb_strlen(strip_tags($linkFor($l)));
+            $fixed += mb_strlen(strip_tags($metaFor($l)));
         }
         $available = max(0, $limit - $fixed - 4);
         $perLang = count($langs) > 0 ? (int) floor($available / count($langs)) : 0;
@@ -498,12 +509,13 @@ final class SocialPublisher
             } elseif ($perLang <= 0) {
                 $excerpt = '';
             }
-            $parts[] = ($title !== '' ? '<b>' . $esc($title) . '</b>' : '')
+            $parts[] = $metaFor($l)
+                . ($title !== '' ? '<b>' . $esc($title) . '</b>' : '')
                 . ($excerpt !== '' ? "\n\n" . $esc($excerpt) : '')
                 . $linkFor($l);
         }
 
-        return $head . implode($sep, $parts) . $tail;
+        return implode($sep, $parts) . $tail;
     }
 
     /**

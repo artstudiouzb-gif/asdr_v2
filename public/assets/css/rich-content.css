@@ -26,11 +26,9 @@
     text-wrap: pretty;
 }
 
-/* Ширину ограничиваем самому тексту, а не контейнеру: картинки, таблицы и
-   врезки по-прежнему занимают всю доступную ширину. */
-:where(.rich-content) > :is(p, ul, ol, dl, h2, h3, h4, h5, h6, blockquote) {
-    max-width: var(--rich-measure);
-}
+/* Мера строки тексту новости не задаётся: владелец выбрал полную ширину
+   колонки. Токен --rich-measure остаётся — им пользуется заголовок
+   текстового блока. */
 
 :where(.rich-content) > :first-child { margin-block-start: 0; }
 :where(.rich-content) > :last-child { margin-block-end: 0; }
@@ -57,7 +55,9 @@
 :where(.rich-content) h6 { font-size: 1rem; }
 
 :where(.rich-content) p { margin-block: 0 1.1em; }
-:where(.rich-content) strong { color: var(--rich-title); font-weight: 700; }
+/* Полужирный — это выделение, а не смена цвета: синий <strong> в тексте
+   читается как ссылка, и абзац с ним выбивался из остальной статьи. */
+:where(.rich-content) strong { color: inherit; font-weight: 700; }
 :where(.rich-content) small { color: var(--rich-muted); font-size: .875em; }
 :where(.rich-content) sub,
 :where(.rich-content) sup { position: relative; font-size: .72em; line-height: 0; }
@@ -286,11 +286,9 @@
 :where(.rich-content) hr { margin-block: 2em; border: 0; border-block-start: 1px solid var(--rich-border); }
 :where(.rich-content) mark { padding-inline: .15em; background: color-mix(in srgb, #ffd84d 52%, transparent); color: inherit; }
 
-.newsdetail-article__content.rich-content > p:first-child {
-    color: var(--rich-title);
-    font-size: 1.1rem;
-    font-weight: 500;
-}
+/* Первый абзац новости раньше набирался крупнее и синим — «вводкой». Но лид
+   у новости уже есть в шапке, и тот же текст выглядел на странице дважды и
+   по-разному. Текст статьи набран единообразно. */
 
 @media (max-width: 720px) {
     :where(.rich-content) { font-size: 1rem; }

@@ -1352,6 +1352,31 @@
         });
     })();
 
+    // --- Лид новости: счётчик с порогами, по которым его режут ---
+    // Карточка ленты обрезает лид на 140 знаках, описание для поисковика — на
+    // 160. Редактор этих границ не видит и узнаёт о них по многоточию на
+    // готовой странице.
+    (function initLeadCounter() {
+        var field = document.querySelector('[data-lead-field]');
+        var out = document.querySelector('[data-lead-count]');
+        if (!field || !out) { return; }
+
+        function render() {
+            var len = field.value.trim().length;
+            if (len === 0) {
+                out.textContent = '';
+                return;
+            }
+            var note = len > 160
+                ? ' — в карточке ленты и в описании для поисковика будет обрезан'
+                : (len > 140 ? ' — в карточке ленты будет обрезан' : '');
+            out.textContent = 'Знаков: ' + len + note + '.';
+        }
+
+        field.addEventListener('input', render);
+        render();
+    })();
+
     // --- Превью выбранных файлов до сохранения ---
     // Снимки галереи появлялись в форме только после сохранения: редактор не
     // видел ни что выбрал, ни сколько кадров, ни того, что выбор вообще
