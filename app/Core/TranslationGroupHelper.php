@@ -168,30 +168,14 @@ final class TranslationGroupHelper
 
     /**
      * Пути опубликованных языковых версий записи: код языка → путь без
-     * языкового префикса. У связанной записи-перевода свой slug, и общий
-     * адрес `/uz/news/{русский-слаг}` отвечал редиректом — лишний шаг и для
-     * поисковика (hreflang), и для читателя (переключатель языков).
+     * языкового префикса. Учитывает оба механизма перевода — реализация
+     * общая, в App\Core\Translations.
      *
      * @return array<string,string>
      */
     public static function publishedPaths(string $table, int $recordId, string $prefix = ''): array
     {
-        $paths = [];
-        foreach (self::getTranslations($table, $recordId) as $code => $row) {
-            if (($row['status'] ?? '') !== 'published' || !empty($row['deleted_at'])) {
-                continue;
-            }
-            if (!empty($row['is_home'])) {
-                $paths[(string) $code] = '/';
-                continue;
-            }
-            $slug = trim((string) ($row['slug'] ?? ''));
-            if ($slug !== '') {
-                $paths[(string) $code] = $prefix . $slug;
-            }
-        }
-
-        return $paths;
+        return Translations::paths($table, $recordId, $prefix);
     }
 
     /**

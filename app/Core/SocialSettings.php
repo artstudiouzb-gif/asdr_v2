@@ -6,7 +6,6 @@ namespace App\Core;
 
 use App\Models\Language;
 use App\Models\News;
-use App\Models\NewsTranslation;
 use App\Models\SocialPost;
 
 /**
@@ -337,10 +336,16 @@ final class SocialSettings
             'en' => ['label' => 'English', 'read_more' => 'Read on site →'],
         ];
 
-        // Связанные записи группы переводов: у каждой свой slug и свой текст.
-        $siblings = (!empty($news['id']) && Database::isConnected())
-            ? News::groupRowsByLang((int) $news['id'])
+        // Языковые версии — из единой точки доступа: она знает и про связанные
+        // записи со своим slug, и про поля перевода. Своя логика по месту
+        // здесь и приводила к тому, что вторая версия уходила отдельным постом.
+        $rows = (!empty($news['id']) && Database::isConnected())
+            ? Translations::rows('news', (int) $news['id'])
             : [];
+        // Переданная строка — источник правды для своего языка: публикуют
+        // именно её, в том числе из предпросмотра черновика.
+        $ownLang = trim((string) ($news['lang'] ?? '')) ?: $default;
+        $rows[$ownLang] = $news;
 
         $activeCodes = Database::isConnected() ? Language::activeCodes() : ['uz', 'ru', 'en'];
         // Порядок языков в посте: сначала основной (узбекский), затем остальные
@@ -352,24 +357,10 @@ final class SocialSettings
 
         $blocks = [];
         foreach ($activeCodes as $code) {
-            if ($code === $default) {
-                $row = $news;
-            } elseif (isset($siblings[$code])) {
-                $row = $siblings[$code];
-            } else {
-                // Черновая полезная нагрузка без id (например, предпросмотр
-                // или unit-тест) не имеет переводов в БД. Не обращаемся к
-                // NewsTranslation с фиктивным id=0 и оставляем только базовый
-                // языковой блок.
-                if (empty($news['id']) || !Database::isConnected()) {
-                    continue;
-                }
-                $translation = NewsTranslation::find((int) ($news['id'] ?? 0), $code);
-                if ($translation === null || trim((string) ($translation['title'] ?? '')) === '') {
-                    continue; // перевода нет — этот язык пропускаем
-                }
-                $row = News::localize($news, $code);
+            if (!isset($rows[$code])) {
+                continue; // версии на этом языке нет
             }
+            $row = $rows[$code];
             $title = trim((string) ($row['title'] ?? ''));
             if ($title === '') {
                 continue;
