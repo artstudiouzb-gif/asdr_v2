@@ -39,7 +39,7 @@ $crumbs = [
                         <figcaption class="media-caption">
                             <?= htmlspecialchars((string) $img['caption'], ENT_QUOTES) ?>
                             <?php if ($imgCredit !== ''): ?>
-                                <span class="media-caption__credit"><?= htmlspecialchars(t('Фото:'), ENT_QUOTES) ?> <?= htmlspecialchars($imgCredit, ENT_QUOTES) ?></span>
+                                <span class="media-caption__credit"><?= htmlspecialchars(t('Фото:'), ENT_QUOTES) ?> <?= htmlspecialchars(\App\Core\Media::photoCredit($imgCredit), ENT_QUOTES) ?></span>
                             <?php endif; ?>
                         </figcaption>
                     <?php endif; ?>

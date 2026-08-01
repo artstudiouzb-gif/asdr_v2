@@ -84,7 +84,7 @@ $photoCaption = static function (array $s): string {
 
     return '<figcaption class="media-caption">'
         . htmlspecialchars($caption, ENT_QUOTES)
-        . ($credit !== '' ? '<span class="media-caption__credit">' . htmlspecialchars(t('Фото:'), ENT_QUOTES) . ' ' . htmlspecialchars($credit, ENT_QUOTES) . '</span>' : '')
+        . ($credit !== '' ? '<span class="media-caption__credit">' . htmlspecialchars(t('Фото:'), ENT_QUOTES) . ' ' . htmlspecialchars(\App\Core\Media::photoCredit($credit), ENT_QUOTES) . '</span>' : '')
         . '</figcaption>';
 };
 

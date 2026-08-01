@@ -42,5 +42,9 @@ test('DemoSeeder RESET полностью заменяет контент эта
     assert_same(0, array_sum($secondRun), 'Повторный запуск полностью идемпотентен');
 
     $version = $pdo->query("SELECT `value` FROM settings WHERE `key` = 'demo_data_version' LIMIT 1")->fetchColumn();
-    assert_same('2026.07-v3', (string) $version, 'Версия демо-комплекта сохранена');
+    // Версию сверяем с самим сидером: она поднимается при каждой правке
+    // демо-контента, и держать её копию в тесте — лишний ручной шаг.
+    $seeder = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
+    preg_match("/DEMO_VERSION = '([^']+)'/", $seeder, $m);
+    assert_same($m[1] ?? '', (string) $version, 'Версия демо-комплекта сохранена');
 });

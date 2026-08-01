@@ -14,7 +14,7 @@ use PDO;
  */
 final class DemoSeeder
 {
-    private const DEMO_VERSION = '2026.07-v3';
+    private const DEMO_VERSION = '2026.08-v1';
 
     /** @return array<string,int> счётчики добавленного по разделам */
     public static function run(PDO $pdo): array
@@ -585,6 +585,7 @@ final class DemoSeeder
                 'uz_title' => 'Islohotlarni monitoring qilish raqamli platformasi taqdim etildi',
                 'uz_excerpt' => 'Yangi platforma «O‘zbekiston–2030» strategiyasining asosiy ko‘rsatkichlarini birlashtiradi va natijalar ijrosini kuzatish imkonini beradi.',
                 'uz_badge' => 'Raqamlashtirish',
+                'uz_hashtags' => '#O‘zbekiston2030 #raqamlashtirish',
             ],
             [
                 'title' => 'Обсуждены приоритеты устойчивого регионального развития',
@@ -597,6 +598,7 @@ final class DemoSeeder
                 'uz_title' => 'Hududlarni barqaror rivojlantirish ustuvor yo‘nalishlari muhokama qilindi',
                 'uz_excerpt' => 'Ekspertlar va hududlar vakillari infratuzilma, bandlik va inson kapitalini rivojlantirish loyihalarini ko‘rib chiqdilar.',
                 'uz_badge' => 'Hududiy rivojlanish',
+                'uz_hashtags' => '#hududlar #infratuzilma',
             ],
             [
                 'title' => 'Опубликован аналитический обзор социально-экономической динамики',
@@ -609,6 +611,7 @@ final class DemoSeeder
                 'uz_title' => 'Ijtimoiy-iqtisodiy dinamika bo‘yicha tahliliy sharh e’lon qilindi',
                 'uz_excerpt' => 'Sharh asosiy tendensiyalar, ssenariy baholari va iqtisodiyot barqarorligini oshirish bo‘yicha tavsiyalarni qamrab oladi.',
                 'uz_badge' => 'Tahlil',
+                'uz_hashtags' => '#tahlil #iqtisodiyot',
             ],
             [
                 'title' => 'Расширяется портфель проектов зелёной экономики',
@@ -618,9 +621,17 @@ final class DemoSeeder
                 'image' => '/uploads/public/demo-green-energy.jpg',
                 'hashtags' => '#зелёнаяэкономика #энергетика #ESG',
                 'layout' => 'gallery',
+                // Слайдер новости — единственное место, где подпись и автор
+                // снимка видны текстом. Без снимков демо этого не показывало.
+                'gallery' => [
+                    ['/uploads/public/demo-green-energy.jpg', 'Ввод в эксплуатацию объекта возобновляемой энергетики', 'пресс-служба Агентства'],
+                    ['/uploads/public/demo-urban-development.jpg', 'Устойчивая городская инфраструктура', 'пресс-служба Агентства'],
+                    ['/uploads/public/demo-strategy-meeting.jpg', 'Обсуждение портфеля проектов', ''],
+                ],
                 'uz_title' => 'Yashil iqtisodiyot loyihalari portfeli kengaymoqda',
                 'uz_excerpt' => 'Portfelga qayta tiklanuvchi energiya, energiya samaradorligi va barqaror infratuzilma tashabbuslari kiritildi.',
                 'uz_badge' => 'Yashil iqtisodiyot',
+                'uz_hashtags' => '#yashiliqtisodiyot #energetika',
             ],
             [
                 'title' => 'Открыт приём заявок в экспертный кадровый резерв',
@@ -633,6 +644,7 @@ final class DemoSeeder
                 'uz_title' => 'Ekspert kadrlar zaxirasiga arizalar qabul qilinmoqda',
                 'uz_excerpt' => 'Strategik rejalashtirish, ma’lumotlar tahlili va loyihalarni boshqarish sohasidagi mutaxassislar taklif etiladi.',
                 'uz_badge' => 'Karyera',
+                'uz_hashtags' => '#karyera #ekspertlar',
             ],
         ];
         $ins = $pdo->prepare(
@@ -641,8 +653,9 @@ final class DemoSeeder
              FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM news WHERE slug = :s2)"
         );
         foreach ($news as $i => $n) {
-            $content = '<p><strong>' . htmlspecialchars($n['excerpt'], ENT_QUOTES) . '</strong></p>'
-                . '<p>Материал демонстрирует полноценную публикацию: структурированный текст, тематическую обложку, метаданные и связанную узбекскую версию.</p>'
+            // Лид не повторяем в тексте: он уже стоит в шапке новости, и один
+            // и тот же абзац выглядел на странице дважды.
+            $content = '<p>Материал демонстрирует полноценную публикацию: структурированный текст, тематическую обложку, метаданные и связанную узбекскую версию.</p>'
                 . '<h3>Основные направления</h3><ul><li>измеримые цели и показатели;</li><li>межведомственная координация;</li><li>открытость результатов для общества.</li></ul>';
             $ins->execute([
                 ':t' => $n['title'],
@@ -660,6 +673,15 @@ final class DemoSeeder
             ]);
             $c['news'] += $ins->rowCount();
 
+            if (!empty($n['gallery']) && self::tableExists($pdo, 'news_images')) {
+                $galleryIdStmt = $pdo->prepare("SELECT id FROM news WHERE slug = :slug AND lang = 'ru' LIMIT 1");
+                $galleryIdStmt->execute([':slug' => $n['slug']]);
+                $galleryNewsId = $galleryIdStmt->fetchColumn();
+                if ($galleryNewsId !== false) {
+                    self::seedNewsGallery($pdo, (int) $galleryNewsId, $n['gallery'], $n['title']);
+                }
+            }
+
             if (self::tableExists($pdo, 'news_translations')) {
                 $idStmt = $pdo->prepare("SELECT id FROM news WHERE slug = :slug AND lang = 'ru' LIMIT 1");
                 $idStmt->execute([':slug' => $n['slug']]);
@@ -674,21 +696,50 @@ final class DemoSeeder
                              SELECT 1 FROM news_translations WHERE news_id = :nid2 AND lang = 'uz'
                          )"
                     );
-                    $uzContent = '<p><strong>' . htmlspecialchars($n['uz_excerpt'], ENT_QUOTES) . '</strong></p>'
-                        . '<p>Material to‘liq nashr imkoniyatlarini namoyish etadi: tuzilgan matn, mavzuli muqova, metadata va ikki tilli kontent.</p>';
+                    $uzContent = '<p>Material to‘liq nashr imkoniyatlarini namoyish etadi: tuzilgan matn, mavzuli muqova, metadata va ikki tilli kontent.</p>';
                     $trans->execute([
                         ':nid' => (int) $newsId,
                         ':t' => $n['uz_title'],
                         ':b' => $n['uz_badge'],
                         ':e' => $n['uz_excerpt'],
                         ':co' => $uzContent,
-                        ':hashtags' => '#O‘zbekiston2030 #islohotlar',
+                        ':hashtags' => $n['uz_hashtags'],
                         ':mt' => $n['uz_title'] . ' — Agentlik',
                         ':md' => $n['uz_excerpt'],
                         ':nid2' => (int) $newsId,
                     ]);
                 }
             }
+        }
+    }
+
+    /**
+     * Снимки галереи новости с подписью и автором. Колонки появились
+     * миграцией подписей, поэтому наличие проверяем: демо ставят и на базу,
+     * где миграция ещё не применена.
+     *
+     * @param list<array{0:string,1:string,2:string}> $images путь, подпись, автор
+     */
+    private static function seedNewsGallery(PDO $pdo, int $newsId, array $images, string $altBase): void
+    {
+        $withCaptions = self::columnExists($pdo, 'news_images', 'caption')
+            && self::columnExists($pdo, 'news_images', 'credit');
+        $ins = $pdo->prepare(
+            $withCaptions
+                ? 'INSERT INTO news_images (news_id, path, alt_text, caption, credit, sort_order, created_at)
+                   SELECT :nid, :p, :a, :cap, :cr, :o, NOW()
+                   FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM news_images WHERE news_id = :nid2 AND path = :p2)'
+                : 'INSERT INTO news_images (news_id, path, alt_text, sort_order, created_at)
+                   SELECT :nid, :p, :a, :o, NOW()
+                   FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM news_images WHERE news_id = :nid2 AND path = :p2)'
+        );
+        foreach ($images as $order => [$path, $caption, $credit]) {
+            $params = [':nid' => $newsId, ':p' => $path, ':a' => $altBase, ':o' => $order, ':nid2' => $newsId, ':p2' => $path];
+            if ($withCaptions) {
+                $params[':cap'] = $caption;
+                $params[':cr'] = $credit;
+            }
+            $ins->execute($params);
         }
     }
 
@@ -710,7 +761,7 @@ final class DemoSeeder
             ['date' => '10:15', 'title' => 'Отчёты по направлениям', 'text' => 'Рассмотрена динамика ключевых показателей.'],
             ['date' => '12:00', 'title' => 'Приняты решения', 'text' => 'Определены ответственные исполнители и контрольные сроки.'],
         ];
-        $content = '<p><strong>В Агентстве стратегического развития и реформ Республики Узбекистан состоялось расширенное заседание, посвящённое вопросам реализации Стратегии «Узбекистан–2030».</strong></p>'
+        $content = '<p>В Агентстве стратегического развития и реформ Республики Узбекистан состоялось расширенное заседание, посвящённое вопросам реализации Стратегии «Узбекистан–2030».</p>'
             . '<p>В заседании приняли участие руководители профильных министерств и ведомств, представители регионов и эксперты. Участники обсудили ход выполнения ключевых инициатив, определили приоритеты на предстоящий период и утвердили конкретные меры по их реализации.</p>'
             . '<blockquote><p>Наша задача — обеспечить эффективную реализацию всех намеченных инициатив и достичь конкретных результатов, которые ощутит каждый гражданин нашей страны.</p><cite>Директор Агентства</cite></blockquote>'
             . '<h3>Основные вопросы повестки</h3>'
@@ -754,7 +805,7 @@ final class DemoSeeder
                 ['title' => 'Yig‘ilish yakunlari bo‘yicha press-reliz', 'meta' => 'PDF · 245 KB', 'url' => '/catalog/documenty'],
                 ['title' => 'Taqdimot: Strategiyani amalga oshirish borishi', 'meta' => 'PDF · 1,2 MB', 'url' => '/catalog/documenty'],
             ];
-            $uzContent = '<p><strong>O‘zbekiston Respublikasi Strategik rejalashtirish va islohotlar agentligida «O‘zbekiston–2030» Strategiyasini amalga oshirish masalalariga bag‘ishlangan kengaytirilgan yig‘ilish bo‘lib o‘tdi.</strong></p>'
+            $uzContent = '<p>O‘zbekiston Respublikasi Strategik rejalashtirish va islohotlar agentligida «O‘zbekiston–2030» Strategiyasini amalga oshirish masalalariga bag‘ishlangan kengaytirilgan yig‘ilish bo‘lib o‘tdi.</p>'
                 . '<p>Yig‘ilishda tegishli vazirlik va idoralar rahbarlari, hududlar vakillari hamda ekspertlar ishtirok etdilar. Ishtirokchilar ustuvor tashabbuslarning bajarilish borishini muhokama qildilar.</p>'
                 . '<blockquote><p>Vazifamiz — barcha belgilangan tashabbuslarning samarali amalga oshirilishini ta’minlash va har bir fuqaro sezadigan aniq natijalarga erishishdir.</p><cite>Agentlik direktori</cite></blockquote>';
 
@@ -786,13 +837,16 @@ final class DemoSeeder
                 $existUz->execute([':gid' => (int) $nid]);
                 if ($existUz->fetchColumn() === false) {
                     $uzIns = $pdo->prepare(
-                        "INSERT INTO news (title, slug, excerpt, badge, content, image, key_points, event_meta, docs, status, published_at, lang, translation_group_id, created_at)
-                         VALUES (:t, 'strategiya-uzbekistan-2030-uz', :e, :b, :c, '/uploads/public/demo-strategy-meeting.jpg', :kp, :em, :dc, 'published', NOW(), 'uz', :gid, NOW())"
+                        "INSERT INTO news (title, slug, excerpt, badge, content, image, hashtags, key_points, event_meta, docs, status, published_at, lang, translation_group_id, created_at)
+                         VALUES (:t, 'strategiya-uzbekistan-2030-uz', :e, :b, :c, '/uploads/public/demo-strategy-meeting.jpg', :tags, :kp, :em, :dc, 'published', NOW(), 'uz', :gid, NOW())"
                     );
                     $uzIns->execute([
                         ':t' => '«O‘zbekiston–2030» Strategiyasini amalga oshirish masalalari bo‘yicha yig‘ilish',
                         ':e' => 'Mamlakatni barqaror rivojlantirish va aholi farovonligini oshirishga qaratilgan strategik tashabbuslarni amalga oshirish borishi muhokama qilindi.',
                         ':b' => 'Tadbirlar',
+                        // Свои хештеги у языковой версии: в пост Telegram
+                        // уходят теги всех версий, без повторов.
+                        ':tags' => '#o‘zbekiston2030 #strategiya',
                         ':c' => $uzContent,
                         ':kp' => "«O‘zbekiston–2030» Strategiyasining ustuvor yo‘nalishlari ko‘rib chiqildi\nAsosiy tashabbuslar ijrosi tahlil qilindi\nKelgusi qadamlar va mas’ul ijrochilar tasdiqlandi",
                         ':em' => "Sana: 20-may 2026-yil\nShakl: kengaytirilgan yig‘ilish\nIshtirokchilar: vazirliklar, idoralar, hududlar",
@@ -803,19 +857,33 @@ final class DemoSeeder
             }
 
             if (self::tableExists($pdo, 'news_images')) {
+                // Подпись и автор снимка: показываем редактору, что эти поля
+                // существуют — они видны под фото на сайте и уходят в пост
+                // Telegram. Колонки появились миграцией, поэтому проверяем.
+                $withCaptions = self::columnExists($pdo, 'news_images', 'caption')
+                    && self::columnExists($pdo, 'news_images', 'credit');
                 $imgIns = $pdo->prepare(
-                    'INSERT INTO news_images (news_id, path, alt_text, sort_order, created_at)
-                     SELECT :nid, :p, :a, :o, NOW()
-                     FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM news_images WHERE news_id = :nid2 AND path = :p2)'
+                    $withCaptions
+                        ? 'INSERT INTO news_images (news_id, path, alt_text, caption, credit, sort_order, created_at)
+                           SELECT :nid, :p, :a, :cap, :cr, :o, NOW()
+                           FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM news_images WHERE news_id = :nid2 AND path = :p2)'
+                        : 'INSERT INTO news_images (news_id, path, alt_text, sort_order, created_at)
+                           SELECT :nid, :p, :a, :o, NOW()
+                           FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM news_images WHERE news_id = :nid2 AND path = :p2)'
                 );
                 $gallery = [
-                    '/uploads/public/demo-strategy-meeting.jpg',
-                    '/uploads/public/demo-agency-hero.jpg',
-                    '/uploads/public/demo-urban-development.jpg',
-                    '/uploads/public/demo-green-energy.jpg',
+                    ['/uploads/public/demo-strategy-meeting.jpg', 'Расширенное заседание по Стратегии «Узбекистан–2030»', 'пресс-служба Агентства'],
+                    ['/uploads/public/demo-agency-hero.jpg', 'Штаб-квартира Агентства', 'пресс-служба Агентства'],
+                    ['/uploads/public/demo-urban-development.jpg', 'Городская среда: проекты развития регионов', ''],
+                    ['/uploads/public/demo-green-energy.jpg', '', 'пресс-служба Агентства'],
                 ];
-                foreach ($gallery as $i => $path) {
-                    $imgIns->execute([':nid' => (int) $nid, ':p' => $path, ':a' => 'Заседание по Стратегии «Узбекистан–2030»', ':o' => $i, ':nid2' => (int) $nid, ':p2' => $path]);
+                foreach ($gallery as $i => [$path, $caption, $credit]) {
+                    $params = [':nid' => (int) $nid, ':p' => $path, ':a' => 'Заседание по Стратегии «Узбекистан–2030»', ':o' => $i, ':nid2' => (int) $nid, ':p2' => $path];
+                    if ($withCaptions) {
+                        $params[':cap'] = $caption;
+                        $params[':cr'] = $credit;
+                    }
+                    $imgIns->execute($params);
                 }
             }
 
@@ -1066,13 +1134,25 @@ final class DemoSeeder
                     $albumIdStmt->execute([':slug' => $album[0]]);
                     $albumId = $albumIdStmt->fetchColumn();
                     if ($albumId !== false) {
+                        // Автор снимка — отдельным полем (колонка из миграции
+                        // подписей): в альбоме он выводится под фото рядом с
+                        // подписью, одним компонентом с новостной галереей.
+                        $withCredit = self::columnExists($pdo, 'photo_album_images', 'credit');
                         $imageIns = $pdo->prepare(
-                            'INSERT INTO photo_album_images (album_id, image_url, caption, sort_order, created_at)
-                             SELECT :aid, :url, :caption, :ord, NOW()
-                             FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM photo_album_images WHERE album_id = :aid2 AND image_url = :url2)'
+                            $withCredit
+                                ? 'INSERT INTO photo_album_images (album_id, image_url, caption, credit, sort_order, created_at)
+                                   SELECT :aid, :url, :caption, :credit, :ord, NOW()
+                                   FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM photo_album_images WHERE album_id = :aid2 AND image_url = :url2)'
+                                : 'INSERT INTO photo_album_images (album_id, image_url, caption, sort_order, created_at)
+                                   SELECT :aid, :url, :caption, :ord, NOW()
+                                   FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM photo_album_images WHERE album_id = :aid2 AND image_url = :url2)'
                         );
                         foreach (['/uploads/public/demo-strategy-meeting.jpg', '/uploads/public/demo-urban-development.jpg', '/uploads/public/demo-agency-hero.jpg', '/uploads/public/demo-green-energy.jpg'] as $order => $url) {
-                            $imageIns->execute([':aid' => (int) $albumId, ':url' => $url, ':caption' => $album[1], ':ord' => $order, ':aid2' => (int) $albumId, ':url2' => $url]);
+                            $params = [':aid' => (int) $albumId, ':url' => $url, ':caption' => $album[1], ':ord' => $order, ':aid2' => (int) $albumId, ':url2' => $url];
+                            if ($withCredit) {
+                                $params[':credit'] = 'пресс-служба Агентства';
+                            }
+                            $imageIns->execute($params);
                         }
 
                         if (self::tableExists($pdo, 'photo_album_translations')) {
@@ -1762,6 +1842,36 @@ final class DemoSeeder
              LIMIT 1'
         );
         $stmt->execute([':name' => $table]);
+
+        return (bool) $stmt->fetchColumn();
+    }
+
+    /**
+     * Есть ли колонка. Демо ставят и на базу, где свежая миграция ещё не
+     * применена, — без проверки установка падала бы на неизвестном поле.
+     */
+    private static function columnExists(PDO $pdo, string $table, string $column): bool
+    {
+        if (!self::tableExists($pdo, $table)) {
+            return false;
+        }
+        $driver = strtolower((string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME));
+        if ($driver === 'sqlite') {
+            foreach ($pdo->query("PRAGMA table_info({$table})")->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                if (strcasecmp((string) ($row['name'] ?? ''), $column) === 0) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        $stmt = $pdo->prepare(
+            'SELECT 1 FROM information_schema.columns
+             WHERE table_schema = DATABASE() AND table_name = :t AND column_name = :c
+             LIMIT 1'
+        );
+        $stmt->execute([':t' => $table, ':c' => $column]);
 
         return (bool) $stmt->fetchColumn();
     }
