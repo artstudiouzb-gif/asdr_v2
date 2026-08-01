@@ -155,6 +155,27 @@ final class SocialPublisher
     }
 
     /**
+     * Произвольное сообщение в канал (не привязанное к новости): итоги недели
+     * и подобные служебные посты. Разметка — HTML Telegram, без медиа.
+     *
+     * @param array<string,string> $cfg
+     * @return array{ok:bool, remote_id:?string, error:?string}
+     */
+    public function sendChannelMessage(array $cfg, string $html): array
+    {
+        if (empty($cfg['token']) || empty($cfg['chat_id'])) {
+            return self::err('Не заданы токен бота или chat_id канала Telegram.');
+        }
+        if (trim($html) === '') {
+            return self::err('Пустое сообщение не отправляем.');
+        }
+
+        $api = self::TG_API . '/bot' . trim((string) $cfg['token']);
+
+        return $this->telegramText($cfg, $api, ['Content-Type: application/json'], $html, [], []);
+    }
+
+    /**
      * Обычное текстовое сообщение с кнопками. Вынесено отдельно: тем же путём
      * уходит текст, не поместившийся в подпись к фото.
      *
