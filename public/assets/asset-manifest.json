@@ -11,9 +11,9 @@
       "/assets/css/rich-content.css",
       "/assets/css/a11y.css"
     ],
-    "sourceSha256": "acfaf52b6b246342e6c495f5498b9df54260320ba095b9e7455e704fa925c1af",
-    "sha256": "ddb4a57d3a0b3fe69ecae94e6e968b84846c461d5b11ffa8c15aa3a8cecb8f31",
-    "raw": 326891,
+    "sourceSha256": "07208bd3b831197aed0b57638576668d5ad73375f099a05317f14cf20079a4ec",
+    "sha256": "ba9350c50e60964ab0bd5ff1bd895bb8b26f5e5135a8385849ec6ab1509fe61f",
+    "raw": 326887,
     "gzip": 55060,
     "brotli": 43631
   },

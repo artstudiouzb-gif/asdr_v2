@@ -475,16 +475,16 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             } elseif ($sidebar !== null) {
             ?>
                 <div class="newsdetail-subscribe newsdetail-subscribe--fallback no-print">
-                    <h2 class="newsdetail-subscribe__title"><?= htmlspecialchars(t('Agentlik yangiliklariga obuna bo\'ling'), ENT_QUOTES) ?></h2>
-                    <p class="newsdetail-subscribe__text"><?= htmlspecialchars(t('Eng muhim yangiliklar va tahliliy materiallarni pochtangizga oling.'), ENT_QUOTES) ?></p>
+                    <h2 class="newsdetail-subscribe__title"><?= htmlspecialchars(t('Подпишитесь на новости Агентства'), ENT_QUOTES) ?></h2>
+                    <p class="newsdetail-subscribe__text"><?= htmlspecialchars(t('Получайте главные новости и аналитику на почту.'), ENT_QUOTES) ?></p>
                     <form class="newsdetail-subscribe__form" method="post" action="<?= htmlspecialchars(Locale::url('subscribe', $lang), ENT_QUOTES) ?>">
                         <?= \App\Core\Csrf::field() ?>
                         <?= \App\Core\Csrf::honeypotField() ?>
                         <input type="hidden" name="source" value="news">
                         <div class="newsdetail-subscribe__row">
-                            <label class="visually-hidden" for="nd-sub-email"><?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?></label>
-                            <input id="nd-sub-email" type="email" name="email" required placeholder="<?= htmlspecialchars(t('Sizning e-pochtangiz'), ENT_QUOTES) ?>" autocomplete="email">
-                            <button type="submit" aria-label="<?= htmlspecialchars(t('Obuna bo\'lish'), ENT_QUOTES) ?>">→</button>
+                            <label class="visually-hidden" for="nd-sub-email"><?= htmlspecialchars(t('Ваш e-mail'), ENT_QUOTES) ?></label>
+                            <input id="nd-sub-email" type="email" name="email" required placeholder="<?= htmlspecialchars(t('Ваш e-mail'), ENT_QUOTES) ?>" autocomplete="email">
+                            <button type="submit" aria-label="<?= htmlspecialchars(t('Подписаться'), ENT_QUOTES) ?>">→</button>
                         </div>
                         <?php if (Setting::get('form_consent_enabled', '0') === '1'): ?>
                             <label class="newsdetail-subscribe__consent">

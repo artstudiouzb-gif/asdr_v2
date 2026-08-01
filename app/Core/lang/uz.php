@@ -370,4 +370,19 @@ return [
     'Режим чтения убирает баннеры и колонки: остаётся только текст страницы.' => 'O‘qish rejimi bannerlar va ustunlarni olib tashlaydi: faqat sahifa matni qoladi.',
     'Сбросить настройки' => 'Sozlamalarni tiklash',
     'Настройки сохраняются в этом браузере и действуют на всех страницах сайта.' => 'Sozlamalar shu brauzerda saqlanadi va saytning barcha sahifalarida amal qiladi.',
+    // Публичные строки, найденные аудитом переводов: без них узбекская
+    // версия показывала русский текст.
+    'Открыть' => 'Ochish',
+    'Обложка' => 'Muqova',
+    'Выбрать язык' => 'Tilni tanlash',
+    'Получайте главные новости и аналитику на почту.' => 'Eng muhim yangiliklar va tahliliy materiallarni pochtangizga oling.',
+    'Аудиозапись' => 'Audioyozuv',
+    'Аудиоверсия новости' => 'Yangilikning audio versiyasi',
+    'Хронология событий' => 'Voqealar xronologiyasi',
+    'Опрос читателей' => 'O‘quvchilar so‘rovi',
+    'Голосовать' => 'Ovoz berish',
+    'Скачать все фото архивом ZIP' => 'Barcha suratlarni ZIP arxivda yuklab olish',
+    'Скачать архив ZIP' => 'ZIP arxivni yuklab olish',
+    'Ничего не найдено' => 'Hech narsa topilmadi',
+    'Все результаты' => 'Barcha natijalar',
 ];
