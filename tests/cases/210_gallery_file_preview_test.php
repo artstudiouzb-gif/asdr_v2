@@ -27,8 +27,13 @@ test('Скрипт админки собирает превью и умеет у
     assert_contains('data-file-preview-drop', $js);
     // FileList только на чтение — без DataTransfer убрать один файл нельзя.
     assert_contains('new DataTransfer()', $js);
-    // Адреса blob: держат файл в памяти до перезагрузки страницы.
-    assert_contains('revokeObjectURL', $js);
+
+    // Превью — data:-адресом. createObjectURL() отдаёт ссылку в нашем origin:
+    // открытая как страница, она исполнит скрипт из SVG. Заодно миниатюра
+    // рисуется только для растровых форматов.
+    assert_contains('readAsDataURL', $js);
+    assert_not_contains('createObjectURL', $js);
+    assert_contains("image\\/(jpeg|png|webp|gif|avif|bmp)", $js);
 });
 
 test('Стили превью описаны своими классами, а не инлайном', function () {

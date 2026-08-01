@@ -1359,7 +1359,13 @@
     // выбор заново. Подписи и порядок остаются послесохранёнными — они живут
     // в БД и привязаны к id снимка.
     (function initFilePreviews() {
-        if (!window.DataTransfer || !window.URL || !URL.createObjectURL) { return; }
+        if (!window.DataTransfer || !window.FileReader) { return; }
+
+        // Только растровые форматы. SVG умеет нести скрипт, и превью такого
+        // файла — лишний риск: ссылка вида blob: живёт в нашем origin, и
+        // открытая как страница она этот скрипт исполнит. Читаем data:-адресом,
+        // как это уже сделано у превью обложки выше.
+        var RASTER = /^image\/(jpeg|png|webp|gif|avif|bmp)$/i;
 
         function render(box) {
             if (!box) { return; }
@@ -1367,8 +1373,6 @@
             var list = box.querySelector('[data-file-preview-list]');
             if (!input || !list) { return; }
 
-            // Адреса blob: живут до перезагрузки страницы — освобождаем свои.
-            list.querySelectorAll('img').forEach(function (img) { URL.revokeObjectURL(img.src); });
             list.innerHTML = '';
             var files = Array.prototype.slice.call(input.files || []);
             list.hidden = files.length === 0;
@@ -1383,10 +1387,12 @@
                 var item = document.createElement('div');
                 item.className = 'file-preview__item';
 
-                if (file.type.indexOf('image/') === 0) {
+                if (RASTER.test(file.type)) {
                     var img = document.createElement('img');
-                    img.src = URL.createObjectURL(file);
                     img.alt = '';
+                    var reader = new FileReader();
+                    reader.onload = function (ev) { img.src = String(ev.target.result); };
+                    reader.readAsDataURL(file);
                     item.appendChild(img);
                 }
 
