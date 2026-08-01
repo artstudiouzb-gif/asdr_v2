@@ -150,7 +150,7 @@ foreach ($options as $key => $opt) {
     </section>
 </div>
 
-<form method="post" action="/admin/design" class="design-fine" data-design-form>
+<form method="post" action="/admin/design" class="design-fine" data-design-form enctype="multipart/form-data">
     <?= Csrf::field() ?>
     <input type="hidden" name="palette" value="custom">
 
@@ -253,6 +253,12 @@ foreach ($options as $key => $opt) {
                             <input type="text" id="design_<?= htmlspecialchars($spaceKey, ENT_QUOTES) ?>" name="<?= htmlspecialchars($spaceKey, ENT_QUOTES) ?>" value="<?= htmlspecialchars($semanticSpacings[$spaceKey], ENT_QUOTES) ?>" data-design-preview-field placeholder="clamp(...) или px/rem">
                         </div>
                     <?php endforeach; ?>
+                    <?= \App\Core\AdminUi::imageField('emblem', (string) \App\Core\Setting::get('design_emblem', ''), [
+                        'label' => 'Фирменная эмблема (SVG)',
+                        'file' => 'emblem_file',
+                        'accept' => 'image/svg+xml,image/*',
+                        'hint' => 'Знак агентства: водяной знак на карточках актов, заглушки карточек без фото, значок перед названием в шапке, если логотип не загружен. Используется как трафарет — цвет берётся из темы, поэтому нужен одноцветный контурный SVG. Пусто — встроенная эмблема. Файл берётся из медиабиблиотеки этого сайта: ссылки на чужие домены не принимаются.',
+                    ]) ?>
                     <div class="form-field">
                         <label for="design_default_theme">Тема по умолчанию для посетителей</label>
                         <select id="design_default_theme" name="default_theme" data-design-preview-field>

@@ -91,6 +91,17 @@ final class SiteThemeCss
                 $variables[$name] = $value;
             }
         }
+        // Своя эмблема из настроек дизайна. Она работает трафаретом (CSS-маской),
+        // поэтому от файла нужна только форма — цвет даёт тема. Пусто или
+        // небезопасный адрес — остаётся эмблема из стилей.
+        // Берём только свой адрес: знак с чужого домена — это и сторонний
+        // запрос с каждой страницы, и лишняя дыра в CSP.
+        $emblem = trim((string) Setting::get('design_emblem', ''));
+        if ($emblem !== '' && str_starts_with($emblem, '/') && UrlGuard::isSafeMedia($emblem)
+            && !preg_match('/["\'()\s]/', $emblem)) {
+            $variables['--gov-emblem'] = 'url("' . $emblem . '")';
+        }
+
         if (!empty($headerConfig['shadow']['enabled']) && !$transparentHeader) {
             $variables['--header-shadow-size'] = (int) ($headerConfig['shadow']['size'] ?? 14) . 'px';
         }
