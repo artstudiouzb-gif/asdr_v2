@@ -718,57 +718,25 @@ final class News
     }
 
     /**
-     * Опубликованные записи группы переводов по языкам. Перевод в этой CMS
-     * бывает двух видов: полем в `news_translations` и отдельной связанной
-     * записью (`translation_group_id`). Публикация в соцсети знала только про
-     * первый вид, поэтому вторая языковая версия уходила отдельным постом.
+     * Опубликованные записи группы переводов по языкам. Логика общая для всех
+     * сущностей и живёт в App\Core\Translations — здесь только удобное имя
+     * для вызовов из моделей и публикатора.
      *
      * @return array<string, array<string,mixed>> lang => строка новости
      */
     public static function groupRowsByLang(int $id): array
     {
-        $pdo = Database::pdo();
-        $stmt = $pdo->prepare(
-            'SELECT COALESCE(NULLIF(translation_group_id, 0), id) FROM news WHERE id = :id LIMIT 1'
-        );
-        $stmt->execute([':id' => $id]);
-        $groupId = (int) ($stmt->fetchColumn() ?: $id);
-
-        $stmtGroup = $pdo->prepare(
-            "SELECT * FROM news
-             WHERE COALESCE(NULLIF(translation_group_id, 0), id) = :group_id
-               AND status = 'published' AND deleted_at IS NULL
-             ORDER BY id"
-        );
-        $stmtGroup->execute([':group_id' => $groupId]);
-
-        $rows = [];
-        foreach ($stmtGroup->fetchAll() as $row) {
-            $lang = trim((string) ($row['lang'] ?? ''));
-            // Первая запись языка выигрывает: дубли в группе — редкость, но
-            // порядок должен быть предсказуемым.
-            if ($lang !== '' && !isset($rows[$lang])) {
-                $rows[$lang] = $row;
-            }
-        }
-
-        return $rows;
+        return \App\Core\Translations::rows('news', $id);
     }
 
     /**
-     * Запись группы, от имени которой публикуется пост: строка основного языка.
-     * Без этого кнопка «опубликовать» у русской версии ставила в очередь
-     * вторую задачу, и в канал уходило два поста вместо одного.
+     * Запись группы, от имени которой публикуется пост: строка основного
+     * языка. Без этого кнопка «опубликовать» у русской версии ставила в
+     * очередь вторую задачу, и в канал уходило два поста вместо одного.
      */
     public static function socialPrimaryId(int $id): int
     {
-        $rows = self::groupRowsByLang($id);
-        $default = Language::defaultCode();
-        if (isset($rows[$default])) {
-            return (int) $rows[$default]['id'];
-        }
-
-        return $id;
+        return \App\Core\Translations::primaryId('news', $id);
     }
 
     public static function availableLangs(int $id): array
