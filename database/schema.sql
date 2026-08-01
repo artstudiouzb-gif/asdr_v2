@@ -559,6 +559,7 @@ CREATE TABLE IF NOT EXISTS social_posts (
     news_id     INT UNSIGNED NOT NULL,
     network     ENUM('telegram','facebook','linkedin','instagram') NOT NULL,
     status      ENUM('pending','sent','failed') NOT NULL DEFAULT 'pending',
+    scheduled_at DATETIME NULL COMMENT 'не отправлять раньше этого времени; NULL — при ближайшем запуске',
     attempts    INT UNSIGNED NOT NULL DEFAULT 0,
     locked_until DATETIME NULL,
     remote_id   VARCHAR(190) NULL COMMENT 'id опубликованного поста в сети',
@@ -567,6 +568,7 @@ CREATE TABLE IF NOT EXISTS social_posts (
     sent_at     DATETIME NULL,
     UNIQUE KEY uq_social_posts_news_network (news_id, network),
     KEY idx_social_posts_status (status, created_at),
+    KEY idx_social_posts_scheduled (status, scheduled_at),
     CONSTRAINT fk_social_posts_news FOREIGN KEY (news_id) REFERENCES news (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1045,7 +1047,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_07_30_remove_header_layout.sql'),
     ('2026_07_30_translation_group_indexes.sql'),
     ('2026_07_31_team_departments.sql'),
-    ('2026_08_01_media_captions.sql')
+    ('2026_08_01_media_captions.sql'),
+    ('2026_08_02_social_scheduled_at.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

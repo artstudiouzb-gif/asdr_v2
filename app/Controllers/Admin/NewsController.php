@@ -99,7 +99,12 @@ final class NewsController
         // Публикация в соцсети выполняется ТОЛЬКО при явном подтверждении админом (флажок publish_to_social).
         if ($data['status'] === 'published') {
             if (!empty($_POST['publish_to_social'])) {
-                \App\Core\SocialSettings::enqueueForNews($id);
+                \App\Core\SocialSettings::enqueueForNews(
+                    $id,
+                    null,
+                    false,
+                    \App\Core\SocialSettings::normalizeScheduleTime((string) ($_POST['schedule_at'] ?? ''))
+                );
             }
             if (\App\Core\WebPush::isEnabled()) {
                 \App\Models\WebPushSubscription::enqueueNews($id);
@@ -273,7 +278,12 @@ final class NewsController
         // Публикация в соцсети выполняется ТОЛЬКО при явном подтверждении админом (флажок publish_to_social).
         if ($data['status'] === 'published') {
             if (!empty($_POST['publish_to_social'])) {
-                \App\Core\SocialSettings::enqueueForNews($id);
+                \App\Core\SocialSettings::enqueueForNews(
+                    $id,
+                    null,
+                    false,
+                    \App\Core\SocialSettings::normalizeScheduleTime((string) ($_POST['schedule_at'] ?? ''))
+                );
             }
             if (!$wasPublished) {
                 if (\App\Core\WebPush::isEnabled()) {
@@ -361,14 +371,25 @@ final class NewsController
         $only = trim((string) ($_POST['network'] ?? ''));
         $only = in_array($only, \App\Core\SocialPublisher::NETWORKS, true) ? $only : null;
 
+        // Отложенная отправка: задача ложится в очередь, но воркер возьмёт её
+        // не раньше указанного времени. Пустое поле и прошедшее время — как
+        // раньше, при ближайшем запуске.
+        $scheduledAt = \App\Core\SocialSettings::normalizeScheduleTime((string) ($_POST['schedule_at'] ?? ''));
+
         // Кнопка публикации в админке — осознанное действие человека, поэтому
         // публикуем и повторно. Автопубликация при сохранении новости (выше по
         // коду) остаётся идемпотентной, иначе правки плодили бы посты.
-        $count = \App\Core\SocialSettings::enqueueForNews((int) $news['id'], $only, true);
+        $count = \App\Core\SocialSettings::enqueueForNews((int) $news['id'], $only, true, $scheduledAt);
         if ($count <= 0) {
             Flash::error($only !== null
                 ? 'Сеть не настроена. Проверьте её в разделе «Соцсети».'
                 : 'Нет настроенных соцсетей. Включите их в разделе «Соцсети».');
+        } elseif ($scheduledAt !== null) {
+            // Отложенную задачу не отправляем сразу — в этом весь смысл.
+            Flash::success('Публикация запланирована на '
+                . \App\Core\DateFormatter::short($scheduledAt) . ' '
+                . date('H:i', (int) strtotime($scheduledAt))
+                . '. Воркер отправит её в это время.');
         } else {
             // Пытаемся отправить сразу. Что не ушло — остаётся в очереди,
             // и воркер дошлёт по расписанию.

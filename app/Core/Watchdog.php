@@ -109,17 +109,21 @@ final class Watchdog
         if (!Database::isConnected()) {
             return [];
         }
+        // У публикаций бывает отложенная отправка: пока её время не пришло,
+        // задача ждёт законно. Считаем возраст от времени, когда она стала
+        // готовой, — иначе пост, запланированный на завтра, поднимал бы
+        // тревогу уже через час.
         $queues = [
-            'social_posts' => 'Публикации в соцсети',
-            'mail_queue' => 'Письма',
+            'social_posts' => ['Публикации в соцсети', 'COALESCE(scheduled_at, created_at)'],
+            'mail_queue' => ['Письма', 'created_at'],
         ];
 
         $problems = [];
-        foreach ($queues as $table => $title) {
+        foreach ($queues as $table => [$title, $readySince]) {
             try {
                 $stmt = Database::pdo()->prepare(
                     "SELECT COUNT(*) FROM {$table}
-                     WHERE status = 'pending' AND created_at < (NOW() - INTERVAL :seconds SECOND)"
+                     WHERE status = 'pending' AND {$readySince} < (NOW() - INTERVAL :seconds SECOND)"
                 );
                 $stmt->bindValue(':seconds', self::QUEUE_STUCK_AFTER, \PDO::PARAM_INT);
                 $stmt->execute();

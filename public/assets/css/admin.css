@@ -4532,6 +4532,16 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     line-height: 1.35;
 }
 
+/* Поле отложенной публикации: подпись в строку, а не в два этажа. */
+.news-schedule { gap: 8px; white-space: nowrap; }
+.news-schedule input[type="datetime-local"] {
+    width: auto;
+    min-width: 208px;
+    margin: 0;
+    padding: 4px 8px;
+    font-size: .875rem;
+}
+
 .tg-status-ok {
     color: var(--admin-success, #10b981);
     font-size: .92rem;

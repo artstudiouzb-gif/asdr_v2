@@ -22,6 +22,15 @@ final class QueueClaim
     private const LEASE_MINUTES = 5;
 
     /**
+     * Дополнительное условие готовности задачи по таблицам. У публикаций
+     * бывает отложенная отправка: задача лежит в очереди, но её время ещё не
+     * пришло — воркер такую не берёт.
+     */
+    private const READY_CLAUSE = [
+        'social_posts' => 'AND (scheduled_at IS NULL OR scheduled_at <= NOW())',
+    ];
+
+    /**
      * Забирает пачку pending-задач эксклюзивно для этого процесса.
      *
      * @return array<int, array<string, mixed>>
@@ -36,10 +45,12 @@ final class QueueClaim
         try {
             $pdo->beginTransaction();
 
+            $ready = self::READY_CLAUSE[$table] ?? '';
             $stmt = $pdo->prepare(
                 "SELECT * FROM {$table}
                  WHERE status = 'pending' AND attempts < :max
                    AND (locked_until IS NULL OR locked_until < NOW())
+                   {$ready}
                  ORDER BY created_at ASC LIMIT :limit
                  FOR UPDATE SKIP LOCKED"
             );
@@ -70,6 +81,7 @@ final class QueueClaim
             // выборка (защиту от наложения даёт ProcessLock на этом хосте).
             $stmt = $pdo->prepare(
                 "SELECT * FROM {$table} WHERE status = 'pending' AND attempts < :max
+                 " . (self::READY_CLAUSE[$table] ?? '') . "
                  ORDER BY created_at ASC LIMIT :limit"
             );
             $stmt->bindValue(':max', $maxAttempts, PDO::PARAM_INT);
