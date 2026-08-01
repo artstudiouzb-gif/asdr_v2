@@ -10,6 +10,10 @@
     --rich-ink: var(--gov-ink, #1f2b3d);
     --rich-title: var(--gov-title, var(--color-primary, #173a63));
     --rich-accent: var(--gov-teal, var(--color-accent, #17999b));
+    /* Ссылки в тексте — отдельным токеном: заливки могут быть яркими, а
+       текст обязан держать 4.5:1. --gov-teal-text считается на сервере с
+       поправкой на контраст, сырой акцент давал 3.19:1. */
+    --rich-link: var(--gov-teal-text, var(--rich-accent));
     --rich-muted: var(--gov-muted, #667182);
     --rich-border: var(--gov-border, #e5e9f0);
     --rich-surface: var(--gov-surface, #ffffff);
@@ -61,7 +65,7 @@
 :where(.rich-content) sub { inset-block-end: -.2em; }
 
 :where(.rich-content) a {
-    color: var(--rich-accent);
+    color: var(--rich-link);
     /* Не жирные: на странице с перечнем документов почти каждый абзац —
        ссылка, и полужирное начертание превращает текст в сплошной акцент. */
     font-weight: inherit;
