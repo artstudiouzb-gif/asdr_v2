@@ -14,7 +14,7 @@ use App\Models\Setting;
  *
  * Зачем: подписчик, пропустивший будни, получает сводку и не листает ленту
  * назад. Формат для госканала привычный — короткий список со ссылками, без
- * картинок и без пересказа.
+ * пересказа; сверху обложка, если редактор её задал.
  *
  * Пустую неделю не отправляем: пост «новостей не было» приучает пролистывать
  * сообщения канала, а вместе с ними и настоящие.
@@ -29,6 +29,7 @@ final class WeeklyRoundup
 
     public const ENABLED_KEY = 'social_telegram_roundup';
     public const LAST_SENT_KEY = 'social_telegram_roundup_sent_at';
+    public const COVER_KEY = 'social_telegram_roundup_image';
 
     public static function isEnabled(): bool
     {
@@ -69,9 +70,33 @@ final class WeeklyRoundup
     }
 
     /**
+     * Обложка сводки: коллаж или заставка, которую редактор задаёт в
+     * настройках. Пусто — берём общую картинку для соцсетей; нет и её —
+     * пост уходит без изображения, это нормально.
+     */
+    public static function coverUrl(): string
+    {
+        foreach ([(string) Setting::get(self::COVER_KEY, ''), (string) Setting::get('default_og_image', '')] as $raw) {
+            $url = trim($raw);
+            if ($url === '') {
+                continue;
+            }
+            if (!preg_match('#^https?://#', $url)) {
+                $url = AppUrl::base() . '/' . ltrim($url, '/');
+            }
+            // Telegram забирает картинку сам и умеет только https.
+            if (str_starts_with($url, 'https://')) {
+                return $url;
+            }
+        }
+
+        return '';
+    }
+
+    /**
      * Пост для канала. Заголовок с датами периода, дальше по разделу на язык:
-     * рубрика, название-ссылка. Формат — обычный HTML Telegram, без медиа:
-     * список из десятка ссылок и так занимает экран.
+     * название-ссылка и рубрика. Формат — обычный HTML Telegram; обложка,
+     * если задана, уходит отдельным полем, а не тегом в тексте.
      *
      * @param array<string, list<array<string,mixed>>> $byLang
      */
@@ -122,16 +147,18 @@ final class WeeklyRoundup
      *
      * @return array{sent:bool, reason:string, items:int}
      */
-    public static function send(?\DateTimeImmutable $now = null, ?SocialPublisher $publisher = null): array
+    public static function send(?\DateTimeImmutable $now = null, ?SocialPublisher $publisher = null, bool $force = false): array
     {
         $now ??= new \DateTimeImmutable();
-        if (!self::isEnabled()) {
+        // Кнопка в админке — осознанное действие человека: она отправляет и
+        // повторно. Автоматический запуск остаётся защищённым от повторов.
+        if (!$force && !self::isEnabled()) {
             return ['sent' => false, 'reason' => 'Сводка выключена в настройках канала.', 'items' => 0];
         }
         if (!SocialSettings::isReady('telegram')) {
             return ['sent' => false, 'reason' => 'Канал Telegram не настроен.', 'items' => 0];
         }
-        if (self::sentRecently($now)) {
+        if (!$force && self::sentRecently($now)) {
             return ['sent' => false, 'reason' => 'Сводка уже отправлена на этой неделе.', 'items' => 0];
         }
 
@@ -145,7 +172,7 @@ final class WeeklyRoundup
 
         $html = self::buildHtml($byLang, $now);
         $res = ($publisher ?? new SocialPublisher())
-            ->sendChannelMessage(SocialSettings::configFor('telegram'), $html);
+            ->sendChannelMessage(SocialSettings::configFor('telegram'), $html, self::coverUrl());
 
         if (!empty($res['ok'])) {
             Setting::set(self::LAST_SENT_KEY, $now->format('Y-m-d H:i:s'));

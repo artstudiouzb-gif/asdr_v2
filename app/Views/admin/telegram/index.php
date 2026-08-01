@@ -336,7 +336,8 @@ $mark = static function (bool $done, bool $started = true): string {
     <h2 class="u-inline-8981e56111">
         <?= AdminUi::icon('settings', 20) ?> 4. Уведомления о заявках с сайта и Telegram Gateway
     </h2>
-    <form method="post" action="/admin/telegram/extras" class="form-grid">
+    <?php // enctype нужен для загрузки обложки сводки прямо из формы. ?>
+    <form method="post" action="/admin/telegram/extras" class="form-grid" enctype="multipart/form-data">
         <?= Csrf::field() ?>
         <div class="form-field">
             <label for="telegram_notify_chat_ids">Уведомления о заявках с форм: chat_id получателей</label>
@@ -374,21 +375,28 @@ $mark = static function (bool $done, bool $started = true): string {
         <div class="form-field form-field--checkbox">
             <input type="checkbox" id="tg_roundup" name="telegram_roundup" value="1"
                    <?= \App\Core\WeeklyRoundup::isEnabled() ? 'checked' : '' ?>>
-            <label for="tg_roundup">Итоги недели одним постом в канал</label>
-            <?php
-            $roundupItems = array_sum(array_map('count', \App\Core\WeeklyRoundup::collect()));
-            $roundupRoot = defined('APP_ROOT') ? APP_ROOT : dirname(__DIR__, 4);
-            ?>
+            <label for="tg_roundup">Готовить итоги недели</label>
             <span class="form-hint">
-                Раз в неделю в канал уходит список новостей за семь дней со ссылками, на всех языках,
-                где они выходили. Пустую неделю пропускаем молча.
+                Сводка новостей за семь дней со ссылками, по разделу на каждый язык.
+                Отправляется вручную — кнопкой ниже, когда пост готов.
+            </span>
+        </div>
+
+        <?= \App\Core\AdminUi::imageField('telegram_roundup_image', (string) \App\Models\Setting::get(\App\Core\WeeklyRoundup::COVER_KEY, ''), [
+            'label' => 'Обложка сводки (необязательно)',
+            'file' => 'telegram_roundup_image_file',
+            'hint' => 'Коллаж или заставка над списком. Пусто — возьмём общую картинку для соцсетей; нет и её — пост уйдёт без изображения.',
+        ]) ?>
+
+        <div class="form-field">
+            <?php $roundupItems = array_sum(array_map('count', \App\Core\WeeklyRoundup::collect())); ?>
+            <span class="form-hint">
                 <?php if ($roundupItems > 0): ?>
-                    Сейчас в сводку попало бы <strong><?= (int) $roundupItems ?></strong> материал(ов).
+                    Сейчас в сводку попало бы <strong><?= (int) $roundupItems ?></strong> материал(ов) за последние семь дней.
                 <?php else: ?>
-                    Сейчас за неделю новостей нет — сводка не ушла бы.
+                    За последние семь дней новостей нет — отправлять нечего.
                 <?php endif; ?>
-                <br>Задание в Cron (понедельник, 09:00):<br>
-                <code>0 9 * * 1 php <?= htmlspecialchars($roundupRoot, ENT_QUOTES) ?>/app/Console/weekly_roundup.php &gt;&gt; <?= htmlspecialchars($roundupRoot, ENT_QUOTES) ?>/storage/logs/weekly_roundup.log 2&gt;&amp;1</code>
+                Сначала сохраните настройки, если меняли обложку.
             </span>
         </div>
 
@@ -419,6 +427,11 @@ $mark = static function (bool $done, bool $started = true): string {
             <button type="submit" class="btn btn--primary"><?= AdminUi::icon('save') ?>Сохранить настройки Telegram</button>
             <button type="submit" formaction="/admin/telegram/extras/check" class="btn btn--outline">
                 <?= AdminUi::icon('send') ?>Отправить тест
+            </button>
+            <?php // Сводка уходит по кнопке, а не по расписанию: момент выбирает редактор. ?>
+            <button type="submit" formaction="/admin/telegram/roundup/send" class="btn btn--outline" formnovalidate
+                    data-confirm="Отправить итоги недели в канал прямо сейчас?">
+                <?= AdminUi::icon('calendar') ?>Отправить итоги недели
             </button>
         </div>
     </form>
