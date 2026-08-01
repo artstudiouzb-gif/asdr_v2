@@ -288,7 +288,10 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
     $langOptions = [];
     foreach ($activeLangs as $l) {
         $code = (string) $l['code'];
-        $href = Locale::url($path, $code) . '?' . \App\Core\LocalePreference::QUERY . '=' . rawurlencode($code);
+        // У связанной записи-перевода свой адрес: ведём сразу на него, иначе
+        // переключение языка отвечало редиректом.
+        $href = Locale::url(Locale::alternatePath($code), $code)
+            . '?' . \App\Core\LocalePreference::QUERY . '=' . rawurlencode($code);
         if ($code === 'uz') {
             // На узбекский всегда возвращаемся в латинице, даже из кириллицы.
             $href = '/script/latn?to=' . rawurlencode($href);
@@ -303,7 +306,7 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
         if ($code !== 'uz') {
             continue;
         }
-        $uzHref = Locale::url($path, 'uz') . '?' . \App\Core\LocalePreference::QUERY . '=uz';
+        $uzHref = Locale::url(Locale::alternatePath('uz'), 'uz') . '?' . \App\Core\LocalePreference::QUERY . '=uz';
         $langOptions[] = [
             'name' => 'Ўзбекча',
             'short' => 'ЎЗ',
@@ -617,9 +620,10 @@ if ($pageTitleText === '') {
       // + x-default (основной язык). Одинокий hreflang не выводим. ?>
 <?php if (count($hrefLangs) > 1): ?>
 <?php foreach ($hrefLangs as $hrefLang): ?>
-<link rel="alternate" hreflang="<?= htmlspecialchars((string) $hrefLang['code'], ENT_QUOTES) ?>" href="<?= htmlspecialchars($appUrl . Locale::url(Locale::path(), (string) $hrefLang['code']), ENT_QUOTES) ?>">
+<link rel="alternate" hreflang="<?= htmlspecialchars((string) $hrefLang['code'], ENT_QUOTES) ?>" href="<?= htmlspecialchars($appUrl . Locale::url(Locale::alternatePath((string) $hrefLang['code']), (string) $hrefLang['code']), ENT_QUOTES) ?>">
 <?php endforeach; ?>
-<link rel="alternate" hreflang="x-default" href="<?= htmlspecialchars($appUrl . Locale::url(Locale::path(), \App\Models\Language::defaultCode()), ENT_QUOTES) ?>">
+<?php $xDefault = \App\Models\Language::defaultCode(); ?>
+<link rel="alternate" hreflang="x-default" href="<?= htmlspecialchars($appUrl . Locale::url(Locale::alternatePath($xDefault), $xDefault), ENT_QUOTES) ?>">
 <?php endif; ?>
 <link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($siteName . ' — Новости', ENT_QUOTES) ?>" href="<?= htmlspecialchars(Locale::url('news/rss.xml', $currentLang), ENT_QUOTES) ?>">
 <?= \App\Core\OpenGraphHelper::render(

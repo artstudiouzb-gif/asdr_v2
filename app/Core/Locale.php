@@ -16,6 +16,9 @@ final class Locale
     private static string $path = '/';
     private static ?array $contentLangs = null;
 
+    /** @var array<string,string> */
+    private static array $alternatePaths = [];
+
     public static function set(string $code): void
     {
         self::$current = $code;
@@ -77,6 +80,33 @@ final class Locale
     public static function contentLangs(): ?array
     {
         return self::$contentLangs;
+    }
+
+    /**
+     * Собственные пути языковых версий записи (код → путь без префикса).
+     * У связанных переводов свой slug, и без этой карты hreflang и
+     * переключатель вели на чужой адрес, который отвечал редиректом:
+     * поисковику это лишний шаг, читателю — лишний запрос.
+     *
+     * @param array<string,string> $paths
+     */
+    public static function setAlternatePaths(array $paths): void
+    {
+        $clean = [];
+        foreach ($paths as $code => $path) {
+            $code = trim((string) $code);
+            $path = trim((string) $path);
+            if ($code !== '' && $path !== '') {
+                $clean[$code] = $path;
+            }
+        }
+        self::$alternatePaths = $clean;
+    }
+
+    /** Путь языковой версии; при отсутствии — путь текущего запроса. */
+    public static function alternatePath(string $code): string
+    {
+        return self::$alternatePaths[$code] ?? self::path();
     }
 
     /**

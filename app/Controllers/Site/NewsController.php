@@ -172,6 +172,7 @@ final class NewsController
         News::incrementViews((int) $news['id']);
         // hreflang и переключатель — только языки с переводом этой новости.
         Locale::setContentLangs($available);
+        Locale::setAlternatePaths(\App\Core\TranslationGroupHelper::publishedPaths('news', (int) $news['id'], 'news/'));
         $adjacent = News::adjacent($news, $lang);
 
         $sidebar = \App\Core\WidgetRenderer::sidebarFor($news['sidebar_layout'] ?? 'right_sidebar', $lang);
