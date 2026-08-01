@@ -1352,6 +1352,91 @@
         });
     })();
 
+    // --- Превью выбранных файлов до сохранения ---
+    // Снимки галереи появлялись в форме только после сохранения: редактор не
+    // видел ни что выбрал, ни сколько кадров, ни того, что выбор вообще
+    // сработал. Показываем их сразу и даём убрать лишний кадр, не начиная
+    // выбор заново. Подписи и порядок остаются послесохранёнными — они живут
+    // в БД и привязаны к id снимка.
+    (function initFilePreviews() {
+        if (!window.DataTransfer || !window.FileReader) { return; }
+
+        // Только растровые форматы. SVG умеет нести скрипт, и превью такого
+        // файла — лишний риск: ссылка вида blob: живёт в нашем origin, и
+        // открытая как страница она этот скрипт исполнит. Читаем data:-адресом,
+        // как это уже сделано у превью обложки выше.
+        var RASTER = /^image\/(jpeg|png|webp|gif|avif|bmp)$/i;
+
+        function render(box) {
+            if (!box) { return; }
+            var input = box.querySelector('[data-file-preview-input]');
+            var list = box.querySelector('[data-file-preview-list]');
+            if (!input || !list) { return; }
+
+            list.innerHTML = '';
+            var files = Array.prototype.slice.call(input.files || []);
+            list.hidden = files.length === 0;
+            if (files.length === 0) { return; }
+
+            var note = document.createElement('p');
+            note.className = 'file-preview__note form-hint';
+            note.textContent = 'Выбрано файлов: ' + files.length + '. Загрузятся при сохранении новости.';
+            list.appendChild(note);
+
+            files.forEach(function (file, i) {
+                var item = document.createElement('div');
+                item.className = 'file-preview__item';
+
+                if (RASTER.test(file.type)) {
+                    var img = document.createElement('img');
+                    img.alt = '';
+                    var reader = new FileReader();
+                    reader.onload = function (ev) { img.src = String(ev.target.result); };
+                    reader.readAsDataURL(file);
+                    item.appendChild(img);
+                }
+
+                var name = document.createElement('span');
+                name.className = 'file-preview__name';
+                name.textContent = file.name + ' · ' + Math.max(1, Math.round(file.size / 1024)) + ' КБ';
+                item.appendChild(name);
+
+                var drop = document.createElement('button');
+                drop.type = 'button';
+                drop.className = 'file-preview__drop';
+                drop.setAttribute('data-file-preview-drop', String(i));
+                drop.setAttribute('aria-label', 'Убрать «' + file.name + '» из выбора');
+                drop.textContent = '×';
+                item.appendChild(drop);
+
+                list.appendChild(item);
+            });
+        }
+
+        document.addEventListener('change', function (e) {
+            var input = e.target.closest('[data-file-preview-input]');
+            if (input) { render(input.closest('[data-file-preview]')); }
+        });
+
+        document.addEventListener('click', function (e) {
+            var drop = e.target.closest('[data-file-preview-drop]');
+            if (!drop) { return; }
+            e.preventDefault();
+            var box = drop.closest('[data-file-preview]');
+            var input = box ? box.querySelector('[data-file-preview-input]') : null;
+            if (!input) { return; }
+
+            // FileList доступен только на чтение — пересобираем через DataTransfer.
+            var skip = parseInt(drop.getAttribute('data-file-preview-drop'), 10);
+            var keep = new DataTransfer();
+            Array.prototype.slice.call(input.files || []).forEach(function (file, i) {
+                if (i !== skip) { keep.items.add(file); }
+            });
+            input.files = keep.files;
+            render(box);
+        });
+    })();
+
     // --- Умный интерактивный виджет фокальной точки (UI/UX Pro Max) ---
     (function initFocalPickers() {
         function updateFocal(picker) {

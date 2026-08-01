@@ -209,9 +209,14 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                         <?php elseif (!$isEdit): ?>
                             <span class="form-hint u-inline-9f398c70f1">Сохраните новость, чтобы управлять галереей.</span>
                         <?php endif; ?>
-                        <div class="u-inline-ef7f355c70">
-                            <input class="u-inline-e596099155" type="file" name="news_gallery[]" accept="image/*" multiple>
-                            <span class="form-hint u-inline-1da9facb4d">Выберите одно или несколько фото. Сжимаются в формат WebP.</span>
+                        <div data-file-preview>
+                            <div class="u-inline-ef7f355c70">
+                                <input class="u-inline-e596099155" type="file" name="news_gallery[]" accept="image/*" multiple data-file-preview-input>
+                                <span class="form-hint u-inline-1da9facb4d">Выберите одно или несколько фото. Сжимаются в формат WebP.</span>
+                            </div>
+                            <!-- Превью выбранного до сохранения: подписи и порядок
+                                 появятся после загрузки, но что выбрано — видно сразу. -->
+                            <div class="file-preview" data-file-preview-list hidden></div>
                         </div>
                     </div>
                 </div>

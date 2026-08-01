@@ -3449,6 +3449,62 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     display: none !important;
 }
 
+/* --- Превью файлов, выбранных но ещё не загруженных --- */
+.file-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+.file-preview__note {
+    flex: 0 0 100%;
+    margin: 0;
+}
+.file-preview__item {
+    position: relative;
+    width: 132px;
+    padding: 8px;
+    border: 1px solid var(--admin-border, #e1e3e8);
+    border-radius: 8px;
+    background: var(--admin-card-bg, #fff);
+}
+.file-preview__item img {
+    display: block;
+    width: 100%;
+    height: 84px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+.file-preview__name {
+    display: block;
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--admin-text-muted, #64748b);
+    word-break: break-all;
+}
+/* Крестик поверх снимка: в ряду из десяти кадров отдельная строка кнопок
+   съедала бы больше места, чем сами превью. */
+.file-preview__drop {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 22px;
+    color: #fff;
+    background: color-mix(in srgb, var(--admin-danger, #b32d2e) 85%, transparent);
+}
+.file-preview__drop:hover,
+.file-preview__drop:focus-visible {
+    background: var(--admin-danger, #b32d2e);
+}
+
 /* generated:inline-utilities:start */
 .u-inline-001013efee{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .u-inline-018813c94c{color:var(--admin-danger, #b42318);}
