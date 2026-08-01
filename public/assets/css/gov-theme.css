@@ -31,8 +31,9 @@
     --gov-title: var(--gov-navy);
     --radius: 12px;
     --container-max: 1200px;
-    /* Эмблема-звезда (два наложенных квадрата = 8-конечная звезда). */
-    --gov-emblem: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='4.7' y='4.7' width='14.6' height='14.6' rx='1'/%3E%3Crect x='4.7' y='4.7' width='14.6' height='14.6' rx='1' transform='rotate(45 12 12)'/%3E%3C/svg%3E");
+    /* Эмблема агентства: восьмиконечная звезда-гирих. Отдельным файлом,
+       а не data-URI: маска в 5 КБ раздувала бы каждый билд CSS. */
+    --gov-emblem: url("../img/emblem.svg");
 }
 :root[data-theme="dark"] {
     /* Премиальная глубокая тёмная тема — тёмно-синий полночный сланец */
@@ -3275,7 +3276,7 @@ span.imgcard__media::after {
     position: absolute;
     inset: 0;
     background: #fff;
-    opacity: .1;
+    opacity: .16;
     -webkit-mask: var(--gov-emblem) center / 58% no-repeat;
     mask: var(--gov-emblem) center / 58% no-repeat;
 }
@@ -3781,7 +3782,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     position: absolute;
     inset: 0;
     background: var(--gov-navy);
-    opacity: .12;
+    opacity: .18;
     -webkit-mask: var(--gov-emblem) center / 44% no-repeat;
     mask: var(--gov-emblem) center / 44% no-repeat;
 }
@@ -5502,16 +5503,20 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
    читать. Цвет — от акцента, поэтому меняется вместе с темой. */
 .act-card__emblem {
     position: absolute;
-    inset-block-start: -12px;
-    inset-inline-end: -12px;
+    inset-block-start: -14px;
+    inset-inline-end: -14px;
     width: 96px;
     height: 96px;
+    z-index: 0;
     background: var(--color-accent, var(--gov-teal));
-    opacity: .07;
+    opacity: .16;
     -webkit-mask: var(--gov-emblem) center / contain no-repeat;
     mask: var(--gov-emblem) center / contain no-repeat;
     pointer-events: none;
 }
+/* Текст всегда поверх водяного знака: длинное название иначе
+   наезжает на орнамент и оба становятся нечитаемыми. */
+.act-card__head, .act-card__title, .act-card__foot { position: relative; z-index: 1; }
 .act-card__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
 .act-card__number {
     font-family: var(--font-family, 'PT Sans', sans-serif);

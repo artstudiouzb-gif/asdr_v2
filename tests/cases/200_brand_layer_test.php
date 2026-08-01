@@ -111,6 +111,20 @@ test('Оглавление: скрытый по расписанию разде�
     assert_not_contains('href="#block-972"', $html);
 });
 
+test('Эмблема агентства подключена файлом и лежит на месте', function () {
+    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $svg = dirname(__DIR__, 2) . '/public/assets/img/emblem.svg';
+
+    assert_contains('--gov-emblem: url("../img/emblem.svg")', $css);
+    assert_true(is_file($svg), 'эмблема должна лежать рядом со стилями');
+    // Маска берёт форму из путей: заливка и размеры внутри файла не нужны,
+    // а вот viewBox обязателен — без него маска схлопывается.
+    assert_contains('viewBox=', (string) file_get_contents($svg));
+    // Тонкую линейную эмблему легко перекрыть текстом — водяной знак уходит
+    // под содержимое карточки.
+    assert_contains('.act-card__head, .act-card__title, .act-card__foot { position: relative; z-index: 1; }', $css);
+});
+
 test('Оглавление: закреплённая полоса не перекрывает якоря', function () {
     $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
     $js = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/blocks/anchor_nav.js');
