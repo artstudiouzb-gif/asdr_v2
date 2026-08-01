@@ -196,6 +196,16 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   Telegram. Достаточно любого; без обоих сессия ограничена профилем
   (`2fa_setup_required`, белый список путей в `public/index.php`). TOTP не
   зависит от сети — им и снимается риск запереть себя без Telegram.
+- **Формат постов в Telegram**: `App\Core\TelegramRichMessage` собирает
+  rich-сообщение (Bot API 10.1+, `sendRichMessage`): заголовок, слайд-шоу,
+  полный текст, второй язык под `<details>`, сноска с хештегами и подписью.
+  Предел 32768 знаков против 1024 у подписи к фото. Снимки в разметке — только
+  ссылками `tg://photo?id=…`, файлы уходят полем `media` (прямой https в `<img>`
+  API не принимает); `reply_markup` метод принимает, поэтому кнопки есть и там.
+  Настройка
+  `social_telegram_format` (auto|rich|classic): «auto» пробует новый формат и
+  при отказе Telegram молча откатывается на sendPhoto/sendMessage. В обычном
+  формате длинный текст уходит отдельным сообщением, а не режется.
 - **Telegram — один раздел `/admin/telegram`** (`TelegramController`): бот →
   привязка админа (коды входа) → канал → уведомления. Токен бота живёт в
   `telegram_bot_token`; `social_telegram_token` — необязательное

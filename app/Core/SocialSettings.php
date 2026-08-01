@@ -31,7 +31,7 @@ final class SocialSettings
      * становятся кликабельными сами; в Instagram ссылки не кликабельны).
      */
     public const FIELDS = [
-        'telegram' => ['token', 'chat_id', 'signature'],
+        'telegram' => ['token', 'chat_id', 'signature', 'format', 'silent'],
         'facebook' => ['token', 'page_id', 'signature'],
         'linkedin' => ['token', 'author', 'signature'],
         'instagram' => ['token', 'user_id', 'signature'],
@@ -86,6 +86,13 @@ final class SocialSettings
         }
         if ($field === 'chat_id') {
             return self::normalizeTelegramChatId($value);
+        }
+        if ($field === 'format') {
+            // auto — пробуем расширенный формат и откатываемся на обычный.
+            return in_array($value, ['auto', 'rich', 'classic'], true) ? $value : 'auto';
+        }
+        if ($field === 'silent') {
+            return $value === '1' ? '1' : '0';
         }
         if (in_array($field, ['page_id', 'user_id'], true)) {
             return $value === '' || preg_match('/^\d{3,30}$/', $value) === 1 ? $value : null;
@@ -266,12 +273,19 @@ final class SocialSettings
             }
         }
 
+        // Рубрика и дата публикации: строкой над заголовком в посте канала —
+        // по ней видно, о чём новость, ещё до заголовка.
+        $published = trim((string) ($news['published_at'] ?? ''));
+        $date = $published !== '' ? DateFormatter::long($published, Language::defaultCode()) : '';
+
         return [
             'message' => $message,
             'link' => $link,
             'image_url' => $cover,
             'title' => $title,
             'hashtags' => $hashtags,
+            'category' => trim((string) ($news['badge'] ?? '')),
+            'date' => $date,
             'gallery' => $gallery,
             'langs' => $langs,
         ];

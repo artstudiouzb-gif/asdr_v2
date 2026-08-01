@@ -195,6 +195,8 @@ final class TelegramController
         Setting::set('social_telegram_chat_id', $chatId);
         Setting::set('social_telegram_signature', $signature);
         Setting::set('social_telegram_enabled', $enabled);
+        Setting::set('social_telegram_format', (string) SocialSettings::normalizeConfigField('telegram', 'format', (string) ($_POST['format'] ?? 'auto')));
+        Setting::set('social_telegram_silent', !empty($_POST['silent']) ? '1' : '0');
         if (!empty($_POST['clear_own_token'])) {
             Setting::set('social_telegram_token', '');
         } elseif ($ownToken !== '') {

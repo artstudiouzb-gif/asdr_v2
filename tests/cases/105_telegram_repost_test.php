@@ -20,7 +20,7 @@ test('Telegram: ссылка стоит внутри своего языково
         ],
     ];
     $sig = '🌐 <a href="https://site.uz">Сайт</a>';
-    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'signature' => $sig], $post);
+    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'format' => 'classic', 'signature' => $sig], $post);
 
     assert_true($res['ok']);
     $text = (string) $seen['text'];
@@ -47,7 +47,7 @@ test('Telegram: одиночный язык не ломается (ссылка 
     };
     (new SocialPublisher($http))->publish(
         'telegram',
-        ['token' => 'T', 'chat_id' => '@c', 'signature' => 'подпись'],
+        ['token' => 'T', 'chat_id' => '@c', 'format' => 'classic', 'signature' => 'подпись'],
         ['message' => 'Текст новости', 'link' => 'https://site.uz/news/x', 'title' => 'Заголовок']
     );
 
@@ -58,10 +58,10 @@ test('Telegram: одиночный язык не ломается (ссылка 
     assert_true(mb_strpos($text, 'https://site.uz/news/x') < mb_strpos($text, 'подпись'));
 });
 
-test('Telegram: длинный двуязычный текст с ссылками влезает в лимит 1024', function () {
-    $seen = [];
-    $http = function ($m, $u, $b, $h) use (&$seen) {
-        $seen = json_decode($b, true);
+test('Telegram: длинный двуязычный текст доезжает целиком, ссылки на месте', function () {
+    $calls = [];
+    $http = function ($m, $u, $b, $h) use (&$calls) {
+        $calls[] = ['url' => $u, 'body' => json_decode($b, true)];
         return ['status' => 200, 'body' => '{"ok":true,"result":[{"message_id":5}]}'];
     };
     $post = [
@@ -72,14 +72,12 @@ test('Telegram: длинный двуязычный текст с ссылкам
             ['title' => 'Заголовок', 'excerpt' => str_repeat('р', 3000), 'link' => 'https://site.uz/news/x', 'read_more' => 'Читать на сайте →'],
         ],
     ];
-    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'signature' => 'подпись'], $post);
+    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'format' => 'classic', 'signature' => 'подпись'], $post);
 
-    // Лимит подписи к фото — 1024 символа видимого текста.
-    $visible = mb_strlen(strip_tags((string) $seen['caption']));
-    assert_true($visible <= 1024, "подпись обязана влезать в лимит, сейчас {$visible}");
-    // Обе ссылки уцелели: режется только текст анонсов.
-    assert_contains('Saytda o‘qish', (string) $seen['caption']);
-    assert_contains('Читать на сайте', (string) $seen['caption']);
+    $text = (string) ($calls[1]['body']['text'] ?? '');
+    assert_true(mb_strlen(strip_tags($text)) <= 4096, 'лимит обычного сообщения — 4096');
+    assert_contains('Saytda o‘qish', $text);
+    assert_contains('Читать на сайте', $text);
 });
 
 test('Повторная публикация: кнопка в админке отправляет заново, автопубликация — нет (БД)', function () {

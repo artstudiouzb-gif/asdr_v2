@@ -63,22 +63,34 @@ final class SocialPublisher
             return self::err('Не заданы токен бота или chat_id канала Telegram.');
         }
 
+        // Расширенный формат (Bot API 10.1+): текст до 32768 символов вместо
+        // 1024 у подписи, вторая языковая версия — под «развернуть». Если метод
+        // не поддержан или формат не принят, публикация не срывается: ниже
+        // отрабатывает прежний путь sendPhoto/sendMessage.
+        $format = (string) ($cfg['format'] ?? 'auto');
+        if ($format !== 'classic') {
+            $rich = $this->telegramRich($cfg, $post);
+            if ($rich !== null && ($rich['ok'] || $format === 'rich')) {
+                return $rich;
+            }
+        }
+
         $esc = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
         // Публичные https-изображения: обложка + галерея, максимум 10 (лимит API).
-        $photos = [];
-        foreach (array_merge(
-            !empty($post['image_url']) ? [(string) $post['image_url']] : [],
-            array_map('strval', (array) ($post['gallery'] ?? []))
-        ) as $url) {
-            if (preg_match('#^https://#', $url) && !in_array($url, $photos, true)) {
-                $photos[] = $url;
-            }
-        }
-        $photos = array_slice($photos, 0, 10);
+        $photos = array_slice($this->telegramPhotos($post), 0, 10);
 
-        $limit = $photos !== [] ? self::TG_CAPTION_LIMIT : self::TG_TEXT_LIMIT;
-        $caption = self::telegramCaption($post, (string) ($cfg['signature'] ?? ''), $limit, $esc);
+        // Полный текст без урезания. Если он не влезает в подпись к фото,
+        // снимок уходит отдельным сообщением, а текст — обычным: у сообщения
+        // лимит 4096 против 1024 у подписи, и анонсы перестают резаться.
+        $full = self::telegramCaption($post, (string) ($cfg['signature'] ?? ''), self::TG_TEXT_LIMIT, $esc);
+        $splitText = $photos !== [] && mb_strlen(strip_tags($full)) > self::TG_CAPTION_LIMIT;
+        $caption = $splitText
+            ? ''
+            : ($photos !== []
+                ? self::telegramCaption($post, (string) ($cfg['signature'] ?? ''), self::TG_CAPTION_LIMIT, $esc)
+                : $full);
+        $buttons = self::telegramButtons($post);
 
         // Токен используется в URL как есть: rawurlencode ломал бы двоеточие
         // (12345:AAH… → 12345%3AAAH…), и Bot API отвечал бы 404 «Not Found».
@@ -101,9 +113,17 @@ final class SocialPublisher
                 $media[] = $item;
             }
             $payload = ['chat_id' => $cfg['chat_id'], 'media' => $media];
+            if (!empty($cfg['silent'])) {
+                $payload['disable_notification'] = true;
+            }
             $res = ($this->http)('POST', $api . '/sendMediaGroup', (string) json_encode($payload, JSON_UNESCAPED_UNICODE), $headers);
+            $group = $this->interpretTelegram($res, true);
+            // К альбому кнопку прикрепить нельзя — она уходит с текстом следом.
+            if ($group['ok'] && $splitText) {
+                $this->telegramText($cfg, $api, $headers, $full, $buttons, $post);
+            }
 
-            return $this->interpretTelegram($res, true);
+            return $group;
         }
 
         if (count($photos) === 1) {
@@ -116,16 +136,47 @@ final class SocialPublisher
             if (!empty($cfg['show_caption_above_media']) || !empty($post['show_caption_above_media'])) {
                 $payload['show_caption_above_media'] = true;
             }
+            if (!$splitText && $buttons !== []) {
+                $payload['reply_markup'] = ['inline_keyboard' => [$buttons]];
+            }
+            if (!empty($cfg['silent'])) {
+                $payload['disable_notification'] = true;
+            }
             $res = ($this->http)('POST', $api . '/sendPhoto', (string) json_encode($payload, JSON_UNESCAPED_UNICODE), $headers);
+            $photoRes = $this->interpretTelegram($res);
+            if ($photoRes['ok'] && $splitText) {
+                $this->telegramText($cfg, $api, $headers, $full, $buttons, $post);
+            }
 
-            return $this->interpretTelegram($res);
+            return $photoRes;
         }
 
+        return $this->telegramText($cfg, $api, $headers, $caption, $buttons, $post);
+    }
+
+    /**
+     * Обычное текстовое сообщение с кнопками. Вынесено отдельно: тем же путём
+     * уходит текст, не поместившийся в подпись к фото.
+     *
+     * @param array<string,string> $cfg
+     * @param list<string> $headers
+     * @param list<array{text:string,url:string}> $buttons
+     * @param array<string,mixed> $post
+     * @return array{ok:bool, remote_id:?string, error:?string}
+     */
+    private function telegramText(array $cfg, string $api, array $headers, string $text, array $buttons, array $post): array
+    {
         $payload = [
             'chat_id' => $cfg['chat_id'],
-            'text' => $caption,
+            'text' => $text,
             'parse_mode' => 'HTML',
         ];
+        if ($buttons !== []) {
+            $payload['reply_markup'] = ['inline_keyboard' => [$buttons]];
+        }
+        if (!empty($cfg['silent'])) {
+            $payload['disable_notification'] = true;
+        }
         if (!empty($cfg['link_preview_options']) && is_array($cfg['link_preview_options'])) {
             $payload['link_preview_options'] = $cfg['link_preview_options'];
         } elseif (!empty($post['link_preview_options']) && is_array($post['link_preview_options'])) {
@@ -134,6 +185,105 @@ final class SocialPublisher
         $res = ($this->http)('POST', $api . '/sendMessage', (string) json_encode($payload, JSON_UNESCAPED_UNICODE), $headers);
 
         return $this->interpretTelegram($res);
+    }
+
+    /**
+     * Кнопки под постом — по одной на язык. Ссылка в теле поста остаётся:
+     * при пересылке кнопки не всегда переносятся вместе с сообщением.
+     *
+     * @param array<string,mixed> $post
+     * @return list<array{text:string,url:string}>
+     */
+    private static function telegramButtons(array $post): array
+    {
+        $buttons = [];
+        foreach ((array) ($post['langs'] ?? []) as $lang) {
+            $url = trim((string) ($lang['link'] ?? ''));
+            $text = trim((string) ($lang['read_more'] ?? ''));
+            if ($url === '' || !str_starts_with($url, 'https://')) {
+                continue;
+            }
+            // Стрелка в подписи кнопки лишняя: кнопка и так ведёт наружу.
+            $buttons[] = ['text' => rtrim(str_replace('→', '', $text)) ?: 'Открыть', 'url' => $url];
+        }
+
+        return array_slice($buttons, 0, 3);
+    }
+
+    /**
+     * Публикация расширенным форматом (`sendRichMessage`, Bot API 10.1+).
+     * Возвращает null, если формат к этому посту неприменим — тогда работает
+     * прежний путь.
+     *
+     * @param array<string,string> $cfg
+     * @param array<string,mixed> $post
+     * @return array{ok:bool, remote_id:?string, error:?string}|null
+     */
+    private function telegramRich(array $cfg, array $post): ?array
+    {
+        $langs = (array) ($post['langs'] ?? []);
+        if ($langs === []) {
+            return null;
+        }
+
+        $doc = TelegramRichMessage::build(
+            $langs,
+            $this->telegramPhotos($post),
+            (string) ($cfg['signature'] ?? ''),
+            (string) ($post['category'] ?? ''),
+            (string) ($post['date'] ?? ''),
+            (string) ($post['hashtags'] ?? '')
+        );
+        if ($doc['html'] === '' || !TelegramRichMessage::fits($doc['html'])) {
+            return null;
+        }
+
+        // Снимки в разметке — ссылками tg://photo?id=…, сами файлы уходят
+        // полем media: прямой https-адрес в <img> API не принимает.
+        $rich = ['html' => $doc['html']];
+        if ($doc['media'] !== []) {
+            $rich['media'] = $doc['media'];
+        }
+        $payload = [
+            'chat_id' => $cfg['chat_id'],
+            'rich_message' => $rich,
+        ];
+        $buttons = self::telegramButtons($post);
+        if ($buttons !== []) {
+            $payload['reply_markup'] = ['inline_keyboard' => [$buttons]];
+        }
+        if (!empty($cfg['silent'])) {
+            $payload['disable_notification'] = true;
+        }
+        $res = ($this->http)(
+            'POST',
+            self::TG_API . '/bot' . trim((string) $cfg['token']) . '/sendRichMessage',
+            (string) json_encode($payload, JSON_UNESCAPED_UNICODE),
+            ['Content-Type: application/json']
+        );
+
+        return $this->interpretTelegram($res);
+    }
+
+    /**
+     * Публичные https-изображения поста: обложка и галерея, без повторов.
+     *
+     * @param array<string,mixed> $post
+     * @return list<string>
+     */
+    private function telegramPhotos(array $post): array
+    {
+        $photos = [];
+        foreach (array_merge(
+            !empty($post['image_url']) ? [(string) $post['image_url']] : [],
+            array_map('strval', (array) ($post['gallery'] ?? []))
+        ) as $url) {
+            if (preg_match('#^https://#', $url) && !in_array($url, $photos, true)) {
+                $photos[] = $url;
+            }
+        }
+
+        return $photos;
     }
 
     /**
@@ -315,10 +465,22 @@ final class SocialPublisher
                 ? "\n\n" . '<a href="' . $esc((string) $l['link']) . '">' . $esc((string) $l['read_more']) . '</a>'
                 : '';
         };
-        $tail = $signature !== '' ? "\n\n" . $signature : '';
+        // Рубрика и дата — служебной строкой сверху, хештеги — в самом низу.
+        $head = '';
+        $meta = array_values(array_filter([
+            trim((string) ($post['category'] ?? '')),
+            trim((string) ($post['date'] ?? '')),
+        ], static fn (string $v): bool => $v !== ''));
+        if ($meta !== []) {
+            $head = '<b>' . $esc(implode(' · ', $meta)) . '</b>' . "\n\n";
+        }
+        $hashtags = trim((string) ($post['hashtags'] ?? ''));
+        $tail = ($hashtags !== '' ? "\n\n" . $esc($hashtags) : '')
+            . ($signature !== '' ? "\n\n" . $signature : '');
 
         // Считаем фиксированную часть: заголовки, ссылки, разделители, подпись.
-        $fixed = mb_strlen(strip_tags($tail)) + (count($langs) - 1) * mb_strlen(strip_tags($sep));
+        $fixed = mb_strlen(strip_tags($head)) + mb_strlen(strip_tags($tail))
+            + (count($langs) - 1) * mb_strlen(strip_tags($sep));
         foreach ($langs as $l) {
             $fixed += mb_strlen((string) $l['title']) + 2; // +2 — перенос строки после заголовка
             $fixed += mb_strlen(strip_tags($linkFor($l)));
@@ -340,7 +502,7 @@ final class SocialPublisher
                 . $linkFor($l);
         }
 
-        return implode($sep, $parts) . $tail;
+        return $head . implode($sep, $parts) . $tail;
     }
 
     /**
