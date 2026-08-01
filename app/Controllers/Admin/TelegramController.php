@@ -240,6 +240,8 @@ final class TelegramController
         Setting::set('social_telegram_enabled', $enabled);
         Setting::set('social_telegram_format', (string) SocialSettings::normalizeConfigField('telegram', 'format', (string) ($_POST['format'] ?? 'auto')));
         Setting::set('social_telegram_silent', !empty($_POST['silent']) ? '1' : '0');
+        Setting::set('social_telegram_second_lang', (string) SocialSettings::normalizeConfigField('telegram', 'second_lang', (string) ($_POST['second_lang'] ?? 'inline')));
+        Setting::set('social_telegram_buttons', !empty($_POST['buttons']) ? '1' : '0');
         if (!empty($_POST['clear_own_token'])) {
             Setting::set('social_telegram_token', '');
         } elseif ($ownToken !== '') {

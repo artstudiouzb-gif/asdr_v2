@@ -245,13 +245,32 @@ $mark = static function (bool $done, bool $started = true): string {
             </select>
             <span class="form-hint">
                 Расширенный формат (Bot API 10.1+) снимает лимит подписи в 1024 символа: текст уходит целиком,
-                вторая языковая версия — под «развернуть», галерея — слайд-шоу. Если Telegram его не примет,
+                обе языковые версии — в одном посте, галерея — слайд-шоу. Если Telegram его не примет,
                 вариант «с откатом» опубликует пост прежним способом.
             </span>
         </div>
+
+        <div class="form-field">
+            <label for="tg_second_lang">Вторая языковая версия</label>
+            <?php $second = (string) ($channel['second_lang'] ?? '') === 'details' ? 'details' : 'inline'; ?>
+            <select id="tg_second_lang" name="second_lang">
+                <option value="inline" <?= $second === 'inline' ? 'selected' : '' ?>>Подряд в тексте поста</option>
+                <option value="details" <?= $second === 'details' ? 'selected' : '' ?>>Свёрнуто, под «развернуть»</option>
+            </select>
+            <span class="form-hint">
+                Перевод из вкладки языка в самой новости уходит тем же постом, после разделителя.
+                Фотографии общие — они берутся из основной новости.
+            </span>
+        </div>
+
         <div class="form-field form-field--checkbox">
             <input type="checkbox" id="tg_silent" name="silent" value="1" <?= !empty($channel['silent']) ? 'checked' : '' ?>>
             <label for="tg_silent">Публиковать без звука</label>
+        </div>
+        <div class="form-field form-field--checkbox">
+            <input type="checkbox" id="tg_buttons" name="buttons" value="1" <?= (string) ($channel['buttons'] ?? '1') !== '0' ? 'checked' : '' ?>>
+            <label for="tg_buttons">Кнопки со ссылкой под постом</label>
+            <span class="form-hint">Ссылка на каждую версию и так стоит в тексте своего блока.</span>
         </div>
 
         <div class="form-field">

@@ -90,7 +90,7 @@ final class SocialPublisher
             : ($photos !== []
                 ? self::telegramCaption($post, (string) ($cfg['signature'] ?? ''), self::TG_CAPTION_LIMIT, $esc)
                 : $full);
-        $buttons = self::telegramButtons($post);
+        $buttons = self::telegramButtons($post, $cfg);
 
         // Токен используется в URL как есть: rawurlencode ломал бы двоеточие
         // (12345:AAH… → 12345%3AAAH…), и Bot API отвечал бы 404 «Not Found».
@@ -194,8 +194,15 @@ final class SocialPublisher
      * @param array<string,mixed> $post
      * @return list<array{text:string,url:string}>
      */
-    private static function telegramButtons(array $post): array
+    private static function telegramButtons(array $post, array $cfg = []): array
     {
+        // Ссылка на каждую версию уже стоит в тексте своего языкового блока,
+        // поэтому кнопки можно отключить: в посте, который редактор потом
+        // дорабатывает руками, они лишний ряд.
+        if ((string) ($cfg['buttons'] ?? '1') === '0') {
+            return [];
+        }
+
         $buttons = [];
         foreach ((array) ($post['langs'] ?? []) as $lang) {
             $url = trim((string) ($lang['link'] ?? ''));
@@ -233,7 +240,8 @@ final class SocialPublisher
             (string) ($post['category'] ?? ''),
             (string) ($post['date'] ?? ''),
             (string) ($post['hashtags'] ?? ''),
-            (array) ($post['gallery_meta'] ?? [])
+            (array) ($post['gallery_meta'] ?? []),
+            (string) ($cfg['second_lang'] ?? '') === 'details' ? 'details' : 'inline'
         );
         if ($doc['html'] === '' || !TelegramRichMessage::fits($doc['html'])) {
             return null;
@@ -249,7 +257,7 @@ final class SocialPublisher
             'chat_id' => $cfg['chat_id'],
             'rich_message' => $rich,
         ];
-        $buttons = self::telegramButtons($post);
+        $buttons = self::telegramButtons($post, $cfg);
         if ($buttons !== []) {
             $payload['reply_markup'] = ['inline_keyboard' => [$buttons]];
         }

@@ -61,9 +61,11 @@ test('Rich: пост уходит одним sendRichMessage со всей вё�
     assert_same(2, count($buttons), 'по кнопке на язык');
     assert_contains('<h1>Sarlavha</h1>', $html);
     assert_contains('Мероприятия · 1 августа 2026', $html);
-    // Второй язык — под «развернуть», а не вторым экраном текста.
-    assert_contains('<details><summary>Русский</summary>', $html);
+    // Второй язык — тем же постом, подряд за разделителем: редактор потом
+    // дорабатывает пост в канале руками, и спойлер там только мешает.
     assert_contains('Русский анонс.', $html);
+    assert_contains('<h2>Заголовок</h2>', $html);
+    assert_not_contains('<details>', $html);
     // Галерея — слайд-шоу: альбом из снимков занимал бы весь экран ленты.
     assert_contains('<tg-slideshow>', $html);
     assert_contains('<p>#реформы</p>', $html, 'хештеги отдельным абзацем — Telegram сам их линкует');

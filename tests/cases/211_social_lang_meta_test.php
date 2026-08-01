@@ -31,11 +31,35 @@ test('Rich-пост: у каждого языка своя рубрика и д�
 
     assert_contains('Tadbirlar · 1-avgust, 2026-yil', $html);
     assert_contains('Мероприятия · 1 августа 2026 г.', $html);
-    // Русская строка — внутри своего <details>, а не над узбекским заголовком.
+    // Русская строка — над русским заголовком, а не в шапке всего поста.
     assert_true(
-        mb_strpos($html, '<details>') < mb_strpos($html, 'Мероприятия · 1 августа'),
-        'русские рубрика и дата идут внутри свёрнутого блока'
+        mb_strpos($html, 'Sarlavha') < mb_strpos($html, 'Мероприятия · 1 августа'),
+        'русские рубрика и дата идут при своём заголовке'
     );
+});
+
+test('Второй язык: подряд по умолчанию, под «развернуть» — по настройке', function () {
+    $inline = TelegramRichMessage::build(meta_langs(), [])['html'];
+    assert_not_contains('<details>', $inline);
+    assert_contains('<h2>Заголовок</h2>', $inline);
+
+    $details = TelegramRichMessage::build(meta_langs(), [], '', '', '', '', [], 'details')['html'];
+    assert_contains('<details><summary>Русский</summary>', $details);
+});
+
+test('Кнопки под постом отключаются настройкой', function () {
+    $post = ['message' => 'Sarlavha', 'title' => 'Sarlavha', 'link' => 'https://site.uz/news/x',
+             'image_url' => '', 'gallery' => [], 'langs' => meta_langs()];
+    $seen = [];
+    $http = function ($m, $u, $b, $h) use (&$seen) { $seen = json_decode($b, true); return ['status' => 200, 'body' => '{"ok":true,"result":{"message_id":5}}']; };
+
+    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'buttons' => '0'], $post);
+    assert_true(!isset($seen['reply_markup']), 'кнопок нет');
+    // Ссылки при этом остаются в тексте своих языковых блоков.
+    assert_contains('https://site.uz/ru/news/x', (string) $seen['rich_message']['html']);
+
+    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c'], $post);
+    assert_same(2, count($seen['reply_markup']['inline_keyboard'][0] ?? []), 'по умолчанию кнопки на месте');
 });
 
 test('Классический пост: дата над заголовком своего языка', function () {

@@ -31,7 +31,7 @@ final class SocialSettings
      * становятся кликабельными сами; в Instagram ссылки не кликабельны).
      */
     public const FIELDS = [
-        'telegram' => ['token', 'chat_id', 'signature', 'format', 'silent'],
+        'telegram' => ['token', 'chat_id', 'signature', 'format', 'silent', 'second_lang', 'buttons'],
         'facebook' => ['token', 'page_id', 'signature'],
         'linkedin' => ['token', 'author', 'signature'],
         'instagram' => ['token', 'user_id', 'signature'],
@@ -93,6 +93,16 @@ final class SocialSettings
         }
         if ($field === 'silent') {
             return $value === '1' ? '1' : '0';
+        }
+        if ($field === 'second_lang') {
+            // Пустое значение — «подряд»: второй язык виден сразу, пост можно
+            // дорабатывать руками, не разворачивая спойлер.
+            return $value === 'details' ? 'details' : 'inline';
+        }
+        if ($field === 'buttons') {
+            // Ссылки на обе версии уже стоят в тексте своих блоков, поэтому
+            // кнопки — дело вкуса. Пустое значение = кнопки есть (как было).
+            return $value === '0' ? '0' : '1';
         }
         if (in_array($field, ['page_id', 'user_id'], true)) {
             return $value === '' || preg_match('/^\d{3,30}$/', $value) === 1 ? $value : null;

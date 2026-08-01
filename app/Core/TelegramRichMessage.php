@@ -40,7 +40,8 @@ final class TelegramRichMessage
         string $category = '',
         string $date = '',
         string $hashtags = '',
-        array $photoMeta = []
+        array $photoMeta = [],
+        string $secondLang = 'inline'
     ): array {
         if ($langs === []) {
             return ['html' => '', 'media' => []];
@@ -82,16 +83,19 @@ final class TelegramRichMessage
         $html .= self::media($media, $esc);
         $html .= self::body($first, $esc);
 
-        // Остальные языки — под «развернуть»: пост не растёт вдвое, но текст
-        // на месте, и его не нужно дописывать руками из админки.
+        // Остальные языки — тем же текстом следом за разделителем. Под
+        // «развернуть» (`details`) пост компактнее, но редактору, который
+        // дорабатывает пост в канале руками, спойлер только мешает.
         foreach ($rest as $lang) {
             $html .= '<hr/>';
-            $label = trim((string) ($lang['label'] ?? '')) ?: mb_strtoupper((string) ($lang['code'] ?? ''));
-            $html .= '<details><summary>' . $esc($label) . '</summary>'
-                . $metaLine($lang)
+            $section = $metaLine($lang)
                 . '<h2>' . $esc((string) $lang['title']) . '</h2>'
-                . self::body($lang, $esc)
-                . '</details>';
+                . self::body($lang, $esc);
+            if ($secondLang === 'details') {
+                $label = trim((string) ($lang['label'] ?? '')) ?: mb_strtoupper((string) ($lang['code'] ?? ''));
+                $section = '<details><summary>' . $esc($label) . '</summary>' . $section . '</details>';
+            }
+            $html .= $section;
         }
 
         // Хештеги — отдельным абзацем: Telegram сам делает их кликабельными.
