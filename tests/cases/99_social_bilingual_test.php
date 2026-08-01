@@ -79,10 +79,11 @@ test('Telegram: длинный текст с фото уходит отдель�
     assert_true(mb_strlen(strip_tags($text)) > 1024, 'в подпись такой текст не поместился бы');
 });
 
-test('Telegram: под постом появляются кнопки на обе языковые версии', function () {
+test('Telegram: включённые кнопки ведут на обе языковые версии', function () {
     $seen = [];
     $http = function ($m, $u, $b, $h) use (&$seen) { $seen = json_decode($b, true); return ['status' => 200, 'body' => '{"ok":true,"result":{"message_id":5}}']; };
-    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'format' => 'classic'], bilingual_post());
+    // Кнопки — не поведение по умолчанию, а галочка в настройках канала.
+    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'format' => 'classic', 'buttons' => '1'], bilingual_post());
 
     $rows = $seen['reply_markup']['inline_keyboard'][0] ?? [];
     assert_same(2, count($rows), 'по кнопке на язык');

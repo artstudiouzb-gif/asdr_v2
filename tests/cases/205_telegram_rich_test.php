@@ -56,9 +56,8 @@ test('Rich: пост уходит одним sendRichMessage со всей вё�
     assert_same('p1', (string) $rich['media'][0]['id']);
     assert_same('photo', (string) $rich['media'][0]['media']['type']);
     assert_same('https://site.uz/cover.jpg', (string) $rich['media'][0]['media']['media']);
-    // sendRichMessage принимает reply_markup — кнопки есть и в новом формате.
-    $buttons = $calls[0]['body']['reply_markup']['inline_keyboard'][0] ?? [];
-    assert_same(2, count($buttons), 'по кнопке на язык');
+    // По умолчанию кнопок нет: ссылки стоят в тексте каждой языковой версии.
+    assert_true(!isset($calls[0]['body']['reply_markup']), 'кнопок по умолчанию нет');
     assert_contains('<h1>Sarlavha</h1>', $html);
     assert_contains('Мероприятия · 1 августа 2026', $html);
     // Второй язык — тем же постом, подряд за разделителем: редактор потом
