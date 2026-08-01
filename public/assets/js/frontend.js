@@ -47,6 +47,21 @@
         }, { passive: true });
     })();
 
+    // Фон внутри карусели обложки принадлежит слайду: пока слайд не показан,
+    // его видео не играет, а YouTube даже не загружается — иначе страница
+    // тянула бы все ролики сразу. Следим за классом слайда, а не за событиями
+    // слайдера: так вся логика фона остаётся в одном месте.
+    var heroSlideOf = function (el) {
+        return el.closest ? el.closest('.block-hero__slide') : null;
+    };
+    var heroSlideShown = function (slide) {
+        return slide === null || slide.classList.contains('is-active');
+    };
+    var onHeroSlideToggle = function (slide, handler) {
+        if (!slide || !window.MutationObserver) { return; }
+        new MutationObserver(handler).observe(slide, { attributes: true, attributeFilter: ['class'] });
+    };
+
     // MP4 в Hero — декоративный фон, а не видеоплеер. Атрибутов разметки
     // достаточно в большинстве браузеров, но после возврата на вкладку или
     // системной паузы autoplay может не возобновиться сам. Восстанавливаем
@@ -64,7 +79,9 @@
                 video.setAttribute('preload', 'none');
                 return;
             }
+            var slide = heroSlideOf(video);
             var resume = function () {
+                if (!heroSlideShown(slide)) { return; }
                 video.controls = false;
                 video.muted = true;
                 video.defaultMuted = true;
@@ -99,6 +116,16 @@
             document.addEventListener('visibilitychange', function () {
                 if (!document.hidden) { resume(); }
             });
+            onHeroSlideToggle(slide, function () {
+                if (heroSlideShown(slide)) {
+                    // Слайд вернулся — показываем ролик с начала, а не с
+                    // середины, на которой посетитель его оставил.
+                    video.currentTime = 0;
+                    resume();
+                } else {
+                    video.pause();
+                }
+            });
 
             resume();
         });
@@ -119,6 +146,7 @@
                 return;
             }
             var container = frame.closest('[data-hero-youtube-container]');
+            var slide = heroSlideOf(frame);
             var loaded = false;
             var readyTimer = null;
             var markReady = function () {
@@ -140,6 +168,7 @@
                 }), '*');
             };
             var resume = function () {
+                if (!heroSlideShown(slide)) { return; }
                 command('mute');
                 command('setLoop', [true]);
                 command('playVideo');
@@ -204,6 +233,19 @@
                     // Игнорируем невалидные сообщения от сторонних скриптов
                 }
             });
+
+            if (slide) {
+                onHeroSlideToggle(slide, function () {
+                    if (heroSlideShown(slide)) {
+                        load();
+                        resume();
+                    } else if (loaded) {
+                        command('pauseVideo');
+                    }
+                });
+                if (heroSlideShown(slide)) { load(); }
+                return;
+            }
 
             if ('IntersectionObserver' in window) {
                 var observer = new IntersectionObserver(function (entries) {

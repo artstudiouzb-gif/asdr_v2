@@ -155,13 +155,12 @@ $templateCss = ($heroRootStyle !== '' ? '#block-' . $blockId . ' .block-hero{' .
     . (($hasMedia || $isSlider) && $overlayEnabled ? "\n#block-" . $blockId . ' .block-hero__scrim{' . $scrimStyle . '}' : '')
     . ($textStyle !== '' ? "\n#block-" . $blockId . ' .block-hero__text{' . $textStyle . '}' : '');
 
-$youtubeEmbedUrl = '';
-if ($bgType === 'youtube' && $youtubeId !== null) {
+$youtubeEmbed = static function (string $id): string {
     $youtubeParams = [
         'autoplay' => '1',
         'mute' => '1',
         'loop' => '1',
-        'playlist' => $youtubeId,
+        'playlist' => $id,
         'controls' => '0',
         'playsinline' => '1',
         'disablekb' => '1',
@@ -172,9 +171,50 @@ if ($bgType === 'youtube' && $youtubeId !== null) {
     if ($youtubeOrigin !== '') {
         $youtubeParams['origin'] = $youtubeOrigin;
     }
-    $youtubeEmbedUrl = 'https://www.youtube-nocookie.com/embed/' . $youtubeId
+
+    return 'https://www.youtube-nocookie.com/embed/' . $id
         . '?' . http_build_query($youtubeParams, '', '&', PHP_QUERY_RFC3986);
-}
+};
+/**
+ * Фон обложки: фото, mp4 или YouTube. Разметка одна и та же для одиночной
+ * обложки и для слайда карусели — различаются только источники и приоритет
+ * загрузки ($lazy у слайдов, кроме первого).
+ */
+$heroMedia = static function (string $type, string $image, string $videoFile, ?string $ytId, string $posClasses, bool $lazy) use ($youtubeEmbed): string {
+    if ($type === 'video' && $videoFile !== '') {
+        // Отложенное видео стартует не по атрибуту autoplay, а из frontend.js,
+        // когда слайд действительно показан: иначе карусель тянула бы все
+        // ролики сразу.
+        return '<video class="block-hero__video ' . $posClasses . '" data-hero-background-video'
+            . ($lazy ? ' preload="none"' : ' autoplay preload="metadata"')
+            . ' muted loop playsinline webkit-playsinline'
+            . ' disablepictureinpicture disableremoteplayback'
+            . ' controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"'
+            . ' tabindex="-1"' . ($image !== '' ? ' poster="' . htmlspecialchars($image, ENT_QUOTES) . '"' : '')
+            . ' aria-hidden="true"><source src="' . htmlspecialchars($videoFile, ENT_QUOTES) . '" type="video/mp4"></video>';
+    }
+
+    if ($type === 'youtube' && $ytId !== null) {
+        $poster = '';
+        if ($image !== '' && UrlGuard::isSafeMedia($image)) {
+            $poster = '<img class="block-hero__youtube-poster ' . $posClasses . '"'
+                . ' src="' . htmlspecialchars($image, ENT_QUOTES) . '" alt=""'
+                . ($lazy ? ' loading="lazy" decoding="async"' : ' loading="eager" decoding="async" fetchpriority="high"')
+                . ' aria-hidden="true">';
+        }
+
+        return $poster . '<div class="block-hero__yt" data-hero-youtube-container aria-hidden="true">'
+            . '<iframe data-hero-youtube-background data-src="' . htmlspecialchars($youtubeEmbed($ytId), ENT_QUOTES) . '"'
+            . ' tabindex="-1" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"'
+            . ' allow="autoplay; encrypted-media" aria-hidden="true"></iframe></div>';
+    }
+
+    if ($type === 'image' && $image !== '') {
+        return Media::picture($image, '', null, null, 'block-hero__image ' . $posClasses, $lazy, '100vw', true, 'block-hero__media ' . $posClasses);
+    }
+
+    return '';
+};
 ?>
 <?php if ($isSlider): ?>
 <?php
@@ -189,6 +229,14 @@ if ($bgType === 'youtube' && $youtubeId !== null) {
         <?php foreach ($slides as $index => $slide): ?>
             <?php
             $slideImage = trim((string) ($slide['image'] ?? ''));
+            $slideVideo = trim((string) ($slide['video_url'] ?? ''));
+            $slideYoutubeId = Video::youtubeId((string) ($slide['youtube_url'] ?? ''));
+            // Тип фона слайда обычно уже посчитан при сохранении; для старых
+            // и вручную заведённых данных выводим его из заполненных полей.
+            $slideMediaType = (string) ($slide['media_type'] ?? '');
+            if (!in_array($slideMediaType, ['image', 'video', 'youtube'], true)) {
+                $slideMediaType = $slideYoutubeId !== null ? 'youtube' : ($slideVideo !== '' ? 'video' : 'image');
+            }
             $slidePos = in_array($slide['text_position'] ?? '', ['left', 'center', 'right'], true) ? $slide['text_position'] : $textPos;
             $slideLink = trim((string) ($slide['link_url'] ?? ''));
             $slideTitle = trim((string) ($slide['title'] ?? ''));
@@ -202,9 +250,7 @@ if ($bgType === 'youtube' && $youtubeId !== null) {
                  role="group" aria-roledescription="<?= htmlspecialchars(t('Слайд'), ENT_QUOTES) ?>"
                  aria-label="<?= ($index + 1) . ' ' . htmlspecialchars(t('из'), ENT_QUOTES) . ' ' . $slideCount ?>"
                  aria-hidden="<?= $index === 0 ? 'false' : 'true' ?>">
-                <?php if ($slideImage !== ''): ?>
-                    <?= Media::picture($slideImage, '', null, null, 'block-hero__image ' . $slideMediaClasses, $index !== 0, '100vw', true, 'block-hero__media ' . $slideMediaClasses) ?>
-                <?php endif; ?>
+                <?= $heroMedia($slideMediaType, $slideImage, $slideVideo, $slideYoutubeId, $slideMediaClasses, $index !== 0) ?>
                 <?php if ($overlayEnabled): ?><div class="block-hero__scrim<?= $overlaySolid ? ' block-hero__scrim--solid' : '' ?>" aria-hidden="true"></div><?php endif; ?>
                 <?php if ($slideLink !== '' && UrlGuard::isSafeLink($slideLink)): ?>
                     <?php // Ссылка-подложка: кликабелен весь слайд, при этом кнопки
@@ -260,38 +306,7 @@ if ($bgType === 'youtube' && $youtubeId !== null) {
 <?php // Без медиа и без своего фона hero — это просто шапка страницы:
       // карточка с рамкой и подложкой в этой роли читается как чужой блок. ?>
 <div class="block-hero<?= $hasMedia ? ' block-hero--media' : '' ?><?= (!$hasMedia && $heroBg === '') ? ' block-hero--plain' : '' ?><?= $heroBg !== '' ? ' block-hero--bgcolor' : '' ?><?= ($bgType === 'video' || $bgType === 'youtube') ? ' block-hero--video' : '' ?> block-hero--w-<?= $heroWidth ?> block-hero--h-<?= $heroHeight ?> block-hero--pos-<?= $textPos ?>">
-    <?php if ($bgType === 'video' && $videoFile !== ''): ?>
-        <video class="block-hero__video <?= $mediaPositionClasses ?>" data-hero-background-video autoplay muted loop playsinline webkit-playsinline preload="metadata"
-               disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
-               tabindex="-1" <?= $image !== '' ? 'poster="' . htmlspecialchars($image, ENT_QUOTES) . '"' : '' ?> aria-hidden="true">
-            <source src="<?= htmlspecialchars($videoFile, ENT_QUOTES) ?>" type="video/mp4">
-        </video>
-    <?php elseif ($bgType === 'youtube' && $youtubeId !== null): ?>
-        <?php if ($image !== '' && UrlGuard::isSafeMedia($image)): ?>
-            <img
-                class="block-hero__youtube-poster <?= $mediaPositionClasses ?>"
-                src="<?= htmlspecialchars($image, ENT_QUOTES) ?>"
-                alt=""
-                loading="eager"
-                decoding="async"
-                fetchpriority="high"
-                aria-hidden="true"
-            >
-        <?php endif; ?>
-        <div class="block-hero__yt" data-hero-youtube-container aria-hidden="true">
-            <iframe
-                data-hero-youtube-background
-                data-src="<?= htmlspecialchars($youtubeEmbedUrl, ENT_QUOTES) ?>"
-                tabindex="-1"
-                loading="lazy"
-                referrerpolicy="strict-origin-when-cross-origin"
-                allow="autoplay; encrypted-media"
-                aria-hidden="true"
-            ></iframe>
-        </div>
-    <?php elseif ($bgType === 'image' && $image !== ''): ?>
-        <?= Media::picture($image, '', null, null, 'block-hero__image ' . $mediaPositionClasses, false, '100vw', true, 'block-hero__media ' . $mediaPositionClasses) ?>
-    <?php endif; ?>
+    <?= $heroMedia($bgType, $image, $videoFile, $youtubeId, $mediaPositionClasses, false) ?>
     <?php if ($hasMedia && $overlayEnabled): ?><div class="block-hero__scrim<?= $overlaySolid ? ' block-hero__scrim--solid' : '' ?>" aria-hidden="true"></div><?php endif; ?>
     <div class="block-hero__inner">
         <div class="block-hero__text<?= $panelOn ? ' block-hero__text--panel' : '' ?>">

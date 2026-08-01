@@ -4176,7 +4176,9 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 /* Картинка слайда ведёт себя как фон обложки: правила выше привязаны к
    .block-hero--media > .block-hero__media, а здесь медиа лежит внутри слайда. */
 .block-hero__slide .block-hero__media,
-.block-hero__slide .block-hero__image {
+.block-hero__slide .block-hero__image,
+.block-hero__slide .block-hero__video,
+.block-hero__slide .block-hero__youtube-poster {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -4184,6 +4186,11 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     object-fit: cover;
     background-color: var(--gov-navy);
 }
+/* Видео и YouTube лежат в потоке слайда, поэтому им нужен свой слой:
+   иначе кадр перекрывал бы затемнение и текст. */
+.block-hero__slide .block-hero__video,
+.block-hero__slide .block-hero__youtube-poster { z-index: 0; }
+.block-hero__slide .block-hero__yt { z-index: 0; }
 .block-hero__slide .block-hero__scrim { z-index: 1; }
 
 /* Ссылка-подложка: кликабелен весь слайд, кнопки поверх неё остаются

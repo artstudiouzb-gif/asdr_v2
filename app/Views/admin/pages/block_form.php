@@ -651,7 +651,16 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                         <?= $slideField($i, 'eyebrow', 'Надзаголовок', (string) ($slide['eyebrow'] ?? '')) ?>
                         <?= $slideField($i, 'title', 'Заголовок', (string) ($slide['title'] ?? '')) ?>
                         <?= $slideField($i, 'subtitle', 'Подзаголовок', (string) ($slide['subtitle'] ?? '')) ?>
-                        <?= \App\Core\AdminUi::imageField('slides[' . $i . '][image]', (string) ($slide['image'] ?? ''), ['label' => 'Изображение слайда']) ?>
+                        <?= \App\Core\AdminUi::imageField('slides[' . $i . '][image]', (string) ($slide['image'] ?? ''), ['label' => 'Изображение слайда', 'hint' => 'Фон слайда, а для видео — заставка до загрузки.']) ?>
+                        <div class="form-field">
+                            <label for="slide_<?= $i ?>_video_url">Видео слайда (mp4)</label>
+                            <div class="image-field__controls">
+                                <input type="text" id="slide_<?= $i ?>_video_url" name="slides[<?= $i ?>][video_url]" value="<?= htmlspecialchars((string) ($slide['video_url'] ?? ''), ENT_QUOTES) ?>" placeholder="/uploads/public/hero.mp4">
+                                <button type="button" class="btn btn--small" data-media-pick data-media-target="#slide_<?= $i ?>_video_url" data-media-type="video">Медиабиблиотека</button>
+                            </div>
+                            <span class="form-hint">Заполнено — слайд показывает видео вместо картинки. Без звука, зациклено; играет только пока слайд на экране.</span>
+                        </div>
+                        <?= $slideField($i, 'youtube_url', 'Видео слайда с YouTube', (string) ($slide['youtube_url'] ?? ''), 'text', 'Корректная ссылка перебивает mp4 и картинку. Ролик загружается только когда слайд показан.') ?>
                         <?= $slideField($i, 'link_url', 'Ссылка со всего слайда', (string) ($slide['link_url'] ?? ''), 'text', 'Клик по слайду ведёт сюда. Кнопки при этом работают по своим ссылкам.') ?>
                         <?= $slideField($i, 'button_text', 'Кнопка 1 — текст', (string) ($slide['button_text'] ?? '')) ?>
                         <?= $slideField($i, 'button_url', 'Кнопка 1 — ссылка', (string) ($slide['button_url'] ?? '')) ?>
@@ -682,7 +691,16 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <div class="form-field"><label>Надзаголовок</label><input type="text" name="slides[__INDEX__][eyebrow]"></div>
                 <div class="form-field"><label>Заголовок</label><input type="text" name="slides[__INDEX__][title]"></div>
                 <div class="form-field"><label>Подзаголовок</label><input type="text" name="slides[__INDEX__][subtitle]"></div>
-                <?= \App\Core\AdminUi::imageField('slides[__INDEX__][image]', '', ['label' => 'Изображение слайда']) ?>
+                <?= \App\Core\AdminUi::imageField('slides[__INDEX__][image]', '', ['label' => 'Изображение слайда', 'hint' => 'Фон слайда, а для видео — заставка до загрузки.']) ?>
+                <div class="form-field">
+                    <label for="slide___INDEX___video_url">Видео слайда (mp4)</label>
+                    <div class="image-field__controls">
+                        <input type="text" id="slide___INDEX___video_url" name="slides[__INDEX__][video_url]" placeholder="/uploads/public/hero.mp4">
+                        <button type="button" class="btn btn--small" data-media-pick data-media-target="#slide___INDEX___video_url" data-media-type="video">Медиабиблиотека</button>
+                    </div>
+                    <span class="form-hint">Заполнено — слайд показывает видео вместо картинки.</span>
+                </div>
+                <div class="form-field"><label>Видео слайда с YouTube</label><input type="text" name="slides[__INDEX__][youtube_url]"><span class="form-hint">Корректная ссылка перебивает mp4 и картинку.</span></div>
                 <div class="form-field"><label>Ссылка со всего слайда</label><input type="text" name="slides[__INDEX__][link_url]"></div>
                 <div class="form-field"><label>Кнопка 1 — текст</label><input type="text" name="slides[__INDEX__][button_text]"></div>
                 <div class="form-field"><label>Кнопка 1 — ссылка</label><input type="text" name="slides[__INDEX__][button_url]"></div>
