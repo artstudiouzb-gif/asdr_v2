@@ -92,6 +92,65 @@ final class TelegramBot
     }
 
     /**
+     * Каналы, где бот видит сообщения, — с их числовыми id. Нужно для
+     * закрытых каналов: у них нет имени `@name`, а идентификатор `-100…`
+     * иначе приходится добывать вручную через сторонние боты.
+     *
+     * null — сам запрос не прошёл (нет связи, неверный токен, включён webhook:
+     * при нём getUpdates отвечает «Conflict»). Пустой массив — запрос прошёл,
+     * но каналов бот пока не видит. Для редактора это разные советы.
+     *
+     * @return list<array{id:int, title:string, type:string}>|null
+     */
+    public static function channelsFromUpdates(): ?array
+    {
+        $updates = self::request('getUpdates', [
+            'limit' => 100,
+            'allowed_updates' => ['channel_post', 'my_chat_member', 'message'],
+        ]);
+
+        return is_array($updates) ? self::matchChannels($updates) : null;
+    }
+
+    /**
+     * Чистая логика разбора getUpdates (тестируемо без сети). Берём чаты из
+     * постов канала и из событий добавления бота: и то и другое приходит,
+     * как только бот становится администратором.
+     *
+     * @param array<int,array<string,mixed>> $updates
+     * @return list<array{id:int, title:string, type:string}>
+     */
+    public static function matchChannels(array $updates): array
+    {
+        $found = [];
+        foreach ($updates as $update) {
+            foreach (['channel_post', 'my_chat_member', 'message'] as $key) {
+                $chat = $update[$key]['chat'] ?? null;
+                if (!is_array($chat)) {
+                    continue;
+                }
+                $type = (string) ($chat['type'] ?? '');
+                // Личная переписка сюда не относится: публикуют в канал или
+                // супергруппу, и только у них бывает id вида -100….
+                if (!in_array($type, ['channel', 'supergroup', 'group'], true)) {
+                    continue;
+                }
+                $id = $chat['id'] ?? null;
+                if (!is_int($id) && !(is_string($id) && preg_match('/^-?\d+$/', $id))) {
+                    continue;
+                }
+                $found[(int) $id] = [
+                    'id' => (int) $id,
+                    'title' => trim((string) ($chat['title'] ?? '')) ?: ('ID ' . $id),
+                    'type' => $type,
+                ];
+            }
+        }
+
+        return array_values($found);
+    }
+
+    /**
      * Чистая логика сопоставления getUpdates с кодом привязки (тестируемо).
      * Принимает и «CODE», и «/start CODE».
      *

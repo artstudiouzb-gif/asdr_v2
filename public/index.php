@@ -305,6 +305,7 @@ $router->post('/admin/telegram/bot/check', [\App\Controllers\Admin\TelegramContr
 $router->post('/admin/telegram/link', [\App\Controllers\Admin\TelegramController::class, 'link']);
 $router->post('/admin/telegram/channel', [\App\Controllers\Admin\TelegramController::class, 'saveChannel']);
 $router->post('/admin/telegram/channel/check', [\App\Controllers\Admin\TelegramController::class, 'checkChannel']);
+$router->post('/admin/telegram/channel/detect', [\App\Controllers\Admin\TelegramController::class, 'detectChannel']);
 $router->post('/admin/telegram/extras', [\App\Controllers\Admin\TelegramController::class, 'saveExtras']);
 $router->post('/admin/telegram/extras/check', [\App\Controllers\Admin\TelegramController::class, 'checkExtras']);
 
