@@ -77,6 +77,12 @@ final class User
         $stmt->execute([':secret' => SecretBox::encrypt($secret, 'users.totp_secret'), ':id' => $id]);
     }
 
+    public static function disableTotp(int $id): void
+    {
+        $stmt = Database::pdo()->prepare('UPDATE users SET totp_secret = NULL, totp_enabled = 0 WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+    }
+
     /** Телефон (E.164) для кода входа через Telegram; null — вход без кода. */
     public static function updatePhone(int $id, ?string $phone): void
     {

@@ -46,7 +46,119 @@ final class ProfileController
             'botUsername' => $botUsername,
             'linkCode' => $_SESSION['tg_link_code'] ?? null,
             'error' => null,
+        ] + self::totpViewData($profileUser));
+    }
+
+    /**
+     * Данные для раздела «Приложение-аутентификатор». Секрет живёт в сессии,
+     * пока код не подтверждён: незавершённая настройка не должна попадать в
+     * базу и делать вид, что второй фактор уже работает.
+     *
+     * @param array<string, mixed>|null $user
+     * @return array<string, mixed>
+     */
+    private static function totpViewData(?array $user, ?string $totpError = null): array
+    {
+        $enabled = (int) ($user['totp_enabled'] ?? 0) === 1;
+        // Секрет хранится зашифрованным: без ключа приложение подключить
+        // нельзя, и честнее сказать об этом, чем упасть при сохранении.
+        $ready = \App\Core\SecretBox::hasValidCurrentKey();
+        $secret = null;
+        if (!$enabled && $ready) {
+            if (empty($_SESSION['totp_setup_secret'])) {
+                $_SESSION['totp_setup_secret'] = \App\Core\TOTP::generateSecret();
+            }
+            $secret = (string) $_SESSION['totp_setup_secret'];
+        }
+
+        return [
+            'totpReady' => $ready,
+            'totpEnabled' => $enabled,
+            'totpSecret' => $secret,
+            'totpUri' => $secret !== null
+                ? \App\Core\TOTP::provisioningUri($secret, (string) ($user['username'] ?? 'admin'), self::totpIssuer())
+                : null,
+            'totpError' => $totpError,
+        ];
+    }
+
+    /**
+     * Issuer для otpauth-URI: только короткий ASCII (домен сайта). Кириллица
+     * раздувает URI percent-кодированием и не помещается в компактный QR.
+     */
+    private static function totpIssuer(): string
+    {
+        $host = (string) (parse_url((string) \App\Core\Config::get('app.url'), PHP_URL_HOST) ?: '');
+
+        return $host !== '' && preg_match('/^[\x21-\x7E]{1,40}$/', $host) ? $host : 'ASDR';
+    }
+
+    /** Подключение приложения-аутентификатора: включаем только по верному коду. */
+    public function enableTotp(): void
+    {
+        Auth::requireLogin();
+        Csrf::verifyRequest();
+
+        $userId = (int) Auth::id();
+        $user = User::findById($userId);
+        $secret = (string) ($_SESSION['totp_setup_secret'] ?? '');
+        $code = (string) preg_replace('/\s+/', '', (string) ($_POST['code'] ?? ''));
+
+        if (!\App\Core\SecretBox::hasValidCurrentKey()) {
+            Flash::error('Не задан ключ шифрования APP_ENCRYPTION_KEY — секрет приложения негде безопасно хранить.');
+            header('Location: /admin/profile');
+            exit;
+        }
+
+        if ($user === null || $secret === '' || !\App\Core\TOTP::verify($secret, $code)) {
+            Flash::error('Неверный код. Проверьте, что время на устройстве синхронизировано, и попробуйте ещё раз.');
+            header('Location: /admin/profile');
+            exit;
+        }
+
+        User::enableTotp($userId, $secret);
+        unset($_SESSION['totp_setup_secret']);
+
+        // Второй фактор появился — ограниченная сессия становится полной.
+        $updated = User::findById($userId);
+        if ($updated !== null) {
+            Auth::syncTwoFactorSetup($updated);
+        }
+        \App\Core\Logger::security('Подключено приложение-аутентификатор', [
+            'user' => (string) ($_SESSION['username'] ?? ''),
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
         ]);
+        Flash::success('Приложение-аутентификатор подключено. Коды входа теперь можно брать из него.');
+        header('Location: /admin/profile');
+        exit;
+    }
+
+    /** Отключение — с подтверждением паролем: это ослабляет защиту входа. */
+    public function disableTotp(): void
+    {
+        Auth::requireLogin();
+        Csrf::verifyRequest();
+
+        $userId = (int) Auth::id();
+        $user = User::findById($userId);
+        if ($user === null || !password_verify((string) ($_POST['password'] ?? ''), $user['password_hash'])) {
+            Flash::error('Неверный пароль. Приложение-аутентификатор не отключён.');
+            header('Location: /admin/profile');
+            exit;
+        }
+
+        User::disableTotp($userId);
+        $updated = User::findById($userId);
+        if ($updated !== null) {
+            Auth::syncTwoFactorSetup($updated);
+        }
+        \App\Core\Logger::security('Отключено приложение-аутентификатор', [
+            'user' => (string) ($_SESSION['username'] ?? ''),
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
+        ]);
+        Flash::success('Приложение-аутентификатор отключён.');
+        header('Location: /admin/profile');
+        exit;
     }
 
     /**

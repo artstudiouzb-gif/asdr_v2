@@ -172,6 +172,52 @@ $themeList = [
 </div>
 
 <div class="form-card u-inline-3343fd6464">
+    <h2 class="u-inline-291b7bbb01">Приложение-аутентификатор (работает без интернета)</h2>
+    <?php if ($totpEnabled ?? false): ?>
+        <p><span class="badge badge--success">Подключено</span> При входе вводите 6-значный код из приложения.</p>
+        <p class="form-hint">Это единственный канал, который не зависит от Telegram и связи: коды считаются на вашем устройстве.</p>
+        <form method="post" action="/admin/profile/totp/disable" class="form-grid u-inline-6add97efa7">
+            <?= Csrf::field() ?>
+            <div class="form-field">
+                <label for="totp_password">Подтвердите паролем, чтобы отключить</label>
+                <input type="password" id="totp_password" name="password" autocomplete="current-password" required>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn btn--danger">Отключить приложение</button></div>
+        </form>
+    <?php elseif (!($totpReady ?? true)): ?>
+        <p class="form-hint">Чтобы подключить приложение, задайте в конфигурации сайта переменную <code>APP_ENCRYPTION_KEY</code> — секрет приложения хранится зашифрованным.</p>
+    <?php else: ?>
+        <p class="form-hint">Подключите Google Authenticator, Aegis, 1Password или другое приложение — коды будут работать даже без интернета и без Telegram.</p>
+        <?php
+        $totpQr = '';
+        if (!empty($totpUri)) {
+            try {
+                $totpQr = \App\Core\QrCode::svg((string) $totpUri, 4);
+            } catch (\Throwable $e) {
+                \App\Core\Logger::swallowed('Профиль: не удалось построить QR-код для двухфакторной настройки', $e);
+            }
+        }
+        ?>
+        <div class="totp-setup">
+            <?php if ($totpQr !== ''): ?><div class="totp-setup__qr"><?= $totpQr ?></div><?php endif; ?>
+            <ol class="u-inline-d40243f2ec">
+                <li><?= $totpQr !== '' ? 'Отсканируйте QR-код приложением.' : 'Добавьте ключ в приложение-аутентификатор.' ?></li>
+                <li>Ключ для ручного ввода: <code class="u-inline-e906946788"><?= htmlspecialchars((string) ($totpSecret ?? ''), ENT_QUOTES) ?></code></li>
+                <li>Введите код из приложения и сохраните.</li>
+            </ol>
+        </div>
+        <form method="post" action="/admin/profile/totp/enable" class="form-grid u-inline-6add97efa7">
+            <?= Csrf::field() ?>
+            <div class="form-field">
+                <label for="totp_code">Код из приложения</label>
+                <input type="text" id="totp_code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,9}" maxlength="9" required>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn btn--primary">Подключить приложение</button></div>
+        </form>
+    <?php endif; ?>
+</div>
+
+<div class="form-card u-inline-3343fd6464">
     <h2 class="u-inline-291b7bbb01">Код входа через Telegram-бота (бесплатно)</h2>
     <?php if (!($botConfigured ?? false)): ?>
         <p class="form-hint">

@@ -33,9 +33,21 @@ use App\Core\Csrf;
         <span class="auth-brand__name"><?= htmlspecialchars(\App\Core\AdminBrand::name(), ENT_QUOTES) ?></span>
     </div>
 
+    <?php
+    // Каналов может быть два сразу: тогда подойдёт код из любого.
+    $channels = \App\Core\Auth::pendingChannels();
+    ?>
     <div class="auth-head">
-        <h1>Код из Telegram</h1>
-        <p class="auth-sub">Мы отправили 6-значный код безопасности в Telegram от канала <strong>Verification&nbsp;Codes</strong>.</p>
+        <h1><?= $channels['totp'] && !$channels['telegram'] ? 'Код из приложения' : 'Код подтверждения' ?></h1>
+        <p class="auth-sub">
+            <?php if ($channels['totp'] && $channels['telegram']): ?>
+                Введите 6-значный код из приложения-аутентификатора или тот, что мы отправили в Telegram.
+            <?php elseif ($channels['totp']): ?>
+                Откройте приложение-аутентификатор и введите 6-значный код для этого сайта.
+            <?php else: ?>
+                Мы отправили 6-значный код безопасности в Telegram.
+            <?php endif; ?>
+        </p>
     </div>
 
     <?php if (!empty($notice)): ?>
@@ -61,10 +73,13 @@ use App\Core\Csrf;
         </button>
     </form>
 
-    <form class="u-inline-3f5e202c68" method="post" action="/admin/login/2fa/resend">
-        <?= Csrf::field() ?>
-        <button type="submit" class="btn btn--small u-inline-8233e9f287">Отправить код повторно</button>
-    </form>
+    <?php if ($channels['telegram']): ?>
+        <?php // Коду из приложения повторная отправка не нужна — он там уже есть. ?>
+        <form class="u-inline-3f5e202c68" method="post" action="/admin/login/2fa/resend">
+            <?= Csrf::field() ?>
+            <button type="submit" class="btn btn--small u-inline-8233e9f287">Отправить код повторно</button>
+        </form>
+    <?php endif; ?>
 </div>
 </body>
 </html>
