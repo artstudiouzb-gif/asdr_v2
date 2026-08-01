@@ -126,7 +126,13 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                         <label class="u-inline-2e190aa086">Краткий лид (анонс)</label>
                         <button type="button" class="btn btn--sm btn--secondary" data-ai-generate-summary data-ai-generate="summary"><?= \App\Core\AdminUi::icon('sparkles') ?>ИИ-Аннотация</button>
                     </div>
-                    <textarea name="excerpt" rows="3" placeholder="Кратко опишите суть новости"><?= htmlspecialchars($news['excerpt'] ?? '', ENT_QUOTES) ?></textarea>
+                    <textarea name="excerpt" rows="4" placeholder="Кратко опишите суть новости"
+                              data-lead-field><?= htmlspecialchars($news['excerpt'] ?? '', ENT_QUOTES) ?></textarea>
+                    <span class="form-hint">
+                        Обычный текст без форматирования: лид уходит в карточки ленты, в описание для
+                        поисковиков и в пост Telegram, где разметка не отображается.
+                        <span data-lead-count></span>
+                    </span>
                 </div>
 
                 <div class="form-field u-inline-79a1c5a5db">
