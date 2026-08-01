@@ -21,6 +21,23 @@ final class Media
     /** @var array<string, array{full: ?string, w1600: ?string, w800: ?string}|null> */
     private static array $variantCache = [];
 
+    /**
+     * Автор снимка без служебного слова «Фото:» в начале: подпись выводится с
+     * этим словом сама, а редактор естественно пишет его руками — и получалось
+     * «Фото: Фото: пресс-служба».
+     */
+    public static function photoCredit(?string $credit): string
+    {
+        $credit = trim((string) $credit);
+        if ($credit === '') {
+            return '';
+        }
+        // Русское, узбекское и английское написание, с двоеточием или тире.
+        $stripped = preg_replace('/^\s*(фото|foto|surat|photo)\s*[:—–-]\s*/iu', '', $credit);
+
+        return trim((string) ($stripped ?? $credit));
+    }
+
     public static function picture(
         ?string $url,
         string $alt = '',

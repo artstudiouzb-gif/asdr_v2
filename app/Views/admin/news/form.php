@@ -199,7 +199,7 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                                     <div class="u-inline-468a6b21bf">
                                         <img class="u-inline-8504468b68" src="<?= htmlspecialchars((string) $gi['path'], ENT_QUOTES) ?>" alt="">
                                         <input class="u-inline-58ee86c404" type="text" name="gallery[<?= (int) $gi['id'] ?>][caption]" value="<?= htmlspecialchars((string) ($gi['caption'] ?? ''), ENT_QUOTES) ?>" maxlength="255" placeholder="Подпись под фото">
-                                        <input class="u-inline-58ee86c404" type="text" name="gallery[<?= (int) $gi['id'] ?>][credit]" value="<?= htmlspecialchars((string) ($gi['credit'] ?? ''), ENT_QUOTES) ?>" maxlength="255" placeholder="Автор/источник (Фото: …)">
+                                        <input class="u-inline-58ee86c404" type="text" name="gallery[<?= (int) $gi['id'] ?>][credit]" value="<?= htmlspecialchars((string) ($gi['credit'] ?? ''), ENT_QUOTES) ?>" maxlength="255" placeholder="Автор или источник: пресс-служба Агентства">
                                         <input class="u-inline-58ee86c404" type="text" name="gallery[<?= (int) $gi['id'] ?>][alt]" value="<?= htmlspecialchars((string) ($gi['alt_text'] ?? ''), ENT_QUOTES) ?>" placeholder="alt-текст (для незрячих и поиска)">
                                         <div class="u-inline-c2a25f11a5">
                                             <input class="u-inline-ac5d34f7f3" type="number" name="gallery[<?= (int) $gi['id'] ?>][sort]" value="<?= (int) $gi['sort_order'] ?>" title="Порядок сортировки" placeholder="№">

@@ -134,7 +134,7 @@ final class TelegramRichMessage
             }
 
             return '<figure>' . $tag . '<figcaption>' . $esc($item['caption'])
-                . ($item['credit'] !== '' ? '<cite>' . $esc($item['credit']) . '</cite>' : '')
+                . ($item['credit'] !== '' ? '<cite>' . $esc(Media::photoCredit($item['credit'])) . '</cite>' : '')
                 . '</figcaption></figure>';
         };
         if (count($media) === 1) {
