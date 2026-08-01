@@ -127,6 +127,7 @@ $router->post('/admin/news/{id}/delete', [AdminNewsController::class, 'destroy']
 $router->post('/admin/news/{id}/create-translation', [AdminNewsController::class, 'createTranslation']);
 $router->post('/admin/news/{id}/duplicate', [AdminNewsController::class, 'duplicate']);
 $router->post('/admin/news/{id}/social', [AdminNewsController::class, 'pushSocial']);
+$router->get('/admin/news/{id}/social-preview', [AdminNewsController::class, 'socialPreview']);
 
 // --- Admin: страницы + конструктор блоков ---
 $router->get('/admin/pages', [AdminPageController::class, 'index']);

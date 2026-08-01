@@ -609,6 +609,13 @@ document.addEventListener('click', function(e) {
                 <?= \App\Core\AdminUi::icon('send', 14) ?>
                 <span>Опубликовать в соцсетях</span>
             </label>
+            <?php if ($isEdit): ?>
+                <a href="/admin/news/<?= (int) $news['id'] ?>/social-preview" class="btn btn--sm btn--secondary"
+                   target="_blank" rel="noopener"
+                   title="Показать, что уйдёт в канал: языки, снимки, длина текста">
+                    <?= \App\Core\AdminUi::icon('eye', 14) ?>Пост в Telegram
+                </a>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 

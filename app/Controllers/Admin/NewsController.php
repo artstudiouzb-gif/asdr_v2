@@ -305,6 +305,45 @@ final class NewsController
         ]);
     }
 
+    /**
+     * Предпросмотр поста Telegram. Раньше содержимое выяснялось по факту в
+     * канале: сколько языков вошло, что попало в текст, влезает ли он в лимит.
+     */
+    public function socialPreview(array $params): void
+    {
+        Auth::requireLogin();
+
+        $news = News::findById((int) $params['id']);
+        if (!$news) {
+            http_response_code(404);
+            View::render('errors/404');
+            return;
+        }
+
+        $cfg = \App\Core\SocialSettings::configFor('telegram');
+        $post = \App\Core\SocialSettings::buildPost($news);
+        $doc = \App\Core\TelegramRichMessage::build(
+            (array) $post['langs'],
+            \App\Core\SocialSettings::telegramPhotoUrls($post),
+            (string) ($cfg['signature'] ?? ''),
+            (string) ($post['category'] ?? ''),
+            (string) ($post['date'] ?? ''),
+            (string) ($post['hashtags'] ?? ''),
+            (array) ($post['gallery_meta'] ?? []),
+            (string) ($cfg['second_lang'] ?? '') === 'details' ? 'details' : 'inline'
+        );
+
+        View::render('admin/news/social_preview', [
+            'news' => $news,
+            'post' => $post,
+            'doc' => $doc,
+            'cfg' => $cfg,
+            'missingLangs' => \App\Core\SocialSettings::missingPostLangs($news),
+            'length' => \App\Core\TelegramRichMessage::textLength($doc['html']),
+            'fits' => \App\Core\TelegramRichMessage::fits($doc['html']),
+        ]);
+    }
+
     /** Ручная постановка новости в очередь публикации во все готовые сети. */
     public function pushSocial(array $params): void
     {

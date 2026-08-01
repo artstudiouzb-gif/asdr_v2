@@ -254,7 +254,10 @@ final class SocialSettings
      * Полезная нагрузка поста из строки новости. gallery — абсолютные ссылки
      * на дополнительные фото (для Telegram sendMediaGroup).
      * @param array<string,mixed> $news
-     * @return array{message:string, link:string, image_url:string, title:string, gallery:list<string>}
+     * @return array{message:string, link:string, image_url:string, title:string,
+     *     hashtags:?string, category:string, date:string, gallery:list<string>,
+     *     gallery_meta:array<string,array{caption:string,credit:string}>,
+     *     langs:list<array<string,mixed>>}
      */
     public static function buildPost(array $news): array
     {
@@ -270,6 +273,9 @@ final class SocialSettings
             $message .= "\n\n" . $hashtags;
         }
         $langs = self::languageBlocks($news, $base);
+        // Хештеги переводятся вместе с новостью, а пост один — собираем их со
+        // всех языковых версий, без повторов и в порядке появления.
+        $hashtags = self::mergeHashtags($hashtags, $langs);
 
         $cover = News::getCoverImage($news) ?? '';
         if ($cover !== '') {
@@ -381,10 +387,60 @@ final class SocialSettings
                 'read_more' => $meta[$code]['read_more'] ?? ('Read (' . strtoupper($code) . ') →'),
                 'category' => trim((string) ($row['badge'] ?? '')),
                 'date' => $published !== '' ? DateFormatter::long($published, $code) : '',
+                'hashtags' => (string) (News::cleanHashtags($row['hashtags'] ?? null) ?? ''),
             ];
         }
 
         return $blocks;
+    }
+
+    /**
+     * Публичные https-снимки поста: обложка и галерея, без повторов. Тот же
+     * список, что уходит в Telegram, — нужен предпросмотру в админке.
+     *
+     * @param array<string,mixed> $post
+     * @return list<string>
+     */
+    public static function telegramPhotoUrls(array $post): array
+    {
+        $photos = [];
+        foreach (array_merge(
+            !empty($post['image_url']) ? [(string) $post['image_url']] : [],
+            array_map('strval', (array) ($post['gallery'] ?? []))
+        ) as $url) {
+            if (str_starts_with($url, 'https://') && !in_array($url, $photos, true)) {
+                $photos[] = $url;
+            }
+        }
+
+        return $photos;
+    }
+
+    /**
+     * Хештеги поста: базовые плюс хештеги языковых версий. Пост один, а теги
+     * у перевода свои — раньше в канал уходили только базовые.
+     *
+     * @param list<array<string,mixed>> $langs
+     */
+    private static function mergeHashtags(?string $base, array $langs): ?string
+    {
+        $tags = [];
+        $add = static function (string $raw) use (&$tags): void {
+            foreach (preg_split('/\s+/u', trim($raw)) ?: [] as $tag) {
+                $tag = trim($tag);
+                // Ключ без регистра: #Реформы и #реформы — один и тот же тег.
+                if ($tag !== '' && !isset($tags[mb_strtolower($tag)])) {
+                    $tags[mb_strtolower($tag)] = $tag;
+                }
+            }
+        };
+
+        $add((string) $base);
+        foreach ($langs as $lang) {
+            $add((string) ($lang['hashtags'] ?? ''));
+        }
+
+        return $tags === [] ? $base : implode(' ', array_values($tags));
     }
 
     /**

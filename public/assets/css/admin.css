@@ -3449,6 +3449,30 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     display: none !important;
 }
 
+/* --- Предпросмотр поста Telegram --- */
+.tg-preview__facts { margin: 0 0 10px; padding-left: 18px; line-height: 1.7; }
+.tg-preview__warn { color: var(--admin-warning, #9a6700); font-weight: 600; }
+.tg-preview {
+    max-width: 560px;
+    padding: 14px 16px;
+    border: 1px solid var(--admin-border, #e1e3e8);
+    border-radius: 12px;
+    background: var(--admin-surface-soft, #f8fafc);
+    line-height: 1.55;
+}
+.tg-preview h1 { font-size: 1.15rem; margin: 6px 0 10px; }
+.tg-preview h2 { font-size: 1.02rem; margin: 14px 0 8px; }
+.tg-preview p { margin: 0 0 10px; }
+.tg-preview img { display: block; width: 100%; border-radius: 8px; margin-bottom: 8px; }
+/* Слайд-шоу в канале листается на месте; в превью показываем кадры лентой. */
+.tg-preview tg-slideshow { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 10px; }
+.tg-preview tg-slideshow img { width: 180px; flex: 0 0 auto; margin: 0; }
+.tg-preview figure { margin: 0 0 10px; }
+.tg-preview figcaption { font-size: 12px; color: var(--admin-text-muted, #64748b); }
+.tg-preview cite { display: block; font-style: normal; opacity: .85; }
+.tg-preview hr { margin: 14px 0; border: 0; border-top: 1px solid var(--admin-border, #e1e3e8); }
+.tg-preview footer { font-size: 13px; color: var(--admin-text-muted, #64748b); }
+
 /* --- Превью файлов, выбранных но ещё не загруженных --- */
 .file-preview {
     display: flex;

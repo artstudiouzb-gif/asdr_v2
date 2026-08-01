@@ -282,17 +282,10 @@ final class SocialPublisher
      */
     private function telegramPhotos(array $post): array
     {
-        $photos = [];
-        foreach (array_merge(
-            !empty($post['image_url']) ? [(string) $post['image_url']] : [],
-            array_map('strval', (array) ($post['gallery'] ?? []))
-        ) as $url) {
-            if (preg_match('#^https://#', $url) && !in_array($url, $photos, true)) {
-                $photos[] = $url;
-            }
-        }
-
-        return $photos;
+        // Один источник правды: тем же списком пользуется предпросмотр в
+        // админке, и расхождение здесь означало бы «в превью одно, в канале
+        // другое».
+        return SocialSettings::telegramPhotoUrls($post);
     }
 
     /**
