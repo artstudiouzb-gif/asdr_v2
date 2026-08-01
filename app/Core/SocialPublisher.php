@@ -155,6 +155,60 @@ final class SocialPublisher
     }
 
     /**
+     * Произвольное сообщение в канал (не привязанное к новости): итоги недели
+     * и подобные служебные посты. Разметка — HTML Telegram; обложка
+     * необязательна и никогда не отменяет сам пост.
+     *
+     * @param array<string,string> $cfg
+     * @return array{ok:bool, remote_id:?string, error:?string}
+     */
+    public function sendChannelMessage(array $cfg, string $html, string $photoUrl = ''): array
+    {
+        if (empty($cfg['token']) || empty($cfg['chat_id'])) {
+            return self::err('Не заданы токен бота или chat_id канала Telegram.');
+        }
+        if (trim($html) === '') {
+            return self::err('Пустое сообщение не отправляем.');
+        }
+
+        $api = self::TG_API . '/bot' . trim((string) $cfg['token']);
+        $headers = ['Content-Type: application/json'];
+        $photoUrl = str_starts_with(trim($photoUrl), 'https://') ? trim($photoUrl) : '';
+
+        // Список из десятка ссылок легко перерастает лимит подписи к фото
+        // (1024 против 4096 у сообщения). Тогда обложка уходит первой, текст —
+        // следом: обрезать список ради картинки бессмысленно.
+        $fitsCaption = mb_strlen(strip_tags($html)) <= self::TG_CAPTION_LIMIT;
+        if ($photoUrl !== '' && $fitsCaption) {
+            $payload = [
+                'chat_id' => $cfg['chat_id'],
+                'photo' => $photoUrl,
+                'caption' => $html,
+                'parse_mode' => 'HTML',
+            ];
+            if (!empty($cfg['silent'])) {
+                $payload['disable_notification'] = true;
+            }
+            $res = ($this->http)('POST', $api . '/sendPhoto', (string) json_encode($payload, JSON_UNESCAPED_UNICODE), $headers);
+            $photoRes = $this->interpretTelegram($res);
+            if ($photoRes['ok']) {
+                return $photoRes;
+            }
+            // Картинка не принята (недоступна, слишком большая) — пост важнее
+            // обложки, отправляем текстом.
+        } elseif ($photoUrl !== '') {
+            $payload = ['chat_id' => $cfg['chat_id'], 'photo' => $photoUrl];
+            if (!empty($cfg['silent'])) {
+                $payload['disable_notification'] = true;
+            }
+            $res = ($this->http)('POST', $api . '/sendPhoto', (string) json_encode($payload, JSON_UNESCAPED_UNICODE), $headers);
+            $this->interpretTelegram($res);
+        }
+
+        return $this->telegramText($cfg, $api, $headers, $html, [], []);
+    }
+
+    /**
      * Обычное текстовое сообщение с кнопками. Вынесено отдельно: тем же путём
      * уходит текст, не поместившийся в подпись к фото.
      *
