@@ -46,15 +46,47 @@ $views = (int) ($news['views'] ?? 0);
 // Слайды: обложка + галерея (уникальные пути).
 $slides = [];
 $cover = trim((string) ($news['image'] ?? ''));
+// Подписи галереи по пути файла: обложка обычно продублирована в галерее, и
+// её подпись раньше терялась вместе с пропущенным кадром.
+$captionsByPath = [];
+foreach ($gallery as $img) {
+    $captionsByPath[trim((string) $img['path'])] = [
+        'caption' => trim((string) ($img['caption'] ?? '')),
+        'credit' => trim((string) ($img['credit'] ?? '')),
+    ];
+}
 if ($cover !== '') {
-    $slides[] = ['path' => $cover, 'alt' => (string) $news['title']];
+    $slides[] = [
+        'path' => $cover,
+        'alt' => (string) $news['title'],
+        'caption' => (string) ($captionsByPath[$cover]['caption'] ?? ''),
+        'credit' => (string) ($captionsByPath[$cover]['credit'] ?? ''),
+    ];
 }
 foreach ($gallery as $img) {
     $p = trim((string) $img['path']);
     if ($p !== '' && $p !== $cover) {
-        $slides[] = ['path' => $p, 'alt' => (string) ($img['alt_text'] ?? '')];
+        $slides[] = [
+            'path' => $p,
+            'alt' => (string) ($img['alt_text'] ?? ''),
+            'caption' => trim((string) ($img['caption'] ?? '')),
+            'credit' => trim((string) ($img['credit'] ?? '')),
+        ];
     }
 }
+// Подпись под снимком: текст и автор строкой «Фото: …».
+$photoCaption = static function (array $s): string {
+    $caption = trim((string) ($s['caption'] ?? ''));
+    $credit = trim((string) ($s['credit'] ?? ''));
+    if ($caption === '' && $credit === '') {
+        return '';
+    }
+
+    return '<figcaption class="media-caption">'
+        . htmlspecialchars($caption, ENT_QUOTES)
+        . ($credit !== '' ? '<span class="media-caption__credit">' . htmlspecialchars(t('Фото:'), ENT_QUOTES) . ' ' . htmlspecialchars($credit, ENT_QUOTES) . '</span>' : '')
+        . '</figcaption>';
+};
 
 $keyPoints = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) ($news['key_points'] ?? '')) ?: [])));
 $eventMeta = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) ($news['event_meta'] ?? '')) ?: [])));
@@ -247,7 +279,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             <div class="newsdetail-gallery" data-ndgallery>
                 <div class="newsdetail-gallery__main">
                     <?php foreach ($heroSlides as $i => $s): ?>
-                        <?= \App\Core\Media::picture((string) $s['path'], (string) $s['alt'], null, null, 'newsdetail-gallery__slide' . ($i === 0 ? ' is-active' : ''), $i !== 0, '(max-width: 900px) 100vw, 70vw') ?>
+                        <?= \App\Core\Media::picture((string) $s['path'], (string) ($s['alt'] !== '' ? $s['alt'] : ($s['caption'] ?? '')), null, null, 'newsdetail-gallery__slide' . ($i === 0 ? ' is-active' : ''), $i !== 0, '(max-width: 900px) 100vw, 70vw') ?>
                     <?php endforeach; ?>
                     <?php if (count($heroSlides) > 1): ?>
                         <button type="button" class="newsdetail-gallery__nav newsdetail-gallery__nav--prev" data-ndg-prev aria-label="<?= htmlspecialchars(t('Предыдущее фото'), ENT_QUOTES) ?>">‹</button>
@@ -255,6 +287,21 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                         <span class="newsdetail-gallery__counter"><span data-ndg-current>1</span> <?= htmlspecialchars(t('из'), ENT_QUOTES) ?> <?= count($heroSlides) ?></span>
                     <?php endif; ?>
                 </div>
+                <?php
+                // Подпись и автор под галереей. Тексты всех слайдов уезжают в
+                // data-атрибуты: при листании их подставляет скрипт галереи.
+                $galleryCaptions = array_map(static fn (array $s): array => [
+                    'caption' => (string) ($s['caption'] ?? ''),
+                    'credit' => (string) ($s['credit'] ?? ''),
+                ], $heroSlides);
+                $hasCaptions = array_filter($galleryCaptions, static fn (array $c): bool => $c['caption'] !== '' || $c['credit'] !== '');
+                ?>
+                <?php if ($hasCaptions !== []): ?>
+                    <figcaption class="media-caption" data-ndg-captions='<?= htmlspecialchars((string) json_encode($galleryCaptions, JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>'>
+                        <span data-ndg-caption-text><?= htmlspecialchars($galleryCaptions[0]['caption'], ENT_QUOTES) ?></span>
+                        <span class="media-caption__credit" data-ndg-caption-credit<?= $galleryCaptions[0]['credit'] === '' ? ' hidden' : '' ?>><?= $galleryCaptions[0]['credit'] !== '' ? htmlspecialchars(t('Фото:'), ENT_QUOTES) . ' ' . htmlspecialchars($galleryCaptions[0]['credit'], ENT_QUOTES) : '' ?></span>
+                    </figcaption>
+                <?php endif; ?>
                 <?php if (count($heroSlides) > 1): ?>
                     <div class="newsdetail-gallery__thumbs">
                         <?php foreach ($heroSlides as $i => $s): ?>
@@ -428,7 +475,14 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                     <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Галерея'), ENT_QUOTES) ?></h2>
                     <div class="newsdetail-sidegallery">
                         <?php foreach (array_slice($slides, 0, 4) as $i => $s): ?>
-                            <a class="newsdetail-sidegallery__item<?= $i === 0 ? ' newsdetail-sidegallery__item--wide' : '' ?>" href="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars($s['alt'] !== '' ? $s['alt'] : 'Фото', ENT_QUOTES) ?>"><?= \App\Core\Media::picture((string) $s['path'], (string) $s['alt'], null, null, '', true, '(max-width: 900px) 50vw, 280px') ?></a>
+                            <?php
+                            // У миниатюр подпись не выводим текстом — она бы
+                            // сломала плитку; отдаём её как имя ссылки и подсказку.
+                            $thumbLabel = trim((string) ($s['caption'] ?? '')) ?: ($s['alt'] !== '' ? $s['alt'] : 'Фото');
+                            $thumbCredit = trim((string) ($s['credit'] ?? ''));
+                            $thumbTitle = $thumbLabel . ($thumbCredit !== '' ? ' — ' . t('Фото:') . ' ' . $thumbCredit : '');
+                            ?>
+                            <a class="newsdetail-sidegallery__item<?= $i === 0 ? ' newsdetail-sidegallery__item--wide' : '' ?>" href="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" target="_blank" rel="noopener" title="<?= htmlspecialchars($thumbTitle, ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars($thumbTitle, ENT_QUOTES) ?>"><?= \App\Core\Media::picture((string) $s['path'], (string) $s['alt'], null, null, '', true, '(max-width: 900px) 50vw, 280px') ?></a>
                         <?php endforeach; ?>
                     </div>
                     <a class="newsdetail__btn newsdetail__btn--ghost newsdetail-sidegallery__all" href="<?= htmlspecialchars(Locale::url('news/' . $news['slug'] . '/photos.zip', $lang), ENT_QUOTES) ?>"><?= htmlspecialchars(t('Скачать все фото'), ENT_QUOTES) ?> <?= $dlIcon ?></a>
@@ -514,7 +568,10 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             </div>
             <div class="newsdetail-photos__grid">
                 <?php foreach (array_slice($slides, 0, 8) as $s): ?>
-                    <a class="newsdetail-photos__item" href="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars($s['alt'] !== '' ? $s['alt'] : 'Фото', ENT_QUOTES) ?>"><?= \App\Core\Media::picture((string) $s['path'], (string) $s['alt'], null, null, '', true, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw') ?></a>
+                    <figure class="newsdetail-photos__figure">
+                        <a class="newsdetail-photos__item" href="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars($s['alt'] !== '' ? $s['alt'] : 'Фото', ENT_QUOTES) ?>"><?= \App\Core\Media::picture((string) $s['path'], (string) $s['alt'], null, null, '', true, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw') ?></a>
+                        <?= $photoCaption($s) ?>
+                    </figure>
                 <?php endforeach; ?>
             </div>
         </section>

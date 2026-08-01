@@ -384,4 +384,5 @@ return [
     'Скачать архив ZIP' => 'Download ZIP archive',
     'Ничего не найдено' => 'Nothing found',
     'Все результаты' => 'All results',
+    'Фото:' => 'Photo:',
 ];

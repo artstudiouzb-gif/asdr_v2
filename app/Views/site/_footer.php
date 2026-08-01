@@ -185,6 +185,7 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
 <?php $cspNonce = \App\Core\SecurityHeaders::nonce(); ?>
 <script type="application/json" id="frontend-labels"><?= json_encode([
     'linkCopied' => t('Ссылка скопирована'),
+    'photoCredit' => t('Фото:'),
     'mediaViewer' => t('Просмотр медиа'),
     'imageViewer' => t('Просмотр изображения'),
     'close' => t('Закрыть'),

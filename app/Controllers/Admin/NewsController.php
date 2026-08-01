@@ -643,7 +643,9 @@ final class NewsController
                 trim((string) ($meta['alt'] ?? '')) ?: null,
                 (int) ($meta['sort'] ?? 0),
                 self::clampPercent($meta['focal_x'] ?? null),
-                self::clampPercent($meta['focal_y'] ?? null)
+                self::clampPercent($meta['focal_y'] ?? null),
+                mb_substr(trim((string) ($meta['caption'] ?? '')), 0, 255) ?: null,
+                mb_substr(trim((string) ($meta['credit'] ?? '')), 0, 255) ?: null
             );
         }
 

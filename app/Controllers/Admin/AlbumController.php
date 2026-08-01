@@ -122,7 +122,7 @@ final class AlbumController
         Csrf::verifyRequest();
 
         $id = (int) $params['id'];
-        $ok = PhotoAlbum::addImage($id, (string) ($_POST['image_url'] ?? ''), (string) ($_POST['caption'] ?? ''));
+        $ok = PhotoAlbum::addImage($id, (string) ($_POST['image_url'] ?? ''), (string) ($_POST['caption'] ?? ''), (string) ($_POST['credit'] ?? ''));
         if ($ok === null) {
             Flash::error('Выберите изображение (URL пуст).');
         } else {

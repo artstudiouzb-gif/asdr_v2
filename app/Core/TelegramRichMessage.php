@@ -30,6 +30,7 @@ final class TelegramRichMessage
      *
      * @param list<array{code:string,label:string,title:string,excerpt:string,link:string,read_more:string}> $langs
      * @param list<string> $photos абсолютные https-адреса
+     * @param array<string, array{caption:string, credit:string}> $photoMeta подписи по адресу снимка
      * @return array{html:string, media:list<array{id:string,media:array{type:string,media:string}}>}
      */
     public static function build(
@@ -38,7 +39,8 @@ final class TelegramRichMessage
         string $signature = '',
         string $category = '',
         string $date = '',
-        string $hashtags = ''
+        string $hashtags = '',
+        array $photoMeta = []
     ): array {
         if ($langs === []) {
             return ['html' => '', 'media' => []];
@@ -61,7 +63,12 @@ final class TelegramRichMessage
         $media = [];
         foreach ($photos as $i => $url) {
             // Идентификатор — только A-Z, a-z, 0-9, _ и -, как требует API.
-            $media[] = ['id' => 'p' . ($i + 1), 'media' => ['type' => 'photo', 'media' => $url]];
+            $media[] = [
+                'id' => 'p' . ($i + 1),
+                'media' => ['type' => 'photo', 'media' => $url],
+                'caption' => trim((string) ($photoMeta[$url]['caption'] ?? '')),
+                'credit' => trim((string) ($photoMeta[$url]['credit'] ?? '')),
+            ];
         }
 
         $html .= '<h1>' . $esc($first['title']) . '</h1>';
@@ -90,7 +97,10 @@ final class TelegramRichMessage
             $html .= '<footer>' . trim($signature) . '</footer>';
         }
 
-        return ['html' => $html, 'media' => $media];
+        return [
+            'html' => $html,
+            'media' => array_map(static fn (array $m): array => ['id' => $m['id'], 'media' => $m['media']], $media),
+        ];
     }
 
     /**
@@ -104,7 +114,17 @@ final class TelegramRichMessage
         if ($media === []) {
             return '';
         }
-        $img = static fn (array $item): string => '<img src="tg://photo?id=' . $esc($item['id']) . '"/>';
+        // Подпись и автор снимка — документированный <figcaption> с <cite>.
+        $img = static function (array $item) use ($esc): string {
+            $tag = '<img src="tg://photo?id=' . $esc($item['id']) . '"/>';
+            if ($item['caption'] === '' && $item['credit'] === '') {
+                return $tag;
+            }
+
+            return '<figure>' . $tag . '<figcaption>' . $esc($item['caption'])
+                . ($item['credit'] !== '' ? '<cite>' . $esc($item['credit']) . '</cite>' : '')
+                . '</figcaption></figure>';
+        };
         if (count($media) === 1) {
             return $img($media[0]);
         }

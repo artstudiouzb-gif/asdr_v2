@@ -104,6 +104,11 @@ $translationLangs = array_values(array_filter(
             <label for="caption">Подпись (необязательно)</label>
             <input type="text" id="caption" name="caption" maxlength="255">
         </div>
+        <div class="form-field">
+            <label for="credit">Автор/источник (необязательно)</label>
+            <input type="text" id="credit" name="credit" maxlength="255" placeholder="Пресс-служба Агентства">
+            <span class="form-hint">Выводится под фото как «Фото: …» и уходит в подпись снимка при публикации в Telegram.</span>
+        </div>
         <div class="form-actions">
             <button type="submit" class="btn btn--primary">Добавить фото</button>
         </div>

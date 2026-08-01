@@ -262,7 +262,7 @@ final class PhotoAlbum
         return $stmt->fetchAll();
     }
 
-    public static function addImage(int $albumId, string $imageUrl, string $caption = ''): ?int
+    public static function addImage(int $albumId, string $imageUrl, string $caption = '', string $credit = ''): ?int
     {
         $imageUrl = trim($imageUrl);
         if ($imageUrl === '' || self::findById($albumId) === null) {
@@ -276,13 +276,14 @@ final class PhotoAlbum
         $next = (int) $stmt->fetchColumn();
 
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO photo_album_images (album_id, image_url, caption, sort_order, created_at)
-             VALUES (:a, :u, :c, :o, NOW())'
+            'INSERT INTO photo_album_images (album_id, image_url, caption, credit, sort_order, created_at)
+             VALUES (:a, :u, :c, :cr, :o, NOW())'
         );
         $stmt->execute([
             ':a' => $albumId,
             ':u' => mb_substr($imageUrl, 0, 500),
             ':c' => mb_substr(trim($caption), 0, 255),
+            ':cr' => mb_substr(trim($credit), 0, 255),
             ':o' => $next,
         ]);
         self::bustPageCache();
