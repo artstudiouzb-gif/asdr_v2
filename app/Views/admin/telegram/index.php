@@ -371,6 +371,29 @@ $mark = static function (bool $done, bool $started = true): string {
             </span>
         </div>
 
+        <div class="form-field">
+            <label>Сторож тишины</label>
+            <?php
+            $watch = \App\Core\Watchdog::check();
+            $appRootPath = defined('APP_ROOT') ? APP_ROOT : dirname(__DIR__, 4);
+            ?>
+            <?php if ($watch === []): ?>
+                <span class="tg-status-ok">Сейчас всё в порядке: воркеры отвечают, очереди разбираются, место на диске есть.</span>
+            <?php else: ?>
+                <ul class="tg-watchdog-list">
+                    <?php foreach ($watch as $line): ?>
+                        <li><?= htmlspecialchars($line, ENT_QUOTES) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+            <span class="form-hint">
+                Сообщает о том, что остановилось без ошибки: cron перестал вызывать воркер, очередь публикаций
+                стоит, кончается место. Пишет на те же chat_id — один раз на проблему и отдельно, когда она ушла.
+                Добавьте задание в Cron:<br>
+                <code>*/15 * * * * php <?= htmlspecialchars($appRootPath, ENT_QUOTES) ?>/app/Console/watchdog.php &gt;&gt; <?= htmlspecialchars($appRootPath, ENT_QUOTES) ?>/storage/logs/watchdog.log 2&gt;&amp;1</code>
+            </span>
+        </div>
+
         <div class="form-actions form-actions--sticky">
             <button type="submit" class="btn btn--primary"><?= AdminUi::icon('save') ?>Сохранить настройки Telegram</button>
             <button type="submit" formaction="/admin/telegram/extras/check" class="btn btn--outline">
