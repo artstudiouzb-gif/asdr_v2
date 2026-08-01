@@ -1010,12 +1010,32 @@
         if (slides.length < 2) { return; }
         var thumbs = root.querySelectorAll('[data-ndg-thumb]');
         var counter = root.querySelector('[data-ndg-current]');
+        // Подпись и автор активного снимка: тексты всех слайдов лежат в
+        // data-атрибуте, при листании подставляется нужная пара.
+        var captionBox = root.querySelector('[data-ndg-captions]');
+        var captions = [];
+        if (captionBox) {
+            try { captions = JSON.parse(captionBox.getAttribute('data-ndg-captions') || '[]'); } catch (e) { captions = []; }
+        }
+        var captionText = root.querySelector('[data-ndg-caption-text]');
+        var captionCredit = root.querySelector('[data-ndg-caption-credit]');
         var idx = 0;
         var show = function (i) {
             idx = (i + slides.length) % slides.length;
             slides.forEach(function (s, n) { s.classList.toggle('is-active', n === idx); });
             thumbs.forEach(function (t, n) { t.classList.toggle('is-active', n === idx); });
             if (counter) { counter.textContent = String(idx + 1); }
+            if (captionBox && captions[idx]) {
+                if (captionText) { captionText.textContent = captions[idx].caption || ''; }
+                if (captionCredit) {
+                    var credit = captions[idx].credit;
+                    captionCredit.textContent = credit ? label('photoCredit', 'Фото:') + ' ' + credit : '';
+                    // Пустой блок прячем целиком: иначе остаётся висеть
+                    // точка-разделитель перед пустотой.
+                    captionCredit.hidden = !credit;
+                }
+                captionBox.style.visibility = (captions[idx].caption || captions[idx].credit) ? '' : 'hidden';
+            }
         };
         var prev = root.querySelector('[data-ndg-prev]');
         var next = root.querySelector('[data-ndg-next]');

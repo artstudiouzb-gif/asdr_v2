@@ -34,14 +34,16 @@ final class NewsImage
         return (int) Database::pdo()->lastInsertId();
     }
 
-    public static function updateMeta(int $id, int $newsId, ?string $alt, int $sortOrder, ?int $focalX, ?int $focalY): void
+    public static function updateMeta(int $id, int $newsId, ?string $alt, int $sortOrder, ?int $focalX, ?int $focalY, ?string $caption = null, ?string $credit = null): void
     {
         $stmt = Database::pdo()->prepare(
-            'UPDATE news_images SET alt_text = :alt, sort_order = :sort, focal_x = :fx, focal_y = :fy
+            'UPDATE news_images SET alt_text = :alt, caption = :caption, credit = :credit, sort_order = :sort, focal_x = :fx, focal_y = :fy
              WHERE id = :id AND news_id = :nid'
         );
         $stmt->execute([
             ':alt' => $alt,
+            ':caption' => $caption,
+            ':credit' => $credit,
             ':sort' => $sortOrder,
             ':fx' => $focalX,
             ':fy' => $focalY,

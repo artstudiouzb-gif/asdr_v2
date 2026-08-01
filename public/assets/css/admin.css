@@ -5374,3 +5374,50 @@ body.has-icon-picker { overflow: hidden; }
 .totp-setup { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 16px; }
 .totp-setup__qr { background: #fff; padding: 12px; border: 1px solid var(--admin-border, #e2e8f0); border-radius: 12px; }
 .totp-setup__qr svg { display: block; }
+
+/* Напоминания редактору: свёрнутая полоса над формой. Не тревога и не ошибка —
+   спокойный тон, потому что материал сохраняется и без этих пунктов. */
+.content-checklist {
+    margin-bottom: 16px;
+    border: 1px solid var(--admin-border, #e2e8f0);
+    border-radius: 10px;
+    background: var(--admin-surface, #fff);
+    overflow: hidden;
+}
+.content-checklist__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--admin-muted, #6b7280);
+}
+.content-checklist__head svg { flex: none; }
+.content-checklist__toggle {
+    margin-inline-start: auto;
+    border: 0;
+    background: none;
+    padding: 2px 4px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--admin-accent, #2563eb);
+    cursor: pointer;
+}
+.content-checklist__list {
+    margin: 0;
+    padding: 0 14px 12px;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+.content-checklist__item {
+    display: grid;
+    gap: 2px;
+    font-size: 13px;
+    line-height: 1.45;
+    padding-inline-start: 10px;
+    border-inline-start: 2px solid var(--admin-border, #e2e8f0);
+}
+.content-checklist__item strong { font-weight: 600; }
+.content-checklist__item span { color: var(--admin-muted, #6b7280); }

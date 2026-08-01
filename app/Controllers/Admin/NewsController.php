@@ -127,11 +127,20 @@ final class NewsController
             $activeLang = Language::defaultCode();
         }
 
+        $translations = NewsTranslation::forNews((int) $news['id']);
+        $gallery = \App\Models\NewsImage::forNews((int) $news['id']);
+
         View::render('admin/news/form', [
             'news' => $news,
-            'translations' => NewsTranslation::forNews((int) $news['id']),
-            'gallery' => \App\Models\NewsImage::forNews((int) $news['id']),
+            'translations' => $translations,
+            'gallery' => $gallery,
             'activeLang' => $activeLang,
+            // Напоминания о незаполненном: ничего не блокируют, просто список.
+            'checklist' => \App\Core\ContentChecklist::forNews(
+                $news,
+                $gallery,
+                array_map('strval', array_keys($translations))
+            ),
             'error' => null,
         ]);
     }
@@ -643,7 +652,9 @@ final class NewsController
                 trim((string) ($meta['alt'] ?? '')) ?: null,
                 (int) ($meta['sort'] ?? 0),
                 self::clampPercent($meta['focal_x'] ?? null),
-                self::clampPercent($meta['focal_y'] ?? null)
+                self::clampPercent($meta['focal_y'] ?? null),
+                mb_substr(trim((string) ($meta['caption'] ?? '')), 0, 255) ?: null,
+                mb_substr(trim((string) ($meta['credit'] ?? '')), 0, 255) ?: null
             );
         }
 

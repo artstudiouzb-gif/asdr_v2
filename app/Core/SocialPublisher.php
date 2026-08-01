@@ -232,7 +232,8 @@ final class SocialPublisher
             (string) ($cfg['signature'] ?? ''),
             (string) ($post['category'] ?? ''),
             (string) ($post['date'] ?? ''),
-            (string) ($post['hashtags'] ?? '')
+            (string) ($post['hashtags'] ?? ''),
+            (array) ($post['gallery_meta'] ?? [])
         );
         if ($doc['html'] === '' || !TelegramRichMessage::fits($doc['html'])) {
             return null;
