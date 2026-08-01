@@ -628,6 +628,15 @@ final class DesignSettings
             $val = self::sanitize($key, (string) $input[$key]);
             Setting::set('design_' . $key, (string) $val);
         }
+        // Фирменная эмблема: путь к SVG в медиабиблиотеке. Пустое присланное
+        // поле — это очистка (редактор нажал «×»), возвращается встроенный знак.
+        if (array_key_exists('emblem', $input) || !empty($_FILES['emblem_file'])) {
+            $emblem = trim((string) (ImageField::resolve('emblem_file', 'emblem', (string) Setting::get('design_emblem', ''), Auth::id()) ?? ''));
+            // Только свой файл: знак с чужого домена — сторонний запрос с
+            // каждой страницы, и тема его всё равно не примет.
+            $ok = $emblem !== '' && str_starts_with($emblem, '/') && UrlGuard::isSafeMedia($emblem);
+            Setting::set('design_emblem', $ok ? $emblem : '');
+        }
         // Своя ширина контейнера — отдельное свободное поле (не из choices).
         if (array_key_exists('container_custom', $input)) {
             Setting::set('design_container_custom', self::normalizeWidth(trim((string) $input['container_custom'])));

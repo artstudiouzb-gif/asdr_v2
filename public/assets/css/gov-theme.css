@@ -4308,16 +4308,11 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     font-family: var(--font-heading, var(--font-family)) !important;
     font-weight: var(--heading-font-weight, 800) !important;
     font-size: clamp(2rem, 3.5vw, 2.75rem) !important;
-    background: linear-gradient(135deg, var(--gov-navy) 30%, var(--gov-teal) 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
+    /* Сплошной цвет вместо градиента: градиент по тексту перекрывал «Цвет
+       текста» блока — что бы редактор ни выбрал, цифры оставались прежними. */
+    color: var(--counters-text, var(--gov-title)) !important;
+    -webkit-text-fill-color: currentColor !important;
     display: inline-block;
-}
-:root[data-theme="dark"] .counter__value,
-:root[data-theme="dark"] .counter__suffix {
-    background: linear-gradient(135deg, #ffffff 40%, var(--gov-teal) 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
 }
 
 .counter__label {

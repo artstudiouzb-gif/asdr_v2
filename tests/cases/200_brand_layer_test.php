@@ -136,3 +136,24 @@ test('Оглавление: закреплённая полоса не пере�
     assert_contains("setProperty('--anchornav-top'", $js);
     assert_contains('IntersectionObserver', $js);
 });
+
+test('Эмблему можно заменить своим SVG из настроек дизайна', function () {
+    \App\Models\Setting::overrideInMemory('design_emblem', '/uploads/public/gerb.svg');
+    $css = \App\Core\SiteThemeCss::build([], \App\Core\HeaderConfig::DEFAULTS, false);
+    assert_contains('--gov-emblem:url("/uploads/public/gerb.svg")', $css);
+
+    // Чужой адрес и попытка вырваться из url() темой игнорируются: значение
+    // уходит прямо в CSS, поэтому проверяется до подстановки.
+    foreach (['https://example.com/x.svg', '/uploads/public/a.svg") ;}body{display:none;/*'] as $bad) {
+        \App\Models\Setting::overrideInMemory('design_emblem', $bad);
+        assert_not_contains('--gov-emblem', \App\Core\SiteThemeCss::build([], \App\Core\HeaderConfig::DEFAULTS, false));
+    }
+
+    \App\Models\Setting::overrideInMemory('design_emblem', '');
+    assert_not_contains('--gov-emblem', \App\Core\SiteThemeCss::build([], \App\Core\HeaderConfig::DEFAULTS, false));
+
+    // Поле есть в форме дизайна, иначе настройку негде задать.
+    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/design/index.php');
+    assert_contains("imageField('emblem'", $form);
+    assert_contains('enctype="multipart/form-data"', $form);
+});
