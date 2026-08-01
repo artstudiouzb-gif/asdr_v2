@@ -85,6 +85,26 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
         <input type="hidden" name="expected_lock_version" value="<?= max(1, (int) ($news['lock_version'] ?? 1)) ?>">
     <?php endif; ?>
 
+    <?php if (!empty($checklist)): ?>
+        <?php // Напоминание, а не запрет: материал сохраняется и публикуется
+              // с любым числом незаполненных пунктов. ?>
+        <div class="content-checklist" data-content-checklist>
+            <div class="content-checklist__head">
+                <?= \App\Core\AdminUi::icon('info', 18) ?>
+                <span>Можно дополнить — <?= count($checklist) ?></span>
+                <button type="button" class="content-checklist__toggle" data-checklist-toggle aria-expanded="false">показать</button>
+            </div>
+            <ul class="content-checklist__list" hidden>
+                <?php foreach ($checklist as $item): ?>
+                    <li class="content-checklist__item">
+                        <strong><?= htmlspecialchars($item['text'], ENT_QUOTES) ?></strong>
+                        <span><?= htmlspecialchars($item['why'], ENT_QUOTES) ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+
     <div class="entry-grid">
         <div class="entry-main">
             <!-- Блок 1: Основная информация (Текстовый редактор) -->

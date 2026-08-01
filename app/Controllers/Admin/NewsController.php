@@ -127,11 +127,20 @@ final class NewsController
             $activeLang = Language::defaultCode();
         }
 
+        $translations = NewsTranslation::forNews((int) $news['id']);
+        $gallery = \App\Models\NewsImage::forNews((int) $news['id']);
+
         View::render('admin/news/form', [
             'news' => $news,
-            'translations' => NewsTranslation::forNews((int) $news['id']),
-            'gallery' => \App\Models\NewsImage::forNews((int) $news['id']),
+            'translations' => $translations,
+            'gallery' => $gallery,
             'activeLang' => $activeLang,
+            // Напоминания о незаполненном: ничего не блокируют, просто список.
+            'checklist' => \App\Core\ContentChecklist::forNews(
+                $news,
+                $gallery,
+                array_map('strval', array_keys($translations))
+            ),
             'error' => null,
         ]);
     }

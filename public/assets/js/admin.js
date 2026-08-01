@@ -3085,3 +3085,17 @@
         if (select && select.form) { select.form.submit(); }
     });
 })();
+
+// Напоминания редактору: список свёрнут, чтобы не занимать экран у тех, кто
+// и так всё заполняет.
+document.addEventListener('click', function (event) {
+    var toggle = event.target.closest('[data-checklist-toggle]');
+    if (!toggle) { return; }
+    var box = toggle.closest('[data-content-checklist]');
+    var list = box && box.querySelector('.content-checklist__list');
+    if (!list) { return; }
+    var open = list.hidden;
+    list.hidden = !open;
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.textContent = open ? 'скрыть' : 'показать';
+});
