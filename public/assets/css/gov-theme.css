@@ -3299,7 +3299,9 @@ span.imgcard__media::after {
 }
 
 /* Карусель проектов. */
-.section-head__tools { display: flex; align-items: center; gap: 16px; }
+/* На узких экранах ссылка «Все …» и стрелки карусели не помещаются в одну
+   строку: без переноса блок вылезал за окно и давал горизонтальный скролл. */
+.section-head__tools { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; max-width: 100%; }
 .carousel-nav { display: inline-flex; gap: 8px; }
 .carousel-nav[hidden] { display: none; }
 .carousel-nav__btn { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gov-border); background: var(--gov-surface); color: var(--gov-title); font-size: 1.375rem; line-height: 1; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease; }
@@ -3889,7 +3891,9 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     display: none !important;
 }
 .media-tabs__tab.is-active { 
-    color: #fff !important;
+    /* Не #fff: на бирюзовом акценте белый даёт 3.19:1 при норме 4.5:1.
+       Цвет считается от акцента (--on-accent), поэтому переживает смену темы. */
+    color: var(--on-accent, #0b1a30) !important;
     background: var(--color-accent, var(--gov-teal)) !important;
     box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 30%, transparent);
 }

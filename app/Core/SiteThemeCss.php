@@ -39,6 +39,9 @@ final class SiteThemeCss
             '--gov-teal' => 'var(--color-accent)',
             '--gov-teal-text' => AccentContrast::onLight($accent, $colors['bg_surface']),
             '--gov-teal-on-dark' => AccentContrast::onDark($accent),
+            // Текст поверх заливки акцентом: белый читается не на всяком
+            // акценте, поэтому цвет выбирается по контрасту, а не на глаз.
+            '--on-accent' => AccentContrast::onFill($accent),
             '--bg-primary' => $colors['bg_primary'],
             '--bg-surface' => $colors['bg_surface'],
             '--text-main' => $colors['text_main'],
