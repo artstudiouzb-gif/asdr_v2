@@ -54,11 +54,18 @@ final class TelegramRichMessage
         $html = '';
 
         // Рубрика и дата — служебной строкой над заголовком: в ленте канала по
-        // ней видно, о чём пост, ещё до заголовка.
-        $meta = array_values(array_filter([trim($category), trim($date)], static fn (string $s): bool => $s !== ''));
-        if ($meta !== []) {
-            $html .= '<p><b>' . $esc(implode(' · ', $meta)) . '</b></p>';
-        }
+        // ней видно, о чём пост, ещё до заголовка. Значения берём из самого
+        // языкового блока, если они там есть: дата и рубрика переводятся, и
+        // под русским заголовком не должно стоять «1-avgust, 2026-yil».
+        $metaLine = static function (array $lang) use ($esc, $category, $date): string {
+            $parts = array_values(array_filter([
+                trim((string) ($lang['category'] ?? $category)),
+                trim((string) ($lang['date'] ?? $date)),
+            ], static fn (string $s): bool => $s !== ''));
+
+            return $parts === [] ? '' : '<p><b>' . $esc(implode(' · ', $parts)) . '</b></p>';
+        };
+        $html .= $metaLine($first);
 
         $media = [];
         foreach ($photos as $i => $url) {
@@ -81,6 +88,7 @@ final class TelegramRichMessage
             $html .= '<hr/>';
             $label = trim((string) ($lang['label'] ?? '')) ?: mb_strtoupper((string) ($lang['code'] ?? ''));
             $html .= '<details><summary>' . $esc($label) . '</summary>'
+                . $metaLine($lang)
                 . '<h2>' . $esc((string) $lang['title']) . '</h2>'
                 . self::body($lang, $esc)
                 . '</details>';

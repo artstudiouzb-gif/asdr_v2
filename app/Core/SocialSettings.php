@@ -350,6 +350,9 @@ final class SocialSettings
             if ($title === '') {
                 continue;
             }
+            // Рубрика и дата — на языке своего блока. Иначе под русским
+            // заголовком стояло бы «1-avgust, 2026-yil».
+            $published = trim((string) ($news['published_at'] ?? ''));
             $blocks[] = [
                 'code' => $code,
                 'label' => $meta[$code]['label'] ?? mb_strtoupper($code),
@@ -357,6 +360,8 @@ final class SocialSettings
                 'excerpt' => trim((string) ($row['excerpt'] ?? '')),
                 'link' => $base . ($code === $default ? '' : '/' . $code) . '/news/' . $slug,
                 'read_more' => $meta[$code]['read_more'] ?? ('Read (' . strtoupper($code) . ') →'),
+                'category' => trim((string) ($row['badge'] ?? '')),
+                'date' => $published !== '' ? DateFormatter::long($published, $code) : '',
             ];
         }
 

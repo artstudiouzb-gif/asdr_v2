@@ -466,25 +466,28 @@ final class SocialPublisher
                 ? "\n\n" . '<a href="' . $esc((string) $l['link']) . '">' . $esc((string) $l['read_more']) . '</a>'
                 : '';
         };
-        // Рубрика и дата — служебной строкой сверху, хештеги — в самом низу.
-        $head = '';
-        $meta = array_values(array_filter([
-            trim((string) ($post['category'] ?? '')),
-            trim((string) ($post['date'] ?? '')),
-        ], static fn (string $v): bool => $v !== ''));
-        if ($meta !== []) {
-            $head = '<b>' . $esc(implode(' · ', $meta)) . '</b>' . "\n\n";
-        }
+        // Рубрика и дата — служебной строкой над заголовком своего языка:
+        // они переводятся, и под русским заголовком не должно стоять
+        // «1-avgust, 2026-yil». Хештеги — в самом низу, они общие.
+        $metaFor = static function (array $l) use ($esc, $post): string {
+            $meta = array_values(array_filter([
+                trim((string) ($l['category'] ?? $post['category'] ?? '')),
+                trim((string) ($l['date'] ?? $post['date'] ?? '')),
+            ], static fn (string $v): bool => $v !== ''));
+
+            return $meta === [] ? '' : '<b>' . $esc(implode(' · ', $meta)) . '</b>' . "\n\n";
+        };
         $hashtags = trim((string) ($post['hashtags'] ?? ''));
         $tail = ($hashtags !== '' ? "\n\n" . $esc($hashtags) : '')
             . ($signature !== '' ? "\n\n" . $signature : '');
 
         // Считаем фиксированную часть: заголовки, ссылки, разделители, подпись.
-        $fixed = mb_strlen(strip_tags($head)) + mb_strlen(strip_tags($tail))
+        $fixed = mb_strlen(strip_tags($tail))
             + (count($langs) - 1) * mb_strlen(strip_tags($sep));
         foreach ($langs as $l) {
             $fixed += mb_strlen((string) $l['title']) + 2; // +2 — перенос строки после заголовка
             $fixed += mb_strlen(strip_tags($linkFor($l)));
+            $fixed += mb_strlen(strip_tags($metaFor($l)));
         }
         $available = max(0, $limit - $fixed - 4);
         $perLang = count($langs) > 0 ? (int) floor($available / count($langs)) : 0;
@@ -498,12 +501,13 @@ final class SocialPublisher
             } elseif ($perLang <= 0) {
                 $excerpt = '';
             }
-            $parts[] = ($title !== '' ? '<b>' . $esc($title) . '</b>' : '')
+            $parts[] = $metaFor($l)
+                . ($title !== '' ? '<b>' . $esc($title) . '</b>' : '')
                 . ($excerpt !== '' ? "\n\n" . $esc($excerpt) : '')
                 . $linkFor($l);
         }
 
-        return $head . implode($sep, $parts) . $tail;
+        return implode($sep, $parts) . $tail;
     }
 
     /**
