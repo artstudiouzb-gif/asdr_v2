@@ -230,6 +230,8 @@ $mark = static function (bool $done, bool $started = true): string {
                    placeholder="@имя_канала или -1001234567890" autocomplete="off" spellcheck="false">
             <span class="form-hint">
                 Публичный канал — <code>@имя_канала</code>, приватный — <code>-100…</code>.
+                У закрытого канала имени <code>@…</code> не существует: добавьте бота администратором,
+                напишите в канал любое сообщение и нажмите «Определить ID канала».
             </span>
         </div>
 
@@ -298,6 +300,9 @@ $mark = static function (bool $done, bool $started = true): string {
             <button type="submit" class="btn btn--primary"><?= AdminUi::icon('save') ?>Сохранить канал</button>
             <button type="submit" formaction="/admin/telegram/channel/check" class="btn btn--outline">
                 <?= AdminUi::icon('check') ?>Проверить канал и права бота
+            </button>
+            <button type="submit" formaction="/admin/telegram/channel/detect" class="btn btn--outline" formnovalidate>
+                <?= AdminUi::icon('search') ?>Определить ID канала
             </button>
         </div>
     </form>

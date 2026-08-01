@@ -147,6 +147,49 @@ final class TelegramController
         exit;
     }
 
+    /**
+     * Определение id канала. У закрытого канала нет имени `@name`, и числовой
+     * `-100…` иначе добывают через сторонние боты. Бот видит свои каналы в
+     * getUpdates, как только его сделали администратором.
+     */
+    public function detectChannel(): void
+    {
+        Auth::requireSuperAdmin();
+        Csrf::verifyRequest();
+
+        if (!TelegramBot::isConfigured()) {
+            Flash::error('Сначала сохраните токен бота.');
+            header('Location: /admin/telegram#telegram-channel');
+            exit;
+        }
+
+        $channels = TelegramBot::channelsFromUpdates();
+        if ($channels === null) {
+            Flash::error(
+                'Telegram не ответил на запрос обновлений. Проверьте токен кнопкой «Проверить бота»; '
+                . 'если у бота настроен webhook, getUpdates не работает, пока он включён. '
+                . 'Подробности — в журнале ошибок.'
+            );
+            header('Location: /admin/telegram#telegram-channel');
+            exit;
+        }
+        if ($channels === []) {
+            Flash::error(
+                'Каналы не найдены. Добавьте бота администратором в канал и отправьте туда любое сообщение, '
+                . 'затем нажмите «Определить ID» ещё раз. Telegram отдаёт боту события только после этого.'
+            );
+            header('Location: /admin/telegram#telegram-channel');
+            exit;
+        }
+
+        foreach ($channels as $chat) {
+            Flash::success('Найден канал «' . $chat['title'] . '» — ID: ' . $chat['id']);
+        }
+        Flash::success('Скопируйте нужный ID в поле «Канал» и сохраните.');
+        header('Location: /admin/telegram#telegram-channel');
+        exit;
+    }
+
     /** Шаг 2: подтверждение привязки своего аккаунта. */
     public function link(): void
     {
