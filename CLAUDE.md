@@ -52,8 +52,10 @@ root@127.0.0.1 без пароля. Если админ-пароль неизв�
 # Полный прогон: 747 сценариев; без TEST_DB_* 140 DB-сценариев пропускаются
 TEST_DB_HOST=127.0.0.1 TEST_DB_DATABASE=artstudio_test TEST_DB_USERNAME=root TEST_DB_PASSWORD= php tests/run.php
 
-# Smoke-обход всего сайта (HTTP+PHP-фаталы), RU+UZ, публичка и вся админка
-php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ
+# Smoke-обход всего сайта (HTTP+PHP-фаталы), RU+UZ, публичка и вся админка.
+# --totp обязателен, когда у админа включено приложение-аутентификатор:
+# без него обход не проходит второй фактор и админку просто пропускает.
+php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp СЕКРЕТ
 ```
 После правок PHP: `php -l <файл>`. Сброс кэша страниц: `rm -rf storage/cache/page/*`
 (в админке — кнопка «Сброс кэша» в шапке).
