@@ -43,6 +43,15 @@ final class TOTP
         return $uri;
     }
 
+    /**
+     * Текущий код для секрета — тем же алгоритмом, что и проверка. Нужен
+     * инструментам (обход админки в smoke), которым надо войти без телефона.
+     */
+    public static function code(string $secret, ?int $timeSlice = null): string
+    {
+        return self::calculateCode($secret, $timeSlice ?? (int) floor(time() / self::PERIOD));
+    }
+
     public static function verify(string $secret, string $code, int $windowSteps = 1): bool
     {
         $code = preg_replace('/\s+/', '', $code) ?? '';

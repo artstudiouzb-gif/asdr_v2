@@ -9,7 +9,7 @@ declare(strict_types=1);
  * десяткам страниц одной командой после деплоя.
  *
  * Запуск:
- *   php scripts/smoke.php [BASE_URL] [--admin ЛОГИН:ПАРОЛЬ] [--max N]
+ *   php scripts/smoke.php [BASE_URL] [--admin ЛОГИН:ПАРОЛЬ] [--totp СЕКРЕТ] [--max N]
  *
  * Примеры:
  *   php scripts/smoke.php http://127.0.0.1:8000
@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 $base = 'http://127.0.0.1:8000';
 $adminCreds = null;
+$adminTotp = null;
 $maxPages = 200;
 $expectedRelease = null;
 
@@ -28,6 +29,10 @@ for ($i = 0; $i < count($args); $i++) {
     $a = $args[$i];
     if ($a === '--admin' && isset($args[$i + 1])) {
         $adminCreds = $args[++$i];
+    } elseif ($a === '--totp' && isset($args[$i + 1])) {
+        // Секрет приложения-аутентификатора: с ним обход проходит второй
+        // фактор сам, иначе вся админка остаётся непроверенной.
+        $adminTotp = trim((string) $args[++$i]);
     } elseif ($a === '--expect-release' && isset($args[$i + 1])) {
         $expectedRelease = trim((string) $args[++$i]);
     } elseif ($a === '--max' && isset($args[$i + 1])) {
@@ -196,8 +201,20 @@ if ($adminCreds !== null) {
     }
     $auth = fetch($base . '/admin/login', $cookieJar, $post);
 
+    if (stripos($auth['final'], '/admin/login/2fa') !== false && $adminTotp !== null) {
+        require_once __DIR__ . '/../app/Core/TOTP.php';
+        $csrf2 = '';
+        if (preg_match('/name=["\']csrf_token["\']\s+value=["\']([^"\']+)["\']/i', $auth['body'], $mm2)) {
+            $csrf2 = $mm2[1];
+        }
+        $auth = fetch($base . '/admin/login/2fa', $cookieJar, [
+            'code' => \App\Core\TOTP::code($adminTotp),
+            'csrf_token' => $csrf2,
+        ]);
+    }
+
     if (stripos($auth['final'], '/admin/login/2fa') !== false) {
-        echo "  ⚠ Включена 2FA — обход админки пропущен (нужен код из почты).\n";
+        echo "  ⚠ Нужен код второго фактора — обход админки пропущен. Передайте --totp СЕКРЕТ.\n";
     } elseif (stripos($auth['final'], '/admin/login') !== false) {
         echo "  ✗ Не удалось войти (проверьте логин/пароль).\n";
         $fail++;
@@ -216,6 +233,10 @@ if ($adminCreds !== null) {
             '/admin/audit', '/admin/audit/errors', '/admin/subscribers', '/admin/redirects', '/admin/users',
             '/admin/design', '/admin/settings', '/admin/social', '/admin/webhooks',
             '/admin/files', '/admin/repository', '/admin/profile',
+            // Формы создания: именно здесь редактор проводит время, и именно
+            // они падают от опечатки во вьюхе — списки такую ошибку не видят.
+            '/admin/news/create', '/admin/pages/create', '/admin/projects/create',
+            '/admin/team/create', '/admin/forms/create', '/admin/widgets/create',
         ];
         echo "Обход админки:\n";
         foreach ($adminRoutes as $path) {
@@ -228,6 +249,11 @@ if ($adminCreds !== null) {
                 && stripos($r['final'], '/admin/profile') !== false;
             if ($bounced || $bouncedToProfile) {
                 $errSig = $bounced ? 'сессия/доступ' : 'редирект на профиль: доступ ограничен';
+            } elseif ($path === '/admin/audit/errors') {
+                // Журнал ошибок показывает тексты перехваченных ошибок — там
+                // «Uncaught» и «Stack trace» лежат в данных, а не в поломке
+                // страницы. Проверяем только код ответа.
+                $errSig = null;
             } else {
                 $errSig = $r['status'] < 400 ? $checkBody($r['body']) : null;
             }
