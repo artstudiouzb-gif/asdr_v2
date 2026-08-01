@@ -38,24 +38,36 @@ test('Страница не предзагружает все локальные
 
 test('Сервер сжимает текст, а hero загружает медиа по приоритету первого экрана', function () {
     $htaccess = (string) file_get_contents(APP_ROOT . '/public/.htaccess');
-    $hero = (string) file_get_contents(APP_ROOT . '/templates/blocks/hero.php');
     assert_contains('BROTLI_COMPRESS', $htaccess);
     assert_contains('DEFLATE', $htaccess);
-    assert_contains('preload="metadata"', $hero);
-    assert_contains('loading="eager"', $hero);
-    assert_contains('fetchpriority="high"', $hero);
 
-    // Фон hero — это первый экран, откладывать его нельзя. Проверяем именно
-    // теги <img>: YouTube-подложка подключается по data-src уже после клика,
-    // и `loading="lazy"` на её <iframe> — ожидаемое поведение, а не отложенная
-    // обложка. Прежний запрет подстроки во всём файле смешивал эти два случая.
-    if (preg_match_all('/<img\b[^>]*>/is', $hero, $images) > 0) {
+    $render = static function (array $data): string {
+        $block = \App\Core\BlockRenderer::render([
+            'id' => 880,
+            'type' => 'hero',
+            'custom_css' => '',
+            'data' => json_encode(array_merge(\App\Core\BlockRenderer::defaultsFor('hero'), $data)),
+        ]);
+
+        return (string) $block['html'];
+    };
+
+    // Проверяем готовую разметку, а не исходник шаблона: подстроки в PHP-коде
+    // ничего не говорят о том, что реально уехало браузеру.
+    $image = $render(['bg_type' => 'image', 'image' => '/uploads/public/hero.jpg']);
+    assert_contains('loading="eager"', $image);
+    assert_contains('fetchpriority="high"', $image);
+
+    // Фон hero — это первый экран, откладывать его нельзя. Смотрим теги <img>:
+    // YouTube-подложка подключается по data-src уже после загрузки, и
+    // `loading="lazy"` на её <iframe> — ожидаемое поведение, а не отложенная
+    // обложка.
+    $video = $render(['bg_type' => 'video', 'video_url' => '/uploads/public/hero.mp4', 'image' => '/uploads/public/hero.jpg']);
+    assert_contains('preload="metadata"', $video);
+    foreach ([$image, $video, $render(['bg_type' => 'youtube', 'youtube_url' => 'https://youtu.be/dQw4w9WgXcQ', 'image' => '/uploads/public/hero.jpg'])] as $html) {
+        preg_match_all('/<img\b[^>]*>/is', $html, $images);
         foreach ($images[0] as $tag) {
             assert_not_contains('loading="lazy"', $tag, 'обложка hero отложена до прокрутки');
         }
     }
-
-    // Фоновая картинка идёт через Media::picture с $lazy = false и
-    // $highPriority = true (аргументы 6 и 8).
-    assert_contains("'100vw', true", $hero);
 });

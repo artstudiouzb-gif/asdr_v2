@@ -108,9 +108,9 @@ final class HeroBlockNormalizer
     }
 
     /**
-     * Слайды обложки. Оформление (высота, фон, затемнение, панель) остаётся
-     * общим для всей обложки — у слайда своё только содержимое: текст,
-     * картинка, кнопки, ссылка и окно показа.
+     * Слайды обложки. Оформление (высота, затемнение, панель) остаётся общим
+     * для всей обложки — у слайда своё только содержимое: текст, фон (фото,
+     * mp4 или YouTube), кнопки, ссылка и окно показа.
      *
      * @return list<array<string, mixed>>
      */
@@ -126,11 +126,20 @@ final class HeroBlockNormalizer
                 continue;
             }
 
+            $video = BlockDataInput::safeMedia($slide['video_url'] ?? '');
+            $youtube = trim((string) ($slide['youtube_url'] ?? ''));
+            // Ссылку храним как ввёл редактор, но фоном она становится только
+            // когда из неё читается идентификатор ролика.
+            $youtubeOk = Video::youtubeId($youtube) !== null;
+
             $normalized = [
                 'eyebrow' => trim((string) ($slide['eyebrow'] ?? '')),
                 'title' => trim((string) ($slide['title'] ?? '')),
                 'subtitle' => trim((string) ($slide['subtitle'] ?? '')),
+                'media_type' => $youtubeOk ? 'youtube' : ($video !== '' ? 'video' : 'image'),
                 'image' => BlockDataInput::safeMedia($slide['image'] ?? ''),
+                'video_url' => $video,
+                'youtube_url' => $youtube,
                 'image_position' => MediaPosition::normalize($slide['image_position'] ?? null),
                 'link_url' => BlockDataInput::safeLink($slide['link_url'] ?? ''),
                 'button_text' => trim((string) ($slide['button_text'] ?? '')),
@@ -148,7 +157,8 @@ final class HeroBlockNormalizer
 
             // Пустая строка репитера (редактор добавил и не заполнил) в данные
             // не попадает: иначе слайдер показывал бы чёрный кадр.
-            if ($normalized['title'] === '' && $normalized['subtitle'] === '' && $normalized['image'] === '') {
+            if ($normalized['title'] === '' && $normalized['subtitle'] === ''
+                && $normalized['image'] === '' && $video === '' && !$youtubeOk) {
                 continue;
             }
 

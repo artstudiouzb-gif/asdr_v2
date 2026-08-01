@@ -61,6 +61,70 @@ test('Обложка: один слайд обходится без навига
     assert_not_contains('data-slide-index', $html);
 });
 
+test('Обложка: у слайда может быть свой видеофон', function () {
+    $html = hero_slider_html([
+        'slides' => [
+            ['title' => 'Картинка', 'image' => '/uploads/public/a.jpg'],
+            ['title' => 'Ролик', 'video_url' => '/uploads/public/hero.mp4', 'image' => '/uploads/public/poster.jpg'],
+            ['title' => 'YouTube', 'youtube_url' => 'https://youtu.be/dQw4w9WgXcQ'],
+        ],
+    ]);
+
+    assert_contains('data-hero-background-video', $html);
+    assert_contains('/uploads/public/hero.mp4', $html);
+    // Картинка слайда остаётся заставкой ролика.
+    assert_contains('poster="/uploads/public/poster.jpg"', $html);
+    assert_contains('data-hero-youtube-background', $html);
+    assert_contains('youtube-nocookie.com/embed/dQw4w9WgXcQ', $html);
+    // Скрытый слайд не тянет медиа заранее: ни автозапуска, ни src у iframe.
+    assert_not_contains('autoplay preload', $html);
+    assert_contains('preload="none"', $html);
+    assert_not_contains('<iframe data-hero-youtube-background src=', $html);
+});
+
+test('Обложка: первый слайд грузится сразу, остальные — отложенно', function () {
+    $html = hero_slider_html([
+        'slides' => [
+            ['title' => 'Первый', 'image' => '/uploads/public/a.jpg'],
+            ['title' => 'Второй', 'image' => '/uploads/public/b.jpg'],
+        ],
+    ]);
+
+    assert_contains('loading="eager"', $html, 'первый слайд — это первый экран');
+    assert_contains('loading="lazy"', $html, 'остальные слайды ждут своей очереди');
+});
+
+test('Обложка: битая ссылка на YouTube не подменяет фон слайда', function () {
+    $normalized = HeroBlockNormalizer::normalize([
+        'slides' => [[
+            'title' => 'Слайд',
+            'image' => '/uploads/public/a.jpg',
+            'youtube_url' => 'https://example.com/watch?v=нет',
+        ]],
+    ]);
+
+    // Введённое редактором не теряем, но фоном остаётся картинка.
+    assert_same('image', $normalized['slides'][0]['media_type']);
+    assert_same('https://example.com/watch?v=нет', $normalized['slides'][0]['youtube_url']);
+
+    $video = HeroBlockNormalizer::normalize(['slides' => [
+        ['video_url' => '/uploads/public/a.mp4'],
+        ['title' => 'Опасный', 'video_url' => 'javascript:alert(1)'],
+    ]]);
+    assert_same('video', $video['slides'][0]['media_type'], 'слайд из одного ролика — тоже слайд');
+    assert_same('', $video['slides'][1]['video_url'], 'небезопасный адрес ролика отбрасывается');
+});
+
+test('Фон карусели: скрытый слайд не играет и не грузит YouTube', function () {
+    $js = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/frontend.js');
+
+    assert_contains('.block-hero__slide', $js);
+    assert_contains('MutationObserver', $js);
+    // Пауза и возврат к началу при уходе слайда.
+    assert_contains('video.pause()', $js);
+    assert_contains("command('pauseVideo')", $js);
+});
+
 test('Обложка: слайд вне окна показа не выводится', function () {
     $html = hero_slider_html([
         'slides' => [

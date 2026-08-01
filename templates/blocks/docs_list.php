@@ -5,11 +5,11 @@ $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
 $items = $data['items'] ?? [];
 $cols = max(1, min(4, (int) ($data['columns'] ?? 4)));
-$variant = ($data['variant'] ?? 'grid') === 'links' ? 'links' : 'grid';
+$variant = in_array($data['variant'] ?? 'grid', ['links', 'acts'], true) ? (string) $data['variant'] : 'grid';
 $searchEnabled = !array_key_exists('search_enabled', $data) || !empty($data['search_enabled']);
 $prepared = array_map([\App\Core\DocumentPresenter::class, 'prepare'], is_array($items) ? $items : []);
 $kinds = array_values(array_unique(array_filter(array_column($prepared, 'extension'), static fn (string $kind): bool => $kind !== 'other')));
-$templateCss = '#block-' . $blockId . ' .docslist-grid{--docs-cols:' . $cols . '}';
+$templateCss = '#block-' . $blockId . ' .docslist-grid,#block-' . $blockId . ' .docslist-acts{--docs-cols:' . $cols . '}';
 ?>
 <div class="block-docslist block-docslist--<?= $variant ?>" data-document-list>
     <div class="section-head">
@@ -40,9 +40,13 @@ $templateCss = '#block-' . $blockId . ' .docslist-grid{--docs-cols:' . $cols . '
                 <span class="document-tools__count" data-document-count aria-live="polite"></span>
             </div>
         <?php endif; ?>
-        <div class="<?= $variant === 'links' ? 'media-list docslist-links' : 'docslist-grid' ?>">
+        <div class="<?= $variant === 'links' ? 'media-list docslist-links' : ($variant === 'acts' ? 'docslist-acts' : 'docslist-grid') ?>">
             <?php foreach ($items as $doc): ?>
-                <?php $compact = $variant === 'links'; include __DIR__ . '/partials/document_card.php'; ?>
+                <?php if ($variant === 'acts'): ?>
+                    <?php include __DIR__ . '/partials/act_card.php'; ?>
+                <?php else: ?>
+                    <?php $compact = $variant === 'links'; include __DIR__ . '/partials/document_card.php'; ?>
+                <?php endif; ?>
             <?php endforeach; ?>
         </div>
         <p class="block-docslist__empty" data-document-empty hidden><?= htmlspecialchars(t('Ничего не найдено.'), ENT_QUOTES) ?></p>

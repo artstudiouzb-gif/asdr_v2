@@ -651,7 +651,16 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                         <?= $slideField($i, 'eyebrow', 'Надзаголовок', (string) ($slide['eyebrow'] ?? '')) ?>
                         <?= $slideField($i, 'title', 'Заголовок', (string) ($slide['title'] ?? '')) ?>
                         <?= $slideField($i, 'subtitle', 'Подзаголовок', (string) ($slide['subtitle'] ?? '')) ?>
-                        <?= \App\Core\AdminUi::imageField('slides[' . $i . '][image]', (string) ($slide['image'] ?? ''), ['label' => 'Изображение слайда']) ?>
+                        <?= \App\Core\AdminUi::imageField('slides[' . $i . '][image]', (string) ($slide['image'] ?? ''), ['label' => 'Изображение слайда', 'hint' => 'Фон слайда, а для видео — заставка до загрузки.']) ?>
+                        <div class="form-field">
+                            <label for="slide_<?= $i ?>_video_url">Видео слайда (mp4)</label>
+                            <div class="image-field__controls">
+                                <input type="text" id="slide_<?= $i ?>_video_url" name="slides[<?= $i ?>][video_url]" value="<?= htmlspecialchars((string) ($slide['video_url'] ?? ''), ENT_QUOTES) ?>" placeholder="/uploads/public/hero.mp4">
+                                <button type="button" class="btn btn--small" data-media-pick data-media-target="#slide_<?= $i ?>_video_url" data-media-type="video">Медиабиблиотека</button>
+                            </div>
+                            <span class="form-hint">Заполнено — слайд показывает видео вместо картинки. Без звука, зациклено; играет только пока слайд на экране.</span>
+                        </div>
+                        <?= $slideField($i, 'youtube_url', 'Видео слайда с YouTube', (string) ($slide['youtube_url'] ?? ''), 'text', 'Корректная ссылка перебивает mp4 и картинку. Ролик загружается только когда слайд показан.') ?>
                         <?= $slideField($i, 'link_url', 'Ссылка со всего слайда', (string) ($slide['link_url'] ?? ''), 'text', 'Клик по слайду ведёт сюда. Кнопки при этом работают по своим ссылкам.') ?>
                         <?= $slideField($i, 'button_text', 'Кнопка 1 — текст', (string) ($slide['button_text'] ?? '')) ?>
                         <?= $slideField($i, 'button_url', 'Кнопка 1 — ссылка', (string) ($slide['button_url'] ?? '')) ?>
@@ -682,7 +691,16 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <div class="form-field"><label>Надзаголовок</label><input type="text" name="slides[__INDEX__][eyebrow]"></div>
                 <div class="form-field"><label>Заголовок</label><input type="text" name="slides[__INDEX__][title]"></div>
                 <div class="form-field"><label>Подзаголовок</label><input type="text" name="slides[__INDEX__][subtitle]"></div>
-                <?= \App\Core\AdminUi::imageField('slides[__INDEX__][image]', '', ['label' => 'Изображение слайда']) ?>
+                <?= \App\Core\AdminUi::imageField('slides[__INDEX__][image]', '', ['label' => 'Изображение слайда', 'hint' => 'Фон слайда, а для видео — заставка до загрузки.']) ?>
+                <div class="form-field">
+                    <label for="slide___INDEX___video_url">Видео слайда (mp4)</label>
+                    <div class="image-field__controls">
+                        <input type="text" id="slide___INDEX___video_url" name="slides[__INDEX__][video_url]" placeholder="/uploads/public/hero.mp4">
+                        <button type="button" class="btn btn--small" data-media-pick data-media-target="#slide___INDEX___video_url" data-media-type="video">Медиабиблиотека</button>
+                    </div>
+                    <span class="form-hint">Заполнено — слайд показывает видео вместо картинки.</span>
+                </div>
+                <div class="form-field"><label>Видео слайда с YouTube</label><input type="text" name="slides[__INDEX__][youtube_url]"><span class="form-hint">Корректная ссылка перебивает mp4 и картинку.</span></div>
                 <div class="form-field"><label>Ссылка со всего слайда</label><input type="text" name="slides[__INDEX__][link_url]"></div>
                 <div class="form-field"><label>Кнопка 1 — текст</label><input type="text" name="slides[__INDEX__][button_text]"></div>
                 <div class="form-field"><label>Кнопка 1 — ссылка</label><input type="text" name="slides[__INDEX__][button_url]"></div>
@@ -981,6 +999,14 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'anchor_nav'): ?>
+            <div class="form-field form-field--check">
+                <label><input type="checkbox" name="auto" value="1" <?= !empty($data['auto']) ? 'checked' : '' ?>> Собирать разделы автоматически</label>
+                <span class="form-hint">В навигацию попадут все блоки страницы, у которых заполнен заголовок — в том порядке, в каком они идут. Пункты ниже добавляются перед ними.</span>
+            </div>
+            <div class="form-field form-field--check">
+                <label><input type="checkbox" name="sticky" value="1" <?= !empty($data['sticky']) ? 'checked' : '' ?>> Закреплять при прокрутке</label>
+                <span class="form-hint">Полоса остаётся под шапкой и подсвечивает раздел, который сейчас на экране. Полезно на длинных страницах.</span>
+            </div>
             <div>
                 <label>Пункты навигации (якоря разделов или ссылки)</label>
                 <div data-repeater="items">
@@ -1067,8 +1093,9 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <select id="docs_variant" name="variant">
                     <option value="grid" <?= ($data['variant'] ?? 'grid') === 'grid' ? 'selected' : '' ?>>Карточки документов</option>
                     <option value="links" <?= ($data['variant'] ?? 'grid') === 'links' ? 'selected' : '' ?>>Компактный список ссылок</option>
+                    <option value="acts" <?= ($data['variant'] ?? 'grid') === 'acts' ? 'selected' : '' ?>>Правовые акты (номер и дата)</option>
                 </select>
-                <span class="form-hint">Компактный вариант подходит для короткого списка файлов и внешних материалов.</span>
+                <span class="form-hint">Компактный вариант подходит для короткого списка файлов и внешних материалов. «Правовые акты» показывают номер и дату из полей ниже.</span>
             </div>
             <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все документы"></div>
             <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
@@ -1084,6 +1111,8 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                         <div class="repeater-row">
                             <div class="form-field"><label>Название</label><input type="text" name="items[<?= $i ?>][title]" value="<?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Мета (необязательно)</label><input type="text" name="items[<?= $i ?>][meta]" value="<?= htmlspecialchars($item['meta'] ?? '', ENT_QUOTES) ?>"><span class="form-hint">Формат и размер локального файла определяются автоматически.</span></div>
+                            <div class="form-field"><label>Номер акта</label><input type="text" name="items[<?= $i ?>][number]" value="<?= htmlspecialchars($item['number'] ?? '', ENT_QUOTES) ?>" placeholder="ПФ-6079"><span class="form-hint">Показывается в варианте «Правовые акты».</span></div>
+                            <div class="form-field"><label>Дата акта</label><input type="text" name="items[<?= $i ?>][date]" value="<?= htmlspecialchars($item['date'] ?? '', ENT_QUOTES) ?>" placeholder="12 марта 2026 г."></div>
                             <div class="form-field">
                                 <label>Ссылка на файл</label>
                                 <div class="u-inline-b9bbe540d3">
@@ -1098,6 +1127,8 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <template data-repeater-template="items">
                     <div class="form-field"><label>Название</label><input type="text" name="items[__INDEX__][title]"></div>
                     <div class="form-field"><label>Мета</label><input type="text" name="items[__INDEX__][meta]"></div>
+                    <div class="form-field"><label>Номер акта</label><input type="text" name="items[__INDEX__][number]" placeholder="ПФ-6079"></div>
+                    <div class="form-field"><label>Дата акта</label><input type="text" name="items[__INDEX__][date]" placeholder="12 марта 2026 г."></div>
                     <div class="form-field">
                         <label>Ссылка на файл</label>
                         <div class="u-inline-b9bbe540d3">

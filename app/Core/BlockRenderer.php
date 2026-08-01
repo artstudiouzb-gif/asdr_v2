@@ -50,6 +50,21 @@ final class BlockRenderer
     private static bool $h1Used = false;
 
     /**
+     * Разделы страницы для якорной навигации: собираются до рендера, потому
+     * что блок оглавления обычно стоит первым и должен знать о том, что будет
+     * ниже. Источник — заголовок блока: он же выводится на странице секцией.
+     *
+     * @var list<array{id: string, label: string}>
+     */
+    private static array $pageSections = [];
+
+    /** @return list<array{id: string, label: string}> */
+    public static function pageSections(): array
+    {
+        return self::$pageSections;
+    }
+
+    /**
      * Типы, чей заголовок может быть заголовком страницы. CTA сюда не входит:
      * это рекламная врезка и всегда использует h2.
      *
@@ -278,6 +293,7 @@ final class BlockRenderer
         $preloadImages = [];
         self::$nextBoundary = null;
         self::$h1Used = false;
+        self::$pageSections = self::collectSections($blocks);
 
         foreach ($blocks as $block) {
             $rendered = self::render($block);
@@ -590,6 +606,41 @@ final class BlockRenderer
         }
 
         return $data;
+    }
+
+    /**
+     * Разделы страницы для автоматического оглавления. Берём заголовок блока:
+     * он выводится на странице как заголовок секции, а якорем служит id самой
+     * секции — отдельных якорей заводить не нужно.
+     *
+     * @param list<array<string,mixed>> $blocks
+     * @return list<array{id: string, label: string}>
+     */
+    private static function collectSections(array $blocks): array
+    {
+        $sections = [];
+        foreach ($blocks as $block) {
+            $type = (string) ($block['type'] ?? '');
+            // Обложка — заголовок всей страницы, а не её раздел; сама
+            // навигация в свой список тоже не попадает.
+            if (in_array($type, ['hero', 'anchor_nav'], true)) {
+                continue;
+            }
+            $data = $block['data'] ?? [];
+            if (is_string($data)) {
+                $data = json_decode($data, true);
+            }
+            if (!is_array($data) || !BlockVisibility::isVisible($data)) {
+                continue;
+            }
+            $label = trim((string) ($data['title'] ?? ''));
+            if ($label === '') {
+                continue;
+            }
+            $sections[] = ['id' => 'block-' . (int) ($block['id'] ?? 0), 'label' => $label];
+        }
+
+        return $sections;
     }
 
     /** @return array{0:string,1:string} */

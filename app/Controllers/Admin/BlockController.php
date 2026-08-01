@@ -681,7 +681,11 @@ final class BlockController
                     }
                     $items[] = ['label' => TextProcessor::typographPlain($label, $locale), 'url' => $url !== '' ? $url : '#'];
                 }
-                return ['items' => $items];
+                return [
+                    'items' => $items,
+                    'auto' => !empty($_POST['auto']),
+                    'sticky' => !empty($_POST['sticky']),
+                ];
             case 'stages':
                 $items = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -741,10 +745,14 @@ final class BlockController
                         'title' => TextProcessor::typographPlain($itemTitle, $locale),
                         'meta' => trim((string) ($item['meta'] ?? '')),
                         'url' => $url,
+                        // Реквизиты акта: показываются только в варианте
+                        // «Правовые акты», в остальных лежат про запас.
+                        'number' => trim((string) ($item['number'] ?? '')),
+                        'date' => trim((string) ($item['date'] ?? '')),
                     ];
                 }
                 return [
-                    'variant' => ($_POST['variant'] ?? 'grid') === 'links' ? 'links' : 'grid',
+                    'variant' => in_array($_POST['variant'] ?? 'grid', ['links', 'acts'], true) ? (string) $_POST['variant'] : 'grid',
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => $this->safeUrlField('all_url'),
