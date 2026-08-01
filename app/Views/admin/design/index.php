@@ -253,7 +253,7 @@ foreach ($options as $key => $opt) {
                             <input type="text" id="design_<?= htmlspecialchars($spaceKey, ENT_QUOTES) ?>" name="<?= htmlspecialchars($spaceKey, ENT_QUOTES) ?>" value="<?= htmlspecialchars($semanticSpacings[$spaceKey], ENT_QUOTES) ?>" data-design-preview-field placeholder="clamp(...) или px/rem">
                         </div>
                     <?php endforeach; ?>
-                    <?= \App\Core\AdminUi::imageField('emblem', (string) \App\Core\Setting::get('design_emblem', ''), [
+                    <?= \App\Core\AdminUi::imageField('emblem', (string) \App\Models\Setting::get('design_emblem', ''), [
                         'label' => 'Фирменная эмблема (SVG)',
                         'file' => 'emblem_file',
                         'accept' => 'image/svg+xml,image/*',
