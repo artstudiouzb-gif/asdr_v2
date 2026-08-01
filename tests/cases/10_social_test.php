@@ -122,7 +122,7 @@ test('Social: Telegram без фото — sendMessage с HTML-подписью 
         $seen = ['url' => $u, 'body' => $b];
         return ['status' => 200, 'body' => '{"ok":true,"result":{"message_id":42}}', 'error' => ''];
     };
-    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'BOT:T', 'chat_id' => '@channel'], [
+    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'BOT:T', 'chat_id' => '@channel', 'format' => 'classic'], [
         'message' => "Заголовок\n\nАнонс новости", 'link' => 'https://site/news/a', 'title' => 'Заголовок',
     ]);
     assert_true($res['ok']);
@@ -145,7 +145,7 @@ test('Social: Telegram с одним фото — sendPhoto', function () {
         $seen = ['url' => $u, 'body' => $b];
         return ['status' => 200, 'body' => '{"ok":true,"result":{"message_id":7}}', 'error' => ''];
     };
-    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '-100123', 'show_caption_above_media' => '1'], [
+    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '-100123', 'format' => 'classic', 'show_caption_above_media' => '1'], [
         'message' => 'Т', 'link' => 'https://site/news/b', 'title' => 'Т', 'image_url' => 'https://site/i.jpg',
     ]);
     assert_true($res['ok']);
@@ -166,7 +166,7 @@ test('Social: Telegram с галереей — sendMediaGroup, подпись у
     for ($i = 1; $i <= 12; $i++) {
         $gallery[] = "https://site/g{$i}.jpg";
     }
-    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@ch'], [
+    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@ch', 'format' => 'classic'], [
         'message' => 'Заг', 'link' => 'https://site/news/c', 'title' => 'Заг',
         'image_url' => 'https://site/cover.jpg', 'gallery' => $gallery,
     ]);
@@ -182,13 +182,13 @@ test('Social: Telegram с галереей — sendMediaGroup, подпись у
 
 test('Social: Telegram — ошибка Bot API возвращает description', function () {
     $http = fn ($m, $u, $b, $h) => ['status' => 400, 'body' => '{"ok":false,"description":"Bad Request: chat not found"}', 'error' => ''];
-    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@x'], ['message' => 'x', 'link' => 'https://x']);
+    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@x', 'format' => 'classic'], ['message' => 'x', 'link' => 'https://x']);
     assert_false($res['ok']);
     assert_contains('chat not found', $res['error']);
 });
 
 test('Social: Telegram без настроек — ошибка конфигурации', function () {
-    $res = (new SocialPublisher())->publish('telegram', ['token' => '', 'chat_id' => ''], ['message' => 'x', 'link' => 'https://x']);
+    $res = (new SocialPublisher())->publish('telegram', ['token' => '', 'chat_id' => '', 'format' => 'classic'], ['message' => 'x', 'link' => 'https://x']);
     assert_false($res['ok']);
     assert_contains('chat_id', $res['error']);
 });

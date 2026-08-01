@@ -234,6 +234,25 @@ $mark = static function (bool $done, bool $started = true): string {
         </div>
 
         <div class="form-field">
+            <label for="tg_format">Формат поста</label>
+            <?php $fmt = (string) ($channel['format'] ?? 'auto'); ?>
+            <select id="tg_format" name="format">
+                <option value="auto" <?= $fmt === 'auto' ? 'selected' : '' ?>>Расширенный, с откатом на обычный (рекомендуется)</option>
+                <option value="rich" <?= $fmt === 'rich' ? 'selected' : '' ?>>Только расширенный</option>
+                <option value="classic" <?= $fmt === 'classic' ? 'selected' : '' ?>>Только обычный (фото с подписью)</option>
+            </select>
+            <span class="form-hint">
+                Расширенный формат (Bot API 10.1+) снимает лимит подписи в 1024 символа: текст уходит целиком,
+                вторая языковая версия — под «развернуть», галерея — слайд-шоу. Если Telegram его не примет,
+                вариант «с откатом» опубликует пост прежним способом.
+            </span>
+        </div>
+        <div class="form-field form-field--checkbox">
+            <input type="checkbox" id="tg_silent" name="silent" value="1" <?= !empty($channel['silent']) ? 'checked' : '' ?>>
+            <label for="tg_silent">Публиковать без звука</label>
+        </div>
+
+        <div class="form-field">
             <label for="tg_signature">Подпись под постом (необязательно)</label>
             
             <?php // Интерактивная панель вставки HTML-тегов для Telegram ?>

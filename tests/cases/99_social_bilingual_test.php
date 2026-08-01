@@ -29,7 +29,7 @@ test('Telegram: оба языка в одном посте, узбекский �
     $seen = [];
     $http = function ($m, $u, $b, $h) use (&$seen) { $seen = json_decode($b, true); return ['status' => 200, 'body' => '{"ok":true,"result":{"message_id":5}}']; };
     $sig = '🌐 <a href="https://site.uz">Сайт</a>';
-    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'signature' => $sig], bilingual_post());
+    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'format' => 'classic', 'signature' => $sig], bilingual_post());
 
     assert_true($res['ok']);
     $text = (string) $seen['text'];
@@ -46,26 +46,62 @@ test('Telegram: оба языка в одном посте, узбекский �
     assert_same('HTML', $seen['parse_mode']);
 });
 
-test('Telegram: длинный двуязычный текст с фото укладывается в лимит 1024', function () {
-    $seen = [];
-    $http = function ($m, $u, $b, $h) use (&$seen) { $seen = json_decode($b, true); return ['status' => 200, 'body' => '{"ok":true,"result":{"message_id":5}}']; };
+test('Telegram: длинный текст с фото уходит отдельным сообщением, а не режется', function () {
+    $calls = [];
+    $http = function ($m, $u, $b, $h) use (&$calls) {
+        $calls[] = ['url' => $u, 'body' => json_decode($b, true)];
+        return ['status' => 200, 'body' => '{"ok":true,"result":{"message_id":5}}'];
+    };
     $post = bilingual_post();
     $post['image_url'] = 'https://site.uz/cover.jpg';
-    $post['langs'][0]['excerpt'] = str_repeat('u', 3000);
-    $post['langs'][1]['excerpt'] = str_repeat('р', 3000);
+    // 1600 знаков не влезают в подпись (1024), но свободно влезают в
+    // сообщение (4096) — именно этот разрыв и был причиной обрезки.
+    $post['langs'][0]['excerpt'] = str_repeat('u', 800);
+    $post['langs'][1]['excerpt'] = str_repeat('р', 800);
     $sig = '🌐 <a href="https://site.uz">Сайт</a> | <a href="https://t.me/x">Telegram</a>';
 
-    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'signature' => $sig], $post);
+    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'format' => 'classic', 'signature' => $sig], $post);
     assert_true($res['ok']);
 
-    $caption = (string) $seen['caption'];
-    // Лимит Telegram для подписи к фото — 1024 видимых символа.
-    assert_true(mb_strlen(strip_tags($caption)) <= 1024, 'подпись не превышает лимит: ' . mb_strlen(strip_tags($caption)));
-    // Оба языка и подпись уцелели, обрезаны только анонсы.
-    assert_contains('Sarlavha', $caption);
-    assert_contains('Заголовок', $caption);
-    assert_contains('Telegram</a>', $caption);
-    assert_contains('…', $caption);
+    // Подпись к фото ограничена 1024 символами, поэтому фото уходит отдельно,
+    // а текст — обычным сообщением: анонсы больше не обрезаются пополам.
+    assert_same(2, count($calls), 'фото и текст — два сообщения');
+    assert_contains('/sendPhoto', (string) $calls[0]['url']);
+    assert_same('', (string) ($calls[0]['body']['caption'] ?? ''), 'подпись у фото пустая — весь текст ниже');
+
+    assert_contains('/sendMessage', (string) $calls[1]['url']);
+    $text = (string) $calls[1]['body']['text'];
+    assert_contains('Sarlavha', $text);
+    assert_contains('Заголовок', $text);
+    assert_contains('Telegram</a>', $text);
+    assert_not_contains('…', $text, 'текст уходит целиком, без многоточия обрезки');
+    assert_true(mb_strlen(strip_tags($text)) <= 4096, 'лимит обычного сообщения — 4096');
+    assert_true(mb_strlen(strip_tags($text)) > 1024, 'в подпись такой текст не поместился бы');
+});
+
+test('Telegram: под постом появляются кнопки на обе языковые версии', function () {
+    $seen = [];
+    $http = function ($m, $u, $b, $h) use (&$seen) { $seen = json_decode($b, true); return ['status' => 200, 'body' => '{"ok":true,"result":{"message_id":5}}']; };
+    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'format' => 'classic'], bilingual_post());
+
+    $rows = $seen['reply_markup']['inline_keyboard'][0] ?? [];
+    assert_same(2, count($rows), 'по кнопке на язык');
+    assert_same('https://site.uz/uz/news/x', (string) $rows[0]['url']);
+    // Стрелка из подписи кнопки убрана: кнопка и так ведёт наружу.
+    assert_not_contains('→', (string) $rows[0]['text']);
+});
+
+test('Telegram: рубрика, дата и хештеги попадают в пост', function () {
+    $seen = [];
+    $http = function ($m, $u, $b, $h) use (&$seen) { $seen = json_decode($b, true); return ['status' => 200, 'body' => '{"ok":true,"result":{"message_id":5}}']; };
+    $post = bilingual_post() + ['category' => 'Мероприятия', 'date' => '1 августа 2026', 'hashtags' => '#реформы #экономика'];
+    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'format' => 'classic'], $post);
+
+    $text = (string) $seen['text'];
+    assert_contains('Мероприятия · 1 августа 2026', $text);
+    // Хештеги редактор уже вводит в новости, но в Telegram они не доезжали.
+    assert_contains('#реформы #экономика', $text);
+    assert_true(mb_strpos($text, 'Мероприятия') < mb_strpos($text, 'Sarlavha'), 'рубрика над заголовком');
 });
 
 test('Facebook/LinkedIn/Instagram: оба языка обычным текстом, без HTML, с голыми URL', function () {
@@ -114,7 +150,7 @@ test('Подпись — отдельное поле у каждой сети и
     // Без подписи пост всё равно уходит.
     $seen = [];
     $http = function ($m, $u, $b, $h) use (&$seen) { $seen = json_decode($b, true); return ['status' => 200, 'body' => '{"ok":true,"result":{"message_id":1}}']; };
-    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c'], bilingual_post());
+    $res = (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'format' => 'classic'], bilingual_post());
     assert_true($res['ok']);
     assert_contains('Заголовок', (string) $seen['text']);
 });
