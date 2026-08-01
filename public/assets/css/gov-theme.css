@@ -3676,7 +3676,19 @@ span.imgcard__media::after {
 .newsdetail-head__info { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; padding-top: 6px; }
 .newsdetail__badge { display: inline-block; padding: 6px 14px; border-radius: 999px; background: color-mix(in srgb, var(--gov-teal) 12%, transparent); color: var(--gov-teal-text); text-transform: uppercase; font-size: 11.5px; letter-spacing: .1em; font-weight: 700; }
 .newsdetail__title { font-size: clamp(1.9rem, 3.4vw, 2.9rem); line-height: 1.12; margin: 0; letter-spacing: -.01em; }
-.newsdetail__lead { color: var(--gov-muted); font-size: 1.02rem; line-height: 1.65; margin: 0; max-width: 52ch; }
+/* Лид набран той же шкалой, что и текст новости: раньше он был мельче,
+   плотнее, серее и вдвое уже — абзац под ним читался как из другой статьи.
+   Роль вводки держит вес, а не отдельный размер и цвет. Ширина — по
+   контейнеру, как у остального текста. */
+.newsdetail__lead {
+    color: var(--gov-ink, #1f2b3d);
+    font-size: 1.025rem;
+    /* 1.6 — то, чем реально набран текст статьи: правило `p { line-height }`
+       из базовой таблицы перебивает :where(.rich-content) с нулевым весом. */
+    line-height: 1.6;
+    font-weight: 500;
+    margin: 0;
+}
 .newsdetail__meta { display: flex; flex-wrap: wrap; gap: 8px; color: var(--gov-muted); font-size: .82rem; margin-top: 4px; }
 .newsdetail__meta-item { display: inline-flex; align-items: center; gap: 6px; background: rgba(0, 0, 0, 0.03); padding: 5px 12px; border-radius: 8px; transition: background .15s ease, color .15s ease; }
 :root[data-theme="dark"] .newsdetail__meta-item { background: rgba(255, 255, 255, 0.05); }

@@ -22,6 +22,26 @@ test('Контент: ширину текста новости не ограни
     assert_contains('.block-text__title { max-width: var(--rich-measure, 72ch); }', $theme);
 });
 
+test('Лид новости набран как текст статьи и занимает контейнер', function () {
+    $theme = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $pos = (int) strpos($theme, '.newsdetail__lead {');
+    assert_true($pos > 0, 'правило лида на месте');
+    $rule = substr($theme, $pos, 460);
+
+    // Ширина — по контейнеру: раньше лид обрывался на 52ch и выглядел вдвое
+    // уже текста под ним.
+    assert_not_contains('max-width', $rule);
+    assert_contains('font-size: 1.025rem;', $rule);
+    assert_contains('line-height: 1.6;', $rule);
+
+    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/rich-content.css');
+    // Первый абзац больше не набирается «вводкой»: лид у новости уже есть в
+    // шапке, и один и тот же текст выглядел на странице дважды и по-разному.
+    assert_not_contains('.newsdetail-article__content.rich-content > p:first-child {', $css);
+    // Полужирный — выделение, а не смена цвета.
+    assert_contains(':where(.rich-content) strong { color: inherit;', $css);
+});
+
 test('Контент: маркер списка — восьмиконечная звезда', function () {
     $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/rich-content.css');
 
