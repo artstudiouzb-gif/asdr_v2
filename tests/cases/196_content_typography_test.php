@@ -3,21 +3,21 @@
 declare(strict_types=1);
 
 /**
- * Типографика контентных страниц: мера строки и вес ссылок.
+ * Типографика контентных страниц: ширина текста и вес ссылок.
  *
- * Без ограничения ширины строка на широком экране уходит за 120 знаков при
- * норме 65–80, и глаз теряет начало следующей строки. Ограничение вешаем на
- * сам текст, а не на контейнер, чтобы картинки и таблицы оставались широкими.
+ * Мера строки в 65–80 знаков — типографская норма, но владелец выбрал полную
+ * ширину колонки: страницы агентства это в основном перечни и документы, и
+ * узкая колонка оставляла справа пустое поле. Токен --rich-measure остался у
+ * заголовка текстового блока.
  */
 
-test('Контент: у текста задана мера строки', function () {
+test('Контент: ширину текста новости не ограничиваем', function () {
     $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/rich-content.css');
 
-    assert_contains('--rich-measure:', $css);
-    assert_contains(':where(.rich-content) > :is(p, ul, ol, dl, h2, h3, h4, h5, h6, blockquote)', $css);
-    assert_contains('max-width: var(--rich-measure);', $css);
+    assert_not_contains(':where(.rich-content) > :is(p, ul, ol, dl, h2, h3, h4, h5, h6, blockquote)', $css);
 
-    // Заголовок текстового блока держит ту же ширину, что и текст под ним.
+    // Токен остаётся: им пользуется заголовок текстового блока.
+    assert_contains('--rich-measure:', $css);
     $theme = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
     assert_contains('.block-text__title { max-width: var(--rich-measure, 72ch); }', $theme);
 });
