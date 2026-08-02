@@ -96,7 +96,7 @@ test('Rich: inline и details используют одинаковое соде
     foreach ([
         '<h2>Заголовок</h2>',
         'Русский анонс.',
-        '<a href="https://site.uz/news/x">Читать на сайте →</a>',
+        '<a href="https://site.uz/news/x"><b>Читать на сайте →</b></a>',
         '<p><mark>#Oʻzbekiston2030 #Strategiya</mark></p>',
         '<p><mark>#Узбекистан2030 #Стратегия</mark></p>',
     ] as $fragment) {
@@ -152,6 +152,7 @@ test('Rich: формат «обычный» отключает новый мет
         assert_not_contains('sendRichMessage', (string) $call['url']);
     }
     $caption = (string) ($calls[0]['body']['media'][0]['caption'] ?? '');
+    assert_contains('<a href="https://site.uz/uz/news/x"><b>Saytda oʻqish →</b></a>', $caption, 'classic делает ссылку на сайт жирной');
     assert_contains('#Oʻzbekiston2030', $caption, 'обычный формат использует единый регистр и безопасный апостроф');
     assert_contains(
         "</a>\n\n\n<b>#Oʻzbekiston2030 #Strategiya</b>\n<b>#Узбекистан2030 #Стратегия</b>",
