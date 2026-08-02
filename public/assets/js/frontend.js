@@ -1058,13 +1058,16 @@
                 btn.setAttribute('aria-label', label('linkCopied', 'Ссылка скопирована'));
                 setTimeout(function () { btn.classList.remove('is-copied'); btn.setAttribute('aria-label', prevLabel); }, 1600);
             };
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url).then(done);
-            } else {
+            var copyFallback = function () {
                 var ta = document.createElement('textarea');
                 ta.value = url; document.body.appendChild(ta); ta.select();
                 try { document.execCommand('copy'); done(); } catch (e) {}
                 document.body.removeChild(ta);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(done).catch(copyFallback);
+            } else {
+                copyFallback();
             }
         });
     });
@@ -1879,7 +1882,9 @@
 
     // === Универсальный Lightbox для фото в новостях и статьях ===
     (function () {
-        var images = Array.prototype.slice.call(document.querySelectorAll('.rich-content img, .newsdetail-article img, .newsdetail-gallery img'));
+        // В галерее берём только большие слайды. Миниатюры повторяют те же
+        // файлы и раньше удваивали счётчик lightbox (2 фото отображались как 4).
+        var images = Array.prototype.slice.call(document.querySelectorAll('.rich-content img, .newsdetail-article img, .newsdetail-gallery__main img'));
         if (!images.length) { return; }
 
         var modal = document.createElement('div');
@@ -1920,7 +1925,22 @@
 
         var currentIndex = 0;
         var validImages = [];
+        var modalImages = [];
         var lightboxLastFocus = null;
+
+        // Галерея и изображения внутри текста — разные смысловые наборы.
+        // Поэтому счётчик галереи не должен включать фото из текста новости.
+        var selectImageGroup = function (img) {
+            var gallery = img.closest('[data-ndgallery]');
+            if (gallery) {
+                return validImages.filter(function (candidate) {
+                    return candidate.closest('[data-ndgallery]') === gallery;
+                });
+            }
+            return validImages.filter(function (candidate) {
+                return !candidate.closest('[data-ndgallery]');
+            });
+        };
 
         var openModal = function (trigger) {
             lightboxLastFocus = trigger || document.activeElement;
@@ -1949,7 +1969,8 @@
 
             trigger.addEventListener('click', function (e) {
                 e.preventDefault();
-                var idx = validImages.indexOf(img);
+                modalImages = selectImageGroup(img);
+                var idx = modalImages.indexOf(img);
                 if (idx !== -1) {
                     showIndex(idx);
                     openModal(trigger);
@@ -1960,7 +1981,8 @@
                 // Enter и Space, для ссылки — только Space.
                 if (e.key !== ' ' && !(trigger === img && e.key === 'Enter')) { return; }
                 e.preventDefault();
-                var idx = validImages.indexOf(img);
+                modalImages = selectImageGroup(img);
+                var idx = modalImages.indexOf(img);
                 if (idx !== -1) {
                     showIndex(idx);
                     openModal(trigger);
@@ -1971,17 +1993,40 @@
         if (!validImages.length) { return; }
 
         var showIndex = function (idx) {
-            if (idx < 0) { idx = validImages.length - 1; }
-            if (idx >= validImages.length) { idx = 0; }
+            if (!modalImages.length) { modalImages = validImages.slice(); }
+            if (idx < 0) { idx = modalImages.length - 1; }
+            if (idx >= modalImages.length) { idx = 0; }
             currentIndex = idx;
 
-            var target = validImages[currentIndex];
-            var src = target.getAttribute('src') || target.currentSrc;
+            var target = modalImages[currentIndex];
+            var src = target.currentSrc || target.getAttribute('src');
             var alt = target.getAttribute('alt') || '';
 
             var fig = target.closest('figure');
             var figCap = fig ? fig.querySelector('figcaption') : null;
             var captionText = figCap ? figCap.innerText : alt;
+            var gallery = target.closest('[data-ndgallery]');
+            if (gallery) {
+                var gallerySlides = Array.prototype.slice.call(gallery.querySelectorAll('.newsdetail-gallery__slide'));
+                var galleryIndex = gallerySlides.indexOf(target);
+                var galleryCaption = gallery.querySelector('[data-ndg-captions]');
+                var galleryCaptions = [];
+                if (galleryCaption) {
+                    try {
+                        galleryCaptions = JSON.parse(galleryCaption.getAttribute('data-ndg-captions') || '[]');
+                    } catch (e) {
+                        galleryCaptions = [];
+                    }
+                }
+                if (galleryIndex !== -1 && galleryCaptions[galleryIndex]) {
+                    var itemCaption = galleryCaptions[galleryIndex].caption || '';
+                    var itemCredit = galleryCaptions[galleryIndex].credit || '';
+                    captionText = itemCaption;
+                    if (itemCredit) {
+                        captionText += (captionText ? ' · ' : '') + label('photoCredit', 'Фото:') + ' ' + itemCredit;
+                    }
+                }
+            }
 
             modalImg.src = src;
             modalImg.alt = alt;
@@ -1995,9 +2040,9 @@
                 modalCaption.innerText = '';
             }
 
-            modalCounter.innerText = (currentIndex + 1) + ' / ' + validImages.length;
-            prevBtn.hidden = validImages.length <= 1;
-            nextBtn.hidden = validImages.length <= 1;
+            modalCounter.innerText = (currentIndex + 1) + ' / ' + modalImages.length;
+            prevBtn.hidden = modalImages.length <= 1;
+            nextBtn.hidden = modalImages.length <= 1;
         };
 
         var closeModal = function () {

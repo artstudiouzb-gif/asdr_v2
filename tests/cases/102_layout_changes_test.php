@@ -161,6 +161,28 @@ test('News: frontend layout rendering with and without sidebar', function () {
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
     assert_contains('align-items: stretch;', $css, 'медиазона не схлопывается без ленты миниатюр');
     assert_contains('width: 100%;', substr($css, (int) strpos($css, '.newsdetail:not(.newsdetail--premium) .newsdetail-gallery {'), 220));
+    foreach ([
+        '.newsdetail:not(.newsdetail--premium) .newsdetail-gallery__main',
+        '.newsdetail:not(.newsdetail--premium) .newsdetail-video',
+        '.newsdetail-card',
+        '.newsdetail-subscribe',
+        '.relnews-card',
+    ] as $selector) {
+        $pattern = '/' . preg_quote($selector, '/')
+            . '\s*\{[^}]*border-radius:\s*var\(--radius,\s*14px\);/s';
+        assert_true(
+            preg_match($pattern, $css) === 1,
+            "{$selector}: использует глобальное скругление"
+        );
+    }
+    $richCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/rich-content.css');
+    assert_contains('border-radius: var(--radius, 12px);', $richCss, 'встроенные в текст фотографии используют глобальное скругление');
+    assert_contains('border-radius: 0 var(--radius, 14px) var(--radius, 14px) 0;', $richCss, 'цитата следует глобальному скруглению');
+    assert_contains(
+        ".newsdetail-gallery__main img'))",
+        (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js'),
+        'lightbox не считает миниатюры галереи отдельными фотографиями'
+    );
 
     // Очистка
     $pdo->exec("DELETE FROM news WHERE id = {$nid}");
