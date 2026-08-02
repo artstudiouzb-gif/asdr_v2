@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Core\DesignSettings;
 
-// Ширина контейнера: пресеты wide/ultra/full + своя точная ширина.
+// Ширина контейнера: ultra фиксирован на 1440px; full и своя точная ширина сохраняются.
 
 test('DesignSettings::normalizeWidth: валидные и невалидные значения', function () {
     assert_same('1440px', DesignSettings::normalizeWidth('1440px'));
@@ -21,7 +21,7 @@ test('DesignSettings::cssVariables: пресеты ultra и full', function () {
     $base = ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'sm', 'density' => 'standard', 'button' => 'rounded', 'card_style' => 'soft'];
 
     $ultra = DesignSettings::cssVariables(['container' => 'ultra'] + $base);
-    assert_true(str_contains($ultra, '--container-max:1560px'), 'ultra = 1560px');
+    assert_true(str_contains($ultra, '--container-max:1440px'), 'ultra = 1440px');
 
     $full = DesignSettings::cssVariables(['container' => 'full'] + $base);
     assert_true(str_contains($full, '--container-max:none'), 'full = none (во всю ширину)');

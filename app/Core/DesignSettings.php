@@ -1009,7 +1009,7 @@ final class DesignSettings
      */
     public static function cssVariables(array $v): string
     {
-        $container = ['narrow' => '1080px', 'standard' => '1200px', 'wide' => '1360px', 'ultra' => '1560px', 'full' => 'none'][$v['container'] ?? 'standard'] ?? '1200px';
+        $container = ['narrow' => '1080px', 'standard' => '1200px', 'wide' => '1360px', 'ultra' => '1440px', 'full' => 'none'][$v['container'] ?? 'standard'] ?? '1200px';
         // Своя точная ширина имеет приоритет над пресетом (число трактуем как px).
         $custom = self::containerCustom();
         if ($custom !== '') {
