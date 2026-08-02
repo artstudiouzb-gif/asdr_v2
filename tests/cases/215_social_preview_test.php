@@ -29,10 +29,10 @@ test('Хештеги собираются со всех языковых вер�
         ]);
 
         $tags = (string) SocialSettings::buildPost(\App\Models\News::findById($id))['hashtags'];
-        assert_contains('#islohot', $tags);
-        assert_contains('#реформы', $tags);
+        assert_contains('#Islohot', $tags);
+        assert_contains('#Реформы', $tags);
         // Регистр не плодит дубли: #Iqtisodiyot и #iqtisodiyot — один тег
-        // (cleanHashtags приводит теги к нижнему регистру ещё до сборки).
+        // (cleanHashtags нормализует регистр ещё до сборки).
         assert_same(1, substr_count(mb_strtolower($tags), '#iqtisodiyot'));
     } finally {
         $pdo->exec('UPDATE languages SET is_default = 0');
