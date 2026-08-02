@@ -29,7 +29,7 @@ $allUrl = $data['all_url'] ?? '/news';
                             <?php endif; ?>
                             <span class="news-card__title"><?= htmlspecialchars($item['title'], ENT_QUOTES) ?></span>
                             <?php if (!empty($item['excerpt'])): ?>
-                                <span class="news-card__excerpt"><?= htmlspecialchars(excerpt((string) $item['excerpt'], 140), ENT_QUOTES) ?></span>
+                                <span class="news-card__excerpt"><?= htmlspecialchars(excerpt((string) $item['excerpt'], 180), ENT_QUOTES) ?></span>
                             <?php endif; ?>
                         </span>
                     </a>

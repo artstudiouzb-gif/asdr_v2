@@ -2497,6 +2497,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .newsdetail-phero .content-crumbs span { color: rgba(255, 255, 255, .68); }
 .newsdetail-phero__title { font-size: clamp(1.9rem, 3.6vw, 3rem); line-height: 1.15; margin: 0; color: #fff; max-width: 22ch; letter-spacing: -.01em; }
 .newsdetail-phero__lead { color: rgba(255,255,255,.85); font-size: 1.02rem; line-height: 1.6; margin: 0; max-width: 48ch; }
+.newsdetail-phero__lead a { color: #fff; text-decoration-color: rgba(255,255,255,.55); }
 .newsdetail__badge--onDark { background: rgba(23,153,155,.25); color: #7fd8d9; }
 /* Мета (дата·чтение·просмотры) и источник на фото-hero — светлые. Базовые серые
    .newsdetail__meta/__source идут ниже по файлу и при равной специфичности
@@ -3689,6 +3690,19 @@ span.imgcard__media::after {
     font-weight: 500;
     margin: 0;
 }
+.news-lead-rich > :first-child { margin-top: 0; }
+.news-lead-rich > :last-child { margin-bottom: 0; }
+.news-lead-rich p { margin: 0 0 .75em; }
+.news-lead-rich :is(ul, ol) { margin: .65em 0; padding-inline-start: 1.35em; }
+.news-lead-rich li + li { margin-top: .25em; }
+.news-lead-rich blockquote {
+    margin: .8em 0;
+    padding: .2em 0 .2em 1em;
+    border-inline-start: 3px solid var(--gov-teal, #12807f);
+    font-weight: 400;
+}
+.news-lead-rich a { color: var(--gov-teal-text, #0b6f70); text-underline-offset: .16em; }
+.reader-mode__lead.news-lead-rich p { margin: 0 0 .75em; }
 .newsdetail__meta { display: flex; flex-wrap: wrap; gap: 8px; color: var(--gov-muted); font-size: .82rem; margin-top: 4px; }
 .newsdetail__meta-item { display: inline-flex; align-items: center; gap: 6px; background: rgba(0, 0, 0, 0.03); padding: 5px 12px; border-radius: 8px; transition: background .15s ease, color .15s ease; }
 :root[data-theme="dark"] .newsdetail__meta-item { background: rgba(255, 255, 255, 0.05); }

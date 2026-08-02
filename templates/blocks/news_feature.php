@@ -43,7 +43,7 @@ $badge = static fn (array $i): string => trim((string) ($i['badge'] ?? ''));
                         <?php if ($badge($featured) !== ''): ?><span class="news-badge news-badge--on-media"><?= htmlspecialchars($badge($featured), ENT_QUOTES) ?></span><?php endif; ?>
                     </span>
                     <span class="newsfeat-lead__title"><?= htmlspecialchars((string) $featured['title'], ENT_QUOTES) ?></span>
-                    <?php if (!empty($featured['excerpt'])): ?><span class="newsfeat-lead__excerpt"><?= htmlspecialchars(excerpt((string) $featured['excerpt'], 160), ENT_QUOTES) ?></span><?php endif; ?>
+                    <?php if (!empty($featured['excerpt'])): ?><span class="newsfeat-lead__excerpt"><?= htmlspecialchars(excerpt((string) $featured['excerpt'], 260), ENT_QUOTES) ?></span><?php endif; ?>
                 </span>
             </span>
         </a>

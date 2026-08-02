@@ -28,7 +28,7 @@ final class TelegramRichMessage
      * снимки указываются ссылками `tg://photo?id=…`, а сами файлы уходят
      * отдельным полем `media` — так требует InputRichMessage.
      *
-     * @param list<array{code:string,label:string,title:string,excerpt:string,link:string,read_more:string}> $langs
+     * @param list<array{code:string,label:string,title:string,excerpt:string,lead_html?:string,link:string,read_more:string}> $langs
      * @param list<string> $photos абсолютные https-адреса
      * @param array<string, array{caption:string, credit:string}> $photoMeta подписи по адресу снимка
      * @return array{html:string, media:list<array{id:string,media:array{type:string,media:string}}>}
@@ -152,17 +152,17 @@ final class TelegramRichMessage
     /**
      * Тело языкового блока: анонс абзацами и ссылка на страницу новости.
      *
-     * @param array{excerpt:string,link:string,read_more:string} $lang
+     * @param array{excerpt:string,lead_html?:string,link:string,read_more:string} $lang
      */
     private static function body(array $lang, callable $esc): string
     {
-        $html = '';
-        foreach (preg_split('/\R{2,}/u', trim((string) $lang['excerpt'])) ?: [] as $paragraph) {
-            $paragraph = trim($paragraph);
-            if ($paragraph !== '') {
-                $html .= '<p>' . nl2br($esc($paragraph), false) . '</p>';
-            }
-        }
+        // NewsLead повторно очищает HTML и оставляет только разметку, которую
+        // одинаково безопасно показывать на сайте и отправлять в rich message.
+        // Старые записи без lead_html автоматически превращаются в абзацы.
+        $html = NewsLead::html(
+            (string) ($lang['lead_html'] ?? ''),
+            (string) $lang['excerpt']
+        );
         if (trim((string) $lang['link']) !== '') {
             // Ссылка — самостоятельная часть публикации. Разделитель не даёт
             // ей визуально сливаться с последним абзацем анонса.

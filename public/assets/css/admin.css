@@ -5527,3 +5527,33 @@ body.has-icon-picker { overflow: hidden; }
 }
 .content-checklist__item strong { font-weight: 600; }
 .content-checklist__item span { color: var(--admin-muted, #6b7280); }
+
+/* Лид новости: переключаемые предпросмотры тех мест, куда он попадёт. */
+.lead-previews {
+    margin-top: 12px;
+    border: 1px solid var(--admin-border, #e2e8f0);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--admin-surface, #fff);
+}
+.lead-previews__tabs { display: flex; gap: 4px; padding: 6px; background: var(--admin-bg, #f8fafc); }
+.lead-previews__tab {
+    border: 0;
+    border-radius: 7px;
+    padding: 7px 12px;
+    background: transparent;
+    color: var(--admin-muted, #6b7280);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.lead-previews__tab.is-active { background: var(--admin-surface, #fff); color: var(--admin-text, #111827); box-shadow: 0 1px 3px rgba(15,23,42,.1); }
+.lead-previews__panel { padding: 14px 16px; font-size: 13px; line-height: 1.55; }
+.lead-previews__panel[hidden] { display: none; }
+.lead-previews__panel > strong,
+.lead-previews__panel > span { display: block; }
+.lead-previews__panel > strong { margin-bottom: 5px; font-size: 14px; }
+.lead-previews__panel > span { color: var(--admin-muted, #6b7280); }
+.lead-previews__panel [data-lead-preview-telegram] :first-child { margin-top: 0; }
+.lead-previews__panel [data-lead-preview-telegram] :last-child { margin-bottom: 0; }

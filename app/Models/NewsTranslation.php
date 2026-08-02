@@ -78,9 +78,9 @@ final class NewsTranslation
         }
 
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO news_translations (news_id, lang, title, badge, excerpt, content, hashtags, key_points, event_meta, timeline_json, docs, poll_question, poll_options_json, meta_title, meta_description)
-             VALUES (:news_id, :lang, :title, :badge, :excerpt, :content, :hashtags, :key_points, :event_meta, :timeline_json, :docs, :poll_question, :poll_options_json, :meta_title, :meta_description)
-             ON DUPLICATE KEY UPDATE title = VALUES(title), badge = VALUES(badge), excerpt = VALUES(excerpt),
+            'INSERT INTO news_translations (news_id, lang, title, badge, excerpt, lead_html, content, hashtags, key_points, event_meta, timeline_json, docs, poll_question, poll_options_json, meta_title, meta_description)
+             VALUES (:news_id, :lang, :title, :badge, :excerpt, :lead_html, :content, :hashtags, :key_points, :event_meta, :timeline_json, :docs, :poll_question, :poll_options_json, :meta_title, :meta_description)
+             ON DUPLICATE KEY UPDATE title = VALUES(title), badge = VALUES(badge), excerpt = VALUES(excerpt), lead_html = VALUES(lead_html),
                 content = VALUES(content), hashtags = VALUES(hashtags), key_points = VALUES(key_points), event_meta = VALUES(event_meta),
                 timeline_json = VALUES(timeline_json), docs = VALUES(docs), poll_question = VALUES(poll_question), poll_options_json = VALUES(poll_options_json),
                 meta_title = VALUES(meta_title), meta_description = VALUES(meta_description)'
@@ -91,6 +91,7 @@ final class NewsTranslation
             ':title' => $data['title'] ?? null,
             ':badge' => $data['badge'] ?? null,
             ':excerpt' => $data['excerpt'] ?? null,
+            ':lead_html' => $data['lead_html'] ?? null,
             ':content' => $data['content'] ?? null,
             ':hashtags' => \App\Models\News::cleanHashtags($data['hashtags'] ?? null),
             ':key_points' => $data['key_points'] ?? null,

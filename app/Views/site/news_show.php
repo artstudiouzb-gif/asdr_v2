@@ -4,6 +4,7 @@ use App\Core\AssetCollector;
 use App\Core\DateFormatter;
 use App\Core\Csrf;
 use App\Core\Locale;
+use App\Core\NewsLead;
 use App\Models\News;
 use App\Models\Setting;
 
@@ -20,6 +21,7 @@ $lang = Locale::current();
 
 $metaTitle = $news['meta_title'] ?: $news['title'];
 $metaDescription = $news['meta_description'] ?: ($news['excerpt'] ?? '');
+$leadHtml = NewsLead::html($news['lead_html'] ?? null, $news['excerpt'] ?? null);
 $ogType = 'article';
 $ogImage = News::getCoverImage($news) ?? '';
 
@@ -213,8 +215,8 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <?php endif; ?>
             </div>
             <h1 class="newsdetail-phero__title"><?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?></h1>
-            <?php if (!empty($news['excerpt'])): ?>
-                <p class="newsdetail-phero__lead"><?= htmlspecialchars((string) $news['excerpt'], ENT_QUOTES) ?></p>
+            <?php if ($leadHtml !== ''): ?>
+                <div class="newsdetail-phero__lead news-lead-rich"><?= $leadHtml ?></div>
             <?php endif; ?>
             <?php if (!empty($news['source_note'])): ?>
                 <p class="newsdetail__source newsdetail__source--onDark"><?= htmlspecialchars((string) $news['source_note'], ENT_QUOTES) ?></p>
@@ -247,8 +249,8 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 </button>
             </div>
             <h1 class="newsdetail__title"><?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?></h1>
-            <?php if (!empty($news['excerpt'])): ?>
-                <p class="newsdetail__lead"><?= htmlspecialchars((string) $news['excerpt'], ENT_QUOTES) ?></p>
+            <?php if ($leadHtml !== ''): ?>
+                <div class="newsdetail__lead news-lead-rich"><?= $leadHtml ?></div>
             <?php endif; ?>
             <?php if (!empty($news['source_note'])): ?>
                 <p class="newsdetail__source"><?= htmlspecialchars((string) $news['source_note'], ENT_QUOTES) ?></p>
@@ -682,8 +684,8 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <?php if ($dateLong !== ''): ?><span><?= htmlspecialchars($dateLong, ENT_QUOTES) ?></span> • <?php endif; ?>
                 <span><?= $readMin ?> <?= htmlspecialchars(t('мин чтения'), ENT_QUOTES) ?></span>
             </div>
-            <?php if (!empty($news['excerpt'])): ?>
-                <p class="reader-mode__lead"><?= htmlspecialchars((string) $news['excerpt'], ENT_QUOTES) ?></p>
+            <?php if ($leadHtml !== ''): ?>
+                <div class="reader-mode__lead news-lead-rich"><?= $leadHtml ?></div>
             <?php endif; ?>
             <?php if ($cover !== ''): ?>
                 <img class="reader-mode__cover" src="<?= htmlspecialchars($cover, ENT_QUOTES) ?>" alt="<?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?>">

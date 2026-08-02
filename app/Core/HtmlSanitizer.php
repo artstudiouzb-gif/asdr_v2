@@ -45,6 +45,17 @@ final class HtmlSanitizer
         'a' => ['href', 'target', 'rel'],
     ];
 
+    /** Компактный профиль лида: только разметка, полезная на сайте и в Telegram. */
+    private const LEAD_TAGS = [
+        'p', 'br', 'strong', 'b', 'em', 'i', 'u', 's',
+        'ul', 'ol', 'li', 'blockquote', 'a',
+    ];
+
+    private const LEAD_ATTRS = [
+        '*' => [],
+        'a' => ['href', 'target', 'rel'],
+    ];
+
     /**
      * Очистка контента кастомных полей (типы контента, этап 16.4): остаётся
      * только безопасная разметка текста; script/iframe, обработчики on*,
@@ -53,6 +64,12 @@ final class HtmlSanitizer
     public static function sanitizeText(string $html): string
     {
         return self::sanitize($html, self::TEXT_TAGS, self::TEXT_ATTRS);
+    }
+
+    /** Безопасная разметка короткого редакционного лида. */
+    public static function sanitizeLead(string $html): string
+    {
+        return self::sanitize($html, self::LEAD_TAGS, self::LEAD_ATTRS);
     }
 
     /**

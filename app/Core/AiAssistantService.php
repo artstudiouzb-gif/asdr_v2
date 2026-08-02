@@ -127,7 +127,7 @@ final class AiAssistantService
     {
         $cleanTitle = self::cleanText($title);
         $cleanContent = self::cleanText($content);
-        $excerpt = self::extractKeySentences($cleanTitle, $cleanContent, 280);
+        $excerpt = self::extractKeySentences($cleanTitle, $cleanContent, 360);
 
         return [
             'excerpt' => $excerpt,
@@ -148,7 +148,7 @@ final class AiAssistantService
         return self::limitAtWord($description, $maxLength);
     }
 
-    public static function generateExcerpt(string $content, int $length = 250): string
+    public static function generateExcerpt(string $content, int $length = 320): string
     {
         $excerpt = self::generateLocalNewsFields('', $content)['excerpt'];
         return self::limitAtWord($excerpt, $length);
@@ -249,7 +249,7 @@ PROMPT,
 PROMPT,
             default => <<<'PROMPT'
 Создай редакционный анонс и хештеги:
-- анонс: 1–2 самостоятельных предложения, примерно 180–250 символов;
+- анонс: 1–3 самостоятельных предложения, примерно 180–360 символов;
 - сначала определи главный факт по всему тексту, затем сформулируй его своими словами;
 - не копируй первые предложения и не воспроизводи длинные фрагменты исходника дословно;
 - сохрани имена, должности, числа и факты; ничего не выдумывай;
@@ -274,7 +274,7 @@ PROMPT,
             $excerpt = self::cleanText((string) ($generated['excerpt'] ?? ''));
             $hashtags = self::normalizeHashtags((string) ($generated['hashtags'] ?? ''));
             if ($excerpt !== '') {
-                $fallback['excerpt'] = self::limitAtWord($excerpt, 280);
+                $fallback['excerpt'] = self::limitAtWord($excerpt, 360);
             }
             if ($hashtags !== '') {
                 $fallback['hashtags'] = $hashtags;

@@ -324,7 +324,7 @@ final class SocialSettings
      * возвращает базовую строку, и без этой проверки текст задвоился бы.
      *
      * @param array<string,mixed> $news
-     * @return list<array{code:string,label:string,title:string,excerpt:string,link:string,read_more:string}>
+     * @return list<array{code:string,label:string,title:string,excerpt:string,lead_html:string,link:string,read_more:string}>
      */
     private static function languageBlocks(array $news, string $base): array
     {
@@ -379,6 +379,7 @@ final class SocialSettings
                 'label' => $meta[$code]['label'] ?? mb_strtoupper($code),
                 'title' => $title,
                 'excerpt' => trim((string) ($row['excerpt'] ?? '')),
+                'lead_html' => trim((string) ($row['lead_html'] ?? '')),
                 // У связанной записи свой адрес — ведём на него, а не на
                 // перевод базового slug.
                 'link' => $link,

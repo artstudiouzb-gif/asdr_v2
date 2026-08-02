@@ -588,7 +588,7 @@ final class News
             return $row;
         }
 
-        foreach (['title', 'badge', 'excerpt', 'content', 'key_points', 'event_meta', 'timeline_json', 'docs', 'poll_question', 'poll_options_json'] as $field) {
+        foreach (['title', 'badge', 'excerpt', 'lead_html', 'content', 'key_points', 'event_meta', 'timeline_json', 'docs', 'poll_question', 'poll_options_json'] as $field) {
             if (isset($translation[$field]) && $translation[$field] !== null && $translation[$field] !== '') {
                 $row[$field] = $translation[$field];
             }
@@ -853,13 +853,14 @@ final class News
     {
         $lang = (string) ($data['lang'] ?? Language::defaultCode());
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO news (title, slug, excerpt, content, image, video_url, audio_url, audio_title, hashtags, timeline_json, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
-             VALUES (:title, :slug, :excerpt, :content, :image, :video_url, :audio_url, :audio_title, :hashtags, :timeline_json, :layout_type, :sidebar_layout, :focal_x, :focal_y, :meta_title, :meta_description, :status, :published_at, :author_id, :lang, NULL, NOW())'
+            'INSERT INTO news (title, slug, excerpt, lead_html, content, image, video_url, audio_url, audio_title, hashtags, timeline_json, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
+             VALUES (:title, :slug, :excerpt, :lead_html, :content, :image, :video_url, :audio_url, :audio_title, :hashtags, :timeline_json, :layout_type, :sidebar_layout, :focal_x, :focal_y, :meta_title, :meta_description, :status, :published_at, :author_id, :lang, NULL, NOW())'
         );
         $stmt->execute([
             ':title' => $data['title'],
             ':slug' => $data['slug'],
             ':excerpt' => $data['excerpt'],
+            ':lead_html' => $data['lead_html'] ?? null,
             ':content' => $data['content'],
             ':image' => $data['image'] ?? null,
             ':video_url' => $data['video_url'] ?? null,
@@ -889,7 +890,7 @@ final class News
     public static function update(int $id, array $data, ?int $expectedLockVersion = null): void
     {
         $stmt = Database::pdo()->prepare(
-            'UPDATE news SET title = :title, slug = :slug, excerpt = :excerpt, content = :content,
+            'UPDATE news SET title = :title, slug = :slug, excerpt = :excerpt, lead_html = :lead_html, content = :content,
              image = :image, video_url = :video_url, audio_url = :audio_url, audio_title = :audio_title, hashtags = :hashtags,
              timeline_json = :timeline_json,
              layout_type = :layout_type, sidebar_layout = :sidebar_layout,
@@ -902,6 +903,7 @@ final class News
             ':title' => $data['title'],
             ':slug' => $data['slug'],
             ':excerpt' => $data['excerpt'],
+            ':lead_html' => $data['lead_html'] ?? null,
             ':content' => $data['content'],
             ':image' => $data['image'] ?? null,
             ':video_url' => $data['video_url'] ?? null,
