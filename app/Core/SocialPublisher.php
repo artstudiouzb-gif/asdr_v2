@@ -532,7 +532,7 @@ final class SocialPublisher
 
             return $meta === [] ? '' : '<b>' . $esc(implode(' · ', $meta)) . '</b>' . "\n\n";
         };
-        $hashtags = trim((string) ($post['hashtags'] ?? ''));
+        $hashtags = TelegramRichMessage::normalizeHashtags(trim((string) ($post['hashtags'] ?? '')));
         $tail = ($hashtags !== '' ? "\n\n" . $esc($hashtags) : '')
             . ($signature !== '' ? "\n\n" . $signature : '');
 

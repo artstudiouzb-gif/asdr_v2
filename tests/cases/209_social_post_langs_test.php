@@ -52,3 +52,16 @@ test('Публикация в соцсети сообщает о пропуще�
 test('Черновая нагрузка без id не лезет в БД за переводами', function () {
     assert_same([], SocialSettings::missingPostLangs(['title' => 'Без id', 'slug' => 'draft']));
 });
+
+test('Русская ссылка из Telegram явно выбирает русский язык', function () {
+    $post = SocialSettings::buildPost([
+        'title' => 'Русский заголовок',
+        'slug' => 'russian-link',
+        'excerpt' => 'Анонс',
+        'lang' => 'ru',
+        'published_at' => '2026-08-01 10:00:00',
+    ]);
+
+    assert_same('ru', (string) ($post['langs'][0]['code'] ?? ''));
+    assert_contains('/news/russian-link?_lang=ru', (string) ($post['langs'][0]['link'] ?? ''));
+});

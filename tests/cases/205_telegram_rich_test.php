@@ -59,7 +59,8 @@ test('Rich: пост уходит одним sendRichMessage со всей вё�
     // По умолчанию кнопок нет: ссылки стоят в тексте каждой языковой версии.
     assert_true(!isset($calls[0]['body']['reply_markup']), 'кнопок по умолчанию нет');
     assert_contains('<h1>Sarlavha</h1>', $html);
-    assert_contains('Мероприятия · 1 августа 2026', $html);
+    assert_contains('<p><sub>Мероприятия · 1 августа 2026</sub></p>', $html);
+    assert_contains('Ikkinchi.</p><hr/><p><a href="https://site.uz/uz/news/x">', $html, 'ссылка отделена от анонса');
     // Второй язык — тем же постом, подряд за разделителем: редактор потом
     // дорабатывает пост в канале руками, и спойлер там только мешает.
     assert_contains('Русский анонс.', $html);
@@ -73,6 +74,21 @@ test('Rich: пост уходит одним sendRichMessage со всей вё�
     assert_contains('<footer><b>Агентство</b></footer>', $html);
     // Разделитель и медиа — в том виде, в каком их показывает документация.
     assert_contains('<hr/>', $html);
+});
+
+test('Rich: узбекский буквенный апостроф не разрывает хештег Telegram', function () {
+    $doc = TelegramRichMessage::build(
+        [['code' => 'uz', 'label' => 'Oʻzbekcha', 'title' => 'Sarlavha', 'excerpt' => '',
+          'link' => '', 'read_more' => '']],
+        [],
+        '',
+        '',
+        '',
+        "#o‘zbekiston2030 #g'oya #maʼnaviyat"
+    );
+
+    assert_contains('<p>#oʻzbekiston2030 #gʻoya #maʻnaviyat</p>', $doc['html']);
+    assert_not_contains('#o‘zbekiston2030', $doc['html']);
 });
 
 test('Rich: отказ Telegram не срывает публикацию — работает прежний формат', function () {
@@ -94,14 +110,17 @@ test('Rich: отказ Telegram не срывает публикацию — р�
 test('Rich: формат «обычный» отключает новый метод полностью', function () {
     $calls = [];
     $http = function ($m, $u, $b, $h) use (&$calls) {
-        $calls[] = $u;
+        $calls[] = ['url' => $u, 'body' => json_decode($b, true)];
         return ['status' => 200, 'body' => '{"ok":true,"result":[{"message_id":3}]}'];
     };
-    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'format' => 'classic'], rich_post());
+    $post = rich_post();
+    $post['hashtags'] = '#o‘zbekiston2030';
+    (new SocialPublisher($http))->publish('telegram', ['token' => 'T', 'chat_id' => '@c', 'format' => 'classic'], $post);
 
-    foreach ($calls as $url) {
-        assert_not_contains('sendRichMessage', $url);
+    foreach ($calls as $call) {
+        assert_not_contains('sendRichMessage', (string) $call['url']);
     }
+    assert_contains('#oʻzbekiston2030', (string) ($calls[0]['body']['media'][0]['caption'] ?? ''), 'обычный формат использует тот же безопасный апостроф');
 });
 
 test('Rich: тихая публикация не будит подписчиков', function () {

@@ -18,9 +18,6 @@ namespace App\Core;
  */
 final class UzCyrillic
 {
-    /** Апострофы, которыми в текстах записывают oʻ, gʻ и tutuq belgisi. */
-    private const APOSTROPHES = ['ʻ', 'ʼ', 'ʹ', '′', '‘', '’', '`', "'", '´'];
-
     /** Теги, внутри которых текст не трогаем. */
     private const SKIP_TAGS = ['script', 'style', 'code', 'pre', 'textarea', 'kbd', 'samp'];
 
@@ -142,7 +139,7 @@ final class UzCyrillic
         // Буквы с апострофом и tutuq belgisi — во всех распространённых
         // начертаниях апострофа. yoʻ — отдельный важный случай: это «йў»
         // (yoʻl → йўл), а не «ёъ».
-        foreach (self::APOSTROPHES as $apostrophe) {
+        foreach (UzbekText::APOSTROPHES as $apostrophe) {
             $map['yo' . $apostrophe] = 'йў';
             $map['Yo' . $apostrophe] = 'Йў';
             $map['YO' . $apostrophe] = 'ЙЎ';

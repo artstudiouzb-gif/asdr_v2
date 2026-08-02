@@ -408,6 +408,7 @@ PROMPT,
         $result = [];
         foreach ($parts as $part) {
             $part = trim($part, "# \t\n\r\0\x0B");
+            $part = UzbekText::normalizeApostrophes($part);
             $part = (string) preg_replace('/[^\p{L}\p{N}_-]+/u', '', $part);
             if ($part !== '' && mb_strlen($part) >= 3) {
                 $result['#' . $part] = true;

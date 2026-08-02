@@ -55,6 +55,8 @@ test('Связанная запись перевода попадает в то�
         // узбекского слага.
         assert_contains('grp-ru-', (string) $langs[1]['link']);
         assert_contains('/ru/news/', (string) $langs[1]['link']);
+        assert_contains('_lang=ru', (string) $langs[1]['link'], 'русская ссылка явно переключает язык и не зависит от cookie посетителя');
+        assert_contains('_lang=uz', (string) $langs[0]['link'], 'узбекская ссылка явно переключает язык');
         // Дата и надпись «читать дальше» — на своём языке.
         assert_contains('августа', (string) $langs[1]['date']);
         assert_contains('Читать', (string) $langs[1]['read_more']);

@@ -64,7 +64,7 @@ final class TelegramRichMessage
                 trim((string) ($lang['date'] ?? $date)),
             ], static fn (string $s): bool => $s !== ''));
 
-            return $parts === [] ? '' : '<p><b>' . $esc(implode(' · ', $parts)) . '</b></p>';
+            return $parts === [] ? '' : '<p><sub>' . $esc(implode(' · ', $parts)) . '</sub></p>';
         };
         $html .= $metaLine($first);
 
@@ -100,7 +100,7 @@ final class TelegramRichMessage
 
         // Хештеги — отдельным абзацем: Telegram сам делает их кликабельными.
         if (trim($hashtags) !== '') {
-            $html .= '<p>' . $esc(trim($hashtags)) . '</p>';
+            $html .= '<p>' . $esc(self::normalizeHashtags($hashtags)) . '</p>';
         }
         // Подпись редактор задаёт с HTML-тегами Telegram — не экранируем её.
         // Своим блоком, а не внутри абзаца: в подписи бывает и цитата, а
@@ -164,10 +164,36 @@ final class TelegramRichMessage
             }
         }
         if (trim((string) $lang['link']) !== '') {
+            // Ссылка — самостоятельная часть публикации. Разделитель не даёт
+            // ей визуально сливаться с последним абзацем анонса.
+            if ($html !== '') {
+                $html .= '<hr/>';
+            }
             $html .= '<p><a href="' . $esc((string) $lang['link']) . '">' . $esc((string) $lang['read_more']) . '</a></p>';
         }
 
         return $html;
+    }
+
+    /**
+     * Делает узбекские хештеги цельными для Telegram. Кавычки U+2018/U+2019
+     * и ASCII-апостроф считаются пунктуацией и завершают hashtag entity.
+     * U+02BB — буквенный узбекский апостроф (категория Unicode Letter), поэтому
+     * сохраняет правильное написание Oʻzbekiston и не разрывает хештег.
+     */
+    public static function normalizeHashtags(string $hashtags): string
+    {
+        $safe = [];
+        foreach (preg_split('/[\s,]+/u', trim($hashtags), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $tag) {
+            $tag = ltrim(trim($tag), '#');
+            $tag = UzbekText::normalizeApostrophes($tag);
+            $tag = (string) preg_replace('/[^\p{L}\p{N}_]+/u', '', $tag);
+            if ($tag !== '') {
+                $safe[] = '#' . $tag;
+            }
+        }
+
+        return implode(' ', array_values(array_unique($safe)));
     }
 
     /** Видимая длина текста без тегов — по ней Telegram считает лимит. */
