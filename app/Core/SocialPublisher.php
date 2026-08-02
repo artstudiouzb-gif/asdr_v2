@@ -532,9 +532,17 @@ final class SocialPublisher
 
             return $meta === [] ? '' : '<b>' . $esc(implode(' · ', $meta)) . '</b>' . "\n\n";
         };
-        $hashtags = TelegramRichMessage::normalizeHashtags(trim((string) ($post['hashtags'] ?? '')));
-        // Полноценная пустая строка между последней ссылкой и тегами.
-        $tail = ($hashtags !== '' ? "\n\n\n" . $esc($hashtags) : '')
+        $hashtagLines = TelegramRichMessage::hashtagLines(
+            $langs,
+            trim((string) ($post['hashtags'] ?? ''))
+        );
+        $hashtagHtml = implode("\n", array_map(
+            static fn (string $line): string => '<b>' . $esc($line) . '</b>',
+            $hashtagLines
+        ));
+        // Classic HTML не поддерживает <mark>, поэтому используем жирное
+        // выделение. Языковые наборы остаются отдельными строками.
+        $tail = ($hashtagHtml !== '' ? "\n\n\n" . $hashtagHtml : '')
             . ($signature !== '' ? "\n\n" . $signature : '');
 
         // Считаем фиксированную часть: заголовки, ссылки, разделители, подпись.
