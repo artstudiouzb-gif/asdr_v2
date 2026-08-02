@@ -5786,7 +5786,8 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     border: 1px solid color-mix(in srgb, var(--gov-teal) 22%, transparent);
 }
 .newsdetail:not(.newsdetail--premium) .newsdetail__title {
-    max-width: 17ch;
+    width: 100%;
+    max-width: none;
     font-size: clamp(2.15rem, 4.2vw, 4rem);
     line-height: 1.04;
     letter-spacing: -.035em;
@@ -6013,7 +6014,8 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 
 /* Текст статьи: комфортная мера строки, более спокойный вертикальный ритм. */
 .newsdetail:not(.newsdetail--premium) .newsdetail-article__content {
-    max-width: 76ch;
+    width: 100%;
+    max-width: none;
     font-size: clamp(1rem, 1.1vw, 1.075rem);
     line-height: 1.74;
 }
