@@ -17,11 +17,30 @@
         });
     }
 
+    // Один проход не позволяет фрагментам вложенных тегов сложиться в новый
+    // тег после удаления (например, «<scr<x>ipt>»). Между тегами оставляем
+    // пробел, чтобы соседние абзацы и пункты списка не склеивались.
+    function stripLeadTags(value) {
+        var text = String(value || '');
+        var out = '';
+        var tag = null;
+        for (var i = 0; i < text.length; i++) {
+            var character = text.charAt(i);
+            if (tag === null) {
+                if (character === '<') { tag = character; } else { out += character; }
+                continue;
+            }
+            tag += character;
+            if (character === '>') {
+                out += ' ';
+                tag = null;
+            }
+        }
+        return tag === null ? out : out + tag;
+    }
+
     function plainTextFromLeadMarkup(value) {
-        var text = String(value || '')
-            .replace(/<\s*br\s*\/?\s*>/gi, ' ')
-            .replace(/<\s*\/\s*(?:p|li|blockquote|ul|ol)\s*>/gi, ' ')
-            .replace(/<[^>]*>/g, ' ');
+        var text = stripLeadTags(value);
         return decodeLeadEntities(text).replace(/\s+/g, ' ').trim();
     }
 
