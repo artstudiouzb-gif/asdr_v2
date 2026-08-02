@@ -9,6 +9,7 @@ use App\Core\Cache;
 use App\Core\Csrf;
 use App\Core\DesignSettings;
 use App\Core\Flash;
+use App\Core\LocalGoogleFonts;
 use App\Core\View;
 use App\Models\Setting;
 
@@ -212,6 +213,19 @@ final class DesignController
         Auth::requireSuperAdmin();
         Csrf::verifyRequest();
 
+        $selectedFonts = [];
+        $bodyChoice = (string) ($_POST['font_body_choice'] ?? '');
+        if (str_starts_with($bodyChoice, 'google:')) {
+            $selectedFonts[] = substr($bodyChoice, 7);
+        }
+        $selectedFonts[] = (string) ($_POST['font_google_heading'] ?? '');
+        $fontInstall = LocalGoogleFonts::installSelected($selectedFonts);
+        if (!$fontInstall['ok']) {
+            Flash::error($fontInstall['error'] . ' Настройки не изменены.');
+            header('Location: /admin/design');
+            exit;
+        }
+
         DesignSettings::save($_POST);
         // Ручная правка снимает метку пресета (значения могли разойтись).
         Setting::set('design_preset', '');
@@ -233,6 +247,21 @@ final class DesignController
             Flash::error('Готовые конфигурации отключены — применять можно только сохранённые вами наборы.');
             header('Location: /admin/design');
             exit;
+        }
+
+        $presetSlug = substr($preset, 5);
+        $presetData = DesignSettings::userPresets()[$presetSlug] ?? null;
+        if (is_array($presetData)) {
+            $appearance = (array) ($presetData['appearance'] ?? []);
+            $fontInstall = LocalGoogleFonts::installSelected([
+                (string) ($appearance['font_google_body'] ?? ''),
+                (string) ($appearance['font_google_heading'] ?? ''),
+            ]);
+            if (!$fontInstall['ok']) {
+                Flash::error($fontInstall['error'] . ' Конфигурация не применена.');
+                header('Location: /admin/design');
+                exit;
+            }
         }
 
         // Применение переписывает все настройки разом, поэтому сначала

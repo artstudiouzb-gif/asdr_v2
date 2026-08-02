@@ -39,7 +39,7 @@ if (!in_array($defaultTheme, ['light', 'dark', 'auto'], true)) {
 }
 $fontUrl = Setting::get('font_url', '');           // ссылка на .woff2 локального шрифта
 $fontFaceName = Setting::get('font_face_name', ''); // имя семейства для @font-face
-// Не загружаем сохранённый локальный файл, когда выбран базовый или Google-шрифт.
+// Не загружаем собственный файл, когда выбран базовый шрифт или локальный каталог.
 if (\App\Core\DesignSettings::bodyFontChoice() !== 'style:custom') {
     $fontUrl = '';
     $fontFaceName = '';
@@ -689,11 +689,9 @@ foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
 <?php foreach (array_keys($fontPreloads) as $fontFile): ?>
 <link rel="preload" href="<?= htmlspecialchars(\App\Core\Asset::url($fontFile), ENT_QUOTES) ?>" as="font" type="font/woff2" crossorigin>
 <?php endforeach; ?>
-<?php // Google-шрифты (если выбраны в «Дизайне»); кириллица включена в css2. ?>
-<?php $googleFontsHref = \App\Core\DesignSettings::googleFontsHref(); ?>
-<?php if ($googleFontsHref !== null): ?>
-<link rel="stylesheet" href="<?= htmlspecialchars($googleFontsHref, ENT_QUOTES) ?>">
-<?php endif; ?>
+<?php foreach (\App\Core\LocalGoogleFonts::stylesheetsForSelected() as $fontStylesheet): ?>
+<link rel="stylesheet" href="<?= htmlspecialchars($fontStylesheet, ENT_QUOTES) ?>" data-local-google-font>
+<?php endforeach; ?>
 <?php foreach (\App\Core\FrontendAssets::styles() as $stylesheet): ?>
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url($stylesheet), ENT_QUOTES) ?>">
 <?php endforeach; ?>

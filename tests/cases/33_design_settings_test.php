@@ -229,23 +229,16 @@ test('Setting::overrideInMemory меняет значение только в п
     assert_same('light', \App\Models\Setting::get('design_header_style'));
 });
 
-test('Google-шрифты: выбранный шрифт имеет приоритет, пусто возвращает базовый стиль', function () {
+test('Локальный каталог шрифтов: выбранный шрифт имеет приоритет, пусто возвращает базовый стиль', function () {
     ensure_test_db();
 
     DesignSettings::save([
         'font_style' => 'serif',
-        'font_google_heading' => 'playfair',
+        'font_google_heading' => 'lora',
         'font_google_body' => 'inter',
     ]);
-    assert_contains('Playfair Display', (string) \App\Models\Setting::get('font_heading', ''));
+    assert_contains('Lora', (string) \App\Models\Setting::get('font_heading', ''));
     assert_contains('Inter', (string) \App\Models\Setting::get('font_family', ''));
-
-    $href = DesignSettings::googleFontsHref();
-    assert_true($href !== null, 'ссылка на css2 построена');
-    assert_contains('fonts.googleapis.com/css2', (string) $href);
-    assert_contains('Playfair+Display', (string) $href);
-    assert_contains('Inter', (string) $href);
-    assert_contains('display=swap', (string) $href);
 
     // Сброс: заголовки возвращаются к PT, текст — к карточке serif выше.
     DesignSettings::save([
@@ -255,10 +248,9 @@ test('Google-шрифты: выбранный шрифт имеет приори
     ]);
     assert_contains('Georgia', (string) \App\Models\Setting::get('font_heading', ''));
     assert_contains('Georgia', (string) \App\Models\Setting::get('font_family', ''));
-    assert_true(DesignSettings::googleFontsHref() === null, 'без выбора ссылки нет');
 });
 
-test('Google-шрифты: неизвестный slug игнорируется', function () {
+test('Локальный каталог шрифтов: неизвестный slug игнорируется', function () {
     ensure_test_db();
     DesignSettings::save(['font_google_heading' => 'evil-font']);
     assert_same('', (string) \App\Models\Setting::get('design_font_google_heading', ''));

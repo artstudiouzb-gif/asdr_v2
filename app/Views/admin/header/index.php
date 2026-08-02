@@ -511,11 +511,10 @@ $heightSelect = function (string $name, string $current): string {
 
                         <div class="form-field">
                             <label for="styles_submenu_font_size">Размер текста</label>
-                            <select id="styles_submenu_font_size" name="styles_submenu_font_size">
-                                <option value="compact" <?= ($st['submenu_font_size'] ?? 'normal') === 'compact' ? 'selected' : '' ?>>Компактный — 12.5px</option>
-                                <option value="normal" <?= ($st['submenu_font_size'] ?? 'normal') === 'normal' ? 'selected' : '' ?>>Обычный — 13.8px</option>
-                                <option value="large" <?= ($st['submenu_font_size'] ?? 'normal') === 'large' ? 'selected' : '' ?>>Крупный — 15.2px</option>
-                            </select>
+                            <input id="styles_submenu_font_size" name="styles_submenu_font_size" type="number"
+                                   min="10" max="24" step="0.1" inputmode="decimal"
+                                   value="<?= htmlspecialchars((string) ($st['submenu_font_size'] ?? '13.8'), ENT_QUOTES) ?>">
+                            <small class="form-hint">Любое значение от 10 до 24 px, например 14.4.</small>
                         </div>
 
                         <div class="form-field">

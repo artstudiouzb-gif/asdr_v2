@@ -71,7 +71,7 @@ final class SiteThemeCss
             '--hoverline-height' => self::hoverlineThickness((string) ($styles['hoverline_thickness'] ?? '2px')),
             '--hoverline-inset' => self::hoverlineInset((string) ($styles['hoverline_length'] ?? 'normal')),
             '--submenu-width' => self::submenuWidth((string) ($styles['submenu_width'] ?? 'normal')),
-            '--submenu-font-size' => self::submenuFontSize((string) ($styles['submenu_font_size'] ?? 'normal')),
+            '--submenu-font-size' => self::submenuFontSize((string) ($styles['submenu_font_size'] ?? '13.8')),
             '--submenu-padding-y' => self::submenuPadding((string) ($styles['submenu_padding'] ?? 'normal')),
             '--submenu-text-transform' => self::submenuTransform((string) ($styles['submenu_transform'] ?? 'none')),
             '--submenu-radius' => self::submenuRadius((string) ($styles['submenu_radius'] ?? 'soft')),
@@ -251,11 +251,13 @@ final class SiteThemeCss
 
     private static function submenuFontSize(string $value): string
     {
-        return match ($value) {
-            'compact' => '.78rem',
-            'large' => '.95rem',
-            default => '.86rem',
-        };
+        $legacy = ['compact' => '12.5', 'normal' => '13.8', 'large' => '15.2'];
+        $value = $legacy[$value] ?? $value;
+        if (!preg_match('/^\d{1,2}(?:\.\d{1,2})?$/', $value)) {
+            return '13.8px';
+        }
+
+        return max(10, min(24, (float) $value)) . 'px';
     }
 
     private static function submenuPadding(string $value): string

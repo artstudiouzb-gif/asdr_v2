@@ -50,8 +50,8 @@ test('publicCsp: разрешает только известный источн
 
 test('publicCsp: хосты добавляются по включённым настройкам', function () {
     $csp = SecurityHeaders::publicCsp('x', ['google_fonts' => true, 'ga' => true, 'ym' => true]);
-    assert_contains('https://fonts.googleapis.com', $csp);
-    assert_contains('https://fonts.gstatic.com', $csp);
+    assert_not_contains('fonts.googleapis.com', $csp, 'локальным шрифтам внешний style-src не нужен');
+    assert_not_contains('fonts.gstatic.com', $csp, 'локальным шрифтам внешний font-src не нужен');
     assert_contains('https://www.googletagmanager.com', $csp);
     assert_contains('https://mc.yandex.ru', $csp);
     assert_contains("script-src 'self' 'nonce-x' https://www.youtube.com https://www.googletagmanager.com https://mc.yandex.ru", $csp);

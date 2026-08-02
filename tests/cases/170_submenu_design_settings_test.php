@@ -9,7 +9,7 @@ test('HeaderConfig нормализует параметры дизайна по
         'styles' => [
             'submenu_style' => 'cards',
             'submenu_width' => 'wide',
-            'submenu_font_size' => 'large',
+            'submenu_font_size' => '14.4',
             'submenu_padding' => 'spacious',
             'submenu_transform' => 'capitalize',
             'submenu_radius' => 'rounded',
@@ -25,7 +25,7 @@ test('HeaderConfig нормализует параметры дизайна по
     $styles = $cfg['styles'];
     assert_same('cards', $styles['submenu_style']);
     assert_same('wide', $styles['submenu_width']);
-    assert_same('large', $styles['submenu_font_size']);
+    assert_same('14.4', $styles['submenu_font_size']);
     assert_same('spacious', $styles['submenu_padding']);
     assert_same('capitalize', $styles['submenu_transform']);
     assert_same('rounded', $styles['submenu_radius']);
@@ -43,6 +43,7 @@ test('HeaderConfig безопасно сбрасывает неизвестны�
             'submenu_style' => 'script',
             'submenu_width' => '9999px',
             'submenu_shadow' => 'url(evil)',
+            'submenu_font_size' => '9999',
             'submenu_bg' => 'red',
         ],
     ])['styles'];
@@ -50,6 +51,7 @@ test('HeaderConfig безопасно сбрасывает неизвестны�
     assert_same('lines', $styles['submenu_style']);
     assert_same('normal', $styles['submenu_width']);
     assert_same('soft', $styles['submenu_shadow']);
+    assert_same('13.8', $styles['submenu_font_size']);
     assert_same('', $styles['submenu_bg']);
 });
 
@@ -81,6 +83,8 @@ test('Конструктор шапки выводит и применяет н�
     assert_contains('site-menu--submenu-', $header);
     assert_contains('site-menu--submenu-transform-', $header);
     assert_contains('--submenu-width', $themeCss);
+    assert_contains("type=\"number\"", $view);
+    assert_contains('Любое значение от 10 до 24 px', $view);
     assert_contains('--submenu-shadow', $themeCss);
     assert_contains('.site-menu--submenu-cards', $css);
     assert_contains('.site-menu--submenu-divider-none', $css);

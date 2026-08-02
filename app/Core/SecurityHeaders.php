@@ -87,10 +87,10 @@ final class SecurityHeaders
 
     /**
      * CSP публичной части. Инлайн-скрипты (анти-FOUC, счётчики, глобальный JS)
-     * — только по nonce; хосты Google Fonts и счётчиков добавляются по
-     * фактически включённым настройкам.
+     * — только по nonce; шрифты самохостятся, внешние хосты добавляются лишь
+     * для фактически включённых счётчиков.
      *
-     * @param array{google_fonts?: bool, ga?: bool, ym?: bool, counter_scripts?: list<string>} $opts
+     * @param array{ga?: bool, ym?: bool, counter_scripts?: list<string>} $opts
      */
     public static function publicCsp(string $nonce, array $opts = []): string
     {
@@ -101,10 +101,6 @@ final class SecurityHeaders
         $style = ["'self'", "'unsafe-inline'"];
         $font = ["'self'", 'data:'];
 
-        if (!empty($opts['google_fonts'])) {
-            $style[] = 'https://fonts.googleapis.com';
-            $font[] = 'https://fonts.gstatic.com';
-        }
         if (!empty($opts['ga'])) {
             $script[] = 'https://www.googletagmanager.com';
             $connect[] = 'https://*.google-analytics.com';
@@ -152,19 +148,18 @@ final class SecurityHeaders
      * Опции публичной CSP из настроек. БД может быть недоступна (503 в
      * bootstrap) — тогда консервативный набор без внешних хостов.
      *
-     * @return array{google_fonts: bool, ga: bool, ym: bool, counter_scripts: list<string>}
+     * @return array{ga: bool, ym: bool, counter_scripts: list<string>}
      */
     private static function publicCspOptions(): array
     {
         try {
             return [
-                'google_fonts' => DesignSettings::googleFontsHref() !== null,
                 'ga' => Analytics::gaId() !== '',
                 'ym' => Analytics::ymId() !== '',
                 'counter_scripts' => self::footerCounterScriptSources(),
             ];
         } catch (\Throwable) {
-            return ['google_fonts' => false, 'ga' => false, 'ym' => false, 'counter_scripts' => []];
+            return ['ga' => false, 'ym' => false, 'counter_scripts' => []];
         }
     }
 

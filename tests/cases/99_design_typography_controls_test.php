@@ -43,7 +43,7 @@ test('форма дизайна объединяет источники шриф
     assert_contains('name="font_body_choice"', $view);
     // Подпись группы дополнена предупреждением о внешнем домене, поэтому
     // проверяем начало, а не точный текст.
-    assert_contains('optgroup label="Google Fonts', $view);
+    assert_contains('optgroup label="Каталог Google Fonts', $view);
     assert_contains('data-custom-font-fields', $view);
     assert_contains('name="font_size_custom"', $view);
     assert_contains('name="line_height_custom"', $view);

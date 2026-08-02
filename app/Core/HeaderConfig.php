@@ -147,7 +147,7 @@ final class HeaderConfig
             'hoverline_thickness' => '2px',
             'submenu_style' => 'lines',
             'submenu_width' => 'normal',
-            'submenu_font_size' => 'normal',
+            'submenu_font_size' => '13.8',
             'submenu_padding' => 'normal',
             'submenu_transform' => 'none',
             'submenu_radius' => 'soft',
@@ -404,6 +404,19 @@ final class HeaderConfig
 
             return max($min, min($max, (int) $value));
         };
+        $boundedDecimal = static function (mixed $value, string $default, float $min, float $max): string {
+            $legacy = ['compact' => '12.5', 'normal' => '13.8', 'large' => '15.2'];
+            $raw = trim((string) $value);
+            if (isset($legacy[$raw])) {
+                return $legacy[$raw];
+            }
+            if (!preg_match('/^\d{1,2}(?:\.\d{1,2})?$/', $raw)) {
+                return $default;
+            }
+            $number = max($min, min($max, (float) $raw));
+
+            return rtrim(rtrim(number_format($number, 2, '.', ''), '0'), '.');
+        };
         $result['styles'] = [
             'nav_color' => $hexOrEmpty($styles['nav_color'] ?? ''),
             'nav_hover' => $hexOrEmpty($styles['nav_hover'] ?? ''),
@@ -428,7 +441,7 @@ final class HeaderConfig
             'hoverline_thickness' => in_array($styles['hoverline_thickness'] ?? '', ['thin', 'normal', 'thick', 'heavy', '1px', '2px', '3px', '4px', '5px', '6px', '8px'], true) ? $styles['hoverline_thickness'] : '2px',
             'submenu_style' => in_array($styles['submenu_style'] ?? '', ['lines', 'minimal', 'cards'], true) ? $styles['submenu_style'] : 'lines',
             'submenu_width' => in_array($styles['submenu_width'] ?? '', ['compact', 'normal', 'wide'], true) ? $styles['submenu_width'] : 'normal',
-            'submenu_font_size' => in_array($styles['submenu_font_size'] ?? '', ['compact', 'normal', 'large'], true) ? $styles['submenu_font_size'] : 'normal',
+            'submenu_font_size' => $boundedDecimal($styles['submenu_font_size'] ?? null, '13.8', 10, 24),
             'submenu_padding' => in_array($styles['submenu_padding'] ?? '', ['compact', 'normal', 'spacious'], true) ? $styles['submenu_padding'] : 'normal',
             'submenu_transform' => in_array($styles['submenu_transform'] ?? '', ['none', 'uppercase', 'capitalize'], true) ? $styles['submenu_transform'] : 'none',
             'submenu_radius' => in_array($styles['submenu_radius'] ?? '', ['none', 'soft', 'rounded'], true) ? $styles['submenu_radius'] : 'soft',

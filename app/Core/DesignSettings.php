@@ -32,12 +32,13 @@ final class DesignSettings
     ];
 
     /**
-     * Каталог Google-шрифтов с поддержкой кириллицы:
+     * Локальный каталог шрифтов из Google Fonts с полной поддержкой узбекской
+     * кириллицы (cyrillic-ext + cyrillic). Третий элемент используется только
+     * локальным установщиком при сохранении, браузер к Google Fonts не обращается.
      * slug => [подпись, CSS-стек, параметр family для css2 API].
      */
     public const GOOGLE_FONTS = [
         'pt-serif' => ['PT Serif (антиква)', "'PT Serif', Georgia, serif", 'PT+Serif:wght@400;700'],
-        'playfair' => ['Playfair Display (антиква)', "'Playfair Display', Georgia, serif", 'Playfair+Display:wght@500;700'],
         'lora' => ['Lora (антиква)', "'Lora', Georgia, serif", 'Lora:wght@400;600;700'],
         'merriweather' => ['Merriweather (антиква)', "'Merriweather', Georgia, serif", 'Merriweather:wght@400;700'],
         'noto-serif' => ['Noto Serif (антиква)', "'Noto Serif', Georgia, serif", 'Noto+Serif:wght@400;600;700'],
@@ -54,7 +55,6 @@ final class DesignSettings
         'ibm-plex-sans' => ['IBM Plex Sans', "'IBM Plex Sans', system-ui, sans-serif", 'IBM+Plex+Sans:wght@400;600;700'],
         'manrope' => ['Manrope', "'Manrope', system-ui, sans-serif", 'Manrope:wght@400;600;700'],
         'rubik' => ['Rubik', "'Rubik', system-ui, sans-serif", 'Rubik:wght@400;500;700'],
-        'jost' => ['Jost', "'Jost', system-ui, sans-serif", 'Jost:wght@400;500;700'],
         'raleway' => ['Raleway', "'Raleway', system-ui, sans-serif", 'Raleway:wght@400;600;700'],
         'exo2' => ['Exo 2', "'Exo 2', system-ui, sans-serif", 'Exo+2:wght@400;600;700'],
         'golos' => ['Golos Text', "'Golos Text', system-ui, sans-serif", 'Golos+Text:wght@400;600;700'],
@@ -742,8 +742,8 @@ final class DesignSettings
             Setting::set('default_theme', $theme);
         }
 
-        // Запоминаем выбранные Google-шрифты до материализации. Пустое
-        // значение отключает Google-шрифт для соответствующей роли.
+        // Запоминаем выбранные шрифты каталога до материализации. Пустое
+        // значение отключает отдельный шрифт для соответствующей роли.
         foreach (['heading', 'body'] as $role) {
             $inputKey = 'font_google_' . $role;
             if (!array_key_exists($inputKey, $input)) {
@@ -774,8 +774,8 @@ final class DesignSettings
             Setting::set('font_family', $custom['font_family']);
         }
 
-        // Google-шрифты имеют явный приоритет над базовой ролью. Отключение
-        // Google-шрифта текста возвращает выбранный выше пресет/свой стек.
+        // Шрифты локального каталога имеют явный приоритет над базовой ролью.
+        // Отключение шрифта текста возвращает выбранный выше пресет/свой стек.
         $bodySlug = (string) Setting::get('design_font_google_body', '');
         if ($bodySlug !== '' && isset(self::GOOGLE_FONTS[$bodySlug])) {
             Setting::set('font_family', self::GOOGLE_FONTS[$bodySlug][1]);
@@ -791,27 +791,6 @@ final class DesignSettings
         );
     }
 
-    /**
-     * Ссылка на css2 Google Fonts для выбранных ролей (или null, если
-     * Google-шрифты не используются). Кириллица включена в css2 по умолчанию.
-     */
-    public static function googleFontsHref(): ?string
-    {
-        $families = [];
-        foreach (['heading', 'body'] as $role) {
-            $slug = (string) Setting::get('design_font_google_' . $role, '');
-            if ($slug !== '' && isset(self::GOOGLE_FONTS[$slug])) {
-                $families[self::GOOGLE_FONTS[$slug][2]] = true;
-            }
-        }
-        if ($families === []) {
-            return null;
-        }
-
-        return 'https://fonts.googleapis.com/css2?family='
-            . implode('&family=', array_keys($families)) . '&display=swap';
-    }
-
     /** Применяет готовую конфигурацию (встроенную или пользовательскую «user:slug»). */
     public static function applyPreset(string $preset): bool
     {
@@ -822,7 +801,7 @@ final class DesignSettings
             return false;
         }
         // Встроенный пресет должен полностью определять типографику, поэтому
-        // отключаем ранее выбранные Google-шрифты, которые иначе имели бы
+        // отключаем ранее выбранные шрифты каталога, которые иначе имели бы
         // приоритет над шрифтом пресета.
         self::save(array_merge(self::PRESETS[$preset]['values'], [
             'font_google_heading' => '',
