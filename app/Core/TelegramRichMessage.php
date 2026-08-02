@@ -176,7 +176,7 @@ final class TelegramRichMessage
             if ($html !== '') {
                 $html .= '<hr/>';
             }
-            $html .= '<p><a href="' . $esc((string) $lang['link']) . '">' . $esc((string) $lang['read_more']) . '</a></p>';
+            $html .= '<p><a href="' . $esc((string) $lang['link']) . '"><b>' . $esc((string) $lang['read_more']) . '</b></a></p>';
         }
 
         return $html;

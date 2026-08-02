@@ -518,7 +518,7 @@ final class SocialPublisher
         // читателю приходилось сопоставлять с языком по догадке.
         $linkFor = static function (array $l) use ($esc): string {
             return ($l['link'] ?? '') !== ''
-                ? "\n\n" . '<a href="' . $esc((string) $l['link']) . '">' . $esc((string) $l['read_more']) . '</a>'
+                ? "\n\n" . '<a href="' . $esc((string) $l['link']) . '"><b>' . $esc((string) $l['read_more']) . '</b></a>'
                 : '';
         };
         // Рубрика и дата — служебной строкой над заголовком своего языка:
