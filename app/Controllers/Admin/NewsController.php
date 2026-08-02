@@ -15,6 +15,7 @@ use App\Core\Database;
 use App\Core\Flash;
 use App\Core\ImageField;
 use App\Core\Locale;
+use App\Core\NewsLead;
 use App\Core\RateLimiter;
 use App\Core\Slug;
 use App\Core\TextProcessor;
@@ -490,6 +491,11 @@ final class NewsController
         // Если форма отправлена с отдельной языковой страницы альтернативного языка
         if ($activeLang !== '' && $activeLang !== $defaultCode) {
             $t = $_POST;
+            $lead = NewsLead::fromInput(
+                (string) ($t['lead_html'] ?? ''),
+                (string) ($t['excerpt'] ?? ''),
+                $activeLang
+            );
             $docs = $this->parseDocs((array) ($t['docs'] ?? []));
             $timeline = $this->parseTimeline((string) ($t['timeline_raw'] ?? ''));
             $pollQuestion = trim((string) ($t['poll_question'] ?? ''));
@@ -498,7 +504,8 @@ final class NewsController
             NewsTranslation::upsert($newsId, $activeLang, [
                 'title' => trim((string) ($t['title'] ?? '')),
                 'badge' => trim((string) ($t['badge'] ?? '')),
-                'excerpt' => trim((string) ($t['excerpt'] ?? '')),
+                'excerpt' => $lead['text'],
+                'lead_html' => $lead['html'],
                 'content' => TextProcessor::process((string) ($t['content'] ?? ''), $activeLang),
                 'hashtags' => trim((string) ($t['hashtags'] ?? '')),
                 'key_points' => trim((string) ($t['key_points'] ?? '')),
@@ -521,6 +528,11 @@ final class NewsController
                 continue;
             }
             $t = (array) $input[$code];
+            $lead = NewsLead::fromInput(
+                (string) ($t['lead_html'] ?? ''),
+                (string) ($t['excerpt'] ?? ''),
+                $code
+            );
 
             $docs = $this->parseDocs((array) ($t['docs'] ?? []));
             $timeline = $this->parseTimeline((string) ($t['timeline_raw'] ?? ''));
@@ -530,7 +542,8 @@ final class NewsController
             NewsTranslation::upsert($newsId, $code, [
                 'title' => trim((string) ($t['title'] ?? '')),
                 'badge' => trim((string) ($t['badge'] ?? '')),
-                'excerpt' => trim((string) ($t['excerpt'] ?? '')),
+                'excerpt' => $lead['text'],
+                'lead_html' => $lead['html'],
                 'content' => TextProcessor::process((string) ($t['content'] ?? ''), $code),
                 'hashtags' => trim((string) ($t['hashtags'] ?? '')),
                 'key_points' => trim((string) ($t['key_points'] ?? '')),
@@ -579,7 +592,13 @@ final class NewsController
         if (!Language::isActive($lang)) {
             $lang = Language::defaultCode();
         }
-        $excerpt = trim((string) ($_POST['excerpt'] ?? ''));
+        $lead = NewsLead::fromInput(
+            (string) ($_POST['lead_html'] ?? ''),
+            (string) ($_POST['excerpt'] ?? ''),
+            $lang
+        );
+        $excerpt = $lead['text'];
+        $leadHtml = $lead['html'];
         // WYSIWYG-контент прогоняем через типограф/санитайзер (задача 75).
         $content = TextProcessor::process((string) ($_POST['content'] ?? ''), $lang);
         $metaTitle = trim((string) ($_POST['meta_title'] ?? ''));
@@ -597,19 +616,19 @@ final class NewsController
         $focalY = self::clampPercent($_POST['focal_y'] ?? null);
 
         if ($title === '') {
-            return [['title' => $title, 'slug' => $slugInput, 'excerpt' => $excerpt, 'content' => $content, 'status' => $status, 'sidebar_layout' => $sidebarLayout], 'Укажите заголовок новости.'];
+            return [['title' => $title, 'slug' => $slugInput, 'excerpt' => $excerpt, 'lead_html' => $leadHtml, 'content' => $content, 'status' => $status, 'sidebar_layout' => $sidebarLayout], 'Укажите заголовок новости.'];
         }
 
         if ($videoUrl !== '' && !\App\Core\Video::isYoutube($videoUrl)) {
             return [
-                ['title' => $title, 'slug' => $slugInput, 'excerpt' => $excerpt, 'content' => $content, 'status' => $status, 'video_url' => $videoUrl, 'layout_type' => $layoutType, 'sidebar_layout' => $sidebarLayout],
+                ['title' => $title, 'slug' => $slugInput, 'excerpt' => $excerpt, 'lead_html' => $leadHtml, 'content' => $content, 'status' => $status, 'video_url' => $videoUrl, 'layout_type' => $layoutType, 'sidebar_layout' => $sidebarLayout],
                 'Ссылка на видео должна быть YouTube-адресом (youtube.com/watch, youtu.be и т.п.).',
             ];
         }
         if ($audioUrl !== ''
             && (str_starts_with($audioUrl, '//') || !\App\Core\UrlGuard::isSafeMedia($audioUrl))) {
             return [
-                ['title' => $title, 'slug' => $slugInput, 'excerpt' => $excerpt, 'content' => $content, 'status' => $status, 'audio_url' => $audioUrl, 'layout_type' => $layoutType, 'sidebar_layout' => $sidebarLayout],
+                ['title' => $title, 'slug' => $slugInput, 'excerpt' => $excerpt, 'lead_html' => $leadHtml, 'content' => $content, 'status' => $status, 'audio_url' => $audioUrl, 'layout_type' => $layoutType, 'sidebar_layout' => $sidebarLayout],
                 'Ссылка на аудио должна быть локальным путём или HTTP(S)-адресом.',
             ];
         }
@@ -634,7 +653,7 @@ final class NewsController
                 || ($publishedAtErrors !== false
                     && ($publishedAtErrors['warning_count'] > 0 || $publishedAtErrors['error_count'] > 0))) {
                 return [
-                    ['title' => $title, 'slug' => $slugInput, 'excerpt' => $excerpt, 'content' => $content, 'status' => $status, 'published_at' => $publishedAtInput, 'layout_type' => $layoutType, 'sidebar_layout' => $sidebarLayout],
+                    ['title' => $title, 'slug' => $slugInput, 'excerpt' => $excerpt, 'lead_html' => $leadHtml, 'content' => $content, 'status' => $status, 'published_at' => $publishedAtInput, 'layout_type' => $layoutType, 'sidebar_layout' => $sidebarLayout],
                     'Укажите корректную дату и время публикации.',
                 ];
             }
@@ -663,6 +682,7 @@ final class NewsController
             'title' => $title,
             'slug' => $slug,
             'excerpt' => $excerpt !== '' ? $excerpt : null,
+            'lead_html' => $leadHtml,
             'content' => $content,
             'image' => $image,
             'video_url' => $videoUrl !== '' ? $videoUrl : null,

@@ -278,13 +278,14 @@ final class TranslationGroupHelper
             );
             if ($table === 'news') {
                 $ins = $pdo->prepare(
-                    "INSERT INTO news (title, slug, excerpt, badge, content, image, video_url, audio_url, audio_title, hashtags, press_release_url, key_points, event_meta, timeline_json, docs, source_note, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
-                     VALUES (:t, :s, :e, :b, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, 'draft', NOW(), :auth, :lang, :gid, NOW())"
+                    "INSERT INTO news (title, slug, excerpt, lead_html, badge, content, image, video_url, audio_url, audio_title, hashtags, press_release_url, key_points, event_meta, timeline_json, docs, source_note, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
+                      VALUES (:t, :s, :e, :lh, :b, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, 'draft', NOW(), :auth, :lang, :gid, NOW())"
                 );
                 $ins->execute([
                     ':t' => '',
                     ':s' => $newSlug,
                     ':e' => null,
+                    ':lh' => null,
                     ':b' => null,
                     ':c' => null,
                     ':img' => $orig['image'] ?? null,

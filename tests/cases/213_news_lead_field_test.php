@@ -2,38 +2,89 @@
 
 declare(strict_types=1);
 
-/**
- * Лид новости — обычный текст. Визуальный редактор здесь был бы ловушкой:
- * лид выводится экранированным в карточках ленты, в поиске, в описании для
- * поисковиков и в постах соцсетей, и разметка превратилась бы в голые теги.
- * Вместо редактора — счётчик с порогами, по которым лид режут.
- */
+use App\Core\NewsLead;
+use App\Core\TelegramRichMessage;
 
-test('Лид остаётся обычным полем, без визуального редактора', function () {
+test('Форматированный лид очищается и одновременно даёт обычный текст', function () {
+    $lead = NewsLead::fromInput(
+        '<p onclick="bad()"><strong>Главный факт</strong> и <em>деталь</em>.</p>'
+        . '<script>alert(1)</script><ul><li>Пункт</li></ul>'
+        . '<p><a href="javascript:alert(2)">опасная ссылка</a></p>',
+        null,
+        'ru'
+    );
+
+    assert_contains('<strong>Главный факт</strong>', (string) $lead['html']);
+    assert_contains('<em>деталь</em>', (string) $lead['html']);
+    assert_contains('<ul><li>Пункт</li></ul>', (string) $lead['html']);
+    assert_not_contains('<script', (string) $lead['html']);
+    assert_not_contains('onclick', (string) $lead['html']);
+    assert_not_contains('javascript:', (string) $lead['html']);
+    assert_same('Главный факт и деталь. Пункт опасная ссылка', $lead['text']);
+});
+
+test('Старый обычный лид продолжает отображаться без миграции содержимого', function () {
+    $html = NewsLead::html(null, "Первый абзац.\n\nВторой <текст>.");
+
+    assert_contains('<p>Первый абзац.</p>', $html);
+    assert_contains('<p>Второй &lt;текст&gt;.</p>', $html);
+});
+
+test('Форма даёт компактный редактор и три честных предпросмотра', function () {
     $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/news/form.php');
-    $pos = (int) strpos($form, 'name="excerpt"');
-    assert_true($pos > 0, 'поле лида на месте');
+    $editor = (string) file_get_contents(APP_ROOT . '/public/assets/js/vendor/editor.js');
+    $admin = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin.js');
 
-    $block = substr($form, $pos, 600);
-    assert_not_contains('data-wysiwyg', $block);
-    assert_contains('data-lead-field', $block);
-    assert_contains('data-lead-count', $block);
+    assert_contains('name="lead_html"', $form);
+    assert_contains('data-lead-editor', $form);
+    assert_contains('Рекомендуемая длина — 180–360', $form);
+    assert_contains('жёсткого лимита нет', $form);
+    assert_contains('data-lead-preview-tab="card"', $form);
+    assert_contains('data-lead-preview-tab="telegram"', $form);
+    assert_contains('data-lead-preview-tab="seo"', $form);
+    assert_contains("var isLead = textarea.hasAttribute('data-lead-editor')", $editor);
+    assert_contains("len < 180", $admin);
+    assert_contains("len > 360", $admin);
+    assert_contains("text.length > 160", $admin, 'SEO остаётся отдельным кратким предпросмотром');
 });
 
-test('Счётчик лида знает пороги обрезки', function () {
-    $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin.js');
-    $pos = (int) strpos($js, 'data-lead-field');
-    $block = substr($js, max(0, $pos - 600), 1600);
-
-    assert_contains('160', $block);
-    assert_contains('140', $block);
-});
-
-test('Пороги счётчика совпадают с реальной обрезкой в шаблонах', function () {
+test('Полный лид хранится, а карточки показывают более полезные фрагменты', function () {
     $latest = (string) file_get_contents(APP_ROOT . '/templates/blocks/news_latest.php');
     $feature = (string) file_get_contents(APP_ROOT . '/templates/blocks/news_feature.php');
+    $listing = (string) file_get_contents(APP_ROOT . '/app/Views/site/_news_list.php');
 
-    // Если лимиты в шаблонах поменяют, подсказка редактору начнёт врать.
-    assert_contains("excerpt((string) \$item['excerpt'], 140)", $latest);
-    assert_contains("excerpt((string) \$featured['excerpt'], 160)", $feature);
+    assert_contains("excerpt((string) \$item['excerpt'], 180)", $latest);
+    assert_contains("excerpt((string) \$featured['excerpt'], 260)", $feature);
+    assert_contains("excerpt((string) \$featured['excerpt'], 280)", $listing);
+    assert_contains("excerpt((string) \$item['excerpt'], 180)", $listing);
+});
+
+test('Сайт и Telegram получают одинаковую безопасную разметку лида', function () {
+    $rich = '<p><strong>Важное</strong> и <u>подчёркнутое</u>.</p><blockquote>Цитата</blockquote>';
+    $doc = TelegramRichMessage::build(
+        [[
+            'code' => 'ru', 'label' => 'Русский', 'title' => 'Заголовок',
+            'excerpt' => 'Важное и подчёркнутое. Цитата', 'lead_html' => $rich,
+            'link' => '', 'read_more' => '',
+        ]],
+        []
+    );
+    $site = (string) file_get_contents(APP_ROOT . '/app/Views/site/news_show.php');
+
+    assert_contains($rich, $doc['html']);
+    assert_contains('NewsLead::html', $site);
+    assert_contains('news-lead-rich', $site);
+});
+
+test('Схема и модели сохраняют HTML лида отдельно от excerpt', function () {
+    $schema = (string) file_get_contents(APP_ROOT . '/database/schema.sql');
+    $migration = (string) file_get_contents(APP_ROOT . '/database/migrations/2026_08_02_news_rich_lead.sql');
+    $newsModel = (string) file_get_contents(APP_ROOT . '/app/Models/News.php');
+    $translationModel = (string) file_get_contents(APP_ROOT . '/app/Models/NewsTranslation.php');
+
+    assert_contains('lead_html       LONGTEXT NULL', $schema);
+    assert_contains("TABLE_NAME = 'news' AND COLUMN_NAME = 'lead_html'", $migration);
+    assert_contains("TABLE_NAME = 'news_translations' AND COLUMN_NAME = 'lead_html'", $migration);
+    assert_contains(':lead_html', $newsModel);
+    assert_contains(':lead_html', $translationModel);
 });

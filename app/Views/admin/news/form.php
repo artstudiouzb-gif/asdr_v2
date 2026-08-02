@@ -1,6 +1,7 @@
 <?php
 
 use App\Core\Csrf;
+use App\Core\NewsLead;
 use App\Core\TranslationGroupHelper;
 use App\Models\Language;
 
@@ -34,6 +35,7 @@ if (TranslationGroupHelper::isProvisionalNewsSlug($slugValue)) {
 
 $keyPoints = (string) ($news['key_points'] ?? '');
 $eventMeta = (string) ($news['event_meta'] ?? '');
+$leadEditorValue = NewsLead::editorValue($news['lead_html'] ?? null, $news['excerpt'] ?? null);
 
 $docsRaw = $news['docs'] ?? [];
 if (is_string($docsRaw)) {
@@ -123,16 +125,35 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
 
                 <div class="form-field u-inline-79a1c5a5db">
                     <div class="u-inline-a42388f688">
-                        <label class="u-inline-2e190aa086">Краткий лид (анонс)</label>
+                        <label class="u-inline-2e190aa086" for="news_lead_html">Лид (анонс)</label>
                         <button type="button" class="btn btn--sm btn--secondary" data-ai-generate-summary data-ai-generate="summary"><?= \App\Core\AdminUi::icon('sparkles') ?>ИИ-Аннотация</button>
                     </div>
-                    <textarea name="excerpt" rows="4" placeholder="Кратко опишите суть новости"
-                              data-lead-field><?= htmlspecialchars($news['excerpt'] ?? '', ENT_QUOTES) ?></textarea>
+                    <textarea id="news_lead_html" name="lead_html" rows="7" placeholder="Кратко опишите суть новости"
+                              data-lead-editor data-lead-field><?= htmlspecialchars($leadEditorValue, ENT_QUOTES) ?></textarea>
                     <span class="form-hint">
-                        Обычный текст без форматирования: лид уходит в карточки ленты, в описание для
-                        поисковиков и в пост Telegram, где разметка не отображается.
+                        Можно использовать жирный, курсив, ссылку, цитату и списки. Для карточек, поиска и SEO
+                        чистый текст создаётся автоматически. Рекомендуемая длина — 180–360 знаков;
+                        жёсткого лимита нет.
                         <span data-lead-count></span>
                     </span>
+                    <div class="lead-previews" data-lead-previews>
+                        <div class="lead-previews__tabs" role="tablist" aria-label="Предпросмотр лида">
+                            <button type="button" class="lead-previews__tab is-active" data-lead-preview-tab="card" role="tab" aria-selected="true">Карточка</button>
+                            <button type="button" class="lead-previews__tab" data-lead-preview-tab="telegram" role="tab" aria-selected="false">Telegram</button>
+                            <button type="button" class="lead-previews__tab" data-lead-preview-tab="seo" role="tab" aria-selected="false">SEO</button>
+                        </div>
+                        <div class="lead-previews__panel" data-lead-preview-panel="card" role="tabpanel">
+                            <strong data-lead-preview-title>Заголовок новости</strong>
+                            <span data-lead-preview-card>Здесь появится текст карточки.</span>
+                        </div>
+                        <div class="lead-previews__panel" data-lead-preview-panel="telegram" role="tabpanel" hidden>
+                            <div data-lead-preview-telegram>Здесь появится форматированный лид Telegram.</div>
+                        </div>
+                        <div class="lead-previews__panel" data-lead-preview-panel="seo" role="tabpanel" hidden>
+                            <strong data-lead-preview-seo-title>Заголовок новости</strong>
+                            <span data-lead-preview-seo>Здесь появится описание для поисковика.</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-field u-inline-79a1c5a5db">

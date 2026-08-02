@@ -63,13 +63,14 @@ final class TranslationGroupMigration
                     }
 
                     $ins = $pdo->prepare(
-                        "INSERT INTO news (title, slug, excerpt, badge, content, image, video_url, audio_url, audio_title, hashtags, press_release_url, key_points, event_meta, timeline_json, docs, source_note, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
-                         VALUES (:t, :s, :e, :b, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, :st, :pub, :auth, :lang, :gid, NOW())"
+                        "INSERT INTO news (title, slug, excerpt, lead_html, badge, content, image, video_url, audio_url, audio_title, hashtags, press_release_url, key_points, event_meta, timeline_json, docs, source_note, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
+                          VALUES (:t, :s, :e, :lh, :b, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, :st, :pub, :auth, :lang, :gid, NOW())"
                     );
                     $ins->execute([
                         ':t' => $title,
                         ':s' => $newSlug,
                         ':e' => $nt['excerpt'] ?? $orig['excerpt'] ?? null,
+                        ':lh' => $nt['lead_html'] ?? $orig['lead_html'] ?? null,
                         ':b' => $nt['badge'] ?? $orig['badge'] ?? null,
                         ':c' => $nt['content'] ?? $orig['content'] ?? null,
                         ':img' => $orig['image'] ?? null,

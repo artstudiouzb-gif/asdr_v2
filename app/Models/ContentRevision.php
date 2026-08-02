@@ -24,9 +24,9 @@ final class ContentRevision
         ],
         'news' => [
             'table' => 'news',
-            'columns' => ['title', 'slug', 'excerpt', 'badge', 'content', 'image', 'video_url', 'audio_url', 'audio_title', 'hashtags', 'press_release_url', 'key_points', 'event_meta', 'timeline_json', 'docs', 'source_note', 'layout_type', 'sidebar_layout', 'focal_x', 'focal_y', 'meta_title', 'meta_description', 'status', 'published_at'],
+            'columns' => ['title', 'slug', 'excerpt', 'lead_html', 'badge', 'content', 'image', 'video_url', 'audio_url', 'audio_title', 'hashtags', 'press_release_url', 'key_points', 'event_meta', 'timeline_json', 'docs', 'source_note', 'layout_type', 'sidebar_layout', 'focal_x', 'focal_y', 'meta_title', 'meta_description', 'status', 'published_at'],
             'children' => [
-                ['table' => 'news_translations', 'fk' => 'news_id', 'columns' => ['lang', 'title', 'badge', 'excerpt', 'content', 'hashtags', 'key_points', 'event_meta', 'timeline_json', 'docs', 'poll_question', 'poll_options_json', 'meta_title', 'meta_description']],
+                ['table' => 'news_translations', 'fk' => 'news_id', 'columns' => ['lang', 'title', 'badge', 'excerpt', 'lead_html', 'content', 'hashtags', 'key_points', 'event_meta', 'timeline_json', 'docs', 'poll_question', 'poll_options_json', 'meta_title', 'meta_description']],
                 ['table' => 'news_images', 'fk' => 'news_id', 'columns' => ['path', 'alt_text', 'focal_x', 'focal_y', 'sort_order']],
                 ['table' => 'news_polls', 'fk' => 'news_id', 'columns' => ['question', 'options_json']],
             ],

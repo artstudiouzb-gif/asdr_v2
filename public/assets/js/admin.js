@@ -1352,28 +1352,85 @@
         });
     })();
 
-    // --- Лид новости: счётчик с порогами, по которым его режут ---
-    // Карточка ленты обрезает лид на 140 знаках, описание для поисковика — на
-    // 160. Редактор этих границ не видит и узнаёт о них по многоточию на
-    // готовой странице.
+    // --- Умный лид: чистый текст, длина и предпросмотр каналов ---
     (function initLeadCounter() {
         var field = document.querySelector('[data-lead-field]');
         var out = document.querySelector('[data-lead-count]');
         if (!field || !out) { return; }
 
+        var title = document.querySelector('[name="title"]');
+        var tabs = document.querySelectorAll('[data-lead-preview-tab]');
+        var panels = document.querySelectorAll('[data-lead-preview-panel]');
+        var card = document.querySelector('[data-lead-preview-card]');
+        var telegram = document.querySelector('[data-lead-preview-telegram]');
+        var seo = document.querySelector('[data-lead-preview-seo]');
+        var previewTitles = document.querySelectorAll('[data-lead-preview-title], [data-lead-preview-seo-title]');
+
+        function currentHtml() {
+            if (window.tinymce && field.id && window.tinymce.get(field.id)) {
+                return window.tinymce.get(field.id).getContent();
+            }
+            return field.value || '';
+        }
+
+        function plain(html) {
+            var doc = new DOMParser().parseFromString(html, 'text/html');
+            return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
+        }
+
+        function safeRich(target, html) {
+            if (!target) { return; }
+            target.textContent = '';
+            var doc = new DOMParser().parseFromString(html, 'text/html');
+            var allowed = {P:1, BR:1, STRONG:1, B:1, EM:1, I:1, U:1, S:1, UL:1, OL:1, LI:1, BLOCKQUOTE:1, A:1};
+            function copy(node, parent) {
+                if (node.nodeType === 3) { parent.appendChild(document.createTextNode(node.nodeValue || '')); return; }
+                if (node.nodeType !== 1) { return; }
+                var tag = allowed[node.tagName] ? node.tagName.toLowerCase() : 'span';
+                var el = document.createElement(tag);
+                if (tag === 'a') {
+                    var href = node.getAttribute('href') || '';
+                    if (/^(https?:|mailto:|tel:|\/|#)/i.test(href)) { el.setAttribute('href', href); }
+                }
+                Array.prototype.forEach.call(node.childNodes, function (child) { copy(child, el); });
+                parent.appendChild(el);
+            }
+            Array.prototype.forEach.call(doc.body.childNodes, function (node) { copy(node, target); });
+        }
+
         function render() {
-            var len = field.value.trim().length;
+            var html = currentHtml();
+            var text = plain(html);
+            var len = text.length;
             if (len === 0) {
                 out.textContent = '';
-                return;
+            } else {
+                var note = len < 180
+                    ? ' — можно добавить больше сути'
+                    : (len > 360 ? ' — полный текст сохранится, карточки покажут сокращение' : ' — оптимальная длина');
+                out.textContent = 'Знаков: ' + len + note + '.';
             }
-            var note = len > 160
-                ? ' — в карточке ленты и в описании для поисковика будет обрезан'
-                : (len > 140 ? ' — в карточке ленты будет обрезан' : '');
-            out.textContent = 'Знаков: ' + len + note + '.';
+
+            if (card) { card.textContent = text.length > 180 ? text.slice(0, 179).trimEnd() + '…' : (text || 'Здесь появится текст карточки.'); }
+            if (seo) { seo.textContent = text.length > 160 ? text.slice(0, 159).trimEnd() + '…' : (text || 'Здесь появится описание для поисковика.'); }
+            safeRich(telegram, html || '<p>Здесь появится форматированный лид Telegram.</p>');
+            var titleText = title && title.value.trim() ? title.value.trim() : 'Заголовок новости';
+            previewTitles.forEach(function (el) { el.textContent = titleText; });
         }
 
         field.addEventListener('input', render);
+        if (title) { title.addEventListener('input', render); }
+        tabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                var name = tab.getAttribute('data-lead-preview-tab');
+                tabs.forEach(function (item) {
+                    var active = item === tab;
+                    item.classList.toggle('is-active', active);
+                    item.setAttribute('aria-selected', active ? 'true' : 'false');
+                });
+                panels.forEach(function (panel) { panel.hidden = panel.getAttribute('data-lead-preview-panel') !== name; });
+            });
+        });
         render();
     })();
 
@@ -1561,7 +1618,7 @@
 
     // --- Автономный WYSIWYG (задача 75): инициализация на textarea[data-wysiwyg] ---
     if (window.ArtEditor) {
-        document.querySelectorAll('textarea[data-wysiwyg]').forEach(function (ta) {
+        document.querySelectorAll('textarea[data-wysiwyg], textarea[data-lead-editor]').forEach(function (ta) {
             window.ArtEditor.attach(ta);
         });
     }
@@ -2766,11 +2823,15 @@
             if (!liveBoxes.length) return;
 
             var titleInput = document.querySelector('input[name="title"], input[name="meta_title"]');
-            var descInput = document.querySelector('textarea[name="excerpt"], input[name="meta_description"], textarea[name="key_points"]');
+            var descInput = document.querySelector('input[name="meta_description"], textarea[name="meta_description"], textarea[name="lead_html"], textarea[name="key_points"]');
             var imageInput = document.querySelector('input[name="image_url"], input[name="image"]');
 
             var titleVal = titleInput ? (titleInput.value || '').trim() : '';
             var descVal = descInput ? (descInput.value || '').trim() : '';
+            if (descInput && descInput.getAttribute('name') === 'lead_html') {
+                var parsedLead = new DOMParser().parseFromString(descVal, 'text/html');
+                descVal = (parsedLead.body.textContent || '').replace(/\s+/g, ' ').trim();
+            }
             var imgVal = imageInput ? (imageInput.value || '').trim() : '';
 
             var titleText = titleVal || 'Заголовок вашей новости или страницы';
@@ -3065,17 +3126,11 @@
         var target = btn.getAttribute('data-ai-generate') || 'summary';
 
         var content = '';
-        if (window.tinymce) {
-            if (tinymce.activeEditor) {
-                content = tinymce.activeEditor.getContent();
-            } else if (tinymce.get(0)) {
-                content = tinymce.get(0).getContent();
-            }
+        var contentField = form.querySelector('[name="content"]');
+        if (window.tinymce && contentField && contentField.id && tinymce.get(contentField.id)) {
+            content = tinymce.get(contentField.id).getContent();
         }
-        if (!content) {
-            var contentField = form.querySelector('[name="content"]');
-            if (contentField) { content = contentField.value; }
-        }
+        if (!content && contentField) { content = contentField.value; }
 
         if (!title.trim() && !content.trim()) {
             adminAlert('Пожалуйста, введите заголовок или текст новости перед генерацией.');
@@ -3120,8 +3175,17 @@
             restoreButton();
             if (data && data.ok) {
                 if (target === 'summary' && data.excerpt) {
-                    var excerptField = form.querySelector('[name="excerpt"]');
-                    if (excerptField) { excerptField.value = data.excerpt; }
+                    var excerptField = form.querySelector('[name="lead_html"]');
+                    if (excerptField) {
+                        var escaped = data.excerpt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        var leadHtml = '<p>' + escaped + '</p>';
+                        excerptField.value = leadHtml;
+                        if (window.tinymce && excerptField.id && window.tinymce.get(excerptField.id)) {
+                            window.tinymce.get(excerptField.id).setContent(leadHtml);
+                            window.tinymce.get(excerptField.id).save();
+                        }
+                        excerptField.dispatchEvent(new Event('input'));
+                    }
                 }
                 if (target === 'summary' && data.hashtags) {
                     var hashtagsField = form.querySelector('[name="hashtags"]');

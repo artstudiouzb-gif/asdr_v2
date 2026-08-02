@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS news (
     title           VARCHAR(255) NOT NULL,
     slug            VARCHAR(255) NOT NULL,
     excerpt         TEXT NULL,
+    lead_html       LONGTEXT NULL COMMENT 'форматированный лид; excerpt — его текстовая версия',
     badge           VARCHAR(100) NULL COMMENT 'бейдж категории детальной страницы',
     content         LONGTEXT NULL,
     image           VARCHAR(255) NULL,
@@ -90,6 +91,7 @@ CREATE TABLE IF NOT EXISTS news_translations (
     title           VARCHAR(255) NULL,
     badge           VARCHAR(100) NULL COMMENT 'бейдж категории',
     excerpt         TEXT NULL,
+    lead_html       LONGTEXT NULL COMMENT 'форматированный лид перевода',
     content         LONGTEXT NULL,
     hashtags        VARCHAR(500) NULL COMMENT 'хештеги новости',
     key_points      TEXT NULL COMMENT 'ключевые тезисы, по одному на строку',
@@ -1048,6 +1050,7 @@ INSERT INTO migrations (filename) VALUES
     ('2026_07_30_translation_group_indexes.sql'),
     ('2026_07_31_team_departments.sql'),
     ('2026_08_01_media_captions.sql'),
+    ('2026_08_02_news_rich_lead.sql'),
     ('2026_08_02_social_scheduled_at.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
