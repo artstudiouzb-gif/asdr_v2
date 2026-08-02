@@ -1003,14 +1003,18 @@
         var loaded = false;
         var loadedType = null;
         var currentType = 'image';
+        var currentMultiple = false;
         var selectedUrl = null;
         var selectedName = null;
+        var selectedUrls = [];
+        var selectedNames = {};
         var libraryItems = [];
 
         var typeOptions = {
             image: { accept: '.jpg,.jpeg,.png,.gif,.webp,.svg', label: 'изображение' },
             svg: { accept: '.svg,image/svg+xml', label: 'SVG-файл' },
             video: { accept: '.mp4,video/mp4', label: 'видео MP4' },
+            audio: { accept: '.mp3,.aac,.ogg,.wav,.m4a,audio/*', label: 'аудиофайл' },
             document: { accept: '.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip', label: 'документ' },
             all_files: { accept: '', label: 'файл' },
             all: { accept: '', label: 'файл' }
@@ -1026,7 +1030,7 @@
         function selectUrl(url) {
             if (!url) { return; }
             if (currentCallback) {
-                currentCallback(url);
+                currentCallback(currentMultiple ? [url] : url);
             } else if (currentTarget) {
                 currentTarget.value = url;
                 currentTarget.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1036,16 +1040,22 @@
         }
 
         function updateSelectedUI() {
-            if (!selectedUrl) {
+            var selectedCount = currentMultiple ? selectedUrls.length : (selectedUrl ? 1 : 0);
+            if (!selectedCount) {
                 if (selectedInfo) selectedInfo.textContent = 'Файл не выбран';
                 if (selectBtn) selectBtn.disabled = true;
             } else {
-                if (selectedInfo) selectedInfo.textContent = 'Выбран: ' + (selectedName || selectedUrl);
+                if (selectedInfo) {
+                    selectedInfo.textContent = currentMultiple
+                        ? 'Выбрано файлов: ' + selectedCount
+                        : 'Выбран: ' + (selectedName || selectedUrl);
+                }
                 if (selectBtn) selectBtn.disabled = false;
             }
 
             grid.querySelectorAll('.media-modal__item').forEach(function (fig) {
-                var isThis = fig.getAttribute('data-url') === selectedUrl;
+                var itemUrl = fig.getAttribute('data-url');
+                var isThis = currentMultiple ? selectedUrls.indexOf(itemUrl) !== -1 : itemUrl === selectedUrl;
                 fig.classList.toggle('is-selected', isThis);
             });
         }
@@ -1069,7 +1079,7 @@
                 fig.title = it.name;
                 fig.setAttribute('data-url', it.url);
 
-                if (selectedUrl === it.url) {
+                if ((currentMultiple && selectedUrls.indexOf(it.url) !== -1) || (!currentMultiple && selectedUrl === it.url)) {
                     fig.classList.add('is-selected');
                 }
 
@@ -1089,20 +1099,31 @@
                     fig.querySelector('.media-modal__filename').textContent = it.name;
                 } else {
                     var img = document.createElement('img');
-                    img.src = it.url;
+                    img.src = encodeURI(it.url);
                     img.alt = it.name;
                     img.loading = 'lazy';
                     fig.appendChild(img);
                 }
 
                 fig.addEventListener('click', function () {
-                    selectedUrl = it.url;
-                    selectedName = it.name;
+                    if (currentMultiple) {
+                        var selectedIndex = selectedUrls.indexOf(it.url);
+                        if (selectedIndex === -1) {
+                            selectedUrls.push(it.url);
+                            selectedNames[it.url] = it.name;
+                        } else {
+                            selectedUrls.splice(selectedIndex, 1);
+                            delete selectedNames[it.url];
+                        }
+                    } else {
+                        selectedUrl = it.url;
+                        selectedName = it.name;
+                    }
                     updateSelectedUI();
                 });
 
                 fig.addEventListener('dblclick', function () {
-                    selectUrl(it.url);
+                    if (!currentMultiple) { selectUrl(it.url); }
                 });
 
                 grid.appendChild(fig);
@@ -1156,16 +1177,26 @@
 
         if (selectBtn) {
             selectBtn.addEventListener('click', function () {
-                if (selectedUrl) selectUrl(selectedUrl);
+                if (currentMultiple) {
+                    if (selectedUrls.length && currentCallback) {
+                        currentCallback(selectedUrls.slice());
+                        close();
+                    }
+                } else if (selectedUrl) {
+                    selectUrl(selectedUrl);
+                }
             });
         }
 
-        function open(targetSelector, callback, type) {
+        function open(targetSelector, callback, type, multiple) {
             currentTarget = targetSelector ? document.querySelector(targetSelector) : null;
             currentCallback = callback || null;
             currentType = type || 'image';
+            currentMultiple = Boolean(multiple);
             selectedUrl = null;
             selectedName = null;
+            selectedUrls = [];
+            selectedNames = {};
             updateSelectedUI();
 
             var options = typeOptions[currentType] || typeOptions.all;
@@ -1182,6 +1213,7 @@
         function close() {
             modal.hidden = true;
             currentCallback = null;
+            currentMultiple = false;
         }
 
         if (uploadInput && uploadBox) {
@@ -1243,13 +1275,77 @@
 
         // Публичный API для редактора: выбор изображения/SVG с колбэком.
         window.MediaPicker = {
-            pick: function (cb) { open(null, cb, 'image'); },
-            pickSvg: function (cb) { open(null, cb, 'svg'); }
+            pick: function (cb) { open(null, cb, 'image', false); },
+            pickMany: function (cb) { open(null, cb, 'image', true); },
+            pickSvg: function (cb) { open(null, cb, 'svg', false); }
         };
+
+        // Галерея новости: переиспользование нескольких изображений из
+        // медиабиблиотеки без повторной загрузки файлов.
+        document.addEventListener('click', function (e) {
+            var galleryPick = e.target.closest('[data-media-gallery-pick]');
+            if (!galleryPick) { return; }
+            e.preventDefault();
+            var gallery = galleryPick.closest('[data-media-gallery]');
+            var selection = gallery ? gallery.querySelector('[data-media-gallery-selection]') : null;
+            if (!selection) { return; }
+
+            window.MediaPicker.pickMany(function (urls) {
+                (urls || []).forEach(function (url) {
+                    var duplicate = Array.prototype.some.call(
+                        selection.querySelectorAll('input[name="gallery_library[]"]'),
+                        function (input) { return input.value === url; }
+                    );
+                    if (duplicate || (!/^\/(?!\/)/.test(url) && !/^https?:\/\//i.test(url))) { return; }
+
+                    var item = document.createElement('div');
+                    item.className = 'file-preview__item';
+
+                    var image = document.createElement('img');
+                    image.src = encodeURI(url);
+                    image.alt = '';
+                    item.appendChild(image);
+
+                    var name = document.createElement('span');
+                    name.className = 'file-preview__name';
+                    var fileName = url.split('/').pop() || url;
+                    try { fileName = decodeURIComponent(fileName); } catch (error) {}
+                    name.textContent = fileName;
+                    item.appendChild(name);
+
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'gallery_library[]';
+                    input.value = url;
+                    item.appendChild(input);
+
+                    var drop = document.createElement('button');
+                    drop.type = 'button';
+                    drop.className = 'file-preview__drop';
+                    drop.setAttribute('data-media-gallery-drop', '');
+                    drop.setAttribute('aria-label', 'Убрать фотографию из выбора');
+                    drop.textContent = '×';
+                    item.appendChild(drop);
+
+                    selection.appendChild(item);
+                });
+                selection.hidden = !selection.children.length;
+            });
+        });
+
+        document.addEventListener('click', function (e) {
+            var galleryDrop = e.target.closest('[data-media-gallery-drop]');
+            if (!galleryDrop) { return; }
+            e.preventDefault();
+            var selection = galleryDrop.closest('[data-media-gallery-selection]');
+            var item = galleryDrop.closest('.file-preview__item');
+            if (item) { item.remove(); }
+            if (selection) { selection.hidden = !selection.children.length; }
+        });
 
         document.addEventListener('click', function (e) {
             var btn = e.target.closest('[data-media-pick]');
-            if (btn) { e.preventDefault(); open(btn.getAttribute('data-media-target'), null, btn.getAttribute('data-media-type')); return; }
+            if (btn) { e.preventDefault(); open(btn.getAttribute('data-media-target'), null, btn.getAttribute('data-media-type'), false); return; }
             if (e.target.closest('[data-media-close]') || e.target === modal) { close(); }
         });
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { close(); } });

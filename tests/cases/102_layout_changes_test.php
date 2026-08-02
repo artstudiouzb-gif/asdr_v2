@@ -127,6 +127,7 @@ test('News: frontend layout rendering with and without sidebar', function () {
     assert_contains('newsdetail-share__home', $html, 'Возврат на главную остаётся доступен в адаптивном блоке действий');
     assert_contains('newsdetail-share--article-top', $html, 'Публикация расположена сразу после галереи перед текстом');
     assert_contains('newsdetail-gallery__caption', $html, 'Подпись и автор фотографии сохраняются под большим кадром');
+    assert_contains('newsdetail-gallery__main', $html, 'Одна главная обложка создаёт полноценную медиазону без дополнительных фото');
     assert_contains('Контакты', $html, 'Виджет правого сайдбара попал в разметку');
     assert_contains('newsdetail-card--summary', $html, 'Тезисы отображаются в информационной колонке');
     assert_contains('Первый важный тезис', $html);
@@ -156,6 +157,10 @@ test('News: frontend layout rendering with and without sidebar', function () {
     assert_not_contains('layout layout--', $htmlNoSidebar, 'Контейнер сайдбара отсутствует при no_sidebar');
     assert_contains('newsdetail-card--summary', $htmlNoSidebar, 'Смысловые тезисы не зависят от набора пользовательских виджетов');
     assert_contains('newsdetail-side newsdetail-side--right', $htmlNoSidebar, 'Тезисы выводятся в информационной колонке новости');
+
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    assert_contains('align-items: stretch;', $css, 'медиазона не схлопывается без ленты миниатюр');
+    assert_contains('width: 100%;', substr($css, (int) strpos($css, '.newsdetail:not(.newsdetail--premium) .newsdetail-gallery {'), 220));
 
     // Очистка
     $pdo->exec("DELETE FROM news WHERE id = {$nid}");

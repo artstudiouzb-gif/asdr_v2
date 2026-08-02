@@ -5756,6 +5756,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .newsdetail:not(.newsdetail--premium) .newsdetail-head {
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: clamp(20px, 2.4vw, 30px);
     margin: 0;
 }
@@ -5821,7 +5822,11 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .newsdetail:not(.newsdetail--premium) .newsdetail__source { margin-top: -4px; }
 
 /* Галерея — один выразительный кадр и компактная горизонтальная кинолента. */
-.newsdetail:not(.newsdetail--premium) .newsdetail-gallery { gap: 10px; }
+.newsdetail:not(.newsdetail--premium) .newsdetail-gallery {
+    align-self: stretch;
+    width: 100%;
+    gap: 10px;
+}
 .newsdetail:not(.newsdetail--premium) .newsdetail-gallery,
 .newsdetail:not(.newsdetail--premium) .newsdetail-gallery__thumbs { min-width: 0; max-width: 100%; }
 .newsdetail:not(.newsdetail--premium) .newsdetail-gallery__caption {

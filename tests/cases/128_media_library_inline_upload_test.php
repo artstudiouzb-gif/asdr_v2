@@ -10,11 +10,26 @@ test('В медиабиблиотеке можно загрузить новый
     assert_contains('data-media-upload-input', $footer);
     assert_contains('data-media-upload-button', $footer);
     assert_contains('data-csrf=', $footer);
+    assert_contains('class="media-modal__upload is-hidden"', $footer, 'скрывается только начальное состояние, а не весь upload-tab навсегда');
+    assert_not_contains('class="media-modal__upload u-inline-c8be1ccba6"', $footer);
     assert_contains("fetch('/admin/files/chunk'", $js);
     assert_contains("fd.append('access_type', 'public')", $js);
     assert_contains('200 * 1024 * 1024', $js);
     assert_contains('loadLibrary(currentType, true)', $js);
     assert_contains('selectUrl(res.url)', $js);
+    assert_contains("audio: { accept: '.mp3,.aac,.ogg,.wav,.m4a,audio/*'", $js, 'медиабиблиотека знает аудиоформаты');
+    assert_contains('pickMany: function (cb)', $js, 'галерея умеет выбирать несколько существующих файлов');
+});
+
+test('Галерея новости принимает фото и с компьютера, и из медиабиблиотеки', function () {
+    $root = dirname(__DIR__, 2);
+    $form = (string) file_get_contents($root . '/app/Views/admin/news/form.php');
+    $controller = (string) file_get_contents($root . '/app/Controllers/Admin/NewsController.php');
+
+    assert_contains('data-media-gallery-pick', $form);
+    assert_contains('name="news_gallery[]"', $form);
+    assert_contains("\$_POST['gallery_library']", $controller);
+    assert_contains('UrlGuard::isSafeMedia($libraryPath)', $controller);
 });
 
 test('После чанковой загрузки сервер возвращает URL нового публичного файла', function () {
