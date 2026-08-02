@@ -368,15 +368,20 @@ final class SocialSettings
             // Рубрика и дата — на языке своего блока. Иначе под русским
             // заголовком стояло бы «1-avgust, 2026-yil».
             $published = trim((string) ($news['published_at'] ?? ''));
+            $slug = (string) ($row['slug'] ?? $news['slug']);
+            // Ссылка из Telegram — явный выбор языка, а не продолжение
+            // предыдущего визита. Без _lang сохранённая cookie могла открыть
+            // узбекскую версию даже по русской ссылке /ru/news/….
+            $link = rtrim($base, '/') . Locale::url('news/' . rawurlencode($slug), $code)
+                . '?' . http_build_query([LocalePreference::QUERY => $code], '', '&', PHP_QUERY_RFC3986);
             $blocks[] = [
                 'code' => $code,
                 'label' => $meta[$code]['label'] ?? mb_strtoupper($code),
                 'title' => $title,
                 'excerpt' => trim((string) ($row['excerpt'] ?? '')),
                 // У связанной записи свой адрес — ведём на него, а не на
-                // перевод базового слага.
-                'link' => $base . ($code === $default ? '' : '/' . $code) . '/news/'
-                    . rawurlencode((string) ($row['slug'] ?? $news['slug'])),
+                // перевод базового slug.
+                'link' => $link,
                 'read_more' => $meta[$code]['read_more'] ?? ('Read (' . strtoupper($code) . ') →'),
                 'category' => trim((string) ($row['badge'] ?? '')),
                 'date' => $published !== '' ? DateFormatter::long($published, $code) : '',

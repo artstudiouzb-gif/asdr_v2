@@ -386,7 +386,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
 
             <?php $hashtagsClean = \App\Models\News::cleanHashtags($news['hashtags'] ?? null); ?>
             <?php if ($hashtagsClean !== null): ?>
-                <div class="newsdetail-hashtags">
+                <div class="newsdetail-hashtags" data-no-translit>
                     <?php foreach (explode(' ', $hashtagsClean) as $tag): ?>
                         <a href="<?= Locale::url('news') ?>?q=<?= rawurlencode($tag) ?>" class="newsdetail-tag"><?= htmlspecialchars($tag, ENT_QUOTES) ?></a>
                     <?php endforeach; ?>

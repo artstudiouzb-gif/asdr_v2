@@ -8,6 +8,7 @@ use App\Core\ConcurrencyException;
 use App\Core\Database;
 use App\Core\Video;
 use App\Core\Logger;
+use App\Core\UzbekText;
 
 final class News
 {
@@ -615,6 +616,7 @@ final class News
         $tags = [];
         foreach ($raw as $word) {
             $clean = ltrim(trim($word), '#');
+            $clean = UzbekText::normalizeApostrophes($clean);
             if ($clean !== '') {
                 $tags[] = '#' . mb_strtolower($clean);
             }

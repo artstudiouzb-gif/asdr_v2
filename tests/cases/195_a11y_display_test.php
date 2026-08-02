@@ -105,6 +105,10 @@ test('Кириллица: теги, атрибуты и скрипты не пе
     $uppercaseSkip = UzCyrillic::html('<div DATA-NO-TRANSLIT>Shahar</div><p>Shahar</p>');
     assert_contains('<div DATA-NO-TRANSLIT>Shahar</div>', $uppercaseSkip);
     assert_contains('<p>Шаҳар</p>', $uppercaseSkip);
+    assert_contains(
+        '<a href="/uz/news?q=%23o%CA%BBzbekiston2030">#oʻzbekiston2030</a>',
+        UzCyrillic::html('<div data-no-translit><a href="/uz/news?q=%23o%CA%BBzbekiston2030">#oʻzbekiston2030</a></div>')
+    );
     assert_same('<kbd>Ctrl+K</kbd>', UzCyrillic::html('<kbd>Ctrl+K</kbd>'));
 });
 
