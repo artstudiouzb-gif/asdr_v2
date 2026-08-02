@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Core\DesignSettings;
 
-// Ширина контейнера: пресеты wide/ultra/full + своя точная ширина.
+// Ширина контейнера: ultra фиксирован на 1440px; full и своя точная ширина сохраняются.
 
 test('DesignSettings::normalizeWidth: валидные и невалидные значения', function () {
     assert_same('1440px', DesignSettings::normalizeWidth('1440px'));
