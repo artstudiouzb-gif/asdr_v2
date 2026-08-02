@@ -533,7 +533,8 @@ final class SocialPublisher
             return $meta === [] ? '' : '<b>' . $esc(implode(' · ', $meta)) . '</b>' . "\n\n";
         };
         $hashtags = TelegramRichMessage::normalizeHashtags(trim((string) ($post['hashtags'] ?? '')));
-        $tail = ($hashtags !== '' ? "\n\n" . $esc($hashtags) : '')
+        // Полноценная пустая строка между последней ссылкой и тегами.
+        $tail = ($hashtags !== '' ? "\n\n\n" . $esc($hashtags) : '')
             . ($signature !== '' ? "\n\n" . $signature : '');
 
         // Считаем фиксированную часть: заголовки, ссылки, разделители, подпись.
@@ -586,15 +587,20 @@ final class SocialPublisher
             }
             $text = implode("\n\n———\n\n", $parts);
         }
-        if ($signature !== '') {
-            $text .= "\n\n" . $signature;
-        }
+        // Facebook, LinkedIn и Instagram используют тот же объединённый
+        // блок тегов после всех языковых ссылок, что и Telegram.
+        $hashtags = TelegramRichMessage::normalizeHashtags((string) ($post['hashtags'] ?? ''));
+        $tail = ($hashtags !== '' ? "\n\n\n" . $hashtags : '')
+            . ($signature !== '' ? "\n\n" . $signature : '');
         $text = trim($text);
-        if ($limit > 0 && mb_strlen($text) > $limit) {
-            $text = rtrim(mb_substr($text, 0, $limit - 1)) . '…';
+        if ($limit > 0 && mb_strlen($text . $tail) > $limit) {
+            $available = max(0, $limit - mb_strlen($tail));
+            $text = $available > 1
+                ? rtrim(mb_substr($text, 0, $available - 1)) . '…'
+                : '';
         }
 
-        return $text;
+        return trim($text . $tail);
     }
 
     private function facebook(array $cfg, array $post): array

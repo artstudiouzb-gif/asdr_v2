@@ -68,7 +68,7 @@ test('Rich: пост уходит одним sendRichMessage со всей вё�
     assert_not_contains('<details>', $html);
     // Галерея — слайд-шоу: альбом из снимков занимал бы весь экран ленты.
     assert_contains('<tg-slideshow>', $html);
-    assert_contains('<p>#реформы</p>', $html, 'хештеги отдельным абзацем — Telegram сам их линкует');
+    assert_contains('<hr/><p>#Реформы</p>', $html, 'хештеги отделены от последней ссылки и нормализованы');
     // Подпись — своим блоком: редактор вставляет в неё и цитаты, а <footer>
     // принимает только строчное содержимое.
     assert_contains('<footer><b>Агентство</b></footer>', $html);
@@ -87,7 +87,7 @@ test('Rich: узбекский буквенный апостроф не разр
         "#o‘zbekiston2030 #g'oya #maʼnaviyat"
     );
 
-    assert_contains('<p>#oʻzbekiston2030 #gʻoya #maʻnaviyat</p>', $doc['html']);
+    assert_contains('<hr/><p>#Oʻzbekiston2030 #Gʻoya #Maʻnaviyat</p>', $doc['html']);
     assert_not_contains('#o‘zbekiston2030', $doc['html']);
 });
 
@@ -120,7 +120,9 @@ test('Rich: формат «обычный» отключает новый мет
     foreach ($calls as $call) {
         assert_not_contains('sendRichMessage', (string) $call['url']);
     }
-    assert_contains('#oʻzbekiston2030', (string) ($calls[0]['body']['media'][0]['caption'] ?? ''), 'обычный формат использует тот же безопасный апостроф');
+    $caption = (string) ($calls[0]['body']['media'][0]['caption'] ?? '');
+    assert_contains('#Oʻzbekiston2030', $caption, 'обычный формат использует единый регистр и безопасный апостроф');
+    assert_contains("</a>\n\n\n#Oʻzbekiston2030", $caption, 'хештеги не приклеиваются к последней ссылке');
 });
 
 test('Rich: тихая публикация не будит подписчиков', function () {
