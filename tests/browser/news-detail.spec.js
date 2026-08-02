@@ -7,7 +7,6 @@ const pixel = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" widt
 async function mountNews(page) {
     await page.setContent(`
         <style>
-            :root { --radius: 0px; --radius-sm: 0px; --btn-radius: 0px; }
             body { margin: 0; }
             .newsdetail { width: min(1100px, 100%); margin-inline: auto; }
         </style>
@@ -61,6 +60,17 @@ async function mountNews(page) {
         </div>
     `);
     await page.addStyleTag({ path: path.join(projectRoot, 'public/assets/css/gov-theme.css') });
+    // Пользовательские переменные дизайна подключаются после базовой темы.
+    // Повторяем тот же порядок, чтобы значения 0px не перезаписывались :root из CSS.
+    await page.addStyleTag({ content: ':root { --radius: 0px; --radius-sm: 0px; --btn-radius: 0px; }' });
+    // about:blank не гарантирует рабочий Clipboard API в headless Chromium.
+    // Стаб гарантирует успешное копирование, а тест проверяет реакцию интерфейса.
+    await page.evaluate(() => {
+        Object.defineProperty(navigator, 'clipboard', {
+            configurable: true,
+            value: { writeText: () => Promise.resolve() }
+        });
+    });
     await page.addScriptTag({ path: path.join(projectRoot, 'public/assets/js/frontend.js') });
 }
 
