@@ -165,7 +165,7 @@ final class HeaderController
                 'hoverline_thickness' => (string) ($_POST['styles_hoverline_thickness'] ?? '2px'),
                 'submenu_style' => (string) ($_POST['styles_submenu_style'] ?? 'lines'),
                 'submenu_width' => (string) ($_POST['styles_submenu_width'] ?? 'normal'),
-                'submenu_font_size' => (string) ($_POST['styles_submenu_font_size'] ?? 'normal'),
+                'submenu_font_size' => (string) ($_POST['styles_submenu_font_size'] ?? '13.8'),
                 'submenu_padding' => (string) ($_POST['styles_submenu_padding'] ?? 'normal'),
                 'submenu_transform' => (string) ($_POST['styles_submenu_transform'] ?? 'none'),
                 'submenu_radius' => (string) ($_POST['styles_submenu_radius'] ?? 'soft'),

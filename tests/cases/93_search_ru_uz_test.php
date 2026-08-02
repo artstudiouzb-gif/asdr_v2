@@ -11,6 +11,8 @@ test('SearchQuery: RU/UZ нормализация и транслитераци�
     assert_same("o'zbekiston e'lon", SearchQuery::normalize(' OʻZBEKISTON  E’LON '));
     assert_true(in_array('ўзбекистон', SearchQuery::variants("o'zbekiston"), true));
     assert_true(in_array("o'zbekiston", SearchQuery::variants('ўзбекистон'), true));
+    assert_true(in_array('йўл', SearchQuery::variants('yoʻl'), true));
+    assert_true(in_array('конституция', SearchQuery::variants('konstitutsiya'), true));
     assert_true(in_array('елка', SearchQuery::variants('Ёлка'), true));
 });
 

@@ -70,8 +70,9 @@ test('Раздел дизайна: шкала и честные подписи �
     assert_contains('Шкала заголовков', $view);
     assert_contains('typo-preview', $view, 'наглядный предпросмотр ступеней');
     assert_contains('Точные размеры', $view, 'ручные значения остаются, но свёрнуты');
-    // Про внешние запросы Google Fonts редактор должен знать до выбора.
+    // Редактор должен видеть, что выбранные шрифты локализуются на сервере.
     assert_contains('Локальные — без внешних запросов', $view);
-    assert_contains('fonts.googleapis.com', $view);
-    assert_contains('адрес уходит Google', $view);
+    assert_contains('Каталог Google Fonts — локальные файлы', $view);
+    assert_contains('Ўў, Ғғ, Ққ, Ҳҳ', $view);
+    assert_not_contains('fonts.googleapis.com', $view);
 });

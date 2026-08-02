@@ -72,12 +72,20 @@ test('Кириллица: узбекская латиница переводит
     assert_same('Экология', UzCyrillic::text('Ekologiya'));
     assert_same('келажак', UzCyrillic::text('kelajak'));
     assert_same('ЙИҒИЛИШ', UzCyrillic::text('YIGʻILISH'));
+    // yoʻ нельзя сначала превращать в «ё»: yoʻl → йўл.
+    assert_same('йўл Йўл ЙЎЛ', UzCyrillic::text("yoʻl Yo‘l YO'L"));
+    assert_same('цемент конституция', UzCyrillic::text('tsement konstitutsiya'));
+    // Реальные редакторы и клавиатуры присылают несколько видов апострофа.
+    assert_same('ў ғ ў ғ ў ғ', UzCyrillic::text("oʹ gʹ o′ g′ o´ g´"));
 });
 
 test('Кириллица: адреса, почта и сущности остаются латиницей', function () {
     assert_same('info@asr.uz', UzCyrillic::text('info@asr.uz'));
     assert_same('https://asr.artstudio.uz/uz', UzCyrillic::text('https://asr.artstudio.uz/uz'));
     assert_contains('&nbsp;', UzCyrillic::text('matn&nbsp;matn'));
+    assert_same('матн&#x27;матн', UzCyrillic::text('matn&#x27;matn'));
+    assert_same('tel:+998711234567', UzCyrillic::text('tel:+998711234567'));
+    assert_same('my.gov.uz', UzCyrillic::text('my.gov.uz'));
 });
 
 test('Кириллица: теги, атрибуты и скрипты не переводятся', function () {
@@ -93,6 +101,37 @@ test('Кириллица: теги, атрибуты и скрипты не пе
     $skip = UzCyrillic::html('<div data-no-translit><span>Lotin</span></div><p>Lotin</p>');
     assert_contains('<span>Lotin</span>', $skip);
     assert_contains('<p>Лотин</p>', $skip);
+
+    $uppercaseSkip = UzCyrillic::html('<div DATA-NO-TRANSLIT>Shahar</div><p>Shahar</p>');
+    assert_contains('<div DATA-NO-TRANSLIT>Shahar</div>', $uppercaseSkip);
+    assert_contains('<p>Шаҳар</p>', $uppercaseSkip);
+    assert_same('<kbd>Ctrl+K</kbd>', UzCyrillic::html('<kbd>Ctrl+K</kbd>'));
+});
+
+test('Кириллица: локальные шрифты содержат узбекский cyrillic-ext', function () {
+    $root = dirname(__DIR__, 2);
+    $styles = [
+        'fonts.css' => ['montserrat-cyrillic-ext.woff2', 'manrope-cyrillic-ext.woff2'],
+        'gov-fonts.css' => [
+            'ptsans-400-cyrillic-ext.woff2',
+            'ptsans-700-cyrillic-ext.woff2',
+            'ptserif-400-cyrillic-ext.woff2',
+            'ptserif-700-cyrillic-ext.woff2',
+        ],
+    ];
+
+    foreach ($styles as $stylesheet => $fontFiles) {
+        $css = (string) file_get_contents($root . '/public/assets/css/' . $stylesheet);
+        assert_contains('unicode-range: U+0460-052F', $css, "{$stylesheet}: нет расширенной кириллицы");
+        foreach ($fontFiles as $fontFile) {
+            assert_contains($fontFile, $css, "{$stylesheet}: не подключён {$fontFile}");
+            assert_true(
+                is_file($root . '/public/assets/fonts/' . $fontFile)
+                    && filesize($root . '/public/assets/fonts/' . $fontFile) > 0,
+                "шрифт {$fontFile} должен лежать в проекте"
+            );
+        }
+    }
 });
 
 test('Панель: разметка, стили и скрипт согласованы', function () {

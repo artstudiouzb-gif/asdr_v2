@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 use App\Core\DesignSettings;
 
-test('каталог внешних шрифтов содержит Inter Tight с нужными начертаниями', function (): void {
+test('локальный каталог содержит Inter Tight с нужными начертаниями', function (): void {
     assert_true(isset(DesignSettings::GOOGLE_FONTS['inter-tight']));
     $font = DesignSettings::GOOGLE_FONTS['inter-tight'];
     assert_same('Inter Tight', $font[0]);
     assert_contains("'Inter Tight'", $font[1]);
     assert_contains('Inter+Tight:wght@400;500;600;700', $font[2]);
+
+    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/inter-tight.css');
+    assert_contains("font-family: 'Inter Tight';", $css);
+    assert_not_contains('https://', $css, 'CSS Inter Tight не должен обращаться во внешний CDN');
 });
 
 test('прозрачная мобильная шапка сохраняет видимый бургер и контрастное раскрытое меню', function (): void {

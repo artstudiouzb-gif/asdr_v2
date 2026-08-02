@@ -132,14 +132,10 @@ final class SeoHelper
         return "<script type=\"application/ld+json\">" . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "</script>\n";
     }
 
-    /**
-     * Подключает подсказки предзагрузки сетевых ресурсов (Resource Hints).
-     */
+    /** Внешних шрифтовых ресурсов больше нет: весь каталог самохостится. */
     public static function resourceHintsHtml(): string
     {
-        return "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n"
-             . "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n"
-             . "<link rel=\"dns-prefetch\" href=\"https://fonts.googleapis.com\">\n";
+        return '';
     }
 
     /**

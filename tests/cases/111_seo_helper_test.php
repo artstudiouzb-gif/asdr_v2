@@ -7,7 +7,7 @@ use App\Core\SeoHelper;
 test('SEO helper формирует resource hints, схемы и favicon-разметку', function (): void {
 // 1. Проверка генерации Resource Hints
 $hints = SeoHelper::resourceHintsHtml();
-assert_true(str_contains($hints, "fonts.googleapis.com"));
+assert_same('', $hints, 'локальным шрифтам внешние resource hints не нужны');
 
 // 2. Проверка генерации микроразметки организации
 $org = SeoHelper::organizationSchema("https://example.com");

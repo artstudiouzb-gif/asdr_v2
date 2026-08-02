@@ -344,7 +344,7 @@ foreach ($options as $key => $opt) {
                                             <?= $bodyFontChoice === $choice ? 'selected' : '' ?>><?= htmlspecialchars($fontData[0], ENT_QUOTES) ?></option>
                                 <?php endforeach; ?>
                             </optgroup>
-                            <optgroup label="Google Fonts — грузятся с fonts.googleapis.com">
+                            <optgroup label="Каталог Google Fonts — локальные файлы">
                                 <?php foreach (\App\Core\DesignSettings::GOOGLE_FONTS as $slug => $fontData): ?>
                                     <?php $choice = 'google:' . $slug; ?>
                                     <option value="<?= htmlspecialchars($choice, ENT_QUOTES) ?>"
@@ -358,9 +358,8 @@ foreach ($options as $key => $opt) {
                             </optgroup>
                         </select>
                         <small class="form-hint">
-                            Локальные шрифты и свой .woff2 отдаются с вашего домена. Google Fonts подгружаются
-                            со стороннего сервера: это внешний запрос от каждого посетителя (его адрес уходит Google)
-                            и лишние миллисекунды к загрузке.
+                            При сохранении сервер скачивает только выбранные шрифты; посетители получают их с
+                            вашего домена без внешних запросов. Для Ўў, Ғғ, Ққ, Ҳҳ проверяются нужные кириллические подмножества.
                         </small>
                     </div>
                     <div class="design-manual__custom-font design-manual__wide" data-custom-font-fields<?= $bodyFontChoice !== 'style:custom' ? ' hidden' : '' ?>>
@@ -387,7 +386,7 @@ foreach ($options as $key => $opt) {
                         <label for="design_font_heading">Шрифт заголовков</label>
                         <select id="design_font_heading" name="font_google_heading" data-design-preview-field>
                             <option value="">Как у основного текста (без отдельного шрифта)</option>
-                            <optgroup label="Google Fonts — грузятся с fonts.googleapis.com">
+                            <optgroup label="Каталог Google Fonts — локальные файлы">
                                 <?php foreach (\App\Core\DesignSettings::GOOGLE_FONTS as $slug => $fontData): ?>
                                     <option value="<?= htmlspecialchars($slug, ENT_QUOTES) ?>"
                                             data-font-family="<?= htmlspecialchars($fontData[1], ENT_QUOTES) ?>"

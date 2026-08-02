@@ -76,15 +76,9 @@ final class SearchQuery
 
     private static function latinToCyrillic(string $value): string
     {
-        return strtr($value, [
-            "o'" => 'ў', "g'" => 'ғ', 'sh' => 'ш', 'ch' => 'ч', 'yo' => 'е',
-            'yu' => 'ю', 'ya' => 'я', 'ts' => 'ц', 'a' => 'а', 'b' => 'б',
-            'd' => 'д', 'e' => 'е', 'f' => 'ф', 'g' => 'г', 'h' => 'ҳ',
-            'i' => 'и', 'j' => 'ж', 'k' => 'к', 'l' => 'л', 'm' => 'м',
-            'n' => 'н', 'o' => 'о', 'p' => 'п', 'q' => 'қ', 'r' => 'р',
-            's' => 'с', 't' => 'т', 'u' => 'у', 'v' => 'в', 'x' => 'х',
-            'y' => 'й', 'z' => 'з',
-        ]);
+        // Один источник правил для видимого текста и поиска. normalize()
+        // сводит «ё» к «е», как и индексируемый текст поисковой выдачи.
+        return self::normalize(UzCyrillic::text($value));
     }
 
     private static function cyrillicToLatin(string $value): string

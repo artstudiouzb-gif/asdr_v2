@@ -19,10 +19,10 @@ namespace App\Core;
 final class UzCyrillic
 {
     /** Апострофы, которыми в текстах записывают oʻ, gʻ и tutuq belgisi. */
-    private const APOSTROPHES = ['ʻ', 'ʼ', '‘', '’', '`', "'"];
+    private const APOSTROPHES = ['ʻ', 'ʼ', 'ʹ', '′', '‘', '’', '`', "'", '´'];
 
     /** Теги, внутри которых текст не трогаем. */
-    private const SKIP_TAGS = ['script', 'style', 'code', 'pre', 'textarea'];
+    private const SKIP_TAGS = ['script', 'style', 'code', 'pre', 'textarea', 'kbd', 'samp'];
 
     /** @var array<string, string>|null */
     private static ?array $map = null;
@@ -33,9 +33,18 @@ final class UzCyrillic
             return $latin;
         }
 
-        // Сущности, ссылки и почта — не текст, их транслитерация ломает.
+        // Сущности, URI, почта и домены — не обычный текст: их
+        // транслитерация ломает адрес или саму HTML-сущность.
         $chunks = preg_split(
-            '/(&[a-zA-Z]+;|&#\d+;|https?:\/\/\S+|[\w.+\-]+@[\w.\-]+\.\w+|[\w\-]+\.(?:uz|com|org|net|ru|info)\b)/u',
+            '~(
+                &[a-zA-Z][a-zA-Z0-9]+;
+                |&\#(?:\d+|[xX][0-9a-fA-F]+);
+                |(?:https?|ftp)://[^\s<]+
+                |(?:mailto:|tel:)[^\s<]+
+                |[\w.+\-]+@[\w.\-]+\.[\p{L}]{2,63}
+                |(?<![\w@])(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?\.)+
+                    [\p{L}]{2,63}(?:/[^\s<]*)?
+            )~iux',
             $latin,
             -1,
             PREG_SPLIT_DELIM_CAPTURE
@@ -84,7 +93,8 @@ final class UzCyrillic
             $selfClosing = str_ends_with(rtrim($part), '/>');
 
             if ($skipTag === null) {
-                $skipHere = in_array($tag, self::SKIP_TAGS, true) || str_contains($part, 'data-no-translit');
+                $skipHere = in_array($tag, self::SKIP_TAGS, true)
+                    || preg_match('/\sdata-no-translit(?=\s|=|\/?>)/i', $part) === 1;
                 if (!$isClosing && !$selfClosing && $skipHere) {
                     $skipTag = $tag;
                     $skipDepth = 1;
@@ -129,8 +139,13 @@ final class UzCyrillic
 
         $map = [];
 
-        // Буквы с апострофом и tutuq belgisi — во всех начертаниях апострофа.
+        // Буквы с апострофом и tutuq belgisi — во всех распространённых
+        // начертаниях апострофа. yoʻ — отдельный важный случай: это «йў»
+        // (yoʻl → йўл), а не «ёъ».
         foreach (self::APOSTROPHES as $apostrophe) {
+            $map['yo' . $apostrophe] = 'йў';
+            $map['Yo' . $apostrophe] = 'Йў';
+            $map['YO' . $apostrophe] = 'ЙЎ';
             $map['o' . $apostrophe] = 'ў';
             $map['O' . $apostrophe] = 'Ў';
             $map['g' . $apostrophe] = 'ғ';
@@ -146,6 +161,9 @@ final class UzCyrillic
             'yu' => 'ю',
             'ya' => 'я',
             'ye' => 'е',
+            // В действующей латинице «ц» передаётся сочетанием ts там, где
+            // оно пишется явно: konstitutsiya → конституция.
+            'ts' => 'ц',
         ];
         foreach ($digraphs as $latin => $cyrillic) {
             $map[$latin] = $cyrillic;
