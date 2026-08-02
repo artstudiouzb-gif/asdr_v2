@@ -24,12 +24,14 @@ function rich_post(): array
         'gallery' => ['https://site.uz/1.jpg', 'https://site.uz/2.jpg'],
         'category' => 'Мероприятия',
         'date' => '1 августа 2026',
-        'hashtags' => '#реформы',
+        'hashtags' => '#o‘zbekiston2030 #strategiya #узбекистан2030 #стратегия',
         'langs' => [
             ['code' => 'uz', 'label' => 'Oʻzbekcha', 'title' => 'Sarlavha', 'excerpt' => "Birinchi.\n\nIkkinchi.",
-             'link' => 'https://site.uz/uz/news/x', 'read_more' => 'Saytda oʻqish →'],
+             'link' => 'https://site.uz/uz/news/x', 'read_more' => 'Saytda oʻqish →',
+             'hashtags' => '#o‘zbekiston2030 #strategiya'],
             ['code' => 'ru', 'label' => 'Русский', 'title' => 'Заголовок', 'excerpt' => 'Русский анонс.',
-             'link' => 'https://site.uz/news/x', 'read_more' => 'Читать на сайте →'],
+             'link' => 'https://site.uz/news/x', 'read_more' => 'Читать на сайте →',
+             'hashtags' => '#узбекистан2030 #стратегия'],
         ],
     ];
 }
@@ -68,12 +70,41 @@ test('Rich: пост уходит одним sendRichMessage со всей вё�
     assert_not_contains('<details>', $html);
     // Галерея — слайд-шоу: альбом из снимков занимал бы весь экран ленты.
     assert_contains('<tg-slideshow>', $html);
-    assert_contains('<hr/><p>#Реформы</p>', $html, 'хештеги отделены от последней ссылки и нормализованы');
+    assert_contains('<hr/><p><mark>#Oʻzbekiston2030 #Strategiya</mark></p>', $html, 'узбекские теги выделены отдельной строкой');
+    assert_contains('<p><mark>#Узбекистан2030 #Стратегия</mark></p>', $html, 'русские теги выделены отдельной строкой');
     // Подпись — своим блоком: редактор вставляет в неё и цитаты, а <footer>
     // принимает только строчное содержимое.
     assert_contains('<footer><b>Агентство</b></footer>', $html);
     // Разделитель и медиа — в том виде, в каком их показывает документация.
     assert_contains('<hr/>', $html);
+});
+
+test('Rich: inline и details используют одинаковое содержимое языковой версии', function () {
+    $post = rich_post();
+    $args = [
+        $post['langs'],
+        [],
+        '',
+        (string) $post['category'],
+        (string) $post['date'],
+        (string) $post['hashtags'],
+        [],
+    ];
+    $inline = TelegramRichMessage::build(...[...$args, 'inline'])['html'];
+    $details = TelegramRichMessage::build(...[...$args, 'details'])['html'];
+
+    foreach ([
+        '<h2>Заголовок</h2>',
+        'Русский анонс.',
+        '<a href="https://site.uz/news/x">Читать на сайте →</a>',
+        '<p><mark>#Oʻzbekiston2030 #Strategiya</mark></p>',
+        '<p><mark>#Узбекистан2030 #Стратегия</mark></p>',
+    ] as $fragment) {
+        assert_contains($fragment, $inline, 'inline содержит полный языковой блок');
+        assert_contains($fragment, $details, 'details содержит тот же языковой блок');
+    }
+    assert_not_contains('<details>', $inline);
+    assert_contains('<details><summary>Русский</summary>', $details);
 });
 
 test('Rich: узбекский буквенный апостроф не разрывает хештег Telegram', function () {
@@ -87,7 +118,7 @@ test('Rich: узбекский буквенный апостроф не разр
         "#o‘zbekiston2030 #g'oya #maʼnaviyat"
     );
 
-    assert_contains('<hr/><p>#Oʻzbekiston2030 #Gʻoya #Maʻnaviyat</p>', $doc['html']);
+    assert_contains('<hr/><p><mark>#Oʻzbekiston2030 #Gʻoya #Maʻnaviyat</mark></p>', $doc['html']);
     assert_not_contains('#o‘zbekiston2030', $doc['html']);
 });
 
@@ -122,7 +153,11 @@ test('Rich: формат «обычный» отключает новый мет
     }
     $caption = (string) ($calls[0]['body']['media'][0]['caption'] ?? '');
     assert_contains('#Oʻzbekiston2030', $caption, 'обычный формат использует единый регистр и безопасный апостроф');
-    assert_contains("</a>\n\n\n#Oʻzbekiston2030", $caption, 'хештеги не приклеиваются к последней ссылке');
+    assert_contains(
+        "</a>\n\n\n<b>#Oʻzbekiston2030 #Strategiya</b>\n<b>#Узбекистан2030 #Стратегия</b>",
+        $caption,
+        'classic выделяет и разделяет языковые строки тегов после последней ссылки'
+    );
 });
 
 test('Rich: тихая публикация не будит подписчиков', function () {

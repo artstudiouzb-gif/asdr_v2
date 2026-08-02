@@ -88,9 +88,10 @@ final class TelegramRichMessage
         // дорабатывает пост в канале руками, спойлер только мешает.
         foreach ($rest as $lang) {
             $html .= '<hr/>';
-            $section = $metaLine($lang)
-                . '<h2>' . $esc((string) $lang['title']) . '</h2>'
-                . self::body($lang, $esc);
+            // Содержимое языковой версии собирается один раз. Режим меняет
+            // только оболочку, поэтому inline и details получают одинаковые
+            // заголовок, метаданные, лид и ссылку.
+            $section = self::languageSection($lang, $esc, $metaLine);
             if ($secondLang === 'details') {
                 $label = trim((string) ($lang['label'] ?? '')) ?: mb_strtoupper((string) ($lang['code'] ?? ''));
                 $section = '<details><summary>' . $esc($label) . '</summary>' . $section . '</details>';
@@ -98,10 +99,15 @@ final class TelegramRichMessage
             $html .= $section;
         }
 
-        // Хештеги — отдельный блок после разделителя: они визуально не
-        // сливаются с последней ссылкой, Telegram делает их кликабельными.
-        if (trim($hashtags) !== '') {
-            $html .= '<hr/><p>' . $esc(self::normalizeHashtags($hashtags)) . '</p>';
+        // Хештеги — отдельные выделенные строки по языкам. <mark>
+        // поддерживается Rich HTML, а автоматическое распознавание hashtag
+        // entities остаётся включённым, поэтому теги сохраняют кликабельность.
+        $hashtagLines = self::hashtagLines($langs, $hashtags);
+        if ($hashtagLines !== []) {
+            $html .= '<hr/>';
+            foreach ($hashtagLines as $line) {
+                $html .= '<p><mark>' . $esc($line) . '</mark></p>';
+            }
         }
         // Подпись редактор задаёт с HTML-тегами Telegram — не экранируем её.
         // Своим блоком, а не внутри абзаца: в подписи бывает и цитата, а
@@ -174,6 +180,59 @@ final class TelegramRichMessage
         }
 
         return $html;
+    }
+
+    /**
+     * Полный языковой раздел. Открытый и сворачиваемый режимы используют
+     * один результат и отличаются только внешней оболочкой <details>.
+     *
+     * @param array<string,mixed> $lang
+     * @param callable(array):string $metaLine
+     */
+    private static function languageSection(array $lang, callable $esc, callable $metaLine): string
+    {
+        return $metaLine($lang)
+            . '<h2>' . $esc((string) ($lang['title'] ?? '')) . '</h2>'
+            . self::body($lang, $esc);
+    }
+
+    /**
+     * Группирует хештеги по языковым версиям. Общая строка используется как
+     * резерв для старых вызовов и добавляет только теги, которых ещё не было.
+     *
+     * @param list<array<string,mixed>> $langs
+     * @return list<string>
+     */
+    public static function hashtagLines(array $langs, string $hashtags): array
+    {
+        $seen = [];
+        $lines = [];
+        $take = static function (string $raw) use (&$seen): string {
+            $normalized = self::normalizeHashtags($raw);
+            $line = [];
+            foreach (preg_split('/\s+/u', trim($normalized), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $tag) {
+                $key = mb_strtolower($tag);
+                if (!isset($seen[$key])) {
+                    $seen[$key] = true;
+                    $line[] = $tag;
+                }
+            }
+
+            return implode(' ', $line);
+        };
+
+        foreach ($langs as $lang) {
+            $line = $take((string) ($lang['hashtags'] ?? ''));
+            if ($line !== '') {
+                $lines[] = $line;
+            }
+        }
+        $fallback = $take($hashtags);
+        if ($fallback !== '') {
+            $lines[] = $fallback;
+        }
+
+        return $lines;
     }
 
     /**
