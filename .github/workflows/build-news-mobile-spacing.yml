@@ -1,0 +1,78 @@
+name: Build compact mobile news layout
+
+on:
+  push:
+    branches:
+      - fix-news-mobile-spacing
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix-news-mobile-spacing
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compact news layout on mobile
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const file = 'public/assets/css/gov-theme.css';
+          let css = fs.readFileSync(file, 'utf8');
+
+          const replaceOnce = (before, after, label) => {
+            if (!css.includes(before)) {
+              throw new Error(`Expected CSS fragment was not found: ${label}`);
+            }
+            css = css.replace(before, after);
+          };
+
+          replaceOnce(
+            `.newsdetail:not(.newsdetail--premium) .newsdetail__lead {\n    max-width: 66ch;`,
+            `.newsdetail:not(.newsdetail--premium) .newsdetail__lead {\n    width: 100%;\n    max-width: none;`,
+            'lead width'
+          );
+
+          replaceOnce(
+            `    .newsdetail:not(.newsdetail--premium) .newsdetail-article__content { max-width: none; }\n}`,
+            `    .newsdetail:not(.newsdetail--premium) .newsdetail-article__content { max-width: none; }\n    .newsdetail:not(.newsdetail--premium),\n    .newsdetail:not(.newsdetail--premium) > .newsdetail-head,\n    .newsdetail:not(.newsdetail--premium) > .newsdetail-body,\n    .newsdetail:not(.newsdetail--premium) .newsdetail-head__info,\n    .newsdetail:not(.newsdetail--premium) .newsdetail-article,\n    .newsdetail:not(.newsdetail--premium) .newsdetail__lead,\n    .newsdetail:not(.newsdetail--premium) .newsdetail-article__content {\n        width: 100%;\n        min-width: 0;\n        max-width: none;\n    }\n    .newsdetail:not(.newsdetail--premium) .newsdetail-side--right > * {\n        width: 100%;\n        min-width: 0;\n        max-width: none;\n        align-self: stretch;\n    }\n}`,
+            'tablet full-width layout'
+          );
+
+          replaceOnce(
+            `@media (max-width: 700px) {\n    .newsdetail:not(.newsdetail--premium) { gap: 28px; }\n    .newsdetail:not(.newsdetail--premium) .newsdetail-head__info {\n        padding-top: 4px;\n    }\n    .newsdetail:not(.newsdetail--premium) .newsdetail__eyebrow { gap: 10px 12px; }\n    .newsdetail:not(.newsdetail--premium) .newsdetail__meta { gap: 9px 12px; }`,
+            `@media (max-width: 700px) {\n    .newsdetail:not(.newsdetail--premium) { gap: 18px; }\n    .newsdetail:not(.newsdetail--premium) .newsdetail-head { gap: 14px; }\n    .newsdetail:not(.newsdetail--premium) .newsdetail-head__info {\n        gap: 12px;\n        padding-top: 0;\n    }\n    .newsdetail:not(.newsdetail--premium) .newsdetail__eyebrow { gap: 6px 10px; }\n    .newsdetail:not(.newsdetail--premium) .newsdetail__meta {\n        gap: 6px 10px;\n        font-size: .78rem;\n        line-height: 1.3;\n    }\n    .newsdetail:not(.newsdetail--premium) .newsdetail__meta-item {\n        display: inline-flex;\n        align-items: center;\n        gap: 5px;\n        min-height: 0;\n        margin: 0;\n        padding: 0;\n        border: 0;\n    }\n    .newsdetail:not(.newsdetail--premium) .newsdetail__meta-item::before,\n    .newsdetail:not(.newsdetail--premium) .newsdetail__meta-item::after {\n        content: none !important;\n        display: none !important;\n    }\n    .newsdetail:not(.newsdetail--premium) .newsdetail__reader-btn {\n        min-height: 30px;\n        padding-inline: 9px;\n        font-size: .75rem;\n    }`,
+            'mobile header spacing'
+          );
+
+          replaceOnce(
+            `    .newsdetail:not(.newsdetail--premium) .newsdetail__title {\n        max-width: none;\n        font-size: clamp(2rem, 10vw, 3rem);\n        line-height: 1.08;\n    }\n    .newsdetail:not(.newsdetail--premium) .newsdetail__lead { font-size: 1rem; }`,
+            `    .newsdetail:not(.newsdetail--premium) .newsdetail__title {\n        width: 100%;\n        max-width: none;\n        margin: 0;\n        font-size: clamp(1.8rem, 8.8vw, 2.55rem);\n        line-height: 1.06;\n    }\n    .newsdetail:not(.newsdetail--premium) .newsdetail__lead {\n        width: 100%;\n        max-width: none;\n        margin: 0;\n        font-size: 1rem;\n        line-height: 1.52;\n    }\n    .newsdetail:not(.newsdetail--premium) .newsdetail-gallery { gap: 6px; }\n    .newsdetail:not(.newsdetail--premium) .newsdetail-card,\n    .newsdetail:not(.newsdetail--premium) .newsdetail-docs,\n    .newsdetail:not(.newsdetail--premium) .newsdetail-subscribe {\n        width: 100%;\n        min-width: 0;\n        max-width: none;\n    }\n    .newsdetail:not(.newsdetail--premium) .newsdetail-doc,\n    .newsdetail:not(.newsdetail--premium) .newsdetail-subscribe__row,\n    .newsdetail:not(.newsdetail--premium) .newsdetail-subscribe__row input {\n        min-width: 0;\n        max-width: 100%;\n    }`,
+            'mobile title and lead'
+          );
+
+          fs.writeFileSync(file, css);
+          NODE
+
+      - name: Rebuild generated assets
+        run: npm run build:assets
+
+      - name: Commit generated files
+        run: |
+          rm .github/workflows/build-news-mobile-spacing.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/assets/css/gov-theme.css public/assets/css/public.min.css public/assets/asset-manifest.json .github/workflows/build-news-mobile-spacing.yml
+          git commit -m "Compact mobile news layout"
+          git push origin HEAD:fix-news-mobile-spacing
