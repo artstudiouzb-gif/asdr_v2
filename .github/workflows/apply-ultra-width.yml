@@ -23,17 +23,23 @@ jobs:
           sed -i "s/'ultra' => '1560px'/'ultra' => '1440px'/" app/Core/DesignSettings.php
           sed -i "s/--container-max:1560px/--container-max:1440px/" tests/cases/72_container_width_test.php
           sed -i "s/ultra = 1560px/ultra = 1440px/" tests/cases/72_container_width_test.php
+          sed -i "s/--container-max:1560px/--container-max:1440px/" tests/cases/198_default_theme_test.php
           grep -F "'ultra' => '1440px'" app/Core/DesignSettings.php
           grep -F -- "--container-max:1440px" tests/cases/72_container_width_test.php
+          grep -F -- "--container-max:1440px" tests/cases/198_default_theme_test.php
+          if grep -R -F "1560px" app tests; then
+            echo "Old ultra width remains in source or tests"
+            exit 1
+          fi
 
-      - name: Run focused test
-        run: php tests/run.php tests/cases/72_container_width_test.php
+      - name: Run test suite
+        run: php tests/run.php
 
       - name: Commit final change
         run: |
           rm .github/workflows/apply-ultra-width.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/Core/DesignSettings.php tests/cases/72_container_width_test.php .github/workflows/apply-ultra-width.yml
+          git add app/Core/DesignSettings.php tests/cases/72_container_width_test.php tests/cases/198_default_theme_test.php .github/workflows/apply-ultra-width.yml
           git commit -m "Set ultra container width to 1440px"
           git push origin HEAD:${{ github.head_ref }}
