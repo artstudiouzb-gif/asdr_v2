@@ -1,0 +1,38 @@
+name: Apply Telegram rich post formatting
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.head_ref == 'improve-telegram-rich-post-format'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - name: Apply formatting patch
+        run: python3 scripts/apply_telegram_rich_post_format.py
+      - name: Check PHP syntax
+        run: |
+          php -l app/Core/TelegramRichMessage.php
+          php -l app/Core/SocialPublisher.php
+          php -l tests/cases/205_telegram_rich_test.php
+      - name: Remove one-time files and push result
+        run: |
+          rm -f scripts/apply_telegram_rich_post_format.py
+          rm -f .github/workflows/apply-telegram-rich-post-format.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Improve Telegram rich post formatting"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
