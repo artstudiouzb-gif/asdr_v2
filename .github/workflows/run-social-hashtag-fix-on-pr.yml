@@ -17,23 +17,19 @@ jobs:
         with:
           ref: fix-social-hashtag-formatting
 
-      - name: Execute embedded patch
+      - name: Execute robust patch
         run: |
           python3 <<'PY'
           from pathlib import Path
           import subprocess
+          import textwrap
 
-          workflow = Path('.github/workflows/build-social-hashtag-fix.yml').read_text(encoding='utf-8')
-          marker = "      - name: Apply hashtag and social post fixes\n        run: |\n"
+          workflow = Path('.github/workflows/apply-social-hashtag-fix-v2.yml').read_text(encoding='utf-8')
+          marker = "      - name: Apply robust patch\n        run: |\n"
           start = workflow.index(marker) + len(marker)
           end = workflow.index("\n      - name: Validate changed PHP files", start)
-          block = workflow[start:end]
-          lines = []
-          for line in block.splitlines():
-              lines.append(line[10:] if line.startswith('          ') else line)
-          script = '\n'.join(lines) + '\n'
-          Path('/tmp/apply-social-hashtag-fix.sh').write_text(script, encoding='utf-8')
-          subprocess.run(['bash', '/tmp/apply-social-hashtag-fix.sh'], check=True)
+          script = textwrap.dedent(workflow[start:end])
+          subprocess.run(['bash', '-lc', script], check=True)
           PY
 
       - name: Validate changed PHP files
@@ -47,10 +43,11 @@ jobs:
 
       - name: Commit changes
         run: |
-          rm .github/workflows/build-social-hashtag-fix.yml
-          rm .github/workflows/run-social-hashtag-fix-on-pr.yml
+          rm -f .github/workflows/build-social-hashtag-fix.yml
+          rm -f .github/workflows/run-social-hashtag-fix-on-pr.yml
+          rm -f .github/workflows/apply-social-hashtag-fix-v2.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/Models/News.php app/Core/SocialSettings.php app/Core/SocialPublisher.php app/Core/TelegramRichMessage.php tests/cases/108_news_hashtags_test.php tests/cases/205_telegram_rich_test.php .github/workflows/build-social-hashtag-fix.yml .github/workflows/run-social-hashtag-fix-on-pr.yml
+          git add -A
           git commit -m "Fix hashtag formatting in site and social posts"
           git push origin HEAD:fix-social-hashtag-formatting
