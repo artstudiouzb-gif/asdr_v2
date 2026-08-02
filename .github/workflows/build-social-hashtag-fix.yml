@@ -1,0 +1,272 @@
+name: Build social hashtag formatting fix
+
+on:
+  push:
+    branches:
+      - fix-social-hashtag-formatting
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix-social-hashtag-formatting
+
+      - name: Apply hashtag and social post fixes
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, before: str, after: str, label: str) -> None:
+              file = Path(path)
+              text = file.read_text(encoding='utf-8')
+              if before not in text:
+                  raise SystemExit(f'Expected fragment not found for {label}: {path}')
+              file.write_text(text.replace(before, after, 1), encoding='utf-8')
+
+          replace_once(
+              'app/Models/News.php',
+              '''        $tags = [];
+        foreach ($raw as $word) {
+            $clean = ltrim(trim($word), '#');
+            $clean = UzbekText::normalizeApostrophes($clean);
+            if ($clean !== '') {
+                $tags[] = '#' . mb_strtolower($clean);
+            }
+        }
+
+        $tags = array_values(array_unique($tags));
+
+        return $tags !== [] ? implode(' ', $tags) : null;''',
+              '''        $tags = [];
+        foreach ($raw as $word) {
+            $clean = ltrim(trim($word), '#');
+            $clean = UzbekText::normalizeApostrophes($clean);
+            if ($clean === '') {
+                continue;
+            }
+
+            // Единый редакционный формат для сайта и соцсетей: первая буква
+            // заглавная, остальная часть — строчная. Дубли удаляем без учёта
+            // регистра, чтобы #Реформы и #реформы не выводились дважды.
+            $clean = mb_strtolower($clean);
+            $clean = mb_strtoupper(mb_substr($clean, 0, 1)) . mb_substr($clean, 1);
+            $key = mb_strtolower($clean);
+            if (!isset($tags[$key])) {
+                $tags[$key] = '#' . $clean;
+            }
+        }
+
+        return $tags !== [] ? implode(' ', array_values($tags)) : null;''',
+              'News hashtag capitalization'
+          )
+
+          replace_once(
+              'app/Core/SocialSettings.php',
+              '''        $title = trim((string) ($news['title'] ?? ''));
+        $excerpt = trim((string) ($news['excerpt'] ?? ''));
+        $hashtags = News::cleanHashtags($news['hashtags'] ?? null);
+        $message = $excerpt !== '' ? $title . "\\n\\n" . $excerpt : $title;
+        if ($hashtags !== null && $hashtags !== '') {
+            $message .= "\\n\\n" . $hashtags;
+        }
+        $langs = self::languageBlocks($news, $base);
+        // Хештеги переводятся вместе с новостью, а пост один — собираем их со
+        // всех языковых версий, без повторов и в порядке появления.
+        $hashtags = self::mergeHashtags($hashtags, $langs);''',
+              '''        $title = trim((string) ($news['title'] ?? ''));
+        $excerpt = trim((string) ($news['excerpt'] ?? ''));
+        $hashtags = News::cleanHashtags($news['hashtags'] ?? null);
+        // Текст и хештеги храним раздельно. Публикатор добавляет единый блок
+        // тегов после всех языковых ссылок — так они не приклеиваются к URL и
+        // не дублируются в резервном формате без языковых блоков.
+        $message = $excerpt !== '' ? $title . "\\n\\n" . $excerpt : $title;
+        $langs = self::languageBlocks($news, $base);
+        // Хештеги переводятся вместе с новостью, а пост один — собираем их со
+        // всех языковых версий, без повторов и в порядке появления.
+        $hashtags = self::mergeHashtags($hashtags, $langs);''',
+              'separate social message and hashtags'
+          )
+
+          replace_once(
+              'app/Core/SocialPublisher.php',
+              '''        $tail = ($hashtags !== '' ? "\\n\\n" . $esc($hashtags) : '')
+            . ($signature !== '' ? "\\n\\n" . $signature : '');''',
+              '''        // Три перевода строки оставляют полноценную пустую строку между
+        // последней ссылкой и хештегами в классическом формате Telegram.
+        $tail = ($hashtags !== '' ? "\\n\\n\\n" . $esc($hashtags) : '')
+            . ($signature !== '' ? "\\n\\n" . $signature : '');''',
+              'classic Telegram hashtag spacing'
+          )
+
+          replace_once(
+              'app/Core/SocialPublisher.php',
+              '''        if ($signature !== '') {
+            $text .= "\\n\\n" . $signature;
+        }
+        $text = trim($text);
+        if ($limit > 0 && mb_strlen($text) > $limit) {
+            $text = rtrim(mb_substr($text, 0, $limit - 1)) . '…';
+        }
+
+        return $text;''',
+              '''        // Для Facebook, LinkedIn и Instagram используем тот же общий
+        // нормализованный блок тегов, что и Telegram. Он идёт только после
+        // всех языковых ссылок и отделяется пустой строкой.
+        $hashtags = TelegramRichMessage::normalizeHashtags((string) ($post['hashtags'] ?? ''));
+        $tail = ($hashtags !== '' ? "\\n\\n\\n" . $hashtags : '')
+            . ($signature !== '' ? "\\n\\n" . $signature : '');
+        $text = trim($text);
+        if ($limit > 0 && mb_strlen($text . $tail) > $limit) {
+            $available = max(0, $limit - mb_strlen($tail));
+            $text = $available > 1
+                ? rtrim(mb_substr($text, 0, $available - 1)) . '…'
+                : '';
+        }
+
+        return trim($text . $tail);''',
+              'plain social hashtag block'
+          )
+
+          replace_once(
+              'app/Core/TelegramRichMessage.php',
+              '''        // Хештеги — отдельным абзацем: Telegram сам делает их кликабельными.
+        if (trim($hashtags) !== '') {
+            $html .= '<p>' . $esc(self::normalizeHashtags($hashtags)) . '</p>';
+        }''',
+              '''        // Хештеги — отдельный блок после разделителя: они визуально не
+        // сливаются с последней ссылкой, Telegram делает их кликабельными.
+        if (trim($hashtags) !== '') {
+            $html .= '<hr/><p>' . $esc(self::normalizeHashtags($hashtags)) . '</p>';
+        }''',
+              'rich Telegram hashtag separator'
+          )
+
+          replace_once(
+              'app/Core/TelegramRichMessage.php',
+              '''    public static function normalizeHashtags(string $hashtags): string
+    {
+        $safe = [];
+        foreach (preg_split('/[\\s,]+/u', trim($hashtags), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $tag) {
+            $tag = ltrim(trim($tag), '#');
+            $tag = UzbekText::normalizeApostrophes($tag);
+            $tag = (string) preg_replace('/[^\\p{L}\\p{N}_]+/u', '', $tag);
+            if ($tag !== '') {
+                $safe[] = '#' . $tag;
+            }
+        }
+
+        return implode(' ', array_values(array_unique($safe)));
+    }''',
+              '''    public static function normalizeHashtags(string $hashtags): string
+    {
+        $safe = [];
+        foreach (preg_split('/[\\s,]+/u', trim($hashtags), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $tag) {
+            $tag = ltrim(trim($tag), '#');
+            $tag = UzbekText::normalizeApostrophes($tag);
+            $tag = (string) preg_replace('/[^\\p{L}\\p{N}_]+/u', '', $tag);
+            if ($tag !== '') {
+                $safe[] = $tag;
+            }
+        }
+
+        // News::cleanHashtags — единый источник регистра, апострофов и
+        // регистронезависимого удаления дублей для сайта и всех соцсетей.
+        return \\App\\Models\\News::cleanHashtags(implode(' ', $safe)) ?? '';
+    }''',
+              'shared hashtag formatting'
+          )
+
+          replace_once(
+              'tests/cases/108_news_hashtags_test.php',
+              '''use App\\Models\\News;
+use App\\Core\\SocialSettings;''',
+              '''use App\\Models\\News;
+use App\\Core\\SocialPublisher;
+use App\\Core\\SocialSettings;''',
+              'hashtag test import'
+          )
+
+          replace_once(
+              'tests/cases/108_news_hashtags_test.php',
+              '''assert_same("#культура #ташкент #события", News::cleanHashtags("культура, #ташкент, события"));
+assert_same("#спорт #футбол", News::cleanHashtags("#спорт #футбол #спорт"));
+assert_same(
+    "#oʻzbekiston2030 #gʻoya #maʻnaviyat #toʻgʻri",
+    News::cleanHashtags("#O‘zbekiston2030 #g'oya #maʼnaviyat #toʹg′ri")
+);''',
+              '''assert_same("#Культура #Ташкент #События", News::cleanHashtags("культура, #ташкент, события"));
+assert_same("#Спорт #Футбол", News::cleanHashtags("#спорт #футбол #СПОРТ"));
+assert_same(
+    "#Oʻzbekiston2030 #Gʻoya #Maʻnaviyat #Toʻgʻri",
+    News::cleanHashtags("#O‘zbekiston2030 #g'oya #maʼnaviyat #toʹg′ri")
+);''',
+              'hashtag test expectations'
+          )
+
+          replace_once(
+              'tests/cases/108_news_hashtags_test.php',
+              '''assert_true(str_contains($post["message"], "#культура #ташкент"));''',
+              '''assert_same("#Культура #Ташкент", (string) $post["hashtags"]);
+assert_not_contains("#Культура", (string) $post["message"], 'теги хранятся отдельно от текста');
+
+$sent = [];
+$http = static function (string $method, string $url, string $body, array $headers) use (&$sent): array {
+    parse_str($body, $sent);
+    return ['status' => 200, 'body' => '{"id":"post-1"}', 'error' => ''];
+};
+$result = (new SocialPublisher($http))->publish(
+    'facebook',
+    ['token' => 'T', 'page_id' => '1'],
+    $post
+);
+assert_true($result['ok']);
+assert_contains("\\n\\n\\n#Культура #Ташкент", (string) ($sent['message'] ?? ''), 'теги отделены от ссылки пустой строкой');''',
+              'social post hashtag test'
+          )
+
+          replace_once(
+              'tests/cases/205_telegram_rich_test.php',
+              '''    assert_contains('<p>#реформы</p>', $html, 'хештеги отдельным абзацем — Telegram сам их линкует');''',
+              '''    assert_contains('<hr/><p>#Реформы</p>', $html, 'хештеги отделены от последней ссылки и нормализованы');''',
+              'rich hashtag test'
+          )
+
+          replace_once(
+              'tests/cases/205_telegram_rich_test.php',
+              '''    assert_contains('<p>#oʻzbekiston2030 #gʻoya #maʻnaviyat</p>', $doc['html']);''',
+              '''    assert_contains('<hr/><p>#Oʻzbekiston2030 #Gʻoya #Maʻnaviyat</p>', $doc['html']);''',
+              'Uzbek hashtag capitalization test'
+          )
+
+          replace_once(
+              'tests/cases/205_telegram_rich_test.php',
+              '''    assert_contains('#oʻzbekiston2030', (string) ($calls[0]['body']['media'][0]['caption'] ?? ''), 'обычный формат использует тот же безопасный апостроф');''',
+              '''    $caption = (string) ($calls[0]['body']['media'][0]['caption'] ?? '');
+    assert_contains('#Oʻzbekiston2030', $caption, 'обычный формат использует единый регистр и безопасный апостроф');
+    assert_contains("</a>\\n\\n\\n#Oʻzbekiston2030", $caption, 'хештеги не приклеиваются к последней ссылке');''',
+              'classic Telegram spacing test'
+          )
+          PY
+
+      - name: Validate changed PHP files
+        run: |
+          php -l app/Models/News.php
+          php -l app/Core/SocialSettings.php
+          php -l app/Core/SocialPublisher.php
+          php -l app/Core/TelegramRichMessage.php
+          php -l tests/cases/108_news_hashtags_test.php
+          php -l tests/cases/205_telegram_rich_test.php
+
+      - name: Commit changes
+        run: |
+          rm .github/workflows/build-social-hashtag-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/Models/News.php app/Core/SocialSettings.php app/Core/SocialPublisher.php app/Core/TelegramRichMessage.php tests/cases/108_news_hashtags_test.php tests/cases/205_telegram_rich_test.php .github/workflows/build-social-hashtag-fix.yml
+          git commit -m "Fix hashtag formatting in site and social posts"
+          git push origin HEAD:fix-social-hashtag-formatting
