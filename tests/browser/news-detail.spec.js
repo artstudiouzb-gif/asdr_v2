@@ -6,6 +6,7 @@ const pixel = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" widt
 
 async function mountNews(page) {
     await page.setContent(`
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
             body { margin: 0; }
             .newsdetail { width: min(1100px, 100%); margin-inline: auto; }
