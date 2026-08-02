@@ -15,7 +15,7 @@ test('По умолчанию: широкий контейнер и кнопки
     assert_same('pill', DesignSettings::OPTIONS['button']['default']);
 
     $css = DesignSettings::cssVariables(['container' => 'ultra', 'button' => 'pill']);
-    assert_contains('--container-max:1560px', $css);
+    assert_contains('--container-max:1440px', $css);
     assert_contains('--btn-radius:999px', $css);
 });
 
