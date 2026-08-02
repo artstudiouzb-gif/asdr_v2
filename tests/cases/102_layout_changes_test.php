@@ -98,9 +98,8 @@ test('News: frontend layout rendering with and without sidebar', function () {
         'key_points' => "Первый важный тезис\nВторой важный тезис",
     ]);
 
-    // 1. Тест рендеринга с правым сайдбаром (по умолчанию)
-    // Убеждаемся, что при включенном сайдбаре тезисы рендерятся инлайн внутри статьи,
-    // а страница имеет разметку .layout--right
+    // 1. Тест рендеринга с правым сайдбаром (по умолчанию).
+    // Тезисы входят в единую информационную колонку вместе с виджетами.
     $controller = new NewsController();
     
     ob_start();
@@ -116,8 +115,13 @@ test('News: frontend layout rendering with and without sidebar', function () {
     // страница собирается из блоков newsdetail-*, а сайдбар выводится отдельным
     // <aside class="newsdetail-side newsdetail-side--right">.
     assert_contains('newsdetail-side newsdetail-side--right', $html, 'Правый сайдбар новости отрисован');
+    assert_contains('newsdetail-actionrail', $html, 'На широком экране доступна компактная панель действий');
+    assert_contains('newsdetail__eyebrow', $html, 'Категория и метаданные собраны в единую строку над заголовком');
+    assert_contains('newsdetail-share__home', $html, 'Возврат на главную остаётся доступен в адаптивном блоке действий');
+    assert_contains('newsdetail-share--article-top', $html, 'Публикация расположена сразу после галереи перед текстом');
+    assert_contains('newsdetail-gallery__caption', $html, 'Подпись и автор фотографии сохраняются под большим кадром');
     assert_contains('Контакты', $html, 'Виджет правого сайдбара попал в разметку');
-    assert_contains('newsdetail-card--thesis-inline', $html, 'Тезисы отображаются инлайново при наличии сайдбара');
+    assert_contains('newsdetail-card--summary', $html, 'Тезисы отображаются в информационной колонке');
     assert_contains('Первый важный тезис', $html);
 
     // 2. Тест рендеринга без сайдбара
@@ -143,8 +147,8 @@ test('News: frontend layout rendering with and without sidebar', function () {
     $htmlNoSidebar = ob_get_clean();
 
     assert_not_contains('layout layout--', $htmlNoSidebar, 'Контейнер сайдбара отсутствует при no_sidebar');
-    assert_not_contains('newsdetail-card--thesis-inline', $htmlNoSidebar, 'Тезисы выводятся в сайдбаре новости, а не инлайново');
-    assert_contains('newsdetail-side', $htmlNoSidebar, 'Тезисы выводятся в отдельной колонке newsdetail-side');
+    assert_contains('newsdetail-card--summary', $htmlNoSidebar, 'Смысловые тезисы не зависят от набора пользовательских виджетов');
+    assert_contains('newsdetail-side newsdetail-side--right', $htmlNoSidebar, 'Тезисы выводятся в информационной колонке новости');
 
     // Очистка
     $pdo->exec("DELETE FROM news WHERE id = {$nid}");

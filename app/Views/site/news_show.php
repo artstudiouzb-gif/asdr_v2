@@ -121,13 +121,13 @@ $base = \App\Core\AppUrl::base();
 $pageUrl = $base . Locale::url('news/' . $news['slug'], $lang);
 $shareTitle = rawurlencode((string) $news['title']);
 $shareUrl = rawurlencode($pageUrl);
+$homeUrl = Locale::url('/');
 
 // Общие мини-иконки (событие: календарь, место, участники, теги — по кругу).
 $eventIcons = array_map(
     static fn (string $name): string => \App\Core\Icon::render($name, 18, 'ui-icon', 1.6),
     ['calendar', 'map-pin', 'users', 'tag']
 );
-$pointIcon = \App\Core\Icon::render('circle-check', 22, 'ui-icon', 1.6);
 $docIcon = \App\Core\Icon::render('file-text', 22, 'ui-icon', 1.5);
 $dlIcon = \App\Core\Icon::render('download', 17, 'ui-icon', 1.8);
 ?>
@@ -156,7 +156,7 @@ if ($layout === 'standard' || $layout === 'gallery') {
 
 $isPremium = $layout === 'premium';
 $hasMedia = !$isPremium && ($layout === 'video' || !empty($heroSlides));
-$hasLeft = !empty($keyPoints);
+$hasKeyPoints = !empty($keyPoints);
 
 // Оглавление статьи (премиум): собираем из <h2>/<h3> контента и проставляем id.
 $toc = [];
@@ -175,8 +175,12 @@ if ($isPremium) {
     ) ?: $contentHtml;
 }
 
-$shareBlock = static function (string $extraClass) use ($shareUrl, $shareTitle, $pageUrl): void { ?>
+$shareBlock = static function (string $extraClass) use ($shareUrl, $shareTitle, $pageUrl, $homeUrl): void { ?>
             <div class="newsdetail-share no-print<?= $extraClass ?>">
+                <a class="newsdetail-share__home" href="<?= htmlspecialchars($homeUrl, ENT_QUOTES) ?>">
+                    <?= \App\Core\Icon::render('arrow-left', 18, 'ui-icon', 1.8) ?>
+                    <span><?= htmlspecialchars(t('На главную'), ENT_QUOTES) ?></span>
+                </a>
                 <h2 class="newsdetail-share__title"><?= htmlspecialchars(t('Поделиться'), ENT_QUOTES) ?></h2>
                 <div class="newsdetail-share__row">
                     <a class="newsdetail-share__btn" href="https://t.me/share/url?url=<?= $shareUrl ?>&text=<?= $shareTitle ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в Telegram'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('brand-telegram', 17) ?></a>
@@ -196,7 +200,12 @@ if (!$isPremium) {
 $sidebar = $sidebar ?? null;
 $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '';
 ?>
-<article class="newsdetail<?= $isPremium ? ' newsdetail--premium' : '' ?>">
+<article class="newsdetail newsdetail--layout-<?= htmlspecialchars($layout, ENT_QUOTES) ?><?= $isPremium ? ' newsdetail--premium' : '' ?>">
+    <?php if (!$isPremium): ?>
+        <nav class="newsdetail-actionrail no-print" aria-label="<?= htmlspecialchars(t('Действия новости'), ENT_QUOTES) ?>">
+            <a class="newsdetail-actionrail__btn newsdetail-actionrail__btn--home" href="<?= htmlspecialchars($homeUrl, ENT_QUOTES) ?>" data-label="<?= htmlspecialchars(t('На главную'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('На главную'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('arrow-left', 19, 'ui-icon', 1.9) ?></a>
+        </nav>
+    <?php endif; ?>
     <?php if ($isPremium): ?>
     <div class="newsdetail-phero"<?= $cover !== '' ? ' style="--news-cover-image:url(\'' . htmlspecialchars($cover, ENT_QUOTES) . '\')"' : '' ?>>
         <span class="newsdetail-phero__overlay"></span>
@@ -221,7 +230,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             <?php if (!empty($news['source_note'])): ?>
                 <p class="newsdetail__source newsdetail__source--onDark"><?= htmlspecialchars((string) $news['source_note'], ENT_QUOTES) ?></p>
             <?php endif; ?>
-            <?php if ($videoUrl !== ''): ?>
+            <?php if ($videoUrl !== '' && $layout !== 'video'): ?>
                 <a class="newsdetail-phero__video" href="<?= htmlspecialchars($videoUrl, ENT_QUOTES) ?>" target="_blank" rel="noopener">
                     <span class="newsdetail-phero__play"><?= \App\Core\Icon::render('player-play', 16) ?></span>
                     <?= htmlspecialchars(t('Смотреть видео'), ENT_QUOTES) ?>
@@ -232,21 +241,23 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
     <?php else: ?>
     <div class="newsdetail-head<?= ($hasMedia && !$hasSidebar) ? '' : ' newsdetail-head--full' ?><?= $hasMedia && $layout === 'side_image' && !$hasSidebar ? ' newsdetail-head--side' : '' ?>">
         <div class="newsdetail-head__info">
-            <?php if (!empty($news['badge'])): ?>
-                <span class="newsdetail__badge"><?= htmlspecialchars((string) $news['badge'], ENT_QUOTES) ?></span>
-            <?php endif; ?>
-            <div class="newsdetail__meta">
-                <?php if ($dateLong !== ''): ?>
-                    <span class="newsdetail__meta-item"><?= $eventIcons[0] ?><time datetime="<?= htmlspecialchars(substr($date, 0, 10), ENT_QUOTES) ?>"><?= htmlspecialchars($dateLong, ENT_QUOTES) ?></time></span>
+            <div class="newsdetail__eyebrow">
+                <?php if (!empty($news['badge'])): ?>
+                    <span class="newsdetail__badge"><?= htmlspecialchars((string) $news['badge'], ENT_QUOTES) ?></span>
                 <?php endif; ?>
-                <span class="newsdetail__meta-item"><?= \App\Core\Icon::render('clock', 18, 'ui-icon', 1.6) ?><?= $readMin ?> <?= htmlspecialchars(t('мин.'), ENT_QUOTES) ?></span>
-                <?php if ($views > 0): ?>
-                    <span class="newsdetail__meta-item"><?= \App\Core\Icon::render('eye', 18, 'ui-icon', 1.6) ?><?= htmlspecialchars(trim(number_format($views, 0, '', ' ') . ' ' . t('просмотров')), ENT_QUOTES) ?></span>
-                <?php endif; ?>
-                <button type="button" class="newsdetail__reader-btn" data-reader-mode-toggle aria-label="<?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?>" title="<?= htmlspecialchars(t('Открыть режим чтения'), ENT_QUOTES) ?>">
-                    <?= \App\Core\Icon::render('book', 17, 'ui-icon', 1.8) ?>
-                    <span><?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?></span>
-                </button>
+                <div class="newsdetail__meta">
+                    <?php if ($dateLong !== ''): ?>
+                        <span class="newsdetail__meta-item"><?= $eventIcons[0] ?><time datetime="<?= htmlspecialchars(substr($date, 0, 10), ENT_QUOTES) ?>"><?= htmlspecialchars($dateLong, ENT_QUOTES) ?></time></span>
+                    <?php endif; ?>
+                    <span class="newsdetail__meta-item"><?= \App\Core\Icon::render('clock', 18, 'ui-icon', 1.6) ?><?= $readMin ?> <?= htmlspecialchars(t('мин.'), ENT_QUOTES) ?></span>
+                    <?php if ($views > 0): ?>
+                        <span class="newsdetail__meta-item"><?= \App\Core\Icon::render('eye', 18, 'ui-icon', 1.6) ?><?= htmlspecialchars(trim(number_format($views, 0, '', ' ') . ' ' . t('просмотров')), ENT_QUOTES) ?></span>
+                    <?php endif; ?>
+                    <button type="button" class="newsdetail__reader-btn" data-reader-mode-toggle aria-label="<?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?>" title="<?= htmlspecialchars(t('Открыть режим чтения'), ENT_QUOTES) ?>">
+                        <?= \App\Core\Icon::render('book', 17, 'ui-icon', 1.8) ?>
+                        <span><?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?></span>
+                    </button>
+                </div>
             </div>
             <h1 class="newsdetail__title"><?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?></h1>
             <?php if ($leadHtml !== ''): ?>
@@ -271,7 +282,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             $fallback = 'https://i.ytimg.com/vi/' . $videoId . '/hqdefault.jpg';
             $embed = \App\Core\Video::youtubeEmbed($videoId) . '&autoplay=1';
             ?>
-            <div class="newsdetail-media">
+            <div class="newsdetail-media newsdetail-media--video">
                 <div class="news-video newsdetail-video skeleton" data-youtube="<?= htmlspecialchars($videoId, ENT_QUOTES) ?>" data-embed="<?= htmlspecialchars($embed, ENT_QUOTES) ?>" data-replay-label="<?= htmlspecialchars(t('Посмотреть ещё раз'), ENT_QUOTES) ?>">
                     <img class="news-video__thumb" src="<?= htmlspecialchars($cover !== '' ? $cover : $thumb, ENT_QUOTES) ?>" data-fallback="<?= htmlspecialchars($fallback, ENT_QUOTES) ?>" alt="<?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?>" loading="eager" decoding="async">
                     <button type="button" class="news-video__play" aria-label="<?= htmlspecialchars(t('Смотреть видео'), ENT_QUOTES) ?>"></button>
@@ -284,9 +295,9 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                         <?= \App\Core\Media::picture((string) $s['path'], (string) ($s['alt'] !== '' ? $s['alt'] : ($s['caption'] ?? '')), null, null, 'newsdetail-gallery__slide' . ($i === 0 ? ' is-active' : ''), $i !== 0, '(max-width: 900px) 100vw, 70vw') ?>
                     <?php endforeach; ?>
                     <?php if (count($heroSlides) > 1): ?>
-                        <button type="button" class="newsdetail-gallery__nav newsdetail-gallery__nav--prev" data-ndg-prev aria-label="<?= htmlspecialchars(t('Предыдущее фото'), ENT_QUOTES) ?>">‹</button>
-                        <button type="button" class="newsdetail-gallery__nav newsdetail-gallery__nav--next" data-ndg-next aria-label="<?= htmlspecialchars(t('Следующее фото'), ENT_QUOTES) ?>">›</button>
-                        <span class="newsdetail-gallery__counter"><span data-ndg-current>1</span> <?= htmlspecialchars(t('из'), ENT_QUOTES) ?> <?= count($heroSlides) ?></span>
+                        <button type="button" class="newsdetail-gallery__nav newsdetail-gallery__nav--prev" data-ndg-prev aria-label="<?= htmlspecialchars(t('Предыдущее фото'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('chevron-left', 22, 'ui-icon', 2) ?></button>
+                        <button type="button" class="newsdetail-gallery__nav newsdetail-gallery__nav--next" data-ndg-next aria-label="<?= htmlspecialchars(t('Следующее фото'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('chevron-right', 22, 'ui-icon', 2) ?></button>
+                        <span class="newsdetail-gallery__counter"><span data-ndg-current>1</span><span aria-hidden="true">/</span><?= count($heroSlides) ?></span>
                     <?php endif; ?>
                 </div>
                 <?php
@@ -299,7 +310,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 $hasCaptions = array_filter($galleryCaptions, static fn (array $c): bool => $c['caption'] !== '' || $c['credit'] !== '');
                 ?>
                 <?php if ($hasCaptions !== []): ?>
-                    <figcaption class="media-caption" data-ndg-captions='<?= htmlspecialchars((string) json_encode($galleryCaptions, JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>'>
+                    <figcaption class="media-caption newsdetail-gallery__caption" data-ndg-captions='<?= htmlspecialchars((string) json_encode($galleryCaptions, JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>'>
                         <span data-ndg-caption-text><?= htmlspecialchars($galleryCaptions[0]['caption'], ENT_QUOTES) ?></span>
                         <span class="media-caption__credit" data-ndg-caption-credit<?= $galleryCaptions[0]['credit'] === '' ? ' hidden' : '' ?>><?= $galleryCaptions[0]['credit'] !== '' ? htmlspecialchars(t('Фото:'), ENT_QUOTES) . ' ' . htmlspecialchars($galleryCaptions[0]['credit'], ENT_QUOTES) : '' ?></span>
                     </figcaption>
@@ -318,22 +329,9 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
     </div>
     <?php endif; ?>
 
-    <div class="newsdetail-body<?= ($hasLeft && !$hasSidebar) ? '' : ' newsdetail-body--no-left' ?>">
-        <?php if ($hasLeft && !$hasSidebar): ?>
-        <aside class="newsdetail-side">
-            <div class="newsdetail-card">
-                <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Ключевые тезисы'), ENT_QUOTES) ?></h2>
-                <ul class="newsdetail-points">
-                    <?php foreach ($keyPoints as $point): ?>
-                        <li class="newsdetail-points__item"><span class="newsdetail-points__icon"><?= $pointIcon ?></span><?= htmlspecialchars($point, ENT_QUOTES) ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-            <?php $shareBlock(''); ?>
-        </aside>
-        <?php endif; ?>
-
+    <div class="newsdetail-body newsdetail-body--no-left">
         <div class="newsdetail-article">
+            <?php $shareBlock(' newsdetail-share--article-top'); ?>
             <?php if ($audioUrl !== ''): ?>
                 <div class="news-audio-player" data-audio-player>
                     <div class="news-audio-player__icon" aria-hidden="true">
@@ -346,17 +344,6 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                     <audio class="news-audio-player__element" src="<?= htmlspecialchars($audioUrl, ENT_QUOTES) ?>" controls preload="metadata"></audio>
                 </div>
             <?php endif; ?>
-            <?php if ($hasLeft && $hasSidebar): ?>
-                <div class="newsdetail-card newsdetail-card--thesis-inline">
-                    <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Ключевые тезисы'), ENT_QUOTES) ?></h2>
-                    <ul class="newsdetail-points">
-                        <?php foreach ($keyPoints as $point): ?>
-                            <li class="newsdetail-points__item"><span class="newsdetail-points__icon"><?= $pointIcon ?></span><?= htmlspecialchars($point, ENT_QUOTES) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-
             <div class="newsdetail-article__content rich-content"><?= $contentHtml ?></div>
 
             <?php // Хронология событий (Таймлайн) ?>
@@ -394,12 +381,22 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
-            <?php if (!$hasLeft || $hasSidebar): ?>
-                <?php $shareBlock(' newsdetail-share--inline'); ?>
-            <?php endif; ?>
         </div>
 
         <aside class="newsdetail-side newsdetail-side--right">
+            <?php if ($hasKeyPoints): ?>
+                <div class="newsdetail-card newsdetail-card--summary">
+                    <div class="newsdetail-card__heading">
+                        <span class="newsdetail-card__heading-icon" aria-hidden="true"><?= \App\Core\Icon::render('notes', 20, 'ui-icon', 1.7) ?></span>
+                        <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Ключевые тезисы'), ENT_QUOTES) ?></h2>
+                    </div>
+                    <ol class="newsdetail-points">
+                        <?php foreach ($keyPoints as $i => $point): ?>
+                            <li class="newsdetail-points__item"><span class="newsdetail-points__number" aria-hidden="true"><?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span><span><?= htmlspecialchars($point, ENT_QUOTES) ?></span></li>
+                        <?php endforeach; ?>
+                    </ol>
+                </div>
+            <?php endif; ?>
             <?php // Интерактивный опрос (часть новости, отображается как карточка в сайдбаре) ?>
             <?php
                 $poll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $news['id']) : null;
@@ -492,17 +489,34 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             <?php endif; ?>
             <?php if (!empty($eventMeta)): ?>
                 <div class="newsdetail-card">
-                    <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('О мероприятии'), ENT_QUOTES) ?></h2>
+                    <div class="newsdetail-card__heading">
+                        <span class="newsdetail-card__heading-icon" aria-hidden="true"><?= \App\Core\Icon::render('calendar-event', 20, 'ui-icon', 1.7) ?></span>
+                        <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('О мероприятии'), ENT_QUOTES) ?></h2>
+                    </div>
                     <ul class="newsdetail-event">
                         <?php foreach ($eventMeta as $i => $line): ?>
-                            <li class="newsdetail-event__item"><span class="newsdetail-event__icon"><?= $eventIcons[$i % count($eventIcons)] ?></span><?= htmlspecialchars($line, ENT_QUOTES) ?></li>
+                            <?php
+                            $eventParts = array_map('trim', explode(':', $line, 2));
+                            $eventLabel = count($eventParts) === 2 ? $eventParts[0] : '';
+                            $eventValue = count($eventParts) === 2 ? $eventParts[1] : $eventParts[0];
+                            ?>
+                            <li class="newsdetail-event__item">
+                                <span class="newsdetail-event__icon"><?= $eventIcons[$i % count($eventIcons)] ?></span>
+                                <span class="newsdetail-event__body">
+                                    <?php if ($eventLabel !== ''): ?><strong class="newsdetail-event__label"><?= htmlspecialchars($eventLabel, ENT_QUOTES) ?></strong><?php endif; ?>
+                                    <span><?= htmlspecialchars($eventValue, ENT_QUOTES) ?></span>
+                                </span>
+                            </li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
             <?php endif; ?>
             <?php if (!empty($docs)): ?>
                 <div class="newsdetail-card">
-                    <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Документы'), ENT_QUOTES) ?></h2>
+                    <div class="newsdetail-card__heading">
+                        <span class="newsdetail-card__heading-icon" aria-hidden="true"><?= \App\Core\Icon::render('file-stack', 20, 'ui-icon', 1.7) ?></span>
+                        <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Документы'), ENT_QUOTES) ?></h2>
+                    </div>
                     <div class="newsdetail-docs">
                         <?php foreach ($docs as $doc): ?>
                             <?php $du = trim((string) ($doc['url'] ?? '')); ?>
@@ -555,9 +569,20 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
     </div>
 
     <?php
-    // Фотогалерея-лента снизу: показывается для стандартного макета с несколькими фото или для видео.
-    // Если макет новости «gallery» — все фото уже показаны в верхнем слайдере!
-    $showPhotoStrip = !$isPremium && $layout !== 'gallery' && ($layout === 'video' ? !empty($slides) : count($slides) > 1);
+    // У видеоновости обложка уже используется как постер плеера и повторно в
+    // фотоленту не попадает. Остальные прикреплённые изображения остаются
+    // самостоятельной фотогалереей под статьёй.
+    $photoStripSlides = $slides;
+    if ($layout === 'video' && $cover !== '') {
+        $photoStripSlides = array_values(array_filter(
+            $slides,
+            static fn (array $slide): bool => (string) ($slide['path'] ?? '') !== $cover
+        ));
+    }
+    // Если макет новости «gallery» — все фото уже показаны в верхнем слайдере.
+    $showPhotoStrip = !$isPremium
+        && $layout !== 'gallery'
+        && ($layout === 'video' ? $photoStripSlides !== [] : count($photoStripSlides) > 1);
     ?>
     <?php if ($showPhotoStrip): ?>
         <section class="newsdetail-photos">
@@ -569,7 +594,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 </a>
             </div>
             <div class="newsdetail-photos__grid">
-                <?php foreach (array_slice($slides, 0, 8) as $s): ?>
+                <?php foreach (array_slice($photoStripSlides, 0, 8) as $s): ?>
                     <figure class="newsdetail-photos__figure">
                         <a class="newsdetail-photos__item" href="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars($s['alt'] !== '' ? $s['alt'] : 'Фото', ENT_QUOTES) ?>"><?= \App\Core\Media::picture((string) $s['path'], (string) $s['alt'], null, null, '', true, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw') ?></a>
                         <?= $photoCaption($s) ?>

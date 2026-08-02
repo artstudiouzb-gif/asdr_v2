@@ -96,7 +96,7 @@ final class SecurityHeaders
     {
         // IFrame API загружается лениво только после клика по YouTube-видео.
         // Он нужен, чтобы заменить экран рекомендаций собственной обложкой.
-        $script = ["'self'", "'nonce-{$nonce}'", 'https://www.youtube.com'];
+        $script = ["'self'", "'nonce-{$nonce}'", 'https://www.youtube.com', 'https://telegram.org'];
         $connect = ["'self'"];
         $style = ["'self'", "'unsafe-inline'"];
         $font = ["'self'", 'data:'];

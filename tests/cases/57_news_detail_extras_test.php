@@ -63,6 +63,9 @@ test('YouTube-видео новости: рекомендации перекры
     assert_contains('YT.PlayerState.ENDED', $js);
     assert_contains('player.seekTo(0, true)', $js);
     assert_contains('data-replay-label', $view);
+    assert_contains('newsdetail-media--video', $view);
+    assert_contains('$layout !== \'video\'', $view, 'У встроенного видеомакета нет дублирующей кнопки «Смотреть видео»');
+    assert_contains('$photoStripSlides', $view, 'Обложка видеоплеера не повторяется в нижней фотоленте');
     assert_contains('.news-video__end[hidden]', $css);
 });
 
