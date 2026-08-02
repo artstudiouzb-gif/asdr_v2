@@ -81,16 +81,23 @@ test('News: frontend layout rendering with and without sidebar', function () {
 
     // Создаём опубликованную новость с тезисами
     $slug = 'test-news-layout-' . bin2hex(random_bytes(3));
+    $imagePath = '/uploads/public/test-news-caption.jpg';
     $nid = News::create([
         'title' => 'Супер новость',
         'slug' => $slug,
         'excerpt' => 'Лид новости',
         'content' => 'Основной текст',
-        'image' => '',
+        'image' => $imagePath,
         'status' => 'published',
         'published_at' => date('Y-m-d H:i:s'),
         'author_id' => null,
     ]);
+
+    // Подпись обложки хранится в записи галереи с тем же путём. Так тест
+    // проверяет реальный контракт рендера, а не ожидает caption у пустого медиа.
+    $pdo->prepare(
+        'INSERT INTO news_images (news_id, path, alt_text, caption, credit, sort_order) VALUES (?, ?, ?, ?, ?, 0)'
+    )->execute([$nid, $imagePath, 'Заседание коллегии', 'Заседание коллегии', 'Пресс-служба']);
 
     // Добавляем тезисы (key_points)
     News::updateExtras($nid, [
