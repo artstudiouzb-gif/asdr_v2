@@ -269,10 +269,9 @@ final class SocialSettings
         $title = trim((string) ($news['title'] ?? ''));
         $excerpt = trim((string) ($news['excerpt'] ?? ''));
         $hashtags = News::cleanHashtags($news['hashtags'] ?? null);
+        // Текст и хештеги храним раздельно. Публикатор добавляет единый
+        // блок тегов после всех языковых ссылок — без склеивания и дублей.
         $message = $excerpt !== '' ? $title . "\n\n" . $excerpt : $title;
-        if ($hashtags !== null && $hashtags !== '') {
-            $message .= "\n\n" . $hashtags;
-        }
         $langs = self::languageBlocks($news, $base);
         // Хештеги переводятся вместе с новостью, а пост один — собираем их со
         // всех языковых версий, без повторов и в порядке появления.

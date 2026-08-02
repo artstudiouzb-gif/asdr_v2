@@ -101,7 +101,7 @@ test('Telegram: рубрика, дата и хештеги попадают в �
     $text = (string) $seen['text'];
     assert_contains('Мероприятия · 1 августа 2026', $text);
     // Хештеги редактор уже вводит в новости, но в Telegram они не доезжали.
-    assert_contains('#реформы #экономика', $text);
+    assert_contains('#Реформы #Экономика', $text);
     assert_true(mb_strpos($text, 'Мероприятия') < mb_strpos($text, 'Sarlavha'), 'рубрика над заголовком');
 });
 

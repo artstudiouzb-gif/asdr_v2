@@ -98,9 +98,10 @@ final class TelegramRichMessage
             $html .= $section;
         }
 
-        // Хештеги — отдельным абзацем: Telegram сам делает их кликабельными.
+        // Хештеги — отдельный блок после разделителя: они визуально не
+        // сливаются с последней ссылкой, Telegram делает их кликабельными.
         if (trim($hashtags) !== '') {
-            $html .= '<p>' . $esc(self::normalizeHashtags($hashtags)) . '</p>';
+            $html .= '<hr/><p>' . $esc(self::normalizeHashtags($hashtags)) . '</p>';
         }
         // Подпись редактор задаёт с HTML-тегами Telegram — не экранируем её.
         // Своим блоком, а не внутри абзаца: в подписи бывает и цитата, а
@@ -189,11 +190,11 @@ final class TelegramRichMessage
             $tag = UzbekText::normalizeApostrophes($tag);
             $tag = (string) preg_replace('/[^\p{L}\p{N}_]+/u', '', $tag);
             if ($tag !== '') {
-                $safe[] = '#' . $tag;
+                $safe[] = $tag;
             }
         }
 
-        return implode(' ', array_values(array_unique($safe)));
+        return \App\Models\News::cleanHashtags(implode(' ', $safe)) ?? '';
     }
 
     /** Видимая длина текста без тегов — по ней Telegram считает лимит. */

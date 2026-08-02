@@ -617,14 +617,22 @@ final class News
         foreach ($raw as $word) {
             $clean = ltrim(trim($word), '#');
             $clean = UzbekText::normalizeApostrophes($clean);
-            if ($clean !== '') {
-                $tags[] = '#' . mb_strtolower($clean);
+            if ($clean === '') {
+                continue;
+            }
+
+            // Единый редакционный формат для сайта и соцсетей: первая буква
+            // заглавная, остальная часть — строчная. Дубли удаляем без учёта
+            // регистра, чтобы #Реформы и #реформы не выводились дважды.
+            $clean = mb_strtolower($clean);
+            $clean = mb_strtoupper(mb_substr($clean, 0, 1)) . mb_substr($clean, 1);
+            $key = mb_strtolower($clean);
+            if (!isset($tags[$key])) {
+                $tags[$key] = '#' . $clean;
             }
         }
 
-        $tags = array_values(array_unique($tags));
-
-        return $tags !== [] ? implode(' ', $tags) : null;
+        return $tags !== [] ? implode(' ', array_values($tags)) : null;
     }
 
     /**
