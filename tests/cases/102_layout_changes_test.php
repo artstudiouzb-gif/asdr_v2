@@ -52,7 +52,7 @@ test('News: sidebar_layout saves, updates and defaults to right_sidebar', functi
     $news = News::findById($nid);
     assert_same('/uploads/public/test-podcast.mp3', $news['audio_url']);
     assert_same('Аудиоверсия выпуска', $news['audio_title']);
-    assert_same('#культура #ташкент #события', $news['hashtags']);
+    assert_same('#Культура #Ташкент #События', $news['hashtags']);
 
     // 4. Обновляем sidebar_layout на no_sidebar
     $data['sidebar_layout'] = 'no_sidebar';
