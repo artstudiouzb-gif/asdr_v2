@@ -38,8 +38,14 @@
 
     function safeImageUrl(value) {
         var url = String(value || '').trim();
-        if (/^\/[^/]/.test(url) || /^https?:\/\//i.test(url)) { return url; }
-        return '';
+        if (!/^\/[^/]/.test(url) && !/^https?:\/\//i.test(url)) { return ''; }
+        try {
+            // Decode once before encoding to preserve already escaped paths while
+            // ensuring DOM text is contextually encoded before reaching img.src.
+            return encodeURI(decodeURI(url));
+        } catch (error) {
+            return '';
+        }
     }
 
     function safeEmbedUrl(value) {

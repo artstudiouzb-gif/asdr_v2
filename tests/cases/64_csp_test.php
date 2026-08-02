@@ -43,6 +43,8 @@ test('TinyMCE: расширенная панель содержит цитату
     assert_contains('data-ae-image-caption', $editor, 'подпись фото задаётся до вставки');
     assert_contains('data-ae-image-credit', $editor, 'автор фото задаётся до вставки');
     assert_contains('data-ae-embed-url', $editor, 'поддерживается предварительная проверка социальной ссылки');
+    assert_contains("!/^\\/[^/]/.test(url) && !/^https?:\\/\\//i.test(url)", $editor, 'превью фото принимает только локальные и HTTP(S) URL');
+    assert_contains('return encodeURI(decodeURI(url));', $editor, 'адрес фото контекстно кодируется перед DOM sink');
 });
 
 test('publicCsp: разрешает только известный источник скрипта счётчика', function () {
