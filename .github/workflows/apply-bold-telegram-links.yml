@@ -1,0 +1,42 @@
+name: Apply bold Telegram links
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.head_ref == 'bold-telegram-read-more-links'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply formatting
+        run: python3 .github/scripts/apply-bold-telegram-links.py
+
+      - name: Validate PHP
+        run: |
+          php -l app/Core/TelegramRichMessage.php
+          php -l app/Core/SocialPublisher.php
+          php -l tests/cases/205_telegram_rich_test.php
+
+      - name: Run test suite
+        run: php tests/run.php
+
+      - name: Commit final change
+        run: |
+          rm .github/workflows/apply-bold-telegram-links.yml
+          rm .github/scripts/apply-bold-telegram-links.py
+          rmdir .github/scripts 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/Core/TelegramRichMessage.php app/Core/SocialPublisher.php tests/cases/205_telegram_rich_test.php .github/workflows/apply-bold-telegram-links.yml .github/scripts/apply-bold-telegram-links.py
+          git commit -m "Make Telegram read-more links bold"
+          git push origin HEAD:${{ github.head_ref }}
