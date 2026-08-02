@@ -60,6 +60,7 @@ async function mountNews(page) {
         </div>
     `);
     await page.addStyleTag({ path: path.join(projectRoot, 'public/assets/css/gov-theme.css') });
+    await page.addStyleTag({ path: path.join(projectRoot, 'public/assets/css/rich-content.css') });
     // Пользовательские переменные дизайна подключаются после базовой темы.
     // Повторяем тот же порядок, чтобы значения 0px не перезаписывались :root из CSS.
     await page.addStyleTag({ content: ':root { --radius: 0px; --radius-sm: 0px; --btn-radius: 0px; }' });
@@ -122,7 +123,8 @@ test('галерея, подписи, lightbox, копирование и реж
     await expect(page.locator('[data-lightbox-caption]')).toHaveText('Подпись');
     await page.getByRole('button', { name: 'Закрыть', exact: true }).click();
 
-    const copy = page.getByRole('button', { name: 'Скопировать ссылку' });
+    // Селектор остаётся стабильным после изменения aria-label на «Ссылка скопирована».
+    const copy = page.locator('[data-copy-link]');
     await copy.click();
     await expect(copy).toHaveClass(/is-copied/);
     await expect(copy).toHaveAttribute('aria-label', 'Ссылка скопирована');
