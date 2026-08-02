@@ -153,7 +153,11 @@ test('Rich: формат «обычный» отключает новый мет
     }
     $caption = (string) ($calls[0]['body']['media'][0]['caption'] ?? '');
     assert_contains('#Oʻzbekiston2030', $caption, 'обычный формат использует единый регистр и безопасный апостроф');
-    assert_contains("</a>\n\n\n<b>#Oʻzbekiston2030</b>", $caption, 'classic выделяет теги и не приклеивает их к ссылке');
+    assert_contains(
+        "</a>\n\n\n<b>#Oʻzbekiston2030 #Strategiya</b>\n<b>#Узбекистан2030 #Стратегия</b>",
+        $caption,
+        'classic выделяет и разделяет языковые строки тегов после последней ссылки'
+    );
 });
 
 test('Rich: тихая публикация не будит подписчиков', function () {
