@@ -209,7 +209,7 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                     </div>
 
                     <!-- Фотогалерея -->
-                    <div class="form-field u-inline-cbc67de98f">
+                    <div class="form-field u-inline-cbc67de98f" data-media-gallery>
                         <label class="u-inline-1dcf0e84b2">
                             <?= \App\Core\AdminUi::icon('image', 18) ?>
                             Фотогалерея статьи
@@ -236,10 +236,15 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                         <?php elseif (!$isEdit): ?>
                             <span class="form-hint u-inline-9f398c70f1">Сохраните новость, чтобы управлять галереей.</span>
                         <?php endif; ?>
+                        <div class="file-preview" data-media-gallery-selection hidden></div>
                         <div data-file-preview>
                             <div class="u-inline-ef7f355c70">
+                                <button type="button" class="btn btn--small btn--secondary" data-media-gallery-pick>
+                                    <?= \App\Core\AdminUi::icon('photo-plus', 16) ?>
+                                    Из медиабиблиотеки
+                                </button>
                                 <input class="u-inline-e596099155" type="file" name="news_gallery[]" accept="image/*" multiple data-file-preview-input>
-                                <span class="form-hint u-inline-1da9facb4d">Выберите одно или несколько фото. Сжимаются в формат WebP.</span>
+                                <span class="form-hint u-inline-1da9facb4d">Можно выбрать несколько фото из библиотеки или напрямую с компьютера. Новые файлы сжимаются в WebP.</span>
                             </div>
                             <!-- Превью выбранного до сохранения: подписи и порядок
                                  появятся после загрузки, но что выбрано — видно сразу. -->

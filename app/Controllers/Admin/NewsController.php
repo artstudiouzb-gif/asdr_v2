@@ -747,13 +747,29 @@ final class NewsController
             );
         }
 
-        // 2. Новые загрузки (множественный input news_gallery[]).
+        // 2. Уже загруженные изображения, выбранные в медиабиблиотеке.
+        $existing = \App\Models\NewsImage::forNews($newsId);
+        $sort = count($existing);
+        $knownPaths = array_fill_keys(array_map(
+            static fn (array $image): string => trim((string) ($image['path'] ?? '')),
+            $existing
+        ), true);
+        foreach ((array) ($_POST['gallery_library'] ?? []) as $libraryPath) {
+            $libraryPath = trim((string) $libraryPath);
+            if ($libraryPath === ''
+                || str_starts_with($libraryPath, '//')
+                || !\App\Core\UrlGuard::isSafeMedia($libraryPath)
+                || isset($knownPaths[$libraryPath])) {
+                continue;
+            }
+            \App\Models\NewsImage::create($newsId, $libraryPath, null, $sort++);
+            $knownPaths[$libraryPath] = true;
+        }
+
+        // 3. Новые загрузки с компьютера (множественный input news_gallery[]).
         if (empty($_FILES['news_gallery']) || !is_array($_FILES['news_gallery']['name'] ?? null)) {
             return $purgeAfterCommit;
         }
-
-        $existing = \App\Models\NewsImage::forNews($newsId);
-        $sort = count($existing);
 
         $names = $_FILES['news_gallery']['name'];
         foreach ($names as $i => $name) {

@@ -38,7 +38,7 @@
         <div class="media-modal__toolbar" data-media-toolbar>
             <input type="search" class="media-modal__search" data-media-search placeholder="Поиск в медиабиблиотеке…">
         </div>
-        <div class="media-modal__upload u-inline-c8be1ccba6" data-media-upload data-csrf="<?= htmlspecialchars(\App\Core\Csrf::token(), ENT_QUOTES) ?>">
+        <div class="media-modal__upload is-hidden" data-media-upload data-csrf="<?= htmlspecialchars(\App\Core\Csrf::token(), ENT_QUOTES) ?>">
             <div class="media-modal__dropzone">
                 <div class="u-inline-30220647a6">Перетащите файлы сюда</div>
                 <div class="u-inline-a43690dc6d">или нажмите кнопку для выбора на диске (до 200 МБ)</div>
