@@ -90,6 +90,9 @@
                     + (isLead ? '17px' : '15px') + '; line-height: 1.65; color: #0f172a; }'
                     + (isLead ? ' p { margin: 0 0 .75em; } blockquote { border-left: 3px solid #0d9488; margin-left: 0; padding-left: 1em; }' : ''),
                 setup: function (editor) {
+                    editor.on('init', function () {
+                        textarea.dispatchEvent(new Event('input'));
+                    });
                     editor.on('change input blur', function () {
                         editor.save();
                         textarea.dispatchEvent(new Event('input'));

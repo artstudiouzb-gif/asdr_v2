@@ -1,6 +1,42 @@
 (function () {
     'use strict';
 
+    // Преобразует разрешённую разметку лида в текст без повторного разбора
+    // строки как HTML. Это безопасный fallback до загрузки TinyMCE; после
+    // загрузки текст берётся непосредственно из уже созданного DOM редактора.
+    function decodeLeadEntities(value) {
+        var named = {amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' '};
+        return String(value || '').replace(/&(?:#([0-9]+)|#x([0-9a-f]+)|(amp|lt|gt|quot|apos|nbsp));/gi, function (match, decimal, hex, name) {
+            if (name) { return named[name.toLowerCase()] || match; }
+            var codePoint = parseInt(decimal || hex, decimal ? 10 : 16);
+            if (!Number.isFinite(codePoint) || codePoint < 0 || codePoint > 0x10FFFF
+                || (codePoint >= 0xD800 && codePoint <= 0xDFFF)) {
+                return '\uFFFD';
+            }
+            return String.fromCodePoint(codePoint);
+        });
+    }
+
+    function plainTextFromLeadMarkup(value) {
+        var text = String(value || '')
+            .replace(/<\s*br\s*\/?\s*>/gi, ' ')
+            .replace(/<\s*\/\s*(?:p|li|blockquote|ul|ol)\s*>/gi, ' ')
+            .replace(/<[^>]*>/g, ' ');
+        return decodeLeadEntities(text).replace(/\s+/g, ' ').trim();
+    }
+
+    function leadEditorFor(field) {
+        return window.tinymce && field && field.id ? window.tinymce.get(field.id) : null;
+    }
+
+    function plainLeadText(field) {
+        var editor = leadEditorFor(field);
+        var body = editor && editor.getBody ? editor.getBody() : null;
+        return body
+            ? (body.textContent || '').replace(/\s+/g, ' ').trim()
+            : plainTextFromLeadMarkup(field ? field.value : '');
+    }
+
     // --- Единая система выбора цвета во всей админке. ---
     // В HTML остаётся нативный input[type=color] как рабочий fallback без JS.
     // До DOMContentLoaded он превращается в текстовое HEX-поле и подключается
@@ -1366,22 +1402,15 @@
         var seo = document.querySelector('[data-lead-preview-seo]');
         var previewTitles = document.querySelectorAll('[data-lead-preview-title], [data-lead-preview-seo-title]');
 
-        function currentHtml() {
-            if (window.tinymce && field.id && window.tinymce.get(field.id)) {
-                return window.tinymce.get(field.id).getContent();
-            }
-            return field.value || '';
-        }
-
-        function plain(html) {
-            var doc = new DOMParser().parseFromString(html, 'text/html');
-            return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
-        }
-
-        function safeRich(target, html) {
+        function safeRich(target) {
             if (!target) { return; }
             target.textContent = '';
-            var doc = new DOMParser().parseFromString(html, 'text/html');
+            var editor = leadEditorFor(field);
+            var source = editor && editor.getBody ? editor.getBody() : null;
+            if (!source) {
+                target.textContent = plainLeadText(field) || 'Здесь появится форматированный лид Telegram.';
+                return;
+            }
             var allowed = {P:1, BR:1, STRONG:1, B:1, EM:1, I:1, U:1, S:1, UL:1, OL:1, LI:1, BLOCKQUOTE:1, A:1};
             function copy(node, parent) {
                 if (node.nodeType === 3) { parent.appendChild(document.createTextNode(node.nodeValue || '')); return; }
@@ -1395,12 +1424,11 @@
                 Array.prototype.forEach.call(node.childNodes, function (child) { copy(child, el); });
                 parent.appendChild(el);
             }
-            Array.prototype.forEach.call(doc.body.childNodes, function (node) { copy(node, target); });
+            Array.prototype.forEach.call(source.childNodes, function (node) { copy(node, target); });
         }
 
         function render() {
-            var html = currentHtml();
-            var text = plain(html);
+            var text = plainLeadText(field);
             var len = text.length;
             if (len === 0) {
                 out.textContent = '';
@@ -1413,7 +1441,7 @@
 
             if (card) { card.textContent = text.length > 180 ? text.slice(0, 179).trimEnd() + '…' : (text || 'Здесь появится текст карточки.'); }
             if (seo) { seo.textContent = text.length > 160 ? text.slice(0, 159).trimEnd() + '…' : (text || 'Здесь появится описание для поисковика.'); }
-            safeRich(telegram, html || '<p>Здесь появится форматированный лид Telegram.</p>');
+            safeRich(telegram);
             var titleText = title && title.value.trim() ? title.value.trim() : 'Заголовок новости';
             previewTitles.forEach(function (el) { el.textContent = titleText; });
         }
@@ -2829,8 +2857,7 @@
             var titleVal = titleInput ? (titleInput.value || '').trim() : '';
             var descVal = descInput ? (descInput.value || '').trim() : '';
             if (descInput && descInput.getAttribute('name') === 'lead_html') {
-                var parsedLead = new DOMParser().parseFromString(descVal, 'text/html');
-                descVal = (parsedLead.body.textContent || '').replace(/\s+/g, ' ').trim();
+                descVal = plainLeadText(descInput);
             }
             var imgVal = imageInput ? (imageInput.value || '').trim() : '';
 

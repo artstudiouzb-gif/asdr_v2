@@ -46,6 +46,8 @@ test('Форма даёт компактный редактор и три чес
     assert_contains("len < 180", $admin);
     assert_contains("len > 360", $admin);
     assert_contains("text.length > 160", $admin, 'SEO остаётся отдельным кратким предпросмотром');
+    assert_contains('plainTextFromLeadMarkup', $admin);
+    assert_not_contains('new DOMParser()', $admin, 'пользовательский текст не должен повторно интерпретироваться как HTML');
 });
 
 test('Полный лид хранится, а карточки показывают более полезные фрагменты', function () {
