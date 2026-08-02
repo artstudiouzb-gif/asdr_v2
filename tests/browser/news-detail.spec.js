@@ -2,7 +2,7 @@ const path = require('node:path');
 const { test, expect } = require('@playwright/test');
 
 const projectRoot = path.resolve(__dirname, '../..');
-const pixel = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1200" height="675"%3E%3Crect width="1200" height="675" fill="%23155182"/%3E%3C/svg%3E';
+const pixel = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675"><rect width="1200" height="675" fill="#155182"/></svg>')}`;
 
 async function mountNews(page) {
     await page.setContent(`
