@@ -1,0 +1,242 @@
+diff --git a/app/Core/bootstrap.php b/app/Core/bootstrap.php
+index 0b220a1..0000000 100644
+--- a/app/Core/bootstrap.php
++++ b/app/Core/bootstrap.php
+@@ -35,6 +35,12 @@ define('APP_INSTALLED', is_file($configFile) && is_file($installedLock));
+ if (is_file($configFile)) {
+     $config = require $configFile;
+     Config::set($config);
++
++    // Runtime-настройка скрытого входа хранится вне public/ и должна быть
++    // подмешана до AdminEntryGate::enforce(). Переменные окружения сохраняют
++    // высший приоритет внутри AdminEntryConfig.
++    if (APP_INSTALLED) {
++        \App\Core\AdminEntryConfig::loadIntoConfig();
++    }
+     date_default_timezone_set($config['app']['timezone'] ?? 'UTC');
+     ErrorHandler::register((bool) ($config['app']['debug'] ?? false));
+ 
+diff --git a/public/index.php b/public/index.php
+index 8dd8a2f..0000000 100644
+--- a/public/index.php
++++ b/public/index.php
+@@ -326,6 +326,7 @@ $router->post('/admin/webhooks/run', [\App\Controllers\Admin\WebhookController
+ 
+ // --- Admin: Центр безопасности ---
+ $router->get('/admin/security', [\App\Controllers\Admin\SecurityController::class, 'index']);
++$router->post('/admin/security/admin-entry', [\App\Controllers\Admin\AdminEntrySettingsController::class, 'update']);
+ 
+ // --- Admin: резервное копирование ---
+ $router->post('/admin/backup', [\App\Controllers\Admin\BackupController::class, 'create']);
+diff --git a/app/Controllers/Admin/SecurityController.php b/app/Controllers/Admin/SecurityController.php
+index be81c08..0000000 100644
+--- a/app/Controllers/Admin/SecurityController.php
++++ b/app/Controllers/Admin/SecurityController.php
+@@ -4,6 +4,7 @@ declare(strict_types=1);
+ 
+ namespace App\Controllers\Admin;
+ 
++use App\Core\AdminEntryConfig;
+ use App\Core\Auth;
+ use App\Core\Database;
+ use App\Core\TelegramBot;
+@@ -64,6 +65,7 @@ final class SecurityController
+             "activeSessions" => $activeSessions,
+             "botLinked" => $botLinked,
+             "gatewayLinked" => $gatewayLinked,
++            "adminEntry" => AdminEntryConfig::state(),
+         ]);
+     }
+ }
+diff --git a/app/Views/admin/security/index.php b/app/Views/admin/security/index.php
+index 293e93a..0000000 100644
+--- a/app/Views/admin/security/index.php
++++ b/app/Views/admin/security/index.php
+@@ -11,6 +11,7 @@ use App\Models\AuditLog;
+ /** @var int $activeSessions */
+ /** @var bool $botLinked */
+ /** @var bool $gatewayLinked */
++/** @var array{enabled:bool,path:string,url:string,ttl:int,allowed_cidrs:list<string>,environment_managed:bool,writable:bool} $adminEntry */
+ 
+ $pageTitle = 'Безопасность';
+ $activeNav = 'security';
+@@ -27,6 +28,9 @@ if ($gatewayLinked) {
+     $channels[] = 'Telegram Gateway';
+ }
+ $riskEvents = (int) $authSummary['failed'] + (int) $authSummary['locked'];
++$entryEnabled = !empty($adminEntry['enabled']);
++$entryManaged = !empty($adminEntry['environment_managed']);
++$entryWritable = !empty($adminEntry['writable']);
+ ?>
+ 
+ <div class="u-inline-f94566b02a">
+@@ -104,6 +108,88 @@ $riskEvents = (int) $authSummary['failed'] + (int) $authSummary['locked'];
+     </div>
+ </div>
+ 
++<div class="form-card u-inline-1e1a9b09bf" id="admin-entry">
++    <div class="admin-card-header">
++        <div class="admin-card-header__title">
++            <span class="admin-card-header__icon"><?= AdminUi::icon('key', 20) ?></span>
++            <h3>Скрытый адрес входа</h3>
++        </div>
++        <span class="status-badge status-badge--<?= $entryEnabled ? 'success' : 'warning' ?>">
++            <?= $entryEnabled ? 'Включён' : 'Не настроен' ?>
++        </span>
++    </div>
++
++    <p class="form-hint">
++        После включения прямые запросы к <code>/admin</code>, <code>/admin/login</code>
++        и восстановлению пароля будут возвращать обычный 404. Через один общий
++        секретный адрес входят и администраторы, и редакторы; права определяются
++        личной учётной записью после авторизации.
++    </p>
++
++    <?php if ($entryEnabled): ?>
++        <div class="admin-code-panel admin-mt-24">
++            <strong>Текущий адрес:</strong>
++            <span><?= htmlspecialchars((string) $adminEntry['url'], ENT_QUOTES) ?></span>
++        </div>
++    <?php endif; ?>
++
++    <?php if ($entryManaged): ?>
++        <div class="alert alert--info admin-mt-24">
++            Адрес управляется переменной окружения <code>ADMIN_ENTRY_PATH</code>.
++            Измените её на сервере; интерфейс CMS не перезаписывает deployment-настройки.
++        </div>
++    <?php elseif (!$entryWritable): ?>
++        <div class="alert alert--error admin-mt-24">
++            Каталог <code>storage/</code> недоступен для записи. Настройка не может быть сохранена.
++        </div>
++    <?php else: ?>
++        <form method="post" action="/admin/security/admin-entry" class="form-grid admin-mt-24">
++            <?= \App\Core\Csrf::field() ?>
++
++            <div class="form-field">
++                <label for="admin_entry_path">Секретный путь</label>
++                <input id="admin_entry_path" name="admin_entry_path" type="text"
++                       maxlength="97" autocomplete="off" spellcheck="false"
++                       value="<?= htmlspecialchars((string) $adminEntry['path'], ENT_QUOTES) ?>"
++                       placeholder="/control-случайное-значение">
++                <span class="form-hint">Один сегмент длиной 16–96 символов: буквы, цифры, дефис и подчёркивание.</span>
++            </div>
++
++            <div class="form-field">
++                <label for="admin_entry_ttl">Срок временного пропуска</label>
++                <select id="admin_entry_ttl" name="admin_entry_ttl">
++                    <?php foreach ([900 => '15 минут', 1800 => '30 минут', 3600 => '60 минут'] as $ttl => $label): ?>
++                        <option value="<?= $ttl ?>" <?= (int) $adminEntry['ttl'] === $ttl ? 'selected' : '' ?>>
++                            <?= htmlspecialchars($label, ENT_QUOTES) ?>
++                        </option>
++                    <?php endforeach; ?>
++                </select>
++            </div>
++
++            <div class="form-field">
++                <label for="admin_entry_allowed_cidrs">Ограничение по IP/CIDR</label>
++                <textarea id="admin_entry_allowed_cidrs" name="admin_entry_allowed_cidrs" rows="3"
++                          placeholder="Например: 203.0.113.10, 2001:db8::/48"><?= htmlspecialchars(implode("\n", $adminEntry['allowed_cidrs']), ENT_QUOTES) ?></textarea>
++                <span class="form-hint">Пусто — доступ с любого IP. Неверный список может заблокировать вход.</span>
++            </div>
++
++            <label class="form-field form-field--checkbox">
++                <input type="checkbox" name="confirm_access_change" value="1" required>
++                Я сохранил новый адрес в безопасном месте и понимаю, что старый адрес перестанет работать.
++            </label>
++
++            <div class="form-actions">
++                <button type="submit" name="action" value="save" class="btn btn--primary">Сохранить</button>
++                <button type="submit" name="action" value="regenerate" class="btn">Создать новый адрес</button>
++                <?php if ($entryEnabled): ?>
++                    <button type="submit" name="action" value="disable" class="btn btn--danger">Отключить скрытый вход</button>
++                <?php endif; ?>
++            </div>
++        </form>
++    <?php endif; ?>
++</div>
++
+ <div class="form-card u-inline-1e1a9b09bf">
+     <div class="admin-card-header">
+         <div class="admin-card-header__title">
+diff --git a/app/Controllers/InstallController.php b/app/Controllers/InstallController.php
+index 0000000..0000000 100644
+--- a/app/Controllers/InstallController.php
++++ b/app/Controllers/InstallController.php
+@@ -297,6 +297,19 @@ final class InstallController
+                 throw $e;
+             }
+ 
++            $adminEntryUrl = rtrim(\App\Core\AppUrl::base(), '/') . '/admin/login';
++            try {
++                $adminEntryPath = \App\Core\AdminEntryConfig::ensureGenerated();
++                $adminEntryUrl = rtrim(\App\Core\AppUrl::base(), '/') . $adminEntryPath;
++            } catch (\Throwable $entryError) {
++                // Ошибка дополнительного hardening не должна оставлять уже
++                // созданную установку в незавершённом состоянии. Стандартный
++                // вход остаётся доступным, а адрес можно создать в разделе
++                // «Безопасность» после первого входа.
++                \App\Core\Logger::swallowed(
++                    'InstallController: не удалось создать скрытый адрес входа',
++                    $entryError
++                );
++            }
++
+             // Отправка уведомления об успешной установке на email администратора.
+             $siteName = Setting::get('site_name', 'ASDR CMS');
+             $appUrl = \App\Core\AppUrl::base();
+@@ -309,7 +322,7 @@ final class InstallController
+                 . "Параметры доступа:\n"
+                 . "— Логин администратора: %s\n"
+                 . "— E-mail: %s\n"
+-                . "— Панель управления: %s/admin/login\n"
++                . "— Панель управления: %s\n"
+                 . "— Дата установки: %s (IP: %s)\n\n"
+                 . "В целях безопасности Ваш пароль НЕ передаётся открытым текстом по электронной почте.\n"
+                 . "Рекомендуем сразу после первого входа включить двухфакторную аутентификацию (2FA) в личном кабинете.",
+@@ -318,7 +331,7 @@ final class InstallController
+                 $siteName,
+                 $username,
+                 $email,
+-                $appUrl,
++                $adminEntryUrl,
+                 date('d.m.Y H:i:s'),
+                 (string) ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1')
+             );
+@@ -356,6 +369,7 @@ final class InstallController
+                 'email' => $email,
+                 'username' => $username,
+                 'emailSent' => $emailSent,
++                'adminEntryUrl' => $adminEntryUrl,
+             ]);
+         } catch (\Throwable $ex) {
+             View::render('install/step4', [
+diff --git a/app/Views/install/done.php b/app/Views/install/done.php
+index 9e7d6fa..0000000 100644
+--- a/app/Views/install/done.php
++++ b/app/Views/install/done.php
+@@ -3,6 +3,7 @@ $step = '4';
+ /** @var string $email */
+ /** @var string $username */
+ /** @var bool $emailSent */
++/** @var string $adminEntryUrl */
+ require __DIR__ . '/_header.php';
+ ?>
+ <div class="u-inline-dc16df27e2">
+@@ -29,7 +30,7 @@ require __DIR__ . '/_header.php';
+         <div class="u-inline-6e20fb40dc">
+             <div><strong>Логин:</strong> <code><?= htmlspecialchars((string) ($username ?? 'admin'), ENT_QUOTES) ?></code></div>
+             <div><strong>E-mail:</strong> <code><?= htmlspecialchars((string) ($email ?? ''), ENT_QUOTES) ?></code></div>
+-            <div><strong>Панель управления:</strong> <code>/admin/login</code></div>
++            <div><strong>Панель управления:</strong> <code><?= htmlspecialchars((string) ($adminEntryUrl ?? '/admin/login'), ENT_QUOTES) ?></code></div>
+         </div>
+         <?php if (empty($emailSent)): ?>
+             <div class="u-inline-87ff6778ab">
+@@ -52,7 +53,7 @@ require __DIR__ . '/_header.php';
+         </div>
+     </div>
+ 
+-    <a href="/admin/login" class="btn btn--primary u-inline-8ca649dc3b">
++    <a href="<?= htmlspecialchars((string) ($adminEntryUrl ?? '/admin/login'), ENT_QUOTES) ?>" class="btn btn--primary u-inline-8ca649dc3b">
+         Войти в панель управления
+         <?= \App\Core\Icon::render('arrow-right', 18, 'btn__icon', 2.5) ?>
+     </a>
