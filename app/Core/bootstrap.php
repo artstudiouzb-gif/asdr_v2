@@ -40,6 +40,14 @@ ini_set('error_log', APP_ROOT . '/storage/logs/php-error.log');
 if (is_file($configFile)) {
     $config = require $configFile;
     Config::set($config);
+
+    // Runtime-настройка скрытого входа хранится вне public/ и должна быть
+    // подмешана до AdminEntryGate::enforce(). Переменные окружения сохраняют
+    // высший приоритет внутри AdminEntryConfig.
+    if (APP_INSTALLED) {
+        \App\Core\AdminEntryConfig::loadIntoConfig();
+    }
+
     date_default_timezone_set($config['app']['timezone'] ?? 'UTC');
     ErrorHandler::register((bool) ($config['app']['debug'] ?? false));
 
@@ -113,4 +121,12 @@ if (PHP_SAPI !== 'cli' && \App\Core\Session::hasCookie()) {
 // раскрыть форму входа, сброс пароля или внутренний маршрут панели.
 if (PHP_SAPI !== 'cli') {
     \App\Core\AdminEntryGate::enforce();
+
+    // Настройка шлюза обслуживается до общего Router, чтобы механизм оставался
+    // автономным и не раскрывал отдельный маршрут неавторизованному сканеру.
+    $bootstrapPath = (string) (parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/');
+    $bootstrapMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+    if ($bootstrapPath === '/admin/security/admin-entry' && $bootstrapMethod === 'POST') {
+        (new \App\Controllers\Admin\AdminEntrySettingsController())->update();
+    }
 }
