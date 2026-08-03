@@ -17,3 +17,10 @@ test('release automation is fail-fast and includes backup, migrations and smoke 
     assert_contains("SELECT filename FROM migrations", $check);
     assert_contains("APP_DEBUG включён", $check);
 });
+
+test('release archive excludes repository-only security documentation', function (): void {
+    $attributes = (string) file_get_contents(dirname(__DIR__, 2) . '/.gitattributes');
+
+    assert_contains('/README.md export-ignore', $attributes);
+    assert_contains('/SECURITY.md export-ignore', $attributes);
+});
