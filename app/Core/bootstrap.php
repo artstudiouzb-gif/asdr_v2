@@ -107,3 +107,10 @@ if (is_file($configFile)) {
 if (PHP_SAPI !== 'cli' && \App\Core\Session::hasCookie()) {
     \App\Core\Session::start();
 }
+
+// Скрытый административный шлюз должен сработать до регистрации маршрутов:
+// прямые неавторизованные /admin/* выглядят как обычный 404 и не успевают
+// раскрыть форму входа, сброс пароля или внутренний маршрут панели.
+if (PHP_SAPI !== 'cli') {
+    \App\Core\AdminEntryGate::enforce();
+}

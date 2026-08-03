@@ -44,6 +44,21 @@ return [
         'login_max_attempts' => 5,
         'login_lockout_minutes' => 15,
         'login_attempts_window_minutes' => 15,
+        // Скрытый вход в админку. Пока путь пуст, /admin/login работает как
+        // раньше. После настройки прямые неавторизованные /admin/* дают 404.
+        // Пример: ADMIN_ENTRY_PATH=/control-7f3a9c2e4d6b8f10
+        'admin_entry_path' => getenv('ADMIN_ENTRY_PATH') ?: '',
+        // Короткоживущий подписанный пропуск после посещения секретного пути.
+        'admin_entry_ttl' => (int) (getenv('ADMIN_ENTRY_TTL') ?: 1800),
+        // Опциональный отдельный HMAC-ключ. Если пусто, используется
+        // APP_ENCRYPTION_KEY. Не храните этот ключ в репозитории.
+        'admin_entry_key' => getenv('ADMIN_ENTRY_KEY') ?: '',
+        // Опциональный IP allowlist для всего /admin и секретного шлюза.
+        // Пустой список разрешает доступ с любого IP.
+        'admin_entry_allowed_cidrs' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', getenv('ADMIN_ENTRY_ALLOWED_CIDRS') ?: '')
+        ))),
         // HSTS с preload (hstspreload.org): включать только после месяца
         // стабильной работы по HTTPS на всех поддоменах — снять быстро нельзя.
         'hsts_preload' => false,
