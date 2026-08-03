@@ -1,14 +1,113 @@
 -- @post-schema
 -- Редакционные метаданные медиабиблиотеки.
 -- Изображение загружается и описывается до привязки к новости/странице.
--- Миграция намеренно остаётся отдельной от базового schema.sql: старые и
--- свежие установки проходят один и тот же проверяемый путь обновления.
+--
+-- MySQL 8 не поддерживает MariaDB-синтаксис ADD COLUMN IF NOT EXISTS.
+-- Каждая колонка поэтому добавляется через проверку information_schema и
+-- динамический DDL. Такой вариант безопасен и при повторном запуске после
+-- частично выполненной миграции.
 
-ALTER TABLE files
-    ADD COLUMN IF NOT EXISTS alt_text VARCHAR(255) NULL AFTER uploaded_by,
-    ADD COLUMN IF NOT EXISTS caption VARCHAR(255) NULL AFTER alt_text,
-    ADD COLUMN IF NOT EXISTS description TEXT NULL AFTER caption,
-    ADD COLUMN IF NOT EXISTS credit VARCHAR(255) NULL AFTER description,
-    ADD COLUMN IF NOT EXISTS focal_x TINYINT UNSIGNED NULL AFTER credit,
-    ADD COLUMN IF NOT EXISTS focal_y TINYINT UNSIGNED NULL AFTER focal_x,
-    ADD COLUMN IF NOT EXISTS metadata_updated_at DATETIME NULL AFTER focal_y;
+SET @asdr_sql = IF(
+    EXISTS(
+        SELECT 1
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'files'
+          AND COLUMN_NAME = 'alt_text'
+    ),
+    'SELECT 1',
+    'ALTER TABLE `files` ADD COLUMN `alt_text` VARCHAR(255) NULL AFTER `uploaded_by`'
+);
+PREPARE asdr_stmt FROM @asdr_sql;
+EXECUTE asdr_stmt;
+DEALLOCATE PREPARE asdr_stmt;
+
+SET @asdr_sql = IF(
+    EXISTS(
+        SELECT 1
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'files'
+          AND COLUMN_NAME = 'caption'
+    ),
+    'SELECT 1',
+    'ALTER TABLE `files` ADD COLUMN `caption` VARCHAR(255) NULL AFTER `alt_text`'
+);
+PREPARE asdr_stmt FROM @asdr_sql;
+EXECUTE asdr_stmt;
+DEALLOCATE PREPARE asdr_stmt;
+
+SET @asdr_sql = IF(
+    EXISTS(
+        SELECT 1
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'files'
+          AND COLUMN_NAME = 'description'
+    ),
+    'SELECT 1',
+    'ALTER TABLE `files` ADD COLUMN `description` TEXT NULL AFTER `caption`'
+);
+PREPARE asdr_stmt FROM @asdr_sql;
+EXECUTE asdr_stmt;
+DEALLOCATE PREPARE asdr_stmt;
+
+SET @asdr_sql = IF(
+    EXISTS(
+        SELECT 1
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'files'
+          AND COLUMN_NAME = 'credit'
+    ),
+    'SELECT 1',
+    'ALTER TABLE `files` ADD COLUMN `credit` VARCHAR(255) NULL AFTER `description`'
+);
+PREPARE asdr_stmt FROM @asdr_sql;
+EXECUTE asdr_stmt;
+DEALLOCATE PREPARE asdr_stmt;
+
+SET @asdr_sql = IF(
+    EXISTS(
+        SELECT 1
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'files'
+          AND COLUMN_NAME = 'focal_x'
+    ),
+    'SELECT 1',
+    'ALTER TABLE `files` ADD COLUMN `focal_x` TINYINT UNSIGNED NULL AFTER `credit`'
+);
+PREPARE asdr_stmt FROM @asdr_sql;
+EXECUTE asdr_stmt;
+DEALLOCATE PREPARE asdr_stmt;
+
+SET @asdr_sql = IF(
+    EXISTS(
+        SELECT 1
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'files'
+          AND COLUMN_NAME = 'focal_y'
+    ),
+    'SELECT 1',
+    'ALTER TABLE `files` ADD COLUMN `focal_y` TINYINT UNSIGNED NULL AFTER `focal_x`'
+);
+PREPARE asdr_stmt FROM @asdr_sql;
+EXECUTE asdr_stmt;
+DEALLOCATE PREPARE asdr_stmt;
+
+SET @asdr_sql = IF(
+    EXISTS(
+        SELECT 1
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'files'
+          AND COLUMN_NAME = 'metadata_updated_at'
+    ),
+    'SELECT 1',
+    'ALTER TABLE `files` ADD COLUMN `metadata_updated_at` DATETIME NULL AFTER `focal_y`'
+);
+PREPARE asdr_stmt FROM @asdr_sql;
+EXECUTE asdr_stmt;
+DEALLOCATE PREPARE asdr_stmt;
