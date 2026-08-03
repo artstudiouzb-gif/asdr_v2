@@ -16,7 +16,11 @@ test('AdminBrand: значения по умолчанию', function () {
     assert_same('A', AdminBrand::letter());
     assert_true(AdminBrand::logo() === null, 'логотип не задан');
     assert_same('#2271b1', AdminBrand::accent());
-    assert_same('', AdminBrand::styleTag(), 'при стандартном акценте инлайн-стилей нет');
+
+    $head = AdminBrand::styleTag();
+    assert_not_contains('<style>', $head, 'при стандартном акценте инлайн-стилей нет');
+    assert_contains('admin-notifications.css', $head, 'внешние стили Центра уведомлений подключены');
+    assert_contains('admin-notifications.js', $head, 'клиент Центра уведомлений подключён');
 });
 
 test('AdminBrand: свои название и буква бейджа', function () {
@@ -41,7 +45,11 @@ test('AdminBrand: свой акцент рождает переменные с �
 test('AdminBrand: мусорный акцент откатывается к стандартному', function () {
     Setting::set('admin_brand_accent', 'red;}body{display:none');
     assert_same('#2271b1', AdminBrand::accent());
-    assert_same('', AdminBrand::styleTag());
+
+    $head = AdminBrand::styleTag();
+    assert_not_contains('<style>', $head, 'невалидный акцент не создаёт инлайн-CSS');
+    assert_contains('admin-notifications.css', $head, 'безопасные внешние ассеты сохраняются');
+    assert_contains('admin-notifications.js', $head, 'безопасный клиент сохраняется');
     Setting::set('admin_brand_accent', '');
 });
 
@@ -78,4 +86,3 @@ test('AdminBrand::faviconHtml: вывод стандартов и кастомн
     assert_contains('type="image/svg+xml"', $htmlWithCustom);
     Setting::set('favicon_url', '');
 });
-
