@@ -1,33 +1,33 @@
 {
-    "version": 1,
-    "generatedBy": "npm run build:assets",
-    "css": {
-        "path": "/assets/css/public.min.css",
-        "sources": [
-            "/assets/css/fonts.css",
-            "/assets/css/gov-fonts.css",
-            "/assets/css/frontend.css",
-            "/assets/css/gov-theme.css",
-            "/assets/css/rich-content.css",
-            "/assets/css/a11y.css"
-        ],
-        "sourceSha256": "160b8cd68b7a92b6a060e36172a513a787e368e6af4a07361dab7f26311a1d8f",
-        "sha256": "371dc32ff96bc00bd43323f2c540b3cf4418fd9144140be0c9f21694bb23c625",
-        "raw": 347888,
-        "gzip": 58180,
-        "brotli": 45957
-    },
-    "js": {
-        "path": "/assets/js/public.min.js",
-        "sources": [
-            "/assets/js/a11y.js",
-            "/assets/js/frontend.js",
-            "/assets/js/forms.js"
-        ],
-        "sourceSha256": "2ad6753a6c717862143e5edc3ddf3fa110c18ca8a85a953217cbbd356966b4eb",
-        "sha256": "7c52c9a514a26f5e6afafa45eb3e66d4fc1552698cac36b6bc34948dfd9f2c31",
-        "raw": 57295,
-        "gzip": 15169,
-        "brotli": 13308
-    }
+  "version": 1,
+  "generatedBy": "npm run build:assets",
+  "css": {
+    "path": "/assets/css/public.min.css",
+    "sources": [
+      "/assets/css/fonts.css",
+      "/assets/css/gov-fonts.css",
+      "/assets/css/frontend.css",
+      "/assets/css/gov-theme.css",
+      "/assets/css/rich-content.css",
+      "/assets/css/a11y.css"
+    ],
+    "sourceSha256": "160b8cd68b7a92b6a060e36172a513a787e368e6af4a07361dab7f26311a1d8f",
+    "sha256": "371dc32ff96bc00bd43323f2c540b3cf4418fd9144140be0c9f21694bb23c625",
+    "raw": 347888,
+    "gzip": 58180,
+    "brotli": 45957
+  },
+  "js": {
+    "path": "/assets/js/public.min.js",
+    "sources": [
+      "/assets/js/a11y.js",
+      "/assets/js/frontend.js",
+      "/assets/js/forms.js"
+    ],
+    "sourceSha256": "2ad6753a6c717862143e5edc3ddf3fa110c18ca8a85a953217cbbd356966b4eb",
+    "sha256": "7c52c9a514a26f5e6afafa45eb3e66d4fc1552698cac36b6bc34948dfd9f2c31",
+    "raw": 57295,
+    "gzip": 15169,
+    "brotli": 13308
+  }
 }
