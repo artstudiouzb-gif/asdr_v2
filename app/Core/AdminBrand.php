@@ -43,8 +43,8 @@ final class AdminBrand
     }
 
     /**
-     * Head-разметка админки: CSS-переменные бренда и отложенный клиент
-     * колокольчика. Имя метода сохраняется для обратной совместимости layout.
+     * Head-разметка админки: CSS-переменные бренда и клиент Центра
+     * уведомлений. Имя метода сохраняется для обратной совместимости layout.
      */
     public static function styleTag(): string
     {
@@ -59,6 +59,9 @@ final class AdminBrand
                 . '}</style>';
         }
 
+        $html .= '<link rel="stylesheet" data-admin-notifications-css="1" href="'
+            . htmlspecialchars(Asset::url('/assets/css/admin-notifications.css'), ENT_QUOTES)
+            . '">';
         $html .= '<script nonce="' . htmlspecialchars(SecurityHeaders::nonce(), ENT_QUOTES)
             . '" src="' . htmlspecialchars(Asset::url('/assets/js/admin-notifications.js'), ENT_QUOTES)
             . '" defer></script>';
