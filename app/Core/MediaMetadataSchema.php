@@ -36,15 +36,17 @@ final class MediaMetadataSchema
 
         $pdo ??= Database::pdo();
         foreach (self::COLUMNS as $column => $definition) {
-            $check = $pdo->prepare('SHOW COLUMNS FROM files LIKE :column');
-            $check->execute([':column' => $column]);
-            if ($check->fetchColumn() !== false) {
+            // MySQL не поддерживает placeholder в SHOW ... LIKE. Значение
+            // всё равно экранируется PDO, а имя колонки берётся только из
+            // закрытой константы приложения.
+            $check = $pdo->query('SHOW COLUMNS FROM `files` LIKE ' . $pdo->quote($column));
+            if ($check !== false && $check->fetchColumn() !== false) {
                 continue;
             }
 
             // Имена и определения колонок заданы константой приложения, не
             // поступают от пользователя и потому безопасны для DDL.
-            $pdo->exec('ALTER TABLE files ADD COLUMN `' . $column . '` ' . $definition);
+            $pdo->exec('ALTER TABLE `files` ADD COLUMN `' . $column . '` ' . $definition);
         }
 
         self::$ready = true;
