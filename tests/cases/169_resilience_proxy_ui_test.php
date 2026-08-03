@@ -47,7 +47,9 @@ test('request guard and trusted proxy resolution run before database startup', f
     assert_true($proxyPosition < $databasePosition, 'доверенный прокси разбирается до подключения к БД');
     assert_true($guardPosition < $databasePosition, 'WAF проверяет запрос до подключения к БД');
     assert_contains("if (\$failedPath === '/health')", $bootstrap);
-    assert_contains("'release' => \\App\\Core\\Release::id()", $bootstrap);
+    assert_contains("'status' => 'down'", $bootstrap, 'аварийный health сохраняет минимальный статус');
+    assert_not_contains("'release' => \\App\\Core\\Release::id()", $bootstrap, 'release не раскрывается без токена');
+    assert_not_contains("'workers' =>", $bootstrap, 'состояние воркеров не раскрывается в fail-safe');
 });
 
 test('search load is bounded and repeated requests are cached', function (): void {
