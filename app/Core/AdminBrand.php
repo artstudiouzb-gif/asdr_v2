@@ -8,7 +8,7 @@ use App\Models\Setting;
 
 /**
  * White-label панели управления: название, логотип и акцентный цвет админки
- * задаются в «Настройках» и применяются в топбаре, <title> и на страницах
+ * задаются в «Настройках» и применяются в topbar, <title> и на страницах
  * входа. Пустые значения означают стандартный брендинг ArtStudio.
  */
 final class AdminBrand
@@ -16,7 +16,7 @@ final class AdminBrand
     public const DEFAULT_NAME = 'ASDR';
     public const DEFAULT_ACCENT = '#2271b1';
 
-    /** Название панели для топбара и <title>. */
+    /** Название панели для topbar и <title>. */
     public static function name(): string
     {
         $name = trim(self::setting('admin_brand_name'));
@@ -51,16 +51,24 @@ final class AdminBrand
         $html = '';
         $accent = self::accent();
         if ($accent !== self::DEFAULT_ACCENT) {
-            $html .= '<style>:root{'
+            // Theme selectors in admin.css use html[data-admin-theme] and are
+            // more specific than a plain :root rule. Match that specificity so
+            // the configured white-label accent is not silently overwritten.
+            $html .= '<style>:root[data-admin-theme]{'
                 . '--admin-accent:' . $accent . ';'
                 . '--admin-accent-hover:' . self::mix($accent, [0, 0, 0], 0.14) . ';'
                 . '--admin-accent-soft:' . self::mix($accent, [255, 255, 255], 0.90) . ';'
                 . '--admin-accent-2:' . self::mix($accent, [255, 255, 255], 0.12) . ';'
+                . '--admin-primary:' . $accent . ';'
+                . '--admin-primary-dark:' . self::mix($accent, [0, 0, 0], 0.14) . ';'
                 . '}</style>';
         }
 
         $html .= '<link rel="stylesheet" data-admin-notifications-css="1" href="'
             . htmlspecialchars(Asset::url('/assets/css/admin-notifications.css'), ENT_QUOTES)
+            . '">';
+        $html .= '<link rel="stylesheet" data-admin-shell-stability-css="1" href="'
+            . htmlspecialchars(Asset::url('/assets/css/admin-shell-stability.css'), ENT_QUOTES)
             . '">';
         $html .= '<script nonce="' . htmlspecialchars(SecurityHeaders::nonce(), ENT_QUOTES)
             . '" src="' . htmlspecialchars(Asset::url('/assets/js/admin-notifications.js'), ENT_QUOTES)
@@ -89,7 +97,7 @@ final class AdminBrand
         return $html;
     }
 
-    /** Разметка бренда для топбара и карточек входа. */
+    /** Разметка бренда для topbar и карточек входа. */
     public static function badgeHtml(string $imgClass = 'admin-topbar__logoimg', string $letterClass = 'admin-topbar__logo'): string
     {
         $logo = self::logo();
