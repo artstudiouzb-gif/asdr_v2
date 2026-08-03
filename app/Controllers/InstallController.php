@@ -232,8 +232,6 @@ final class InstallController
                 return;
             }
 
-
-
             $lockPath = APP_ROOT . '/storage/installed.lock';
             $lockCreated = false;
             try {
@@ -252,9 +250,23 @@ final class InstallController
                 throw $e;
             }
 
+            $adminEntryUrl = rtrim(\App\Core\AppUrl::base(), '/') . '/admin/login';
+            try {
+                $adminEntryPath = \App\Core\AdminEntryConfig::ensureGenerated();
+                $adminEntryUrl = rtrim(\App\Core\AppUrl::base(), '/') . $adminEntryPath;
+            } catch (\Throwable $entryError) {
+                // Ошибка дополнительного hardening не должна оставлять уже
+                // созданную установку в незавершённом состоянии. Стандартный
+                // вход остаётся доступным, а адрес можно создать в разделе
+                // «Безопасность» после первого входа.
+                \App\Core\Logger::swallowed(
+                    'InstallController: не удалось создать скрытый адрес входа',
+                    $entryError
+                );
+            }
+
             // Отправка уведомления об успешной установке на email администратора.
             $siteName = Setting::get('site_name', 'ASDR CMS');
-            $appUrl = \App\Core\AppUrl::base();
             $subject = sprintf('Установка %s успешно завершена', $siteName);
             $body = sprintf(
                 "Здравствуйте, %s!\n\n"
@@ -262,7 +274,7 @@ final class InstallController
                 . "Параметры доступа:\n"
                 . "— Логин администратора: %s\n"
                 . "— E-mail: %s\n"
-                . "— Панель управления: %s/admin/login\n"
+                . "— Панель управления: %s\n"
                 . "— Дата установки: %s (IP: %s)\n\n"
                 . "В целях безопасности Ваш пароль НЕ передаётся открытым текстом по электронной почте.\n"
                 . "Рекомендуем сразу после первого входа включить двухфакторную аутентификацию (2FA) в личном кабинете.",
@@ -270,7 +282,7 @@ final class InstallController
                 $siteName,
                 $username,
                 $email,
-                $appUrl,
+                $adminEntryUrl,
                 date('d.m.Y H:i:s'),
                 (string) ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1')
             );
@@ -302,6 +314,7 @@ final class InstallController
                 'email' => $email,
                 'username' => $username,
                 'emailSent' => $emailSent,
+                'adminEntryUrl' => $adminEntryUrl,
             ]);
         } catch (\Throwable $ex) {
             View::render('install/step4', [

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers\Admin;
 
+use App\Core\AdminEntryConfig;
 use App\Core\Auth;
 use App\Core\Database;
 use App\Core\TelegramBot;
@@ -60,6 +61,7 @@ final class SecurityController
             "activeSessions" => $activeSessions,
             "botLinked" => $botLinked,
             "gatewayLinked" => $gatewayLinked,
+            "adminEntry" => AdminEntryConfig::state(),
         ]);
     }
 }
