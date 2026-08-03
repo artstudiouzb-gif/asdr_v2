@@ -92,6 +92,7 @@ final class Redirect
             return $target;
         }
 
+        $query = [];
         parse_str($queryString, $query);
         $encoded = http_build_query($query, '', '&', PHP_QUERY_RFC3986);
 
