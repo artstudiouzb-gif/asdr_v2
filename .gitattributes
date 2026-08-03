@@ -27,6 +27,8 @@
 # Локальные инструкции и отчёты разработки
 /.gitattributes export-ignore
 /.gitignore export-ignore
+/README.md export-ignore
+/SECURITY.md export-ignore
 /CLAUDE.md export-ignore
 /PRE_RELEASE_TASKS.md export-ignore
 /WORK_COMPLETED.md export-ignore
