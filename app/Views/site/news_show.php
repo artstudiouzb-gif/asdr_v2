@@ -181,7 +181,7 @@ $shareBlock = static function (string $extraClass) use ($shareUrl, $shareTitle, 
                     <?= \App\Core\Icon::render('arrow-left', 18, 'ui-icon', 1.8) ?>
                     <span><?= htmlspecialchars(t('На главную'), ENT_QUOTES) ?></span>
                 </a>
-                <h2 class="newsdetail-share__title"><?= htmlspecialchars(t('Поделиться'), ENT_QUOTES) ?></h2>
+                <p class="newsdetail-share__title"><?= htmlspecialchars(t('Поделиться'), ENT_QUOTES) ?></p>
                 <div class="newsdetail-share__row">
                     <a class="newsdetail-share__btn" href="https://t.me/share/url?url=<?= $shareUrl ?>&text=<?= $shareTitle ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в Telegram'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('brand-telegram', 17) ?></a>
                     <a class="newsdetail-share__btn" href="https://www.facebook.com/sharer/sharer.php?u=<?= $shareUrl ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в Facebook'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('brand-facebook', 17) ?></a>
