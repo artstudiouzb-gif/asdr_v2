@@ -81,7 +81,7 @@ test('Внешние уведомления используют безопас�
     assert_contains('htmlspecialchars($message, ENT_QUOTES)', $worker, 'Текст внешней доставки HTML-экранируется');
     assert_contains('Подробности доступны после', $worker, 'Внешняя доставка содержит только безопасную краткую версию');
     assert_contains('Получена новая заявка через форму', $form, 'Заявка уведомляет только о факте события');
-    assert_contains("'form-submission-' . $submissionId", $form, 'Заявка дедуплицируется по внутреннему ID');
+    assert_contains("'form-submission-' . \$submissionId", $form, 'Заявка дедуплицируется по внутреннему ID');
     assert_contains('Сам секретный адрес во внешние уведомления не передаётся', $entry, 'Секрет gateway явно исключён');
     assert_not_contains("NotificationCenter::administrators(\n                    'Адрес входа обновлён'", $worker, 'Worker не строит тексты с секретом шлюза');
 });
