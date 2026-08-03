@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers\Admin;
 
+use App\Core\AdminEntryGate;
 use App\Core\Auth;
 use App\Core\AppUrl;
 use App\Core\Csrf;
@@ -138,7 +139,7 @@ final class PasswordResetController
             $scheme = SecurityHeaders::isHttps() ? 'https' : 'http';
             $base = $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
         }
-        $link = $base . '/admin/reset/' . $token;
+        $link = $base . AdminEntryGate::entryUrl('/admin/reset/' . $token);
 
         $subject = 'Восстановление пароля — ArtStudio CMS';
         $body = "Здравствуйте, {$username}!\n\n"
