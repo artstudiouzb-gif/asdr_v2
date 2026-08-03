@@ -9,6 +9,23 @@ use App\Core\MediaMetadataSchema;
 use App\Models\FileEntry;
 use App\Models\NewsImage;
 
+test('миграция метаданных совместима с MySQL 8 и повторным запуском', function (): void {
+    $migration = (string) file_get_contents(APP_ROOT . '/database/migrations/2026_08_03_media_library_metadata.sql');
+
+    assert_true(!str_contains($migration, 'ADD COLUMN IF NOT EXISTS'), 'не используется MariaDB-синтаксис');
+    assert_contains('information_schema.COLUMNS', $migration, 'наличие колонок проверяется перед DDL');
+    assert_contains('PREPARE asdr_stmt FROM @asdr_sql', $migration, 'условный DDL выполняется через MySQL PREPARE');
+
+    $pdo = Database::pdo();
+    $pdo->exec($migration);
+    $pdo->exec($migration);
+
+    foreach (['alt_text', 'caption', 'description', 'credit', 'focal_x', 'focal_y', 'metadata_updated_at'] as $column) {
+        $stmt = $pdo->query('SHOW COLUMNS FROM `files` LIKE ' . $pdo->quote($column));
+        assert_true($stmt !== false && $stmt->fetchColumn() !== false, "колонка files.{$column} существует после повторного запуска");
+    }
+});
+
 test('медиабиблиотека хранит редакционные метаданные отдельно от новости', function (): void {
     MediaMetadataSchema::ensure();
     $pdo = Database::pdo();
