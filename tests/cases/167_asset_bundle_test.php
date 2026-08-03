@@ -17,13 +17,17 @@ test('public frontend delegates CSS and JS selection to the asset service', func
 
 test('asset service supports optimized mode and diagnostic source fallback', function (): void {
     Setting::set('perf_asset_bundle', '1');
-    assert_same(['/assets/css/public.min.css'], FrontendAssets::styles());
+    assert_same([
+        '/assets/css/public.min.css',
+        '/assets/css/public-content-modes.css',
+    ], FrontendAssets::styles());
     assert_same(['/assets/js/public.min.js'], FrontendAssets::scripts());
 
     Setting::set('perf_asset_bundle', '0');
-    assert_same(6, count(FrontendAssets::styles()));
+    assert_same(7, count(FrontendAssets::styles()));
     assert_same(3, count(FrontendAssets::scripts()));
     assert_contains('/assets/css/frontend.css', implode(',', FrontendAssets::styles()));
+    assert_contains('/assets/css/public-content-modes.css', implode(',', FrontendAssets::styles()));
     assert_contains('/assets/js/frontend.js', implode(',', FrontendAssets::scripts()));
 
     Setting::set('perf_asset_bundle', '1');

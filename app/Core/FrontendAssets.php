@@ -33,11 +33,17 @@ final class FrontendAssets
     private const CSS_BUNDLE = '/assets/css/public.min.css';
     private const JS_BUNDLE = '/assets/js/public.min.js';
     private const MANIFEST = '/public/assets/asset-manifest.json';
+    private const CONTENT_MODES_CSS = '/assets/css/public-content-modes.css';
 
     /** @return array<int, string> */
     public static function styles(): array
     {
-        return self::enabled() ? [self::CSS_BUNDLE] : self::CSS_SOURCES;
+        $styles = self::enabled() ? [self::CSS_BUNDLE] : self::CSS_SOURCES;
+        // Печатный и читательский режимы загружаются после темы и generated
+        // CSS. Так правила печати не зависят от актуальности asset bundle.
+        $styles[] = self::CONTENT_MODES_CSS;
+
+        return $styles;
     }
 
     /** @return array<int, string> */
@@ -51,9 +57,7 @@ final class FrontendAssets
         return Setting::get('perf_asset_bundle', '1') === '1' && self::bundleReady();
     }
 
-    /**
-     * Быстрая production-проверка без чтения содержимого всех исходников.
-     */
+    /** Быстрая production-проверка без чтения содержимого всех исходников. */
     private static function bundleReady(): bool
     {
         $manifest = self::manifest();
@@ -75,11 +79,7 @@ final class FrontendAssets
         return true;
     }
 
-    /**
-     * Данные для экрана «Производительность».
-     *
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public static function status(): array
     {
         $manifest = self::manifest();

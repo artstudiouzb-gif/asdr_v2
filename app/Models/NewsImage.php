@@ -7,8 +7,9 @@ namespace App\Models;
 use App\Core\Database;
 
 /**
- * Фотографии галереи новости. Хранит относительный путь к файлу, alt-текст,
- * фокальную точку (в %) и порядок сортировки.
+ * Фотографии галереи новости. При привязке файла из медиабиблиотеки копирует
+ * редакционные метаданные в снимок новости: последующая правка общей карточки
+ * файла не меняет уже опубликованную подпись задним числом.
  */
 final class NewsImage
 {
@@ -25,11 +26,29 @@ final class NewsImage
 
     public static function create(int $newsId, string $path, ?string $alt = null, int $sortOrder = 0): int
     {
+        $libraryFile = FileEntry::findPublicByUrl($path);
+        $resolvedAlt = $alt ?? self::nullableString($libraryFile['alt_text'] ?? null, 255);
+        $caption = self::nullableString($libraryFile['caption'] ?? null, 255);
+        $credit = self::nullableString($libraryFile['credit'] ?? null, 255);
+        $focalX = self::nullablePercent($libraryFile['focal_x'] ?? null);
+        $focalY = self::nullablePercent($libraryFile['focal_y'] ?? null);
+
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO news_images (news_id, path, alt_text, sort_order, created_at)
-             VALUES (:nid, :path, :alt, :sort, NOW())'
+            'INSERT INTO news_images
+                (news_id, path, alt_text, caption, credit, focal_x, focal_y, sort_order, created_at)
+             VALUES
+                (:nid, :path, :alt, :caption, :credit, :fx, :fy, :sort, NOW())'
         );
-        $stmt->execute([':nid' => $newsId, ':path' => $path, ':alt' => $alt, ':sort' => $sortOrder]);
+        $stmt->execute([
+            ':nid' => $newsId,
+            ':path' => $path,
+            ':alt' => $resolvedAlt,
+            ':caption' => $caption,
+            ':credit' => $credit,
+            ':fx' => $focalX,
+            ':fy' => $focalY,
+            ':sort' => $sortOrder,
+        ]);
 
         return (int) Database::pdo()->lastInsertId();
     }
@@ -90,5 +109,20 @@ final class NewsImage
         $path = $stmt->fetchColumn();
 
         return $path !== false ? (string) $path : null;
+    }
+
+    private static function nullableString(mixed $value, int $limit): ?string
+    {
+        $value = trim((string) $value);
+        return $value === '' ? null : mb_substr($value, 0, $limit);
+    }
+
+    private static function nullablePercent(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return max(0, min(100, (int) $value));
     }
 }
