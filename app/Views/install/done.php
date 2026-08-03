@@ -3,6 +3,7 @@ $step = '4';
 /** @var string $email */
 /** @var string $username */
 /** @var bool $emailSent */
+/** @var string $adminEntryUrl */
 require __DIR__ . '/_header.php';
 ?>
 <div class="u-inline-dc16df27e2">
@@ -29,12 +30,12 @@ require __DIR__ . '/_header.php';
         <div class="u-inline-6e20fb40dc">
             <div><strong>Логин:</strong> <code><?= htmlspecialchars((string) ($username ?? 'admin'), ENT_QUOTES) ?></code></div>
             <div><strong>E-mail:</strong> <code><?= htmlspecialchars((string) ($email ?? ''), ENT_QUOTES) ?></code></div>
-            <div><strong>Панель управления:</strong> <code>/admin/login</code></div>
+            <div><strong>Панель управления:</strong> <code><?= htmlspecialchars((string) ($adminEntryUrl ?? '/admin/login'), ENT_QUOTES) ?></code></div>
         </div>
         <?php if (empty($emailSent)): ?>
             <div class="u-inline-87ff6778ab">
                 <?= \App\Core\Icon::render('bulb', 18, 'install-hint-icon') ?>
-                <em>Поскольку SMTP-сервер еще не настроен, сообщение не отправлялось на почту. Настроить отправку писем или подключить Telegram-бота можно в панели управления.</em>
+                <em>Поскольку SMTP-сервер еще не настроен, сообщение не отправлялось на почту. Сохраните адрес панели сейчас. Настроить отправку писем или подключить Telegram-бота можно после входа.</em>
             </div>
         <?php endif; ?>
     </div>
@@ -43,13 +44,13 @@ require __DIR__ . '/_header.php';
         <div class="u-inline-d850ac3a7e">
             <?= \App\Core\Icon::render('lock', 20, 'u-inline-6abc078b20') ?>
             <div class="u-inline-c6e9746c81">
-                <strong class="u-inline-c0811a5932">Защита установщика:</strong>
-                Установщик заблокирован файлом <code>storage/installed.lock</code> и закрыт для повторного использования (403 Forbidden).
+                <strong class="u-inline-c0811a5932">Защита установщика и входа:</strong>
+                Установщик заблокирован файлом <code>storage/installed.lock</code>. Прямой адрес <code>/admin/login</code> скрыт после создания защищённого адреса выше.
             </div>
         </div>
     </div>
 
-    <a href="/admin/login" class="btn btn--primary u-inline-8ca649dc3b">
+    <a href="<?= htmlspecialchars((string) ($adminEntryUrl ?? '/admin/login'), ENT_QUOTES) ?>" class="btn btn--primary u-inline-8ca649dc3b">
         Войти в панель управления
         <?= \App\Core\Icon::render('arrow-right', 18, 'btn__icon', 2.5) ?>
     </a>
