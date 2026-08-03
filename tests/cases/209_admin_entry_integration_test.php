@@ -7,8 +7,10 @@ test('Скрытый вход загружается до gateway и управ�
     $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/SecurityController.php');
     $view = (string) file_get_contents(APP_ROOT . '/app/Views/admin/security/index.php');
 
-    $loadPos = strpos($bootstrap, 'AdminEntryConfig::loadIntoConfig()');
-    $enforcePos = strpos($bootstrap, 'AdminEntryGate::enforce()');
+    // Ищем именно исполняемые вызовы: названия методов также упоминаются в
+    // комментариях bootstrap, поэтому короткий поиск давал ложный порядок.
+    $loadPos = strpos($bootstrap, '\\App\\Core\\AdminEntryConfig::loadIntoConfig();');
+    $enforcePos = strpos($bootstrap, '\\App\\Core\\AdminEntryGate::enforce();');
     assert_true($loadPos !== false, 'Runtime-конфигурация шлюза загружается');
     assert_true($enforcePos !== false, 'Gateway применяется к HTTP-запросам');
     assert_true($loadPos < $enforcePos, 'Runtime-конфигурация загружается до проверки маршрута');
