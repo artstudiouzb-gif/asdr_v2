@@ -74,6 +74,7 @@ final class HealthController
         $status = $ok ? ($stale === [] ? 'ok' : 'degraded') : 'down';
         http_response_code($ok ? 200 : 503);
 
+        /** @var array<string,mixed> $payload */
         $payload = ['status' => $status];
         if ($detailed) {
             $payload['checks'] = $checks;
