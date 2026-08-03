@@ -88,10 +88,13 @@ foreach ($navGroups as $navGroupLabel => $navGroupItems) {
 }
 
 $navInitials = mb_strtoupper(mb_substr((string) ($navUser['username'] ?? 'A'), 0, 1));
+$navRoleLabel = (string) ($navUser['role'] ?? 'editor') === 'admin' ? t('Администратор') : t('Редактор');
 $activeLangs = \App\Models\Language::active();
 $currentLang = \App\Core\Locale::current();
 $navUserId = (int) ($navUser['id'] ?? 0);
 $navAdminTheme = $_SESSION['admin_theme'] ?? (\App\Models\Setting::get('admin_theme_user_' . $navUserId, 'default'));
+$navBrandHost = (string) (parse_url((string) \App\Core\Config::get('app.url', ''), PHP_URL_HOST) ?: '');
+$navBrandSubtitle = $navBrandHost !== '' ? $navBrandHost : t('Панель управления');
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars($currentLang, ENT_QUOTES) ?>" data-theme="light" data-admin-theme="<?= htmlspecialchars((string) $navAdminTheme, ENT_QUOTES) ?>">
@@ -101,6 +104,7 @@ $navAdminTheme = $_SESSION['admin_theme'] ?? (\App\Models\Setting::get('admin_th
 <title><?= htmlspecialchars($pageTitle, ENT_QUOTES) ?> — <?= htmlspecialchars(\App\Core\AdminBrand::name(), ENT_QUOTES) ?></title>
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/vendor/coloris/coloris.min.css'), ENT_QUOTES) ?>">
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/css/admin.css'), ENT_QUOTES) ?>">
+<link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/css/admin-shell-v2.css'), ENT_QUOTES) ?>">
 <?= \App\Core\Icon::browserConfigHtml() ?>
 <?= \App\Core\AdminBrand::styleTag() ?>
 <?= \App\Core\AdminBrand::faviconHtml() ?>
@@ -118,22 +122,17 @@ try {
     <button type="button" class="admin-topbar__toggle" data-sidebar-toggle aria-label="Открыть меню" aria-controls="admin-sidebar" aria-expanded="false">
         <?= \App\Core\AdminUi::icon('menu', 20) ?>
     </button>
-    <a href="/admin" class="admin-topbar__brand">
-        <?= \App\Core\AdminBrand::badgeHtml() ?>
-        <span class="admin-topbar__name"><?= htmlspecialchars(\App\Core\AdminBrand::name(), ENT_QUOTES) ?></span>
-    </a>
     <span class="admin-topbar__crumb"><?= htmlspecialchars($navCrumb, ENT_QUOTES) ?></span>
     <div class="admin-topbar__spacer"></div>
     <div class="admin-search" data-search>
         <?= \App\Core\AdminUi::icon('search', 16, 'admin-search__icon') ?>
         <input type="search" class="admin-search__input" data-search-input
-               placeholder="Поиск…" autocomplete="off" aria-label="Поиск по админке">
+               placeholder="Поиск по панели…" autocomplete="off" aria-label="Поиск по админке">
         <kbd class="admin-search__kbd">Ctrl K</kbd>
         <div class="admin-search__results" data-search-results hidden></div>
     </div>
 
     <div class="admin-tools">
-
         <?php if (count($activeLangs) > 1): ?>
             <details class="admin-menu admin-tools__lang">
                 <summary class="admin-tbtn" title="<?= htmlspecialchars(t('Язык интерфейса'), ENT_QUOTES) ?>">
@@ -199,9 +198,17 @@ try {
     <details class="admin-user">
         <summary class="admin-user__btn" aria-label="Аккаунт">
             <span class="admin-user__avatar"><?= htmlspecialchars($navInitials, ENT_QUOTES) ?></span>
+            <span class="admin-user__identity">
+                <strong><?= htmlspecialchars((string) ($navUser['username'] ?? ''), ENT_QUOTES) ?></strong>
+                <small><?= htmlspecialchars($navRoleLabel, ENT_QUOTES) ?></small>
+            </span>
+            <?= \App\Core\AdminUi::icon('chevron-down', 14, 'admin-user__chevron', 2) ?>
         </summary>
         <div class="admin-user__menu">
-            <div class="admin-user__name"><?= htmlspecialchars((string) ($navUser['username'] ?? ''), ENT_QUOTES) ?></div>
+            <div class="admin-user__name">
+                <?= htmlspecialchars((string) ($navUser['username'] ?? ''), ENT_QUOTES) ?>
+                <small><?= htmlspecialchars($navRoleLabel, ENT_QUOTES) ?></small>
+            </div>
             <a href="/admin/profile" class="admin-user__link">Профиль</a>
             <form method="post" action="/admin/logout">
                 <?= Csrf::field() ?>
@@ -213,30 +220,43 @@ try {
 
 <div class="admin-shell">
     <aside class="admin-sidebar" id="admin-sidebar" data-sidebar aria-label="<?= htmlspecialchars(t('Основная навигация'), ENT_QUOTES) ?>">
-        <a href="/admin" class="admin-nav-item <?= $activeNav === 'dashboard' ? 'is-active' : '' ?>" title="<?= htmlspecialchars(t('Дашборд'), ENT_QUOTES) ?>"<?= $activeNav === 'dashboard' ? ' aria-current="page"' : '' ?>>
-            <?= \App\Core\AdminUi::navigationIcon('dashboard') ?><span><?= htmlspecialchars(t('Дашборд'), ENT_QUOTES) ?></span>
+        <a href="/admin" class="admin-sidebar__brand" aria-label="<?= htmlspecialchars(\App\Core\AdminBrand::name(), ENT_QUOTES) ?>">
+            <span class="admin-sidebar__brand-mark">
+                <?= \App\Core\AdminBrand::badgeHtml('admin-sidebar__logoimg', 'admin-sidebar__logo') ?>
+            </span>
+            <span class="admin-sidebar__brand-copy">
+                <strong><?= htmlspecialchars(\App\Core\AdminBrand::name(), ENT_QUOTES) ?></strong>
+                <small><?= htmlspecialchars($navBrandSubtitle, ENT_QUOTES) ?></small>
+            </span>
         </a>
-        <?php foreach ($navGroups as $navGroupLabel => $navGroupItems): ?>
-            <?php if (empty($navGroupItems)) { continue; } ?>
-            <div class="admin-nav-group" data-nav-group="<?= htmlspecialchars($navGroupLabel, ENT_QUOTES) ?>">
-                <button type="button" class="admin-sidebar__label admin-sidebar__label--toggle" data-nav-toggle aria-expanded="true">
-                    <span><?= htmlspecialchars($navGroupLabel, ENT_QUOTES) ?></span>
-                    <?= \App\Core\AdminUi::icon('chevron-down', 12, 'admin-sidebar__chevron', 2.5) ?>
-                </button>
-                <div class="admin-nav-group__items">
-                    <?php foreach ($navGroupItems as $navKey => [$navUrl, $navText]): ?>
-                        <?php $navIc = str_starts_with($navKey, 'content:') ? 'content_types' : $navKey; ?>
-                        <a href="<?= $navUrl ?>" class="admin-nav-item <?= $activeNav === $navKey ? 'is-active' : '' ?>" title="<?= htmlspecialchars($navText, ENT_QUOTES) ?>"<?= $activeNav === $navKey ? ' aria-current="page"' : '' ?>>
-                            <?= \App\Core\AdminUi::navigationIcon($navIc) ?><span><?= htmlspecialchars($navText, ENT_QUOTES) ?></span>
-                        </a>
-                    <?php endforeach; ?>
+
+        <div class="admin-sidebar__nav">
+            <a href="/admin" class="admin-nav-item <?= $activeNav === 'dashboard' ? 'is-active' : '' ?>" title="<?= htmlspecialchars(t('Дашборд'), ENT_QUOTES) ?>"<?= $activeNav === 'dashboard' ? ' aria-current="page"' : '' ?>>
+                <?= \App\Core\AdminUi::navigationIcon('dashboard') ?><span><?= htmlspecialchars(t('Дашборд'), ENT_QUOTES) ?></span>
+            </a>
+            <?php foreach ($navGroups as $navGroupLabel => $navGroupItems): ?>
+                <?php if (empty($navGroupItems)) { continue; } ?>
+                <div class="admin-nav-group" data-nav-group="<?= htmlspecialchars($navGroupLabel, ENT_QUOTES) ?>">
+                    <button type="button" class="admin-sidebar__label admin-sidebar__label--toggle" data-nav-toggle aria-expanded="true">
+                        <span><?= htmlspecialchars($navGroupLabel, ENT_QUOTES) ?></span>
+                        <?= \App\Core\AdminUi::icon('chevron-down', 12, 'admin-sidebar__chevron', 2.5) ?>
+                    </button>
+                    <div class="admin-nav-group__items">
+                        <?php foreach ($navGroupItems as $navKey => [$navUrl, $navText]): ?>
+                            <?php $navIc = str_starts_with($navKey, 'content:') ? 'content_types' : $navKey; ?>
+                            <a href="<?= $navUrl ?>" class="admin-nav-item <?= $activeNav === $navKey ? 'is-active' : '' ?>" title="<?= htmlspecialchars($navText, ENT_QUOTES) ?>"<?= $activeNav === $navKey ? ' aria-current="page"' : '' ?>>
+                                <?= \App\Core\AdminUi::navigationIcon($navIc) ?><span><?= htmlspecialchars($navText, ENT_QUOTES) ?></span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-            </div>
-        <?php endforeach; ?>
-        <div class="admin-sidebar__label"><?= htmlspecialchars(t('Аккаунт'), ENT_QUOTES) ?></div>
-        <a href="/admin/profile" class="admin-nav-item <?= $activeNav === 'profile' ? 'is-active' : '' ?>" title="<?= htmlspecialchars(t('Профиль'), ENT_QUOTES) ?>"<?= $activeNav === 'profile' ? ' aria-current="page"' : '' ?>>
-            <?= \App\Core\AdminUi::navigationIcon('profile') ?><span><?= htmlspecialchars(t('Профиль'), ENT_QUOTES) ?></span>
-        </a>
+            <?php endforeach; ?>
+            <div class="admin-sidebar__label"><?= htmlspecialchars(t('Аккаунт'), ENT_QUOTES) ?></div>
+            <a href="/admin/profile" class="admin-nav-item <?= $activeNav === 'profile' ? 'is-active' : '' ?>" title="<?= htmlspecialchars(t('Профиль'), ENT_QUOTES) ?>"<?= $activeNav === 'profile' ? ' aria-current="page"' : '' ?>>
+                <?= \App\Core\AdminUi::navigationIcon('profile') ?><span><?= htmlspecialchars(t('Профиль'), ENT_QUOTES) ?></span>
+            </a>
+        </div>
+
         <button type="button" class="admin-sidebar__collapse" data-sidebar-collapse aria-expanded="true" title="<?= htmlspecialchars(t('Свернуть меню'), ENT_QUOTES) ?>">
             <?= \App\Core\AdminUi::icon('panel-left', 18, 'btn__icon', 1.8) ?>
             <span><?= htmlspecialchars(t('Свернуть меню'), ENT_QUOTES) ?></span>
