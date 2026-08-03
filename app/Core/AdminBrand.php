@@ -43,8 +43,8 @@ final class AdminBrand
     }
 
     /**
-     * Head-разметка админки: CSS-переменные бренда и клиент Центра
-     * уведомлений. Имя метода сохраняется для обратной совместимости layout.
+     * Head-разметка админки: CSS-переменные бренда и внешние клиенты панели.
+     * Имя метода сохраняется для обратной совместимости layout.
      */
     public static function styleTag(): string
     {
@@ -70,20 +70,22 @@ final class AdminBrand
         $html .= '<link rel="stylesheet" data-admin-shell-stability-css="1" href="'
             . htmlspecialchars(Asset::url('/assets/css/admin-shell-stability.css'), ENT_QUOTES)
             . '">';
+        $html .= '<link rel="stylesheet" data-admin-media-metadata-css="1" href="'
+            . htmlspecialchars(Asset::url('/assets/css/admin-media-metadata.css'), ENT_QUOTES)
+            . '">';
         $html .= '<script nonce="' . htmlspecialchars(SecurityHeaders::nonce(), ENT_QUOTES)
             . '" src="' . htmlspecialchars(Asset::url('/assets/js/admin-notifications.js'), ENT_QUOTES)
+            . '" defer></script>';
+        $html .= '<script nonce="' . htmlspecialchars(SecurityHeaders::nonce(), ENT_QUOTES)
+            . '" src="' . htmlspecialchars(Asset::url('/assets/js/admin-media-metadata.js'), ENT_QUOTES)
             . '" defer></script>';
 
         return $html;
     }
 
-    /**
-     * HTML-теги фавиконки для страниц админ-панели и авторизации.
-     */
+    /** HTML-теги фавиконки для страниц админ-панели и авторизации. */
     public static function faviconHtml(): string
     {
-        // Ссылки только на существующие файлы: иначе каждая страница админки
-        // тянет три ответа 404.
         $html = '';
         foreach (Favicon::staticIcons() as $tag) {
             $html .= $tag . "\n";
