@@ -7,6 +7,7 @@ namespace App\Controllers\Site;
 use App\Core\Csrf;
 use App\Core\Flash;
 use App\Core\Mailer;
+use App\Core\NotificationCenter;
 use App\Core\RateLimiter;
 use App\Core\View;
 use App\Models\FormDef;
@@ -129,7 +130,7 @@ final class FormController
             $this->fail('Проверьте правильность заполнения формы.', $errors);
         }
 
-        FormSubmission::create(
+        $submissionId = FormSubmission::create(
             (int) $form['id'],
             $data,
             $_SERVER['REMOTE_ADDR'] ?? null,
@@ -142,6 +143,19 @@ final class FormController
 
         // Мгновенное уведомление в Telegram (если настроен бот и получатели).
         \App\Core\FormNotifier::notifySubmission((string) $form['name'], $data);
+
+        // Внутреннее уведомление не содержит поля заявки и персональные данные:
+        // они доступны только после авторизации и проверки роли в админке.
+        NotificationCenter::roles(
+            ['admin', 'super_admin', 'editor'],
+            'Новая заявка',
+            'Получена новая заявка через форму «' . (string) $form['name'] . '».',
+            'forms',
+            'info',
+            '/admin/forms/submissions/' . $submissionId,
+            false,
+            'form-submission-' . $submissionId
+        );
 
         // Событие для исходящих вебхуков (задача 136).
         \App\Core\WebhookDispatcher::dispatch('form.submitted', [
