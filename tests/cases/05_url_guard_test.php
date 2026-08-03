@@ -16,10 +16,12 @@ test('UrlGuard: блокирует javascript:/vbscript: в ссылках', fun
     assert_false(UrlGuard::isSafeLink("https://example.com/\njavascript:alert(1)"));
 });
 
-test('UrlGuard: медиа разрешает только локальные и http(s) URL', function () {
+test('UrlGuard: медиа разрешает только корневые локальные и явные http(s) URL', function () {
     assert_true(UrlGuard::isSafeMedia('/uploads/public/image.jpg'));
     assert_true(UrlGuard::isSafeMedia('https://cdn.example.com/image.jpg'));
-    assert_true(UrlGuard::isSafeMedia('//cdn.example.com/image.jpg'));
+    assert_false(UrlGuard::isSafeMedia('//cdn.example.com/image.jpg'));
+    assert_false(UrlGuard::isSafeMedia('../../etc/passwd'));
+    assert_false(UrlGuard::isSafeMedia('images/photo.jpg'));
     assert_false(UrlGuard::isSafeMedia('javascript:alert(1)'));
     assert_false(UrlGuard::isSafeMedia('data:image/svg+xml,<svg></svg>'));
     assert_false(UrlGuard::isSafeMedia('mailto:editor@example.com'));

@@ -167,18 +167,18 @@ final class HtmlSanitizer
                 continue;
             }
 
-            $normalized = strtolower(preg_replace('/\s+/', '', $value) ?? '');
-
-            // URL-атрибуты: только http/https/mailto/tel/относительные и data:image.
-            if (in_array($name, ['href', 'src'], true)) {
-                if (str_starts_with($normalized, 'javascript:')
-                    || str_starts_with($normalized, 'vbscript:')
-                    || (str_starts_with($normalized, 'data:') && !str_starts_with($normalized, 'data:image/'))) {
-                    $el->removeAttribute($attr->nodeName);
-                    continue;
-                }
+            // URL-атрибуты проверяются центральным allowlist-гейтом. href
+            // допускает http(s), mailto/tel и локальные пути; src — только
+            // http(s) и локальные пути. data:, file:, protocol-relative URL,
+            // управляющие символы и URL с userinfo удаляются.
+            if ($name === 'href' && !UrlGuard::isSafeLink($value)) {
+                $el->removeAttribute($attr->nodeName);
+                continue;
             }
-
+            if ($name === 'src' && !UrlGuard::isSafeMedia($value)) {
+                $el->removeAttribute($attr->nodeName);
+                continue;
+            }
         }
 
         // Внешние ссылки делаем безопасными.

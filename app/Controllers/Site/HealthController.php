@@ -9,9 +9,9 @@ use App\Core\Heartbeat;
 use App\Core\Logger;
 
 /**
- * Health-check для мониторинга (задача 59). Проверяет БД, доступность записи
- * в storage и «живость» фоновых воркеров (heartbeat, группа 2.1). Отдаёт JSON
- * и корректный HTTP-код; при неуспехе шлёт алерт.
+ * Health-check для мониторинга (задача 59). Публично отдаёт только общий
+ * статус и HTTP-код. Подробности о БД, storage, воркерах и релизе доступны
+ * только с сервисным токеном из переменной окружения HEALTH_CHECK_TOKEN.
  */
 final class HealthController
 {
@@ -19,6 +19,19 @@ final class HealthController
     {
         header('Content-Type: application/json; charset=UTF-8');
         header('Cache-Control: no-store');
+
+        [$providedToken, $authAttempted] = self::providedToken();
+        $expectedToken = trim((string) getenv('HEALTH_CHECK_TOKEN'));
+        $detailed = $expectedToken !== ''
+            && $providedToken !== ''
+            && hash_equals($expectedToken, $providedToken);
+
+        if ($authAttempted && !$detailed) {
+            http_response_code(403);
+            header('WWW-Authenticate: Bearer realm="health"');
+            echo json_encode(['status' => 'forbidden'], JSON_UNESCAPED_UNICODE);
+            return;
+        }
 
         $checks = ['db' => false, 'storage' => false];
 
@@ -58,12 +71,49 @@ final class HealthController
         // Инфраструктурный статус (db+storage) определяет HTTP-код, чтобы не
         // «флапать» 503 на установках, где часть воркеров осознанно не настроена.
         $ok = $checks['db'] && $checks['storage'];
+        $status = $ok ? ($stale === [] ? 'ok' : 'degraded') : 'down';
         http_response_code($ok ? 200 : 503);
-        echo json_encode([
-            'status' => $ok ? ($stale === [] ? 'ok' : 'degraded') : 'down',
-            'checks' => $checks,
-            'workers' => $workers,
-            'release' => \App\Core\Release::id(),
-        ], JSON_UNESCAPED_UNICODE);
+
+        /** @var array<string,mixed> $payload */
+        $payload = ['status' => $status];
+        if ($detailed) {
+            $payload['checks'] = $checks;
+            $payload['workers'] = $workers;
+            $payload['release'] = \App\Core\Release::id();
+        }
+
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Принимает токен только из заголовка Authorization: Bearer ... или
+     * X-Health-Token. Query-параметры намеренно не используются, чтобы секрет
+     * не попадал в access-логи, историю браузера и URL мониторинга.
+     *
+     * @return array{0:string,1:bool} [token, была ли попытка авторизации]
+     */
+    private static function providedToken(): array
+    {
+        $authorization = trim((string) (
+            $_SERVER['HTTP_AUTHORIZATION']
+            ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
+            ?? ''
+        ));
+        $headerToken = trim((string) ($_SERVER['HTTP_X_HEALTH_TOKEN'] ?? ''));
+        $attempted = $authorization !== '' || $headerToken !== '';
+
+        $token = $headerToken;
+        if ($authorization !== '') {
+            if (preg_match('/^Bearer[ \t]+([^\s]+)$/i', $authorization, $matches) !== 1) {
+                return ['', true];
+            }
+            $token = (string) $matches[1];
+        }
+
+        if ($token === '' || preg_match('/[\x00-\x1F\x7F]/', $token) === 1) {
+            return ['', $attempted];
+        }
+
+        return [$token, $attempted];
     }
 }

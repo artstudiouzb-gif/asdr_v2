@@ -22,7 +22,7 @@ final class Redirect
     public static function normalizePath(string $raw): ?string
     {
         $raw = trim($raw);
-        if ($raw === '') {
+        if ($raw === '' || self::containsUnsafeHeaderChars($raw) || str_contains($raw, '\\')) {
             return null;
         }
         if (preg_match('#^https?://#i', $raw) === 1) {
@@ -46,36 +46,57 @@ final class Redirect
 
     /**
      * Валидирует целевой адрес: относительный путь («/new-page») или
-     * абсолютный http(s)-URL. Иное — null.
+     * абсолютный http(s)-URL. Иное — null. Управляющие символы и обратные
+     * слеши запрещены до передачи значения в header('Location: ...').
      */
     public static function normalizeTarget(string $raw): ?string
     {
         $raw = trim($raw);
-        if ($raw === '' || mb_strlen($raw) > 500) {
+        if ($raw === ''
+            || mb_strlen($raw) > 500
+            || self::containsUnsafeHeaderChars($raw)
+            || preg_match('/\s/u', $raw) === 1
+            || str_contains($raw, '\\')) {
             return null;
         }
         if ($raw[0] === '/') {
             // Защита от «//evil.site» (протокол-относительный URL).
             return str_starts_with($raw, '//') ? null : $raw;
         }
-        if (preg_match('#^https?://[^\s]+$#i', $raw) === 1) {
-            return $raw;
+
+        $parts = parse_url($raw);
+        if ($parts === false
+            || !in_array(strtolower((string) ($parts['scheme'] ?? '')), ['http', 'https'], true)
+            || empty($parts['host'])
+            || isset($parts['user'])
+            || isset($parts['pass'])) {
+            return null;
         }
 
-        return null;
+        return $raw;
     }
 
     /**
      * Целевой URL с переносом query-строки исходного запроса (если у цели
-     * нет собственной). Чистая функция.
+     * нет собственной). Значение повторно валидируется, а query разбирается
+     * и кодируется заново, чтобы CR/LF и другие сырые байты не попали в
+     * Location-заголовок.
      */
     public static function buildTarget(string $toUrl, string $queryString): string
     {
-        if ($queryString !== '' && !str_contains($toUrl, '?')) {
-            return $toUrl . '?' . $queryString;
+        $target = self::normalizeTarget($toUrl);
+        if ($target === null) {
+            return '/';
+        }
+        if ($queryString === '' || str_contains($target, '?') || strlen($queryString) > 4096) {
+            return $target;
         }
 
-        return $toUrl;
+        $query = [];
+        parse_str($queryString, $query);
+        $encoded = http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+
+        return $encoded === '' ? $target : $target . '?' . $encoded;
     }
 
     /**
@@ -195,5 +216,10 @@ final class Redirect
         } catch (\Throwable) {
             // Счётчик не должен ломать редирект.
         }
+    }
+
+    private static function containsUnsafeHeaderChars(string $value): bool
+    {
+        return preg_match('/[\x00-\x1F\x7F]/', $value) === 1;
     }
 }
