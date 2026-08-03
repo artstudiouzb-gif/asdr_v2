@@ -26,11 +26,11 @@ test('Установщик генерирует и показывает защи
     $done = (string) file_get_contents(APP_ROOT . '/app/Views/install/done.php');
 
     assert_contains('AdminEntryConfig::ensureGenerated()', $installer, 'Адрес генерируется после создания установки');
-    assert_contains("'adminEntryUrl' => $adminEntryUrl", $installer, 'URL передаётся финальному экрану');
+    assert_contains("'adminEntryUrl' => \$adminEntryUrl", $installer, 'URL передаётся финальному экрану');
     assert_contains('— Панель управления: %s', $installer, 'Письмо содержит фактический защищённый URL');
     assert_not_contains('— Панель управления: %s/admin/login', $installer, 'Старый очевидный URL не отправляется');
 
     assert_contains('/** @var string $adminEntryUrl */', $done, 'Финальный экран ожидает защищённый URL');
-    assert_contains("$adminEntryUrl ?? '/admin/login'", $done, 'Есть безопасный fallback при ошибке генерации');
+    assert_contains("\$adminEntryUrl ?? '/admin/login'", $done, 'Есть безопасный fallback при ошибке генерации');
     assert_contains('Войти в панель управления', $done, 'Ссылка входа остаётся понятной пользователю');
 });
