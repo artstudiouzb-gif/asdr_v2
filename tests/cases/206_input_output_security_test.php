@@ -21,7 +21,7 @@ test('URL allowlist отклоняет опасные и protocol-relative ад�
     assert_true(UrlGuard::isSafeMedia('/uploads/public/photo.jpg'), 'Локальное медиа разрешено');
     assert_true(UrlGuard::isSafeMedia('images/photo.jpg'), 'Относительное медиа разрешено');
     assert_false(UrlGuard::isSafeMedia('mailto:info@example.test'), 'mailto запрещён для src');
-    assert_false(UrlGuard::isSafeMedia('data:image/svg+xml,<svg/>'), 'SVG data URL запрещён для src');
+    assert_false(UrlGuard::isSafeMedia('data:image/svg+xml,%3Csvg%2F%3E'), 'SVG data URL запрещён для src');
 });
 
 test('HTML-санитайзер удаляет небезопасные href и src', function (): void {
@@ -32,7 +32,7 @@ test('HTML-санитайзер удаляет небезопасные href и 
         . '<a href="data:text/html,bad">data</a>'
         . '<a href="file:///etc/passwd">file</a>'
         . '<img src="/uploads/public/good.jpg" alt="good">'
-        . '<img src="data:image/svg+xml,<svg onload=alert(1)></svg>" alt="bad">'
+        . '<img src="data:image/svg+xml,%3Csvg%20onload%3Dalert(1)%3E%3C/svg%3E" alt="bad">'
         . '</p>'
     );
 
@@ -64,9 +64,9 @@ test('Публичный health endpoint скрывает детали без с
     $source = (string) file_get_contents(APP_ROOT . '/app/Controllers/Site/HealthController.php');
 
     assert_contains('HEALTH_CHECK_TOKEN', $source, 'Подробный режим требует секрет из окружения');
-    assert_contains("HTTP_AUTHORIZATION", $source, 'Поддержан Authorization: Bearer');
-    assert_contains("HTTP_X_HEALTH_TOKEN", $source, 'Поддержан сервисный заголовок');
-    assert_contains("$payload = ['status' => $status]", $source, 'Публичный payload начинается только со статуса');
+    assert_contains('HTTP_AUTHORIZATION', $source, 'Поддержан Authorization: Bearer');
+    assert_contains('HTTP_X_HEALTH_TOKEN', $source, 'Поддержан сервисный заголовок');
+    assert_contains('$payload = [\'status\' => $status]', $source, 'Публичный payload начинается только со статуса');
     assert_contains('if ($detailed)', $source, 'Технические детали добавляются только после авторизации');
     assert_contains("['status' => 'forbidden']", $source, 'Неверный переданный токен получает 403');
 });
