@@ -1,0 +1,41 @@
+name: Apply admin entry integration
+
+on:
+  push:
+    branches:
+      - fix/admin-entry-integration
+    paths:
+      - patches/admin-entry-integration.patch
+      - .github/workflows/apply-admin-entry-integration.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v7
+        with:
+          ref: fix/admin-entry-integration
+          fetch-depth: 0
+
+      - name: Apply patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply --check patches/admin-entry-integration.patch
+          git apply patches/admin-entry-integration.patch
+          rm -f patches/admin-entry-integration.patch
+          rm -f .github/workflows/apply-admin-entry-integration.yml
+
+      - name: Commit integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Wire admin entry gateway into installer and security UI"
+          git push origin HEAD:fix/admin-entry-integration
