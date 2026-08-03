@@ -1,0 +1,54 @@
+name: Diagnose notification tests
+
+on:
+  push:
+    branches:
+      - feature/notification-center
+    paths:
+      - .github/workflows/diagnose-notification-tests.yml
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: asdr_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: feature/notification-center
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, mbstring, gd, curl, dom, fileinfo, openssl, zip
+          coverage: none
+      - run: php tests/load_schema.php asdr_test
+      - name: Capture full test output
+        env:
+          TEST_DB_HOST: 127.0.0.1
+          TEST_DB_PORT: '3306'
+          TEST_DB_DATABASE: asdr_test
+          TEST_DB_USERNAME: root
+          TEST_DB_PASSWORD: ''
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set +e
+          php tests/run.php > notification-test-output.txt 2>&1
+          status=$?
+          echo "exit_status=$status" >> notification-test-output.txt
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add notification-test-output.txt
+          git commit -m "Capture notification test diagnostics"
+          git push origin HEAD:feature/notification-center
