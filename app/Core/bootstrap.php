@@ -24,10 +24,6 @@ use App\Core\SecurityHeaders;
 
 define('APP_ROOT', dirname(__DIR__, 2));
 
-// Заголовки безопасности выставляем до любого вывода, чтобы они попали
-// на ВСЕ ответы, включая брендированный fail-safe 503 ниже и страницы ошибок.
-SecurityHeaders::send();
-
 $configFile = APP_ROOT . '/config/config.php';
 $installedLock = APP_ROOT . '/storage/installed.lock';
 
@@ -36,6 +32,38 @@ define('APP_INSTALLED', is_file($configFile) && is_file($installedLock));
 
 ini_set('log_errors', '1');
 ini_set('error_log', APP_ROOT . '/storage/logs/php-error.log');
+
+// Заголовки Forwarded контролируются клиентом, если origin доступен напрямую.
+// До отправки security headers удаляем их для любого peer, который не входит
+// в явный allowlist reverse proxy. Для доверенного proxy затем безопасно
+// определяем реальный IP посетителя.
+$prepareHttpSecurity = static function (): void {
+    if (PHP_SAPI === 'cli') {
+        return;
+    }
+
+    $peer = trim((string) ($_SERVER['REMOTE_ADDR'] ?? ''));
+    if ($peer === '' || !\App\Core\ClientIp::isTrustedProxy($peer)) {
+        foreach ([
+            'HTTP_CF_CONNECTING_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED_PROTO',
+            'HTTP_X_FORWARDED_HOST',
+            'HTTP_X_FORWARDED_PORT',
+            'HTTP_FORWARDED',
+        ] as $header) {
+            unset($_SERVER[$header]);
+        }
+    }
+
+    \App\Core\ClientIp::applyTrustedProxy();
+    // Выставляем заголовки после загрузки Config, но до подключения к БД:
+    // так они попадают и на 404/500/503, а trusted proxy policy уже известна.
+    SecurityHeaders::send();
+    if (!headers_sent()) {
+        header('Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()');
+    }
+};
 
 if (is_file($configFile)) {
     $config = require $configFile;
@@ -50,11 +78,9 @@ if (is_file($configFile)) {
 
     date_default_timezone_set($config['app']['timezone'] ?? 'UTC');
     ErrorHandler::register((bool) ($config['app']['debug'] ?? false));
+    $prepareHttpSecurity();
 
     if (APP_INSTALLED) {
-        // Forwarded IP headers are accepted only from explicitly trusted
-        // reverse proxies configured outside the database.
-        \App\Core\ClientIp::applyTrustedProxy();
         // Inspect the request before opening MySQL so obvious malicious input
         // cannot consume a database connection first.
         \App\Core\WafGuard::inspect();
@@ -70,20 +96,13 @@ if (is_file($configFile)) {
             if (PHP_SAPI !== 'cli') {
                 $failedPath = (string) (parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/');
                 if ($failedPath === '/health') {
-                    $logDir = APP_ROOT . '/storage/logs';
+                    // Fail-safe health endpoint не раскрывает release, storage
+                    // и внутреннюю структуру проверок неавторизованному клиенту.
                     http_response_code(503);
                     header('Content-Type: application/json; charset=UTF-8');
                     header('Cache-Control: no-store');
                     header('Retry-After: 60');
-                    echo json_encode([
-                        'status' => 'down',
-                        'checks' => [
-                            'db' => false,
-                            'storage' => is_dir($logDir) && is_writable($logDir),
-                        ],
-                        'workers' => [],
-                        'release' => \App\Core\Release::id(),
-                    ], JSON_UNESCAPED_UNICODE);
+                    echo json_encode(['status' => 'down'], JSON_UNESCAPED_UNICODE);
                     exit;
                 }
                 http_response_code(503);
@@ -108,6 +127,7 @@ if (is_file($configFile)) {
     Config::set(['app' => ['env' => 'production', 'debug' => true, 'url' => '', 'timezone' => 'UTC']]);
     date_default_timezone_set('UTC');
     ErrorHandler::register(true);
+    $prepareHttpSecurity();
 }
 
 // Для обычного публичного GET без cookie сессию не создаём. Компоненты,

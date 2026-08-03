@@ -3,13 +3,21 @@
 declare(strict_types=1);
 
 use App\Core\AppUrl;
+use App\Core\Config;
 use App\Core\RequestUrl;
 
-test('Внешний HTTPS корректно определяется за reverse proxy', function () {
+test('Внешний HTTPS корректно определяется за доверенным reverse proxy', function () {
     $server = $_SERVER;
+    $security = Config::get('security', []);
+    $security = is_array($security) ? $security : [];
 
     try {
+        Config::merge(['security' => array_merge($security, [
+            'trusted_proxy_cidrs' => ['10.0.0.0/8'],
+        ])]);
+        $_SERVER['REMOTE_ADDR'] = '10.20.30.40';
         $_SERVER['HTTPS'] = 'off';
+        $_SERVER['SERVER_PORT'] = '80';
         $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https, http';
         $_SERVER['HTTP_HOST'] = 'ASR.ArtStudio.UZ';
 
@@ -17,6 +25,30 @@ test('Внешний HTTPS корректно определяется за reve
         assert_same('https://asr.artstudio.uz', RequestUrl::origin());
     } finally {
         $_SERVER = $server;
+        Config::merge(['security' => $security]);
+    }
+});
+
+test('Поддельный X-Forwarded-Proto от прямого клиента игнорируется', function () {
+    $server = $_SERVER;
+    $security = Config::get('security', []);
+    $security = is_array($security) ? $security : [];
+
+    try {
+        Config::merge(['security' => array_merge($security, [
+            'trusted_proxy_cidrs' => ['10.0.0.0/8'],
+        ])]);
+        $_SERVER['REMOTE_ADDR'] = '203.0.113.25';
+        $_SERVER['HTTPS'] = 'off';
+        $_SERVER['SERVER_PORT'] = '80';
+        $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
+        $_SERVER['HTTP_HOST'] = 'asr.artstudio.uz';
+
+        assert_false(RequestUrl::isHttps(), 'клиент не может выдать HTTP за HTTPS');
+        assert_same('http://asr.artstudio.uz', RequestUrl::origin());
+    } finally {
+        $_SERVER = $server;
+        Config::merge(['security' => $security]);
     }
 });
 
