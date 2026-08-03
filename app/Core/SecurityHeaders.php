@@ -40,7 +40,12 @@ final class SecurityHeaders
             header('Strict-Transport-Security: ' . self::hstsValue());
         }
 
-        $isAdmin = str_starts_with($path, '/admin') || str_starts_with($path, '/install');
+        $isAdminPath = str_starts_with($path, '/admin');
+        // Без session/gateway-cookie неизвестный посетитель получает тот же
+        // публичный CSP, что и обычная 404. Иначе набор заголовков сам выдавал
+        // бы существование скрываемой административной поверхности.
+        $hasAdminContext = Session::hasCookie() || AdminEntryGate::hasPresentedCookie();
+        $isAdmin = ($isAdminPath && $hasAdminContext) || str_starts_with($path, '/install');
         header('Content-Security-Policy: ' . ($isAdmin
             ? self::adminCsp(self::nonce())
             : self::publicCsp(self::nonce(), self::publicCspOptions())));
