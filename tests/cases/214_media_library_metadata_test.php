@@ -11,8 +11,9 @@ use App\Models\NewsImage;
 
 test('миграция метаданных совместима с MySQL 8 и повторным запуском', function (): void {
     $migration = (string) file_get_contents(APP_ROOT . '/database/migrations/2026_08_03_media_library_metadata.sql');
+    $executableSql = preg_replace('/^\s*--.*$/m', '', $migration) ?? $migration;
 
-    assert_true(!str_contains($migration, 'ADD COLUMN IF NOT EXISTS'), 'не используется MariaDB-синтаксис');
+    assert_true(!str_contains($executableSql, 'ADD COLUMN IF NOT EXISTS'), 'не используется MariaDB-синтаксис в исполняемом SQL');
     assert_contains('information_schema.COLUMNS', $migration, 'наличие колонок проверяется перед DDL');
     assert_contains('PREPARE asdr_stmt FROM @asdr_sql', $migration, 'условный DDL выполняется через MySQL PREPARE');
 
