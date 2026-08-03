@@ -21,8 +21,8 @@ test('block wrapper renders one public attribute per line', function (): void {
 });
 
 test('admin toolbar is maintained as a readable partial component', function (): void {
-    $core = (string) file_get_contents(APP_ROOT . '/app/Core/AppToolbar.php');
-    $partial = (string) file_get_contents(APP_ROOT . '/app/Views/site/components/admin_toolbar.php');
+    $core = str_replace("\r\n", "\n", (string) file_get_contents(APP_ROOT . '/app/Core/AppToolbar.php'));
+    $partial = str_replace("\r\n", "\n", (string) file_get_contents(APP_ROOT . '/app/Views/site/components/admin_toolbar.php'));
 
     assert_contains("View::renderPartial('site/components/admin_toolbar'", $core);
     assert_not_contains('<<<HTML', $core);
@@ -35,7 +35,7 @@ test('admin toolbar is maintained as a readable partial component', function ():
 });
 
 test('cards template does not generate element names or links through string concatenation', function (): void {
-    $template = (string) file_get_contents(APP_ROOT . '/templates/blocks/cards_grid.php');
+    $template = str_replace("\r\n", "\n", (string) file_get_contents(APP_ROOT . '/templates/blocks/cards_grid.php'));
 
     assert_not_contains('$tag =', $template);
     assert_contains('<a class="feature-card"', $template);
@@ -44,7 +44,7 @@ test('cards template does not generate element names or links through string con
 });
 
 test('document and site header attributes are maintained in multiline markup', function (): void {
-    $header = (string) file_get_contents(APP_ROOT . '/app/Views/site/_header.php');
+    $header = str_replace("\r\n", "\n", (string) file_get_contents(APP_ROOT . '/app/Views/site/_header.php'));
 
     assert_contains("<html\n    lang=", $header);
     assert_contains("<header\n    class=", $header);

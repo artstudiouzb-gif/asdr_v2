@@ -17,6 +17,10 @@ test('миграция метаданных совместима с MySQL 8 и �
     assert_contains('information_schema.COLUMNS', $migration, 'наличие колонок проверяется перед DDL');
     assert_contains('PREPARE asdr_stmt FROM @asdr_sql', $migration, 'условный DDL выполняется через MySQL PREPARE');
 
+    if (!Database::isConnected()) {
+        return;
+    }
+
     $pdo = Database::pdo();
     $pdo->exec($migration);
     $pdo->exec($migration);
@@ -28,6 +32,10 @@ test('миграция метаданных совместима с MySQL 8 и �
 });
 
 test('медиабиблиотека хранит редакционные метаданные отдельно от новости', function (): void {
+    if (!Database::isConnected()) {
+        return;
+    }
+
     MediaMetadataSchema::ensure();
     $pdo = Database::pdo();
 
