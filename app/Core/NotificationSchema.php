@@ -20,6 +20,16 @@ final class NotificationSchema
         }
 
         $pdo = Database::pdo();
+        try {
+            // Обычный запрос после миграции: не выполняем DDL на каждой
+            // загрузке колокольчика и каждой странице админки.
+            $pdo->query('SELECT 1 FROM notification_recipients LIMIT 1');
+            self::$ready = true;
+            return;
+        } catch (\Throwable) {
+            // Свежая установка или миграция ещё не применена.
+        }
+
         foreach (self::statements() as $sql) {
             $pdo->exec($sql);
         }
