@@ -14,9 +14,8 @@ test('медиабиблиотека хранит редакционные ме�
     $pdo = Database::pdo();
 
     foreach (['alt_text', 'caption', 'description', 'credit', 'focal_x', 'focal_y', 'metadata_updated_at'] as $column) {
-        $stmt = $pdo->prepare('SHOW COLUMNS FROM files LIKE :column');
-        $stmt->execute([':column' => $column]);
-        assert_true($stmt->fetchColumn() !== false, "колонка files.{$column} существует");
+        $stmt = $pdo->query('SHOW COLUMNS FROM `files` LIKE ' . $pdo->quote($column));
+        assert_true($stmt !== false && $stmt->fetchColumn() !== false, "колонка files.{$column} существует");
     }
 
     $suffix = bin2hex(random_bytes(6));
