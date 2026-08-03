@@ -10,6 +10,7 @@ use App\Models\AuditLog;
 /** @var int $activeSessions */
 /** @var bool $botLinked */
 /** @var bool $gatewayLinked */
+/** @var array{enabled:bool,path:string,url:string,ttl:int,allowed_cidrs:list<string>,environment_managed:bool,writable:bool} $adminEntry */
 
 $pageTitle = 'Безопасность';
 $activeNav = 'security';
@@ -24,6 +25,9 @@ if ($gatewayLinked) {
     $channels[] = 'Telegram Gateway';
 }
 $riskEvents = (int) $authSummary['failed'] + (int) $authSummary['locked'];
+$entryEnabled = !empty($adminEntry['enabled']);
+$entryManaged = !empty($adminEntry['environment_managed']);
+$entryWritable = !empty($adminEntry['writable']);
 ?>
 
 <div class="u-inline-f94566b02a">
@@ -95,6 +99,87 @@ $riskEvents = (int) $authSummary['failed'] + (int) $authSummary['locked'];
         <a href="/admin/profile" class="btn btn--primary">Профиль и сессии</a>
         <a href="/admin/telegram" class="btn">Настройки Telegram</a>
     </div>
+</div>
+
+<div class="form-card u-inline-1e1a9b09bf" id="admin-entry">
+    <div class="admin-card-header">
+        <div class="admin-card-header__title">
+            <span class="admin-card-header__icon"><?= AdminUi::icon('key', 20) ?></span>
+            <h3>Скрытый адрес входа</h3>
+        </div>
+        <span class="status-badge status-badge--<?= $entryEnabled ? 'success' : 'warning' ?>">
+            <?= $entryEnabled ? 'Включён' : 'Не настроен' ?>
+        </span>
+    </div>
+
+    <p class="form-hint">
+        После включения прямые запросы к <code>/admin</code>, <code>/admin/login</code>
+        и восстановлению пароля будут возвращать обычный 404. Через один общий
+        секретный адрес входят и администраторы, и редакторы; права определяются
+        личной учётной записью после авторизации.
+    </p>
+
+    <?php if ($entryEnabled): ?>
+        <div class="admin-code-panel admin-mt-24">
+            <strong>Текущий адрес:</strong>
+            <span><?= htmlspecialchars((string) $adminEntry['url'], ENT_QUOTES) ?></span>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($entryManaged): ?>
+        <div class="alert alert--info admin-mt-24">
+            Адрес управляется переменной окружения <code>ADMIN_ENTRY_PATH</code>.
+            Измените её на сервере; интерфейс CMS не перезаписывает deployment-настройки.
+        </div>
+    <?php elseif (!$entryWritable): ?>
+        <div class="alert alert--error admin-mt-24">
+            Каталог <code>storage/</code> недоступен для записи. Настройка не может быть сохранена.
+        </div>
+    <?php else: ?>
+        <form method="post" action="/admin/security/admin-entry" class="form-grid admin-mt-24">
+            <?= \App\Core\Csrf::field() ?>
+
+            <div class="form-field">
+                <label for="admin_entry_path">Секретный путь</label>
+                <input id="admin_entry_path" name="admin_entry_path" type="text"
+                       maxlength="97" autocomplete="off" spellcheck="false"
+                       value="<?= htmlspecialchars((string) $adminEntry['path'], ENT_QUOTES) ?>"
+                       placeholder="/control-случайное-значение">
+                <span class="form-hint">Один сегмент длиной 16–96 символов: буквы, цифры, дефис и подчёркивание.</span>
+            </div>
+
+            <div class="form-field">
+                <label for="admin_entry_ttl">Срок временного пропуска</label>
+                <select id="admin_entry_ttl" name="admin_entry_ttl">
+                    <?php foreach ([900 => '15 минут', 1800 => '30 минут', 3600 => '60 минут'] as $ttl => $label): ?>
+                        <option value="<?= $ttl ?>" <?= (int) $adminEntry['ttl'] === $ttl ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($label, ENT_QUOTES) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="admin_entry_allowed_cidrs">Ограничение по IP/CIDR</label>
+                <textarea id="admin_entry_allowed_cidrs" name="admin_entry_allowed_cidrs" rows="3"
+                          placeholder="Например: 203.0.113.10, 2001:db8::/48"><?= htmlspecialchars(implode("\n", $adminEntry['allowed_cidrs']), ENT_QUOTES) ?></textarea>
+                <span class="form-hint">Пусто — доступ с любого IP. Неверный список может заблокировать вход.</span>
+            </div>
+
+            <label class="form-field form-field--checkbox">
+                <input type="checkbox" name="confirm_access_change" value="1" required>
+                Я сохранил новый адрес в безопасном месте и понимаю, что старый адрес перестанет работать.
+            </label>
+
+            <div class="form-actions">
+                <button type="submit" name="action" value="save" class="btn btn--primary">Сохранить</button>
+                <button type="submit" name="action" value="regenerate" class="btn">Создать новый адрес</button>
+                <?php if ($entryEnabled): ?>
+                    <button type="submit" name="action" value="disable" class="btn btn--danger">Отключить скрытый вход</button>
+                <?php endif; ?>
+            </div>
+        </form>
+    <?php endif; ?>
 </div>
 
 <div class="form-card u-inline-1e1a9b09bf">
