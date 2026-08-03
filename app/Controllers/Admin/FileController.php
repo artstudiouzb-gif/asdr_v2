@@ -8,6 +8,7 @@ use App\Core\Auth;
 use App\Core\Config;
 use App\Core\Csrf;
 use App\Core\Flash;
+use App\Core\MediaMetadataSchema;
 use App\Core\RbacGuard;
 use App\Core\Uploader;
 use App\Core\View;
@@ -27,13 +28,20 @@ final class FileController
     }
 
     /**
-     * JSON-список публичных изображений для модальной «Медиабиблиотеки»
-     * (задача 90). Позволяет переиспользовать уже загруженные файлы.
+     * JSON-список публичных файлов для модальной медиабиблиотеки.
+     * Изображения возвращаются вместе с редакционными метаданными, поэтому их
+     * можно описать до сохранения новости и затем переиспользовать.
      */
     public function library(): void
     {
         Auth::requireLogin();
         header('Content-Type: application/json; charset=UTF-8');
+
+        try {
+            MediaMetadataSchema::ensure();
+        } catch (\Throwable $e) {
+            $this->json(['items' => [], 'error' => 'Не удалось подготовить метаданные медиабиблиотеки.'], 500);
+        }
 
         // Фильтр по типу: image (по умолчанию), svg, video, audio, document, all_files, all.
         $type = (string) ($_GET['type'] ?? 'image');
@@ -51,26 +59,59 @@ final class FileController
         };
 
         $items = [];
-        foreach (FileEntry::all() as $f) {
-            if (($f['access_type'] ?? '') !== 'public') {
+        foreach (FileEntry::all() as $file) {
+            if (($file['access_type'] ?? '') !== 'public') {
                 continue;
             }
-            if (!$matches((string) $f['mime_type'])) {
+            if (!$matches((string) $file['mime_type'])) {
                 continue;
             }
-            $items[] = [
-                'url' => FileEntry::publicUrl($f),
-                'name' => (string) $f['original_name'],
-            ];
+            $items[] = self::libraryItem($file);
         }
 
-        echo json_encode(['items' => $items], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['items' => $items], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
     public function upload(): void
     {
         Auth::requireLogin();
         Csrf::verifyRequest();
+
+        // AJAX-сохранение описания уже загруженного файла. Оно использует
+        // существующий защищённый POST-маршрут, поэтому отдельный публичный API
+        // для метаданных не появляется.
+        $metadataId = (int) ($_POST['metadata_id'] ?? 0);
+        if ($metadataId > 0) {
+            $file = FileEntry::findById($metadataId);
+            if ($file === null) {
+                $this->json(['ok' => false, 'error' => 'Файл не найден.'], 404);
+            }
+            if (($file['access_type'] ?? '') === 'protected') {
+                RbacGuard::requirePermission('manage_protected_files');
+            }
+
+            try {
+                $updated = FileEntry::updateMetadata($metadataId, [
+                    'alt_text' => self::nullableText($_POST['alt_text'] ?? '', 255),
+                    'caption' => self::nullableText($_POST['caption'] ?? '', 255),
+                    'description' => self::nullableText($_POST['description'] ?? '', 4000),
+                    'credit' => self::nullableText($_POST['credit'] ?? '', 255),
+                    'focal_x' => self::nullablePercent($_POST['focal_x'] ?? null),
+                    'focal_y' => self::nullablePercent($_POST['focal_y'] ?? null),
+                ]);
+            } catch (\Throwable $e) {
+                $this->json(['ok' => false, 'error' => 'Не удалось сохранить метаданные файла.'], 500);
+            }
+
+            if ($updated === null) {
+                $this->json(['ok' => false, 'error' => 'Файл не найден.'], 404);
+            }
+
+            $this->json([
+                'ok' => true,
+                'item' => self::libraryItem($updated),
+            ]);
+        }
 
         $accessType = ($_POST['access_type'] ?? 'public') === 'protected' ? 'protected' : 'public';
         if ($accessType === 'protected') {
@@ -104,12 +145,15 @@ final class FileController
             if (($file['access_type'] ?? '') === 'protected') {
                 RbacGuard::requirePermission('manage_protected_files');
             }
-            // Переиспользование файлов (задача 90): не удаляем файл, который ещё
-            // где-то используется — иначе сломались бы связанные сущности.
+            // Переиспользование файлов: не удаляем файл, который ещё где-то
+            // используется — иначе сломались бы связанные сущности.
             $publicUrl = FileEntry::publicUrl($file);
             $refs = \App\Core\MediaCleaner::referenceCount($publicUrl);
-            if ($refs > 0) {
-                Flash::error("Файл используется в {$refs} местах и не может быть удалён. Сначала уберите его из этих записей.");
+            // Сама запись files считается владением файла. Для явного удаления
+            // из медиабиблиотеки вычитаем её и проверяем внешние ссылки.
+            $externalRefs = max(0, $refs - 1);
+            if ($externalRefs > 0) {
+                Flash::error("Файл используется в {$externalRefs} местах и не может быть удалён. Сначала уберите его из этих записей.");
                 header('Location: /admin/files');
                 exit;
             }
@@ -122,7 +166,7 @@ final class FileController
                 unlink($path);
             }
 
-            // Удаляем сопутствующие WebP-варианты (name.webp, name-1600.webp, name-800.webp) для растровых картинок
+            // Удаляем сопутствующие WebP-варианты.
             $base = preg_replace('/\.[^.]+$/', '', $path) ?? $path;
             foreach (['.webp', '-1600.webp', '-800.webp'] as $suffix) {
                 $variant = $base . $suffix;
@@ -181,8 +225,8 @@ final class FileController
                 return;
             }
             $publicUrl = FileEntry::publicUrl($file);
-            $refs = \App\Core\MediaCleaner::referenceCount($publicUrl);
-            if ($refs > 0) {
+            $externalRefs = max(0, \App\Core\MediaCleaner::referenceCount($publicUrl) - 1);
+            if ($externalRefs > 0) {
                 $skippedCount++;
                 continue;
             }
@@ -211,6 +255,47 @@ final class FileController
         }
 
         header('Location: /admin/files');
+        exit;
+    }
+
+    /** @return array<string, mixed> */
+    private static function libraryItem(array $file): array
+    {
+        return [
+            'id' => (int) $file['id'],
+            'url' => FileEntry::publicUrl($file),
+            'name' => (string) $file['original_name'],
+            'mime_type' => (string) ($file['mime_type'] ?? ''),
+            'alt_text' => (string) ($file['alt_text'] ?? ''),
+            'caption' => (string) ($file['caption'] ?? ''),
+            'description' => (string) ($file['description'] ?? ''),
+            'credit' => (string) ($file['credit'] ?? ''),
+            'focal_x' => $file['focal_x'] === null || $file['focal_x'] === '' ? null : (int) $file['focal_x'],
+            'focal_y' => $file['focal_y'] === null || $file['focal_y'] === '' ? null : (int) $file['focal_y'],
+        ];
+    }
+
+    private static function nullableText(mixed $value, int $limit): ?string
+    {
+        $text = trim((string) $value);
+        return $text === '' ? null : mb_substr($text, 0, $limit);
+    }
+
+    private static function nullablePercent(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return max(0, min(100, (int) $value));
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function json(array $payload, int $status = 200): never
+    {
+        http_response_code($status);
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         exit;
     }
 }
