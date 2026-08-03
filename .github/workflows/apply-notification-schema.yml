@@ -1,0 +1,40 @@
+name: Apply notification schema
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.head_ref == 'feature/notification-center'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Synchronize fresh-install schema
+        run: python3 .github/scripts/apply-notification-schema.py
+
+      - name: Validate migration consistency
+        run: |
+          php -l tests/cases/06_migrations_test.php
+          php -l tests/cases/210_notification_center_test.php
+          php tests/run.php
+
+      - name: Commit final schema
+        run: |
+          rm .github/workflows/apply-notification-schema.yml
+          rm .github/scripts/apply-notification-schema.py
+          rmdir .github/scripts 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Synchronize notification tables with fresh-install schema"
+          git push origin HEAD:${{ github.head_ref }}
