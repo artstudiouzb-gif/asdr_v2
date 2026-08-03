@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\Flash;
+use App\Core\NotificationCenter;
 use App\Core\View;
 use App\Models\User;
 
@@ -57,7 +58,33 @@ final class UserController
             return;
         }
 
-        User::create($username, $email, $password, $role, $phone, $adminLang);
+        $newUserId = User::create($username, $email, $password, $role, $phone, $adminLang);
+        $actor = Auth::sessionUser();
+        $actorName = (string) ($actor['username'] ?? 'Администратор');
+        $actorId = isset($actor['id']) ? (int) $actor['id'] : null;
+
+        NotificationCenter::users(
+            [$newUserId],
+            'Учётная запись создана',
+            'Для вас создан доступ к панели управления. После первого входа проверьте профиль и подключите второй фактор.',
+            'users',
+            'success',
+            '/admin/profile',
+            false,
+            'user-created-welcome-' . $newUserId,
+            $actorId
+        );
+        NotificationCenter::administrators(
+            'Создан пользователь',
+            $actorName . ' создал учётную запись «' . $username . '» с ролью ' . $role . '.',
+            'users',
+            'security',
+            '/admin/users',
+            false,
+            null,
+            $actorId
+        );
+
         Flash::success('Пользователь создан. Код входа будет приходить в Telegram, если указан телефон и настроен шлюз.');
         header('Location: /admin/users');
         exit;
@@ -82,7 +109,23 @@ final class UserController
             exit;
         }
 
+        $removed = User::findById($id);
         User::delete($id);
+
+        $actor = Auth::sessionUser();
+        $actorName = (string) ($actor['username'] ?? 'Администратор');
+        $actorId = isset($actor['id']) ? (int) $actor['id'] : null;
+        NotificationCenter::administrators(
+            'Удалена учётная запись',
+            $actorName . ' удалил пользователя «' . (string) ($removed['username'] ?? ('ID ' . $id)) . '».',
+            'users',
+            'security',
+            '/admin/users',
+            true,
+            null,
+            $actorId
+        );
+
         Flash::success('Пользователь удалён.');
         header('Location: /admin/users');
         exit;
