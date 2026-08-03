@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Core\Config;
 use App\Core\Database;
+use App\Core\MediaMetadataSchema;
 
 final class FileEntry
 {
@@ -80,6 +81,32 @@ final class FileEntry
         return $row ?: null;
     }
 
+    /**
+     * Находит публичный файл по каноническому URL медиабиблиотеки.
+     * Внешние URL и произвольные пути намеренно не сопоставляются.
+     */
+    public static function findPublicByUrl(string $url): ?array
+    {
+        $baseUrl = rtrim((string) Config::get('paths.public_uploads_url'), '/');
+        $path = (string) (parse_url(trim($url), PHP_URL_PATH) ?? '');
+        if ($baseUrl === '' || !str_starts_with($path, $baseUrl . '/')) {
+            return null;
+        }
+
+        $relative = ltrim(substr($path, strlen($baseUrl)), '/');
+        if ($relative === '' || str_contains($relative, '..') || str_contains($relative, '/')) {
+            return null;
+        }
+
+        $stmt = Database::pdo()->prepare(
+            "SELECT * FROM files WHERE stored_name = :stored AND access_type = 'public' LIMIT 1"
+        );
+        $stmt->execute([':stored' => $relative]);
+        $row = $stmt->fetch();
+
+        return $row ?: null;
+    }
+
     public static function create(array $data): int
     {
         $stmt = Database::pdo()->prepare(
@@ -97,6 +124,44 @@ final class FileEntry
         ]);
 
         return (int) Database::pdo()->lastInsertId();
+    }
+
+    /**
+     * Обновляет редакционные метаданные уже загруженного файла.
+     *
+     * @param array{alt_text?:?string,caption?:?string,description?:?string,credit?:?string,focal_x?:?int,focal_y?:?int} $metadata
+     */
+    public static function updateMetadata(int $id, array $metadata): ?array
+    {
+        MediaMetadataSchema::ensure();
+
+        $file = self::findById($id);
+        if ($file === null) {
+            return null;
+        }
+
+        $stmt = Database::pdo()->prepare(
+            'UPDATE files
+             SET alt_text = :alt_text,
+                 caption = :caption,
+                 description = :description,
+                 credit = :credit,
+                 focal_x = :focal_x,
+                 focal_y = :focal_y,
+                 metadata_updated_at = NOW()
+             WHERE id = :id'
+        );
+        $stmt->execute([
+            ':alt_text' => $metadata['alt_text'] ?? null,
+            ':caption' => $metadata['caption'] ?? null,
+            ':description' => $metadata['description'] ?? null,
+            ':credit' => $metadata['credit'] ?? null,
+            ':focal_x' => $metadata['focal_x'] ?? null,
+            ':focal_y' => $metadata['focal_y'] ?? null,
+            ':id' => $id,
+        ]);
+
+        return self::findById($id);
     }
 
     public static function regenerateToken(int $id): string
