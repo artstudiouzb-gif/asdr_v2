@@ -122,11 +122,18 @@ if (PHP_SAPI !== 'cli' && \App\Core\Session::hasCookie()) {
 if (PHP_SAPI !== 'cli') {
     \App\Core\AdminEntryGate::enforce();
 
-    // Настройка шлюза обслуживается до общего Router, чтобы механизм оставался
-    // автономным и не раскрывал отдельный маршрут неавторизованному сканеру.
     $bootstrapPath = (string) (parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/');
     $bootstrapMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+
+    // Настройка шлюза обслуживается до общего Router, чтобы механизм оставался
+    // автономным и не раскрывал отдельный маршрут неавторизованному сканеру.
     if ($bootstrapPath === '/admin/security/admin-entry' && $bootstrapMethod === 'POST') {
         (new \App\Controllers\Admin\AdminEntrySettingsController())->update();
+    }
+
+    // Центр уведомлений подключён как изолированный admin-модуль. Gateway уже
+    // отработал, а сам контроллер повторно требует живую сессию и CSRF для POST.
+    if (APP_INSTALLED && \App\Controllers\Admin\NotificationController::dispatch($bootstrapPath, $bootstrapMethod)) {
+        exit;
     }
 }

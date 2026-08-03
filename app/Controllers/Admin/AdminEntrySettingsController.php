@@ -9,6 +9,7 @@ use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\Flash;
 use App\Core\Logger;
+use App\Core\NotificationCenter;
 
 /** Handles the protected admin-entry settings form before the main router. */
 final class AdminEntrySettingsController
@@ -24,13 +25,27 @@ final class AdminEntrySettingsController
             $this->redirect();
         }
 
+        $actor = Auth::sessionUser();
+        $actorName = (string) ($actor['username'] ?? 'Администратор');
+        $actorId = isset($actor['id']) ? (int) $actor['id'] : null;
+
         try {
             if ($action === 'disable') {
                 AdminEntryConfig::disable();
                 Logger::security('Скрытый адрес административной панели отключён', [
-                    'user' => (string) (Auth::sessionUser()['username'] ?? ''),
+                    'user' => $actorName,
                     'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
                 ]);
+                NotificationCenter::administrators(
+                    'Скрытый вход отключён',
+                    $actorName . ' отключил защищённый адрес входа. Стандартный маршрут авторизации снова доступен.',
+                    'security',
+                    'critical',
+                    '/admin/security#admin-entry',
+                    true,
+                    null,
+                    $actorId
+                );
                 Flash::success('Скрытый адрес отключён. Стандартный /admin/login снова доступен.');
                 $this->redirect();
             }
@@ -43,15 +58,23 @@ final class AdminEntrySettingsController
                 : (string) ($_POST['admin_entry_path'] ?? '');
 
             AdminEntryConfig::save($path, $ttl, preg_split('/[\s,]+/', $cidrs, -1, PREG_SPLIT_NO_EMPTY) ?: []);
-            Logger::security(
-                $action === 'regenerate'
-                    ? 'Скрытый адрес административной панели сгенерирован заново'
-                    : 'Настройки скрытого адреса административной панели изменены',
-                [
-                    'user' => (string) (Auth::sessionUser()['username'] ?? ''),
-                    'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
-                    'cidr_restricted' => trim($cidrs) !== '',
-                ]
+            $event = $action === 'regenerate'
+                ? 'Скрытый адрес административной панели сгенерирован заново'
+                : 'Настройки скрытого адреса административной панели изменены';
+            Logger::security($event, [
+                'user' => $actorName,
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
+                'cidr_restricted' => trim($cidrs) !== '',
+            ]);
+            NotificationCenter::administrators(
+                $action === 'regenerate' ? 'Адрес входа обновлён' : 'Защита входа изменена',
+                $actorName . ' изменил настройки защищённого входа. Сам секретный адрес во внешние уведомления не передаётся.',
+                'security',
+                'security',
+                '/admin/security#admin-entry',
+                true,
+                null,
+                $actorId
             );
             Flash::success(
                 $action === 'regenerate'
@@ -60,10 +83,20 @@ final class AdminEntrySettingsController
             );
         } catch (\Throwable $e) {
             Logger::security('Не удалось изменить скрытый адрес административной панели', [
-                'user' => (string) (Auth::sessionUser()['username'] ?? ''),
+                'user' => $actorName,
                 'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
                 'error' => $e->getMessage(),
             ]);
+            NotificationCenter::administrators(
+                'Ошибка изменения защищённого входа',
+                'Не удалось сохранить настройки защищённого входа. Проверьте Центр безопасности и журналы.',
+                'security',
+                'error',
+                '/admin/security#admin-entry',
+                false,
+                null,
+                $actorId
+            );
             Flash::error($e->getMessage());
         }
 

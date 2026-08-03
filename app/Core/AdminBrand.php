@@ -43,22 +43,30 @@ final class AdminBrand
     }
 
     /**
-     * Инлайновый <style> с переопределением CSS-переменных админки.
-     * При стандартном акценте возвращает пустую строку — работает admin.css.
+     * Head-разметка админки: CSS-переменные бренда и клиент Центра
+     * уведомлений. Имя метода сохраняется для обратной совместимости layout.
      */
     public static function styleTag(): string
     {
+        $html = '';
         $accent = self::accent();
-        if ($accent === self::DEFAULT_ACCENT) {
-            return '';
+        if ($accent !== self::DEFAULT_ACCENT) {
+            $html .= '<style>:root{'
+                . '--admin-accent:' . $accent . ';'
+                . '--admin-accent-hover:' . self::mix($accent, [0, 0, 0], 0.14) . ';'
+                . '--admin-accent-soft:' . self::mix($accent, [255, 255, 255], 0.90) . ';'
+                . '--admin-accent-2:' . self::mix($accent, [255, 255, 255], 0.12) . ';'
+                . '}</style>';
         }
 
-        return '<style>:root{'
-            . '--admin-accent:' . $accent . ';'
-            . '--admin-accent-hover:' . self::mix($accent, [0, 0, 0], 0.14) . ';'
-            . '--admin-accent-soft:' . self::mix($accent, [255, 255, 255], 0.90) . ';'
-            . '--admin-accent-2:' . self::mix($accent, [255, 255, 255], 0.12) . ';'
-            . '}</style>';
+        $html .= '<link rel="stylesheet" data-admin-notifications-css="1" href="'
+            . htmlspecialchars(Asset::url('/assets/css/admin-notifications.css'), ENT_QUOTES)
+            . '">';
+        $html .= '<script nonce="' . htmlspecialchars(SecurityHeaders::nonce(), ENT_QUOTES)
+            . '" src="' . htmlspecialchars(Asset::url('/assets/js/admin-notifications.js'), ENT_QUOTES)
+            . '" defer></script>';
+
+        return $html;
     }
 
     /**
@@ -80,7 +88,6 @@ final class AdminBrand
 
         return $html;
     }
-
 
     /** Разметка бренда для топбара и карточек входа. */
     public static function badgeHtml(string $imgClass = 'admin-topbar__logoimg', string $letterClass = 'admin-topbar__logo'): string
