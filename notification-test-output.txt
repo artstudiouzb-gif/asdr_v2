@@ -1309,13 +1309,13 @@ sh: 1: /usr/sbin/sendmail: not found
   [31m✗[0m AdminBrand: значения по умолчанию
       assert_same failed: при стандартном акценте инлайн-стилей нет
            expected: ''
-           actual:   '<link rel="stylesheet" data-admin-notifications-css="1" href="/assets/css/admin-notifications.css?v=25a3f962"><script nonce="KRHvMZG7hWX6OR2Kcgo2k4gF" src="/assets/js/admin-notifications.js?v=e28b3fbd" defer></script>'
+           actual:   '<link rel="stylesheet" data-admin-notifications-css="1" href="/assets/css/admin-notifications.css?v=756ad0b4"><script nonce="Dkbtx7_o0o_X9jhONWZnylWC" src="/assets/js/admin-notifications.js?v=2ed3d5cd" defer></script>'
   [32m✓[0m AdminBrand: свои название и буква бейджа
   [32m✓[0m AdminBrand: свой акцент рождает переменные с оттенками
   [31m✗[0m AdminBrand: мусорный акцент откатывается к стандартному
       assert_same failed
            expected: ''
-           actual:   '<link rel="stylesheet" data-admin-notifications-css="1" href="/assets/css/admin-notifications.css?v=25a3f962"><script nonce="KRHvMZG7hWX6OR2Kcgo2k4gF" src="/assets/js/admin-notifications.js?v=e28b3fbd" defer></script>'
+           actual:   '<link rel="stylesheet" data-admin-notifications-css="1" href="/assets/css/admin-notifications.css?v=756ad0b4"><script nonce="Dkbtx7_o0o_X9jhONWZnylWC" src="/assets/js/admin-notifications.js?v=2ed3d5cd" defer></script>'
   [32m✓[0m AdminBrand::badgeHtml: картинка при логотипе, буква без него
   [32m✓[0m AdminBrand::faviconHtml: вывод стандартов и кастомной фавиконки
   [32m✓[0m SecurityHeaders::nonce: стабилен в запросе, URL-safe base64
