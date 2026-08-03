@@ -11,9 +11,9 @@
             "/assets/css/rich-content.css",
             "/assets/css/a11y.css"
         ],
-        "sourceSha256": "dde77299b027139660bede71e0df68d99634e6d243901bafe19b0edd230ea703",
-        "sha256": "446c3271518e1afdc5bd5a55e4162cbce112dd88a3a6acc3ccbdd102968e0b6a",
-        "raw": 347908,
+        "sourceSha256": "160b8cd68b7a92b6a060e36172a513a787e368e6af4a07361dab7f26311a1d8f",
+        "sha256": "371dc32ff96bc00bd43323f2c540b3cf4418fd9144140be0c9f21694bb23c625",
+        "raw": 347888,
         "gzip": 58180,
         "brotli": 45957
     },
@@ -24,9 +24,9 @@
             "/assets/js/frontend.js",
             "/assets/js/forms.js"
         ],
-        "sourceSha256": "45090bb8680f805e54d163726a7a2e366869197277a0f851d0e27f301b711af3",
-        "sha256": "7c1453ed4ef5e757bd003d5da6994950e3bda1d33aefdfdfa7dddb3b428886ba",
-        "raw": 57297,
+        "sourceSha256": "2ad6753a6c717862143e5edc3ddf3fa110c18ca8a85a953217cbbd356966b4eb",
+        "sha256": "7c52c9a514a26f5e6afafa45eb3e66d4fc1552698cac36b6bc34948dfd9f2c31",
+        "raw": 57295,
         "gzip": 15169,
         "brotli": 13308
     }

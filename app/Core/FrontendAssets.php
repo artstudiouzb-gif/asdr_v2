@@ -138,6 +138,7 @@ final class FrontendAssets
             if (!is_string($content)) {
                 return false;
             }
+            $content = str_replace(["\r\n", "\r"], "\n", $content);
             hash_update($hash, 'public' . $source);
             hash_update($hash, "\0");
             hash_update($hash, $content);
