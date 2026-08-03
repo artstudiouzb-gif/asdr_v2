@@ -82,5 +82,5 @@ test('Шлюз подключён до роутера и скрывает admin 
 
     assert_contains('AdminEntryGate::enforce()', $bootstrap);
     assert_contains('AdminEntryGate::hasPresentedCookie()', $headers);
-    assert_contains("AdminEntryGate::entryUrl('/admin/reset/' . $token)", $reset);
+    assert_contains("AdminEntryGate::entryUrl('/admin/reset/' . \$token)", $reset);
 });
