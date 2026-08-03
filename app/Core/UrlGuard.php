@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Core;
 
 /**
- * Проверка пользовательских URL. Две задачи:
+ * Проверка пользовательских URL. Три задачи:
  *
  *  1. isSafeLink()   — URL для вывода в href: только http/https, mailto/tel
- *     или относительный путь; javascript:/data: и прочее отсекается.
+ *     или обычный относительный путь; javascript:/data:/file: и
+ *     protocol-relative адреса отсекаются.
  *  2. isSafeMedia()  — более строгий URL для src: только http/https или
- *     локальный путь, без mailto/tel/data.
+ *     локальный/относительный путь, без mailto/tel/data.
  *  3. isSafeRemote() — URL, по которому СЕРВЕР будет делать исходящий запрос:
  *     дополнительно резолвит хост и запрещает приватные/loopback/link-local
  *     диапазоны (защита от SSRF).
@@ -21,21 +22,43 @@ namespace App\Core;
  */
 final class UrlGuard
 {
-    /** Ссылка безопасна для вывода в атрибут href/src. */
+    /** Ссылка безопасна для вывода в атрибут href. */
     public static function isSafeLink(string $url): bool
     {
         $url = trim($url);
-        if ($url === '' || preg_match('/[\x00-\x1F\x7F]/', $url)) {
+        if ($url === ''
+            || preg_match('/[\x00-\x1F\x7F]/', $url) === 1
+            || str_contains($url, '\\')
+            || str_starts_with($url, '//')) {
             return false;
         }
 
-        // Относительные пути и якоря — безопасны.
+        // Обычные локальные пути, якоря и query-only ссылки безопасны.
         if (str_starts_with($url, '/') || str_starts_with($url, '#') || str_starts_with($url, '?')) {
             return true;
         }
 
-        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
-        return in_array($scheme, ['http', 'https', 'mailto', 'tel'], true);
+        $parts = parse_url($url);
+        if ($parts === false) {
+            return false;
+        }
+        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+
+        // Путь вида "news/item" не имеет схемы и остаётся локальным. Если до
+        // первого /, ? или # присутствует двоеточие, это попытка задать схему,
+        // которую parse_url не смог корректно распознать — отклоняем fail-closed.
+        if ($scheme === '') {
+            $colon = strpos($url, ':');
+            $separator = strcspn($url, '/?#');
+
+            return $colon === false || $colon >= $separator;
+        }
+
+        if (in_array($scheme, ['http', 'https'], true)) {
+            return !empty($parts['host']) && !isset($parts['user']) && !isset($parts['pass']);
+        }
+
+        return in_array($scheme, ['mailto', 'tel'], true);
     }
 
     /**
@@ -46,17 +69,15 @@ final class UrlGuard
     public static function isSafeMedia(string $url): bool
     {
         $url = trim($url);
-        if (!self::isSafeLink($url)) {
+        if (!self::isSafeLink($url)
+            || str_starts_with($url, '#')
+            || str_starts_with($url, '?')) {
             return false;
-        }
-
-        if (str_starts_with($url, '/')) {
-            return true;
         }
 
         $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
 
-        return in_array($scheme, ['http', 'https'], true);
+        return $scheme === '' || in_array($scheme, ['http', 'https'], true);
     }
 
     /**
