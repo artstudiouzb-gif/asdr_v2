@@ -7,15 +7,11 @@ namespace App\Core;
 /**
  * Каскадная очистка файлов-сирот. При окончательном (физическом) удалении
  * страницы или новости собирает привязанные медиафайлы и удаляет их с диска —
- * но только если файл больше нигде не используется (в других блоках, новостях,
- * проектах, команде или настройках).
+ * но только если файл больше нигде не используется.
  */
 final class MediaCleaner
 {
-    /**
-     * Медиа, на которые ссылается страница (через её блоки, все языки).
-     * @return array<int, string> публичные URL файлов
-     */
+    /** @return array<int, string> публичные URL файлов */
     public static function collectForPage(int $pageId): array
     {
         $refs = [];
@@ -30,9 +26,7 @@ final class MediaCleaner
         return array_keys($refs);
     }
 
-    /**
-     * @return array<int, string>
-     */
+    /** @return array<int, string> */
     public static function collectForNews(array $news): array
     {
         $paths = [];
@@ -42,8 +36,6 @@ final class MediaCleaner
             }
         }
 
-        // Фотографии галереи новости (этап 12.1). Вызывать ДО force-delete,
-        // пока строки news_images ещё существуют.
         if (!empty($news['id'])) {
             foreach (\App\Models\NewsImage::forNews((int) $news['id']) as $img) {
                 foreach (self::extractPaths((string) $img['path']) as $p) {
@@ -55,13 +47,7 @@ final class MediaCleaner
         return array_keys($paths);
     }
 
-    /**
-     * Удаляет файлы, если они не используются больше нигде. Вызывать ПОСЛЕ
-     * удаления самой сущности (её блоки уже удалены каскадом), чтобы проверка
-     * ссылок не учитывала удаляемый объект.
-     *
-     * @param array<int, string> $candidatePaths
-     */
+    /** @param array<int, string> $candidatePaths */
     public static function purgeUnreferenced(array $candidatePaths): void
     {
         foreach ($candidatePaths as $publicUrl) {
@@ -78,8 +64,11 @@ final class MediaCleaner
     }
 
     /**
-     * Число упоминаний файла во всех таблицах системы (задача 90 —
-     * переиспользование файлов). Файл удаляется с диска только при нуле.
+     * Число упоминаний файла во всех таблицах системы.
+     *
+     * Запись в files считается владением медиабиблиотеки. Поэтому удаление
+     * связи с новостью не удаляет физический файл: он остаётся доступным для
+     * повторного использования, пока редактор явно не удалит его из библиотеки.
      */
     public static function referenceCount(string $publicUrl): int
     {
@@ -87,19 +76,15 @@ final class MediaCleaner
             return 0;
         }
         $pdo = Database::pdo();
-        // Для JSON/HTML-полей ищем по имени файла: в JSON слэши экранируются
-        // (\/uploads\/...), поэтому поиск по полному пути даёт ложные нули.
-        // Имена файлов — случайные 32-hex, коллизии исключены.
-        $like = '%' . basename($publicUrl) . '%';
+        $basename = basename((string) (parse_url($publicUrl, PHP_URL_PATH) ?? $publicUrl));
+        $like = '%' . $basename . '%';
         $total = 0;
 
-        // LIKE — для полей, где путь встречается внутри JSON/HTML.
         $likeQueries = [
             'SELECT COUNT(*) FROM blocks WHERE data LIKE :v',
             'SELECT COUNT(*) FROM news WHERE content LIKE :v',
             'SELECT COUNT(*) FROM news_translations WHERE content LIKE :v',
         ];
-        // Точное совпадение — для отдельных полей-ссылок.
         $exactQueries = [
             'SELECT COUNT(*) FROM news WHERE image = :exact',
             'SELECT COUNT(*) FROM news_images WHERE path = :exact',
@@ -130,6 +115,16 @@ final class MediaCleaner
             }
         }
 
+        if ($basename !== '') {
+            try {
+                $stmt = $pdo->prepare('SELECT COUNT(*) FROM files WHERE stored_name = :stored');
+                $stmt->execute([':stored' => $basename]);
+                $total += (int) $stmt->fetchColumn();
+            } catch (\Throwable $e) {
+                Logger::error('referenceCount (library) failed: ' . $e->getMessage());
+            }
+        }
+
         return $total;
     }
 
@@ -138,12 +133,10 @@ final class MediaCleaner
         $baseUrl = rtrim((string) Config::get('paths.public_uploads_url'), '/');
         $baseDir = (string) Config::get('paths.public_uploads');
 
-        // Только файлы из публичной папки загрузок.
         if (!str_starts_with($publicUrl, $baseUrl . '/')) {
             return;
         }
         $relative = ltrim(substr($publicUrl, strlen($baseUrl)), '/');
-        // Защита от path traversal.
         if ($relative === '' || str_contains($relative, '..')) {
             return;
         }
@@ -156,7 +149,6 @@ final class MediaCleaner
 
         @unlink($fullPath);
 
-        // Удаляем сгенерированные WebP-варианты (name.webp, name-1600.webp, name-800.webp).
         $base = preg_replace('/\.[^.]+$/', '', $fullPath) ?? $fullPath;
         foreach (['.webp', '-1600.webp', '-800.webp'] as $suffix) {
             $variant = $base . $suffix;
@@ -166,13 +158,9 @@ final class MediaCleaner
         }
     }
 
-    /**
-     * Извлекает публичные пути к загрузкам из произвольной строки/JSON.
-     * @return array<int, string>
-     */
+    /** @return array<int, string> */
     private static function extractPaths(string $haystack): array
     {
-        // В JSON слэши экранируются (\/uploads\/public\/...) — нормализуем.
         $haystack = str_replace('\\/', '/', $haystack);
         $baseUrl = preg_quote(rtrim((string) Config::get('paths.public_uploads_url'), '/'), '#');
         if (preg_match_all('#' . $baseUrl . '/[A-Za-z0-9_./-]+#', $haystack, $m)) {
