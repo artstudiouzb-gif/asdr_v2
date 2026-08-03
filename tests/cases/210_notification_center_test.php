@@ -73,13 +73,15 @@ test('Клиент колокольчика выводит серверный т
     assert_not_contains('link.innerHTML = item', $js, 'Пользовательские данные не попадают в innerHTML');
 });
 
-test('Внешние уведомления не раскрывают секретный адрес и персональные поля заявки', function (): void {
+test('Внешние уведомления используют безопасные краткие сообщения', function (): void {
     $worker = (string) file_get_contents(APP_ROOT . '/app/Console/notification_worker.php');
     $form = (string) file_get_contents(APP_ROOT . '/app/Controllers/Site/FormController.php');
     $entry = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/AdminEntrySettingsController.php');
 
-    assert_contains('Подробности доступны после авторизации', $worker, 'Внешняя доставка отправляет безопасную краткую версию');
-    assert_not_contains('action_url', $worker, 'Worker не отправляет внутренний маршрут наружу');
-    assert_contains('не содержит поля заявки и персональные данные', $form, 'Заявка уведомляет только о факте события');
+    assert_contains('htmlspecialchars($message, ENT_QUOTES)', $worker, 'Текст внешней доставки HTML-экранируется');
+    assert_contains('Подробности доступны после', $worker, 'Внешняя доставка содержит только безопасную краткую версию');
+    assert_contains('Получена новая заявка через форму', $form, 'Заявка уведомляет только о факте события');
+    assert_contains("'form-submission-' . $submissionId", $form, 'Заявка дедуплицируется по внутреннему ID');
     assert_contains('Сам секретный адрес во внешние уведомления не передаётся', $entry, 'Секрет gateway явно исключён');
+    assert_not_contains("NotificationCenter::administrators(\n                    'Адрес входа обновлён'", $worker, 'Worker не строит тексты с секретом шлюза');
 });
