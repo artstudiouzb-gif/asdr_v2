@@ -1,6 +1,7 @@
 name: Apply admin entry integration
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - fix/admin-entry-integration
