@@ -11,7 +11,7 @@ namespace App\Core;
  *     или обычный относительный путь; javascript:/data:/file: и
  *     protocol-relative адреса отсекаются.
  *  2. isSafeMedia()  — более строгий URL для src: только http/https или
- *     локальный/относительный путь, без mailto/tel/data.
+ *     локальный путь от корня сайта, без mailto/tel/data.
  *  3. isSafeRemote() — URL, по которому СЕРВЕР будет делать исходящий запрос:
  *     дополнительно резолвит хост и запрещает приватные/loopback/link-local
  *     диапазоны (защита от SSRF).
@@ -63,9 +63,10 @@ final class UrlGuard
     }
 
     /**
-     * URL безопасен для изображения/видео: локальный путь либо http(s).
-     * Схемы mailto/tel допустимы для ссылок, но не для медиа; data: намеренно
-     * запрещена, чтобы SVG/HTML не попадали в src в обход медиабиблиотеки.
+     * URL безопасен для изображения/видео: локальный путь от корня сайта либо
+     * абсолютный http(s). Произвольные относительные пути запрещены, чтобы
+     * `../` не использовался как обход каталогов; protocol-relative URL тоже
+     * отклоняются, чтобы схема всегда была явной.
      */
     public static function isSafeMedia(string $url): bool
     {
@@ -76,9 +77,13 @@ final class UrlGuard
             return false;
         }
 
+        if (str_starts_with($url, '/')) {
+            return true;
+        }
+
         $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
 
-        return $scheme === '' || in_array($scheme, ['http', 'https'], true);
+        return in_array($scheme, ['http', 'https'], true);
     }
 
     /**
