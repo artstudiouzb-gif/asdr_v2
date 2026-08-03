@@ -60,6 +60,9 @@ $prepareHttpSecurity = static function (): void {
     // Выставляем заголовки после загрузки Config, но до подключения к БД:
     // так они попадают и на 404/500/503, а trusted proxy policy уже известна.
     SecurityHeaders::send();
+    if (!headers_sent()) {
+        header('Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()');
+    }
 };
 
 if (is_file($configFile)) {
