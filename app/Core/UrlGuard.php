@@ -28,6 +28,7 @@ final class UrlGuard
         $url = trim($url);
         if ($url === ''
             || preg_match('/[\x00-\x1F\x7F]/', $url) === 1
+            || preg_match('/\s/u', $url) === 1
             || str_contains($url, '\\')
             || str_starts_with($url, '//')) {
             return false;
