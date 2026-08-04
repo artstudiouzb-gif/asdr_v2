@@ -23,7 +23,7 @@ $items = $data['items'] ?? [];
                 ?>
                 <div class="person-card<?= $vacant ? ' person-card--vacant' : '' ?>">
                     <?php if ($photo !== ''): ?>
-                        <?= \App\Core\Media::picture($photo, $name !== '' ? $name : t('Фото'), null, null, 'person-card__photo', true, '(max-width: 700px) 100vw, 25vw') ?>
+                        <?= \App\Core\Media::picture($photo, $name !== '' ? $name : t('Фото'), null, null, 'person-card__img', true, '(max-width: 700px) 100vw, 25vw', false, 'person-card__photo') ?>
                     <?php else: ?>
                         <span class="person-card__placeholder">
                             <?= \App\Core\Icon::render('user', 34, 'person-card__placeholder-icon', 1.5) ?>

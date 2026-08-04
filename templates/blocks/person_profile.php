@@ -9,7 +9,7 @@ $btnUrl = trim((string) ($data['button_url'] ?? ''));
 <div class="block-profile">
     <div class="profile__media">
         <?php if ($photo !== ''): ?>
-            <?= \App\Core\Media::picture($photo, (string) ($data['name'] ?? ''), null, null, 'profile__photo', false, '(max-width: 700px) 100vw, 35vw') ?>
+            <?= \App\Core\Media::picture($photo, (string) ($data['name'] ?? ''), null, null, 'profile__img', false, '(max-width: 700px) 100vw, 35vw', false, 'profile__photo') ?>
         <?php else: ?>
             <span class="profile__photo profile__photo--empty">
                 <?= \App\Core\Icon::render('user', 64, 'profile__placeholder-icon', 1.2) ?>
@@ -19,7 +19,11 @@ $btnUrl = trim((string) ($data['button_url'] ?? ''));
     <div class="profile__info">
         <?php if (!empty($data['name'])): ?><?php $hTag = $data['_heading_tag'] ?? 'h1'; ?><<?= $hTag ?> class="profile__name"><?= htmlspecialchars((string) $data['name'], ENT_QUOTES) ?></<?= $hTag ?>><?php endif; ?>
         <?php if (!empty($data['position'])): ?><div class="profile__position"><?= htmlspecialchars((string) $data['position'], ENT_QUOTES) ?></div><?php endif; ?>
-        <?php if (!empty($data['text'])): ?><p class="profile__text"><?= nl2br(htmlspecialchars((string) $data['text'], ENT_QUOTES)) ?></p><?php endif; ?>
+        <?php if (!empty($data['text'])): ?>
+            <div class="profile__text rich-content">
+                <?= \App\Core\HtmlSanitizer::sanitize((string) $data['text']) ?>
+            </div>
+        <?php endif; ?>
         <div class="profile__contacts">
             <?php if ($phone !== ''): ?>
                 <span class="profile__contact">
