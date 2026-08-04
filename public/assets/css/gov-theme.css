@@ -3177,14 +3177,16 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     display: inline-flex !important; 
     align-items: center !important; 
     justify-content: center !important; 
-    padding: 14px 28px; 
+    padding: 11px 26px !important; 
+    min-height: 52px !important;
+    box-sizing: border-box !important;
     background: var(--gov-navy); 
     color: #fff; 
     text-transform: uppercase; 
     font-size: 0.8125rem; 
     letter-spacing: .06em; 
     font-weight: 700; 
-    border-radius: var(--btn-radius, 8px); 
+    border-radius: var(--btn-radius, 9999px); 
     text-decoration: none; 
     transition: background 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease;
     position: relative;
