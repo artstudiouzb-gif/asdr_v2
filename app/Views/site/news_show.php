@@ -615,7 +615,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                     <?php $rc = News::getCoverImage($item); ?>
                     <a class="relnews-card" href="<?= htmlspecialchars(Locale::url('news/' . $item['slug'], $lang), ENT_QUOTES) ?>">
                         <?php if ($rc !== null): ?>
-                            <?= \App\Core\Media::picture($rc, (string) $item['title'], null, null, 'relnews-card__media', true, '(max-width: 700px) 100vw, 33vw') ?>
+                            <?= \App\Core\Media::picture($rc, (string) $item['title'], null, null, 'relnews-card__img', true, '(max-width: 700px) 100vw, 33vw', false, 'relnews-card__media') ?>
                         <?php else: ?>
                             <span class="relnews-card__media relnews-card__media--empty" aria-hidden="true"></span>
                         <?php endif; ?>

@@ -26,7 +26,7 @@ require __DIR__ . '/_header.php';
             <?php foreach ($albums as $album): ?>
                 <a class="album-card" href="<?= htmlspecialchars(Locale::url('albums/' . $album['slug']), ENT_QUOTES) ?>">
                     <?php if ($album['cover'] !== ''): ?>
-                        <?= \App\Core\Media::picture((string) $album['cover'], (string) $album['title'], null, null, 'album-card__cover', true, '(max-width: 700px) 100vw, 33vw') ?>
+                        <?= \App\Core\Media::picture((string) $album['cover'], (string) $album['title'], null, null, 'album-card__img', true, '(max-width: 700px) 100vw, 33vw', false, 'album-card__cover') ?>
                     <?php else: ?>
                         <span class="album-card__cover album-card__cover--empty" aria-hidden="true"></span>
                     <?php endif; ?>

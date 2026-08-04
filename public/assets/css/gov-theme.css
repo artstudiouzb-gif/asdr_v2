@@ -2428,11 +2428,29 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 .newsdetail-photos__item { aspect-ratio: 4/3; border-radius: var(--radius, 14px); background: var(--gov-navy) center/cover no-repeat; transition: transform .25s ease, box-shadow .25s ease; }
 .newsdetail-photos__item:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(19,42,92,.16); }
 
-/* --- Похожие новости --- */
-.newsdetail-related__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-@media (max-width: 1000px) { .newsdetail-related__grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { .newsdetail-related__grid { grid-template-columns: 1fr; } }
-.relnews-card {
+/* --- Единая система карточек и похожих новостей --- */
+.newsdetail-related__grid,
+.albums-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+@media (max-width: 1024px) {
+    .newsdetail-related__grid,
+    .albums-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+    .newsdetail-related__grid,
+    .albums-grid { grid-template-columns: 1fr; }
+}
+
+/* Единые карточки (Unified Card Components) */
+.relnews-card,
+.album-card,
+.catcard,
+.project-card,
+.person-card,
+.team-card {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -2442,14 +2460,24 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
     background: var(--gov-surface);
     text-decoration: none;
     color: var(--gov-ink);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    box-shadow: var(--card-shadow, 0 2px 8px rgba(15, 23, 42, 0.03));
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
 }
-.relnews-card:hover {
-    transform: translateY(-3px);
+.relnews-card:hover,
+.album-card:hover,
+.catcard:hover,
+.project-card:hover,
+.person-card:hover,
+.team-card:hover {
+    transform: translateY(-4px);
     border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
     box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
 }
-.relnews-card__media {
+
+.relnews-card__media,
+.album-card__cover,
+.catcard__media,
+.project-card__media {
     aspect-ratio: 16 / 10;
     border-radius: var(--radius-sm, 8px);
     background-color: var(--gov-navy);
@@ -2461,25 +2489,42 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
     overflow: hidden;
     position: relative;
 }
-.relnews-card__media picture {
+.relnews-card__media picture,
+.album-card__cover picture,
+.catcard__media picture,
+.project-card__media picture {
     display: block;
     width: 100%;
     height: 100%;
 }
 .relnews-card__media img,
-.relnews-card__img {
+.relnews-card__img,
+.album-card__cover img,
+.album-card__img,
+.catcard__media img,
+.project-card__media img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.35s ease;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .relnews-card:hover .relnews-card__media img,
-.relnews-card:hover .relnews-card__img {
+.relnews-card:hover .relnews-card__img,
+.album-card:hover .album-card__cover img,
+.album-card:hover .album-card__img,
+.catcard:hover .catcard__media img,
+.project-card:hover .project-card__media img {
     transform: scale(1.04);
 }
-.relnews-card__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
-.relnews-card__date { color: var(--gov-muted); font-size: .82rem; }
+.relnews-card__media--empty,
+.album-card__cover--empty,
+.project-card__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
+.relnews-card__date,
+.album-card__meta { color: var(--gov-muted); font-size: .82rem; font-weight: 600; }
+.album-card__body { display: flex; flex-direction: column; gap: 6px; padding: 2px 2px 4px; flex: 1; }
+.album-card__title { font-size: 1.02rem; font-weight: 700; color: var(--gov-title); margin: 0; line-height: 1.35; transition: color 0.2s ease; }
+.album-card:hover .album-card__title { color: var(--gov-teal); }
 /* Ровный ряд собираем ограничением заголовка, а не растяжкой промежутка:
    раньше лид прижимался к низу карточки (margin-top: auto), и расстояние
    «заголовок → анонс» у соседей отличалось вдвое. */
