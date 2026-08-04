@@ -727,7 +727,6 @@ body:has(.site-header--transparent) .site-content { margin-top: 0; }
 body .site-header--transparent.is-scrolled { background: var(--gov-surface); }
 body .site-header--transparent:not(.is-scrolled) .site-header__logo,
 body .site-header--transparent:not(.is-scrolled) .site-header__logo span,
-body .site-header--transparent:not(.is-scrolled) .site-menu__link,
 body .site-header--transparent:not(.is-scrolled) .site-lang-switcher__item,
 body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__trigger,
 body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__globe,
@@ -738,6 +737,9 @@ body .site-header--transparent:not(.is-scrolled) .site-search-toggle,
 body .site-header--transparent:not(.is-scrolled) .site-burger,
 body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle,
 body .site-header--transparent:not(.is-scrolled) .hdr-contact { color: #fff; }
+body .site-header--transparent:not(.is-scrolled) .site-menu__link {
+    color: var(--menu-color-transparent, var(--menu-color, #fff));
+}
 body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__trigger:hover { background: rgba(255, 255, 255, 0.16); }
 /* Отдельный (светлый) логотип для прозрачного режима.
    Стандартный логотип прячем ТОЛЬКО когда реально задан светлый вариант —
@@ -751,7 +753,11 @@ body .site-header--transparent:not(.is-scrolled) .site-header__logo:has(.site-he
 .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle:hover,
 .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle:focus-visible,
 .site-header--transparent:not(.is-scrolled) .site-menu__overflow.is-open .site-menu__overflow-toggle {
-    color: #9fe3e4 !important;
+    color: var(--menu-hover-transparent, var(--menu-hover, #9fe3e4)) !important;
+}
+body .site-header--transparent:not(.is-scrolled) .site-menu__link.is-active,
+body .site-header--transparent:not(.is-scrolled) .site-menu__link[aria-current="page"] {
+    color: var(--menu-active-transparent, var(--menu-active, #00f2fe)) !important;
 }
 /* Линия подчеркивания активного и наведенного пункта меню с настройками длины, высоты и толщины */
 .site-menu--style-underline .site-menu__link::after {
@@ -5304,18 +5310,18 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline > .
     outline-offset: 1px;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__toggle {
-    color: #fff !important;
+    color: var(--menu-color-transparent, var(--menu-color, #fff)) !important;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:hover > .site-menu__toggle,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:focus-within > .site-menu__toggle,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .site-menu__toggle {
-    color: #9fe3e4 !important;
+    color: var(--menu-hover-transparent, var(--menu-hover, #9fe3e4)) !important;
     background: transparent !important;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:hover > .site-menu__link,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:focus-within > .site-menu__link,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .site-menu__link {
-    color: #9fe3e4 !important;
+    color: var(--menu-hover-transparent, var(--menu-hover, #9fe3e4)) !important;
 }
 
 /* Панель «Ещё» имеет собственный непрозрачный фон, поэтому её ссылки
