@@ -6040,79 +6040,97 @@ select,
 }
 
 /* ============================================================================
-   Улучшение читаемости и увеличение шрифтов в админ-панели (Admin Typography & Legibility)
+   Улучшение читаемости и увеличение шрифтов в админ-панели (Admin Typography 16px Base)
    ============================================================================ */
 
-/* 1. Базовый шрифт и межстрочный интервал рабочей области */
+/* 1. Базовый шрифт 16px и комфортный межстрочный интервал */
 body, body.admin-body {
-    font-size: 14.5px !important;
-    line-height: 1.55 !important;
+    font-size: 16px !important;
+    line-height: 1.6 !important;
 }
 
-/* 2. Таблицы: заголовки колонок, ячейки, ссылки и высоты строк */
+/* 2. Заголовки страниц и секций */
+.admin-main h1, .admin-page-title, h1 { font-size: 26px !important; line-height: 1.25 !important; }
+.admin-main h2, h2 { font-size: 21px !important; line-height: 1.3 !important; }
+.admin-main h3, h3 { font-size: 18px !important; line-height: 1.35 !important; }
+.admin-main h4, h4 { font-size: 16px !important; line-height: 1.4 !important; }
+
+/* 3. Таблицы: заголовки колонок, ячейки, названия записей и отступы */
 .admin-table th, table.table th, .table th {
-    font-size: 12.5px !important;
+    font-size: 13.5px !important;
     font-weight: 700 !important;
     letter-spacing: 0.04em !important;
     text-transform: uppercase !important;
-    padding: 12px 14px !important;
+    padding: 14px 16px !important;
     color: #475569 !important;
     background-color: #f8fafc !important;
 }
 
 .admin-table td, table.table td, .table td {
-    font-size: 14px !important;
-    padding: 13px 14px !important;
-    line-height: 1.45 !important;
+    font-size: 15.5px !important;
+    padding: 14px 16px !important;
+    line-height: 1.5 !important;
     color: #1e293b !important;
 }
 
 .admin-table td a, table.table td a, .table td a {
-    font-size: 14px !important;
+    font-size: 15.5px !important;
     font-weight: 600 !important;
 }
 
-/* 3. Фильтры, поиск, селекты и поля ввода */
+/* 4. Фильтры, поиск, селекты, инпуты и подсказки */
 .filters-panel input, .filters-panel select, .filters-panel label,
 .admin-filters input, .admin-filters select, .admin-filters label,
 .admin-main input[type="text"], .admin-main input[type="search"], .admin-main input[type="email"],
 .admin-main select, .admin-main textarea {
-    font-size: 14px !important;
+    font-size: 15px !important;
 }
 
-.filters-panel label, .form-field label, label.form-label {
-    font-size: 13.5px !important;
+.filters-panel label, .form-field label, label.form-label, label {
+    font-size: 14.5px !important;
     font-weight: 600 !important;
     color: #334155 !important;
 }
 
-/* 4. Бейджи языков и статусов */
+small, .form-hint, .help-block {
+    font-size: 13.5px !important;
+    line-height: 1.45 !important;
+}
+
+/* 5. Бейджи языков (RU/UZ), статусов и теги */
 .lang-badge, [class*="lang-badge"] {
-    font-size: 12px !important;
+    font-size: 13px !important;
     font-weight: 700 !important;
-    padding: 4px 8px !important;
-    border-radius: 5px !important;
+    padding: 5px 10px !important;
+    border-radius: 6px !important;
 }
 
 .badge, .status-badge {
-    font-size: 12.5px !important;
+    font-size: 13.5px !important;
     font-weight: 700 !important;
-    padding: 5px 12px !important;
+    padding: 6px 14px !important;
 }
 
-/* 5. Сайдбар и кнопки действий */
+/* 6. Сайдбар, меню и кнопки действий */
 .admin-sidebar .nav-link, .admin-nav-item, .admin-sidebar a {
-    font-size: 14px !important;
+    font-size: 15px !important;
     font-weight: 600 !important;
 }
 
+.admin-sidebar__label, .admin-sidebar__section-title {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+}
+
 .btn {
-    font-size: 14px !important;
+    font-size: 15px !important;
     font-weight: 600 !important;
 }
 
 .btn--small, .btn--sm, .btn-sm {
-    font-size: 13px !important;
+    font-size: 14px !important;
     font-weight: 600 !important;
+    padding: 7px 12px !important;
 }
 
