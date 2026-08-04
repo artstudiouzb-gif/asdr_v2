@@ -1752,6 +1752,27 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .media-modal__footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-top: 1px solid #e2e8f0; background: #f8fafc; }
 .media-modal__selected-info { font-size: 13px; font-weight: 600; color: #0f172a; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .media-modal__footer-actions { display: flex; gap: 8px; }
+
+/* Кнопки внутри модала — всегда «светлая тема», независимо от admin-theme */
+.media-modal .btn--primary {
+    background: #2563eb !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+}
+.media-modal .btn--primary:hover {
+    background: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+}
+.media-modal .btn {
+    color: #1e293b;
+    background: #ffffff;
+    border-color: #cbd5e1;
+}
+.media-modal .btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
 @media (max-width: 640px) {
     .media-modal { padding: 8px; }
     .media-modal__dialog { max-height: 94vh; }
@@ -6271,6 +6292,38 @@ small, .form-hint, .help-block {
     border-color: rgba(255, 255, 255, 0.18) !important;
 }
 .form-actions--sticky [class*="u-inline-"] strong {
+    color: #ffffff !important;
+}
+
+/* Переключатель соцсетей внутри панели сохранения (неактивное состояние) */
+.form-actions--sticky .news-social-toggle {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: #cbd5e1 !important;
+    box-shadow: none !important;
+}
+.form-actions--sticky .news-social-toggle:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: #f1f5f9 !important;
+}
+.form-actions--sticky .news-social-toggle__icon {
+    color: #94a3b8 !important;
+}
+.form-actions--sticky .news-social-toggle:hover .news-social-toggle__icon {
+    color: #cbd5e1 !important;
+}
+.form-actions--sticky .news-social-toggle input[type="checkbox"] {
+    accent-color: #60a5fa !important;
+}
+/* Активное (checked) состояние остаётся ярким */
+.form-actions--sticky .news-social-toggle:has(input:checked) {
+    background: #2563eb !important;
+    border-color: #1d4ed8 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+}
+.form-actions--sticky .news-social-toggle:has(input:checked) .news-social-toggle__icon {
     color: #ffffff !important;
 }
 
