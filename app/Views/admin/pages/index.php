@@ -45,6 +45,7 @@ $langs = Language::active();
     <span class="bulk-bar__count" data-bulk-count>0 выбрано</span>
 </form>
 
+<div class="table-responsive">
 <table class="data-table">
     <thead>
         <tr>
@@ -109,6 +110,7 @@ $langs = Language::active();
         <?php endforeach; ?>
     </tbody>
 </table>
+</div>
 
 <?= \App\Core\View::renderPartial('admin/layout/pagination', ['paginationPath' => '/admin/pages', 'filterParams' => $filterParams, 'page' => $filters['page'], 'pages' => $pages, 'total' => $total]) ?>
 

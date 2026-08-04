@@ -6153,3 +6153,213 @@ small, .form-hint, .help-block {
     padding: 7px 12px !important;
 }
 
+/* ============================================================================
+   Адаптивность таблиц, Плавающая панель сохранения, Фильтры, Тоасты и Меню действий
+   ============================================================================ */
+
+/* 1. Мобильная адаптивность таблиц */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1.25rem;
+    border-radius: 12px;
+}
+
+@media (max-width: 900px) {
+    .table-responsive .admin-table,
+    .table-responsive table.table,
+    .table-responsive .table {
+        min-width: 700px !important;
+    }
+}
+
+/* 2. Плавающая панель действий в формах */
+.form-actions--sticky, .admin-save-bar {
+    position: sticky !important;
+    bottom: 16px !important;
+    z-index: 900 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    padding: 14px 22px !important;
+    border-radius: 14px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 14px !important;
+    margin-top: 24px !important;
+}
+
+/* 3. Индикация активных фильтров */
+.active-filters-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 16px;
+    padding: 8px 14px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    font-size: 13.5px;
+}
+.active-filters-bar__title {
+    font-weight: 700;
+    color: #475569;
+    margin-right: 4px;
+}
+.active-filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.active-filter-pill__clear {
+    color: #64748b;
+    cursor: pointer;
+    font-weight: 700;
+    text-decoration: none;
+}
+.active-filter-pill__clear:hover {
+    color: #ef4444;
+}
+
+/* 4. Выпадающее меню действий в строках таблиц */
+.admin-dropdown {
+    position: relative;
+    display: inline-block;
+}
+.admin-dropdown__toggle {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+}
+.admin-dropdown__toggle:hover, .admin-dropdown__toggle:focus {
+    background: #ffffff;
+    border-color: #2563eb;
+    color: #2563eb;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+.admin-dropdown__menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    z-index: 950;
+    min-width: 170px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+    padding: 6px;
+    list-style: none;
+    margin: 0;
+}
+.admin-dropdown.is-open .admin-dropdown__menu {
+    display: block;
+    animation: adminDropdownFadeIn 0.15s ease-out;
+}
+@keyframes adminDropdownFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.admin-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.15s ease, color 0.15s ease;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+.admin-dropdown__item:hover {
+    background: #f1f5f9;
+    color: #2563eb;
+}
+.admin-dropdown__item--danger:hover {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+/* 5. Всплывающие Toast-уведомления */
+.admin-toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 380px;
+    pointer-events: none;
+}
+.admin-toast {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.15);
+    color: #0f172a;
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.4;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    opacity: 0;
+    transform: translateX(30px);
+}
+.admin-toast.is-show {
+    opacity: 1;
+    transform: translateX(0);
+}
+.admin-toast--success {
+    border-left: 5px solid #16a34a;
+}
+.admin-toast--error {
+    border-left: 5px solid #dc2626;
+}
+.admin-toast--info {
+    border-left: 5px solid #2563eb;
+}
+.admin-toast__close {
+    margin-left: auto;
+    background: transparent;
+    border: 0;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0;
+    line-height: 1;
+}
+.admin-toast__close:hover {
+    color: #0f172a;
+}
+
