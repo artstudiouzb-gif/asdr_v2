@@ -251,7 +251,7 @@ summary:focus-visible {
 
 .block-text__title { font-size: 1.75rem; margin-bottom: 12px; }
 
-.block-cta { text-align: center; padding: 40px; background: var(--bg-surface); border-radius: 12px; }
+.block-cta { text-align: center; padding: 40px; background: var(--bg-surface); border-radius: var(--radius, 12px); }
 .block-cta__button {
     display: inline-block;
     margin-top: 16px;
@@ -660,7 +660,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 }
 .testimonial {
     scroll-snap-align: start; flex: 0 0 min(360px, 85%); margin: 0;
-    background: var(--gov-surface, #fff); border: 1px solid var(--gov-border); border-radius: 16px; padding: 32px 28px; text-align: center;
+    background: var(--gov-surface, #fff); border: 1px solid var(--gov-border); border-radius: var(--radius, 16px); padding: 32px 28px; text-align: center;
     box-shadow: 0 4px 12px rgba(19,42,92,.02);
     transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s ease;
 }
@@ -705,12 +705,12 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 
 .block-team__grid, .block-projects__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
 .team-card { text-align: center; }
-.team-card__photo { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 12px; margin-bottom: 12px; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
+.team-card__photo { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: var(--radius-sm, 12px); margin-bottom: 12px; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
 .team-card:hover .team-card__photo { transform: scale(1.04); }
 .team-card__name { font-weight: 700; transition: color 0.3s ease; }
 .team-card:hover .team-card__name { color: var(--color-accent, #e63946); }
 .team-card__position { color: var(--text-muted); font-size: 0.875rem; }
-.project-card { display: block; text-decoration: none; color: inherit; background: var(--bg-surface); border-radius: 12px; overflow: hidden; }
+.project-card { display: block; text-decoration: none; color: inherit; background: var(--bg-surface); border-radius: var(--radius, 12px); overflow: hidden; }
 .project-card__cover { width: 100%; aspect-ratio: 16/10; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
 .project-card:hover .project-card__cover { transform: scale(1.05); }
 .project-card__title { font-weight: 700; padding: 12px 14px 0; transition: color 0.3s ease; }
@@ -736,7 +736,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .block-faq__list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 .faq-item {
     border: 1px solid var(--gov-border, #e0e0e0);
-    border-radius: 8px;
+    border-radius: var(--radius-sm, 8px);
     background: var(--gov-surface, #fff);
     transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
     overflow: hidden;

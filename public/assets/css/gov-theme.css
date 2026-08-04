@@ -1804,7 +1804,7 @@ body.lightbox-active { overflow: hidden !important; }
 /* Виджет информера валют (JSON API) */
 .currency-widget {
     display: inline-flex; align-items: center; gap: 14px; padding: 4px 12px;
-    border-radius: 20px; background: color-mix(in srgb, var(--gov-teal, #0d9488) 10%, transparent);
+    border-radius: var(--radius-sm, 14px); background: color-mix(in srgb, var(--gov-teal, #0d9488) 10%, transparent);
     font-size: 0.8125rem; font-weight: 600; color: var(--gov-title);
 }
 .currency-item { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
@@ -2427,7 +2427,7 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 @media (max-width: 1000px) { .newsdetail-related__grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .newsdetail-related__grid { grid-template-columns: 1fr; } }
 .relnews-card { display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: var(--gov-ink); }
-.relnews-card__media { aspect-ratio: 16/10; border-radius: 12px; background-color: var(--gov-navy); background-position: center; background-size: cover; background-repeat: no-repeat; display: block; width: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.5s ease; overflow: hidden; }
+.relnews-card__media { aspect-ratio: 16/10; border-radius: var(--radius-sm, 10px); background-color: var(--gov-navy); background-position: center; background-size: cover; background-repeat: no-repeat; display: block; width: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.5s ease; overflow: hidden; }
 .relnews-card:hover .relnews-card__media { transform: translateY(-4px) scale(1.02); box-shadow: 0 10px 24px rgba(19,42,92,.08); }
 .relnews-card__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
 .relnews-card__date { color: var(--gov-muted); font-size: .82rem; }
@@ -4303,7 +4303,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .block-counters {
     background: var(--counters-bg, var(--gov-surface)) !important;
     border: 1px solid var(--gov-border) !important;
-    border-radius: 20px !important;
+    border-radius: var(--radius, 20px) !important;
     padding: clamp(24px, 3.5vw, 38px) !important;
     box-shadow: 0 16px 40px rgba(19, 42, 92, 0.06), 0 2px 8px rgba(19, 42, 92, 0.02) !important;
     position: relative;
@@ -4564,8 +4564,8 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 
 /* ===== Оформление виджетов сайдбара (панель «Оформление» в админке) ===== */
 .widget--style-card { padding: 22px; }
-.widget--style-tinted { padding: 22px; border-radius: 14px; background: color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)); }
-.widget--style-navy { padding: 22px; border-radius: 14px; background: var(--gov-navy); color: #fff; }
+.widget--style-tinted { padding: 22px; border-radius: var(--radius, 14px); background: color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)); }
+.widget--style-navy { padding: 22px; border-radius: var(--radius, 14px); background: var(--gov-navy); color: #fff; }
 .widget--style-navy .widget__title, .widget--style-navy a { color: #fff; }
 .widget--style-navy a:hover { color: #cfe6e6; }
 .widget--pad-compact { padding: 14px; }
