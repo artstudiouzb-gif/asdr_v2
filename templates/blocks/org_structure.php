@@ -122,9 +122,12 @@ if ($branches !== []) {
     }
 }
 
-// Число колонок ряда уходит в scoped CSS блока: inline-style на публичной
-// странице запрещён (CSP и проверка шаблонов).
+// Число колонок ряда и размер шрифта уходят в scoped CSS блока.
 $templateCss = '';
+$fontSize = (int) ($data['font_size'] ?? 0);
+if ($fontSize >= 10 && $fontSize <= 24) {
+    $templateCss .= '#block-' . $blockId . ' .orgstruct{--org-font-size:' . $fontSize . 'px}';
+}
 foreach ($rows as $rowIndex => $row) {
     $templateCss .= '#block-' . $blockId . ' .orgstruct__row:nth-child(' . ($rowIndex + 1) . ')'
         . '{--orgstruct-cols:' . count($row) . '}';

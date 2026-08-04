@@ -1984,10 +1984,12 @@ body.lightbox-active { overflow: hidden !important; }
 .orgstruct {
     --org-line: color-mix(in srgb, var(--gov-navy) 22%, var(--gov-border));
     --org-gap: 24px;
+    --org-font: var(--org-font-size, var(--base-font-size, 1rem));
     /* Пометка «проектный офис» и советники: служебный цвет схемы,
        намеренно не зависит от бренд-акцента, чтобы читаться на его фоне. */
     --org-flag: #c98a12;
     display: flex; flex-direction: column; align-items: center;
+    font-size: var(--org-font);
 }
 :root[data-theme="dark"] .orgstruct { --org-flag: #e2a93c; --org-line: color-mix(in srgb, #fff 22%, var(--gov-border)); }
 
@@ -1999,7 +2001,7 @@ body.lightbox-active { overflow: hidden !important; }
 }
 .orgstruct__council-card {
     padding: 14px 26px; border-radius: var(--radius); text-align: center;
-    background: var(--gov-navy); color: #fff; font-weight: 700; font-size: 1rem;
+    background: var(--gov-navy); color: #fff; font-weight: 700; font-size: var(--org-font);
     box-shadow: 0 14px 34px color-mix(in srgb, var(--gov-navy) 24%, transparent);
 }
 .orgstruct__council-card .orgstruct__link { color: inherit; text-decoration: none; }
@@ -2021,8 +2023,8 @@ a.orgstruct__head:hover {
     box-shadow: 0 20px 40px color-mix(in srgb, var(--gov-navy) 40%, transparent);
 }
 a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--gov-teal) 55%, #fff); }
-.orgstruct__head-role { font-size: 0.75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .82; }
-.orgstruct__head-name { font-family: var(--font-heading, 'PT Serif', Georgia, serif); font-size: 1.35rem; font-weight: 700; line-height: 1.25; transition: color .15s ease; }
+.orgstruct__head-role { font-size: calc(var(--org-font) * 0.82); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .88; }
+.orgstruct__head-name { font-family: var(--font-heading, 'PT Serif', Georgia, serif); font-size: calc(var(--org-font) * 1.38); font-weight: 700; line-height: 1.25; transition: color .15s ease; }
 
 /* Советники и прочие органы сбоку от руководителя — отвод вправо. */
 .orgstruct__aside { position: relative; display: flex; flex-direction: column; gap: 10px; margin: 0 0 0 40px; padding: 0; list-style: none; }
@@ -2032,7 +2034,7 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
 .orgstruct__aside-item {
     padding: 12px 20px; border: 1px solid var(--gov-border); border-left: 4px solid var(--org-flag);
     border-radius: var(--radius); background: var(--gov-surface); color: var(--gov-title);
-    font-size: 0.875rem; font-weight: 600;
+    font-size: calc(var(--org-font) * 0.94); font-weight: 600;
     box-shadow: 0 8px 22px -16px color-mix(in srgb, var(--gov-navy) 35%, transparent);
     transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease;
 }
@@ -2080,15 +2082,15 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
     box-shadow: 0 16px 36px color-mix(in srgb, var(--gov-navy) 12%, transparent);
 }
 .orgstruct__deputy-link { display: flex; flex-direction: column; color: inherit; text-decoration: none; }
-.orgstruct__deputy-role { color: var(--gov-title); font-weight: 700; font-size: 0.9375rem; line-height: 1.35; }
-.orgstruct__deputy-name { color: var(--gov-muted); font-size: 0.8125rem; }
+.orgstruct__deputy-role { color: var(--gov-title); font-weight: 700; font-size: calc(var(--org-font) * 0.98); line-height: 1.35; }
+.orgstruct__deputy-name { color: var(--gov-muted, #475569); font-size: calc(var(--org-font) * 0.88); }
 
 .orgstruct__units { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none; }
 .orgstruct__unit {
     position: relative; padding: 13px 16px;
     background: var(--gov-surface);
     border: 1px solid var(--gov-border); border-left: 3px solid var(--gov-teal); border-radius: 0 8px 8px 0;
-    color: var(--gov-ink); font-size: 0.875rem; line-height: 1.5;
+    color: var(--gov-ink); font-size: calc(var(--org-font) * 0.94); line-height: 1.5;
     box-shadow: 0 6px 18px -14px color-mix(in srgb, var(--gov-navy) 40%, transparent);
     transition: transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
 }
@@ -2107,19 +2109,19 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
     display: flex; flex-direction: column; gap: 5px;
     margin: 8px 0 0; padding: 0 0 0 10px; list-style: none;
     border-left: 1px dashed var(--gov-muted);
-    font-size: 0.8125rem; color: var(--gov-muted); font-weight: 400;
+    font-size: calc(var(--org-font) * 0.85); color: var(--gov-muted, #475569); font-weight: 400;
 }
 .orgstruct__subunit::before { content: '• '; }
 .orgstruct__link { color: inherit; text-decoration: none; }
-.orgstruct__link:hover { color: var(--gov-teal-text); text-decoration: underline; }
+.orgstruct__link:hover { color: var(--gov-teal-text, #0284c7); text-decoration: underline; }
 
 /* Примечания под схемой (изъятия, сноски о подчинении). */
 .orgstruct__notes { display: grid; padding: 0; list-style: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; margin: 40px 0 0; padding-top: 22px; border-top: 1px solid var(--gov-border); }
 .orgstruct__note {
     padding: 15px; border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 8px);
-    background: var(--gov-surface); color: var(--gov-ink); font-size: 0.8125rem; line-height: 1.55;
+    background: var(--gov-surface); color: var(--gov-ink); font-size: calc(var(--org-font) * 0.88); line-height: 1.55;
 }
-.orgstruct__footnote { margin-top: 22px; color: var(--gov-muted); font-size: .84rem; }
+.orgstruct__footnote { margin-top: 22px; color: var(--gov-muted, #475569); font-size: calc(var(--org-font) * 0.88); }
 
 /* Сворачивание подразделений включается в настройках блока: тогда кнопка
    видна на любой ширине, а не только на телефоне. */
