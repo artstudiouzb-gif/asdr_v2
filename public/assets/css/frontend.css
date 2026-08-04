@@ -976,8 +976,8 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
    перекрывать per-block классы --space-*. */
 
 /* --- Каталог: макеты из настроек дизайна --- */
-body.design-catalog-cards_lg .content-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
-body.design-catalog-cards_sm .content-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+body.design-catalog-cards_lg .content-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); }
+body.design-catalog-cards_sm .content-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
 body.design-catalog-cards_sm .content-card { padding: 16px 18px; }
 body.design-catalog-list .content-cards { display: flex; flex-direction: column; }
 

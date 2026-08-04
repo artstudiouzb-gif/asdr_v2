@@ -4140,12 +4140,12 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .catlist-count { color: var(--gov-muted); margin: 0; }
 .catlist-count b { color: var(--gov-title); }
 
-.catlist { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--card-gap, 20px); }
+.catlist { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--card-gap, 20px); }
 @media (max-width: 900px) { .catlist { grid-template-columns: 1fr; } }
 
 /* --- Управление шаблоном списка разделов (Каталог) из настроек дизайна --- */
 body.design-catalog-cards_lg .catlist { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--card-gap, 24px); }
-body.design-catalog-cards_sm .catlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+body.design-catalog-cards_sm .catlist { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
 body.design-catalog-cards_sm .catcard { padding: 16px; }
 body.design-catalog-cards_sm .catcard__title { font-size: 1rem; }
 body.design-catalog-list .catlist { display: flex; flex-direction: column; gap: 12px; }

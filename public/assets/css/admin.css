@@ -6039,3 +6039,80 @@ select,
     color: #ffffff !important;
 }
 
+/* ============================================================================
+   Улучшение читаемости и увеличение шрифтов в админ-панели (Admin Typography & Legibility)
+   ============================================================================ */
+
+/* 1. Базовый шрифт и межстрочный интервал рабочей области */
+body, body.admin-body {
+    font-size: 14.5px !important;
+    line-height: 1.55 !important;
+}
+
+/* 2. Таблицы: заголовки колонок, ячейки, ссылки и высоты строк */
+.admin-table th, table.table th, .table th {
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    padding: 12px 14px !important;
+    color: #475569 !important;
+    background-color: #f8fafc !important;
+}
+
+.admin-table td, table.table td, .table td {
+    font-size: 14px !important;
+    padding: 13px 14px !important;
+    line-height: 1.45 !important;
+    color: #1e293b !important;
+}
+
+.admin-table td a, table.table td a, .table td a {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+/* 3. Фильтры, поиск, селекты и поля ввода */
+.filters-panel input, .filters-panel select, .filters-panel label,
+.admin-filters input, .admin-filters select, .admin-filters label,
+.admin-main input[type="text"], .admin-main input[type="search"], .admin-main input[type="email"],
+.admin-main select, .admin-main textarea {
+    font-size: 14px !important;
+}
+
+.filters-panel label, .form-field label, label.form-label {
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+}
+
+/* 4. Бейджи языков и статусов */
+.lang-badge, [class*="lang-badge"] {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    padding: 4px 8px !important;
+    border-radius: 5px !important;
+}
+
+.badge, .status-badge {
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    padding: 5px 12px !important;
+}
+
+/* 5. Сайдбар и кнопки действий */
+.admin-sidebar .nav-link, .admin-nav-item, .admin-sidebar a {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+.btn {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+.btn--small, .btn--sm, .btn-sm {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
+
