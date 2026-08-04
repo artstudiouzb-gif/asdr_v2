@@ -131,7 +131,7 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     }
     html::-webkit-scrollbar-thumb {
         background-color: color-mix(in srgb, var(--color-primary, var(--gov-navy)) 28%, transparent);
-        border-radius: 10px;
+        border-radius: var(--radius-sm, 10px);
         transition: background-color 0.3s ease;
     }
     html::-webkit-scrollbar-thumb:hover {
@@ -556,7 +556,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 .site-lang-dropdown summary::marker { display: none; content: ""; }
 .site-lang-dropdown__trigger {
     display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 6px; border-radius: 8px;
+    padding: 4px 6px; border-radius: var(--radius-sm, 8px);
     background: transparent;
     border: 1px solid transparent;
     color: var(--gov-title, inherit); font-size: 0.8rem; font-weight: 700;
@@ -583,7 +583,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 .site-lang-dropdown__menu {
     position: absolute; top: calc(100% + 6px); right: 0; min-width: 105px; width: auto;
     padding: 4px; background: var(--gov-surface, #ffffff);
-    border: 1px solid var(--gov-border, rgba(0, 0, 0, 0.12)); border-radius: 8px;
+    border: 1px solid var(--gov-border, rgba(0, 0, 0, 0.12)); border-radius: var(--radius-sm, 8px);
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.04);
     z-index: 1050; display: flex; flex-direction: column; gap: 2px;
     animation: langDropdownFade 0.18s cubic-bezier(0.16, 1, 0.3, 1);
@@ -594,7 +594,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 }
 .site-lang-dropdown__item {
     display: flex; align-items: center; gap: 8px; padding: 6px 10px;
-    border-radius: 6px; color: var(--gov-title, #1e293b); text-decoration: none;
+    border-radius: var(--radius-sm, 6px); color: var(--gov-title, #1e293b); text-decoration: none;
     font-size: 0.8rem; font-weight: 600; transition: background 0.15s ease, color 0.15s ease;
 }
 .site-lang-dropdown__item:hover { background: var(--gov-bg, #f1f5f9); color: var(--gov-teal, #0d9488); }
@@ -687,7 +687,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 .hdr-snippet a { color: var(--gov-teal); text-decoration: none; border-bottom: 1px dotted currentColor; transition: color .2s ease; }
 .hdr-snippet a:hover { color: var(--gov-teal-text); }
 .hdr-snippet strong, .hdr-snippet b { font-weight: 700; color: var(--gov-title); }
-.hdr-snippet .badge { background: color-mix(in srgb, var(--gov-teal) 12%, transparent); color: var(--gov-teal-text); padding: 3px 8px; border-radius: 6px; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
+.hdr-snippet .badge { background: color-mix(in srgb, var(--gov-teal) 12%, transparent); color: var(--gov-teal-text); padding: 3px 8px; border-radius: var(--radius-sm, 6px); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
 
 .site-nav--with-extras .site-nav__inner { display: flex; align-items: center; gap: 18px; }
 .site-nav__extra { display: inline-flex; align-items: center; gap: 12px; }
@@ -1143,10 +1143,10 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
 body .site-header--borders-container.site-header--transparent:not(.is-scrolled) .site-nav .site-nav__inner { border-top-color: rgba(255,255,255,.16); }
 
 /* --- Выпадающее подменю (гос-тема) --- */
-.site-submenu { background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: 12px; box-shadow: 0 18px 44px rgba(11,26,48,.16); padding: 8px; min-width: 240px; margin-top: 6px; }
+.site-submenu { background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 12px); box-shadow: 0 18px 44px rgba(11,26,48,.16); padding: 8px; min-width: 240px; margin-top: 6px; }
 .site-submenu::before { content: ''; position: absolute; top: -6px; left: 26px; width: 10px; height: 10px; background: var(--gov-surface); border-left: 1px solid var(--gov-border); border-top: 1px solid var(--gov-border); transform: rotate(45deg); }
 .site-submenu::after { content: ''; position: absolute; top: -10px; left: 0; right: 0; height: 12px; background: transparent; }
-.site-submenu__link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; color: var(--gov-title); font-weight: 600; font-size: .92rem; text-transform: var(--submenu-text-transform, none); letter-spacing: 0; }
+.site-submenu__link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-sm, 8px); color: var(--gov-title); font-weight: 600; font-size: .92rem; text-transform: var(--submenu-text-transform, none); letter-spacing: 0; }
 .site-submenu__link:hover, .site-submenu__link:focus-visible { background: color-mix(in srgb, var(--gov-teal) 9%, var(--gov-surface)); color: var(--gov-teal-text); }
 .site-submenu__link .site-menu__icon,
 .site-submenu__link svg { color: var(--gov-teal); flex-shrink: 0; transition: transform .18s ease; }
@@ -1200,7 +1200,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
     z-index: 60;
     background: var(--gov-surface);
     border: 1px solid var(--gov-border);
-    border-radius: 12px;
+    border-radius: var(--radius, 12px);
     box-shadow: 0 18px 44px rgba(11,26,48,.16);
     padding: 6px;
     max-height: min(60vh, 420px);
@@ -1213,7 +1213,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
     justify-content: space-between;
     gap: 12px;
     padding: 9px 12px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm, 8px);
     color: var(--gov-title);
     text-decoration: none;
 }
@@ -1417,7 +1417,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     text-transform: uppercase; color: var(--gov-teal, #0d9488);
 }
 .news-audio-player__title { font-size: 0.9375rem; font-weight: 700; color: var(--gov-title, #1e293b); }
-.news-audio-player__element { flex: 1 1 280px; height: 40px; border-radius: 20px; outline: none; }
+.news-audio-player__element { flex: 1 1 280px; height: 40px; border-radius: var(--radius, 20px); outline: none; }
 
 :root[data-theme="dark"] .news-audio-player {
     background: linear-gradient(135deg, rgba(63, 193, 192, 0.1), rgba(30, 41, 59, 0.6));
@@ -1521,10 +1521,10 @@ body.reader-mode-active { overflow: hidden !important; }
 .reader-mode__body { font-size: calc(1.125rem * var(--reader-scale, 1)); }
 .reader-mode__cover {
     width: 100%; max-height: 480px; object-fit: cover;
-    border-radius: 16px; margin-bottom: 36px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius, 16px); margin-bottom: 36px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 .reader-mode__body p { margin-bottom: 1.6em; }
-.reader-mode__body img { max-width: 100%; height: auto; border-radius: 12px; margin: 24px 0; }
+.reader-mode__body img { max-width: 100%; height: auto; border-radius: var(--radius, 12px); margin: 24px 0; }
 
 /* ==========================================================================
    Интерактивные встраиваемые блоки и карточки соцсетей (Social Embeds)
@@ -1532,7 +1532,7 @@ body.reader-mode-active { overflow: hidden !important; }
 .social-embed { margin: 28px 0; clear: both; }
 .social-embed--youtube {
     position: relative; padding-bottom: 56.25%; height: 0;
-    overflow: hidden; border-radius: 16px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    overflow: hidden; border-radius: var(--radius, 16px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 .social-embed--youtube iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
 .social-embed--telegram { display: flex; justify-content: center; max-width: 100%; overflow-x: auto; }
@@ -1540,7 +1540,7 @@ body.reader-mode-active { overflow: hidden !important; }
 
 .social-embed-card {
     display: flex; align-items: center; gap: 16px; padding: 14px 18px;
-    border-radius: 14px; border: 1px solid var(--gov-border, rgba(0, 0, 0, 0.1));
+    border-radius: var(--radius, 14px); border: 1px solid var(--gov-border, rgba(0, 0, 0, 0.1));
     background: var(--gov-surface, #ffffff); text-decoration: none !important;
     color: var(--gov-title, #1e293b); transition: all 0.25s ease;
     box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04); width: 100%;
@@ -1619,7 +1619,7 @@ body.lightbox-active { overflow: hidden !important; }
 }
 .rich-lightbox-img {
     max-width: 100%; max-height: 75vh; object-fit: contain;
-    border-radius: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    border-radius: var(--radius, 12px); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     user-select: none;
 }
 .rich-lightbox-caption {
@@ -1668,7 +1668,7 @@ body.lightbox-active { overflow: hidden !important; }
 
 .push-prompt-card {
     position: fixed; bottom: 84px; left: 24px; z-index: 999;
-    max-width: 360px; padding: 18px 20px; border-radius: 16px;
+    max-width: 360px; padding: 18px 20px; border-radius: var(--radius, 16px);
     background: var(--gov-surface, #ffffff);
     border: 1px solid var(--gov-border, rgba(0, 0, 0, 0.12));
     box-shadow: 0 12px 40px rgba(15, 23, 42, 0.15);
@@ -1695,7 +1695,7 @@ body.lightbox-active { overflow: hidden !important; }
     display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 28px;
 }
 .newsdetail-tag {
-    display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 20px;
+    display: inline-flex; align-items: center; padding: 6px 14px; border-radius: var(--radius, 20px);
     background: color-mix(in srgb, var(--gov-teal, #0d9488) 10%, transparent);
     color: var(--gov-teal, #0d9488); font-size: 0.875rem; font-weight: 600;
     text-decoration: none; transition: all 0.2s ease;
@@ -1710,7 +1710,7 @@ body.lightbox-active { overflow: hidden !important; }
     top: var(--quote-popover-top);
     left: var(--quote-popover-left);
     position: absolute; z-index: 1000; transform: translateX(-50%);
-    display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 12px;
+    display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: var(--radius, 12px);
     background: #1e293b; color: #ffffff; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3);
     animation: quotePopoverPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1720,7 +1720,7 @@ body.lightbox-active { overflow: hidden !important; }
     to { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 .quote-share-btn {
-    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px;
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--radius-sm, 8px);
     border: 0; background: transparent; color: #f8fafc; font-size: 0.8125rem; font-weight: 600;
     cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
 }
@@ -1728,7 +1728,7 @@ body.lightbox-active { overflow: hidden !important; }
 
 /* 2. Хронология событий (Таймлайн) */
 .newsdetail-timeline {
-    margin: 32px 0; padding: 24px; border-radius: 16px;
+    margin: 32px 0; padding: 24px; border-radius: var(--radius, 16px);
     background: color-mix(in srgb, var(--gov-teal, #0d9488) 3%, var(--gov-surface));
     border: 1px solid var(--gov-border, rgba(0, 0, 0, 0.1));
 }
@@ -1766,12 +1766,12 @@ body.lightbox-active { overflow: hidden !important; }
 
 /* 3. Интерактивные опросы */
 .news-poll-card {
-    margin: 32px 0; padding: 24px; border-radius: 16px;
+    margin: 32px 0; padding: 24px; border-radius: var(--radius, 16px);
     background: var(--gov-surface); border: 1px solid var(--gov-border);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 .news-poll-card__badge {
-    display: inline-block; padding: 4px 10px; border-radius: 6px;
+    display: inline-block; padding: 4px 10px; border-radius: var(--radius-sm, 6px);
     background: color-mix(in srgb, var(--gov-teal, #0d9488) 12%, transparent);
     color: var(--gov-teal, #0d9488); font-size: 0.75rem; font-weight: 700; margin-bottom: 8px;
 }
@@ -1781,7 +1781,7 @@ body.lightbox-active { overflow: hidden !important; }
 .news-poll-card__header .news-poll-card__question { margin-top: 6px; font-size: 1rem; }
 .news-poll-options { display: flex; flex-direction: column; gap: 10px; }
 .news-poll-option {
-    display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px;
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius-sm, 10px);
     border: 1px solid var(--gov-border); background: color-mix(in srgb, var(--gov-surface) 95%, #000);
     cursor: pointer; transition: all 0.2s ease;
 }
@@ -1801,8 +1801,8 @@ body.lightbox-active { overflow: hidden !important; }
 
 .news-poll-res-row { margin-bottom: 14px; }
 .news-poll-res-info { display: flex; justify-content: space-between; font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: var(--gov-title); }
-.news-poll-bar-track { height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--gov-border) 40%, transparent); overflow: hidden; }
-.news-poll-bar-fill { width: var(--poll-percent, 0%); height: 100%; border-radius: 5px; background: var(--gov-teal, #0d9488); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+.news-poll-bar-track { height: 10px; border-radius: var(--radius-sm, 5px); background: color-mix(in srgb, var(--gov-border) 40%, transparent); overflow: hidden; }
+.news-poll-bar-fill { width: var(--poll-percent, 0%); height: 100%; border-radius: var(--radius-sm, 5px); background: var(--gov-teal, #0d9488); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
 .news-poll-card__meta { margin-top: 14px; font-size: 0.8125rem; color: var(--gov-subtext); }
 .news-poll-card__actions { margin-top: 14px; }
 .news-poll-card__actions .btn { width: 100%; justify-content: center; }
@@ -1820,7 +1820,7 @@ body.lightbox-active { overflow: hidden !important; }
 
 /* Живой поиск */
 .search-suggest__item { display: flex !important; align-items: center !important; gap: 12px !important; }
-.search-suggest__thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+.search-suggest__thumb { width: 44px; height: 44px; border-radius: var(--radius-sm, 8px); object-fit: cover; flex-shrink: 0; }
 .search-suggest__info { display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0; }
 .search-suggest__meta { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--gov-subtext); }
 .currency-item__diff.is-up { color: #10b981; background: rgba(16, 185, 129, 0.15); }
@@ -2115,7 +2115,7 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
 /* Примечания под схемой (изъятия, сноски о подчинении). */
 .orgstruct__notes { display: grid; padding: 0; list-style: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; margin: 40px 0 0; padding-top: 22px; border-top: 1px solid var(--gov-border); }
 .orgstruct__note {
-    padding: 15px; border: 1px solid var(--gov-border); border-radius: 8px;
+    padding: 15px; border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 8px);
     background: var(--gov-surface); color: var(--gov-ink); font-size: 0.8125rem; line-height: 1.55;
 }
 .orgstruct__footnote { margin-top: 22px; color: var(--gov-muted); font-size: .84rem; }
@@ -2369,7 +2369,7 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
         margin-top: 24px;
     }
 }
-.newsdetail-card { background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: 12px; padding: 22px; }
+.newsdetail-card { background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 12px); padding: 22px; }
 .newsdetail-card__title { font-size: 1.08rem; margin: 0 0 16px; }
 .newsdetail-card--thesis-inline {
     margin-bottom: 30px;
@@ -2403,13 +2403,13 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 .newsdetail-event__item { display: grid; grid-template-columns: auto 1fr; gap: 10px; font-size: .9rem; line-height: 1.5; }
 .newsdetail-event__icon { color: var(--gov-teal); margin-top: 1px; }
 .newsdetail-docs { display: flex; flex-direction: column; gap: 10px; }
-.newsdetail-doc { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--gov-border); border-radius: 10px; text-decoration: none; color: var(--gov-ink); background: var(--gov-surface); transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease; }
+.newsdetail-doc { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 10px); text-decoration: none; color: var(--gov-ink); background: var(--gov-surface); transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease; }
 .newsdetail-doc:hover { border-color: var(--gov-teal); box-shadow: 0 8px 24px rgba(19,42,92,.08); background: var(--gov-surface); }
 .newsdetail-doc__icon { color: var(--gov-teal); }
 .newsdetail-doc__title { display: block; font-weight: 700; font-size: .88rem; color: var(--gov-title); line-height: 1.35; }
 .newsdetail-doc__meta { display: block; color: var(--gov-muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; margin-top: 3px; }
 .newsdetail-doc__dl { color: var(--gov-title); }
-.newsdetail-subscribe { background: var(--gov-navy); border-radius: 12px; padding: 26px 24px; color: #fff; }
+.newsdetail-subscribe { background: var(--gov-navy); border-radius: var(--radius, 12px); padding: 26px 24px; color: #fff; }
 .newsdetail-subscribe__title { font-size: 1.12rem; margin: 0 0 10px; color: #fff; }
 .newsdetail-subscribe__text { color: rgba(255,255,255,.8); font-size: .88rem; line-height: 1.5; margin: 0 0 16px; }
 .newsdetail-subscribe__row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
@@ -2544,12 +2544,12 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 /* --- Предыдущая / следующая --- */
 .newsdetail-adjacent { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-top: 1px solid var(--gov-border); padding-top: clamp(24px, 3vw, 40px); }
 @media (max-width: 760px) { .newsdetail-adjacent { grid-template-columns: 1fr; } }
-.adjnews { display: flex; align-items: center; gap: 18px; padding: 18px 20px; background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: 14px; text-decoration: none; color: var(--gov-ink); transition: box-shadow .2s ease, border-color .2s ease; }
+.adjnews { display: flex; align-items: center; gap: 18px; padding: 18px 20px; background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 14px); text-decoration: none; color: var(--gov-ink); transition: box-shadow .2s ease, border-color .2s ease; }
 .adjnews:hover { box-shadow: 0 12px 30px rgba(19,42,92,.1); border-color: color-mix(in srgb, var(--gov-navy) 22%, var(--gov-border)); }
 .adjnews--next { text-align: right; justify-content: flex-end; }
 .adjnews--empty { border: 0; background: transparent; }
 .adjnews__arrow { font-size: 1.3rem; color: var(--gov-teal-text); flex: 0 0 auto; }
-.adjnews__media { width: 92px; aspect-ratio: 4/3; border-radius: 10px; background: var(--gov-navy) center/cover no-repeat; flex: 0 0 auto; object-fit: cover; }
+.adjnews__media { width: 92px; aspect-ratio: 4/3; border-radius: var(--radius-sm, 10px); background: var(--gov-navy) center/cover no-repeat; flex: 0 0 auto; object-fit: cover; }
 .adjnews__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
 .adjnews__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .adjnews__label { text-transform: uppercase; font-size: 0.6875rem; letter-spacing: .08em; font-weight: 700; color: var(--gov-muted); }
@@ -2573,7 +2573,7 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 .newsdetail-head--side { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
 .newsdetail-head--side .newsdetail-gallery__main { aspect-ratio: 4/3; }
 .newsdetail-media { min-width: 0; }
-.newsdetail-video { margin-bottom: 0; border-radius: 14px; }
+.newsdetail-video { margin-bottom: 0; border-radius: var(--radius, 14px); }
 
 /* Премиум-новость: полноэкранный тёмный hero, галерея сбоку, оглавление. */
 .newsdetail--premium { margin-top: -1px; }
@@ -2611,7 +2611,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 
 /* Галерея-карточка в правой колонке. */
 .newsdetail-sidegallery { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.newsdetail-sidegallery__item { aspect-ratio: 4/3; border-radius: 8px; background: var(--gov-navy) center/cover no-repeat; transition: opacity .15s ease; }
+.newsdetail-sidegallery__item { aspect-ratio: 4/3; border-radius: var(--radius-sm, 8px); background: var(--gov-navy) center/cover no-repeat; transition: opacity .15s ease; }
 .newsdetail-sidegallery__item--wide { grid-column: 1 / -1; aspect-ratio: 16/9; }
 .newsdetail-sidegallery__item:hover { opacity: .85; }
 .newsdetail-sidegallery__all { width: 100%; justify-content: center; }
@@ -2619,7 +2619,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 /* Оглавление статьи + prev/next. */
 .newsdetail-adjacent--with-toc { grid-template-columns: minmax(0, 300px) 1fr 1fr; }
 @media (max-width: 1000px) { .newsdetail-adjacent--with-toc { grid-template-columns: 1fr; } }
-.newsdetail-toc { background: color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)); border-radius: 14px; padding: 20px 22px; }
+.newsdetail-toc { background: color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)); border-radius: var(--radius, 14px); padding: 20px 22px; }
 .newsdetail-toc__title { display: block; font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; color: var(--gov-title); margin-bottom: 12px; }
 .newsdetail-toc__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
 .newsdetail-toc__list a { display: flex; gap: 10px; align-items: baseline; color: var(--gov-ink); text-decoration: none; font-size: .9rem; line-height: 1.35; }
@@ -3266,7 +3266,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .block-hero--pos-right .block-hero__eyebrow { justify-content: flex-start; }
 
 /* Подложка под текстом (цвет и прозрачность задаются инлайн из настроек). */
-.block-hero__text--panel { padding: clamp(22px, 3vw, 38px); border-radius: 16px; background: var(--hero-panel-bg); backdrop-filter: blur(3px); }
+.block-hero__text--panel { padding: clamp(22px, 3vw, 38px); border-radius: var(--radius, 16px); background: var(--hero-panel-bg); backdrop-filter: blur(3px); }
 .block-hero--pos-center .block-hero__text--panel { display: inline-block; }
 
 /* Hero как шапка страницы: убираем верхний отступ контента, чтобы hero стоял
@@ -3372,7 +3372,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     place-items: center;
     width: 46px;
     height: 46px;
-    border-radius: 12px;
+    border-radius: var(--radius, 12px);
     margin-bottom: 14px;
     background: color-mix(in srgb, var(--gov-navy) 7%, transparent);
     color: var(--gov-title);
@@ -3687,7 +3687,7 @@ span.imgcard__media::after {
 .newsdocs-news { display: flex; flex-direction: column; }
 .newsdocs-item { display: grid; grid-template-columns: 96px 1fr; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--gov-border); text-decoration: none; color: var(--gov-ink); }
 .newsdocs-item:first-child { padding-top: 0; }
-.newsdocs-item__media { display: block; aspect-ratio: 4/3; border-radius: 8px; background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; }
+.newsdocs-item__media { display: block; aspect-ratio: 4/3; border-radius: var(--radius-sm, 8px); background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; }
 .newsdocs-item__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
 .newsdocs-item__body { display: flex; flex-direction: column; gap: 5px; }
 .newsdocs-item__date { color: var(--gov-muted); font-size: .82rem; }
@@ -3702,7 +3702,7 @@ span.imgcard__media::after {
     border-color: var(--gov-teal);
 }
 .doc-card__icon { 
-    display: grid; place-items: center; width: 44px; height: 44px; border-radius: 10px; 
+    display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-sm, 10px); 
     background: color-mix(in srgb, var(--gov-teal) 12%, var(--gov-surface)); color: var(--gov-teal); 
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s, color 0.3s;
 }
@@ -3847,7 +3847,7 @@ span.imgcard__media::after {
 .news-lead-rich a { color: var(--gov-teal-text, #0b6f70); text-underline-offset: .16em; }
 .reader-mode__lead.news-lead-rich p { margin: 0 0 .75em; }
 .newsdetail__meta { display: flex; flex-wrap: wrap; gap: 8px; color: var(--gov-muted); font-size: .82rem; margin-top: 4px; }
-.newsdetail__meta-item { display: inline-flex; align-items: center; gap: 6px; background: rgba(0, 0, 0, 0.03); padding: 5px 12px; border-radius: 8px; transition: background .15s ease, color .15s ease; }
+.newsdetail__meta-item { display: inline-flex; align-items: center; gap: 6px; background: rgba(0, 0, 0, 0.03); padding: 5px 12px; border-radius: var(--radius-sm, 8px); transition: background .15s ease, color .15s ease; }
 :root[data-theme="dark"] .newsdetail__meta-item { background: rgba(255, 255, 255, 0.05); }
 .newsdetail__meta-item:hover { background: rgba(0, 0, 0, 0.055); color: var(--gov-title); }
 :root[data-theme="dark"] .newsdetail__meta-item:hover { background: rgba(255, 255, 255, 0.09); color: #fff; }
@@ -3862,7 +3862,7 @@ span.imgcard__media::after {
 
 /* --- Медиа-модуль 16:9 + миниатюры --- */
 .newsdetail-gallery { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.newsdetail-gallery__main { position: relative; aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; background: #16283f; }
+.newsdetail-gallery__main { position: relative; aspect-ratio: 16/9; border-radius: var(--radius, 14px); overflow: hidden; background: #16283f; }
 .newsdetail-gallery__slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .35s ease; }
 .newsdetail-gallery__slide.is-active { opacity: 1; }
 .newsdetail-gallery__nav { position: absolute; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255,255,255,.92); color: var(--gov-navy); font-size: 1.375rem; cursor: pointer; transition: background .15s ease; z-index: 2; }
@@ -3877,7 +3877,7 @@ button.newsdetail-gallery__thumb {
     min-width: 110px !important;
     height: 62px !important;
     aspect-ratio: 16 / 9 !important;
-    border-radius: 6px !important;
+    border-radius: var(--radius-sm, 6px) !important;
     border: 2px solid transparent !important;
     background: var(--gov-bg-alt, #f1f5f9) !important;
     cursor: pointer !important;
@@ -3993,7 +3993,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .newsfeat__date--on-media { color: rgba(255,255,255,.88); }
 .newsfeat__more { color: var(--gov-teal-text); font-size: 0.85rem; font-weight: 700; }
 .newsfeat-mini { display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: var(--gov-ink); }
-.newsfeat-mini__thumb { display: block; width: 100%; aspect-ratio: 16/10; min-height: 150px; border-radius: 8px; overflow: hidden; background: var(--gov-navy); }
+.newsfeat-mini__thumb { display: block; width: 100%; aspect-ratio: 16/10; min-height: 150px; border-radius: var(--radius-sm, 8px); overflow: hidden; background: var(--gov-navy); }
 .newsfeat-mini__media { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) !important; }
 .newsfeat-mini:hover .newsfeat-mini__media { transform: scale(1.04) !important; }
 .newsfeat-mini__media--empty { display: block; width: 100%; height: 100%; background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
@@ -4032,7 +4032,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     background: color-mix(in srgb, var(--gov-border) 16%, var(--gov-bg));
     padding: 3px;
     border: 1px solid var(--gov-border);
-    border-radius: 24px;
+    border-radius: var(--radius, 24px);
 }
 .media-tabs__tab { 
     position: relative;
@@ -4049,7 +4049,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     font-size: 0.8125rem;
     font-weight: 700;
     color: var(--gov-muted);
-    border-radius: 20px;
+    border-radius: var(--radius, 20px);
     transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: var(--font-family, 'PT Sans', sans-serif); 
 }
@@ -4158,7 +4158,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     justify-content: center;
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm, 8px);
     background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 12%, transparent);
     color: var(--gov-teal-text);
     flex-shrink: 0;
@@ -4212,7 +4212,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     flex-direction: column;
     gap: 3px;
     padding: 8px 12px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm, 8px);
     background: color-mix(in srgb, var(--gov-bg) 65%, transparent);
     border: 1px solid color-mix(in srgb, var(--gov-border) 50%, transparent);
     transition: background-color 0.25s ease, border-color 0.25s ease;
@@ -4257,7 +4257,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     align-items: center;
     gap: 7px;
     padding: 5px 12px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm, 6px);
     background: color-mix(in srgb, var(--color-primary, var(--gov-navy)) 6%, transparent);
     color: var(--gov-title);
     font-size: .82rem;
@@ -4285,13 +4285,13 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 /* Мероприятия: плитка даты слева. */
 .catlist--events .catcard { align-items: flex-start; }
 .catlist--events .catcard--with-image { display: grid; grid-template-columns: 74px minmax(0, 1fr); align-items: start; }
-.catcard__event-media { display: block; grid-column: 1 / -1; width: 100%; height: 190px; overflow: hidden; border-radius: 12px; background: var(--gov-bg); }
+.catcard__event-media { display: block; grid-column: 1 / -1; width: 100%; height: 190px; overflow: hidden; border-radius: var(--radius, 12px); background: var(--gov-bg); }
 .catcard__event-media picture { display: block; width: 100%; height: 100%; }
 .catcard__event-image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--media-object-position, center); transition: transform .35s ease; }
 .catcard:hover .catcard__event-image { transform: scale(1.035); }
 .catcard--with-image .catcard__datebox { grid-column: 1; }
 .catcard--with-image .catcard__main { grid-column: 2; }
-.catcard__datebox { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 74px; min-height: 84px; padding: 10px 6px; border-radius: 12px; background: var(--gov-navy); color: #fff; text-align: center; }
+.catcard__datebox { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 74px; min-height: 84px; padding: 10px 6px; border-radius: var(--radius, 12px); background: var(--gov-navy); color: #fff; text-align: center; }
 .catcard__datebox b { font-family: var(--font-heading, 'PT Serif', serif); font-size: 1.7rem; line-height: 1; }
 .catcard__datebox i { font-style: normal; font-size: .72rem; font-weight: 700; letter-spacing: .08em; margin-top: 4px; }
 .catcard__datebox em { font-style: normal; font-size: .72rem; opacity: .75; }
@@ -4547,7 +4547,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     font-weight: 800;
     color: var(--color-accent, var(--gov-teal));
     opacity: 0.28;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-family, 'Inter', system-ui, sans-serif);
     line-height: 1;
     pointer-events: none;
     z-index: 2;
@@ -4590,14 +4590,14 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .catdetail__body { display: flex; flex-direction: column; gap: 26px; max-width: 76ch; }
 .catdetail__subtitle { margin: 0 0 10px; font-size: 1.2rem; color: var(--gov-title); }
 .catdetail__text { color: var(--gov-ink, #2b3b4e); line-height: 1.6; }
-.catdetail__text img { max-width: 100%; border-radius: 12px; }
+.catdetail__text img { max-width: 100%; border-radius: var(--radius, 12px); }
 .catdetail__empty { color: var(--gov-muted); }
 .catdetail__card { position: sticky; top: 90px; display: flex; flex-direction: column; gap: 16px; padding: 24px; }
 .catdetail__card-title { margin: 0; font-size: 1.05rem; color: var(--gov-title); }
 .catdetail__facts { display: flex; flex-direction: column; gap: 12px; margin: 0; }
 .catdetail__fact dt { font-size: .74rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--gov-muted); }
 .catdetail__fact dd { margin: 2px 0 0; color: var(--gov-title); font-weight: 600; }
-.catdetail__download { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 10px; background: var(--gov-navy); color: #fff; font-weight: 700; text-decoration: none; }
+.catdetail__download { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: var(--radius-sm, 10px); background: var(--gov-navy); color: #fff; font-weight: 700; text-decoration: none; }
 button.catdetail__download { border: none; cursor: pointer; font-family: inherit; font-size: inherit; width: 100%; }
 .catdetail__download:hover { background: var(--gov-teal); }
 .catdetail__back { color: var(--gov-teal-text); font-weight: 600; font-size: .9rem; text-decoration: none; }
@@ -4605,26 +4605,26 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 
 /* Календарь мероприятий. */
 .gcal-nav { display: flex; align-items: center; gap: 14px; }
-.gcal-nav__btn { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--gov-border); border-radius: 10px; background: var(--gov-surface); color: var(--gov-title); font-weight: 700; text-decoration: none; }
+.gcal-nav__btn { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 10px); background: var(--gov-surface); color: var(--gov-title); font-weight: 700; text-decoration: none; }
 .gcal-nav__btn:hover { border-color: var(--gov-teal); color: var(--gov-teal-text); }
 .gcal-nav__label { font-family: var(--font-heading, 'PT Serif', serif); font-size: 1.25rem; color: var(--gov-title); text-transform: capitalize; }
 .gcal-nav__all { margin-left: auto; color: var(--gov-teal-text); font-weight: 700; font-size: .9rem; text-decoration: none; }
 .gcal-scroll { overflow-x: auto; }
-.gcal { width: 100%; min-width: 720px; border-collapse: collapse; border: 1px solid var(--gov-border); border-radius: 14px; overflow: hidden; background: var(--gov-surface); }
+.gcal { width: 100%; min-width: 720px; border-collapse: collapse; border: 1px solid var(--gov-border); border-radius: var(--radius, 14px); overflow: hidden; background: var(--gov-surface); }
 .gcal th { padding: 12px 10px; background: var(--gov-navy); color: #fff; font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; text-align: left; }
 .gcal__cell { vertical-align: top; width: 14.28%; height: 96px; padding: 10px; border: 1px solid var(--gov-border); }
 .gcal__cell--empty { background: color-mix(in srgb, var(--gov-surface) 55%, var(--gov-bg)); }
 .gcal__cell--today { box-shadow: inset 0 0 0 2px var(--gov-teal); }
 .gcal__cell--today .gcal__day { color: var(--gov-teal-text); }
 .gcal__day { display: block; font-weight: 700; color: var(--gov-title); margin-bottom: 6px; }
-.gcal__event { display: block; margin-top: 4px; padding: 5px 8px; border-radius: 8px; background: rgba(23, 153, 155, .12); color: var(--gov-teal-text); font-size: .78rem; font-weight: 600; line-height: 1.35; text-decoration: none; }
+.gcal__event { display: block; margin-top: 4px; padding: 5px 8px; border-radius: var(--radius-sm, 8px); background: rgba(23, 153, 155, .12); color: var(--gov-teal-text); font-size: .78rem; font-weight: 600; line-height: 1.35; text-decoration: none; }
 .gcal__event:hover { background: var(--gov-teal); color: #fff; }
 .gcal-list { display: flex; flex-direction: column; gap: 14px; }
 .gcal-list__title { margin: 0; font-size: 1.3rem; color: var(--gov-title); }
-.gcal-list__items { display: flex; flex-direction: column; gap: 0; margin: 0; padding: 0; list-style: none; border: 1px solid var(--gov-border); border-radius: 14px; background: var(--gov-surface); overflow: hidden; }
+.gcal-list__items { display: flex; flex-direction: column; gap: 0; margin: 0; padding: 0; list-style: none; border: 1px solid var(--gov-border); border-radius: var(--radius, 14px); background: var(--gov-surface); overflow: hidden; }
 .gcal-list__item { display: flex; align-items: center; gap: 14px; padding: 16px 22px; }
 .gcal-list__item + .gcal-list__item { border-top: 1px solid var(--gov-border); }
-.gcal-list__media { display: block; flex: 0 0 96px; height: 68px; overflow: hidden; border-radius: 9px; background: var(--gov-bg); }
+.gcal-list__media { display: block; flex: 0 0 96px; height: 68px; overflow: hidden; border-radius: var(--radius-sm, 9px); background: var(--gov-bg); }
 .gcal-list__media picture { display: block; width: 100%; height: 100%; }
 .gcal-list__image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--media-object-position, center); }
 .gcal-list__body { display: flex; flex: 1; min-width: 0; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
@@ -4682,7 +4682,7 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 
 /* --- Подписка / футер: глубокий navy без градиента --- */
 .subscribe-block, .block-subscribe .subscribe-block {
-    background: var(--gov-navy); border: 0; border-radius: 14px; box-shadow: none;
+    background: var(--gov-navy); border: 0; border-radius: var(--radius, 14px); box-shadow: none;
 }
 .site-footer--columns {
     background: color-mix(in srgb, var(--gov-navy) 92%, #000); border-top: 0; color: rgba(255,255,255,.85);
@@ -4722,15 +4722,15 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 
 /* ===== Капча публичных форм ===== */
 .captcha-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.captcha-row__img { border: 1px solid var(--gov-border); border-radius: 10px; background: var(--gov-bg); }
-.captcha-row__refresh { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--gov-border); border-radius: 10px; background: var(--gov-surface); color: var(--gov-title); font-size: 1.2rem; cursor: pointer; }
+.captcha-row__img { border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 10px); background: var(--gov-bg); }
+.captcha-row__refresh { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 10px); background: var(--gov-surface); color: var(--gov-title); font-size: 1.2rem; cursor: pointer; }
 .captcha-row__refresh:hover { border-color: var(--gov-teal); color: var(--gov-teal-text); }
 .captcha-row input {
     width: 130px;
     height: 46px;
     padding: 0 14px;
     border: 1px solid var(--gov-border);
-    border-radius: 10px;
+    border-radius: var(--radius-sm, 10px);
     background: var(--gov-surface);
     color: var(--gov-title);
     font: inherit;
@@ -4939,7 +4939,7 @@ body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__moon {
     gap: 5px;
     width: 40px;
     height: 40px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm, 8px);
     border: 1px solid var(--gov-border);
     background: var(--gov-surface);
     cursor: pointer;
@@ -4981,7 +4981,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle {
     padding: 8px;
     gap: 4px;
     border: 0;
-    border-radius: 6px;
+    border-radius: var(--radius-sm, 6px);
     background: transparent;
     box-shadow: none;
     color: #fff;
@@ -5065,7 +5065,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow.is-open .s
     align-items: center;
     gap: 10px;
     padding: 12px 18px;
-    border-radius: 10px;
+    border-radius: var(--radius-sm, 10px);
     background: var(--gov-surface);
     color: var(--gov-title);
     border: 1px solid var(--gov-border);
@@ -5126,7 +5126,7 @@ body.quick-search-active { overflow: hidden; }
     width: min(640px, calc(100vw - 32px));
     background: var(--gov-surface);
     border: 1px solid var(--gov-border);
-    border-radius: 16px;
+    border-radius: var(--radius, 16px);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     transform: translateY(-12px) scale(0.97);
@@ -5161,7 +5161,7 @@ body.quick-search-active { overflow: hidden; }
     font-size: 0.75rem;
     font-weight: 700;
     padding: 3px 7px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm, 6px);
     background: var(--gov-bg);
     color: var(--gov-muted);
     border: 1px solid var(--gov-border);
@@ -5237,7 +5237,7 @@ body.quick-search-active { overflow: hidden; }
     min-width: 68px;
     height: 48px;
     aspect-ratio: 16 / 10;
-    border-radius: 6px;
+    border-radius: var(--radius-sm, 6px);
     overflow: hidden;
     background: var(--gov-bg-alt, #f1f5f9);
     flex-shrink: 0;
@@ -5404,7 +5404,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline > .
     margin: 0 0 0 -8px;
     padding: 0 !important;
     border: 0 !important;
-    border-radius: 6px !important;
+    border-radius: var(--radius-sm, 6px) !important;
     color: var(--menu-text-color, var(--gov-title)) !important;
     background: transparent !important;
     background-image: none !important;
@@ -5568,7 +5568,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
         margin: 2px 0;
         padding-inline: 12px;
         border-bottom: 0;
-        border-radius: 8px;
+        border-radius: var(--radius-sm, 8px);
     }
     .site-menu--submenu-cards .site-submenu__link:hover,
     .site-menu--submenu-cards .site-submenu__link:focus-visible,
@@ -5589,7 +5589,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
         width: 44px;
         height: 44px;
         margin-left: 0;
-        border-radius: 9px !important;
+        border-radius: var(--radius-sm, 9px) !important;
     }
 }
 
