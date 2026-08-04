@@ -12,10 +12,10 @@
       "/assets/css/a11y.css"
     ],
     "sourceSha256": "ced45abef3915c3a143c0acf96338c2475a973f10250964e7029642b3430cf7d",
-    "sha256": "371dc32ff96bc00bd43323f2c540b3cf4418fd9144140be0c9f21694bb23c625",
-    "raw": 347888,
-    "gzip": 58180,
-    "brotli": 45957
+    "sha256": "5696b0749caf8f3bd02707a765958e8433215bbc64d18f82b92b13e004dbed94",
+    "raw": 348526,
+    "gzip": 58262,
+    "brotli": 45948
   },
   "js": {
     "path": "/assets/js/public.min.js",
