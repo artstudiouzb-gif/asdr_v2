@@ -94,15 +94,25 @@ $cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '') . ($textColor !
             <p class="block-cards__empty"><?= htmlspecialchars(t('Пункты ещё не добавлены.'), ENT_QUOTES) ?></p>
         <?php else: ?>
             <div class="cards-grid">
-                <?php foreach ($items as $item): ?>
+                <?php foreach ($items as $index => $item): ?>
                     <?php $url = trim((string) ($item['url'] ?? '')); ?>
                     <?php if ($url !== ''): ?>
                     <a class="feature-card" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
                     <?php else: ?>
                     <article class="feature-card">
                     <?php endif; ?>
-                        <?php if (!empty($item['icon_svg'])): ?><span class="feature-card__icon" aria-hidden="true"><?= Icon::render($item['icon_svg'], 32) ?></span><?php endif; ?>
-                        <h3 class="feature-card__title"><?= htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES) ?></h3>
+                        <div class="feature-card__top">
+                            <?php if (!empty($item['icon_svg'])): ?>
+                                <span class="feature-card__icon" aria-hidden="true"><?= Icon::render($item['icon_svg'], 26) ?></span>
+                            <?php else: ?>
+                                <span class="feature-card__spacer"></span>
+                            <?php endif; ?>
+                            <span class="feature-card__num"><?= sprintf('%02d', $index + 1) ?></span>
+                        </div>
+                        <h3 class="feature-card__title">
+                            <?= htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES) ?>
+                            <?php if ($url !== ''): ?> <span class="feature-card__arrow" aria-hidden="true">&rarr;</span><?php endif; ?>
+                        </h3>
                         <?php if (!empty($item['text'])): ?><p class="feature-card__text"><?= htmlspecialchars((string) $item['text'], ENT_QUOTES) ?></p><?php endif; ?>
                     <?php if ($url !== ''): ?></a><?php else: ?></article><?php endif; ?>
                 <?php endforeach; ?>
