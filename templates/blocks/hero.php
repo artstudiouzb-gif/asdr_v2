@@ -94,12 +94,12 @@ $heroButtonIcon = static function (string $iconName, string $iconImage): string 
     $iconImage = trim($iconImage);
     if ($iconImage !== '' && UrlGuard::isSafeMedia($iconImage)) {
         return '<img class="block-hero__button-icon" src="' . htmlspecialchars($iconImage, ENT_QUOTES)
-            . '" alt="" aria-hidden="true" width="28" height="28">';
+            . '" alt="" aria-hidden="true" width="46" height="46">';
     }
     $iconName = \App\Core\Icon::cleanName($iconName);
 
     return $iconName !== ''
-        ? '<span class="block-hero__button-icon" aria-hidden="true">' . \App\Core\Icon::render($iconName, 26, '', 2) . '</span>'
+        ? '<span class="block-hero__button-icon" aria-hidden="true">' . \App\Core\Icon::render($iconName, 46, '', 2) . '</span>'
         : '';
 };
 $btnIcon = $heroButtonIcon((string) ($data['button_icon'] ?? ''), (string) ($data['button_icon_image'] ?? ''));
