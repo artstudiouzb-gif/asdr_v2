@@ -54,20 +54,6 @@ final class TelegramRichMessage
         $rest = array_slice($langs, 1);
         $html = '';
 
-        // Рубрика и дата — служебной строкой над заголовком: в ленте канала по
-        // ней видно, о чём пост, ещё до заголовка. Значения берём из самого
-        // языкового блока, если они там есть: дата и рубрика переводятся, и
-        // под русским заголовком не должно стоять «1-avgust, 2026-yil».
-        $metaLine = static function (array $lang) use ($esc, $category, $date): string {
-            $parts = array_values(array_filter([
-                trim((string) ($lang['category'] ?? $category)),
-                trim((string) ($lang['date'] ?? $date)),
-            ], static fn (string $s): bool => $s !== ''));
-
-            return $parts === [] ? '' : '<p><sub>' . $esc(implode(' · ', $parts)) . '</sub></p>';
-        };
-        $html .= $metaLine($first);
-
         $media = [];
         foreach ($photos as $i => $url) {
             // Идентификатор — только A-Z, a-z, 0-9, _ и -, как требует API.
@@ -79,8 +65,22 @@ final class TelegramRichMessage
             ];
         }
 
-        $html .= '<h1>' . $esc($first['title']) . '</h1>';
+        // Фото / слайдер — первым элементом поста по стандарту каналов Telegram.
         $html .= self::media($media, $esc);
+
+        // Рубрика и дата — служебной строкой перед заголовком новости.
+        $metaLine = static function (array $lang) use ($esc, $category, $date): string {
+            $parts = array_values(array_filter([
+                trim((string) ($lang['category'] ?? $category)),
+                trim((string) ($lang['date'] ?? $date)),
+            ], static fn (string $s): bool => $s !== ''));
+
+            return $parts === [] ? '' : '<p><sub>' . $esc(implode(' · ', $parts)) . '</sub></p>';
+        };
+        $html .= $metaLine($first);
+
+        // Заголовок компактного размера (h2)
+        $html .= '<h2>' . $esc($first['title']) . '</h2>';
         $html .= self::body($first, $esc);
 
         // Остальные языки — тем же текстом следом за разделителем. Под

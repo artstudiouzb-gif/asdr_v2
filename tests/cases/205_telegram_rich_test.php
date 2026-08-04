@@ -60,7 +60,7 @@ test('Rich: пост уходит одним sendRichMessage со всей вё�
     assert_same('https://site.uz/cover.jpg', (string) $rich['media'][0]['media']['media']);
     // По умолчанию кнопок нет: ссылки стоят в тексте каждой языковой версии.
     assert_true(!isset($calls[0]['body']['reply_markup']), 'кнопок по умолчанию нет');
-    assert_contains('<h1>Sarlavha</h1>', $html);
+    assert_contains('<h2>Sarlavha</h2>', $html);
     assert_contains('<p><sub>Мероприятия · 1 августа 2026</sub></p>', $html);
     assert_contains('Ikkinchi.</p><hr/><p><a href="https://site.uz/uz/news/x">', $html, 'ссылка отделена от анонса');
     // Второй язык — тем же постом, подряд за разделителем: редактор потом

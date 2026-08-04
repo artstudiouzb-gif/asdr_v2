@@ -3545,8 +3545,9 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     background: var(--admin-surface-soft, #f8fafc);
     line-height: 1.55;
 }
-.tg-preview h1 { font-size: 1.15rem; margin: 6px 0 10px; }
-.tg-preview h2 { font-size: 1.02rem; margin: 14px 0 8px; }
+.tg-preview h1 { font-size: 1.05rem; font-weight: 700; margin: 8px 0 8px; line-height: 1.35; }
+.tg-preview h2 { font-size: 0.98rem; font-weight: 700; margin: 10px 0 6px; line-height: 1.35; }
+.tg-preview h3 { font-size: 0.94rem; font-weight: 700; margin: 8px 0 6px; line-height: 1.35; }
 .tg-preview p { margin: 0 0 10px; }
 .tg-preview img { display: block; width: 100%; border-radius: 8px; margin-bottom: 8px; }
 /* Слайд-шоу в канале листается на месте; в превью показываем кадры лентой. */
