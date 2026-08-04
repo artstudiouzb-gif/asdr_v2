@@ -356,6 +356,49 @@ $heightSelect = function (string $name, string $current): string {
                 </div>
 
                 <div class="u-inline-d4e35c613b">
+                    <h4 class="u-inline-2e67dd3b15">Цвета меню (Обычная и Прозрачная шапка)</h4>
+                    <p class="form-hint">Задайте индивидуальные цвета текста и наведения для пунктов меню в обычной и прозрачной шапке.</p>
+
+                    <div class="hb-inline-grid">
+                        <div class="form-field">
+                            <label for="styles_nav_color">Текст (Обычная шапка)</label>
+                            <div class="color-picker-group">
+                                <input type="color" id="styles_nav_color" name="styles_nav_color"
+                                       value="<?= htmlspecialchars(($st['nav_color'] ?? '') ?: '#1e293b', ENT_QUOTES) ?>">
+                                <label><input type="checkbox" name="styles_nav_color_use" value="1" <?= !empty($st['nav_color']) ? 'checked' : '' ?>> Свой цвет</label>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_nav_hover">Ховер (Обычная шапка)</label>
+                            <div class="color-picker-group">
+                                <input type="color" id="styles_nav_hover" name="styles_nav_hover"
+                                       value="<?= htmlspecialchars(($st['nav_hover'] ?? '') ?: '#0284c7', ENT_QUOTES) ?>">
+                                <label><input type="checkbox" name="styles_nav_hover_use" value="1" <?= !empty($st['nav_hover']) ? 'checked' : '' ?>> Свой цвет</label>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_nav_color_transparent">Текст (Прозрачная шапка)</label>
+                            <div class="color-picker-group">
+                                <input type="color" id="styles_nav_color_transparent" name="styles_nav_color_transparent"
+                                       value="<?= htmlspecialchars(($st['nav_color_transparent'] ?? '') ?: '#ffffff', ENT_QUOTES) ?>">
+                                <label><input type="checkbox" name="styles_nav_color_transparent_use" value="1" <?= !empty($st['nav_color_transparent']) ? 'checked' : '' ?>> Свой цвет</label>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="styles_nav_hover_transparent">Ховер (Прозрачная шапка)</label>
+                            <div class="color-picker-group">
+                                <input type="color" id="styles_nav_hover_transparent" name="styles_nav_hover_transparent"
+                                       value="<?= htmlspecialchars(($st['nav_hover_transparent'] ?? '') ?: '#38bdf8', ENT_QUOTES) ?>">
+                                <label><input type="checkbox" name="styles_nav_hover_transparent_use" value="1" <?= !empty($st['nav_hover_transparent']) ? 'checked' : '' ?>> Свой цвет</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="u-inline-d4e35c613b">
                     <h4 class="u-inline-2e67dd3b15">Расстояния и разделители главного меню</h4>
                     <p class="form-hint">Настройки применяются к верхнему уровню меню. На мобильном разделители скрываются, а пункты остаются удобными для касания.</p>
 

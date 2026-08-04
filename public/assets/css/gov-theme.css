@@ -754,7 +754,7 @@ body .site-header--transparent:not(.is-scrolled) .site-header__logo:has(.site-he
 .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle:hover,
 .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle:focus-visible,
 .site-header--transparent:not(.is-scrolled) .site-menu__overflow.is-open .site-menu__overflow-toggle {
-    color: var(--menu-hover-transparent, var(--menu-hover, #9fe3e4)) !important;
+    color: var(--menu-hover-transparent, var(--menu-hover, var(--color-accent, var(--gov-teal)))) !important;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__link.is-active,
 body .site-header--transparent:not(.is-scrolled) .site-menu__link[aria-current="page"] {
@@ -4587,20 +4587,9 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 }
 .feature-card::after {
     content: "0" counter(cards-counter) !important;
-    position: absolute;
-    top: 16px;
-    right: 18px;
-    /* Номер — ориентир, а не заголовок: раньше он был вдвое крупнее названия
-       направления и первым перетягивал взгляд на себя. */
-    font-size: 1.6rem;
+    display: none !important;
+    font-size: 1.4rem;
     font-weight: 800;
-    color: var(--color-accent, var(--gov-teal));
-    opacity: 0.28;
-    font-family: var(--font-family, 'Inter', system-ui, sans-serif);
-    line-height: 1;
-    pointer-events: none;
-    z-index: 2;
-    transition: all 0.3s ease;
 }
 .feature-card:hover {
     background: var(--gov-surface);
@@ -4609,14 +4598,10 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     border-color: var(--color-accent, var(--gov-teal));
     border-bottom-color: var(--color-accent, var(--gov-teal)) !important;
 }
-.feature-card:hover::after {
-    opacity: 0.6;
-}
 .feature-card__title::after {
-    /* Неразрывный пробел: с обычным стрелка отрывалась от последнего слова и
-       падала на следующую строку вплотную к тексту — «…рост→». */
     content: "\00a0→";
     display: inline-block;
+    color: var(--gov-teal-text, #0284c7);
     transition: transform 0.25s ease;
 }
 .feature-card:hover .feature-card__title::after {
@@ -5498,13 +5483,13 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__toggle {
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:hover > .site-menu__toggle,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:focus-within > .site-menu__toggle,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .site-menu__toggle {
-    color: var(--menu-hover-transparent, var(--menu-hover, #9fe3e4)) !important;
+    color: var(--menu-hover-transparent, var(--menu-hover, var(--color-accent, var(--gov-teal)))) !important;
     background: transparent !important;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:hover > .site-menu__link,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:focus-within > .site-menu__link,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .site-menu__link {
-    color: var(--menu-hover-transparent, var(--menu-hover, #9fe3e4)) !important;
+    color: var(--menu-hover-transparent, var(--menu-hover, var(--color-accent, var(--gov-teal)))) !important;
 }
 
 /* Панель «Ещё» имеет собственный непрозрачный фон, поэтому её ссылки

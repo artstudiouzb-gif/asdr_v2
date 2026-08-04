@@ -109,10 +109,7 @@ $cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '') . ($textColor !
                             <?php endif; ?>
                             <span class="feature-card__num"><?= sprintf('%02d', $index + 1) ?></span>
                         </div>
-                        <h3 class="feature-card__title">
-                            <?= htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES) ?>
-                            <?php if ($url !== ''): ?> <span class="feature-card__arrow" aria-hidden="true">&rarr;</span><?php endif; ?>
-                        </h3>
+                        <h3 class="feature-card__title"><?= htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES) ?></h3>
                         <?php if (!empty($item['text'])): ?><p class="feature-card__text"><?= htmlspecialchars((string) $item['text'], ENT_QUOTES) ?></p><?php endif; ?>
                     <?php if ($url !== ''): ?></a><?php else: ?></article><?php endif; ?>
                 <?php endforeach; ?>
