@@ -242,6 +242,9 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
     <div class="newsdetail-head<?= ($hasMedia && !$hasSidebar) ? '' : ' newsdetail-head--full' ?><?= $hasMedia && $layout === 'side_image' && !$hasSidebar ? ' newsdetail-head--side' : '' ?>">
         <div class="newsdetail-head__info">
             <div class="newsdetail__eyebrow">
+                <a class="newsdetail-back-pill" href="<?= htmlspecialchars($homeUrl, ENT_QUOTES) ?>" title="<?= htmlspecialchars(t('Назад'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Назад'), ENT_QUOTES) ?>">
+                    <?= \App\Core\Icon::render('arrow-left', 16, 'ui-icon', 1.8) ?>
+                </a>
                 <?php if (!empty($news['badge'])): ?>
                     <span class="newsdetail__badge"><?= htmlspecialchars((string) $news['badge'], ENT_QUOTES) ?></span>
                 <?php endif; ?>
