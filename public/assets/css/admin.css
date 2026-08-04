@@ -1062,7 +1062,7 @@ body.theme-dark .alert--success,
     width: 100%; border-collapse: separate; border-spacing: 0; background: var(--admin-surface);
     border: 1px solid var(--admin-border); border-radius: 14px; overflow: hidden; box-shadow: var(--admin-shadow);
 }
-.data-table th, .data-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--admin-border); font-size: 14px; vertical-align: middle; }
+.data-table th, .data-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--admin-border); font-size: 16px; vertical-align: middle; }
 .data-table th { background: var(--admin-surface-soft, #f8fafc); font-weight: 700; color: #1e293b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
 .news-social, .data-table td.news-social { min-width: 140px; }
 .data-table tbody tr:nth-child(even) { background: #fdfdfd; }

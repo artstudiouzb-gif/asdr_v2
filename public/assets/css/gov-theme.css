@@ -2264,16 +2264,16 @@ body.design-type-static .orgstruct__note { font-size: 13px; line-height: 1.5; }
    .design-type-static из DesignSettings::bodyClasses().
    ========================================================================== */
 body.design-type-static .counter__value,
-body.design-type-static .counter__suffix { font-size: 2.5rem; }
+body.design-type-static .counter__suffix { font-size: 2.5rem !important; }
 body.design-type-static h1 { font-size: 2.5rem; }
 body.design-type-static h2 { font-size: 1.95rem; }
 body.design-type-static h3 { font-size: 1.55rem; }
 body.design-type-static h4 { font-size: 1.25rem; }
-body.design-type-static .block-hero--media .block-hero__title { font-size: 3.7rem; }
+body.design-type-static .block-hero--media .block-hero__title { font-size: 3.7rem !important; }
 body.design-type-static .block-hero--media .block-hero__subtitle { font-size: 1.02rem; }
 body.design-type-static .block-hero__title { font-size: 3.4rem; }
 body.design-type-static .block-hero__subtitle { font-size: 1.02rem; }
-body.design-type-static .section-head__title { font-size: 2rem; }
+body.design-type-static .section-head__title { font-size: 2rem !important; }
 body.design-type-static .timeline-cta__title { font-size: 1.7rem; }
 body.design-type-static .profile__name { font-size: 2.5rem; }
 body.design-type-static .block-featband__title { font-size: 2rem; }
@@ -2309,13 +2309,13 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
    чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем). */
 @media (max-width: 640px) {
     body.design-type-static .counter__value,
-    body.design-type-static .counter__suffix { font-size: 1.75rem; }
+    body.design-type-static .counter__suffix { font-size: 1.75rem !important; }
     body.design-type-static h1 { font-size: 1.8rem; }
     body.design-type-static h2 { font-size: 1.45rem; }
     body.design-type-static h3 { font-size: 1.2rem; }
-    body.design-type-static .block-hero--media .block-hero__title { font-size: 2.2rem; }
+    body.design-type-static .block-hero--media .block-hero__title { font-size: 2.2rem !important; }
     body.design-type-static .block-hero__title { font-size: 2rem; }
-    body.design-type-static .section-head__title { font-size: 1.5rem; }
+    body.design-type-static .section-head__title { font-size: 1.5rem !important; }
     body.design-type-static .timeline-cta__title { font-size: 1.3rem; }
     body.design-type-static .profile__name { font-size: 1.8rem; }
     body.design-type-static .block-featband__title { font-size: 1.5rem; }
