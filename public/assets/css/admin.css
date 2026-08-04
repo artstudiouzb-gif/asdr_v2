@@ -3534,30 +3534,48 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     display: none !important;
 }
 
-/* --- Предпросмотр поста Telegram --- */
-.tg-preview__facts { margin: 0 0 10px; padding-left: 18px; line-height: 1.7; }
-.tg-preview__warn { color: var(--admin-warning, #9a6700); font-weight: 600; }
+/* --- Предпросмотр поста Telegram (Telegram Bubble Design) --- */
+.tg-preview__facts { margin: 0 0 14px; padding-left: 20px; line-height: 1.7; font-size: 14px; }
+.tg-preview__warn { color: var(--admin-warning, #d97706); font-weight: 600; }
 .tg-preview {
-    max-width: 560px;
-    padding: 14px 16px;
-    border: 1px solid var(--admin-border, #e1e3e8);
-    border-radius: 12px;
-    background: var(--admin-surface-soft, #f8fafc);
+    max-width: 580px;
+    padding: 16px 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
     line-height: 1.55;
+    position: relative;
 }
-.tg-preview h1 { font-size: 1.05rem; font-weight: 700; margin: 8px 0 8px; line-height: 1.35; }
-.tg-preview h2 { font-size: 0.98rem; font-weight: 700; margin: 10px 0 6px; line-height: 1.35; }
-.tg-preview h3 { font-size: 0.94rem; font-weight: 700; margin: 8px 0 6px; line-height: 1.35; }
-.tg-preview p { margin: 0 0 10px; }
-.tg-preview img { display: block; width: 100%; border-radius: 8px; margin-bottom: 8px; }
-/* Слайд-шоу в канале листается на месте; в превью показываем кадры лентой. */
-.tg-preview tg-slideshow { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 10px; }
-.tg-preview tg-slideshow img { width: 180px; flex: 0 0 auto; margin: 0; }
-.tg-preview figure { margin: 0 0 10px; }
-.tg-preview figcaption { font-size: 12px; color: var(--admin-text-muted, #64748b); }
+.tg-preview sub {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.tg-preview h1, .tg-preview h2, .tg-preview h3 {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 8px 0 6px !important;
+    line-height: 1.35 !important;
+}
+.tg-preview p { margin: 0 0 10px; color: #1e293b; }
+.tg-preview img { display: block; width: 100%; border-radius: 12px; margin-bottom: 10px; }
+.tg-preview tg-slideshow { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 4px; }
+.tg-preview tg-slideshow img { width: 200px; flex: 0 0 auto; margin: 0; border-radius: 10px; }
+.tg-preview figure { margin: 0 0 12px; }
+.tg-preview figcaption { font-size: 12.5px; color: #64748b; margin-top: 4px; }
 .tg-preview cite { display: block; font-style: normal; opacity: .85; }
-.tg-preview hr { margin: 14px 0; border: 0; border-top: 1px solid var(--admin-border, #e1e3e8); }
-.tg-preview footer { font-size: 13px; color: var(--admin-text-muted, #64748b); }
+.tg-preview hr { margin: 16px 0; border: 0; border-top: 1px solid #e2e8f0; }
+.tg-preview mark { background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+.tg-preview footer { font-size: 13px; color: #64748b; margin-top: 10px; }
 
 /* --- Превью файлов, выбранных но ещё не загруженных --- */
 .file-preview {
