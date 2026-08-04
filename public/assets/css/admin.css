@@ -1224,16 +1224,16 @@ body.theme-dark .alert--success,
 .form-actions { display: flex; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
 .form-actions--sticky {
     position: fixed; bottom: 0;
-    left: max(calc(var(--admin-sidebar-w) + 24px), calc(50vw - 820px + (var(--admin-sidebar-w) / 2)));
-    right: max(24px, calc(50vw - 820px - (var(--admin-sidebar-w) / 2)));
+    left: var(--admin-sidebar-w, 240px);
+    right: 0;
     z-index: 999999 !important;
-    display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 0; padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0; padding: 16px 32px;
+    min-height: 64px;
     background: rgba(255, 255, 255, 0.98);
-    border: 1.5px solid color-mix(in srgb, var(--admin-primary, #0284c7) 45%, #cbd5e1);
-    border-top: 3.5px solid var(--admin-primary, #0284c7);
-    border-bottom: 0;
-    border-radius: 18px 18px 0 0;
-    box-shadow: 0 -12px 40px -4px rgba(15, 23, 42, 0.22), 0 -4px 12px rgba(2, 132, 199, 0.12);
+    border: 0;
+    border-top: 1px solid var(--admin-border, #cbd5e1);
+    border-radius: 0 !important;
+    box-shadow: 0 -6px 24px rgba(15, 23, 42, 0.08);
     backdrop-filter: blur(20px) saturate(190%); -webkit-backdrop-filter: blur(20px) saturate(190%);
     transition: opacity .15s ease, transform .15s ease, visibility .15s ease;
 }
