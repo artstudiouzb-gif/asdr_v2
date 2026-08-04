@@ -5846,3 +5846,146 @@ body.article-media-dialog-open .media-modal { z-index: 10080; }
     .article-media-dialog__pickrow { grid-template-columns: 1fr; }
     .article-media-dialog__pickrow button { min-height: 40px; }
 }
+
+/* ============================================================================
+   Чистый дизайн админ-панели (Clean Flat Admin Design Overrides)
+   - Исправление и выравнивание топбара
+   - Уменьшение радиусов всех блоков и элементов до 6px / 8px
+   - Удаление градиентов с сайдбара и шапки
+   ============================================================================ */
+
+/* 1. Плоский тёмный сайдбар без градиентов и свечений */
+.admin-sidebar,
+.admin-sidebar__logo,
+.admin-brand,
+.admin-sidebar-header {
+    background: var(--admin-sidebar-bg, #0f172a) !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+.admin-nav-item {
+    border-radius: 6px !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.admin-nav-item:hover {
+    background: var(--admin-sidebar-hover, #1e293b) !important;
+    background-image: none !important;
+}
+
+.admin-nav-item.is-active {
+    background: var(--admin-sidebar-active-bg, #2563eb) !important;
+    background-image: none !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+}
+
+/* 2. Чистая плоская верхняя панель (Topbar) */
+.admin-topbar {
+    background: var(--admin-topbar-bg, #0f172a) !important;
+    background-image: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+}
+
+.admin-topbar__logo {
+    border-radius: 6px !important;
+    box-shadow: none !important;
+}
+
+.admin-tbtn {
+    border-radius: 6px !important;
+    box-shadow: none !important;
+}
+
+.admin-tbtn--primary {
+    box-shadow: none !important;
+}
+
+.admin-topbar input,
+.admin-topbar select,
+.admin-topbar .form-control,
+.admin-user__avatar {
+    border-radius: 6px !important;
+}
+
+.admin-menu__list,
+.admin-user__menu {
+    border-radius: 8px !important;
+    border: 1px solid var(--admin-border, #cbd5e1) !important;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1) !important;
+}
+
+.admin-user__link {
+    border-radius: 5px !important;
+}
+
+/* 3. Оптимизированные уменьшенные радиусы для всех блоков и элементов */
+.stat-card,
+.admin-card,
+.form-card,
+.hb-behavior-card,
+.fb-card,
+.preset-card,
+.design-preset,
+.revision-item,
+.audit-item,
+.block-list-item,
+.menu-node__inner,
+.panel,
+.repeater-row,
+.fb-grid > .repeater-row,
+.sidebar-cover-preview,
+.install-card,
+.totp-setup__qr,
+.form-section,
+.fb-palette,
+.hb-palette,
+.design-card,
+.design-section,
+.hdr-workspace-header,
+.article-media-dialog__panel,
+.article-media-dialog__embed-card,
+[class*="u-inline-"] {
+    border-radius: 6px !important;
+}
+
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.btn-danger,
+.form-control,
+.form-select,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+input[type="url"],
+textarea,
+select,
+.badge,
+.tag,
+.chip,
+.fb-card__badge {
+    border-radius: 6px !important;
+}
+
+/* 4. Отключение пятнистых фоновых бликов на карточках и полях ввода */
+.stat-card::before, .design-card::before, .hb-behavior-card::before, .fb-card::before,
+.preset-card::before, .form-card::before, .design-preset::before, .revision-item::before,
+.audit-item::before, .block-list-item::before, .menu-node__inner::before, .btn::before {
+    display: none !important;
+}
+
+.admin-main input[type="text"]:hover, .admin-main input[type="email"]:hover,
+.admin-main input[type="password"]:hover, .admin-main input[type="search"]:hover,
+.admin-main textarea:hover, .admin-main select:hover,
+.admin-main input[type="text"]:focus, .admin-main input[type="email"]:focus,
+.admin-main input[type="password"]:focus, .admin-main input[type="search"]:focus,
+.admin-main textarea:focus, .admin-main select:focus {
+    background-image: none !important;
+}
+
