@@ -320,15 +320,15 @@ body.auth-page {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at 50% 0%, #f1f5f9 0%, #f8fafc 100%);
-    color: #0f172a;
+    background: #0b1120;
+    color: #e2e8f0;
     padding: 32px 20px;
     font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     overflow-x: hidden;
     isolation: isolate;
 }
 
-/* Фоновый декор (Мягкие свечения) */
+/* Фоновый декор (Мягкие свечения — тёмный вариант) */
 .auth-decor {
     position: fixed;
     inset: 0;
@@ -340,7 +340,7 @@ body.auth-page {
     position: absolute;
     border-radius: 50%;
     filter: blur(120px);
-    opacity: 0.4;
+    opacity: 0.5;
     will-change: transform;
 }
 .auth-decor__blob--1 {
@@ -350,7 +350,7 @@ body.auth-page {
     height: 50vw;
     max-width: 600px;
     max-height: 600px;
-    background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, rgba(59, 130, 246, 0.05) 70%, transparent 100%);
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.25) 0%, rgba(59, 130, 246, 0.08) 70%, transparent 100%);
 }
 .auth-decor__blob--2 {
     bottom: -15%;
@@ -359,14 +359,14 @@ body.auth-page {
     height: 55vw;
     max-width: 650px;
     max-height: 650px;
-    background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(13, 148, 136, 0.04) 70%, transparent 100%);
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, rgba(13, 148, 136, 0.06) 70%, transparent 100%);
 }
 .auth-decor__grid {
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(rgba(148, 163, 184, 0.2) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px);
     background-size: 24px 24px;
-    opacity: 0.5;
+    opacity: 0.6;
     mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 90%);
     -webkit-mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 90%);
 }
@@ -382,21 +382,22 @@ body.auth-page {
     gap: 8px;
     padding: 8px 16px;
     border-radius: 9999px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    color: #475569;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
     font-size: 0.8125rem;
     font-weight: 600;
     text-decoration: none;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(12px);
     transition: all 0.2s ease;
 }
 .auth-site-link:hover {
-    background: #ffffff;
-    border-color: #cbd5e1;
-    color: #2563eb;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #60a5fa;
     transform: translateX(-2px);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .auth-lang-switcher {
@@ -409,29 +410,30 @@ body.auth-page {
     gap: 4px;
     padding: 4px;
     border-radius: 9999px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(12px);
 }
 .auth-lang-btn {
     padding: 5px 12px;
     border-radius: 9999px;
     border: 0;
     background: transparent;
-    color: #64748b;
+    color: #94a3b8;
     font-size: 0.78rem;
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
 }
 .auth-lang-btn:hover {
-    color: #0f172a;
-    background: #f1f5f9;
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.08);
 }
 .auth-lang-btn.is-active {
     background: #2563eb;
     color: #ffffff;
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
 }
 
 /* Карточка авторизации */
@@ -441,9 +443,10 @@ body.auth-page {
     max-width: 420px;
     padding: 40px 36px;
     border-radius: 24px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.07), 0 10px 20px -5px rgba(15, 23, 42, 0.03);
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
     animation: authCardEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .auth-card::before {
@@ -476,9 +479,9 @@ body.auth-page {
     border-radius: 14px;
     font-size: 20px;
     font-weight: 800;
-    background: #eff6ff;
-    color: #2563eb;
-    border: 1px solid #dbeafe;
+    background: rgba(37, 99, 235, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(37, 99, 235, 0.25);
 }
 .auth-brand__logoimg {
     height: 42px;
@@ -488,7 +491,7 @@ body.auth-page {
 .auth-brand__name {
     font-size: 1.25rem;
     font-weight: 800;
-    color: #0f172a;
+    color: #f1f5f9;
     letter-spacing: -0.02em;
 }
 
@@ -499,13 +502,13 @@ body.auth-page {
 .auth-head h1 {
     font-size: 1.4rem;
     font-weight: 800;
-    color: #0f172a;
+    color: #f1f5f9;
     margin: 0 0 6px;
     letter-spacing: -0.02em;
 }
 .auth-sub {
     font-size: 0.88rem;
-    color: #64748b;
+    color: #94a3b8;
     margin: 0;
     line-height: 1.45;
 }
@@ -522,14 +525,14 @@ body.auth-page {
     border: 1px solid transparent;
 }
 .auth-card .alert--error {
-    background: #fef2f2;
-    border-color: #fecaca;
-    color: #991b1b;
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
 }
 .auth-card .alert--success {
-    background: #f0fdf4;
-    border-color: #bbf7d0;
-    color: #166534;
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.25);
+    color: #6ee7b7;
 }
 
 /* Форма и Инпуты */
@@ -551,19 +554,19 @@ body.auth-page {
 .auth-field label {
     font-size: 0.82rem;
     font-weight: 700;
-    color: #334155;
+    color: #cbd5e1;
     margin: 0;
     letter-spacing: -0.01em;
 }
 .auth-forgot-link {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #2563eb;
+    color: #60a5fa;
     text-decoration: none;
     transition: color 0.15s ease;
 }
 .auth-forgot-link:hover {
-    color: #1d4ed8;
+    color: #93bbfd;
     text-decoration: underline;
 }
 
@@ -577,7 +580,7 @@ body.auth-page {
     position: absolute;
     left: 15px;
     z-index: 2;
-    color: #94a3b8;
+    color: #64748b;
     pointer-events: none;
     transition: color 0.2s ease, transform 0.2s ease;
 }
@@ -589,24 +592,24 @@ body.auth-page {
     padding: 12px 44px 12px 44px !important;
     font-size: 0.95rem;
     font-weight: 500;
-    color: #0f172a;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
+    color: #f1f5f9;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     outline: none;
     transition: all 0.2s ease;
 }
 .auth-card input::placeholder {
-    color: #94a3b8;
+    color: #64748b;
     font-weight: 400;
 }
 .auth-card input:focus {
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
     border-color: #2563eb;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
 }
 .auth-input-wrap:focus-within .auth-input-icon {
-    color: #2563eb;
+    color: #60a5fa;
     transform: scale(1.05);
 }
 
@@ -619,7 +622,7 @@ body.auth-page {
     padding: 6px !important;
     border: 0 !important;
     background: transparent !important;
-    color: #94a3b8;
+    color: #64748b;
     cursor: pointer;
     border-radius: 8px;
     transition: all 0.15s ease;
@@ -633,8 +636,8 @@ body.auth-page {
     box-shadow: none !important;
 }
 .auth-eye-btn:hover {
-    color: #2563eb;
-    background: #f1f5f9 !important;
+    color: #60a5fa;
+    background: rgba(255, 255, 255, 0.08) !important;
 }
 .auth-eye-icon--hide { display: none; }
 
@@ -645,11 +648,11 @@ body.auth-page {
     margin-top: 6px;
     font-size: 0.78rem;
     font-weight: 600;
-    color: #b45309;
-    background: #fffbeb;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.1);
     padding: 7px 12px;
     border-radius: 8px;
-    border: 1px solid #fef3c7;
+    border: 1px solid rgba(251, 191, 36, 0.2);
 }
 
 /* Главная кнопка отправки */
@@ -669,13 +672,13 @@ body.auth-page {
     font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.22);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
     transition: all 0.2s ease;
 }
 .auth-submit-btn:hover {
-    background: #1d4ed8;
+    background: #3b82f6;
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.32);
+    box-shadow: 0 6px 22px rgba(37, 99, 235, 0.45);
 }
 .auth-submit-btn:active {
     transform: translateY(1px);
@@ -691,7 +694,7 @@ body.auth-page {
 .auth-security-badge {
     margin-top: 28px;
     padding-top: 18px;
-    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -702,13 +705,14 @@ body.auth-page {
     text-align: center;
 }
 .auth-security-badge svg {
-    color: #0d9488;
+    color: #2dd4bf;
 }
 
-.totp-secret { background: var(--admin-bg); border: 1px dashed var(--admin-border-strong); border-radius: 8px; padding: 12px; margin-bottom: 10px; text-align: center; word-break: break-all; }
-.totp-secret code { font-size: 16px; letter-spacing: 1px; background: none; }
+.totp-secret { background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 12px; margin-bottom: 10px; text-align: center; word-break: break-all; color: #e2e8f0; }
+.totp-secret code { font-size: 16px; letter-spacing: 1px; background: none; color: #f1f5f9; }
 .totp-qr { display: flex; justify-content: center; margin-bottom: 16px; }
-.totp-qr svg { width: 220px; height: 220px; border: 1px solid var(--admin-border); border-radius: 8px; }
+.totp-qr svg { width: 220px; height: 220px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: #ffffff; }
+
 
 /* ============================================================================
    Улучшенные уведомления и всплывающие сообщения (Flash Alerts)
