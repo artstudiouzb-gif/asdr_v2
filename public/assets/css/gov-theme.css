@@ -3177,7 +3177,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     display: inline-flex !important; 
     align-items: center !important; 
     justify-content: center !important; 
-    padding: 14px 26px; 
+    padding: 14px 28px; 
     background: var(--gov-navy); 
     color: #fff; 
     text-transform: uppercase; 
@@ -3189,6 +3189,37 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     transition: background 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
+    gap: 8px;
+}
+
+/* --- Зона иконки в кнопках (Button Icon Area & Enlarged Scale) --- */
+.block-hero__button-icon,
+.block-hero__button .block-hero__button-icon,
+.btn__icon,
+.btn-icon-area {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    margin-right: 10px !important;
+    flex-shrink: 0 !important;
+}
+
+.block-hero__button-icon svg,
+.block-hero__button svg:not(.ui-icon-arrow),
+.btn__icon svg,
+.btn-icon-area svg {
+    width: 26px !important;
+    height: 26px !important;
+}
+
+.block-hero__button-icon img,
+.block-hero__button img.block-hero__button-icon {
+    width: 28px !important;
+    height: 28px !important;
+    object-fit: contain !important;
 }
 .block-hero__button::after {
     content: '';
