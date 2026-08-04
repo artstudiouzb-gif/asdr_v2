@@ -4,16 +4,16 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c89d4d7007df226480b7098961e00035",
+    "content-hash": "903c487be0a8e5d9236fcc1dc7dcb521",
     "packages": [],
     "packages-dev": [
         {
             "name": "phpstan/phpstan",
-            "version": "2.2.6",
+            "version": "2.2.7",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/a6e9b5a9420f6109c091e87d82683bd1a80b87ed",
-                "reference": "a6e9b5a9420f6109c091e87d82683bd1a80b87ed",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/692db47b9dddb0487934e5236e77d48594aef921",
+                "reference": "692db47b9dddb0487934e5236e77d48594aef921",
                 "shasum": ""
             },
             "require": {
@@ -69,7 +69,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-07-26T21:22:49+00:00"
+            "time": "2026-07-29T17:39:32+00:00"
         }
     ],
     "aliases": [],
