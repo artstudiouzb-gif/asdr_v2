@@ -571,11 +571,12 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                             <?php foreach ($readyNetworks as $net): ?>
                                 <button type="submit" form="news-social-form" name="network" value="<?= htmlspecialchars($net, ENT_QUOTES) ?>"
                                         class="btn btn--small btn--social btn--social-<?= htmlspecialchars($net, ENT_QUOTES) ?>">
-                                    <?= \App\Core\AdminUi::icon($net) ?><?= htmlspecialchars($netLabels[$net] ?? ucfirst($net), ENT_QUOTES) ?>
+                                    <?= \App\Core\AdminUi::icon($net, 16) ?>
+                                    <span><?= htmlspecialchars($netLabels[$net] ?? ucfirst($net), ENT_QUOTES) ?></span>
                                 </button>
                             <?php endforeach; ?>
                             <?php if (count($readyNetworks) > 1): ?>
-                                <button type="submit" form="news-social-form" class="btn btn--small"><?= \App\Core\AdminUi::icon('send') ?>Во все сети</button>
+                                <button type="submit" form="news-social-form" class="btn btn--small btn--secondary"><?= \App\Core\AdminUi::icon('send', 16) ?> <span>Во все сети</span></button>
                             <?php endif; ?>
                         </div>
                         <p class="form-hint u-inline-76084ee4e5">Отправляет мгновенную публикацию в привязанные каналы соцсетей.</p>

@@ -983,24 +983,23 @@ body.theme-dark .alert--success,
 .btn__icon { flex-shrink: 0; opacity: .85; }
 .btn--primary .btn__icon, .btn--danger .btn__icon { opacity: 1; }
 .btn:disabled, .btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; transform: none; }
-/* Кнопка публикации в соцсети — по умолчанию нейтрально-серая */
 .btn--social {
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    min-width: 32px; height: 32px; padding: 0 12px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    min-width: max-content; height: 34px; padding: 0 12px; border-radius: 6px;
     background: var(--admin-surface-soft, #f8fafc);
     border: 1px solid var(--admin-border, #cbd5e1);
     color: var(--admin-muted, #475569);
     box-shadow: none;
     transition: all .18s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative; flex-shrink: 0;
-    font-size: 13px; font-weight: 500;
+    font-size: 13px; font-weight: 600; white-space: nowrap;
 }
-.btn--social:has(svg:only-child),
 .btn--social--icon-only {
-    width: 32px;
+    width: 34px;
+    min-width: 34px;
     padding: 0;
 }
-.btn--social svg { width: 16px; height: 16px; flex-shrink: 0; }
+.btn--social svg { width: 16px; height: 16px; flex-shrink: 0; display: inline-block; }
 
 /* Ховер на непубликовавшуюся кнопку — предпросмотр яркого бренда */
 .btn--social:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 0, 0, .14); }
