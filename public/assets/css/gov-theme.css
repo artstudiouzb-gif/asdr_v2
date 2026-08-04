@@ -6383,45 +6383,56 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
    ========================================================================== */
 
 /* --- FAQ / Аккордеон вопросов --- */
-.block-faq { display: flex; flex-direction: column; gap: 20px; }
-.block-faq__title { font-size: clamp(1.6rem, 2.8vw, 2.2rem); margin: 0 0 10px; color: var(--gov-title); }
-.faq-tools { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
+.block-faq { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 100%; }
+.block-faq__title { font-size: clamp(1.6rem, 2.8vw, 2.2rem); margin: 0 0 10px; color: var(--gov-title); text-align: left; }
+.faq-tools { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; width: 100%; }
 .faq-tools__search, .faq-tools__category select {
     display: flex; align-items: center; gap: 10px; padding: 10px 16px;
     border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 8px);
     background: var(--gov-surface); color: var(--gov-ink); font-size: 0.92rem;
 }
 .faq-tools__search input { border: 0; background: transparent; outline: none; color: var(--gov-ink); width: 100%; font: inherit; }
-.block-faq__list { display: flex; flex-direction: column; gap: 12px; }
+.block-faq__list { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 100%; margin: 0; }
 .faq-item {
     border: 1px solid var(--gov-border); border-radius: var(--radius, 14px);
-    background: var(--gov-surface); overflow: hidden;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+    background: var(--gov-surface); overflow: hidden; width: 100%;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .faq-item[open] {
-    border-color: color-mix(in srgb, var(--gov-teal) 40%, var(--gov-border));
+    border-color: color-mix(in srgb, var(--gov-teal) 45%, var(--gov-border));
     box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
 }
 .faq-item__q {
-    padding: 18px 22px; font-weight: 700; font-size: 1.02rem;
+    padding: 20px 24px; font-weight: 700; font-size: 1.05rem;
     color: var(--gov-title); cursor: pointer; list-style: none;
     display: flex; justify-content: space-between; align-items: center; gap: 16px;
-    transition: color 0.2s ease; user-select: none;
+    transition: color 0.2s ease; user-select: none; width: 100%;
 }
 .faq-item__q::-webkit-details-marker { display: none; }
 .faq-item__q::after {
-    content: '+'; display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0;
-    border-radius: 50%; background: color-mix(in srgb, var(--gov-navy) 6%, transparent);
-    color: var(--gov-teal-text, #0284c7); font-size: 1.2rem; font-weight: 600; line-height: 1;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, color 0.2s ease;
+    content: '';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--gov-teal) 12%, transparent);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230284c7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+    flex-shrink: 0;
+    margin-left: 16px;
 }
 .faq-item[open] .faq-item__q::after {
-    content: '−'; transform: rotate(180deg);
-    background: var(--gov-navy); color: #ffffff;
+    transform: rotate(180deg);
+    background-color: var(--gov-navy);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
 .faq-item__q:hover { color: var(--gov-teal-text, #0284c7); }
 .faq-item__a {
-    padding: 0 22px 22px; color: var(--gov-ink); font-size: 0.98rem; line-height: 1.65;
+    padding: 0 24px 22px; color: var(--gov-ink); font-size: 0.98rem; line-height: 1.65;
     border-top: 1px solid color-mix(in srgb, var(--gov-border) 60%, transparent);
     margin-top: 4px; padding-top: 16px;
 }
