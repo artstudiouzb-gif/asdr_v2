@@ -6178,9 +6178,8 @@ small, .form-hint, .help-block {
 .form-actions--sticky, .admin-save-bar {
     position: fixed !important;
     bottom: 0 !important;
-    left: 0 !important;
+    left: var(--admin-sidebar-w, 240px) !important;
     right: 0 !important;
-    width: 100% !important;
     z-index: 1000 !important;
     background: #0f172a !important;
     backdrop-filter: blur(16px) !important;
