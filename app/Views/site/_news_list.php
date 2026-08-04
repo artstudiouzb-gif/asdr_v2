@@ -35,7 +35,7 @@ $pageUrl = static fn (int $p): string => Locale::url('news')
         <?php $fc = News::getCoverImage($featured); ?>
         <a class="newslist-lead" href="<?= htmlspecialchars(Locale::url('news/' . $featured['slug']), ENT_QUOTES) ?>">
             <?php if ($fc !== null): ?>
-                <?= \App\Core\Media::picture($fc, (string) $featured['title'], null, null, 'newslist-lead__media', false, '(max-width: 900px) 100vw, 55vw') ?>
+                <?= \App\Core\Media::picture($fc, (string) $featured['title'], null, null, 'newslist-lead__img', false, '(max-width: 900px) 100vw, 55vw', false, 'newslist-lead__media') ?>
             <?php else: ?>
                 <span class="newslist-lead__media newslist-lead__media--empty" aria-hidden="true"></span>
             <?php endif; ?>
@@ -55,7 +55,7 @@ $pageUrl = static fn (int $p): string => Locale::url('news')
             <?php $c = News::getCoverImage($item); ?>
             <a class="relnews-card" href="<?= htmlspecialchars(Locale::url('news/' . $item['slug']), ENT_QUOTES) ?>">
                 <?php if ($c !== null): ?>
-                    <?= \App\Core\Media::picture($c, (string) $item['title'], null, null, 'relnews-card__media', true, '(max-width: 700px) 100vw, 33vw') ?>
+                    <?= \App\Core\Media::picture($c, (string) $item['title'], null, null, 'relnews-card__img', true, '(max-width: 700px) 100vw, 33vw', false, 'relnews-card__media') ?>
                 <?php else: ?>
                     <span class="relnews-card__media relnews-card__media--empty" aria-hidden="true"></span>
                 <?php endif; ?>
