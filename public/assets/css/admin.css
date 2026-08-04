@@ -5988,3 +5988,54 @@ select,
     background-image: none !important;
 }
 
+/* --- Заметный переключатель автопубикации в соцсетях в нижней панели --- */
+.news-social-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    background: #eff6ff !important;
+    border: 1px solid #93c5fd !important;
+    color: #1d4ed8 !important;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.12) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    user-select: none !important;
+}
+
+.news-social-toggle:hover {
+    background: #dbeafe !important;
+    border-color: #60a5fa !important;
+    color: #1e40af !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.18) !important;
+}
+
+.news-social-toggle input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+    accent-color: #2563eb !important;
+    cursor: pointer !important;
+}
+
+.news-social-toggle__icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    color: #2563eb !important;
+}
+
+.news-social-toggle:has(input:checked) {
+    background: #2563eb !important;
+    border-color: #1d4ed8 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+}
+
+.news-social-toggle:has(input:checked) .news-social-toggle__icon {
+    color: #ffffff !important;
+}
+
