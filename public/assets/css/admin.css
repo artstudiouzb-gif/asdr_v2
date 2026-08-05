@@ -6561,39 +6561,55 @@ body.auth-page label,
 }
 
 .check-item {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
     border-radius: 12px !important;
     padding: 14px 18px !important;
     margin-bottom: 10px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
     transition: background 0.15s ease, border-color 0.15s ease !important;
 }
 
 .check-item:hover {
-    background: rgba(255, 255, 255, 0.09) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
+    background: #f8fafc !important;
+    border-color: #94a3b8 !important;
 }
 
 .check-item__label {
-    color: #f8fafc !important;
-    font-weight: 600 !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
     font-size: 0.94rem !important;
 }
 
 .check-item__hint {
-    color: #fca5a5 !important;
+    color: #dc2626 !important;
     font-size: 0.8rem !important;
     margin-top: 2px !important;
 }
 
 .check-item__icon.ok {
-    background: rgba(16, 185, 129, 0.2) !important;
-    color: #34d399 !important;
+    background: #dcfce7 !important;
+    color: #15803d !important;
 }
 
 .check-item__icon.fail {
-    background: rgba(239, 68, 68, 0.2) !important;
-    color: #f87171 !important;
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+}
+
+.check-item .badge,
+.check-item .badge--success {
+    background: #dcfce7 !important;
+    color: #15803d !important;
+    border: 1px solid #bbf7d0 !important;
+    font-weight: 700 !important;
+}
+
+.check-item .badge--danger {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+    border: 1px solid #fecaca !important;
+    font-weight: 700 !important;
 }
 
 .install-input-wrap input,
