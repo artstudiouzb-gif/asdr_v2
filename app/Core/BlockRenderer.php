@@ -123,7 +123,7 @@ final class BlockRenderer
         // Самодостаточные визуальные и интерактивные элементы могут не иметь
         // текста, но всё равно являются содержимым блока.
         if (preg_match(
-            '#<(img|picture|video|audio|iframe|svg|canvas|form|input|textarea|select|button|main|header|footer|section|article|div\b[^>]*\b(?:id|class|data-[a-z0-9-]+)=)\b#i',
+            '#<(img|picture|video|audio|iframe|svg|canvas|form|input|textarea|select|button)\b#i',
             $withoutCode
         ) === 1) {
             return false;
