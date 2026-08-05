@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@melloware/coloris": "0.25.0",
-    "@playwright/test": "1.62.0",
+    "@playwright/test": "1.62.1",
     "@tabler/icons-sprite": "3.46.0",
     "clean-css": "5.3.3",
     "terser": "5.49.0"
