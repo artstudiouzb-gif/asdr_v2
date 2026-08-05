@@ -6502,3 +6502,151 @@ small, .form-hint, .help-block {
     color: #0f172a;
 }
 
+/* ============================================================================
+   High-Contrast Typography & Accessibility Hardening for Install & Auth Pages
+   ============================================================================ */
+:root {
+    --inst-primary: #2563eb;
+    --inst-primary-hover: #1d4ed8;
+    --inst-border: rgba(255, 255, 255, 0.12);
+    --inst-success: #10b981;
+    --inst-text: #f8fafc;
+    --inst-muted: #94a3b8;
+}
+
+body.auth-page label,
+.auth-card label,
+.install-card label,
+.auth-field label,
+.install-card .form-field label,
+.auth-card .form-field label {
+    color: #f1f5f9 !important;
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+    letter-spacing: -0.01em !important;
+}
+
+.install-header__title {
+    color: #f8fafc !important;
+}
+
+.install-header__desc {
+    color: #94a3b8 !important;
+}
+
+.check-card-group__title {
+    color: #cbd5e1 !important;
+    font-weight: 700 !important;
+}
+
+.install-step-title {
+    color: #94a3b8 !important;
+}
+
+.install-step-item.is-active .install-step-title {
+    color: #60a5fa !important;
+    font-weight: 700 !important;
+}
+
+.install-step-item.is-done .install-step-title {
+    color: #cbd5e1 !important;
+}
+
+.install-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.install-card .form-actions {
+    border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.check-item {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    padding: 14px 18px !important;
+    margin-bottom: 10px !important;
+    transition: background 0.15s ease, border-color 0.15s ease !important;
+}
+
+.check-item:hover {
+    background: rgba(255, 255, 255, 0.09) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.check-item__label {
+    color: #f8fafc !important;
+    font-weight: 600 !important;
+    font-size: 0.94rem !important;
+}
+
+.check-item__hint {
+    color: #fca5a5 !important;
+    font-size: 0.8rem !important;
+    margin-top: 2px !important;
+}
+
+.check-item__icon.ok {
+    background: rgba(16, 185, 129, 0.2) !important;
+    color: #34d399 !important;
+}
+
+.check-item__icon.fail {
+    background: rgba(239, 68, 68, 0.2) !important;
+    color: #f87171 !important;
+}
+
+.install-input-wrap input,
+.install-input-wrap select,
+.install-input-wrap textarea {
+    color: #f8fafc !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 12px !important;
+}
+
+.install-input-wrap select option {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+.install-input-wrap input::placeholder,
+.install-input-wrap textarea::placeholder {
+    color: #94a3b8 !important;
+}
+
+.install-input-wrap input:focus,
+.install-input-wrap select:focus,
+.install-input-wrap textarea:focus {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25) !important;
+}
+
+.install-input-icon {
+    color: #94a3b8 !important;
+}
+
+.install-input-wrap:focus-within .install-input-icon {
+    color: #60a5fa !important;
+}
+
+.install-callout {
+    background: rgba(37, 99, 235, 0.12) !important;
+    border: 1px solid rgba(37, 99, 235, 0.25) !important;
+    color: #93c5fd !important;
+}
+
+.install-callout svg {
+    color: #60a5fa !important;
+}
+
+.install-callout strong {
+    color: #ffffff !important;
+}
+
+.install-card .form-hint,
+.auth-card .form-hint {
+    color: #94a3b8 !important;
+}
+
