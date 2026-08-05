@@ -12,23 +12,38 @@ namespace App\Core;
  */
 final class HtmlSanitizer
 {
-    /** Разрешённые теги (форматирование, ссылки, изображения, таблицы, списки). */
+    /** Разрешённые теги (форматирование, ссылки, изображения, таблицы, списки, HTML5, SVG, формы). */
     private const ALLOWED_TAGS = [
-        'p', 'br', 'hr', 'span', 'div', 'section', 'article',
+        'p', 'br', 'hr', 'span', 'div', 'section', 'article', 'main', 'header', 'footer', 'aside', 'nav', 'details', 'summary',
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
         'strong', 'b', 'em', 'i', 'u', 's', 'small', 'sub', 'sup', 'mark',
         'ul', 'ol', 'li', 'blockquote', 'pre', 'code',
-        'a', 'img', 'figure', 'figcaption',
+        'a', 'img', 'figure', 'figcaption', 'picture', 'source', 'video', 'audio', 'track', 'iframe',
         'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption',
+        'form', 'input', 'button', 'select', 'option', 'textarea', 'label',
+        'svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'g', 'text', 'tspan', 'use', 'defs', 'clippath', 'mask',
     ];
 
     /** Разрешённые атрибуты по тегам. */
     private const ALLOWED_ATTRS = [
-        '*' => ['class', 'id', 'title'],
+        '*' => [
+            'class', 'id', 'title', 'role', 'tabindex', 'hidden', 'dir', 'lang',
+            'viewbox', 'cx', 'cy', 'r', 'd', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'transform', 'opacity',
+        ],
         'a' => ['href', 'target', 'rel'],
         'img' => ['src', 'alt', 'width', 'height', 'loading'],
         'td' => ['colspan', 'rowspan'],
         'th' => ['colspan', 'rowspan', 'scope'],
+        'input' => ['type', 'name', 'value', 'placeholder', 'checked', 'disabled', 'readonly', 'required', 'autocomplete'],
+        'button' => ['type', 'name', 'value', 'disabled'],
+        'select' => ['name', 'disabled', 'required', 'multiple'],
+        'option' => ['value', 'selected', 'disabled'],
+        'textarea' => ['name', 'rows', 'cols', 'placeholder', 'disabled', 'readonly', 'required'],
+        'label' => ['for'],
+        'iframe' => ['src', 'width', 'height', 'allow', 'allowfullscreen', 'frameborder'],
+        'video' => ['src', 'poster', 'controls', 'autoplay', 'loop', 'muted', 'playsinline', 'width', 'height'],
+        'audio' => ['src', 'controls', 'autoplay', 'loop', 'muted'],
+        'source' => ['src', 'type', 'media'],
     ];
 
     /**
@@ -162,7 +177,8 @@ final class HtmlSanitizer
             $name = strtolower($attr->nodeName);
             $value = $attr->nodeValue ?? '';
 
-            if (!in_array($name, $allowed, true) || str_starts_with($name, 'on')) {
+            $isDataOrAria = str_starts_with($name, 'data-') || str_starts_with($name, 'aria-');
+            if ((!$isDataOrAria && !in_array($name, $allowed, true)) || str_starts_with($name, 'on')) {
                 $el->removeAttribute($attr->nodeName);
                 continue;
             }
