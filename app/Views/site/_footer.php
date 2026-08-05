@@ -235,5 +235,10 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
 <?php if (trim($globalJs) !== ''): ?>
 <script nonce="<?= $cspNonce ?>"><?= $globalJs ?></script>
 <?php endif; ?>
+<?php if (!empty($page['custom_js']) && !empty($page['id'])): ?>
+<?php foreach (\App\Core\CustomAssetHelper::resolveJsUrls((string) $page['custom_js'], (int) $page['id']) as $pageJsUrl): ?>
+<script src="<?= htmlspecialchars($pageJsUrl, ENT_QUOTES) ?>" defer></script>
+<?php endforeach; ?>
+<?php endif; ?>
 </body>
 </html>

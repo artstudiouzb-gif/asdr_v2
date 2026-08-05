@@ -85,6 +85,23 @@ foreach ($blocks as $b) {
                     </div>
                 </div>
             </div>
+
+            <!-- Блок 3: Пользовательские и внешние CSS / JS -->
+            <div class="form-card">
+                <?= \App\Core\AdminUi::cardHeader('3. Внешние и пользовательские CSS / JS файлы', 'code', 'var(--admin-primary)') ?>
+
+                <div class="form-field">
+                    <label class="u-inline-e925a44577">Внешние CSS файлы или кастомный CSS-код страницы</label>
+                    <textarea name="custom_css" rows="3" class="admin-code-input" placeholder="https://cdn.example.com/style.css&#10;body { --page-accent: #007bff; }"><?= htmlspecialchars($page['custom_css'] ?? '', ENT_QUOTES) ?></textarea>
+                    <span class="form-hint">Указывайте URL внешних .css файлов (по одному на строку) или кастомный CSS. Стили подключаются строго внешними файлами без инлайн-тегов.</span>
+                </div>
+
+                <div class="form-field">
+                    <label class="u-inline-e925a44577">Внешние JS скрипты или кастомный JS-код страницы</label>
+                    <textarea name="custom_js" rows="3" class="admin-code-input" placeholder="https://cdn.example.com/script.js&#10;console.log('Custom script running');"><?= htmlspecialchars($page['custom_js'] ?? '', ENT_QUOTES) ?></textarea>
+                    <span class="form-hint">Указывайте URL внешних .js скриптов (по одному на строку) или кастомный JavaScript. Скрипты подключаются строго внешними ресурсами перед &lt;/body&gt;.</span>
+                </div>
+            </div>
         </div>
 
         <aside class="entry-side">

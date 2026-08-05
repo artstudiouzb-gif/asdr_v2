@@ -461,6 +461,9 @@ final class PageController
         $rawSlug = $slugInput !== '' ? $slugInput : $title;
         $slug = Slug::unique($rawSlug, static fn (string $s, ?int $ex) => Page::slugExists($s, $ex, $lang), $id);
 
+        $customCss = trim((string) ($_POST['custom_css'] ?? ''));
+        $customJs = trim((string) ($_POST['custom_js'] ?? ''));
+
         $data = [
             'title' => $title,
             'slug' => $slug,
@@ -472,6 +475,8 @@ final class PageController
             'layout_type' => $layoutType,
             'hide_chrome' => !empty($_POST['hide_chrome']), // лендинг (группа 6)
             'transparent_header' => !empty($_POST['transparent_header']),
+            'custom_css' => $customCss !== '' ? $customCss : null,
+            'custom_js' => $customJs !== '' ? $customJs : null,
             'lang' => $lang,
             'parent_id' => $parentId,
         ];

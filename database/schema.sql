@@ -180,6 +180,8 @@ CREATE TABLE IF NOT EXISTS pages (
     layout_type     ENUM('no_sidebar', 'left_sidebar', 'right_sidebar') NOT NULL DEFAULT 'no_sidebar',
     hide_chrome     TINYINT(1) NOT NULL DEFAULT 0,
     transparent_header TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'прозрачная шапка на этой странице',
+    custom_css      TEXT NULL COMMENT 'постраничный CSS / внешние стили',
+    custom_js       TEXT NULL COMMENT 'постраничный JS / внешние скрипты',
     created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     lock_version    INT UNSIGNED NOT NULL DEFAULT 1,
@@ -1126,7 +1128,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_01_media_captions.sql'),
     ('2026_08_02_news_rich_lead.sql'),
     ('2026_08_02_social_scheduled_at.sql'),
-    ('2026_08_03_notification_center.sql')
+    ('2026_08_03_notification_center.sql'),
+    ('2026_08_05_page_custom_assets.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (
