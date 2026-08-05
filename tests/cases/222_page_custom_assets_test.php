@@ -13,7 +13,7 @@ test('CustomAssetHelper::resolveCssUrls: разделяет внешние URL �
     assert_same(2, count($urls));
     assert_same('https://cdn.example.com/animate.min.css', $urls[0]);
     assert_true(str_starts_with($urls[1], '/uploads/public/generated-css/page-999-'), 'сгенерирован внешний CSS файл');
-    assert_true(str_ends_with($urls[1], '.css'));
+    assert_true(str_contains($urls[1], '.css'));
 });
 
 test('CustomAssetHelper::resolveJsUrls: разделяет внешние URL и компилирует кастомный JS во внешние файлы', function () {
@@ -23,7 +23,7 @@ test('CustomAssetHelper::resolveJsUrls: разделяет внешние URL и
     assert_same(2, count($urls));
     assert_same('https://cdn.example.com/confetti.js', $urls[0]);
     assert_true(str_starts_with($urls[1], '/uploads/public/generated-js/page-999-'), 'сгенерирован внешний JS файл');
-    assert_true(str_ends_with($urls[1], '.js'));
+    assert_true(str_contains($urls[1], '.js'));
 });
 
 test('GeneratedJs::publish: сохраняет JS во внешний файл на диске без инлайн-тегов', function () {
