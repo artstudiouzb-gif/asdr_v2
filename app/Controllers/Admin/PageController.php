@@ -164,7 +164,7 @@ final class PageController
         }
 
         $count = Block::copyLanguageBlocks($id, $fromLang, $toLang);
-        Cache::forgetPrefix('page:' . $id);
+        Cache::clearPageCache($id);
         Flash::success("Скопировано {$count} блоков с языка " . strtoupper($fromLang) . " на язык " . strtoupper($toLang) . ". Теперь вы можете отредактировать тексты.");
 
         header('Location: /admin/pages/' . $id . '/edit?block_lang=' . urlencode($toLang));
@@ -313,7 +313,7 @@ final class PageController
             ]);
             return;
         }
-        \App\Core\Cache::forgetPrefix('page:' . $id);
+        \App\Core\Cache::clearPageCache($id);
 
         Flash::success('Страница обновлена.');
         $blockLang = $this->resolveBlockLang();
@@ -327,7 +327,7 @@ final class PageController
         Csrf::verifyRequest();
 
         Page::delete((int) $params['id']);
-        \App\Core\Cache::forgetPrefix('page:' . (int) $params['id']);
+        \App\Core\Cache::clearPageCache((int) $params['id']);
         Flash::success('Страница удалена.');
         header('Location: ' . AdminListQuery::returnPath('/admin/pages', $_POST['return_query'] ?? ''));
         exit;
