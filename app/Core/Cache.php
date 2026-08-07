@@ -164,6 +164,29 @@ final class Cache
         }
     }
 
+    /**
+     * Очищает кэш текущей страницы и всех связанных страниц из той же группы
+     * переводов (RU, UZ, EN), гарантируя немедленный сброс на всех языках.
+     */
+    public static function clearPageCache(int $pageId): void
+    {
+        self::forgetPrefix('page:' . $pageId);
+
+        try {
+            $stmt = Database::pdo()->prepare(
+                'SELECT id FROM pages WHERE translation_group_id = (SELECT translation_group_id FROM pages WHERE id = :id LIMIT 1)'
+            );
+            $stmt->execute([':id' => $pageId]);
+            foreach ($stmt->fetchAll(\PDO::FETCH_COLUMN) as $relatedId) {
+                if ((int) $relatedId > 0 && (int) $relatedId !== $pageId) {
+                    self::forgetPrefix('page:' . (int) $relatedId);
+                }
+            }
+        } catch (\Throwable) {
+            self::forgetPrefix('page:');
+        }
+    }
+
     public static function flush(): void
     {
         $dir = self::dir();

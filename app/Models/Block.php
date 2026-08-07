@@ -174,7 +174,11 @@ final class Block
 
     public static function delete(int $id): void
     {
-        $stmt = Database::pdo()->prepare('DELETE FROM blocks WHERE id = :id');
+        $pdo = Database::pdo();
+        $stmtChildren = $pdo->prepare('DELETE FROM blocks WHERE parent_block_id = :pid');
+        $stmtChildren->execute([':pid' => $id]);
+
+        $stmt = $pdo->prepare('DELETE FROM blocks WHERE id = :id');
         $stmt->execute([':id' => $id]);
     }
 

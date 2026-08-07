@@ -105,7 +105,7 @@ final class BlockController
             $parentBlockId,
             $columnIndex
         );
-        \App\Core\Cache::forgetPrefix('page:');
+        \App\Core\Cache::clearPageCache($pageId);
 
         Flash::success($sample !== []
             ? 'Блок добавлен с примером наполнения — замените тексты своими.'
@@ -184,7 +184,7 @@ final class BlockController
             ]);
             return;
         }
-        \App\Core\Cache::forgetPrefix('page:' . (int) $block['page_id']);
+        \App\Core\Cache::clearPageCache((int) $block['page_id']);
 
         Flash::success('Блок сохранён.');
 
@@ -262,7 +262,7 @@ final class BlockController
             header('Location: /admin/blocks/' . (int) $block['id'] . '/revisions');
             exit;
         }
-        \App\Core\Cache::forgetPrefix('page:' . (int) $block['page_id']);
+        \App\Core\Cache::clearPageCache((int) $block['page_id']);
 
         Flash::success('Блок восстановлен из выбранной версии.');
         header('Location: ' . $this->pageEditUrl($block));
@@ -282,7 +282,7 @@ final class BlockController
         }
 
         Block::delete((int) $block['id']);
-        \App\Core\Cache::forgetPrefix('page:' . (int) $block['page_id']);
+        \App\Core\Cache::clearPageCache((int) $block['page_id']);
         Flash::success('Блок удалён.');
         header('Location: ' . $this->pageEditUrl($block));
         exit;
@@ -314,7 +314,7 @@ final class BlockController
         }
 
         Block::reorder($pageId, $lang, $order);
-        \App\Core\Cache::forgetPrefix('page:');
+        \App\Core\Cache::clearPageCache($pageId);
 
         echo json_encode(['ok' => true]);
     }
@@ -338,7 +338,7 @@ final class BlockController
         } elseif ($direction === 'down') {
             Block::moveDown((int) $block['id'], (int) $block['page_id'], $lang);
         }
-        \App\Core\Cache::forgetPrefix('page:' . (int) $block['page_id']);
+        \App\Core\Cache::clearPageCache((int) $block['page_id']);
 
         header('Location: ' . $this->pageEditUrl($block));
         exit;
@@ -359,7 +359,7 @@ final class BlockController
 
         $newState = (int) ($block['is_active'] ?? 1) !== 1;
         Block::setActive((int) $block['id'], $newState);
-        \App\Core\Cache::forgetPrefix('page:' . (int) $block['page_id']);
+        \App\Core\Cache::clearPageCache((int) $block['page_id']);
 
         Flash::success($newState ? 'Блок включён и снова выводится на сайте.' : 'Блок отключён — он скрыт на сайте, но сохранён.');
         header('Location: ' . $this->pageEditUrl($block));
