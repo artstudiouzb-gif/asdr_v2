@@ -15,6 +15,7 @@
 /storage/cache/*
 !/storage/cache/.gitkeep
 !/storage/cache/README.md
+/storage/integrity/
 /public/uploads/public/*
 !/public/uploads/public/.gitkeep
 !/public/uploads/public/index.html

@@ -60,6 +60,19 @@ try {
 foreach ($report['messages'] as $m) {
     fwrite(STDOUT, '  - ' . $m . "\n");
 }
+// Отметка об успешной репетиции восстановления. По ней `release_check.php`
+// напоминает, что бэкапы давно не разворачивали: копия, которую ни разу не
+// восстанавливали, бэкапом не является.
+if ($report['ok']) {
+    $marker = APP_ROOT . '/storage/backups/.last_restore_check';
+    @file_put_contents($marker, json_encode([
+        'checked_at' => date('c'),
+        'archive' => basename($zip),
+        'tables' => $report['tables'],
+        'files' => $report['files'],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL, LOCK_EX);
+}
+
 $seconds = round(microtime(true) - $started, 1);
 fwrite(STDOUT, sprintf(
     "Итог: %s. Таблиц: %d, файлов: %d. Контрольная сумма: %s. Заняло: %s c.\n",

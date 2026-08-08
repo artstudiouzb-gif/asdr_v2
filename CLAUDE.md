@@ -57,6 +57,12 @@ TEST_DB_HOST=127.0.0.1 TEST_DB_DATABASE=artstudio_test TEST_DB_USERNAME=root TES
 # без него обход не проходит второй фактор и админку просто пропускает.
 php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp СЕКРЕТ
 ```
+На боевом сервере к этому добавляются `scripts/release_check.php` (в т.ч. DNS
+почты SPF/DKIM/DMARC, свежесть репетиции восстановления, наличие эталона
+целостности) и `app/Console/integrity_check.php` — почасовая сверка SHA-256
+файлов кода с эталоном, алерт в Telegram при подмене (`App\Core\Integrity`,
+эталон пересобирает `scripts/release.php`).
+
 После правок PHP: `php -l <файл>`. Сброс кэша страниц: `rm -rf storage/cache/page/*`
 (в админке — кнопка «Сброс кэша» в шапке).
 

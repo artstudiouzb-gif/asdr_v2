@@ -100,6 +100,78 @@ if ($latestBackup === 0) {
     $add('recent_backup', $ageHours <= 48 ? 'ok' : 'warning', 'Последняя копия: ' . $ageHours . ' ч. назад');
 }
 
+// Репетиция восстановления. Отметку ставит database/restore.php после успешного
+// разворачивания архива в отдельную БД. Раз в квартал — разумный минимум:
+// без этого о нерабочем бэкапе узнают в день, когда он нужен.
+$restoreMarker = $root . '/storage/backups/.last_restore_check';
+if (!is_file($restoreMarker)) {
+    $add('restore_drill', 'warning', 'Восстановление ни разу не проверялось (database/restore.php)');
+} else {
+    $drillDays = (int) floor((time() - (int) filemtime($restoreMarker)) / 86400);
+    $add('restore_drill', $drillDays <= 90 ? 'ok' : 'warning', 'Последняя проверка восстановления: ' . $drillDays . ' дн. назад');
+}
+
+// Эталон целостности файлов (app/Console/integrity_check.php).
+require_once $root . '/app/Core/Integrity.php';
+$baselineAge = \App\Core\Integrity::baselineAge();
+if ($baselineAge === null) {
+    $add('integrity_baseline', 'warning', 'Эталон целостности не снят (integrity_check.php --baseline)');
+} else {
+    $add('integrity_baseline', 'ok', 'Эталон снят ' . (int) floor($baselineAge / 86400) . ' дн. назад');
+}
+
+// Доставляемость почты: без SPF/DKIM/DMARC уведомления заявителям и письма
+// сброса пароля уходят в спам, причём молча — очередь считает их отправленными.
+$mailHost = (string) Config::get('mail.host', '');
+$fromEmail = (string) Config::get('mail.from_email', '');
+if ($mailHost === '') {
+    $add('mail_dns', 'warning', 'SMTP не настроен — письма не отправляются');
+} elseif (!str_contains($fromEmail, '@')) {
+    $add('mail_dns', 'warning', 'Не задан mail.from_email — проверить SPF/DKIM/DMARC не по чему');
+} elseif (!function_exists('dns_get_record')) {
+    $add('mail_dns', 'warning', 'dns_get_record недоступна — проверьте SPF/DKIM/DMARC вручную');
+} else {
+    $mailDomain = strtolower(substr($fromEmail, strrpos($fromEmail, '@') + 1));
+    $txt = static function (string $name): array {
+        $records = @dns_get_record($name, DNS_TXT);
+
+        return is_array($records) ? $records : [];
+    };
+    $joined = static function (array $records): string {
+        $values = [];
+        foreach ($records as $record) {
+            $values[] = (string) ($record['txt'] ?? implode('', (array) ($record['entries'] ?? [])));
+        }
+
+        return implode("\n", $values);
+    };
+
+    $spf = $joined($txt($mailDomain));
+    $dmarc = $joined($txt('_dmarc.' . $mailDomain));
+    $missing = [];
+    if (!str_contains(strtolower($spf), 'v=spf1')) {
+        $missing[] = 'SPF';
+    }
+    if (!str_contains(strtolower($dmarc), 'v=dmarc1')) {
+        $missing[] = 'DMARC';
+    }
+
+    $selector = trim((string) Config::get('mail.dkim_selector', ''));
+    if ($selector === '') {
+        $missing[] = 'DKIM (селектор не задан в mail.dkim_selector)';
+    } elseif (!str_contains(strtolower($joined($txt($selector . '._domainkey.' . $mailDomain))), 'v=dkim1')) {
+        $missing[] = 'DKIM (' . $selector . ')';
+    }
+
+    $add(
+        'mail_dns',
+        $missing === [] ? 'ok' : 'warning',
+        $missing === []
+            ? $mailDomain . ': SPF, DKIM, DMARC на месте'
+            : $mailDomain . ': нет ' . implode(', ', $missing)
+    );
+}
+
 $errors = count(array_filter($checks, static fn (array $check): bool => $check['status'] === 'error'));
 $warnings = count(array_filter($checks, static fn (array $check): bool => $check['status'] === 'warning'));
 

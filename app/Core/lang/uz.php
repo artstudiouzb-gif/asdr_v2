@@ -43,6 +43,7 @@ return [
     'Проекты' => 'Loyihalar',
     'Фотоальбомы' => 'Fotoalbomlar',
     'Хлебные крошки' => 'Navigatsiya yo‘li',
+    'Обновлено' => 'Yangilangan',
     'Календарь мероприятий' => 'Tadbirlar taqvimi',
     'Мероприятия' => 'Tadbirlar',
     'Календарь' => 'Taqvim',

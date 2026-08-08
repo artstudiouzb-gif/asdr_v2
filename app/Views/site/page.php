@@ -91,4 +91,22 @@ $hasSidebar = $sidebar !== null && trim($sidebar['html']) !== '';
 <?php else: ?>
     <?= $content ?>
 <?php endif; ?>
+<?php
+// Дата последнего обновления — обязательный реквизит страницы сайта госоргана
+// (и подсказка посетителю, насколько сведения свежие). На главной и лендингах
+// не выводится: там она путает, потому что страница собрана из блоков.
+$updatedAt = trim((string) ($page['updated_at'] ?? ''));
+$updatedTs = $updatedAt === '' ? false : strtotime($updatedAt);
+if (!$isHome && !$hideChrome && $updatedTs !== false):
+    $updatedLang = \App\Core\Locale::current();
+    ?>
+    <div class="page-updated">
+        <p class="page-updated__inner">
+            <?= htmlspecialchars(\App\Core\Lang::t('Обновлено'), ENT_QUOTES) ?>:
+            <time datetime="<?= htmlspecialchars(date('Y-m-d', $updatedTs), ENT_QUOTES) ?>"><?=
+                htmlspecialchars(\App\Core\DateFormatter::long($updatedAt, $updatedLang), ENT_QUOTES)
+            ?></time>
+        </p>
+    </div>
+<?php endif; ?>
 <?php require __DIR__ . '/_footer.php'; ?>
