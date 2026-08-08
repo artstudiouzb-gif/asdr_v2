@@ -683,6 +683,10 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .block-testimonials__track {
     display: flex; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory;
     padding: 10px 10px 20px; scrollbar-width: none;
+    /* safe center: пока лента помещается — карточки по центру, при
+       переполнении выравнивание возвращается к началу и прокрутка цела.
+       Два отзыва иначе жались влево, оставляя полэкрана пустым. */
+    justify-content: safe center;
 }
 .block-testimonials__track::-webkit-scrollbar { display: none; }
 .block-testimonials__track:focus-visible {
@@ -1059,7 +1063,9 @@ h1, h2 { letter-spacing: -.015em; }
 
 /* --- Блок «Партнёры» (логотипы) --- */
 .block-partners__title { text-align: center; margin: 0 0 28px; }
-.block-partners__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--card-gap, 24px); align-items: center; }
+/* Логотипы не растягиваются на всю ширину: при двух партнёрах ряд
+   центрируется, а не липнет к левому краю с пустотой справа. */
+.block-partners__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 200px)); gap: var(--card-gap, 24px); align-items: center; justify-content: center; }
 .block-testimonials > .section-head,
 .block-partners > .section-head { margin-bottom: 28px; }
 .block-testimonials__title,

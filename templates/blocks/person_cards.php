@@ -4,6 +4,9 @@ $title = $data['title'] ?? '';
 $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
 $items = $data['items'] ?? [];
+// Сетка подстраивается под число карточек: две персоны в жёстких
+// четырёх колонках занимали половину ширины, справа зияла пустота.
+$templateCss = \App\Core\GridBalance::css($blockId, '.persons-grid', '.person-card', count(is_array($items) ? $items : []), 4);
 ?>
 <div class="block-persons">
     <div class="section-head">

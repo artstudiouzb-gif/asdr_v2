@@ -1307,6 +1307,23 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
     box-shadow: 0 6px 16px rgba(19,42,92,.25) !important;
 }
 
+/* Кнопка на тёмной подложке. Общее правило красит любую кнопку в navy, а
+   у блоков «Призыв к действию» и «Подписка» подложка того же navy — кнопка
+   сливалась с фоном (контраст 1:1 при норме 3:1 для элементов управления).
+   Пользовательский цвет кнопки (--cta-btn) остаётся за автором. */
+.block-cta:not([style*="--cta-btn"]) .block-cta__button,
+.subscribe-block .btn,
+.subscribe-block input[type="submit"] {
+    background: #fff !important;
+    color: var(--gov-navy) !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .22) !important;
+}
+.block-cta:not([style*="--cta-btn"]) .block-cta__button:hover,
+.subscribe-block .btn:hover {
+    background: color-mix(in srgb, #fff 90%, var(--gov-teal)) !important;
+    color: var(--gov-navy) !important;
+}
+
 /* --- Доступность (WCAG, гос-требования): фокус-кольца, контраст, touch-цели --- */
 /* Акцент для текста динамически следует за --color-accent. */
 :root { 
@@ -3606,9 +3623,16 @@ span.imgcard__media::after {
 }
 
 /* Медиа-галерея — карточки с play и длительностью. */
-.mediagallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-@media (max-width: 1000px) { .mediagallery-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { .mediagallery-grid { grid-template-columns: 1fr; } }
+.mediagallery-grid { display: grid; grid-template-columns: repeat(var(--grid-track, 4), minmax(0, 1fr)); gap: 20px; }
+.mediagallery-grid > .mediacard { grid-column: span var(--grid-span, 1); }
+@media (max-width: 1000px) {
+    .mediagallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mediagallery-grid > .mediacard { grid-column: auto; }
+}
+@media (max-width: 560px) {
+    .mediagallery-grid { grid-template-columns: 1fr; }
+    .mediagallery-grid > .mediacard { grid-column: auto; }
+}
 .mediacard { 
     text-decoration: none; color: var(--gov-ink); 
     display: block;
@@ -3685,11 +3709,23 @@ span.imgcard__media::after {
 .cms-block--fullwidth.cms-block--bg-navy::before { background: var(--gov-navy); }
 
 /* Руководство — карточки персон (вакантные с плейсхолдером). */
-.persons-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-@media (max-width: 1000px) { .persons-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { .persons-grid { grid-template-columns: 1fr; } }
+/* Дорожки считает App\Core\GridBalance — сетка занимает всю ширину при
+   любом числе карточек, а хвост последнего ряда не оставляет дыр. */
+.persons-grid { display: grid; grid-template-columns: repeat(var(--grid-track, 4), minmax(0, 1fr)); gap: 20px; }
+.persons-grid > .person-card { grid-column: span var(--grid-span, 1); }
+@media (max-width: 1000px) {
+    .persons-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .persons-grid > .person-card { grid-column: auto; }
+}
+@media (max-width: 560px) {
+    .persons-grid { grid-template-columns: 1fr; }
+    .persons-grid > .person-card { grid-column: auto; }
+}
 .person-card { display: flex; flex-direction: column; background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius); overflow: hidden; }
 .person-card__photo { display: block; aspect-ratio: 4/4.4; background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
+/* Потолок высоты портрета: когда персон в ряду две, карточка занимает
+   половину экрана, и пропорция 4:4.4 растила её до шестисот пикселей. */
+.person-card__photo, .person-card__placeholder { max-height: 360px; }
 .person-card:hover .person-card__photo { transform: scale(1.05); }
 /* Карточка без фотографии: вместо пустого серого поля — фирменная эмблема
    водяным знаком, как на карточках актов. Пустых прямоугольников на странице
@@ -6656,7 +6692,9 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     border-radius: var(--radius-sm, 10px); background: color-mix(in srgb, var(--gov-teal) 14%, transparent);
     color: var(--gov-teal-text, #0284c7); font-size: 1.4rem; font-weight: 700;
 }
-.block-advantages__title { font-weight: 700; font-size: 1.1rem; color: var(--gov-title); margin: 0; line-height: 1.3; }
+/* Заголовок блока — как у остальных секций: 1.1rem читался подписью, а не
+   названием раздела, и ломал иерархию страницы. */
+.block-advantages__title { font-weight: 700; font-size: clamp(1.5rem, 2.6vw, 2rem); color: var(--gov-title); margin: 0 0 26px; line-height: 1.25; letter-spacing: -0.02em; }
 .block-advantages__text { color: var(--gov-muted, #475569); font-size: 0.92rem; line-height: 1.55; margin: 0; }
 
 /* --- Контактные карточки / Отделы (Contact Cards Block) --- */

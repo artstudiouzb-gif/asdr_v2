@@ -12,6 +12,9 @@ foreach ($items as $it) {
     if (($it['kind'] ?? 'video') === 'photo') { $hasPhoto = true; } else { $hasVideo = true; }
 }
 $showTabs = $hasVideo && $hasPhoto;
+// Сетка подстраивается под число материалов — иначе два ролика
+// занимали половину ряда.
+$templateCss = \App\Core\GridBalance::css($blockId, '.mediagallery-grid', '.mediacard', count(is_array($items) ? $items : []), 4);
 ?>
 <div class="block-mediagallery" data-media-gallery>
     <div class="section-head">
