@@ -263,7 +263,12 @@ summary:focus-visible {
     font-weight: 600;
 }
 
-.block-advantages__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
+/* Колонки задаёт шаблон блока (--adv-cols) по числу карточек, чтобы в
+   последнем ряду не оставалась одна карточка. auto-fit оставлен запасным
+   вариантом на случай, если переменная не пришла. */
+.block-advantages__grid { display: grid; grid-template-columns: repeat(var(--adv-cols, auto-fit), minmax(220px, 1fr)); gap: 24px; }
+@media (max-width: 900px) { .block-advantages__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .block-advantages__grid { grid-template-columns: 1fr; } }
 .block-advantages__item {
     text-align: center;
     padding: 30px 24px;

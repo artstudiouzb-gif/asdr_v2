@@ -2689,7 +2689,10 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .block-anchornav__link.is-active, .block-anchornav__link:hover { color: var(--gov-title); border-bottom-color: var(--gov-teal); }
 
 /* Этапы реализации — горизонтальный таймлайн со статусами. */
-.stages { --stages-gap: 24px; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--stages-gap); position: relative; }
+/* Колонок ровно столько, сколько этапов (до пяти): при жёстких пяти четыре
+   этапа оставляли пустую колонку, и хронология обрывалась на середине ряда.
+   Число приходит из шаблона блока через --stages-count. */
+.stages { --stages-gap: 24px; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--stages-count, 5), minmax(0, 1fr)); gap: var(--stages-gap); position: relative; }
 @media (max-width: 1000px) { .stages { grid-template-columns: repeat(2, 1fr); } }
 .stages--carousel {
     display: flex;
@@ -2717,10 +2720,9 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
         scroll-snap-align: start;
     }
 }
-.stages::before { 
-    content: ''; position: absolute; top: 5px; left: 0; right: 0; height: 2px; 
-    background: var(--gov-border);
-}
+/* Общей полосы во всю ширину нет намеренно: она продолжалась за последнюю
+   точку и выглядела оборванным хвостом. Линию собирают отрезки между
+   этапами — поэтому она заканчивается ровно на последней точке. */
 .stage:not(:last-child)::before {
     content: '';
     position: absolute;
@@ -2738,12 +2740,9 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 }
 .stage--active.stage--next-active::before { background: #2f80ed; }
 @media (max-width: 1000px) and (min-width: 561px) {
-    .stages:not(.stages--carousel)::before,
+    /* В два столбца (правило выше) отрезки соединяли бы этапы из разных
+       строк — прячем их, точки остаются. */
     .stages:not(.stages--carousel) .stage:not(:last-child)::before { display: none; }
-}
-.stages--carousel::before { display: none; }
-@media (max-width: 560px) {
-    .stages[data-carousel-track]::before { display: none; }
 }
 .stages--carousel .stage:not(:last-child)::after {
     content: '';
@@ -3890,10 +3889,18 @@ span.imgcard__media::after {
 .bio__text { color: var(--gov-muted); line-height: 1.6; margin-bottom: 26px; }
 .bio-career { list-style: none; margin: 0; padding: 0; position: relative; }
 .bio-career::before { content: ''; position: absolute; left: 4px; top: 8px; bottom: 8px; width: 2px; background: color-mix(in srgb, var(--gov-navy) 15%, transparent); }
-.bio-career__item { position: relative; display: grid; grid-template-columns: 110px 1fr; gap: 14px; padding: 0 0 20px 26px; }
+/* Колонка годов не фиксированная: длинная подпись вроде «2026 — н.в.» или
+   «from 16 July 2026» раньше не помещалась в 110px и, из-за nowrap, наезжала
+   на должность. minmax разрешает колонке подрасти, а тексту — перенестись. */
+.bio-career__item { position: relative; display: grid; grid-template-columns: minmax(110px, max-content) 1fr; gap: 14px; padding: 0 0 20px 26px; }
 .bio-career__item:last-child { padding-bottom: 0; }
 .bio-career__item::before { content: ''; position: absolute; left: 0; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--gov-navy); }
-.bio-career__years { font-weight: 700; color: var(--gov-title); font-size: .93rem; white-space: nowrap; }
+.bio-career__years { font-weight: 700; color: var(--gov-title); font-size: .93rem; overflow-wrap: anywhere; }
+@media (max-width: 560px) {
+    /* На узком экране годы уходят строкой над должностью: две колонки там
+       оставляют должности 40% ширины и рвут её на отдельные слова. */
+    .bio-career__item { grid-template-columns: 1fr; gap: 4px; }
+}
 .bio-career__text { color: var(--gov-muted); font-size: .93rem; line-height: 1.5; }
 .bio-side { display: flex; flex-direction: column; gap: 26px; }
 .bio-edu { background: color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)); border-radius: var(--radius); padding: 28px; }

@@ -3,6 +3,23 @@
 $title = $data['title'] ?? '';
 $items = $data['items'] ?? [];
 $variant = ($data['variant'] ?? 'grid') === 'band' ? 'band' : 'grid';
+
+if ($variant === 'grid') {
+    // Число колонок подбирается так, чтобы в последнем ряду не оставалась
+    // одинокая карточка: пять преимуществ при четырёх колонках давали 4+1 —
+    // пятая уезжала вниз в пустой ряд. Здесь пятёрка ложится как 3+2.
+    $count = count($items);
+    $columns = $count > 0 && $count <= 3 ? $count : 4;
+    if ($count > 3) {
+        foreach ([4, 3, 2] as $candidate) {
+            if ($count % $candidate !== 1) {
+                $columns = $candidate;
+                break;
+            }
+        }
+    }
+    $templateCss = '#block-' . $blockId . ' .block-advantages__grid{--adv-cols:' . max(1, $columns) . '}';
+}
 ?>
 <?php if ($variant === 'band'): ?>
 <div class="block-featband">
