@@ -46,8 +46,11 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php if ($type === 'html'): ?>
             <div class="form-field">
                 <label for="html">HTML-код блока</label>
-                <textarea class="u-inline-6650b8308c" id="html" name="html"><?= htmlspecialchars($data['html'] ?? '', ENT_QUOTES) ?></textarea>
+                <textarea class="u-inline-6650b8308c" id="html" name="html"<?= \App\Core\Auth::isSuperAdmin() ? '' : ' readonly' ?>><?= htmlspecialchars($data['html'] ?? '', ENT_QUOTES) ?></textarea>
                 <span class="form-hint">Разрешена безопасная разметка без script, style, обработчиков on* и iframe. Для карт и видео используйте специальные блоки.</span>
+                <?php if (!\App\Core\Auth::isSuperAdmin()): ?>
+                    <span class="form-hint">Разметку этого блока меняет только супер-администратор — остальные поля блока доступны как обычно.</span>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
 

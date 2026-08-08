@@ -15,6 +15,9 @@ $statuses = array_map(
         : 'planned',
     $items
 );
+// Колонок ровно по числу этапов (до пяти): иначе четыре этапа занимают четыре
+// колонки из пяти, и хронология обрывается посреди ряда.
+$templateCss = '#block-' . $blockId . ' .stages{--stages-count:' . max(1, min(5, count($items))) . '}';
 ?>
 <div class="block-stages"<?= $carousel ? ' data-carousel' : '' ?>>
     <div class="section-head">

@@ -125,7 +125,9 @@ final class FileController
         }
 
         try {
-            Uploader::store($_FILES['file'], $accessType, Auth::id());
+            // .css/.js — код страницы: разрешаем только супер-администратору,
+            // тому же, кто правит поля «произвольный CSS/JS» у страницы.
+            Uploader::store($_FILES['file'], $accessType, Auth::id(), null, Auth::isSuperAdmin());
             Flash::success('Файл загружен.');
         } catch (\RuntimeException $e) {
             Flash::error($e->getMessage());

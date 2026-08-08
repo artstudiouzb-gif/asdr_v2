@@ -23,6 +23,28 @@ test('CssScoper: @media сохраняется, внутренние селек�
     assert_contains('#block-1 .box', $out);
 });
 
+test('CssScoper: забытая скобка не выбрасывает весь CSS блока', function () {
+    $out = CssScoper::scope('.a { color: red; } .b { color: blue', '#block-7');
+    assert_contains('#block-7 .a', $out);
+    assert_contains('#block-7 .b', $out);
+    assert_contains('color: blue', $out);
+});
+
+test('CssScoper: незакрытый @media скоупит вложенные правила', function () {
+    $out = CssScoper::scope('@media (max-width: 600px) { .box { display: none; }', '#block-8');
+    assert_contains('@media', $out);
+    assert_contains('#block-8 .box', $out);
+});
+
+test('CssScoper: лишняя закрывающая скобка не даёт правилу выйти из области блока', function () {
+    $out = CssScoper::scope('.a { color: red; }} body { display: none; }', '#block-3');
+    assert_contains('#block-3 .a', $out);
+    // Правило после лишней скобки сохраняется, но остаётся внутри блока.
+    assert_contains('display: none', $out);
+    assert_false((bool) preg_match('/(^|})\s*body\s*\{/', $out), 'непрефиксованный body просочился');
+    assert_not_contains('} body', $out);
+});
+
 test('CssScoper: вырезает опасные конструкции', function () {
     $out = CssScoper::scope('.x { background: url(javascript:alert(1)); } @import "evil.css";', '#block-1');
     assert_not_contains('javascript:', $out);

@@ -97,6 +97,10 @@ if (is_dir($cacheDir)) {
 }
 fwrite(STDOUT, "Кеш очищен.\n");
 
+// Эталон целостности снимается после каждого выпуска: иначе плановое
+// обновление кода почасовой контроль целостности примет за подмену файлов.
+releaseRun('Эталон целостности файлов', $root . '/app/Console/integrity_check.php', ['--baseline']);
+
 releaseRun('Проверка после миграций', $root . '/scripts/release_check.php');
 releaseRun('Smoke-обход сайта', $root . '/scripts/smoke.php', [$baseUrl, '--expect-release', $releaseId]);
 

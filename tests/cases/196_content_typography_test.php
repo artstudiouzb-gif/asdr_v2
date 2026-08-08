@@ -16,10 +16,12 @@ test('Контент: ширину текста новости не ограни
 
     assert_not_contains(':where(.rich-content) > :is(p, ul, ol, dl, h2, h3, h4, h5, h6, blockquote)', $css);
 
-    // Токен остаётся: им пользуется заголовок текстового блока.
-    assert_contains('--rich-measure:', $css);
+    // Меры строки не осталось и у заголовка блока: он занимает всю ширину
+    // колонки, как и текст под ним. Токен удалён, чтобы не тянуть за собой
+    // неиспользуемую «половинную» ширину.
+    assert_not_contains('--rich-measure:', $css);
     $theme = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
-    assert_contains('.block-text__title { max-width: var(--rich-measure, 72ch); }', $theme);
+    assert_contains('.block-text__title { max-width: none; }', $theme);
 });
 
 test('Лид новости набран как текст статьи и занимает контейнер', function () {

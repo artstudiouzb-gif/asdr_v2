@@ -43,6 +43,7 @@ return [
     'Проекты' => 'Projects',
     'Фотоальбомы' => 'Photo albums',
     'Хлебные крошки' => 'Breadcrumbs',
+    'Обновлено' => 'Updated',
     'Календарь мероприятий' => 'Events calendar',
     'Мероприятия' => 'Events',
     'Календарь' => 'Calendar',

@@ -83,6 +83,7 @@ shared-хостинге обычно `localhost`. Установщик подк�
 0 3 * * *  php /path/to/app/Console/backup_worker.php    >> /path/to/storage/logs/backup_worker.log 2>&1
 30 3 * * * php /path/to/app/Console/gdpr_cleanup.php     >> /path/to/storage/logs/gdpr_cleanup.log 2>&1
 0 9 * * 1  php /path/to/app/Console/digest_worker.php    >> /path/to/storage/logs/digest_worker.log 2>&1
+17 * * * * php /path/to/app/Console/integrity_check.php >> /path/to/storage/logs/integrity.log 2>&1
 ```
 
 `/health` возвращает `degraded` и шлёт алерт, если воркер перестал запускаться.
@@ -97,6 +98,20 @@ shared-хостинге обычно `localhost`. Установщик подк�
 простую ротацию по `BACKUP_RETENTION_DAYS`). При сбое бэкапа уведомление
 приходит в Telegram: и алерт из логов (`TELEGRAM_*` в config), и сообщение от
 бота на chat_id из настройки «Уведомления о заявках форм».
+
+### Репетиция восстановления — раз в квартал
+
+Копия, которую ни разу не разворачивали, бэкапом не является. `restore.php`
+восстанавливает архив в **отдельную** базу и каталог, боевые данные не трогает:
+
+```bash
+php database/restore.php storage/backups/backup_2026-08-01_030000.zip \
+    artstudio_restore_check /tmp/artstudio_restore_files
+```
+
+После успеха скрипт ставит отметку `storage/backups/.last_restore_check`, а
+`scripts/release_check.php` предупреждает, если последней репетиции больше 90
+дней (или её не было вовсе). Первый прогон обязателен **до** открытия сайта.
 
 ## 7. Быстродействие (OPcache, сжатие, HTTP/2)
 
@@ -174,6 +189,47 @@ php scripts/release.php https://asr.artstudio.uz
 
 Новые установки получают полную схему из `schema.sql`; существующие — через
 миграции в `database/migrations/`.
+
+### Откат миграции
+
+Автоматического `down` у миграций нет и не планируется: на shared-хостинге
+надёжнее откатываться из бэкапа, который `release.php` снимает прямо перед
+миграциями. Правило для новых миграций — **писать компенсирующий SQL в шапке
+файла комментарием** (`-- Откат: ALTER TABLE … DROP COLUMN …`), чтобы в момент
+аварии его не пришлось сочинять заново. Если миграция применилась частично,
+порядок такой: восстановить БД из свежей копии (`database/restore.php` в
+боевую базу — только осознанно), затем накатывать заново.
+
+## 10. Почта: SPF, DKIM, DMARC
+
+Настроенный SMTP ещё не значит доставленное письмо. Без DNS-записей
+уведомления заявителям, сброс пароля и дайджест уходят в спам молча — очередь
+считает такие письма отправленными, и ошибка обнаруживается только по жалобе.
+Для сайта госоргана это критично: часть писем отправляется во исполнение
+регламентных сроков.
+
+Записи ставятся у владельца домена, в коде их сделать нельзя:
+
+| Запись | Имя | Значение (пример) |
+| --- | --- | --- |
+| SPF | `asr.artstudio.uz` | `v=spf1 include:<хост-провайдера> -all` |
+| DKIM | `<селектор>._domainkey.asr.artstudio.uz` | выдаёт почтовый провайдер |
+| DMARC | `_dmarc.asr.artstudio.uz` | `v=DMARC1; p=quarantine; rua=mailto:postmaster@asr.artstudio.uz` |
+
+Точное значение `include:` для SPF и содержимое DKIM берутся в панели
+почтового провайдера (cPanel → Email Deliverability показывает обе записи
+готовыми). DMARC начинают с `p=none` и переводят в `p=quarantine` через пару
+недель, когда в отчётах не осталось легитимных отправителей мимо SPF/DKIM.
+
+Селектор DKIM прописывается в config — `mail.dkim_selector` (или переменная
+`MAIL_DKIM_SELECTOR`). После этого проверка автоматическая:
+
+```bash
+php scripts/release_check.php   # строка mail_dns
+```
+
+Она резолвит TXT-записи домена из `mail.from_email` и предупреждает, если
+какой-то из трёх записей нет. Ручной вариант — `dig TXT _dmarc.домен +short`.
 
 ## Если сайт отвечает «403 Forbidden»
 

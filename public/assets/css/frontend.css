@@ -212,6 +212,11 @@ summary:focus-visible {
 .cms-block--space-small { padding: var(--space-small) 0; }
 .cms-block--space-premium { padding: var(--space-premium) 0; }
 .cms-block--space-max { padding: var(--space-max) 0; }
+/* Соседние секции без собственного фона не удваивают вертикальный ритм:
+   нижний отступ одного блока и верхний следующего давали между секциями
+   почти 160px пустоты. Блоки с фоном (cms-block--bg) сохраняют свои поля —
+   иначе цветная подложка липнет к тексту. */
+.cms-block:not(.cms-block--bg) + .cms-block:not(.cms-block--bg) { padding-top: 0; }
 /* Условия показа по устройству. Порог 768px совпадает с основным мобильным
    брейкпоинтом темы; ограничение решается стилями, потому что кэш страницы
    общий для всех посетителей. */
@@ -226,6 +231,11 @@ summary:focus-visible {
 [data-reveal-type="zoom-in"] { transform: scale(.94); }
 /* fade — только прозрачность (transform не нужен). */
 [data-reveal].is-visible { opacity: 1; transform: none; }
+/* Появление — прогрессивное улучшение: при отключённом JavaScript блок
+   обязан остаться видимым, иначе часть страницы просто исчезает. */
+@media (scripting: none) {
+    [data-reveal] { opacity: 1 !important; transform: none !important; }
+}
 @media (prefers-reduced-motion: reduce) {
     [data-reveal] { opacity: 1 !important; transform: none !important; transition: none; }
 }
@@ -263,9 +273,25 @@ summary:focus-visible {
     font-weight: 600;
 }
 
-.block-advantages__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
+/* Колонки задаёт шаблон блока (--adv-cols) по числу карточек, чтобы в
+   последнем ряду не оставалась одна карточка. auto-fit оставлен запасным
+   вариантом на случай, если переменная не пришла. */
+/* Дорожки и ширину карточки считает App\Core\GridBalance: последний ряд
+   растягивается на всю ширину, пустых ячеек справа не остаётся. */
+.block-advantages__grid { display: grid; grid-template-columns: repeat(var(--grid-track, 3), minmax(0, 1fr)); gap: 24px; }
+.block-advantages__item { grid-column: span var(--grid-span, 1); }
+@media (max-width: 900px) {
+    .block-advantages__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .block-advantages__item { grid-column: auto; }
+}
+@media (max-width: 560px) {
+    .block-advantages__grid { grid-template-columns: 1fr; }
+    .block-advantages__item { grid-column: auto; }
+}
 .block-advantages__item {
-    text-align: center;
+    /* Текст по левому краю: центровка на абзаце в 250 знаков даёт рваные
+       края и читается заметно хуже. */
+    text-align: left;
     padding: 30px 24px;
     background: var(--gov-surface);
     border: 1px solid var(--gov-border);
@@ -277,6 +303,12 @@ summary:focus-visible {
     transform: translateY(-6px);
     box-shadow: 0 16px 36px rgba(19,42,92,.08);
     border-color: var(--gov-teal);
+}
+.block-advantages__item h3,
+.block-advantages__item p {
+    /* Расстояния внутри карточки задаёт gap: собственные margin заголовка
+       (1.4rem сверху) складывались с ним и разрывали карточку. */
+    margin: 0;
 }
 .block-advantages__item h3 {
     transition: color 0.3s ease;

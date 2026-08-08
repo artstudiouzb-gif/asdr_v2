@@ -25,9 +25,13 @@ $items = $data['items'] ?? [];
                     <?php if ($photo !== ''): ?>
                         <?= \App\Core\Media::picture($photo, $name !== '' ? $name : t('Фото'), null, null, 'person-card__img', true, '(max-width: 700px) 100vw, 25vw', false, 'person-card__photo') ?>
                     <?php else: ?>
+                        <?php // Заглушка без фотографии — фирменная эмблема (её рисует CSS). ?>
+                        <?php // Подпись только у по-настоящему пустой карточки: раньше её ?>
+                        <?php // получал и руководитель, у которого просто нет фотографии. ?>
                         <span class="person-card__placeholder">
-                            <?= \App\Core\Icon::render('user', 34, 'person-card__placeholder-icon', 1.5) ?>
-                            <span class="person-card__vacant"><?= htmlspecialchars(t('Вакантно'), ENT_QUOTES) ?></span>
+                            <?php if ($vacant): ?>
+                                <span class="person-card__vacant"><?= htmlspecialchars(t('Вакантно'), ENT_QUOTES) ?></span>
+                            <?php endif; ?>
                         </span>
                     <?php endif; ?>
                     <span class="person-card__body">

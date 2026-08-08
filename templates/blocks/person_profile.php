@@ -11,9 +11,8 @@ $btnUrl = trim((string) ($data['button_url'] ?? ''));
         <?php if ($photo !== ''): ?>
             <?= \App\Core\Media::picture($photo, (string) ($data['name'] ?? ''), null, null, 'profile__img', false, '(max-width: 700px) 100vw, 35vw', false, 'profile__photo') ?>
         <?php else: ?>
-            <span class="profile__photo profile__photo--empty">
-                <?= \App\Core\Icon::render('user', 64, 'profile__placeholder-icon', 1.2) ?>
-            </span>
+            <?php // Портрета нет — вместо серого поля фирменная эмблема из CSS. ?>
+            <span class="profile__photo profile__photo--empty" aria-hidden="true"></span>
         <?php endif; ?>
     </div>
     <div class="profile__info">

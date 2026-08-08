@@ -87,6 +87,10 @@ return [
         'password' => getenv('SMTP_PASSWORD') ?: '',
         'from_email' => getenv('SMTP_FROM_EMAIL') ?: '',
         'from_name' => getenv('SMTP_FROM_NAME') ?: 'ASDR CMS',
+        // Селектор DKIM у почтового провайдера (например, 'default' или 'mail').
+        // Подпись ставит провайдер; здесь селектор нужен, чтобы
+        // scripts/release_check.php проверил наличие записи в DNS.
+        'dkim_selector' => getenv('MAIL_DKIM_SELECTOR') ?: '',
         'timeout' => 15,
     ],
     // Telegram-алертинг (задача 59). Читается строго из файла/окружения, не из

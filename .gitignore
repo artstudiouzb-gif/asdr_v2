@@ -18,6 +18,7 @@
 /storage/cache/*
 !/storage/cache/.gitkeep
 !/storage/cache/README.md
+/storage/integrity/
 /public/uploads/public/*
 !/public/uploads/public/.gitkeep
 !/public/uploads/public/index.html
@@ -65,3 +66,6 @@ desktop.ini
 
 # Архивы
 *.zip
+
+# Экспорт отчёта «Мониторинг 2030» (scripts/u30-report-export.php) — сборка, не исходник
+/build/

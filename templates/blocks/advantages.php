@@ -3,6 +3,20 @@
 $title = $data['title'] ?? '';
 $items = $data['items'] ?? [];
 $variant = ($data['variant'] ?? 'grid') === 'band' ? 'band' : 'grid';
+
+if ($variant === 'grid') {
+    // Колонки подбираются так, чтобы в последнем ряду не осталась одинокая
+    // карточка (пятёрка ложится 3+2), а сами карточки хвоста растягиваются
+    // на всю ширину — иначе справа зияет пустая ячейка.
+    $count = count($items);
+    $templateCss = \App\Core\GridBalance::css(
+        $blockId,
+        '.block-advantages__grid',
+        '.block-advantages__item',
+        $count,
+        \App\Core\GridBalance::columnsFor($count)
+    );
+}
 ?>
 <?php if ($variant === 'band'): ?>
 <div class="block-featband">

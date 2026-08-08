@@ -50,9 +50,21 @@ final class CssScoper
             }
 
             $header = trim(substr($css, $i, $bracePos - $i));
+
+            // Лишняя закрывающая скобка не должна съедать следующее правило:
+            // «.a{}} body{…}» — это .a и body, а не селектор «} body». Иначе
+            // правило получало невалидный селектор и молча пропадало.
+            $strayBrace = strrpos($header, '}');
+            if ($strayBrace !== false) {
+                $header = trim(substr($header, $strayBrace + 1));
+            }
+
             $closePos = self::findMatchingBrace($css, $bracePos);
             if ($closePos === false) {
-                break;
+                // Незакрытое правило: концом блока считаем конец ввода — так же
+                // поступает браузер. Иначе одна забытая скобка выбрасывала
+                // весь CSS блока, и редактор не понимал, куда делись стили.
+                $closePos = $length;
             }
 
             $body = substr($css, $bracePos + 1, $closePos - $bracePos - 1);

@@ -14,7 +14,7 @@ final class AssetCollector
     /** @var array<string, bool> */
     private static array $js = [];
 
-    /** @var array<string, bool> */
+    /** @var array<string, string> ключ ассета -> путь к файлу */
     private static array $css = [];
 
     /** Известные ассеты блоков: ключ -> путь к файлу. */
@@ -22,12 +22,25 @@ final class AssetCollector
         'slider' => '/assets/js/blocks/slider.js',
         'anchor_nav' => '/assets/js/blocks/anchor_nav.js',
         'news' => '/assets/js/news.js',
+        'u30_report' => '/assets/js/blocks/u30_report.js',
+    ];
+
+    /**
+     * Стили блоков, слишком объёмные для общего public.min.css: подключаются
+     * только на страницах, где такой блок действительно есть.
+     */
+    private const CSS_MAP = [
+        'u30_report' => '/assets/css/blocks/u30-report.css',
     ];
 
     public static function requireJs(string $key): void
     {
         if (isset(self::JS_MAP[$key])) {
             self::$js[$key] = true;
+        }
+        // Стили и скрипт блока адресуются одним ключом — типом блока.
+        if (isset(self::CSS_MAP[$key])) {
+            self::$css[$key] = self::CSS_MAP[$key];
         }
     }
 
@@ -57,7 +70,8 @@ final class AssetCollector
     {
         $html = '';
         foreach (self::$css as $href) {
-            $html .= '<link rel="stylesheet" href="' . htmlspecialchars((string) $href, ENT_QUOTES) . '">' . "\n";
+            $url = Asset::url((string) $href);
+            $html .= '<link rel="stylesheet" href="' . htmlspecialchars($url, ENT_QUOTES) . '" data-block-css>' . "\n";
         }
 
         return $html;

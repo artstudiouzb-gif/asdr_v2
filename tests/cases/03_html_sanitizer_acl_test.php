@@ -88,3 +88,41 @@ test('Текстовый блок очищает script и style в старом
     assert_not_contains(' style=', $rendered['html']);
     assert_not_contains('<script', $rendered['html']);
 });
+
+// SVG регистрозависим, а HTML-разбор опускает регистр имён: без обратного
+// восстановления вставленная в блок графика теряла масштаб и заливку.
+test('HtmlSanitizer: сохраняет регистр viewBox и ссылку на символ спрайта', function () {
+    $out = HtmlSanitizer::sanitize(
+        '<svg viewBox="0 0 24 24" width="18" height="18"><use href="#tabler-printer"></use></svg>'
+    );
+    assert_contains('viewBox="0 0 24 24"', $out);
+    assert_not_contains('viewbox=', $out);
+    assert_contains('href="#tabler-printer"', $out);
+});
+
+test('HtmlSanitizer: <use> ведёт только внутрь документа', function () {
+    assert_not_contains('href', HtmlSanitizer::sanitize('<svg><use href="https://evil.example/x.svg#a"></use></svg>'));
+    assert_not_contains('href', HtmlSanitizer::sanitize('<svg><use href="javascript:alert(1)"></use></svg>'));
+});
+
+test('HtmlSanitizer: градиенты переживают очистку', function () {
+    $out = HtmlSanitizer::sanitize(
+        '<svg viewBox="0 0 10 10"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1" gradientUnits="userSpaceOnUse">'
+        . '<stop offset="0" stop-color="#f00"></stop></linearGradient></defs><rect width="10" height="10" fill="url(#g)"></rect></svg>'
+    );
+    assert_contains('<linearGradient', $out);
+    assert_contains('gradientUnits="userSpaceOnUse"', $out);
+    assert_contains('stop-color="#f00"', $out);
+    assert_contains('fill="url(#g)"', $out);
+});
+
+test('HtmlSanitizer: расширение SVG не открыло дорогу скриптам', function () {
+    $out = HtmlSanitizer::sanitize('<svg onload="alert(1)"><script>alert(2)</script><path d="M0 0"/></svg>');
+    assert_not_contains('onload', $out);
+    assert_not_contains('<script', $out);
+    assert_contains('<path d="M0 0">', $out);
+});
+
+test('HtmlSanitizer: слово viewbox в тексте не подменяется', function () {
+    assert_contains('слово viewbox в тексте', HtmlSanitizer::sanitize('<p>слово viewbox в тексте</p>'));
+});
