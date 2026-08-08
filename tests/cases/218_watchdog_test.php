@@ -57,6 +57,15 @@ test('Воркер, который ни разу не запускался, тр
 test('О проблеме сообщаем один раз, об уходе — отдельно (БД)', function () {
     ensure_test_db();
     $file = watchdog_heartbeat_file('social');
+    // Метки соседних воркеров тоже успевают устареть — без изоляции тест
+    // ловил чужую тревогу и падал через раз.
+    $others = [];
+    foreach (glob(APP_ROOT . '/storage/cache/worker_heartbeat_*.txt') ?: [] as $path) {
+        if ($path !== $file) {
+            $others[$path] = (string) file_get_contents($path);
+            @unlink($path);
+        }
+    }
     $backup = is_file($file) ? (string) file_get_contents($file) : null;
     \App\Models\Setting::set('watchdog_active_alerts', '');
 
@@ -85,6 +94,9 @@ test('О проблеме сообщаем один раз, об уходе — 
             file_put_contents($file, $backup);
         } else {
             @unlink($file);
+        }
+        foreach ($others as $path => $content) {
+            file_put_contents($path, $content);
         }
         \App\Models\Setting::set('watchdog_active_alerts', '');
     }

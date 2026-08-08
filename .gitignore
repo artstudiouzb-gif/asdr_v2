@@ -9,6 +9,9 @@
 /storage/protected_uploads/*
 !/storage/protected_uploads/.gitkeep
 !/storage/protected_uploads/README.md
+# Локальные секреты и инструменты среды разработки (создаёт хук старта).
+/storage/.env.local
+/storage/tools/
 /storage/backups/*
 !/storage/backups/.gitkeep
 !/storage/backups/README.md
@@ -48,11 +51,15 @@ desktop.ini
 *.tmp
 
 # AI и локальные конфигурации агентов
-/.claude/
-# ...кроме общих навыков: это часть договорённостей проекта, а не локальная
-# настройка машины, и они должны переживать смену окружения.
+# Звёздочка, а не /.claude/: из исключённого каталога git не достаёт
+# отдельные файлы, и исключения ниже не работали бы.
+/.claude/*
+# ...кроме общих навыков, команд и хуков: это часть договорённостей проекта,
+# а не локальная настройка машины, и они должны переживать смену окружения.
 !/.claude/skills/
-!/.claude/skills/**
+!/.claude/commands/
+!/.claude/hooks/
+!/.claude/settings.json
 /.antigravity/
 /.gemini/
 
