@@ -64,6 +64,48 @@ test('Этапы: колонок ровно по числу этапов, дал
     assert_same(5, $columns(7));
 });
 
+test('Карточки персон: «Вакантно» только у карточки без имени', function () {
+    $render = static function (array $items): string {
+        $result = BlockRenderer::render([
+            'id' => 640,
+            'type' => 'person_cards',
+            'data' => json_encode(['items' => $items], JSON_UNESCAPED_UNICODE),
+            'custom_css' => '',
+        ]);
+
+        return (string) $result['html'];
+    };
+
+    // Руководитель без загруженной фотографии — не вакансия.
+    $named = $render([['photo' => '', 'name' => 'Иванов Иван', 'role' => 'Директор', 'url' => '/direktor']]);
+    assert_contains('Иванов Иван', $named);
+    assert_not_contains('Вакантно', $named);
+    assert_not_contains('person-card--vacant', $named);
+
+    $vacant = $render([['photo' => '', 'name' => '', 'role' => 'Заместитель директора', 'url' => '']]);
+    assert_contains('Вакантно', $vacant);
+    assert_contains('person-card--vacant', $vacant);
+    assert_contains('Заместитель директора', $vacant);
+});
+
+test('Контент блоков не зажат мерой строки в ch', function () {
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    // Колонка в ch обрывала текст раньше, чем кончался контейнер: заголовок
+    // текстового блока, лид страницы и текст профиля жили в своей ширине.
+    foreach (['.block-text__title', '.content-pagehead__lead', '.profile__text', '.listing__lead', '.catdetail__body'] as $selector) {
+        $offset = strpos($css, $selector . ' {');
+        assert_true($offset !== false, 'нет правила ' . $selector);
+        $rule = substr($css, $offset, (int) strpos($css, '}', $offset) - $offset);
+        assert_true(
+            preg_match('/max-width:\s*[\d.]+ch/', $rule) !== 1,
+            'ширина в ch вернулась в ' . $selector
+        );
+    }
+    // Исключения оставлены осознанно: заголовок поверх фотографии в шапке
+    // новости и режим чтения, где узкая колонка — сама функция.
+    assert_contains('.newsdetail-phero__title', $css);
+});
+
 test('Этапы: сплошной полосы во всю ширину нет — линия кончается на последней точке', function () {
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
     // Полоса .stages::before тянулась от left:0 до right:0 и продолжалась

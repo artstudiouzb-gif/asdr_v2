@@ -295,6 +295,10 @@ return [
                         'items' => [
                             ['photo' => '', 'name' => 'Умурзаков Сардор Уктамович', 'role' => 'Директор Агентства', 'url' => '/direktor'],
                             ['photo' => '', 'name' => 'Абдукодиров Абдулла Мамасаатович', 'role' => 'Первый заместитель директора Агентства', 'url' => '/pervyy-zamestitel-direktora'],
+                            // Карточка без имени и фото выводится как вакансия
+                            // (пунктирная рамка и подпись «Вакантно»).
+                            ['photo' => '', 'name' => '', 'role' => 'Заместитель директора Агентства', 'url' => ''],
+                            ['photo' => '', 'name' => '', 'role' => 'Заместитель директора Агентства', 'url' => ''],
                         ],
                     ]],
                 ],
@@ -312,6 +316,8 @@ return [
                         'items' => [
                             ['photo' => '', 'name' => 'Umurzoqov Sardor O‘ktamovich', 'role' => 'Agentlik direktori', 'url' => '/uz/direktor'],
                             ['photo' => '', 'name' => 'Abduqodirov Abdulla Mamasaatovich', 'role' => 'Agentlik direktorining birinchi o‘rinbosari', 'url' => '/uz/pervyy-zamestitel-direktora'],
+                            ['photo' => '', 'name' => '', 'role' => 'Agentlik direktorining o‘rinbosari', 'url' => ''],
+                            ['photo' => '', 'name' => '', 'role' => 'Agentlik direktorining o‘rinbosari', 'url' => ''],
                         ],
                     ]],
                 ],

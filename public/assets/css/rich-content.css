@@ -1,11 +1,4 @@
 /* Shared editorial typography for the public site and TinyMCE. */
-:root {
-    /* Мера строки: комфортный диапазон — 65–80 знаков; замер на живой странице
-       даёт при 72ch около 75 знаков в строке. Объявлена глобально, чтобы
-       заголовок текстового блока держал ту же ширину, что и текст. */
-    --rich-measure: 72ch;
-}
-
 :where(.rich-content) {
     --rich-ink: var(--gov-ink, #1f2b3d);
     --rich-title: var(--gov-title, var(--color-primary, #173a63));
@@ -26,9 +19,9 @@
     text-wrap: pretty;
 }
 
-/* Мера строки тексту новости не задаётся: владелец выбрал полную ширину
-   колонки. Токен --rich-measure остаётся — им пользуется заголовок
-   текстового блока. */
+/* Мера строки не задаётся нигде: и текст, и заголовок блока занимают всю
+   ширину колонки — так решил владелец. Токена --rich-measure больше нет,
+   чтобы в разметке не осталось неиспользуемой «половинной» ширины. */
 
 :where(.rich-content) > :first-child { margin-block-start: 0; }
 :where(.rich-content) > :last-child { margin-block-end: 0; }

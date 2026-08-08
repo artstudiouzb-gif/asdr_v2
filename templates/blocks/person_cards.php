@@ -27,7 +27,11 @@ $items = $data['items'] ?? [];
                     <?php else: ?>
                         <span class="person-card__placeholder">
                             <?= \App\Core\Icon::render('user', 34, 'person-card__placeholder-icon', 1.5) ?>
-                            <span class="person-card__vacant"><?= htmlspecialchars(t('Вакантно'), ENT_QUOTES) ?></span>
+                            <?php if ($vacant): ?>
+                                <?php // Подпись только у по-настоящему пустой карточки: раньше её ?>
+                                <?php // получал и руководитель, у которого просто нет фотографии. ?>
+                                <span class="person-card__vacant"><?= htmlspecialchars(t('Вакантно'), ENT_QUOTES) ?></span>
+                            <?php endif; ?>
                         </span>
                     <?php endif; ?>
                     <span class="person-card__body">
