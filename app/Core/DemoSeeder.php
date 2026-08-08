@@ -1289,8 +1289,10 @@ final class DemoSeeder
         // [ФИО, должность, ФИО (uz), должность (uz), сектор, отдел/группа,
         //  сектор (uz), отдел/группа (uz)] — руководство идёт без сектора.
         $team = [
-            ['Нуриддинов Шерзод Бахтиярович', 'Директор', 'Nuriddinov Sherzod Baxtiyarovich', 'Direktor', '', '', '', ''],
-            ['Юлдашева Нилуфар Азизовна', 'Заместитель директора', 'Yuldasheva Nilufar Azizovna', 'Direktor o‘rinbosari', '', '', '', ''],
+            // Руководство — реальное (см. database/content/agency_content.php),
+            // остальные сотрудники демонстрационные.
+            ['Умурзаков Сардор Уктамович', 'Директор', 'Umurzoqov Sardor O‘ktamovich', 'Direktor', '', '', '', ''],
+            ['Абдукодиров Абдулла Мамасаатович', 'Первый заместитель директора', 'Abduqodirov Abdulla Mamasaatovich', 'Direktor birinchi o‘rinbosari', '', '', '', ''],
             [
                 'Каримов Бехзод Шухратович', 'Руководитель сектора',
                 'Karimov Behzod Shuhratovich', 'Shoʻba rahbari',
@@ -1499,6 +1501,18 @@ final class DemoSeeder
             }
         }
 
+        // Реальный контент Агентства перекрывает демо-страницы: после установки
+        // на сайте не должно оставаться вымышленного руководителя. Тот же
+        // источник использует database/seed_agency_content.php, поэтому демо и
+        // боевая загрузка не расходятся.
+        $agencyFixture = \dirname(__DIR__, 2) . '/database/content/agency_content.php';
+        if (is_file($agencyFixture)) {
+            $agencyContent = require $agencyFixture;
+            if (is_array($agencyContent) && is_array($agencyContent['pages'] ?? null)) {
+                $pages = array_replace($pages, $agencyContent['pages']);
+            }
+        }
+
         $pageIns = $pdo->prepare(
             "INSERT INTO pages
                 (title, slug, meta_title, meta_description, `lead`, status, is_home,
@@ -1544,15 +1558,24 @@ final class DemoSeeder
                 $lang = (string) $lang;
                 $title = (string) ($data['title'] ?? '');
                 $blocks = $data['blocks'] ?? [];
-                $metaTitle = $title . ($lang === 'uz'
-                    ? ' — Strategik rivojlanish va islohotlar agentligi'
-                    : ' — Агентство стратегического развития и реформ');
-                $metaDescription = $lang === 'uz'
-                    ? '«' . $title . '» bo‘limining rasmiy ma’lumotlari.'
-                    : 'Официальная информация раздела «' . $title . '».';
-                $lead = $lang === 'uz'
-                    ? 'Agentlikning strategik tashabbuslari, natijalari va dolzarb materiallari.'
-                    : 'Стратегические инициативы, результаты и актуальные материалы Агентства.';
+                $metaTitle = array_key_exists('meta_title', $data)
+                    ? (string) $data['meta_title']
+                    : $title . ($lang === 'uz'
+                        ? ' — Strategik rivojlanish va islohotlar agentligi'
+                        : ' — Агентство стратегического развития и реформ');
+                $metaDescription = array_key_exists('meta_description', $data)
+                    ? (string) $data['meta_description']
+                    : ($lang === 'uz'
+                        ? '«' . $title . '» bo‘limining rasmiy ma’lumotlari.'
+                        : 'Официальная информация раздела «' . $title . '».');
+                // Лид из фикстуры может быть пустым намеренно: на странице с
+                // блоком «Профиль персоны» заголовок даёт сам блок, и лид
+                // добавил бы второй h1.
+                $lead = array_key_exists('lead', $data)
+                    ? (string) $data['lead']
+                    : ($lang === 'uz'
+                        ? 'Agentlikning strategik tashabbuslari, natijalari va dolzarb materiallari.'
+                        : 'Стратегические инициативы, результаты и актуальные материалы Агентства.');
 
                 if ($lang !== 'ru' && $groupId === null) {
                     continue;
@@ -1716,6 +1739,7 @@ final class DemoSeeder
                     ['Руководство', 'page', 'rukovodstvo'],
                     ['Структура', 'page', 'struktura'],
                     ['Директор', 'page', 'direktor'],
+                    ['Первый заместитель директора', 'page', 'pervyy-zamestitel-direktora'],
                     ['Противодействие коррупции', 'page', 'antikorrupciya'],
                 ]],
                 ['title' => 'Деятельность', 'type' => 'page', 'value' => 'napravleniya', 'mega' => 3, 'children' => [
@@ -1744,6 +1768,7 @@ final class DemoSeeder
                     ['Rahbariyat', 'page', 'rukovodstvo'],
                     ['Tuzilma', 'page', 'struktura'],
                     ['Direktor', 'page', 'direktor'],
+                    ['Direktorning birinchi o‘rinbosari', 'page', 'pervyy-zamestitel-direktora'],
                     ['Korrupsiyaga qarshi kurash', 'page', 'antikorrupciya'],
                 ]],
                 ['title' => 'Faoliyat', 'type' => 'page', 'value' => 'napravleniya', 'mega' => 3, 'children' => [
