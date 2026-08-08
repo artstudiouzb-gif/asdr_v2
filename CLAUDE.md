@@ -67,6 +67,15 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
 После правок PHP: `php -l <файл>`. Сброс кэша страниц: `rm -rf storage/cache/page/*`
 (в админке — кнопка «Сброс кэша» в шапке).
 
+## Навык impeccable (дизайн-ревью)
+Установлен в `.claude/skills/impeccable` (Apache 2.0, pbakaus/impeccable) — вызов
+`/impeccable`, полезен как второй взгляд на публичную часть. В релизный архив не
+попадает (`/.claude export-ignore`). Его предложения принимаются только в рамках
+проекта: акцент берётся из админки (`--color-accent`), инлайн-стили в блоках
+запрещены тестами (scoped CSS через `$templateCss`), анимации уважают
+`prefers-reduced-motion` и настройку «остановка анимаций», контраст текста не
+ниже 4.5:1, после правок CSS/JS — `npm run build:assets`. Админку не трогаем.
+
 ## Архитектура — где что лежит
 - **Блоки страниц** (конструктор): `app/Core/BlockRenderer.php`
   (`DEFAULTS` = список типов и их поля; `enrichData()` = блоки-обёртки, которые
