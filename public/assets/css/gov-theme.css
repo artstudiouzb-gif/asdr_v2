@@ -3225,7 +3225,10 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     display: inline-flex !important; 
     align-items: center !important; 
     justify-content: center !important; 
-    padding: 2px 24px 2px 4px !important; 
+    /* Симметричные отступы по умолчанию. Узкий левый отступ нужен только
+       под зону иконки (46px) — его ставит модификатор --with-icon, иначе
+       текст кнопки прилипает к левому краю. */
+    padding: 2px 24px !important;
     height: 50px !important;
     min-height: 50px !important;
     max-height: 50px !important;
@@ -3243,6 +3246,8 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     overflow: hidden;
     gap: 10px;
 }
+
+.block-hero__button--with-icon { padding-left: 4px !important; }
 
 /* --- Зона иконки в кнопках (Button Icon Area & Enlarged Scale) --- */
 .block-hero__button-icon,

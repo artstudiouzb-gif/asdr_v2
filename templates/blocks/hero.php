@@ -103,6 +103,9 @@ $heroButtonIcon = static function (string $iconName, string $iconImage): string 
         : '';
 };
 $btnIcon = $heroButtonIcon((string) ($data['button_icon'] ?? ''), (string) ($data['button_icon_image'] ?? ''));
+// Левый отступ кнопки укорочен под зону иконки (46px). Без иконки его надо
+// вернуть, иначе текст прилипает к левому краю.
+$heroButtonClass = static fn (string $icon): string => $icon !== '' ? ' block-hero__button--with-icon' : '';
 $btn2Icon = $heroButtonIcon((string) ($data['button2_icon'] ?? ''), (string) ($data['button2_icon_image'] ?? ''));
 
 $vBtnText = trim((string) ($data['video_button_text'] ?? ''));
@@ -275,10 +278,10 @@ $heroMedia = static function (string $type, string $image, string $videoFile, ?s
                         <?php if (!empty($slide['button_text']) && $slideBtnUrl !== '' && UrlGuard::isSafeLink($slideBtnUrl) || !empty($slide['button2_text']) && $slideBtn2Url !== '' && UrlGuard::isSafeLink($slideBtn2Url)): ?>
                         <div class="block-hero__actions">
                             <?php if (!empty($slide['button_text']) && $slideBtnUrl !== '' && UrlGuard::isSafeLink($slideBtnUrl)): ?>
-                                <a class="block-hero__button" href="<?= htmlspecialchars($slideBtnUrl, ENT_QUOTES) ?>"><?= $slideBtnIcon ?><?= htmlspecialchars((string) $slide['button_text'], ENT_QUOTES) ?> →</a>
+                                <a class="block-hero__button<?= $heroButtonClass($slideBtnIcon) ?>" href="<?= htmlspecialchars($slideBtnUrl, ENT_QUOTES) ?>"><?= $slideBtnIcon ?><?= htmlspecialchars((string) $slide['button_text'], ENT_QUOTES) ?> →</a>
                             <?php endif; ?>
                             <?php if (!empty($slide['button2_text']) && $slideBtn2Url !== '' && UrlGuard::isSafeLink($slideBtn2Url)): ?>
-                                <a class="block-hero__button block-hero__button--ghost" href="<?= htmlspecialchars($slideBtn2Url, ENT_QUOTES) ?>"><?= $slideBtn2Icon ?><?= htmlspecialchars((string) $slide['button2_text'], ENT_QUOTES) ?> →</a>
+                                <a class="block-hero__button block-hero__button--ghost<?= $heroButtonClass($slideBtn2Icon) ?>" href="<?= htmlspecialchars($slideBtn2Url, ENT_QUOTES) ?>"><?= $slideBtn2Icon ?><?= htmlspecialchars((string) $slide['button2_text'], ENT_QUOTES) ?> →</a>
                             <?php endif; ?>
                         </div>
                         <?php endif; ?>
@@ -316,10 +319,10 @@ $heroMedia = static function (string $type, string $image, string $videoFile, ?s
             <?php if (($btnText !== '' && $btnUrl !== '') || ($btn2Text !== '' && $btn2Url !== '') || ($vBtnText !== '')): ?>
             <div class="block-hero__actions">
                 <?php if ($btnText !== '' && $btnUrl !== '' && UrlGuard::isSafeLink($btnUrl)): ?>
-                    <a class="block-hero__button" href="<?= htmlspecialchars($btnUrl, ENT_QUOTES) ?>"><?= $btnIcon ?><?= htmlspecialchars($btnText, ENT_QUOTES) ?> →</a>
+                    <a class="block-hero__button<?= $heroButtonClass($btnIcon) ?>" href="<?= htmlspecialchars($btnUrl, ENT_QUOTES) ?>"><?= $btnIcon ?><?= htmlspecialchars($btnText, ENT_QUOTES) ?> →</a>
                 <?php endif; ?>
                 <?php if ($btn2Text !== '' && $btn2Url !== '' && UrlGuard::isSafeLink($btn2Url)): ?>
-                    <a class="block-hero__button block-hero__button--ghost" href="<?= htmlspecialchars($btn2Url, ENT_QUOTES) ?>"><?= $btn2Icon ?><?= htmlspecialchars($btn2Text, ENT_QUOTES) ?> →</a>
+                    <a class="block-hero__button block-hero__button--ghost<?= $heroButtonClass($btn2Icon) ?>" href="<?= htmlspecialchars($btn2Url, ENT_QUOTES) ?>"><?= $btn2Icon ?><?= htmlspecialchars($btn2Text, ENT_QUOTES) ?> →</a>
                 <?php endif; ?>
                 <?php if ($vBtnText !== ''): ?>
                     <?php $vSafe = $vBtnUrl !== '' && UrlGuard::isSafeLink($vBtnUrl); ?>
