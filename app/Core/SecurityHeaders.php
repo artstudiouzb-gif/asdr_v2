@@ -18,6 +18,12 @@ final class SecurityHeaders
 {
     private static ?string $nonce = null;
 
+    /** @var list<string> внешние источники стилей текущей страницы */
+    private static array $pageStyleOrigins = [];
+
+    /** @var list<string> внешние источники скриптов текущей страницы */
+    private static array $pageScriptOrigins = [];
+
     public static function send(?string $path = null): void
     {
         if (PHP_SAPI === 'cli' || headers_sent()) {
@@ -95,7 +101,7 @@ final class SecurityHeaders
      * — только по nonce; шрифты самохостятся, внешние хосты добавляются лишь
      * для фактически включённых счётчиков.
      *
-     * @param array{ga?: bool, ym?: bool, counter_scripts?: list<string>} $opts
+     * @param array{ga?: bool, ym?: bool, counter_scripts?: list<string>, extra_style?: list<string>, extra_script?: list<string>} $opts
      */
     public static function publicCsp(string $nonce, array $opts = []): string
     {
@@ -129,6 +135,18 @@ final class SecurityHeaders
             }
         }
 
+        // Постраничные CSS/JS с внешнего домена (поля страницы, супер-админ).
+        // Без этого браузер молча блокировал бы <link>/<script src>, а редактор
+        // видел бы «файл подключён, но не работает».
+        foreach (self::normalizeOrigins($opts['extra_style'] ?? []) as $origin) {
+            $style[] = $origin;
+        }
+        foreach (self::normalizeOrigins($opts['extra_script'] ?? []) as $origin) {
+            $script[] = $origin;
+        }
+        $style = array_values(array_unique($style));
+        $script = array_values(array_unique($script));
+
         return "default-src 'self'; "
             // Блоки могут ссылаться на внешние картинки (URL проверяется UrlGuard);
             // пиксели счётчиков тоже сюда попадают.
@@ -147,6 +165,66 @@ final class SecurityHeaders
             . "base-uri 'self'; "
             . "form-action 'self'; "
             . "frame-ancestors 'self'";
+    }
+
+    /**
+     * Оставляет только пригодные для CSP источники: схема + хост, без пути,
+     * подстановок и портов-мусора. Всё остальное молча отбрасывается.
+     *
+     * @param mixed $origins
+     * @return list<string>
+     */
+    private static function normalizeOrigins(mixed $origins): array
+    {
+        $result = [];
+        foreach ((array) $origins as $origin) {
+            $origin = trim((string) $origin);
+            if ($origin === '' || preg_match('#^https?://[a-z0-9.\-]+(:\d{1,5})?$#i', $origin) !== 1) {
+                continue;
+            }
+            $result[] = $origin;
+        }
+
+        return array_values(array_unique($result));
+    }
+
+    /**
+     * Дополняет CSP текущего ответа источниками постраничных CSS/JS.
+     *
+     * Заголовок в bootstrap выставляется до маршрутизации, когда страница ещё
+     * неизвестна. Вьюхи рендерятся в буфер (View::render), поэтому здесь ещё
+     * можно переслать заголовок — header() заменяет прежнее значение.
+     *
+     * @param list<string> $styleOrigins
+     * @param list<string> $scriptOrigins
+     */
+    public static function allowPageAssets(array $styleOrigins, array $scriptOrigins): void
+    {
+        $style = self::normalizeOrigins($styleOrigins);
+        $script = self::normalizeOrigins($scriptOrigins);
+        if ($style === [] && $script === []) {
+            return;
+        }
+
+        self::$pageStyleOrigins = array_values(array_unique([...self::$pageStyleOrigins, ...$style]));
+        self::$pageScriptOrigins = array_values(array_unique([...self::$pageScriptOrigins, ...$script]));
+
+        if (PHP_SAPI === 'cli' || headers_sent()) {
+            return;
+        }
+
+        // Предпросмотр страницы рендерит те же шаблоны под /admin, где действует
+        // более строгая CSP панели. Подменять её публичной нельзя — внешний
+        // ассет там просто не покажется, и это правильнее ослабления админки.
+        $path = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/';
+        if (str_starts_with($path, '/admin') || str_starts_with($path, '/install')) {
+            return;
+        }
+
+        $opts = self::publicCspOptions();
+        $opts['extra_style'] = self::$pageStyleOrigins;
+        $opts['extra_script'] = self::$pageScriptOrigins;
+        header('Content-Security-Policy: ' . self::publicCsp(self::nonce(), $opts));
     }
 
     /**

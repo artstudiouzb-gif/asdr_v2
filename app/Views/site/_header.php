@@ -699,7 +699,13 @@ foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
 <link rel="stylesheet" href="<?= htmlspecialchars($generatedCssUrl, ENT_QUOTES) ?>" data-generated-site-css="<?= htmlspecialchars($cssScope, ENT_QUOTES) ?>">
 <?php endforeach; ?>
 <?php if (!empty($page['custom_css']) && !empty($page['id'])): ?>
-<?php foreach (\App\Core\CustomAssetHelper::resolveCssUrls((string) $page['custom_css'], (int) $page['id']) as $pageCssUrl): ?>
+<?php
+$pageCssUrls = \App\Core\CustomAssetHelper::resolveCssUrls((string) $page['custom_css'], (int) $page['id']);
+// Внешний домен нужно разрешить в CSP, иначе браузер отклонит <link>.
+// Вьюха рендерится в буфер, поэтому заголовок ещё можно переслать.
+\App\Core\SecurityHeaders::allowPageAssets(\App\Core\CustomAssetHelper::originsOf($pageCssUrls), []);
+?>
+<?php foreach ($pageCssUrls as $pageCssUrl): ?>
 <link rel="stylesheet" href="<?= htmlspecialchars($pageCssUrl, ENT_QUOTES) ?>" data-page-custom-css>
 <?php endforeach; ?>
 <?php endif; ?>

@@ -86,7 +86,8 @@ foreach ($blocks as $b) {
                 </div>
             </div>
 
-            <!-- Блок 3: Пользовательские и внешние CSS / JS -->
+            <!-- Блок 3: Пользовательские и внешние CSS / JS (только супер-админ) -->
+            <?php if (\App\Core\Auth::isSuperAdmin()): ?>
             <div class="form-card">
                 <?= \App\Core\AdminUi::cardHeader('3. Внешние и пользовательские CSS / JS файлы', 'code', 'var(--admin-primary)') ?>
 
@@ -102,6 +103,7 @@ foreach ($blocks as $b) {
                     <span class="form-hint">Указывайте URL внешних .js скриптов (по одному на строку) или кастомный JavaScript. Скрипты подключаются строго внешними ресурсами перед &lt;/body&gt;.</span>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
 
         <aside class="entry-side">

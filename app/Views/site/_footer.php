@@ -236,7 +236,11 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
 <script nonce="<?= $cspNonce ?>"><?= $globalJs ?></script>
 <?php endif; ?>
 <?php if (!empty($page['custom_js']) && !empty($page['id'])): ?>
-<?php foreach (\App\Core\CustomAssetHelper::resolveJsUrls((string) $page['custom_js'], (int) $page['id']) as $pageJsUrl): ?>
+<?php
+$pageJsUrls = \App\Core\CustomAssetHelper::resolveJsUrls((string) $page['custom_js'], (int) $page['id']);
+\App\Core\SecurityHeaders::allowPageAssets([], \App\Core\CustomAssetHelper::originsOf($pageJsUrls));
+?>
+<?php foreach ($pageJsUrls as $pageJsUrl): ?>
 <script src="<?= htmlspecialchars($pageJsUrl, ENT_QUOTES) ?>" defer></script>
 <?php endforeach; ?>
 <?php endif; ?>

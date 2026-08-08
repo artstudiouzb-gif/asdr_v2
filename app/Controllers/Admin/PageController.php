@@ -397,6 +397,16 @@ final class PageController
     }
 
     /**
+     * Колонки pages.custom_css/custom_js — TEXT (64 КБ). Режем по границе
+     * символа: MySQL в строгом режиме отклонил бы весь UPDATE, а в нестрогом
+     * молча обрезал бы значение посреди UTF-8.
+     */
+    private static function limitAssetField(string $value): string
+    {
+        return trim(mb_strcut(trim($value), 0, \App\Core\CustomAssetHelper::MAX_FIELD_BYTES, 'UTF-8'));
+    }
+
+    /**
      * @return array{0: array, 1: string|null}
      */
     private function collectInput(?int $id, ?array $existing = null): array
@@ -461,8 +471,16 @@ final class PageController
         $rawSlug = $slugInput !== '' ? $slugInput : $title;
         $slug = Slug::unique($rawSlug, static fn (string $s, ?int $ex) => Page::slugExists($s, $ex, $lang), $id);
 
-        $customCss = trim((string) ($_POST['custom_css'] ?? ''));
-        $customJs = trim((string) ($_POST['custom_js'] ?? ''));
+        // Произвольные CSS/JS — та же поверхность доверия, что и глобальный код
+        // в настройках и блок «HTML»: правит только супер-администратор.
+        // Редактору сохраняем прежние значения, что бы ни пришло в форме.
+        if (\App\Core\Auth::isSuperAdmin()) {
+            $customCss = self::limitAssetField((string) ($_POST['custom_css'] ?? ''));
+            $customJs = self::limitAssetField((string) ($_POST['custom_js'] ?? ''));
+        } else {
+            $customCss = trim((string) ($existing['custom_css'] ?? ''));
+            $customJs = trim((string) ($existing['custom_js'] ?? ''));
+        }
 
         $data = [
             'title' => $title,

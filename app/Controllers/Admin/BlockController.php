@@ -155,6 +155,13 @@ final class BlockController
             : (string) ($block['custom_css'] ?? '');
         $locale = ((string) $block['lang'] === 'en') ? 'en' : 'ru';
         $data = $this->collectData($block['type'], $locale);
+        // Создавать блок «HTML-код» может только супер-администратор — значит и
+        // переписывать разметку уже созданного тоже: иначе запрет обходится
+        // редактированием блока, добавленного кем-то другим.
+        if ((string) $block['type'] === 'html' && !Auth::isSuperAdmin()) {
+            $stored = json_decode((string) $block['data'], true);
+            $data['html'] = (string) (is_array($stored) ? ($stored['html'] ?? '') : '');
+        }
         $data = array_merge($data, BlockPresentationNormalizer::normalize($_POST));
 
         // Перевёрнутое окно молча не чиним: блок и правда не покажется никогда —
@@ -247,12 +254,20 @@ final class BlockController
             ? ($rev['custom_css'] !== null ? (string) $rev['custom_css'] : '')
             : (string) ($block['custom_css'] ?? '');
 
+        $revData = json_decode((string) $rev['data'], true) ?: [];
+        // Разметку блока «HTML-код» правит только супер-админ — откат версии
+        // не должен становиться обходным путём.
+        if ((string) $block['type'] === 'html' && !Auth::isSuperAdmin()) {
+            $stored = json_decode((string) $block['data'], true);
+            $revData['html'] = (string) (is_array($stored) ? ($stored['html'] ?? '') : '');
+        }
+
         $expectedVersion = (int) ($_POST['expected_lock_version'] ?? ($block['lock_version'] ?? 1));
         try {
             BlockVersioning::updateWithSnapshot(
                 $block,
                 $rev['title'] !== null ? (string) $rev['title'] : null,
-                json_decode((string) $rev['data'], true) ?: [],
+                $revData,
                 $customCss,
                 Auth::id(),
                 $expectedVersion
