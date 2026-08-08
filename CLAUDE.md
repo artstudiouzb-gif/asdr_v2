@@ -43,14 +43,15 @@ MySQL/MariaDB. Composer/PHPStan и npm/Playwright нужны только раз
 sudo service mariadb start                     # или: mysqld_safe &
 php -S 127.0.0.1:8000 -t public public/router.php
 ```
-Базы: `artstudio_cms` (демо-контент), `artstudio_test` (для тестов). Доступ
+Базы: `asdr_cms` (демо-контент), `asdr_test` (для тестов — имя жёстко ждут
+тесты и CI, `tests/load_schema.php asdr_test` заливает схему). Доступ
 root@127.0.0.1 без пароля. Если админ-пароль неизвестен — сбросить в БД
 (`users.password_hash`, `password_hash()`), логин `admin`.
 
 ## Проверки (вместо ручного клика)
 ```bash
-# Полный прогон: 747 сценариев; без TEST_DB_* 140 DB-сценариев пропускаются
-TEST_DB_HOST=127.0.0.1 TEST_DB_DATABASE=artstudio_test TEST_DB_USERNAME=root TEST_DB_PASSWORD= php tests/run.php
+# Полный прогон: 1036 сценариев; без TEST_DB_* 172 DB-сценария пропускаются
+TEST_DB_HOST=127.0.0.1 TEST_DB_DATABASE=asdr_test TEST_DB_USERNAME=root TEST_DB_PASSWORD= php tests/run.php
 
 # Smoke-обход всего сайта (HTTP+PHP-фаталы), RU+UZ, публичка и вся админка.
 # --totp обязателен, когда у админа включено приложение-аутентификатор:
@@ -204,7 +205,8 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
 - **Реальный контент Агентства** — фикстура `database/content/agency_content.php`
   (страницы «Об Агентстве», «Руководство», профили руководителя и первого
   заместителя на RU/UZ/EN + записи «Команды»), применяется
-  `php database/seed_agency_content.php` (есть `--dry-run`). Скрипт заменяет
+  `php database/seed_agency_content.php` (есть `--dry-run`; вся логика —
+  `App\Core\AgencyContentSeeder`, её гоняет DB-тест 230). Скрипт заменяет
   блоки этих страниц целиком, поэтому после выкладки контент правят в админке,
   а не повторным запуском. Ключи блоков в фикстуре обязаны совпадать с
   `BlockTypeRegistry::DEFAULTS` — иначе первое сохранение в админке их потеряет
