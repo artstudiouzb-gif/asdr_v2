@@ -2819,6 +2819,14 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     background: var(--gov-surface);
     border-color: #2f80ed;
     box-shadow: 0 0 0 4px color-mix(in srgb, #2f80ed 18%, transparent);
+    /* Текущий этап дышит кольцом: анимируется только тень, поэтому нет ни
+       перекомпоновки, ни рывков. Медленно и без вспышек — мигание чаще трёх
+       раз в секунду запрещено (WCAG 2.3.1), здесь один цикл в 2.6 секунды. */
+    animation: gov-pulse-ring 2.6s ease-in-out infinite;
+}
+@keyframes gov-pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 4px color-mix(in srgb, #2f80ed 18%, transparent); }
+    50% { box-shadow: 0 0 0 9px color-mix(in srgb, #2f80ed 5%, transparent); }
 }
 .stage--active:hover .stage__dot { box-shadow: 0 0 0 5px color-mix(in srgb, #2f80ed 22%, transparent), 0 0 14px rgba(47, 128, 237, 0.28); }
 .stage--planned .stage__dot {
@@ -3827,6 +3835,7 @@ span.imgcard__media::after {
     background: var(--gov-bg);
     border-color: #2f80ed;
     box-shadow: 0 0 0 4px color-mix(in srgb, #2f80ed 18%, transparent);
+    animation: gov-pulse-ring 2.6s ease-in-out infinite;
 }
 .timeline-item--planned::before {
     background: var(--gov-bg);
@@ -6756,3 +6765,12 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 }
 .stage-item__title { font-weight: 700; font-size: 1.05rem; color: var(--gov-title); margin: 0 0 6px; }
 .stage-item__text { color: var(--gov-muted, #475569); font-size: 0.92rem; line-height: 1.55; margin: 0; }
+
+/* Пульсация текущего этапа отключается при системном запросе «меньше
+   движения». Правило стоит в конце файла намеренно: выше определения
+   анимации каскад его не перебивал. Настройку панели доступности
+   («остановить анимации») глушит a11y.css своим !important. */
+@media (prefers-reduced-motion: reduce) {
+    .stage--active .stage__dot,
+    .timeline-item--active::before { animation: none; }
+}
