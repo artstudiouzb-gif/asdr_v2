@@ -26,27 +26,53 @@ function grid_block_css(string $type, int $count, array $extra = []): string
 }
 
 test('Преимущества: в последнем ряду не остаётся одинокой карточки', function () {
-    $columns = static function (int $count): int {
-        $css = grid_block_css('advantages', $count, ['variant' => 'grid']);
-        preg_match('/--adv-cols:(\d+)/', $css, $m);
-
-        return (int) ($m[1] ?? 0);
-    };
-
-    assert_same(2, $columns(2));
-    assert_same(3, $columns(3));
-    assert_same(4, $columns(4));
-    assert_same(3, $columns(5), 'пятёрка раскладывается 3+2, а не 4+1');
-    assert_same(4, $columns(6));
-    assert_same(4, $columns(7));
-    assert_same(4, $columns(8));
-    assert_same(3, $columns(9), 'девятка ложится 3+3+3, а не 4+4+1');
+    assert_same(2, \App\Core\GridBalance::columnsFor(2));
+    assert_same(3, \App\Core\GridBalance::columnsFor(3));
+    assert_same(4, \App\Core\GridBalance::columnsFor(4));
+    assert_same(3, \App\Core\GridBalance::columnsFor(5), 'пятёрка раскладывается 3+2, а не 4+1');
+    assert_same(4, \App\Core\GridBalance::columnsFor(6));
+    assert_same(4, \App\Core\GridBalance::columnsFor(7));
+    assert_same(4, \App\Core\GridBalance::columnsFor(8));
+    assert_same(3, \App\Core\GridBalance::columnsFor(9), 'девятка ложится 3+3+3, а не 4+4+1');
 
     foreach (range(2, 12) as $count) {
-        $cols = $columns($count);
-        assert_true($cols > 0, 'колонки не посчитаны для ' . $count);
+        $cols = \App\Core\GridBalance::columnsFor($count);
         assert_true($count % $cols !== 1, "остаётся одинокая карточка: {$count} элементов в {$cols} колонок");
     }
+});
+
+test('Преимущества: хвост последнего ряда занимает всю ширину', function () {
+    // Пять карточек: три дорожки по два деления, хвост из двух карточек
+    // растягивается на три деления каждая — пустых ячеек справа нет.
+    $css = grid_block_css('advantages', 5, ['variant' => 'grid']);
+    assert_contains('--grid-track:6', $css);
+    assert_contains('--grid-span:2', $css);
+    assert_contains(':nth-last-child(-n+2)', $css);
+    assert_contains('grid-column:span 3', $css);
+    // Мобильную раскладку задаёт тема, поэтому растяжение только на десктопе.
+    assert_contains('@media (min-width:901px)', $css);
+
+    // Восьмёрка делится на четыре колонки нацело — хвостового правила нет.
+    $even = grid_block_css('advantages', 8, ['variant' => 'grid']);
+    assert_contains('--grid-track:4', $even);
+    assert_contains('--grid-span:1', $even);
+    assert_not_contains('nth-last-child', $even);
+});
+
+test('Правовые акты: пятая карточка не оставляет дыру справа', function () {
+    $items = [];
+    for ($i = 1; $i <= 5; $i++) {
+        $items[] = ['title' => 'Акт ' . $i, 'number' => '№ ' . $i, 'date' => '2025', 'url' => '', 'meta' => ''];
+    }
+    $rendered = BlockRenderer::render([
+        'id' => 700,
+        'type' => 'docs_list',
+        'data' => json_encode(['variant' => 'acts', 'columns' => 3, 'items' => $items], JSON_UNESCAPED_UNICODE),
+        'custom_css' => '',
+    ]);
+    $css = (string) $rendered['css'];
+    assert_contains('.docslist-acts{--grid-track:6;--grid-span:2}', $css);
+    assert_contains('.act-card:nth-last-child(-n+2){grid-column:span 3}', $css);
 });
 
 test('Этапы: колонок ровно по числу этапов, дальше карусель', function () {

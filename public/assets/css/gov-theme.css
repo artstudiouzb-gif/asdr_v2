@@ -2835,8 +2835,8 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .textimage__media { display: block; aspect-ratio: 16/11; border-radius: var(--radius); background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; }
 
 /* Сетка документов. */
-.docslist-grid { display: grid; grid-template-columns: repeat(var(--docs-cols, 4), 1fr); gap: 16px; }
-@media (max-width: 1000px) { .docslist-grid { grid-template-columns: repeat(2, 1fr); } }
+.docslist-grid { display: grid; grid-template-columns: repeat(var(--grid-track, 4), minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1000px) { .docslist-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .docslist-grid { grid-template-columns: 1fr; } }
 
 /* Карта с меткой. */
@@ -3691,11 +3691,35 @@ span.imgcard__media::after {
 .person-card { display: flex; flex-direction: column; background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius); overflow: hidden; }
 .person-card__photo { display: block; aspect-ratio: 4/4.4; background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
 .person-card:hover .person-card__photo { transform: scale(1.05); }
-.person-card__placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; aspect-ratio: 4/4.4; background: color-mix(in srgb, var(--gov-navy) 5%, var(--gov-surface)); color: var(--gov-muted); }
+/* Карточка без фотографии: вместо пустого серого поля — фирменная эмблема
+   водяным знаком, как на карточках актов. Пустых прямоугольников на странице
+   руководства получалось четыре подряд. */
+.person-card__placeholder {
+    position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; aspect-ratio: 4/4.4; color: var(--gov-muted);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--gov-navy) 8%, var(--gov-surface)), color-mix(in srgb, var(--gov-navy) 3%, var(--gov-surface)));
+}
+.person-card__placeholder::after {
+    content: ""; position: absolute; inset: 0; background: var(--gov-navy); opacity: .12;
+    -webkit-mask: var(--gov-emblem) center / 46% no-repeat;
+    mask: var(--gov-emblem) center / 46% no-repeat;
+    transition: opacity .4s ease, transform .6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.person-card:hover .person-card__placeholder::after { opacity: .2; transform: scale(1.06); }
+.person-card__placeholder svg, .person-card__vacant { position: relative; z-index: 1; }
 .person-card__placeholder svg { opacity: .55; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease; }
 .person-card:hover .person-card__placeholder svg { transform: scale(1.15); color: var(--gov-teal); }
-.person-card__vacant { text-transform: uppercase; font-size: 0.75rem; letter-spacing: .08em; font-weight: 700; color: var(--gov-muted); }
+.person-card__vacant {
+    text-transform: uppercase; font-size: 0.75rem; letter-spacing: .08em; font-weight: 700;
+    color: var(--gov-muted);
+    /* Подпись уходит под эмблему: по центру она ложилась прямо на гирих. */
+    position: absolute; left: 0; right: 0; bottom: 16px; text-align: center;
+}
 .person-card__body { display: flex; flex-direction: column; gap: 6px; padding: 18px; text-align: center; flex: 1; }
+/* У вакансии нет ни имени, ни ссылки «Подробнее» — без выравнивания по
+   центру внизу карточки оставалась дыра высотой со строку. */
+.person-card--vacant .person-card__body { justify-content: center; }
+.person-card--vacant .person-card__role { flex: 0 0 auto; }
 .person-card__name { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: 1.05rem; color: var(--gov-title); transition: color 0.3s ease; }
 .person-card:hover .person-card__name { color: var(--gov-teal-text); }
 .person-card__role { color: var(--gov-muted); font-size: .9rem; line-height: 1.35; flex: 1; }
@@ -3853,10 +3877,21 @@ span.imgcard__media::after {
 }
 
 /* Профиль руководителя. */
-.block-profile { display: grid; grid-template-columns: minmax(0, 420px) 1fr; gap: 44px; align-items: start; }
+/* Колонка портрета уже: при 420px карточка без фотографии оказывалась выше
+   текста профиля почти вдвое и оставляла справа пустое поле. */
+.block-profile { display: grid; grid-template-columns: minmax(0, 340px) 1fr; gap: 44px; align-items: start; }
 @media (max-width: 900px) { .block-profile { grid-template-columns: 1fr; } }
 .profile__photo { display: block; width: 100%; aspect-ratio: 4/4.3; object-fit: cover; border-radius: var(--radius); }
-.profile__photo--empty { display: grid; place-items: center; background: color-mix(in srgb, var(--gov-navy) 6%, var(--gov-surface)); color: var(--gov-muted); }
+.profile__photo--empty {
+    position: relative; display: grid; place-items: center; color: var(--gov-muted);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--gov-navy) 9%, var(--gov-surface)), color-mix(in srgb, var(--gov-navy) 3%, var(--gov-surface)));
+}
+.profile__photo--empty::after {
+    content: ""; position: absolute; inset: 0; background: var(--gov-navy); opacity: .12;
+    -webkit-mask: var(--gov-emblem) center / 52% no-repeat;
+    mask: var(--gov-emblem) center / 52% no-repeat;
+}
+.profile__photo--empty > * { position: relative; z-index: 1; }
 .profile__name { font-size: clamp(1.8rem, 3.4vw, 2.5rem); margin: 0 0 12px; }
 .profile__position { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; color: var(--gov-teal-text, #0284c7); font-size: 1.15rem; line-height: 1.35; margin-bottom: 18px; }
 .profile__text { color: var(--gov-ink); line-height: 1.65; margin: 0 0 22px; font-size: 1rem; }
@@ -3883,7 +3918,10 @@ span.imgcard__media::after {
 .block-featband__title { font-size: clamp(1.5rem, 2.6vw, 2rem); margin: 0 0 26px; }
 
 /* Биография + образование (две колонки). */
-.block-bio { display: grid; grid-template-columns: 1.15fr 1fr; gap: 40px; align-items: start; }
+/* Список карьеры длиннее карточки образования, поэтому боковая колонка
+   уже и «едет» вместе со страницей: иначе под ней оставалось до восьмисот
+   пикселей пустоты. */
+.block-bio { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: start; }
 @media (max-width: 900px) { .block-bio { grid-template-columns: 1fr; } }
 .bio__title { font-size: 1.5rem; margin: 0 0 18px; }
 .bio__text { color: var(--gov-muted); line-height: 1.6; margin-bottom: 26px; }
@@ -3903,6 +3941,12 @@ span.imgcard__media::after {
 }
 .bio-career__text { color: var(--gov-muted); font-size: .93rem; line-height: 1.5; }
 .bio-side { display: flex; flex-direction: column; gap: 26px; }
+@media (min-width: 901px) {
+    .bio-side { position: sticky; top: 92px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .bio-side { position: static; }
+}
 .bio-edu { background: color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)); border-radius: var(--radius); padding: 28px; }
 .bio-edu__list { list-style: none; margin: 0; padding: 0; }
 .bio-edu__item { position: relative; padding: 0 0 18px 24px; display: flex; flex-direction: column; gap: 3px; }
@@ -5733,9 +5777,18 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
    ========================================================================== */
 /* Колонок столько же, сколько выбрано в блоке: у актов длинные названия,
    и четыре колонки режут их на «лесенку» из двух слов. */
-.docslist-acts { display: grid; grid-template-columns: repeat(var(--docs-cols, 2), 1fr); gap: 16px; }
-@media (max-width: 1000px) { .docslist-acts { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px) { .docslist-acts { grid-template-columns: 1fr; } }
+/* Дорожки считает App\Core\GridBalance: пять актов в три колонки раньше
+   оставляли пустую ячейку справа, теперь последний ряд занимает всю ширину. */
+.docslist-acts { display: grid; grid-template-columns: repeat(var(--grid-track, 2), minmax(0, 1fr)); gap: 16px; }
+.docslist-acts > .act-card { grid-column: span var(--grid-span, 1); }
+@media (max-width: 1000px) {
+    .docslist-acts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .docslist-acts > .act-card { grid-column: auto; }
+}
+@media (max-width: 640px) {
+    .docslist-acts { grid-template-columns: 1fr; }
+    .docslist-acts > .act-card { grid-column: auto; }
+}
 .act-card {
     position: relative;
     display: flex;
@@ -6533,9 +6586,16 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 }
 
 /* --- Документы и списки актов (Docs Grid / List) --- */
-.docslist-grid { display: grid; grid-template-columns: repeat(var(--docs-cols, 3), 1fr); gap: 18px; }
-@media (max-width: 900px) { .docslist-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { .docslist-grid { grid-template-columns: 1fr; } }
+.docslist-grid { display: grid; grid-template-columns: repeat(var(--grid-track, 3), minmax(0, 1fr)); gap: 18px; }
+.docslist-grid > .doc-card { grid-column: span var(--grid-span, 1); }
+@media (max-width: 900px) {
+    .docslist-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .docslist-grid > .doc-card { grid-column: auto; }
+}
+@media (max-width: 560px) {
+    .docslist-grid { grid-template-columns: 1fr; }
+    .docslist-grid > .doc-card { grid-column: auto; }
+}
 
 .document-tools { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
 .document-tools__search, .document-tools__filter select {

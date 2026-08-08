@@ -42,7 +42,10 @@ test('Контент Агентства: типы блоков зарегист�
         assert_true(isset(BlockTypeRegistry::DEFAULTS[$type]), 'неизвестный тип блока: ' . $where);
         // Ключ вне DEFAULTS не переживёт первого сохранения блока в админке:
         // collectData собирает данные по белому списку и лишнее отбрасывает.
-        $unknown = array_diff(array_keys($data), array_keys(BlockTypeRegistry::DEFAULTS[$type]));
+        // Служебные ключи с подчёркиванием (_reveal, _spacing, _visible_*)
+        // хранятся отдельно от полей блока и проверке не подлежат.
+        $keys = array_filter(array_keys($data), static fn (string $key): bool => !str_starts_with($key, '_'));
+        $unknown = array_diff($keys, array_keys(BlockTypeRegistry::DEFAULTS[$type]));
         assert_same([], array_values($unknown), 'лишние ключи в ' . $where);
     }
 });

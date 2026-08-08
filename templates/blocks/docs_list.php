@@ -9,7 +9,10 @@ $variant = in_array($data['variant'] ?? 'grid', ['links', 'acts'], true) ? (stri
 $searchEnabled = !array_key_exists('search_enabled', $data) || !empty($data['search_enabled']);
 $prepared = array_map([\App\Core\DocumentPresenter::class, 'prepare'], is_array($items) ? $items : []);
 $kinds = array_values(array_unique(array_filter(array_column($prepared, 'extension'), static fn (string $kind): bool => $kind !== 'other')));
-$templateCss = '#block-' . $blockId . ' .docslist-grid,#block-' . $blockId . ' .docslist-acts{--docs-cols:' . $cols . '}';
+// Хвост последнего ряда растягивается на всю ширину: пять актов в три
+// колонки иначе оставляют справа пустую ячейку.
+$templateCss = \App\Core\GridBalance::css($blockId, '.docslist-grid', '.doc-card', count($prepared), $cols)
+    . \App\Core\GridBalance::css($blockId, '.docslist-acts', '.act-card', count($prepared), $cols);
 ?>
 <div class="block-docslist block-docslist--<?= $variant ?>" data-document-list>
     <div class="section-head">

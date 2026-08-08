@@ -48,6 +48,7 @@ return [
                         'content' => '<p>Агентство участвует во всём цикле стратегического планирования — от анализа и подготовки инициатив до мониторинга их реализации и оценки достигнутых результатов.</p>',
                     ]],
                     ['advantages', 'Направления работы', [
+                        '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'variant' => 'grid',
                         'title' => '',
                         'items' => [
@@ -77,6 +78,7 @@ return [
                         'content' => '<p>Современная модель Агентства сформировалась в результате последовательного развития системы стратегического управления в Узбекистане.</p>',
                     ]],
                     ['stages', 'Этапы развития', [
+                        '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'title' => '',
                         'all_text' => '',
                         'all_url' => '',
@@ -96,6 +98,7 @@ return [
                             . '<p><strong>Стратегическое планирование — это путь от долгосрочной цели к конкретному результату. Агентство помогает сделать этот путь системным, измеримым и согласованным.</strong></p>',
                     ]],
                     ['docs_list', 'Нормативно-правовые документы', [
+                        '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'variant' => 'acts',
                         'title' => 'Основные нормативно-правовые документы',
                         'all_text' => '',
@@ -130,6 +133,7 @@ return [
                         'content' => '<p>Agentlik strategik rejalashtirishning barcha bosqichlarida — vaziyatni tahlil qilish va tashabbuslarni ishlab chiqishdan tortib, ularning amalga oshirilishini monitoring qilish va natijadorligini baholashgacha ishtirok etadi.</p>',
                     ]],
                     ['advantages', 'Faoliyat yo‘nalishlari', [
+                        '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'variant' => 'grid',
                         'title' => '',
                         'items' => [
@@ -159,6 +163,7 @@ return [
                         'content' => '<p>Agentlikning bugungi modeli O‘zbekistonda strategik boshqaruv tizimini izchil takomillashtirish natijasida shakllandi.</p>',
                     ]],
                     ['stages', 'Rivojlanish bosqichlari', [
+                        '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'title' => '',
                         'all_text' => '',
                         'all_url' => '',
@@ -178,6 +183,7 @@ return [
                             . '<p><strong>Strategik rejalashtirish — uzoq muddatli maqsaddan aniq natijaga olib boruvchi yo‘ldir. Agentlik ushbu yo‘lning tizimli, o‘lchanadigan va o‘zaro muvofiqlashtirilgan bo‘lishiga xizmat qiladi.</strong></p>',
                     ]],
                     ['docs_list', 'Normativ-huquqiy hujjatlar', [
+                        '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'variant' => 'acts',
                         'title' => 'Asosiy normativ-huquqiy hujjatlar',
                         'all_text' => '',
@@ -212,6 +218,7 @@ return [
                         'content' => '<p>The Agency is involved throughout the strategic planning cycle — from analysis and the development of new initiatives to implementation monitoring and evaluation of results.</p>',
                     ]],
                     ['advantages', 'Areas of work', [
+                        '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'variant' => 'grid',
                         'title' => '',
                         'items' => [
@@ -241,6 +248,7 @@ return [
                         'content' => '<p>The Agency’s present-day model is the result of the gradual development of Uzbekistan’s strategic governance system.</p>',
                     ]],
                     ['stages', 'Development stages', [
+                        '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'title' => '',
                         'all_text' => '',
                         'all_url' => '',
@@ -260,6 +268,7 @@ return [
                             . '<p><strong>Strategic planning is the path from a long-term objective to a concrete result. The Agency helps make this path systematic, measurable and coordinated.</strong></p>',
                     ]],
                     ['docs_list', 'Legal documents', [
+                        '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'variant' => 'acts',
                         'title' => 'Key Legal and Regulatory Documents',
                         'all_text' => '',
@@ -289,6 +298,7 @@ return [
                 'meta_description' => 'Директор и первый заместитель директора Агентства стратегического развития и реформ при Президенте Республики Узбекистан.',
                 'blocks' => [
                     ['person_cards', 'Карточки руководителей', [
+                        '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'title' => '',
                         'all_text' => '',
                         'all_url' => '',
@@ -310,6 +320,7 @@ return [
                 'meta_description' => 'O‘zbekiston Respublikasi Prezidenti huzuridagi Strategik rivojlanish va islohotlar agentligi direktori va direktorining birinchi o‘rinbosari.',
                 'blocks' => [
                     ['person_cards', 'Rahbarlar kartochkalari', [
+                        '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'title' => '',
                         'all_text' => '',
                         'all_url' => '',

@@ -5,20 +5,17 @@ $items = $data['items'] ?? [];
 $variant = ($data['variant'] ?? 'grid') === 'band' ? 'band' : 'grid';
 
 if ($variant === 'grid') {
-    // Число колонок подбирается так, чтобы в последнем ряду не оставалась
-    // одинокая карточка: пять преимуществ при четырёх колонках давали 4+1 —
-    // пятая уезжала вниз в пустой ряд. Здесь пятёрка ложится как 3+2.
+    // Колонки подбираются так, чтобы в последнем ряду не осталась одинокая
+    // карточка (пятёрка ложится 3+2), а сами карточки хвоста растягиваются
+    // на всю ширину — иначе справа зияет пустая ячейка.
     $count = count($items);
-    $columns = $count > 0 && $count <= 3 ? $count : 4;
-    if ($count > 3) {
-        foreach ([4, 3, 2] as $candidate) {
-            if ($count % $candidate !== 1) {
-                $columns = $candidate;
-                break;
-            }
-        }
-    }
-    $templateCss = '#block-' . $blockId . ' .block-advantages__grid{--adv-cols:' . max(1, $columns) . '}';
+    $templateCss = \App\Core\GridBalance::css(
+        $blockId,
+        '.block-advantages__grid',
+        '.block-advantages__item',
+        $count,
+        \App\Core\GridBalance::columnsFor($count)
+    );
 }
 ?>
 <?php if ($variant === 'band'): ?>
