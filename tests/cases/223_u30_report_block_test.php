@@ -173,3 +173,32 @@ test('u30_report: наборы организаций читаемы постр�
         );
     }
 });
+
+test('u30_report: слой инфо-панелей, разделителей и TOP-5 на месте', function (): void {
+    // Эти правила в исходном документе лежали внутри <style type="text/css">
+    // вместе со служебными классами логотипа и однажды уже терялись при
+    // переносе: пропадали разделители секций и нумерация TOP-5.
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/u30-report.css');
+
+    assert_contains('.u30-section::before', $css, 'разделитель над секцией');
+    assert_contains('.u30-info-topfive li::before', $css, 'нумерация TOP-5');
+    assert_contains('.u30-info-topfive {', $css, 'список TOP-5 снимает маркеры браузера');
+    assert_contains('.u30-info-panel {', $css, 'боковые информационные панели');
+    assert_contains('.u30-org-matrix-guide', $css, 'пояснение к матрице организаций');
+});
+
+test('u30_report: шрифт задан списком семейств, а не inherit', function (): void {
+    // Часть правил использует шорткат «font: 750 13px/1.3 var(--u30-font-sans)».
+    // С «inherit» такой шорткат невалиден, и браузер отбрасывает его целиком —
+    // вместе с размером и начертанием, молча.
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/u30-report.css');
+
+    assert_true(
+        (bool) preg_match('/--u30-font-sans:\s*var\(--font-family/', $css),
+        'шрифт отчёта берётся из --font-family дизайн-системы'
+    );
+    assert_false(
+        (bool) preg_match('/--u30-font-sans:\s*inherit/', $css),
+        'inherit ломает все font-шорткаты в файле'
+    );
+});
