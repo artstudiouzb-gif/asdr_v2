@@ -835,6 +835,9 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     from { opacity: 0; transform: translateY(-6px); }
     to { opacity: 1; transform: translateY(0); }
 }
+@media (prefers-reduced-motion: reduce) {
+    .faq-item[open] .faq-item__a { animation: none; }
+}
 
 /* --- Каталог пользовательских типов контента (Документы/Вакансии/Тендеры) --- */
 /* Страницы фотоальбомов: ширина как у остальных списков сайта, а не

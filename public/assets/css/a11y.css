@@ -270,6 +270,23 @@ html[data-a11y-reading="on"] .cms-block {
 .a11y-backdrop[hidden] {
     display: none;
 }
+/* Панель выезжает справа, а не появляется рывком. Открытие анимируется
+   ключевыми кадрами, потому что элемент выходит из display:none и обычный
+   transition на нём не сработал бы. */
+@keyframes a11y-drawer-in {
+    from { transform: translateX(100%); }
+    to { transform: none; }
+}
+@keyframes a11y-backdrop-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.a11y-drawer:not([hidden]) { animation: a11y-drawer-in .28s cubic-bezier(0.16, 1, 0.3, 1); }
+.a11y-backdrop:not([hidden]) { animation: a11y-backdrop-in .28s ease; }
+@media (prefers-reduced-motion: reduce) {
+    .a11y-drawer:not([hidden]),
+    .a11y-backdrop:not([hidden]) { animation: none; }
+}
 .a11y-drawer__head {
     display: flex;
     align-items: center;
