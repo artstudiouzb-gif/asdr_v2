@@ -43,7 +43,9 @@
     --gov-surface: #1e293b;
     --gov-border: #334155;
     --gov-ink: #f8fafc;
-    --gov-muted: #94a3b8;
+    /* Было #94a3b8 — на поверхности карточки мелкий текст (дата акта,
+       подписи) давал 3.77:1 при норме 4.5. */
+    --gov-muted: #aab6c6;
     --gov-title: #f8fafc;
     --gov-teal-text: var(--gov-teal-on-dark, var(--color-accent, #38bdf8));
 }
@@ -600,8 +602,11 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 }
 .site-lang-dropdown__item:hover { background: var(--gov-bg, #f1f5f9); color: var(--gov-teal, #0d9488); }
 .site-lang-dropdown__item.is-active {
-    background: color-mix(in srgb, var(--gov-teal, #0d9488) 12%, transparent);
-    color: var(--gov-teal, #0d9488); font-weight: 700;
+    background: var(--gov-bg, #f1f5f9);
+    /* Не сырой акцент: он давал 3.19:1 при норме 4.5, а подложка из того же
+       акцента съедала ещё 0.14. --gov-teal-text считает SiteThemeCss через
+       AccentContrast::onLight() как раз от нейтральной поверхности. */
+    color: var(--gov-teal-text, #0f766e); font-weight: 700;
 }
 .site-lang-dropdown__item-flag { font-size: 1rem; line-height: 1; }
 .site-lang-dropdown__item-name { flex: 1; white-space: nowrap; }
@@ -2369,6 +2374,13 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 /* --- Хлебные крошки --- */
 .crumbs, .content-crumbs { color: var(--gov-muted); font-size: .9rem; }
 .crumbs a, .content-crumbs a { color: var(--gov-teal-text); }
+/* Цель нажатия не ниже 24×24 CSS-пикселей (WCAG 2.2, 2.5.8). Высоту даёт
+   inline-flex с min-height: вид строки при этом не меняется. */
+.crumbs a, .content-crumbs a,
+.site-footer__col a,
+.person-card__more {
+    display: inline-flex; align-items: center; min-height: 24px;
+}
 
 /* Заливная CTA-кнопка шапки: слегка затемняем акцент, чтобы белый текст
    давал контраст ≥4.5:1 (WCAG AA). Общий акцент/бренд при этом не меняется. */
@@ -2829,8 +2841,11 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .stage__title { font-weight: 700; color: var(--gov-title); font-size: .98rem; }
 .stage__text { color: var(--gov-muted); font-size: .88rem; line-height: 1.5; flex: 1; }
 .stage__status { align-self: flex-start; padding: 5px 12px; border-radius: 999px; font-size: .78rem; font-weight: 700; background: color-mix(in srgb, var(--gov-navy) 7%, var(--gov-bg)); color: var(--gov-muted); transition: background 0.3s, color 0.3s; }
-.stage--done .stage__status { background: color-mix(in srgb, var(--gov-teal) 14%, var(--gov-bg)); color: var(--gov-teal-text); }
+.stage--done .stage__status { background: color-mix(in srgb, var(--gov-teal) 14%, var(--gov-bg)); color: color-mix(in srgb, var(--gov-teal-text) 82%, #000); }
 .stage--active .stage__status { background: color-mix(in srgb, #2f80ed 13%, var(--gov-bg)); color: #2465c6; }
+/* Тёмная тема: синий текста рассчитан на светлый фон, на тёмном он давал
+   3.22:1. Берём светлый оттенок той же линейки. */
+:root[data-theme="dark"] .stage--active .stage__status { color: #9dc1f7; }
 .stage--planned .stage__status {
     border: 1px solid var(--gov-border);
     background: color-mix(in srgb, var(--gov-muted) 6%, var(--gov-bg));
