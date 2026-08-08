@@ -46,9 +46,20 @@ final class Uploader
         'm4a' => 'audio/mp4',
     ];
 
+    /**
+     * Код страницы (стили и скрипты) загружается отдельным разрешением: это
+     * та же поверхность доверия, что и поля «произвольный CSS/JS» — только
+     * супер-администратор. В общий ALLOWED эти расширения класть нельзя:
+     * через Uploader идут и файлы из публичных форм сайта.
+     */
+    private const CODE_ALLOWED = [
+        'css' => 'text/css',
+        'js' => 'text/javascript',
+    ];
+
     // Типы, для которых finfo часто возвращает application/octet-stream —
     // строгую проверку MIME по расширению для них не применяем.
-    private const LENIENT_MIME = ['svg', 'woff2', 'woff', 'mp3', 'ogg', 'wav', 'aac', 'm4a'];
+    private const LENIENT_MIME = ['svg', 'woff2', 'woff', 'mp3', 'ogg', 'wav', 'aac', 'm4a', 'css', 'js'];
 
     /**
      * @param array $fileInput один элемент $_FILES, например $_FILES['file']
@@ -58,7 +69,8 @@ final class Uploader
         array $fileInput,
         string $accessType,
         ?int $uploadedBy,
-        ?array $allowedExtensions = null
+        ?array $allowedExtensions = null,
+        bool $allowCode = false
     ): array
     {
         if (($fileInput['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
@@ -81,7 +93,8 @@ final class Uploader
             $uploadedBy,
             true,
             self::MAX_SIZE_BYTES,
-            $allowedExtensions
+            $allowedExtensions,
+            $allowCode
         );
     }
 
@@ -101,7 +114,8 @@ final class Uploader
         ?int $uploadedBy,
         bool $isUploadedFile,
         int $maxSize = self::MAX_SIZE_BYTES,
-        ?array $allowedExtensions = null
+        ?array $allowedExtensions = null,
+        bool $allowCode = false
     ): array {
         if (!is_file($sourcePath)) {
             throw new RuntimeException('Файл не найден.');
@@ -112,8 +126,9 @@ final class Uploader
 
         self::assertDiskSpace($accessType);
 
+        $allowed = $allowCode ? self::ALLOWED + self::CODE_ALLOWED : self::ALLOWED;
         $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-        if (!isset(self::ALLOWED[$extension])) {
+        if (!isset($allowed[$extension])) {
             throw new RuntimeException('Недопустимый тип файла: .' . $extension);
         }
         if ($allowedExtensions !== null
@@ -123,7 +138,7 @@ final class Uploader
 
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $detectedMime = (string) $finfo->file($sourcePath);
-        $expectedMime = self::ALLOWED[$extension];
+        $expectedMime = $allowed[$extension];
         if (!self::mimeMatches($extension, $detectedMime, $sourcePath)) {
             throw new RuntimeException('Содержимое файла не соответствует расширению.');
         }
@@ -201,7 +216,7 @@ final class Uploader
     public static function mimeMatches(string $extension, string $detectedMime, string $path): bool
     {
         $extension = strtolower($extension);
-        if (!isset(self::ALLOWED[$extension])) {
+        if (!isset(self::ALLOWED[$extension]) && !isset(self::CODE_ALLOWED[$extension])) {
             return false;
         }
         if (in_array($extension, self::LENIENT_MIME, true)) {

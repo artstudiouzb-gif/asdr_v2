@@ -22,6 +22,28 @@ final class HtmlSanitizer
         'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption',
         'form', 'input', 'button', 'select', 'option', 'textarea', 'label',
         'svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'g', 'text', 'tspan', 'use', 'defs', 'clippath', 'mask',
+        // Градиенты и переиспользуемые символы: разметка без скриптов и без
+        // сетевых обращений. Без них вставленная в блок графика теряла заливку.
+        'lineargradient', 'radialgradient', 'stop', 'symbol', 'ellipse',
+    ];
+
+    /**
+     * SVG регистрозависим, а HTML-разбор приводит имена к нижнему регистру:
+     * viewBox превращается в viewbox и перестаёт работать. Восстанавливаем
+     * написание на готовой строке — в DOM этого сделать нельзя, setAttribute
+     * в HTML-режиме снова опустит регистр.
+     */
+    private const SVG_CASE = [
+        'viewbox' => 'viewBox',
+        'preserveaspectratio' => 'preserveAspectRatio',
+        'gradientunits' => 'gradientUnits',
+        'gradienttransform' => 'gradientTransform',
+        'spreadmethod' => 'spreadMethod',
+        'clippathunits' => 'clipPathUnits',
+        'maskunits' => 'maskUnits',
+        'lineargradient' => 'linearGradient',
+        'radialgradient' => 'radialGradient',
+        'clippath' => 'clipPath',
     ];
 
     /** Разрешённые атрибуты по тегам. */
@@ -29,8 +51,20 @@ final class HtmlSanitizer
         '*' => [
             'class', 'id', 'title', 'role', 'tabindex', 'hidden', 'dir', 'lang',
             'viewbox', 'cx', 'cy', 'r', 'd', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'transform', 'opacity',
+            // Геометрия и оформление SVG: значения инертны — ни скриптов,
+            // ни загрузок, поэтому список безопасно держать широким.
+            'x', 'y', 'x1', 'y1', 'x2', 'y2', 'rx', 'ry', 'points', 'offset', 'preserveaspectratio',
+            'fill-rule', 'fill-opacity', 'clip-rule', 'stroke-opacity', 'stroke-dasharray', 'stroke-dashoffset',
+            'stop-color', 'stop-opacity', 'gradientunits', 'gradienttransform', 'spreadmethod',
+            'text-anchor', 'dominant-baseline', 'font-size', 'font-weight', 'letter-spacing',
         ],
         'a' => ['href', 'target', 'rel'],
+        // Ссылка на символ в этом же документе (спрайт иконок).
+        'use' => ['href', 'width', 'height'],
+        'svg' => ['width', 'height', 'xmlns'],
+        'symbol' => ['width', 'height'],
+        'rect' => ['width', 'height'],
+        'image' => ['width', 'height'],
         'img' => ['src', 'alt', 'width', 'height', 'loading'],
         'td' => ['colspan', 'rowspan'],
         'th' => ['colspan', 'rowspan', 'scope'],
@@ -126,7 +160,7 @@ final class HtmlSanitizer
             $out .= $dom->saveHTML($child);
         }
 
-        return trim($out);
+        return trim(self::restoreSvgCase($out));
     }
 
     /**
@@ -165,6 +199,27 @@ final class HtmlSanitizer
     /**
      * @param array<string, array<int, string>> $allowedAttrs
      */
+    /**
+     * Возвращает SVG-именам их настоящий регистр. Работает по готовой строке:
+     * значения атрибутов не трогаем, поэтому текст с «viewbox» внутри абзаца
+     * не пострадает — заменяются только имена тегов и атрибутов.
+     */
+    private static function restoreSvgCase(string $html): string
+    {
+        if (!str_contains($html, '<svg')) {
+            return $html;
+        }
+
+        foreach (self::SVG_CASE as $lower => $proper) {
+            // Имя атрибута: перед ним пробел, после — знак равенства.
+            $html = (string) preg_replace('~(<[^>]*\s)' . $lower . '(=)~i', '$1' . $proper . '$2', $html);
+            // Имя тега: сразу после < или </.
+            $html = (string) preg_replace('~(</?)' . $lower . '(?=[\s/>])~i', '$1' . $proper, $html);
+        }
+
+        return $html;
+    }
+
     private static function cleanAttributes(\DOMElement $el, string $tag, array $allowedAttrs): void
     {
         $allowed = array_merge(
@@ -186,6 +241,15 @@ final class HtmlSanitizer
             // допускает http(s), mailto/tel и локальные пути; src — только
             // http(s) и локальные пути. data:, file:, protocol-relative URL,
             // управляющие символы и URL с userinfo удаляются.
+            // <use> ссылается только на символ внутри этой же страницы:
+            // внешний документ браузеры и так не подгрузят, а разрешать адрес
+            // значило бы завести ещё одну точку выхода наружу.
+            if ($tag === 'use' && $name === 'href') {
+                if (!str_starts_with($value, '#')) {
+                    $el->removeAttribute($attr->nodeName);
+                }
+                continue;
+            }
             if ($name === 'href' && !UrlGuard::isSafeLink($value)) {
                 $el->removeAttribute($attr->nodeName);
                 continue;
