@@ -134,3 +134,42 @@ test('u30_report: скрипт учитывает остановку анима�
     assert_not_contains('http://', $js);
     assert_not_contains('https://', $js);
 });
+
+test('u30_report: числа в шапке сходятся с данными диаграммы направлений', function (): void {
+    // Одни и те же величины лежат в двух местах: счётчики в разметке и разбивка
+    // по направлениям в скрипте. Разойдясь, они не сломают страницу — отчёт
+    // просто покажет разные цифры в разных разделах, и это никто не заметит.
+    $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/blocks/u30_report.js');
+    preg_match('~const data = \{(.*?)\n  \};~s', $js, $block);
+    assert_true(isset($block[1]), 'набор данных диаграмм найден');
+
+    preg_match_all('~green: (\d+), yellow: (\d+), red: (\d+)~', $block[1], $rows);
+    assert_true(count($rows[1]) > 0, 'направления разобраны');
+
+    $green = array_sum(array_map('intval', $rows[1]));
+    $yellow = array_sum(array_map('intval', $rows[2]));
+    $red = array_sum(array_map('intval', $rows[3]));
+
+    $tpl = (string) file_get_contents(APP_ROOT . '/templates/blocks/u30_report.php');
+    preg_match_all('~data-count="(\d+)"~', $tpl, $counters);
+    $counts = array_map('intval', $counters[1]);
+
+    // Порядок счётчиков в разметке: всего · оценено · зелёные · жёлтые · красные.
+    assert_same(5, count($counts), 'счётчиков в шапке пять');
+    assert_same($green, $counts[2], 'счётчик «зелёных» = сумма по направлениям');
+    assert_same($yellow, $counts[3], 'счётчик «жёлтых» = сумма по направлениям');
+    assert_same($red, $counts[4], 'счётчик «красных» = сумма по направлениям');
+    assert_same($green + $yellow + $red, $counts[1], 'оценено = зелёные + жёлтые + красные');
+    assert_true($counts[0] >= $counts[1], 'всего показателей не меньше оценённых');
+});
+
+test('u30_report: наборы организаций читаемы построчно', function (): void {
+    // Выгрузки матрицы и рейтинга правятся руками, поэтому они не должны
+    // лежать одной строкой на десятки тысяч символов.
+    foreach (explode("\n", (string) file_get_contents(APP_ROOT . '/public/assets/js/blocks/u30_report.js')) as $n => $line) {
+        assert_true(
+            strlen($line) <= 1200,
+            'строка ' . ($n + 1) . ': ' . strlen($line) . ' символов — разверните набор данных построчно'
+        );
+    }
+});
