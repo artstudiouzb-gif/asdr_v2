@@ -26,6 +26,7 @@ use App\Models\BlockRevision;
 use App\Models\FormDef;
 use App\Models\Language;
 use App\Models\Page;
+use App\Models\Widget;
 
 final class BlockController
 {
@@ -132,6 +133,7 @@ final class BlockController
             'data' => $data,
             'forms' => $block['type'] === 'form' ? FormDef::all() : [],
             'departments' => self::departmentsFor((string) $block['type']),
+            'widgets' => $block['type'] === 'bio_education' ? Widget::all() : [],
         ]);
     }
 
@@ -187,6 +189,7 @@ final class BlockController
                 'data' => json_decode((string) $block['data'], true) ?: [],
                 'forms' => $block['type'] === 'form' ? FormDef::all() : [],
                 'departments' => self::departmentsFor((string) $block['type']),
+                'widgets' => $block['type'] === 'bio_education' ? Widget::all() : [],
                 'error' => 'Блок уже был изменён в другой вкладке или другим пользователем. Текущие данные перезагружены; восстановите локальный черновик и проверьте изменения.',
             ]);
             return;
@@ -714,6 +717,27 @@ final class BlockController
                     }
                     return $rows;
                 };
+                $collectWidgetIds = static function (string $key): array {
+                    $ids = [];
+                    foreach ((array) ($_POST[$key] ?? []) as $rawId) {
+                        if (!is_scalar($rawId)) {
+                            continue;
+                        }
+                        $id = (int) $rawId;
+                        if ($id > 0 && !in_array($id, $ids, true)) {
+                            $ids[] = $id;
+                        }
+                        if (count($ids) >= 12) {
+                            break;
+                        }
+                    }
+                    return $ids;
+                };
+                $widgetsBefore = $collectWidgetIds('widgets_before');
+                $widgetsAfter = array_values(array_diff(
+                    $collectWidgetIds('widgets_after'),
+                    $widgetsBefore
+                ));
                 return [
                     'bio_title' => TextProcessor::typographPlain(trim((string) ($_POST['bio_title'] ?? 'Биография')), $locale),
                     'bio_text' => TextProcessor::typographPlain(trim((string) ($_POST['bio_text'] ?? '')), $locale),
@@ -723,6 +747,8 @@ final class BlockController
                     'edu_items' => $collect('edu_items', ['years', 'title', 'org']),
                     'extra_title' => TextProcessor::typographPlain(trim((string) ($_POST['extra_title'] ?? '')), $locale),
                     'extra_text' => TextProcessor::typographPlain(trim((string) ($_POST['extra_text'] ?? '')), $locale),
+                    'widgets_before' => $widgetsBefore,
+                    'widgets_after' => $widgetsAfter,
                     'quote_text' => TextProcessor::typographPlain(trim((string) ($_POST['quote_text'] ?? '')), $locale),
                     'quote_author' => TextProcessor::typographPlain(trim((string) ($_POST['quote_author'] ?? '')), $locale),
                 ];
