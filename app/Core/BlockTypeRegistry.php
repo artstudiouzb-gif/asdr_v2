@@ -15,7 +15,22 @@ final class BlockTypeRegistry
 {
     /** @var array<string, array<string, mixed>> */
     public const DEFAULTS = [
-        'text' => ['variant' => 'default', 'title' => '', 'content' => '', 'aside_title' => '', 'items' => [], 'quote' => ''],
+        'text' => [
+            'variant' => 'default',
+            'title' => '',
+            'content' => '',
+            'aside_title' => '',
+            'items' => [],
+            'quote' => '',
+            'media_type' => 'none',
+            'media_image' => '',
+            'media_video' => '',
+            'media_youtube' => '',
+            'media_alt' => '',
+            'media_caption' => '',
+            'image_position' => 'center-center',
+            'image_position_mobile' => 'center-center',
+        ],
         'html' => ['html' => ''],
         'cta' => ['variant' => 'card', 'title' => '', 'text' => '', 'icon_svg' => '', 'image' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'button_text' => '', 'button_url' => '', 'bg_color' => '', 'text_color' => '', 'button_color' => ''],
         'advantages' => ['variant' => 'grid', 'title' => '', 'items' => []],
