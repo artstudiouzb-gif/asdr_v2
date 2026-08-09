@@ -157,7 +157,10 @@
 }
 
 .editorial-page__content > .cms-block--text:has(.block-text__title) {
-    padding-top: 28px;
+    /* Заголовок нового раздела отбивается воздухом: цветной полосы, которая
+       раньше отделяла разделы, больше нет — держим ритм отступом. Связка
+       «заголовок → его карточки» остаётся плотной за счёт малого нижнего. */
+    padding-top: 56px;
     padding-bottom: 16px;
     border-top: 1px solid var(--editorial-line);
 }
@@ -236,10 +239,10 @@
 }
 
 .editorial-page__content .block-advantages__item:hover {
-    transform: none;
+    transform: translateY(-3px);
     border-color: color-mix(in srgb, var(--gov-teal) 38%, var(--editorial-line));
     background: color-mix(in srgb, var(--gov-teal) 3%, var(--gov-surface));
-    box-shadow: none;
+    box-shadow: 0 14px 30px -22px rgba(15, 43, 70, .45);
 }
 
 .editorial-page__content .block-advantages__icon {
@@ -354,8 +357,8 @@
 
 .editorial-page__content .act-card:hover,
 .editorial-page__content .doc-card:hover {
-    transform: none;
-    box-shadow: none;
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px -22px rgba(15, 43, 70, .45);
 }
 
 /* Leadership ------------------------------------------------------------- */
@@ -382,9 +385,9 @@
 }
 
 .editorial-page__content .person-card:hover {
-    transform: none;
+    transform: translateY(-3px);
     border-color: color-mix(in srgb, var(--gov-teal) 34%, var(--editorial-line));
-    box-shadow: none;
+    box-shadow: 0 14px 30px -22px rgba(15, 43, 70, .45);
 }
 
 .editorial-page__content .person-card__photo,
