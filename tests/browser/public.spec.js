@@ -77,19 +77,23 @@ test('mobile drawer controls focus trap and restores trigger on escape', async (
     await page.goto('/');
     const burger = page.locator('.site-burger');
 
-    if (await burger.isVisible()) {
-        await burger.click();
-        const drawer = page.locator('#site-drawer');
-        await expect(drawer).toBeVisible();
-        await expect(drawer).toHaveAttribute('aria-hidden', 'false');
+    // Раньше проверки прятались в `if (isVisible())` и на фикстуре без бургера
+    // тест молча зеленел, ничего не проверив. Пропуск должен быть виден.
+    test.skip(!(await burger.isVisible()), 'в этой сборке шапки бургера нет');
 
-        const closeBtn = page.locator('.site-drawer__close');
-        await expect(closeBtn).toBeFocused();
+    await burger.click();
+    const drawer = page.locator('#site-drawer');
+    await expect(drawer).toBeVisible();
+    // Открытая шторка не помечается `aria-hidden="false"` — атрибут снимается:
+    // явное "false" считается плохой практикой и сбивает часть скринридеров.
+    expect(await drawer.getAttribute('aria-hidden')).toBeNull();
 
-        await page.keyboard.press('Escape');
-        await expect(drawer).toHaveAttribute('aria-hidden', 'true');
-        await expect(burger).toBeFocused();
-    }
+    const closeBtn = page.locator('.site-drawer__close');
+    await expect(closeBtn).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(drawer).toHaveAttribute('aria-hidden', 'true');
+    await expect(burger).toBeFocused();
 });
 
 test('theme toggle and accessibility panel toggle data attributes correctly', async ({ page }) => {
