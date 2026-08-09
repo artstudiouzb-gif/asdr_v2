@@ -5,6 +5,8 @@ $careerTitle = trim((string) ($data['career_title'] ?? ''));
 $edu = $data['edu_items'] ?? [];
 $extraTitle = trim((string) ($data['extra_title'] ?? ''));
 $extraText = trim((string) ($data['extra_text'] ?? ''));
+$widgetsBefore = trim((string) ($data['_widgets_before_html'] ?? ''));
+$widgetsAfter = trim((string) ($data['_widgets_after_html'] ?? ''));
 $quote = trim((string) ($data['quote_text'] ?? ''));
 ?>
 <div class="block-bio">
@@ -35,6 +37,9 @@ $quote = trim((string) ($data['quote_text'] ?? ''));
         <?php endif; ?>
     </div>
     <div class="bio-side">
+        <?php if ($widgetsBefore !== ''): ?>
+            <div class="bio-side__widgets bio-side__widgets--before"><?= $widgetsBefore ?></div>
+        <?php endif; ?>
         <div class="bio-edu">
             <?php if (!empty($data['edu_title'])): ?><h2 class="bio__title"><?= htmlspecialchars((string) $data['edu_title'], ENT_QUOTES) ?></h2><?php endif; ?>
             <?php if (!empty($edu)): ?>
@@ -62,6 +67,9 @@ $quote = trim((string) ($data['quote_text'] ?? ''));
                 </div>
             <?php endif; ?>
         </div>
+        <?php if ($widgetsAfter !== ''): ?>
+            <div class="bio-side__widgets bio-side__widgets--after"><?= $widgetsAfter ?></div>
+        <?php endif; ?>
         <?php if ($quote !== ''): ?>
             <figure class="bio-quote">
                 <span class="bio-quote__mark">“</span>
