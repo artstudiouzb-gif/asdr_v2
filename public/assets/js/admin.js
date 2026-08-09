@@ -2655,15 +2655,17 @@
     });
 })();
 
-/* Конструктор футера: перестановка колонок стрелками. */
+/* Перестановка строк повторителей стрелками (футер и слоты виджетов). */
 (function () {
     'use strict';
     document.addEventListener('click', function (e) {
-        var btn = e.target.closest('[data-fb-move]');
+        var btn = e.target.closest('[data-fb-move], [data-repeater-move]');
         if (!btn) { return; }
+        e.preventDefault();
         var row = btn.closest('.repeater-row');
         if (!row) { return; }
-        if (btn.getAttribute('data-fb-move') === 'up') {
+        var direction = btn.getAttribute('data-repeater-move') || btn.getAttribute('data-fb-move');
+        if (direction === 'up') {
             var prev = row.previousElementSibling;
             if (prev) { row.parentNode.insertBefore(row, prev); }
         } else {

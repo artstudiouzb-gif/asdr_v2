@@ -9,10 +9,12 @@ require __DIR__ . '/../layout/header.php';
 /** @var array $block */
 /** @var array $data */
 /** @var array $forms */
+/** @var array $widgets */
 /** @var string|null $error */
 
 $type = $block['type'];
 $error = $error ?? null;
+$widgets = $widgets ?? [];
 $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . urlencode((string) ($block['lang'] ?? ''));
 ?>
 <?php if ($error): ?><div class="alert alert--error"><?= htmlspecialchars($error, ENT_QUOTES) ?></div><?php endif; ?>
@@ -1075,6 +1077,74 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
             <div class="form-field"><label for="extra_title">Доп. образование — заголовок</label><input type="text" id="extra_title" name="extra_title" value="<?= htmlspecialchars($data['extra_title'] ?? '', ENT_QUOTES) ?>" placeholder="Дополнительное образование"></div>
             <div class="form-field"><label for="extra_text">Доп. образование — пункты (по одному на строку)</label><textarea id="extra_text" name="extra_text" rows="3"><?= htmlspecialchars($data['extra_text'] ?? '', ENT_QUOTES) ?></textarea></div>
+            <?php
+            $widgetSlots = [
+                ['key' => 'widgets_before', 'title' => 'Виджеты над образованием', 'selected' => (array) ($data['widgets_before'] ?? [])],
+                ['key' => 'widgets_after', 'title' => 'Виджеты под образованием', 'selected' => (array) ($data['widgets_after'] ?? [])],
+            ];
+            $widgetLabel = static function (array $widget): string {
+                $typeLabel = \App\Models\Widget::TYPE_LABELS[(string) ($widget['type'] ?? '')] ?? (string) ($widget['type'] ?? 'Виджет');
+                $title = trim((string) ($widget['title'] ?? ''));
+                $lang = trim((string) ($widget['lang'] ?? ''));
+                $parts = [$title !== '' ? $title : $typeLabel, $lang !== '' ? strtoupper($lang) : 'все языки'];
+                if (empty($widget['is_active'])) {
+                    $parts[] = 'выключен';
+                }
+                return implode(' · ', $parts);
+            };
+            ?>
+            <div class="bio-widget-slots">
+                <h3>Виджеты правой колонки</h3>
+                <p class="form-hint">Можно добавить существующие виджеты непосредственно до или после карточки «Образование». Порядок меняется стрелками. На сайте выводятся только активные виджеты текущего языка.</p>
+                <?php if ($widgets === []): ?>
+                    <p class="form-hint">Сначала создайте виджет в разделе <a href="/admin/widgets/create">«Виджеты»</a>.</p>
+                <?php endif; ?>
+                <?php foreach ($widgetSlots as $slot): ?>
+                    <?php $slotKey = (string) $slot['key']; ?>
+                    <section class="bio-widget-slot">
+                        <h4><?= htmlspecialchars((string) $slot['title'], ENT_QUOTES) ?></h4>
+                        <div data-repeater="<?= htmlspecialchars($slotKey, ENT_QUOTES) ?>" data-repeater-max="12" data-widget-slot>
+                            <?php foreach ($slot['selected'] as $i => $selectedId): ?>
+                                <div class="repeater-row widget-slot-row">
+                                    <div class="widget-slot-row__head">
+                                        <span>Виджет</span>
+                                        <span class="widget-slot-row__tools">
+                                            <button type="button" class="btn btn--small" data-repeater-move="up" aria-label="Переместить выше" title="Переместить выше"><?= \App\Core\AdminUi::icon('arrow-up') ?></button>
+                                            <button type="button" class="btn btn--small" data-repeater-move="down" aria-label="Переместить ниже" title="Переместить ниже"><?= \App\Core\AdminUi::icon('arrow-down') ?></button>
+                                        </span>
+                                    </div>
+                                    <select name="<?= htmlspecialchars($slotKey, ENT_QUOTES) ?>[<?= (int) $i ?>]">
+                                        <option value="">— выберите виджет —</option>
+                                        <?php foreach ($widgets as $widget): ?>
+                                            <option value="<?= (int) $widget['id'] ?>" <?= (int) $selectedId === (int) $widget['id'] ? 'selected' : '' ?>><?= htmlspecialchars($widgetLabel($widget), ENT_QUOTES) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <template data-repeater-template="<?= htmlspecialchars($slotKey, ENT_QUOTES) ?>">
+                            <div class="widget-slot-row__head">
+                                <span>Виджет</span>
+                                <span class="widget-slot-row__tools">
+                                    <button type="button" class="btn btn--small" data-repeater-move="up" aria-label="Переместить выше" title="Переместить выше"><?= \App\Core\AdminUi::icon('arrow-up') ?></button>
+                                    <button type="button" class="btn btn--small" data-repeater-move="down" aria-label="Переместить ниже" title="Переместить ниже"><?= \App\Core\AdminUi::icon('arrow-down') ?></button>
+                                </span>
+                            </div>
+                            <select name="<?= htmlspecialchars($slotKey, ENT_QUOTES) ?>[__INDEX__]">
+                                <option value="">— выберите виджет —</option>
+                                <?php foreach ($widgets as $widget): ?>
+                                    <option value="<?= (int) $widget['id'] ?>"><?= htmlspecialchars($widgetLabel($widget), ENT_QUOTES) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
+                        </template>
+                        <?php if ($widgets !== []): ?>
+                            <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="<?= htmlspecialchars($slotKey, ENT_QUOTES) ?>"><?= \App\Core\AdminUi::icon('plus') ?>Добавить виджет</button></div>
+                        <?php endif; ?>
+                    </section>
+                <?php endforeach; ?>
+            </div>
             <div class="form-field"><label for="quote_text">Цитата</label><textarea id="quote_text" name="quote_text" rows="2"><?= htmlspecialchars($data['quote_text'] ?? '', ENT_QUOTES) ?></textarea></div>
             <div class="form-field"><label for="quote_author">Автор цитаты</label><input type="text" id="quote_author" name="quote_author" value="<?= htmlspecialchars($data['quote_author'] ?? '', ENT_QUOTES) ?>"></div>
         <?php endif; ?>

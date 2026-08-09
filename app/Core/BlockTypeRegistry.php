@@ -54,7 +54,7 @@ final class BlockTypeRegistry
         'timeline' => ['title' => '', 'items' => [], 'button_text' => '', 'button_url' => '', 'cta_title' => '', 'cta_text' => '', 'cta_button_text' => '', 'cta_button_url' => '', 'cta_image' => ''],
         'news_docs' => ['news_title' => 'Актуальные новости', 'news_all_text' => 'Все новости', 'news_all_url' => '', 'limit' => 3, 'docs_title' => 'Документы', 'docs_all_text' => 'Все документы', 'docs_all_url' => '', 'docs' => []],
         'person_profile' => ['photo' => '', 'name' => '', 'position' => '', 'text' => '', 'phone' => '', 'phone_label' => 'Приёмная:', 'email' => '', 'email_label' => 'E-mail:', 'button_text' => '', 'button_url' => ''],
-        'bio_education' => ['bio_title' => 'Биография', 'bio_text' => '', 'career_title' => '', 'career' => [], 'edu_title' => 'Образование', 'edu_items' => [], 'extra_title' => '', 'extra_text' => '', 'quote_text' => '', 'quote_author' => ''],
+        'bio_education' => ['bio_title' => 'Биография', 'bio_text' => '', 'career_title' => '', 'career' => [], 'edu_title' => 'Образование', 'edu_items' => [], 'extra_title' => '', 'extra_text' => '', 'widgets_before' => [], 'widgets_after' => [], 'quote_text' => '', 'quote_author' => ''],
         'anchor_nav' => ['items' => [], 'auto' => false, 'sticky' => false],
         'stages' => ['variant' => 'default', 'title' => '', 'all_text' => '', 'all_url' => '', 'items' => []],
         'text_image' => ['title' => '', 'text' => '', 'image' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'image_side' => 'right', 'items' => []],

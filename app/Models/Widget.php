@@ -51,6 +51,61 @@ final class Widget
         return $stmt->fetchAll();
     }
 
+    /**
+     * Активные виджеты, выбранные внутри контентного блока. Порядок берётся
+     * из JSON блока, а не из глобальной левой/правой колонки.
+     *
+     * @param array<int, mixed> $ids
+     * @return list<array<string, mixed>>
+     */
+    public static function activeByIds(array $ids, string $lang): array
+    {
+        $clean = [];
+        foreach ($ids as $rawId) {
+            if (!is_scalar($rawId)) {
+                continue;
+            }
+            $id = (int) $rawId;
+            if ($id > 0 && !in_array($id, $clean, true)) {
+                $clean[] = $id;
+            }
+            if (count($clean) >= 12) {
+                break;
+            }
+        }
+        if ($clean === []) {
+            return [];
+        }
+
+        $params = [':lang' => $lang];
+        $placeholders = [];
+        foreach ($clean as $index => $id) {
+            $placeholder = ':id_' . $index;
+            $placeholders[] = $placeholder;
+            $params[$placeholder] = $id;
+        }
+
+        $stmt = Database::pdo()->prepare(
+            'SELECT * FROM widgets WHERE id IN (' . implode(', ', $placeholders) . ")
+             AND is_active = 1 AND (lang = :lang OR lang = '')"
+        );
+        $stmt->execute($params);
+
+        $byId = [];
+        foreach ($stmt->fetchAll() as $widget) {
+            $byId[(int) $widget['id']] = $widget;
+        }
+
+        $ordered = [];
+        foreach ($clean as $id) {
+            if (isset($byId[$id])) {
+                $ordered[] = $byId[$id];
+            }
+        }
+
+        return $ordered;
+    }
+
     public static function renderSidebar(string $sidebar, string $lang): string
     {
         $html = '';

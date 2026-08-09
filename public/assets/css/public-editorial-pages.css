@@ -1223,6 +1223,17 @@
     box-shadow: 0 22px 48px -40px rgba(15, 43, 70, .48);
 }
 
+.editorial-page__content .bio-side__widgets {
+    display: grid;
+    gap: 20px;
+    min-width: 0;
+}
+
+.editorial-page__content .bio-side__widgets .widget {
+    min-width: 0;
+    margin-bottom: 0;
+}
+
 .editorial-page__content .bio-edu__list {
     margin: 0;
 }

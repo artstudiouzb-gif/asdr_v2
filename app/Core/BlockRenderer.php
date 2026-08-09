@@ -457,6 +457,18 @@ final class BlockRenderer
             }
         }
 
+        if ($type === 'bio_education') {
+            $lang = Locale::current();
+            $data['_widgets_before_html'] = WidgetRenderer::renderSelection(
+                (array) ($data['widgets_before'] ?? []),
+                $lang
+            );
+            $data['_widgets_after_html'] = WidgetRenderer::renderSelection(
+                (array) ($data['widgets_after'] ?? []),
+                $lang
+            );
+        }
+
         // Блоки-обёртки над существующими сущностями (группа 4): выводят
         // опубликованные записи команды/проектов, ограниченные limit (0 = все).
         if ($type === 'team_list') {
