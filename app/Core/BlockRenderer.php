@@ -221,6 +221,10 @@ final class BlockRenderer
         if (!in_array($bg, ['none', 'light', 'tint', 'navy'], true)) {
             $bg = 'none';
         }
+        $surface = (string) ($data['_surface'] ?? 'flat');
+        if (!in_array($surface, ['flat', 'card'], true)) {
+            $surface = 'flat';
+        }
         $fullwidth = !empty($data['_fullwidth']);
         $padMap = ['none' => '0', 'small' => 'var(--space-small)', 'medium' => 'var(--space-premium)', 'large' => 'var(--space-max)'];
         $extraClass = '';
@@ -229,6 +233,9 @@ final class BlockRenderer
         }
         if ($fullwidth) {
             $extraClass .= ' cms-block--fullwidth';
+        }
+        if ($surface === 'card') {
+            $extraClass .= ' cms-block--surface-card';
         }
         // Ограничение по устройству — только CSS: кэш страницы общий, серверное
         // ветвление по User-Agent сделало бы его непригодным.
