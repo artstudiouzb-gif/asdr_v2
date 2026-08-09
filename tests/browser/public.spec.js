@@ -143,3 +143,41 @@ test('theme toggle and accessibility panel toggle data attributes correctly', as
     }
 });
 
+test('explicit block paddings override page rhythm and keep print/a11y modes intact', async ({ page }) => {
+    await page.setContent(`
+        <main class="site-content editorial-page">
+            <div class="content-pagehead"></div>
+            <div class="page-blocks editorial-page__content">
+                <section id="block-first" class="cms-block cms-block--text cms-block--space-premium cms-block--pad-top-custom cms-block--pad-bottom-custom">Первый</section>
+                <section id="block-second" class="cms-block cms-block--text cms-block--space-premium cms-block--pad-top-custom cms-block--pad-bottom-custom">Второй</section>
+                <section id="block-bio" class="cms-block cms-block--bio_education cms-block--space-premium cms-block--pad-top-custom cms-block--pad-bottom-custom"><div class="block-bio">Биография</div></section>
+                <section class="cms-block cms-block--hero cms-block--space-none">Hero</section>
+                <section id="block-counters" class="cms-block cms-block--counters cms-block--space-premium cms-block--pad-top-custom cms-block--pad-bottom-custom">Счётчики</section>
+            </div>
+        </main>
+        <style>
+            #block-first { --block-pad-top: 0; --block-pad-bottom: 96px; }
+            #block-second { --block-pad-top: 96px; --block-pad-bottom: 0; }
+            #block-bio { --block-pad-top: 0; --block-pad-bottom: 96px; }
+            #block-counters { --block-pad-top: 96px; --block-pad-bottom: 0; }
+        </style>
+    `);
+    await page.addStyleTag({ path: require('node:path').resolve(__dirname, '../../public/assets/css/public.min.css') });
+
+    const paddings = async (selector) => page.locator(selector).evaluate((element) => {
+        const style = getComputedStyle(element);
+        return [style.paddingTop, style.paddingBottom];
+    });
+
+    expect(await paddings('#block-first')).toEqual(['0px', '96px']);
+    expect(await paddings('#block-second')).toEqual(['96px', '0px']);
+    expect(await paddings('#block-bio')).toEqual(['0px', '96px']);
+    expect(await paddings('#block-counters')).toEqual(['96px', '0px']);
+
+    await page.locator('html').evaluate((element) => element.setAttribute('data-a11y-reading', 'on'));
+    expect(await paddings('#block-bio')).toEqual(['18px', '18px']);
+    await page.locator('html').evaluate((element) => element.removeAttribute('data-a11y-reading'));
+
+    await page.emulateMedia({ media: 'print' });
+    expect(await paddings('#block-bio')).toEqual(['12px', '12px']);
+});
