@@ -41,16 +41,20 @@ test('Преимущества: в последнем ряду не остаёт
     }
 });
 
-test('Преимущества: хвост последнего ряда занимает всю ширину', function () {
-    // Пять карточек: три дорожки по два деления, хвост из двух карточек
-    // растягивается на три деления каждая — пустых ячеек справа нет.
+test('Преимущества: до пяти карточек — один ряд, дальше хвост во всю ширину', function () {
+    // Пять карточек идут пятёркой в один ряд: делить их 3+2 незачем.
     $css = grid_block_css('advantages', 5, ['variant' => 'grid']);
-    assert_contains('--grid-track:6', $css);
-    assert_contains('--grid-span:2', $css);
-    assert_contains(':nth-last-child(-n+2)', $css);
-    assert_contains('grid-column:span 3', $css);
+    assert_contains('--grid-track:5', $css);
+    assert_contains('--grid-span:1', $css);
+    assert_not_contains('nth-last-child', $css);
+
+    // Семь карточек в один ряд не помещаются: три дорожки по два деления,
+    // хвост растягивается — пустых ячеек справа нет.
+    $tail = grid_block_css('advantages', 7, ['variant' => 'grid']);
+    assert_contains('--grid-span:3', $tail);
+    assert_contains(':nth-last-child(-n+3)', $tail);
     // Мобильную раскладку задаёт тема, поэтому растяжение только на десктопе.
-    assert_contains('@media (min-width:901px)', $css);
+    assert_contains('@media (min-width:901px)', $tail);
 
     // Восьмёрка делится на четыре колонки нацело — хвостового правила нет.
     $even = grid_block_css('advantages', 8, ['variant' => 'grid']);

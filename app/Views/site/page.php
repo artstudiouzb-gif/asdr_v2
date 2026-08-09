@@ -14,8 +14,13 @@ $hideChrome = !empty($page['hide_chrome']); // лендинг (группа 6)
 $transparentHeader = !empty($page['transparent_header']);
 require __DIR__ . '/_header.php';
 
-// Первый блок — hero (шапка-герой)? Тогда он служит заголовком страницы.
+// Блоки, которые сами содержат заголовок страницы. Для них отдельный
+// editorial pagehead не нужен, иначе на странице появятся два h1.
 $firstIsHero = (bool) preg_match('/^\s*<section\b[^>]*\bcms-block--hero\b/', $content);
+$firstOwnsHeading = (bool) preg_match(
+    '/^\s*<section\b[^>]*\bcms-block--(?:hero|person_profile|u30_report)\b/',
+    $content
+);
 $pageLead = trim((string) ($page['lead'] ?? ''));
 
 // Определяем, является ли эта страница Главной базово или по языку.
@@ -26,12 +31,17 @@ if ($isHome) {
     $content = preg_replace('/<nav\b[^>]*\bclass="[^"]*\b(?:site-crumbs|content-crumbs)\b[^"]*"[^>]*>.*?<\/nav>/si', '', $content);
 }
 
+$ancestorTrail = !$isHome
+    ? \App\Models\Page::ancestorTrail($page, \App\Core\Locale::current())
+    : [];
+$crumbsHtml = '';
+
 // Хлебные крошки для обычных страниц (не главная, не лендинг).
 if (!$isHome && !$hideChrome) {
     $crumbs = [
         ['label' => \App\Core\Lang::t('Главная'), 'url' => \App\Core\Locale::url('/')],
     ];
-    foreach (\App\Models\Page::ancestorTrail($page, \App\Core\Locale::current()) as $ancestor) {
+    foreach ($ancestorTrail as $ancestor) {
         if (!empty($ancestor['is_home']) || (string) ($ancestor['slug'] ?? '') === 'home') {
             continue;
         }
@@ -44,53 +54,90 @@ if (!$isHome && !$hideChrome) {
         ];
     }
     $crumbs[] = ['label' => (string) ($page['title'] ?? '')];
+
     // Если первый блок страницы — hero (шапка-герой), крошки встраиваем внутрь
-    // hero (поверх фона, сверху), а не отдельной серой полосой над ним.
+    // hero (поверх фона, сверху), а не отдельной полосой над ним.
     if ($firstIsHero) {
-        // Помечаем первый hero как «шапку страницы» — CSS убирает отступ между
-        // шапкой сайта и hero (герой встаёт вплотную под меню).
         $content = preg_replace('/(class="[^"]*\bcms-block--hero\b)/', '$1 cms-block--page-hero', $content, 1);
         $crumbsClass = 'content-crumbs--on-hero';
         ob_start();
         require __DIR__ . '/_crumbs.php';
-        $crumbsHtml = ob_get_clean();
+        $crumbsHtml = (string) ob_get_clean();
         unset($crumbsClass);
-        // Вставляем сразу после корневого <div class="block-hero …">.
         if ($crumbsHtml !== '') {
             $content = preg_replace('/(<div class="block-hero\b[^>]*>)/', '$1' . addcslashes($crumbsHtml, '\\$'), $content, 1);
         }
+        $crumbsHtml = '';
     } else {
+        ob_start();
         require __DIR__ . '/_crumbs.php';
+        $crumbsHtml = (string) ob_get_clean();
     }
 }
 
-// Заголовок страницы + лид для простых страниц (без hero-шапки): показываем,
-// когда задан лид, чтобы не менять вид существующих страниц без описания.
-$showLeadHead = !$isHome && !$hideChrome && !$firstIsHero && $pageLead !== '';
-if ($showLeadHead): ?>
-    <div class="content-pagehead">
-        <div class="content-pagehead__inner">
-            <h1 class="content-pagehead__title"><?= htmlspecialchars((string) ($page['title'] ?? ''), ENT_QUOTES) ?></h1>
-            <p class="content-pagehead__lead"><?= nl2br(htmlspecialchars($pageLead, ENT_QUOTES)) ?></p>
-        </div>
-    </div>
-<?php endif; ?>
-<?php
+// Все обычные внутренние страницы получают единый editorial shell. Hero и
+// лендинги сохраняют собственную композицию; профиль руководителя оставляет
+// свой h1, но всё равно живёт внутри той же открытой сетки контента.
+$editorialPage = !$isHome && !$hideChrome && !$firstIsHero;
+$showPageHead = $editorialPage && !$firstOwnsHeading;
+
+
 $hasSidebar = $sidebar !== null && trim($sidebar['html']) !== '';
 ?>
-<?php if ($hasSidebar): ?>
-    <div class="layout layout--<?= htmlspecialchars($sidebar['position'], ENT_QUOTES) ?>">
-        <?php if ($sidebar['position'] === 'left'): ?>
-            <aside class="layout__sidebar"><?= $sidebar['html'] ?></aside>
-            <div class="layout__main"><?= $content ?></div>
+
+<?php if ($editorialPage): ?>
+<div class="editorial-page<?= $firstOwnsHeading ? ' editorial-page--block-heading' : '' ?>">
+    <?php if ($crumbsHtml !== ''): ?>
+        <div class="editorial-page__crumbs"><?= $crumbsHtml ?></div>
+    <?php endif; ?>
+
+    <?php if ($showPageHead): ?>
+        <header class="content-pagehead content-pagehead--editorial">
+            <div class="content-pagehead__inner">
+                <div class="content-pagehead__copy">
+                    <h1 class="content-pagehead__title"><?= htmlspecialchars((string) ($page['title'] ?? ''), ENT_QUOTES) ?></h1>
+                    <?php if ($pageLead !== ''): ?>
+                        <p class="content-pagehead__lead"><?= nl2br(htmlspecialchars($pageLead, ENT_QUOTES)) ?></p>
+                    <?php endif; ?>
+                </div>
+                <span class="content-pagehead__emblem" aria-hidden="true"></span>
+            </div>
+        </header>
+    <?php endif; ?>
+
+    <div class="editorial-page__content">
+        <?php if ($hasSidebar): ?>
+            <div class="layout layout--<?= htmlspecialchars($sidebar['position'], ENT_QUOTES) ?>">
+                <?php if ($sidebar['position'] === 'left'): ?>
+                    <aside class="layout__sidebar"><?= $sidebar['html'] ?></aside>
+                    <div class="layout__main"><?= $content ?></div>
+                <?php else: ?>
+                    <div class="layout__main"><?= $content ?></div>
+                    <aside class="layout__sidebar"><?= $sidebar['html'] ?></aside>
+                <?php endif; ?>
+            </div>
         <?php else: ?>
-            <div class="layout__main"><?= $content ?></div>
-            <aside class="layout__sidebar"><?= $sidebar['html'] ?></aside>
+            <?= $content ?>
         <?php endif; ?>
     </div>
+</div>
 <?php else: ?>
-    <?= $content ?>
+    <?php if ($crumbsHtml !== ''): ?><?= $crumbsHtml ?><?php endif; ?>
+    <?php if ($hasSidebar): ?>
+        <div class="layout layout--<?= htmlspecialchars($sidebar['position'], ENT_QUOTES) ?>">
+            <?php if ($sidebar['position'] === 'left'): ?>
+                <aside class="layout__sidebar"><?= $sidebar['html'] ?></aside>
+                <div class="layout__main"><?= $content ?></div>
+            <?php else: ?>
+                <div class="layout__main"><?= $content ?></div>
+                <aside class="layout__sidebar"><?= $sidebar['html'] ?></aside>
+            <?php endif; ?>
+        </div>
+    <?php else: ?>
+        <?= $content ?>
+    <?php endif; ?>
 <?php endif; ?>
+
 <?php
 // Дата последнего обновления — обязательный реквизит страницы сайта госоргана
 // (и подсказка посетителю, насколько сведения свежие). На главной и лендингах

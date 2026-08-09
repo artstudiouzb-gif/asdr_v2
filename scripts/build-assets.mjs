@@ -13,6 +13,7 @@ const cssSources = [
     'public/assets/css/rich-content.css',
     'public/assets/css/a11y.css',
     'public/assets/css/public-layout-polish.css',
+    'public/assets/css/public-editorial-pages.css',
 ];
 
 const jsSources = [
