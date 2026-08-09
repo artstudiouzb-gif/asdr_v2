@@ -6478,7 +6478,8 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .newsdetail-related__grid { gap: clamp(16px, 2vw, 24px); }
 .relnews-card {
     gap: 9px;
-    padding: 10px;
+    padding: 0 0 14px;
+    overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--gov-border) 78%, transparent);
     border-radius: var(--radius, 14px);
     background: var(--gov-surface);
@@ -6489,11 +6490,50 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     border-color: color-mix(in srgb, var(--gov-teal) 30%, var(--gov-border));
     box-shadow: 0 18px 40px -30px rgba(11, 26, 48, .48);
 }
-.relnews-card__media { border-radius: var(--radius-sm, 8px); }
+.relnews-card__media { border-radius: 0; }
 .relnews-card:hover .relnews-card__media { transform: none; box-shadow: none; }
-.relnews-card__date,
-.relnews-card__title { margin-inline: 4px; }
+.relnews-card > .news-meta { margin: 14px 14px 0; }
+.relnews-card__date { margin-inline: 0; }
+.relnews-card__title,
+.relnews-card__excerpt { margin-inline: 14px; }
 .relnews-card__title { margin-bottom: 5px; }
+
+/* Фото в карточках начинается от внешнего контура, как у крупной новости.
+   Отступ остаётся у текста, но больше не образует белую «фоторамку». */
+.album-card,
+.project-card,
+.person-card,
+.team-card,
+.catcard--with-image {
+    overflow: hidden;
+}
+.album-card,
+.project-card,
+.person-card {
+    gap: 0;
+    padding: 0;
+}
+.album-card__cover,
+.project-card__cover,
+.person-card__photo,
+.person-card__placeholder,
+.team-card__photo,
+.catcard__event-media {
+    border-radius: 0;
+}
+.album-card__body { padding: 14px; }
+.team-card {
+    gap: 0;
+    padding: 0 0 14px;
+}
+.team-card__photo { margin-bottom: 12px; }
+.team-card__name,
+.team-card__position { margin-inline: 14px; }
+.catcard--with-image { padding: 0 24px 24px; }
+.catcard--with-image .catcard__event-media {
+    width: calc(100% + 48px);
+    margin-inline: -24px;
+}
 
 @media (max-width: 1000px) {
     .newsdetail:not(.newsdetail--premium) { display: flex; }

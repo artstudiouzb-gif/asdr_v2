@@ -391,7 +391,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <div class="newsdetail-card newsdetail-card--summary">
                     <div class="newsdetail-card__heading">
                         <span class="newsdetail-card__heading-icon" aria-hidden="true"><?= \App\Core\Icon::render('notes', 20, 'ui-icon', 1.7) ?></span>
-                        <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Ключевые тезисы'), ENT_QUOTES) ?></h2>
+                        <h3 class="newsdetail-card__title"><?= htmlspecialchars(t('Ключевые тезисы'), ENT_QUOTES) ?></h3>
                     </div>
                     <ol class="newsdetail-points">
                         <?php foreach ($keyPoints as $i => $point): ?>
@@ -474,7 +474,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             <?php endif; ?>
             <?php if ($isPremium && !empty($slides)): ?>
                 <div class="newsdetail-card">
-                    <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Галерея'), ENT_QUOTES) ?></h2>
+                    <h3 class="newsdetail-card__title"><?= htmlspecialchars(t('Галерея'), ENT_QUOTES) ?></h3>
                     <div class="newsdetail-sidegallery">
                         <?php foreach (array_slice($slides, 0, 4) as $i => $s): ?>
                             <?php
@@ -494,7 +494,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <div class="newsdetail-card">
                     <div class="newsdetail-card__heading">
                         <span class="newsdetail-card__heading-icon" aria-hidden="true"><?= \App\Core\Icon::render('calendar-event', 20, 'ui-icon', 1.7) ?></span>
-                        <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('О мероприятии'), ENT_QUOTES) ?></h2>
+                        <h3 class="newsdetail-card__title"><?= htmlspecialchars(t('О мероприятии'), ENT_QUOTES) ?></h3>
                     </div>
                     <ul class="newsdetail-event">
                         <?php foreach ($eventMeta as $i => $line): ?>
@@ -518,7 +518,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <div class="newsdetail-card">
                     <div class="newsdetail-card__heading">
                         <span class="newsdetail-card__heading-icon" aria-hidden="true"><?= \App\Core\Icon::render('file-stack', 20, 'ui-icon', 1.7) ?></span>
-                        <h2 class="newsdetail-card__title"><?= htmlspecialchars(t('Документы'), ENT_QUOTES) ?></h2>
+                        <h3 class="newsdetail-card__title"><?= htmlspecialchars(t('Документы'), ENT_QUOTES) ?></h3>
                     </div>
                     <div class="newsdetail-docs">
                         <?php foreach ($docs as $doc): ?>
@@ -548,7 +548,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             } elseif ($sidebar !== null) {
             ?>
                 <div class="newsdetail-subscribe newsdetail-subscribe--fallback no-print">
-                    <h2 class="newsdetail-subscribe__title"><?= htmlspecialchars(t('Подпишитесь на новости Агентства'), ENT_QUOTES) ?></h2>
+                    <h3 class="newsdetail-subscribe__title"><?= htmlspecialchars(t('Подпишитесь на новости Агентства'), ENT_QUOTES) ?></h3>
                     <p class="newsdetail-subscribe__text"><?= htmlspecialchars(t('Получайте главные новости и аналитику на почту.'), ENT_QUOTES) ?></p>
                     <form class="newsdetail-subscribe__form" method="post" action="<?= htmlspecialchars(Locale::url('subscribe', $lang), ENT_QUOTES) ?>">
                         <?= \App\Core\Csrf::field() ?>
