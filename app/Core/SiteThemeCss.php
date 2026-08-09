@@ -18,18 +18,18 @@ final class SiteThemeCss
      */
     public static function build(array $designValues, array $headerConfig, bool $transparentHeader): string
     {
-        $primary = (string) Setting::get('color_primary', '#155182');
-        $accent = (string) Setting::get('color_accent', '#00A0A6');
+        $primary = (string) Setting::get('color_primary', '#0F2B46');
+        $accent = (string) Setting::get('color_accent', '#009BBE');
         $colors = DesignSettings::semanticColors();
         $spacings = DesignSettings::semanticSpacings();
         $font = self::fontValue((string) Setting::get(
             'font_family',
-            "'PT Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+            "'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
         ), 'system-ui, sans-serif');
-        // Пара PT Serif + PT Sans нарисована одной командой и лежит локально:
-        // антиква в заголовках даёт официальный голос, гротеск — читаемый текст.
-        $heading = (string) Setting::get('font_heading', "'PT Serif', Georgia, serif");
-        $heading = self::fontValue($heading !== '' ? $heading : $font, "'PT Serif', Georgia, serif");
+        // Заголовки идут тем же гротеском, что и текст: так задано в концепции
+        // дизайна. Manrope лежит локально (кириллица и латиница, веса 400-700).
+        $heading = (string) Setting::get('font_heading', "'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif");
+        $heading = self::fontValue($heading !== '' ? $heading : $font, "'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif");
         $styles = (array) ($headerConfig['styles'] ?? []);
 
         $variables = [
