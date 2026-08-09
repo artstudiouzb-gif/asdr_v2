@@ -712,9 +712,13 @@ $pageCssUrls = \App\Core\CustomAssetHelper::resolveCssUrls((string) $page['custo
 <?php endforeach; ?>
 <?php endif; ?>
 </head>
-<?php $bodyClass = trim($designBodyClass
+<?php
+$isHomePage = in_array($currentReqPath, ['/', '/ru', '/uz', '/en', '/kk', '/tr', '/de'], true);
+$bodyClass = trim($designBodyClass
+    . ($isHomePage ? ' is-home' : '')
     . (!empty($previewNotice) ? ' is-preview' : '')
-    . (\App\Core\AppToolbar::isVisible() ? ' has-admin-bar' : '')); ?>
+    . (\App\Core\AppToolbar::isVisible() ? ' has-admin-bar' : ''));
+?>
 <body class="<?= htmlspecialchars($bodyClass, ENT_QUOTES) ?>">
 <?= \App\Core\AppToolbar::renderHtml(get_defined_vars()) ?>
 <a href="#main-content" class="skip-link"><?= $et('Перейти к содержимому') ?></a>
