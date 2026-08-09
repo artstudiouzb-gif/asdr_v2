@@ -71,6 +71,22 @@ final class WidgetRenderer
         ];
     }
 
+    /**
+     * Рендер выбранных виджетов внутри блока страницы. Nonce добавляется
+     * здесь же, поэтому custom_html сохраняет совместимость с CSP.
+     *
+     * @param array<int, mixed> $ids
+     */
+    public static function renderSelection(array $ids, string $lang): string
+    {
+        $html = '';
+        foreach (Widget::activeByIds($ids, $lang) as $widget) {
+            $html .= self::render($widget, $lang);
+        }
+
+        return SecurityHeaders::injectScriptNonce($html);
+    }
+
     public static function resolveTitle(array $widget, string $lang): string
     {
         $data = json_decode((string) ($widget['data'] ?? '{}'), true);
