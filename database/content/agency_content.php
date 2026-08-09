@@ -103,7 +103,7 @@ return [
                         'title' => 'Основные нормативно-правовые документы',
                         'all_text' => '',
                         'all_url' => '',
-                        'columns' => 3,
+                        'columns' => 5,
                         'search_enabled' => false,
                         'items' => [
                             ['title' => 'Создание Агентства стратегического развития Республики Узбекистан', 'meta' => '', 'url' => 'https://lex.uz/uz/docs/5520880', 'number' => 'Указ Президента № ПФ-6264', 'date' => '19 июля 2021 года'],
@@ -188,7 +188,7 @@ return [
                         'title' => 'Asosiy normativ-huquqiy hujjatlar',
                         'all_text' => '',
                         'all_url' => '',
-                        'columns' => 3,
+                        'columns' => 5,
                         'search_enabled' => false,
                         'items' => [
                             ['title' => 'O‘zbekiston Respublikasi Strategik rivojlanish agentligining tashkil etilishi', 'meta' => '', 'url' => 'https://lex.uz/uz/docs/5520880', 'number' => 'PF-6264-son Farmon', 'date' => '2021-yil 19-iyul'],
@@ -273,7 +273,7 @@ return [
                         'title' => 'Key Legal and Regulatory Documents',
                         'all_text' => '',
                         'all_url' => '',
-                        'columns' => 3,
+                        'columns' => 5,
                         'search_enabled' => false,
                         'items' => [
                             ['title' => 'Establishment of the Strategic Development Agency of the Republic of Uzbekistan', 'meta' => '', 'url' => 'https://lex.uz/uz/docs/5520880', 'number' => 'Presidential Decree No. PF-6264', 'date' => '19 July 2021'],

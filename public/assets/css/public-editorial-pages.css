@@ -220,7 +220,6 @@
         grid-template-columns: repeat(var(--grid-track, 3), minmax(0, 1fr));
     }
 }
-
 .editorial-page__content .block-advantages__item {
     min-height: 150px;
     padding: 16px 14px 15px;

@@ -771,7 +771,7 @@ final class BlockController
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => $this->safeUrlField('all_url'),
-                    'columns' => max(1, min(4, (int) ($_POST['columns'] ?? 4))),
+                    'columns' => max(1, min(5, (int) ($_POST['columns'] ?? 4))),
                     'search_enabled' => !empty($_POST['search_enabled']),
                     'items' => $items,
                 ];
