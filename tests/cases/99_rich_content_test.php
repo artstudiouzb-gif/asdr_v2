@@ -40,6 +40,18 @@ test('text_image поддерживает безопасный HTML и стар�
     assert_contains('Вторая строка', $plain);
 });
 
+test('text_image адаптируется к ширине контейнера с viewport fallback', function (): void {
+    $root = dirname(__DIR__, 2);
+    $css = (string) file_get_contents($root . '/public/assets/css/public-layout-polish.css');
+    $fallback = (string) file_get_contents($root . '/public/assets/css/gov-theme.css');
+
+    assert_contains('.cms-block--text_image {', $css);
+    assert_contains('container-type: inline-size;', $css);
+    assert_contains('container-name: text-image;', $css);
+    assert_contains('@container text-image (max-width: 900px)', $css);
+    assert_contains('@media (max-width: 900px)', $fallback);
+});
+
 test('форма и обработчик text_image используют WYSIWYG и текстовый санитайзер', function (): void {
     $root = dirname(__DIR__, 2);
     $form = (string) file_get_contents($root . '/app/Views/admin/pages/block_form.php');
