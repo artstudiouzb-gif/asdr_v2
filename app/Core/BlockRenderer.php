@@ -244,9 +244,11 @@ final class BlockRenderer
         $padTop = (string) ($data['_pad_top'] ?? 'default');
         $padBottom = (string) ($data['_pad_bottom'] ?? 'default');
         if (isset($padMap[$padTop])) {
+            $extraClass .= ' cms-block--pad-top-custom';
             $styleVars .= '--block-pad-top:' . $padMap[$padTop] . ';';
         }
         if (isset($padMap[$padBottom])) {
+            $extraClass .= ' cms-block--pad-bottom-custom';
             $styleVars .= '--block-pad-bottom:' . $padMap[$padBottom] . ';';
         }
         if ($styleVars !== '') {
