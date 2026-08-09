@@ -8,7 +8,10 @@
  */
 
 .editorial-page {
-    --editorial-wide: min(1180px, calc(100vw - 48px));
+    /* Ширина содержимого = ширина сайта. Собственные 1180px уводили контент
+       на 110px внутрь от логотипа, подвала и строки «Обновлено», которые
+       стоят по краю контейнера. Родитель уже даёт нужные поля. */
+    --editorial-wide: 100%;
     --editorial-reading: 760px;
     --editorial-line: color-mix(in srgb, var(--gov-border) 92%, transparent);
     --editorial-muted: color-mix(in srgb, var(--gov-muted) 94%, transparent);
@@ -646,7 +649,6 @@ html[data-theme="dark"] .content-pagehead__emblem {
 /* Responsive ------------------------------------------------------------- */
 @media (max-width: 1000px) {
     .editorial-page {
-        --editorial-wide: min(100% - 36px, 920px);
     }
 
 
@@ -660,7 +662,6 @@ html[data-theme="dark"] .content-pagehead__emblem {
 
 @media (max-width: 720px) {
     .editorial-page {
-        --editorial-wide: calc(100% - 28px);
     }
 
     .editorial-page__crumbs {
@@ -710,7 +711,6 @@ html[data-theme="dark"] .content-pagehead__emblem {
 
 @media (max-width: 560px) {
     .editorial-page {
-        --editorial-wide: calc(100% - 24px);
     }
 
         .content-pagehead--editorial .content-pagehead__lead {
