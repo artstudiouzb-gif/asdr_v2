@@ -1,0 +1,95 @@
+name: Apply demo starter home fix
+
+on:
+  push:
+    branches:
+      - fix/demo-starter-home-seeding
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/demo-starter-home-seeding
+
+      - name: Patch semantic JSON comparison and regression test
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          seeder = Path('app/Core/DemoSeeder.php')
+          source = seeder.read_text(encoding='utf-8')
+
+          marker = '    private static function isUntouchedStarterHome(PDO $pdo, int $pageId): bool\n'
+          if marker not in source:
+              raise SystemExit('isUntouchedStarterHome marker not found')
+
+          helper = '''    /**\n     * Canonical form for decoded JSON: object key order is irrelevant, while\n     * list order and scalar types remain strict. MySQL JSON normalizes object\n     * keys, so direct PHP array identity can reject untouched starter data.\n     */\n    private static function canonicalJsonValue(mixed $value): mixed\n    {\n        if (!is_array($value)) {\n            return $value;\n        }\n        if (array_is_list($value)) {\n            return array_map(static fn (mixed $item): mixed => self::canonicalJsonValue($item), $value);\n        }\n\n        ksort($value, SORT_STRING);\n        foreach ($value as $key => $item) {\n            $value[$key] = self::canonicalJsonValue($item);\n        }\n\n        return $value;\n    }\n\n'''
+          source = source.replace(marker, helper + marker, 1)
+
+          old = '                || $data !== $expected[$i][2]) {'
+          new = '                || self::canonicalJsonValue($data) !== self::canonicalJsonValue($expected[$i][2])) {'
+          if source.count(old) != 1:
+              raise SystemExit(f'unexpected strict comparison occurrences: {source.count(old)}')
+          source = source.replace(old, new, 1)
+          seeder.write_text(source, encoding='utf-8')
+
+          test_file = Path('tests/cases/69_demo_home_fixture_test.php')
+          tests = test_file.read_text(encoding='utf-8')
+          test_marker = "test('Демо: повторный запуск не удаляет страницы и не дополняет настроенное меню', function () {\n"
+          if test_marker not in tests:
+              raise SystemExit('demo test marker not found')
+
+          regression = r'''test('Демо: сравнение стартовой главной не зависит от порядка JSON-ключей', function () {
+    $method = new ReflectionMethod(\App\Core\DemoSeeder::class, 'canonicalJsonValue');
+
+    $fromMysql = [
+        '_spacing' => 'max',
+        'button_text' => 'Последние новости',
+        'button_url' => '/news',
+        'text' => 'Актуальная информация, документы, новости и услуги в одном месте.',
+        'title' => 'Официальный сайт организации',
+    ];
+    $fixtureOrder = [
+        'title' => 'Официальный сайт организации',
+        'text' => 'Актуальная информация, документы, новости и услуги в одном месте.',
+        'button_text' => 'Последние новости',
+        'button_url' => '/news',
+        '_spacing' => 'max',
+    ];
+
+    assert_same(
+        $method->invoke(null, $fixtureOrder),
+        $method->invoke(null, $fromMysql),
+        'порядок ключей JSON-объекта не влияет на определение нетронутой главной'
+    );
+    assert_true(
+        $method->invoke(null, ['limit' => 3]) !== $method->invoke(null, ['limit' => '3']),
+        'типы JSON-значений сравниваются строго'
+    );
+
+    $seeder = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
+    assert_contains('self::canonicalJsonValue($data)', $seeder);
+    assert_not_contains('|| $data !== $expected[$i][2])', $seeder);
+});
+
+'''
+          tests = tests.replace(test_marker, regression + test_marker, 1)
+          test_file.write_text(tests, encoding='utf-8')
+
+          workflow = Path('.github/workflows/apply-demo-starter-home-fix.yml')
+          workflow.unlink()
+          PY
+
+      - name: Commit fix to branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/Core/DemoSeeder.php tests/cases/69_demo_home_fixture_test.php .github/workflows/apply-demo-starter-home-fix.yml
+          git commit -m "Fix starter home detection for MySQL JSON"
+          git push origin HEAD:fix/demo-starter-home-seeding
