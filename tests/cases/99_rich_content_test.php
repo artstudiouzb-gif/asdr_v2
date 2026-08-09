@@ -6,6 +6,7 @@ test('public editorial surfaces use the shared rich content class', function ():
     $root = dirname(__DIR__, 2);
     $files = [
         '/templates/blocks/text.php',
+        '/templates/blocks/text_image.php',
         '/templates/blocks/faq.php',
         '/app/Views/site/news_show.php',
         '/app/Views/site/project_show.php',
@@ -17,6 +18,35 @@ test('public editorial surfaces use the shared rich content class', function ():
         assert_true(is_string($view));
         assert_contains('rich-content', $view);
     }
+});
+
+test('text_image поддерживает безопасный HTML и старый простой текст', function (): void {
+    $template = dirname(__DIR__, 2) . '/templates/blocks/text_image.php';
+
+    $render = static function (string $text) use ($template): string {
+        $data = ['text' => $text];
+        ob_start();
+        require $template;
+        return (string) ob_get_clean();
+    };
+
+    $html = $render('<p>Абзац <strong>важный</strong></p><script>alert(1)</script>');
+    assert_contains('<p>Абзац <strong>важный</strong></p>', $html);
+    assert_not_contains('<script', $html);
+    assert_contains('rich-content', $html);
+
+    $plain = $render("Первая строка\nВторая строка");
+    assert_contains('Первая строка<br', $plain);
+    assert_contains('Вторая строка', $plain);
+});
+
+test('форма и обработчик text_image используют WYSIWYG и текстовый санитайзер', function (): void {
+    $root = dirname(__DIR__, 2);
+    $form = (string) file_get_contents($root . '/app/Views/admin/pages/block_form.php');
+    $controller = (string) file_get_contents($root . '/app/Controllers/Admin/BlockController.php');
+
+    assert_contains('id="text" name="text" rows="5" data-wysiwyg', $form);
+    assert_contains("HtmlSanitizer::sanitizeText((string) (\$_POST['text'] ?? ''))", $controller);
 });
 
 test('rich content stylesheet covers editorial elements and responsive tables', function (): void {

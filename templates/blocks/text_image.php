@@ -1,7 +1,15 @@
 <?php
 /** @var array $data */
 $title = trim((string) ($data['title'] ?? ''));
-$text = trim((string) ($data['text'] ?? ''));
+$rawText = trim((string) ($data['text'] ?? ''));
+// Новые записи содержат безопасный HTML из WYSIWYG. Старые записи могли
+// хранить обычный текст, поэтому для них сохраняем прежнее отображение
+// переносов строк. В обоих случаях вывод проходит через allowlist.
+$text = \App\Core\HtmlSanitizer::sanitizeText($rawText);
+$textIsPlain = $rawText !== '' && $rawText === strip_tags($rawText);
+if ($textIsPlain) {
+    $text = nl2br($text);
+}
 $image = trim((string) ($data['image'] ?? ''));
 $items = $data['items'] ?? [];
 $imageSide = ($data['image_side'] ?? 'right') === 'left' ? 'left' : 'right';
@@ -10,7 +18,7 @@ $mediaClasses = \App\Core\MediaPosition::classes($data['image_position'] ?? null
 <div class="block-textimage block-textimage--image-<?= $imageSide ?><?= $image !== '' ? '' : ' block-textimage--no-image' ?>">
     <div class="textimage__info">
         <?php if ($title !== ''): ?><h2 class="textimage__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
-        <?php if ($text !== ''): ?><div class="textimage__text"><?= nl2br(htmlspecialchars($text, ENT_QUOTES)) ?></div><?php endif; ?>
+        <?php if ($text !== ''): ?><div class="textimage__text rich-content"><?= $text ?></div><?php endif; ?>
         <?php if (!empty($items)): ?>
             <div class="textimage__features">
                 <?php foreach ($items as $item): ?>

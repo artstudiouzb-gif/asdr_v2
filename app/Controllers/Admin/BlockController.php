@@ -807,7 +807,10 @@ final class BlockController
                 }
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'text' => TextProcessor::typographPlain(trim((string) ($_POST['text'] ?? '')), $locale),
+                    'text' => TextProcessor::process(
+                        \App\Core\HtmlSanitizer::sanitizeText((string) ($_POST['text'] ?? '')),
+                        $locale
+                    ),
                     'image' => \App\Core\UrlGuard::isSafeMedia(trim((string) ($_POST['image'] ?? '')))
                         ? trim((string) ($_POST['image'] ?? ''))
                         : '',
