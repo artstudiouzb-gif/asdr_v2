@@ -407,21 +407,6 @@
       "lead": "Данные и аналитические материалы для принятия обоснованных стратегических решений.",
       "blocks": [
         [
-          "hero",
-          "",
-          {
-            "title": "Аналитические исследования",
-            "subtitle": "Данные и аналитические материалы для принятия обоснованных стратегических решений.",
-            "image": "/uploads/public/hero-demo-g3.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 60
-          }
-        ],
-        [
           "counters",
           "",
           {
@@ -498,21 +483,6 @@
       "lead": "Asoslangan strategik qarorlar qabul qilish uchun ma’lumotlar va tahliliy materiallar.",
       "blocks": [
         [
-          "hero",
-          "",
-          {
-            "title": "Tahliliy tadqiqotlar",
-            "subtitle": "Asoslangan strategik qarorlar qabul qilish uchun ma’lumotlar va tahliliy materiallar.",
-            "image": "/uploads/public/hero-demo-g3.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 60
-          }
-        ],
-        [
           "counters",
           "",
           {
@@ -580,21 +550,6 @@
       "title": "Пресс-центр",
       "lead": "Оперативная информация о деятельности Агентства, новости, пресс-релизы, мероприятия и медиаматериалы.",
       "blocks": [
-        [
-          "hero",
-          "",
-          {
-            "title": "Пресс-центр",
-            "subtitle": "Оперативная информация о деятельности Агентства, новости, пресс-релизы, мероприятия и медиаматериалы.",
-            "image": "/uploads/public/hero-demo.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 60
-          }
-        ],
         [
           "counters",
           "",
@@ -721,21 +676,6 @@
       "lead": "Agentlik faoliyati, yangiliklar, press-relizlar va mediamateriallar haqida tezkor ma’lumotlar.",
       "blocks": [
         [
-          "hero",
-          "",
-          {
-            "title": "Matbuot xizmati",
-            "subtitle": "Agentlik faoliyati, yangiliklar, press-relizlar va mediamateriallar haqida tezkor ma’lumotlar.",
-            "image": "/uploads/public/hero-demo.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 60
-          }
-        ],
-        [
           "counters",
           "",
           {
@@ -825,21 +765,6 @@
       "lead": "Конференции, форумы, семинары и открытые обсуждения Агентства.",
       "blocks": [
         [
-          "hero",
-          "",
-          {
-            "title": "Мероприятия",
-            "subtitle": "Конференции, форумы, семинары и открытые обсуждения Агентства.",
-            "image": "/uploads/public/hero-demo.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 60
-          }
-        ],
-        [
           "counters",
           "",
           {
@@ -907,21 +832,6 @@
       "title": "Tadbirlar",
       "lead": "Agentlik tomonidan o‘tkaziladigan konferensiyalar, forumlar va ochiq muloqotlar.",
       "blocks": [
-        [
-          "hero",
-          "",
-          {
-            "title": "Tadbirlar",
-            "subtitle": "Agentlik tomonidan o‘tkaziladigan konferensiyalar, forumlar va ochiq muloqotlar.",
-            "image": "/uploads/public/hero-demo.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 60
-          }
-        ],
         [
           "counters",
           "",
@@ -1174,21 +1084,6 @@
       "lead": "Мы открыты для сотрудничества и диалога. Свяжитесь с нами любым удобным способом.",
       "blocks": [
         [
-          "hero",
-          "",
-          {
-            "title": "Контакты",
-            "subtitle": "Мы открыты для сотрудничества и диалога. Свяжитесь с нами любым удобным способом.",
-            "image": "/uploads/public/hero-demo-g2.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 58
-          }
-        ],
-        [
           "contact_cards",
           "",
           {
@@ -1268,21 +1163,6 @@
       "title": "Bog‘lanish",
       "lead": "Biz muloqot va hamkorlik uchun ochiqmiz. O‘zingizga qulay usulda bog‘laning.",
       "blocks": [
-        [
-          "hero",
-          "",
-          {
-            "title": "Bog‘lanish",
-            "subtitle": "Biz muloqot va hamkorlik uchun ochiqmiz. O‘zingizga qulay usulda bog‘laning.",
-            "image": "/uploads/public/hero-demo-g2.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 58
-          }
-        ],
         [
           "contact_cards",
           "",

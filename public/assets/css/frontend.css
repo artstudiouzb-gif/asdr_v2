@@ -470,6 +470,15 @@ summary:focus-visible {
     color: var(--text-main, #222);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+/* Флажок и радиокнопка — не текстовые поля: правило выше растягивало их на
+   всю строку, из-за чего галочка согласия уезжала от своей подписи к
+   противоположному краю формы. */
+.block-form__field input[type="checkbox"],
+.block-form__field input[type="radio"] {
+    width: auto;
+    flex: none;
+    padding: 0;
+}
 .block-form__field input:focus, .block-form__field textarea:focus, .block-form__field select:focus {
     outline: none;
     border-color: var(--color-primary, #173a63);
