@@ -63,7 +63,87 @@
     </div>
 </div>
 
+<?php
+$isCardsGridEditor = isset($block)
+    && is_array($block)
+    && (string) ($block['type'] ?? '') === 'cards_grid'
+    && isset($data)
+    && is_array($data);
+$cardsGridEditorStyle = $isCardsGridEditor && in_array($data['_cards_style'] ?? 'old', ['old', 'new'], true)
+    ? (string) $data['_cards_style']
+    : 'old';
+$cardsGridEditorIconSize = $isCardsGridEditor
+    ? max(16, min(64, (int) ($data['_cards_icon_size'] ?? 22)))
+    : 22;
+?>
 <script nonce="<?= \App\Core\SecurityHeaders::nonce() ?>">
+<?php if ($isCardsGridEditor): ?>
+/* Настройки внешнего вида cards_grid добавляем только в редактор конкретного
+   блока. На остальные карточки и страницы эти поля не распространяются. */
+(function () {
+    var variant = document.getElementById('cards_variant');
+    if (!variant || document.getElementById('cards_style')) { return; }
+    var anchor = variant.closest('.form-field');
+    if (!anchor || !anchor.parentNode) { return; }
+
+    var styleField = document.createElement('div');
+    styleField.className = 'form-field';
+    var styleLabel = document.createElement('label');
+    styleLabel.setAttribute('for', 'cards_style');
+    styleLabel.textContent = 'Стиль карточек';
+    var styleSelect = document.createElement('select');
+    styleSelect.id = 'cards_style';
+    styleSelect.name = 'cards_style';
+    [
+        ['old', 'Старый — классические карточки'],
+        ['new', 'Новый — редакционный стиль']
+    ].forEach(function (item) {
+        var option = document.createElement('option');
+        option.value = item[0];
+        option.textContent = item[1];
+        styleSelect.appendChild(option);
+    });
+    styleSelect.value = <?= json_encode($cardsGridEditorStyle, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    var styleHint = document.createElement('span');
+    styleHint.className = 'form-hint';
+    styleHint.textContent = 'Только для этого блока. Новый стиль — плоская редакционная подача «Основных направлений» без глобальной замены карточек сайта.';
+    styleField.appendChild(styleLabel);
+    styleField.appendChild(styleSelect);
+    styleField.appendChild(styleHint);
+
+    var sizeField = document.createElement('div');
+    sizeField.className = 'form-field';
+    var sizeLabel = document.createElement('label');
+    sizeLabel.setAttribute('for', 'cards_icon_size');
+    sizeLabel.textContent = 'Размер иконок, px';
+    var sizeInput = document.createElement('input');
+    sizeInput.type = 'number';
+    sizeInput.id = 'cards_icon_size';
+    sizeInput.name = 'cards_icon_size';
+    sizeInput.min = '16';
+    sizeInput.max = '64';
+    sizeInput.step = '1';
+    sizeInput.value = <?= (int) $cardsGridEditorIconSize ?>;
+    var sizeHint = document.createElement('span');
+    sizeHint.className = 'form-hint';
+    sizeHint.textContent = 'Настройка действует только на иконки этого блока.';
+    sizeField.appendChild(sizeLabel);
+    sizeField.appendChild(sizeInput);
+    sizeField.appendChild(sizeHint);
+
+    anchor.parentNode.insertBefore(styleField, anchor.nextSibling);
+    anchor.parentNode.insertBefore(sizeField, styleField.nextSibling);
+
+    function syncCardsGridControls() {
+        var iconVariant = variant.value === 'icon';
+        styleField.hidden = !iconVariant;
+        sizeField.hidden = !iconVariant;
+    }
+    variant.addEventListener('change', syncCardsGridControls);
+    syncCardsGridControls();
+})();
+<?php endif; ?>
+
 var stickyActions = Array.prototype.slice.call(document.querySelectorAll('.form-actions--sticky'));
 if (stickyActions.length) {
     document.body.classList.add('has-sticky-actions');

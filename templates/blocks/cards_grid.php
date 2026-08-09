@@ -15,8 +15,29 @@ $mediaClasses = MediaPosition::classes($data['image_position'] ?? null, $data['i
 $cardBg = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['card_bg'] ?? '')) ? (string) $data['card_bg'] : '';
 $textColor = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['text_color'] ?? '')) ? (string) $data['text_color'] : '';
 $cardStyle = ($cardBg !== '' ? '--card-bg:' . $cardBg . ';' : '') . ($textColor !== '' ? '--cards-text:' . $textColor . ';' : '');
-$templateCss = '#block-' . (int) $blockId . ' .block-cards{--cards-cols:' . $columns . ';' . $cardStyle . '}';
+$visualStyle = in_array($data['_cards_style'] ?? 'old', ['old', 'new'], true) ? (string) $data['_cards_style'] : 'old';
+$iconSize = max(16, min(64, (int) ($data['_cards_icon_size'] ?? 22)));
+$iconBoxSize = max(42, $iconSize + 18);
+$scope = '#block-' . (int) $blockId;
+$templateCss = $scope . ' .block-cards{--cards-cols:' . $columns . ';' . $cardStyle . '}';
+$templateCss .= $scope . ' .feature-card__icon{width:' . $iconBoxSize . 'px;height:' . $iconBoxSize . 'px;}';
+$templateCss .= $scope . ' .feature-card__icon svg{width:' . $iconSize . 'px;height:' . $iconSize . 'px;}';
 $cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '') . ($textColor !== '' ? ' block-cards--custom-text' : '');
+
+// Новый вид включается только у выбранного экземпляра cards_grid: базовые
+// .feature-card и остальные карточки сайта остаются нетронутыми.
+if ($variant === 'icon' && $visualStyle === 'new') {
+    $cardClasses .= ' block-cards--style-new';
+    $templateCss .= $scope . ' .block-cards--style-new .cards-grid{gap:clamp(20px,2.4vw,36px);}';
+    $templateCss .= $scope . ' .block-cards--style-new .feature-card{background:var(--card-bg,transparent);border:0;border-top:1px solid rgba(23,58,99,.16);border-radius:0;box-shadow:none;min-height:0;padding:26px 0 30px;transform:none;overflow:visible;transition:border-color .18s ease,color .18s ease,background-color .18s ease;}';
+    $templateCss .= $scope . ' .block-cards--style-new .feature-card::before{display:none;}';
+    $templateCss .= $scope . ' .block-cards--style-new .feature-card:hover{background:var(--card-bg,transparent);border-top-color:var(--gov-accent,#17999b);box-shadow:none;transform:none;}';
+    $templateCss .= $scope . ' .block-cards--style-new .feature-card__top{align-items:flex-start;margin-bottom:clamp(22px,2.3vw,34px);}';
+    $templateCss .= $scope . ' .block-cards--style-new .feature-card__icon{width:' . $iconSize . 'px;height:' . $iconSize . 'px;border:0;border-radius:0;background:transparent;color:var(--gov-accent,#17999b);justify-content:flex-start;}';
+    $templateCss .= $scope . ' .block-cards--style-new .feature-card__num{color:var(--gov-accent,#17999b);font-size:12px;font-weight:700;letter-spacing:.12em;}';
+    $templateCss .= $scope . ' .block-cards--style-new .feature-card__title{color:var(--cards-text,var(--gov-primary,#173a63));font-size:clamp(18px,1.35vw,21px);line-height:1.25;margin-bottom:10px;}';
+    $templateCss .= $scope . ' .block-cards--style-new .feature-card__text{color:var(--cards-text,var(--gov-text,#334155));max-width:34ch;}';
+}
 ?>
 <?php if ($variant === 'image'): ?>
     <?php $carousel = count($items) > 1; $desktopCarousel = count($items) > 4; ?>
@@ -103,7 +124,7 @@ $cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '') . ($textColor !
                     <?php endif; ?>
                         <div class="feature-card__top">
                             <?php if (!empty($item['icon_svg'])): ?>
-                                <span class="feature-card__icon" aria-hidden="true"><?= Icon::render($item['icon_svg'], 26) ?></span>
+                                <span class="feature-card__icon" aria-hidden="true"><?= Icon::render($item['icon_svg'], $iconSize) ?></span>
                             <?php else: ?>
                                 <span class="feature-card__spacer"></span>
                             <?php endif; ?>
