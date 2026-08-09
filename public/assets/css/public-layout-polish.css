@@ -484,3 +484,18 @@
         padding: 20px;
     }
 }
+/* Container-query enhancement for the text + image builder block.
+   Existing viewport media queries in gov-theme.css remain the fallback. */
+.cms-block--text_image {
+    container-type: inline-size;
+    container-name: text-image;
+}
+
+@container text-image (max-width: 900px) {
+    .block-textimage { grid-template-columns: 1fr; }
+}
+
+@container text-image (max-width: 720px) {
+    .block-textimage--image-left .textimage__info,
+    .block-textimage--image-left .textimage__visual { order: initial; }
+}
