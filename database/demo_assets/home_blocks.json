@@ -1,224 +1,208 @@
 [
-    {
-        "type": "hero",
-        "title": "",
-        "data": {
-            "title": "Строим будущее для процветающего Узбекистана",
-            "eyebrow": "Стратегия. Реформы. Развитие.",
-            "subtitle": "Разрабатываем и реализуем стратегические инициативы, направленные на устойчивый экономический рост, повышение качества жизни и развитие человеческого капитала.",
-            "image": "\/uploads\/public\/demo-agency-hero.jpg",
-            "video_url": "",
-            "button_text": "Об агентстве",
-            "button_url": "\/o-nas",
-            "button2_text": "Стратегия-2030",
-            "button2_url": "\/strategiya-2030",
-            "video_button_text": "Смотреть видео",
-            "video_button_url": "\/press-centr",
-            "bg_type": "image",
-            "youtube_url": "",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#0b1a30",
-            "overlay_opacity": 55,
-            "text_position": "left",
-            "panel_enabled": false,
-            "panel_color": "#0b1a30",
-            "panel_opacity": 35
-        }
-    },
-    {
-        "type": "counters",
-        "title": "",
-        "data": {
-            "title": "",
-            "items": [
-                {
-                    "icon_svg": "building",
-                    "value": "100",
-                    "suffix": "+",
-                    "label": "стратегических инициатив реализовано"
-                },
-                {
-                    "icon_svg": "users",
-                    "value": "20",
-                    "suffix": "+",
-                    "label": "проектов в ключевых отраслях"
-                },
-                {
-                    "icon_svg": "chart-bar",
-                    "value": "30",
-                    "suffix": "+",
-                    "label": "аналитических исследований ежегодно"
-                },
-                {
-                    "icon_svg": "world",
-                    "value": "10",
-                    "suffix": "+",
-                    "label": "международных партнёров и организаций"
-                }
-            ]
-        }
-    },
-    {
-        "type": "cards_grid",
-        "title": "",
-        "data": {
-            "title": "Приоритетные направления",
-            "all_text": "Все направления",
-            "all_url": "\/napravleniya",
-            "columns": 5,
-            "items": [
-                {
-                    "icon_svg": "trending-up",
-                    "title": "Устойчивый экономический рост",
-                    "text": "Создание благоприятных условий для бизнеса и инвестиций",
-                    "url": "\/ustoychivyy-ekonomicheskiy-rost"
-                },
-                {
-                    "icon_svg": "users",
-                    "title": "Человеческий капитал",
-                    "text": "Развитие образования, здравоохранения и навыков будущего",
-                    "url": "\/analitika"
-                },
-                {
-                    "icon_svg": "building",
-                    "title": "Эффективное государство",
-                    "text": "Совершенствование институтов и повышение качества управления",
-                    "url": "\/strategiya-2030"
-                },
-                {
-                    "icon_svg": "leaf",
-                    "title": "«Зелёная» экономика",
-                    "text": "Переход к низкоуглеродной модели и рациональное использование ресурсов",
-                    "url": "\/projects\/zelenaya-energetika"
-                },
-                {
-                    "icon_svg": "route",
-                    "title": "Региональное развитие",
-                    "text": "Сбалансированное развитие регионов и улучшение инфраструктуры",
-                    "url": "\/projects\/transportnaya-infrastruktura"
-                }
-            ]
-        }
-    },
-    {
-        "type": "cards_grid",
-        "title": "",
-        "data": {
-            "variant": "image",
-            "title": "Проекты и инициативы",
-            "all_text": "Все проекты",
-            "all_url": "\/projects",
-            "source": "projects",
-            "limit": 6,
-            "items": [
-                {
-                    "image": "\/uploads\/public\/hero-demo.jpg",
-                    "title": "Привлечение инвестиций в приоритетные отрасли",
-                    "url": "\/projects\/investicii-prioritetnye-otrasli"
-                },
-                {
-                    "image": "\/uploads\/public\/hero-demo-g2.jpg",
-                    "title": "Развитие транспортной и логистической инфраструктуры",
-                    "url": "\/projects\/transportnaya-infrastruktura"
-                },
-                {
-                    "image": "\/uploads\/public\/hero-demo-g3.jpg",
-                    "title": "Цифровая трансформация и развитие инноваций",
-                    "url": "\/projects\/cifrovaya-transformaciya"
-                },
-                {
-                    "image": "\/uploads\/public\/hero-demo-g4.jpg",
-                    "title": "Увеличение доли возобновляемых источников энергии",
-                    "url": "\/projects\/zelenaya-energetika"
-                },
-                {
-                    "image": "\/uploads\/public\/hero-demo.jpg",
-                    "title": "Поддержка малого и среднего бизнеса",
-                    "url": "\/ustoychivyy-ekonomicheskiy-rost"
-                },
-                {
-                    "image": "\/uploads\/public\/hero-demo-g2.jpg",
-                    "title": "Развитие человеческого капитала и образования",
-                    "url": "\/analitika"
-                }
-            ]
-        }
-    },
-    {
-        "type": "news_feature",
-        "title": "",
-        "data": {
-            "title": "Новости и аналитика",
-            "all_text": "Все новости",
-            "all_url": "\/news",
-            "limit": 6
-        }
-    },
-    {
-        "type": "media_gallery",
-        "title": "",
-        "data": {
-            "title": "Медиа",
-            "all_text": "Все материалы",
-            "all_url": "\/albums",
-            "source": "media",
-            "limit": 8,
-            "items": [
-                {
-                    "image": "\/uploads\/public\/hero-demo.jpg",
-                    "title": "Узбекистан–2030: ключевые цели",
-                    "meta": "02:35",
-                    "text": "20 мая 2026",
-                    "kind": "video",
-                    "url": "\/news"
-                },
-                {
-                    "image": "\/uploads\/public\/hero-demo-g2.jpg",
-                    "title": "Переход к «зелёной» экономике",
-                    "meta": "03:12",
-                    "text": "18 мая 2026",
-                    "kind": "video",
-                    "url": "\/news"
-                },
-                {
-                    "image": "\/uploads\/public\/hero-demo-g3.jpg",
-                    "title": "Развитие инфраструктуры",
-                    "meta": "02:08",
-                    "text": "15 мая 2026",
-                    "kind": "video",
-                    "url": "\/news"
-                },
-                {
-                    "image": "\/uploads\/public\/hero-demo-g4.jpg",
-                    "title": "Заседание по Стратегии-2030",
-                    "meta": "",
-                    "text": "20 мая 2026",
-                    "kind": "photo",
-                    "url": "\/albums"
-                },
-                {
-                    "image": "\/uploads\/public\/hero-demo.jpg",
-                    "title": "Международный форум",
-                    "meta": "",
-                    "text": "18 мая 2026",
-                    "kind": "photo",
-                    "url": "\/albums"
-                },
-                {
-                    "image": "\/uploads\/public\/hero-demo-g2.jpg",
-                    "title": "Церемония подписания",
-                    "meta": "",
-                    "text": "12 мая 2026",
-                    "kind": "photo",
-                    "url": "\/albums"
-                }
-            ],
-            "_bg": "light",
-            "_fullwidth": true,
-            "_pad_top": "large",
-            "_pad_bottom": "large"
-        }
+  {
+    "type": "hero",
+    "title": "",
+    "data": {
+      "title": "От стратегической цели — к измеримому результату",
+      "eyebrow": "Цель. Действие. Результат.",
+      "subtitle": "Агентство формирует единую систему стратегического планирования: от анализа и подготовки инициатив до координации, мониторинга и оценки достигнутых результатов.",
+      "image": "/uploads/public/demo-agency-hero.jpg",
+      "video_url": "",
+      "button_text": "Об Агентстве",
+      "button_url": "/o-nas",
+      "button2_text": "Узбекистан — 2030",
+      "button2_url": "/strategiya-2030",
+      "video_button_text": "Пресс-центр",
+      "video_button_url": "/press-centr",
+      "bg_type": "image",
+      "youtube_url": "",
+      "overlay_enabled": true,
+      "overlay_mode": "gradient",
+      "overlay_direction": "auto",
+      "overlay_color": "#0b1a30",
+      "overlay_opacity": 55,
+      "text_position": "left",
+      "panel_enabled": false,
+      "panel_color": "#0b1a30",
+      "panel_opacity": 35
     }
+  },
+  {
+    "type": "counters",
+    "title": "",
+    "data": {
+      "title": "",
+      "items": [
+        {
+          "icon_svg": "building",
+          "value": "5",
+          "suffix": "",
+          "label": "основных направлений работы Агентства"
+        },
+        {
+          "icon_svg": "chart-line",
+          "value": "4",
+          "suffix": "",
+          "label": "этапа развития в истории Агентства"
+        },
+        {
+          "icon_svg": "clipboard-check",
+          "value": "5",
+          "suffix": "",
+          "label": "ключевых нормативно-правовых документов"
+        },
+        {
+          "icon_svg": "users",
+          "value": "2",
+          "suffix": "",
+          "label": "профиля действующего руководства"
+        }
+      ]
+    }
+  },
+  {
+    "type": "cards_grid",
+    "title": "",
+    "data": {
+      "title": "Основные направления работы",
+      "all_text": "Подробнее об Агентстве",
+      "all_url": "/o-nas",
+      "columns": 5,
+      "items": [
+        {
+          "icon_svg": "target",
+          "title": "Стратегическое планирование",
+          "text": "Методологические подходы и единая система стратегического планирования на республиканском, отраслевом и региональном уровнях.",
+          "url": "/o-nas"
+        },
+        {
+          "icon_svg": "chart-line",
+          "title": "Анализ и разработка инициатив",
+          "text": "Анализ социально-экономических процессов, международного опыта и подготовка предложений по системным реформам.",
+          "url": "/analitika"
+        },
+        {
+          "icon_svg": "network",
+          "title": "Координация",
+          "text": "Согласование стратегического планирования министерств, ведомств и регионов с общенациональными приоритетами.",
+          "url": "/struktura"
+        },
+        {
+          "icon_svg": "clipboard-check",
+          "title": "Качество стратегических документов",
+          "text": "Оценка обоснованности целей, измеримых показателей, мероприятий и ожидаемых результатов стратегических документов.",
+          "url": "/o-nas"
+        },
+        {
+          "icon_svg": "chart-bar",
+          "title": "Мониторинг и оценка",
+          "text": "Мониторинг целевых показателей, анализ результатов и подготовка предложений по совершенствованию механизмов исполнения.",
+          "url": "/strategiya-2030"
+        }
+      ]
+    }
+  },
+  {
+    "type": "cards_grid",
+    "title": "",
+    "data": {
+      "variant": "image",
+      "title": "Стратегические инициативы",
+      "all_text": "Все проекты",
+      "all_url": "/projects",
+      "source": "projects",
+      "limit": 6,
+      "items": [
+        {
+          "image": "/uploads/public/demo-strategy-meeting.jpg",
+          "title": "Привлечение инвестиций в приоритетные отрасли",
+          "url": "/projects/investicii-prioritetnye-otrasli"
+        },
+        {
+          "image": "/uploads/public/demo-urban-development.jpg",
+          "title": "Развитие транспортной и логистической инфраструктуры",
+          "url": "/projects/transportnaya-infrastruktura"
+        },
+        {
+          "image": "/uploads/public/demo-agency-hero.jpg",
+          "title": "Цифровая трансформация и развитие инноваций",
+          "url": "/projects/cifrovaya-transformaciya"
+        },
+        {
+          "image": "/uploads/public/demo-green-energy.jpg",
+          "title": "Увеличение доли возобновляемых источников энергии",
+          "url": "/projects/zelenaya-energetika"
+        },
+        {
+          "image": "/uploads/public/demo-strategy-meeting.jpg",
+          "title": "Поддержка малого и среднего бизнеса",
+          "url": "/ustoychivyy-ekonomicheskiy-rost"
+        },
+        {
+          "image": "/uploads/public/demo-urban-development.jpg",
+          "title": "Развитие человеческого капитала и образования",
+          "url": "/analitika"
+        }
+      ]
+    }
+  },
+  {
+    "type": "news_feature",
+    "title": "",
+    "data": {
+      "title": "Новости Агентства",
+      "all_text": "Все новости",
+      "all_url": "/news",
+      "limit": 6
+    }
+  },
+  {
+    "type": "media_gallery",
+    "title": "",
+    "data": {
+      "title": "Медиатека Агентства",
+      "all_text": "Все материалы",
+      "all_url": "/albums",
+      "source": "media",
+      "limit": 8,
+      "items": [
+        {
+          "image": "/uploads/public/demo-strategy-meeting.jpg",
+          "title": "Узбекистан — 2030: ключевые цели и приоритеты",
+          "meta": "02:35",
+          "text": "Видеоматериал",
+          "kind": "video",
+          "url": "/press-centr"
+        },
+        {
+          "image": "/uploads/public/demo-green-energy.jpg",
+          "title": "Переход к «зелёной» экономике",
+          "meta": "03:12",
+          "text": "Видеоматериал",
+          "kind": "video",
+          "url": "/press-centr"
+        },
+        {
+          "image": "/uploads/public/demo-agency-hero.jpg",
+          "title": "Стратегическое планирование и цифровые инструменты",
+          "meta": "02:08",
+          "text": "Видеоматериал",
+          "kind": "video",
+          "url": "/press-centr"
+        },
+        {
+          "image": "/uploads/public/demo-urban-development.jpg",
+          "title": "Региональное развитие и инфраструктура",
+          "meta": "",
+          "text": "Фотоматериал",
+          "kind": "photo",
+          "url": "/albums"
+        }
+      ],
+      "_bg": "light",
+      "_fullwidth": true,
+      "_pad_top": "large",
+      "_pad_bottom": "large"
+    }
+  }
 ]
