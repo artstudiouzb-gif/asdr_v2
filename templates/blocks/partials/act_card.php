@@ -31,6 +31,9 @@ $date = trim((string) ($doc['date'] ?? ''));
         </span>
     <?php endif; ?>
     <span class="act-card__title"><?= htmlspecialchars($presented['title'], ENT_QUOTES) ?></span>
+    <?php /* У акта без ссылки и без формата файла подвал пуст: его разделительная
+             линия висела бы под названием как обрыв карточки. */ ?>
+    <?php if ($presented['meta'] !== '' || $presented['url'] !== ''): ?>
     <span class="act-card__foot">
         <?php if ($presented['meta'] !== ''): ?>
             <span class="act-card__meta">
@@ -45,4 +48,5 @@ $date = trim((string) ($doc['date'] ?? ''));
             </span>
         <?php endif; ?>
     </span>
+    <?php endif; ?>
 </<?= $tag ?>>

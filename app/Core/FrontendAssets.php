@@ -22,6 +22,7 @@ final class FrontendAssets
         '/assets/css/gov-theme.css',
         '/assets/css/rich-content.css',
         '/assets/css/a11y.css',
+        '/assets/css/public-layout-polish.css',
     ];
 
     private const JS_SOURCES = [

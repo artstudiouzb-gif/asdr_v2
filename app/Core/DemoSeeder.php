@@ -1405,6 +1405,7 @@ final class DemoSeeder
             'struktura' => [
                 'ru' => [
                     'title' => 'Структура',
+                    'lead' => 'Руководство, секторы и проектные офисы Агентства, а также их подчинённость.',
                     'blocks' => [
                         ['org_structure', 'Оргсхема', [
                             'title' => 'Структура Агентства стратегического развития и реформ при Президенте Республики Узбекистан',
@@ -1428,6 +1429,7 @@ final class DemoSeeder
                 ],
                 'uz' => [
                     'title' => 'Tuzilma',
+                    'lead' => 'Agentlik rahbariyati, shoʻbalari va loyiha ofislari hamda ularning boʻysunuvi.',
                     'blocks' => [
                         ['org_structure', 'Tuzilma sxemasi', [
                             'title' => 'Oʻzbekiston Respublikasi Prezidenti huzuridagi Strategik rivojlanish va islohotlar agentligining tuzilmasi',
@@ -1453,12 +1455,14 @@ final class DemoSeeder
             'antikorrupciya' => [
                 'ru' => [
                     'title' => 'Противодействие коррупции',
+                    'lead' => 'Антикоррупционная политика Агентства, нормативные документы и порядок обращений.',
                     'blocks' => [
                         ['text', 'Антикоррупция', ['title' => 'Противодействие коррупции', 'content' => '<p>Организация проводит последовательную антикоррупционную политику. Ознакомиться с нормативными документами можно в разделе «Документы».</p><p>Сообщить о фактах коррупции можно через форму обратной связи.</p>']]
                     ]
                 ],
                 'uz' => [
                     'title' => 'Korrupsiyaga qarshi kurash',
+                    'lead' => 'Agentlikning korrupsiyaga qarshi siyosati, normativ hujjatlar va murojaat tartibi.',
                     'blocks' => [
                         ['text', 'Korrupsiyaga qarshi kurashish', ['title' => 'Korrupsiyaga qarshi kurashish', 'content' => '<p>Tashkilotda korrupsiyaga qarshi kurashish bo‘yicha tizimli siyosat yuritiladi. Normativ hujjatlar bilan «Hujjatlar» bo‘limida tanishishingiz mumkin.</p><p>Korrupsiya holatlari haqida xabar berish uchun qayta aloqa shaklidan foydalanishingiz mumkin.</p>']]
                     ]
@@ -1469,12 +1473,14 @@ final class DemoSeeder
             'media' => [
                 'ru' => [
                     'title' => 'Медиатека',
+                    'lead' => 'Фотографии и видеозаписи с мероприятий, встреч и рабочих поездок Агентства.',
                     'blocks' => [
                         ['media_gallery', 'Медиатека', ['title' => 'Фото и видео', 'source' => 'media', 'limit' => 12]]
                     ]
                 ],
                 'uz' => [
                     'title' => 'Mediateka',
+                    'lead' => 'Agentlik tadbirlari, uchrashuvlari va ish safarlaridan foto va videolavhalar.',
                     'blocks' => [
                         ['media_gallery', 'Mediateka', ['title' => 'Foto va video', 'source' => 'media', 'limit' => 12]]
                     ]

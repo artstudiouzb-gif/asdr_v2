@@ -2,6 +2,7 @@
   "napravleniya": {
     "ru": {
       "title": "Направления деятельности",
+      "lead": "Системная работа по ключевым направлениям развития Республики Узбекистан до 2030 года.",
       "blocks": [
         [
           "hero",
@@ -76,6 +77,7 @@
     },
     "uz": {
       "title": "Faoliyat yo‘nalishlari",
+      "lead": "O‘zbekiston Respublikasining 2030-yilgacha bo‘lgan rivojlanish strategiyasining asosiy yo‘nalishlari bo‘yicha tizimli ishlar.",
       "blocks": [
         [
           "hero",
@@ -152,6 +154,7 @@
   "ustoychivyy-ekonomicheskiy-rost": {
     "ru": {
       "title": "Устойчивый экономический рост",
+      "lead": "Благоприятные условия для бизнеса, инвестиций и повышения благосостояния населения.",
       "blocks": [
         [
           "hero",
@@ -275,6 +278,7 @@
     },
     "uz": {
       "title": "Barqaror iqtisodiy o‘sish",
+      "lead": "Biznes va investitsiyalar uchun qulay sharoitlar yaratish hamda aholi farovonligini oshirish.",
       "blocks": [
         [
           "hero",
@@ -400,22 +404,8 @@
   "analitika": {
     "ru": {
       "title": "Аналитические исследования",
+      "lead": "Данные и аналитические материалы для принятия обоснованных стратегических решений.",
       "blocks": [
-        [
-          "hero",
-          "",
-          {
-            "title": "Аналитические исследования",
-            "subtitle": "Данные и аналитические материалы для принятия обоснованных стратегических решений.",
-            "image": "/uploads/public/hero-demo-g3.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 60
-          }
-        ],
         [
           "counters",
           "",
@@ -490,22 +480,8 @@
     },
     "uz": {
       "title": "Tahliliy tadqiqotlar",
+      "lead": "Asoslangan strategik qarorlar qabul qilish uchun ma’lumotlar va tahliliy materiallar.",
       "blocks": [
-        [
-          "hero",
-          "",
-          {
-            "title": "Tahliliy tadqiqotlar",
-            "subtitle": "Asoslangan strategik qarorlar qabul qilish uchun ma’lumotlar va tahliliy materiallar.",
-            "image": "/uploads/public/hero-demo-g3.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 60
-          }
-        ],
         [
           "counters",
           "",
@@ -572,22 +548,8 @@
   "press-centr": {
     "ru": {
       "title": "Пресс-центр",
+      "lead": "Оперативная информация о деятельности Агентства, новости, пресс-релизы, мероприятия и медиаматериалы.",
       "blocks": [
-        [
-          "hero",
-          "",
-          {
-            "title": "Пресс-центр",
-            "subtitle": "Оперативная информация о деятельности Агентства, новости, пресс-релизы, мероприятия и медиаматериалы.",
-            "image": "/uploads/public/hero-demo.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 60
-          }
-        ],
         [
           "counters",
           "",
@@ -711,22 +673,8 @@
     },
     "uz": {
       "title": "Matbuot xizmati",
+      "lead": "Agentlik faoliyati, yangiliklar, press-relizlar va mediamateriallar haqida tezkor ma’lumotlar.",
       "blocks": [
-        [
-          "hero",
-          "",
-          {
-            "title": "Matbuot xizmati",
-            "subtitle": "Agentlik faoliyati, yangiliklar, press-relizlar va mediamateriallar haqida tezkor ma’lumotlar.",
-            "image": "/uploads/public/hero-demo.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 60
-          }
-        ],
         [
           "counters",
           "",
@@ -814,22 +762,8 @@
   "meropriyatiya": {
     "ru": {
       "title": "Мероприятия",
+      "lead": "Конференции, форумы, семинары и открытые обсуждения Агентства.",
       "blocks": [
-        [
-          "hero",
-          "",
-          {
-            "title": "Мероприятия",
-            "subtitle": "Конференции, форумы, семинары и открытые обсуждения Агентства.",
-            "image": "/uploads/public/hero-demo.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 60
-          }
-        ],
         [
           "counters",
           "",
@@ -896,22 +830,8 @@
     },
     "uz": {
       "title": "Tadbirlar",
+      "lead": "Agentlik tomonidan o‘tkaziladigan konferensiyalar, forumlar va ochiq muloqotlar.",
       "blocks": [
-        [
-          "hero",
-          "",
-          {
-            "title": "Tadbirlar",
-            "subtitle": "Agentlik tomonidan o‘tkaziladigan konferensiyalar, forumlar va ochiq muloqotlar.",
-            "image": "/uploads/public/hero-demo.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 60
-          }
-        ],
         [
           "counters",
           "",
@@ -966,6 +886,7 @@
   "karera": {
     "ru": {
       "title": "Карьера",
+      "lead": "Присоединяйтесь к команде профессионалов, которые создают будущее Нового Узбекистана.",
       "blocks": [
         [
           "hero",
@@ -1084,6 +1005,7 @@
     },
     "uz": {
       "title": "Karyera",
+      "lead": "Yangi O‘zbekiston kelajagini yaratayotgan professionallar jamoasiga qo‘shiling.",
       "blocks": [
         [
           "hero",
@@ -1159,22 +1081,8 @@
   "kontakty": {
     "ru": {
       "title": "Контакты",
+      "lead": "Мы открыты для сотрудничества и диалога. Свяжитесь с нами любым удобным способом.",
       "blocks": [
-        [
-          "hero",
-          "",
-          {
-            "title": "Контакты",
-            "subtitle": "Мы открыты для сотрудничества и диалога. Свяжитесь с нами любым удобным способом.",
-            "image": "/uploads/public/hero-demo-g2.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 58
-          }
-        ],
         [
           "contact_cards",
           "",
@@ -1253,22 +1161,8 @@
     },
     "uz": {
       "title": "Bog‘lanish",
+      "lead": "Biz muloqot va hamkorlik uchun ochiqmiz. O‘zingizga qulay usulda bog‘laning.",
       "blocks": [
-        [
-          "hero",
-          "",
-          {
-            "title": "Bog‘lanish",
-            "subtitle": "Biz muloqot va hamkorlik uchun ochiqmiz. O‘zingizga qulay usulda bog‘laning.",
-            "image": "/uploads/public/hero-demo-g2.jpg",
-            "bg_type": "image",
-            "overlay_enabled": true,
-            "overlay_mode": "gradient",
-            "overlay_direction": "auto",
-            "overlay_color": "#071b3f",
-            "overlay_opacity": 58
-          }
-        ],
         [
           "contact_cards",
           "",
@@ -1329,6 +1223,7 @@
   "strategiya-2030": {
     "ru": {
       "title": "Стратегия «Узбекистан–2030»",
+      "lead": "Стратегические цели и приоритеты развития Республики Узбекистан на период до 2030 года.",
       "blocks": [
         [
           "hero",
@@ -1436,6 +1331,7 @@
     },
     "uz": {
       "title": "«O‘zbekiston–2030» Strategiyasi",
+      "lead": "2030-yilgacha bo‘lgan davrda O‘zbekiston Respublikasini rivojlantirishning strategik maqsadlari va ustuvor yo‘nalishlari.",
       "blocks": [
         [
           "hero",
