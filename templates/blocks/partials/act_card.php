@@ -26,19 +26,17 @@ $docIndex = isset($docIndex) ? (int) $docIndex : 0;
     <?= $presented['url'] !== '' && $presented['direct_file'] ? 'download' : '' ?>
 >
     <span class="act-card__emblem" aria-hidden="true"></span>
-    <?php if ($editorialAct): ?>
-        <span class="feature-card__top act-card__editorial-head" aria-hidden="true">
-            <span class="feature-card__icon act-card__editorial-icon"><?= Icon::render('file-description', 22) ?></span>
-            <span class="feature-card__num act-card__index"><?= str_pad((string) ($docIndex + 1), 2, '0', STR_PAD_LEFT) ?></span>
-        </span>
-    <?php endif; ?>
+    <span class="feature-card__top act-card__editorial-head" aria-hidden="true">
+        <span class="feature-card__icon act-card__editorial-icon"><?= Icon::render('file-description', 22) ?></span>
+        <span class="feature-card__num act-card__index"><?= str_pad((string) ($docIndex + 1), 2, '0', STR_PAD_LEFT) ?></span>
+    </span>
     <?php if ($number !== '' || $date !== ''): ?>
         <span class="act-card__head">
-            <?php if ($number !== ''): ?><span class="act-card__number"><?= htmlspecialchars($number, ENT_QUOTES) ?></span><?php endif; ?>
+            <?php if ($number !== ''): ?><span class="feature-card__title act-card__number"><?= htmlspecialchars($number, ENT_QUOTES) ?></span><?php endif; ?>
             <?php if ($date !== ''): ?><span class="act-card__date"><?= htmlspecialchars($date, ENT_QUOTES) ?></span><?php endif; ?>
         </span>
     <?php endif; ?>
-    <span class="act-card__title"><?= htmlspecialchars($presented['title'], ENT_QUOTES) ?></span>
+    <span class="feature-card__text act-card__title"><?= htmlspecialchars($presented['title'], ENT_QUOTES) ?></span>
     <?php /* У акта без ссылки и без формата файла подвал пуст: его разделительная
              линия висела бы под названием как обрыв карточки. */ ?>
     <?php if ($presented['meta'] !== '' || $presented['url'] !== ''): ?>
