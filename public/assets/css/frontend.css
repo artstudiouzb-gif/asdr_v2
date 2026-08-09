@@ -882,6 +882,11 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 }
 
 /* --- Поиск по сайту --- */
+/* Свёрткой поля поиска заведует обёртка `.site-search-wrap` (классы
+   `is-expanded`/`is-open` из gov-theme.css). Прежний механизм жил здесь:
+   поле держали в `width: 0; opacity: 0`, а раскрывал класс `.is-active`.
+   Его никто не ставит с тех пор, как появилась обёртка, зато gov-theme
+   приходилось гасить эти правила через `!important`. Убрано вместе с ними. */
 .site-search {
     display: inline-flex;
     align-items: center;
@@ -889,7 +894,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     border-radius: 20px;
     overflow: hidden;
     background: transparent;
-    transition: width 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+    transition: background 0.3s ease, border-color 0.3s ease;
 }
 .site-search input {
     border: 0;
@@ -898,10 +903,6 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     font: inherit;
     background: transparent;
     color: inherit;
-    width: 0;
-    opacity: 0;
-    transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
-    pointer-events: none;
 }
 .site-search button {
     border: 0;
@@ -913,16 +914,6 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     align-items: center;
     justify-content: center;
     transition: background 0.2s ease;
-}
-.site-search.is-active {
-    background: var(--surface, #fff);
-    border-color: var(--border-color, #d5d9de);
-}
-.site-search.is-active input {
-    width: 140px;
-    padding: 6px 12px;
-    opacity: 1;
-    pointer-events: auto;
 }
 .site-search-page { max-width: 780px; margin: 0 auto; padding: 24px 16px 56px; }
 .site-search-page__form { display: flex; gap: 10px; margin: 16px 0 24px; }
@@ -952,10 +943,6 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .content-badge--active { background: #e6f4ea; color: #1c7c3b; }
 .content-badge--archived { background: #eef0f3; color: #66707c; }
 .content-card--archived { opacity: .72; }
-.content-pager { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 28px; }
-.content-pager__link { min-width: 40px; text-align: center; padding: 8px 12px; border: 1px solid var(--border-color, #d5d9de); border-radius: 8px; text-decoration: none; color: var(--color-primary, #1a1a1a); }
-.content-pager__link:hover { border-color: var(--color-accent, #e63946); color: var(--color-accent, #e63946); }
-.content-pager__link.is-current { background: var(--color-accent, #e63946); color: #fff; border-color: var(--color-accent, #e63946); font-weight: 700; }
 
 /* --- Блок «Последние новости» (для главной и любых страниц) --- */
 .block-news__head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }

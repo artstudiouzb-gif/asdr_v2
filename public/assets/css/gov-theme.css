@@ -1005,11 +1005,7 @@ body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: rg
 .site-search-wrap .site-search input[type="search"] {
     flex: 1;
     min-width: 0;
-    /* Старый механизм (frontend.css) держит .site-search input в opacity:0/width:0
-       и раскрывает через .is-active — но капсула управляется .is-open/.is-expanded,
-       поэтому input оставался невидимым. Форсим видимость: свёрткой заведует обёртка. */
-    opacity: 1 !important;
-    width: auto !important;
+    /* Свёрткой заведует обёртка (.is-open/.is-expanded), само поле не прячется. */
     border: none !important;
     background: transparent !important;
     box-shadow: none !important;
@@ -1021,7 +1017,6 @@ body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: rg
     margin: 0 !important;
     height: 32px !important;
     line-height: 1.4 !important;
-    pointer-events: auto !important;
     cursor: text !important;
     user-select: text !important;
     -webkit-user-select: text !important;
