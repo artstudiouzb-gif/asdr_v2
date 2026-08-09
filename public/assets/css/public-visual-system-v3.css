@@ -1533,7 +1533,7 @@ img.newsfeat-mini__media {
     }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 560px) {
     .section-head {
         align-items: flex-start;
         flex-direction: column;
