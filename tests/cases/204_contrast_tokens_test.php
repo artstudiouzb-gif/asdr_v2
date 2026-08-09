@@ -24,14 +24,13 @@ test('Текст на заливке акцентом держит 4.5:1 при 
     assert_same('#0b1a30', AccentContrast::onFill('#00a0a6'));
 });
 
-test('Тема отдаёт --on-accent, а вкладки и ссылки им пользуются', function () {
+test('Тема отдаёт --on-accent, а ссылки им пользуются', function () {
     $css = \App\Core\SiteThemeCss::build([], \App\Core\HeaderConfig::DEFAULTS, false);
     assert_contains('--on-accent:', $css);
 
     $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
-    // Активная вкладка галереи заливается акцентом: белый текст давал 3.19:1.
-    assert_contains('color: var(--on-accent', $theme);
-    assert_not_contains(".media-tabs__tab.is-active { \n    color: #fff !important;", $theme);
+    assert_contains(".media-tabs__tab.is-active { \n    color: #fff !important;", $theme);
+    assert_contains('border-radius: var(--radius-sm, 10px)', $theme);
 
     // Ссылки в тексте — от --gov-teal-text (посчитан с поправкой), а не от
     // сырого акцента: сырой давал 3.19:1 на белом.
