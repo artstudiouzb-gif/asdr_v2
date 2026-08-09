@@ -35,16 +35,18 @@ final class FrontendAssets
     private const JS_BUNDLE = '/assets/js/public.min.js';
     private const MANIFEST = '/public/assets/asset-manifest.json';
     private const VISUAL_SYSTEM_CSS = '/assets/css/public-visual-system-v3.css';
+    private const EDITORIAL_PAGES_CSS = '/assets/css/public-editorial-pages.css';
     private const CONTENT_MODES_CSS = '/assets/css/public-content-modes.css';
 
     /** @return array<int, string> */
     public static function styles(): array
     {
         $styles = self::enabled() ? [self::CSS_BUNDLE] : self::CSS_SOURCES;
-        // Visual System 3 intentionally stays outside the production bundle
-        // during its staged rollout. It must override both the bundled theme
-        // and the internal-page polish, while reader/print modes remain last.
+        // Visual System 3 and the page-level editorial shell stay outside the
+        // production bundle during staged rollout. Reader/print modes are last
+        // by design and therefore keep accessibility overrides authoritative.
         $styles[] = self::VISUAL_SYSTEM_CSS;
+        $styles[] = self::EDITORIAL_PAGES_CSS;
         $styles[] = self::CONTENT_MODES_CSS;
 
         return $styles;
