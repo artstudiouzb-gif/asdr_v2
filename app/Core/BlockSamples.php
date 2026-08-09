@@ -151,7 +151,9 @@ final class BlockSamples
                 'edu_items' => [
                     ['years' => '2010–2015', 'org' => 'Название университета', 'title' => 'Специальность', 'text' => 'Специальность'],
                 ],
-                'extra_title' => '', 'extra_text' => '', 'quote_text' => '', 'quote_author' => '',
+                'extra_title' => '', 'extra_text' => '',
+                'widgets_before' => [], 'widgets_after' => [],
+                'quote_text' => '', 'quote_author' => '',
             ],
             'anchor_nav' => ['items' => [
                 ['label' => 'Первый раздел', 'url' => '#sec-1'],
