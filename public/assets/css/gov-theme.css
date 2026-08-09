@@ -508,8 +508,9 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 .site-menu__badge {
     position: absolute; top: 4px; right: 0px; z-index: 10;
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 1.5px 4.5px; border-radius: 3px;
-    font-size: 0.6rem; font-weight: 800; line-height: 1;
+    padding: 1.5px 5px; border-radius: 3px;
+    /* Не ниже 12px: капслок с разрядкой на 9.6px переставал читаться. */
+    font-size: 0.75rem; font-weight: 800; line-height: 1;
     letter-spacing: 0.04em; text-transform: uppercase; color: #ffffff;
     background: #e11d48; box-shadow: 0 2px 5px rgba(225, 29, 72, 0.35);
     pointer-events: none; white-space: nowrap; transform: translateY(-40%);
@@ -3789,9 +3790,11 @@ span.imgcard__media::after {
     background: linear-gradient(160deg, color-mix(in srgb, var(--gov-navy) 8%, var(--gov-surface)), color-mix(in srgb, var(--gov-navy) 3%, var(--gov-surface)));
 }
 .person-card__placeholder::after {
-    content: ""; position: absolute; inset: 0; background: var(--gov-navy); opacity: .12;
-    -webkit-mask: var(--gov-emblem) center / 46% no-repeat;
-    mask: var(--gov-emblem) center / 46% no-repeat;
+    /* Силуэт, а не гирих: на карточке сотрудника без фото он читается
+       однозначно. Гирих остаётся заглушкой прочих карточек без изображения. */
+    content: ""; position: absolute; inset: 0; background: var(--gov-navy); opacity: .16;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2012.4a4.7%204.7%200%201%200%200-9.4%204.7%204.7%200%200%200%200%209.4Z'%2F%3E%3Cpath%20d%3D'M12%2014.3c-4.9%200-7.6%202.6-7.6%205.4V21h15.2v-1.3c0-2.8-2.7-5.4-7.6-5.4Z'%2F%3E%3C%2Fsvg%3E") center / 38% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2012.4a4.7%204.7%200%201%200%200-9.4%204.7%204.7%200%200%200%200%209.4Z'%2F%3E%3Cpath%20d%3D'M12%2014.3c-4.9%200-7.6%202.6-7.6%205.4V21h15.2v-1.3c0-2.8-2.7-5.4-7.6-5.4Z'%2F%3E%3C%2Fsvg%3E") center / 38% no-repeat;
     transition: opacity .4s ease, transform .6s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 .person-card:hover .person-card__placeholder::after { opacity: .2; transform: scale(1.06); }
@@ -4228,7 +4231,13 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 @media (max-width: 560px) { .newsfeat-side__texts { grid-template-columns: 1fr; } }
 .newsfeat__date { color: var(--gov-muted); font-size: .82rem; }
 /* Обязательно ПОСЛЕ базового правила: специфичность одинаковая, решает порядок. */
-.newsfeat__date--on-media { color: rgba(255,255,255,.88); }
+.newsfeat__date--on-media {
+    align-self: flex-start;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--gov-navy);
+    color: #fff;
+}
 .newsfeat__more { color: var(--gov-teal-text); font-size: 0.85rem; font-weight: 700; }
 .newsfeat-mini { display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: var(--gov-ink); }
 .newsfeat-mini__thumb { display: block; width: 100%; aspect-ratio: 16/10; min-height: 150px; border-radius: var(--radius-sm, 8px); overflow: hidden; background: var(--gov-navy); }
