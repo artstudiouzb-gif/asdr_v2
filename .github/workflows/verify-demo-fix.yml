@@ -1,0 +1,118 @@
+name: Verify corrected demo seed
+
+on:
+  push:
+    branches:
+      - preview/demo-fix-screenshots
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: asdr_demo_verify
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, mbstring, gd, curl, dom, fileinfo, openssl, zip
+          coverage: none
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Load clean schema and normal DEMO seed
+        env:
+          APP_ENV: testing
+          APP_DEBUG: 'true'
+          APP_URL: http://127.0.0.1:8080
+          APP_ENCRYPTION_KEY: 0000000000000000000000000000000000000000000000000000000000000000
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_DATABASE: asdr_demo_verify
+          DB_USERNAME: root
+          DB_PASSWORD: ''
+        run: |
+          php tests/load_schema.php asdr_demo_verify
+          cp config/config.example.php config/config.php
+          mkdir -p storage/logs storage/cache storage/protected_uploads public/uploads/public
+          touch storage/installed.lock
+          php database/seed_demo.php | tee /tmp/demo-seed.log
+          grep -Eq '^  home[[:space:]]+\+12$' /tmp/demo-seed.log
+          php -r '
+            $pdo = new PDO("mysql:host=127.0.0.1;port=3306;dbname=asdr_demo_verify", "root", "");
+            $stmt = $pdo->query("SELECT b.data FROM blocks b JOIN pages p ON p.id=b.page_id WHERE p.is_home=1 AND p.lang=\"ru\" AND b.parent_block_id IS NULL ORDER BY b.sort_order,b.id LIMIT 1");
+            $data = json_decode((string)$stmt->fetchColumn(), true);
+            $expected = "От стратегической цели — к измеримому результату";
+            if (($data["title"] ?? "") !== $expected) { fwrite(STDERR, "Unexpected RU hero: ".json_encode($data, JSON_UNESCAPED_UNICODE).PHP_EOL); exit(1); }
+          '
+
+      - name: Install Chromium
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Start application
+        env:
+          APP_ENV: testing
+          APP_DEBUG: 'true'
+          APP_URL: http://127.0.0.1:8080
+          APP_ENCRYPTION_KEY: 0000000000000000000000000000000000000000000000000000000000000000
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_DATABASE: asdr_demo_verify
+          DB_USERNAME: root
+          DB_PASSWORD: ''
+        run: |
+          php -S 127.0.0.1:8080 -t public public/router.php > /tmp/asdr-demo-verify.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/health >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/asdr-demo-verify.log
+          exit 1
+
+      - name: Capture corrected home
+        run: |
+          mkdir -p screenshots
+          node <<'NODE'
+          const { chromium } = require('@playwright/test');
+          (async () => {
+            const browser = await chromium.launch();
+            const desktop = await browser.newContext({ viewport: { width: 1440, height: 1100 }, locale: 'ru-RU' });
+            const page = await desktop.newPage();
+            const response = await page.goto('http://127.0.0.1:8080/', { waitUntil: 'networkidle' });
+            if (!response || response.status() >= 400) throw new Error(`home: HTTP ${response?.status()}`);
+            await page.evaluate(() => document.fonts && document.fonts.ready);
+            await page.screenshot({ path: 'screenshots/home-fixed.png', fullPage: true });
+            await desktop.close();
+            const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, locale: 'ru-RU' });
+            const mobilePage = await mobile.newPage();
+            await mobilePage.goto('http://127.0.0.1:8080/', { waitUntil: 'networkidle' });
+            await mobilePage.screenshot({ path: 'screenshots/home-fixed-mobile.png', fullPage: true });
+            await mobile.close();
+            await browser.close();
+          })();
+          NODE
+
+      - name: Upload corrected screenshots
+        uses: actions/upload-artifact@v7
+        with:
+          name: corrected-demo-home-screenshots
+          path: screenshots/*.png
+          if-no-files-found: error
