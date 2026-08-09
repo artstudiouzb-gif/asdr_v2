@@ -12,6 +12,7 @@ const cssSources = [
     'public/assets/css/gov-theme.css',
     'public/assets/css/rich-content.css',
     'public/assets/css/a11y.css',
+    'public/assets/css/public-layout-polish.css',
 ];
 
 const jsSources = [

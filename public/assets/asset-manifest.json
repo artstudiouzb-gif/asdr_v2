@@ -9,13 +9,14 @@
       "/assets/css/frontend.css",
       "/assets/css/gov-theme.css",
       "/assets/css/rich-content.css",
-      "/assets/css/a11y.css"
+      "/assets/css/a11y.css",
+      "/assets/css/public-layout-polish.css"
     ],
-    "sourceSha256": "e85e1ff9317e5afb333b3264bf1ef937228d59f8b5f1f1a4fd11ec47d3797030",
-    "sha256": "e52ada16a432e35502a9bf6eb423307a07fef7f56032afe8e533de3f14edf839",
-    "raw": 365168,
-    "gzip": 60686,
-    "brotli": 47699
+    "sourceSha256": "21e3d4340cdc7df8e1b1c2806d53ad69ec8ae401bc2813ab80cec7a0ead62a8e",
+    "sha256": "f1d55d192ea57390e32407b632768ec59b7c1bb80058bbf1eb705ae036ab6250",
+    "raw": 371861,
+    "gzip": 61988,
+    "brotli": 48630
   },
   "js": {
     "path": "/assets/js/public.min.js",
