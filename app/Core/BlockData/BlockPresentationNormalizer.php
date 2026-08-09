@@ -36,7 +36,7 @@ final class BlockPresentationNormalizer
         $padBottom = self::scalarString($input['pad_bottom'] ?? null, 'default');
         $device = self::scalarString($input['visible_device'] ?? null);
 
-        $normalized = [
+        return [
             '_spacing' => in_array($spacing, self::SPACING, true) ? $spacing : 'premium',
             '_reveal' => in_array($revealType, self::REVEAL_TYPES, true)
                 ? ['enabled' => true, 'type' => $revealType]
@@ -49,19 +49,6 @@ final class BlockPresentationNormalizer
             '_visible_to' => BlockVisibility::normalize(self::scalarString($input['visible_to'] ?? null)),
             '_visible_device' => in_array($device, ['desktop', 'mobile'], true) ? $device : '',
         ];
-
-        // Настройки карточек добавляются только когда конкретная форма блока
-        // их прислала. Так переключатель «старый / новый» остаётся локальным
-        // для cards_grid и не загрязняет данные остальных типов блоков.
-        if (array_key_exists('cards_style', $input)) {
-            $cardsStyle = self::scalarString($input['cards_style'] ?? null, 'old');
-            $normalized['_cards_style'] = in_array($cardsStyle, ['old', 'new'], true) ? $cardsStyle : 'old';
-        }
-        if (array_key_exists('cards_icon_size', $input)) {
-            $normalized['_cards_icon_size'] = max(16, min(64, (int) ($input['cards_icon_size'] ?? 22)));
-        }
-
-        return $normalized;
     }
 
     /** @param array<string, mixed> $data */

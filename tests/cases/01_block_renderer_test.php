@@ -51,26 +51,3 @@ test('BlockRenderer: пресет отступов и reveal попадают в
     assert_contains('cms-block--space-max', $result['html']);
     assert_contains('data-reveal', $result['html']);
 });
-
-test('BlockRenderer: старый cards_grid без _cards_style рендерится классическим стилем', function () {
-    $result = BlockRenderer::render([
-        'id' => 11,
-        'type' => 'cards_grid',
-        'data' => json_encode([
-            'variant' => 'icon',
-            'columns' => 3,
-            'items' => [[
-                'icon_svg' => 'target',
-                'title' => 'Направление',
-                'text' => 'Описание',
-                'url' => '/o-nas',
-            ]],
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-        'custom_css' => '',
-    ]);
-
-    assert_contains('id="block-11"', $result['html']);
-    assert_contains('class="block-cards"', $result['html']);
-    assert_contains('feature-card__icon', $result['html']);
-    assert_contains('#block-11 .feature-card__icon', $result['css']);
-});

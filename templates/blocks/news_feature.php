@@ -14,10 +14,6 @@ $rest = array_slice($news, 1);
 $withThumb = array_slice($rest, 0, 2);
 $textOnly = array_slice($rest, 2);
 
-// На десктопе лид и правая колонка делят секцию поровну. Правило scoped
-// конкретным блоком и не вмешивается в мобильный одноколоночный макет.
-$templateCss = '@media (min-width:901px){#block-' . (int) $blockId . ' .newsfeat-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}}';
-
 // Дата — единым числовым форматом на всех языках: 19.07.2026.
 $fmt = static fn (string $d): string => DateFormatter::short($d);
 // Рубрика — только если она реально заполнена: метка, одинаковая у всех
@@ -37,7 +33,7 @@ $badge = static fn (array $i): string => trim((string) ($i['badge'] ?? ''));
         <a class="newsfeat-lead" href="<?= htmlspecialchars((string) $featured['url'], ENT_QUOTES) ?>">
             <span class="newsfeat-lead__frame">
                 <?php if (!empty($featured['cover'])): ?>
-                    <?= \App\Core\Media::picture((string) $featured['cover'], (string) $featured['title'], null, null, 'newsfeat-lead__media', false, '(max-width: 900px) 100vw, 50vw') ?>
+                    <?= \App\Core\Media::picture((string) $featured['cover'], (string) $featured['title'], null, null, 'newsfeat-lead__media', false, '(max-width: 900px) 100vw, 60vw') ?>
                 <?php else: ?>
                     <span class="newsfeat-lead__media newsfeat-lead__media--empty" aria-hidden="true"></span>
                 <?php endif; ?>
@@ -59,7 +55,7 @@ $badge = static fn (array $i): string => trim((string) ($i['badge'] ?? ''));
                         <a class="newsfeat-mini" href="<?= htmlspecialchars((string) $item['url'], ENT_QUOTES) ?>">
                             <span class="newsfeat-mini__thumb">
                                 <?php if (!empty($item['cover'])): ?>
-                                    <?= \App\Core\Media::picture((string) $item['cover'], (string) $item['title'], null, null, 'newsfeat-mini__media', true, '(max-width: 700px) 100vw, 25vw') ?>
+                                    <?= \App\Core\Media::picture((string) $item['cover'], (string) $item['title'], null, null, 'newsfeat-mini__media', true, '(max-width: 700px) 100vw, 30vw') ?>
                                 <?php else: ?>
                                     <span class="newsfeat-mini__media newsfeat-mini__media--empty" aria-hidden="true"></span>
                                 <?php endif; ?>

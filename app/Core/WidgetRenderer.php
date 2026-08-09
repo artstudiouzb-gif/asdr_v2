@@ -129,7 +129,7 @@ final class WidgetRenderer
             '<aside id="widget-%d" class="%s">%s%s</aside>',
             $widgetId,
             htmlspecialchars($classes, ENT_QUOTES),
-            $title !== '' ? '<h3 class="widget__title">' . htmlspecialchars($title, ENT_QUOTES) . '</h3>' : '',
+            $title !== '' ? '<h2 class="widget__title">' . htmlspecialchars($title, ENT_QUOTES) . '</h2>' : '',
             $inner
         );
     }
