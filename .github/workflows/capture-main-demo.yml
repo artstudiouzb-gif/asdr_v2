@@ -1,0 +1,146 @@
+name: Capture current main demo
+
+on:
+  push:
+    branches:
+      - chore/capture-main-demo-fixed-20260809
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: asdr_capture
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, mbstring, gd, curl, dom, fileinfo, openssl, zip
+          coverage: none
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Prepare full demo site
+        env:
+          APP_ENV: testing
+          APP_DEBUG: 'true'
+          APP_URL: http://127.0.0.1:8080
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_DATABASE: asdr_capture
+          DB_USERNAME: root
+          DB_PASSWORD: ''
+        run: |
+          cp config/config.example.php config/config.php
+          mkdir -p storage/logs storage/cache storage/protected_uploads
+          touch storage/installed.lock
+          php tests/load_schema.php asdr_capture
+          php database/seed_demo.php
+
+      - name: Install Chromium
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Start application
+        env:
+          APP_ENV: testing
+          APP_DEBUG: 'true'
+          APP_URL: http://127.0.0.1:8080
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_DATABASE: asdr_capture
+          DB_USERNAME: root
+          DB_PASSWORD: ''
+        run: |
+          php -S 127.0.0.1:8080 -t public public/router.php > /tmp/asdr-capture-server.log 2>&1 &
+          echo $! > /tmp/asdr-capture-server.pid
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/health >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/asdr-capture-server.log
+          exit 1
+
+      - name: Capture screenshots
+        run: |
+          mkdir -p screenshots
+          node <<'NODE'
+          const { chromium } = require('@playwright/test');
+          const fs = require('fs');
+
+          async function settle(page) {
+            await page.waitForLoadState('networkidle');
+            await page.evaluate(async () => {
+              const step = Math.max(500, Math.floor(window.innerHeight * 0.75));
+              for (let y = 0; y < document.body.scrollHeight; y += step) {
+                window.scrollTo(0, y);
+                await new Promise(r => setTimeout(r, 100));
+              }
+              window.scrollTo(0, 0);
+              await new Promise(r => setTimeout(r, 250));
+            });
+          }
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const desktop = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+            const routes = [
+              ['01-home-desktop.png', '/'],
+              ['02-about.png', '/o-nas'],
+              ['03-leadership.png', '/rukovodstvo'],
+              ['04-director.png', '/direktor'],
+              ['05-news.png', '/news']
+            ];
+            for (const [file, path] of routes) {
+              const response = await desktop.goto('http://127.0.0.1:8080' + path, { waitUntil: 'domcontentloaded' });
+              if (!response || response.status() >= 400) throw new Error(path + ' returned ' + (response ? response.status() : 'no response'));
+              await settle(desktop);
+              await desktop.screenshot({ path: 'screenshots/' + file, fullPage: true });
+            }
+            await desktop.close();
+
+            const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+            const response = await mobile.goto('http://127.0.0.1:8080/', { waitUntil: 'domcontentloaded' });
+            if (!response || response.status() >= 400) throw new Error('/ mobile returned ' + (response ? response.status() : 'no response'));
+            await settle(mobile);
+            await mobile.screenshot({ path: 'screenshots/06-home-mobile.png', fullPage: true });
+            await mobile.close();
+            await browser.close();
+
+            console.log(fs.readdirSync('screenshots').join('\n'));
+          })().catch(err => { console.error(err); process.exit(1); });
+          NODE
+
+      - name: Show diagnostics on failure
+        if: failure()
+        run: |
+          echo '--- PHP server log ---'
+          cat /tmp/asdr-capture-server.log || true
+          echo '--- application logs ---'
+          find storage/logs -maxdepth 1 -type f -print -exec tail -n 120 {} \; || true
+
+      - name: Upload screenshots
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: current-main-demo-screenshots
+          path: screenshots/*.png
+          if-no-files-found: error
+          retention-days: 7
