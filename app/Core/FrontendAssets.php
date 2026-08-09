@@ -33,14 +33,17 @@ final class FrontendAssets
     private const CSS_BUNDLE = '/assets/css/public.min.css';
     private const JS_BUNDLE = '/assets/js/public.min.js';
     private const MANIFEST = '/public/assets/asset-manifest.json';
+    private const LAYOUT_POLISH_CSS = '/assets/css/public-layout-polish.css';
     private const CONTENT_MODES_CSS = '/assets/css/public-content-modes.css';
 
     /** @return array<int, string> */
     public static function styles(): array
     {
         $styles = self::enabled() ? [self::CSS_BUNDLE] : self::CSS_SOURCES;
-        // Печатный и читательский режимы загружаются после темы и generated
-        // CSS. Так правила печати не зависят от актуальности asset bundle.
+        // Небольшой слой компоновки внутренних страниц загружается отдельно
+        // от production-бандла: это позволяет улучшать CMS-блоки без риска
+        // рассинхронизировать manifest. Режимы печати/чтения остаются последними.
+        $styles[] = self::LAYOUT_POLISH_CSS;
         $styles[] = self::CONTENT_MODES_CSS;
 
         return $styles;
