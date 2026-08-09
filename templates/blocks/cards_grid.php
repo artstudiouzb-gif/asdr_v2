@@ -15,7 +15,8 @@ $mediaClasses = MediaPosition::classes($data['image_position'] ?? null, $data['i
 $cardBg = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['card_bg'] ?? '')) ? (string) $data['card_bg'] : '';
 $textColor = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['text_color'] ?? '')) ? (string) $data['text_color'] : '';
 $cardStyle = ($cardBg !== '' ? '--card-bg:' . $cardBg . ';' : '') . ($textColor !== '' ? '--cards-text:' . $textColor . ';' : '');
-$visualStyle = in_array($data['_cards_style'] ?? 'old', ['old', 'new'], true) ? (string) $data['_cards_style'] : 'old';
+$visualStyleRaw = (string) ($data['_cards_style'] ?? 'old');
+$visualStyle = in_array($visualStyleRaw, ['old', 'new'], true) ? $visualStyleRaw : 'old';
 $iconSize = max(16, min(64, (int) ($data['_cards_icon_size'] ?? 22)));
 $iconBoxSize = max(42, $iconSize + 18);
 $scope = '#block-' . (int) $blockId;
