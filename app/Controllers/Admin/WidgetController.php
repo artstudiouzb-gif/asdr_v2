@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers\Admin;
 
 use App\Core\Auth;
+use App\Core\Cache;
 use App\Core\Csrf;
 use App\Core\Flash;
 use App\Core\View;
@@ -51,6 +52,7 @@ final class WidgetController
         }
 
         Widget::create($data);
+        Cache::flush();
         Flash::success('Виджет добавлен.');
         header('Location: /admin/widgets');
         exit;
@@ -99,6 +101,7 @@ final class WidgetController
         }
 
         Widget::update((int) $widget['id'], $data);
+        Cache::flush();
         Flash::success('Виджет обновлён.');
         header('Location: /admin/widgets');
         exit;
@@ -110,6 +113,7 @@ final class WidgetController
         Csrf::verifyRequest();
 
         Widget::delete((int) $params['id']);
+        Cache::flush();
         Flash::success('Виджет удалён.');
         header('Location: /admin/widgets');
         exit;
@@ -122,6 +126,7 @@ final class WidgetController
 
         $direction = ($_POST['direction'] ?? '') === 'up' ? 'up' : 'down';
         Widget::move((int) $params['id'], $direction);
+        Cache::flush();
         header('Location: /admin/widgets');
         exit;
     }
