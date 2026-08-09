@@ -123,12 +123,19 @@
     max-width: none;
 }
 
-/* Internal pages must never look empty while waiting for reveal observers. */
-.editorial-page .anim-card,
-.editorial-page .anim-card.is-inview {
+/* Internal pages must never look empty while waiting for reveal observers.
+   Feature cards keep their own hover transition: the former broad
+   transition:none made their lift and border snap instantly. */
+.editorial-page .anim-card:not(.feature-card),
+.editorial-page .anim-card.is-inview:not(.feature-card) {
     opacity: 1;
     transform: none;
     transition: none;
+}
+
+.editorial-page .feature-card.anim-card,
+.editorial-page .feature-card.anim-card.is-inview {
+    opacity: 1;
 }
 
 /* About / text rhythm ---------------------------------------------------- */
@@ -223,7 +230,7 @@
         grid-template-columns: repeat(var(--grid-track, 3), minmax(0, 1fr));
     }
 }
-.editorial-page__content .block-advantages__item {
+.editorial-page__content .block-advantages__item:not(.feature-card) {
     min-height: 150px;
     padding: 16px 14px 15px;
     border: 1px solid var(--editorial-line);
@@ -232,20 +239,20 @@
     box-shadow: none;
 }
 
-.editorial-page__content .block-advantages__item:nth-child(odd),
-.editorial-page__content .block-advantages__item:nth-child(even) {
+.editorial-page__content .block-advantages__item:not(.feature-card):nth-child(odd),
+.editorial-page__content .block-advantages__item:not(.feature-card):nth-child(even) {
     padding-inline: 14px;
     border-right: 1px solid var(--editorial-line);
 }
 
-.editorial-page__content .block-advantages__item:hover {
+.editorial-page__content .block-advantages__item:not(.feature-card):hover {
     transform: translateY(-3px);
     border-color: color-mix(in srgb, var(--gov-teal) 38%, var(--editorial-line));
     background: color-mix(in srgb, var(--gov-teal) 3%, var(--gov-surface));
     box-shadow: 0 14px 30px -22px rgba(15, 43, 70, .45);
 }
 
-.editorial-page__content .block-advantages__icon {
+.editorial-page__content .block-advantages__item:not(.feature-card) .block-advantages__icon {
     width: 28px;
     height: 28px;
     margin: 0 0 16px;
@@ -255,21 +262,21 @@
     color: var(--gov-teal);
 }
 
-.editorial-page__content .block-advantages__icon svg {
+.editorial-page__content .block-advantages__item:not(.feature-card) .block-advantages__icon svg {
     width: 24px;
     height: 24px;
 }
 
-.editorial-page__content .block-advantages__title,
-.editorial-page__content .block-advantages__item h3 {
+.editorial-page__content .block-advantages__item:not(.feature-card) .block-advantages__title,
+.editorial-page__content .block-advantages__item:not(.feature-card) h3 {
     margin: 0 0 7px;
     color: var(--gov-title);
     font-size: .91rem;
     line-height: 1.3;
 }
 
-.editorial-page__content .block-advantages__desc,
-.editorial-page__content .block-advantages__item p {
+.editorial-page__content .block-advantages__item:not(.feature-card) .block-advantages__desc,
+.editorial-page__content .block-advantages__item:not(.feature-card) p {
     margin: 0;
     color: var(--editorial-muted);
     font-size: .76rem;
@@ -345,7 +352,7 @@
     border: 0;
 }
 
-.editorial-page__content .act-card,
+.editorial-page__content .act-card:not(.feature-card),
 .editorial-page__content .doc-card {
     min-height: 132px;
     padding: 14px;
@@ -355,7 +362,7 @@
     box-shadow: none;
 }
 
-.editorial-page__content .act-card:hover,
+.editorial-page__content .act-card:not(.feature-card):hover,
 .editorial-page__content .doc-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 14px 30px -22px rgba(15, 43, 70, .45);
@@ -366,15 +373,102 @@
     min-width: 0;
 }
 
-/* Intro: readable narrative plus Goal → Action → Result. */
+/* Intro: narrative and principles share the row with an optional editorial
+   image/video. A branded placeholder keeps the second column intentional on
+   installations that have not selected media yet. */
 .editorial-page__content .block-text--intro .block-text__layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 28px;
+    grid-template-columns: minmax(0, 1.08fr) minmax(300px, .82fr);
+    gap: clamp(36px, 5vw, 72px);
+    align-items: center;
 }
 
 .editorial-page__content > .cms-block:first-child.cms-block--text .block-text--intro .block-text__content {
-    max-width: 880px;
+    max-width: none;
+}
+
+.editorial-page__content > .cms-block:first-child.cms-block--text .block-text--intro .block-text__content > p:first-child {
+    max-width: none;
+}
+
+.editorial-page__content .block-text__intro-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.editorial-page__content .block-text__media {
+    position: relative;
+    min-width: 0;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--gov-navy) 9%, var(--editorial-line));
+    border-radius: var(--radius, 14px);
+    background: color-mix(in srgb, var(--gov-navy) 4%, var(--gov-surface));
+    box-shadow: 0 28px 58px -42px color-mix(in srgb, var(--gov-navy) 52%, transparent);
+}
+
+.editorial-page__content .block-text__media picture,
+.editorial-page__content .block-text__media-image,
+.editorial-page__content .block-text__media-video,
+.editorial-page__content .block-text__media-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.editorial-page__content .block-text__media-image,
+.editorial-page__content .block-text__media-video {
+    border: 0;
+    object-fit: cover;
+}
+
+.editorial-page__content .block-text__media--placeholder {
+    isolation: isolate;
+    background:
+        radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--gov-teal) 28%, transparent), transparent 38%),
+        linear-gradient(145deg, color-mix(in srgb, var(--gov-navy) 94%, #fff), var(--gov-navy));
+}
+
+.editorial-page__content .block-text__media--placeholder::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 0 46%, rgba(255, 255, 255, .045) 46% 62%, transparent 62%);
+}
+
+.editorial-page__content .block-text__media-placeholder {
+    display: grid;
+    place-items: center;
+}
+
+.editorial-page__content .block-text__media-emblem {
+    width: min(42%, 190px);
+    aspect-ratio: 1;
+    background: #fff;
+    opacity: .16;
+    -webkit-mask: var(--gov-emblem) center / contain no-repeat;
+    mask: var(--gov-emblem) center / contain no-repeat;
+}
+
+.editorial-page__content .block-text__media-caption {
+    position: absolute;
+    inset-inline: 16px;
+    bottom: 14px;
+    z-index: 2;
+    width: fit-content;
+    max-width: calc(100% - 32px);
+    padding: 7px 10px;
+    border-radius: var(--radius-sm, 8px);
+    background: color-mix(in srgb, var(--gov-navy) 82%, transparent);
+    color: #fff;
+    font-size: .76rem;
+    line-height: 1.4;
+    backdrop-filter: blur(8px);
 }
 
 /* Existing installations keep the old principle paragraph in rich text;
@@ -445,63 +539,10 @@
     padding-top: 0;
 }
 
-/* The Agency directions are the same component as cards_grid and Contacts:
-   only their data source differs. Keep one feature-card geometry and motion. */
+/* The Agency directions use the exact feature-card component from home.
+   This file controls only the grid around it, never the card shell. */
 .editorial-page__content .block-advantages__grid {
     gap: 20px;
-}
-
-.editorial-page__content .feature-card.block-advantages__item {
-    min-height: 100%;
-    padding: 24px !important;
-    border: 1px solid var(--gov-border);
-    border-bottom: 3px solid transparent !important;
-    border-radius: var(--radius, 14px);
-    background: var(--gov-surface);
-    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, .04);
-    transition: transform .46s cubic-bezier(.22, 1, .36, 1),
-        box-shadow .46s cubic-bezier(.22, 1, .36, 1),
-        border-color .38s ease, border-bottom-color .38s ease !important;
-}
-
-.editorial-page__content .feature-card.block-advantages__item:nth-child(odd),
-.editorial-page__content .feature-card.block-advantages__item:nth-child(even) {
-    padding-inline: 24px;
-    border-right: 1px solid var(--gov-border);
-}
-
-.editorial-page__content .feature-card.block-advantages__item:hover {
-    transform: translateY(-4px);
-    border-color: var(--color-accent, var(--gov-teal));
-    border-bottom-color: var(--color-accent, var(--gov-teal)) !important;
-    background: var(--gov-surface);
-    box-shadow: 0 16px 36px rgba(37, 99, 235, .12);
-}
-
-.editorial-page__content .block-advantages__icon {
-    width: 44px;
-    height: 44px;
-    margin: 0;
-    border-radius: var(--radius-sm, 10px);
-}
-
-.editorial-page__content .block-advantages__icon svg {
-    width: 22px;
-    height: 22px;
-}
-
-.editorial-page__content .feature-card.block-advantages__item .feature-card__title {
-    max-width: none;
-    margin: 0;
-    font-size: 1.12rem;
-    line-height: 1.3;
-}
-
-.editorial-page__content .feature-card.block-advantages__item .feature-card__text {
-    margin: 0;
-    color: var(--gov-muted);
-    font-size: .92rem;
-    line-height: 1.55;
 }
 
 /* Strategic system: narrative and structured checklist share one block. */
@@ -716,27 +757,6 @@
     gap: 20px;
 }
 
-.editorial-page__content .block-docslist--acts-editorial .feature-card.act-card {
-    min-height: 100%;
-    padding: 24px !important;
-    border: 1px solid var(--gov-border);
-    border-bottom: 3px solid transparent !important;
-    border-radius: var(--radius, 14px);
-    background: var(--gov-surface);
-    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, .04);
-    transition: transform .46s cubic-bezier(.22, 1, .36, 1),
-        box-shadow .46s cubic-bezier(.22, 1, .36, 1),
-        border-color .38s ease, border-bottom-color .38s ease !important;
-}
-
-.editorial-page__content .block-docslist--acts-editorial .feature-card.act-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--color-accent, var(--gov-teal));
-    border-bottom-color: var(--color-accent, var(--gov-teal)) !important;
-    background: var(--gov-surface);
-    box-shadow: 0 16px 36px rgba(37, 99, 235, .12);
-}
-
 .editorial-page__content .block-docslist--acts-editorial .act-card__emblem {
     display: none;
 }
@@ -774,9 +794,6 @@
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--gov-title);
-    font-size: .93rem;
-    line-height: 1.35;
 }
 
 .editorial-page__content .block-docslist--acts-editorial .act-card__date {
@@ -785,10 +802,6 @@
 
 .editorial-page__content .block-docslist--acts-editorial .act-card__title {
     margin-top: 17px;
-    font-family: var(--font-family);
-    font-size: .9rem;
-    font-weight: 600;
-    line-height: 1.48;
 }
 
 .editorial-page__content .block-docslist--acts-editorial .act-card__foot {
@@ -813,10 +826,15 @@
 }
 
 @media (max-width: 1000px) {
+    .editorial-page__content .block-text--intro .block-text__layout,
     .editorial-page__content .block-text--system .block-text__layout,
     .editorial-page__content .block-text--spotlight .block-text__layout {
         grid-template-columns: 1fr;
         gap: 34px;
+    }
+
+    .editorial-page__content .block-text__media {
+        aspect-ratio: 16 / 9;
     }
 
     .editorial-page__content .block-text__system {
@@ -828,6 +846,10 @@
 }
 
 @media (max-width: 720px) {
+    .editorial-page__content .block-text__media {
+        aspect-ratio: 4 / 3;
+    }
+
     .editorial-page__content .block-text__principles {
         align-items: stretch;
         gap: 12px;
