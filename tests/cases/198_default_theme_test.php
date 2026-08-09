@@ -30,14 +30,14 @@ test('По умолчанию: шапка липкая, прозрачная и 
 test('По умолчанию: цвета и шрифты фирменные', function () {
     $theme = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Core/SiteThemeCss.php');
 
-    // Пара из логотипа Агентства: синий и бирюзовый.
-    assert_contains("Setting::get('color_primary', '#155182')", $theme);
-    assert_contains("Setting::get('color_accent', '#00A0A6')", $theme);
-    // PT Serif в заголовках и PT Sans в тексте — оба лежат локально.
-    assert_contains("'PT Serif', Georgia, serif", $theme);
-    assert_contains("'PT Sans', system-ui", $theme);
+    // Палитра из утверждённой концепции дизайна: тёмно-синий и бирюзовый.
+    assert_contains("Setting::get('color_primary', '#0F2B46')", $theme);
+    assert_contains("Setting::get('color_accent', '#009BBE')", $theme);
+    // Manrope и в заголовках, и в тексте — так задано в концепции; лежит локально.
+    assert_contains("'Manrope', system-ui", $theme);
+    assert_not_contains("'PT Serif', Georgia, serif", $theme);
 
-    foreach (['ptserif-400-cyrillic.woff2', 'ptsans-400-cyrillic.woff2'] as $file) {
+    foreach (['manrope-400-cyrillic.woff2', 'manrope-700-cyrillic.woff2'] as $file) {
         assert_true(
             is_file(dirname(__DIR__, 2) . '/public/assets/fonts/' . $file),
             "шрифт {$file} должен лежать в проекте, а не грузиться со стороны"

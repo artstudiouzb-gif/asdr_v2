@@ -554,16 +554,16 @@ final class DesignSettings
     {
         return [
             'color_primary' => SettingsValidator::hexColor(
-                (string) Setting::get('design_custom_color_primary', Setting::get('color_primary', '#155182')),
+                (string) Setting::get('design_custom_color_primary', Setting::get('color_primary', '#0F2B46')),
                 '#173a63'
             ),
             'color_accent' => SettingsValidator::hexColor(
-                (string) Setting::get('design_custom_color_accent', Setting::get('color_accent', '#00A0A6')),
+                (string) Setting::get('design_custom_color_accent', Setting::get('color_accent', '#009BBE')),
                 '#17999b'
             ),
             'font_family' => (string) Setting::get(
                 'design_custom_font_family',
-                Setting::get('font_family', "'PT Sans', system-ui, sans-serif")
+                Setting::get('font_family', "'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif")
             ),
         ];
     }
@@ -575,11 +575,11 @@ final class DesignSettings
             // Страница — чуть серая, карточки — белые: карточка «поднимается»
             // над фоном без тени и рамки. Обратный порядок делал карточки
             // серыми пятнами на белом.
-            'bg_primary' => '#f6f8fa',
+            'bg_primary' => '#F4F6F8',
             'bg_surface' => '#ffffff',
             'text_main' => '#1a1a1a',
             'text_muted' => '#666666',
-            'border_color' => '#e1e3e8',
+            'border_color' => '#E6EBF0',
         ];
         $colors = [];
         foreach ($defaults as $key => $fallback) {
