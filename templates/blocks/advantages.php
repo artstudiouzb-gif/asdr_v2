@@ -42,14 +42,18 @@ if ($variant !== 'band') {
     <?php if ($title !== ''): ?><h2 class="block-advantages__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
     <div class="block-advantages__grid">
         <?php foreach ($items as $index => $item): ?>
-            <div class="block-advantages__item">
-                <?php if ($variant === 'indexed'): ?><span class="block-advantages__index" aria-hidden="true"><?= str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) ?></span><?php endif; ?>
-                <?php if (!empty($item['icon_svg'])): ?>
-                    <div class="block-advantages__icon block-advantages__icon--svg"><?= \App\Core\Icon::render($item['icon_svg'], 32) ?></div>
-                <?php endif; ?>
-                <h3><?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?></h3>
-                <p><?= htmlspecialchars($item['text'] ?? '', ENT_QUOTES) ?></p>
-            </div>
+            <article class="feature-card block-advantages__item">
+                <div class="feature-card__top">
+                    <?php if (!empty($item['icon_svg'])): ?>
+                        <span class="feature-card__icon block-advantages__icon block-advantages__icon--svg" aria-hidden="true"><?= \App\Core\Icon::render($item['icon_svg'], 22) ?></span>
+                    <?php else: ?>
+                        <span class="feature-card__spacer"></span>
+                    <?php endif; ?>
+                    <?php if ($variant === 'indexed'): ?><span class="feature-card__num block-advantages__index" aria-hidden="true"><?= str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) ?></span><?php endif; ?>
+                </div>
+                <h3 class="feature-card__title"><?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?></h3>
+                <p class="feature-card__text"><?= htmlspecialchars($item['text'] ?? '', ENT_QUOTES) ?></p>
+            </article>
         <?php endforeach; ?>
     </div>
 </div>

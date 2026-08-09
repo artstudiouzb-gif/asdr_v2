@@ -34,9 +34,10 @@ test('Миграция включает варианты без замены р�
 test('Редакционные стили не меняют шапку и подвал', function (): void {
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');
     assert_contains('.block-text--system', $css);
-    assert_contains('.block-advantages--indexed', $css);
+    assert_contains('.feature-card.block-advantages__item', $css);
     assert_contains('.block-stages--history', $css);
     assert_contains('.block-docslist--acts-editorial', $css);
+    assert_contains('.block-stages--history .stage::after', $css, 'в истории должна быть отключена дублирующая линия');
     assert_not_contains('.site-header', $css);
     assert_not_contains('.site-footer', $css);
 });
@@ -58,5 +59,22 @@ test('Страница директора использует читаемую 
 
     $template = (string) file_get_contents(APP_ROOT . '/templates/blocks/bio_education.php');
     assert_contains('bio-career__title', $template);
-    assert_contains('bio-career__item:last-child', (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css'));
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');
+    assert_contains('bio-career__item:last-child', $css);
+    assert_contains('left: -1px', $css, 'маркеры карьеры должны быть центрированы по линии');
+    assert_contains('box-sizing: border-box', $css, 'граница должна входить в размер маркера');
+});
+
+test('Преимущества, контакты и правовые акты используют один feature-card', function (): void {
+    $advantages = (string) file_get_contents(APP_ROOT . '/templates/blocks/advantages.php');
+    $contacts = (string) file_get_contents(APP_ROOT . '/templates/blocks/contact_cards.php');
+    $acts = (string) file_get_contents(APP_ROOT . '/templates/blocks/partials/act_card.php');
+    assert_contains('feature-card block-advantages__item', $advantages);
+    assert_contains('feature-card contact-card', $contacts);
+    assert_contains('feature-card act-card', $acts);
+
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    assert_contains('.feature-card.block-advantages__item', $css);
+    assert_contains('.feature-card.contact-card', $css);
+    assert_contains('.feature-card.act-card', $css);
 });

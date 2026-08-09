@@ -18,7 +18,7 @@ $editorialAct = !empty($editorialAct);
 $docIndex = isset($docIndex) ? (int) $docIndex : 0;
 ?>
 <<?= $tag ?>
-    class="act-card"
+    class="feature-card act-card"
     data-document-card
     data-document-kind="<?= htmlspecialchars($presented['extension'], ENT_QUOTES) ?>"
     data-document-search="<?= htmlspecialchars(trim($presented['search'] . ' ' . mb_strtolower($number . ' ' . $date)), ENT_QUOTES) ?>"
@@ -27,9 +27,9 @@ $docIndex = isset($docIndex) ? (int) $docIndex : 0;
 >
     <span class="act-card__emblem" aria-hidden="true"></span>
     <?php if ($editorialAct): ?>
-        <span class="act-card__editorial-head" aria-hidden="true">
-            <span class="act-card__editorial-icon"><?= Icon::render('file-description', 22) ?></span>
-            <span class="act-card__index"><?= str_pad((string) ($docIndex + 1), 2, '0', STR_PAD_LEFT) ?></span>
+        <span class="feature-card__top act-card__editorial-head" aria-hidden="true">
+            <span class="feature-card__icon act-card__editorial-icon"><?= Icon::render('file-description', 22) ?></span>
+            <span class="feature-card__num act-card__index"><?= str_pad((string) ($docIndex + 1), 2, '0', STR_PAD_LEFT) ?></span>
         </span>
     <?php endif; ?>
     <?php if ($number !== '' || $date !== ''): ?>

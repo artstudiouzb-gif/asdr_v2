@@ -31,22 +31,26 @@ $getFallbackIcon = static function (string $cardTitle): ?string {
         <div class="contact-cards">
             <?php foreach ($items as $item): ?>
                 <?php $iconSvg = !empty($item['icon_svg']) ? (string) $item['icon_svg'] : $getFallbackIcon((string) ($item['title'] ?? '')); ?>
-                <div class="contact-card">
-                    <?php if ($iconSvg !== null && $iconSvg !== ''): ?>
-                        <span class="contact-card__icon" aria-hidden="true"><?= \App\Core\Icon::render($iconSvg, 22, 'contact-card__icon-svg', 1.8) ?></span>
-                    <?php endif; ?>
+                <article class="feature-card contact-card">
+                    <div class="feature-card__top">
+                        <?php if ($iconSvg !== null && $iconSvg !== ''): ?>
+                            <span class="feature-card__icon contact-card__icon" aria-hidden="true"><?= \App\Core\Icon::render($iconSvg, 22, 'contact-card__icon-svg', 1.8) ?></span>
+                        <?php else: ?>
+                            <span class="feature-card__spacer"></span>
+                        <?php endif; ?>
+                    </div>
                     <?php if (!empty($item['title'])): ?>
-                        <div class="contact-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></div>
+                        <h3 class="feature-card__title contact-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
                     <?php endif; ?>
                     <?php foreach (preg_split('/\R/', (string) ($item['lines'] ?? '')) ?: [] as $line): ?>
                         <?php $line = trim($line); if ($line === '') { continue; } ?>
-                        <p class="contact-card__line"><?= htmlspecialchars($line, ENT_QUOTES) ?></p>
+                        <p class="feature-card__text contact-card__line"><?= htmlspecialchars($line, ENT_QUOTES) ?></p>
                     <?php endforeach; ?>
                     <?php $linkUrl = trim((string) ($item['link_url'] ?? '')); ?>
                     <?php if ($linkUrl !== '' && \App\Core\UrlGuard::isSafeLink($linkUrl) && !empty($item['link_text'])): ?>
                         <a class="contact-card__link" href="<?= htmlspecialchars($linkUrl, ENT_QUOTES) ?>"><?= htmlspecialchars((string) $item['link_text'], ENT_QUOTES) ?> →</a>
                     <?php endif; ?>
-                </div>
+                </article>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
