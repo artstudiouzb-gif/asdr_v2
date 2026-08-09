@@ -96,6 +96,36 @@ test('Block renderer: добавляет карточный контейнер �
     assert_not_contains('cms-block--surface-card', (string) ($flat['html'] ?? ''));
 });
 
+test('Block renderer: отмечает только явно заданные независимые отступы', function (): void {
+    $custom = \App\Core\BlockRenderer::render([
+        'id' => 9141,
+        'type' => 'text',
+        'custom_css' => '',
+        'data' => json_encode([
+            'content' => '<p>Текст</p>',
+            '_pad_top' => 'none',
+            '_pad_bottom' => 'large',
+        ]),
+    ]);
+    $defaults = \App\Core\BlockRenderer::render([
+        'id' => 9142,
+        'type' => 'text',
+        'custom_css' => '',
+        'data' => json_encode(['content' => '<p>Текст</p>']),
+    ]);
+
+    $customHtml = (string) ($custom['html'] ?? '');
+    $customCss = (string) ($custom['css'] ?? '');
+    $defaultHtml = (string) ($defaults['html'] ?? '');
+
+    assert_contains('cms-block--pad-top-custom', $customHtml);
+    assert_contains('cms-block--pad-bottom-custom', $customHtml);
+    assert_contains('--block-pad-top:0;', $customCss);
+    assert_contains('--block-pad-bottom:var(--space-max);', $customCss);
+    assert_not_contains('cms-block--pad-top-custom', $defaultHtml);
+    assert_not_contains('cms-block--pad-bottom-custom', $defaultHtml);
+});
+
 test('Block presentation normalizer: обнаруживает перевёрнутое окно показа', function (): void {
     assert_true(BlockPresentationNormalizer::hasInvalidVisibilityWindow([
         '_visible_from' => '2026-07-25 10:00',
