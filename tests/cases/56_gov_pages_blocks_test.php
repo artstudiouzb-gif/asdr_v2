@@ -98,6 +98,24 @@ test('Блок bio_education: карьера, образование, доп. с
     assert_contains('Элёр Ганиев', $out);
 });
 
+test('Блок bio_education: биография разбита на абзацы, а не склеена <br><br>', function () {
+    $out = BlockRenderer::render(['id' => 47, 'type' => 'bio_education', 'custom_css' => null, 'data' => json_encode([
+        'bio_title' => 'Биография',
+        'bio_text' => "Родился в Ташкенте.\n\nОкончил университет.\nПродолжил обучение за рубежом.\n\n\nРаботал в банке.",
+    ])])['html'];
+
+    // Пустая строка = новый абзац, одиночный перенос остаётся переносом внутри него.
+    assert_same(3, substr_count($out, '<p>'), 'три абзаца биографии');
+    assert_contains('<p>Родился в Ташкенте.</p>', $out);
+    assert_contains('Окончил университет.<br />', $out);
+    assert_not_contains('<br /><br />', $out);
+
+    // pre-line удвоил бы переносы: абзацы приходят разметкой.
+    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/public-layout-polish.css');
+    assert_not_contains('white-space: pre-line', $css);
+    assert_contains('.bio__text p {', $css);
+});
+
 test('Блок news_docs: документы и заглушки; ссылка «Все» у документов', function () {
     ensure_test_db();
     $out = BlockRenderer::render(['id' => 47, 'type' => 'news_docs', 'custom_css' => null, 'data' => json_encode([
