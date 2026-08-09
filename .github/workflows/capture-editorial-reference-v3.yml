@@ -1,0 +1,128 @@
+name: Capture editorial reference v3
+
+on:
+  push:
+    branches:
+      - chore/capture-editorial-reference-v3
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: asdr_capture
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, mbstring, gd, curl, dom, fileinfo, openssl, zip
+          coverage: none
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Prepare agency content
+        env:
+          APP_ENV: testing
+          APP_DEBUG: 'true'
+          APP_URL: http://127.0.0.1:8080
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_DATABASE: asdr_capture
+          DB_USERNAME: root
+          DB_PASSWORD: ''
+        run: |
+          cp config/config.example.php config/config.php
+          mkdir -p storage/logs storage/cache storage/protected_uploads
+          touch storage/installed.lock
+          php tests/load_schema.php asdr_capture
+          php database/seed_demo.php
+          php database/seed_agency_content.php
+
+      - name: Install Chromium
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Start application
+        env:
+          APP_ENV: testing
+          APP_DEBUG: 'true'
+          APP_URL: http://127.0.0.1:8080
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_DATABASE: asdr_capture
+          DB_USERNAME: root
+          DB_PASSWORD: ''
+        run: |
+          php -S 127.0.0.1:8080 -t public public/router.php > /tmp/asdr-editorial-reference-v3.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/health >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/asdr-editorial-reference-v3.log
+          exit 1
+
+      - name: Capture screenshots
+        run: |
+          mkdir -p screenshots
+          node <<'NODE'
+          const { chromium } = require('@playwright/test');
+          async function ready(page) {
+            await page.waitForLoadState('networkidle');
+            await page.evaluate(() => document.fonts && document.fonts.ready);
+            await page.waitForTimeout(200);
+          }
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const desktop = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+            for (const [file, path] of [
+              ['01-about-reference-v3.png', '/o-nas'],
+              ['02-leadership-reference-v3.png', '/rukovodstvo'],
+              ['03-director-reference-v3.png', '/direktor']
+            ]) {
+              const response = await desktop.goto('http://127.0.0.1:8080' + path, { waitUntil: 'domcontentloaded' });
+              if (!response || response.status() >= 400) throw new Error(path + ' returned ' + (response ? response.status() : 'no response'));
+              await ready(desktop);
+              await desktop.screenshot({ path: 'screenshots/' + file, fullPage: true });
+            }
+            await desktop.close();
+            const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+            const response = await mobile.goto('http://127.0.0.1:8080/o-nas', { waitUntil: 'domcontentloaded' });
+            if (!response || response.status() >= 400) throw new Error('/o-nas mobile returned ' + (response ? response.status() : 'no response'));
+            await ready(mobile);
+            await mobile.screenshot({ path: 'screenshots/04-about-mobile-reference-v3.png', fullPage: true });
+            await mobile.close();
+            await browser.close();
+          })().catch(err => { console.error(err); process.exit(1); });
+          NODE
+
+      - name: Show diagnostics on failure
+        if: failure()
+        run: |
+          cat /tmp/asdr-editorial-reference-v3.log || true
+          find storage/logs -maxdepth 1 -type f -print -exec tail -n 160 {} \; || true
+
+      - name: Upload screenshots
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: editorial-reference-v3
+          path: screenshots/*.png
+          if-no-files-found: error
+          retention-days: 7
