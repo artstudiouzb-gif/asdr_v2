@@ -91,6 +91,39 @@ test('Демо: прототипные госстраницы собраны и�
     }
 });
 
+test('Демо: сравнение стартовой главной не зависит от порядка JSON-ключей', function () {
+    $method = new ReflectionMethod(\App\Core\DemoSeeder::class, 'canonicalJsonValue');
+
+    $fromMysql = [
+        '_spacing' => 'max',
+        'button_text' => 'Последние новости',
+        'button_url' => '/news',
+        'text' => 'Актуальная информация, документы, новости и услуги в одном месте.',
+        'title' => 'Официальный сайт организации',
+    ];
+    $fixtureOrder = [
+        'title' => 'Официальный сайт организации',
+        'text' => 'Актуальная информация, документы, новости и услуги в одном месте.',
+        'button_text' => 'Последние новости',
+        'button_url' => '/news',
+        '_spacing' => 'max',
+    ];
+
+    assert_same(
+        $method->invoke(null, $fixtureOrder),
+        $method->invoke(null, $fromMysql),
+        'порядок ключей JSON-объекта не влияет на определение нетронутой главной'
+    );
+    assert_true(
+        $method->invoke(null, ['limit' => 3]) !== $method->invoke(null, ['limit' => '3']),
+        'типы JSON-значений сравниваются строго'
+    );
+
+    $seeder = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
+    assert_contains('self::canonicalJsonValue($data)', $seeder);
+    assert_not_contains('|| $data !== $expected[$i][2])', $seeder);
+});
+
 test('Демо: повторный запуск не удаляет страницы и не дополняет настроенное меню', function () {
     $seeder = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
     assert_not_contains('DELETE FROM pages', $seeder);
