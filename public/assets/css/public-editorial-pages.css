@@ -571,7 +571,10 @@
     grid-template-columns: 112px minmax(0, 1fr);
     gap: 16px;
     margin: 0;
-    padding: 8px 0;
+    /* Слева освобождаем место под маркер и вертикальную линию: они
+       позиционируются абсолютно, и без отступа кружок ложился прямо на год
+       («2000-2003» читалось как «0-2003»). */
+    padding: 8px 0 8px 30px;
     border-bottom: 1px solid var(--editorial-line);
 }
 
@@ -606,7 +609,8 @@
 }
 
 .editorial-page__content .bio-edu__item {
-    padding: 10px 0;
+    /* То же самое в «Образовании»: маркер накрывал первую букву степени. */
+    padding: 10px 0 10px 24px;
     border-bottom: 1px solid var(--editorial-line);
 }
 
@@ -775,4 +779,39 @@ html[data-theme="dark"] .content-pagehead__emblem {
     }
 
     
+}
+
+/* Телефон: карточка персоны становится горизонтальной.
+   Вертикальная карточка с фото 4:3 во всю ширину растягивала «Руководство»
+   на 2600px — четыре человека занимали три экрана. Карусель тут не подходит:
+   на страницу с руководством приходят посмотреть весь состав, а она спрятала
+   бы троих из четырёх за жестом. Компактная строка оставляет всех на виду и
+   укорачивает страницу втрое. */
+@media (max-width: 640px) {
+    .editorial-page__content .person-card {
+        display: grid;
+        grid-template-columns: 110px minmax(0, 1fr);
+        align-items: stretch;
+    }
+
+    .editorial-page__content .person-card__photo,
+    .editorial-page__content .person-card__placeholder {
+        height: 100%;
+        aspect-ratio: auto;
+        min-height: 132px;
+    }
+
+    .editorial-page__content .person-card__placeholder {
+        background-size: 56px 56px;
+    }
+
+    .editorial-page__content .person-card__body {
+        min-height: 0;
+        justify-content: center;
+        padding: 12px 14px;
+    }
+
+    .editorial-page__content .person-card__more {
+        margin-top: 8px;
+    }
 }
