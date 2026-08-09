@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Core\BlockRenderer;
+use App\Core\Database;
+use App\Core\Locale;
 
 test('Блок person_cards: персона с фото и вакантная карточка', function () {
     $out = BlockRenderer::render(['id' => 40, 'type' => 'person_cards', 'custom_css' => null, 'data' => json_encode([
@@ -96,6 +98,62 @@ test('Блок bio_education: карьера, образование, доп. с
     assert_contains('<li>Executive Program</li>', $out);
     assert_contains('bio-quote__text', $out);
     assert_contains('Элёр Ганиев', $out);
+});
+
+test('Блок bio_education: выбранные виджеты выводятся над и под образованием', function () {
+    ensure_test_db();
+    Locale::set('ru');
+    $pdo = Database::pdo();
+
+    $insert = $pdo->prepare(
+        "INSERT INTO widgets (sidebar, type, title, lang, data, sort_order, is_active, created_at)
+         VALUES ('right', 'custom_html', :title, :lang, :data, :sort_order, :is_active, NOW())"
+    );
+    $ids = [];
+    foreach ([
+        ['До образования', '', '{"html":"<p>WIDGET-BEFORE</p><script>window.__bioWidget=1;<\\/script>"}', 951, 1],
+        ['После образования', 'ru', '{"html":"<p>WIDGET-AFTER</p>"}', 952, 1],
+        ['Только UZ', 'uz', '{"html":"<p>WIDGET-UZ</p>"}', 953, 1],
+        ['Выключенный', '', '{"html":"<p>WIDGET-OFF</p>"}', 954, 0],
+    ] as [$title, $lang, $data, $order, $active]) {
+        $insert->execute([
+            ':title' => $title,
+            ':lang' => $lang,
+            ':data' => $data,
+            ':sort_order' => $order,
+            ':is_active' => $active,
+        ]);
+        $ids[] = (int) $pdo->lastInsertId();
+    }
+
+    try {
+        $out = BlockRenderer::render(['id' => 146, 'type' => 'bio_education', 'custom_css' => null, 'data' => json_encode([
+            'bio_title' => 'Биография',
+            'bio_text' => 'Текст биографии.',
+            'edu_title' => 'Образование',
+            'edu_items' => [['years' => '2010', 'title' => 'Магистр', 'org' => 'Университет']],
+            'widgets_before' => [$ids[0], $ids[2], $ids[3]],
+            'widgets_after' => [$ids[1]],
+            'quote_text' => 'Цитата после виджетов.',
+        ], JSON_UNESCAPED_UNICODE)])['html'];
+
+        assert_contains('bio-side__widgets--before', $out);
+        assert_contains('bio-side__widgets--after', $out);
+        assert_contains('WIDGET-BEFORE', $out);
+        assert_contains('WIDGET-AFTER', $out);
+        assert_not_contains('WIDGET-UZ', $out, 'виджет другого языка скрывается');
+        assert_not_contains('WIDGET-OFF', $out, 'выключенный виджет скрывается');
+        assert_contains('<script nonce="', $out, 'custom_html внутри блока получает CSP nonce');
+
+        $before = strpos($out, 'WIDGET-BEFORE');
+        $education = strpos($out, 'bio-edu');
+        $after = strpos($out, 'WIDGET-AFTER');
+        $quote = strpos($out, 'bio-quote');
+        assert_true(is_int($before) && is_int($education) && is_int($after) && is_int($quote));
+        assert_true($before < $education && $education < $after && $after < $quote, 'порядок: верхние виджеты → образование → нижние виджеты → цитата');
+    } finally {
+        $pdo->exec('DELETE FROM widgets WHERE id IN (' . implode(',', $ids) . ')');
+    }
 });
 
 test('Блок bio_education: биография разбита на абзацы, а не склеена <br><br>', function () {
