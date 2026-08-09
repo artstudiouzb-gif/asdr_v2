@@ -3674,8 +3674,12 @@ span.imgcard__media::after {
 }
 
 /* Медиа-галерея — карточки с play и длительностью. */
-.mediagallery-grid { display: grid; grid-template-columns: repeat(var(--grid-track, 4), minmax(0, 1fr)); gap: 20px; }
-.mediagallery-grid > .mediacard { grid-column: span var(--grid-span, 1); }
+.mediagallery-grid { display: grid; grid-template-columns: repeat(var(--media-columns, 4), minmax(0, 1fr)); gap: 20px; }
+.mediagallery-grid--cols-1 { --media-columns: 1; }
+.mediagallery-grid--cols-2 { --media-columns: 2; }
+.mediagallery-grid--cols-3 { --media-columns: 3; }
+.mediagallery-grid--cols-4 { --media-columns: 4; }
+.mediagallery-grid > .mediacard { grid-column: auto; min-width: 0; }
 @media (max-width: 1000px) {
     .mediagallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .mediagallery-grid > .mediacard { grid-column: auto; }
