@@ -287,6 +287,33 @@ html[data-a11y-reading="on"] .cms-block {
     .a11y-drawer:not([hidden]),
     .a11y-backdrop:not([hidden]) { animation: none; }
 }
+
+/* Системная настройка повышенного контраста работает и без открытия панели
+   доступности. Меняем только семантические токены, не ломая тему и бренд. */
+@media (prefers-contrast: more) {
+    :root {
+        --border-color: currentColor;
+        --gov-border: color-mix(in srgb, currentColor 58%, transparent);
+    }
+
+    :where(a, button, input, select, textarea):focus-visible {
+        outline-width: 3px;
+        outline-offset: 3px;
+    }
+}
+
+/* Windows High Contrast заменяет палитру системными цветами. Явные границы
+   сохраняют видимость элементов, которые в обычной теме отделяются тенью. */
+@media (forced-colors: active) {
+    :where(button, .btn, input, select, textarea, [role="button"]) {
+        border: 1px solid ButtonText;
+    }
+
+    :where(a, button, input, select, textarea):focus-visible {
+        outline: 3px solid Highlight;
+        outline-offset: 3px;
+    }
+}
 .a11y-drawer__head {
     display: flex;
     align-items: center;
