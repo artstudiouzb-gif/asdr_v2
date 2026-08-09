@@ -191,15 +191,14 @@
     background: color-mix(in srgb, var(--gov-navy) 4%, var(--gov-surface));
 }
 
-.person-card--vacant .person-card__placeholder::after {
-    opacity: .08;
-    -webkit-mask-size: 38%;
-    mask-size: 38%;
-}
+/* Размер и плотность гириха не переопределяем: сотрудник без фото получает
+   такую же заглушку, и рядом с вакансией в одном ряду они должны совпадать. */
 
 .person-card__vacant {
     bottom: 20px;
-    font-size: .7rem;
+    /* Не ниже 12px: подпись набрана капслоком с разрядкой, на .7rem она
+       перестаёт читаться и нарушает нижний порог размера текста. */
+    font-size: .75rem;
     letter-spacing: .12em;
 }
 
