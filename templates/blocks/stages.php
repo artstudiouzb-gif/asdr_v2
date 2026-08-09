@@ -5,6 +5,7 @@ use App\Core\Icon;
 $title = trim((string) ($data['title'] ?? ''));
 $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
+$variant = ($data['variant'] ?? 'default') === 'history' ? 'history' : 'default';
 $items = is_array($data['items'] ?? null) ? array_values($data['items']) : [];
 $carousel = count($items) > 1;
 $desktopCarousel = count($items) > 5;
@@ -19,7 +20,7 @@ $statuses = array_map(
 // колонки из пяти, и хронология обрывается посреди ряда.
 $templateCss = '#block-' . $blockId . ' .stages{--stages-count:' . max(1, min(5, count($items))) . '}';
 ?>
-<div class="block-stages"<?= $carousel ? ' data-carousel' : '' ?>>
+<div class="block-stages block-stages--<?= $variant ?>"<?= $carousel ? ' data-carousel' : '' ?>>
     <div class="section-head">
         <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
         <div class="section-head__tools">
@@ -36,7 +37,7 @@ $templateCss = '#block-' . $blockId . ' .stages{--stages-count:' . max(1, min(5,
     <?php if (empty($items)): ?>
         <p class="block-stages__empty"><?= htmlspecialchars(t('Этапы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
-        <ol class="stages<?= $desktopCarousel ? ' stages--carousel' : '' ?>"<?= $carousel ? ' data-carousel-track tabindex="0" role="group" aria-label="' . htmlspecialchars(t('Этапы — прокрутка вбок'), ENT_QUOTES) . '"' : '' ?>>
+        <ol class="stages stages--<?= $variant ?><?= $desktopCarousel ? ' stages--carousel' : '' ?>"<?= $carousel ? ' data-carousel-track tabindex="0" role="group" aria-label="' . htmlspecialchars(t('Этапы — прокрутка вбок'), ENT_QUOTES) . '"' : '' ?>>
             <?php foreach ($items as $index => $item): ?>
                 <?php
                 $status = $statuses[$index];

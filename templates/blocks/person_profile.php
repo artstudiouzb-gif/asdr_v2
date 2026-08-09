@@ -5,6 +5,7 @@ $phone = trim((string) ($data['phone'] ?? ''));
 $email = trim((string) ($data['email'] ?? ''));
 $btnText = trim((string) ($data['button_text'] ?? ''));
 $btnUrl = trim((string) ($data['button_url'] ?? ''));
+$hasContacts = $phone !== '' || $email !== '';
 ?>
 <div class="block-profile">
     <div class="profile__media">
@@ -23,7 +24,7 @@ $btnUrl = trim((string) ($data['button_url'] ?? ''));
                 <?= \App\Core\HtmlSanitizer::sanitize((string) $data['text']) ?>
             </div>
         <?php endif; ?>
-        <div class="profile__contacts">
+        <?php if ($hasContacts): ?><div class="profile__contacts">
             <?php if ($phone !== ''): ?>
                 <span class="profile__contact">
                     <?= \App\Core\Icon::render('phone', 17, 'profile__contact-icon', 1.6) ?>
@@ -38,7 +39,7 @@ $btnUrl = trim((string) ($data['button_url'] ?? ''));
                     <a href="mailto:<?= htmlspecialchars($email, ENT_QUOTES) ?>"><?= htmlspecialchars($email, ENT_QUOTES) ?></a>
                 </span>
             <?php endif; ?>
-        </div>
+        </div><?php endif; ?>
         <?php if ($btnText !== '' && $btnUrl !== ''): ?>
             <a class="profile__button" href="<?= htmlspecialchars($btnUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($btnText, ENT_QUOTES) ?> →</a>
         <?php endif; ?>

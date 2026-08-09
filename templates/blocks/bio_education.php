@@ -1,6 +1,7 @@
 <?php
 /** @var array $data */
 $career = $data['career'] ?? [];
+$careerTitle = trim((string) ($data['career_title'] ?? ''));
 $edu = $data['edu_items'] ?? [];
 $extraTitle = trim((string) ($data['extra_title'] ?? ''));
 $extraText = trim((string) ($data['extra_text'] ?? ''));
@@ -22,6 +23,7 @@ $quote = trim((string) ($data['quote_text'] ?? ''));
             </div>
         <?php endif; ?>
         <?php if (!empty($career)): ?>
+            <?php if ($careerTitle !== ''): ?><h3 class="bio-career__title"><?= htmlspecialchars($careerTitle, ENT_QUOTES) ?></h3><?php endif; ?>
             <ol class="bio-career">
                 <?php foreach ($career as $row): ?>
                     <li class="bio-career__item">

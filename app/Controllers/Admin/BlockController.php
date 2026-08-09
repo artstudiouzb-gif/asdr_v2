@@ -403,12 +403,31 @@ final class BlockController
     {
         switch ($type) {
             case 'text':
+                $items = [];
+                foreach ((array) ($_POST['items'] ?? []) as $item) {
+                    if (!is_array($item)) {
+                        continue;
+                    }
+                    $itemTitle = trim((string) ($item['title'] ?? ''));
+                    if ($itemTitle === '') {
+                        continue;
+                    }
+                    $items[] = [
+                        'icon_svg' => \App\Core\Icon::cleanName($item['icon_svg'] ?? ''),
+                        'title' => TextProcessor::typographPlain($itemTitle, $locale),
+                    ];
+                }
+                $textVariant = (string) ($_POST['variant'] ?? 'default');
                 return [
+                    'variant' => in_array($textVariant, ['default', 'section', 'intro', 'system', 'spotlight'], true) ? $textVariant : 'default',
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'content' => TextProcessor::process(
                         \App\Core\HtmlSanitizer::sanitizeText((string) ($_POST['content'] ?? '')),
                         $locale
                     ),
+                    'aside_title' => TextProcessor::typographPlain(trim((string) ($_POST['aside_title'] ?? '')), $locale),
+                    'items' => $items,
+                    'quote' => TextProcessor::typographPlain(trim((string) ($_POST['quote'] ?? '')), $locale),
                 ];
             case 'html':
                 // Даже супер-администратор сохраняет только безопасную
@@ -674,6 +693,7 @@ final class BlockController
                 return [
                     'bio_title' => TextProcessor::typographPlain(trim((string) ($_POST['bio_title'] ?? 'Биография')), $locale),
                     'bio_text' => TextProcessor::typographPlain(trim((string) ($_POST['bio_text'] ?? '')), $locale),
+                    'career_title' => TextProcessor::typographPlain(trim((string) ($_POST['career_title'] ?? '')), $locale),
                     'career' => $collect('career', ['years', 'text']),
                     'edu_title' => TextProcessor::typographPlain(trim((string) ($_POST['edu_title'] ?? 'Образование')), $locale),
                     'edu_items' => $collect('edu_items', ['years', 'title', 'org']),
@@ -719,6 +739,7 @@ final class BlockController
                     ];
                 }
                 return [
+                    'variant' => ($_POST['variant'] ?? 'default') === 'history' ? 'history' : 'default',
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => $this->safeUrlField('all_url'),
@@ -767,7 +788,7 @@ final class BlockController
                     ];
                 }
                 return [
-                    'variant' => in_array($_POST['variant'] ?? 'grid', ['links', 'acts'], true) ? (string) $_POST['variant'] : 'grid',
+                    'variant' => in_array($_POST['variant'] ?? 'grid', ['grid', 'links', 'acts', 'acts-editorial'], true) ? (string) $_POST['variant'] : 'grid',
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => $this->safeUrlField('all_url'),

@@ -142,6 +142,7 @@ final class BlockSamples
             'bio_education' => [
                 'bio_title' => 'Биография',
                 'bio_text' => self::LEAD,
+                'career_title' => 'Профессиональный путь',
                 'career' => [
                     ['years' => '2020–2023', 'text' => 'Должность и организация.'],
                     ['years' => 'с 2023', 'text' => 'Текущая должность.'],

@@ -38,8 +38,45 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
 
         <?php if ($type === 'text'): ?>
             <div class="form-field">
+                <label for="text_variant">Вариант отображения</label>
+                <select id="text_variant" name="variant">
+                    <?php foreach (['default' => 'Обычный текст', 'section' => 'Вступление к разделу', 'intro' => 'Вводный блок с принципами', 'system' => 'Текст + системный список', 'spotlight' => 'Текст + акцентная цитата'] as $value => $label): ?>
+                        <option value="<?= $value ?>" <?= ($data['variant'] ?? 'default') === $value ? 'selected' : '' ?>><?= $label ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">Специальные варианты остаются обычными системными блоками и адаптируются автоматически.</span>
+            </div>
+            <div class="form-field">
                 <label for="content">Текст</label>
                 <textarea class="u-inline-9bef318bc9" id="content" name="content" data-wysiwyg><?= htmlspecialchars($data['content'] ?? '', ENT_QUOTES) ?></textarea>
+            </div>
+            <div class="form-field">
+                <label for="aside_title">Заголовок структурированного списка</label>
+                <input type="text" id="aside_title" name="aside_title" value="<?= htmlspecialchars($data['aside_title'] ?? '', ENT_QUOTES) ?>">
+                <span class="form-hint">Используется вариантом «Текст + системный список».</span>
+            </div>
+            <div>
+                <label>Структурированные пункты</label>
+                <div data-repeater="items">
+                    <?php foreach (($data['items'] ?? []) as $i => $item): ?>
+                        <div class="repeater-row">
+                            <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
+                            <div class="form-field"><label>Подпись</label><input type="text" name="items[<?= $i ?>][title]" value="<?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?>"></div>
+                            <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <template data-repeater-template="items">
+                    <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
+                    <div class="form-field"><label>Подпись</label><input type="text" name="items[__INDEX__][title]"></div>
+                    <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
+                </template>
+                <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить пункт</button></div>
+            </div>
+            <div class="form-field">
+                <label for="quote">Акцентная цитата</label>
+                <textarea id="quote" name="quote" rows="4"><?= htmlspecialchars($data['quote'] ?? '', ENT_QUOTES) ?></textarea>
+                <span class="form-hint">Используется вариантом «Текст + акцентная цитата».</span>
             </div>
         <?php endif; ?>
 
@@ -91,6 +128,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <label for="advantages_variant">Вариант отображения</label>
                 <select id="advantages_variant" name="variant">
                     <option value="grid" <?= ($data['variant'] ?? 'grid') === 'grid' ? 'selected' : '' ?>>Карточки</option>
+                    <option value="indexed" <?= ($data['variant'] ?? 'grid') === 'indexed' ? 'selected' : '' ?>>Карточки с нумерацией</option>
                     <option value="band" <?= ($data['variant'] ?? 'grid') === 'band' ? 'selected' : '' ?>>Компактная полоса</option>
                 </select>
             </div>
@@ -955,6 +993,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php if ($type === 'bio_education'): ?>
             <div class="form-field"><label for="bio_title">Левая колонка — заголовок</label><input type="text" id="bio_title" name="bio_title" value="<?= htmlspecialchars($data['bio_title'] ?? 'Биография', ENT_QUOTES) ?>"></div>
             <div class="form-field"><label for="bio_text">Вступительный текст</label><textarea id="bio_text" name="bio_text" rows="4"><?= htmlspecialchars($data['bio_text'] ?? '', ENT_QUOTES) ?></textarea></div>
+            <div class="form-field"><label for="career_title">Заголовок хронологии</label><input type="text" id="career_title" name="career_title" value="<?= htmlspecialchars($data['career_title'] ?? '', ENT_QUOTES) ?>" placeholder="Профессиональный путь"></div>
             <div>
                 <label>Карьера (годы + позиция)</label>
                 <div data-repeater="career">
@@ -1031,6 +1070,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'stages'): ?>
+            <div class="form-field"><label for="stages_variant">Вариант отображения</label><select id="stages_variant" name="variant"><option value="default" <?= ($data['variant'] ?? 'default') === 'default' ? 'selected' : '' ?>>Этапы реализации</option><option value="history" <?= ($data['variant'] ?? 'default') === 'history' ? 'selected' : '' ?>>История организации</option></select></div>
             <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все этапы"></div>
             <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
             <div>
@@ -1097,12 +1137,13 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <option value="grid" <?= ($data['variant'] ?? 'grid') === 'grid' ? 'selected' : '' ?>>Карточки документов</option>
                     <option value="links" <?= ($data['variant'] ?? 'grid') === 'links' ? 'selected' : '' ?>>Компактный список ссылок</option>
                     <option value="acts" <?= ($data['variant'] ?? 'grid') === 'acts' ? 'selected' : '' ?>>Правовые акты (номер и дата)</option>
+                    <option value="acts-editorial" <?= ($data['variant'] ?? 'grid') === 'acts-editorial' ? 'selected' : '' ?>>Правовые акты — редакционные карточки</option>
                 </select>
                 <span class="form-hint">Компактный вариант подходит для короткого списка файлов и внешних материалов. «Правовые акты» показывают номер и дату из полей ниже.</span>
             </div>
             <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все документы"></div>
             <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="columns">Колонок</label><select id="columns" name="columns"><?php foreach ([1,2,3,4] as $n): ?><option value="<?= $n ?>" <?= (int)($data['columns'] ?? 4)===$n?'selected':'' ?>><?= $n ?></option><?php endforeach; ?></select></div>
+            <div class="form-field"><label for="columns">Колонок</label><select id="columns" name="columns"><?php foreach ([1,2,3,4,5] as $n): ?><option value="<?= $n ?>" <?= (int)($data['columns'] ?? 4)===$n?'selected':'' ?>><?= $n ?></option><?php endforeach; ?></select></div>
             <div class="form-field form-field--checkbox">
                 <input type="checkbox" id="search_enabled" name="search_enabled" value="1" <?= (!array_key_exists('search_enabled', $data) || !empty($data['search_enabled'])) ? 'checked' : '' ?>>
                 <label for="search_enabled">Добавлять поиск и фильтр форматов</label>
