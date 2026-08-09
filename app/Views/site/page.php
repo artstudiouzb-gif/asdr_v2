@@ -12,6 +12,11 @@ $extraHeadCss = $blockCss;
 $hideChrome = !empty($page['hide_chrome']); // лендинг (группа 6)
 // Флаг страницы «Прозрачная шапка» — активирует режим из конструктора.
 $transparentHeader = !empty($page['transparent_header']);
+
+// Главная сохраняет текущую композицию, но отдельные будущие блоки могут
+// подключать дизайн-систему локально через атрибут data-visual-system.
+$isHome = \App\Models\Page::isHomePage($page);
+$visualSystemScope = !$isHome;
 require __DIR__ . '/_header.php';
 
 // Блоки, которые сами содержат заголовок страницы. Для них отдельный
@@ -22,9 +27,6 @@ $firstOwnsHeading = (bool) preg_match(
     $content
 );
 $pageLead = trim((string) ($page['lead'] ?? ''));
-
-// Определяем, является ли эта страница Главной базово или по языку.
-$isHome = \App\Models\Page::isHomePage($page);
 
 if ($isHome) {
     // На Главной странице сайта хлебные крошки строго запрещены на любых языках (RU, UZ, EN...).

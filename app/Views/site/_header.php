@@ -713,9 +713,7 @@ $pageCssUrls = \App\Core\CustomAssetHelper::resolveCssUrls((string) $page['custo
 <?php endif; ?>
 </head>
 <?php
-$isHomePage = in_array($currentReqPath, ['/', '/ru', '/uz', '/en', '/kk', '/tr', '/de'], true);
 $bodyClass = trim($designBodyClass
-    . ($isHomePage ? ' is-home' : '')
     . (!empty($previewNotice) ? ' is-preview' : '')
     . (\App\Core\AppToolbar::isVisible() ? ' has-admin-bar' : ''));
 ?>
@@ -821,7 +819,7 @@ $headerClasses = implode(' ', array_filter($headerClasses));
 <!-- Контейнер для всплывающих Toast-уведомлений -->
 <div class="site-toast-container" id="site-toast-container" aria-live="polite" aria-atomic="true"></div>
 <?php endif; ?>
-<main class="site-content" id="main-content">
+<main class="site-content" id="main-content"<?= ($visualSystemScope ?? true) ? ' data-visual-system' : '' ?>>
 <header class="print-only print-header">
     <?php if ($logo !== ''): ?>
         <img src="<?= htmlspecialchars($logo, ENT_QUOTES) ?>" alt="<?= htmlspecialchars($siteName, ENT_QUOTES) ?>">

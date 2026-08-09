@@ -11,22 +11,23 @@
     --editorial-media-filter: saturate(.9) contrast(1.025);
 }
 
-/* Shared visual language for reusable section headings. The accent is tied to
-   the configured theme color and does not require changes to block markup. */
-body:not(.is-home) .section-head {
+/* Shared visual language for reusable section headings. Internal pages opt in
+   at the main content level; a future homepage block can opt in locally by
+   adding data-visual-system to its own root without restyling the whole page. */
+[data-visual-system] .section-head {
     position: relative;
     padding-block-end: 16px;
     border-block-end: 1px solid color-mix(in srgb, var(--gov-border) 78%, transparent);
 }
 
-body:not(.is-home) .section-head__title {
+[data-visual-system] .section-head__title {
     position: relative;
     max-inline-size: 24ch;
     padding-inline-start: 18px;
     text-wrap: balance;
 }
 
-body:not(.is-home) .section-head__title::before {
+[data-visual-system] .section-head__title::before {
     content: "";
     position: absolute;
     inset-block: .16em;
@@ -36,18 +37,18 @@ body:not(.is-home) .section-head__title::before {
     background: var(--gov-teal);
 }
 
-body:not(.is-home) .cms-block--bg-navy .section-head {
+[data-visual-system] .cms-block--bg-navy .section-head {
     border-block-end-color: color-mix(in srgb, #ffffff 22%, transparent);
 }
 
-body:not(.is-home) .cms-block--bg-navy .section-head__title::before {
+[data-visual-system] .cms-block--bg-navy .section-head__title::before {
     background: var(--gov-teal-on-dark);
 }
 
 /* A restrained photo treatment makes news, project and gallery sources feel
    like one publication. Portraits and content images are intentionally left
    untouched so faces and documentary material retain their natural colour. */
-body:not(.is-home) :where(
+[data-visual-system] :where(
     .news-card__cover,
     .relnews-card__media,
     .album-card__cover,
@@ -59,7 +60,7 @@ body:not(.is-home) :where(
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gov-navy) 10%, transparent);
 }
 
-body:not(.is-home) :where(
+[data-visual-system] :where(
     .news-card__cover,
     .relnews-card__media,
     .album-card__cover,
@@ -72,7 +73,7 @@ body:not(.is-home) :where(
 }
 
 @media (hover: hover) and (pointer: fine) {
-    body:not(.is-home) :where(
+    [data-visual-system] :where(
         .news-card,
         .relnews-card,
         .album-card,
@@ -86,10 +87,10 @@ body:not(.is-home) :where(
 }
 
 @media (forced-colors: active) {
-    body:not(.is-home) .section-head { border-block-end-color: CanvasText; }
-    body:not(.is-home) .section-head__title::before { background: Highlight; }
+    [data-visual-system] .section-head { border-block-end-color: CanvasText; }
+    [data-visual-system] .section-head__title::before { background: Highlight; }
 
-    body:not(.is-home) :where(
+    [data-visual-system] :where(
         .news-card__cover,
         .relnews-card__media,
         .album-card__cover,
