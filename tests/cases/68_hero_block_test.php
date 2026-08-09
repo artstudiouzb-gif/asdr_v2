@@ -195,16 +195,31 @@ test('Hero: мобильное фото сохраняет исходную не
     assert_not_contains('calc(var(--hero-scrim-a) * 1.31)', $css);
 });
 
-test('Hero: градиент начинается у края и исчезает до противоположного края', function () {
+test('Hero: градиент затемнения держит плотность под текстом и не гаснет до нуля', function () {
     $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
     $form = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/admin/pages/block_form.php');
 
+    // Полная плотность у ближнего края и почти полная под текстовой колонкой.
     assert_contains('rgba(var(--hero-scrim-rgb), var(--hero-scrim-a)) 0%', $css);
-    assert_contains('rgba(var(--hero-scrim-rgb), 0) 68%', $css);
-    assert_contains('rgba(var(--hero-scrim-rgb), 0) 100%', $css);
+    assert_contains('rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.92)) 46%', $css);
+    // До дальнего края доходит нижний порог: на нуле заголовок ложился на
+    // голый снимок и на светлой фотографии переставал читаться.
+    assert_contains('rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.22)) 100%', $css);
+    assert_not_contains('rgba(var(--hero-scrim-rgb), 0) 100%', $css);
     assert_contains('Градиентное от края', $form);
     assert_contains('От левого края', $form);
     assert_contains('От правого края', $form);
+});
+
+test('Hero: на телефоне затемнение почти равномерное, а надзаголовок читается на фото', function () {
+    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+
+    // Текст на телефоне занимает всю ширину, боковой градиент там не спасает.
+    assert_contains('.block-hero__scrim:not(.block-hero__scrim--solid)', $css);
+    assert_contains('rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.88)) 100%', $css);
+    // Акцентный надзаголовок поверх снимка не добирает 4.5:1 при любой
+    // разумной плотности затемнения — цветным остаётся только штрих.
+    assert_contains('.block-hero--media .block-hero__eyebrow { color: var(--hero-text, #fff); }', $css);
 });
 
 test('Hero: контроллер передаёт данные формы отдельному нормализатору', function () {

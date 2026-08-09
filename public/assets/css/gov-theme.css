@@ -3198,11 +3198,16 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .block-hero__video::-webkit-media-controls-overlay-play-button { display: none !important; -webkit-appearance: none; opacity: 0; }
 .block-hero__scrim {
     position: absolute; inset: 0;
+    /* Затемнение обязано доходить до конца текстовой колонки. Прежние
+       остановки гасили его до нуля уже на 68% ширины, а текстовый блок
+       шире: заголовок и хлебные крошки ложились на голый снимок и на
+       светлой фотографии переставали читаться. Держим плотность под
+       текстом и нижний порог до дальнего края. */
     background: linear-gradient(var(--hero-scrim-direction, 90deg),
         rgba(var(--hero-scrim-rgb), var(--hero-scrim-a)) 0%,
-        rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.62)) 28%,
-        rgba(var(--hero-scrim-rgb), 0) 68%,
-        rgba(var(--hero-scrim-rgb), 0) 100%);
+        rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.92)) 46%,
+        rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.45)) 78%,
+        rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.22)) 100%);
     z-index: 2;
 }
 .block-hero__scrim--solid { background: rgba(var(--hero-scrim-rgb), var(--hero-scrim-a)); }
@@ -3210,11 +3215,24 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
     /* frontend.css приглушает старый боковой Hero до opacity:.16.
        Полноэкранный медиа-Hero сохраняет исходные цвета и на телефоне. */
     .block-hero--media .block-hero__media { opacity: 1; }
+    /* На телефоне текст занимает всю ширину, поэтому боковой градиент
+       смысла не имеет: затемняем кадр почти равномерно. Сплошной вариант
+       затемнения не трогаем — он и так равномерный. */
+    .block-hero__scrim:not(.block-hero__scrim--solid) {
+        background: linear-gradient(var(--hero-scrim-direction, 90deg),
+            rgba(var(--hero-scrim-rgb), var(--hero-scrim-a)) 0%,
+            rgba(var(--hero-scrim-rgb), calc(var(--hero-scrim-a) * 0.88)) 100%);
+    }
 }
 .block-hero--media .block-hero__inner { position: relative; width: 100%; max-width: var(--container-max); margin: 0 auto; padding: 0 20px; z-index: 3; }
 .block-hero--media .block-hero__text { max-width: var(--hero-text-width, 620px); }
 .block-hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; color: var(--gov-teal-text); font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; font-size: 0.8125rem; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 18px; }
 .block-hero__eyebrow::before { content: ''; width: 34px; height: 2px; background: var(--gov-teal); }
+/* Над фотографией акцентный надзаголовок не добирает контраста даже при
+   плотном затемнении: чтобы вытянуть его до 4.5:1, снимок пришлось бы
+   закрасить почти полностью. Цветным остаётся штрих, сам текст идёт
+   цветом остального текста hero. */
+.block-hero--media .block-hero__eyebrow { color: var(--hero-text, #fff); }
 .block-hero--media .block-hero__title { color: var(--hero-text, #fff); font-size: clamp(2.5rem, 5.5vw, 4rem) !important; line-height: 1.1; margin: 0 0 20px; font-weight: 700; letter-spacing: -0.02em; }
 .block-hero--media .block-hero__subtitle { color: var(--hero-text, rgba(255,255,255,.85)); font-size: 1.02rem; max-width: 520px; }
 .block-hero__actions { display: flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 16px !important; margin-top: 30px; }
