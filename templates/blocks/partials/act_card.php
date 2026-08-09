@@ -14,6 +14,8 @@ $presented = DocumentPresenter::prepare($doc);
 $tag = $presented['url'] !== '' ? 'a' : 'div';
 $number = trim((string) ($doc['number'] ?? ''));
 $date = trim((string) ($doc['date'] ?? ''));
+$editorialAct = !empty($editorialAct);
+$docIndex = isset($docIndex) ? (int) $docIndex : 0;
 ?>
 <<?= $tag ?>
     class="act-card"
@@ -24,6 +26,12 @@ $date = trim((string) ($doc['date'] ?? ''));
     <?= $presented['url'] !== '' && $presented['direct_file'] ? 'download' : '' ?>
 >
     <span class="act-card__emblem" aria-hidden="true"></span>
+    <?php if ($editorialAct): ?>
+        <span class="act-card__editorial-head" aria-hidden="true">
+            <span class="act-card__editorial-icon"><?= Icon::render('file-description', 22) ?></span>
+            <span class="act-card__index"><?= str_pad((string) ($docIndex + 1), 2, '0', STR_PAD_LEFT) ?></span>
+        </span>
+    <?php endif; ?>
     <?php if ($number !== '' || $date !== ''): ?>
         <span class="act-card__head">
             <?php if ($number !== ''): ?><span class="act-card__number"><?= htmlspecialchars($number, ENT_QUOTES) ?></span><?php endif; ?>

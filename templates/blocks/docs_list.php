@@ -5,7 +5,8 @@ $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
 $items = $data['items'] ?? [];
 $cols = max(1, min(5, (int) ($data['columns'] ?? 4)));
-$variant = in_array($data['variant'] ?? 'grid', ['links', 'acts'], true) ? (string) $data['variant'] : 'grid';
+$variant = in_array($data['variant'] ?? 'grid', ['grid', 'links', 'acts', 'acts-editorial'], true) ? (string) $data['variant'] : 'grid';
+$actsVariant = in_array($variant, ['acts', 'acts-editorial'], true);
 $searchEnabled = !array_key_exists('search_enabled', $data) || !empty($data['search_enabled']);
 $prepared = array_map([\App\Core\DocumentPresenter::class, 'prepare'], is_array($items) ? $items : []);
 $kinds = array_values(array_unique(array_filter(array_column($prepared, 'extension'), static fn (string $kind): bool => $kind !== 'other')));
@@ -43,9 +44,10 @@ $templateCss = \App\Core\GridBalance::css($blockId, '.docslist-grid', '.doc-card
                 <span class="document-tools__count" data-document-count aria-live="polite"></span>
             </div>
         <?php endif; ?>
-        <div class="<?= $variant === 'links' ? 'media-list docslist-links' : ($variant === 'acts' ? 'docslist-acts' : 'docslist-grid') ?>">
-            <?php foreach ($items as $doc): ?>
-                <?php if ($variant === 'acts'): ?>
+        <div class="<?= $variant === 'links' ? 'media-list docslist-links' : ($actsVariant ? 'docslist-acts' : 'docslist-grid') ?>">
+            <?php foreach ($items as $docIndex => $doc): ?>
+                <?php if ($actsVariant): ?>
+                    <?php $editorialAct = $variant === 'acts-editorial'; ?>
                     <?php include __DIR__ . '/partials/act_card.php'; ?>
                 <?php else: ?>
                     <?php $compact = $variant === 'links'; include __DIR__ . '/partials/document_card.php'; ?>

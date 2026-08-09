@@ -93,7 +93,7 @@ test('Контент Агентства: разметка текстовых б�
 test('Контент Агентства: правовые акты с реквизитами, у каждой страницы есть русская версия', function () {
     $acts = 0;
     foreach (agency_blocks() as [$slug, $lang, $type, $data]) {
-        if ($type !== 'docs_list' || ($data['variant'] ?? '') !== 'acts') {
+        if ($type !== 'docs_list' || !in_array($data['variant'] ?? '', ['acts', 'acts-editorial'], true)) {
             continue;
         }
         foreach ($data['items'] as $item) {
@@ -156,6 +156,13 @@ test('Контент Агентства: все блоки рендерятся 
     assert_contains('Мониторинг и оценка', $renderedPages['o-nas|ru']);
     assert_contains('Указ Президента № ПФ-6264', $renderedPages['o-nas|ru']);
     assert_contains('act-card', $renderedPages['o-nas|ru']);
+    assert_contains('block-text--intro', $renderedPages['o-nas|ru']);
+    assert_contains('block-text__principles', $renderedPages['o-nas|ru']);
+    assert_contains('block-advantages--indexed', $renderedPages['o-nas|ru']);
+    assert_contains('block-text--system', $renderedPages['o-nas|ru']);
+    assert_contains('block-stages--history', $renderedPages['o-nas|ru']);
+    assert_contains('block-text--spotlight', $renderedPages['o-nas|ru']);
+    assert_contains('block-docslist--acts-editorial', $renderedPages['o-nas|ru']);
     assert_contains('Agentlik nima bilan shug‘ullanadi?', $renderedPages['o-nas|uz']);
     assert_contains('What the Agency Does', $renderedPages['o-nas|en']);
 

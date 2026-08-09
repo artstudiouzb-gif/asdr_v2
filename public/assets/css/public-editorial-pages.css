@@ -12,7 +12,7 @@
        на 110px внутрь от логотипа, подвала и строки «Обновлено», которые
        стоят по краю контейнера. Родитель уже даёт нужные поля. */
     --editorial-wide: 100%;
-    --editorial-reading: 760px;
+    --editorial-reading: 840px;
     --editorial-line: color-mix(in srgb, var(--gov-border) 92%, transparent);
     --editorial-muted: color-mix(in srgb, var(--gov-muted) 94%, transparent);
     color: var(--gov-ink);
@@ -60,7 +60,7 @@
     margin: 0;
     color: var(--gov-title);
     font-family: var(--font-family);
-    font-size: clamp(2rem, 3vw, 2.55rem);
+    font-size: clamp(2.45rem, 4vw, 3.25rem);
     font-weight: 700;
     line-height: 1.08;
     letter-spacing: -.038em;
@@ -71,7 +71,7 @@
     max-width: 680px;
     margin: 12px 0 0;
     color: var(--editorial-muted);
-    font-size: .94rem;
+    font-size: 1.02rem;
     line-height: 1.55;
 }
 
@@ -133,23 +133,23 @@
 
 /* About / text rhythm ---------------------------------------------------- */
 .editorial-page__content > .cms-block:first-child.cms-block--text {
-    padding-top: 30px;
-    padding-bottom: 28px;
+    padding-top: 42px;
+    padding-bottom: 46px;
 }
 
 .editorial-page__content > .cms-block:first-child.cms-block--text .block-text__content {
     max-width: 790px;
     color: var(--gov-ink);
-    font-size: .92rem;
-    line-height: 1.66;
+    font-size: 1rem;
+    line-height: 1.72;
 }
 
 .editorial-page__content > .cms-block:first-child.cms-block--text .block-text__content > p:first-child {
     margin-top: 0;
     max-width: 760px;
     color: var(--gov-title);
-    font-size: 1.04rem;
-    line-height: 1.55;
+    font-size: 1.12rem;
+    line-height: 1.62;
 }
 
 .editorial-page__content > .cms-block:first-child.cms-block--text .block-text__content p {
@@ -171,7 +171,7 @@
     margin: 0;
     color: var(--gov-title);
     font-family: var(--font-family);
-    font-size: clamp(1.45rem, 2.1vw, 1.85rem);
+    font-size: clamp(1.75rem, 2.5vw, 2.25rem);
     font-weight: 700;
     line-height: 1.18;
     letter-spacing: -.03em;
@@ -181,8 +181,8 @@
     max-width: var(--editorial-reading);
     margin-top: 12px;
     color: var(--gov-ink);
-    font-size: .9rem;
-    line-height: 1.66;
+    font-size: 1rem;
+    line-height: 1.7;
 }
 
 .editorial-page__content > .cms-block--text:has(.block-text__title) .block-text__content p {
@@ -361,6 +361,472 @@
     box-shadow: 0 14px 30px -22px rgba(15, 43, 70, .45);
 }
 
+/* Reusable editorial variants ------------------------------------------- */
+.editorial-page__content .block-text__layout {
+    min-width: 0;
+}
+
+/* Intro: readable narrative plus Goal → Action → Result. */
+.editorial-page__content .block-text--intro .block-text__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+}
+
+.editorial-page__content > .cms-block:first-child.cms-block--text .block-text--intro .block-text__content {
+    max-width: 880px;
+}
+
+/* Existing installations keep the old principle paragraph in rich text;
+   structured items replace it without forcing an editorial text rewrite. */
+.editorial-page__content .block-text--intro:has(.block-text__principles) .block-text__content > p:last-child:has(strong) {
+    display: none;
+}
+
+.editorial-page__content .block-text__principles {
+    display: flex;
+    align-items: center;
+    width: min(100%, 760px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.editorial-page__content .block-text__principle {
+    position: relative;
+    display: flex;
+    flex: 1 1 0;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: var(--gov-title);
+    font-size: .96rem;
+    font-weight: 700;
+}
+
+.editorial-page__content .block-text__principle:not(:last-child)::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    margin-inline: 12px;
+    background: color-mix(in srgb, var(--gov-teal) 58%, var(--editorial-line));
+}
+
+.editorial-page__content .block-text__principle-icon,
+.editorial-page__content .block-text__system-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid color-mix(in srgb, var(--gov-teal) 34%, var(--editorial-line));
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--gov-teal) 6%, var(--gov-surface));
+    color: var(--gov-teal);
+}
+
+/* A short heading remains visually connected to its supporting block. */
+.editorial-page__content > .cms-block--text:has(.block-text--section) {
+    padding-top: 72px;
+    padding-bottom: 22px;
+}
+
+.editorial-page__content > .cms-block--text .block-text--section .block-text__content {
+    max-width: 900px;
+    margin-top: 12px;
+    color: var(--editorial-muted);
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
+.editorial-page__content > .cms-block--text:has(.block-text--section) + .cms-block--advantages,
+.editorial-page__content > .cms-block--text:has(.block-text--section) + .cms-block--stages {
+    padding-top: 0;
+}
+
+/* Indexed directions: five substantial cards, still a normal advantages block. */
+.editorial-page__content .block-advantages--indexed .block-advantages__grid {
+    gap: 16px;
+}
+
+.editorial-page__content .block-advantages--indexed .block-advantages__item {
+    position: relative;
+    min-height: 310px;
+    padding: 24px 22px 26px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--gov-surface) 97%, var(--gov-bg));
+}
+
+.editorial-page__content .block-advantages--indexed .block-advantages__item:nth-child(odd),
+.editorial-page__content .block-advantages--indexed .block-advantages__item:nth-child(even) {
+    padding-inline: 22px;
+}
+
+.editorial-page__content .block-advantages__index {
+    position: absolute;
+    top: 22px;
+    right: 20px;
+    color: color-mix(in srgb, var(--gov-muted) 38%, transparent);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+.editorial-page__content .block-advantages--indexed .block-advantages__icon {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 24px;
+}
+
+.editorial-page__content .block-advantages--indexed .block-advantages__icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.editorial-page__content .block-advantages--indexed .block-advantages__item h3 {
+    max-width: calc(100% - 24px);
+    margin-bottom: 13px;
+    font-size: 1rem;
+    line-height: 1.35;
+}
+
+.editorial-page__content .block-advantages--indexed .block-advantages__item p {
+    color: var(--editorial-muted);
+    font-size: .9rem;
+    line-height: 1.62;
+}
+
+/* Strategic system: narrative and structured checklist share one block. */
+.editorial-page__content > .cms-block--text:has(.block-text--system) {
+    padding-top: 80px;
+    padding-bottom: 72px;
+}
+
+.editorial-page__content .block-text--system .block-text__layout {
+    display: grid;
+    grid-template-columns: minmax(0, .82fr) minmax(520px, 1.18fr);
+    gap: clamp(44px, 6vw, 88px);
+    align-items: start;
+    margin-top: 26px;
+}
+
+.editorial-page__content > .cms-block--text .block-text--system .block-text__content {
+    max-width: 620px;
+    margin-top: 0;
+}
+
+/* The migration is intentionally non-destructive. Hide the legacy list only
+   when the structured system list is present beside it. */
+.editorial-page__content .block-text--system:has(.block-text__system-list) .block-text__content ul,
+.editorial-page__content .block-text--system:has(.block-text__system-list) .block-text__content ol {
+    display: none;
+}
+
+.editorial-page__content .block-text__system {
+    padding-left: clamp(28px, 3.5vw, 52px);
+    border-left: 1px solid var(--editorial-line);
+}
+
+.editorial-page__content .block-text__system-title {
+    margin: 0 0 24px;
+    color: var(--gov-title);
+    font-size: clamp(1.15rem, 1.5vw, 1.35rem);
+    line-height: 1.35;
+}
+
+.editorial-page__content .block-text__system-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 28px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.editorial-page__content .block-text__system-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+    color: var(--gov-title);
+    font-size: .94rem;
+    font-weight: 600;
+    line-height: 1.42;
+}
+
+.editorial-page__content .block-text__system-icon {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--gov-teal) 7%, transparent);
+}
+
+/* Present-day summary: editorial copy with a real block-level quotation. */
+.editorial-page__content > .cms-block--text:has(.block-text--spotlight) {
+    padding-top: 78px;
+    padding-bottom: 78px;
+}
+
+.editorial-page__content .block-text--spotlight .block-text__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(420px, .92fr);
+    gap: clamp(44px, 6vw, 84px);
+    align-items: stretch;
+    margin-top: 26px;
+}
+
+.editorial-page__content > .cms-block--text .block-text--spotlight .block-text__content {
+    max-width: 720px;
+    margin-top: 0;
+}
+
+.editorial-page__content .block-text--spotlight:has(.block-text__quote) .block-text__content > p:last-child:has(strong) {
+    display: none;
+}
+
+.editorial-page__content .block-text__quote {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 250px;
+    margin: 0;
+    padding: clamp(34px, 4vw, 54px);
+    overflow: hidden;
+    border-radius: 14px;
+    background: var(--gov-navy);
+    color: #fff;
+}
+
+.editorial-page__content .block-text__quote::before {
+    content: '“';
+    position: absolute;
+    top: 12px;
+    left: 26px;
+    color: var(--gov-teal);
+    font-family: Georgia, serif;
+    font-size: 5rem;
+    line-height: 1;
+    opacity: .9;
+}
+
+.editorial-page__content .block-text__quote::after {
+    content: '';
+    position: absolute;
+    right: -36px;
+    bottom: -46px;
+    width: 190px;
+    aspect-ratio: 1;
+    background: url('../img/emblem.svg') center / contain no-repeat;
+    opacity: .055;
+}
+
+.editorial-page__content .block-text__quote p {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* Organization history uses the stages data model without status pills. */
+.editorial-page__content .block-stages--history {
+    margin-top: 8px;
+}
+
+.editorial-page__content .block-stages--history .stages {
+    gap: 0;
+}
+
+.editorial-page__content .block-stages--history .stage {
+    min-height: 320px;
+    padding: 38px 28px 10px 0;
+    border-top-color: color-mix(in srgb, var(--gov-teal) 52%, var(--editorial-line));
+}
+
+.editorial-page__content .block-stages--history .stage__dot {
+    top: -8px;
+    width: 16px;
+    height: 16px;
+    border-width: 3px;
+    background: var(--gov-surface);
+}
+
+.editorial-page__content .block-stages--history .stage__year {
+    color: var(--gov-title);
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.editorial-page__content .block-stages--history .stage--active .stage__year {
+    color: var(--gov-teal);
+}
+
+.editorial-page__content .block-stages--history .stage__title {
+    max-width: 24ch;
+    margin-top: 16px;
+    font-size: .98rem;
+    line-height: 1.45;
+}
+
+.editorial-page__content .block-stages--history .stage__text {
+    max-width: 31ch;
+    margin-top: 14px;
+    font-size: .88rem;
+    line-height: 1.62;
+}
+
+/* Legal acts: compact editorial cards with explicit number, date and action. */
+.editorial-page__content > .cms-block--docs_list:has(.block-docslist--acts-editorial) {
+    padding-top: 76px;
+    padding-bottom: 72px;
+}
+
+.editorial-page__content .block-docslist--acts-editorial .section-head {
+    margin-bottom: 28px;
+}
+
+.editorial-page__content .block-docslist--acts-editorial .docslist-acts {
+    gap: 16px;
+}
+
+.editorial-page__content .block-docslist--acts-editorial .act-card {
+    min-height: 270px;
+    padding: 22px 20px 20px;
+    border-radius: 12px;
+}
+
+.editorial-page__content .block-docslist--acts-editorial .act-card__emblem {
+    display: none;
+}
+
+.editorial-page__content .act-card__editorial-head {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.editorial-page__content .act-card__editorial-icon {
+    display: inline-flex;
+    color: var(--gov-teal);
+}
+
+.editorial-page__content .act-card__index {
+    color: color-mix(in srgb, var(--gov-muted) 36%, transparent);
+    font-size: .95rem;
+    font-weight: 700;
+}
+
+.editorial-page__content .block-docslist--acts-editorial .act-card__head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+}
+
+.editorial-page__content .block-docslist--acts-editorial .act-card__number {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--gov-title);
+    font-size: .93rem;
+    line-height: 1.35;
+}
+
+.editorial-page__content .block-docslist--acts-editorial .act-card__date {
+    font-size: .8rem;
+}
+
+.editorial-page__content .block-docslist--acts-editorial .act-card__title {
+    margin-top: 17px;
+    font-family: var(--font-family);
+    font-size: .9rem;
+    font-weight: 600;
+    line-height: 1.48;
+}
+
+.editorial-page__content .block-docslist--acts-editorial .act-card__foot {
+    margin-top: auto;
+}
+
+@media (max-width: 1100px) and (min-width: 721px) {
+    .editorial-page__content .block-advantages--indexed .block-advantages__grid,
+    .editorial-page__content .block-docslist--acts-editorial .docslist-acts {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .editorial-page__content .block-advantages--indexed .block-advantages__item,
+    .editorial-page__content .block-docslist--acts-editorial .act-card {
+        grid-column: auto !important;
+    }
+
+    .editorial-page__content .block-advantages--indexed .block-advantages__item:last-child,
+    .editorial-page__content .block-docslist--acts-editorial .act-card:last-child {
+        grid-column: 1 / -1 !important;
+    }
+}
+
+@media (max-width: 1000px) {
+    .editorial-page__content .block-text--system .block-text__layout,
+    .editorial-page__content .block-text--spotlight .block-text__layout {
+        grid-template-columns: 1fr;
+        gap: 34px;
+    }
+
+    .editorial-page__content .block-text__system {
+        padding-top: 30px;
+        padding-left: 0;
+        border-top: 1px solid var(--editorial-line);
+        border-left: 0;
+    }
+}
+
+@media (max-width: 720px) {
+    .editorial-page__content .block-text__principles {
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .editorial-page__content .block-text__principle {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: .88rem;
+    }
+
+    .editorial-page__content .block-text__principle:not(:last-child)::after {
+        position: absolute;
+        top: 21px;
+        right: -8px;
+        width: calc(100% - 54px);
+        margin: 0;
+    }
+
+    .editorial-page__content .block-text__system-list {
+        grid-template-columns: 1fr;
+    }
+
+    .editorial-page__content .block-advantages--indexed .block-advantages__grid,
+    .editorial-page__content .block-docslist--acts-editorial .docslist-acts {
+        grid-template-columns: 1fr !important;
+    }
+
+    .editorial-page__content .block-advantages--indexed .block-advantages__item,
+    .editorial-page__content .block-docslist--acts-editorial .act-card {
+        grid-column: auto !important;
+        min-height: 0;
+    }
+
+    .editorial-page__content .block-text__quote {
+        min-height: 220px;
+    }
+}
+
 /* Leadership ------------------------------------------------------------- */
 .editorial-page__content > .cms-block--person_cards {
     padding-top: 24px;
@@ -452,15 +918,15 @@
 /* Director profile ------------------------------------------------------- */
 .editorial-page--block-heading .editorial-page__content > .cms-block:first-child,
 .editorial-page__content > .cms-block--person_profile {
-    padding-top: 26px;
-    padding-bottom: 24px;
+    padding-top: clamp(38px, 5vw, 64px);
+    padding-bottom: clamp(48px, 6vw, 78px);
 }
 
 .editorial-page__content .block-profile {
     display: grid;
-    grid-template-columns: 250px minmax(0, 1fr);
-    align-items: stretch;
-    gap: 28px;
+    grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(40px, 6vw, 82px);
     padding: 0;
     border: 0;
     border-radius: 0;
@@ -475,121 +941,164 @@
 .editorial-page__content .profile__photo,
 .editorial-page__content .profile__photo--empty {
     width: 100%;
-    height: 218px;
-    border-radius: 8px;
+    height: auto;
+    aspect-ratio: 4 / 4.45;
+    border: 1px solid color-mix(in srgb, var(--gov-navy) 8%, var(--editorial-line));
+    border-radius: 14px;
     background-color: color-mix(in srgb, var(--gov-navy) 4%, var(--gov-surface));
-    background-size: 86px 86px;
+    background-size: 112px 112px;
 }
 
 .editorial-page__content .profile__img {
     width: 100%;
-    height: 218px;
+    height: auto;
+    aspect-ratio: 4 / 4.45;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 14px;
 }
 
 .editorial-page__content .profile__info {
     align-self: center;
-    padding: 4px 0;
+    max-width: 860px;
+    padding: 12px 0;
 }
 
 .editorial-page__content .profile__name {
-    max-width: 720px;
+    max-width: 820px;
     margin: 0;
     color: var(--gov-title);
     font-family: var(--font-family);
-    font-size: clamp(1.7rem, 2.5vw, 2.2rem);
-    line-height: 1.08;
-    letter-spacing: -.035em;
+    font-size: clamp(2.25rem, 4vw, 3.35rem);
+    line-height: 1.04;
+    letter-spacing: -.045em;
 }
 
 .editorial-page__content .profile__position {
-    max-width: 700px;
-    margin-top: 10px;
-    color: var(--gov-title);
-    font-size: .88rem;
+    max-width: 760px;
+    margin-top: 20px;
+    color: var(--gov-teal);
+    font-size: 1.02rem;
     font-weight: 700;
-    line-height: 1.45;
+    line-height: 1.5;
 }
 
 .editorial-page__content .profile__text {
-    max-width: 700px;
-    margin-top: 12px;
-    color: var(--editorial-muted);
-    font-size: .82rem;
-    line-height: 1.55;
+    max-width: 790px;
+    margin-top: 22px;
+    color: var(--gov-ink);
+    font-size: 1rem;
+    line-height: 1.7;
 }
 
 .editorial-page__content .profile__contacts {
     display: flex;
     flex-wrap: wrap;
     gap: 8px 18px;
-    margin-top: 13px;
-    padding-top: 12px;
+    margin-top: 22px;
+    padding-top: 18px;
     border-top: 1px solid var(--editorial-line);
 }
 
 .editorial-page__content .profile__contact {
-    font-size: .76rem;
+    font-size: .9rem;
 }
 
 /* Biography + education ------------------------------------------------- */
 .editorial-page__content > .cms-block--bio_education {
-    padding-top: 0;
-    padding-bottom: 30px;
+    padding-top: clamp(48px, 6vw, 76px);
+    padding-bottom: clamp(64px, 8vw, 104px);
+    border-top: 1px solid var(--editorial-line);
 }
 
 .editorial-page__content .block-bio {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
     align-items: start;
-    gap: 30px;
-    padding-top: 22px;
-    border-top: 1px solid var(--editorial-line);
+    gap: clamp(48px, 7vw, 92px);
+    padding-top: 0;
+    border-top: 0;
 }
 
 .editorial-page__content .bio__title {
-    margin: 0 0 12px;
+    margin: 0 0 22px;
     color: var(--gov-title);
-    font-size: 1.28rem;
-    line-height: 1.2;
+    font-size: clamp(1.7rem, 2.5vw, 2.2rem);
+    line-height: 1.15;
+    letter-spacing: -.03em;
 }
 
 .editorial-page__content .bio__text {
-    max-width: 760px;
+    max-width: 820px;
     color: var(--gov-ink);
-    font-size: .8rem;
-    line-height: 1.58;
+    font-size: 1rem;
+    line-height: 1.76;
+}
+
+.editorial-page__content .bio__text p {
+    margin: 0 0 16px;
+}
+
+.editorial-page__content .bio__text p:last-child {
+    margin-bottom: 0;
+}
+
+.editorial-page__content .bio-career__title {
+    margin: clamp(40px, 5vw, 62px) 0 20px;
+    color: var(--gov-title);
+    font-size: 1.2rem;
+    line-height: 1.3;
 }
 
 .editorial-page__content .bio-career {
-    margin: 18px 0 0;
+    margin: 0;
     padding: 0;
-    border-top: 1px solid var(--editorial-line);
+    border-top: 0;
 }
 
 .editorial-page__content .bio-career__item {
     display: grid;
-    grid-template-columns: 112px minmax(0, 1fr);
-    gap: 16px;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 22px;
     margin: 0;
     /* Слева освобождаем место под маркер и вертикальную линию: они
        позиционируются абсолютно, и без отступа кружок ложился прямо на год
        («2000-2003» читалось как «0-2003»). */
-    padding: 8px 0 8px 30px;
+    padding: 16px 18px 16px 36px;
     border-bottom: 1px solid var(--editorial-line);
+}
+
+.editorial-page__content .bio-career__item::before {
+    left: 1px;
+    top: 22px;
+    width: 11px;
+    height: 11px;
+    border: 3px solid var(--gov-surface);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--gov-navy) 18%, transparent);
 }
 
 .editorial-page__content .bio-career__years {
     color: var(--gov-title);
-    font-size: .75rem;
+    font-size: .88rem;
     font-weight: 800;
+    line-height: 1.5;
 }
 
 .editorial-page__content .bio-career__text {
     color: var(--gov-ink);
-    font-size: .875rem;
-    line-height: 1.45;
+    font-size: .95rem;
+    line-height: 1.58;
+}
+
+.editorial-page__content .bio-career__item:last-child {
+    margin-top: 10px;
+    border-bottom: 0;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--gov-teal) 7%, var(--gov-surface));
+}
+
+.editorial-page__content .bio-career__item:last-child::before {
+    background: var(--gov-teal);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--gov-teal) 15%, transparent);
 }
 
 .editorial-page__content .bio-career__item:last-child .bio-career__years,
@@ -599,11 +1108,11 @@
 }
 
 .editorial-page__content .bio-edu {
-    padding: 18px;
-    border: 0;
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--gov-navy) 4%, var(--gov-surface));
-    box-shadow: none;
+    padding: 30px;
+    border: 1px solid color-mix(in srgb, var(--gov-navy) 8%, var(--editorial-line));
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--gov-navy) 3%, var(--gov-surface));
+    box-shadow: 0 22px 48px -40px rgba(15, 43, 70, .48);
 }
 
 .editorial-page__content .bio-edu__list {
@@ -612,7 +1121,7 @@
 
 .editorial-page__content .bio-edu__item {
     /* То же самое в «Образовании»: маркер накрывал первую букву степени. */
-    padding: 10px 0 10px 24px;
+    padding: 16px 0 18px 30px;
     border-bottom: 1px solid var(--editorial-line);
 }
 
@@ -620,11 +1129,26 @@
     border-bottom: 0;
 }
 
-.editorial-page__content .bio-edu__years,
-.editorial-page__content .bio-edu__degree,
+.editorial-page__content .bio-edu__item::before {
+    top: 21px;
+    width: 11px;
+    height: 11px;
+    border-width: 2px;
+}
+
+.editorial-page__content .bio-edu__years {
+    font-size: .82rem;
+}
+
+.editorial-page__content .bio-edu__degree {
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
 .editorial-page__content .bio-edu__org {
-    font-size: .875rem;
-    line-height: 1.42;
+    margin-top: 4px;
+    font-size: .9rem;
+    line-height: 1.55;
 }
 
 /* Updated line ----------------------------------------------------------- */
@@ -653,13 +1177,28 @@ html[data-theme="dark"] .content-pagehead__emblem {
     .editorial-page {
     }
 
+    .editorial-page__content .block-profile {
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 36px;
+    }
 
     .editorial-page__content .block-bio {
-        grid-template-columns: minmax(0, 1fr) 260px;
-        gap: 22px;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 40px;
     }
 
     
+}
+
+@media (max-width: 900px) {
+    .editorial-page__content .block-bio {
+        grid-template-columns: 1fr;
+    }
+
+    .editorial-page__content .bio-side {
+        position: static;
+        max-width: none;
+    }
 }
 
 @media (max-width: 720px) {
@@ -690,22 +1229,14 @@ html[data-theme="dark"] .content-pagehead__emblem {
     }
 
     .editorial-page__content .block-profile {
-        grid-template-columns: 190px minmax(0, 1fr);
-        gap: 20px;
+        grid-template-columns: 210px minmax(0, 1fr);
+        gap: 28px;
     }
 
     .editorial-page__content .profile__photo,
     .editorial-page__content .profile__photo--empty,
     .editorial-page__content .profile__img {
-        height: 180px;
-    }
-
-    .editorial-page__content .block-bio {
-        grid-template-columns: 1fr;
-    }
-
-    .editorial-page__content .bio-side {
-        max-width: none;
+        height: auto;
     }
 
     
@@ -755,26 +1286,27 @@ html[data-theme="dark"] .content-pagehead__emblem {
 
     .editorial-page__content .block-profile {
         grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 26px;
     }
 
     .editorial-page__content .profile__media {
-        max-width: 260px;
+        max-width: 300px;
     }
 
     .editorial-page__content .profile__photo,
     .editorial-page__content .profile__photo--empty,
     .editorial-page__content .profile__img {
-        height: 220px;
+        height: auto;
     }
 
     .editorial-page__content .profile__name {
-        font-size: 1.7rem;
+        font-size: clamp(2rem, 10vw, 2.6rem);
     }
 
     .editorial-page__content .bio-career__item {
-        grid-template-columns: 86px minmax(0, 1fr);
-        gap: 10px;
+        grid-template-columns: 1fr;
+        gap: 5px;
+        padding: 16px 14px 16px 34px;
     }
 
     

@@ -2,9 +2,9 @@
 /** @var array $data */
 $title = $data['title'] ?? '';
 $items = $data['items'] ?? [];
-$variant = ($data['variant'] ?? 'grid') === 'band' ? 'band' : 'grid';
+$variant = in_array($data['variant'] ?? 'grid', ['grid', 'indexed', 'band'], true) ? (string) $data['variant'] : 'grid';
 
-if ($variant === 'grid') {
+if ($variant !== 'band') {
     // До пяти карточек — один ряд: пять направлений идут пятёркой, как на
     // макете. Дальше колонки подбираются так, чтобы в последнем ряду не
     // осталась одинокая карточка, а карточки хвоста растягиваются на всю
@@ -38,11 +38,12 @@ if ($variant === 'grid') {
     <?php endif; ?>
 </div>
 <?php else: ?>
-<div class="block-advantages">
+<div class="block-advantages block-advantages--<?= htmlspecialchars($variant, ENT_QUOTES) ?>">
     <?php if ($title !== ''): ?><h2 class="block-advantages__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
     <div class="block-advantages__grid">
-        <?php foreach ($items as $item): ?>
+        <?php foreach ($items as $index => $item): ?>
             <div class="block-advantages__item">
+                <?php if ($variant === 'indexed'): ?><span class="block-advantages__index" aria-hidden="true"><?= str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) ?></span><?php endif; ?>
                 <?php if (!empty($item['icon_svg'])): ?>
                     <div class="block-advantages__icon block-advantages__icon--svg"><?= \App\Core\Icon::render($item['icon_svg'], 32) ?></div>
                 <?php endif; ?>

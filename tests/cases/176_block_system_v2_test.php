@@ -68,6 +68,35 @@ test('Варианты объединённых блоков сохраняют 
         'data' => json_encode(['variant' => 'band', 'items' => [['title' => 'Открытость', 'text' => 'Описание']]]),
     ]);
     assert_contains('featband__item', $advantageBand['html']);
+
+    $editorialText = BlockRenderer::render([
+        'id' => 1769,
+        'type' => 'text',
+        'data' => json_encode([
+            'variant' => 'system',
+            'title' => 'Система',
+            'content' => '<p>Вводный текст.</p>',
+            'aside_title' => 'Принципы',
+            'items' => [['icon_svg' => 'target', 'title' => 'Цель']],
+        ], JSON_UNESCAPED_UNICODE),
+    ]);
+    assert_contains('block-text--system', $editorialText['html']);
+    assert_contains('block-text__system-list', $editorialText['html']);
+
+    $history = BlockRenderer::render([
+        'id' => 1770,
+        'type' => 'stages',
+        'data' => json_encode(['variant' => 'history', 'items' => [['year' => '2025', 'title' => 'Новая система']]], JSON_UNESCAPED_UNICODE),
+    ]);
+    assert_contains('block-stages--history', $history['html']);
+
+    $editorialActs = BlockRenderer::render([
+        'id' => 1771,
+        'type' => 'docs_list',
+        'data' => json_encode(['variant' => 'acts-editorial', 'items' => [['title' => 'Указ', 'number' => 'ПФ-1', 'date' => '2026']]], JSON_UNESCAPED_UNICODE),
+    ]);
+    assert_contains('block-docslist--acts-editorial', $editorialActs['html']);
+    assert_contains('act-card__editorial-head', $editorialActs['html']);
 });
 
 test('Документы определяют формат, действие и поддерживают поиск', function (): void {

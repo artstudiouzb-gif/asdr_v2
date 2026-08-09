@@ -37,19 +37,27 @@ return [
                 'meta_description' => 'Агентство стратегического развития и реформ при Президенте Республики Узбекистан — уполномоченный государственный орган в сфере стратегического планирования и развития.',
                 'blocks' => [
                     ['text', 'Вводная часть', [
+                        'variant' => 'intro',
                         'title' => '',
                         'content' => '<p><strong>Агентство стратегического развития и реформ при Президенте Республики Узбекистан</strong> — уполномоченный государственный орган в сфере стратегического планирования и развития.</p>'
                             . '<p>Агентство помогает выстраивать единую систему, в которой долгосрочные цели страны последовательно преобразуются в конкретные действия, измеримые показатели и практические результаты.</p>'
-                            . '<p>Его задача — содействовать тому, чтобы государственные стратегии и программы были взаимосвязаны, основывались на качественном анализе, имели понятные цели и механизмы реализации, а их выполнение регулярно оценивалось.</p>'
-                            . '<p>В основе этой системы лежит принцип: <strong>Цель → Действие → Результат</strong>.</p>',
+                            . '<p>Его задача — содействовать тому, чтобы государственные стратегии и программы были взаимосвязаны, основывались на качественном анализе, имели понятные цели и механизмы реализации, а их выполнение регулярно оценивалось.</p>',
+                        'aside_title' => '',
+                        'items' => [
+                            ['icon_svg' => 'target', 'title' => 'Цель'],
+                            ['icon_svg' => 'flag', 'title' => 'Действие'],
+                            ['icon_svg' => 'chart-bar', 'title' => 'Результат'],
+                        ],
+                        'quote' => '',
                     ]],
                     ['text', 'Чем занимается Агентство — вступление', [
+                        'variant' => 'section',
                         'title' => 'Чем занимается Агентство',
                         'content' => '<p>Агентство участвует во всём цикле стратегического планирования — от анализа и подготовки инициатив до мониторинга их реализации и оценки достигнутых результатов.</p>',
                     ]],
                     ['advantages', 'Направления работы', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
-                        'variant' => 'grid',
+                        'variant' => 'indexed',
                         'title' => '',
                         'items' => [
                             ['icon_svg' => 'target', 'title' => 'Стратегическое планирование', 'text' => 'Агентство формирует методологические подходы к разработке стратегических документов и содействует созданию единой системы стратегического планирования на республиканском, отраслевом и региональном уровнях.'],
@@ -60,25 +68,30 @@ return [
                         ],
                     ]],
                     ['text', 'От стратегии — к реальным изменениям', [
+                        'variant' => 'system',
                         'title' => 'От стратегии — к реальным изменениям',
                         'content' => '<p>Агентство не подменяет министерства, ведомства и органы власти на местах, которые непосредственно отвечают за реализацию государственной политики в своих сферах.</p>'
-                            . '<p>Его роль заключается в другом — <strong>создать целостную систему стратегического управления</strong>, в которой:</p>'
-                            . '<ul>'
-                            . '<li>цели государства чётко сформулированы;</li>'
-                            . '<li>приоритеты разных отраслей и регионов согласованы между собой;</li>'
-                            . '<li>для каждой цели определены конкретные действия;</li>'
-                            . '<li>установлены измеримые показатели;</li>'
-                            . '<li>результаты регулярно отслеживаются и оцениваются;</li>'
-                            . '<li>решения принимаются на основе анализа и данных.</li>'
-                            . '</ul>'
+                            . '<p>Его роль заключается в другом — создать целостную систему стратегического управления.</p>'
                             . '<p>Такой подход помогает связать долгосрочное видение развития страны с конкретной ежедневной работой государственных органов.</p>',
+                        'aside_title' => 'Целостная система стратегического управления',
+                        'items' => [
+                            ['icon_svg' => 'target', 'title' => 'Чётко сформулированные цели'],
+                            ['icon_svg' => 'network', 'title' => 'Согласованные приоритеты'],
+                            ['icon_svg' => 'route', 'title' => 'Конкретные действия'],
+                            ['icon_svg' => 'chart-bar', 'title' => 'Измеримые показатели'],
+                            ['icon_svg' => 'calendar-check', 'title' => 'Регулярный мониторинг'],
+                            ['icon_svg' => 'database', 'title' => 'Решения на основе данных'],
+                        ],
+                        'quote' => '',
                     ]],
                     ['text', 'Как развивалось Агентство — вступление', [
+                        'variant' => 'section',
                         'title' => 'Как развивалось Агентство',
                         'content' => '<p>Современная модель Агентства сформировалась в результате последовательного развития системы стратегического управления в Узбекистане.</p>',
                     ]],
                     ['stages', 'Этапы развития', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
+                        'variant' => 'history',
                         'title' => '',
                         'all_text' => '',
                         'all_url' => '',
@@ -90,16 +103,19 @@ return [
                         ],
                     ]],
                     ['text', 'Агентство сегодня', [
+                        'variant' => 'spotlight',
                         'title' => 'Агентство сегодня',
                         'content' => '<p>Сегодня Агентство объединяет <strong>стратегическое планирование, анализ, координацию и оценку результатов</strong> в единую систему.</p>'
                             . '<p>Оно взаимодействует с министерствами и ведомствами, органами власти на местах, аналитическими и научно-исследовательскими организациями, экспертным сообществом и международными институтами.</p>'
                             . '<p>Одним из важных направлений деятельности является мониторинг реализации стратегических целей страны, включая показатели стратегии «Узбекистан — 2030».</p>'
-                            . '<p>Главный ориентир этой работы — не количество разработанных документов, а их практическая результативность: насколько поставленные цели превращаются в последовательные действия и приводят к ощутимым изменениям.</p>'
-                            . '<p><strong>Стратегическое планирование — это путь от долгосрочной цели к конкретному результату. Агентство помогает сделать этот путь системным, измеримым и согласованным.</strong></p>',
+                            . '<p>Главный ориентир этой работы — не количество разработанных документов, а их практическая результативность: насколько поставленные цели превращаются в последовательные действия и приводят к ощутимым изменениям.</p>',
+                        'aside_title' => '',
+                        'items' => [],
+                        'quote' => 'Стратегическое планирование — это путь от долгосрочной цели к конкретному результату. Агентство помогает сделать этот путь системным, измеримым и согласованным.',
                     ]],
                     ['docs_list', 'Нормативно-правовые документы', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
-                        'variant' => 'acts',
+                        'variant' => 'acts-editorial',
                         'title' => 'Основные нормативно-правовые документы',
                         'all_text' => '',
                         'all_url' => '',
@@ -122,19 +138,27 @@ return [
                 'meta_description' => 'O‘zbekiston Respublikasi Prezidenti huzuridagi Strategik rivojlanish va islohotlar agentligi — strategik rejalashtirish va rivojlanish sohasidagi vakolatli davlat organi.',
                 'blocks' => [
                     ['text', 'Kirish qismi', [
+                        'variant' => 'intro',
                         'title' => '',
                         'content' => '<p><strong>O‘zbekiston Respublikasi Prezidenti huzuridagi Strategik rivojlanish va islohotlar agentligi</strong> — strategik rejalashtirish va rivojlanish sohasidagi vakolatli davlat organi.</p>'
                             . '<p>Agentlik mamlakatning uzoq muddatli maqsadlarini aniq vazifalar, o‘lchanadigan ko‘rsatkichlar va amaliy natijalar bilan bog‘laydigan yagona strategik rejalashtirish tizimini shakllantirishga xizmat qiladi.</p>'
-                            . '<p>Agentlikning asosiy vazifasi — davlat strategiyalari va dasturlarining o‘zaro uyg‘unligini ta’minlash, ularni sifatli tahlil asosida ishlab chiqishga ko‘maklashish, aniq maqsad va amalga oshirish mexanizmlarini belgilash hamda erishilgan natijalarni muntazam baholab borishdan iborat.</p>'
-                            . '<p>Ushbu tizimning asosiy tamoyili: <strong>Maqsad → Harakat → Natija</strong>.</p>',
+                            . '<p>Agentlikning asosiy vazifasi — davlat strategiyalari va dasturlarining o‘zaro uyg‘unligini ta’minlash, ularni sifatli tahlil asosida ishlab chiqishga ko‘maklashish, aniq maqsad va amalga oshirish mexanizmlarini belgilash hamda erishilgan natijalarni muntazam baholab borishdan iborat.</p>',
+                        'aside_title' => '',
+                        'items' => [
+                            ['icon_svg' => 'target', 'title' => 'Maqsad'],
+                            ['icon_svg' => 'flag', 'title' => 'Harakat'],
+                            ['icon_svg' => 'chart-bar', 'title' => 'Natija'],
+                        ],
+                        'quote' => '',
                     ]],
                     ['text', 'Agentlik nima bilan shug‘ullanadi — kirish', [
+                        'variant' => 'section',
                         'title' => 'Agentlik nima bilan shug‘ullanadi?',
                         'content' => '<p>Agentlik strategik rejalashtirishning barcha bosqichlarida — vaziyatni tahlil qilish va tashabbuslarni ishlab chiqishdan tortib, ularning amalga oshirilishini monitoring qilish va natijadorligini baholashgacha ishtirok etadi.</p>',
                     ]],
                     ['advantages', 'Faoliyat yo‘nalishlari', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
-                        'variant' => 'grid',
+                        'variant' => 'indexed',
                         'title' => '',
                         'items' => [
                             ['icon_svg' => 'target', 'title' => 'Strategik rejalashtirish', 'text' => 'Agentlik strategik hujjatlarni ishlab chiqish bo‘yicha metodologik yondashuvlarni shakllantiradi hamda respublika, tarmoq va hududiy darajalarda yagona strategik rejalashtirish tizimini rivojlantirishga ko‘maklashadi.'],
@@ -145,25 +169,30 @@ return [
                         ],
                     ]],
                     ['text', 'Strategiyadan — amaliy o‘zgarishlarga', [
+                        'variant' => 'system',
                         'title' => 'Strategiyadan — amaliy o‘zgarishlarga',
                         'content' => '<p>Agentlik davlat siyosatini bevosita amalga oshirish uchun mas’ul bo‘lgan vazirliklar, idoralar va mahalliy ijro etuvchi hokimiyat organlarining vazifalarini o‘z zimmasiga olmaydi.</p>'
-                            . '<p>Agentlikning roli — <strong>yaxlit strategik boshqaruv tizimini shakllantirish</strong>. Bunday tizimda:</p>'
-                            . '<ul>'
-                            . '<li>davlatning maqsadlari aniq belgilanadi;</li>'
-                            . '<li>tarmoqlar va hududlarning ustuvor yo‘nalishlari o‘zaro muvofiqlashtiriladi;</li>'
-                            . '<li>har bir maqsadga erishish uchun aniq harakatlar belgilanadi;</li>'
-                            . '<li>o‘lchanadigan ko‘rsatkichlar shakllantiriladi;</li>'
-                            . '<li>natijalar muntazam monitoring va baholashdan o‘tkaziladi;</li>'
-                            . '<li>qarorlar tahlil va ma’lumotlarga asoslangan holda qabul qilinadi.</li>'
-                            . '</ul>'
+                            . '<p>Agentlikning roli — yaxlit strategik boshqaruv tizimini shakllantirish.</p>'
                             . '<p>Bu yondashuv mamlakatning uzoq muddatli rivojlanish maqsadlarini davlat organlarining kundalik faoliyati va aniq natijalar bilan bog‘lashga xizmat qiladi.</p>',
+                        'aside_title' => 'Yaxlit strategik boshqaruv tizimi',
+                        'items' => [
+                            ['icon_svg' => 'target', 'title' => 'Aniq belgilangan maqsadlar'],
+                            ['icon_svg' => 'network', 'title' => 'Muvofiqlashtirilgan ustuvor yo‘nalishlar'],
+                            ['icon_svg' => 'route', 'title' => 'Aniq harakatlar'],
+                            ['icon_svg' => 'chart-bar', 'title' => 'O‘lchanadigan ko‘rsatkichlar'],
+                            ['icon_svg' => 'calendar-check', 'title' => 'Muntazam monitoring'],
+                            ['icon_svg' => 'database', 'title' => 'Ma’lumotlarga asoslangan qarorlar'],
+                        ],
+                        'quote' => '',
                     ]],
                     ['text', 'Agentlikning rivojlanish tarixi — kirish', [
+                        'variant' => 'section',
                         'title' => 'Agentlikning rivojlanish tarixi',
                         'content' => '<p>Agentlikning bugungi modeli O‘zbekistonda strategik boshqaruv tizimini izchil takomillashtirish natijasida shakllandi.</p>',
                     ]],
                     ['stages', 'Rivojlanish bosqichlari', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
+                        'variant' => 'history',
                         'title' => '',
                         'all_text' => '',
                         'all_url' => '',
@@ -175,16 +204,19 @@ return [
                         ],
                     ]],
                     ['text', 'Agentlik bugun', [
+                        'variant' => 'spotlight',
                         'title' => 'Agentlik bugun',
                         'content' => '<p>Bugungi kunda Agentlik <strong>strategik rejalashtirish, tahlil, muvofiqlashtirish va natijalarni baholashni</strong> yagona tizimda birlashtiradi.</p>'
                             . '<p>Agentlik vazirlik va idoralar, mahalliy ijro etuvchi hokimiyat organlari, tahliliy va ilmiy-tadqiqot tashkilotlari, ekspertlar hamjamiyati hamda xalqaro institutlar bilan hamkorlik qiladi.</p>'
                             . '<p>Faoliyatning muhim yo‘nalishlaridan biri mamlakat strategik maqsadlari, jumladan, “O‘zbekiston — 2030” strategiyasi ko‘rsatkichlarining amalga oshirilishini monitoring qilishdan iborat.</p>'
-                            . '<p>Agentlik faoliyatining asosiy mezoni ishlab chiqilgan hujjatlar soni emas, balki ularning amaliy natijadorligidir — belgilangan maqsadlar qay darajada aniq harakatlarga, harakatlar esa fuqarolar va mamlakat taraqqiyoti uchun sezilarli natijalarga olib kelishi.</p>'
-                            . '<p><strong>Strategik rejalashtirish — uzoq muddatli maqsaddan aniq natijaga olib boruvchi yo‘ldir. Agentlik ushbu yo‘lning tizimli, o‘lchanadigan va o‘zaro muvofiqlashtirilgan bo‘lishiga xizmat qiladi.</strong></p>',
+                            . '<p>Agentlik faoliyatining asosiy mezoni ishlab chiqilgan hujjatlar soni emas, balki ularning amaliy natijadorligidir — belgilangan maqsadlar qay darajada aniq harakatlarga, harakatlar esa fuqarolar va mamlakat taraqqiyoti uchun sezilarli natijalarga olib kelishi.</p>',
+                        'aside_title' => '',
+                        'items' => [],
+                        'quote' => 'Strategik rejalashtirish — uzoq muddatli maqsaddan aniq natijaga olib boruvchi yo‘ldir. Agentlik ushbu yo‘lning tizimli, o‘lchanadigan va o‘zaro muvofiqlashtirilgan bo‘lishiga xizmat qiladi.',
                     ]],
                     ['docs_list', 'Normativ-huquqiy hujjatlar', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
-                        'variant' => 'acts',
+                        'variant' => 'acts-editorial',
                         'title' => 'Asosiy normativ-huquqiy hujjatlar',
                         'all_text' => '',
                         'all_url' => '',
@@ -207,19 +239,27 @@ return [
                 'meta_description' => 'The Agency for Strategic Development and Reforms under the President of the Republic of Uzbekistan is the authorized government body responsible for strategic planning and development.',
                 'blocks' => [
                     ['text', 'Introduction', [
+                        'variant' => 'intro',
                         'title' => '',
                         'content' => '<p>The <strong>Agency for Strategic Development and Reforms under the President of the Republic of Uzbekistan</strong> is the authorized government body responsible for strategic planning and development.</p>'
                             . '<p>The Agency contributes to building an integrated system that translates the country’s long-term priorities into concrete actions, measurable indicators and tangible results.</p>'
-                            . '<p>Its core mission is to help ensure that national strategies and programmes are aligned, based on sound analysis, supported by clear objectives and implementation mechanisms, and regularly assessed against the results achieved.</p>'
-                            . '<p>The system is built around a simple principle: <strong>Goal → Action → Result</strong>.</p>',
+                            . '<p>Its core mission is to help ensure that national strategies and programmes are aligned, based on sound analysis, supported by clear objectives and implementation mechanisms, and regularly assessed against the results achieved.</p>',
+                        'aside_title' => '',
+                        'items' => [
+                            ['icon_svg' => 'target', 'title' => 'Goal'],
+                            ['icon_svg' => 'flag', 'title' => 'Action'],
+                            ['icon_svg' => 'chart-bar', 'title' => 'Result'],
+                        ],
+                        'quote' => '',
                     ]],
                     ['text', 'What the Agency does — intro', [
+                        'variant' => 'section',
                         'title' => 'What the Agency Does',
                         'content' => '<p>The Agency is involved throughout the strategic planning cycle — from analysis and the development of new initiatives to implementation monitoring and evaluation of results.</p>',
                     ]],
                     ['advantages', 'Areas of work', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
-                        'variant' => 'grid',
+                        'variant' => 'indexed',
                         'title' => '',
                         'items' => [
                             ['icon_svg' => 'target', 'title' => 'Strategic Planning', 'text' => 'The Agency develops methodological approaches for the preparation of strategic planning documents and supports the establishment of an integrated strategic planning system at national, sectoral and regional levels.'],
@@ -230,25 +270,30 @@ return [
                         ],
                     ]],
                     ['text', 'Turning strategies into real change', [
+                        'variant' => 'system',
                         'title' => 'Turning Strategies into Real Change',
                         'content' => '<p>The Agency does not replace ministries, government agencies or local executive authorities that are directly responsible for implementing public policy in their respective areas.</p>'
-                            . '<p>Its role is to <strong>help build an integrated system of strategic governance</strong> in which:</p>'
-                            . '<ul>'
-                            . '<li>national goals are clearly defined;</li>'
-                            . '<li>sectoral and regional priorities are aligned;</li>'
-                            . '<li>concrete actions are established for each objective;</li>'
-                            . '<li>measurable indicators are introduced;</li>'
-                            . '<li>results are regularly monitored and evaluated;</li>'
-                            . '<li>decisions are informed by analysis and reliable data.</li>'
-                            . '</ul>'
+                            . '<p>Its role is to help build an integrated system of strategic governance.</p>'
                             . '<p>This approach connects the country’s long-term development vision with the day-to-day activities of public authorities and measurable outcomes.</p>',
+                        'aside_title' => 'An Integrated System of Strategic Governance',
+                        'items' => [
+                            ['icon_svg' => 'target', 'title' => 'Clearly defined goals'],
+                            ['icon_svg' => 'network', 'title' => 'Aligned priorities'],
+                            ['icon_svg' => 'route', 'title' => 'Concrete actions'],
+                            ['icon_svg' => 'chart-bar', 'title' => 'Measurable indicators'],
+                            ['icon_svg' => 'calendar-check', 'title' => 'Regular monitoring'],
+                            ['icon_svg' => 'database', 'title' => 'Data-informed decisions'],
+                        ],
+                        'quote' => '',
                     ]],
                     ['text', 'The Agency’s development — intro', [
+                        'variant' => 'section',
                         'title' => 'The Agency’s Development',
                         'content' => '<p>The Agency’s present-day model is the result of the gradual development of Uzbekistan’s strategic governance system.</p>',
                     ]],
                     ['stages', 'Development stages', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
+                        'variant' => 'history',
                         'title' => '',
                         'all_text' => '',
                         'all_url' => '',
@@ -260,16 +305,19 @@ return [
                         ],
                     ]],
                     ['text', 'The Agency today', [
+                        'variant' => 'spotlight',
                         'title' => 'The Agency Today',
                         'content' => '<p>Today, the Agency brings together <strong>strategic planning, analysis, coordination and results evaluation</strong> within a single system.</p>'
                             . '<p>It works with ministries and government agencies, local executive authorities, analytical and research institutions, the expert community and international organisations.</p>'
                             . '<p>One of its important areas of work is monitoring the implementation of the country’s strategic objectives, including the indicators of the Uzbekistan — 2030 Strategy.</p>'
-                            . '<p>The ultimate measure of the Agency’s work is not the number of documents produced, but their practical impact — the extent to which strategic objectives are translated into concrete actions and those actions lead to tangible outcomes for the country and its people.</p>'
-                            . '<p><strong>Strategic planning is the path from a long-term objective to a concrete result. The Agency helps make this path systematic, measurable and coordinated.</strong></p>',
+                            . '<p>The ultimate measure of the Agency’s work is not the number of documents produced, but their practical impact — the extent to which strategic objectives are translated into concrete actions and those actions lead to tangible outcomes for the country and its people.</p>',
+                        'aside_title' => '',
+                        'items' => [],
+                        'quote' => 'Strategic planning is the path from a long-term objective to a concrete result. The Agency helps make this path systematic, measurable and coordinated.',
                     ]],
                     ['docs_list', 'Legal documents', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
-                        'variant' => 'acts',
+                        'variant' => 'acts-editorial',
                         'title' => 'Key Legal and Regulatory Documents',
                         'all_text' => '',
                         'all_url' => '',
@@ -364,6 +412,7 @@ return [
                             . "Профессиональную деятельность начал в системе Национального банка внешнеэкономической деятельности Республики Узбекистан. В последующие годы работал в Европейском банке реконструкции и развития в Лондоне, занимал руководящие должности в системе Казначейства Министерства финансов Республики Узбекистан.\n\n"
                             . "Работал в различных сферах государственного управления, инвестиционной и внешнеэкономической политики. В разные годы возглавлял ассоциацию «Узчармсаноат», занимал должности министра инвестиций и внешней торговли, заместителя Премьер-министра Республики Узбекистан, руководителя Администрации Президента Республики Узбекистан, советника Президента по особым поручениям и советника Президента по стратегическому развитию.\n\n"
                             . 'С 10 июля 2026 года — директор Агентства стратегического развития и реформ при Президенте Республики Узбекистан.',
+                        'career_title' => 'Профессиональный путь',
                         // Колонка «Годы» узкая (110px) — точные даты живут в
                         // тексте должности, иначе строка выезжает на неё.
                         'career' => [
@@ -417,6 +466,7 @@ return [
                             . "Mehnat faoliyatini O‘zbekiston Respublikasi Tashqi iqtisodiy faoliyat milliy banki tizimida boshlagan. Keyingi yillarda Londondagi Yevropa tiklanish va taraqqiyot bankida ishlagan, O‘zbekiston Respublikasi Moliya vazirligi G‘aznachiligi tizimida rahbarlik lavozimlarida faoliyat yuritgan.\n\n"
                             . "Turli yillarda “O‘zcharmsanoat” uyushmasi raisi, investitsiyalar va tashqi savdo vaziri, Bosh vazirning o‘rinbosari, Prezident Administratsiyasi rahbari, Prezidentning maxsus topshiriqlar bo‘yicha maslahatchisi hamda strategik rivojlanish bo‘yicha maslahatchisi lavozimlarida faoliyat yuritgan.\n\n"
                             . '2026-yil 10-iyuldan O‘zbekiston Respublikasi Prezidenti huzuridagi Strategik rivojlanish va islohotlar agentligi direktori.',
+                        'career_title' => 'Kasbiy faoliyati',
                         'career' => [
                             ['years' => '2000–2003', 'text' => 'O‘zbekiston Respublikasi Tashqi iqtisodiy faoliyat milliy banki — bosh ofis va Samarqand hududiy bo‘linmasi.'],
                             ['years' => '2003–2007', 'text' => 'Londondagi Yevropa tiklanish va taraqqiyot banki (2003-yil noyabridan).'],
