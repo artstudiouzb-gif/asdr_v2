@@ -225,7 +225,7 @@
 .profile__photo {
     aspect-ratio: 4 / 4.8;
     border-radius: 16px;
-    box-shadow: 0 22px 50px -38px rgba(15, 39, 86, .55);
+    box-shadow: var(--page-soft-shadow);
 }
 
 .profile__name {

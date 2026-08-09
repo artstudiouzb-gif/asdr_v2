@@ -74,8 +74,12 @@ test('Страница директора использует читаемую 
 
 test('Профиль руководителя использует адаптивную колонку без искусственного сужения текста', function (): void {
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');
+    $layoutCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-layout-polish.css');
     assert_contains('aspect-ratio: 4 / 5', $css, 'портрет должен сохранять вертикальную пропорцию');
     assert_contains('.editorial-page__content .profile__info::before', $css, 'между портретом и текстом нужен редакционный акцент');
+    assert_not_contains('.editorial-page__content .profile__media::before', $css, 'у портрета не должно быть отдельной цветной псевдотени');
+    assert_contains('box-shadow: var(--page-soft-shadow);', $css, 'портрет должен использовать общую тень внутренних страниц');
+    assert_contains(".profile__photo {\n    aspect-ratio: 4 / 4.8;\n    border-radius: 16px;\n    box-shadow: var(--page-soft-shadow);", $layoutCss);
 
     foreach (['bio__text', 'profile__name', 'profile__position', 'profile__text'] as $selector) {
         $matched = preg_match(
