@@ -9,9 +9,9 @@ test('служебная подпись Поделиться не входит �
     assert_contains('<p class="newsdetail-share__title">', $view);
 });
 
-test('заголовки самостоятельных виджетов используют второй уровень', function (): void {
+test('заголовки sidebar-виджетов не занимают уровень разделов страницы', function (): void {
     $renderer = (string) file_get_contents(APP_ROOT . '/app/Core/WidgetRenderer.php');
 
-    assert_contains('<h2 class="widget__title">', $renderer);
-    assert_true(!str_contains($renderer, '<h3 class="widget__title">'));
+    assert_contains('<h3 class="widget__title">', $renderer);
+    assert_true(!str_contains($renderer, '<h2 class="widget__title">'));
 });
