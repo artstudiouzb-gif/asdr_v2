@@ -13,7 +13,6 @@
     --editorial-line: color-mix(in srgb, var(--gov-border) 92%, transparent);
     --editorial-muted: color-mix(in srgb, var(--gov-muted) 94%, transparent);
     color: var(--gov-ink);
-    background: var(--gov-surface);
 }
 
 .editorial-page__crumbs {
@@ -36,7 +35,6 @@
     overflow: hidden;
     margin: 0;
     padding: 26px 0 32px;
-    background: var(--gov-surface);
     border-bottom: 1px solid var(--editorial-line);
 }
 
@@ -95,7 +93,6 @@
 /* Content canvas --------------------------------------------------------- */
 .editorial-page__content {
     padding-bottom: 34px;
-    background: var(--gov-surface);
 }
 
 .editorial-page__content > .cms-block,
