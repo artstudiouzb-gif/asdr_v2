@@ -43,11 +43,6 @@
     padding-top: 0;
 }
 
-.site-content:has(> .content-pagehead) .page-updated {
-    padding-top: 14px;
-    padding-bottom: 28px;
-}
-
 /* Editorial text blocks */
 .site-content:has(> .content-pagehead) .block-text {
     max-width: var(--page-reading-width);
@@ -221,7 +216,6 @@
 }
 
 .profile__name {
-    max-width: 760px;
     margin-bottom: 12px;
     font-size: clamp(2.05rem, 3.4vw, 3rem);
     line-height: 1.08;
@@ -229,14 +223,12 @@
 }
 
 .profile__position {
-    max-width: 820px;
     margin-bottom: 16px;
     font-size: clamp(1.02rem, 1.45vw, 1.18rem);
     line-height: 1.45;
 }
 
 .profile__text {
-    max-width: 760px;
     margin-bottom: 0;
     color: var(--gov-muted);
     font-size: 1rem;
@@ -258,7 +250,6 @@
 }
 
 .bio__text {
-    max-width: 820px;
     margin-bottom: 32px;
     color: var(--gov-muted);
     font-size: 1rem;

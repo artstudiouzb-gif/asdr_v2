@@ -65,6 +65,22 @@ test('Страница директора использует читаемую 
     assert_contains('box-sizing: border-box', $css, 'граница должна входить в размер маркера');
 });
 
+test('Профиль руководителя использует адаптивную колонку без искусственного сужения текста', function (): void {
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');
+    assert_contains('aspect-ratio: 4 / 5', $css, 'портрет должен сохранять вертикальную пропорцию');
+    assert_contains('.editorial-page__content .profile__info::before', $css, 'между портретом и текстом нужен редакционный акцент');
+
+    foreach (['bio__text', 'profile__name', 'profile__position', 'profile__text'] as $selector) {
+        $matched = preg_match(
+            '/\\.editorial-page__content \\.' . preg_quote($selector, '/') . '\\s*\\{([^}]*)\\}/',
+            $css,
+            $rule,
+        );
+        assert_same(1, $matched, "нет правила {$selector}");
+        assert_not_contains('max-width', $rule[1], "{$selector} не должен иметь фиксированную максимальную ширину");
+    }
+});
+
 test('Преимущества, контакты и правовые акты используют один feature-card', function (): void {
     $advantages = (string) file_get_contents(APP_ROOT . '/templates/blocks/advantages.php');
     $contacts = (string) file_get_contents(APP_ROOT . '/templates/blocks/contact_cards.php');
