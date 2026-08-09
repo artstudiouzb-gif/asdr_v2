@@ -879,13 +879,11 @@
             var start = track.scrollLeft;
             var distance = destination - start;
             var startedAt = null;
-            var duration = 540;
+            var duration = 620;
             var step = function (timestamp) {
                 if (startedAt === null) { startedAt = timestamp; }
                 var progress = Math.min(1, (timestamp - startedAt) / duration);
-                var eased = progress < 0.5
-                    ? 4 * progress * progress * progress
-                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                var eased = 0.5 - Math.cos(progress * Math.PI) / 2;
                 track.scrollLeft = start + distance * eased;
                 if (progress < 1) {
                     motionFrame = window.requestAnimationFrame(step);
