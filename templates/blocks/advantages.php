@@ -49,7 +49,7 @@ if ($variant !== 'band') {
                     <?php else: ?>
                         <span class="feature-card__spacer"></span>
                     <?php endif; ?>
-                    <?php if ($variant === 'indexed'): ?><span class="feature-card__num block-advantages__index" aria-hidden="true"><?= str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) ?></span><?php endif; ?>
+                    <span class="feature-card__num block-advantages__index" aria-hidden="true"><?= str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) ?></span>
                 </div>
                 <h3 class="feature-card__title"><?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?></h3>
                 <p class="feature-card__text"><?= htmlspecialchars($item['text'] ?? '', ENT_QUOTES) ?></p>
