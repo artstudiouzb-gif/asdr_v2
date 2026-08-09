@@ -47,7 +47,7 @@
         },
         {
           "icon_svg": "clipboard-check",
-          "value": "4",
+          "value": "5",
           "suffix": "",
           "label": "asosiy normativ-huquqiy hujjat"
         },
@@ -77,7 +77,7 @@
         },
         {
           "icon_svg": "chart-line",
-          "title": "Tahlil va tashabbuslarni ishlab chiqish",
+          "title": "Tahlil va yangi tashabbuslar",
           "text": "Ijtimoiy-iqtisodiy jarayonlar va xalqaro tajribani tahlil qilish, tizimli islohotlar bo‘yicha takliflar tayyorlash.",
           "url": "/analitika"
         },
