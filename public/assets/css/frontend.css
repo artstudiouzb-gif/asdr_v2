@@ -167,7 +167,7 @@ summary:focus-visible {
 .layout { max-width: 1140px; margin: 0 auto; padding: 20px; display: grid; gap: 30px; }
 .layout--left { grid-template-columns: 300px 1fr; }
 .layout--right { grid-template-columns: 1fr 300px; }
-@media (max-width: 860px) { .layout--left, .layout--right { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .layout--left, .layout--right { grid-template-columns: 1fr; } }
 .layout__sidebar { min-width: 0; }
 
 .widget { margin-bottom: 28px; }
@@ -406,7 +406,7 @@ summary:focus-visible {
 .block-form__field { margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px; }
 
 /* Двухколоночный макет формы на десктопах */
-@media (min-width: 768px) {
+@media (min-width: 721px) {
     .block-form__form--2col {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -1084,7 +1084,7 @@ h1, h2 { letter-spacing: -.015em; }
     flex: 0 0 calc((100% - (4 * var(--card-gap, 24px))) / 5);
     scroll-snap-align: start;
 }
-@media (max-width: 700px) {
+@media (max-width: 720px) {
     .block-partners__grid[data-carousel-track] {
         display: flex;
         grid-template-columns: none;
@@ -1169,7 +1169,7 @@ body.design-cards-flat .block-partners__item { border: 1px solid var(--border-co
 /* Плавающий сайдбар — липнет при прокрутке; неподвижный — обычный поток. */
 body.design-sidebar-floating .layout__sidebar { position: sticky; top: 20px; align-self: start; }
 body.design-header-sticky.design-sidebar-floating .layout__sidebar { top: calc(var(--sticky-offset, 76px)); }
-@media (max-width: 860px) { body.design-sidebar-floating .layout__sidebar { position: static; } }
+@media (max-width: 900px) { body.design-sidebar-floating .layout__sidebar { position: static; } }
 
 /* --- Тип поиска: в строке vs выпадающий (настройки дизайна) --- */
 .site-search-toggle { display: none; background: transparent; border: 1px solid currentColor; color: inherit; border-radius: 50%; width: 38px; height: 38px; cursor: pointer; align-items: center; justify-content: center; }
@@ -1255,7 +1255,7 @@ body.design-detail-sidebar .content-detail__aside {
 }
 body.design-detail-sidebar .content-detail__aside .content-detail__row { grid-template-columns: 1fr; gap: 2px; padding: 10px 0; }
 body.design-detail-sidebar .content-detail__aside .content-detail__row dt { color: var(--text-muted); font-size: .85rem; }
-@media (max-width: 820px) { body.design-detail-sidebar .content-detail__grid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { body.design-detail-sidebar .content-detail__grid { grid-template-columns: 1fr; } }
 
 /* --- Футер колонками --- */
 .site-footer--columns { background: var(--bg-surface); color: var(--text-main); border-top: 1px solid var(--border-color); padding: 0; text-align: left; font-size: 0.9375rem; }
@@ -1316,7 +1316,7 @@ body.design-detail-sidebar .content-detail__aside .content-detail__row dt { colo
     color: var(--color-accent, #e63946);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 720px) {
     .site-footer__bottom-inner {
         flex-direction: column;
         text-align: center;
@@ -2708,7 +2708,7 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
 .media-position--center-bottom { object-position: center bottom; background-position: center bottom; }
 .media-position--right-bottom { object-position: right bottom; background-position: right bottom; }
 
-@media (max-width: 700px) {
+@media (max-width: 720px) {
     .media-position-mobile--left-top { object-position: left top; background-position: left top; }
     .media-position-mobile--center-top { object-position: center top; background-position: center top; }
     .media-position-mobile--right-top { object-position: right top; background-position: right top; }
@@ -2822,7 +2822,7 @@ button.block-map__card-link { border: 0; padding: 0; background: none; font: inh
 .block-textimage--image-left .textimage__info { order: 2; }
 .block-textimage--image-left .textimage__visual { order: 1; }
 
-@media (max-width: 700px) {
+@media (max-width: 720px) {
     .document-tools,
     .faq-tools { align-items: stretch; }
     .document-tools__filter select,

@@ -11,7 +11,7 @@ test('503 fail-safe remains standalone, responsive and actionable', function ():
     assert_contains('<main>', $html);
     assert_contains('href="">Повторить попытку</a>', $html);
     assert_contains('.system-error--503 a:focus-visible', $css);
-    assert_contains('@media (max-width: 420px)', $css);
+    assert_contains('@media (max-width: 480px)', $css);
     assert_false(str_contains($html, '<?php'), 'bootstrap отдаёт 503 через file_get_contents, PHP-код здесь не выполнится');
 });
 

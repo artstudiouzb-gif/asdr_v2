@@ -23,7 +23,7 @@
 .reader-mode__body table,
 .reader-mode__body pre { max-width: 100%; }
 
-@media (max-width: 700px) {
+@media (max-width: 720px) {
     .reader-mode-container { padding-inline: 18px; }
     .reader-mode__headline,
     .reader-mode__lead,

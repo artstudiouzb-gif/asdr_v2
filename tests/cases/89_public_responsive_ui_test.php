@@ -16,7 +16,7 @@ test('public layouts include narrow header and grid safeguards', function (): vo
     $css = file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
 
     assert_true(is_string($css));
-    assert_contains('@media (max-width: 1024px) and (min-width: 721px)', $css);
+    assert_contains('@media (max-width: 1000px) and (min-width: 721px)', $css);
     assert_contains('.cms-columns--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }', $css);
     assert_contains('body.mobile-menu-open { overflow: hidden; }', $css);
     assert_contains('max-height: calc(100dvh - 72px)', $css);

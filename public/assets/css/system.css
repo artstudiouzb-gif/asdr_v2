@@ -165,7 +165,7 @@
     .system-error--503 a:hover { filter: brightness(1.08); }
     .system-error--503 a:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
     .system-error--503 .hint { margin-top: 24px; font-size: 13px; }
-    @media (max-width: 420px) {
+    @media (max-width: 480px) {
         .system-error--503 { padding: 12px; }
         .system-error--503 main { padding: 30px 20px; border-radius: 16px; }
         .system-error--503 .actions { display: grid; }
