@@ -263,7 +263,16 @@
     color: var(--gov-muted);
     font-size: 1rem;
     line-height: 1.72;
-    white-space: pre-line;
+    /* pre-line здесь больше не нужен: абзацы приходят разметкой, а перенос
+       строки внутри абзаца даёт <br>. С pre-line они бы удвоились. */
+}
+
+.bio__text p {
+    margin: 0 0 14px;
+}
+
+.bio__text p:last-child {
+    margin-bottom: 0;
 }
 
 .bio-career {

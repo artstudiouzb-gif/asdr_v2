@@ -9,7 +9,18 @@ $quote = trim((string) ($data['quote_text'] ?? ''));
 <div class="block-bio">
     <div class="bio-main">
         <?php if (!empty($data['bio_title'])): ?><h2 class="bio__title"><?= htmlspecialchars((string) $data['bio_title'], ENT_QUOTES) ?></h2><?php endif; ?>
-        <?php if (!empty($data['bio_text'])): ?><div class="bio__text"><?= nl2br(htmlspecialchars((string) $data['bio_text'], ENT_QUOTES)) ?></div><?php endif; ?>
+        <?php if (!empty($data['bio_text'])): ?>
+            <?php /* Пустая строка разделяет абзацы. Прежде весь текст шёл одним
+                     куском с <br><br>: при межстрочном интервале биографии это
+                     давало полсотни пикселей между абзацами и не давало
+                     скринридеру границ абзаца. */ ?>
+            <div class="bio__text">
+                <?php foreach (preg_split('/\R\s*\R/u', trim((string) $data['bio_text'])) ?: [] as $paragraph): ?>
+                    <?php if (trim($paragraph) === '') { continue; } ?>
+                    <p><?= nl2br(htmlspecialchars(trim($paragraph), ENT_QUOTES)) ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
         <?php if (!empty($career)): ?>
             <ol class="bio-career">
                 <?php foreach ($career as $row): ?>

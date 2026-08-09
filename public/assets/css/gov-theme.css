@@ -1318,6 +1318,16 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
     color: var(--gov-navy) !important;
     box-shadow: 0 2px 12px rgba(0, 0, 0, .22) !important;
 }
+/* У кнопки подписки не было собственных метрик: на десктопе её растягивал
+   flex рядом с полем ввода, а на телефоне она сжималась до отступов браузера
+   по умолчанию — 86×20, и переставала читаться как кнопка. */
+.subscribe-block .btn,
+.subscribe-block input[type="submit"] {
+    padding: 12px 24px;
+    min-height: 44px;
+    font-weight: 700;
+    cursor: pointer;
+}
 .block-cta:not([style*="--cta-btn"]) .block-cta__button:hover,
 .subscribe-block .btn:hover {
     background: color-mix(in srgb, #fff 90%, var(--gov-teal)) !important;
@@ -5003,6 +5013,28 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
     }
     /* Кнопка поиска в шапке была 36×32. */
     .site-search button { min-height: 40px; min-width: 40px; }
+}
+
+/* Минимум 24px требуется не только на телефоне: мышью в строку высотой
+   21px тоже попадают не с первого раза. Отдельные ссылки-действия
+   («Все новости →», «Построить маршрут») добирают высоту отступом, не меняя
+   размер текста. Ссылки внутри предложения под это правило не подпадают —
+   для них минимальный размер цели не действует. */
+.section-head__all,
+.newsfeat__more,
+.person-card__more,
+.imgcard__more,
+.content-card__more,
+.news-card__more,
+.catcard__more,
+.block-map__card-link,
+.search-suggest__all {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+}
+@media (max-width: 900px) {
+    .block-map__card-link { min-height: 44px; }
 }
 
 /* ============================================================================
