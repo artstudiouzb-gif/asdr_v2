@@ -117,7 +117,7 @@ jobs:
             await desktop.close();
 
             const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
-            let response = await mobile.goto('http://127.0.0.1:8080/', { waitUntil: 'domcontentloaded' });
+            const response = await mobile.goto('http://127.0.0.1:8080/', { waitUntil: 'domcontentloaded' });
             if (!response || response.status() >= 400) throw new Error('/ mobile returned ' + (response ? response.status() : 'no response'));
             await settle(mobile);
             await mobile.screenshot({ path: 'screenshots/06-home-mobile.png', fullPage: true });
@@ -128,10 +128,30 @@ jobs:
           })().catch(err => { console.error(err); process.exit(1); });
           NODE
 
+      - name: Show diagnostics on failure
+        if: failure()
+        run: |
+          echo '--- PHP server log ---'
+          cat /tmp/asdr-capture-server.log || true
+          echo '--- application logs ---'
+          find storage/logs -maxdepth 1 -type f -print -exec tail -n 120 {} \; || true
+
       - name: Upload screenshots
+        if: success()
         uses: actions/upload-artifact@v7
         with:
           name: current-main-demo-screenshots
           path: screenshots/*.png
           if-no-files-found: error
           retention-days: 7
+
+      - name: Upload diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: current-main-demo-diagnostics
+          path: |
+            /tmp/asdr-capture-server.log
+            storage/logs/
+          if-no-files-found: ignore
+          retention-days: 2
