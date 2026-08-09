@@ -854,7 +854,48 @@
         var positions = [0];
         var renderedDotsKey = '';
         var frame = null;
+        var motionFrame = null;
         var MAX_PROGRESS_DOTS = 7;
+
+        var stopMotion = function () {
+            if (motionFrame !== null) {
+                window.cancelAnimationFrame(motionFrame);
+                motionFrame = null;
+            }
+        };
+
+        // Native smooth-scroll timing differs noticeably between browsers.
+        // Use one gentle ease-in-out for every card carousel and keep the
+        // reduced-motion path instant.
+        var scrollToPosition = function (target) {
+            var max = Math.max(0, track.scrollWidth - track.clientWidth);
+            var destination = Math.max(0, Math.min(max, Number(target) || 0));
+            stopMotion();
+            if (motionPreference.matches || Math.abs(destination - track.scrollLeft) < 2) {
+                track.scrollLeft = destination;
+                return;
+            }
+
+            var start = track.scrollLeft;
+            var distance = destination - start;
+            var startedAt = null;
+            var duration = 540;
+            var step = function (timestamp) {
+                if (startedAt === null) { startedAt = timestamp; }
+                var progress = Math.min(1, (timestamp - startedAt) / duration);
+                var eased = progress < 0.5
+                    ? 4 * progress * progress * progress
+                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                track.scrollLeft = start + distance * eased;
+                if (progress < 1) {
+                    motionFrame = window.requestAnimationFrame(step);
+                } else {
+                    motionFrame = null;
+                    track.scrollLeft = destination;
+                }
+            };
+            motionFrame = window.requestAnimationFrame(step);
+        };
 
         var pagePositions = function () {
             var max = Math.max(0, track.scrollWidth - track.clientWidth);
@@ -912,10 +953,7 @@
                 dot.className = 'carousel-nav__dot';
                 dot.setAttribute('aria-label', label('goToSlide', 'Перейти к слайду') + ' ' + (positionIndex + 1));
                 dot.addEventListener('click', function () {
-                    track.scrollTo({
-                        left: positions[positionIndex] || 0,
-                        behavior: motionPreference.matches ? 'auto' : 'smooth'
-                    });
+                    scrollToPosition(positions[positionIndex] || 0);
                 });
                 dots.appendChild(dot);
             });
@@ -957,10 +995,7 @@
         var go = function (direction) {
             var current = closestPage();
             var target = Math.max(0, Math.min(positions.length - 1, current + direction));
-            track.scrollTo({
-                left: positions[target] || 0,
-                behavior: motionPreference.matches ? 'auto' : 'smooth'
-            });
+            scrollToPosition(positions[target] || 0);
         };
 
         prev.addEventListener('click', function () { go(-1); });
@@ -975,15 +1010,15 @@
                 go(1);
             } else if (event.key === 'Home') {
                 event.preventDefault();
-                track.scrollTo({ left: 0, behavior: motionPreference.matches ? 'auto' : 'smooth' });
+                scrollToPosition(0);
             } else if (event.key === 'End') {
                 event.preventDefault();
-                track.scrollTo({
-                    left: positions[positions.length - 1] || 0,
-                    behavior: motionPreference.matches ? 'auto' : 'smooth'
-                });
+                scrollToPosition(positions[positions.length - 1] || 0);
             }
         });
+        track.addEventListener('pointerdown', stopMotion, { passive: true });
+        track.addEventListener('touchstart', stopMotion, { passive: true });
+        track.addEventListener('wheel', stopMotion, { passive: true });
         track.addEventListener('scroll', function () {
             if (frame !== null) { return; }
             frame = window.requestAnimationFrame(function () {

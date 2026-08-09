@@ -24,7 +24,8 @@ test('Блок contact_cards: модульный, карточки с ссылк
     // Модульная обёртка (toggle/move/reorder в конструкторе работают через неё).
     assert_contains('cms-block cms-block--contact_cards', $h);
     assert_contains('block-contact-cards__title', $h);
-    assert_same(2, substr_count($h, 'class="contact-card"'), 'две карточки');
+    assert_same(2, substr_count($h, 'class="feature-card contact-card"'), 'две карточки');
+    assert_contains('feature-card__title contact-card__title', $h, 'контакты используют единый компонент карточки');
     // Строки разбиты по переносам.
     assert_contains('info@example.uz', $h);
     assert_contains('press@example.uz', $h);

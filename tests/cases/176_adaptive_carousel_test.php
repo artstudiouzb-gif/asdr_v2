@@ -54,6 +54,8 @@ test('Единый движок управляет переполнением, �
     assert_contains("prefers-reduced-motion: reduce", $js);
     assert_contains("positions = pagePositions()", $js);
     assert_contains('MAX_PROGRESS_DOTS = 7', $js, 'индикаторы не должны переполнять мобильную шапку');
+    assert_contains('scrollToPosition', $js, 'переключение карточек должно использовать единое плавное движение');
+    assert_contains('duration = 540', $js, 'переход между карточками не должен быть резким');
     assert_not_contains("track.querySelector('.imgcard')", $js, 'движок не должен зависеть от одного типа карточки');
 
     assert_contains('.carousel-nav__dot.is-active', $css);

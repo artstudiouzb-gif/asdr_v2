@@ -159,6 +159,7 @@ test('Контент Агентства: все блоки рендерятся 
     assert_contains('block-text--intro', $renderedPages['o-nas|ru']);
     assert_contains('block-text__principles', $renderedPages['o-nas|ru']);
     assert_contains('block-advantages--indexed', $renderedPages['o-nas|ru']);
+    assert_contains('feature-card block-advantages__item', $renderedPages['o-nas|ru']);
     assert_contains('block-text--system', $renderedPages['o-nas|ru']);
     assert_contains('block-stages--history', $renderedPages['o-nas|ru']);
     assert_contains('block-text--spotlight', $renderedPages['o-nas|ru']);

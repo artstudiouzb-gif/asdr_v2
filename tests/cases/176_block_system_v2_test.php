@@ -96,6 +96,7 @@ test('Варианты объединённых блоков сохраняют 
         'data' => json_encode(['variant' => 'acts-editorial', 'items' => [['title' => 'Указ', 'number' => 'ПФ-1', 'date' => '2026']]], JSON_UNESCAPED_UNICODE),
     ]);
     assert_contains('block-docslist--acts-editorial', $editorialActs['html']);
+    assert_contains('feature-card act-card', $editorialActs['html']);
     assert_contains('act-card__editorial-head', $editorialActs['html']);
 });
 
