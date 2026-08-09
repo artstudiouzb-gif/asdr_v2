@@ -415,7 +415,7 @@ html[data-theme="dark"] .editorial-page {
     }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 720px) {
     .editorial-page {
         --editorial-wide: calc(100% - 40px);
         --editorial-main: 100%;
