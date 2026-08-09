@@ -29,7 +29,7 @@ $getFallbackIcon = static function (string $cardTitle): ?string {
         <p class="block-contact-cards__empty"><?= htmlspecialchars(t('Контактные карточки ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
         <div class="contact-cards">
-            <?php foreach ($items as $item): ?>
+            <?php foreach ($items as $index => $item): ?>
                 <?php $iconSvg = !empty($item['icon_svg']) ? (string) $item['icon_svg'] : $getFallbackIcon((string) ($item['title'] ?? '')); ?>
                 <article class="feature-card contact-card">
                     <div class="feature-card__top">
@@ -38,6 +38,7 @@ $getFallbackIcon = static function (string $cardTitle): ?string {
                         <?php else: ?>
                             <span class="feature-card__spacer"></span>
                         <?php endif; ?>
+                        <span class="feature-card__num" aria-hidden="true"><?= str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) ?></span>
                     </div>
                     <?php if (!empty($item['title'])): ?>
                         <h3 class="feature-card__title contact-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>

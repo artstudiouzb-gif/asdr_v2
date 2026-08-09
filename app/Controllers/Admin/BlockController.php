@@ -418,6 +418,22 @@ final class BlockController
                     ];
                 }
                 $textVariant = (string) ($_POST['variant'] ?? 'default');
+                $mediaType = (string) ($_POST['media_type'] ?? 'none');
+                $mediaType = in_array($mediaType, ['none', 'image', 'video', 'youtube'], true)
+                    ? $mediaType
+                    : 'none';
+                $mediaImage = \App\Core\BlockData\BlockDataInput::safeMedia($_POST['media_image'] ?? '');
+                $mediaVideo = \App\Core\BlockData\BlockDataInput::safeMedia($_POST['media_video'] ?? '');
+                $mediaYoutube = trim((string) ($_POST['media_youtube'] ?? ''));
+                if ($mediaType === 'none') {
+                    if (\App\Core\Video::youtubeId($mediaYoutube) !== null) {
+                        $mediaType = 'youtube';
+                    } elseif ($mediaVideo !== '') {
+                        $mediaType = 'video';
+                    } elseif ($mediaImage !== '') {
+                        $mediaType = 'image';
+                    }
+                }
                 return [
                     'variant' => in_array($textVariant, ['default', 'section', 'intro', 'system', 'spotlight'], true) ? $textVariant : 'default',
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
@@ -428,6 +444,14 @@ final class BlockController
                     'aside_title' => TextProcessor::typographPlain(trim((string) ($_POST['aside_title'] ?? '')), $locale),
                     'items' => $items,
                     'quote' => TextProcessor::typographPlain(trim((string) ($_POST['quote'] ?? '')), $locale),
+                    'media_type' => $mediaType,
+                    'media_image' => $mediaImage,
+                    'media_video' => $mediaVideo,
+                    'media_youtube' => \App\Core\Video::youtubeId($mediaYoutube) !== null ? $mediaYoutube : '',
+                    'media_alt' => TextProcessor::typographPlain(trim((string) ($_POST['media_alt'] ?? '')), $locale),
+                    'media_caption' => TextProcessor::typographPlain(trim((string) ($_POST['media_caption'] ?? '')), $locale),
+                    'image_position' => \App\Core\MediaPosition::normalize($_POST['image_position'] ?? null),
+                    'image_position_mobile' => \App\Core\MediaPosition::normalize($_POST['image_position_mobile'] ?? null),
                 ];
             case 'html':
                 // Даже супер-администратор сохраняет только безопасную

@@ -50,6 +50,45 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <label for="content">Текст</label>
                 <textarea class="u-inline-9bef318bc9" id="content" name="content" data-wysiwyg><?= htmlspecialchars($data['content'] ?? '', ENT_QUOTES) ?></textarea>
             </div>
+            <?php
+            $textMediaType = (string) ($data['media_type'] ?? 'none');
+            $textMediaType = in_array($textMediaType, ['none', 'image', 'video', 'youtube'], true) ? $textMediaType : 'none';
+            ?>
+            <div class="form-field">
+                <label for="text_media_type">Медиа справа во вводном блоке</label>
+                <select id="text_media_type" name="media_type">
+                    <option value="none" <?= $textMediaType === 'none' ? 'selected' : '' ?>>Фирменная заглушка</option>
+                    <option value="image" <?= $textMediaType === 'image' ? 'selected' : '' ?>>Фотография</option>
+                    <option value="video" <?= $textMediaType === 'video' ? 'selected' : '' ?>>Видео из медиабиблиотеки</option>
+                    <option value="youtube" <?= $textMediaType === 'youtube' ? 'selected' : '' ?>>Видео с YouTube</option>
+                </select>
+                <span class="form-hint">Показывается у варианта «Вводный блок с принципами». Если файл не выбран, справа остаётся аккуратная фирменная композиция.</span>
+            </div>
+            <?= \App\Core\AdminUi::imageField('media_image', (string) ($data['media_image'] ?? ''), [
+                'label' => 'Фотография / постер видео',
+                'hint' => 'Выберите изображение из медиабиблиотеки. Для видео оно используется как заставка.',
+            ]) ?>
+            <?= \App\Core\AdminUi::mediaPositionFields($data['image_position'] ?? 'center-center', $data['image_position_mobile'] ?? 'center-center') ?>
+            <div class="form-field">
+                <label for="text_media_video">Видео из медиабиблиотеки (mp4)</label>
+                <div class="image-field__controls">
+                    <input type="text" id="text_media_video" name="media_video" value="<?= htmlspecialchars($data['media_video'] ?? '', ENT_QUOTES) ?>" placeholder="/uploads/public/about.mp4">
+                    <button type="button" class="btn btn--small" data-media-pick data-media-target="#text_media_video" data-media-type="video">Медиабиблиотека</button>
+                </div>
+            </div>
+            <div class="form-field">
+                <label for="text_media_youtube">Ссылка на YouTube</label>
+                <input type="text" id="text_media_youtube" name="media_youtube" value="<?= htmlspecialchars($data['media_youtube'] ?? '', ENT_QUOTES) ?>" placeholder="https://www.youtube.com/watch?v=…">
+            </div>
+            <div class="form-field">
+                <label for="text_media_alt">Описание изображения</label>
+                <input type="text" id="text_media_alt" name="media_alt" value="<?= htmlspecialchars($data['media_alt'] ?? '', ENT_QUOTES) ?>" placeholder="Что изображено на фотографии">
+                <span class="form-hint">Нужно для доступности. Для декоративной фотографии можно оставить пустым.</span>
+            </div>
+            <div class="form-field">
+                <label for="text_media_caption">Подпись под медиа</label>
+                <input type="text" id="text_media_caption" name="media_caption" value="<?= htmlspecialchars($data['media_caption'] ?? '', ENT_QUOTES) ?>" placeholder="Необязательная подпись или источник">
+            </div>
             <div class="form-field">
                 <label for="aside_title">Заголовок структурированного списка</label>
                 <input type="text" id="aside_title" name="aside_title" value="<?= htmlspecialchars($data['aside_title'] ?? '', ENT_QUOTES) ?>">

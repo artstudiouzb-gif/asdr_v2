@@ -10,11 +10,15 @@ test('Редакционные варианты страницы Агентст�
     assert_true(array_key_exists('aside_title', $defaults['text']));
     assert_true(array_key_exists('items', $defaults['text']));
     assert_true(array_key_exists('quote', $defaults['text']));
+    assert_true(array_key_exists('media_type', $defaults['text']));
+    assert_true(array_key_exists('media_image', $defaults['text']));
+    assert_true(array_key_exists('media_video', $defaults['text']));
+    assert_true(array_key_exists('media_youtube', $defaults['text']));
     assert_true(array_key_exists('variant', $defaults['stages']));
     assert_true(array_key_exists('career_title', $defaults['bio_education']));
 
     $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
-    foreach (['intro', 'system', 'spotlight', 'indexed', 'history', 'acts-editorial'] as $variant) {
+    foreach (['intro', 'system', 'spotlight', 'indexed', 'history', 'acts-editorial', 'media_image', 'media_video', 'media_youtube'] as $variant) {
         assert_contains($variant, $form, "вариант {$variant} недоступен в редакторе");
     }
 });
@@ -34,7 +38,7 @@ test('Миграция включает варианты без замены р�
 test('Редакционные стили не меняют шапку и подвал', function (): void {
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');
     assert_contains('.block-text--system', $css);
-    assert_contains('.feature-card.block-advantages__item', $css);
+    assert_contains('.block-advantages__grid', $css);
     assert_contains('.block-stages--history', $css);
     assert_contains('.block-docslist--acts-editorial', $css);
     assert_contains('.block-stages--history .stage::after', $css, 'в истории должна быть отключена дублирующая линия');
@@ -88,9 +92,70 @@ test('Преимущества, контакты и правовые акты и
     assert_contains('feature-card block-advantages__item', $advantages);
     assert_contains('feature-card contact-card', $contacts);
     assert_contains('feature-card act-card', $acts);
+    assert_contains('feature-card__num block-advantages__index', $advantages);
+    assert_contains('feature-card__num', $contacts);
+    assert_contains('feature-card__title act-card__number', $acts);
+    assert_contains('feature-card__text act-card__title', $acts);
 
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
     assert_contains('.feature-card.block-advantages__item', $css);
     assert_contains('.feature-card.contact-card', $css);
     assert_contains('.feature-card.act-card', $css);
+    assert_contains('--feature-card-motion-duration: .62s', $css);
+
+    $editorial = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');
+    assert_contains('.anim-card:not(.feature-card)', $editorial);
+    assert_not_contains('.feature-card.block-advantages__item:hover', $editorial);
+
+    $layout = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-layout-polish.css');
+    assert_contains('.block-advantages__item:not(.feature-card)', $layout);
+});
+
+test('Вводный блок Агентства имеет управляемую медиаколонку и безопасную заглушку', function (): void {
+    $base = [
+        'id' => 23401,
+        'type' => 'text',
+        'custom_css' => null,
+    ];
+
+    $placeholder = \App\Core\BlockRenderer::render($base + ['data' => json_encode([
+        'variant' => 'intro',
+        'content' => '<p>О работе Агентства</p>',
+        'media_type' => 'none',
+    ], JSON_UNESCAPED_UNICODE)])['html'];
+    assert_contains('block-text__intro-copy', $placeholder);
+    assert_contains('block-text__media--placeholder', $placeholder);
+
+    $image = \App\Core\BlockRenderer::render($base + ['data' => json_encode([
+        'variant' => 'intro',
+        'content' => '<p>О работе Агентства</p>',
+        'media_type' => 'image',
+        'media_image' => '/uploads/public/about.jpg',
+        'media_alt' => 'Рабочая встреча',
+    ], JSON_UNESCAPED_UNICODE)])['html'];
+    assert_contains('block-text__media--image', $image);
+    assert_contains('/uploads/public/about.jpg', $image);
+    assert_contains('alt="Рабочая встреча"', $image);
+
+    $video = \App\Core\BlockRenderer::render($base + ['data' => json_encode([
+        'variant' => 'intro',
+        'content' => '<p>О работе Агентства</p>',
+        'media_type' => 'video',
+        'media_video' => '/uploads/public/about.mp4',
+    ], JSON_UNESCAPED_UNICODE)])['html'];
+    assert_contains('<video class="block-text__media-video" controls', $video);
+    assert_contains('/uploads/public/about.mp4', $video);
+
+    $youtube = \App\Core\BlockRenderer::render($base + ['data' => json_encode([
+        'variant' => 'intro',
+        'content' => '<p>О работе Агентства</p>',
+        'media_type' => 'youtube',
+        'media_youtube' => 'https://youtu.be/dQw4w9WgXcQ',
+    ], JSON_UNESCAPED_UNICODE)])['html'];
+    assert_contains('youtube-nocookie.com/embed/dQw4w9WgXcQ', $youtube);
+    assert_contains('loading="lazy"', $youtube);
+
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');
+    assert_contains('.block-text__media--placeholder', $css);
+    assert_contains('grid-template-columns: minmax(0, 1.08fr) minmax(300px, .82fr)', $css);
 });
