@@ -37,7 +37,8 @@ test('WidgetRenderer::render добавляет классы оформлени�
     assert_contains('widget--pad-compact', $html);
     assert_contains('widget--accent', $html);
     assert_contains('widget--custom_html', $html);
-    assert_contains('Баннер', $html);
+    assert_contains('<h3 class="widget__title">Баннер</h3>', $html);
+    assert_not_contains('<h2 class="widget__title">', $html);
 });
 
 test('WidgetRenderer::render без _design — без классов оформления', function () {
