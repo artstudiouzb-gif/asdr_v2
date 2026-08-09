@@ -1789,6 +1789,13 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .repeater-row__remove { align-self: flex-end; }
 .repeater-actions { margin-bottom: 20px; }
 
+.bio-widget-slots { display: grid; gap: 20px; padding-top: 8px; }
+.bio-widget-slots > h3, .bio-widget-slot > h4 { margin: 0; }
+.bio-widget-slot { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--admin-border); border-radius: 10px; background: var(--admin-bg-soft, #f8fafc); }
+.widget-slot-row__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 600; }
+.widget-slot-row__tools { display: inline-flex; gap: 6px; }
+.widget-slot-row__tools .btn { min-width: 36px; padding-inline: 8px; }
+
 .block-list-item {
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
     background: var(--admin-card-bg, #ffffff);
@@ -6665,4 +6672,3 @@ body.auth-page label,
 .auth-card .form-hint {
     color: #94a3b8 !important;
 }
-
