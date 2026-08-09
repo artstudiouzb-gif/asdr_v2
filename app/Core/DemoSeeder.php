@@ -1921,6 +1921,28 @@ final class DemoSeeder
         $stmt->execute([':version' => self::DEMO_VERSION]);
     }
 
+    /**
+     * Canonical form for decoded JSON: object key order is irrelevant, while
+     * list order and scalar types remain strict. MySQL JSON normalizes object
+     * keys, so direct PHP array identity can reject untouched starter data.
+     */
+    private static function canonicalJsonValue(mixed $value): mixed
+    {
+        if (!is_array($value)) {
+            return $value;
+        }
+        if (array_is_list($value)) {
+            return array_map(static fn (mixed $item): mixed => self::canonicalJsonValue($item), $value);
+        }
+
+        ksort($value, SORT_STRING);
+        foreach ($value as $key => $item) {
+            $value[$key] = self::canonicalJsonValue($item);
+        }
+
+        return $value;
+    }
+
     private static function isUntouchedStarterHome(PDO $pdo, int $pageId): bool
     {
         $stmt = $pdo->prepare(
@@ -1941,7 +1963,7 @@ final class DemoSeeder
             $data = json_decode((string) ($block['data'] ?? ''), true);
             if (($block['type'] ?? '') !== $expected[$i][0]
                 || ($block['title'] ?? '') !== $expected[$i][1]
-                || $data !== $expected[$i][2]) {
+                || self::canonicalJsonValue($data) !== self::canonicalJsonValue($expected[$i][2])) {
                 return false;
             }
         }
