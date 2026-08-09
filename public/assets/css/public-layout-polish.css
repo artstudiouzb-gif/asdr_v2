@@ -38,9 +38,22 @@
     padding-block: var(--page-section-gap);
 }
 
-.site-content:has(> .content-pagehead) > .cms-block:not(.cms-block--bg) + .cms-block:not(.cms-block--bg),
-.site-content:has(> .content-pagehead) > .page-blocks > .cms-block:not(.cms-block--bg) + .cms-block:not(.cms-block--bg) {
+.site-content:has(> .content-pagehead) > .cms-block:not(.cms-block--bg):not(.cms-block--surface-card)
+    + .cms-block:not(.cms-block--bg):not(.cms-block--surface-card),
+.site-content:has(> .content-pagehead) > .page-blocks > .cms-block:not(.cms-block--bg):not(.cms-block--surface-card)
+    + .cms-block:not(.cms-block--bg):not(.cms-block--surface-card) {
     padding-top: 0;
+}
+
+/* Опциональный контейнер секции: фон принадлежит самому блоку, а не всей
+   полосе страницы. Вертикальный ритм по-прежнему задаёт preset секции. */
+.cms-block--surface-card {
+    box-sizing: border-box;
+    padding-inline: clamp(20px, 3.5vw, 48px);
+    border: 1px solid color-mix(in srgb, var(--gov-border) 84%, transparent);
+    border-radius: var(--page-card-radius);
+    background: var(--gov-surface);
+    box-shadow: var(--page-soft-shadow);
 }
 
 /* Editorial text blocks */
