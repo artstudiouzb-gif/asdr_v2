@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 36840)
-Total output lines: 1550
-
 <?php
 
 use App\Core\Csrf;
@@ -699,7 +696,271 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 'label' => 'Кнопка 2 — своя иконка (SVG или картинка)',
                 'hint' => 'Загруженный SVG очищается от скриптов. Показывается вместо иконки из библиотеки.',
             ]) ?>
-            <div class="form-field"><label for="video_button_text">Кнопка «Смотреть видео» — те…6840 tokens truncated…]"><option value="done">Завершён</option><option value="active">В процессе</option><option value="planned" selected>Запланирован</option></select></div>
+            <div class="form-field"><label for="video_button_text">Кнопка «Смотреть видео» — текст</label><input type="text" id="video_button_text" name="video_button_text" value="<?= htmlspecialchars($data['video_button_text'] ?? '', ENT_QUOTES) ?>"></div>
+            <div class="form-field"><label for="video_button_url">Кнопка «Смотреть видео» — ссылка</label><input type="text" id="video_button_url" name="video_button_url" value="<?= htmlspecialchars($data['video_button_url'] ?? '', ENT_QUOTES) ?>"></div>
+
+            <?php
+            $heroSlides = is_array($data['slides'] ?? null) ? $data['slides'] : [];
+            $slideField = static function (int $index, string $key, string $label, string $value, string $type = 'text', string $hint = ''): string {
+                $id = 'slide_' . $index . '_' . $key;
+                return '<div class="form-field"><label for="' . $id . '">' . htmlspecialchars($label, ENT_QUOTES) . '</label>'
+                    . '<input type="' . $type . '" id="' . $id . '" name="slides[' . $index . '][' . $key . ']" value="' . htmlspecialchars($value, ENT_QUOTES) . '">'
+                    . ($hint !== '' ? '<span class="form-hint">' . htmlspecialchars($hint, ENT_QUOTES) . '</span>' : '')
+                    . '</div>';
+            };
+            ?>
+            <h3 class="form-subtitle">Слайды</h3>
+            <p class="form-hint u-inline-291b7bbb01">
+                Заполните слайды, чтобы обложка стала слайдером: до <?= \App\Core\BlockData\HeroBlockNormalizer::MAX_SLIDES ?> штук.
+                Оформление (высота, затемнение, подложка, цвета) остаётся общим, у слайда своё — текст, картинка,
+                кнопки, ссылка и срок показа. Пока слайдов нет, обложка работает как раньше.
+            </p>
+            <div class="form-field">
+                <label for="hero_autoplay">Автопрокрутка, секунд</label>
+                <input type="number" id="hero_autoplay" name="autoplay" min="0" max="30" value="<?= (int) ($data['autoplay'] ?? 0) ?>">
+                <span class="form-hint">0 — переключать только вручную. Прокрутка останавливается под курсором, при фокусе с клавиатуры и у посетителей, попросивших меньше движения.</span>
+            </div>
+            <div data-repeater="heroslides" data-repeater-max="<?= \App\Core\BlockData\HeroBlockNormalizer::MAX_SLIDES ?>" class="fb-grid">
+                <?php foreach ($heroSlides as $i => $slide): ?>
+                    <div class="repeater-row fb-card">
+                        <div class="fb-card__head">
+                            <span class="fb-card__badge">Слайд</span>
+                            <span class="fb-card__tools">
+                                <button type="button" class="fb-move" data-fb-move="up" aria-label="Выше" title="Переместить">↑</button>
+                                <button type="button" class="fb-move" data-fb-move="down" aria-label="Ниже" title="Переместить">↓</button>
+                            </span>
+                        </div>
+                        <?= $slideField($i, 'eyebrow', 'Надзаголовок', (string) ($slide['eyebrow'] ?? '')) ?>
+                        <?= $slideField($i, 'title', 'Заголовок', (string) ($slide['title'] ?? '')) ?>
+                        <?= $slideField($i, 'subtitle', 'Подзаголовок', (string) ($slide['subtitle'] ?? '')) ?>
+                        <?= \App\Core\AdminUi::imageField('slides[' . $i . '][image]', (string) ($slide['image'] ?? ''), ['label' => 'Изображение слайда', 'hint' => 'Фон слайда, а для видео — заставка до загрузки.']) ?>
+                        <div class="form-field">
+                            <label for="slide_<?= $i ?>_video_url">Видео слайда (mp4)</label>
+                            <div class="image-field__controls">
+                                <input type="text" id="slide_<?= $i ?>_video_url" name="slides[<?= $i ?>][video_url]" value="<?= htmlspecialchars((string) ($slide['video_url'] ?? ''), ENT_QUOTES) ?>" placeholder="/uploads/public/hero.mp4">
+                                <button type="button" class="btn btn--small" data-media-pick data-media-target="#slide_<?= $i ?>_video_url" data-media-type="video">Медиабиблиотека</button>
+                            </div>
+                            <span class="form-hint">Заполнено — слайд показывает видео вместо картинки. Без звука, зациклено; играет только пока слайд на экране.</span>
+                        </div>
+                        <?= $slideField($i, 'youtube_url', 'Видео слайда с YouTube', (string) ($slide['youtube_url'] ?? ''), 'text', 'Корректная ссылка перебивает mp4 и картинку. Ролик загружается только когда слайд показан.') ?>
+                        <?= $slideField($i, 'link_url', 'Ссылка со всего слайда', (string) ($slide['link_url'] ?? ''), 'text', 'Клик по слайду ведёт сюда. Кнопки при этом работают по своим ссылкам.') ?>
+                        <?= $slideField($i, 'button_text', 'Кнопка 1 — текст', (string) ($slide['button_text'] ?? '')) ?>
+                        <?= $slideField($i, 'button_url', 'Кнопка 1 — ссылка', (string) ($slide['button_url'] ?? '')) ?>
+                        <?= $slideField($i, 'button2_text', 'Кнопка 2 — текст', (string) ($slide['button2_text'] ?? '')) ?>
+                        <?= $slideField($i, 'button2_url', 'Кнопка 2 — ссылка', (string) ($slide['button2_url'] ?? '')) ?>
+                        <div class="form-field">
+                            <label for="slide_<?= $i ?>_text_position">Положение текста</label>
+                            <select id="slide_<?= $i ?>_text_position" name="slides[<?= $i ?>][text_position]">
+                                <?php foreach (['' => 'Как у обложки', 'left' => 'Слева', 'center' => 'По центру', 'right' => 'Справа'] as $val => $label): ?>
+                                    <option value="<?= $val ?>" <?= (string) ($slide['text_position'] ?? '') === (string) $val ? 'selected' : '' ?>><?= $label ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <?= $slideField($i, '_visible_from', 'Показывать с', \App\Core\BlockVisibility::forInput($slide['_visible_from'] ?? ''), 'datetime-local', 'Пусто — сразу.') ?>
+                        <?= $slideField($i, '_visible_to', 'Показывать до', \App\Core\BlockVisibility::forInput($slide['_visible_to'] ?? ''), 'datetime-local', 'Пусто — бессрочно. Слайд исчезнет сам, кэш страницы пересоберётся.') ?>
+                        <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить слайд</button>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <template data-repeater-template="heroslides">
+                <div class="fb-card__head">
+                    <span class="fb-card__badge">Слайд</span>
+                    <span class="fb-card__tools">
+                        <button type="button" class="fb-move" data-fb-move="up" aria-label="Выше" title="Переместить">↑</button>
+                        <button type="button" class="fb-move" data-fb-move="down" aria-label="Ниже" title="Переместить">↓</button>
+                    </span>
+                </div>
+                <div class="form-field"><label>Надзаголовок</label><input type="text" name="slides[__INDEX__][eyebrow]"></div>
+                <div class="form-field"><label>Заголовок</label><input type="text" name="slides[__INDEX__][title]"></div>
+                <div class="form-field"><label>Подзаголовок</label><input type="text" name="slides[__INDEX__][subtitle]"></div>
+                <?= \App\Core\AdminUi::imageField('slides[__INDEX__][image]', '', ['label' => 'Изображение слайда', 'hint' => 'Фон слайда, а для видео — заставка до загрузки.']) ?>
+                <div class="form-field">
+                    <label for="slide___INDEX___video_url">Видео слайда (mp4)</label>
+                    <div class="image-field__controls">
+                        <input type="text" id="slide___INDEX___video_url" name="slides[__INDEX__][video_url]" placeholder="/uploads/public/hero.mp4">
+                        <button type="button" class="btn btn--small" data-media-pick data-media-target="#slide___INDEX___video_url" data-media-type="video">Медиабиблиотека</button>
+                    </div>
+                    <span class="form-hint">Заполнено — слайд показывает видео вместо картинки.</span>
+                </div>
+                <div class="form-field"><label>Видео слайда с YouTube</label><input type="text" name="slides[__INDEX__][youtube_url]"><span class="form-hint">Корректная ссылка перебивает mp4 и картинку.</span></div>
+                <div class="form-field"><label>Ссылка со всего слайда</label><input type="text" name="slides[__INDEX__][link_url]"></div>
+                <div class="form-field"><label>Кнопка 1 — текст</label><input type="text" name="slides[__INDEX__][button_text]"></div>
+                <div class="form-field"><label>Кнопка 1 — ссылка</label><input type="text" name="slides[__INDEX__][button_url]"></div>
+                <div class="form-field"><label>Кнопка 2 — текст</label><input type="text" name="slides[__INDEX__][button2_text]"></div>
+                <div class="form-field"><label>Кнопка 2 — ссылка</label><input type="text" name="slides[__INDEX__][button2_url]"></div>
+                <div class="form-field">
+                    <label>Положение текста</label>
+                    <select name="slides[__INDEX__][text_position]">
+                        <option value="">Как у обложки</option>
+                        <option value="left">Слева</option>
+                        <option value="center">По центру</option>
+                        <option value="right">Справа</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>Показывать с</label><input type="datetime-local" name="slides[__INDEX__][_visible_from]"></div>
+                <div class="form-field"><label>Показывать до</label><input type="datetime-local" name="slides[__INDEX__][_visible_to]"></div>
+                <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить слайд</button>
+            </template>
+            <div class="repeater-actions">
+                <button type="button" class="btn btn--small" data-repeater-add="heroslides"><?= \App\Core\AdminUi::icon('plus') ?>Добавить слайд</button>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($type === 'news_feature'): ?>
+            <div class="form-field"><label for="nf_limit">Сколько новостей показывать</label><input type="number" id="nf_limit" name="limit" min="2" max="12" value="<?= (int) ($data['limit'] ?? 6) ?>"><span class="form-hint">1 крупная + список. Берутся опубликованные новости.</span></div>
+            <div class="form-field"><label for="nf_all_text">Ссылка «Все …» — текст</label><input type="text" id="nf_all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все новости"></div>
+            <div class="form-field"><label for="nf_all_url">Ссылка «Все …» — URL (пусто = /news)</label><input type="text" id="nf_all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
+        <?php endif; ?>
+
+        <?php if (in_array($type, ['cards_grid', 'media_gallery'], true)): ?>
+            <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все направления"></div>
+            <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
+            <?php
+            $srcVal = $data['source'] ?? 'manual';
+            $srcOptions = $type === 'cards_grid'
+                ? ['projects' => 'Из раздела «Проекты»']
+                : ['media' => 'Видео + фотоальбомы', 'albums' => 'Из фотоальбомов', 'videos' => 'Из раздела «Видео»'];
+            ?>
+            <div class="form-field">
+                <label for="source">Источник данных</label>
+                <select id="source" name="source">
+                    <option value="manual" <?= !isset($srcOptions[$srcVal]) ? 'selected' : '' ?>>Ручной список (ниже)</option>
+                    <?php foreach ($srcOptions as $value => $label): ?><option value="<?= $value ?>" <?= $srcVal === $value ? 'selected' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES) ?></option><?php endforeach; ?>
+                </select>
+                <span class="form-hint">Автоматический источник использует записи с отметкой «Показать на главной».</span>
+            </div>
+            <div class="form-field"><label for="limit">Сколько карточек показывать</label><input type="number" id="limit" name="limit" min="2" max="24" value="<?= (int) ($data['limit'] ?? ($type === 'cards_grid' ? 6 : 8)) ?>"></div>
+            <?php if ($type === 'cards_grid'): ?>
+                <div class="form-field">
+                    <label for="cards_variant">Вариант карточек</label>
+                    <select id="cards_variant" name="variant">
+                        <option value="icon" <?= ($data['variant'] ?? 'icon') === 'icon' ? 'selected' : '' ?>>Иконка, заголовок и текст</option>
+                        <option value="compact" <?= ($data['variant'] ?? 'icon') === 'compact' ? 'selected' : '' ?>>Компактные категории</option>
+                        <option value="image" <?= ($data['variant'] ?? 'icon') === 'image' ? 'selected' : '' ?>>Карточки с фотографией</option>
+                    </select>
+                    <span class="form-hint">Один набор данных можно показать как карточки с иконками, категории или карточки с фотографиями.</span>
+                </div>
+                <div class="form-field"><label for="columns">Колонок</label>
+                    <select id="columns" name="columns">
+                        <?php foreach ([2,3,4,5] as $n): ?><option value="<?= $n ?>" <?= (int)($data['columns'] ?? 5)===$n?'selected':'' ?>><?= $n ?></option><?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="colorfield-row">
+                    <?= \App\Core\AdminUi::colorField('card_bg', $data['card_bg'] ?? '', 'Цвет карточек (фон)', '#ffffff') ?>
+                    <?= \App\Core\AdminUi::colorField('text_color', $data['text_color'] ?? '', 'Цвет текста и иконок', '#173a63') ?>
+                </div>
+                <?= \App\Core\AdminUi::mediaPositionFields($data['image_position'] ?? 'center-center', $data['image_position_mobile'] ?? 'center-center') ?>
+            <?php endif; ?>
+            <div>
+                <label>Элементы</label>
+                <div data-repeater="items">
+                    <?php foreach (($data['items'] ?? []) as $i => $item): ?>
+                        <div class="repeater-row">
+                            <?php if ($type === 'cards_grid'): ?>
+                                <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
+                                <?= \App\Core\AdminUi::imageField("items[{$i}][image]", (string) ($item['image'] ?? ''), ['label' => 'Изображение для варианта с фото']) ?>
+                            <?php else: ?>
+                                <?= \App\Core\AdminUi::imageField("items[{$i}][image]", (string) ($item['image'] ?? ''), ['label' => 'Превью / фотография']) ?>
+                            <?php endif; ?>
+                            <div class="form-field"><label>Заголовок</label><input type="text" name="items[<?= $i ?>][title]" value="<?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?>"></div>
+                            <?php if ($type === 'cards_grid'): ?>
+                                <div class="form-field"><label>Текст</label><textarea name="items[<?= $i ?>][text]"><?= htmlspecialchars($item['text'] ?? '', ENT_QUOTES) ?></textarea></div>
+                            <?php elseif ($type === 'media_gallery'): ?>
+                                <div class="form-field"><label>Тип</label><select name="items[<?= $i ?>][kind]"><option value="video" <?= ($item['kind'] ?? 'video')==='video'?'selected':'' ?>>Видео</option><option value="photo" <?= ($item['kind'] ?? '')==='photo'?'selected':'' ?>>Фото</option></select></div>
+                                <div class="form-field"><label>Длительность (напр. 02:35)</label><input type="text" name="items[<?= $i ?>][meta]" value="<?= htmlspecialchars($item['meta'] ?? '', ENT_QUOTES) ?>"></div>
+                                <div class="form-field"><label>Дата</label><input type="text" name="items[<?= $i ?>][text]" value="<?= htmlspecialchars($item['text'] ?? '', ENT_QUOTES) ?>"></div>
+                            <?php endif; ?>
+                            <div class="form-field"><label>Ссылка</label><input type="text" name="items[<?= $i ?>][url]" value="<?= htmlspecialchars($item['url'] ?? '', ENT_QUOTES) ?>"></div>
+                            <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <template data-repeater-template="items">
+                    <?php if ($type === 'cards_grid'): ?>
+                        <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
+                        <?= \App\Core\AdminUi::imageField('items[__INDEX__][image]', '', ['label' => 'Изображение для варианта с фото']) ?>
+                    <?php else: ?>
+                        <?= \App\Core\AdminUi::imageField('items[__INDEX__][image]', '', ['label' => 'Превью / фотография']) ?>
+                    <?php endif; ?>
+                    <div class="form-field"><label>Заголовок</label><input type="text" name="items[__INDEX__][title]"></div>
+                    <?php if ($type === 'cards_grid'): ?>
+                        <div class="form-field"><label>Текст</label><textarea name="items[__INDEX__][text]"></textarea></div>
+                    <?php elseif ($type === 'media_gallery'): ?>
+                        <div class="form-field"><label>Тип</label><select name="items[__INDEX__][kind]"><option value="video">Видео</option><option value="photo">Фото</option></select></div>
+                        <div class="form-field"><label>Длительность</label><input type="text" name="items[__INDEX__][meta]"></div>
+                        <div class="form-field"><label>Дата</label><input type="text" name="items[__INDEX__][text]"></div>
+                    <?php endif; ?>
+                    <div class="form-field"><label>Ссылка</label><input type="text" name="items[__INDEX__][url]"></div>
+                    <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
+                </template>
+                <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить</button></div>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($type === 'person_cards'): ?>
+            <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все руководство"></div>
+            <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
+            <div>
+                <label>Персоны (без фото и имени — карточка «Вакантно»)</label>
+                <div data-repeater="items">
+                    <?php foreach (($data['items'] ?? []) as $i => $item): ?>
+                        <div class="repeater-row">
+                            <div class="form-field"><label>Фото (URL)</label><input type="text" name="items[<?= $i ?>][photo]" value="<?= htmlspecialchars($item['photo'] ?? '', ENT_QUOTES) ?>" placeholder="/uploads/public/..."></div>
+                            <div class="form-field"><label>Имя</label><input type="text" name="items[<?= $i ?>][name]" value="<?= htmlspecialchars($item['name'] ?? '', ENT_QUOTES) ?>"></div>
+                            <div class="form-field"><label>Должность</label><input type="text" name="items[<?= $i ?>][role]" value="<?= htmlspecialchars($item['role'] ?? '', ENT_QUOTES) ?>"></div>
+                            <div class="form-field"><label>Ссылка «Подробнее»</label><input type="text" name="items[<?= $i ?>][url]" value="<?= htmlspecialchars($item['url'] ?? '', ENT_QUOTES) ?>"></div>
+                            <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <template data-repeater-template="items">
+                    <div class="form-field"><label>Фото (URL)</label><input type="text" name="items[__INDEX__][photo]" placeholder="/uploads/public/..."></div>
+                    <div class="form-field"><label>Имя</label><input type="text" name="items[__INDEX__][name]"></div>
+                    <div class="form-field"><label>Должность</label><input type="text" name="items[__INDEX__][role]"></div>
+                    <div class="form-field"><label>Ссылка «Подробнее»</label><input type="text" name="items[__INDEX__][url]"></div>
+                    <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
+                </template>
+                <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить персону</button></div>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($type === 'timeline'): ?>
+            <?php
+            $timelineItems = is_array($data['items'] ?? null) ? $data['items'] : [];
+            $timelineHasStatuses = false;
+            foreach ($timelineItems as $timelineItem) {
+                if (in_array($timelineItem['status'] ?? '', ['done', 'active', 'planned'], true)) {
+                    $timelineHasStatuses = true;
+                    break;
+                }
+            }
+            $timelineLastIndex = count($timelineItems) - 1;
+            ?>
+            <div>
+                <label>События (год + описание + статус)</label>
+                <div data-repeater="items">
+                    <?php foreach ($timelineItems as $i => $item): ?>
+                        <?php
+                        $timelineStatus = in_array($item['status'] ?? '', ['done', 'active', 'planned'], true)
+                            ? (string) $item['status']
+                            : (!$timelineHasStatuses ? ($i === $timelineLastIndex ? 'active' : 'done') : 'planned');
+                        ?>
+                        <div class="repeater-row">
+                            <div class="form-field"><label>Год</label><input type="text" name="items[<?= $i ?>][year]" value="<?= htmlspecialchars($item['year'] ?? '', ENT_QUOTES) ?>" placeholder="2023+"></div>
+                            <div class="form-field"><label>Текст</label><textarea name="items[<?= $i ?>][text]"><?= htmlspecialchars($item['text'] ?? '', ENT_QUOTES) ?></textarea></div>
+                            <div class="form-field"><label>Статус</label><select name="items[<?= $i ?>][status]">
+                                <?php foreach (['done' => 'Завершён', 'active' => 'В процессе', 'planned' => 'Запланирован'] as $statusValue => $statusLabel): ?>
+                                    <option value="<?= $statusValue ?>" <?= $timelineStatus === $statusValue ? 'selected' : '' ?>><?= $statusLabel ?></option>
+                                <?php endforeach; ?>
+                            </select></div>
+                            <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <template data-repeater-template="items">
+                    <div class="form-field"><label>Год</label><input type="text" name="items[__INDEX__][year]"></div>
+                    <div class="form-field"><label>Текст</label><textarea name="items[__INDEX__][text]"></textarea></div>
+                    <div class="form-field"><label>Статус</label><select name="items[__INDEX__][status]"><option value="done">Завершён</option><option value="active">В процессе</option><option value="planned" selected>Запланирован</option></select></div>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить событие</button></div>
