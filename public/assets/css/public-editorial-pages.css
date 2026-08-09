@@ -146,6 +146,17 @@
     max-width: none;
 }
 
+/* Internal institutional pages prioritize immediate readability over the
+   generic card stagger used on marketing-like blocks. Without this override a
+   tall timeline or document grid can remain visually blank until the observer
+   threshold is met. */
+.editorial-page .anim-card,
+.editorial-page .anim-card.is-inview {
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+
 /* Intro: the first text block behaves as an editorial lead, not a card. */
 .editorial-page__content > .cms-block:first-child.cms-block--text {
     padding-top: clamp(54px, 6vw, 82px);
