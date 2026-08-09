@@ -6,15 +6,16 @@ $allUrl = trim((string) ($data['all_url'] ?? ''));
 $items = $data['items'] ?? [];
 
 // Разделяем на видео/фото для переключателей.
-$hasVideo = false;
-$hasPhoto = false;
+$videoCount = 0;
+$photoCount = 0;
 foreach ($items as $it) {
-    if (($it['kind'] ?? 'video') === 'photo') { $hasPhoto = true; } else { $hasVideo = true; }
+    if (($it['kind'] ?? 'video') === 'photo') { $photoCount++; } else { $videoCount++; }
 }
+$hasVideo = $videoCount > 0;
+$hasPhoto = $photoCount > 0;
 $showTabs = $hasVideo && $hasPhoto;
-// Сетка подстраивается под число материалов — иначе два ролика
-// занимали половину ряда.
-$templateCss = \App\Core\GridBalance::css($blockId, '.mediagallery-grid', '.mediacard', count(is_array($items) ? $items : []), 4);
+$initialCount = $hasVideo ? $videoCount : $photoCount;
+$initialColumns = max(1, min(4, $initialCount));
 ?>
 <div class="block-mediagallery" data-media-gallery>
     <div class="section-head">
@@ -30,7 +31,7 @@ $templateCss = \App\Core\GridBalance::css($blockId, '.mediagallery-grid', '.medi
     <?php if (empty($items)): ?>
         <p class="block-mediagallery__empty"><?= htmlspecialchars(t('Материалы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
-        <div class="mediagallery-grid">
+        <div class="mediagallery-grid mediagallery-grid--cols-<?= $initialColumns ?>" data-media-grid>
             <?php foreach ($items as $item): ?>
                 <?php
                 $url = trim((string) ($item['url'] ?? ''));

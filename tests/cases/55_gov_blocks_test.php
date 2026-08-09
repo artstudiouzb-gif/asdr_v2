@@ -117,8 +117,27 @@ test('Блок media_gallery: переключатели видео/фото п�
     assert_contains('media-tabs', $out);
     assert_contains('data-media-kind="video"', $out);
     assert_contains('data-media-kind="photo"', $out);
+    assert_contains('data-media-grid', $out);
+    assert_contains('mediagallery-grid--cols-1', $out);
 
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
     assert_contains('.media-tabs__tab::after', $css);
     assert_contains('.media-tabs__tab.is-active::after', $css);
+    assert_contains('.mediagallery-grid--cols-3 { --media-columns: 3; }', $css);
+
+    $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js');
+    assert_contains("grid.classList.add('mediagallery-grid--cols-'", $js);
+});
+
+test('Блок media_gallery: фото образуют равномерную сетку без растянутых карточек', function () {
+    $rendered = \App\Core\BlockRenderer::render(['id' => 32, 'type' => 'media_gallery', 'custom_css' => null, 'data' => json_encode([
+        'title' => 'Фото', 'items' => [
+            ['image' => '/a.jpg', 'title' => 'Фото 1', 'kind' => 'photo'],
+            ['image' => '/b.jpg', 'title' => 'Фото 2', 'kind' => 'photo'],
+            ['image' => '/c.jpg', 'title' => 'Фото 3', 'kind' => 'photo'],
+        ],
+    ])]);
+
+    assert_contains('mediagallery-grid--cols-3', (string) ($rendered['html'] ?? ''));
+    assert_not_contains('nth-last-child', (string) ($rendered['css'] ?? ''));
 });

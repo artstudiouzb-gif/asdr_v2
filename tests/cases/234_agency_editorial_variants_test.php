@@ -65,6 +65,9 @@ test('Страница директора использует читаемую 
     assert_contains('bio-career__title', $template);
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');
     assert_contains('bio-career__item:last-child', $css);
+    assert_contains('background: transparent;', $css);
+    assert_contains(':root[data-theme="dark"] .editorial-page__content .bio-career__item::before', $css);
+    assert_contains('border-color: color-mix(in srgb, var(--gov-teal) 72%, #fff);', $css);
     assert_contains('left: -1px', $css, 'маркеры карьеры должны быть центрированы по линии');
     assert_contains('box-sizing: border-box', $css, 'граница должна входить в размер маркера');
 });

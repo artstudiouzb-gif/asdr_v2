@@ -782,8 +782,18 @@
         var tabs = gallery.querySelectorAll('[data-media-tab]');
         if (!tabs.length) { return; }
         var cards = gallery.querySelectorAll('[data-media-kind]');
+        var grid = gallery.querySelector('[data-media-grid]');
         var apply = function (kind) {
-            cards.forEach(function (c) { c.hidden = c.getAttribute('data-media-kind') !== kind; });
+            var visibleCount = 0;
+            cards.forEach(function (c) {
+                var visible = c.getAttribute('data-media-kind') === kind;
+                c.hidden = !visible;
+                if (visible) { visibleCount += 1; }
+            });
+            if (grid) {
+                grid.classList.remove('mediagallery-grid--cols-1', 'mediagallery-grid--cols-2', 'mediagallery-grid--cols-3', 'mediagallery-grid--cols-4');
+                grid.classList.add('mediagallery-grid--cols-' + Math.max(1, Math.min(4, visibleCount)));
+            }
             tabs.forEach(function (t) {
                 var on = t.getAttribute('data-media-tab') === kind;
                 t.classList.toggle('is-active', on);

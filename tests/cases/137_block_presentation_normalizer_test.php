@@ -9,6 +9,7 @@ test('Block presentation normalizer: формирует прежние знач�
         '_spacing' => 'premium',
         '_reveal' => ['enabled' => false, 'type' => 'fade'],
         '_bg' => 'none',
+        '_surface' => 'flat',
         '_fullwidth' => false,
         '_pad_top' => 'default',
         '_pad_bottom' => 'default',
@@ -23,6 +24,7 @@ test('Block presentation normalizer: сохраняет допустимые н�
         '_spacing' => 'max',
         '_reveal' => ['enabled' => true, 'type' => 'slide-up'],
         '_bg' => 'navy',
+        '_surface' => 'card',
         '_fullwidth' => true,
         '_pad_top' => 'none',
         '_pad_bottom' => 'large',
@@ -33,6 +35,7 @@ test('Block presentation normalizer: сохраняет допустимые н�
         'spacing' => 'max',
         'reveal_type' => 'slide-up',
         'bg' => 'navy',
+        'surface' => 'card',
         'fullwidth' => '1',
         'pad_top' => 'none',
         'pad_bottom' => 'large',
@@ -48,6 +51,7 @@ test('Block presentation normalizer: ограничивает неизвестн
         'spacing' => 'huge',
         'reveal_type' => 'spin',
         'bg' => 'script',
+        'surface' => 'floating',
         'fullwidth' => '0',
         'pad_top' => 'giant',
         'pad_bottom' => [],
@@ -59,6 +63,7 @@ test('Block presentation normalizer: ограничивает неизвестн
     assert_same('premium', $data['_spacing']);
     assert_same(['enabled' => false, 'type' => 'fade'], $data['_reveal']);
     assert_same('none', $data['_bg']);
+    assert_same('flat', $data['_surface']);
     assert_false($data['_fullwidth']);
     assert_same('default', $data['_pad_top']);
     assert_same('default', $data['_pad_bottom']);
@@ -71,6 +76,24 @@ test('Block presentation normalizer: поддерживает каскад ка�
     $data = BlockPresentationNormalizer::normalize(['reveal_type' => 'stagger']);
 
     assert_same(['enabled' => true, 'type' => 'stagger'], $data['_reveal']);
+});
+
+test('Block renderer: добавляет карточный контейнер только по настройке секции', function (): void {
+    $card = \App\Core\BlockRenderer::render([
+        'id' => 9137,
+        'type' => 'person_profile',
+        'custom_css' => '',
+        'data' => json_encode(['name' => 'Директор', '_surface' => 'card']),
+    ]);
+    $flat = \App\Core\BlockRenderer::render([
+        'id' => 9138,
+        'type' => 'person_profile',
+        'custom_css' => '',
+        'data' => json_encode(['name' => 'Директор', '_surface' => 'flat']),
+    ]);
+
+    assert_contains('cms-block--surface-card', (string) ($card['html'] ?? ''));
+    assert_not_contains('cms-block--surface-card', (string) ($flat['html'] ?? ''));
 });
 
 test('Block presentation normalizer: обнаруживает перевёрнутое окно показа', function (): void {
@@ -96,4 +119,8 @@ test('Контроллер делегирует общие настройки Bl
     assert_contains('BlockPresentationNormalizer::hasInvalidVisibilityWindow($data)', $controller);
     assert_not_contains('$allowedReveal =', $controller);
     assert_not_contains('$padOptions =', $controller);
+
+    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
+    assert_contains('name="surface"', $form);
+    assert_contains('Карточка с фоном', $form);
 });

@@ -21,6 +21,9 @@ final class BlockPresentationNormalizer
     private const BACKGROUNDS = ['none', 'light', 'tint', 'navy'];
 
     /** @var list<string> */
+    private const SURFACES = ['flat', 'card'];
+
+    /** @var list<string> */
     private const PADDINGS = ['default', 'none', 'small', 'medium', 'large'];
 
     /**
@@ -32,6 +35,7 @@ final class BlockPresentationNormalizer
         $spacing = self::scalarString($input['spacing'] ?? null, 'premium');
         $revealType = self::scalarString($input['reveal_type'] ?? null);
         $background = self::scalarString($input['bg'] ?? null, 'none');
+        $surface = self::scalarString($input['surface'] ?? null, 'flat');
         $padTop = self::scalarString($input['pad_top'] ?? null, 'default');
         $padBottom = self::scalarString($input['pad_bottom'] ?? null, 'default');
         $device = self::scalarString($input['visible_device'] ?? null);
@@ -42,6 +46,7 @@ final class BlockPresentationNormalizer
                 ? ['enabled' => true, 'type' => $revealType]
                 : ['enabled' => false, 'type' => 'fade'],
             '_bg' => in_array($background, self::BACKGROUNDS, true) ? $background : 'none',
+            '_surface' => in_array($surface, self::SURFACES, true) ? $surface : 'flat',
             '_fullwidth' => !empty($input['fullwidth']),
             '_pad_top' => in_array($padTop, self::PADDINGS, true) ? $padTop : 'default',
             '_pad_bottom' => in_array($padBottom, self::PADDINGS, true) ? $padBottom : 'default',

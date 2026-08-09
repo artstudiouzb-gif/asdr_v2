@@ -1346,10 +1346,12 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php
         // Фон секции + полноширинная подложка + независимые отступы сверху/снизу.
         $bg = $data['_bg'] ?? 'none';
+        $surface = $data['_surface'] ?? 'flat';
         $fullwidth = !empty($data['_fullwidth']);
         $padTop = $data['_pad_top'] ?? 'default';
         $padBottom = $data['_pad_bottom'] ?? 'default';
         $bgOpts = ['none' => 'Нет', 'light' => 'Светлый', 'tint' => 'Лёгкий акцент', 'navy' => 'Тёмный (navy)'];
+        $surfaceOpts = ['flat' => 'Без карточки (прозрачный)', 'card' => 'Карточка с фоном'];
         $padOpts = ['default' => 'По умолчанию', 'none' => 'Нет', 'small' => 'Малый', 'medium' => 'Средний', 'large' => 'Большой'];
         ?>
         <div class="form-field">
@@ -1357,6 +1359,13 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <select id="bg" name="bg">
                 <?php foreach ($bgOpts as $v => $l): ?><option value="<?= $v ?>" <?= $bg === $v ? 'selected' : '' ?>><?= $l ?></option><?php endforeach; ?>
             </select>
+        </div>
+        <div class="form-field">
+            <label for="surface">Тип контейнера секции</label>
+            <select id="surface" name="surface">
+                <?php foreach ($surfaceOpts as $v => $l): ?><option value="<?= $v ?>" <?= $surface === $v ? 'selected' : '' ?>><?= $l ?></option><?php endforeach; ?>
+            </select>
+            <span class="form-hint">Карточка добавляет локальный фон, рамку и внутренние поля; фон всей секции настраивается отдельно выше.</span>
         </div>
         <div class="form-field form-field--checkbox">
             <input type="checkbox" id="fullwidth" name="fullwidth" value="1" <?= $fullwidth ? 'checked' : '' ?>>

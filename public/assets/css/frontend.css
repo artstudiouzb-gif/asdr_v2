@@ -216,7 +216,8 @@ summary:focus-visible {
    нижний отступ одного блока и верхний следующего давали между секциями
    почти 160px пустоты. Блоки с фоном (cms-block--bg) сохраняют свои поля —
    иначе цветная подложка липнет к тексту. */
-.cms-block:not(.cms-block--bg) + .cms-block:not(.cms-block--bg) { padding-top: 0; }
+.cms-block:not(.cms-block--bg):not(.cms-block--surface-card)
+    + .cms-block:not(.cms-block--bg):not(.cms-block--surface-card) { padding-top: 0; }
 /* Условия показа по устройству. Порог 768px совпадает с основным мобильным
    брейкпоинтом темы; ограничение решается стилями, потому что кэш страницы
    общий для всех посетителей. */

@@ -109,8 +109,16 @@
     padding-inline: 0;
 }
 
-.editorial-page__content .cms-block:not(.cms-block--bg):not(.cms-block--fullwidth) {
+.editorial-page__content .cms-block:not(.cms-block--bg):not(.cms-block--fullwidth):not(.cms-block--surface-card) {
     background: transparent;
+}
+
+.editorial-page__content > .cms-block--surface-card {
+    padding-inline: clamp(22px, 4vw, 52px);
+    border: 1px solid var(--editorial-line);
+    border-radius: var(--page-card-radius);
+    background: var(--gov-surface);
+    box-shadow: var(--page-soft-shadow);
 }
 
 .editorial-page__content .block-text,
@@ -1184,10 +1192,10 @@
 }
 
 .editorial-page__content .bio-career__item:last-child {
-    margin-top: 10px;
+    margin-top: 0;
     border-bottom: 0;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--gov-teal) 7%, var(--gov-surface));
+    border-radius: 0;
+    background: transparent;
 }
 
 .editorial-page__content .bio-career__item:last-child::before {
@@ -1199,6 +1207,22 @@
 .editorial-page__content .bio-career__item:last-child .bio-career__text {
     color: var(--gov-title);
     font-weight: 700;
+}
+
+:root[data-theme="dark"] .editorial-page__content .bio-career::before {
+    background: color-mix(in srgb, #fff 30%, transparent);
+}
+
+:root[data-theme="dark"] .editorial-page__content .bio-career__item::before {
+    background: var(--gov-bg);
+    border-color: color-mix(in srgb, var(--gov-teal) 72%, #fff);
+    box-shadow: 0 0 0 2px color-mix(in srgb, #fff 24%, transparent);
+}
+
+:root[data-theme="dark"] .editorial-page__content .bio-career__item:last-child::before {
+    background: var(--gov-teal);
+    border-color: #fff;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--gov-teal) 38%, transparent);
 }
 
 .editorial-page__content .bio-edu {
