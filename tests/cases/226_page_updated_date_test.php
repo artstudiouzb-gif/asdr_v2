@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Core\DateFormatter;
 
-// Дата последнего обновления страницы — обязательный реквизит сайта госоргана.
-// Проверяем формат по языкам, наличие перевода и условия вывода во вью.
+// Форматирование дат остаётся доступно другим публичным компонентам, но
+// служебная строка последнего обновления больше не выводится под страницей.
 
 test('Дата обновления: длинный формат на всех языках публички', function () {
     assert_same('8 августа 2026 г.', DateFormatter::long('2026-08-08 11:20:00', 'ru'));
@@ -23,11 +23,9 @@ test('Дата обновления: строка переведена на уз
     }
 });
 
-test('Дата обновления: не выводится на главной, лендинге и при пустой дате', function () {
+test('Служебная дата обновления не выводится в публичном шаблоне страницы', function () {
     $view = (string) file_get_contents(APP_ROOT . '/app/Views/site/page.php');
-    assert_contains('page-updated', $view);
-    // Условие вывода: не главная, не лендинг (hide_chrome) и дата разбирается.
-    assert_contains('!$isHome && !$hideChrome && $updatedTs !== false', $view);
-    // Машиночитаемая дата в <time datetime> — для поисковиков и оценки сайта.
-    assert_contains('<time datetime=', $view);
+    assert_not_contains('page-updated', $view);
+    assert_not_contains("Lang::t('Обновлено')", $view);
+    assert_not_contains("\$page['updated_at']", $view);
 });

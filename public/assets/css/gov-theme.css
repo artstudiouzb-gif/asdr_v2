@@ -2982,15 +2982,6 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
    в ch обрывала строку раньше абзаца под ней и выглядела случайной. */
 .block-text__title { max-width: none; }
 .content-pagehead__inner { max-width: var(--container-max); margin: 0 auto; }
-/* Дата обновления страницы: служебная строка внизу контента, тем же
-   контейнером, что и остальной текст. */
-.page-updated { padding: 4px 0 clamp(18px, 2.4vw, 30px); }
-.page-updated__inner {
-    max-width: var(--container-max);
-    margin: 0 auto;
-    color: var(--gov-muted);
-    font-size: .9rem;
-}
 .content-pagehead__title { font-size: clamp(1.9rem, 3.4vw, 2.6rem); margin: 0 0 10px; color: var(--gov-title); }
 .content-pagehead__lead { color: var(--gov-muted); font-size: 1.05rem; line-height: 1.6; margin: 0; }
 
