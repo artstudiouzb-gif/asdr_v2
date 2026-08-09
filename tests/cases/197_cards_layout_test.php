@@ -39,6 +39,19 @@ test('Карточки новостей: ровные интервалы вме�
     assert_contains('-webkit-line-clamp: 3;', $css);
 });
 
+test('Карточки с фото: изображение не окружено внутренней рамкой', function () {
+    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+
+    assert_true(
+        (bool) preg_match('/\.relnews-card\s*\{[^}]*padding:\s*0 0 14px;[^}]*overflow:\s*hidden;/s', $css),
+        'фото похожей новости должно начинаться от внешнего контура карточки'
+    );
+    assert_contains('.relnews-card__media { border-radius: 0; }', $css);
+    assert_contains('.album-card__body { padding: 14px; }', $css);
+    assert_contains('.catcard--with-image { padding: 0 24px 24px; }', $css);
+    assert_contains('margin-inline: -24px;', $css);
+});
+
 test('Карточки: материал без изображения получает фирменную подложку', function () {
     $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
 
