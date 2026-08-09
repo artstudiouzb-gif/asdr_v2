@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Core\BlockTypeRegistry;
+use App\Controllers\Admin\BlockController;
 
 test('Редакционные варианты страницы Агентства являются настройками системных блоков', function (): void {
     $defaults = BlockTypeRegistry::DEFAULTS;
@@ -16,10 +17,35 @@ test('Редакционные варианты страницы Агентст�
     assert_true(array_key_exists('media_youtube', $defaults['text']));
     assert_true(array_key_exists('variant', $defaults['stages']));
     assert_true(array_key_exists('career_title', $defaults['bio_education']));
+    assert_true(array_key_exists('widgets_before', $defaults['bio_education']));
+    assert_true(array_key_exists('widgets_after', $defaults['bio_education']));
 
     $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
     foreach (['intro', 'system', 'spotlight', 'indexed', 'history', 'acts-editorial', 'media_image', 'media_video', 'media_youtube'] as $variant) {
         assert_contains($variant, $form, "вариант {$variant} недоступен в редакторе");
+    }
+    assert_contains("['key' => 'widgets_before'", $form);
+    assert_contains("['key' => 'widgets_after'", $form);
+    assert_contains('name="<?= htmlspecialchars($slotKey, ENT_QUOTES) ?>[', $form);
+    assert_contains('data-repeater-move="up"', $form);
+});
+
+test('Редактор bio_education сохраняет порядок виджетов и удаляет дубли между слотами', function (): void {
+    $oldPost = $_POST;
+    $_POST = [
+        'bio_title' => 'Биография',
+        'widgets_before' => ['7', '0', ['bad'], '7', '8'],
+        'widgets_after' => ['8', '9', '9', '-2'],
+    ];
+
+    try {
+        $method = new ReflectionMethod(BlockController::class, 'collectData');
+        $method->setAccessible(true);
+        $data = $method->invoke(new BlockController(), 'bio_education', 'ru');
+        assert_same([7, 8], $data['widgets_before']);
+        assert_same([9], $data['widgets_after']);
+    } finally {
+        $_POST = $oldPost;
     }
 });
 
