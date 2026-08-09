@@ -1146,36 +1146,12 @@
         if (img) { img.src = '/captcha.png?ts=' + Date.now(); }
     });
 
-    // Сворачивание/разворачивание формы поиска при клике на иконку
-    (function () {
-        var searchForms = document.querySelectorAll('.site-search');
-        searchForms.forEach(function (form) {
-            var input = form.querySelector('input[type="search"]');
-            var button = form.querySelector('button[type="submit"]');
-            if (!input || !button) { return; }
-            
-            button.addEventListener('click', function (e) {
-                if (!form.classList.contains('is-active')) {
-                    e.preventDefault();
-                    form.classList.add('is-active');
-                    input.focus();
-                } else {
-                    if (input.value.trim() === '') {
-                        e.preventDefault();
-                        form.classList.remove('is-active');
-                    }
-                }
-            });
-            
-            document.addEventListener('click', function (e) {
-                if (!form.contains(e.target)) {
-                    if (input.value.trim() === '') {
-                        form.classList.remove('is-active');
-                    }
-                }
-            });
-        });
-    })();
+    // Раскрытием формы поиска заведует [data-search-toggle] выше: он ставит
+    // `is-expanded` на обёртку и `is-open` на форму. Прежний механизм на классе
+    // `is-active` отсюда убран — он отменял отправку. Enter (и кнопка «поиск»
+    // на экранной клавиатуре) шлёт клик по submit-кнопке, а тот обработчик
+    // звал preventDefault, пока не увидит `is-active`, которого новый механизм
+    // не ставит: поле было открыто, а поиск не запускался.
 
     // Лайтбокс: фото (альбомы, медиагалерея, фотолента новости)
     // и видео YouTube (карточки на главной/страницах, «Смотреть видео» в новостях).

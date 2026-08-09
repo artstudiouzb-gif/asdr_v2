@@ -13,6 +13,42 @@ test('public home renders without horizontal overflow', async ({ page }) => {
     expect(overflow.content).toBeLessThanOrEqual(overflow.viewport + 15);
 });
 
+test('поиск в шапке отправляется с клавиатуры и с первого нажатия кнопки', async ({ page }) => {
+    await page.goto('/');
+    const toggle = page.locator('[data-search-toggle]').first();
+    test.skip(!(await toggle.isVisible()), 'в этой сборке шапки нет поля поиска');
+
+    // Раскрытие ставит `is-open`/`is-expanded`. Прежний обработчик ждал класса
+    // `is-active`, которого никто не ставил, и отменял отправку: поле было
+    // открыто, а Enter (он же кнопка «поиск» на экранной клавиатуре) молчал.
+    await toggle.click();
+    const input = page.locator('.site-search input[type="search"]').first();
+    await expect(input).toBeVisible();
+
+    await input.fill('Sardor');
+    await input.press('Enter');
+    await expect(page).toHaveURL(/[?&]q=Sardor/);
+
+    // Кнопка отправки обязана срабатывать сразу, а не со второго нажатия.
+    await page.goto('/');
+    await toggle.click();
+    await input.fill('Sardor');
+    await page.locator('.site-search__submit').first().click();
+    await expect(page).toHaveURL(/[?&]q=Sardor/);
+});
+
+test('пустой запрос из шапки не уводит со страницы', async ({ page }) => {
+    await page.goto('/');
+    const toggle = page.locator('[data-search-toggle]').first();
+    test.skip(!(await toggle.isVisible()), 'в этой сборке шапки нет поля поиска');
+
+    await toggle.click();
+    const before = page.url();
+    await page.locator('.site-search input[type="search"]').first().press('Enter');
+    await page.waitForTimeout(500);
+    expect(page.url()).toBe(before);
+});
+
 test('quick search traps keyboard focus and restores the trigger', async ({ page }) => {
     const response = await page.goto('/');
     expect(response).not.toBeNull();
