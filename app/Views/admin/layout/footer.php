@@ -69,9 +69,12 @@ $isCardsGridEditor = isset($block)
     && (string) ($block['type'] ?? '') === 'cards_grid'
     && isset($data)
     && is_array($data);
-$cardsGridEditorStyle = $isCardsGridEditor && in_array($data['_cards_style'] ?? 'old', ['old', 'new'], true)
-    ? (string) $data['_cards_style']
+$cardsGridEditorStyle = $isCardsGridEditor
+    ? (string) ($data['_cards_style'] ?? 'old')
     : 'old';
+if (!in_array($cardsGridEditorStyle, ['old', 'new'], true)) {
+    $cardsGridEditorStyle = 'old';
+}
 $cardsGridEditorIconSize = $isCardsGridEditor
     ? max(16, min(64, (int) ($data['_cards_icon_size'] ?? 22)))
     : 22;

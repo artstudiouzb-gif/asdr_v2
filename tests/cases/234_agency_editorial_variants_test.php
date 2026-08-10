@@ -97,6 +97,12 @@ test('Преимущества, этапы и таймлайн имеют соб
     }
 });
 
+test('Старый cards_grid без служебного ключа открывается в админке', function (): void {
+    $footer = (string) file_get_contents(APP_ROOT . '/app/Views/admin/layout/footer.php');
+    assert_contains("(string) (\$data['_cards_style'] ?? 'old')", $footer);
+    assert_not_contains("(string) \$data['_cards_style']", $footer);
+});
+
 test('Заголовки редакционных разделов используют единый акцентный маркер', function (): void {
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');
     foreach (['block-text__title', 'block-advantages__title', 'section-head__title', 'block-timeline__title'] as $selector) {
