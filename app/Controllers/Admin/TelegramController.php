@@ -8,6 +8,7 @@ use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\Flash;
 use App\Core\FormNotifier;
+use App\Core\Session;
 use App\Core\SocialPublisher;
 use App\Core\SocialSettings;
 use App\Core\TelegramBot;
@@ -28,9 +29,20 @@ use App\Models\User;
  */
 final class TelegramController
 {
+    private const DETECTED_CHANNELS_SESSION_KEY = 'telegram_detected_channels';
+
     public function index(): void
     {
         Auth::requireSuperAdmin();
+
+        // Результат определения нужен только для следующего показа формы:
+        // ID подставляется в поле, но не сохраняется без явного подтверждения.
+        Session::start();
+        $detectedChannels = $_SESSION[self::DETECTED_CHANNELS_SESSION_KEY] ?? [];
+        unset($_SESSION[self::DETECTED_CHANNELS_SESSION_KEY]);
+        if (!is_array($detectedChannels)) {
+            $detectedChannels = [];
+        }
 
         $botConfigured = trim((string) Setting::get('telegram_bot_token', '')) !== '';
         $botUsername = trim((string) Setting::get('telegram_bot_username', ''));
@@ -51,6 +63,7 @@ final class TelegramController
                 ? TelegramLink::code()
                 : null,
             'channel' => SocialSettings::configFor('telegram'),
+            'detectedChannels' => $detectedChannels,
             'channelOwnTokenConfigured' => trim((string) Setting::get('social_telegram_token', '')) !== '',
             'channelEnabled' => SocialSettings::isEnabled('telegram'),
             'notifyChatIds' => (string) Setting::get('telegram_notify_chat_ids', ''),
@@ -182,10 +195,21 @@ final class TelegramController
             exit;
         }
 
-        foreach ($channels as $chat) {
-            Flash::success('Найден канал «' . $chat['title'] . '» — ID: ' . $chat['id']);
+        Session::start();
+        $_SESSION[self::DETECTED_CHANNELS_SESSION_KEY] = $channels;
+
+        if (count($channels) === 1) {
+            $chat = $channels[0];
+            Flash::success(
+                'Найден канал «' . $chat['title'] . '» — ID ' . $chat['id']
+                . ' автоматически вставлен в поле «Канал». Проверьте и нажмите «Сохранить канал».'
+            );
+        } else {
+            foreach ($channels as $chat) {
+                Flash::success('Найден канал «' . $chat['title'] . '» — ID: ' . $chat['id']);
+            }
+            Flash::success('Найдено несколько каналов. Выберите нужный под полем «Канал».');
         }
-        Flash::success('Скопируйте нужный ID в поле «Канал» и сохраните.');
         header('Location: /admin/telegram#telegram-channel');
         exit;
     }
