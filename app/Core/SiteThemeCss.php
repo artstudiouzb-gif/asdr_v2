@@ -32,6 +32,17 @@ final class SiteThemeCss
             '--gov-teal' => 'var(--color-accent)',
             '--gov-teal-text' => AccentContrast::onLight($accent, $colors['bg_surface']),
             '--gov-teal-on-dark' => AccentContrast::onDark($accent),
+            // Текст на подложке, подмешанной из самого акцента (плашки тегов,
+            // номера тезисов, бейджи опроса). Такая подложка темнее и
+            // «акцентнее» поверхности, поэтому --gov-teal-text на ней не
+            // добирает до 4.5:1: axe ловил 2.71–4.41. Считаем отдельный
+            // вариант ровно от того фона, на котором текст и лежит.
+            // Для тёмной темы отдельный расчёт не нужен: там подложка светлее
+            // фона, и подходит уже готовый --gov-teal-on-dark.
+            '--gov-teal-tint-light' => AccentContrast::onLight(
+                $accent,
+                self::mixHex($accent, $colors['bg_surface'], 0.13)
+            ),
             // Текст поверх заливки акцентом: белый читается не на всяком
             // акценте, поэтому цвет выбирается по контрасту, а не на глаз.
             '--on-accent' => AccentContrast::onFill($accent),
@@ -237,6 +248,24 @@ final class SiteThemeCss
         $heading = self::fontValue($heading !== '' ? $heading : $body, self::DEFAULT_HEADING_FONT);
 
         return ['body' => $body, 'heading' => $heading];
+    }
+
+    /**
+     * Смешивает два цвета в sRGB — то же, что делает color-mix() в CSS.
+     * Нужен, чтобы посчитать контраст относительно фактической подложки,
+     * а не относительно поверхности под ней.
+     */
+    private static function mixHex(string $top, string $bottom, float $share): string
+    {
+        $share = max(0.0, min(1.0, $share));
+        [$tr, $tg, $tb] = AccentContrast::toRgb($top);
+        [$br, $bg, $bb] = AccentContrast::toRgb($bottom);
+
+        return AccentContrast::toHex([
+            (int) round($tr * $share + $br * (1 - $share)),
+            (int) round($tg * $share + $bg * (1 - $share)),
+            (int) round($tb * $share + $bb * (1 - $share)),
+        ]);
     }
 
     private static function fontValue(string $value, string $fallback): string

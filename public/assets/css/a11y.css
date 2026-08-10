@@ -191,6 +191,26 @@ html[data-a11y-images="off"] .repo-main * {
 }
 
 /* ===== Анимации ===== */
+/* ===== Системная настройка «уменьшить движение» =====
+   Тумблер в панели ниже сбрасывает движение целиком, а системная настройка
+   до этого гасила только появление карточек ([data-reveal], .anim-card).
+   Посетитель, попросивший ОС убрать анимации, всё равно получал подъёмы
+   карточек, сдвиги кнопок и плавные подчёркивания.
+
+   Длительность 0.01ms, а не none: события transitionend/animationend
+   продолжают приходить, если на них когда-нибудь повесят обработчик.
+   Сейчас таких нет, но правило переживёт появление первого. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 html[data-a11y-motion="off"] *,
 html[data-a11y-motion="off"] *::before,
 html[data-a11y-motion="off"] *::after {

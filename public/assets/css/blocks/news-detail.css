@@ -58,7 +58,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero { pad
 .newsdetail-tag {
     display: inline-flex; align-items: center; padding: 6px 14px; border-radius: var(--radius, 20px);
     background: color-mix(in srgb, var(--gov-teal, #0d9488) 10%, transparent);
-    color: var(--gov-teal, #0d9488); font-size: 0.875rem; font-weight: 600;
+    color: var(--gov-teal-on-tint, #00697d); font-size: 0.875rem; font-weight: 600;
     text-decoration: none; transition: all 0.2s ease;
 }
 .newsdetail-tag:hover {
@@ -307,7 +307,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .newsdetail-toc__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
 .newsdetail-toc__list a { display: flex; gap: 10px; align-items: baseline; color: var(--gov-ink); text-decoration: none; font-size: .9rem; line-height: 1.35; }
 .newsdetail-toc__list a:hover { color: var(--gov-teal-text); }
-.newsdetail-toc__num { color: var(--gov-teal-text); font-weight: 700; font-size: .8rem; }
+.newsdetail-toc__num { color: var(--gov-teal-on-tint, #00697d); font-weight: 700; font-size: .8rem; }
 .relnews-card__excerpt { color: var(--gov-muted); font-size: .86rem; line-height: 1.5; }
 /* Премиум-hero новости — полноширинный тёмный экран; прижимаем к шапке,
    убирая верхний отступ контента (иначе светлая полоса-зазор). */
@@ -797,7 +797,7 @@ button.newsdetail-gallery__thumb:hover {
     height: 32px;
     border-radius: var(--radius-sm, 8px);
     background: color-mix(in srgb, var(--gov-teal) 13%, var(--gov-surface));
-    color: var(--gov-teal-text);
+    color: var(--gov-teal-on-tint, #00697d);
     font-size: .74rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;

@@ -57,7 +57,10 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
         case 'about':
             $h = '';
             if ($footerLogo !== '') {
-                $h .= '<img class="site-footer__logo" src="' . htmlspecialchars($footerLogo, ENT_QUOTES) . '" alt="' . htmlspecialchars($siteName, ENT_QUOTES) . '">';
+                $footerLogoSize = \App\Core\Media::dimensions($footerLogo);
+                $h .= '<img class="site-footer__logo" src="' . htmlspecialchars($footerLogo, ENT_QUOTES) . '"'
+                    . ($footerLogoSize === null ? '' : ' width="' . $footerLogoSize[0] . '" height="' . $footerLogoSize[1] . '"')
+                    . ' loading="lazy" decoding="async" alt="' . htmlspecialchars($siteName, ENT_QUOTES) . '">';
             } else {
                 $h .= '<div class="site-footer__name">' . htmlspecialchars($siteName, ENT_QUOTES) . '</div>';
             }

@@ -30,6 +30,9 @@
        на тёмной (чтобы навигационные заголовки карточек не пропадали). */
     --gov-title: var(--gov-navy);
     --gov-teal-text: var(--gov-teal-dark, #0284c7); /* WCAG AA: 5.4:1 контрастность на белом фоне */
+    /* Текст на подложке из самого акцента (плашки, бейджи, номера): она
+       темнее поверхности, и --gov-teal-text на ней не добирает до 4.5:1. */
+    --gov-teal-on-tint: var(--gov-teal-tint-light, #00697d);
     --radius: 12px;
     --container-max: 1200px;
     /* Эмблема агентства: восьмиконечная звезда-гирих. Отдельным файлом,
@@ -101,6 +104,7 @@
     --gov-muted: #aab6c6;
     --gov-title: #f8fafc;
     --gov-teal-text: var(--gov-teal-on-dark, var(--color-accent, #38bdf8));
+    --gov-teal-on-tint: var(--gov-teal-on-dark, var(--color-accent, #6fd7e8));
 }
 
 body {
@@ -1822,7 +1826,7 @@ body.lightbox-active { overflow: hidden !important; }
 .news-poll-card__badge {
     display: inline-block; padding: 4px 10px; border-radius: var(--radius-sm, 6px);
     background: color-mix(in srgb, var(--gov-teal, #0d9488) 12%, transparent);
-    color: var(--gov-teal, #0d9488); font-size: 0.75rem; font-weight: 700; margin-bottom: 8px;
+    color: var(--gov-teal-on-tint, #00697d); font-size: 0.75rem; font-weight: 700; margin-bottom: 8px;
 }
 .news-poll-card__question {
     margin: 0 0 16px; font-size: 1.1rem; font-weight: 700; color: var(--gov-title);
@@ -2158,7 +2162,9 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 /* Заливная CTA-кнопка шапки: слегка затемняем акцент, чтобы белый текст
    давал контраст ≥4.5:1 (WCAG AA). Общий акцент/бренд при этом не меняется. */
 .site-cta--filled,
-.site-search-page__form button[type="submit"] { background: color-mix(in srgb, var(--gov-teal) 85%, #000); }
+/* Затемнение акцента на 15% давало белому тексту 4.36:1 при норме 4.5.
+   Затемняем сильнее: цвет остаётся акцентным, а подпись читается. */
+.site-search-page__form button[type="submit"] { background: color-mix(in srgb, var(--gov-teal) 72%, #000); }
 /* Ссылки-действия на белом фоне карточек контактов: тёмный teal для контраста. */
 .contact-card__link { color: var(--gov-teal-text); }
 

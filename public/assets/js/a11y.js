@@ -73,8 +73,29 @@
         return Object.keys(DEFAULTS).some(function (key) { return state[key] !== DEFAULTS[key]; });
     }
 
+    /** Системная настройка «уменьшить движение» действует как выключенный
+     *  тумблер, пока посетитель не выбрал иное сам. Тот же учёт есть в
+     *  theme-init.js — там он срабатывает до первой отрисовки. */
+    function effectiveState(state) {
+        var copy = {};
+        Object.keys(state).forEach(function (key) { copy[key] = state[key]; });
+        try {
+            if (copy.motion === DEFAULTS.motion && !hasExplicit('motion')
+                && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                copy.motion = 'off';
+            }
+        } catch (error) {}
+        return copy;
+    }
+
+    function hasExplicit(name) {
+        var raw = readCookie(COOKIE);
+        return raw.indexOf('=') !== -1 && new URLSearchParams(raw).get(name) !== null;
+    }
+
     /** Значения по умолчанию в разметку не пишем: обычная страница — обычная. */
-    function applyState(state) {
+    function applyState(rawState) {
+        var state = effectiveState(rawState);
         Object.keys(DEFAULTS).forEach(function (key) {
             if (state[key] === DEFAULTS[key]) {
                 root.removeAttribute('data-a11y-' + key);

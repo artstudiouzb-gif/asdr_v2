@@ -927,7 +927,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .site-search-page__count { color: var(--text-muted); margin-bottom: 16px; }
 .site-search-results { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
 .site-search-results__item { padding: 14px 16px; border: 1px solid var(--border-color, #eee); border-radius: 8px; }
-.site-search-results__type { display: inline-block; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--color-accent, #e63946); font-weight: 700; margin-bottom: 4px; }
+.site-search-results__type { display: inline-block; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--gov-teal-text, #006a81); font-weight: 700; margin-bottom: 4px; }
 .site-search-results__link { display: block; font-size: 1.1rem; font-weight: 600; text-decoration: none; color: var(--color-primary, #1a1a1a); }
 .site-search-results__link:hover { color: var(--color-accent, #e63946); }
 .site-search-results__excerpt { margin: 6px 0 0; color: var(--text-muted); font-size: .95rem; }
@@ -2431,7 +2431,10 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
     justify-content: center !important;
     cursor: pointer !important;
     border-radius: 50% !important;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease !important;
+    /* Без !important: иначе сокращённая запись перебивала бы сброс движения
+       при системной настройке «уменьшить движение» — она объявлена
+       селектором «*», у которого специфичность ниже. */
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
     color: var(--gov-ink, var(--text-main)) !important; /* По умолчанию темные */
 }
 

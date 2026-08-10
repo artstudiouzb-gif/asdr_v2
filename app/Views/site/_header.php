@@ -69,9 +69,19 @@ $hcfg = HeaderConfig::get();
 $currentLang = Locale::current();
 
 // --- Логотип ---
+// Размеры логотипа в атрибутах: без них браузер не знает, сколько места
+// занять, и шапка подпрыгивает при загрузке картинки — сдвиг ровно на первом
+// экране. Media::dimensions() читает их из файла и сам пропускает SVG, где
+// пиксельных размеров может не быть (см. грабли в CLAUDE.md).
+$logoSizeAttr = static function (string $url): string {
+    $size = \App\Core\Media::dimensions($url);
+
+    return $size === null ? '' : ' width="' . $size[0] . '" height="' . $size[1] . '"';
+};
 $logoHtml = '<a href="' . htmlspecialchars(Locale::url('/', $currentLang), ENT_QUOTES) . '" class="site-header__logo">';
 if ($logo !== '') {
-    $logoHtml .= '<img class="site-header__logo-std" src="' . htmlspecialchars($logo, ENT_QUOTES) . '" alt="' . htmlspecialchars($siteName, ENT_QUOTES) . '">';
+    $logoHtml .= '<img class="site-header__logo-std" src="' . htmlspecialchars($logo, ENT_QUOTES) . '"'
+        . $logoSizeAttr($logo) . ' alt="' . htmlspecialchars($siteName, ENT_QUOTES) . '">';
     // Светлый вариант логотипа для прозрачной шапки (задаётся в конструкторе):
     // сначала — для текущего языка, иначе — общий.
     $logoLight = trim((string) ($hcfgAll['logo_light_by_lang'][$currentLang] ?? ''));
@@ -79,7 +89,8 @@ if ($logo !== '') {
         $logoLight = trim((string) ($hcfgAll['logo_light'] ?? ''));
     }
     if ($logoLight !== '') {
-        $logoHtml .= '<img class="site-header__logo-light" src="' . htmlspecialchars($logoLight, ENT_QUOTES) . '" alt="' . htmlspecialchars($siteName, ENT_QUOTES) . '">';
+        $logoHtml .= '<img class="site-header__logo-light" src="' . htmlspecialchars($logoLight, ENT_QUOTES) . '"'
+            . $logoSizeAttr($logoLight) . ' alt="' . htmlspecialchars($siteName, ENT_QUOTES) . '">';
     }
 } else {
     $logoHtml .= '<span>' . htmlspecialchars($siteName, ENT_QUOTES) . '</span>';

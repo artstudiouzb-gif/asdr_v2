@@ -53,6 +53,19 @@
             });
         }
 
+        // Системная просьба «уменьшить движение» включает ту же настройку, что и
+        // тумблер в панели: у неё в CSS уже есть полный сброс анимаций
+        // (html[data-a11y-motion="off"] *). Отдельный @media-блок такой
+        // специфичности не даёт и проигрывает правилам с !important.
+        // Явный выбор посетителя важнее системного: его не перебиваем.
+        try {
+            if (state.motion === undefined
+                && window.matchMedia
+                && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                state.motion = 'off';
+            }
+        } catch (error) { /* matchMedia может быть недоступен */ }
+
         var changed = false;
         Object.keys(A11Y_DEFAULTS).forEach(function (key) {
             var value = state[key];
