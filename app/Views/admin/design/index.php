@@ -487,7 +487,7 @@ foreach ($options as $key => $opt) {
             <div class="design-opt">
                 <div class="design-opt__label">
                     <span>Шкала заголовков</span>
-                    <small>Коэффициент пропорционального роста H1–H5 от базового текста.</small>
+                    <small>Коэффициент пропорционального роста H1–H6 от базового текста.</small>
                 </div>
                 <div class="design-opt__choices typo-scale">
                     <?php foreach (\App\Core\DesignSettings::TYPO_SCALES as $scaleKey => $scaleMeta): ?>
@@ -504,7 +504,7 @@ foreach ($options as $key => $opt) {
             <div class="typo-preview u-inline-8a359a76eb">
                 <div class="typo-preview__head">Как это выглядит</div>
                 <div class="typo-preview__row">
-                    <?php foreach (['fs_h1' => 'H1', 'fs_h2' => 'H2', 'fs_h3' => 'H3', 'fs_h4' => 'H4', 'fs_h5' => 'H5'] as $k => $label): ?>
+                    <?php foreach (['fs_h1' => 'H1', 'fs_h2' => 'H2', 'fs_h3' => 'H3', 'fs_h4' => 'H4', 'fs_h5' => 'H5', 'fs_h6' => 'H6'] as $k => $label): ?>
                         <div class="typo-preview__item">
                             <span class="typo-preview__sample" data-font-size="<?= htmlspecialchars($previewSizes[$k] ?? '16px', ENT_QUOTES) ?>"><?= $label ?></span>
                             <span class="typo-preview__size"><?= htmlspecialchars($previewSizes[$k] ?? '', ENT_QUOTES) ?><?= ($overrides[$k] ?? '') !== '' ? ' → ' . htmlspecialchars($overrides[$k], ENT_QUOTES) : '' ?></span>
