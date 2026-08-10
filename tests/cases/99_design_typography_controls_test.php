@@ -49,7 +49,15 @@ test('форма дизайна объединяет источники шриф
     assert_contains('name="line_height_custom"', $view);
     // Поля размеров по элементам рендерятся циклом из TYPO_SIZES.
     assert_contains('DesignSettings::TYPO_SIZES as $fsKey', $view);
-    assert_true(isset(DesignSettings::TYPO_SIZES['fs_h1'], DesignSettings::TYPO_SIZES['fs_menu'], DesignSettings::TYPO_SIZES['fs_topbar']));
+    assert_true(isset(
+        DesignSettings::TYPO_SIZES['fs_h1'],
+        DesignSettings::TYPO_SIZES['fs_lead'],
+        DesignSettings::TYPO_SIZES['fs_card_title'],
+        DesignSettings::TYPO_SIZES['fs_card_text'],
+        DesignSettings::TYPO_SIZES['fs_meta'],
+        DesignSettings::TYPO_SIZES['fs_menu'],
+        DesignSettings::TYPO_SIZES['fs_topbar'],
+    ));
     assert_contains('name="radius_custom"', $view);
     assert_not_contains('<h2 class="design-section__title">Google-шрифты</h2>', $view);
 });
@@ -62,6 +70,7 @@ test('точные размеры сохраняются и переопреде
         'radius_custom' => '13',
         'line_height_custom' => '1.35',
         'fs_h1' => '34',
+        'fs_card_text' => '14',
         'fs_menu' => '15',
     ]);
 
@@ -70,13 +79,17 @@ test('точные размеры сохраняются и переопреде
     $css = DesignSettings::cssVariables(['button' => 'rounded'] + DesignSettings::current());
     assert_contains('--base-font-size:17.5px', $css);
     assert_contains('--base-line-height:1.35', $css);
+    assert_contains('--font-size-h1:34px', $css);
+    assert_contains('--font-size-card-text:14px', $css);
     assert_contains('h1,', $css);
-    assert_contains('font-size:34px !important;}', $css);
-    assert_contains('.site-menu__link{font-size:15px !important;}', $css);
+    assert_contains('font-size:var(--font-size-h1) !important;}', $css);
+    assert_contains('.stage__text', $css);
+    assert_contains('font-size:var(--font-size-card-text) !important;}', $css);
+    assert_contains('.site-menu__link{font-size:var(--font-size-menu) !important;}', $css);
 
     // Сброс, чтобы прогон был идемпотентным и не влиял на другие тесты.
-    DesignSettings::save(['fs_h1' => '', 'fs_menu' => '']);
-    assert_not_contains('font-size:34px', DesignSettings::cssVariables(DesignSettings::current()));
+    DesignSettings::save(['fs_h1' => '', 'fs_card_text' => '', 'fs_menu' => '']);
+    assert_not_contains('--font-size-h1:34px', DesignSettings::cssVariables(DesignSettings::current()));
     assert_contains('--radius:13px', $css);
     assert_contains('--btn-radius:13px', $css);
     assert_same('inter', (string) \App\Models\Setting::get('design_font_google_body', ''));
@@ -91,4 +104,27 @@ test('точные размеры сохраняются и переопреде
         'line_height_custom' => '',
     ]);
     \App\Models\Setting::set('design_font_google_body', '');
+});
+
+test('редакционные размеры используют переменные из настроек типографики', function (): void {
+    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/public-editorial-pages.css');
+
+    assert_contains(
+        '.block-stages--history .stage__text',
+        $css,
+        'текст истории должен оставаться отдельным управляемым элементом',
+    );
+    assert_contains(
+        'font-size: var(--font-size-card-text, .88rem);',
+        $css,
+        'размер текста этапа должен приходить из настроек, сохраняя прежний fallback',
+    );
+    assert_contains('font-size: var(--font-size-card-title, .98rem);', $css);
+    assert_contains('font-size: var(--font-size-meta, .8rem);', $css);
+    assert_contains('.profile__name', DesignSettings::TYPO_SIZES['fs_h1'][1]);
+    assert_contains(
+        'font-family: var(--font-heading, var(--font-family));',
+        $css,
+        'классовый стиль H1 не должен обходить выбранный шрифт заголовков',
+    );
 });

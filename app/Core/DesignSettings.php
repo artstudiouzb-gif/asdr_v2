@@ -388,12 +388,16 @@ final class DesignSettings
      * компонентные clamp()-размеры тем (панель a11y всё равно сильнее).
      */
     public const TYPO_SIZES = [
-        'fs_h1' => ['Заголовок H1', 'h1, .block-hero__title, .content-pagehead__title, .projdetail__title, .newsdetail__title, .newsdetail-phero__title', '42'],
-        'fs_h2' => ['Заголовок H2', 'h2, .section-title, .block-title, .content-list__head h1, .block-news__title, .block-categories__title, .block-contact-cards__title, .newsdetail-card__title, .section-head__title', '32'],
+        'fs_h1' => ['Заголовок H1', 'h1, .block-hero__title, .content-pagehead__title, .profile__name, .projdetail__title, .newsdetail__title, .newsdetail-phero__title', '42'],
+        'fs_h2' => ['Заголовок H2', 'h2, .section-title, .block-title, .block-text__title, .bio__title, .content-list__head h1, .block-news__title, .block-categories__title, .block-contact-cards__title, .newsdetail-card__title, .section-head__title', '32'],
         'fs_h3' => ['Заголовок H3', 'h3, .card__title, .feature-card__title, .imgcard__title, .catcard__title, .newsfeat-lead__title, .newsfeat-mini__title, .newsfeat-text__title, .catdetail__title, .gcal-list__title, .orgstruct__head-name, .person-card__name, .timeline-item__year, .ctaband__title, .profile__position, .featband__name, .bio-quote__mark, .widget__title, .bio-extra__title, .relnews-card__title, .adjnews__title, .album-card__title, .block-banner__title', '24'],
         'fs_h4' => ['Заголовок H4', 'h4', '20'],
         'fs_h5' => ['Заголовок H5', 'h5', '18'],
-        'fs_small' => ['Мелкий текст (small)', 'small', '13'],
+        'fs_lead' => ['Вводный и крупный текст', '.content-pagehead__lead, .block-hero__lead, .block-hero__subtitle, .newsdetail__lead, .profile__text, .rich-content--lead', '17'],
+        'fs_card_title' => ['Заголовки карточек и этапов', '.feature-card__title, .stage__title, .person-card__name, .act-card__title, .doc-card__title, .repo-card__title, .news-card__title, .project-card__title, .bio-edu__degree', '16'],
+        'fs_card_text' => ['Текст карточек и этапов', '.feature-card__text, .stage__text, .person-card__role, .act-card__desc, .doc-card__desc, .repo-card__desc, .news-card__desc, .project-card__desc, .bio-career__text', '14'],
+        'fs_meta' => ['Метаданные и подписи', '.crumbs, .content-crumbs, .stage__year, .act-card__date, .person-card__more, .person-card__vacant, .bio-career__years, .bio-edu__years, .bio-edu__org, .block-text__media-caption, .article-media__caption, .article-media__credit', '13'],
+        'fs_small' => ['Мелкий и вспомогательный текст', 'small, .form-hint, .section-head__eyebrow, .block-hero__eyebrow, .newsdetail__meta, .news-card__meta, .project-card__meta', '13'],
         'fs_btn' => ['Кнопки', '.block-cta__button, .btn-cta, .btn, button, input[type="button"], input[type="submit"]', '15'],
         'fs_menu' => ['Главное меню', '.site-menu__link', '13'],
         'fs_topbar' => ['Верхняя панель', '.site-topbar', '13'],
@@ -493,13 +497,16 @@ final class DesignSettings
     public static function typographyCss(): string
     {
         $rules = '';
+        $variables = '';
         foreach (self::typographySizes() as $key => $size) {
             if ($size !== '') {
-                $rules .= self::TYPO_SIZES[$key][1] . '{font-size:' . $size . ' !important;}';
+                $variable = '--font-size-' . str_replace('_', '-', substr($key, 3));
+                $variables .= $variable . ':' . $size . ';';
+                $rules .= self::TYPO_SIZES[$key][1] . '{font-size:var(' . $variable . ') !important;}';
             }
         }
 
-        return $rules;
+        return ($variables !== '' ? ':root{' . $variables . '}' : '') . $rules;
     }
 
     /** Точный межстрочный интервал, 1–2.5 (без единиц); пусто — значение пресета. */
