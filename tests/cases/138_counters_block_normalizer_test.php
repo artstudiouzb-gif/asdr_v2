@@ -9,6 +9,10 @@ test('Counters normalizer: сохраняет числа, подписи, цве
         'title_field' => ' Наши результаты ',
         'card_bg' => '#AABBCC',
         'text_color' => '#112233',
+        'icon_size' => '36',
+        'icon_bg' => 'off',
+        'icon_position' => 'right',
+        'text_align' => 'center',
         'items' => [
             [
                 'value' => ' 1 250+ ',
@@ -24,6 +28,10 @@ test('Counters normalizer: сохраняет числа, подписи, цве
     assert_same('Наши результаты', $data['title']);
     assert_same('#aabbcc', $data['card_bg']);
     assert_same('#112233', $data['text_color']);
+    assert_same(36, $data['icon_size']);
+    assert_same('off', $data['icon_bg']);
+    assert_same('right', $data['icon_position']);
+    assert_same('center', $data['text_align']);
     assert_same(1, count($data['items']));
     assert_same(1250, $data['items'][0]['value']);
     assert_same('+', $data['items'][0]['suffix']);
@@ -50,6 +58,10 @@ test('Counters normalizer: цвета по умолчанию и поврежд�
     assert_same('', $data['title']);
     assert_same('', $data['card_bg']);
     assert_same('', $data['text_color']);
+    assert_same(28, $data['icon_size']);
+    assert_same('on', $data['icon_bg']);
+    assert_same('left', $data['icon_position']);
+    assert_same('left', $data['text_align']);
     assert_same(1, count($data['items']));
     assert_same(0, $data['items'][0]['value']);
     assert_same('', $data['items'][0]['suffix']);
@@ -74,4 +86,14 @@ test('Контроллер делегирует счётчики CountersBlockNo
 
     assert_contains('CountersBlockNormalizer::normalize($_POST, $locale)', $controller);
     assert_not_contains('// Число хранится как целое', $controller);
+});
+
+test('Форма счётчиков показывает настройки иконки и выравнивания', function (): void {
+    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
+
+    foreach (['name="icon_size"', 'name="icon_bg"', 'name="icon_position"', 'name="text_align"'] as $field) {
+        assert_contains($field, $form);
+    }
+    assert_contains('Сверху по центру', $form);
+    assert_contains('Без подложки', $form);
 });

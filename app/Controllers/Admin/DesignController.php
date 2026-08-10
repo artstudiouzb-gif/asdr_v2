@@ -77,6 +77,15 @@ final class DesignController
                 DesignSettings::normalizeRadius((string) $preview['radius_custom'])
             );
         }
+        foreach (['top', 'bottom'] as $edge) {
+            $key = 'newsdetail_padding_' . $edge;
+            if (array_key_exists($key, $preview)) {
+                Setting::overrideInMemory(
+                    'design_' . $key,
+                    DesignSettings::normalizeNewsDetailSpacing((string) $preview[$key])
+                );
+            }
+        }
         if (array_key_exists('line_height_custom', $preview)) {
             Setting::overrideInMemory(
                 'design_line_height_custom',
@@ -87,6 +96,12 @@ final class DesignController
             Setting::overrideInMemory(
                 'design_heading_line_height_custom',
                 DesignSettings::normalizeLineHeight((string) $preview['heading_line_height_custom'])
+            );
+        }
+        if (array_key_exists('meta_letter_spacing_custom', $preview)) {
+            Setting::overrideInMemory(
+                'design_meta_letter_spacing_custom',
+                DesignSettings::normalizeMetaLetterSpacing((string) $preview['meta_letter_spacing_custom'])
             );
         }
         if (array_key_exists('typo_scale', $preview)) {

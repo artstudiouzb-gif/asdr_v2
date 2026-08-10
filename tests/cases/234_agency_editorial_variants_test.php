@@ -101,6 +101,15 @@ test('Старый cards_grid без служебного ключа откры�
     $footer = (string) file_get_contents(APP_ROOT . '/app/Views/admin/layout/footer.php');
     assert_contains("(string) (\$data['_cards_style'] ?? 'old')", $footer);
     assert_not_contains("(string) \$data['_cards_style']", $footer);
+    assert_contains("(string) (\$data['_cards_icon_bg'] ?? 'on')", $footer);
+    assert_contains("backgroundSelect.name = 'cards_icon_bg'", $footer);
+    assert_contains("['off', 'Без подложки']", $footer);
+    assert_contains("(string) (\$data['_cards_icon_position'] ?? 'top')", $footer);
+    assert_contains("positionSelect.name = 'cards_icon_position'", $footer);
+    assert_contains("['right', 'Справа от текста']", $footer);
+    assert_contains("(string) (\$data['_cards_text_align'] ?? 'left')", $footer);
+    assert_contains("textAlignSelect.name = 'cards_text_align'", $footer);
+    assert_contains("['center', 'По центру']", $footer);
 });
 
 test('Заголовки редакционных разделов используют единый акцентный маркер', function (): void {

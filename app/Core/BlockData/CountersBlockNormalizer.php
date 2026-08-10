@@ -37,10 +37,26 @@ final class CountersBlockNormalizer
             ];
         }
 
+        $iconSizeRaw = BlockDataInput::trimmed($input, 'icon_size');
+        $iconSize = $iconSizeRaw !== '' ? (int) $iconSizeRaw : 28;
+        $iconBackground = BlockDataInput::trimmed($input, 'icon_bg');
+        $iconPosition = BlockDataInput::trimmed($input, 'icon_position');
+        $textAlign = BlockDataInput::trimmed($input, 'text_align');
+
         return [
             'title' => BlockDataInput::plain($input, 'title_field', $locale),
             'card_bg' => BlockDataInput::optionalColor($input, 'card_bg'),
             'text_color' => BlockDataInput::optionalColor($input, 'text_color'),
+            'icon_size' => max(16, min(64, $iconSize)),
+            'icon_bg' => in_array($iconBackground, ['on', 'off'], true)
+                ? $iconBackground
+                : 'on',
+            'icon_position' => in_array($iconPosition, ['top', 'left', 'right', 'center'], true)
+                ? $iconPosition
+                : 'left',
+            'text_align' => in_array($textAlign, ['left', 'center', 'right'], true)
+                ? $textAlign
+                : 'left',
             'items' => $items,
         ];
     }

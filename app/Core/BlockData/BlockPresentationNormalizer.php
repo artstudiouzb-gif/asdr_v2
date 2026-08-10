@@ -65,6 +65,24 @@ final class BlockPresentationNormalizer
         if (array_key_exists('cards_icon_size', $input)) {
             $normalized['_cards_icon_size'] = max(16, min(64, (int) ($input['cards_icon_size'] ?? 22)));
         }
+        if (array_key_exists('cards_icon_bg', $input)) {
+            $iconBackground = self::scalarString($input['cards_icon_bg'] ?? null, 'on');
+            $normalized['_cards_icon_bg'] = in_array($iconBackground, ['on', 'off'], true)
+                ? $iconBackground
+                : 'on';
+        }
+        if (array_key_exists('cards_icon_position', $input)) {
+            $iconPosition = self::scalarString($input['cards_icon_position'] ?? null, 'top');
+            $normalized['_cards_icon_position'] = in_array($iconPosition, ['top', 'left', 'right', 'center'], true)
+                ? $iconPosition
+                : 'top';
+        }
+        if (array_key_exists('cards_text_align', $input)) {
+            $textAlign = self::scalarString($input['cards_text_align'] ?? null, 'left');
+            $normalized['_cards_text_align'] = in_array($textAlign, ['left', 'center', 'right'], true)
+                ? $textAlign
+                : 'left';
+        }
 
         return $normalized;
     }

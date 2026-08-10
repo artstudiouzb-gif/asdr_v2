@@ -14,16 +14,27 @@ $columns = max(2, min(5, (int) ($data['columns'] ?? 5)));
 $mediaClasses = MediaPosition::classes($data['image_position'] ?? null, $data['image_position_mobile'] ?? null);
 $cardBg = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['card_bg'] ?? '')) ? (string) $data['card_bg'] : '';
 $textColor = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['text_color'] ?? '')) ? (string) $data['text_color'] : '';
-$cardStyle = ($cardBg !== '' ? '--card-bg:' . $cardBg . ';' : '') . ($textColor !== '' ? '--cards-text:' . $textColor . ';' : '');
 $visualStyleRaw = (string) ($data['_cards_style'] ?? 'old');
 $visualStyle = in_array($visualStyleRaw, ['old', 'new'], true) ? $visualStyleRaw : 'old';
 $iconSize = max(16, min(64, (int) ($data['_cards_icon_size'] ?? 22)));
+$iconBackgroundRaw = (string) ($data['_cards_icon_bg'] ?? 'on');
+$iconBackground = in_array($iconBackgroundRaw, ['on', 'off'], true) ? $iconBackgroundRaw : 'on';
+$iconPositionRaw = (string) ($data['_cards_icon_position'] ?? 'top');
+$iconPosition = in_array($iconPositionRaw, ['top', 'left', 'right', 'center'], true) ? $iconPositionRaw : 'top';
+$textAlignRaw = (string) ($data['_cards_text_align'] ?? 'left');
+$textAlign = in_array($textAlignRaw, ['left', 'center', 'right'], true) ? $textAlignRaw : 'left';
 $iconBoxSize = max(42, $iconSize + 18);
+$cardStyle = '--feature-card-icon-size:' . $iconSize . 'px;'
+    . ($cardBg !== '' ? '--card-bg:' . $cardBg . ';' : '')
+    . ($textColor !== '' ? '--cards-text:' . $textColor . ';' : '');
 $scope = '#block-' . (int) $blockId;
 $templateCss = $scope . ' .block-cards{--cards-cols:' . $columns . ';' . $cardStyle . '}';
 $templateCss .= $scope . ' .feature-card__icon{width:' . $iconBoxSize . 'px;height:' . $iconBoxSize . 'px;}';
-$templateCss .= $scope . ' .feature-card__icon svg{width:' . $iconSize . 'px;height:' . $iconSize . 'px;}';
-$cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '') . ($textColor !== '' ? ' block-cards--custom-text' : '');
+$cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '')
+    . ($textColor !== '' ? ' block-cards--custom-text' : '')
+    . ($iconBackground === 'off' ? ' block-cards--icons-no-bg' : '')
+    . ' block-cards--icon-pos-' . $iconPosition
+    . ' block-cards--text-align-' . $textAlign;
 
 // Новый вид включается только у выбранного экземпляра cards_grid: базовые
 // .feature-card и остальные карточки сайта остаются нетронутыми.
@@ -35,8 +46,8 @@ if ($variant === 'icon' && $visualStyle === 'new') {
     $templateCss .= $scope . ' .block-cards--style-new .feature-card:hover{background:var(--card-bg,transparent);border-top-color:var(--gov-accent,#17999b);box-shadow:none;transform:none;}';
     $templateCss .= $scope . ' .block-cards--style-new .feature-card__top{align-items:flex-start;margin-bottom:clamp(22px,2.3vw,34px);}';
     $templateCss .= $scope . ' .block-cards--style-new .feature-card__icon{width:' . $iconSize . 'px;height:' . $iconSize . 'px;border:0;border-radius:0;background:transparent;color:var(--gov-accent,#17999b);justify-content:flex-start;}';
-    $templateCss .= $scope . ' .block-cards--style-new .feature-card__num{color:var(--gov-accent,#17999b);font-size:12px;font-weight:700;letter-spacing:.12em;}';
-    $templateCss .= $scope . ' .block-cards--style-new .feature-card__title{color:var(--cards-text,var(--gov-primary,#173a63));font-size:clamp(18px,1.35vw,21px);line-height:1.25;margin-bottom:10px;}';
+    $templateCss .= $scope . ' .block-cards--style-new .feature-card__num{color:var(--gov-accent,#17999b);font-size:var(--font-size-meta,.75rem);font-weight:700;letter-spacing:var(--meta-letter-spacing,.12em);}';
+    $templateCss .= $scope . ' .block-cards--style-new .feature-card__title{color:var(--cards-text,var(--gov-primary,#173a63));font-size:var(--font-size-h3,clamp(18px,1.35vw,21px));line-height:1.25;margin-bottom:10px;}';
     $templateCss .= $scope . ' .block-cards--style-new .feature-card__text{color:var(--cards-text,var(--gov-text,#334155));max-width:34ch;}';
 }
 ?>
@@ -117,22 +128,28 @@ if ($variant === 'icon' && $visualStyle === 'new') {
         <?php else: ?>
             <div class="cards-grid">
                 <?php foreach ($items as $index => $item): ?>
-                    <?php $url = trim((string) ($item['url'] ?? '')); ?>
-                    <?php if ($url !== ''): ?>
+                    <?php $url = trim((string) ($item['url'] ?? '')); $hasIcon = !empty($item['icon_svg']); ?>
+                    <?php if ($url !== '' && $hasIcon): ?>
+                    <a class="feature-card feature-card--has-icon" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                    <?php elseif ($url !== ''): ?>
                     <a class="feature-card" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                    <?php elseif ($hasIcon): ?>
+                    <article class="feature-card feature-card--has-icon">
                     <?php else: ?>
                     <article class="feature-card">
                     <?php endif; ?>
                         <div class="feature-card__top">
-                            <?php if (!empty($item['icon_svg'])): ?>
+                            <?php if ($hasIcon): ?>
                                 <span class="feature-card__icon" aria-hidden="true"><?= Icon::render($item['icon_svg'], $iconSize) ?></span>
                             <?php else: ?>
                                 <span class="feature-card__spacer"></span>
                             <?php endif; ?>
                             <span class="feature-card__num"><?= sprintf('%02d', $index + 1) ?></span>
                         </div>
-                        <h3 class="feature-card__title"><?= htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES) ?></h3>
-                        <?php if (!empty($item['text'])): ?><p class="feature-card__text"><?= htmlspecialchars((string) $item['text'], ENT_QUOTES) ?></p><?php endif; ?>
+                        <div class="feature-card__content">
+                            <h3 class="feature-card__title"><?= htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES) ?></h3>
+                            <?php if (!empty($item['text'])): ?><p class="feature-card__text"><?= htmlspecialchars((string) $item['text'], ENT_QUOTES) ?></p><?php endif; ?>
+                        </div>
                     <?php if ($url !== ''): ?></a><?php else: ?></article><?php endif; ?>
                 <?php endforeach; ?>
             </div>
