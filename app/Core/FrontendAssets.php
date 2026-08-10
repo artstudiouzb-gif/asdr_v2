@@ -54,6 +54,28 @@ final class FrontendAssets
         return self::enabled() ? [self::JS_BUNDLE] : self::JS_SOURCES;
     }
 
+    /**
+     * Путь к ассету блока с учётом сборки: при включённых бандлах отдаёт
+     * минифицированную версию из манифеста, иначе — исходник. Ассеты блоков
+     * не входят в общий бандл (подключаются только на своих страницах), но
+     * минифицируются тем же `npm run build:assets`.
+     */
+    public static function blockAsset(string $path): string
+    {
+        if (!self::enabled()) {
+            return $path;
+        }
+
+        $manifest = self::manifest();
+        $entry = is_array($manifest['blocks'] ?? null) ? ($manifest['blocks'][$path] ?? null) : null;
+        if (!is_array($entry) || !is_string($entry['path'] ?? null)) {
+            return $path;
+        }
+
+        // Файл мог не доехать при выкладке — тогда лучше исходник, чем 404.
+        return is_file(APP_ROOT . '/public' . $entry['path']) ? $entry['path'] : $path;
+    }
+
     public static function enabled(): bool
     {
         return Setting::get('perf_asset_bundle', '1') === '1' && self::bundleReady();

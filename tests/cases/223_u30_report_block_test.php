@@ -82,8 +82,17 @@ test('u30_report: стили и скрипт подключаются тольк
     AssetCollector::requireJs('u30_report');
     $styles = AssetCollector::renderStyles();
     $scripts = AssetCollector::renderScripts();
-    assert_contains('/assets/css/blocks/u30-report.css', $styles);
-    assert_contains('/assets/js/blocks/u30_report.js', $scripts);
+    // Сборка отдаёт минифицированный вариант (u30-report.min.css), исходник —
+    // когда бандлы выключены. Проверяем сам факт подключения файла блока,
+    // а не то, какой из двух вариантов выбран.
+    assert_true(
+        preg_match('#/assets/css/blocks/u30-report(\.min)?\.css#', $styles) === 1,
+        'подключён CSS блока: ' . $styles
+    );
+    assert_true(
+        preg_match('#/assets/js/blocks/u30_report(\.min)?\.js#', $scripts) === 1,
+        'подключён JS блока: ' . $scripts
+    );
 
     // Повторный блок того же типа не должен подключать файлы дважды.
     AssetCollector::requireJs('u30_report');

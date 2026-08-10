@@ -704,8 +704,18 @@
     // Переключатель светлой/тёмной темы с сохранением выбора в localStorage.
     // Тем же способом тему меняет панель настроек отображения, поэтому выбор
     // темы живёт в одном месте, а не в двух похожих обработчиках.
+    var themeSwitchTimer = null;
     window.asdrSetTheme = function (next) {
         var root = document.documentElement;
+        // Переход цвета включаем только на время самой смены темы: постоянный
+        // transition на всём документе стоил бы перерисовки при каждой смене
+        // класса (шапка при скролле, открытие меню и т.д.).
+        root.classList.add('is-theme-switching');
+        if (themeSwitchTimer) { window.clearTimeout(themeSwitchTimer); }
+        themeSwitchTimer = window.setTimeout(function () {
+            root.classList.remove('is-theme-switching');
+            themeSwitchTimer = null;
+        }, 400);
         root.setAttribute('data-theme', next);
         if (document.body) {
             document.body.setAttribute('data-theme', next);
@@ -1820,8 +1830,26 @@
 
         overlay.addEventListener('scroll', updateProgress, { passive: true });
 
+        // Тело статьи в разметке оверлея пустое: содержимое переносится из
+        // основной статьи при первом открытии. В разметке оно раньше печаталось
+        // вторым экземпляром и удваивало DOM на каждой новости.
+        var fillReaderBody = function () {
+            var target = overlay.querySelector('[data-reader-body]');
+            if (!target || target.getAttribute('data-reader-filled') === '1') { return; }
+            var source = document.querySelector(target.getAttribute('data-reader-source') || '');
+            if (!source) { return; }
+            var copy = source.cloneNode(true);
+            // id внутри копии сделали бы дубликаты в документе — снимаем их,
+            // якорные ссылки внутри режима чтения всё равно не используются.
+            copy.removeAttribute('id');
+            copy.querySelectorAll('[id]').forEach(function (el) { el.removeAttribute('id'); });
+            while (copy.firstChild) { target.appendChild(copy.firstChild); }
+            target.setAttribute('data-reader-filled', '1');
+        };
+
         var openReader = function (trigger) {
             readerLastFocus = trigger || document.activeElement;
+            fillReaderBody();
             overlay.hidden = false;
             body.classList.add('reader-mode-active');
             setReaderIsolation(true);

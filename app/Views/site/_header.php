@@ -593,6 +593,11 @@ if ($extraHeadCss !== '') {
 >
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<?php // Синхронный и ВНЕШНИЙ по обоим требованиям сразу: синхронный — иначе
+      // мигание темы до применения атрибута; внешний — публичная шапка не
+      // держит исполняемых инлайн-скриптов даже с nonce (тест 171). Файл
+      // отдаётся с Cache-Control: immutable, так что цена — один запрос при
+      // первом визите. ?>
 <script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/js/theme-init.js'), ENT_QUOTES) ?>"></script>
 <?= \App\Core\SeoHelper::resourceHintsHtml() ?>
 <?= \App\Core\SeoHelper::faviconsHtml($appUrl) ?>

@@ -22,6 +22,21 @@ const jsSources = [
     'public/assets/js/forms.js',
 ];
 
+// Ассеты блоков (AssetCollector::JS_MAP / CSS_MAP) в общий бандл не входят:
+// они подключаются только на страницах, где такой блок есть. Раньше они и не
+// минифицировались — u30-report.css отдавался как 160 КБ исходника, а
+// u30_report.js как 120 КБ. Здесь они проходят ту же обработку, что и бандлы,
+// и попадают в манифест отдельным разделом.
+const blockSources = [
+    'public/assets/css/blocks/u30-report.css',
+    'public/assets/js/blocks/u30_report.js',
+    'public/assets/js/blocks/slider.js',
+    'public/assets/js/blocks/anchor_nav.js',
+    'public/assets/js/news.js',
+];
+
+const minifiedName = (path) => path.replace(/\.(css|js)$/, '.min.$1');
+
 const outputs = {
     css: 'public/assets/css/public.min.css',
     js: 'public/assets/js/public.min.js',
@@ -135,8 +150,31 @@ async function verifyOrWrite(path, content) {
     }
 }
 
+/**
+ * Минифицирует один файл блока. CSS проходит тот же CleanCSS, что и бандл;
+ * JS — тот же terser. Возвращает запись для манифеста.
+ */
+async function buildBlockAsset(path) {
+    const [{ content }] = await readSources([path]);
+    const isCss = path.endsWith('.css');
+    const output = minifiedName(path);
+    const built = isCss
+        ? await buildCss([{ path, content }])
+        : await buildJs([{ path, content }]);
+
+    await verifyOrWrite(output, built);
+
+    return [`/${path.replace(/^public\//, '')}`, {
+        path: `/${output.replace(/^public\//, '')}`,
+        sourceSha256: sha256(content),
+        sha256: sha256(built),
+        ...sizeReport(built),
+    }];
+}
+
 const [cssInput, jsInput] = await Promise.all([readSources(cssSources), readSources(jsSources)]);
 const [css, js] = await Promise.all([buildCss(cssInput), buildJs(jsInput)]);
+const blocks = Object.fromEntries(await Promise.all(blockSources.map(buildBlockAsset)));
 const cssSize = sizeReport(css);
 const jsSize = sizeReport(js);
 const manifest = `${JSON.stringify({
@@ -156,6 +194,10 @@ const manifest = `${JSON.stringify({
         sha256: sha256(js),
         ...jsSize,
     },
+    // Ключ — исходный путь (как он записан в AssetCollector), значение —
+    // минифицированный файл. FrontendAssets::blockAsset() подставляет его,
+    // когда включена сборка бандлов.
+    blocks,
 }, null, 2)}\n`;
 await Promise.all([
     verifyOrWrite(outputs.css, css),
@@ -167,6 +209,9 @@ const mode = checkOnly ? 'verified' : 'built';
 console.log(`Public assets ${mode}:`);
 console.log(`  CSS ${cssSize.raw} raw / ${cssSize.gzip} gzip / ${cssSize.brotli} brotli`);
 console.log(`  JS  ${jsSize.raw} raw / ${jsSize.gzip} gzip / ${jsSize.brotli} brotli`);
+for (const [source, entry] of Object.entries(blocks)) {
+    console.log(`  блок ${source} -> ${entry.raw} raw / ${entry.gzip} gzip / ${entry.brotli} brotli`);
+}
 
 // Превышение ориентира — только предупреждение: бандлы уже записаны и сайт
 // продолжает собираться. Размер остаётся видимым в выводе и в manifest, так что

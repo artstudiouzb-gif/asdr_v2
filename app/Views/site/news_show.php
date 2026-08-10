@@ -716,11 +716,26 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <div class="reader-mode__lead news-lead-rich"><?= $leadHtml ?></div>
             <?php endif; ?>
             <?php if ($cover !== ''): ?>
-                <img class="reader-mode__cover" src="<?= htmlspecialchars($cover, ENT_QUOTES) ?>" alt="<?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?>">
+                <?php // Оверлей скрыт до открытия — обложке нужен именно lazy:
+                      // так она не конкурирует за канал с LCP основной статьи. ?>
+                <?= \App\Core\Media::picture(
+                    $cover,
+                    (string) $news['title'],
+                    null,
+                    null,
+                    'reader-mode__cover',
+                    true
+                ) ?>
             <?php endif; ?>
-            <div class="reader-mode__body rich-content">
-                <?= $contentHtml ?>
-            </div>
+            <?php // Тело статьи НЕ дублируется в разметке: раньше $contentHtml
+                  // печатался здесь второй раз, удваивая HTML и число DOM-узлов
+                  // на самых посещаемых страницах сайта. Теперь содержимое
+                  // клонируется из основной статьи при первом открытии режима
+                  // чтения (frontend.js). Без JS оверлей всё равно не
+                  // открывается, поэтому прогрессивное улучшение не страдает. ?>
+            <div class="reader-mode__body rich-content"
+                 data-reader-body
+                 data-reader-source=".newsdetail-article__content"></div>
         </article>
     </div>
 </div>

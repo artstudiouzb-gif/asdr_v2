@@ -59,7 +59,7 @@ final class AssetCollector
     {
         $html = '';
         foreach (array_keys(self::$js) as $key) {
-            $src = Asset::url(self::JS_MAP[$key]);
+            $src = Asset::url(FrontendAssets::blockAsset(self::JS_MAP[$key]));
             $html .= '<script src="' . htmlspecialchars($src, ENT_QUOTES) . '" defer></script>' . "\n";
         }
 
@@ -70,7 +70,7 @@ final class AssetCollector
     {
         $html = '';
         foreach (self::$css as $href) {
-            $url = Asset::url((string) $href);
+            $url = Asset::url(FrontendAssets::blockAsset((string) $href));
             $html .= '<link rel="stylesheet" href="' . htmlspecialchars($url, ENT_QUOTES) . '" data-block-css>' . "\n";
         }
 
