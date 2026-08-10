@@ -23,7 +23,7 @@ require __DIR__ . '/_header.php';
 // editorial pagehead не нужен, иначе на странице появятся два h1.
 $firstIsHero = (bool) preg_match('/^\s*<section\b[^>]*\bcms-block--hero\b/', $content);
 $firstOwnsHeading = (bool) preg_match(
-    '/^\s*<section\b[^>]*\bcms-block--(?:hero|person_profile|u30_report)\b/',
+    '/^\s*<section\b[^>]*\bcms-block--(?:hero|person_profile)\b/',
     $content
 );
 $pageLead = trim((string) ($page['lead'] ?? ''));

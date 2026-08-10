@@ -22,16 +22,13 @@ const jsSources = [
     'public/assets/js/forms.js',
 ];
 
-// Ассеты блоков (AssetCollector::JS_MAP / CSS_MAP) в общий бандл не входят:
-// они подключаются только на страницах, где такой блок есть. Раньше они и не
-// минифицировались — u30-report.css отдавался как 160 КБ исходника, а
-// u30_report.js как 120 КБ. Здесь они проходят ту же обработку, что и бандлы,
-// и попадают в манифест отдельным разделом.
+// Ассеты, подключаемые не на каждой странице (AssetCollector: JS_MAP, CSS_MAP,
+// THEME_PART_MAP), в общий бандл не входят. Раньше они и не минифицировались —
+// отдавались исходниками. Здесь они проходят ту же обработку, что и бандлы, и
+// попадают в манифест отдельным разделом.
 const blockSources = [
     'public/assets/css/blocks/news-detail.css',
     'public/assets/css/blocks/org-structure.css',
-    'public/assets/css/blocks/u30-report.css',
-    'public/assets/js/blocks/u30_report.js',
     'public/assets/js/blocks/slider.js',
     'public/assets/js/blocks/anchor_nav.js',
     'public/assets/js/news.js',

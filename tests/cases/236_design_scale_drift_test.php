@@ -49,16 +49,15 @@ function public_design_css(): string
 
     // Части, вынесенные из темы (THEME_PART_MAP), — это та же дизайн-система,
     // просто в отдельных файлах: их считаем. А самостоятельные ассеты блоков
-    // из CSS_MAP — нет: отчёт «Oʻzbekiston — 2030» это свёрстанный документ
-    // со своим языком графиков в области #uz2030-report, он в теме никогда не
-    // жил и к её шкалам отношения не имеет.
+    // из CSS_MAP — нет: у такого блока свой визуальный язык, к шкалам темы он
+    // отношения не имеет. Сейчас CSS_MAP пуст, но фильтр оставлен, чтобы
+    // метрика не сломалась, когда туда что-то добавят.
     $collector = (string) file_get_contents(APP_ROOT . '/app/Core/AssetCollector.php');
     $standalone = [];
     if (preg_match('/const CSS_MAP = \[(.*?)\];/s', $collector, $m) === 1) {
         preg_match_all("#'(/assets/css/[^']+)'#", $m[1], $found);
         $standalone = array_map(static fn (string $p): string => basename($p), $found[1]);
     }
-    assert_true($standalone !== [], 'список самостоятельных ассетов блоков прочитан');
 
     foreach (glob(APP_ROOT . '/public/assets/css/blocks/*.css') ?: [] as $file) {
         if (str_ends_with($file, '.min.css') || in_array(basename($file), $standalone, true)) {

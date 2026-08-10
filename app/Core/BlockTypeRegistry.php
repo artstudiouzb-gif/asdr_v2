@@ -61,9 +61,6 @@ final class BlockTypeRegistry
         'docs_list' => ['variant' => 'grid', 'title' => '', 'all_text' => '', 'all_url' => '', 'columns' => 4, 'search_enabled' => true, 'items' => []],
         'map_point' => ['title' => '', 'image' => '', 'embed_url' => '', 'load_mode' => 'click', 'card_title' => '', 'address' => '', 'copy_enabled' => true, 'button_text' => '', 'button_url' => ''],
         'org_structure' => ['title' => '', 'layout' => 'tree', 'columns' => 4, 'council' => '', 'head_title' => 'Директор', 'head_name' => '', 'head_url' => '', 'side_items' => '', 'branches' => [], 'collapsible' => false, 'notes' => '', 'footnote' => ''],
-        // Готовый документ без настраиваемых полей: содержимое живёт в
-        // templates/blocks/u30_report.php, а не в данных блока.
-        'u30_report' => [],
     ];
 
     /** Короткие русские названия для сообщений редактору. */
@@ -81,7 +78,6 @@ final class BlockTypeRegistry
         'bio_education' => 'Биография и образование',
         'anchor_nav' => 'Якорная навигация', 'stages' => 'Этапы', 'text_image' => 'Текст с фото',
         'docs_list' => 'Список документов', 'map_point' => 'Карта', 'org_structure' => 'Оргструктура',
-        'u30_report' => 'Мониторинг «Oʻzbekiston — 2030»',
     ];
 
     /**
@@ -111,7 +107,6 @@ final class BlockTypeRegistry
         'docs_list' => 'Документы (сетка)',
         'map_point' => 'Карта с меткой',
         'org_structure' => 'Структура организации (оргсхема)',
-        'u30_report' => 'Мониторинг «Oʻzbekiston — 2030» (готовый отчёт)',
     ];
 
     /** @return list<string> */
