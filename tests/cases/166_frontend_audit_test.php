@@ -37,7 +37,7 @@ test('reader, lightbox and quick search preserve keyboard focus', function (): v
     $view = (string) file_get_contents(APP_ROOT . '/app/Views/site/news_show.php');
     $header = (string) file_get_contents(APP_ROOT . '/app/Views/site/_header.php');
     $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js');
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     assert_contains('role="progressbar"', $view);
     assert_contains('aria-valuenow="0"', $view);

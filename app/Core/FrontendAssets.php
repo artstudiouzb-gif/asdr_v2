@@ -19,6 +19,8 @@ final class FrontendAssets
         '/assets/css/fonts.css',
         '/assets/css/gov-fonts.css',
         '/assets/css/frontend.css',
+        // Стили детальной новости живут в blocks/news-detail.css и в общий
+        // бандл не входят: см. AssetCollector::THEME_PART_MAP.
         '/assets/css/gov-theme.css',
         '/assets/css/rich-content.css',
         '/assets/css/a11y.css',

@@ -44,7 +44,7 @@ test('Тема отдаёт вычисленные варианты акцент
     assert_contains('AccentContrast::onDark', $theme);
     assert_contains('--gov-teal-on-dark', $theme);
 
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     // На тёмных подложках текстовый акцент переключается на светлый вариант.
     assert_contains('.cms-block--bg-navy, .block-hero--media, .site-footer { --gov-teal-text: var(--gov-teal-on-dark); }', $css);
     // Мелкие ссылки берут текстовый вариант, а не «графический» акцент.

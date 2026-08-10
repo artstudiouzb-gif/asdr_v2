@@ -60,7 +60,7 @@ test('Точки хронологии и этапов не обрезаются 
 });
 
 test('Цветовая цепочка этапов различает завершённый, текущий и запланированный статусы', function (): void {
-    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $theme = theme_css();
 
     // Соединительная линия завершённого этапа красится по состоянию следующего
     // этапа (`stage--next-done` / `stage--next-active`), а не по

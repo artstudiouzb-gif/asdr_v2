@@ -13,11 +13,11 @@
       "/assets/css/public-layout-polish.css",
       "/assets/css/public-editorial-pages.css"
     ],
-    "sourceSha256": "71ccbf5c702bc65d21761e07033ff07e7b41e23fbc242c3ce836c2623f681c6d",
-    "sha256": "27067c3ace69c2f08200818139f5bc6e8bffda6946600f2fc92fc4a944086f84",
-    "raw": 420100,
-    "gzip": 69078,
-    "brotli": 53754
+    "sourceSha256": "a5ab15f5085798376879d4130eb6ef22d3167ebb3aa4c4e661172e2c5a4a2be1",
+    "sha256": "ff2dc433c7e15b60dfbbe5075ae3e76a07d21c91b1089b14b50e7842e91cf344",
+    "raw": 383180,
+    "gzip": 63339,
+    "brotli": 49744
   },
   "js": {
     "path": "/assets/js/public.min.js",
@@ -33,6 +33,14 @@
     "brotli": 13571
   },
   "blocks": {
+    "/assets/css/blocks/news-detail.css": {
+      "path": "/assets/css/blocks/news-detail.min.css",
+      "sourceSha256": "289bf0b394d85bcc152e99688e2a15ac41de9c6c52ee4ebb1fb4b8fb6dd773fc",
+      "sha256": "2e2957def793ce25b906b76841c14e3b5dea961981d178fb019f21b31909ad49",
+      "raw": 37253,
+      "gzip": 6999,
+      "brotli": 6150
+    },
     "/assets/css/blocks/u30-report.css": {
       "path": "/assets/css/blocks/u30-report.min.css",
       "sourceSha256": "74bb2f92de7c82a3a11d8375f1fc43c1ce88892407f1cadb1a7773cfc1ed869d",

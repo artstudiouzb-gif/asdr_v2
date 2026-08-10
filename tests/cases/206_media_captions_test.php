@@ -58,7 +58,7 @@ test('Страница новости: подпись и автор под га�
 });
 
 test('Подпись — один фирменный компонент, 12px, без капслока', function () {
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     $block = substr($css, (int) strpos($css, '.media-caption {'), 700);
 
     // Владелец задал предел: подпись не крупнее 12px.

@@ -60,7 +60,7 @@ test('Конструктор шапки выводит и применяет н�
     $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/HeaderController.php');
     $header = (string) file_get_contents(APP_ROOT . '/app/Views/site/_header.php');
     $themeCss = (string) file_get_contents(APP_ROOT . '/app/Core/SiteThemeCss.php');
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     foreach ([
         'styles_submenu_style',

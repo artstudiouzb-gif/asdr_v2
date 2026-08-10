@@ -47,7 +47,7 @@ test('Priority-бургер является последним элементо
 });
 
 test('Прозрачная шапка использует компактный hamburger без белой карточки', function (): void {
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     assert_contains('body .site-header--transparent:not(.is-scrolled) .site-burger,', $css);
     assert_contains('body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle {', $css);
@@ -58,7 +58,7 @@ test('Прозрачная шапка использует компактный 
 });
 
 test('Ссылки панели «Ещё» контрастны на прозрачной шапке', function (): void {
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     assert_contains(
         'body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__link,',

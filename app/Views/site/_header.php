@@ -700,6 +700,9 @@ foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
 <?php foreach (\App\Core\FrontendAssets::styles() as $stylesheet): ?>
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url($stylesheet), ENT_QUOTES) ?>">
 <?php endforeach; ?>
+<?php // Части темы, вынесенные из бандла (стили детальной новости и т.п.).
+      // Место строго здесь: после темы, но до дизайн-CSS из админки. ?>
+<?= \App\Core\AssetCollector::renderThemeStyles() ?>
 <?php foreach ($generatedCssUrls as $cssScope => $generatedCssUrl): ?>
 <link rel="stylesheet" href="<?= htmlspecialchars($generatedCssUrl, ENT_QUOTES) ?>" data-generated-site-css="<?= htmlspecialchars($cssScope, ENT_QUOTES) ?>">
 <?php endforeach; ?>

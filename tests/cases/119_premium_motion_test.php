@@ -16,7 +16,7 @@ test('Главные CTA и преимущества используют дос
 });
 
 test('Карусель проектов не отключает анимации своих карточек', function (): void {
-    $govCss = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $govCss = theme_css();
     $frontendCss = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/frontend.css');
 
     assert_true(!str_contains($govCss, '[data-carousel-track] *'), 'Вложенные переходы карусели должны оставаться активными');
@@ -25,7 +25,7 @@ test('Карусель проектов не отключает анимации
 });
 
 test('Счётчики без стекла и поворота, новости появляются мягко', function (): void {
-    $govCss = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $govCss = theme_css();
     $frontendCss = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/frontend.css');
 
     $countersStart = (int) strpos($govCss, '.block-counters {');
@@ -46,7 +46,7 @@ test('Счётчики без стекла и поворота, новости �
 });
 
 test('Медиакарточки не поднимаются при наведении', function (): void {
-    $govCss = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $govCss = theme_css();
 
     assert_false(
         (bool) preg_match('/[^{}]*\.mediacard[^{}]*:hover[^{}]*\{[^{}]*transform:\s*translateY/s', $govCss),

@@ -112,7 +112,7 @@ test('Оглавление: скрытый по расписанию разде�
 });
 
 test('Эмблема агентства подключена файлом и лежит на месте', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     $svg = dirname(__DIR__, 2) . '/public/assets/img/emblem.svg';
 
     assert_contains('--gov-emblem: url("../img/emblem.svg")', $css);
@@ -126,7 +126,7 @@ test('Эмблема агентства подключена файлом и л�
 });
 
 test('Оглавление: закреплённая полоса не перекрывает якоря', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     $js = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/blocks/anchor_nav.js');
 
     // Липкой должна быть секция: sticky внутри низкого блока уезжает вместе с ним.

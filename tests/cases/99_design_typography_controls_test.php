@@ -71,7 +71,7 @@ test('форма дизайна объединяет источники шриф
 });
 
 test('детальная новость использует управляемые вертикальные отступы и ровную линию метаданных', function (): void {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     assert_contains('padding-top: var(--newsdetail-padding-top, 0px);', $css);
     assert_contains('padding-bottom: var(--newsdetail-padding-bottom, clamp(32px, 5vw, 72px));', $css);

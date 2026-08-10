@@ -17,7 +17,7 @@ test('локальный каталог содержит Inter Tight с нужн
 });
 
 test('прозрачная мобильная шапка сохраняет видимый бургер и контрастное раскрытое меню', function (): void {
-    $css = file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     assert_true(is_string($css));
     assert_contains('body .site-header--transparent:not(.is-scrolled) .site-burger,', $css);
     assert_contains('body.design-mmenu-burger.mobile-menu-open .site-header--transparent:not(.is-scrolled) .site-menu__link {', $css);

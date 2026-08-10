@@ -120,7 +120,7 @@ test('Блок media_gallery: переключатели видео/фото п�
     assert_contains('data-media-grid', $out);
     assert_contains('mediagallery-grid--cols-1', $out);
 
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     assert_contains('.media-tabs__tab::after', $css);
     assert_contains('.media-tabs__tab.is-active::after', $css);
     assert_contains('.mediagallery-grid--cols-3 { --media-columns: 3; }', $css);

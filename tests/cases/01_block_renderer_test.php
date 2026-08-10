@@ -104,7 +104,7 @@ test('BlockRenderer: cards_grid применяет размер и отключ�
     assert_contains('font-size:var(--font-size-h3,clamp(18px,1.35vw,21px))', $result['css']);
     assert_not_contains('.feature-card__icon svg{width:38px', $result['css']);
 
-    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $theme = theme_css();
     assert_contains('var(--feature-card-icon-size, 22px) !important', $theme);
     assert_contains('.block-cards--icons-no-bg .feature-card:hover .feature-card__icon', $theme);
     assert_contains('.block-cards--icon-pos-right .feature-card--has-icon .feature-card__icon', $theme);

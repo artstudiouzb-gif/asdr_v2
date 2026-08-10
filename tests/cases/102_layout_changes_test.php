@@ -158,7 +158,7 @@ test('News: frontend layout rendering with and without sidebar', function () {
     assert_contains('newsdetail-card--summary', $htmlNoSidebar, 'Смысловые тезисы не зависят от набора пользовательских виджетов');
     assert_contains('newsdetail-side newsdetail-side--right', $htmlNoSidebar, 'Тезисы выводятся в информационной колонке новости');
 
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     assert_contains('align-items: stretch;', $css, 'медиазона не схлопывается без ленты миниатюр');
     assert_contains('width: 100%;', substr($css, (int) strpos($css, '.newsdetail:not(.newsdetail--premium) .newsdetail-gallery {'), 220));
     foreach ([

@@ -112,7 +112,7 @@ test('Hero: overlay поддерживает сплошную заливку б�
 
     assert_contains('block-hero__scrim--solid', $html);
 
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     assert_contains('.block-hero__scrim--solid { background: rgba(var(--hero-scrim-rgb), var(--hero-scrim-a)); }', $css);
 });
 
@@ -189,14 +189,14 @@ test('Hero: форма и сохранение содержат два явны�
 });
 
 test('Hero: мобильное фото сохраняет исходную непрозрачность', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     assert_contains('.block-hero--media .block-hero__media { opacity: 1; }', $css);
     assert_not_contains('calc(var(--hero-scrim-a) * 1.31)', $css);
 });
 
 test('Hero: градиент затемнения держит плотность под текстом и не гаснет до нуля', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     $form = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/admin/pages/block_form.php');
 
     // Полная плотность у ближнего края и почти полная под текстовой колонкой.
@@ -212,7 +212,7 @@ test('Hero: градиент затемнения держит плотност�
 });
 
 test('Hero: на телефоне затемнение почти равномерное, а надзаголовок читается на фото', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     // Текст на телефоне занимает всю ширину, боковой градиент там не спасает.
     assert_contains('.block-hero__scrim:not(.block-hero__scrim--solid)', $css);

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 test('public cards expose consistent keyboard and pointer states', function (): void {
-    $css = file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     assert_true(is_string($css));
     assert_contains('.news-card__link, .newsfeat-lead, .newsfeat-mini', $css);
@@ -13,7 +13,7 @@ test('public cards expose consistent keyboard and pointer states', function (): 
 });
 
 test('public layouts include narrow header and grid safeguards', function (): void {
-    $css = file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     assert_true(is_string($css));
     assert_contains('@media (max-width: 1000px) and (min-width: 721px)', $css);

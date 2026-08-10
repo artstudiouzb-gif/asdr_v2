@@ -46,7 +46,7 @@ test('Блоки без выбранных цветов не добавляют 
 });
 
 test('Настройка фона кнопок имеет приоритет над государственной темой', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     assert_contains('.block-hero--media .block-hero__button:not(.block-hero__button--ghost)', $css);
     assert_contains('background: var(--hero-btn, #16406e) !important;', $css);
     assert_contains('.block-hero__button--ghost { background: transparent !important;', $css);

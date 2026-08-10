@@ -8,7 +8,7 @@ declare(strict_types=1);
  */
 
 test('Карточки: стрелка не отрывается от заголовка', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     // С обычным пробелом стрелка переносилась на следующую строку и липла
     // к тексту — «…рост→».
@@ -20,7 +20,7 @@ test('Карточки: стрелка не отрывается от загол
 });
 
 test('Карточки: номер не спорит с заголовком', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     // Номер направления был 2.6rem при заголовке 1.12rem.
     assert_true(
@@ -30,7 +30,7 @@ test('Карточки: номер не спорит с заголовком', f
 });
 
 test('Карточки новостей: ровные интервалы вместо растянутого промежутка', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     // margin-top: auto прижимал анонс к низу, и расстояние «заголовок → анонс»
     // у соседей по ряду отличалось вдвое.
@@ -40,7 +40,7 @@ test('Карточки новостей: ровные интервалы вме�
 });
 
 test('Карточки с фото: изображение не окружено внутренней рамкой', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     assert_true(
         (bool) preg_match('/\.relnews-card\s*\{[^}]*padding:\s*0 0 14px;[^}]*overflow:\s*hidden;/s', $css),
@@ -53,7 +53,7 @@ test('Карточки с фото: изображение не окружено
 });
 
 test('Карточки: материал без изображения получает фирменную подложку', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     assert_contains('span.imgcard__media', $css);
     assert_contains('mask: var(--gov-emblem) center / 58% no-repeat;', $css);
@@ -61,7 +61,7 @@ test('Карточки: материал без изображения полу�
 });
 
 test('Карточки: подпись читается и на светлом фото', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     // Прежний градиент начинал затемнение только на 30% высоты и оставлял
     // белый заголовок на светлом небе почти без контраста.
@@ -70,7 +70,7 @@ test('Карточки: подпись читается и на светлом �
 
 test('Токены: один радиус и подвал по числу колонок', function () {
     $base = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/frontend.css');
-    $theme = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $theme = theme_css();
 
     preg_match('/--radius:\s*(\d+)px/', $base, $baseRadius);
     preg_match('/--radius:\s*(\d+)px/', $theme, $themeRadius);

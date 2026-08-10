@@ -47,6 +47,10 @@ final class NewsController
             return;
         }
 
+        // Список новостей строится на карточках .relnews-card, а они лежат в
+        // вынесенной части темы вместе со стилями детальной новости.
+        \App\Core\AssetCollector::requireThemePart('news_detail');
+
         View::render('site/news_index', $vars);
     }
 
@@ -176,6 +180,11 @@ final class NewsController
         $adjacent = News::adjacent($news, $lang);
 
         $sidebar = \App\Core\WidgetRenderer::sidebarFor($news['sidebar_layout'] ?? 'right_sidebar', $lang);
+
+        // Стили детальной новости (.newsdetail-*, .relnews-*) вынесены из
+        // общего бандла: 42 КБ правил, нужных только здесь, приезжали на
+        // каждую страницу сайта, включая главную.
+        \App\Core\AssetCollector::requireThemePart('news_detail');
 
         View::render('site/news_show', [
             'news' => $news,

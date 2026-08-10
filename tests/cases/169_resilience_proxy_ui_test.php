@@ -62,7 +62,7 @@ test('search load is bounded and repeated requests are cached', function (): voi
 });
 
 test('mobile controls meet coarse pointer target size and notices are announced', function (): void {
-    $publicCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $publicCss = theme_css();
     $adminCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/admin.css');
     $siteHeader = (string) file_get_contents(APP_ROOT . '/app/Views/site/_header.php');
     $adminHeader = (string) file_get_contents(APP_ROOT . '/app/Views/admin/layout/header.php');

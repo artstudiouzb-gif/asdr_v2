@@ -39,3 +39,13 @@ test('Переключатель языка передаёт явный выбо
     $cache = (string) file_get_contents(APP_ROOT . '/app/Core/PublicResponseCache.php');
     assert_contains('LocalePreference::changedThisRequest()', $cache);
 });
+
+test('Сохранённый язык перебивает адрес только на корне сайта', function (): void {
+    $router = (string) file_get_contents(APP_ROOT . '/app/Core/Router.php');
+
+    // Раньше редирект по cookie срабатывал на любом адресе: ссылка на
+    // /uz/news/x уводила человека с русской настройкой на /news/x, а ответ
+    // каждой страницы зависел от cookie и не кешировался на CDN.
+    assert_contains("\$storedCode !== \$code && \$rest === '/'", $router);
+    assert_contains("\$storedCode !== \$defaultCode && \$path === '/'", $router);
+});

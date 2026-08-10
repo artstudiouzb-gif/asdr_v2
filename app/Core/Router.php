@@ -135,7 +135,12 @@ final class Router
             $code = strtolower($m[1]);
             if ($code !== $defaultCode && in_array($code, $activeCodes, true)) {
                 $rest = $m[2] === '' ? '/' : $m[2];
-                if ($storedCode !== null && $storedCode !== $code) {
+                // Сохранённый язык перебивает адрес только на корне сайта.
+                // На конкретной странице выигрывает язык из URL: иначе ссылка
+                // на /uz/news/x, присланная человеку с русской настройкой,
+                // уводила бы его на /news/x, а ответ каждой страницы зависел
+                // бы от cookie и не мог кэшироваться на CDN.
+                if ($storedCode !== null && $storedCode !== $code && $rest === '/') {
                     if (in_array(strtoupper($method), ['GET', 'HEAD'], true)) {
                         $target = Locale::url($rest, $storedCode) . LocalePreference::querySuffix($uri);
                         header('Cache-Control: private, no-store');
@@ -159,7 +164,9 @@ final class Router
             }
         }
 
-        if ($storedCode !== null && $storedCode !== $defaultCode) {
+        // То же правило для адресов основного языка (без префикса): на корень
+        // сохранённый язык действует, на конкретную страницу — нет.
+        if ($storedCode !== null && $storedCode !== $defaultCode && $path === '/') {
             if (in_array(strtoupper($method), ['GET', 'HEAD'], true)) {
                 $target = Locale::url($path, $storedCode) . LocalePreference::querySuffix($uri);
                 header('Cache-Control: private, no-store');

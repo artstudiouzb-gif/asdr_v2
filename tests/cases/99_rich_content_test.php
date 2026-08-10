@@ -43,7 +43,7 @@ test('text_image поддерживает безопасный HTML и стар�
 test('text_image адаптируется к ширине контейнера с viewport fallback', function (): void {
     $root = dirname(__DIR__, 2);
     $css = (string) file_get_contents($root . '/public/assets/css/public-layout-polish.css');
-    $fallback = (string) file_get_contents($root . '/public/assets/css/gov-theme.css');
+    $fallback = theme_css();
 
     assert_contains('.cms-block--text_image {', $css);
     assert_contains('container-type: inline-size;', $css);
@@ -77,7 +77,7 @@ test('rich content stylesheet covers editorial elements and responsive tables', 
 });
 
 test('детальный проект использует всю ширину контейнера для rich-content', function (): void {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     assert_contains('.projdetail__content { width: 100%; max-width: none; }', $css);
     assert_false(str_contains($css, '.projdetail__content { max-width: 76ch; }'));

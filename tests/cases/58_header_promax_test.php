@@ -35,7 +35,7 @@ test('HeaderConfig Pro Max: элемент может повторяться в 
 });
 
 test('Topbar: утилитарные иконки наследуют цвет и имеют единый размер', function () {
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     assert_contains('.site-topbar .site-theme-toggle,', $css);
     assert_contains('color: inherit !important;', $css);
     assert_contains('width: 18px !important;', $css);

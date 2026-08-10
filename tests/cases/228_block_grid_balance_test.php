@@ -119,7 +119,7 @@ test('Карточки персон: «Вакантно» только у кар
 });
 
 test('Контент блоков не зажат мерой строки в ch', function () {
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     // Колонка в ch обрывала текст раньше, чем кончался контейнер: заголовок
     // текстового блока, лид страницы и текст профиля жили в своей ширине.
     foreach (['.block-text__title', '.content-pagehead__lead', '.profile__text', '.listing__lead', '.catdetail__body'] as $selector) {
@@ -137,7 +137,7 @@ test('Контент блоков не зажат мерой строки в ch'
 });
 
 test('Этапы: сплошной полосы во всю ширину нет — линия кончается на последней точке', function () {
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     // Полоса .stages::before тянулась от left:0 до right:0 и продолжалась
     // за последнюю точку хвостом на всю пустую часть ряда.
     assert_not_contains('.stages::before', $css);

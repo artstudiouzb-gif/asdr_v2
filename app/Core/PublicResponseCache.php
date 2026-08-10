@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Models\Language;
 use App\Models\Setting;
 
 /** HTTP/CDN-кеширование только общих публичных ответов без сессии. */
@@ -47,7 +48,8 @@ final class PublicResponseCache
             (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'),
             $sessionActive,
             $status,
-            $hasAuthorization
+            $hasAuthorization,
+            Language::activeCodes()
         )) {
             if ($sessionActive || $hasAuthorization) {
                 header('Cache-Control: private, no-store');
@@ -66,23 +68,44 @@ final class PublicResponseCache
             $browserTtl,
             $sharedTtl
         ));
-        // Один и тот же URL может быть запрошен с разным сохранённым языком.
-        // Без Vary браузер повторно показывает ранее закешированную языковую
-        // копию и запрос не доходит до редиректа в Router::resolveLocale().
-        header('Vary: Accept-Encoding, Cookie');
+        // Раньше здесь всегда стоял «Vary: Accept-Encoding, Cookie», потому что
+        // Router::resolveLocale() редиректил по сохранённому языку на любом
+        // адресе: закешированная копия увела бы посетителя мимо редиректа.
+        // Теперь этот редирект работает только на корне сайта (корни ниже
+        // исключены из кеширования), поэтому язык страницы определяется её
+        // адресом, а не cookie.
+        //
+        // Остальные значения cookie «a11y» на общий кеш не влияют: атрибуты
+        // отображения переставляет theme-init.js до первой отрисовки.
+        // Исключение — узбекская кириллица: её даёт транслитерация готовой
+        // страницы на сервере (View::wantsCyrillic), клиент это повторить не
+        // может, поэтому узбекские ответы по-прежнему зависят от cookie.
+        $varyCookie = Locale::current() === 'uz';
+        header('Vary: Accept-Encoding' . ($varyCookie ? ', Cookie' : ''));
     }
 
+    /**
+     * @param list<string>|null $activeCodes Активные языки; нужны, чтобы
+     *        отличить корень языка («/uz») от страницы со схожим slug
+     *        («/news»). null — считать корнем только «/».
+     */
     public static function isCacheableRequest(
         string $path,
         string $method,
         bool $sessionActive,
         int $status,
-        bool $hasAuthorization = false
+        bool $hasAuthorization = false,
+        ?array $activeCodes = null
     ): bool {
         if (!in_array(strtoupper($method), ['GET', 'HEAD'], true)
             || $sessionActive
             || $hasAuthorization
             || $status !== 200) {
+            return false;
+        }
+
+        // Корни языков отдают либо страницу, либо редирект — по cookie.
+        if (self::isLanguageRootPath($path, $activeCodes ?? [])) {
             return false;
         }
 
@@ -93,6 +116,25 @@ final class PublicResponseCache
         // Публичные маршруты могут иметь языковой префикс (/uz/search).
         $localizedPath = preg_replace('#^/[a-zA-Z]{2,8}(?=/|$)#', '', $path) ?: '/';
         return !self::isPrivatePath($localizedPath);
+    }
+
+    /**
+     * Корень сайта и корни языков («/», «/uz», «/uz/»). Только на них
+     * Router::resolveLocale() ещё редиректит по сохранённому языку, поэтому
+     * ответ зависит от cookie и в общий кеш не годится.
+     *
+     * Сверяемся со списком активных языков, а не с шаблоном «/xx»: иначе
+     * обычная страница со slug из двух-восьми букв (/news, /contacts) тоже
+     * считалась бы корнем и потеряла кеширование.
+     */
+    public static function isLanguageRootPath(string $path, array $activeCodes): bool
+    {
+        $trimmed = rtrim($path, '/');
+        if ($trimmed === '') {
+            return true;
+        }
+
+        return in_array(strtolower(ltrim($trimmed, '/')), array_map('strtolower', $activeCodes), true);
     }
 
     private static function isPrivatePath(string $path): bool

@@ -46,7 +46,7 @@ test('Адаптивная карусель подключена только к
 
 test('Единый движок управляет переполнением, клавиатурой и reduced motion', function (): void {
     $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js');
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     assert_contains("querySelectorAll('[data-carousel]')", $js);
     assert_contains("event.key === 'ArrowLeft'", $js);

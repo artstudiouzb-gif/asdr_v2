@@ -196,7 +196,7 @@ test('Преимущества, контакты и правовые акты и
     assert_contains('.act-card__desc', $cardTextSelectors);
     assert_not_contains('.act-card__desc', $cardTitleSelectors);
 
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     assert_contains('.feature-card.block-advantages__item', $css);
     assert_contains('.feature-card.contact-card', $css);
     assert_contains('.feature-card.act-card', $css);

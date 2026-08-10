@@ -28,6 +28,7 @@ const jsSources = [
 // u30_report.js как 120 КБ. Здесь они проходят ту же обработку, что и бандлы,
 // и попадают в манифест отдельным разделом.
 const blockSources = [
+    'public/assets/css/blocks/news-detail.css',
     'public/assets/css/blocks/u30-report.css',
     'public/assets/js/blocks/u30_report.js',
     'public/assets/js/blocks/slider.js',

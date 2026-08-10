@@ -59,7 +59,7 @@ test('Хронология поддерживает статусы и совме
 });
 
 test('CSS различает завершённые, текущие и будущие участки', function () {
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     assert_contains('.stage--done.stage--next-active::before', $css);
     assert_contains('.timeline-item--done.timeline-item--next-active::after', $css);

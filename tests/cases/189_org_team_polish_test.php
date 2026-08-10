@@ -13,7 +13,7 @@ use App\Core\Search;
  */
 
 test('Оргсхема: печать не теряет тёмные карточки', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     $print = strstr($css, '@media print {
     .orgstruct');
     assert_true($print !== false, 'нет печатных правил для схемы');

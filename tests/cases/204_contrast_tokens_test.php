@@ -28,7 +28,7 @@ test('Тема отдаёт --on-accent, а ссылки им пользуютс
     $css = \App\Core\SiteThemeCss::build([], \App\Core\HeaderConfig::DEFAULTS, false);
     assert_contains('--on-accent:', $css);
 
-    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $theme = theme_css();
     assert_contains(".media-tabs__tab.is-active { \n    color: #fff !important;", $theme);
     assert_contains('border-radius: var(--radius-sm, 10px)', $theme);
 
@@ -40,7 +40,7 @@ test('Тема отдаёт --on-accent, а ссылки им пользуютс
 });
 
 test('Ряд заголовка секции переносится и не рвёт вёрстку на 320px', function () {
-    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $theme = theme_css();
 
     // Ссылка «Все …» и стрелки карусели в одну строку на 320px не влезают:
     // без переноса блок вылезал за окно на 19px и давал скролл вбок.

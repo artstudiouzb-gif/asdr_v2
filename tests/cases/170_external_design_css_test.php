@@ -22,7 +22,7 @@ test('dynamic design CSS is published as an immutable external asset', function 
 
 test('public header has no inline CSS or embedded style blocks', function (): void {
     $header = (string) file_get_contents(APP_ROOT . '/app/Views/site/_header.php');
-    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $theme = theme_css();
 
     assert_not_contains(' style="', $header);
     assert_not_contains('<style', $header);

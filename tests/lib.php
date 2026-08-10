@@ -188,3 +188,34 @@ function reset_design_state(): void
         ->execute($keys);
     \App\Models\Setting::set('design_preset', ''); // заодно сбрасывает кэш настроек
 }
+
+/**
+ * Публичная тема целиком: gov-theme.css плюс части, вынесенные из общего
+ * бандла ради страниц, которым они не нужны (AssetCollector::THEME_PART_MAP).
+ *
+ * Тесты проверяют правила темы, а не то, в каком файле они лежат. Читать
+ * напрямую gov-theme.css нельзя: очередной вынос по разделу 2.1 плана
+ * (docs/PERFORMANCE_PLAN.md) молча уронил бы половину проверок вёрстки.
+ */
+function theme_css(): string
+{
+    static $css = null;
+    if ($css !== null) {
+        return $css;
+    }
+
+    $parts = [APP_ROOT . '/public/assets/css/gov-theme.css'];
+    foreach (glob(APP_ROOT . '/public/assets/css/blocks/*.css') ?: [] as $file) {
+        // Минифицированные сборки — производные, в проверках не участвуют.
+        if (!str_ends_with($file, '.min.css')) {
+            $parts[] = $file;
+        }
+    }
+
+    $css = '';
+    foreach ($parts as $file) {
+        $css .= (string) @file_get_contents($file) . "\n";
+    }
+
+    return $css;
+}

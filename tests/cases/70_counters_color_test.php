@@ -26,7 +26,7 @@ test('Counters: без цветов — без инлайн-стиля (знач
 });
 
 test('Counters: цифры сплошного цвета, а не градиентом по тексту', function () {
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
 
     // Градиент по тексту (`background-clip: text` + прозрачная заливка)
     // перекрывал «Цвет текста» блока: что бы редактор ни выбрал, цифры
@@ -57,7 +57,7 @@ test('Counters: размер, фон, положение и выравниван
     assert_contains('block-counters--icon-pos-right', $rendered['html']);
     assert_contains('block-counters--text-align-center', $rendered['html']);
 
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    $css = theme_css();
     assert_contains('var(--counter-icon-size, 28px) !important', $css);
     assert_contains('.block-counters--icons-no-bg .counter:hover .counter__icon', $css);
     assert_contains('.block-counters--icon-pos-right .counter', $css);

@@ -20,12 +20,12 @@ test('Контент: ширину текста новости не ограни
     // колонки, как и текст под ним. Токен удалён, чтобы не тянуть за собой
     // неиспользуемую «половинную» ширину.
     assert_not_contains('--rich-measure:', $css);
-    $theme = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $theme = theme_css();
     assert_contains('.block-text__title { max-width: none; }', $theme);
 });
 
 test('Лид новости набран как текст статьи и занимает контейнер', function () {
-    $theme = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $theme = theme_css();
     $pos = (int) strpos($theme, '.newsdetail__lead {');
     assert_true($pos > 0, 'правило лида на месте');
     $rule = substr($theme, $pos, 460);
@@ -68,7 +68,7 @@ test('Контент: ссылки в тексте не полужирные', f
 });
 
 test('Контент: первый блок не отбивается от шапки страницы дважды', function () {
-    $theme = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+    $theme = theme_css();
 
     assert_contains('.content-pagehead + .cms-block,', $theme);
     assert_contains('.content-pagehead + .layout .cms-block:first-child', $theme);

@@ -33,6 +33,20 @@ final class AssetCollector
         'u30_report' => '/assets/css/blocks/u30-report.css',
     ];
 
+    /**
+     * Части темы, вынесенные из общего бандла ради страниц, которым они не
+     * нужны. От CSS_MAP отличаются местом подключения: сразу после бандла и
+     * ДО дизайн-CSS из админки — то есть там же, где эти правила лежали
+     * внутри gov-theme.css. Подключи их наравне с блочными стилями, и
+     * настройки раздела «Дизайн» проиграли бы им на этих страницах.
+     */
+    private const THEME_PART_MAP = [
+        'news_detail' => '/assets/css/blocks/news-detail.css',
+    ];
+
+    /** @var array<string, bool> */
+    private static array $themeParts = [];
+
     public static function requireJs(string $key): void
     {
         if (isset(self::JS_MAP[$key])) {
@@ -49,10 +63,31 @@ final class AssetCollector
         self::$css[$key] = $href;
     }
 
+    /** Подключает вынесенную часть темы (см. THEME_PART_MAP). */
+    public static function requireThemePart(string $key): void
+    {
+        if (isset(self::THEME_PART_MAP[$key])) {
+            self::$themeParts[$key] = true;
+        }
+    }
+
     public static function reset(): void
     {
         self::$js = [];
         self::$css = [];
+        self::$themeParts = [];
+    }
+
+    /** Части темы: выводятся сразу после общего бандла, до дизайн-CSS. */
+    public static function renderThemeStyles(): string
+    {
+        $html = '';
+        foreach (array_keys(self::$themeParts) as $key) {
+            $url = Asset::url(FrontendAssets::blockAsset(self::THEME_PART_MAP[$key]));
+            $html .= '<link rel="stylesheet" href="' . htmlspecialchars($url, ENT_QUOTES) . '" data-theme-part>' . "\n";
+        }
+
+        return $html;
     }
 
     public static function renderScripts(): string
