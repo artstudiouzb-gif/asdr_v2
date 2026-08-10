@@ -59,15 +59,44 @@ test('По умолчанию: цвета и шрифты фирменные', f
 });
 
 test('Расширенная кириллица покрыта: узбекские буквы попадают в подключаемое подмножество', function () {
-    // Ғғ Ққ Ҳҳ — U+0492..U+04B3, это диапазон cyrillic-ext. Без него узбекская
-    // кириллица рисуется системным шрифтом вперемешку с основным.
+    // Проверяем по существу, а не по строке диапазона: файл cyrillic-ext
+    // обрезан со всей исторической кириллицы до современных тюркских букв,
+    // поэтому дословный диапазон Google здесь уже не встречается.
+    //
+    // Узбекские Ғғ Ққ Ҳҳ и казахские Әә Ңң Өө Үү Һһ. Без них кириллица
+    // рисуется системным шрифтом вперемешку с основным.
+    $letters = [
+        'Ғ' => 0x0492, 'ғ' => 0x0493, 'Қ' => 0x049A, 'қ' => 0x049B,
+        'Ҳ' => 0x04B2, 'ҳ' => 0x04B3, 'Ә' => 0x04D8, 'Ң' => 0x04A2,
+        'Ө' => 0x04E8, 'Ү' => 0x04AE, 'Һ' => 0x04BA,
+    ];
+
     foreach (['inter', 'noto-serif'] as $slug) {
         $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/' . $slug . '.css');
-        assert_contains('U+0460-052F', $css, $slug . ': нет диапазона расширенной кириллицы');
         assert_true(
-            preg_match('/cyrillic-ext/', $css) === 1,
+            preg_match('/\/\* cyrillic-ext \*\/\s*@font-face\s*\{[^}]*unicode-range:\s*([^;]+);/s', $css, $m) === 1,
             $slug . ': не объявлено подмножество cyrillic-ext'
         );
+
+        $covered = static function (int $code) use ($m): bool {
+            foreach (explode(',', $m[1]) as $part) {
+                $part = trim($part);
+                if (preg_match('/^U\+([0-9A-Fa-f]+)-([0-9A-Fa-f]+)$/', $part, $range) === 1) {
+                    if ($code >= hexdec($range[1]) && $code <= hexdec($range[2])) {
+                        return true;
+                    }
+                } elseif (preg_match('/^U\+([0-9A-Fa-f]+)$/', $part, $single) === 1
+                    && $code === (int) hexdec($single[1])) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        foreach ($letters as $letter => $code) {
+            assert_true($covered($code), $slug . ": буква {$letter} вне объявленного диапазона");
+        }
     }
 });
 
