@@ -171,7 +171,7 @@ final class DesignController
             } elseif (array_key_exists('font_google_' . $role, $preview)) {
                 Setting::overrideInMemory('design_font_google_' . $role, '');
                 if ($role === 'heading') {
-                    $bodyFont = (string) Setting::get('font_family', "'PT Sans', 'PT Sans Fallback', system-ui, sans-serif");
+                    $bodyFont = (string) Setting::get('font_family', \App\Core\SiteThemeCss::DEFAULT_BODY_FONT);
                     Setting::overrideInMemory('font_heading', $bodyFont);
                 }
             }

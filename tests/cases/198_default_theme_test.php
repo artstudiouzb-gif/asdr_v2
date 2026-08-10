@@ -33,14 +33,40 @@ test('По умолчанию: цвета и шрифты фирменные', f
     // Палитра из утверждённой концепции дизайна: тёмно-синий и бирюзовый.
     assert_contains("Setting::get('color_primary', '#0F2B46')", $theme);
     assert_contains("Setting::get('color_accent', '#009BBE')", $theme);
-    // Manrope и в заголовках, и в тексте — так задано в концепции; лежит локально.
-    assert_contains("'Manrope', system-ui", $theme);
-    assert_not_contains("'PT Serif', Georgia, serif", $theme);
+    // Пара по умолчанию: Inter — текст, Noto Serif — заголовки. Оба лежат
+    // локально. Умолчания объявлены ровно в одном месте: раньше SiteThemeCss
+    // и шапка задавали разные семейства, и сайт предзагружал шрифты, которыми
+    // ничего не набрано.
+    assert_contains("DEFAULT_BODY_FONT = \"'Inter'", $theme);
+    assert_contains("DEFAULT_HEADING_FONT = \"'Noto Serif'", $theme);
 
-    foreach (['manrope-400-cyrillic.woff2', 'manrope-700-cyrillic.woff2'] as $file) {
+    $header = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/site/_header.php');
+    assert_contains('SiteThemeCss::fontStacks()', $header, 'шапка берёт стек из общего источника');
+    assert_not_contains("Setting::get('font_family'", $header, 'второго умолчания в шапке быть не должно');
+
+    // Расширенная кириллица обязательна: узбекские Ғ Қ Ҳ лежат в cyrillic-ext.
+    foreach ([
+        'inter/inter-400-cyrillic.woff2',
+        'inter/inter-400-cyrillic-ext.woff2',
+        'noto-serif/noto-serif-400-cyrillic.woff2',
+        'noto-serif/noto-serif-400-cyrillic-ext.woff2',
+    ] as $file) {
         assert_true(
             is_file(dirname(__DIR__, 2) . '/public/assets/fonts/' . $file),
             "шрифт {$file} должен лежать в проекте, а не грузиться со стороны"
+        );
+    }
+});
+
+test('Расширенная кириллица покрыта: узбекские буквы попадают в подключаемое подмножество', function () {
+    // Ғғ Ққ Ҳҳ — U+0492..U+04B3, это диапазон cyrillic-ext. Без него узбекская
+    // кириллица рисуется системным шрифтом вперемешку с основным.
+    foreach (['inter', 'noto-serif'] as $slug) {
+        $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/' . $slug . '.css');
+        assert_contains('U+0460-052F', $css, $slug . ': нет диапазона расширенной кириллицы');
+        assert_true(
+            preg_match('/cyrillic-ext/', $css) === 1,
+            $slug . ': не объявлено подмножество cyrillic-ext'
         );
     }
 });

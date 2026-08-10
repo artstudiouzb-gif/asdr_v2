@@ -11,7 +11,10 @@ use App\Models\Setting;
  *
  * Браузер посетителя никогда не обращается к Google: при сохранении дизайна
  * сервер один раз скачивает только выбранные семейства и дальше отдаёт CSS и
- * WOFF2 со своего домена. Inter Tight входит в дистрибутив заранее.
+ * WOFF2 со своего домена.
+ *
+ * Часть семейств входит в дистрибутив (BUNDLED) — ими набран сайт сразу после
+ * установки, до того как администратор впервые открыл раздел «Дизайн».
  */
 final class LocalGoogleFonts
 {
@@ -22,6 +25,16 @@ final class LocalGoogleFonts
         . 'AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36';
     private const MAX_FONT_BYTES = 3_145_728;
 
+    /**
+     * Семейства из поставки: slug => файл CSS в /assets/css. Скачивать их не
+     * нужно, файлы уже лежат рядом (npm run sync:fonts).
+     */
+    private const BUNDLED = [
+        'inter' => 'inter',
+        'noto-serif' => 'noto-serif',
+        'inter-tight' => 'inter-tight',
+    ];
+
     /** @param list<string> $slugs @return array{ok:bool,error:string} */
     public static function installSelected(array $slugs): array
     {
@@ -29,9 +42,12 @@ final class LocalGoogleFonts
             if ($slug === '' || !isset(DesignSettings::GOOGLE_FONTS[$slug])) {
                 continue;
             }
-            if ($slug === 'inter-tight') {
-                if (!self::bundledInterTightReady()) {
-                    return ['ok' => false, 'error' => 'Локальные файлы Inter Tight отсутствуют.'];
+            if (isset(self::BUNDLED[$slug])) {
+                if (!self::bundledReady($slug)) {
+                    return [
+                        'ok' => false,
+                        'error' => 'Локальные файлы «' . DesignSettings::GOOGLE_FONTS[$slug][0] . '» отсутствуют.',
+                    ];
                 }
                 continue;
             }
@@ -55,14 +71,22 @@ final class LocalGoogleFonts
     public static function stylesheetsForSelected(): array
     {
         $urls = [];
-        foreach (['body', 'heading'] as $role) {
+        $stacks = SiteThemeCss::fontStacks();
+        foreach (['body' => $stacks['body'], 'heading' => $stacks['heading']] as $role => $stack) {
             $slug = (string) Setting::get('design_font_google_' . $role, '');
+            if ($slug === '' || !isset(DesignSettings::GOOGLE_FONTS[$slug])) {
+                // Слуг пуст на свежей установке, а стек уже просит семейство из
+                // поставки. Без этой ветки страница объявляла шрифт, для
+                // которого не подключён ни один @font-face: браузер молча
+                // рисовал системным, а preload всё равно качал файл.
+                $slug = self::bundledSlugForStack($stack);
+            }
             if ($slug === '' || !isset(DesignSettings::GOOGLE_FONTS[$slug])) {
                 continue;
             }
-            if ($slug === 'inter-tight') {
-                if (self::bundledInterTightReady()) {
-                    $urls['inter-tight'] = Asset::url('/assets/css/inter-tight.css');
+            if (isset(self::BUNDLED[$slug])) {
+                if (self::bundledReady($slug)) {
+                    $urls[$slug] = Asset::url('/assets/css/' . self::BUNDLED[$slug] . '.css');
                 }
                 continue;
             }
@@ -72,6 +96,31 @@ final class LocalGoogleFonts
         }
 
         return array_values($urls);
+    }
+
+    /**
+     * Семейство из поставки, которым начинается стек, — или пустая строка.
+     * Сравнение по началу: «Inter Tight» содержит «Inter», поэтому длинные
+     * имена проверяются первыми.
+     */
+    private static function bundledSlugForStack(string $stack): string
+    {
+        $first = trim(explode(',', $stack)[0] ?? '', " '\"");
+        if ($first === '') {
+            return '';
+        }
+        foreach (self::BUNDLED as $slug => $name) {
+            if (strcasecmp($first, DesignSettings::GOOGLE_FONTS[$slug][0]) === 0) {
+                return $slug;
+            }
+            // В каталоге подпись может отличаться от имени семейства
+            // («Noto Serif (антиква)»), поэтому сверяем и с самим стеком.
+            if (stripos(DesignSettings::GOOGLE_FONTS[$slug][1], "'" . $first . "'") === 0) {
+                return $slug;
+            }
+        }
+
+        return '';
     }
 
     private static function install(string $slug): ?string
@@ -251,23 +300,27 @@ final class LocalGoogleFonts
         return self::coverageError($slug, self::parseFaces($css)) === null;
     }
 
-    private static function bundledInterTightReady(): bool
+    private static function bundledReady(string $slug): bool
     {
+        if (!isset(self::BUNDLED[$slug])) {
+            return false;
+        }
+        $name = self::BUNDLED[$slug];
         $root = self::root();
-        $cssPath = $root . '/public/assets/css/inter-tight.css';
+        $cssPath = $root . '/public/assets/css/' . $name . '.css';
         $css = (string) @file_get_contents($cssPath);
         if ($css === '' || preg_match('/https?:\/\//i', $css)) {
             return false;
         }
-        if (self::coverageError('inter-tight', self::parseFaces($css)) !== null) {
+        if (self::coverageError($slug, self::parseFaces($css)) !== null) {
             return false;
         }
-        preg_match_all("/url\\('\.\.\/fonts\/inter-tight\/([a-z0-9-]+\\.woff2)'\\)/", $css, $files);
+        preg_match_all("/url\\('\.\.\/fonts\/" . preg_quote($name, '/') . "\/([a-z0-9-]+\\.woff2)'\\)/", $css, $files);
         if (($files[1] ?? []) === []) {
             return false;
         }
         foreach (array_unique($files[1]) as $filename) {
-            if (!self::validWoff2($root . '/public/assets/fonts/inter-tight/' . $filename)) {
+            if (!self::validWoff2($root . '/public/assets/fonts/' . $name . '/' . $filename)) {
                 return false;
             }
         }

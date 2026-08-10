@@ -22,14 +22,7 @@ final class SiteThemeCss
         $accent = (string) Setting::get('color_accent', '#009BBE');
         $colors = DesignSettings::semanticColors();
         $spacings = DesignSettings::semanticSpacings();
-        $font = self::fontValue((string) Setting::get(
-            'font_family',
-            "'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
-        ), 'system-ui, sans-serif');
-        // Заголовки идут тем же гротеском, что и текст: так задано в концепции
-        // дизайна. Manrope лежит локально (кириллица и латиница, веса 400-700).
-        $heading = (string) Setting::get('font_heading', "'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif");
-        $heading = self::fontValue($heading !== '' ? $heading : $font, "'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif");
+        ['body' => $font, 'heading' => $heading] = self::fontStacks();
         $styles = (array) ($headerConfig['styles'] ?? []);
 
         $variables = [
@@ -218,7 +211,33 @@ final class SiteThemeCss
      * макет дёргается. Без правки расхождение доходит до 9,4 % по ширине,
      * с ней — 0,6 % (замерено в браузере).
      */
-    private const METRIC_FALLBACKS = ['PT Sans', 'PT Serif', 'Manrope', 'Montserrat', 'Inter Tight'];
+    private const METRIC_FALLBACKS = ['PT Sans', 'PT Serif', 'Manrope', 'Montserrat', 'Inter Tight', 'Inter', 'Noto Serif'];
+
+    /** Пара по умолчанию: Inter — текст, Noto Serif — заголовки. Обе в поставке. */
+    public const DEFAULT_BODY_FONT = "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+    public const DEFAULT_HEADING_FONT = "'Noto Serif', Georgia, 'Times New Roman', serif";
+
+    /**
+     * Единственный источник шрифтовых стеков сайта.
+     *
+     * До этого умолчания были в двух местах и различались: SiteThemeCss рисовал
+     * страницу одним семейством, а шапка предзагружала файлы другого. Сайт
+     * тянул два шрифта, которыми ничего не набрано, — около 49 КБ на каждую
+     * загрузку, и они конкурировали с картинкой первого экрана.
+     *
+     * @return array{body: string, heading: string}
+     */
+    public static function fontStacks(): array
+    {
+        $body = self::fontValue(
+            (string) Setting::get('font_family', self::DEFAULT_BODY_FONT),
+            self::DEFAULT_BODY_FONT
+        );
+        $heading = (string) Setting::get('font_heading', self::DEFAULT_HEADING_FONT);
+        $heading = self::fontValue($heading !== '' ? $heading : $body, self::DEFAULT_HEADING_FONT);
+
+        return ['body' => $body, 'heading' => $heading];
+    }
 
     private static function fontValue(string $value, string $fallback): string
     {

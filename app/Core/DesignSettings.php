@@ -41,11 +41,11 @@ final class DesignSettings
         'pt-serif' => ['PT Serif (антиква)', "'PT Serif', 'PT Serif Fallback', Georgia, serif", 'PT+Serif:wght@400;700'],
         'lora' => ['Lora (антиква)', "'Lora', Georgia, serif", 'Lora:wght@400;600;700'],
         'merriweather' => ['Merriweather (антиква)', "'Merriweather', Georgia, serif", 'Merriweather:wght@400;700'],
-        'noto-serif' => ['Noto Serif (антиква)', "'Noto Serif', Georgia, serif", 'Noto+Serif:wght@400;600;700'],
+        'noto-serif' => ['Noto Serif (антиква)', "'Noto Serif', 'Noto Serif Fallback', Georgia, serif", 'Noto+Serif:wght@400;600;700'],
         'ibm-plex-serif' => ['IBM Plex Serif (антиква)', "'IBM Plex Serif', Georgia, serif", 'IBM+Plex+Serif:wght@400;600;700'],
         'cormorant' => ['Cormorant Garamond (антиква)', "'Cormorant Garamond', Georgia, serif", 'Cormorant+Garamond:wght@500;600;700'],
         'pt-sans' => ['PT Sans', "'PT Sans', 'PT Sans Fallback', system-ui, sans-serif", 'PT+Sans:wght@400;700'],
-        'inter' => ['Inter', "'Inter', system-ui, sans-serif", 'Inter:wght@400;600;700'],
+        'inter' => ['Inter', "'Inter', 'Inter Fallback', system-ui, sans-serif", 'Inter:wght@400;600;700'],
         'inter-tight' => ['Inter Tight', "'Inter Tight', 'Inter Tight Fallback', system-ui, sans-serif", 'Inter+Tight:wght@400;500;600;700'],
         'montserrat' => ['Montserrat', "'Montserrat', 'Montserrat Fallback', system-ui, sans-serif", 'Montserrat:wght@400;600;700'],
         'roboto' => ['Roboto', "'Roboto', system-ui, sans-serif", 'Roboto:wght@400;500;700'],
@@ -63,7 +63,7 @@ final class DesignSettings
     /** Шрифтовые пресеты: значение опции font_style => [подпись, CSS-стек]. */
     public const FONTS = [
         'pt' => ['PT Serif / PT Sans (гос)', "'PT Sans', 'PT Sans Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"],
-        'inter' => ['Inter', "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"],
+        'inter' => ['Inter', "'Inter', 'Inter Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"],
         'system' => ['Системный', "system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif"],
         'serif' => ['С засечками', "Georgia, 'Times New Roman', serif"],
         'custom' => ['Свой шрифт', ''],
@@ -875,7 +875,7 @@ final class DesignSettings
         }
 
         $headingSlug = (string) Setting::get('design_font_google_heading', '');
-        $bodyFont = (string) Setting::get('font_family', "'PT Sans', 'PT Sans Fallback', system-ui, sans-serif");
+        $bodyFont = (string) Setting::get('font_family', SiteThemeCss::DEFAULT_BODY_FONT);
         Setting::set(
             'font_heading',
             $headingSlug !== '' && isset(self::GOOGLE_FONTS[$headingSlug])

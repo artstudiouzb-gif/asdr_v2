@@ -25,43 +25,59 @@
 @font-face {
     font-family: 'PT Sans Fallback';
     src: local('Arial'), local('Liberation Sans'), local('Helvetica');
-    size-adjust: 93.64%;
-    ascent-override: 108.71%;
-    descent-override: 29.47%;
+    size-adjust: 93.91%;
+    ascent-override: 108.40%;
+    descent-override: 29.39%;
     line-gap-override: 0%;
 }
 @font-face {
     font-family: 'PT Serif Fallback';
     src: local('Times New Roman'), local('Liberation Serif'), local('Georgia');
-    size-adjust: 108.78%;
-    ascent-override: 95.51%;
-    descent-override: 26.29%;
+    size-adjust: 109.27%;
+    ascent-override: 95.09%;
+    descent-override: 26.17%;
     line-gap-override: 0%;
 }
 /* Остальные семейства, которые лежат в поставке локально и выбираются в
    разделе «Дизайн». Числа получены тем же способом. */
 @font-face {
+    font-family: 'Inter Fallback';
+    src: local('Arial'), local('Liberation Sans'), local('Helvetica');
+    size-adjust: 107.09%;
+    ascent-override: 90.46%;
+    descent-override: 22.52%;
+    line-gap-override: 0%;
+}
+@font-face {
+    font-family: 'Noto Serif Fallback';
+    src: local('Times New Roman'), local('Liberation Serif'), local('Georgia');
+    size-adjust: 119.12%;
+    ascent-override: 89.74%;
+    descent-override: 24.60%;
+    line-gap-override: 0%;
+}
+@font-face {
     font-family: 'Manrope Fallback';
     src: local('Arial'), local('Liberation Sans'), local('Helvetica');
-    size-adjust: 102.58%;
-    ascent-override: 103.92%;
-    descent-override: 29.25%;
+    size-adjust: 102.71%;
+    ascent-override: 103.79%;
+    descent-override: 29.21%;
     line-gap-override: 0%;
 }
 @font-face {
     font-family: 'Montserrat Fallback';
     src: local('Arial'), local('Liberation Sans'), local('Helvetica');
-    size-adjust: 117.89%;
-    ascent-override: 82.11%;
-    descent-override: 21.29%;
+    size-adjust: 119.80%;
+    ascent-override: 80.80%;
+    descent-override: 20.95%;
     line-gap-override: 0%;
 }
 @font-face {
     font-family: 'Inter Tight Fallback';
     src: local('Arial'), local('Liberation Sans'), local('Helvetica');
-    size-adjust: 91.55%;
-    ascent-override: 105.82%;
-    descent-override: 26.35%;
+    size-adjust: 97.85%;
+    ascent-override: 99.00%;
+    descent-override: 24.65%;
     line-gap-override: 0%;
 }
 

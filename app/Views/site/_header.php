@@ -24,12 +24,12 @@ if ($logo === '') {
 }
 // Выбранные семейства нужны для точечного preload локальных файлов шрифтов;
 // сами CSS-переменные публикует SiteThemeCss.
-$font = Setting::get('font_family', "'PT Sans', 'PT Sans Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif");
-// По умолчанию заголовки — PT Serif (пара к PT Sans, оба лежат локально).
-$fontHeading = Setting::get('font_heading', "'PT Serif', 'PT Serif Fallback', Georgia, serif");
-if (trim((string) $fontHeading) === '') {
-    $fontHeading = $font;
-}
+// Стеки берём из SiteThemeCss — там же, откуда они попадают в CSS страницы.
+// Иначе шапка предзагружает файлы одного семейства, а текст набирается другим:
+// так сайт качал PT Sans и PT Serif, которыми ничего не набрано.
+$fontStacks = \App\Core\SiteThemeCss::fontStacks();
+$font = $fontStacks['body'];
+$fontHeading = $fontStacks['heading'];
 $extraHeadCss = $extraHeadCss ?? '';
 
 // --- Дизайн-система: тема и локальный шрифт ---
@@ -679,20 +679,33 @@ if (is_array($cdnParts) && in_array($cdnParts['scheme'] ?? '', ['http', 'https']
 <?php
 $fontPreloads = [];
 foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
+    // Порядок важен: «Inter Tight» содержит «Inter», поэтому длинные имена
+    // проверяются первыми и совпадение прерывает перебор.
     foreach ([
+        'Inter Tight' => '/assets/fonts/inter-tight/inter-tight-400-cyrillic.woff2',
+        'Noto Serif' => '/assets/fonts/noto-serif/noto-serif-400-cyrillic.woff2',
+        'Inter' => '/assets/fonts/inter/inter-400-cyrillic.woff2',
         'Manrope' => '/assets/fonts/manrope-400-cyrillic.woff2',
         'Montserrat' => '/assets/fonts/montserrat-700-cyrillic.woff2',
         'PT Serif' => '/assets/fonts/ptserif-700-cyrillic.woff2',
         'PT Sans' => '/assets/fonts/ptsans-400-cyrillic.woff2',
     ] as $family => $fontFile) {
-        if (stripos($selectedFont, $family) !== false) {
+        // Совпадать должно начало стека: семейство, которым реально набран
+        // текст. Иначе запасное начертание («Inter Fallback») или дальний
+        // элемент стека тянул бы за собой лишний preload.
+        if (stripos(ltrim($selectedFont, " '\""), $family) === 0) {
             $fontPreloads[$fontFile] = true;
+            break;
         }
     }
 }
 ?>
+<?php // Адрес — БЕЗ ?v=: в @font-face файл указан относительным путём без версии,
+      // а preload с другим адресом браузер за тот же ресурс не считает и качает
+      // файл вторым запросом. Версионировать шрифты и не нужно: имя файла меняется
+      // вместе с содержимым (npm run sync:fonts). ?>
 <?php foreach (array_keys($fontPreloads) as $fontFile): ?>
-<link rel="preload" href="<?= htmlspecialchars(\App\Core\Asset::url($fontFile), ENT_QUOTES) ?>" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="<?= htmlspecialchars($fontFile, ENT_QUOTES) ?>" as="font" type="font/woff2" crossorigin>
 <?php endforeach; ?>
 <?php foreach (\App\Core\LocalGoogleFonts::stylesheetsForSelected() as $fontStylesheet): ?>
 <link rel="stylesheet" href="<?= htmlspecialchars($fontStylesheet, ENT_QUOTES) ?>" data-local-google-font>
