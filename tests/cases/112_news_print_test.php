@@ -47,8 +47,7 @@ test('Печать новости: служебные блоки помечен�
 });
 
 test('Печать новости: печатные стили знают текущие классы страницы', function () {
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/frontend.css');
-    $printBlock = substr($css, (int) strpos($css, '@media print'), 3000);
+    $printBlock = public_print_css();
 
     // Общий выключатель для помеченной разметки.
     assert_contains('.no-print', $printBlock);

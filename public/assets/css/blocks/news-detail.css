@@ -1,62 +1,32 @@
 /* Стили новостного раздела (.newsdetail-*, .relnews-*).
-   Вынесены из gov-theme.css: правила, нужные только на страницах
-   новостей, приезжали на каждую страницу сайта, включая главную.
-   Подключает AssetCollector::requireThemePart('news_detail') из
-   NewsController — сразу после общего бандла и ДО дизайн-CSS из
-   админки, то есть на том же месте каскада, где правила и лежали.
+   Вынесены из общей темы: правила, нужные только на страницах новостей,
+   приезжали на каждую страницу сайта, включая главную. Подключает
+   AssetCollector::requireThemePart('news_detail') из NewsController —
+   на детальной новости и на списке (список построен на .relnews-card).
 
    В теме намеренно остались три семейства, которые встречаются вне
    новостей: .newsdetail-subscribe (виджет подписки, любой сайдбар),
    .newsdetail-article и .newsdetail__badge (страница проекта). */
 
-/* Переходы цвета — только у интерактивных элементов и карточек. Раньше здесь
-   стоял общий селектор (body, header, aside, section, div, footer, …, span),
-   и браузер заводил четыре анимируемых свойства на КАЖДЫЙ div и span
-   документа. Любая смена класса — is-scrolled у шапки при скролле, is-open у
-   меню, открытие a11y-панели — запускала переходы по всему поддереву, а
-   box-shadow в списке анимируется только перерисовкой, не композитором.
-   Плавность при смене темы обеспечивает .is-theme-switching (см. ниже). */
-a, button, summary, label,
-input, select, textarea,
-[class*="card"], [class*="__button"], .btn, [role="button"], [tabindex]:not([tabindex="-1"]),
-/* Контейнеры с собственным :hover, которые не являются ссылкой или кнопкой.
-   Список собран по фактическим hover-правилам темы, а не на глаз. */
-.site-menu__item, .site-menu__item--has-children, .hdr-contact,
-.counter, .block-advantages__item, .timeline-item, .faq-item__q,
-.adjnews, .newslist-lead, .newsdetail__meta-item, .stage {
-    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+/* из public/assets/css/frontend.css */
+
+@media print {
+
+    /* Обложка-hero: на бумаге белый текст на фото нечитаем, поэтому печатаем
+       заголовок и мету обычным чёрным по белому, без подложки. */
+    .newsdetail-phero { background-image: none !important; min-height: 0 !important; padding: 0 !important; }
+    .newsdetail-phero__overlay { display: none !important; }
+
+    /* Колонки статьи на A4 не нужны — один поток. */
+    .newsdetail-body, .newsdetail-head { display: block !important; }
+    .newsdetail-card { border: 0 !important; padding: 0 !important; margin: 12px 0 !important; }
+    /* Заголовок не должен отрываться от текста. */
+    .newsdetail-card__title, .newsdetail__body h2, .newsdetail__body h3 { break-after: avoid; }
+    .newsdetail-photos__grid img, .newsdetail-gallery__slide { break-inside: avoid; }
 }
 
-/* Элементы, которым переход противопоказан (карусель позиционируется
-   transform'ом). Дубль с :root.is-theme-switching нужен по специфичности:
-   иначе правило смены темы выше перебило бы этот запрет. */
-[data-carousel-track], .newsdetail-gallery__slide, .newsdetail-gallery__thumb, .no-transition, .no-transition *,
-:root.is-theme-switching [data-carousel-track],
-:root.is-theme-switching .newsdetail-gallery__slide,
-:root.is-theme-switching .newsdetail-gallery__thumb,
-:root.is-theme-switching .no-transition,
-:root.is-theme-switching .no-transition * {
-    transition: none !important;
-}
+/* из public/assets/css/gov-theme.css */
 
-/* Заголовки, карточки, блоки и акцентные подписи (управляются из раздела «Дизайн») */
-h1, h2, h3, h4, h5, h6,
-.section-title, .block-title, .card__title,
-.feature-card__title, .imgcard__title, .catcard__title, .newsfeat-lead__title,
-.newsfeat-mini__title, .newsfeat-text__title, .catdetail__title, .gcal-list__title,
-.orgstruct__head-name, .person-card__name, .timeline-item__year, .ctaband__title,
-.profile__name, .profile__position, .bio__title, .block-text__title,
-.featband__name, .bio-quote__mark, .widget__title, .bio-extra__title,
-.block-hero__title, .news-index__title, .content-list__head h1,
-.block-news__title, .block-categories__title,
-.block-contact-cards__title, .site-footer__name, .newsdetail-toc__title,
-.newslist-lead__title, .relnews-card__title, .adjnews__title, .album-card__title, .block-banner__title {
-    font-family: var(--font-heading, var(--font-family));
-    color: var(--gov-title);
-    letter-spacing: var(--heading-letter-spacing, -0.02em);
-    font-weight: var(--heading-font-weight, 700);
-    line-height: var(--heading-line-height, 1.25);
-}
 body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero { padding-top: 120px; }
 
 /* ==========================================================================
@@ -145,6 +115,14 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero { pad
 }
 body.design-type-static .newsdetail__title { font-size: 2.9rem; }
 body.design-type-static .newsdetail-phero__title { font-size: 3rem; }
+
+/* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
+   чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем). */
+@media (max-width: 640px) {
+    body.design-type-static .newsdetail__title { font-size: 1.9rem; }
+    body.design-type-static .newsdetail-phero__title { font-size: 1.9rem; }
+}
+
 
 /* --- Тело: 3 колонки --- */
 .newsdetail-body { display: grid; grid-template-columns: minmax(0, 240px) minmax(0, 1fr) minmax(0, 340px); gap: clamp(24px, 3.4vw, 48px); align-items: start; }
@@ -237,90 +215,6 @@ body.design-type-static .newsdetail-phero__title { font-size: 3rem; }
     .newsdetail-related__grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 560px) {
-    .newsdetail-related__grid,
-    .albums-grid { grid-template-columns: 1fr; }
-}
-
-
-/* Единые карточки (Unified Card Components) */
-.relnews-card,
-.album-card,
-.catcard,
-.project-card,
-.person-card,
-.team-card {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 14px;
-    border: 1px solid var(--gov-border);
-    border-radius: var(--radius, 14px);
-    background: var(--gov-surface);
-    text-decoration: none;
-    color: var(--gov-ink);
-    box-shadow: var(--card-shadow, 0 2px 8px rgba(15, 23, 42, 0.03));
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
-}
-.relnews-card:hover,
-.album-card:hover,
-.catcard:hover,
-.project-card:hover,
-.person-card:hover,
-.team-card:hover {
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
-    box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
-}
-
-.relnews-card__media,
-.album-card__cover,
-.catcard__media,
-.project-card__media {
-    aspect-ratio: 16 / 10;
-    border-radius: var(--radius-sm, 8px);
-    background-color: var(--gov-navy);
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    display: block;
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-}
-.relnews-card__media picture,
-.album-card__cover picture,
-.catcard__media picture,
-.project-card__media picture {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-.relnews-card__media img,
-.relnews-card__img,
-.album-card__cover img,
-.album-card__img,
-.catcard__media img,
-.project-card__media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.relnews-card:hover .relnews-card__media img,
-.relnews-card:hover .relnews-card__img,
-.album-card:hover .album-card__cover img,
-.album-card:hover .album-card__img,
-.catcard:hover .catcard__media img,
-.project-card:hover .project-card__media img {
-    transform: scale(1.04);
-}
-.relnews-card__media--empty,
-.album-card__cover--empty,
-.project-card__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
-.relnews-card__date,
-.album-card__meta { color: var(--gov-muted); font-size: .82rem; font-weight: 600; }
 /* Ровный ряд собираем ограничением заголовка, а не растяжкой промежутка:
    раньше лид прижимался к низу карточки (margin-top: auto), и расстояние
    «заголовок → анонс» у соседей отличалось вдвое. */
@@ -344,7 +238,6 @@ body.design-type-static .newsdetail-phero__title { font-size: 3rem; }
 
 @media (prefers-reduced-motion: reduce) {
     .newsdetail-gallery__slide { transition: none; }
-    .newsdetail-photos__item, .adjnews, .relnews-card { transition: none; }
 }
 
 
@@ -416,10 +309,6 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .newsdetail-toc__list a:hover { color: var(--gov-teal-text); }
 .newsdetail-toc__num { color: var(--gov-teal-text); font-weight: 700; font-size: .8rem; }
 .relnews-card__excerpt { color: var(--gov-muted); font-size: .86rem; line-height: 1.5; }
-/* Лид героя набирается тем же кеглем, что и лиды разделов
-   (.listing__lead, .newsdetail-phero__lead) — 1.02rem. Раньше он
-   дорастал до 1.18–1.22rem и выбивался из общей шкалы. */
-.block-hero__subtitle { color: var(--hero-text, var(--gov-muted)); font-size: 1.02rem; }
 /* Премиум-hero новости — полноширинный тёмный экран; прижимаем к шапке,
    убирая верхний отступ контента (иначе светлая полоса-зазор). */
 .site-content:has(> .newsdetail--premium) { padding-top: 0; }
@@ -503,32 +392,6 @@ button.newsdetail-gallery__thumb.is-active {
 button.newsdetail-gallery__thumb:hover {
     opacity: 1 !important;
     transform: translateY(-2px) !important;
-}
-
-/* Материал без изображения. Раньше место картинки заливалось сплошным цветом
-   и читалось как ошибка загрузки; теперь это фирменная подложка с эмблемой. */
-.newsfeat-lead__media--empty,
-.newsfeat-mini__media--empty,
-.newsdocs-item__media--empty,
-.newslist-lead__media--empty,
-.relnews-card__media--empty,
-.adjnews__media--empty {
-    position: relative;
-    background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface));
-}
-.newsfeat-lead__media--empty::after,
-.newsfeat-mini__media--empty::after,
-.newsdocs-item__media--empty::after,
-.newslist-lead__media--empty::after,
-.relnews-card__media--empty::after,
-.adjnews__media--empty::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: var(--gov-navy);
-    opacity: .18;
-    -webkit-mask: var(--gov-emblem) center / 44% no-repeat;
-    mask: var(--gov-emblem) center / 44% no-repeat;
 }
 
 /* ==========================================================================
@@ -1163,7 +1026,7 @@ button.newsdetail-gallery__thumb:hover {
 /* Тач-устройства: снимаем hover-подъём фото-плитки. Селектор жил в общем
    блоке @media (hover:none) внутри gov-theme.css, а само правило переехало
    сюда. Файл подключается позже темы, поэтому сброс обязан ехать вместе с
-   правилом — иначе при тапе карточка снова «залипала» бы приподнятой. */
+   правилом — иначе при тапе плитка «залипала» бы приподнятой. */
 @media (hover: none) {
     .newsdetail-photos__item:hover { transform: none; }
 }

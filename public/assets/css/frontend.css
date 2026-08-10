@@ -612,21 +612,9 @@ summary:focus-visible {
     .newsdetail-gallery__nav, .newsdetail-gallery__thumbs, .newsdetail-gallery__counter,
     .newsdetail-toc, .newsdetail-photos .newsdetail__btn,
     .newsdetail-phero__video, .scroll-top, .search-suggest { display: none !important; }
-
-    /* Обложка-hero: на бумаге белый текст на фото нечитаем, поэтому печатаем
-       заголовок и мету обычным чёрным по белому, без подложки. */
-    .newsdetail-phero { background-image: none !important; min-height: 0 !important; padding: 0 !important; }
-    .newsdetail-phero__overlay { display: none !important; }
     .newsdetail-phero__title, .newsdetail-phero__lead,
     .newsdetail__meta--onDark, .newsdetail__badge--onDark,
     .newsdetail__source--onDark { color: #000 !important; background: none !important; }
-
-    /* Колонки статьи на A4 не нужны — один поток. */
-    .newsdetail-body, .newsdetail-head { display: block !important; }
-    .newsdetail-card { border: 0 !important; padding: 0 !important; margin: 12px 0 !important; }
-    /* Заголовок не должен отрываться от текста. */
-    .newsdetail-card__title, .newsdetail__body h2, .newsdetail__body h3 { break-after: avoid; }
-    .newsdetail-photos__grid img, .newsdetail-gallery__slide { break-inside: avoid; }
 
     html, body { background: #fff !important; color: #000 !important; }
     a { color: #000 !important; text-decoration: none; }
@@ -643,6 +631,7 @@ summary:focus-visible {
     /* Раскрываем ссылки после текста, где это уместно. */
     .news-single__content a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.6875rem; }
 }
+
 
 /* Cookie-Consent баннер (задача 116) */
 .cookie-banner {
@@ -2816,10 +2805,6 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
 button.block-map__card-link { border: 0; padding: 0; background: none; font: inherit; cursor: pointer; }
 .block-map__card-link { display: inline-flex; align-items: center; gap: 5px; }
 
-.orgstruct__deputy { position: relative; }
-.orgstruct__deputy-link { display: flex; flex-direction: column; color: inherit; text-decoration: none; }
-.orgstruct__toggle { display: none; }
-
 .textimage__visual { min-width: 0; }
 .textimage__visual .textimage__media { height: 100%; }
 .block-textimage--image-left .textimage__info { order: 2; }
@@ -2832,26 +2817,10 @@ button.block-map__card-link { border: 0; padding: 0; background: none; font: inh
     .faq-tools__category select { width: 100%; }
     .faq-item__category { display: none; }
     .block-map__card { max-width: calc(100% - 24px); }
-    .orgstruct__toggle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        width: 36px;
-        height: 36px;
-        transform: translateY(-50%);
-        border: 0;
-        border-radius: 50%;
-        background: color-mix(in srgb, var(--gov-teal) 12%, transparent);
-        color: var(--gov-title);
-        cursor: pointer;
-    }
-    .orgstruct__toggle[aria-expanded="false"] svg { transform: rotate(-90deg); }
     .block-textimage--image-left .textimage__info,
     .block-textimage--image-left .textimage__visual { order: initial; }
 }
+
 
 /* generated:embedded-styles:start */
 .app-admin-bar {

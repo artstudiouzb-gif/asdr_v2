@@ -13,12 +13,8 @@ use App\Core\Search;
  */
 
 test('Оргсхема: печать не теряет тёмные карточки', function () {
-    $css = theme_css();
-    $print = strstr($css, '@media print {
-    .orgstruct');
-    assert_true($print !== false, 'нет печатных правил для схемы');
-
-    $print = (string) substr((string) $print, 0, 1800);
+    $print = public_print_css();
+    assert_contains('.orgstruct', $print, 'нет печатных правил для схемы');
     // Тёмные карточки на печати становятся контуром с чёрным текстом.
     assert_contains('.orgstruct__head', $print);
     assert_contains('.orgstruct__council-card', $print);

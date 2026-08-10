@@ -29,6 +29,7 @@ const jsSources = [
 // и попадают в манифест отдельным разделом.
 const blockSources = [
     'public/assets/css/blocks/news-detail.css',
+    'public/assets/css/blocks/org-structure.css',
     'public/assets/css/blocks/u30-report.css',
     'public/assets/js/blocks/u30_report.js',
     'public/assets/js/blocks/slider.js',

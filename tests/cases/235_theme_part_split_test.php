@@ -4,20 +4,112 @@ declare(strict_types=1);
 
 use App\Core\AssetCollector;
 
-test('Часть темы подключается отдельно и только на своих страницах', function (): void {
+/**
+ * Части темы, вынесенные из общего бандла: файл -> регулярка семейства.
+ * Всё, что лежит в файле, обязано принадлежать этому семейству.
+ */
+const THEME_PART_FAMILIES = [
+    'news-detail.css' => '/newsdetail|relnews/',
+    'org-structure.css' => '/orgstruct/',
+];
+
+/** Разбор CSS на правила верхнего уровня: [селектор без комментариев, тело]. */
+function split_css_rules(string $css): array
+{
+    $out = [];
+    $i = 0;
+    $n = strlen($css);
+    while ($i < $n) {
+        $b = strpos($css, '{', $i);
+        if ($b === false) {
+            break;
+        }
+        $selector = substr($css, $i, $b - $i);
+        $depth = 1;
+        $j = $b + 1;
+        while ($j < $n && $depth > 0) {
+            if ($css[$j] === '{') {
+                $depth++;
+            } elseif ($css[$j] === '}') {
+                $depth--;
+            }
+            $j++;
+        }
+        $bare = trim((string) preg_replace('#/\*.*?\*/#s', '', $selector));
+        $out[] = [$bare, substr($css, $b + 1, $j - $b - 2)];
+        $i = $j;
+    }
+
+    return $out;
+}
+
+test('В вынесенных частях темы нет чужих правил', function (): void {
+    foreach (THEME_PART_FAMILIES as $file => $family) {
+        $path = APP_ROOT . '/public/assets/css/blocks/' . $file;
+        assert_true(is_file($path), $file . ' существует');
+        $css = (string) file_get_contents($path);
+
+        $foreign = [];
+        $check = static function (string $selector) use ($family, &$foreign): void {
+            if ($selector === '') {
+                return;
+            }
+            // Проверяем КАЖДУЮ часть группового селектора. Строка вида
+            // «.newsdetail-photos__item:hover, .album-card:hover, .btn:hover»
+            // содержит искомое, но уносить её нельзя: на остальных страницах
+            // карточки и кнопки молча потеряли бы своё правило. Именно так
+            // при первом выносе утёк .block-hero__subtitle.
+            foreach (array_filter(array_map('trim', explode(',', $selector))) as $part) {
+                if (preg_match($family, $part) !== 1) {
+                    $foreign[] = $part;
+                }
+            }
+        };
+
+        foreach (split_css_rules($css) as [$selector, $body]) {
+            if (str_starts_with($selector, '@')) {
+                foreach (split_css_rules($body) as [$inner]) {
+                    $check($inner);
+                }
+                continue;
+            }
+            $check($selector);
+        }
+
+        assert_same(
+            [],
+            array_slice(array_unique($foreign), 0, 8),
+            $file . ': правила не из своего семейства уносить нельзя'
+        );
+    }
+});
+
+test('Часть темы подключается отдельно и только по запросу', function (): void {
     AssetCollector::reset();
     assert_same('', AssetCollector::renderThemeStyles(), 'без запроса часть темы не подключается');
 
     AssetCollector::requireThemePart('news_detail');
-    $html = AssetCollector::renderThemeStyles();
     assert_true(
-        preg_match('#/assets/css/blocks/news-detail(\.min)?\.css#', $html) === 1,
-        'подключён файл части темы: ' . $html
+        preg_match('#/assets/css/blocks/news-detail(\.min)?\.css#', AssetCollector::renderThemeStyles()) === 1,
+        'подключён файл части темы'
     );
 
     // Повторный запрос не должен дублировать <link>.
     AssetCollector::requireThemePart('news_detail');
     assert_same(1, substr_count(AssetCollector::renderThemeStyles(), '<link'));
+    AssetCollector::reset();
+});
+
+test('Часть темы, названная типом блока, подключается сама', function (): void {
+    AssetCollector::reset();
+    // PageController прогоняет через requireJs каждый тип блока страницы
+    // (BlockRenderer::renderPage() отдаёт их списком), поэтому строки в
+    // THEME_PART_MAP достаточно — правок в контроллерах не нужно.
+    AssetCollector::requireJs('org_structure');
+    assert_true(
+        preg_match('#/assets/css/blocks/org-structure(\.min)?\.css#', AssetCollector::renderThemeStyles()) === 1,
+        'стили блока подключились по типу блока'
+    );
     AssetCollector::reset();
 });
 
@@ -49,20 +141,14 @@ test('Новостные страницы запрашивают вынесен�
     );
 });
 
-test('Классы, живущие вне новостей, остались в общей теме', function (): void {
+test('Классы, живущие вне своего раздела, остались в общей теме', function (): void {
     $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
-    $part = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/news-detail.css');
 
     // Виджет подписки может стоять в сайдбаре любой страницы, а
     // .newsdetail-article__content и .newsdetail__badge есть в project_show.php.
-    // Если эти правила уедут в часть темы, они пропадут вне новостей.
+    // Уедут в часть темы — пропадут вне новостей.
     foreach (['newsdetail-subscribe', 'newsdetail-article__content', 'newsdetail__badge'] as $needle) {
         assert_contains($needle, $theme, $needle . ' обязан остаться в общей теме');
-    }
-
-    // Обратная проверка: детальные семейства из темы ушли.
-    foreach (['newsdetail-gallery', 'newsdetail-toc', 'newsdetail-timeline'] as $needle) {
-        assert_contains($needle, $part, $needle . ' должен быть в вынесенной части');
     }
 });
 

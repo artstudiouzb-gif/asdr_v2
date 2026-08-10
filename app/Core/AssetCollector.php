@@ -39,9 +39,20 @@ final class AssetCollector
      * ДО дизайн-CSS из админки — то есть там же, где эти правила лежали
      * внутри gov-theme.css. Подключи их наравне с блочными стилями, и
      * настройки раздела «Дизайн» проиграли бы им на этих страницах.
+     *
+     * Ключ — либо тип блока конструктора (тогда подключение происходит само:
+     * BlockRenderer отдаёт список типов страницы, PageController прогоняет их
+     * через requireJs), либо имя раздела для страниц вне конструктора —
+     * такие вызывает контроллер сам.
+     *
+     * Выносить сюда стоит не всё подряд: правило окупается, когда стилей
+     * много И блок редкий. Разрез общего на десятки мелких файлов даёт
+     * обратный эффект — каждый файл это ещё один блокирующий запрос в <head>.
+     * Замеры по текущей теме — в docs/PERFORMANCE_PLAN.md, раздел 2.1.
      */
     private const THEME_PART_MAP = [
         'news_detail' => '/assets/css/blocks/news-detail.css',
+        'org_structure' => '/assets/css/blocks/org-structure.css',
     ];
 
     /** @var array<string, bool> */
@@ -56,6 +67,11 @@ final class AssetCollector
         if (isset(self::CSS_MAP[$key])) {
             self::$css[$key] = self::CSS_MAP[$key];
         }
+        // Часть темы, вынесенная под этот тип блока, подключается сама:
+        // PageController уже прогоняет через requireJs каждый тип со страницы
+        // (BlockRenderer::renderPage() отдаёт их списком). Достаточно строки
+        // в THEME_PART_MAP — правок в контроллерах не требуется.
+        self::requireThemePart($key);
     }
 
     public static function requireCss(string $key, string $href): void

@@ -219,3 +219,58 @@ function theme_css(): string
 
     return $css;
 }
+
+/**
+ * Все печатные правила публичной части: содержимое каждого блока
+ * «@media print» из frontend.css, темы и вынесенных частей темы.
+ *
+ * Тесты печати раньше брали окно фиксированной длины от первого вхождения
+ * «@media print» в конкретном файле. Такая проверка ломается от любого
+ * переноса правил между файлами и от вставки нового печатного блока выше,
+ * хотя сама вёрстка при этом в порядке.
+ */
+function public_print_css(): string
+{
+    static $css = null;
+    if ($css !== null) {
+        return $css;
+    }
+
+    $files = [
+        APP_ROOT . '/public/assets/css/frontend.css',
+        APP_ROOT . '/public/assets/css/gov-theme.css',
+        APP_ROOT . '/public/assets/css/public-content-modes.css',
+    ];
+    foreach (glob(APP_ROOT . '/public/assets/css/blocks/*.css') ?: [] as $file) {
+        if (!str_ends_with($file, '.min.css')) {
+            $files[] = $file;
+        }
+    }
+
+    $css = '';
+    foreach ($files as $file) {
+        $source = (string) @file_get_contents($file);
+        $offset = 0;
+        while (($start = strpos($source, '@media print', $offset)) !== false) {
+            $brace = strpos($source, '{', $start);
+            if ($brace === false) {
+                break;
+            }
+            $depth = 1;
+            $i = $brace + 1;
+            $len = strlen($source);
+            while ($i < $len && $depth > 0) {
+                if ($source[$i] === '{') {
+                    $depth++;
+                } elseif ($source[$i] === '}') {
+                    $depth--;
+                }
+                $i++;
+            }
+            $css .= substr($source, $start, $i - $start) . "\n";
+            $offset = $i;
+        }
+    }
+
+    return $css;
+}
