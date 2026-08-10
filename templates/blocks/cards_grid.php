@@ -129,8 +129,10 @@ if ($variant === 'icon' && $visualStyle === 'new') {
             <div class="cards-grid">
                 <?php foreach ($items as $index => $item): ?>
                     <?php $url = trim((string) ($item['url'] ?? '')); $hasIcon = !empty($item['icon_svg']); ?>
-                    <?php if ($url !== ''): ?>
-                    <a class="feature-card<?= $hasIcon ? ' feature-card--has-icon' : '' ?>" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                    <?php if ($url !== '' && $hasIcon): ?>
+                    <a class="feature-card feature-card--has-icon" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                    <?php elseif ($url !== ''): ?>
+                    <a class="feature-card" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
                     <?php elseif ($hasIcon): ?>
                     <article class="feature-card feature-card--has-icon">
                     <?php else: ?>
