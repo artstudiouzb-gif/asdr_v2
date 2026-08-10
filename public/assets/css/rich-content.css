@@ -13,7 +13,7 @@
     --rich-tint: color-mix(in srgb, var(--rich-title) 5%, var(--rich-surface));
     color: var(--rich-ink);
     font-family: var(--font-family, 'PT Sans', system-ui, -apple-system, 'Segoe UI', sans-serif);
-    font-size: 1.025rem;
+    font-size: var(--font-size-body, 1.025rem);
     line-height: 1.75;
     overflow-wrap: break-word;
     text-wrap: pretty;
@@ -41,19 +41,19 @@
     scroll-margin-block-start: 7rem;
 }
 
-:where(.rich-content) h2 { font-size: 1.75rem; }
-:where(.rich-content) h3 { font-size: 1.4rem; }
-:where(.rich-content) h4 { font-size: 1.18rem; }
+:where(.rich-content) h2 { font-size: var(--font-size-h2, 1.75rem); }
+:where(.rich-content) h3 { font-size: var(--font-size-h3, 1.4rem); }
+:where(.rich-content) h4 { font-size: var(--font-size-h4, 1.18rem); }
 :where(.rich-content) h5,
-:where(.rich-content) h6 { font-size: 1rem; }
+:where(.rich-content) h6 { font-size: var(--font-size-h5, 1rem); }
 
 :where(.rich-content) p { margin-block: 0 1.1em; }
 /* Полужирный — это выделение, а не смена цвета: синий <strong> в тексте
    читается как ссылка, и абзац с ним выбивался из остальной статьи. */
 :where(.rich-content) strong { color: inherit; font-weight: 700; }
-:where(.rich-content) small { color: var(--rich-muted); font-size: .875em; }
+:where(.rich-content) small { color: var(--rich-muted); font-size: var(--font-size-small, .875em); }
 :where(.rich-content) sub,
-:where(.rich-content) sup { position: relative; font-size: .72em; line-height: 0; }
+:where(.rich-content) sup { position: relative; font-size: var(--font-size-small, .72em); line-height: 0; }
 :where(.rich-content) sup { inset-block-start: -.45em; }
 :where(.rich-content) sub { inset-block-end: -.2em; }
 
@@ -112,7 +112,7 @@
     border-radius: 0 var(--radius, 14px) var(--radius, 14px) 0;
     background: linear-gradient(135deg, color-mix(in srgb, var(--rich-accent, #0d9488) 7%, transparent), color-mix(in srgb, var(--rich-accent, #0d9488) 2%, transparent));
     color: var(--rich-title, #1e293b);
-    font-size: 1.08em;
+    font-size: var(--font-size-lead, 1.08em);
     line-height: 1.68;
     box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -129,7 +129,7 @@
     right: 1.2rem;
     color: var(--rich-accent, #0d9488);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 4.25rem;
+    font-size: var(--font-size-h1, 4.25rem);
     line-height: 1;
     opacity: 0.2;
     pointer-events: none;
@@ -152,7 +152,7 @@
     margin-block-start: 0.9rem;
     color: var(--rich-muted, #64748b);
     font-family: var(--font-family, system-ui, sans-serif);
-    font-size: 0.85rem;
+    font-size: var(--font-size-meta, .85rem);
     font-style: normal;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -173,7 +173,7 @@
     border-block: 2px solid var(--rich-accent, #0d9488);
     padding: 1.6rem 1rem;
     text-align: center;
-    font-size: 1.2rem;
+    font-size: var(--font-size-h3, 1.2rem);
     font-weight: 600;
 }
 :where(.rich-content) blockquote.pullquote::before,
@@ -228,7 +228,7 @@
     border-inline-start: 3px solid var(--rich-accent, #0d9488);
     border-radius: 0 var(--radius-sm, 8px) var(--radius-sm, 8px) 0;
     color: var(--rich-muted, #475569);
-    font-size: 0.85rem;
+    font-size: var(--font-size-meta, .85rem);
     line-height: 1.55;
     text-align: start;
     font-weight: 500;
@@ -264,7 +264,7 @@
     border-spacing: 0;
     border-radius: var(--radius-sm, 8px);
     background: var(--rich-surface);
-    font-size: .94rem;
+    font-size: var(--font-size-card-text, .94rem);
     line-height: 1.45;
 }
 
@@ -303,7 +303,7 @@
     background: var(--rich-tint);
     color: var(--rich-title);
     font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
-    font-size: .88em;
+    font-size: var(--font-size-small, .88em);
 }
 
 :where(.rich-content) hr { margin-block: 2em; border: 0; border-block-start: 1px solid var(--rich-border); }
@@ -314,11 +314,11 @@
    по-разному. Текст статьи набран единообразно. */
 
 @media (max-width: 720px) {
-    :where(.rich-content) { font-size: 1rem; }
-    :where(.rich-content) h2 { font-size: 1.5rem; }
-    :where(.rich-content) h3 { font-size: 1.28rem; }
+    :where(.rich-content) { font-size: var(--font-size-body, 1rem); }
+    :where(.rich-content) h2 { font-size: var(--font-size-h2, 1.5rem); }
+    :where(.rich-content) h3 { font-size: var(--font-size-h3, 1.28rem); }
     :where(.rich-content) blockquote { padding: 1.1rem 2.8rem 1.1rem 1.15rem; }
-    :where(.rich-content) blockquote::before { inset-inline-end: .65rem; font-size: 3rem; }
+    :where(.rich-content) blockquote::before { inset-inline-end: .65rem; font-size: var(--font-size-h1, 3rem); }
     :where(.rich-content) table { display: block; max-inline-size: 100%; overflow-x: auto; scrollbar-width: thin; }
     :where(.rich-content) th,
     :where(.rich-content) td { min-inline-size: 8rem; }
