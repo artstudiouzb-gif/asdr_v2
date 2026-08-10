@@ -70,7 +70,39 @@ test('BlockRenderer: старый cards_grid без _cards_style рендери�
     ]);
 
     assert_contains('id="block-11"', $result['html']);
-    assert_contains('class="block-cards"', $result['html']);
+    assert_contains('class="block-cards block-cards--icon-pos-top block-cards--text-align-left"', $result['html']);
     assert_contains('feature-card__icon', $result['html']);
     assert_contains('#block-11 .feature-card__icon', $result['css']);
+    assert_contains('--feature-card-icon-size:22px', $result['css']);
+    assert_not_contains('block-cards--icons-no-bg', $result['html']);
+});
+
+test('BlockRenderer: cards_grid применяет размер и отключение фона иконок', function () {
+    $result = BlockRenderer::render([
+        'id' => 12,
+        'type' => 'cards_grid',
+        'data' => json_encode([
+            'variant' => 'icon',
+            '_cards_icon_size' => 38,
+            '_cards_icon_bg' => 'off',
+            '_cards_icon_position' => 'right',
+            '_cards_text_align' => 'center',
+            'items' => [['icon_svg' => 'target', 'title' => 'Направление']],
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        'custom_css' => '',
+    ]);
+
+    assert_contains('block-cards--icons-no-bg', $result['html']);
+    assert_contains('block-cards--icon-pos-right', $result['html']);
+    assert_contains('block-cards--text-align-center', $result['html']);
+    assert_contains('feature-card feature-card--has-icon', $result['html']);
+    assert_contains('feature-card__content', $result['html']);
+    assert_contains('--feature-card-icon-size:38px', $result['css']);
+    assert_not_contains('.feature-card__icon svg{width:38px', $result['css']);
+
+    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    assert_contains('var(--feature-card-icon-size, 22px) !important', $theme);
+    assert_contains('.block-cards--icons-no-bg .feature-card:hover .feature-card__icon', $theme);
+    assert_contains('.block-cards--icon-pos-right .feature-card--has-icon .feature-card__icon', $theme);
+    assert_contains('.block-cards--text-align-center .feature-card__content', $theme);
 });

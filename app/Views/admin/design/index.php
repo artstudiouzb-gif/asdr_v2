@@ -471,6 +471,17 @@ foreach ($options as $key => $opt) {
                     </select>
                 </div>
             </div>
+            <div class="design-opt">
+                <div class="design-opt__label">
+                    <span>Межбуквенный интервал метаданных</span>
+                    <small>Для номеров документов, дат и служебных подписей. От -0.10 до 0.30 em; пусто — значение темы.</small>
+                </div>
+                <div class="design-opt__choices">
+                    <?php $metaLetter = preg_replace('/em$/', '', \App\Core\DesignSettings::metaLetterSpacingCustom()); ?>
+                    <input class="u-inline-e73ebf4146" type="number" name="meta_letter_spacing_custom" min="-0.10" max="0.30" step="0.01" inputmode="decimal"
+                           value="<?= htmlspecialchars((string) $metaLetter, ENT_QUOTES) ?>" placeholder="как в теме" data-design-preview-field>
+                </div>
+            </div>
 
             <?php
             $currentScale = \App\Core\DesignSettings::typoScale();
@@ -536,6 +547,30 @@ foreach ($options as $key => $opt) {
          aria-labelledby="design-tab-components" tabindex="0" hidden>
         <section class="design-section">
             <h2 class="design-section__title">Настройки компонентов и страниц</h2>
+            <?php
+            $newsPaddingTop = preg_replace('/px$/', '', \App\Core\DesignSettings::newsDetailPaddingTop());
+            $newsPaddingBottom = preg_replace('/px$/', '', \App\Core\DesignSettings::newsDetailPaddingBottom());
+            ?>
+            <div class="design-opt">
+                <div class="design-opt__label">
+                    <span>Страница новости — отступ сверху</span>
+                    <small>Расстояние от хлебных крошек до обычной новости и от premium-hero до текста. От 0 до 200 px; пусто — адаптивное значение темы.</small>
+                </div>
+                <div class="design-opt__choices">
+                    <input class="u-inline-e73ebf4146" type="number" name="newsdetail_padding_top" min="0" max="200" step="1" inputmode="numeric"
+                           value="<?= htmlspecialchars((string) $newsPaddingTop, ENT_QUOTES) ?>" placeholder="как в теме" data-design-preview-field>
+                </div>
+            </div>
+            <div class="design-opt">
+                <div class="design-opt__label">
+                    <span>Страница новости — отступ снизу</span>
+                    <small>Расстояние после последнего блока новости до нижней части страницы. От 0 до 200 px; пусто — адаптивное значение темы.</small>
+                </div>
+                <div class="design-opt__choices">
+                    <input class="u-inline-e73ebf4146" type="number" name="newsdetail_padding_bottom" min="0" max="200" step="1" inputmode="numeric"
+                           value="<?= htmlspecialchars((string) $newsPaddingBottom, ENT_QUOTES) ?>" placeholder="как в теме" data-design-preview-field>
+                </div>
+            </div>
             <div class="design-destination-links">
                 <a href="/admin/header" class="design-destination-link">
                     <?= \App\Core\AdminUi::icon('layout-navbar', 20) ?>

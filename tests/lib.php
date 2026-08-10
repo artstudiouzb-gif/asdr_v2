@@ -148,6 +148,8 @@ function reset_design_state(): void
 {
     $keys = [
         'design_radius_custom', 'design_font_size_custom', 'design_line_height_custom',
+        'design_newsdetail_padding_top', 'design_newsdetail_padding_bottom',
+        'design_meta_letter_spacing_custom',
         'design_heading_line_height_custom', 'design_heading_line_height', 'design_heading_font_weight', 'design_heading_letter_spacing',
         'design_container_custom', 'design_font_google_body', 'design_font_google_heading',
         'design_custom_color_primary', 'design_custom_color_accent', 'design_custom_font_family',

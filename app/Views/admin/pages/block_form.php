@@ -336,6 +336,38 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <?= \App\Core\AdminUi::colorField('text_color', $data['text_color'] ?? '', 'Цвет текста и цифр', '#173a63', 'По умолчанию (тёмно-синий)') ?>
             </div>
             <span class="form-hint u-inline-1e51bacc25">Оставьте «по умолчанию», чтобы карточка была белой с тёмным текстом. Для тёмной карточки выберите тёмный фон и светлый текст.</span>
+            <div class="colorfield-row">
+                <div class="form-field">
+                    <label for="counter_icon_size">Размер иконок, px</label>
+                    <input type="number" id="counter_icon_size" name="icon_size" min="16" max="64" step="1" value="<?= max(16, min(64, (int) ($data['icon_size'] ?? 28))) ?>">
+                </div>
+                <div class="form-field">
+                    <label for="counter_icon_bg">Фон иконок</label>
+                    <select id="counter_icon_bg" name="icon_bg">
+                        <option value="on" <?= (string) ($data['icon_bg'] ?? 'on') === 'on' ? 'selected' : '' ?>>С подложкой</option>
+                        <option value="off" <?= (string) ($data['icon_bg'] ?? 'on') === 'off' ? 'selected' : '' ?>>Без подложки</option>
+                    </select>
+                </div>
+            </div>
+            <div class="colorfield-row">
+                <div class="form-field">
+                    <label for="counter_icon_position">Положение иконки</label>
+                    <select id="counter_icon_position" name="icon_position">
+                        <?php foreach (['left' => 'Слева от текста', 'right' => 'Справа от текста', 'top' => 'Сверху', 'center' => 'Сверху по центру'] as $value => $label): ?>
+                            <option value="<?= $value ?>" <?= (string) ($data['icon_position'] ?? 'left') === $value ? 'selected' : '' ?>><?= $label ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="counter_text_align">Выравнивание содержимого</label>
+                    <select id="counter_text_align" name="text_align">
+                        <?php foreach (['left' => 'Слева', 'center' => 'По центру', 'right' => 'Справа'] as $value => $label): ?>
+                            <option value="<?= $value ?>" <?= (string) ($data['text_align'] ?? 'left') === $value ? 'selected' : '' ?>><?= $label ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <span class="form-hint">Размер, фон и расположение применяются только к иконкам этого блока; выравнивание — к числу и подписи.</span>
             <div>
                 <label>Счётчики</label>
                 <div data-repeater="items">

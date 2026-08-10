@@ -382,6 +382,29 @@ final class DesignSettings
     }
 
     /**
+     * Точные вертикальные отступы детальной страницы новости, 0–200px.
+     * Пустое значение оставляет адаптивный отступ, заданный темой.
+     */
+    public static function newsDetailPaddingTop(): string
+    {
+        return self::normalizeNewsDetailSpacing(
+            (string) Setting::get('design_newsdetail_padding_top', '')
+        );
+    }
+
+    public static function newsDetailPaddingBottom(): string
+    {
+        return self::normalizeNewsDetailSpacing(
+            (string) Setting::get('design_newsdetail_padding_bottom', '')
+        );
+    }
+
+    public static function normalizeNewsDetailSpacing(string $raw): string
+    {
+        return self::normalizePixelValue($raw, 0, 200);
+    }
+
+    /**
      * Размеры шрифта по элементам: ключ формы fs_* => [подпись, CSS-селектор,
      * placeholder-значение темы]. Пустое значение — размер темы не трогаем.
      * Правила выводятся с !important, чтобы предсказуемо перекрывать
@@ -394,12 +417,12 @@ final class DesignSettings
         'fs_h4' => ['Заголовок H4', 'h4, .block-team__unit-title, .newsdetail-timeline__heading', '20'],
         'fs_h5' => ['Заголовок H5', 'h5', '18'],
         'fs_h6' => ['Заголовок H6', 'h6', '16'],
-        'fs_lead' => ['Вводный и крупный текст', '.content-pagehead__lead, .block-hero__lead, .block-hero__subtitle, .newsdetail__lead, .profile__text, .rich-content--lead', '17'],
-        'fs_card_title' => ['Заголовки карточек и этапов', '.feature-card__title, .stage__title, .person-card__name, .doc-card__title, .repo-card__title, .news-card__title, .project-card__title, .bio-edu__degree', '16'],
-        'fs_card_text' => ['Текст карточек и этапов', '.feature-card__text, .stage__text, .person-card__role, .act-card__desc, .doc-card__desc, .repo-card__desc, .news-card__desc, .project-card__desc, .bio-career__text', '14'],
-        'fs_meta' => ['Метаданные и подписи', '.crumbs, .content-crumbs, .stage__year, .act-card__date, .person-card__more, .person-card__vacant, .bio-career__years, .bio-edu__years, .bio-edu__org, .block-text__media-caption, .article-media__caption, .article-media__credit', '13'],
-        'fs_small' => ['Мелкий и вспомогательный текст', 'small, .form-hint, .section-head__eyebrow, .block-hero__eyebrow, .newsdetail__meta, .news-card__meta, .project-card__meta', '13'],
-        'fs_btn' => ['Кнопки', '.block-cta__button, .btn-cta, .btn, button, input[type="button"], input[type="submit"]', '15'],
+        'fs_lead' => ['Вводный и крупный текст', '.content-pagehead__lead, .content-list__lead, .listing__lead, .block-hero__lead, .block-hero__subtitle, .block-banner__text, .newsdetail__lead, .newsdetail-phero__lead, .newslist-lead__excerpt, .newsfeat-lead__excerpt, .profile__text, .bio-quote__text, .rich-content--lead', '17'],
+        'fs_card_title' => ['Заголовки карточек и этапов', '.card__title, .content-card__title, .feature-card__title, .contact-card__title, .stage__title, .stage-item__title, .person-card__name, .doc-card__title, .repo-card__title, .news-card__title, .project-card__title, .album-card__title, .relnews-card__title, .adjnews__title, .imgcard__title, .newsfeat-mini__title, .newsfeat-text__title, .newsdocs-item__title, .catcard__title, .catdetail__card-title, .faq-item__q, .news-poll-card__question, .newsdetail-doc__title, .block-map__card-title, .gcal-list__title, .widget-latest-news__title, .bio-edu__degree', '16'],
+        'fs_card_text' => ['Текст карточек и этапов', '.feature-card__text, .stage__text, .stage-item__text, .person-card__role, .act-card__desc, .doc-card__desc, .repo-card__desc, .news-card__desc, .news-card__excerpt, .project-card__desc, .relnews-card__excerpt, .imgcard__desc, .catcard__excerpt, .timeline-item__text, .featband__text, .bio-career__text, .newsdetail-timeline__desc, .newsdetail-points__item, .faq-item__a, .block-advantages__text, .contact-card__item, .block-map__card-address', '14'],
+        'fs_meta' => ['Метаданные и подписи', '.crumbs, .content-crumbs, .content-card__meta, .content-detail__date, .stage__year, .stage__label, .act-card__number, .act-card__date, .act-card__meta, .person-card__more, .person-card__vacant, .news-card__date, .news-card__meta, .project-card__meta, .album-card__meta, .relnews-card__date, .adjnews__date, .newsfeat__date, .newsdocs-item__date, .doc-card__meta, .catcard__created, .catcard__meta-item, .catcard__file, .catdetail__date, .newsdetail__meta, .newsdetail__source, .newsdetail-gallery__caption, .newsdetail-timeline__date, .newsdetail-event__label, .newsdetail-doc__meta, .newsdetail-points__number, .bio-career__years, .bio-edu__years, .bio-edu__org, .block-text__media-caption, .article-media__caption, .article-media__credit, .media-caption, .gcal-list__time, .gcal-list__loc', '13'],
+        'fs_small' => ['Мелкий и вспомогательный текст', 'small, .form-hint, .section-head__eyebrow, .block-hero__eyebrow, .content-badge, .newsdetail__badge, .news-badge, .faq-item__category, .search-suggest__type, .search-suggest__meta, .site-search-results__type, .news-poll-card__badge, .news-poll-card__meta', '13'],
+        'fs_btn' => ['Кнопки и ссылки-действия', '.block-cta__button, .block-banner__button, .block-hero__button, .timeline-card__button, .timeline-cta__button, .ctaband__button, .profile__button, .newsdetail__btn, .newsdetail__reader-btn, .newsdetail-dl-btn, .doc-card__action, .act-card__action, .catcard__more, .content-toolbar__reset, .news-card__more, .newsfeat__more, .imgcard__more, .person-card__more, .block-map__card-link, .section-head__all, .gcal-nav__all, .btn-cta, .btn, button, input[type="button"], input[type="submit"]', '15'],
         'fs_menu' => ['Главное меню', '.site-menu__link', '13'],
         'fs_topbar' => ['Верхняя панель', '.site-topbar', '13'],
     ];
@@ -521,6 +544,13 @@ final class DesignSettings
             $headingRules .= ':root body ' . $tag . '[class],:root body ' . $tag . ':not([class]){font-size:var(' . $variable . ') !important;}';
         }
 
+        // Служебные подписи используют отдельный tracking-токен: интервал
+        // заголовков для uppercase-номеров и дат семантически не подходит.
+        if (self::metaLetterSpacingCustom() !== '') {
+            $rules .= self::TYPO_SIZES['fs_meta'][1]
+                . '{letter-spacing:var(--meta-letter-spacing) !important;}';
+        }
+
         return ($variables !== '' ? ':root{' . $variables . '}' : '') . $rules . $headingRules;
     }
 
@@ -547,6 +577,29 @@ final class DesignSettings
         }
 
         return rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.');
+    }
+
+    /** Точный межбуквенный интервал метаданных, -0.1–0.3em; пусто — тема. */
+    public static function metaLetterSpacingCustom(): string
+    {
+        return self::normalizeMetaLetterSpacing(
+            (string) Setting::get('design_meta_letter_spacing_custom', '')
+        );
+    }
+
+    public static function normalizeMetaLetterSpacing(string $raw): string
+    {
+        $raw = strtolower(trim(str_replace(',', '.', $raw)));
+        $raw = preg_replace('/em$/', '', $raw) ?? '';
+        if ($raw === '' || !preg_match('/^-?(?:\d+(?:\.\d{1,3})?|\.\d{1,3})$/', $raw)) {
+            return '';
+        }
+        $value = (float) $raw;
+        if ($value < -0.1 || $value > 0.3) {
+            return '';
+        }
+
+        return rtrim(rtrim(number_format($value, 3, '.', ''), '0'), '.') . 'em';
     }
 
     private static function normalizePixelValue(string $raw, float $min, float $max): string
@@ -669,11 +722,29 @@ final class DesignSettings
         if (array_key_exists('radius_custom', $input)) {
             Setting::set('design_radius_custom', self::normalizeRadius((string) $input['radius_custom']));
         }
+        if (array_key_exists('newsdetail_padding_top', $input)) {
+            Setting::set(
+                'design_newsdetail_padding_top',
+                self::normalizeNewsDetailSpacing((string) $input['newsdetail_padding_top'])
+            );
+        }
+        if (array_key_exists('newsdetail_padding_bottom', $input)) {
+            Setting::set(
+                'design_newsdetail_padding_bottom',
+                self::normalizeNewsDetailSpacing((string) $input['newsdetail_padding_bottom'])
+            );
+        }
         if (array_key_exists('line_height_custom', $input)) {
             Setting::set('design_line_height_custom', self::normalizeLineHeight((string) $input['line_height_custom']));
         }
         if (array_key_exists('heading_line_height_custom', $input)) {
             Setting::set('design_heading_line_height_custom', self::normalizeLineHeight((string) $input['heading_line_height_custom']));
+        }
+        if (array_key_exists('meta_letter_spacing_custom', $input)) {
+            Setting::set(
+                'design_meta_letter_spacing_custom',
+                self::normalizeMetaLetterSpacing((string) $input['meta_letter_spacing_custom'])
+            );
         }
         if (array_key_exists('heading_font_weight', $input)) {
             $weight = (string) $input['heading_font_weight'];
@@ -830,7 +901,10 @@ final class DesignSettings
             'font_google_body' => '',
             'font_size_custom' => '',
             'radius_custom' => '',
+            'newsdetail_padding_top' => '',
+            'newsdetail_padding_bottom' => '',
             'line_height_custom' => '',
+            'meta_letter_spacing_custom' => '',
         ], array_fill_keys(array_keys(self::TYPO_SIZES), '')));
         Setting::set('design_preset', $preset);
 
@@ -902,8 +976,11 @@ final class DesignSettings
                 'font_google_body' => Setting::get('design_font_google_body', ''),
                 'font_size_custom' => Setting::get('design_font_size_custom', ''),
                 'radius_custom' => Setting::get('design_radius_custom', ''),
+                'newsdetail_padding_top' => Setting::get('design_newsdetail_padding_top', ''),
+                'newsdetail_padding_bottom' => Setting::get('design_newsdetail_padding_bottom', ''),
                 'line_height_custom' => Setting::get('design_line_height_custom', ''),
                 'heading_line_height_custom' => Setting::get('design_heading_line_height_custom', ''),
+                'meta_letter_spacing_custom' => Setting::get('design_meta_letter_spacing_custom', ''),
                 'typo_scale' => self::typoScale(),
             ] + array_combine(
                 array_keys(self::TYPO_SIZES),
@@ -965,7 +1042,8 @@ final class DesignSettings
             'color_primary', 'color_accent', 'font_family', 'font_face_name',
             'font_url', 'default_theme', 'font_google_heading', 'font_google_body',
             'font_size_custom', 'radius_custom', 'line_height_custom',
-            'heading_line_height_custom', 'typo_scale',
+            'newsdetail_padding_top', 'newsdetail_padding_bottom',
+            'heading_line_height_custom', 'meta_letter_spacing_custom', 'typo_scale',
             'bg_primary', 'bg_surface', 'text_main', 'text_muted', 'border_color',
             'space_small', 'space_premium', 'space_max',
         ], array_keys(self::TYPO_SIZES))));
@@ -976,8 +1054,11 @@ final class DesignSettings
             'font_google_body' => '',
             'font_size_custom' => '',
             'radius_custom' => '',
+            'newsdetail_padding_top' => '',
+            'newsdetail_padding_bottom' => '',
             'line_height_custom' => '',
             'heading_line_height_custom' => '',
+            'meta_letter_spacing_custom' => '',
             // Конфигурации, сохранённые до появления шкалы, восстанавливают
             // поведение «как в теме», а не наследуют текущую шкалу.
             'typo_scale' => 'theme',

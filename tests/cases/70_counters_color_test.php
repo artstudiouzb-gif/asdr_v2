@@ -42,3 +42,24 @@ test('Counters: цифры сплошного цвета, а не градиен
     }
     assert_contains('color: var(--counters-text, var(--gov-title)) !important;', $css);
 });
+
+test('Counters: размер, фон, положение и выравнивание иконок настраиваются', function () {
+    $rendered = BlockRenderer::render(['id' => 3, 'type' => 'counters', 'custom_css' => null, 'data' => json_encode([
+        'icon_size' => 40,
+        'icon_bg' => 'off',
+        'icon_position' => 'right',
+        'text_align' => 'center',
+        'items' => [['value' => 12, 'label' => 'проектов', 'icon_svg' => 'chart-bar']],
+    ])]);
+
+    assert_contains('--counter-icon-size:40px', $rendered['css']);
+    assert_contains('block-counters--icons-no-bg', $rendered['html']);
+    assert_contains('block-counters--icon-pos-right', $rendered['html']);
+    assert_contains('block-counters--text-align-center', $rendered['html']);
+
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    assert_contains('var(--counter-icon-size, 28px) !important', $css);
+    assert_contains('.block-counters--icons-no-bg .counter:hover .counter__icon', $css);
+    assert_contains('.block-counters--icon-pos-right .counter', $css);
+    assert_contains('.block-counters--text-align-center .counter__body', $css);
+});

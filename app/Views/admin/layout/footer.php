@@ -78,6 +78,24 @@ if (!in_array($cardsGridEditorStyle, ['old', 'new'], true)) {
 $cardsGridEditorIconSize = $isCardsGridEditor
     ? max(16, min(64, (int) ($data['_cards_icon_size'] ?? 22)))
     : 22;
+$cardsGridEditorIconBackground = $isCardsGridEditor
+    ? (string) ($data['_cards_icon_bg'] ?? 'on')
+    : 'on';
+if (!in_array($cardsGridEditorIconBackground, ['on', 'off'], true)) {
+    $cardsGridEditorIconBackground = 'on';
+}
+$cardsGridEditorIconPosition = $isCardsGridEditor
+    ? (string) ($data['_cards_icon_position'] ?? 'top')
+    : 'top';
+if (!in_array($cardsGridEditorIconPosition, ['top', 'left', 'right', 'center'], true)) {
+    $cardsGridEditorIconPosition = 'top';
+}
+$cardsGridEditorTextAlign = $isCardsGridEditor
+    ? (string) ($data['_cards_text_align'] ?? 'left')
+    : 'left';
+if (!in_array($cardsGridEditorTextAlign, ['left', 'center', 'right'], true)) {
+    $cardsGridEditorTextAlign = 'left';
+}
 ?>
 <script nonce="<?= \App\Core\SecurityHeaders::nonce() ?>">
 <?php if ($isCardsGridEditor): ?>
@@ -134,13 +152,97 @@ $cardsGridEditorIconSize = $isCardsGridEditor
     sizeField.appendChild(sizeInput);
     sizeField.appendChild(sizeHint);
 
+    var backgroundField = document.createElement('div');
+    backgroundField.className = 'form-field';
+    var backgroundLabel = document.createElement('label');
+    backgroundLabel.setAttribute('for', 'cards_icon_bg');
+    backgroundLabel.textContent = 'Фон иконок';
+    var backgroundSelect = document.createElement('select');
+    backgroundSelect.id = 'cards_icon_bg';
+    backgroundSelect.name = 'cards_icon_bg';
+    [
+        ['on', 'С подложкой'],
+        ['off', 'Без подложки']
+    ].forEach(function (item) {
+        var option = document.createElement('option');
+        option.value = item[0];
+        option.textContent = item[1];
+        backgroundSelect.appendChild(option);
+    });
+    backgroundSelect.value = <?= json_encode($cardsGridEditorIconBackground, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    var backgroundHint = document.createElement('span');
+    backgroundHint.className = 'form-hint';
+    backgroundHint.textContent = 'Без подложки иконка остаётся акцентной и при наведении.';
+    backgroundField.appendChild(backgroundLabel);
+    backgroundField.appendChild(backgroundSelect);
+    backgroundField.appendChild(backgroundHint);
+
+    var positionField = document.createElement('div');
+    positionField.className = 'form-field';
+    var positionLabel = document.createElement('label');
+    positionLabel.setAttribute('for', 'cards_icon_position');
+    positionLabel.textContent = 'Положение иконки';
+    var positionSelect = document.createElement('select');
+    positionSelect.id = 'cards_icon_position';
+    positionSelect.name = 'cards_icon_position';
+    [
+        ['top', 'Сверху'],
+        ['left', 'Слева от текста'],
+        ['right', 'Справа от текста'],
+        ['center', 'Сверху по центру']
+    ].forEach(function (item) {
+        var option = document.createElement('option');
+        option.value = item[0];
+        option.textContent = item[1];
+        positionSelect.appendChild(option);
+    });
+    positionSelect.value = <?= json_encode($cardsGridEditorIconPosition, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    var positionHint = document.createElement('span');
+    positionHint.className = 'form-hint';
+    positionHint.textContent = 'Слева и справа — рядом с текстом; по центру — над заголовком.';
+    positionField.appendChild(positionLabel);
+    positionField.appendChild(positionSelect);
+    positionField.appendChild(positionHint);
+
+    var textAlignField = document.createElement('div');
+    textAlignField.className = 'form-field';
+    var textAlignLabel = document.createElement('label');
+    textAlignLabel.setAttribute('for', 'cards_text_align');
+    textAlignLabel.textContent = 'Выравнивание текста';
+    var textAlignSelect = document.createElement('select');
+    textAlignSelect.id = 'cards_text_align';
+    textAlignSelect.name = 'cards_text_align';
+    [
+        ['left', 'Слева'],
+        ['center', 'По центру'],
+        ['right', 'Справа']
+    ].forEach(function (item) {
+        var option = document.createElement('option');
+        option.value = item[0];
+        option.textContent = item[1];
+        textAlignSelect.appendChild(option);
+    });
+    textAlignSelect.value = <?= json_encode($cardsGridEditorTextAlign, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    var textAlignHint = document.createElement('span');
+    textAlignHint.className = 'form-hint';
+    textAlignHint.textContent = 'Применяется к заголовку и описанию карточки независимо от положения иконки.';
+    textAlignField.appendChild(textAlignLabel);
+    textAlignField.appendChild(textAlignSelect);
+    textAlignField.appendChild(textAlignHint);
+
     anchor.parentNode.insertBefore(styleField, anchor.nextSibling);
     anchor.parentNode.insertBefore(sizeField, styleField.nextSibling);
+    anchor.parentNode.insertBefore(backgroundField, sizeField.nextSibling);
+    anchor.parentNode.insertBefore(positionField, backgroundField.nextSibling);
+    anchor.parentNode.insertBefore(textAlignField, positionField.nextSibling);
 
     function syncCardsGridControls() {
         var iconVariant = variant.value === 'icon';
         styleField.hidden = !iconVariant;
         sizeField.hidden = !iconVariant;
+        backgroundField.hidden = !iconVariant;
+        positionField.hidden = !iconVariant;
+        textAlignField.hidden = !iconVariant;
     }
     variant.addEventListener('change', syncCardsGridControls);
     syncCardsGridControls();

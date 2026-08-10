@@ -78,6 +78,31 @@ test('Block presentation normalizer: поддерживает каскад ка�
     assert_same(['enabled' => true, 'type' => 'stagger'], $data['_reveal']);
 });
 
+test('Block presentation normalizer: сохраняет размер и фон иконок cards_grid', function (): void {
+    $data = BlockPresentationNormalizer::normalize([
+        'cards_icon_size' => '38',
+        'cards_icon_bg' => 'off',
+        'cards_icon_position' => 'right',
+        'cards_text_align' => 'center',
+    ]);
+
+    assert_same(38, $data['_cards_icon_size']);
+    assert_same('off', $data['_cards_icon_bg']);
+    assert_same('right', $data['_cards_icon_position']);
+    assert_same('center', $data['_cards_text_align']);
+
+    $invalid = BlockPresentationNormalizer::normalize([
+        'cards_icon_size' => '200',
+        'cards_icon_bg' => 'unknown',
+        'cards_icon_position' => 'diagonal',
+        'cards_text_align' => 'justify',
+    ]);
+    assert_same(64, $invalid['_cards_icon_size']);
+    assert_same('on', $invalid['_cards_icon_bg']);
+    assert_same('top', $invalid['_cards_icon_position']);
+    assert_same('left', $invalid['_cards_text_align']);
+});
+
 test('Block renderer: добавляет карточный контейнер только по настройке секции', function (): void {
     $card = \App\Core\BlockRenderer::render([
         'id' => 9137,

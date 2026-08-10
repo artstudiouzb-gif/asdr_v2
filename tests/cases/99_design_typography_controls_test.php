@@ -35,6 +35,10 @@ test('точные размеры принимают только безопас
     assert_same('34px', DesignSettings::normalizeFsSize('34'));
     assert_same('', DesignSettings::normalizeFsSize('7'));
     assert_same('', DesignSettings::normalizeFsSize('97'));
+    assert_same('0.08em', DesignSettings::normalizeMetaLetterSpacing('0,08'));
+    assert_same('-0.03em', DesignSettings::normalizeMetaLetterSpacing('-.03em'));
+    assert_same('', DesignSettings::normalizeMetaLetterSpacing('0.31'));
+    assert_same('', DesignSettings::normalizeMetaLetterSpacing('calc(.1em)'));
 });
 
 test('форма дизайна объединяет источники шрифта и показывает точные размеры', function (): void {
@@ -60,7 +64,26 @@ test('форма дизайна объединяет источники шриф
         DesignSettings::TYPO_SIZES['fs_topbar'],
     ));
     assert_contains('name="radius_custom"', $view);
+    assert_contains('name="newsdetail_padding_top"', $view);
+    assert_contains('name="newsdetail_padding_bottom"', $view);
+    assert_contains('name="meta_letter_spacing_custom"', $view);
     assert_not_contains('<h2 class="design-section__title">Google-шрифты</h2>', $view);
+});
+
+test('детальная новость использует управляемые вертикальные отступы и ровную линию метаданных', function (): void {
+    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
+
+    assert_contains('padding-top: var(--newsdetail-padding-top, 0px);', $css);
+    assert_contains('padding-bottom: var(--newsdetail-padding-bottom, clamp(32px, 5vw, 72px));', $css);
+    assert_contains('margin-top: var(--newsdetail-padding-top, clamp(28px, 4vw, 48px));', $css);
+    assert_contains('.relnews-card__date { margin-inline: 14px; }', $css);
+    assert_contains('font-family: var(--font-family, inherit);', $css);
+    assert_contains('color: var(--gov-ink, #0b1a30);', $css);
+    assert_contains('color: var(--on-accent, #ffffff);', $css);
+    assert_contains('font-size: var(--font-size-meta, .82rem);', $css);
+    assert_contains('letter-spacing: var(--meta-letter-spacing, .08em);', $css);
+    assert_contains('.act-card__number', DesignSettings::TYPO_SIZES['fs_meta'][1]);
+    assert_contains('.act-card__meta', DesignSettings::TYPO_SIZES['fs_meta'][1]);
 });
 
 test('точные размеры сохраняются и переопределяют CSS-переменные (БД)', function (): void {
@@ -73,6 +96,7 @@ test('точные размеры сохраняются и переопреде
         'fs_h1' => '34',
         'fs_card_text' => '14',
         'fs_menu' => '15',
+        'meta_letter_spacing_custom' => '0.06',
     ]);
 
     // Точный радиус переносится на кнопки только при скруглённой форме:
@@ -87,6 +111,9 @@ test('точные размеры сохраняются и переопреде
     assert_contains('.stage__text', $css);
     assert_contains('font-size:var(--font-size-card-text) !important;}', $css);
     assert_contains('.site-menu__link{font-size:var(--font-size-menu) !important;}', $css);
+    assert_contains('{letter-spacing:var(--meta-letter-spacing) !important;}', $css);
+    $themeCss = \App\Core\SiteThemeCss::build([], \App\Core\HeaderConfig::DEFAULTS, false);
+    assert_contains('--meta-letter-spacing:0.06em', $themeCss);
 
     // Сброс, чтобы прогон был идемпотентным и не влиял на другие тесты.
     DesignSettings::save(['fs_h1' => '', 'fs_card_text' => '', 'fs_menu' => '']);
@@ -103,6 +130,7 @@ test('точные размеры сохраняются и переопреде
         'font_size_custom' => '',
         'radius_custom' => '',
         'line_height_custom' => '',
+        'meta_letter_spacing_custom' => '',
     ]);
     \App\Models\Setting::set('design_font_google_body', '');
 });

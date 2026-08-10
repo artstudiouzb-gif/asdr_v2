@@ -78,6 +78,22 @@ final class SiteThemeCss
             '--submenu-shadow' => self::submenuShadow((string) ($styles['submenu_shadow'] ?? 'soft')),
         ];
 
+        // Пустые значения намеренно не публикуем: у обычного и premium-макета
+        // разные адаптивные fallback-отступы, которые должны сохраниться до
+        // явной настройки администратора.
+        $newsPaddingTop = DesignSettings::newsDetailPaddingTop();
+        if ($newsPaddingTop !== '') {
+            $variables['--newsdetail-padding-top'] = $newsPaddingTop;
+        }
+        $newsPaddingBottom = DesignSettings::newsDetailPaddingBottom();
+        if ($newsPaddingBottom !== '') {
+            $variables['--newsdetail-padding-bottom'] = $newsPaddingBottom;
+        }
+        $metaLetterSpacing = DesignSettings::metaLetterSpacingCustom();
+        if ($metaLetterSpacing !== '') {
+            $variables['--meta-letter-spacing'] = $metaLetterSpacing;
+        }
+
         foreach ([
             '--header-mid-bg' => (string) ($headerConfig['middlebar']['bg'] ?? ''),
             '--header-nav-bg' => (string) ($headerConfig['bottombar']['bg'] ?? ''),

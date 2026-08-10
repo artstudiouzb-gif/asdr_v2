@@ -29,6 +29,31 @@ test('DesignSettings::cssVariables формирует корректные пе�
     assert_contains('--btn-radius:999px', $css);
 });
 
+test('Отступы страницы новости принимают безопасные значения и сохраняются (БД)', function () {
+    ensure_test_db();
+    DesignSettings::save([
+        'newsdetail_padding_top' => '24',
+        'newsdetail_padding_bottom' => '64px',
+    ]);
+
+    assert_same('24px', DesignSettings::newsDetailPaddingTop());
+    assert_same('64px', DesignSettings::newsDetailPaddingBottom());
+    assert_same('0px', DesignSettings::normalizeNewsDetailSpacing('0'));
+    assert_same('', DesignSettings::normalizeNewsDetailSpacing('201'));
+    assert_same('', DesignSettings::normalizeNewsDetailSpacing('clamp(1px, 2vw, 3px)'));
+    $themeCss = \App\Core\SiteThemeCss::build([], \App\Core\HeaderConfig::DEFAULTS, false);
+    assert_contains('--newsdetail-padding-top:24px', $themeCss);
+    assert_contains('--newsdetail-padding-bottom:64px', $themeCss);
+
+    DesignSettings::save([
+        'newsdetail_padding_top' => '',
+        'newsdetail_padding_bottom' => '',
+    ]);
+    $themeCss = \App\Core\SiteThemeCss::build([], \App\Core\HeaderConfig::DEFAULTS, false);
+    assert_not_contains('--newsdetail-padding-top:', $themeCss);
+    assert_not_contains('--newsdetail-padding-bottom:', $themeCss);
+});
+
 test('DesignSettings::bodyClasses отражает глобальный макет без настроек конструктора шапки', function () {
     $on = DesignSettings::bodyClasses([
         'container' => 'standard', 'radius' => 'small', 'card_gap' => 'sm', 'density' => 'standard',
