@@ -46,8 +46,8 @@ if ($variant === 'icon' && $visualStyle === 'new') {
     $templateCss .= $scope . ' .block-cards--style-new .feature-card:hover{background:var(--card-bg,transparent);border-top-color:var(--gov-accent,#17999b);box-shadow:none;transform:none;}';
     $templateCss .= $scope . ' .block-cards--style-new .feature-card__top{align-items:flex-start;margin-bottom:clamp(22px,2.3vw,34px);}';
     $templateCss .= $scope . ' .block-cards--style-new .feature-card__icon{width:' . $iconSize . 'px;height:' . $iconSize . 'px;border:0;border-radius:0;background:transparent;color:var(--gov-accent,#17999b);justify-content:flex-start;}';
-    $templateCss .= $scope . ' .block-cards--style-new .feature-card__num{color:var(--gov-accent,#17999b);font-size:12px;font-weight:700;letter-spacing:.12em;}';
-    $templateCss .= $scope . ' .block-cards--style-new .feature-card__title{color:var(--cards-text,var(--gov-primary,#173a63));font-size:clamp(18px,1.35vw,21px);line-height:1.25;margin-bottom:10px;}';
+    $templateCss .= $scope . ' .block-cards--style-new .feature-card__num{color:var(--gov-accent,#17999b);font-size:var(--font-size-meta,.75rem);font-weight:700;letter-spacing:var(--meta-letter-spacing,.12em);}';
+    $templateCss .= $scope . ' .block-cards--style-new .feature-card__title{color:var(--cards-text,var(--gov-primary,#173a63));font-size:var(--font-size-h3,clamp(18px,1.35vw,21px));line-height:1.25;margin-bottom:10px;}';
     $templateCss .= $scope . ' .block-cards--style-new .feature-card__text{color:var(--cards-text,var(--gov-text,#334155));max-width:34ch;}';
 }
 ?>
@@ -131,8 +131,10 @@ if ($variant === 'icon' && $visualStyle === 'new') {
                     <?php $url = trim((string) ($item['url'] ?? '')); $hasIcon = !empty($item['icon_svg']); ?>
                     <?php if ($url !== ''): ?>
                     <a class="feature-card<?= $hasIcon ? ' feature-card--has-icon' : '' ?>" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                    <?php elseif ($hasIcon): ?>
+                    <article class="feature-card feature-card--has-icon">
                     <?php else: ?>
-                    <article class="feature-card<?= $hasIcon ? ' feature-card--has-icon' : '' ?>">
+                    <article class="feature-card">
                     <?php endif; ?>
                         <div class="feature-card__top">
                             <?php if ($hasIcon): ?>

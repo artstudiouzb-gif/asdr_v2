@@ -87,6 +87,7 @@ test('BlockRenderer: cards_grid применяет размер и отключ�
             '_cards_icon_bg' => 'off',
             '_cards_icon_position' => 'right',
             '_cards_text_align' => 'center',
+            '_cards_style' => 'new',
             'items' => [['icon_svg' => 'target', 'title' => 'Направление']],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         'custom_css' => '',
@@ -98,6 +99,9 @@ test('BlockRenderer: cards_grid применяет размер и отключ�
     assert_contains('feature-card feature-card--has-icon', $result['html']);
     assert_contains('feature-card__content', $result['html']);
     assert_contains('--feature-card-icon-size:38px', $result['css']);
+    assert_contains('font-size:var(--font-size-meta,.75rem)', $result['css']);
+    assert_contains('letter-spacing:var(--meta-letter-spacing,.12em)', $result['css']);
+    assert_contains('font-size:var(--font-size-h3,clamp(18px,1.35vw,21px))', $result['css']);
     assert_not_contains('.feature-card__icon svg{width:38px', $result['css']);
 
     $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
