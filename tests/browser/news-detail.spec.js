@@ -60,9 +60,13 @@ async function mountNews(page) {
             <div class="reader-mode-container">Текст для чтения</div>
         </div>
     `);
-    // Повторяем реальный порядок CSS страницы: базовая сетка, тема, контент.
+    // Повторяем реальный порядок CSS страницы: базовая сетка, тема, вынесенная
+    // часть темы, контент. Стили новостного раздела живут отдельным файлом и на
+    // странице подключаются сразу после бандла — до пользовательских переменных
+    // дизайна (AssetCollector::renderThemeStyles).
     await page.addStyleTag({ path: path.join(projectRoot, 'public/assets/css/public.min.css') });
     await page.addStyleTag({ path: path.join(projectRoot, 'public/assets/css/gov-theme.css') });
+    await page.addStyleTag({ path: path.join(projectRoot, 'public/assets/css/blocks/news-detail.css') });
     await page.addStyleTag({ path: path.join(projectRoot, 'public/assets/css/rich-content.css') });
     // Пользовательские переменные дизайна подключаются после базовой темы.
     // Повторяем тот же порядок, чтобы значения 0px не перезаписывались :root из CSS.

@@ -78,10 +78,21 @@ test('Uzbek home uses localized title and secure language URL', async ({ page })
 
 test('selected language persists until the visitor explicitly changes it', async ({ page }) => {
     await page.goto('/uz');
-    await page.goto('/projects');
-    expect(page.url()).toMatch(/^http:\/\/127\.0\.0\.1:8080\/uz\/projects\/?$/);
 
     let cookies = await page.context().cookies();
+    expect(cookies.find((cookie) => cookie.name === 'site_lang')?.value).toBe('uz');
+
+    // Сохранённый язык перебивает адрес только на корне сайта: заход на «/»
+    // уводит на «/uz». На конкретной странице выигрывает язык из URL — иначе
+    // ответ каждой страницы зависел бы от cookie и не кешировался бы на CDN,
+    // а присланная ссылка уводила бы читателя на другую языковую версию.
+    await page.goto('/');
+    expect(page.url()).toMatch(/^http:\/\/127\.0\.0\.1:8080\/uz\/?$/);
+
+    await page.goto('/projects');
+    expect(page.url()).toMatch(/^http:\/\/127\.0\.0\.1:8080\/projects\/?$/);
+
+    cookies = await page.context().cookies();
     expect(cookies.find((cookie) => cookie.name === 'site_lang')?.value).toBe('uz');
 
     await page.goto('/projects?_lang=ru');
@@ -89,10 +100,17 @@ test('selected language persists until the visitor explicitly changes it', async
     cookies = await page.context().cookies();
     expect(cookies.find((cookie) => cookie.name === 'site_lang')?.value).toBe('ru');
 
+    // Открыть страницу на другом языке по прямой ссылке можно всегда, и
+    // сохранённый выбор от этого не меняется: язык переключают явно —
+    // параметром _lang или переключателем в шапке.
     await page.goto('/uz/projects');
-    expect(page.url()).toMatch(/^http:\/\/127\.0\.0\.1:8080\/projects\/?$/);
+    expect(page.url()).toMatch(/^http:\/\/127\.0\.0\.1:8080\/uz\/projects\/?$/);
     cookies = await page.context().cookies();
     expect(cookies.find((cookie) => cookie.name === 'site_lang')?.value).toBe('ru');
+
+    // Корень по-прежнему уводит на сохранённый язык.
+    await page.goto('/uz');
+    expect(page.url()).toMatch(/^http:\/\/127\.0\.0\.1:8080\/?$/);
 });
 
 test('health endpoint and admin login are reachable', async ({ page, request }) => {
