@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS news (
     lang            VARCHAR(8) NOT NULL DEFAULT 'ru',
     translation_group_id INT UNSIGNED NULL,
     UNIQUE KEY uq_news_slug_lang (slug, lang),
-    KEY idx_news_status_published (status, published_at),
+    KEY idx_news_listing (status, deleted_at, published_at),
     KEY idx_news_lang_group (translation_group_id, lang),
     CONSTRAINT fk_news_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -288,7 +288,8 @@ CREATE TABLE IF NOT EXISTS projects (
     lang            VARCHAR(8) NOT NULL DEFAULT 'ru',
     translation_group_id INT UNSIGNED NULL,
     UNIQUE KEY uq_projects_slug_lang (slug, lang),
-    KEY idx_projects_lang_group (translation_group_id, lang)
+    KEY idx_projects_lang_group (translation_group_id, lang),
+    KEY idx_projects_listing (status, deleted_at, is_featured, sort_order, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Галерея изображений проекта
@@ -676,7 +677,8 @@ CREATE TABLE IF NOT EXISTS photo_albums (
     is_published TINYINT(1) NOT NULL DEFAULT 1,
     is_featured  TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'показывать на главной (блок Медиа)',
     created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uniq_albums_slug (slug)
+    UNIQUE KEY uniq_albums_slug (slug),
+    KEY idx_albums_listing (is_published, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS photo_album_images (
@@ -716,7 +718,8 @@ CREATE TABLE IF NOT EXISTS videos (
     is_featured  TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'показывать на главной (блок Медиа)',
     sort_order   INT NOT NULL DEFAULT 0,
     created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uniq_videos_slug (slug)
+    UNIQUE KEY uniq_videos_slug (slug),
+    KEY idx_videos_listing (is_published, sort_order, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Переводы видео (заголовок и описание на неосновных языках)
@@ -1130,7 +1133,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_02_social_scheduled_at.sql'),
     ('2026_08_03_notification_center.sql'),
     ('2026_08_05_page_custom_assets.sql'),
-    ('2026_08_11_web_vitals.sql')
+    ('2026_08_11_web_vitals.sql'),
+    ('2026_08_11_public_listing_indexes.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (
