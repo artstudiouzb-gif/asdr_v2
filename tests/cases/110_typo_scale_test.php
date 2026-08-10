@@ -21,7 +21,7 @@ test('Шкала типографики: иерархия строго убыв�
         Setting::overrideInMemory('design_typo_scale', $scale);
         $sizes = DesignSettings::scaleSizes();
 
-        $order = ['fs_h1', 'fs_h2', 'fs_h3', 'fs_h4', 'fs_h5'];
+        $order = ['fs_h1', 'fs_h2', 'fs_h3', 'fs_h4', 'fs_h5', 'fs_h6'];
         $previous = PHP_INT_MAX;
         foreach ($order as $key) {
             $value = (int) rtrim($sizes[$key], 'px');
@@ -29,8 +29,8 @@ test('Шкала типографики: иерархия строго убыв�
             assert_true($value < $previous, "{$scale}: {$key} не мельче предыдущего — иерархия сломана");
             $previous = $value;
         }
-        // Все ступени крупнее основного текста.
-        assert_true((int) rtrim($sizes['fs_h5'], 'px') > 16, "{$scale}: H5 не крупнее основного текста");
+        // Даже самая младшая ступень остаётся крупнее основного текста.
+        assert_true((int) rtrim($sizes['fs_h6'], 'px') > 16, "{$scale}: H6 не крупнее основного текста");
         // Дробных размеров быть не должно: они и создают ощущение хаоса.
         foreach ($sizes as $key => $value) {
             assert_false(str_contains($value, '.'), "{$scale}: дробный размер у {$key} — {$value}");
