@@ -53,7 +53,7 @@ final class BlockSamples
                 'button_text' => 'Перейти к новостям',
                 'button_url' => $news,
             ],
-            'advantages' => ['title' => 'Преимущества', 'items' => [
+            'advantages' => ['title' => 'Преимущества', 'description' => '<p>Краткое описание раздела с карточками.</p>', 'items' => [
                 ['title' => 'Первое преимущество', 'text' => self::LEAD, 'icon_svg' => ''],
                 ['title' => 'Второе преимущество', 'text' => self::LEAD, 'icon_svg' => ''],
                 ['title' => 'Третье преимущество', 'text' => self::LEAD, 'icon_svg' => ''],
@@ -127,7 +127,7 @@ final class BlockSamples
             'person_cards' => ['title' => 'Руководство', 'items' => [
                 $person('Директор'), $person('Заместитель директора'),
             ]],
-            'timeline' => ['title' => 'Хронология', 'items' => [
+            'timeline' => ['title' => 'Хронология', 'description' => '<p>Краткое описание ключевых событий.</p>', 'items' => [
                 ['year' => '2024', 'text' => 'Событие или этап — замените своим описанием.', 'status' => 'done'],
                 ['year' => '2025', 'text' => 'Следующий этап.', 'status' => 'done'],
                 ['year' => '2026', 'text' => 'Текущий этап.', 'status' => 'active'],
@@ -159,7 +159,7 @@ final class BlockSamples
                 ['label' => 'Первый раздел', 'url' => '#sec-1'],
                 ['label' => 'Второй раздел', 'url' => '#sec-2'],
             ]],
-            'stages' => ['title' => 'Этапы', 'items' => [
+            'stages' => ['title' => 'Этапы', 'description' => '<p>Краткое описание этапов реализации.</p>', 'items' => [
                 ['stage' => 'Шаг 1', 'title' => 'Подготовка', 'text' => 'Что происходит на этом этапе.', 'year' => '', 'status' => 'done', 'status_text' => 'Завершён'],
                 ['stage' => 'Шаг 2', 'title' => 'Реализация', 'text' => 'Что происходит на этом этапе.', 'year' => '', 'status' => 'active', 'status_text' => 'В работе'],
                 ['stage' => 'Шаг 3', 'title' => 'Результат', 'text' => 'Что происходит на этом этапе.', 'year' => '', 'status' => '', 'status_text' => 'Запланирован'],

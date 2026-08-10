@@ -24,6 +24,7 @@ test('Блок person_cards: персона с фото и вакантная к
 test('Блок timeline: события, кнопка и CTA-карточка', function () {
     $rendered = BlockRenderer::render(['id' => 41, 'type' => 'timeline', 'custom_css' => null, 'data' => json_encode([
         'title' => 'История Агентства',
+        'description' => '<p>Как развивалась организация.</p>',
         'items' => [
             ['year' => '2017', 'text' => 'Создан центр', 'status' => 'done'],
             ['year' => '2023+', 'text' => 'Расширение функций', 'status' => 'active'],
@@ -39,6 +40,8 @@ test('Блок timeline: события, кнопка и CTA-карточка', 
     assert_contains('timeline-item--active', $out);
     assert_contains('2023+', $out);
     assert_contains('timeline-cta__title', $out);
+    assert_contains('block-timeline__description', $out);
+    assert_contains('Как развивалась организация.', $out);
     assert_contains("url('/uploads/public/t.jpg')", $out);
     assert_not_contains(' style="', $rendered['html']);
 
@@ -75,12 +78,14 @@ test('Блок person_profile: фото, контакты, кнопка', functi
 
 test('Преимущества-полоса: элементы с иконками', function () {
     $out = BlockRenderer::render(['id' => 45, 'type' => 'advantages', 'custom_css' => null, 'data' => json_encode([
-        'variant' => 'band', 'items' => [
+        'variant' => 'band', 'title' => 'Преимущества', 'description' => '<p>Почему это удобно.</p>', 'items' => [
             ['icon_svg' => 'target-arrow', 'title' => 'Стратегическое управление', 'text' => 'Определение приоритетов'],
             ['icon_svg' => '', 'title' => 'Координация реформ', 'text' => ''],
         ],
     ])])['html'];
     assert_contains('featband__item', $out);
+    assert_contains('block-featband__description', $out);
+    assert_contains('Почему это удобно.', $out);
     assert_contains('Стратегическое управление', $out);
 });
 

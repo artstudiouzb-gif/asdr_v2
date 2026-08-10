@@ -86,9 +86,16 @@ test('Варианты объединённых блоков сохраняют 
     $history = BlockRenderer::render([
         'id' => 1770,
         'type' => 'stages',
-        'data' => json_encode(['variant' => 'history', 'items' => [['year' => '2025', 'title' => 'Новая система']]], JSON_UNESCAPED_UNICODE),
+        'data' => json_encode([
+            'variant' => 'history',
+            'title' => 'История организации',
+            'description' => '<p>Ключевые этапы развития.</p>',
+            'items' => [['year' => '2025', 'title' => 'Новая система']],
+        ], JSON_UNESCAPED_UNICODE),
     ]);
     assert_contains('block-stages--history', $history['html']);
+    assert_contains('section-head__description', $history['html']);
+    assert_contains('Ключевые этапы развития.', $history['html']);
 
     $editorialActs = BlockRenderer::render([
         'id' => 1771,

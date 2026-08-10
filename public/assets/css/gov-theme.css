@@ -3467,7 +3467,29 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 
 /* Заголовок секции: серифный + ссылка «Все …». */
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 26px; flex-wrap: wrap; }
+.section-head__copy { flex: 1 1 520px; min-width: 0; }
 .section-head__title { font-size: clamp(1.8rem, 3.5vw, 2.2rem) !important; margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+.section-head__description,
+.block-advantages__description,
+.block-featband__description,
+.block-timeline__description {
+    max-width: 860px;
+    margin-top: 10px;
+    color: var(--gov-muted);
+    font-size: var(--font-size-body, 1rem);
+    line-height: 1.65;
+}
+.section-head__description p,
+.block-advantages__description p,
+.block-featband__description p,
+.block-timeline__description p { margin: 0 0 8px; }
+.section-head__description p:last-child,
+.block-advantages__description p:last-child,
+.block-featband__description p:last-child,
+.block-timeline__description p:last-child { margin-bottom: 0; }
+.cms-block--bg-navy :is(.section-head__description, .block-advantages__description, .block-featband__description, .block-timeline__description) {
+    color: rgba(255, 255, 255, .82);
+}
 .section-head__all { color: var(--gov-teal-text); font-family: var(--font-family, 'PT Sans', sans-serif); font-size: 0.9rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
 
 /* Приоритетные направления — карточки иконка+заголовок+текст+стрелка. */
@@ -3825,10 +3847,12 @@ span.imgcard__media::after {
 
 /* История — таймлайн + CTA-карточка с фоном. */
 /* История — таймлайн + CTA-карточка с фоном. */
-.block-timeline--with-cta { display: grid; grid-template-columns: 1fr 1.1fr; gap: 28px; align-items: stretch; }
-@media (max-width: 900px) { .block-timeline--with-cta { grid-template-columns: 1fr; } }
+.block-timeline__head { margin-bottom: 26px; }
+.block-timeline__title { margin: 0; color: var(--gov-title); font-size: var(--font-size-h2, clamp(1.5rem, 2.6vw, 2rem)); font-weight: 700; line-height: 1.25; letter-spacing: -.02em; }
+.block-timeline__layout { min-width: 0; }
+.block-timeline--with-cta .block-timeline__layout { display: grid; grid-template-columns: 1fr 1.1fr; gap: 28px; align-items: stretch; }
+@media (max-width: 900px) { .block-timeline--with-cta .block-timeline__layout { grid-template-columns: 1fr; } }
 .timeline-card { background: color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)); border-radius: var(--radius); padding: 30px; }
-.timeline-card__title { font-size: 1.4rem; margin: 0 0 22px; }
 .timeline-list { list-style: none; margin: 0; padding: 0; position: relative; }
 .timeline-item { position: relative; display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 0 0 22px 28px; cursor: default; }
 .timeline-item:last-child { padding-bottom: 0; }
@@ -4010,7 +4034,8 @@ span.imgcard__media::after {
 .featband__icon svg { width: 30px; height: 30px; }
 .featband__name { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: 1.05rem; color: #ffffff; }
 .featband__text { color: rgba(255,255,255,.92); font-size: .92rem; line-height: 1.5; }
-.block-featband__title { font-size: clamp(1.5rem, 2.6vw, 2rem); margin: 0 0 26px; }
+.block-featband__head { margin-bottom: 26px; }
+.block-featband__title { margin: 0; font-size: var(--font-size-h2, clamp(1.5rem, 2.6vw, 2rem)); }
 
 /* Биография + образование (две колонки). */
 /* Список карьеры длиннее карточки образования, поэтому боковая колонка
@@ -5948,7 +5973,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 }
 /* Текст всегда поверх водяного знака: длинное название иначе
    наезжает на орнамент и оба становятся нечитаемыми. */
-.act-card__head, .act-card__title, .act-card__foot { position: relative; z-index: 1; }
+.act-card__head, .act-card__desc, .act-card__foot { position: relative; z-index: 1; }
 .act-card__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
 .act-card__number {
     font-family: var(--font-family, 'PT Sans', sans-serif);
@@ -5965,15 +5990,6 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 14%, transparent);
 }
 .act-card__date { color: var(--gov-muted); font-size: .84rem; }
-.act-card__title {
-    font-family: var(--font-heading, 'PT Serif', Georgia, serif);
-    font-weight: 700;
-    font-size: 1.05rem;
-    line-height: 1.35;
-    color: var(--gov-title);
-    transition: color .25s ease;
-}
-.act-card:hover .act-card__title { color: var(--gov-teal-text); }
 .act-card__foot {
     display: flex;
     flex-wrap: wrap;
@@ -5990,7 +6006,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .act-card__action { display: inline-flex; align-items: center; gap: 6px; flex: none; color: var(--gov-teal-text); font-weight: 700; font-size: .86rem; }
 .act-card:hover .act-card__action { gap: 9px; }
 @media (prefers-reduced-motion: reduce) {
-    .act-card, .act-card__title, .act-card__action { transition: none; }
+    .act-card, .act-card__action { transition: none; }
     .act-card:hover { transform: none; }
 }
 
@@ -6820,7 +6836,8 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 }
 /* Заголовок блока — как у остальных секций: 1.1rem читался подписью, а не
    названием раздела, и ломал иерархию страницы. */
-.block-advantages__title { font-weight: 700; font-size: clamp(1.5rem, 2.6vw, 2rem); color: var(--gov-title); margin: 0 0 26px; line-height: 1.25; letter-spacing: -0.02em; }
+.block-advantages__head { margin-bottom: 26px; }
+.block-advantages__title { margin: 0; color: var(--gov-title); font-size: var(--font-size-h2, clamp(1.5rem, 2.6vw, 2rem)); font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; }
 .block-advantages__text { color: var(--gov-muted, #475569); font-size: 0.92rem; line-height: 1.55; margin: 0; }
 
 /* --- Контактные карточки / Отделы (Contact Cards Block) --- */
@@ -6915,8 +6932,14 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .feature-card.act-card .feature-card__text {
     margin: 0;
     color: var(--gov-muted, #475569);
-    font-size: .92rem;
+    font-size: var(--font-size-card-text, .92rem);
     line-height: 1.55;
+}
+
+.feature-card.act-card .act-card__desc {
+    font-family: var(--font-family, 'PT Sans', sans-serif);
+    font-weight: 400;
+    line-height: 1.6;
 }
 
 .feature-card.act-card .act-card__emblem {
