@@ -33,8 +33,16 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
 
         <?php if (in_array($type, ['text', 'cta', 'advantages', 'testimonials', 'counters', 'team_list', 'projects_list', 'news_latest', 'partners', 'faq', 'subscribe', 'contact_cards', 'hero', 'cards_grid', 'media_gallery', 'news_feature', 'person_cards', 'timeline', 'stages', 'text_image', 'docs_list', 'map_point', 'org_structure'], true)): ?>
             <div class="form-field">
-                <label for="title_field">Заголовок, показываемый на сайте</label>
+                <label for="title_field"><?= in_array($type, ['advantages', 'timeline', 'stages'], true) ? 'Заголовок раздела' : 'Заголовок, показываемый на сайте' ?></label>
                 <input type="text" id="title_field" name="title_field" value="<?= htmlspecialchars($data['title'] ?? '', ENT_QUOTES) ?>">
+            </div>
+        <?php endif; ?>
+
+        <?php if (in_array($type, ['advantages', 'timeline', 'stages'], true)): ?>
+            <div class="form-field">
+                <label for="section_description">Описание раздела</label>
+                <textarea id="section_description" name="description" rows="4" data-wysiwyg><?= htmlspecialchars($data['description'] ?? '', ENT_QUOTES) ?></textarea>
+                <span class="form-hint">Заголовок и описание выводятся над содержимым блока — отдельный текстовый блок не нужен.</span>
             </div>
         <?php endif; ?>
 

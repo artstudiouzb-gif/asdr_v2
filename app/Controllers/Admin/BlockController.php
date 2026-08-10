@@ -649,6 +649,10 @@ final class BlockController
                 }
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    'description' => TextProcessor::process(
+                        \App\Core\HtmlSanitizer::sanitizeText((string) ($_POST['description'] ?? '')),
+                        $locale
+                    ),
                     'items' => $items,
                     'button_text' => trim((string) ($_POST['button_text'] ?? '')),
                     'button_url' => $this->safeUrlField('button_url'),
@@ -791,6 +795,10 @@ final class BlockController
                 return [
                     'variant' => ($_POST['variant'] ?? 'default') === 'history' ? 'history' : 'default',
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    'description' => TextProcessor::process(
+                        \App\Core\HtmlSanitizer::sanitizeText((string) ($_POST['description'] ?? '')),
+                        $locale
+                    ),
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => $this->safeUrlField('all_url'),
                     'items' => $items,

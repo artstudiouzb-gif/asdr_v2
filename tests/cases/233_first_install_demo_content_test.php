@@ -84,3 +84,25 @@ test('Первая установка: направления главной с�
         assert_same($agencyTitles, $homeTitles, "{$lang}: направления не расходятся с официальной страницей");
     }
 });
+
+test('Первая установка: заголовки карточек и хронологии не требуют отдельного text-блока', function (): void {
+    $agency = require APP_ROOT . '/database/content/agency_content.php';
+
+    foreach (['ru', 'uz', 'en'] as $lang) {
+        $blocks = $agency['pages']['o-nas'][$lang]['blocks'] ?? [];
+        foreach ($blocks as $block) {
+            $type = (string) ($block[0] ?? '');
+            $data = is_array($block[2] ?? null) ? $block[2] : [];
+            if (in_array($type, ['advantages', 'stages'], true)) {
+                assert_true(trim((string) ($data['title'] ?? '')) !== '', "{$lang}/{$type}: нет заголовка");
+                assert_true(trim(strip_tags((string) ($data['description'] ?? ''))) !== '', "{$lang}/{$type}: нет описания");
+            }
+            if ($type === 'text') {
+                assert_false(
+                    ($data['variant'] ?? '') === 'section',
+                    "{$lang}: вступление к карточкам не должно оставаться отдельным блоком",
+                );
+            }
+        }
+    }
+});

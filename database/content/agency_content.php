@@ -50,15 +50,11 @@ return [
                         ],
                         'quote' => '',
                     ]],
-                    ['text', 'Чем занимается Агентство — вступление', [
-                        'variant' => 'section',
-                        'title' => 'Чем занимается Агентство',
-                        'content' => '<p>Агентство участвует во всём цикле стратегического планирования — от анализа и подготовки инициатив до мониторинга их реализации и оценки достигнутых результатов.</p>',
-                    ]],
                     ['advantages', 'Направления работы', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'variant' => 'indexed',
-                        'title' => '',
+                        'title' => 'Чем занимается Агентство',
+                        'description' => '<p>Агентство участвует во всём цикле стратегического планирования — от анализа и подготовки инициатив до мониторинга их реализации и оценки достигнутых результатов.</p>',
                         'items' => [
                             ['icon_svg' => 'target', 'title' => 'Стратегическое планирование', 'text' => 'Агентство формирует методологические подходы к разработке стратегических документов и содействует созданию единой системы стратегического планирования на республиканском, отраслевом и региональном уровнях.'],
                             ['icon_svg' => 'chart-line', 'title' => 'Анализ и разработка инициатив', 'text' => 'Изучаются социально-экономические процессы, актуальные проблемы развития, международный опыт, исследования и рекомендации экспертного сообщества. На основе анализа разрабатываются предложения по новым направлениям развития и системным реформам.'],
@@ -84,15 +80,11 @@ return [
                         ],
                         'quote' => '',
                     ]],
-                    ['text', 'Как развивалось Агентство — вступление', [
-                        'variant' => 'section',
-                        'title' => 'Как развивалось Агентство',
-                        'content' => '<p>Современная модель Агентства сформировалась в результате последовательного развития системы стратегического управления в Узбекистане.</p>',
-                    ]],
                     ['stages', 'Этапы развития', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'variant' => 'history',
-                        'title' => '',
+                        'title' => 'Как развивалось Агентство',
+                        'description' => '<p>Современная модель Агентства сформировалась в результате последовательного развития системы стратегического управления в Узбекистане.</p>',
                         'all_text' => '',
                         'all_url' => '',
                         'items' => [
@@ -151,15 +143,11 @@ return [
                         ],
                         'quote' => '',
                     ]],
-                    ['text', 'Agentlik nima bilan shug‘ullanadi — kirish', [
-                        'variant' => 'section',
-                        'title' => 'Agentlik nima bilan shug‘ullanadi?',
-                        'content' => '<p>Agentlik strategik rejalashtirishning barcha bosqichlarida — vaziyatni tahlil qilish va tashabbuslarni ishlab chiqishdan tortib, ularning amalga oshirilishini monitoring qilish va natijadorligini baholashgacha ishtirok etadi.</p>',
-                    ]],
                     ['advantages', 'Faoliyat yo‘nalishlari', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'variant' => 'indexed',
-                        'title' => '',
+                        'title' => 'Agentlik nima bilan shug‘ullanadi?',
+                        'description' => '<p>Agentlik strategik rejalashtirishning barcha bosqichlarida — vaziyatni tahlil qilish va tashabbuslarni ishlab chiqishdan tortib, ularning amalga oshirilishini monitoring qilish va natijadorligini baholashgacha ishtirok etadi.</p>',
                         'items' => [
                             ['icon_svg' => 'target', 'title' => 'Strategik rejalashtirish', 'text' => 'Agentlik strategik hujjatlarni ishlab chiqish bo‘yicha metodologik yondashuvlarni shakllantiradi hamda respublika, tarmoq va hududiy darajalarda yagona strategik rejalashtirish tizimini rivojlantirishga ko‘maklashadi.'],
                             ['icon_svg' => 'chart-line', 'title' => 'Tahlil va yangi tashabbuslar', 'text' => 'Ijtimoiy-iqtisodiy jarayonlar, rivojlanishdagi dolzarb masalalar, xalqaro tajriba, ilmiy tadqiqotlar va ekspertlar tavsiyalari o‘rganiladi. Ushbu tahlil asosida mamlakatni rivojlantirishning yangi yo‘nalishlari va tizimli islohotlar bo‘yicha takliflar ishlab chiqiladi.'],
@@ -185,15 +173,11 @@ return [
                         ],
                         'quote' => '',
                     ]],
-                    ['text', 'Agentlikning rivojlanish tarixi — kirish', [
-                        'variant' => 'section',
-                        'title' => 'Agentlikning rivojlanish tarixi',
-                        'content' => '<p>Agentlikning bugungi modeli O‘zbekistonda strategik boshqaruv tizimini izchil takomillashtirish natijasida shakllandi.</p>',
-                    ]],
                     ['stages', 'Rivojlanish bosqichlari', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'variant' => 'history',
-                        'title' => '',
+                        'title' => 'Agentlikning rivojlanish tarixi',
+                        'description' => '<p>Agentlikning bugungi modeli O‘zbekistonda strategik boshqaruv tizimini izchil takomillashtirish natijasida shakllandi.</p>',
                         'all_text' => '',
                         'all_url' => '',
                         'items' => [
@@ -252,15 +236,11 @@ return [
                         ],
                         'quote' => '',
                     ]],
-                    ['text', 'What the Agency does — intro', [
-                        'variant' => 'section',
-                        'title' => 'What the Agency Does',
-                        'content' => '<p>The Agency is involved throughout the strategic planning cycle — from analysis and the development of new initiatives to implementation monitoring and evaluation of results.</p>',
-                    ]],
                     ['advantages', 'Areas of work', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'variant' => 'indexed',
-                        'title' => '',
+                        'title' => 'What the Agency Does',
+                        'description' => '<p>The Agency is involved throughout the strategic planning cycle — from analysis and the development of new initiatives to implementation monitoring and evaluation of results.</p>',
                         'items' => [
                             ['icon_svg' => 'target', 'title' => 'Strategic Planning', 'text' => 'The Agency develops methodological approaches for the preparation of strategic planning documents and supports the establishment of an integrated strategic planning system at national, sectoral and regional levels.'],
                             ['icon_svg' => 'chart-line', 'title' => 'Analysis and Development of Initiatives', 'text' => 'The Agency studies socio-economic developments, key development challenges, international experience, research findings and recommendations from the expert community. Based on this analysis, proposals are developed for new development priorities and systemic reforms.'],
@@ -286,15 +266,11 @@ return [
                         ],
                         'quote' => '',
                     ]],
-                    ['text', 'The Agency’s development — intro', [
-                        'variant' => 'section',
-                        'title' => 'The Agency’s Development',
-                        'content' => '<p>The Agency’s present-day model is the result of the gradual development of Uzbekistan’s strategic governance system.</p>',
-                    ]],
                     ['stages', 'Development stages', [
                         '_reveal' => ['enabled' => true, 'type' => 'stagger'],
                         'variant' => 'history',
-                        'title' => '',
+                        'title' => 'The Agency’s Development',
+                        'description' => '<p>The Agency’s present-day model is the result of the gradual development of Uzbekistan’s strategic governance system.</p>',
                         'all_text' => '',
                         'all_url' => '',
                         'items' => [

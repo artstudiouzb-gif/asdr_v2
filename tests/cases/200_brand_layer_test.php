@@ -122,7 +122,7 @@ test('Эмблема агентства подключена файлом и л�
     assert_contains('viewBox=', (string) file_get_contents($svg));
     // Тонкую линейную эмблему легко перекрыть текстом — водяной знак уходит
     // под содержимое карточки.
-    assert_contains('.act-card__head, .act-card__title, .act-card__foot { position: relative; z-index: 1; }', $css);
+    assert_contains('.act-card__head, .act-card__desc, .act-card__foot { position: relative; z-index: 1; }', $css);
 });
 
 test('Оглавление: закреплённая полоса не перекрывает якоря', function () {

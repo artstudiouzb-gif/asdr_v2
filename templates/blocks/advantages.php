@@ -1,6 +1,7 @@
 <?php
 /** @var array $data */
 $title = $data['title'] ?? '';
+$description = trim(\App\Core\HtmlSanitizer::sanitizeText((string) ($data['description'] ?? '')));
 $items = $data['items'] ?? [];
 $variant = in_array($data['variant'] ?? 'grid', ['grid', 'indexed', 'band'], true) ? (string) $data['variant'] : 'grid';
 
@@ -22,7 +23,12 @@ if ($variant !== 'band') {
 ?>
 <?php if ($variant === 'band'): ?>
 <div class="block-featband">
-    <?php if ($title !== ''): ?><h2 class="block-featband__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+    <?php if ($title !== '' || $description !== ''): ?>
+        <div class="block-featband__head">
+            <?php if ($title !== ''): ?><h2 class="block-featband__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+            <?php if ($description !== ''): ?><div class="block-featband__description rich-content"><?= $description ?></div><?php endif; ?>
+        </div>
+    <?php endif; ?>
     <?php if (empty($items)): ?>
         <p class="block-featband__empty"><?= htmlspecialchars(t('Элементы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
@@ -39,7 +45,12 @@ if ($variant !== 'band') {
 </div>
 <?php else: ?>
 <div class="block-advantages block-advantages--<?= htmlspecialchars($variant, ENT_QUOTES) ?>">
-    <?php if ($title !== ''): ?><h2 class="block-advantages__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+    <?php if ($title !== '' || $description !== ''): ?>
+        <div class="block-advantages__head">
+            <?php if ($title !== ''): ?><h2 class="block-advantages__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+            <?php if ($description !== ''): ?><div class="block-advantages__description rich-content"><?= $description ?></div><?php endif; ?>
+        </div>
+    <?php endif; ?>
     <div class="block-advantages__grid">
         <?php foreach ($items as $index => $item): ?>
             <article class="feature-card block-advantages__item">

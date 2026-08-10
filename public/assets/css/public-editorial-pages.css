@@ -181,15 +181,44 @@
 }
 
 .editorial-page__content > .cms-block--text:has(.block-text__title) .block-text__title,
+.editorial-page__content > .cms-block--advantages .block-advantages__title,
+.editorial-page__content > .cms-block--stages .section-head__title,
+.editorial-page__content > .cms-block--timeline .block-timeline__title,
 .editorial-page__content > .cms-block--docs_list .section-head__title {
+    position: relative;
     max-width: 820px;
     margin: 0;
+    padding-left: 18px;
     color: var(--gov-title);
     font-family: var(--font-heading, var(--font-family));
-    font-size: var(--font-size-h2, clamp(1.75rem, 2.5vw, 2.25rem));
+    font-size: var(--font-size-h2, clamp(1.75rem, 2.5vw, 2.25rem)) !important;
     font-weight: 700;
     line-height: 1.18;
     letter-spacing: -.03em;
+    text-wrap: balance;
+}
+
+.editorial-page__content > .cms-block--text:has(.block-text__title) .block-text__title::before,
+.editorial-page__content > .cms-block--advantages .block-advantages__title::before,
+.editorial-page__content > .cms-block--stages .section-head__title::before,
+.editorial-page__content > .cms-block--timeline .block-timeline__title::before,
+.editorial-page__content > .cms-block--docs_list .section-head__title::before {
+    content: '';
+    position: absolute;
+    inset-block: .16em;
+    left: 0;
+    width: 3px;
+    border-radius: 999px;
+    background: var(--gov-teal);
+}
+
+.editorial-page__content > .cms-block--bg-navy :is(
+    .block-text__title,
+    .block-advantages__title,
+    .section-head__title,
+    .block-timeline__title
+)::before {
+    background: var(--gov-teal-on-dark);
 }
 
 .editorial-page__content > .cms-block--text:has(.block-text__title) .block-text__content {
@@ -202,6 +231,10 @@
 
 .editorial-page__content > .cms-block--text:has(.block-text__title) .block-text__content p {
     margin-block: 0 9px;
+}
+
+.editorial-page__content > .cms-block--text:has(.block-text__title) .block-text__content p:last-child {
+    margin-bottom: 0;
 }
 
 .editorial-page__content > .cms-block--text:has(.block-text__title) .block-text__content ul,
@@ -221,6 +254,23 @@
 .editorial-page__content > .cms-block--cards_grid {
     padding-top: 0;
     padding-bottom: 30px;
+}
+
+.editorial-page__content > .cms-block--advantages:has(.block-advantages__head),
+.editorial-page__content > .cms-block--stages:has(.section-head__copy),
+.editorial-page__content > .cms-block--timeline:has(.block-timeline__head) {
+    padding-top: 56px;
+    border-top: 1px solid var(--editorial-line);
+}
+
+.editorial-page__content > .cms-block--advantages .block-advantages__description,
+.editorial-page__content > .cms-block--stages .section-head__description,
+.editorial-page__content > .cms-block--timeline .block-timeline__description {
+    max-width: var(--editorial-reading);
+    margin-top: 12px;
+    color: var(--editorial-muted);
+    font-size: var(--font-size-body, 1rem);
+    line-height: 1.65;
 }
 
 /* Directions: compact five-column reference grid ----------------------- */
@@ -808,7 +858,7 @@
     font-size: var(--font-size-meta, .8rem);
 }
 
-.editorial-page__content .block-docslist--acts-editorial .act-card__title {
+.editorial-page__content .block-docslist--acts-editorial .act-card__desc {
     margin-top: 17px;
 }
 

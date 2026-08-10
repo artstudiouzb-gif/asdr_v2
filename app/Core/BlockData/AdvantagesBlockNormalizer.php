@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Core\BlockData;
 
+use App\Core\HtmlSanitizer;
 use App\Core\Icon;
+use App\Core\TextProcessor;
 
 final class AdvantagesBlockNormalizer
 {
@@ -40,6 +42,10 @@ final class AdvantagesBlockNormalizer
         return [
             'variant' => in_array($variant, ['grid', 'indexed', 'band'], true) ? $variant : 'grid',
             'title' => BlockDataInput::plain($input, 'title_field', $locale),
+            'description' => TextProcessor::process(
+                HtmlSanitizer::sanitizeText((string) ($input['description'] ?? '')),
+                $locale,
+            ),
             'items' => $items,
         ];
     }

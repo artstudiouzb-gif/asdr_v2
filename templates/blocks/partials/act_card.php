@@ -4,9 +4,9 @@ use App\Core\DocumentPresenter;
 use App\Core\Icon;
 
 /**
- * Карточка правового акта: номер и дата вынесены в шапку, название —
- * серифом, внизу формат файла. Отличается от обычной карточки документа
- * тем, что у акта есть реквизиты, по которым его и ищут.
+ * Карточка правового акта: номер и дата вынесены в шапку, название остаётся
+ * обычным текстом, внизу формат файла. Отличается от обычной карточки
+ * документа тем, что у акта есть реквизиты, по которым его и ищут.
  *
  * @var array $doc
  */
@@ -36,7 +36,7 @@ $docIndex = isset($docIndex) ? (int) $docIndex : 0;
             <?php if ($date !== ''): ?><span class="act-card__date"><?= htmlspecialchars($date, ENT_QUOTES) ?></span><?php endif; ?>
         </span>
     <?php endif; ?>
-    <span class="feature-card__text act-card__title"><?= htmlspecialchars($presented['title'], ENT_QUOTES) ?></span>
+    <p class="feature-card__text act-card__desc"><?= htmlspecialchars($presented['title'], ENT_QUOTES) ?></p>
     <?php /* У акта без ссылки и без формата файла подвал пуст: его разделительная
              линия висела бы под названием как обрыв карточки. */ ?>
     <?php if ($presented['meta'] !== '' || $presented['url'] !== ''): ?>

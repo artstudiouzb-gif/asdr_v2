@@ -3,6 +3,7 @@ use App\Core\Icon;
 
 /** @var array $data */
 $title = trim((string) ($data['title'] ?? ''));
+$description = trim(\App\Core\HtmlSanitizer::sanitizeText((string) ($data['description'] ?? '')));
 $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
 $variant = ($data['variant'] ?? 'default') === 'history' ? 'history' : 'default';
@@ -22,7 +23,12 @@ $templateCss = '#block-' . $blockId . ' .stages{--stages-count:' . max(1, min(5,
 ?>
 <div class="block-stages block-stages--<?= $variant ?>"<?= $carousel ? ' data-carousel' : '' ?>>
     <div class="section-head">
-        <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+        <?php if ($title !== '' || $description !== ''): ?>
+            <div class="section-head__copy">
+                <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+                <?php if ($description !== ''): ?><div class="section-head__description rich-content"><?= $description ?></div><?php endif; ?>
+            </div>
+        <?php endif; ?>
         <div class="section-head__tools">
             <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
             <?php if ($carousel): ?>

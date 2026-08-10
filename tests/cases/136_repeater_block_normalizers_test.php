@@ -11,6 +11,7 @@ use App\Core\BlockRenderer;
 test('Advantages normalizer: принимает ключ Tabler, типографит и пропускает пустые строки', function (): void {
     $data = AdvantagesBlockNormalizer::normalize([
         'title_field' => ' Преимущества ',
+        'description' => '<p>Краткое <strong>описание</strong>.</p><script>alert(1)</script>',
         'items' => [
             [
                 'icon_svg' => 'bolt',
@@ -23,6 +24,8 @@ test('Advantages normalizer: принимает ключ Tabler, типогра�
     ]);
 
     assert_same('Преимущества', $data['title']);
+    assert_contains('<strong>описание</strong>', $data['description']);
+    assert_not_contains('<script', $data['description']);
     assert_same(1, count($data['items']));
     assert_same('bolt', $data['items'][0]['icon_svg']);
     assert_same('Скорость', $data['items'][0]['title']);

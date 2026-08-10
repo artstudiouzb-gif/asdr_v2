@@ -16,6 +16,9 @@ test('Редакционные варианты страницы Агентст�
     assert_true(array_key_exists('media_video', $defaults['text']));
     assert_true(array_key_exists('media_youtube', $defaults['text']));
     assert_true(array_key_exists('variant', $defaults['stages']));
+    foreach (['advantages', 'stages', 'timeline'] as $type) {
+        assert_true(array_key_exists('description', $defaults[$type]), "{$type}: нет описания раздела");
+    }
     assert_true(array_key_exists('career_title', $defaults['bio_education']));
     assert_true(array_key_exists('widgets_before', $defaults['bio_education']));
     assert_true(array_key_exists('widgets_after', $defaults['bio_education']));
@@ -70,6 +73,47 @@ test('Редакционные стили не меняют шапку и под
     assert_contains('.block-stages--history .stage::after', $css, 'в истории должна быть отключена дублирующая линия');
     assert_not_contains('.site-header', $css);
     assert_not_contains('.site-footer', $css);
+});
+
+test('Последний абзац заголовочного блока не создаёт лишний зазор между разделами', function (): void {
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');
+    assert_contains(
+        '.cms-block--text:has(.block-text__title) .block-text__content p:last-child',
+        $css,
+    );
+    assert_contains('margin-bottom: 0;', $css);
+});
+
+test('Преимущества, этапы и таймлайн имеют собственное описание раздела', function (): void {
+    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
+    assert_contains("['advantages', 'timeline', 'stages']", $form);
+    assert_contains('name="description"', $form);
+    assert_contains('отдельный текстовый блок не нужен', $form);
+
+    foreach (['advantages', 'stages', 'timeline'] as $type) {
+        $template = (string) file_get_contents(APP_ROOT . '/templates/blocks/' . $type . '.php');
+        assert_contains("\$data['description']", $template, "{$type}: описание не выводится");
+    }
+});
+
+test('Заголовки редакционных разделов используют единый акцентный маркер', function (): void {
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');
+    foreach (['block-text__title', 'block-advantages__title', 'section-head__title', 'block-timeline__title'] as $selector) {
+        assert_contains($selector . '::before', $css, "{$selector}: нет общего маркера");
+    }
+    assert_contains('font-size: var(--font-size-h2', $css);
+
+    $designSettings = (string) file_get_contents(APP_ROOT . '/app/Core/DesignSettings.php');
+    assert_contains('.block-timeline__title', $designSettings, 'таймлайн должен брать H2 из настроек типографики');
+});
+
+test('Миграция объединяет старые вступления с целевыми блоками без потери текста', function (): void {
+    $sql = (string) file_get_contents(APP_ROOT . '/database/migrations/2026_08_10_block_section_descriptions.sql');
+    assert_contains('-- @post-schema', $sql);
+    assert_contains("'$.description'", $sql);
+    assert_contains('JSON_EXTRACT(intro.data', $sql);
+    assert_contains('DELETE intro', $sql);
+    assert_contains("target.type IN ('advantages', 'stages')", $sql);
 });
 
 test('Страница директора использует читаемую системную хронологию', function (): void {
@@ -128,17 +172,26 @@ test('Преимущества, контакты и правовые акты и
     assert_contains('feature-card__num block-advantages__index', $advantages);
     assert_contains('feature-card__num', $contacts);
     assert_contains('feature-card__title act-card__number', $acts);
-    assert_contains('feature-card__text act-card__title', $acts);
+    assert_contains('<p class="feature-card__text act-card__desc">', $acts);
+    assert_not_contains('act-card__title', $acts);
+
+    $cardTextSelectors = DesignSettings::TYPO_SIZES['fs_card_text'][1];
+    $cardTitleSelectors = DesignSettings::TYPO_SIZES['fs_card_title'][1];
+    assert_contains('.act-card__desc', $cardTextSelectors);
+    assert_not_contains('.act-card__desc', $cardTitleSelectors);
 
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
     assert_contains('.feature-card.block-advantages__item', $css);
     assert_contains('.feature-card.contact-card', $css);
     assert_contains('.feature-card.act-card', $css);
+    assert_contains('.feature-card.act-card .act-card__desc', $css);
+    assert_contains('font-size: var(--font-size-card-text, .92rem)', $css);
     assert_contains('--feature-card-motion-duration: .62s', $css);
 
     $editorial = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');
     assert_contains('.anim-card:not(.feature-card)', $editorial);
     assert_not_contains('.feature-card.block-advantages__item:hover', $editorial);
+    assert_contains('.block-docslist--acts-editorial .act-card__desc', $editorial);
 
     $layout = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-layout-polish.css');
     assert_contains('.block-advantages__item:not(.feature-card)', $layout);
