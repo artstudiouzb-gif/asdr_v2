@@ -316,6 +316,22 @@ final class Auth
 
     public static function check(): bool
     {
+        // Без cookie сессии посетитель войти не мог — значит и заводить ему
+        // сессию незачем. Раньше здесь стоял безусловный Session::start(), и
+        // публичная страница выдавала Set-Cookie каждому анониму: шапка зовёт
+        // AppToolbar::isVisible() → sessionUser() → check() на каждом рендере.
+        // Побочный эффект был дороже: активная сессия делает ответ
+        // некэшируемым (PublicResponseCache), поэтому общий HTTP-кэш публички
+        // не работал вообще ни на одной странице.
+        // Восстанавливать нечего: данных сессии в процессе нет, она не
+        // запущена и cookie не прислана. Условие проверяет все три источника —
+        // в CLI и тестах $_SESSION заполняют напрямую, там cookie не бывает.
+        if (empty($_SESSION['user_id'])
+            && session_status() !== PHP_SESSION_ACTIVE
+            && !Session::hasCookie()) {
+            return false;
+        }
+
         Session::start();
         if (empty($_SESSION['user_id'])) {
             return false;

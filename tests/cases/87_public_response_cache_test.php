@@ -70,3 +70,19 @@ test('Настройки отображения переставляются д�
     // ключа script в наборе умолчаний скрипта быть не должно.
     assert_not_contains('script:', $themeInit);
 });
+
+test('Анонимному посетителю публичка не заводит сессию', function (): void {
+    $auth = (string) file_get_contents(APP_ROOT . '/app/Core/Auth.php');
+
+    // Шапка на каждом рендере зовёт AppToolbar::isVisible() → sessionUser()
+    // → check(). Пока там стоял безусловный Session::start(), каждый аноним
+    // получал Set-Cookie, а активная сессия делает ответ некэшируемым — общий
+    // HTTP-кэш публички не работал вообще ни на одной странице.
+    assert_true(
+        preg_match('/function check\(\).*?Session::hasCookie\(\).*?Session::start\(\)/s', $auth) === 1,
+        'Auth::check() обязан проверить наличие сессии до её запуска'
+    );
+
+    $toolbar = (string) file_get_contents(APP_ROOT . '/app/Core/AppToolbar.php');
+    assert_contains('Auth::sessionUser()', $toolbar, 'бар администратора спрашивает сессию');
+});
