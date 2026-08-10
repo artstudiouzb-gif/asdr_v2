@@ -61,3 +61,19 @@ test('Кнопка и маршрут определения канала на м
     // Кнопка не должна требовать заполненного поля: её и жмут, когда id неизвестен.
     assert_contains('formnovalidate', $view);
 });
+
+test('Найденный ID возвращается в форму без автоматического сохранения', function () {
+    $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/TelegramController.php');
+    assert_contains('DETECTED_CHANNELS_SESSION_KEY', $controller);
+    assert_contains("'detectedChannels' => \$detectedChannels", $controller);
+    assert_contains('автоматически вставлен в поле «Канал»', $controller);
+    assert_not_contains("Setting::set('social_telegram_chat_id', (string) \$chat['id'])", $controller);
+
+    $view = (string) file_get_contents(APP_ROOT . '/app/Views/admin/telegram/index.php');
+    assert_contains("\$detectedChatId !== '' ? \$detectedChatId", $view);
+    assert_contains('data-tg-use-channel-id', $view);
+
+    $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin.js');
+    assert_contains("closest('[data-tg-use-channel-id]')", $js);
+    assert_contains("getElementById('tg_chat_id')", $js);
+});
