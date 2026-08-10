@@ -15,6 +15,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var int $myChatId */
 /** @var string|null $linkCode */
 /** @var array<string,string> $channel */
+/** @var list<array{id:int,title:string,type:string}> $detectedChannels */
 /** @var bool $channelOwnTokenConfigured */
 /** @var bool $channelEnabled */
 /** @var string $notifyChatIds */
@@ -23,6 +24,10 @@ require __DIR__ . '/../layout/header.php';
 
 $channelReady = \App\Core\SocialSettings::isReady('telegram');
 $notifyCount = count(\App\Core\FormNotifier::parseChatIds($notifyChatIds));
+$detectedChannels = is_array($detectedChannels ?? null) ? array_values($detectedChannels) : [];
+$detectedChatId = count($detectedChannels) === 1
+    ? (string) ($detectedChannels[0]['id'] ?? '')
+    : '';
 
 // Значок шага через единый локальный набор Tabler Icons.
 $mark = static function (bool $done, bool $started = true): string {
@@ -225,9 +230,30 @@ $mark = static function (bool $done, bool $started = true): string {
         <div class="form-field">
             <label for="tg_chat_id">Канал</label>
             <input type="text" id="tg_chat_id" name="chat_id"
-                   value="<?= htmlspecialchars((string) ($channel['chat_id'] ?? ''), ENT_QUOTES) ?>"
+                   value="<?= htmlspecialchars($detectedChatId !== '' ? $detectedChatId : (string) ($channel['chat_id'] ?? ''), ENT_QUOTES) ?>"
                    maxlength="40"
                    placeholder="@имя_канала или -1001234567890" autocomplete="off" spellcheck="false">
+            <?php if ($detectedChatId !== ''): ?>
+                <span class="form-hint">
+                    ID найденного канала уже вставлен. Проверьте его и нажмите «Сохранить канал».
+                </span>
+            <?php elseif (count($detectedChannels) > 1): ?>
+                <div class="form-hint" data-tg-detected-channels>
+                    <strong>Найдено несколько каналов — выберите нужный:</strong>
+                    <div class="form-actions">
+                        <?php foreach ($detectedChannels as $detectedChannel): ?>
+                            <?php $candidateId = (string) ($detectedChannel['id'] ?? ''); ?>
+                            <?php if ($candidateId === '') { continue; } ?>
+                            <button type="button" class="btn btn--small btn--outline"
+                                    aria-pressed="false"
+                                    data-tg-use-channel-id="<?= htmlspecialchars($candidateId, ENT_QUOTES) ?>">
+                                <?= htmlspecialchars((string) ($detectedChannel['title'] ?? $candidateId), ENT_QUOTES) ?>
+                                <code><?= htmlspecialchars($candidateId, ENT_QUOTES) ?></code>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
             <span class="form-hint">
                 Публичный канал — <code>@имя_канала</code>, приватный — <code>-100…</code>.
                 У закрытого канала имени <code>@…</code> не существует: добавьте бота администратором,

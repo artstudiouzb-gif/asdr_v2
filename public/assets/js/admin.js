@@ -548,6 +548,23 @@
                 if (values.indexOf(chatId) === -1) { values.push(chatId); }
                 input.value = values.join(', ');
                 input.dispatchEvent(new Event('input', { bubbles: true }));
+                return;
+            }
+
+            var channelButton = event.target.closest('[data-tg-use-channel-id]');
+            if (channelButton) {
+                event.preventDefault();
+                var channelInput = document.getElementById('tg_chat_id');
+                var channelId = channelButton.getAttribute('data-tg-use-channel-id') || '';
+                if (!channelInput || channelId === '') { return; }
+                channelInput.value = channelId;
+                channelInput.dispatchEvent(new Event('input', { bubbles: true }));
+                channelInput.dispatchEvent(new Event('change', { bubbles: true }));
+                channelInput.focus();
+                document.querySelectorAll('[data-tg-use-channel-id]').forEach(function (button) {
+                    button.classList.toggle('is-active', button === channelButton);
+                    button.setAttribute('aria-pressed', button === channelButton ? 'true' : 'false');
+                });
             }
         });
     })();
