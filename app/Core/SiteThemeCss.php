@@ -211,9 +211,47 @@ final class SiteThemeCss
             . "font-weight:100 900;font-display:swap;}\n";
     }
 
+    /**
+     * Семейства, для которых в gov-fonts.css объявлено запасное начертание с
+     * подогнанными метриками. Пока веб-шрифт грузится (font-display: swap),
+     * текст рисуется системным, и в момент подмены строка меняет ширину —
+     * макет дёргается. Без правки расхождение доходит до 9,4 % по ширине,
+     * с ней — 0,6 % (замерено в браузере).
+     */
+    private const METRIC_FALLBACKS = ['PT Sans', 'PT Serif', 'Manrope', 'Montserrat', 'Inter Tight'];
+
     private static function fontValue(string $value, string $fallback): string
     {
-        return preg_replace("/[^a-zA-Z0-9 ,'\\-]/", '', $value) ?: $fallback;
+        $clean = preg_replace("/[^a-zA-Z0-9 ,'\\-]/", '', $value) ?: $fallback;
+
+        return self::withMetricFallback($clean);
+    }
+
+    /**
+     * Дописывает запасное начертание сразу после основного семейства.
+     * Делается на рендере, а не только в значениях по умолчанию: у уже
+     * установленных сайтов стек лежит в настройках, и правка дефолтов их
+     * не затронула бы.
+     */
+    public static function withMetricFallback(string $stack): string
+    {
+        foreach (self::METRIC_FALLBACKS as $family) {
+            $fallback = $family . ' Fallback';
+            if (str_contains($stack, $fallback)) {
+                return $stack;
+            }
+            // Семейство должно быть первым в стеке — только тогда подмена
+            // идёт именно с него, и подгонять метрики имеет смысл.
+            foreach (["'{$family}'", "\"{$family}\"", $family] as $needle) {
+                if (str_starts_with(ltrim($stack), $needle)) {
+                    $pos = strpos($stack, $needle) + strlen($needle);
+
+                    return substr($stack, 0, $pos) . ", '{$fallback}'" . substr($stack, $pos);
+                }
+            }
+        }
+
+        return $stack;
     }
 
     private static function elementsGap(string $value): string

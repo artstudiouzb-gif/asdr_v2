@@ -38,22 +38,22 @@ final class DesignSettings
      * slug => [подпись, CSS-стек, параметр family для css2 API].
      */
     public const GOOGLE_FONTS = [
-        'pt-serif' => ['PT Serif (антиква)', "'PT Serif', Georgia, serif", 'PT+Serif:wght@400;700'],
+        'pt-serif' => ['PT Serif (антиква)', "'PT Serif', 'PT Serif Fallback', Georgia, serif", 'PT+Serif:wght@400;700'],
         'lora' => ['Lora (антиква)', "'Lora', Georgia, serif", 'Lora:wght@400;600;700'],
         'merriweather' => ['Merriweather (антиква)', "'Merriweather', Georgia, serif", 'Merriweather:wght@400;700'],
         'noto-serif' => ['Noto Serif (антиква)', "'Noto Serif', Georgia, serif", 'Noto+Serif:wght@400;600;700'],
         'ibm-plex-serif' => ['IBM Plex Serif (антиква)', "'IBM Plex Serif', Georgia, serif", 'IBM+Plex+Serif:wght@400;600;700'],
         'cormorant' => ['Cormorant Garamond (антиква)', "'Cormorant Garamond', Georgia, serif", 'Cormorant+Garamond:wght@500;600;700'],
-        'pt-sans' => ['PT Sans', "'PT Sans', system-ui, sans-serif", 'PT+Sans:wght@400;700'],
+        'pt-sans' => ['PT Sans', "'PT Sans', 'PT Sans Fallback', system-ui, sans-serif", 'PT+Sans:wght@400;700'],
         'inter' => ['Inter', "'Inter', system-ui, sans-serif", 'Inter:wght@400;600;700'],
-        'inter-tight' => ['Inter Tight', "'Inter Tight', system-ui, sans-serif", 'Inter+Tight:wght@400;500;600;700'],
-        'montserrat' => ['Montserrat', "'Montserrat', system-ui, sans-serif", 'Montserrat:wght@400;600;700'],
+        'inter-tight' => ['Inter Tight', "'Inter Tight', 'Inter Tight Fallback', system-ui, sans-serif", 'Inter+Tight:wght@400;500;600;700'],
+        'montserrat' => ['Montserrat', "'Montserrat', 'Montserrat Fallback', system-ui, sans-serif", 'Montserrat:wght@400;600;700'],
         'roboto' => ['Roboto', "'Roboto', system-ui, sans-serif", 'Roboto:wght@400;500;700'],
         'open-sans' => ['Open Sans', "'Open Sans', system-ui, sans-serif", 'Open+Sans:wght@400;600;700'],
         'noto-sans' => ['Noto Sans', "'Noto Sans', system-ui, sans-serif", 'Noto+Sans:wght@400;600;700'],
         'source-sans' => ['Source Sans 3', "'Source Sans 3', system-ui, sans-serif", 'Source+Sans+3:wght@400;600;700'],
         'ibm-plex-sans' => ['IBM Plex Sans', "'IBM Plex Sans', system-ui, sans-serif", 'IBM+Plex+Sans:wght@400;600;700'],
-        'manrope' => ['Manrope', "'Manrope', system-ui, sans-serif", 'Manrope:wght@400;600;700'],
+        'manrope' => ['Manrope', "'Manrope', 'Manrope Fallback', system-ui, sans-serif", 'Manrope:wght@400;600;700'],
         'rubik' => ['Rubik', "'Rubik', system-ui, sans-serif", 'Rubik:wght@400;500;700'],
         'raleway' => ['Raleway', "'Raleway', system-ui, sans-serif", 'Raleway:wght@400;600;700'],
         'exo2' => ['Exo 2', "'Exo 2', system-ui, sans-serif", 'Exo+2:wght@400;600;700'],
@@ -62,7 +62,7 @@ final class DesignSettings
 
     /** Шрифтовые пресеты: значение опции font_style => [подпись, CSS-стек]. */
     public const FONTS = [
-        'pt' => ['PT Serif / PT Sans (гос)', "'PT Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"],
+        'pt' => ['PT Serif / PT Sans (гос)', "'PT Sans', 'PT Sans Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"],
         'inter' => ['Inter', "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"],
         'system' => ['Системный', "system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif"],
         'serif' => ['С засечками', "Georgia, 'Times New Roman', serif"],
@@ -875,7 +875,7 @@ final class DesignSettings
         }
 
         $headingSlug = (string) Setting::get('design_font_google_heading', '');
-        $bodyFont = (string) Setting::get('font_family', "'PT Sans', system-ui, sans-serif");
+        $bodyFont = (string) Setting::get('font_family', "'PT Sans', 'PT Sans Fallback', system-ui, sans-serif");
         Setting::set(
             'font_heading',
             $headingSlug !== '' && isset(self::GOOGLE_FONTS[$headingSlug])

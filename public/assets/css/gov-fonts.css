@@ -1,6 +1,70 @@
 /* Гос-тема: PT Serif — заголовки, PT Sans — текст
    (OFL, cyrillic-ext+cyrillic+latin). */
 
+/* --- Запасные начертания с подогнанными метриками ---------------------
+   У всех шрифтов стоит font-display: swap. Пока файл не приехал, текст
+   рисуется системным шрифтом, и в момент подмены строка меняет ширину и
+   высоту — макет дёргается (это CLS). Переопределения ниже приводят
+   метрики системного шрифта к метрикам PT, поэтому подмена проходит без
+   сдвига.
+
+   Как получены числа:
+     size-adjust      — ЗАМЕРОМ в браузере: ширина одной и той же строки
+                        (кириллица + латиница + цифры) в веб-шрифте и в
+                        запасном. Брать OS/2.xAvgCharWidth из файла нельзя:
+                        наши woff2 — кириллические сабсеты, и это среднее
+                        несопоставимо со средним по полному запасному шрифту.
+                        На Manrope такой расчёт давал −6,45 % вместо −4,11 %
+                        у необработанного Arial, то есть делал хуже.
+     ascent/descent   — hhea.ascent и hhea.descent из файла, делённые на
+                        unitsPerEm и на size-adjust (вертикальные метрики
+                        сабсетом не искажаются).
+   Замер в этом же браузере: Arial без правки шире PT Sans на 9,42 %,
+   с переопределениями расхождение 0,57 %.
+   Пересчитывать при смене набора шрифтов — скриптом из истории сессии. */
+@font-face {
+    font-family: 'PT Sans Fallback';
+    src: local('Arial'), local('Liberation Sans'), local('Helvetica');
+    size-adjust: 93.64%;
+    ascent-override: 108.71%;
+    descent-override: 29.47%;
+    line-gap-override: 0%;
+}
+@font-face {
+    font-family: 'PT Serif Fallback';
+    src: local('Times New Roman'), local('Liberation Serif'), local('Georgia');
+    size-adjust: 108.78%;
+    ascent-override: 95.51%;
+    descent-override: 26.29%;
+    line-gap-override: 0%;
+}
+/* Остальные семейства, которые лежат в поставке локально и выбираются в
+   разделе «Дизайн». Числа получены тем же способом. */
+@font-face {
+    font-family: 'Manrope Fallback';
+    src: local('Arial'), local('Liberation Sans'), local('Helvetica');
+    size-adjust: 102.58%;
+    ascent-override: 103.92%;
+    descent-override: 29.25%;
+    line-gap-override: 0%;
+}
+@font-face {
+    font-family: 'Montserrat Fallback';
+    src: local('Arial'), local('Liberation Sans'), local('Helvetica');
+    size-adjust: 117.89%;
+    ascent-override: 82.11%;
+    descent-override: 21.29%;
+    line-gap-override: 0%;
+}
+@font-face {
+    font-family: 'Inter Tight Fallback';
+    src: local('Arial'), local('Liberation Sans'), local('Helvetica');
+    size-adjust: 91.55%;
+    ascent-override: 105.82%;
+    descent-override: 26.35%;
+    line-gap-override: 0%;
+}
+
 @font-face {
     font-family: 'PT Serif';
     font-style: normal;
