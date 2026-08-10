@@ -44,8 +44,8 @@
 :where(.rich-content) h2 { font-size: var(--font-size-h2, 1.75rem); }
 :where(.rich-content) h3 { font-size: var(--font-size-h3, 1.4rem); }
 :where(.rich-content) h4 { font-size: var(--font-size-h4, 1.18rem); }
-:where(.rich-content) h5,
-:where(.rich-content) h6 { font-size: var(--font-size-h5, 1rem); }
+:where(.rich-content) h5 { font-size: var(--font-size-h5, 1rem); }
+:where(.rich-content) h6 { font-size: var(--font-size-h6, .92rem); }
 
 :where(.rich-content) p { margin-block: 0 1.1em; }
 /* Полужирный — это выделение, а не смена цвета: синий <strong> в тексте

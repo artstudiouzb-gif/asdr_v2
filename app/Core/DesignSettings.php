@@ -388,11 +388,12 @@ final class DesignSettings
      * компонентные clamp()-размеры тем (панель a11y всё равно сильнее).
      */
     public const TYPO_SIZES = [
-        'fs_h1' => ['Заголовок H1', 'h1, .block-hero__title, .content-pagehead__title, .profile__name, .projdetail__title, .newsdetail__title, .newsdetail-phero__title', '42'],
-        'fs_h2' => ['Заголовок H2', 'h2, .section-title, .block-title, .block-text__title, .bio__title, .content-list__head h1, .block-news__title, .block-categories__title, .block-contact-cards__title, .newsdetail-card__title, .section-head__title', '32'],
-        'fs_h3' => ['Заголовок H3', 'h3, .card__title, .feature-card__title, .imgcard__title, .catcard__title, .newsfeat-lead__title, .newsfeat-mini__title, .newsfeat-text__title, .catdetail__title, .gcal-list__title, .orgstruct__head-name, .person-card__name, .timeline-item__year, .ctaband__title, .profile__position, .featband__name, .bio-quote__mark, .widget__title, .bio-extra__title, .relnews-card__title, .adjnews__title, .album-card__title, .block-banner__title', '24'],
-        'fs_h4' => ['Заголовок H4', 'h4', '20'],
+        'fs_h1' => ['Заголовок H1', 'h1, .block-hero__title, .content-pagehead__title, .profile__name, .listing__title, .projdetail__title, .catdetail__title, .translation-notice__title, .newsdetail__title, .newsdetail-phero__title, .reader-mode__headline', '42'],
+        'fs_h2' => ['Заголовок H2', 'h2, .section-title, .block-title, .block-text__title, .bio__title, .content-list__head h1, .block-news__title, .block-categories__title, .block-contact-cards__title, .block-counters__title, .block-projects__title, .block-team__title, .block-faq__title, .block-testimonials__title, .block-advantages__title, .block-banner__title, .block-featband__title, .block-map__title, .block-partners__title, .textimage__title, .subscribe-block__title, .section-head__title, .newslist-lead__title, .gcal-list__title, .album-card__title, .catcard__title, .catdetail__subtitle, .catdetail__card-title, .timeline-card__title', '32'],
+        'fs_h3' => ['Заголовок H3', 'h3, .card__title, .feature-card__title, .contact-card__title, .imgcard__title, .newsfeat-lead__title, .newsfeat-mini__title, .newsfeat-text__title, .orgstruct__head-name, .person-card__name, .timeline-item__year, .timeline-cta__title, .ctaband__title, .profile__position, .featband__name, .bio-career__title, .bio-quote__mark, .widget__title, .bio-extra__title, .relnews-card__title, .adjnews__title, .block-team__group-title, .newsdetail-card__title, .newsdetail-timeline__title, .newsdetail-subscribe__title, .news-poll-card__question', '24'],
+        'fs_h4' => ['Заголовок H4', 'h4, .block-team__unit-title, .newsdetail-timeline__heading', '20'],
         'fs_h5' => ['Заголовок H5', 'h5', '18'],
+        'fs_h6' => ['Заголовок H6', 'h6', '16'],
         'fs_lead' => ['Вводный и крупный текст', '.content-pagehead__lead, .block-hero__lead, .block-hero__subtitle, .newsdetail__lead, .profile__text, .rich-content--lead', '17'],
         'fs_card_title' => ['Заголовки карточек и этапов', '.feature-card__title, .stage__title, .person-card__name, .act-card__title, .doc-card__title, .repo-card__title, .news-card__title, .project-card__title, .bio-edu__degree', '16'],
         'fs_card_text' => ['Текст карточек и этапов', '.feature-card__text, .stage__text, .person-card__role, .act-card__desc, .doc-card__desc, .repo-card__desc, .news-card__desc, .project-card__desc, .bio-career__text', '14'],
@@ -419,8 +420,8 @@ final class DesignSettings
         'expressive' => ['Выразительная', 1.333, 'Крупные заголовки, сильный контраст с текстом.'],
     ];
 
-    /** Ступени шкалы относительно базового размера: fs_h5 = базовый × k¹ и т.д. */
-    private const SCALE_STEPS = ['fs_h5' => 1, 'fs_h4' => 2, 'fs_h3' => 3, 'fs_h2' => 4, 'fs_h1' => 5];
+    /** Ступени шкалы относительно базового размера; H6 — половина шага. */
+    private const SCALE_STEPS = ['fs_h6' => 0.5, 'fs_h5' => 1, 'fs_h4' => 2, 'fs_h3' => 3, 'fs_h2' => 4, 'fs_h1' => 5];
 
     public static function typoScale(): string
     {
@@ -498,7 +499,9 @@ final class DesignSettings
     {
         $rules = '';
         $variables = '';
-        foreach (self::typographySizes() as $key => $size) {
+        $headingRules = '';
+        $sizes = self::typographySizes();
+        foreach ($sizes as $key => $size) {
             if ($size !== '') {
                 $variable = '--font-size-' . str_replace('_', '-', substr($key, 3));
                 $variables .= $variable . ':' . $size . ';';
@@ -506,7 +509,19 @@ final class DesignSettings
             }
         }
 
-        return ($variables !== '' ? ':root{' . $variables . '}' : '') . $rules;
+        // Компонентный класс не должен менять семантический уровень заголовка:
+        // <h3 class="..."> всегда получает настройку H3, даже если класс по
+        // ошибке попал в другую группу. :root + [class]/:not([class]) дают
+        // правилу достаточную специфичность против компонентных селекторов.
+        foreach (['fs_h1' => 'h1', 'fs_h2' => 'h2', 'fs_h3' => 'h3', 'fs_h4' => 'h4', 'fs_h5' => 'h5', 'fs_h6' => 'h6'] as $key => $tag) {
+            if (($sizes[$key] ?? '') === '') {
+                continue;
+            }
+            $variable = '--font-size-' . substr($key, 3);
+            $headingRules .= ':root body ' . $tag . '[class],:root body ' . $tag . ':not([class]){font-size:var(' . $variable . ') !important;}';
+        }
+
+        return ($variables !== '' ? ':root{' . $variables . '}' : '') . $rules . $headingRules;
     }
 
     /** Точный межстрочный интервал, 1–2.5 (без единиц); пусто — значение пресета. */

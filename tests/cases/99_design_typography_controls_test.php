@@ -51,6 +51,7 @@ test('форма дизайна объединяет источники шриф
     assert_contains('DesignSettings::TYPO_SIZES as $fsKey', $view);
     assert_true(isset(
         DesignSettings::TYPO_SIZES['fs_h1'],
+        DesignSettings::TYPO_SIZES['fs_h6'],
         DesignSettings::TYPO_SIZES['fs_lead'],
         DesignSettings::TYPO_SIZES['fs_card_title'],
         DesignSettings::TYPO_SIZES['fs_card_text'],
@@ -127,4 +128,56 @@ test('редакционные размеры используют переме�
         $css,
         'классовый стиль H1 не должен обходить выбранный шрифт заголовков',
     );
+});
+
+test('HTML-уровень заголовка главнее компонентного класса', function (): void {
+    assert_not_contains('.newsdetail-card__title', DesignSettings::TYPO_SIZES['fs_h2'][1]);
+    assert_contains('.newsdetail-card__title', DesignSettings::TYPO_SIZES['fs_h3'][1]);
+
+    \App\Models\Setting::overrideInMemory('design_fs_h2', '32px');
+    \App\Models\Setting::overrideInMemory('design_fs_h3', '24px');
+    $css = DesignSettings::typographyCss();
+
+    $componentRule = strpos($css, '.newsdetail-card__title');
+    $semanticRule = strpos($css, ':root body h3[class],:root body h3:not([class])');
+    assert_true($componentRule !== false, 'класс карточки должен быть связан с настройкой H3');
+    assert_true($semanticRule !== false, 'для H3 нужна финальная защита от классовых переопределений');
+    assert_true($semanticRule > $componentRule, 'семантическое правило H3 должно выводиться последним');
+
+    \App\Models\Setting::overrideInMemory('design_fs_h2', '');
+    \App\Models\Setting::overrideInMemory('design_fs_h3', '');
+});
+
+test('классы публичных заголовков не привязаны к чужому уровню', function (): void {
+    $configuredLevels = [];
+    foreach (range(1, 6) as $level) {
+        preg_match_all('/\.([a-z][a-z0-9_-]*)/i', DesignSettings::TYPO_SIZES['fs_h' . $level][1], $matches);
+        foreach ($matches[1] as $className) {
+            $configuredLevels[$className][] = $level;
+        }
+    }
+
+    $root = dirname(__DIR__, 2);
+    foreach ([$root . '/app/Views/site', $root . '/templates'] as $directory) {
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory));
+        foreach ($files as $file) {
+            if (!$file->isFile() || $file->getExtension() !== 'php') {
+                continue;
+            }
+            $source = (string) file_get_contents($file->getPathname());
+            preg_match_all('/<h([1-6])\b[^>]*\bclass=["\']([^"\']+)["\']/i', $source, $headings, PREG_SET_ORDER);
+            foreach ($headings as $heading) {
+                $actualLevel = (int) $heading[1];
+                foreach (preg_split('/\s+/', trim($heading[2])) ?: [] as $className) {
+                    if (!isset($configuredLevels[$className])) {
+                        continue;
+                    }
+                    assert_true(
+                        in_array($actualLevel, $configuredLevels[$className], true),
+                        ".{$className} используется как H{$actualLevel}, но назначен другой настройке",
+                    );
+                }
+            }
+        }
+    }
 });
