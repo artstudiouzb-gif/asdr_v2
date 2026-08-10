@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Core\BlockTypeRegistry;
+use App\Core\DesignSettings;
 use App\Controllers\Admin\BlockController;
 
 test('Редакционные варианты страницы Агентства являются настройками системных блоков', function (): void {
