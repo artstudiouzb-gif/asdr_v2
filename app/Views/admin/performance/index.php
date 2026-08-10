@@ -173,6 +173,53 @@ $size = static function (mixed $bytes): string {
             </div>
         </div>
 
+        <div class="header-builder__group performance-section" id="perf-vitals">
+            <h3>Скорость у реальных посетителей</h3>
+            <p class="form-hint">
+                Лабораторные замеры (Lighthouse) не показывают INP — отзывчивость на
+                нажатия — вообще, а LCP на тестовом сервере упирается в сам сервер.
+                Здесь собираются метрики с браузеров посетителей. Ни адрес страницы,
+                ни IP, ни идентификатор посетителя не сохраняются: только метрика,
+                значение и крупный срез. Cookie не заводится.
+            </p>
+            <div class="form-field form-field--checkbox">
+                <input type="checkbox" id="perf_vitals_enabled" name="perf_vitals_enabled" value="1" <?= $on('perf_vitals_enabled', '0') ? 'checked' : '' ?>>
+                <label for="perf_vitals_enabled">Собирать Core Web Vitals</label>
+            </div>
+            <div class="form-field">
+                <label for="perf_vitals_sample">Доля посетителей, %</label>
+                <input type="number" id="perf_vitals_sample" name="perf_vitals_sample" min="1" max="100"
+                       value="<?= (int) round(((float) ($settings['perf_vitals_sample'] ?? '1')) * 100) ?>">
+                <span class="form-hint">На небольшом сайте нужна вся выборка. Уменьшать имеет смысл, когда посещаемость вырастет.</span>
+            </div>
+<?php if (!empty($vitals)): ?>
+            <table class="data-table">
+                <thead><tr><th>Метрика</th><th>75-й перцентиль</th><th>Мобильные</th><th>Замеров</th></tr></thead>
+                <tbody>
+<?php foreach ($vitals as $name => $row): ?>
+                    <?php
+                    $unit = $name === 'CLS' ? '' : ' мс';
+                    $fmt = static fn (float $v): string => $name === 'CLS'
+                        ? number_format($v, 3, ',', ' ')
+                        : number_format($v, 0, ',', ' ');
+                    $label = ['good' => 'хорошо', 'needs-improvement' => 'нужно улучшить', 'poor' => 'плохо'];
+                    $mobile = $vitalsMobile[$name] ?? null;
+                    ?>
+                    <tr>
+                        <td><strong><?= htmlspecialchars($name, ENT_QUOTES) ?></strong></td>
+                        <td><?= $fmt($row['p75']) . $unit ?> — <?= $label[$row['rating']] ?? '' ?></td>
+                        <td><?= $mobile ? $fmt($mobile['p75']) . $unit : '—' ?></td>
+                        <td><?= (int) $row['count'] ?></td>
+                    </tr>
+<?php endforeach; ?>
+                </tbody>
+            </table>
+            <p class="form-hint">За последние 28 дней. 75-й перцентиль, а не среднее: среднее вытягивают быстрые заходы с горячим кэшем.</p>
+<?php elseif ($on('perf_vitals_enabled', '0')): ?>
+            <p class="form-hint">Замеров пока нет — они появятся после визитов на публичную часть.</p>
+<?php endif; ?>
+        </div>
+
         <div class="header-builder__group performance-section" id="perf-cdn">
             <h3>CDN для статики и загрузок</h3>
             <div class="form-field">

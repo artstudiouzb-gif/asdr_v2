@@ -144,7 +144,7 @@ if ($variant === 'icon' && $visualStyle === 'new') {
                             <?php else: ?>
                                 <span class="feature-card__spacer"></span>
                             <?php endif; ?>
-                            <span class="feature-card__num"><?= sprintf('%02d', $index + 1) ?></span>
+                            <span class="feature-card__num" aria-hidden="true"><?= sprintf('%02d', $index + 1) ?></span>
                         </div>
                         <div class="feature-card__content">
                             <h3 class="feature-card__title"><?= htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES) ?></h3>

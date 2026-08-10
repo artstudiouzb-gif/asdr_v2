@@ -163,10 +163,10 @@ php tests/run.php
 
 ```bash
 # только публичная часть
-php scripts/smoke.php https://asr.artstudio.uz
+php scripts/smoke.php https://artstudio.uz
 
 # + все разделы админки (обход по ссылкам от главной + вход)
-php scripts/smoke.php https://asr.artstudio.uz --admin ЛОГИН:ПАРОЛЬ
+php scripts/smoke.php https://artstudio.uz --admin ЛОГИН:ПАРОЛЬ
 ```
 
 Обходит публичные страницы (по ссылкам от главной + ключевые маршруты, RU и UZ)
@@ -179,7 +179,7 @@ php scripts/smoke.php https://asr.artstudio.uz --admin ЛОГИН:ПАРОЛЬ
 После загрузки новой версии на сервер выполните одну команду:
 
 ```bash
-php scripts/release.php https://asr.artstudio.uz
+php scripts/release.php https://artstudio.uz
 ```
 
 Она останавливается при первой ошибке и последовательно проверяет окружение,

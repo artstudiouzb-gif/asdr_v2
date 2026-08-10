@@ -64,6 +64,9 @@ final class PerformanceController
             'opcacheInfo' => $opcacheInfo,
             'assetStatus' => FrontendAssets::status(),
             'cfTokenConfigured' => Setting::get('cf_api_token', '') !== '',
+            // Замеры с реальных посетителей: 75-й перцентиль за 28 дней.
+            'vitals' => \App\Core\WebVitals::enabled() ? \App\Core\WebVitals::summary(28) : [],
+            'vitalsMobile' => \App\Core\WebVitals::enabled() ? \App\Core\WebVitals::summary(28, 'mobile') : [],
         ]);
     }
 
@@ -156,6 +159,10 @@ final class PerformanceController
         Setting::set('perf_public_cache_ttl', (string) $publicTtl);
         Setting::set('perf_shared_cache_ttl', (string) $sharedTtl);
         Setting::set('perf_lazy_load', !empty($_POST['perf_lazy_load']) ? '1' : '0');
+        Setting::set('perf_vitals_enabled', !empty($_POST['perf_vitals_enabled']) ? '1' : '0');
+        // Доля посетителей, с которых собираем метрики: 1–100 %.
+        $vitalsSample = max(1, min(100, (int) ($_POST['perf_vitals_sample'] ?? 100)));
+        Setting::set('perf_vitals_sample', (string) round($vitalsSample / 100, 2));
         Setting::set('perf_webp_quality', (string) $quality);
         Setting::set('perf_image_max_width', (string) $imgMaxW);
         Setting::set('perf_cdn_url', (string) $cdn);

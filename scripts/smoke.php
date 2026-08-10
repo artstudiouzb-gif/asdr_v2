@@ -13,7 +13,7 @@ declare(strict_types=1);
  *
  * Примеры:
  *   php scripts/smoke.php http://127.0.0.1:8000
- *   php scripts/smoke.php https://asr.artstudio.uz --admin admin:secret
+ *   php scripts/smoke.php https://artstudio.uz --admin admin:secret
  *
  * Код выхода 0 — всё зелёное; 1 — есть падения (удобно для CI/скриптов).
  */

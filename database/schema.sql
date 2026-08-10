@@ -1129,7 +1129,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_02_news_rich_lead.sql'),
     ('2026_08_02_social_scheduled_at.sql'),
     ('2026_08_03_notification_center.sql'),
-    ('2026_08_05_page_custom_assets.sql')
+    ('2026_08_05_page_custom_assets.sql'),
+    ('2026_08_11_web_vitals.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (
@@ -1149,6 +1150,21 @@ CREATE TABLE IF NOT EXISTS news_views (
     PRIMARY KEY (news_id, view_date),
     KEY idx_news_views_date (view_date, views_count),
     CONSTRAINT fk_news_views_news FOREIGN KEY (news_id) REFERENCES news(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ломало бы общий кеш (см. историю с Vary: Cookie).
+CREATE TABLE IF NOT EXISTS web_vitals (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    metric VARCHAR(8) NOT NULL,
+    value DOUBLE NOT NULL,
+    rating VARCHAR(16) NOT NULL DEFAULT '',
+    page_kind VARCHAR(24) NOT NULL DEFAULT 'other',
+    device VARCHAR(8) NOT NULL DEFAULT 'desktop',
+    lang VARCHAR(8) NOT NULL DEFAULT '',
+    created_at DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    KEY idx_web_vitals_metric (metric, created_at),
+    KEY idx_web_vitals_slice (metric, page_kind, device, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

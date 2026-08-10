@@ -19,6 +19,11 @@ final class View
         // extract вызывался прямо здесь, ключ 'data' конфликтовал бы с
         // параметром $data и (при EXTR_SKIP) не попадал во вьюху — из-за этого
         // редакторы блоков не показывали сохранённое содержимое.
+        // Имя шаблона доступно вьюхе как $viewTemplate: по нему подвал
+        // определяет крупный тип страницы для Core Web Vitals, не собирая
+        // адрес. EXTR_SKIP не даст перебить одноимённый ключ из $data.
+        $data['viewTemplate'] = $data['viewTemplate'] ?? $template;
+
         $renderTo = static function (string $__file, array $__vars): void {
             extract($__vars, EXTR_SKIP);
             require $__file;

@@ -372,6 +372,8 @@ $router->post('/repo/security/telegram/disable', [\App\Controllers\Repo\PortalCo
 
 // --- Health-check (мониторинг) ---
 $router->get('/health', [\App\Controllers\Site\HealthController::class, 'index']);
+// Приём Core Web Vitals: sendBeacon шлёт их при закрытии вкладки.
+$router->post('/_vitals', [\App\Controllers\Site\VitalsController::class, 'store']);
 
 // --- PWA-манифест ---
 $router->get('/manifest.webmanifest', [\App\Controllers\Site\ManifestController::class, 'webmanifest']);

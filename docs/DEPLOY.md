@@ -180,7 +180,7 @@ php database/doctor.php            # проверить структуру, кл
 Для выпуска после загрузки новой версии используйте fail-fast сценарий:
 
 ```bash
-php scripts/release.php https://asr.artstudio.uz
+php scripts/release.php https://artstudio.uz
 ```
 
 Он создаёт резервную копию до миграций, применяет их, очищает кеш и запускает
@@ -212,9 +212,9 @@ php scripts/release.php https://asr.artstudio.uz
 
 | Запись | Имя | Значение (пример) |
 | --- | --- | --- |
-| SPF | `asr.artstudio.uz` | `v=spf1 include:<хост-провайдера> -all` |
-| DKIM | `<селектор>._domainkey.asr.artstudio.uz` | выдаёт почтовый провайдер |
-| DMARC | `_dmarc.asr.artstudio.uz` | `v=DMARC1; p=quarantine; rua=mailto:postmaster@asr.artstudio.uz` |
+| SPF | `artstudio.uz` | `v=spf1 include:<хост-провайдера> -all` |
+| DKIM | `<селектор>._domainkey.artstudio.uz` | выдаёт почтовый провайдер |
+| DMARC | `_dmarc.artstudio.uz` | `v=DMARC1; p=quarantine; rua=mailto:postmaster@artstudio.uz` |
 
 Точное значение `include:` для SPF и содержимое DKIM берутся в панели
 почтового провайдера (cPanel → Email Deliverability показывает обе записи

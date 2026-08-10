@@ -28,7 +28,7 @@ $docIndex = isset($docIndex) ? (int) $docIndex : 0;
     <span class="act-card__emblem" aria-hidden="true"></span>
     <span class="feature-card__top act-card__editorial-head" aria-hidden="true">
         <span class="feature-card__icon act-card__editorial-icon"><?= Icon::render('file-description', 22) ?></span>
-        <span class="feature-card__num act-card__index"><?= str_pad((string) ($docIndex + 1), 2, '0', STR_PAD_LEFT) ?></span>
+        <span class="feature-card__num act-card__index" aria-hidden="true"><?= str_pad((string) ($docIndex + 1), 2, '0', STR_PAD_LEFT) ?></span>
     </span>
     <?php if ($number !== '' || $date !== ''): ?>
         <span class="act-card__head">

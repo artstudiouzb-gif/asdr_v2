@@ -22,6 +22,18 @@ const files = [
         source: 'node_modules/@tabler/icons-sprite/LICENSE',
         target: 'public/assets/vendor/tabler/LICENSE',
     },
+    // Сбор Core Web Vitals с реальных посетителей. Считать LCP и особенно INP
+    // руками нельзя: у INP своя логика группировки взаимодействий, учёта
+    // bfcache и скрытых вкладок. Библиотека маленькая (около 2 КБ сжатой) и
+    // отдаётся со своего домена — сторонних запросов у сайта нет.
+    {
+        source: 'node_modules/web-vitals/dist/web-vitals.iife.js',
+        target: 'public/assets/vendor/web-vitals/web-vitals.js',
+    },
+    {
+        source: 'node_modules/web-vitals/LICENSE',
+        target: 'public/assets/vendor/web-vitals/LICENSE',
+    },
 ];
 
 const checkOnly = process.argv.includes('--check');
