@@ -18,3 +18,15 @@ test('Колонка действий остаётся частью таблиц
     }
 });
 
+test('Текстовые действия языков не схлопываются до кнопки-иконки', function () {
+    $root = dirname(__DIR__, 2);
+    $css = (string) file_get_contents($root . '/public/assets/css/admin.css');
+    $view = (string) file_get_contents($root . '/app/Views/admin/languages/index.php');
+
+    assert_contains('.data-table__actions .btn:not(.btn--icon) { width: auto;', $css);
+    assert_contains('.data-table td.language-settings-table__actions { width: auto;', $css);
+    assert_contains('<div class="table-responsive language-settings-table-wrap">', $view);
+    assert_contains('language-settings-table__actions', $view);
+    assert_contains("AdminUi::icon('save')", $view);
+    assert_contains('>Сохранить</button>', $view);
+});

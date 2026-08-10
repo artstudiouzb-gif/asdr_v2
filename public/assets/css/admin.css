@@ -1646,17 +1646,23 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .bulk-bar select { height: 36px; padding: 4px 10px; border-radius: 8px; font-weight: 500; }
 .bulk-bar__count { color: #64748b; font-size: 13px; margin-left: auto; font-weight: 600; }
 
-/* Улучшенные кнопки действий в строках таблиц (`[↗] [✎] [🗑]`) */
-.data-table__actions .btn,
+/* Компактный квадрат применяется только к кнопкам-иконкам. Текстовые действия
+   вроде «Сохранить» должны сохранять естественную ширину и не обрезаться. */
 .data-table__actions .btn--icon {
     width: 32px; height: 32px; min-width: 32px; padding: 0;
     display: inline-flex; align-items: center; justify-content: center;
     border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0;
     color: #475569; transition: all 0.15s ease;
 }
-.data-table__actions .btn:hover { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; transform: translateY(-1px); }
+.data-table__actions .btn:not(.btn--icon) { width: auto; min-width: max-content; }
+.data-table__actions .btn--icon:hover { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; transform: translateY(-1px); }
 .data-table__actions .btn--danger:hover,
 .data-table__actions form .btn--danger:hover { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
+
+.language-settings-table { min-width: 940px; }
+.language-settings-table__actions-head { min-width: 190px; text-align: right !important; }
+.data-table td.language-settings-table__actions { width: auto; min-width: 190px; }
+.language-settings-table__actions .btn { gap: 6px; }
 
 /* Языковые бейджи в таблицах (`RU`, `UZ`) */
 .badge--lang {

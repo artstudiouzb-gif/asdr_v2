@@ -16,32 +16,34 @@ require __DIR__ . '/../layout/header.php';
     </form>
 <?php endforeach; ?>
 
-<table class="data-table u-inline-5370cbf1a7">
-    <thead>
-        <tr><th>Код</th><th>Название</th><th>По умолчанию</th><th>Активен</th><th>Порядок</th><th></th></tr>
-    </thead>
-    <tbody>
-        <?php foreach ($items as $item): ?>
-            <?php $f = 'lang-' . (int) $item['id']; ?>
-            <tr>
-                <td><input class="u-inline-1a91ef9eca" type="text" name="code" value="<?= htmlspecialchars($item['code'], ENT_QUOTES) ?>" form="<?= $f ?>"></td>
-                <td><input type="text" name="name" value="<?= htmlspecialchars($item['name'], ENT_QUOTES) ?>" form="<?= $f ?>"></td>
-                <td class="u-inline-dac4fe6c9b"><input type="checkbox" name="is_default" value="1" <?= $item['is_default'] ? 'checked' : '' ?> form="<?= $f ?>"></td>
-                <td class="u-inline-dac4fe6c9b"><input type="checkbox" name="is_active" value="1" <?= $item['is_active'] ? 'checked' : '' ?> form="<?= $f ?>"></td>
-                <td><input class="u-inline-d26d79f4c2" type="number" name="sort_order" value="<?= (int) $item['sort_order'] ?>" form="<?= $f ?>"></td>
-                <td class="data-table__actions">
-                    <button type="submit" class="btn btn--small btn--primary" form="<?= $f ?>">Сохранить</button>
-                    <?php if (!$item['is_default']): ?>
-                    <form method="post" action="/admin/languages/<?= (int) $item['id'] ?>/delete" data-confirm="Удалить язык «<?= htmlspecialchars($item['name'], ENT_QUOTES) ?>»? Переводы на этом языке будут удалены.">
-                        <?= Csrf::field() ?>
-                        <button type="submit" class="btn btn--small btn--danger"><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
-                    </form>
-                    <?php endif; ?>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+<div class="table-responsive language-settings-table-wrap">
+    <table class="data-table language-settings-table u-inline-5370cbf1a7">
+        <thead>
+            <tr><th>Код</th><th>Название</th><th>По умолчанию</th><th>Активен</th><th>Порядок</th><th class="language-settings-table__actions-head">Действия</th></tr>
+        </thead>
+        <tbody>
+            <?php foreach ($items as $item): ?>
+                <?php $f = 'lang-' . (int) $item['id']; ?>
+                <tr>
+                    <td><input class="u-inline-1a91ef9eca" type="text" name="code" value="<?= htmlspecialchars($item['code'], ENT_QUOTES) ?>" form="<?= $f ?>"></td>
+                    <td><input type="text" name="name" value="<?= htmlspecialchars($item['name'], ENT_QUOTES) ?>" form="<?= $f ?>"></td>
+                    <td class="u-inline-dac4fe6c9b"><input type="checkbox" name="is_default" value="1" <?= $item['is_default'] ? 'checked' : '' ?> form="<?= $f ?>"></td>
+                    <td class="u-inline-dac4fe6c9b"><input type="checkbox" name="is_active" value="1" <?= $item['is_active'] ? 'checked' : '' ?> form="<?= $f ?>"></td>
+                    <td><input class="u-inline-d26d79f4c2" type="number" name="sort_order" value="<?= (int) $item['sort_order'] ?>" form="<?= $f ?>"></td>
+                    <td class="data-table__actions language-settings-table__actions">
+                        <button type="submit" class="btn btn--small btn--primary" form="<?= $f ?>"><?= \App\Core\AdminUi::icon('save') ?>Сохранить</button>
+                        <?php if (!$item['is_default']): ?>
+                        <form method="post" action="/admin/languages/<?= (int) $item['id'] ?>/delete" data-confirm="Удалить язык «<?= htmlspecialchars($item['name'], ENT_QUOTES) ?>»? Переводы на этом языке будут удалены.">
+                            <?= Csrf::field() ?>
+                            <button type="submit" class="btn btn--small btn--danger"><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
+                        </form>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
 
 <div class="form-card">
     <h2 class="u-inline-291b7bbb01">Добавить язык</h2>
