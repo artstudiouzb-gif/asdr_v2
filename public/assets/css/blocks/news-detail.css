@@ -14,12 +14,12 @@
 
     /* Обложка-hero: на бумаге белый текст на фото нечитаем, поэтому печатаем
        заголовок и мету обычным чёрным по белому, без подложки. */
-    .newsdetail-phero { background-image: none; min-height: 0; padding: 0; }
-    .newsdetail-phero__overlay { display: none; }
+    .newsdetail-phero { background-image: none !important; min-height: 0 !important; padding: 0 !important; }
+    .newsdetail-phero__overlay { display: none !important; }
 
     /* Колонки статьи на A4 не нужны — один поток. */
-    .newsdetail-body, .newsdetail-head { display: block; }
-    .newsdetail-card { border: 0; padding: 0; margin: 12px 0; }
+    .newsdetail-body, .newsdetail-head { display: block !important; }
+    .newsdetail-card { border: 0 !important; padding: 0 !important; margin: 12px 0 !important; }
     /* Заголовок не должен отрываться от текста. */
     .newsdetail-card__title, .newsdetail__body h2, .newsdetail__body h3 { break-after: avoid; }
     .newsdetail-photos__grid img, .newsdetail-gallery__slide { break-inside: avoid; }
@@ -384,9 +384,9 @@ button.newsdetail-gallery__thumb img {
 }
 .newsdetail-gallery__thumb.is-active,
 button.newsdetail-gallery__thumb.is-active {
-    opacity: 1;
-    border-color: var(--gov-teal, #0d9488);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gov-teal, #0d9488) 30%, transparent);
+    opacity: 1 !important;
+    border-color: var(--gov-teal, #0d9488) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gov-teal, #0d9488) 30%, transparent) !important;
 }
 .newsdetail-gallery__thumb:hover,
 button.newsdetail-gallery__thumb:hover {

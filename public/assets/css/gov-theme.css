@@ -157,11 +157,11 @@ input, select, textarea,
 /* Смена темы: переход навешивается на всё документ на время анимации и
    снимается сразу после. Класс ставит window.asdrSetTheme (frontend.js). */
 :root.is-theme-switching, :root.is-theme-switching * {
-    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease !important;
 }
 @media (prefers-reduced-motion: reduce) {
     :root.is-theme-switching, :root.is-theme-switching * {
-        transition: none;
+        transition: none !important;
     }
 }
 
@@ -228,7 +228,7 @@ body.design-scrolltop .scroll-top {
 body.design-scrolltop .scroll-top.is-visible { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
 body.design-scrolltop .scroll-top:hover { background: var(--gov-teal); color: #fff; border-color: var(--gov-teal); }
 body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-teal); outline-offset: 2px; }
-@media print { .scroll-top { display: none; } }
+@media print { .scroll-top { display: none !important; } }
 @media (prefers-reduced-motion: reduce) {
     body.design-scrolltop .scroll-top { transition: opacity .2s ease, visibility .2s ease; transform: none; }
     body.design-scrolltop .scroll-top.is-visible { transform: none; }
@@ -260,9 +260,9 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     50% { opacity: 0.9; }
 }
 .block-form__submit.is-loading {
-    animation: submit-btn-pulse 1.4s infinite ease-in-out;
-    cursor: progress;
-    pointer-events: none;
+    animation: submit-btn-pulse 1.4s infinite ease-in-out !important;
+    cursor: progress !important;
+    pointer-events: none !important;
 }
 
 /* Анимация фокуса для фильтров, поиска и полей ввода */
@@ -352,8 +352,8 @@ body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-
 }
 
 .site-submenu__link.is-active {
-    color: var(--gov-teal, #12807f);
-    background: color-mix(in srgb, var(--gov-teal, #12807f) 10%, transparent);
+    color: var(--gov-teal, #12807f) !important;
+    background: color-mix(in srgb, var(--gov-teal, #12807f) 10%, transparent) !important;
     font-weight: 700;
 }
 
@@ -422,7 +422,7 @@ body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-
     color: var(--menu-hover-color) !important;
 }
 .site-menu__link.is-active {
-    color: var(--menu-active-color);
+    color: var(--menu-active-color) !important;
 }
 
 /* Font Size Modifiers */
@@ -461,8 +461,8 @@ body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-
 }
 .site-menu--style-pill .site-menu__link::after { display: none; }
 .site-menu--style-pill .site-menu__link.is-active {
-    background: var(--menu-capsule-bg);
-    color: #ffffff;
+    background: var(--menu-capsule-bg) !important;
+    color: #ffffff !important;
 }
 .site-menu--style-pill .site-menu__link:hover:not(.is-active) {
     background: color-mix(in srgb, var(--menu-capsule-bg) 14%, transparent) !important;
@@ -578,41 +578,41 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-dot .site-men
         var(--header-floating-angle, 135deg),
         rgba(15, 23, 42, var(--header-floating-opacity, 0.25)) 0%,
         rgba(30, 41, 59, calc(var(--header-floating-opacity, 0.25) * 0.8)) 100%
-    );
-    backdrop-filter: blur(var(--header-floating-blur, 14px)) saturate(160%);
-    -webkit-backdrop-filter: blur(var(--header-floating-blur, 14px)) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, calc(var(--header-floating-opacity, 0.25) + 0.05));
-    box-shadow: 0 8px 24px rgba(0, 0, 0, calc(var(--header-floating-opacity, 0.25) * 0.8));
+    ) !important;
+    backdrop-filter: blur(var(--header-floating-blur, 14px)) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(var(--header-floating-blur, 14px)) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, calc(var(--header-floating-opacity, 0.25) + 0.05)) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, calc(var(--header-floating-opacity, 0.25) * 0.8)) !important;
 }
 
 /* 4. Липкая парящая шапка при прокрутке вниз (Sticky Scrolled State) */
 body .site-header--container-floating.site-header--sticky.is-scrolled {
-    margin: 10px auto;
-    max-width: min(calc(100% - 32px), var(--container-max, 1280px));
-    border-radius: 50px;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+    margin: 10px auto !important;
+    max-width: min(calc(100% - 32px), var(--container-max, 1280px)) !important;
+    border-radius: 50px !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22) !important;
 }
 :root[data-theme="light"] body .site-header--container-floating.site-header--sticky.is-scrolled,
 :root:not([data-theme="dark"]) body .site-header--container-floating.site-header--sticky.is-scrolled {
-    background: rgba(255, 255, 255, 0.96);
-    border-color: rgba(203, 213, 225, 0.8);
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-color: rgba(203, 213, 225, 0.8) !important;
 }
 :root[data-theme="dark"] body .site-header--container-floating.site-header--sticky.is-scrolled {
-    background: rgba(15, 23, 42, 0.92);
-    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(15, 23, 42, 0.92) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
 }
 
 /* 5. Расширение боксовой/парящей шапки до 100% полной ширины при прокрутке вниз (Full Width on Sticky) */
 body .site-header--sticky-full.is-scrolled,
 body .site-header--container-container.site-header--sticky-full.is-scrolled,
 body .site-header--container-floating.site-header--sticky-full.is-scrolled {
-    margin: 0;
-    max-width: 100%;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-    transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    margin: 0 !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18) !important;
+    transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
 }
 
 /* === Плашки / Бейджи для пунктов меню («АКТУАЛЬНО!», «NEW», «TOP») === */
@@ -839,7 +839,7 @@ body:has(.site-header--transparent) .site-topbar .hdr-contact { color: #fff; }
 body:has(.site-header--transparent) .site-topbar .site-search-toggle,
 body:has(.site-header--transparent) .site-topbar .site-theme-toggle,
 body:has(.site-header--transparent) .site-topbar .a11y-toggle { border-color: rgba(255,255,255,.4); color: #fff; }
-body .site-header.site-header--transparent.site-header--sticky.is-scrolled { position: fixed; top: var(--hdr-panel-height, 0px); animation: hdr-slide-down .25s ease; }
+body .site-header.site-header--transparent.site-header--sticky.is-scrolled { position: fixed; top: var(--hdr-panel-height, 0px) !important; animation: hdr-slide-down .25s ease; }
 @keyframes hdr-slide-down { from { transform: translateY(-100%); } to { transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { body .site-header.site-header--transparent.site-header--sticky.is-scrolled { animation: none; } }
 body:has(.site-header--transparent) .site-content { margin-top: 0; }
@@ -876,7 +876,7 @@ body .site-header--transparent:not(.is-scrolled) .site-header__logo:has(.site-he
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__link.is-active,
 body .site-header--transparent:not(.is-scrolled) .site-menu__link[aria-current="page"] {
-    color: var(--menu-active-transparent, var(--menu-active, var(--gov-teal)));
+    color: var(--menu-active-transparent, var(--menu-active, var(--gov-teal))) !important;
 }
 /* Линия подчеркивания активного и наведенного пункта меню с настройками длины, высоты и толщины */
 .site-menu--style-underline .site-menu__link::after {
@@ -912,24 +912,24 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__link[aria-current="
 }
 
 body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline .site-menu__link::after {
-    bottom: var(--hoverline-bottom, 4px);
-    left: var(--hoverline-inset, 4px);
-    right: var(--hoverline-inset, 4px);
-    height: var(--hoverline-height, 2px);
+    bottom: var(--hoverline-bottom, 4px) !important;
+    left: var(--hoverline-inset, 4px) !important;
+    right: var(--hoverline-inset, 4px) !important;
+    height: var(--hoverline-height, 2px) !important;
     background: linear-gradient(
         90deg,
         transparent 0%,
         color-mix(in srgb, var(--menu-active-transparent, var(--menu-active, var(--gov-teal))) 78%, transparent) 35%,
         var(--menu-active-transparent, var(--menu-active, var(--gov-teal))) 65%,
         transparent 100%
-    );
-    box-shadow: none;
-    filter: drop-shadow(0 0 6px var(--menu-active-transparent, var(--menu-active, var(--gov-teal))));
+    ) !important;
+    box-shadow: none !important;
+    filter: drop-shadow(0 0 6px var(--menu-active-transparent, var(--menu-active, var(--gov-teal)))) !important;
 }
 body .site-header--transparent:not(.is-scrolled) .site-nav { border-top-color: rgba(255,255,255,.16); background: transparent; }
-.site-header--transparent:not(.is-scrolled) .site-search { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.3); }
-.site-header--transparent:not(.is-scrolled) .site-search input { color: #fff; }
-.site-header--transparent:not(.is-scrolled) .site-search button { color: #fff; }
+.site-header--transparent:not(.is-scrolled) .site-search { background: rgba(255,255,255,.15) !important; border-color: rgba(255,255,255,.3) !important; }
+.site-header--transparent:not(.is-scrolled) .site-search input { color: #fff !important; }
+.site-header--transparent:not(.is-scrolled) .site-search button { color: #fff !important; }
 .site-header--transparent:not(.is-scrolled) .site-search input::placeholder { color: rgba(255,255,255,.6); }
 body .site-header { transition: background-color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
 
@@ -952,14 +952,14 @@ body .site-header { transition: background-color 0.25s ease, box-shadow 0.25s ea
     content: none !important;
 }
 body .site-header--sticky.is-scrolled {
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    background: color-mix(in srgb, var(--gov-surface) 85%, transparent);
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    background: color-mix(in srgb, var(--gov-surface) 85%, transparent) !important;
 }
 /* Прозрачная поверх контента: первый блок страницы должен быть full-bleed hero;
    для обычных страниц режим автоматически даёт сплошную шапку после прокрутки. */
 /* Отключаем легаси-блюр старой дизайн-системы в прозрачном режиме без скролла. */
-body .site-header--transparent:not(.is-scrolled) { backdrop-filter: none; -webkit-backdrop-filter: none; }
+body .site-header--transparent:not(.is-scrolled) { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 /* Компенсация под прозрачной шапкой: контент первого full-bleed hero
    опускается ниже высоты шапки, чтобы не подлезать под меню. */
 body:has(.site-header--transparent) .cms-block--hero .block-hero--media .block-hero__inner { padding-top: clamp(120px, 14vw, 170px); }
@@ -1008,10 +1008,10 @@ body .site-header .site-theme-toggle:active,
 
 body .site-header--transparent:not(.is-scrolled) .site-theme-toggle,
 body:has(.site-header--transparent) .site-topbar .site-theme-toggle {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    color: #ffffff;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
 }
 
 body .site-header--transparent:not(.is-scrolled) .site-theme-toggle:hover,
@@ -1057,8 +1057,8 @@ body:has(.site-header--transparent) .site-topbar .site-theme-toggle:hover {
 @media (prefers-reduced-motion: reduce) {
     body .site-header .site-theme-toggle,
     .site-theme-toggle__icon {
-        transition: none;
-        transform: none;
+        transition: none !important;
+        transform: none !important;
     }
 }
 /* Кнопка для слабовидящих: иконка, текст — в aria-label/title. */
@@ -1103,10 +1103,10 @@ body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: rg
 
 .site-search-wrap.is-expanded .site-search,
 .site-search-wrap .site-search.is-open {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateY(-50%) scaleX(1);
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(-50%) scaleX(1) !important;
 }
 
 .site-search-wrap .site-search:focus-within {
@@ -1194,24 +1194,24 @@ body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: rg
 /* Прозрачная шапка: тёмное «стекло» для поля ввода (blur возвращён —
    невидимый текст был не из-за него, а из-за opacity:0 у самого input). */
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search {
-    background: rgba(15, 23, 42, 0.85);
+    background: rgba(15, 23, 42, 0.85) !important;
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4) !important;
 }
 
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search input[type="search"] {
-    color: #ffffff;
+    color: #ffffff !important;
 }
 
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search input[type="search"]::placeholder {
-    color: rgba(255, 255, 255, 0.65);
+    color: rgba(255, 255, 255, 0.65) !important;
 }
 
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search__submit,
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search__close {
-    color: #ffffff;
+    color: #ffffff !important;
 }
 
 body.design-search-inline .site-header .site-search { display: inline-flex; }
@@ -1243,9 +1243,9 @@ body .site-header--shadow { box-shadow: 0 6px var(--header-shadow-size, 14px) rg
 /* Прозрачная шапка поверх hero: пока не проскроллено, свои фоны не применяются
    (иначе перекрашивали бы «прозрачное» состояние); после скролла — применяются. */
 :root[data-theme] .site-header.site-header--transparent.site-header--mid-bg:not(.is-scrolled),
-body .site-header--transparent.site-header--mid-bg:not(.is-scrolled) { background: transparent; }
+body .site-header--transparent.site-header--mid-bg:not(.is-scrolled) { background: transparent !important; }
 :root[data-theme] .site-header.site-header--transparent.site-header--nav-bg:not(.is-scrolled) .site-nav,
-body .site-header--transparent.site-header--nav-bg:not(.is-scrolled) .site-nav { background: transparent; }
+body .site-header--transparent.site-header--nav-bg:not(.is-scrolled) .site-nav { background: transparent !important; }
 
 body .site-header--borders-none, body .site-header--borders-none .site-nav { border-top: 0; border-bottom: 0; }
 body:has(.site-header--borders-none) .site-topbar--light { border-bottom: 0; }
@@ -1697,7 +1697,7 @@ body.reader-mode-active { overflow: hidden; }
 /* ==========================================================================
    Универсальный полноэкранный Lightbox просмотр фотографий
    ========================================================================== */
-.is-lightboxable { cursor: zoom-in; }
+.is-lightboxable { cursor: zoom-in !important; }
 .is-lightboxable[tabindex]:focus-visible {
     outline: 3px solid var(--gov-teal, #0d9488);
     outline-offset: 4px;
@@ -1903,12 +1903,12 @@ body.lightbox-active { overflow: hidden; }
 @media print {
     .site-header, .site-footer, .newsdetail-share, .push-floating-bell,
     .reader-mode-overlay, .site-theme-toggle, .no-print {
-        display: none;
+        display: none !important;
     }
-    body { background: #ffffff; color: #000000; font-size: 12pt; }
-    .newsdetail-article { width: 100%; max-width: 100%; padding: 0; margin: 0; }
-    .rich-content { color: #000000; }
-    .rich-content a { color: #000000; text-decoration: underline; }
+    body { background: #ffffff !important; color: #000000 !important; font-size: 12pt; }
+    .newsdetail-article { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+    .rich-content { color: #000000 !important; }
+    .rich-content a { color: #000000 !important; text-decoration: underline; }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -3967,7 +3967,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     display: none;
 }
 .media-tabs__tab.is-active::after {
-    display: none;
+    display: none !important;
 }
 .media-tabs__tab.is-active { 
     color: #fff !important;
@@ -4815,7 +4815,7 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
    иначе тёплый #e67e22/#f1c40f выбивается на фоне hero. */
 body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__sun,
 body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__moon {
-    color: #ffffff;
+    color: #ffffff !important;
 }
 
 /* Анимация лучей солнца при наведении */
@@ -5149,7 +5149,7 @@ body.quick-search-active { overflow: hidden; }
     .site-scroll-progress,
     .site-toast-container,
     .site-quick-search {
-        display: none;
+        display: none !important;
     }
 }
 
@@ -5286,9 +5286,9 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline > .
         var(--menu-active-transparent, var(--menu-active, var(--gov-teal))) 50%,
         color-mix(in srgb, var(--menu-active-transparent, var(--menu-active, var(--gov-teal))) 78%, transparent) 70%,
         transparent 100%
-    );
-    box-shadow: 0 1px 6px color-mix(in srgb, var(--menu-active-transparent, var(--menu-active, var(--gov-teal))) 22%, transparent);
-    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--menu-active-transparent, var(--menu-active, var(--gov-teal))) 28%, transparent));
+    ) !important;
+    box-shadow: 0 1px 6px color-mix(in srgb, var(--menu-active-transparent, var(--menu-active, var(--gov-teal))) 22%, transparent) !important;
+    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--menu-active-transparent, var(--menu-active, var(--gov-teal))) 28%, transparent)) !important;
 }
 
 .site-menu__item--has-children {
@@ -5349,7 +5349,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline > .
     outline-offset: 1px;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__toggle {
-    color: var(--menu-color-transparent, var(--menu-color, #fff));
+    color: var(--menu-color-transparent, var(--menu-color, #fff)) !important;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:hover > .site-menu__toggle,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:focus-within > .site-menu__toggle,
@@ -5379,8 +5379,8 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     color: var(--submenu-hover, var(--menu-hover-color, var(--gov-teal))) !important;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .site-menu__item > .site-menu__toggle {
-    color: var(--submenu-color, var(--gov-title));
-    background: transparent;
+    color: var(--submenu-color, var(--gov-title)) !important;
+    background: transparent !important;
 }
 
 .site-submenu {
@@ -5444,8 +5444,8 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     }
     .site-submenu__link.is-active,
     .site-submenu__link[aria-current="page"] {
-        color: var(--submenu-hover, var(--menu-active-color, var(--gov-teal)));
-        background: transparent;
+        color: var(--submenu-hover, var(--menu-active-color, var(--gov-teal))) !important;
+        background: transparent !important;
         border-bottom-color: var(--submenu-hover, var(--menu-active-color, var(--gov-teal)));
         box-shadow: none;
     }
@@ -5512,7 +5512,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     .block-map__pin-ripple,
     .block-form__submit.is-loading,
     .timeline-list::before {
-        animation: none;
+        animation: none !important;
     }
 
     .block-hero__button:hover,
@@ -6018,7 +6018,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     .feature-card__title,
     .feature-card__title::after,
     .feature-card__arrow {
-        transition: none;
+        transition: none !important;
     }
 
     .feature-card:hover,
