@@ -2242,7 +2242,8 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .catcard,
 .project-card,
 .person-card,
-.team-card {
+.team-card,
+.mediacard {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -3457,14 +3458,16 @@ span.imgcard__media::after {
     .mediagallery-grid { grid-template-columns: 1fr; }
     .mediagallery-grid > .mediacard { grid-column: auto; }
 }
-.mediacard { 
-    text-decoration: none; color: var(--gov-ink); 
-    display: block;
+/* Карточка видео оформляется как карточка альбома (подложка, рамка, тень,
+   подъём при наведении) — раньше это была просто картинка с подписью, и на
+   странице медиатеки вкладки «Видео» и «Фото» выглядели из разных наборов. */
+.mediacard {
+    text-decoration: none;
+    color: var(--gov-ink);
 }
 .mediacard__media { 
     position: relative; display: grid; place-items: center; aspect-ratio: 16/10; 
     border-radius: var(--radius); overflow: hidden; background: #24425f center/cover no-repeat; 
-    margin-bottom: 12px; 
     box-shadow: 0 4px 14px rgba(19, 42, 92, 0.03);
     transition: box-shadow 0.4s ease;
 }
@@ -3499,11 +3502,18 @@ span.imgcard__media::after {
 .mediacard__duration { position: absolute; right: 10px; bottom: 10px; background: rgba(11,26,48,.8); color: #fff; font-size: var(--step--4); padding: 2px 8px; border-radius: 4px; }
 .mediacard__title { 
     display: block; font-weight: 700; font-family: var(--font-heading, 'PT Serif', serif); 
-    color: var(--gov-title); line-height: 1.35; 
+    color: var(--gov-title); line-height: 1.35; font-size: var(--step-0); 
     transition: color 0.3s ease;
 }
 .mediacard:hover .mediacard__title {
     color: var(--gov-teal-text);
+}
+/* Подложку и рамку карточка получает как альбом, но подъёма при наведении у
+   неё нет намеренно: внутри уже увеличивается картинка, и два движения сразу
+   выглядят суетливо (закреплено тестом 119). */
+.mediacard:hover {
+    border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
+    box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
 }
 .mediacard__date { display: block; color: var(--gov-muted); font-size: var(--step--2); margin-top: 4px; }
 
