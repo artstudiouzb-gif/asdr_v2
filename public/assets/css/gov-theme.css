@@ -2937,10 +2937,13 @@ body.design-type-static .section-title { font-size: var(--step-6); }
     animation: button-shimmer 6s infinite ease-in-out;
     pointer-events: none;
 }
+/* Движение через transform, а не left: анимация left пересчитывает лейаут на
+   каждом кадре, transform уходит в композитор. Смещение то же: элемент шириной
+   50% контейнера проходит 300% его ширины, то есть 600% собственной. */
 @keyframes button-shimmer {
-    0% { left: -150%; }
-    30% { left: 150%; }
-    100% { left: 150%; }
+    0% { transform: translateX(0) skewX(-25deg); }
+    30% { transform: translateX(600%) skewX(-25deg); }
+    100% { transform: translateX(600%) skewX(-25deg); }
 }
 .block-hero--media .block-hero__button:not(.block-hero__button--ghost) { background: var(--hero-btn, #16406e) !important; }
 .block-hero:not(.block-hero--media) .block-hero__button:not(.block-hero__button--ghost) { background: var(--hero-btn, var(--gov-navy)) !important; }
@@ -4834,11 +4837,18 @@ body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__moon {
     0%, 100% { opacity: 0.3; transform: scale(0.7); }
     50% { opacity: 1; transform: scale(1.3); }
 }
+/* Только под наведением — как у соседних sun-rays-spin и eye-pupil-pulse.
+   Переключатель темы виден в шапке всегда, и бесконечная анимация на нём
+   означала, что композитор не простаивает ни секунды: браузер перерисовывает
+   кадр даже на неподвижной странице. Это стоит батареи на телефоне и мешает
+   замерам отзывчивости. */
 @media (prefers-reduced-motion: no-preference) {
-    .site-theme-toggle .theme-star--1 {
+    .site-theme-toggle:hover .theme-star--1,
+    .site-theme-toggle:focus-visible .theme-star--1 {
         animation: moon-star-twinkle 2s infinite ease-in-out;
     }
-    .site-theme-toggle .theme-star--2 {
+    .site-theme-toggle:hover .theme-star--2,
+    .site-theme-toggle:focus-visible .theme-star--2 {
         animation: moon-star-twinkle 2s 1s infinite ease-in-out;
     }
 }
