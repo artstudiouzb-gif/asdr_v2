@@ -774,7 +774,32 @@
     width: 16px;
     height: 16px;
     border-width: 3px;
-    background: var(--gov-surface);
+    /* Фон здесь намеренно не задаём: он перекрывал бы состояние этапа.
+       Пройденный этап заливается акцентом (.stage--done), текущий остаётся
+       полым (.stage--active) — иначе все точки выглядят одинаково. */
+}
+
+/* Хвост шкалы после последнего этапа: сплошная линия обрывалась ровно на
+   последней точке, и лента выглядела недоделанной. Пунктир читается как
+   «продолжение следует», а не как обрыв. */
+.editorial-page__content .block-stages--history .stage:last-child::before {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    border-top: 1px dashed color-mix(in srgb, var(--gov-teal) 45%, var(--editorial-line));
+    background: none;
+    pointer-events: none;
+}
+
+@media (max-width: 1000px) and (min-width: 561px) {
+    /* В два столбца отрезки соединяли бы этапы из разных строк. */
+    .editorial-page__content .block-stages--history .stage:last-child::before {
+        display: none;
+    }
 }
 
 .editorial-page__content .block-stages--history .stage__year {
