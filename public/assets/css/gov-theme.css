@@ -338,7 +338,10 @@ body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-
 .site-menu__link:hover,
 .site-menu__link:focus-visible,
 .site-menu__link.is-active {
-    color: var(--menu-hover-color, var(--gov-teal, #12807f)) !important;
+    /* Запасной цвет — контрастный вариант акцента, а не сам акцент: на белой
+       шапке сырой #009bbe даёт 3.26:1 при норме 4.5:1 (ловил axe). Если цвет
+       наведения задан в конструкторе шапки, он остаётся выбором админа. */
+    color: var(--menu-hover-color, var(--gov-teal-text, #12807f)) !important;
     background: transparent !important;
     background-color: transparent !important;
 }
@@ -392,8 +395,11 @@ body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-
 /* === Advanced Menu Design System === */
 .site-menu {
     --menu-text-color: var(--menu-color, var(--gov-title));
-    --menu-hover-color: var(--menu-hover, var(--gov-teal, #12807f));
-    --menu-active-color: var(--menu-active, var(--gov-teal, #12807f));
+    --menu-hover-color: var(--menu-hover, var(--gov-teal-text, #12807f));
+    /* Контрастный вариант акцента: этой переменной красится текст активного
+       пункта, а сырой акцент на белой шапке не добирает 4.5:1. Цвет, заданный
+       в конструкторе шапки (--menu-active), остаётся выбором админа. */
+    --menu-active-color: var(--menu-active, var(--gov-teal-text, #12807f));
     --menu-capsule-bg: var(--menu-pill-bg, var(--gov-teal, #12807f));
 }
 .site-menu__link {
@@ -1385,7 +1391,10 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
 .search-suggest__all:hover { text-decoration: underline; }
 
 /* Индикатор подменю (▾): плавный поворот на 180° при раскрытии. */
-.site-menu__toggle { display: inline-flex; align-items: center; justify-content: center; color: var(--gov-teal); background: transparent; border: 0; cursor: pointer; font-size: var(--step--4); padding: 4px; transition: transform .2s ease; }
+/* min-width/height 24px — минимальная цель нажатия по WCAG 2.2 (2.5.8).
+   Кнопка была 22×30, и axe справедливо считал её мелкой. */
+.site-menu__item--has-children > .site-menu__link { padding-right: 4px; }
+.site-menu__toggle { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; color: var(--gov-teal-text); background: transparent; border: 0; cursor: pointer; font-size: var(--step--4); padding: 4px; transition: transform .2s ease; }
 .site-menu__item.is-open > .site-menu__toggle { transform: rotate(180deg); }
 @media (hover: hover) and (min-width: 901px) {
     .site-menu__item--has-children:hover > .site-menu__toggle,
@@ -5502,9 +5511,13 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline > .
     display: inline-grid;
     place-items: center;
     flex: 0 0 auto;
-    width: 22px;
+    /* 24px — минимальная цель нажатия по WCAG 2.2 (2.5.8). Отрицательного
+       отступа больше нет: он затягивал кнопку под ссылку, и свободной для
+       нажатия оставалась полоса 16px (axe: target-size, «partially obscured»).
+       Визуальную близость к подписи держит уменьшенный отступ самой ссылки. */
+    width: 24px;
     height: 30px;
-    margin: 0 0 0 -8px;
+    margin: 0;
     padding: 0 !important;
     border: 0 !important;
     border-radius: var(--radius-sm, 6px) !important;

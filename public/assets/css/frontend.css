@@ -102,8 +102,10 @@ summary:focus-visible {
     align-items: center;
 }
 .site-menu__link { position: relative; text-decoration: none; color: var(--color-primary, #1a1a1a); font-weight: 600; padding: 10px 4px; background: transparent; background-color: transparent; transition: color 0.2s ease; }
-.site-menu__link:hover { color: var(--color-accent, #2f6fed); background: transparent !important; background-color: transparent !important; }
-.site-menu__link.is-active { color: var(--color-accent, #2f6fed) !important; font-weight: 700; background: transparent !important; background-color: transparent !important; }
+.site-menu__link:hover { color: var(--gov-teal-text, var(--color-accent, #2f6fed)); background: transparent !important; background-color: transparent !important; }
+/* Контрастный вариант акцента, а не сам акцент: сырой #009bbe на белой
+   шапке даёт 3.26:1 при норме 4.5:1 (ловил axe). */
+.site-menu__link.is-active { color: var(--gov-teal-text, var(--color-accent, #2f6fed)) !important; font-weight: 700; background: transparent !important; background-color: transparent !important; }
 .site-menu__link::after {
     content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
     background: var(--color-accent, #2f6fed); border-radius: 3px 3px 0 0;
