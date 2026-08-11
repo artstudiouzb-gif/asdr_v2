@@ -1110,14 +1110,31 @@ final class DesignSettings
      * CSS-переменные для фронтенда на основе текущих значений.
      * @param array<string,string> $v
      */
-    public static function cssVariables(array $v): string
+    /**
+     * Действующая максимальная ширина контента: пресет или своя точная
+     * ширина. 'none' — контент на всю ширину экрана.
+     *
+     * Вынесено из cssVariables(), потому что это значение нужно ещё и
+     * подсказкам в админке: раньше форма шапки называла ширину контейнера
+     * жёстко зашитым «1280px», хотя настоящее значение задаётся здесь и по
+     * умолчанию другое.
+     *
+     * @param array<string, mixed>|null $v Настройки; null — взять текущие.
+     */
+    public static function containerWidth(?array $v = null): string
     {
-        $container = ['narrow' => '1080px', 'standard' => '1200px', 'wide' => '1360px', 'ultra' => '1440px', 'full' => 'none'][$v['container'] ?? 'standard'] ?? '1200px';
+        $v = $v ?? self::current();
+        $preset = ['narrow' => '1080px', 'standard' => '1200px', 'wide' => '1360px', 'ultra' => '1440px', 'full' => 'none'];
+        $container = $preset[$v['container'] ?? 'standard'] ?? '1200px';
         // Своя точная ширина имеет приоритет над пресетом (число трактуем как px).
         $custom = self::containerCustom();
-        if ($custom !== '') {
-            $container = $custom;
-        }
+
+        return $custom !== '' ? $custom : $container;
+    }
+
+    public static function cssVariables(array $v): string
+    {
+        $container = self::containerWidth($v);
         $radius = ['none' => '0px', 'small' => '8px', 'medium' => '14px', 'large' => '22px'][$v['radius'] ?? 'medium'] ?? '14px';
         $customRadius = self::radiusCustom();
         if ($customRadius !== '') {

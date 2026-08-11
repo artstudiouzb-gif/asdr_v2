@@ -148,7 +148,16 @@ $heightSelect = function (string $name, string $current): string {
                 <p class="form-hint u-inline-291b7bbb01">Выберите архитектуру отображения шапки относительно краев экрана.</p>
 
                 <div class="hdr-card-grid">
-                    <?php $cmode = $config['container_mode'] ?? 'full'; ?>
+                    <?php
+                    $cmode = $config['container_mode'] ?? 'full';
+                    // Ширина контейнера задаётся в «Дизайне сайта»; раньше здесь
+                    // стояло жёстко вписанное «1280px», которое не совпадало ни
+                    // с одним пресетом.
+                    $containerWidthValue = \App\Core\DesignSettings::containerWidth();
+                    $containerWidthLabel = $containerWidthValue === 'none'
+                        ? 'на всю ширину'
+                        : $containerWidthValue;
+                    ?>
                     <label class="hdr-select-card <?= $cmode === 'full' ? 'is-selected' : '' ?>">
                         <input type="radio" name="container_mode" value="full" <?= $cmode === 'full' ? 'checked' : '' ?>>
                         <span class="hdr-select-card__title">На всю ширину</span>
@@ -158,7 +167,7 @@ $heightSelect = function (string $name, string $current): string {
                     <label class="hdr-select-card <?= $cmode === 'container' ? 'is-selected' : '' ?>">
                         <input type="radio" name="container_mode" value="container" <?= $cmode === 'container' ? 'checked' : '' ?>>
                         <span class="hdr-select-card__title">По ширине контента</span>
-                        <span class="hdr-select-card__desc">Вся шапка с фоном ограничена рамкой контента (1280px) и центрируется на странице.</span>
+                        <span class="hdr-select-card__desc">Вся шапка с фоном ограничена рамкой контента (<?= htmlspecialchars($containerWidthLabel, ENT_QUOTES) ?>) и центрируется на странице.</span>
                     </label>
 
                     <label class="hdr-select-card <?= $cmode === 'floating' ? 'is-selected' : '' ?>">
