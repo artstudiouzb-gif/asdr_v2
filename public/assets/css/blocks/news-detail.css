@@ -288,7 +288,11 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .newsdetail-phero__video { display: inline-flex; align-items: center; gap: 12px; margin-top: 8px; color: #fff; text-decoration: none; text-transform: uppercase; font-size: var(--step--3); letter-spacing: .08em; font-weight: 700; }
 .newsdetail-phero__play { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.45); transition: background .2s ease; }
 .newsdetail-phero__video:hover .newsdetail-phero__play { background: var(--gov-teal); border-color: var(--gov-teal); }
-.newsdetail--premium .newsdetail-body { margin-top: var(--newsdetail-padding-top, clamp(28px, 4vw, 48px)); }
+/* Отступ от hero до текста задаёт `gap` самой статьи (те же 72px, что между
+   остальными секциями). Собственный `margin-top` здесь складывался с ним и
+   давал 120px — вдвое больше, чем между любой другой парой секций. Настройка
+   администратора по-прежнему добавляется сверху, как и в обычном макете. */
+.newsdetail--premium .newsdetail-body { margin-top: var(--newsdetail-padding-top, 0px); }
 
 /* Галерея-карточка в правой колонке. */
 .newsdetail-sidegallery { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
@@ -896,11 +900,13 @@ button.newsdetail-gallery__thumb:hover {
 }
 .relnews-card__media { border-radius: 0; }
 .relnews-card:hover .relnews-card__media { transform: none; box-shadow: none; }
-.relnews-card > .news-meta { margin: 14px 14px 0; }
-.relnews-card__date { margin-inline: 14px; }
+.relnews-card > .news-meta { margin: 5px 14px 0; }
 .relnews-card__title,
 .relnews-card__excerpt { margin-inline: 14px; }
-.relnews-card__title { margin-bottom: 5px; }
+/* Заголовку не нужен внешний отступ уровня h3: расстояние между строками
+   карточки задаёт её собственный `gap`, а с наследованным `margin-top` дата
+   отходила от заголовка на 31px против 14px у остальных строк. */
+.relnews-card__title { margin-top: 0; margin-bottom: 0; }
 /* Карточка ленты обходится без бокового паддинга (обложка идёт от края до
    края), поэтому внутренние элементы отступают сами. Ссылке нужен тот же
    отступ, иначе черта и текст упирались в границу карточки. */

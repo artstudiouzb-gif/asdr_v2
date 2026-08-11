@@ -22,6 +22,7 @@ final class AssetCollector
         'slider' => '/assets/js/blocks/slider.js',
         'anchor_nav' => '/assets/js/blocks/anchor_nav.js',
         'news' => '/assets/js/news.js',
+        'leader_card' => '/assets/js/blocks/leader_card.js',
     ];
 
     /**
@@ -62,6 +63,7 @@ final class AssetCollector
         // выполняется вовсе).
         'news_feature' => '/assets/css/blocks/news-detail.css',
         'org_structure' => '/assets/css/blocks/org-structure.css',
+        'leader_card' => '/assets/css/blocks/leader-card.css',
     ];
 
     /** @var array<string, bool> */

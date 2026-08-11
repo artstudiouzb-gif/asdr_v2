@@ -30,6 +30,9 @@
        на тёмной (чтобы навигационные заголовки карточек не пропадали). */
     --gov-title: var(--gov-navy);
     --gov-teal-text: var(--gov-teal-dark, #0284c7); /* WCAG AA: 5.4:1 контрастность на белом фоне */
+    /* Заливка, на которой читается белый текст. Без своего акцента совпадает
+       с текстовым вариантом бирюзы — у него те же 5.4:1 к белому. */
+    --accent-fill-strong: var(--gov-teal-dark, #0284c7);
     /* Текст на подложке из самого акцента (плашки, бейджи, номера): она
        темнее поверхности, и --gov-teal-text на ней не добирает до 4.5:1. */
     --gov-teal-on-tint: var(--gov-teal-tint-light, #00697d);
@@ -335,7 +338,10 @@ body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-
 .site-menu__link:hover,
 .site-menu__link:focus-visible,
 .site-menu__link.is-active {
-    color: var(--menu-hover-color, var(--gov-teal, #12807f)) !important;
+    /* Запасной цвет — контрастный вариант акцента, а не сам акцент: на белой
+       шапке сырой #009bbe даёт 3.26:1 при норме 4.5:1 (ловил axe). Если цвет
+       наведения задан в конструкторе шапки, он остаётся выбором админа. */
+    color: var(--menu-hover-color, var(--gov-teal-text, #12807f)) !important;
     background: transparent !important;
     background-color: transparent !important;
 }
@@ -389,8 +395,11 @@ body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-
 /* === Advanced Menu Design System === */
 .site-menu {
     --menu-text-color: var(--menu-color, var(--gov-title));
-    --menu-hover-color: var(--menu-hover, var(--gov-teal, #12807f));
-    --menu-active-color: var(--menu-active, var(--gov-teal, #12807f));
+    --menu-hover-color: var(--menu-hover, var(--gov-teal-text, #12807f));
+    /* Контрастный вариант акцента: этой переменной красится текст активного
+       пункта, а сырой акцент на белой шапке не добирает 4.5:1. Цвет, заданный
+       в конструкторе шапки (--menu-active), остаётся выбором админа. */
+    --menu-active-color: var(--menu-active, var(--gov-teal-text, #12807f));
     --menu-capsule-bg: var(--menu-pill-bg, var(--gov-teal, #12807f));
 }
 .site-menu__link {
@@ -866,6 +875,16 @@ body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__trigger:ho
 .site-header__logo-light { display: none; }
 body .site-header--transparent:not(.is-scrolled) .site-header__logo-light { display: block; }
 body .site-header--transparent:not(.is-scrolled) .site-header__logo:has(.site-header__logo-light) img.site-header__logo-std { display: none; }
+/* Тёмная тема — тот же случай, что и прозрачная шапка: фон тёмный, и обычный
+   логотип на нём тонет. Раньше подмена работала только на прозрачной шапке, и
+   в тёмной теме оставался вариант для светлого фона. Условие :has() важно:
+   если светлого логотипа не загрузили, обычный обязан остаться. */
+:root[data-theme="dark"] .site-header__logo-light { display: block; }
+:root[data-theme="dark"] .site-header__logo:has(.site-header__logo-light) img.site-header__logo-std { display: none; }
+@media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] .site-header__logo-light { display: block; }
+    :root[data-theme="auto"] .site-header__logo:has(.site-header__logo-light) img.site-header__logo-std { display: none; }
+}
 .site-header--transparent:not(.is-scrolled) .site-header__logo:not(:has(img))::before { background: #fff; }
 .site-header--transparent:not(.is-scrolled) .site-menu__link:hover,
 .site-header--transparent:not(.is-scrolled) .site-menu__link:focus-visible,
@@ -1372,7 +1391,10 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
 .search-suggest__all:hover { text-decoration: underline; }
 
 /* Индикатор подменю (▾): плавный поворот на 180° при раскрытии. */
-.site-menu__toggle { display: inline-flex; align-items: center; justify-content: center; color: var(--gov-teal); background: transparent; border: 0; cursor: pointer; font-size: var(--step--4); padding: 4px; transition: transform .2s ease; }
+/* min-width/height 24px — минимальная цель нажатия по WCAG 2.2 (2.5.8).
+   Кнопка была 22×30, и axe справедливо считал её мелкой. */
+.site-menu__item--has-children > .site-menu__link { padding-right: 4px; }
+.site-menu__toggle { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; color: var(--gov-teal-text); background: transparent; border: 0; cursor: pointer; font-size: var(--step--4); padding: 4px; transition: transform .2s ease; }
 .site-menu__item.is-open > .site-menu__toggle { transform: rotate(180deg); }
 @media (hover: hover) and (min-width: 901px) {
     .site-menu__item--has-children:hover > .site-menu__toggle,
@@ -5489,9 +5511,13 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline > .
     display: inline-grid;
     place-items: center;
     flex: 0 0 auto;
-    width: 22px;
+    /* 24px — минимальная цель нажатия по WCAG 2.2 (2.5.8). Отрицательного
+       отступа больше нет: он затягивал кнопку под ссылку, и свободной для
+       нажатия оставалась полоса 16px (axe: target-size, «partially obscured»).
+       Визуальную близость к подписи держит уменьшенный отступ самой ссылки. */
+    width: 24px;
     height: 30px;
-    margin: 0 0 0 -8px;
+    margin: 0;
     padding: 0 !important;
     border: 0 !important;
     border-radius: var(--radius-sm, 6px) !important;
@@ -6256,3 +6282,38 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     .stage--active .stage__dot,
     .timeline-item--active::before { animation: none; }
 }
+/* ==========================================================================
+   Блок «Иконка и текст»: карточки с иконкой и парами «подпись → значение».
+   Типовое место — полезные телефоны поверх фонового снимка, поэтому карточка
+   непрозрачная: полупрозрачная подложка на светлом фото теряет читаемость.
+   ========================================================================== */
+.icon-text__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1000px) { .icon-text__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 720px) { .icon-text__grid { grid-template-columns: 1fr; } }
+.icon-text__card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 20px;
+    background: var(--gov-surface);
+    border: 1px solid var(--gov-border);
+    border-radius: var(--radius, 14px);
+    box-shadow: var(--shadow-1);
+}
+/* Плитка иконки: оттенок берётся из --icon-text-accent, а он по умолчанию —
+   акцент сайта. Свой цвет карточки задаётся в админке и приходит scoped CSS. */
+.icon-text__icon {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm, 10px);
+    background: color-mix(in srgb, var(--icon-text-accent, var(--color-accent, var(--gov-teal))) 14%, var(--gov-surface));
+    color: var(--icon-text-accent, var(--gov-teal-text));
+}
+.icon-text__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.icon-text__label { margin: 0; color: var(--gov-muted); font-size: var(--step--2); line-height: 1.4; }
+.icon-text__value { margin: 0 0 6px; color: var(--gov-title); font-size: var(--step-1); font-weight: 700; line-height: 1.25; }
+.icon-text__value:last-child { margin-bottom: 0; }
+.block-icon-text__empty { color: var(--gov-muted); margin: 0; }

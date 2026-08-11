@@ -132,6 +132,33 @@ final class BlockSamples
                 ['year' => '2025', 'text' => 'Следующий этап.', 'status' => 'done'],
                 ['year' => '2026', 'text' => 'Текущий этап.', 'status' => 'active'],
             ]],
+            'icon_text' => [
+                'title' => 'Полезные телефоны',
+                'description' => '',
+                'columns' => 3,
+                'items' => [
+                    ['icon_svg' => 'scale', 'icon_color' => '', 'rows' => "Телефон доверия | (71) 202-06-00"],
+                    ['icon_svg' => 'id-badge', 'icon_color' => '', 'rows' => "Социальная карта | 1070\nТелефон доверия по вопросам насилия | 1146"],
+                    ['icon_svg' => 'bell', 'icon_color' => '', 'rows' => "Канцелярия (для юридических лиц) | (71) 239-59-22"],
+                ],
+            ],
+            'leader_card' => [
+                'photo' => '', 'name' => 'Фамилия Имя Отчество',
+                'position' => 'Должность руководителя',
+                'phone' => '+998 (71) 000-00-00', 'email' => 'info@example.uz',
+                'hours' => 'Пн–Пт 10:00 – 12:00',
+                'facts_title' => 'Основная информация',
+                'items' => [
+                    ['icon_svg' => 'user', 'label' => 'Должность', 'value' => 'Должность руководителя'],
+                    ['icon_svg' => 'calendar', 'label' => 'Назначен', 'value' => 'с 1 января 2024 года'],
+                    ['icon_svg' => 'school', 'label' => 'Образование', 'value' => 'Название учебного заведения'],
+                    ['icon_svg' => 'language', 'label' => 'Языки', 'value' => 'узбекский, русский, английский'],
+                ],
+                'bio_title' => 'Биография',
+                'bio' => '<p>' . self::LEAD . '</p>',
+                'duties_title' => 'Функции',
+                'duties' => '<p>' . self::LEAD . '</p>',
+            ],
             'person_profile' => [
                 'photo' => '', 'name' => 'Фамилия Имя Отчество', 'position' => 'Должность',
                 'text' => self::LEAD,

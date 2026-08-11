@@ -43,7 +43,11 @@ $templateCss = '#block-' . $blockId . ' .stages{--stages-count:' . max(1, min(5,
     <?php if (empty($items)): ?>
         <p class="block-stages__empty"><?= htmlspecialchars(t('Этапы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
-        <ol class="stages stages--<?= $variant ?><?= $desktopCarousel ? ' stages--carousel' : '' ?>"<?= $carousel ? ' data-carousel-track tabindex="0" role="group" aria-label="' . htmlspecialchars(t('Этапы — прокрутка вбок'), ENT_QUOTES) . '"' : '' ?>>
+        <?php // role="group" здесь ставить нельзя: он вытесняет роль списка у <ol>,
+              // и каждый <li> остаётся без родителя-списка (axe: listitem).
+              // Прокручиваемая область и без роли доступна с клавиатуры
+              // (tabindex) и подписана (aria-label). ?>
+        <ol class="stages stages--<?= $variant ?><?= $desktopCarousel ? ' stages--carousel' : '' ?>"<?= $carousel ? ' data-carousel-track tabindex="0" aria-label="' . htmlspecialchars(t('Этапы — прокрутка вбок'), ENT_QUOTES) . '"' : '' ?>>
             <?php foreach ($items as $index => $item): ?>
                 <?php
                 $status = $statuses[$index];

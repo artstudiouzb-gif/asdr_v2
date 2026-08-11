@@ -36,7 +36,7 @@ final class BlockTypeRegistry
         'advantages' => ['variant' => 'grid', 'title' => '', 'description' => '', 'items' => []],
         'slider' => ['slides' => []],
         'form' => ['form_id' => null],
-        'columns' => ['columns' => 2, 'gap' => 'medium'],
+        'columns' => ['columns' => 2, 'gap' => 'medium', 'ratio' => ''],
         'testimonials' => ['title' => '', 'items' => []],
         'counters' => ['title' => '', 'card_bg' => '', 'text_color' => '', 'icon_size' => 28, 'icon_bg' => 'on', 'icon_position' => 'left', 'text_align' => 'left', 'items' => []],
         'team_list' => ['title' => '', 'limit' => 0, 'department' => '', 'group_by_department' => false],
@@ -61,6 +61,13 @@ final class BlockTypeRegistry
         'docs_list' => ['variant' => 'grid', 'title' => '', 'all_text' => '', 'all_url' => '', 'columns' => 4, 'search_enabled' => true, 'items' => []],
         'map_point' => ['title' => '', 'image' => '', 'embed_url' => '', 'load_mode' => 'click', 'card_title' => '', 'address' => '', 'copy_enabled' => true, 'button_text' => '', 'button_url' => ''],
         'org_structure' => ['title' => '', 'layout' => 'tree', 'columns' => 4, 'council' => '', 'head_title' => 'Директор', 'head_name' => '', 'head_url' => '', 'side_items' => '', 'branches' => [], 'collapsible' => false, 'notes' => '', 'footnote' => ''],
+        'leader_card' => ['photo' => '', 'name' => '', 'name_tag' => 'p', 'position' => '', 'phone' => '', 'email' => '', 'hours' => '',
+            'facebook' => '', 'x' => '', 'linkedin' => '', 'instagram' => '', 'telegram' => '',
+            'facts_title' => 'Основная информация', 'facts_icon' => '', 'items' => [],
+            'bio_title' => 'Биография', 'bio_icon' => '', 'bio' => '',
+            'duties_title' => 'Функции', 'duties_icon' => '', 'duties' => '',
+            'mobile_icons_only' => false],
+        'icon_text' => ['title' => '', 'description' => '', 'columns' => 3, 'items' => []],
     ];
 
     /** Короткие русские названия для сообщений редактору. */
@@ -78,6 +85,8 @@ final class BlockTypeRegistry
         'bio_education' => 'Биография и образование',
         'anchor_nav' => 'Якорная навигация', 'stages' => 'Этапы', 'text_image' => 'Текст с фото',
         'docs_list' => 'Список документов', 'map_point' => 'Карта', 'org_structure' => 'Оргструктура',
+        'leader_card' => 'Карточка руководителя',
+        'icon_text' => 'Иконка и текст',
     ];
 
     /**
@@ -107,6 +116,8 @@ final class BlockTypeRegistry
         'docs_list' => 'Документы (сетка)',
         'map_point' => 'Карта с меткой',
         'org_structure' => 'Структура организации (оргсхема)',
+        'leader_card' => 'Карточка руководителя (с вкладками)',
+        'icon_text' => 'Иконка и текст (контакты, телефоны)',
     ];
 
     /** @return list<string> */

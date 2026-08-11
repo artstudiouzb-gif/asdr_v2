@@ -495,7 +495,8 @@ final class BlockController
                 }
                 $gap = in_array($_POST['gap'] ?? 'medium', ['small', 'medium', 'large'], true)
                     ? (string) $_POST['gap'] : 'medium';
-                return ['columns' => $cols, 'gap' => $gap];
+                $ratio = \App\Core\ColumnRatio::normalize((string) ($_POST['ratio'] ?? ''), $cols);
+                return ['columns' => $cols, 'gap' => $gap, 'ratio' => $ratio];
             case 'testimonials':
                 return TestimonialsBlockNormalizer::normalize($_POST, $locale);
             case 'counters':
@@ -696,6 +697,73 @@ final class BlockController
                     'docs_all_text' => trim((string) ($_POST['docs_all_text'] ?? '')),
                     'docs_all_url' => $this->safeUrlField('docs_all_url'),
                     'docs' => $docs,
+                ];
+            case 'icon_text':
+                $iconRows = [];
+                foreach ((array) ($_POST['items'] ?? []) as $item) {
+                    $rows = trim((string) ($item['rows'] ?? ''));
+                    $icon = \App\Core\Icon::cleanName($item['icon_svg'] ?? '');
+                    if ($rows === '' && $icon === '') {
+                        continue;
+                    }
+                    $iconRows[] = [
+                        'icon_svg' => $icon,
+                        // Пустой цвет = оттенок акцента сайта. Мусор в поле не
+                        // должен попасть в разметку, поэтому нормализуем тем же
+                        // помощником, что и цвет метки новости.
+                        'icon_color' => \App\Core\NewsBadge::normalizeColor($item['icon_color'] ?? ''),
+                        'rows' => TextProcessor::typographPlain($rows, $locale),
+                    ];
+                }
+
+                return [
+                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
+                    'columns' => max(1, min(4, (int) ($_POST['columns'] ?? 3))),
+                    'items' => $iconRows,
+                ];
+            case 'leader_card':
+                $facts = [];
+                foreach ((array) ($_POST['items'] ?? []) as $item) {
+                    $label = trim((string) ($item['label'] ?? ''));
+                    $value = trim((string) ($item['value'] ?? ''));
+                    if ($label === '' && $value === '') {
+                        continue;
+                    }
+                    $facts[] = [
+                        'icon_svg' => \App\Core\Icon::cleanName($item['icon_svg'] ?? ''),
+                        'label' => TextProcessor::typographPlain($label, $locale),
+                        'value' => TextProcessor::typographPlain($value, $locale),
+                    ];
+                }
+
+                return [
+                    'photo' => trim((string) ($_POST['photo'] ?? '')),
+                    'name' => TextProcessor::typographPlain(trim((string) ($_POST['name'] ?? '')), $locale),
+                    // Уровень заголовка выбирает редактор: карточка стоит на
+                    // разных страницах, и что для одной h2, для другой h3.
+                    'name_tag' => in_array($_POST['name_tag'] ?? 'p', ['p', 'h2', 'h3'], true) ? (string) $_POST['name_tag'] : 'p',
+                    'position' => TextProcessor::typographPlain(trim((string) ($_POST['position'] ?? '')), $locale),
+                    'phone' => trim((string) ($_POST['phone'] ?? '')),
+                    'email' => trim((string) ($_POST['email'] ?? '')),
+                    'hours' => TextProcessor::typographPlain(trim((string) ($_POST['hours'] ?? '')), $locale),
+                    // Соцсети — только безопасные ссылки: адрес приходит из формы
+                    // и попадает в href, javascript: там быть не должно.
+                    'facebook' => $this->safeUrlField('facebook'),
+                    'x' => $this->safeUrlField('x'),
+                    'linkedin' => $this->safeUrlField('linkedin'),
+                    'instagram' => $this->safeUrlField('instagram'),
+                    'telegram' => $this->safeUrlField('telegram'),
+                    'facts_title' => TextProcessor::typographPlain(trim((string) ($_POST['facts_title'] ?? '')), $locale),
+                    'facts_icon' => \App\Core\Icon::cleanName($_POST['facts_icon'] ?? ''),
+                    'items' => $facts,
+                    'bio_title' => TextProcessor::typographPlain(trim((string) ($_POST['bio_title'] ?? '')), $locale),
+                    'bio_icon' => \App\Core\Icon::cleanName($_POST['bio_icon'] ?? ''),
+                    'bio' => TextProcessor::process((string) ($_POST['bio'] ?? ''), $locale),
+                    'duties_title' => TextProcessor::typographPlain(trim((string) ($_POST['duties_title'] ?? '')), $locale),
+                    'duties_icon' => \App\Core\Icon::cleanName($_POST['duties_icon'] ?? ''),
+                    'duties' => TextProcessor::process((string) ($_POST['duties'] ?? ''), $locale),
+                    'mobile_icons_only' => !empty($_POST['mobile_icons_only']),
                 ];
             case 'person_profile':
                 return [

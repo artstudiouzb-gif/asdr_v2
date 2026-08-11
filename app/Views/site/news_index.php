@@ -27,7 +27,6 @@ require __DIR__ . '/_crumbs.php';
 ?>
 <div class="listing" data-listing>
     <div class="listing__head">
-        <p class="listing__eyebrow"><?= htmlspecialchars(t('Пресс-центр'), ENT_QUOTES) ?></p>
         <h1 class="listing__title"><?= htmlspecialchars(t('Новости и аналитика'), ENT_QUOTES) ?></h1>
         <p class="listing__lead"><?= htmlspecialchars(t('Официальные сообщения, события и аналитические материалы Агентства.'), ENT_QUOTES) ?></p>
     </div>

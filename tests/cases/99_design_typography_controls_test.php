@@ -75,8 +75,13 @@ test('детальная новость использует управляем�
 
     assert_contains('padding-top: var(--newsdetail-padding-top, 0px);', $css);
     assert_contains('padding-bottom: var(--newsdetail-padding-bottom, clamp(32px, 5vw, 72px));', $css);
-    assert_contains('margin-top: var(--newsdetail-padding-top, clamp(28px, 4vw, 48px));', $css);
-    assert_contains('.relnews-card__date { margin-inline: 14px; }', $css);
+    // У премиум-макета расстояние от hero до текста задаёт `gap` статьи, а
+    // настройка администратора добавляется сверху — как в обычном макете.
+    assert_contains('margin-top: var(--newsdetail-padding-top, 0px);', $css);
+    // Дата живёт внутри .news-meta, у которой свой боковой отступ: собственный
+    // margin-inline у даты сдвигал бы её вдвое дальше заголовка.
+    assert_not_contains('.relnews-card__date { margin-inline', $css);
+    assert_contains('.relnews-card > .news-meta { margin: 5px 14px 0; }', $css);
     assert_contains('font-family: var(--font-family, inherit);', $css);
     assert_contains('color: var(--gov-ink, #0b1a30);', $css);
     assert_contains('color: var(--on-accent, #ffffff);', $css);
