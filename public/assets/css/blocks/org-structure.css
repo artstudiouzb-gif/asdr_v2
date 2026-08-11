@@ -259,15 +259,15 @@ body.design-type-static .orgstruct__note { font-size: 13px; line-height: 1.5; }
     .orgstruct__unit,
     .orgstruct__aside-item,
     .orgstruct__note {
-        background: #fff !important;
-        color: #000 !important;
+        background: #fff;
+        color: #000;
         border: 1px solid #000;
-        box-shadow: none !important;
-        transform: none !important;
+        box-shadow: none;
+        transform: none;
     }
     .orgstruct__council-card, .orgstruct__head { border-width: 2px; }
     .orgstruct__head-role, .orgstruct__head-name, .orgstruct__deputy-role,
-    .orgstruct__deputy-name, .orgstruct__link, .orgstruct__subunits { color: #000 !important; opacity: 1; }
+    .orgstruct__deputy-name, .orgstruct__link, .orgstruct__subunits { color: #000; opacity: 1; }
     .orgstruct__unit--accent, .orgstruct__aside-item { border-left-width: 4px; }
     .orgstruct__branches::before,
     .orgstruct__row::before,
@@ -275,14 +275,14 @@ body.design-type-static .orgstruct__note { font-size: 13px; line-height: 1.5; }
     .orgstruct__branch::before,
     .orgstruct__council::after,
     .orgstruct__aside::before {
-        background: #000 !important;
+        background: #000;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
     /* Свёрнутые на телефоне ветки при печати раскрываем: лист должен
        содержать всю схему, а не то, что осталось открытым на экране. */
-    .orgstruct__toggle { display: none !important; }
-    .orgstruct__units[hidden] { display: flex !important; }
+    .orgstruct__toggle { display: none; }
+    .orgstruct__units[hidden] { display: flex; }
 }
 
 

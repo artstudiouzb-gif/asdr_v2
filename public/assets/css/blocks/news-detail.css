@@ -14,12 +14,12 @@
 
     /* Обложка-hero: на бумаге белый текст на фото нечитаем, поэтому печатаем
        заголовок и мету обычным чёрным по белому, без подложки. */
-    .newsdetail-phero { background-image: none !important; min-height: 0 !important; padding: 0 !important; }
-    .newsdetail-phero__overlay { display: none !important; }
+    .newsdetail-phero { background-image: none; min-height: 0; padding: 0; }
+    .newsdetail-phero__overlay { display: none; }
 
     /* Колонки статьи на A4 не нужны — один поток. */
-    .newsdetail-body, .newsdetail-head { display: block !important; }
-    .newsdetail-card { border: 0 !important; padding: 0 !important; margin: 12px 0 !important; }
+    .newsdetail-body, .newsdetail-head { display: block; }
+    .newsdetail-card { border: 0; padding: 0; margin: 12px 0; }
     /* Заголовок не должен отрываться от текста. */
     .newsdetail-card__title, .newsdetail__body h2, .newsdetail__body h3 { break-after: avoid; }
     .newsdetail-photos__grid img, .newsdetail-gallery__slide { break-inside: avoid; }
@@ -360,33 +360,33 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .newsdetail-gallery__thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
 .newsdetail-gallery__thumb,
 button.newsdetail-gallery__thumb {
-    width: 110px !important;
-    min-width: 110px !important;
-    height: 62px !important;
-    aspect-ratio: 16 / 9 !important;
-    border-radius: var(--radius-sm, 6px) !important;
-    border: 2px solid transparent !important;
-    background: var(--gov-bg-alt, #f1f5f9) !important;
-    cursor: pointer !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    opacity: .7 !important;
-    box-shadow: none !important;
-    transition: opacity .15s ease, border-color .15s ease, transform .15s ease !important;
+    width: 110px;
+    min-width: 110px;
+    height: 62px;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-sm, 6px);
+    border: 2px solid transparent;
+    background: var(--gov-bg-alt, #f1f5f9);
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+    opacity: .7;
+    box-shadow: none;
+    transition: opacity .15s ease, border-color .15s ease, transform .15s ease;
 }
 .newsdetail-gallery__thumb img,
 button.newsdetail-gallery__thumb img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    display: block !important;
-    border-radius: 4px !important;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 4px;
 }
 .newsdetail-gallery__thumb.is-active,
 button.newsdetail-gallery__thumb.is-active {
-    opacity: 1 !important;
-    border-color: var(--gov-teal, #0d9488) !important;
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gov-teal, #0d9488) 30%, transparent) !important;
+    opacity: 1;
+    border-color: var(--gov-teal, #0d9488);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gov-teal, #0d9488) 30%, transparent);
 }
 .newsdetail-gallery__thumb:hover,
 button.newsdetail-gallery__thumb:hover {
@@ -472,7 +472,7 @@ button.newsdetail-gallery__thumb:hover {
     min-width: 0;
     width: 100%;
 }
-.newsdetail-actionrail { display: none !important; }
+.newsdetail-actionrail { display: none; }
 
 .newsdetail-back-pill {
     display: inline-flex;
@@ -482,7 +482,7 @@ button.newsdetail-gallery__thumb:hover {
     height: 36px;
     border-radius: 9999px;
     background: var(--gov-navy, #0b1a30);
-    color: #ffffff !important;
+    color: #ffffff;
     text-decoration: none;
     transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     flex-shrink: 0;
@@ -705,10 +705,10 @@ button.newsdetail-gallery__thumb:hover {
     height: auto;
     aspect-ratio: 16 / 10;
     scroll-snap-align: start;
-    border-radius: var(--radius-sm, 8px) !important;
+    border-radius: var(--radius-sm, 8px);
 }
 .newsdetail:not(.newsdetail--premium) .newsdetail-gallery__thumb img {
-    border-radius: inherit !important;
+    border-radius: inherit;
 }
 
 /* Видеоновость использует ту же медиа-геометрию, что и галерея. Плеер не
@@ -962,8 +962,8 @@ button.newsdetail-gallery__thumb:hover {
     }
     .newsdetail:not(.newsdetail--premium) .newsdetail__meta-item::before,
     .newsdetail:not(.newsdetail--premium) .newsdetail__meta-item::after {
-        content: none !important;
-        display: none !important;
+        content: none;
+        display: none;
     }
     .newsdetail:not(.newsdetail--premium) .newsdetail__reader-btn {
         min-height: 30px;
