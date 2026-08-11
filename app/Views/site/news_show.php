@@ -629,15 +629,32 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <a class="section-head__all" href="<?= htmlspecialchars(Locale::url('news'), ENT_QUOTES) ?>"><?= htmlspecialchars(t('Все новости'), ENT_QUOTES) ?> →</a>
             </div>
             <div class="newsdetail-related__grid">
+                <?php
+                // Рубрики всех похожих новостей одним запросом — карточек здесь
+                // несколько, и запрос на каждую был бы N+1.
+                $relatedCategories = \App\Models\NewsCategory::namesForIds(
+                    array_map(static fn (array $item): int => (int) ($item['category_id'] ?? 0), $related),
+                    $lang
+                );
+                ?>
                 <?php foreach ($related as $item): ?>
-                    <?php $rc = News::getCoverImage($item); ?>
+                    <?php
+                    $rc = News::getCoverImage($item);
+                    $relCategory = (int) ($item['category_id'] ?? 0);
+                    $relCategoryName = $relCategory > 0 ? (string) ($relatedCategories[$relCategory] ?? '') : '';
+                    ?>
                     <a class="relnews-card" href="<?= htmlspecialchars(Locale::url('news/' . $item['slug'], $lang), ENT_QUOTES) ?>">
                         <?php if ($rc !== null): ?>
                             <?= \App\Core\Media::picture($rc, (string) $item['title'], null, null, 'relnews-card__img', true, '(max-width: 700px) 100vw, 33vw', false, 'relnews-card__media') ?>
                         <?php else: ?>
                             <span class="relnews-card__media relnews-card__media--empty" aria-hidden="true"></span>
                         <?php endif; ?>
-                        <?php if (!empty($item['published_at'])): ?><time class="relnews-card__date"><?= htmlspecialchars(DateFormatter::short((string) $item['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                        <?php if (!empty($item['published_at']) || $relCategoryName !== ''): ?>
+                            <span class="news-meta">
+                                <?php if (!empty($item['published_at'])): ?><time class="relnews-card__date"><?= htmlspecialchars(DateFormatter::short((string) $item['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                                <?php if ($relCategoryName !== ''): ?><span class="news-category"><?= htmlspecialchars($relCategoryName, ENT_QUOTES) ?></span><?php endif; ?>
+                            </span>
+                        <?php endif; ?>
                         <h3 class="relnews-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
                     </a>
                 <?php endforeach; ?>

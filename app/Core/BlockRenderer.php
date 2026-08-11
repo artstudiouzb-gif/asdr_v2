@@ -455,6 +455,21 @@ final class BlockRenderer
      * рубрикой, ссылка ведёт в ту же рубрику: иначе посетитель, кликнув «Все»
      * под подборкой одной рубрики, попадал бы в общую ленту и терял контекст.
      */
+    /**
+     * Названия рубрик для набора новостей одним запросом — блоки выводят
+     * несколько карточек, и запрос на каждую был бы N+1.
+     *
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, string>
+     */
+    private static function newsCategoryNames(array $rows, string $lang): array
+    {
+        return \App\Models\NewsCategory::namesForIds(
+            array_map(static fn (array $row): int => (int) ($row['category_id'] ?? 0), $rows),
+            $lang
+        );
+    }
+
     private static function newsAllUrl(string $lang, int $categoryId): string
     {
         $url = Locale::url('news', $lang);
@@ -526,13 +541,17 @@ final class BlockRenderer
             }
             $lang = Locale::current();
             $category = (int) ($data['category'] ?? 0);
+            $rows = \App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null);
+            $categoryNames = self::newsCategoryNames($rows, $lang);
             $items = [];
-            foreach (\App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null) as $row) {
+            foreach ($rows as $row) {
+                $rowCategory = (int) ($row['category_id'] ?? 0);
                 $items[] = [
                     'title' => (string) $row['title'],
                     'slug' => (string) $row['slug'],
                     'published_at' => (string) ($row['published_at'] ?? ''),
                     'excerpt' => (string) ($row['excerpt'] ?? ''),
+                    'category' => $rowCategory > 0 ? (string) ($categoryNames[$rowCategory] ?? '') : '',
                     'cover' => \App\Models\News::getCoverImage($row),
                     'url' => Locale::url('news/' . $row['slug'], $lang),
                 ];
@@ -551,10 +570,7 @@ final class BlockRenderer
             $lang = Locale::current();
             $category = (int) ($data['category'] ?? 0);
             $rows = \App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null);
-            $categoryNames = \App\Models\NewsCategory::namesForIds(
-                array_map(static fn (array $row): int => (int) ($row['category_id'] ?? 0), $rows),
-                $lang
-            );
+            $categoryNames = self::newsCategoryNames($rows, $lang);
             $items = [];
             foreach ($rows as $row) {
                 $rowCategory = (int) ($row['category_id'] ?? 0);

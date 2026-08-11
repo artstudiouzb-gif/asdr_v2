@@ -3982,6 +3982,17 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
    порталов. Метка стоит на одной строке с датой, поэтому не занимает
    отдельную строку и не сдвигает соседей по ряду, у которых рубрики нет. */
 .news-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; min-width: 0; }
+/* В сетке «Последних новостей» карточки узкие, и длинная рубрика переносила
+   строку — заголовки соседей по ряду переставали начинаться на одной высоте.
+   Здесь строка меты держится в одну линию, а рубрика обрезается многоточием.
+   Обрезка требует inline-block: у inline-flex (базовый вид рубрики) текст —
+   анонимный флекс-элемент, и text-overflow до него не доходит, из-за чего
+   вместо многоточия получался обрыв слова у самого края карточки. */
+.news-card .news-meta { flex-wrap: nowrap; }
+.news-card .news-category { display: inline-block; vertical-align: middle; }
+.news-card .news-category::before {
+    display: inline-block; vertical-align: middle; margin-right: 7px;
+}
 .news-category {
     display: inline-flex; align-items: center; gap: 7px; min-width: 0; max-width: 100%;
     color: var(--gov-teal-text); font-size: var(--step--3); font-weight: 700; line-height: 1.3;

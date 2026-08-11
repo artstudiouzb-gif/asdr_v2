@@ -24,8 +24,16 @@ $allUrl = $data['all_url'] ?? '/news';
                             <span class="news-card__cover news-card__cover--empty" aria-hidden="true"></span>
                         <?php endif; ?>
                         <span class="news-card__body">
-                            <?php if (!empty($item['published_at'])): ?>
-                                <time class="news-card__date" datetime="<?= htmlspecialchars(substr((string) $item['published_at'], 0, 10), ENT_QUOTES) ?>"><?= htmlspecialchars(\App\Core\DateFormatter::short((string) $item['published_at']), ENT_QUOTES) ?></time>
+                            <?php // Дата и рубрика — одной строкой, как в ленте новостей. ?>
+                            <?php if (!empty($item['published_at']) || trim((string) ($item['category'] ?? '')) !== ''): ?>
+                                <span class="news-meta">
+                                    <?php if (!empty($item['published_at'])): ?>
+                                        <time class="news-card__date" datetime="<?= htmlspecialchars(substr((string) $item['published_at'], 0, 10), ENT_QUOTES) ?>"><?= htmlspecialchars(\App\Core\DateFormatter::short((string) $item['published_at']), ENT_QUOTES) ?></time>
+                                    <?php endif; ?>
+                                    <?php if (trim((string) ($item['category'] ?? '')) !== ''): ?>
+                                        <span class="news-category"><?= htmlspecialchars((string) $item['category'], ENT_QUOTES) ?></span>
+                                    <?php endif; ?>
+                                </span>
                             <?php endif; ?>
                             <span class="news-card__title"><?= htmlspecialchars($item['title'], ENT_QUOTES) ?></span>
                             <?php if (!empty($item['excerpt'])): ?>
