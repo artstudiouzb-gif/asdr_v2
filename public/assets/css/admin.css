@@ -3331,6 +3331,11 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     padding: 6px 6px 0 6px;
     border-radius: 12px 12px 0 0;
     overflow-x: auto;
+    /* Вкладки выходят за нижний край контейнера на 2px (у .admin-tab-btn
+       margin-bottom: -2px, чтобы подчёркивание накрывало общую линию). При
+       overflow-x: auto вторая ось по спецификации тоже становится auto — и
+       из-за этих 2px появлялась крошечная вертикальная полоса прокрутки. */
+    overflow-y: hidden;
     overscroll-behavior-inline: contain;
     scrollbar-width: thin;
 }

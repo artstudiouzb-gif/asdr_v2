@@ -660,11 +660,27 @@ document.addEventListener('click', function(e) {
             <button type="submit" form="news_edit_form" class="btn btn--primary"><?= \App\Core\AdminUi::icon('save') ?>Сохранить изменения</button>
         <?php endif; ?>
         <a href="/admin/news" class="btn">Отмена</a>
-        <?php if ($isEdit && $slugValue !== ''): ?>
-            <a href="/news/<?= htmlspecialchars($slugValue, ENT_QUOTES) ?>" class="btn btn--outline u-inline-a512aee2ba" target="_blank" rel="noopener">
+        <?php if ($isEdit): ?>
+            <?php
+            // Предпросмотр рендерит запись под /admin, поэтому работает и для
+            // черновика. Ссылка «Открыть на сайте» ведёт на публичный адрес и
+            // имеет смысл только у опубликованной записи — у черновика она
+            // привела бы на 404. Языковой префикс берём из самой записи:
+            // у узбекской новости публичный адрес начинается с /uz.
+            $publicPath = $slugValue !== ''
+                ? \App\Core\Locale::prefix((string) ($news['lang'] ?? '')) . '/news/' . $slugValue
+                : '';
+            ?>
+            <a href="/admin/news/<?= (int) $news['id'] ?>/preview" class="btn btn--outline u-inline-a512aee2ba" target="_blank" rel="noopener">
                 <?= \App\Core\AdminUi::icon('eye', 14) ?>
                 Предпросмотр ↗
             </a>
+            <?php if ($nStatus === 'published' && $publicPath !== ''): ?>
+                <a href="<?= htmlspecialchars($publicPath, ENT_QUOTES) ?>" class="btn btn--outline u-inline-a512aee2ba" target="_blank" rel="noopener">
+                    <?= \App\Core\AdminUi::icon('external-link', 14) ?>
+                    Открыть на сайте ↗
+                </a>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>

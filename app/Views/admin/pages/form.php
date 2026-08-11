@@ -373,6 +373,26 @@ foreach ($blocks as $b) {
         <?php if ($isEdit): ?>
             <a href="/admin/pages/<?= (int) $page['id'] ?>/preview?block_lang=<?= urlencode($blockLang) ?>"
                class="btn" target="_blank" rel="noopener">Предпросмотр ↗</a>
+            <?php
+            // Предпросмотр показывает и черновик; публичный адрес есть только
+            // у опубликованной страницы. Главная живёт на «/», у остальных —
+            // slug с языковым префиксом самой страницы.
+            $publicPath = '';
+            if ($pStatus === 'published') {
+                $prefix = \App\Core\Locale::prefix((string) ($page['lang'] ?? ''));
+                if (!empty($page['is_home'])) {
+                    $publicPath = $prefix === '' ? '/' : $prefix;
+                } elseif ((string) ($page['slug'] ?? '') !== '') {
+                    $publicPath = $prefix . '/' . $page['slug'];
+                }
+            }
+            ?>
+            <?php if ($publicPath !== ''): ?>
+                <a href="<?= htmlspecialchars($publicPath, ENT_QUOTES) ?>" class="btn" target="_blank" rel="noopener">
+                    <?= \App\Core\AdminUi::icon('external-link', 14) ?>
+                    Открыть на сайте ↗
+                </a>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>
