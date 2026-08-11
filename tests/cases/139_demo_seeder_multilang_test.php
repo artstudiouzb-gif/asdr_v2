@@ -19,7 +19,15 @@ test('DemoSeeder создает демо-данные с многоязычны�
     $uzTrans = NewsTranslation::find((int) $news['id'], 'uz');
     assert_true($uzTrans !== null, 'Узбекский перевод для демо-новости создан');
     assert_contains('O‘zbekiston–2030', (string) $uzTrans['title'], 'Узбекский заголовок новости создан');
-    assert_contains('Tadbirlar', (string) $uzTrans['badge'], 'Узбекский бейдж новости создан');
+    // Рубрика демо-новости — категория с переводом названия, а не текст в
+    // бейдже: свежая установка должна получать готовый справочник рубрик.
+    $demoCategoryId = (int) ($news['category_id'] ?? 0);
+    assert_true($demoCategoryId > 0, 'У флагманской демо-новости задана категория');
+    assert_same(
+        'Tadbirlar',
+        (string) (\App\Models\NewsCategory::namesForIds([$demoCategoryId], 'uz')[$demoCategoryId] ?? ''),
+        'Узбекское название рубрики создано'
+    );
     assert_contains('ustuvor yo‘nalishlari', (string) $uzTrans['key_points'], 'Узбекские тезисы новости созданы');
     assert_true(in_array('uz', News::availableLangs((int) $news['id']), true), 'Опубликованная UZ-версия доступна на сайте');
 

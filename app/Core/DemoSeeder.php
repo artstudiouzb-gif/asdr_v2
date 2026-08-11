@@ -578,46 +578,46 @@ final class DemoSeeder
                 'title' => 'Представлена цифровая платформа мониторинга реформ',
                 'slug' => 'platforma-monitoringa-reform',
                 'excerpt' => 'Новая платформа объединяет ключевые показатели Стратегии «Узбекистан–2030» и позволяет отслеживать достижение результатов.',
-                'badge' => 'Цифровизация',
+                'category' => 'Цифровизация',
                 'image' => '/uploads/public/demo-agency-hero.jpg',
                 'hashtags' => '#Узбекистан2030 #цифровизация #реформы',
                 'layout' => 'standard',
                 'uz_title' => 'Islohotlarni monitoring qilish raqamli platformasi taqdim etildi',
                 'uz_excerpt' => 'Yangi platforma «O‘zbekiston–2030» strategiyasining asosiy ko‘rsatkichlarini birlashtiradi va natijalar ijrosini kuzatish imkonini beradi.',
-                'uz_badge' => 'Raqamlashtirish',
+                'uz_category' => 'Raqamlashtirish',
                 'uz_hashtags' => '#O‘zbekiston2030 #raqamlashtirish',
             ],
             [
                 'title' => 'Обсуждены приоритеты устойчивого регионального развития',
                 'slug' => 'regionalnoe-razvitie-prioritety',
                 'excerpt' => 'Эксперты и представители регионов рассмотрели проекты инфраструктуры, занятости и развития человеческого капитала.',
-                'badge' => 'Региональное развитие',
+                'category' => 'Региональное развитие',
                 'image' => '/uploads/public/demo-urban-development.jpg',
                 'hashtags' => '#регионы #инфраструктура #развитие',
                 'layout' => 'side_image',
                 'uz_title' => 'Hududlarni barqaror rivojlantirish ustuvor yo‘nalishlari muhokama qilindi',
                 'uz_excerpt' => 'Ekspertlar va hududlar vakillari infratuzilma, bandlik va inson kapitalini rivojlantirish loyihalarini ko‘rib chiqdilar.',
-                'uz_badge' => 'Hududiy rivojlanish',
+                'uz_category' => 'Hududiy rivojlanish',
                 'uz_hashtags' => '#hududlar #infratuzilma',
             ],
             [
                 'title' => 'Опубликован аналитический обзор социально-экономической динамики',
                 'slug' => 'analiticheskiy-obzor-dinamiki',
                 'excerpt' => 'Обзор содержит ключевые тенденции, сценарные оценки и рекомендации для дальнейшего повышения устойчивости экономики.',
-                'badge' => 'Аналитика',
+                'category' => 'Аналитика',
                 'image' => '/uploads/public/demo-strategy-meeting.jpg',
                 'hashtags' => '#аналитика #экономика #прогноз',
                 'layout' => 'premium',
                 'uz_title' => 'Ijtimoiy-iqtisodiy dinamika bo‘yicha tahliliy sharh e’lon qilindi',
                 'uz_excerpt' => 'Sharh asosiy tendensiyalar, ssenariy baholari va iqtisodiyot barqarorligini oshirish bo‘yicha tavsiyalarni qamrab oladi.',
-                'uz_badge' => 'Tahlil',
+                'uz_category' => 'Tahlil',
                 'uz_hashtags' => '#tahlil #iqtisodiyot',
             ],
             [
                 'title' => 'Расширяется портфель проектов зелёной экономики',
                 'slug' => 'portfel-zelenoy-ekonomiki',
                 'excerpt' => 'В портфель включены инициативы в сфере возобновляемой энергетики, энергоэффективности и устойчивой инфраструктуры.',
-                'badge' => 'Зелёная экономика',
+                'category' => 'Зелёная экономика',
                 'image' => '/uploads/public/demo-green-energy.jpg',
                 'hashtags' => '#зелёнаяэкономика #энергетика #ESG',
                 'layout' => 'gallery',
@@ -630,26 +630,30 @@ final class DemoSeeder
                 ],
                 'uz_title' => 'Yashil iqtisodiyot loyihalari portfeli kengaymoqda',
                 'uz_excerpt' => 'Portfelga qayta tiklanuvchi energiya, energiya samaradorligi va barqaror infratuzilma tashabbuslari kiritildi.',
-                'uz_badge' => 'Yashil iqtisodiyot',
+                'uz_category' => 'Yashil iqtisodiyot',
                 'uz_hashtags' => '#yashiliqtisodiyot #energetika',
             ],
             [
                 'title' => 'Открыт приём заявок в экспертный кадровый резерв',
                 'slug' => 'ekspertnyy-kadrovyy-rezerv',
                 'excerpt' => 'К участию приглашаются специалисты в области стратегического планирования, анализа данных и управления проектами.',
-                'badge' => 'Карьера',
+                'category' => 'Карьера',
                 'image' => '/uploads/public/hero-demo-g2.jpg',
                 'hashtags' => '#карьера #эксперты #вакансии',
                 'layout' => 'standard',
                 'uz_title' => 'Ekspert kadrlar zaxirasiga arizalar qabul qilinmoqda',
                 'uz_excerpt' => 'Strategik rejalashtirish, ma’lumotlar tahlili va loyihalarni boshqarish sohasidagi mutaxassislar taklif etiladi.',
-                'uz_badge' => 'Karyera',
+                'uz_category' => 'Karyera',
                 'uz_hashtags' => '#karyera #ekspertlar',
             ],
         ];
+        // Рубрика демо-новостей — категория, а не текст в бейдже: справочник
+        // нужен свежей установке сразу, иначе фильтр ленты нечем наполнить.
+        $categoryIds = self::seedNewsCategories($pdo, $news, $c);
+
         $ins = $pdo->prepare(
-            "INSERT INTO news (title, slug, excerpt, badge, content, image, hashtags, layout_type, sidebar_layout, meta_title, meta_description, status, published_at, lang, created_at)
-             SELECT :t, :s, :e, :b, :co, :img, :hashtags, :layout, 'right_sidebar', :mt, :md, 'published', NOW() - INTERVAL :d DAY, 'ru', NOW()
+            "INSERT INTO news (title, slug, excerpt, category_id, content, image, hashtags, layout_type, sidebar_layout, meta_title, meta_description, status, published_at, lang, created_at)
+             SELECT :t, :s, :e, :cat, :co, :img, :hashtags, :layout, 'right_sidebar', :mt, :md, 'published', NOW() - INTERVAL :d DAY, 'ru', NOW()
              FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM news WHERE slug = :s2)"
         );
         foreach ($news as $i => $n) {
@@ -661,7 +665,7 @@ final class DemoSeeder
                 ':t' => $n['title'],
                 ':s' => $n['slug'],
                 ':e' => $n['excerpt'],
-                ':b' => $n['badge'],
+                ':cat' => $categoryIds[$n['category']] ?? null,
                 ':co' => $content,
                 ':img' => $n['image'],
                 ':hashtags' => $n['hashtags'],
@@ -689,8 +693,8 @@ final class DemoSeeder
                 if ($newsId !== false) {
                     $trans = $pdo->prepare(
                         "INSERT INTO news_translations
-                            (news_id, lang, title, badge, excerpt, content, hashtags, meta_title, meta_description)
-                         SELECT :nid, 'uz', :t, :b, :e, :co, :hashtags, :mt, :md
+                            (news_id, lang, title, excerpt, content, hashtags, meta_title, meta_description)
+                         SELECT :nid, 'uz', :t, :e, :co, :hashtags, :mt, :md
                          FROM DUAL
                          WHERE NOT EXISTS (
                              SELECT 1 FROM news_translations WHERE news_id = :nid2 AND lang = 'uz'
@@ -700,7 +704,6 @@ final class DemoSeeder
                     $trans->execute([
                         ':nid' => (int) $newsId,
                         ':t' => $n['uz_title'],
-                        ':b' => $n['uz_badge'],
                         ':e' => $n['uz_excerpt'],
                         ':co' => $uzContent,
                         ':hashtags' => $n['uz_hashtags'],
@@ -720,6 +723,56 @@ final class DemoSeeder
      *
      * @param list<array{0:string,1:string,2:string}> $images путь, подпись, автор
      */
+    /**
+     * Категории демо-новостей: справочник рубрик с узбекскими переводами.
+     * Повторный запуск ничего не дублирует — существующие берутся по slug.
+     *
+     * @param array<int, array<string, mixed>> $news
+     * @param array<string, int> $c счётчики созданного (по ссылке)
+     * @return array<string, int> название рубрики → id категории
+     */
+    private static function seedNewsCategories(PDO $pdo, array $news, array &$c): array
+    {
+        if (!self::tableExists($pdo, 'news_categories')) {
+            return [];
+        }
+
+        $map = [];
+        $sortOrder = 0;
+        foreach ($news as $item) {
+            $name = trim((string) ($item['category'] ?? ''));
+            if ($name === '' || isset($map[$name])) {
+                continue;
+            }
+
+            $sortOrder += 10;
+            $slug = \App\Core\Slug::make($name);
+            $existing = $pdo->prepare('SELECT id FROM news_categories WHERE slug = :slug LIMIT 1');
+            $existing->execute([':slug' => $slug]);
+            $id = $existing->fetchColumn();
+
+            if ($id === false) {
+                $pdo->prepare(
+                    'INSERT INTO news_categories (name, slug, is_active, sort_order) VALUES (:n, :s, 1, :o)'
+                )->execute([':n' => $name, ':s' => $slug, ':o' => $sortOrder]);
+                $id = $pdo->lastInsertId();
+                $c['news_categories'] = ($c['news_categories'] ?? 0) + 1;
+            }
+
+            $map[$name] = (int) $id;
+
+            $uzName = trim((string) ($item['uz_category'] ?? ''));
+            if ($uzName !== '' && self::tableExists($pdo, 'news_category_translations')) {
+                $pdo->prepare(
+                    'INSERT INTO news_category_translations (category_id, lang, name) VALUES (:c, :l, :n)
+                     ON DUPLICATE KEY UPDATE name = VALUES(name)'
+                )->execute([':c' => (int) $id, ':l' => 'uz', ':n' => $uzName]);
+            }
+        }
+
+        return $map;
+    }
+
     private static function seedNewsGallery(PDO $pdo, int $newsId, array $images, string $altBase): void
     {
         $withCaptions = self::columnExists($pdo, 'news_images', 'caption')
@@ -772,16 +825,26 @@ final class DemoSeeder
             . '<li>Цифровая трансформация и электронное правительство</li></ul>'
             . '<p>По итогам заседания ответственным ведомствам и регионам даны поручения по ускорению реализации проектов и обеспечению своевременного достижения ключевых показателей.</p>';
 
+        // Рубрика — категория «Мероприятия»; метка остаётся меткой и показывает
+        // редактору, как выглядит выделенная новость.
+        $categoryId = self::seedNewsCategories(
+            $pdo,
+            [['category' => 'Мероприятия', 'uz_category' => 'Tadbirlar']],
+            $c
+        )['Мероприятия'] ?? null;
+
         $ins = $pdo->prepare(
-            "INSERT INTO news (title, slug, excerpt, badge, content, image, hashtags, key_points, event_meta, timeline_json, docs, source_note, views, layout_type, sidebar_layout, meta_title, meta_description, status, published_at, lang, created_at)
-             SELECT :t, :s, :e, :b, :co, :img, :hashtags, :kp, :em, :timeline, :dc, :sn, 1284, 'premium', 'right_sidebar', :mt, :md, 'published', NOW() - INTERVAL 1 DAY, 'ru', NOW()
+            "INSERT INTO news (title, slug, excerpt, badge, badge_color, category_id, content, image, hashtags, key_points, event_meta, timeline_json, docs, source_note, views, layout_type, sidebar_layout, meta_title, meta_description, status, published_at, lang, created_at)
+             SELECT :t, :s, :e, :b, :bc, :cat, :co, :img, :hashtags, :kp, :em, :timeline, :dc, :sn, 1284, 'premium', 'right_sidebar', :mt, :md, 'published', NOW() - INTERVAL 1 DAY, 'ru', NOW()
              FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM news WHERE slug = :s2)"
         );
         $ins->execute([
             ':t' => 'Заседание по вопросам реализации Стратегии «Узбекистан–2030»',
             ':s' => $slug,
             ':e' => 'Обсуждены ключевые приоритеты и ход реализации стратегических инициатив, направленных на устойчивое развитие страны и повышение благосостояния населения.',
-            ':b' => 'Мероприятие',
+            ':b' => 'Важно',
+            ':bc' => '#c0392b',
+            ':cat' => $categoryId,
             ':co' => $content,
             ':img' => '/uploads/public/demo-strategy-meeting.jpg',
             ':hashtags' => '#Узбекистан2030 #стратегия #реформы #развитие',
@@ -812,14 +875,13 @@ final class DemoSeeder
             if (self::tableExists($pdo, 'news_translations')) {
 
                 $transIns = $pdo->prepare(
-                    'INSERT INTO news_translations (news_id, lang, title, badge, excerpt, content, key_points, event_meta, docs, poll_question, poll_options_json)
-                     SELECT :nid, "uz", :t, :b, :e, :co, :kp, :em, :dc, :pq, :po
+                    'INSERT INTO news_translations (news_id, lang, title, excerpt, content, key_points, event_meta, docs, poll_question, poll_options_json)
+                     SELECT :nid, "uz", :t, :e, :co, :kp, :em, :dc, :pq, :po
                      FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM news_translations WHERE news_id = :nid2 AND lang = "uz")'
                 );
                 $transIns->execute([
                     ':nid' => (int) $nid,
                     ':t' => '«O‘zbekiston–2030» Strategiyasini amalga oshirish masalalari bo‘yicha yig‘ilish',
-                    ':b' => 'Tadbirlar',
                     ':e' => 'Mamlakatni barqaror rivojlantirish va aholi farovonligini oshirishga qaratilgan strategik tashabbuslarni amalga oshirish borishi muhokama qilindi.',
                     ':co' => $uzContent,
                     ':kp' => "«O‘zbekiston–2030» Strategiyasining ustuvor yo‘nalishlari ko‘rib chiqildi\nAsosiy tashabbuslar ijrosi tahlil qilindi\nKelgusi qadamlar va mas’ul ijrochilar tasdiqlandi",
@@ -837,13 +899,15 @@ final class DemoSeeder
                 $existUz->execute([':gid' => (int) $nid]);
                 if ($existUz->fetchColumn() === false) {
                     $uzIns = $pdo->prepare(
-                        "INSERT INTO news (title, slug, excerpt, badge, content, image, hashtags, key_points, event_meta, docs, status, published_at, lang, translation_group_id, created_at)
-                         VALUES (:t, 'strategiya-uzbekistan-2030-uz', :e, :b, :c, '/uploads/public/demo-strategy-meeting.jpg', :tags, :kp, :em, :dc, 'published', NOW(), 'uz', :gid, NOW())"
+                        "INSERT INTO news (title, slug, excerpt, badge, badge_color, category_id, content, image, hashtags, key_points, event_meta, docs, status, published_at, lang, translation_group_id, created_at)
+                         VALUES (:t, 'strategiya-uzbekistan-2030-uz', :e, :b, :bc, :cat, :c, '/uploads/public/demo-strategy-meeting.jpg', :tags, :kp, :em, :dc, 'published', NOW(), 'uz', :gid, NOW())"
                     );
                     $uzIns->execute([
                         ':t' => '«O‘zbekiston–2030» Strategiyasini amalga oshirish masalalari bo‘yicha yig‘ilish',
                         ':e' => 'Mamlakatni barqaror rivojlantirish va aholi farovonligini oshirishga qaratilgan strategik tashabbuslarni amalga oshirish borishi muhokama qilindi.',
-                        ':b' => 'Tadbirlar',
+                        ':b' => 'Muhim',
+                        ':bc' => '#c0392b',
+                        ':cat' => $categoryId,
                         // Свои хештеги у языковой версии: в пост Telegram
                         // уходят теги всех версий, без повторов.
                         ':tags' => '#o‘zbekiston2030 #strategiya',
