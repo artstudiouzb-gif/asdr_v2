@@ -5183,6 +5183,13 @@ body.auth-page {
     padding: 7px 10px;
     font-size: .8rem;
 }
+/* Кнопка не исчезает, когда обложки нет: пропадающий элемент управления
+   читается как «функции удаления здесь не предусмотрено». Вместо этого она
+   гаснет и не нажимается. */
+.sidebar-cover-clear[disabled] {
+    opacity: .45;
+    cursor: not-allowed;
+}
 
 .admin-progress__bar {
     width: var(--progress-width, 0%);
@@ -6653,3 +6660,38 @@ body.auth-page label,
 .auth-card .form-hint {
     color: #94a3b8 !important;
 }
+
+/* --- Плашка «Редактируется: XX» над списком языков ---------------------- */
+/* Раньше она была того же акцентного цвета, что и строка текущего языка
+   ниже, и две соседние плашки читались как одинаковые по смыслу. Акцент
+   оставлен строке языка (это состояние записи), а этой полосе — роль
+   подписи: нейтральный фон и приглушённый текст. */
+.multilang-editing {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--admin-bg-soft, #f8fafc);
+    border: 1px solid var(--admin-border, #e2e8f0);
+    border-radius: 8px;
+    margin-bottom: 14px;
+}
+.multilang-editing__code {
+    font-size: 0.92rem;
+    color: var(--admin-text, #1e293b);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+/* В узкой боковой колонке подпись и плашка не помещались в строку, и плашка
+   вылезала за край карточки. На синем фоне это было незаметно, на спокойном
+   стало видно. Разрешаем перенос и даём тексту сжиматься. */
+.multilang-editing { flex-wrap: wrap; }
+.multilang-editing > div { min-width: 0; flex-wrap: wrap; }
+.multilang-editing > span { flex: 0 0 auto; }
+
+/* Спрайт иконок вставляется сразу после <body>. Правило есть в frontend.css,
+   но админка его не грузит — и строчный <svg> создавал строку высотой в
+   line-height, из-за чего верхняя панель стояла на 26px ниже края экрана и
+   «прилипала» только после прокрутки. */
+.tabler-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }

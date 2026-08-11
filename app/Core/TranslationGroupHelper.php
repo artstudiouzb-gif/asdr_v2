@@ -495,10 +495,10 @@ final class TranslationGroupHelper
             </div>
 
             <!-- Верхняя выделенная плашка с текущим редактируемым языком -->
-            <div class="u-inline-8b8ad782a0">
+            <div class="multilang-editing">
                 <div class="u-inline-e3f61041ef">
                     <span class="u-inline-7c3cfec592">Редактируется:</span>
-                    <strong class="u-inline-0d175b7d93"><?= htmlspecialchars($currentLang, ENT_QUOTES) ?></strong>
+                    <strong class="multilang-editing__code"><?= htmlspecialchars($currentLang, ENT_QUOTES) ?></strong>
                     <span class="u-inline-72088eb607">(<?= htmlspecialchars($currentLangName, ENT_QUOTES) ?>)</span>
                 </div>
                 <?php if ($currentLang === $defaultCode): ?>

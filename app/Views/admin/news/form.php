@@ -409,7 +409,7 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                             Загрузить
                             <input class="u-inline-c8be1ccba6" type="file" id="image_file_input" name="image_file" accept="image/*" data-image-file>
                         </label>
-                        <button type="button" id="sidebar_cover_clear" class="btn btn--small btn--danger sidebar-cover-clear<?= $hasImg ? '' : ' is-hidden' ?>" data-image-clear title="Удалить обложку">
+                        <button type="button" id="sidebar_cover_clear" class="btn btn--small btn--danger sidebar-cover-clear" data-image-clear title="Удалить обложку"<?= $hasImg ? '' : ' disabled' ?>>
                             <?= \App\Core\AdminUi::icon('trash', 15) ?>
                             Удалить
                         </button>
@@ -437,12 +437,12 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                     if (val !== '') {
                         if (coverImg) { coverImg.src = val; coverImg.style.display = 'block'; }
                         if (placeholder) placeholder.style.display = 'none';
-                        if (clearBtn) clearBtn.style.display = 'inline-flex';
+                        if (clearBtn) clearBtn.disabled = false;
                         if (fileBadge) fileBadge.style.display = isFromFile ? 'flex' : 'none';
                     } else {
                         if (coverImg) { coverImg.src = ''; coverImg.style.display = 'none'; }
                         if (placeholder) placeholder.style.display = 'block';
-                        if (clearBtn) clearBtn.style.display = 'none';
+                        if (clearBtn) clearBtn.disabled = true;
                         if (fileBadge) fileBadge.style.display = 'none';
                     }
                 }
