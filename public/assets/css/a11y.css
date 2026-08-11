@@ -347,7 +347,7 @@ html[data-a11y-reading="on"] .cms-block {
     align-items: center;
     gap: 8px;
     margin: 0;
-    font-size: 1.05rem;
+    font-size: var(--step-0);
     font-weight: 700;
 }
 .a11y-drawer__close {
@@ -395,7 +395,7 @@ html[data-a11y-reading="on"] .cms-block {
 }
 .a11y-group__hint {
     margin: 10px 0 0;
-    font-size: .875rem;
+    font-size: var(--step--2);
     color: var(--text-muted, #666);
 }
 .a11y-group__row {
@@ -500,7 +500,7 @@ html[data-a11y-reading="on"] .cms-block {
 }
 .a11y-drawer__note {
     margin: 10px 0 0;
-    font-size: .8125rem;
+    font-size: var(--step--3);
     color: var(--text-muted, #666);
 }
 

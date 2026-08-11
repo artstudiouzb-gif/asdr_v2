@@ -201,7 +201,7 @@ test('Преимущества, контакты и правовые акты и
     assert_contains('.feature-card.contact-card', $css);
     assert_contains('.feature-card.act-card', $css);
     assert_contains('.feature-card.act-card .act-card__desc', $css);
-    assert_contains('font-size: var(--font-size-card-text, .92rem)', $css);
+    assert_contains('font-size: var(--font-size-card-text, var(--step--1))', $css);
     assert_contains('--feature-card-motion-duration: .62s', $css);
 
     $editorial = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');

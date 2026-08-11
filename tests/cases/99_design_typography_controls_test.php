@@ -80,7 +80,7 @@ test('детальная новость использует управляем�
     assert_contains('font-family: var(--font-family, inherit);', $css);
     assert_contains('color: var(--gov-ink, #0b1a30);', $css);
     assert_contains('color: var(--on-accent, #ffffff);', $css);
-    assert_contains('font-size: var(--font-size-meta, .8125rem);', $css);
+    assert_contains('font-size: var(--font-size-meta, var(--step--3));', $css);
     assert_contains('letter-spacing: var(--meta-letter-spacing, .08em);', $css);
     assert_contains('.act-card__number', DesignSettings::TYPO_SIZES['fs_meta'][1]);
     assert_contains('.act-card__meta', DesignSettings::TYPO_SIZES['fs_meta'][1]);
@@ -144,12 +144,12 @@ test('редакционные размеры используют переме�
         'текст истории должен оставаться отдельным управляемым элементом',
     );
     assert_contains(
-        'font-size: var(--font-size-card-text, .875rem);',
+        'font-size: var(--font-size-card-text, var(--step--2));',
         $css,
         'размер текста этапа должен приходить из настроек, сохраняя прежний fallback',
     );
-    assert_contains('font-size: var(--font-size-card-title, .98rem);', $css);
-    assert_contains('font-size: var(--font-size-meta, .8125rem);', $css);
+    assert_contains('font-size: var(--font-size-card-title, var(--step-0));', $css);
+    assert_contains('font-size: var(--font-size-meta, var(--step--3));', $css);
     assert_contains('.profile__name', DesignSettings::TYPO_SIZES['fs_h1'][1]);
     assert_contains(
         'font-family: var(--font-heading, var(--font-family));',

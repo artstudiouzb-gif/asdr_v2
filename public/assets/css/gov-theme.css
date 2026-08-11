@@ -54,20 +54,40 @@
        Токены НЕ дублируют админские переменные (--radius, --card-gap,
        --section-pad, --card-shadow) и не переопределяют их.
 
-       Новый и переписываемый код берёт значения отсюда. Массовый перевод
-       существующих компонентов — отдельная задача: снапить 61 размер к
-       восьми ступеням значит менять вид сайта, это решение владельца.
-       См. docs/PERFORMANCE_PLAN.md, раздел 3.1.
+       Размеры шрифта переведены на шкалу целиком: статичных rem в публичном
+       CSS не осталось. См. docs/PERFORMANCE_PLAN.md, раздел 3.1.
        ------------------------------------------------------------------ */
 
-    /* Типографика: перфект-четвёртая шкала, сжатая на малых экранах. */
-    --step--2: clamp(0.72rem, 0.70rem + 0.10vw, 0.78rem);
-    --step--1: clamp(0.83rem, 0.80rem + 0.15vw, 0.89rem);
-    --step-0: clamp(1rem, 0.96rem + 0.20vw, 1.13rem);
-    --step-1: clamp(1.20rem, 1.13rem + 0.35vw, 1.42rem);
-    --step-2: clamp(1.44rem, 1.32rem + 0.60vw, 1.80rem);
-    --step-3: clamp(1.73rem, 1.54rem + 0.95vw, 2.27rem);
-    --step-4: clamp(2.07rem, 1.78rem + 1.45vw, 2.86rem);
+    /* Типографика. Шаг неравномерный намеренно: у текстовых размеров ~8 %,
+       у крупных заголовков растёт до 25 %. Ровное отношение здесь не
+       работает — почти вся типографика сайта живёт в узкой полосе
+       0.75–1.25rem, и шкала с шагом 1.2 сдвигала бы её на ±10 %.
+
+       Ступени статичные, а не clamp(): текучие размеры замерены и отклонены —
+       на 390px они дали бы −20…−38 % против нынешних значений, то есть
+       заметно уменьшили бы текст на телефонах. Уменьшение размера на
+       мобильных на госсайте — не улучшение. Адаптацию по-прежнему делают
+       медиазапросы, где она осмысленна.
+
+       --step-0 = 1rem — базовый размер текста. Он же подчиняется настройке
+       «Размер базового шрифта» из админки, потому что единицы относительные. */
+    --step--4: 0.75rem;
+    --step--3: 0.8125rem;
+    --step--2: 0.875rem;
+    --step--1: 0.95rem;
+    --step-0: 1rem;
+    --step-1: 1.125rem;
+    --step-2: 1.25rem;
+    --step-3: 1.4rem;
+    --step-4: 1.5rem;
+    --step-5: 1.8rem;
+    --step-6: 2rem;
+    --step-7: 2.25rem;
+    --step-8: 2.5rem;
+    --step-9: 3rem;
+    --step-10: 3.5rem;
+    --step-11: 4.25rem;
+    --step-12: 5rem;
 
     /* Отступы: шаг примерно в 1.5 раза, чтобы соседние значения различались
        заметно. Сейчас в теме 307 разных значений padding/margin/gap. */
@@ -260,7 +280,7 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
 .site-header__logo img, .site-header__logo span, .site-header__logo::before { transition: transform 0.25s ease, opacity 0.25s ease; }
 .site-header__logo:hover img, .site-header__logo:hover::before { transform: scale(1.03); }
 .site-header__logo:hover span { opacity: 0.88; }
-.site-header__logo span { font-size: 0.95rem; line-height: 1.25; letter-spacing: .01em; text-transform: uppercase; max-width: 320px; }
+.site-header__logo span { font-size: var(--step--1); line-height: 1.25; letter-spacing: .01em; text-transform: uppercase; max-width: 320px; }
 /* Эмблема-звезда перед названием (если нет загруженного логотипа). */
 .site-header--logo-left .site-header__logo:not(:has(img))::before,
 .site-header__logo:not(:has(img))::before {
@@ -274,7 +294,7 @@ body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-
 .site-menu { display: flex; gap: var(--menu-gap-current, var(--menu-gap, 18px)); flex-wrap: wrap; align-items: center; }
 
 .site-menu__link {
-    text-transform: uppercase; font-size: 0.8125rem; letter-spacing: .04em; font-weight: 700;
+    text-transform: uppercase; font-size: var(--step--3); letter-spacing: .04em; font-weight: 700;
     color: var(--gov-title); padding: 14px 0;
     position: relative;
     background: transparent !important;
@@ -350,7 +370,7 @@ body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-
     gap: var(--menu-gap-current, var(--menu-gap, 18px));
 }
 .site-topbar .site-menu__link {
-    font-size: 0.78rem;
+    font-size: var(--step--4);
     padding-block: 4px;
     padding-inline: 6px;
     color: inherit;
@@ -406,9 +426,9 @@ body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-
 }
 
 /* Font Size Modifiers */
-.site-menu--font-compact .site-menu__link { font-size: 0.75rem; }
-.site-menu--font-normal .site-menu__link { font-size: 0.8125rem; }
-.site-menu--font-large .site-menu__link { font-size: 0.95rem; }
+.site-menu--font-compact .site-menu__link { font-size: var(--step--4); }
+.site-menu--font-normal .site-menu__link { font-size: var(--step--3); }
+.site-menu--font-large .site-menu__link { font-size: var(--step--1); }
 
 /* Text Transform Modifiers */
 .site-menu--transform-uppercase .site-menu__link { text-transform: uppercase; }
@@ -490,7 +510,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-dot .site-men
     padding-block: 8px;
 }
 .site-menu--icon-top .site-menu__icon {
-    font-size: 1.35rem;
+    font-size: var(--step-3);
     line-height: 1;
     display: inline-flex;
     align-items: center;
@@ -602,7 +622,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
     display: inline-flex; align-items: center; justify-content: center;
     padding: 1.5px 5px; border-radius: 3px;
     /* Не ниже 12px: капслок с разрядкой на 9.6px переставал читаться. */
-    font-size: 0.75rem; font-weight: 800; line-height: 1;
+    font-size: var(--step--4); font-weight: 800; line-height: 1;
     letter-spacing: 0.04em; text-transform: uppercase; color: #ffffff;
     background: #e11d48; box-shadow: 0 2px 5px rgba(225, 29, 72, 0.35);
     pointer-events: none; white-space: nowrap; transform: translateY(-40%);
@@ -642,7 +662,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
     position: static; transform: none; margin-left: auto;
 }
 .site-submenu__link .site-menu__badge::after { display: none; }
-.site-lang-switcher__item { color: var(--gov-title); font-weight: 700; font-size: 0.8125rem; transition: color 0.25s ease, opacity 0.25s ease !important; }
+.site-lang-switcher__item { color: var(--gov-title); font-weight: 700; font-size: var(--step--3); transition: color 0.25s ease, opacity 0.25s ease !important; }
 .site-lang-switcher__item.is-active { color: var(--gov-teal); }
 .site-lang-switcher__item:not(.is-active):hover { color: var(--color-accent, var(--gov-teal)) !important; opacity: 0.85; }
 
@@ -655,7 +675,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
     padding: 4px 6px; border-radius: var(--radius-sm, 8px);
     background: transparent;
     border: 1px solid transparent;
-    color: var(--gov-title, inherit); font-size: 0.8125rem; font-weight: 700;
+    color: var(--gov-title, inherit); font-size: var(--step--3); font-weight: 700;
     cursor: pointer; list-style: none; outline: none; transition: all 0.2s ease;
 }
 .site-lang-dropdown__trigger:hover {
@@ -691,7 +711,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 .site-lang-dropdown__item {
     display: flex; align-items: center; gap: 8px; padding: 6px 10px;
     border-radius: var(--radius-sm, 6px); color: var(--gov-title, #1e293b); text-decoration: none;
-    font-size: 0.8125rem; font-weight: 600; transition: background 0.15s ease, color 0.15s ease;
+    font-size: var(--step--3); font-weight: 600; transition: background 0.15s ease, color 0.15s ease;
 }
 .site-lang-dropdown__item:hover { background: var(--gov-bg, #f1f5f9); color: var(--gov-teal, #0d9488); }
 .site-lang-dropdown__item.is-active {
@@ -701,7 +721,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
        AccentContrast::onLight() как раз от нейтральной поверхности. */
     color: var(--gov-teal-text, #0f766e); font-weight: 700;
 }
-.site-lang-dropdown__item-flag { font-size: 1rem; line-height: 1; }
+.site-lang-dropdown__item-flag { font-size: var(--step-0); line-height: 1; }
 .site-lang-dropdown__item-name { flex: 1; white-space: nowrap; }
 .site-lang-dropdown__check { color: var(--gov-teal, #0d9488); flex-shrink: 0; }
 
@@ -747,7 +767,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 }
 
 /* --- Шапка Pro Max: верхняя утилитарная полоса + элементы нижней полосы --- */
-.site-topbar { font-size: 0.8125rem; }
+.site-topbar { font-size: var(--step--3); }
 .site-topbar__inner { max-width: var(--container-max); margin: 0 auto; padding: 7px 20px; display: flex; align-items: center; gap: 18px; }
 .site-topbar__zone { display: flex; align-items: center; gap: 14px; }
 .site-topbar__zone--left { margin-right: auto; }
@@ -782,11 +802,11 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 @media (max-width: 720px) { .site-topbar { display: none; } .site-topbar--mobile-on { display: block; } .site-topbar--mobile-on .site-topbar__zone--center { display: none; } }
 
 .hdr-contact { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; white-space: nowrap; }
-.hdr-snippet { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: .875rem; }
+.hdr-snippet { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: var(--step--2); }
 .hdr-snippet a { color: var(--gov-teal); text-decoration: none; border-bottom: 1px dotted currentColor; transition: color .2s ease; }
 .hdr-snippet a:hover { color: var(--gov-teal-text); }
 .hdr-snippet strong, .hdr-snippet b { font-weight: 700; color: var(--gov-title); }
-.hdr-snippet .badge { background: color-mix(in srgb, var(--gov-teal) 12%, transparent); color: var(--gov-teal-text); padding: 3px 8px; border-radius: var(--radius-sm, 6px); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
+.hdr-snippet .badge { background: color-mix(in srgb, var(--gov-teal) 12%, transparent); color: var(--gov-teal-text); padding: 3px 8px; border-radius: var(--radius-sm, 6px); font-size: var(--step--4); font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
 
 .site-nav--with-extras .site-nav__inner { display: flex; align-items: center; gap: 18px; }
 .site-nav__extra { display: inline-flex; align-items: center; gap: 12px; }
@@ -1103,7 +1123,7 @@ body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: rg
     box-shadow: none !important;
     outline: none !important;
     color: var(--gov-ink, #0f172a) !important;
-    font-size: 0.875rem !important;
+    font-size: var(--step--2) !important;
     font-family: inherit !important;
     padding: 6px 0 !important;
     margin: 0 !important;
@@ -1239,7 +1259,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
 .site-submenu { background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 12px); box-shadow: 0 18px 44px rgba(11,26,48,.16); padding: 8px; min-width: 240px; margin-top: 6px; }
 .site-submenu::before { content: ''; position: absolute; top: -6px; left: 26px; width: 10px; height: 10px; background: var(--gov-surface); border-left: 1px solid var(--gov-border); border-top: 1px solid var(--gov-border); transform: rotate(45deg); }
 .site-submenu::after { content: ''; position: absolute; top: -10px; left: 0; right: 0; height: 12px; background: transparent; }
-.site-submenu__link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-sm, 8px); color: var(--gov-title); font-weight: 600; font-size: .92rem; text-transform: var(--submenu-text-transform, none); letter-spacing: 0; }
+.site-submenu__link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-sm, 8px); color: var(--gov-title); font-weight: 600; font-size: var(--step--1); text-transform: var(--submenu-text-transform, none); letter-spacing: 0; }
 .site-submenu__link:hover, .site-submenu__link:focus-visible { background: color-mix(in srgb, var(--gov-teal) 9%, var(--gov-surface)); color: var(--gov-teal-text); }
 .site-submenu__link .site-menu__icon,
 .site-submenu__link svg { color: var(--gov-teal); flex-shrink: 0; transition: transform .18s ease; }
@@ -1314,16 +1334,16 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
     background: color-mix(in srgb, var(--gov-teal) 9%, var(--gov-surface));
     color: var(--gov-teal-text);
 }
-.search-suggest__title { font-weight: 600; font-size: .92rem; }
+.search-suggest__title { font-weight: 600; font-size: var(--step--1); }
 /* Тип записи — подсказка, а не заголовок: приглушаем и не даём переносить. */
-.search-suggest__type { flex-shrink: 0; font-size: .75rem; color: var(--gov-muted, #6b7a90); white-space: nowrap; }
-.search-suggest__empty { margin: 0; padding: 12px; font-size: .9rem; color: var(--gov-muted, #6b7a90); }
+.search-suggest__type { flex-shrink: 0; font-size: var(--step--4); color: var(--gov-muted, #6b7a90); white-space: nowrap; }
+.search-suggest__empty { margin: 0; padding: 12px; font-size: var(--step--2); color: var(--gov-muted, #6b7a90); }
 .search-suggest__all {
     display: block;
     padding: 9px 12px;
     border-top: 1px solid var(--gov-border);
     margin-top: 4px;
-    font-size: .85rem;
+    font-size: var(--step--2);
     font-weight: 600;
     color: var(--gov-teal-text);
     text-decoration: none;
@@ -1331,7 +1351,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
 .search-suggest__all:hover { text-decoration: underline; }
 
 /* Индикатор подменю (▾): плавный поворот на 180° при раскрытии. */
-.site-menu__toggle { display: inline-flex; align-items: center; justify-content: center; color: var(--gov-teal); background: transparent; border: 0; cursor: pointer; font-size: 0.7rem; padding: 4px; transition: transform .2s ease; }
+.site-menu__toggle { display: inline-flex; align-items: center; justify-content: center; color: var(--gov-teal); background: transparent; border: 0; cursor: pointer; font-size: var(--step--4); padding: 4px; transition: transform .2s ease; }
 .site-menu__item.is-open > .site-menu__toggle { transform: rotate(180deg); }
 @media (hover: hover) and (min-width: 901px) {
     .site-menu__item--has-children:hover > .site-menu__toggle,
@@ -1361,7 +1381,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
     .site-submenu { position: static; box-shadow: none; border: 0; border-left: 2px solid color-mix(in srgb, var(--gov-teal) 45%, transparent); border-radius: 0; margin: 0 0 4px 12px; padding: 0 0 0 10px; min-width: 0; opacity: 1 !important; visibility: visible !important; transform: none !important; display: none; }
     .site-menu__item.is-open > .site-submenu { display: flex; }
     .site-submenu::before { display: none; }
-    .site-submenu__link { padding: 9px 10px; font-size: .9rem; }
+    .site-submenu__link { padding: 9px 10px; font-size: var(--step--2); }
 }
 /* Мобильный: без дублей элементов нижней полосы; строка пункта с подменю — flex. */
 @media (max-width: 720px) {
@@ -1371,7 +1391,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
     .site-drawer__panel .site-menu__item--has-children > .site-menu__link,
     body.mobile-menu-open .site-menu__item--has-children > .site-menu__link { flex: 1; }
     .site-drawer__panel .site-menu__toggle,
-    body.mobile-menu-open .site-menu__toggle { width: 44px; height: 44px; display: grid; place-items: center; font-size: 0.75rem; }
+    body.mobile-menu-open .site-menu__toggle { width: 44px; height: 44px; display: grid; place-items: center; font-size: var(--step--4); }
     .site-drawer__panel .site-submenu,
     body.mobile-menu-open .site-submenu { flex-basis: 100%; }
 }
@@ -1533,10 +1553,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 }
 .news-audio-player__info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 180px; }
 .news-audio-player__badge {
-    font-size: 0.7rem; font-weight: 800; letter-spacing: 0.05em;
+    font-size: var(--step--4); font-weight: 800; letter-spacing: 0.05em;
     text-transform: uppercase; color: var(--gov-teal, #0d9488);
 }
-.news-audio-player__title { font-size: 0.95rem; font-weight: 700; color: var(--gov-title, #1e293b); }
+.news-audio-player__title { font-size: var(--step--1); font-weight: 700; color: var(--gov-title, #1e293b); }
 .news-audio-player__element { flex: 1 1 280px; height: 40px; border-radius: var(--radius, 20px); outline: none; }
 
 :root[data-theme="dark"] .news-audio-player {
@@ -1550,7 +1570,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     position: fixed; inset: 0; z-index: 9999;
     background: #ffffff; color: #111827;
     font-family: var(--font-family, system-ui, sans-serif);
-    overflow-y: auto; font-size: 1.125rem; line-height: 1.8;
+    overflow-y: auto; font-size: var(--step-1); line-height: 1.8;
     transition: background 0.25s ease, color 0.25s ease;
 }
 body.reader-mode-active { overflow: hidden !important; }
@@ -1581,7 +1601,7 @@ body.reader-mode-active { overflow: hidden !important; }
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
 }
 .reader-mode-bar__title {
-    font-size: 0.875rem; font-weight: 700; white-space: nowrap;
+    font-size: var(--step--2); font-weight: 700; white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis; opacity: 0.85;
 }
 .reader-mode-controls { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
@@ -1594,7 +1614,7 @@ body.reader-mode-active { overflow: hidden !important; }
 }
 .reader-theme-btn, .reader-font-btn {
     border: 0; background: transparent; cursor: pointer;
-    padding: 4px 8px; border-radius: 9999px; font-size: 0.8125rem;
+    padding: 4px 8px; border-radius: 9999px; font-size: var(--step--3);
     font-family: inherit; font-weight: 700; color: inherit; transition: all 0.15s ease;
 }
 .reader-theme-btn.is-active, .reader-font-btn:hover {
@@ -1606,7 +1626,7 @@ body.reader-mode-active { overflow: hidden !important; }
 .reader-mode-close {
     border: 0; background: rgba(0, 0, 0, 0.06); color: inherit;
     font-family: inherit;
-    font-size: 1.5rem; line-height: 1; width: 34px; height: 34px;
+    font-size: var(--step-4); line-height: 1; width: 34px; height: 34px;
     border-radius: 50%; cursor: pointer; display: flex;
     align-items: center; justify-content: center; transition: background 0.2s, transform 0.2s;
 }
@@ -1619,7 +1639,7 @@ body.reader-mode-active { overflow: hidden !important; }
     font-size: calc(1.125rem * var(--reader-scale, 1));
 }
 .reader-mode__headline {
-    font-size: calc(clamp(1.8rem, 3.5vw, 2.6rem) * var(--reader-scale, 1)); font-weight: 800; line-height: 1.25;
+    font-size: calc(clamp(var(--step-5), 3.5vw, var(--step-8)) * var(--reader-scale, 1)); font-weight: 800; line-height: 1.25;
     margin: 0 0 16px; letter-spacing: -0.02em;
 }
 .reader-mode__submeta { font-size: calc(0.875rem * var(--reader-scale, 1)); opacity: 0.7; margin-bottom: 24px; font-weight: 600; }
@@ -1658,12 +1678,12 @@ body.reader-mode-active { overflow: hidden !important; }
 .social-embed-card--instagram:hover { border-color: #e1306c; }
 .social-embed-card--facebook { border-left: 4px solid #1877f2; }
 .social-embed-card--facebook:hover { border-color: #1877f2; }
-.social-embed-card__icon { font-size: 1.5rem; line-height: 1; }
+.social-embed-card__icon { font-size: var(--step-4); line-height: 1; }
 .social-embed-card__body { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.social-embed-card__title { font-weight: 700; font-size: 0.95rem; color: var(--gov-title, #1e293b); }
-.social-embed-card__url { font-size: 0.8125rem; color: var(--gov-subtext, #64748b); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.social-embed-card__title { font-weight: 700; font-size: var(--step--1); color: var(--gov-title, #1e293b); }
+.social-embed-card__url { font-size: var(--step--3); color: var(--gov-subtext, #64748b); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .social-embed-card__btn {
-    font-size: 0.8125rem; font-weight: 700; padding: 6px 14px; border-radius: 9999px;
+    font-size: var(--step--3); font-weight: 700; padding: 6px 14px; border-radius: 9999px;
     background: var(--gov-bg, #f1f5f9); color: var(--gov-teal, #0d9488);
     white-space: nowrap; transition: all 0.2s ease;
 }
@@ -1703,13 +1723,13 @@ body.lightbox-active { overflow: hidden !important; }
     padding: 16px 24px; background: rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-.rich-lightbox-counter { font-size: 0.875rem; font-weight: 700; color: rgba(255, 255, 255, 0.85); letter-spacing: 0.05em; }
+.rich-lightbox-counter { font-size: var(--step--2); font-weight: 700; color: rgba(255, 255, 255, 0.85); letter-spacing: 0.05em; }
 .rich-lightbox-actions { display: flex; align-items: center; gap: 12px; }
 .rich-lightbox-btn {
     display: flex; align-items: center; justify-content: center;
     width: 38px; height: 38px; border-radius: 50%; border: 0;
     background: rgba(255, 255, 255, 0.12); color: #ffffff;
-    font-size: 1.5rem; line-height: 1; cursor: pointer;
+    font-size: var(--step-4); line-height: 1; cursor: pointer;
     transition: all 0.2s ease; text-decoration: none !important;
 }
 .rich-lightbox-btn:hover { background: var(--gov-teal, #0d9488); transform: scale(1.08); }
@@ -1729,7 +1749,7 @@ body.lightbox-active { overflow: hidden !important; }
     user-select: none;
 }
 .rich-lightbox-caption {
-    margin-top: 14px; font-size: 0.95rem; color: rgba(255, 255, 255, 0.9);
+    margin-top: 14px; font-size: var(--step--1); color: rgba(255, 255, 255, 0.9);
     max-width: 700px; font-weight: 500; line-height: 1.5;
     background: rgba(0, 0, 0, 0.4); padding: 8px 18px; border-radius: 9999px;
 }
@@ -1738,11 +1758,11 @@ body.lightbox-active { overflow: hidden !important; }
     display: flex; align-items: center; justify-content: center;
     width: 48px; height: 48px; border-radius: 50%; border: 0;
     background: rgba(255, 255, 255, 0.15); color: #ffffff;
-    font-size: 1.5rem; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0;
+    font-size: var(--step-4); cursor: pointer; transition: all 0.2s ease; flex-shrink: 0;
 }
 .rich-lightbox-nav:hover { background: var(--gov-teal, #0d9488); transform: scale(1.1); }
 @media (max-width: 640px) {
-    .rich-lightbox-nav { width: 38px; height: 38px; font-size: 1.1rem; }
+    .rich-lightbox-nav { width: 38px; height: 38px; font-size: var(--step-1); }
     .rich-lightbox-stage { padding: 10px 6px; }
 }
 
@@ -1785,9 +1805,9 @@ body.lightbox-active { overflow: hidden !important; }
     to { opacity: 1; transform: translateY(0); }
 }
 .push-prompt-card__header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.push-prompt-card__icon { font-size: 1.25rem; line-height: 1; }
-.push-prompt-card__title { font-weight: 700; font-size: 0.95rem; color: var(--gov-title, #1e293b); }
-.push-prompt-card__text { font-size: 0.8125rem; line-height: 1.5; color: var(--gov-subtext, #64748b); margin-bottom: 14px; }
+.push-prompt-card__icon { font-size: var(--step-2); line-height: 1; }
+.push-prompt-card__title { font-weight: 700; font-size: var(--step--1); color: var(--gov-title, #1e293b); }
+.push-prompt-card__text { font-size: var(--step--3); line-height: 1.5; color: var(--gov-subtext, #64748b); margin-bottom: 14px; }
 .push-prompt-card__actions { display: flex; align-items: center; gap: 8px; }
 
 :root[data-theme="dark"] .push-prompt-card {
@@ -1812,7 +1832,7 @@ body.lightbox-active { overflow: hidden !important; }
 }
 .quote-share-btn {
     display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--radius-sm, 8px);
-    border: 0; background: transparent; color: #f8fafc; font-size: 0.8125rem; font-weight: 600;
+    border: 0; background: transparent; color: #f8fafc; font-size: var(--step--3); font-weight: 600;
     cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
 }
 .quote-share-btn:hover { background: var(--gov-teal, #0d9488); color: #ffffff; }
@@ -1826,12 +1846,12 @@ body.lightbox-active { overflow: hidden !important; }
 .news-poll-card__badge {
     display: inline-block; padding: 4px 10px; border-radius: var(--radius-sm, 6px);
     background: color-mix(in srgb, var(--gov-teal, #0d9488) 12%, transparent);
-    color: var(--gov-teal-on-tint, #00697d); font-size: 0.75rem; font-weight: 700; margin-bottom: 8px;
+    color: var(--gov-teal-on-tint, #00697d); font-size: var(--step--4); font-weight: 700; margin-bottom: 8px;
 }
 .news-poll-card__question {
-    margin: 0 0 16px; font-size: 1.1rem; font-weight: 700; color: var(--gov-title);
+    margin: 0 0 16px; font-size: var(--step-1); font-weight: 700; color: var(--gov-title);
 }
-.news-poll-card__header .news-poll-card__question { margin-top: 6px; font-size: 1rem; }
+.news-poll-card__header .news-poll-card__question { margin-top: 6px; font-size: var(--step-0); }
 .news-poll-options { display: flex; flex-direction: column; gap: 10px; }
 .news-poll-option {
     display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius-sm, 10px);
@@ -1850,13 +1870,13 @@ body.lightbox-active { overflow: hidden !important; }
     border-color: var(--gov-teal, #0d9488); background: var(--gov-teal, #0d9488);
     box-shadow: inset 0 0 0 3px #ffffff;
 }
-.news-poll-option__text { font-size: 0.95rem; font-weight: 500; color: var(--gov-title); }
+.news-poll-option__text { font-size: var(--step--1); font-weight: 500; color: var(--gov-title); }
 
 .news-poll-res-row { margin-bottom: 14px; }
-.news-poll-res-info { display: flex; justify-content: space-between; font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: var(--gov-title); }
+.news-poll-res-info { display: flex; justify-content: space-between; font-size: var(--step--2); font-weight: 600; margin-bottom: 6px; color: var(--gov-title); }
 .news-poll-bar-track { height: 10px; border-radius: var(--radius-sm, 5px); background: color-mix(in srgb, var(--gov-border) 40%, transparent); overflow: hidden; }
 .news-poll-bar-fill { width: var(--poll-percent, 0%); height: 100%; border-radius: var(--radius-sm, 5px); background: var(--gov-teal, #0d9488); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-.news-poll-card__meta { margin-top: 14px; font-size: 0.8125rem; color: var(--gov-subtext); }
+.news-poll-card__meta { margin-top: 14px; font-size: var(--step--3); color: var(--gov-subtext); }
 .news-poll-card__actions { margin-top: 14px; }
 .news-poll-card__actions .btn { width: 100%; justify-content: center; }
 
@@ -1864,18 +1884,18 @@ body.lightbox-active { overflow: hidden !important; }
 .currency-widget {
     display: inline-flex; align-items: center; gap: 14px; padding: 4px 12px;
     border-radius: var(--radius-sm, 14px); background: color-mix(in srgb, var(--gov-teal, #0d9488) 10%, transparent);
-    font-size: 0.8125rem; font-weight: 600; color: var(--gov-title);
+    font-size: var(--step--3); font-weight: 600; color: var(--gov-title);
 }
 .currency-item { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
-.currency-item__code { opacity: 0.85; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--gov-teal, #0d9488); }
+.currency-item__code { opacity: 0.85; font-size: var(--step--4); font-weight: 700; text-transform: uppercase; color: var(--gov-teal, #0d9488); }
 .currency-item__rate { font-weight: 700; }
-.currency-item__diff { font-size: 0.7rem; padding: 1px 4px; border-radius: 4px; font-weight: 700; }
+.currency-item__diff { font-size: var(--step--4); padding: 1px 4px; border-radius: 4px; font-weight: 700; }
 
 /* Живой поиск */
 .search-suggest__item { display: flex !important; align-items: center !important; gap: 12px !important; }
 .search-suggest__thumb { width: 44px; height: 44px; border-radius: var(--radius-sm, 8px); object-fit: cover; flex-shrink: 0; }
 .search-suggest__info { display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0; }
-.search-suggest__meta { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--gov-subtext); }
+.search-suggest__meta { display: flex; align-items: center; gap: 8px; font-size: var(--step--4); color: var(--gov-subtext); }
 .currency-item__diff.is-up { color: #10b981; background: rgba(16, 185, 129, 0.15); }
 .currency-item__diff.is-down { color: #ef4444; background: rgba(239, 68, 68, 0.15); }
 
@@ -1967,7 +1987,7 @@ body.lightbox-active { overflow: hidden !important; }
     .site-header__logo span {
         max-width: min(54vw, 240px);
         overflow-wrap: anywhere;
-        font-size: clamp(0.75rem, 3.4vw, 0.95rem);
+        font-size: clamp(var(--step--4), 3.4vw, var(--step--1));
     }
     .site-burger, .site-search-toggle, .site-theme-toggle { flex: 0 0 auto; }
     body.mobile-menu-open { overflow: hidden; }
@@ -2066,81 +2086,81 @@ body.lightbox-active { overflow: hidden !important; }
    .design-type-static из DesignSettings::bodyClasses().
    ========================================================================== */
 body.design-type-static .counter__value,
-body.design-type-static .counter__suffix { font-size: 2.5rem !important; }
-body.design-type-static h1 { font-size: 2.5rem; }
-body.design-type-static h2 { font-size: 1.95rem; }
-body.design-type-static h3 { font-size: 1.55rem; }
-body.design-type-static h4 { font-size: 1.25rem; }
-body.design-type-static .block-hero--media .block-hero__title { font-size: 3.7rem !important; }
-body.design-type-static .block-hero--media .block-hero__subtitle { font-size: 1rem; }
-body.design-type-static .block-hero__title { font-size: 3.4rem; }
-body.design-type-static .block-hero__subtitle { font-size: 1rem; }
-body.design-type-static .section-head__title { font-size: 2rem !important; }
-body.design-type-static .timeline-cta__title { font-size: 1.7rem; }
-body.design-type-static .profile__name { font-size: 2.5rem; }
-body.design-type-static .block-featband__title { font-size: 2rem; }
-body.design-type-static .block-banner--light .block-banner__title { font-size: 2.7rem; }
-body.design-type-static .block-banner__title { font-size: 2.4rem; }
+body.design-type-static .counter__suffix { font-size: var(--step-8) !important; }
+body.design-type-static h1 { font-size: var(--step-8); }
+body.design-type-static h2 { font-size: var(--step-6); }
+body.design-type-static h3 { font-size: var(--step-4); }
+body.design-type-static h4 { font-size: var(--step-2); }
+body.design-type-static .block-hero--media .block-hero__title { font-size: var(--step-10) !important; }
+body.design-type-static .block-hero--media .block-hero__subtitle { font-size: var(--step-0); }
+body.design-type-static .block-hero__title { font-size: var(--step-10); }
+body.design-type-static .block-hero__subtitle { font-size: var(--step-0); }
+body.design-type-static .section-head__title { font-size: var(--step-6) !important; }
+body.design-type-static .timeline-cta__title { font-size: var(--step-5); }
+body.design-type-static .profile__name { font-size: var(--step-8); }
+body.design-type-static .block-featband__title { font-size: var(--step-6); }
+body.design-type-static .block-banner--light .block-banner__title { font-size: var(--step-8); }
+body.design-type-static .block-banner__title { font-size: var(--step-8); }
 body.design-type-static .textimage__title,
-body.design-type-static .block-map__title { font-size: 1.9rem; }
+body.design-type-static .block-map__title { font-size: var(--step-5); }
 body.design-type-static .listing__title,
-body.design-type-static .content-pagehead__title { font-size: 2.6rem; }
-body.design-type-static .newslist-lead__title { font-size: 1.7rem; }
-body.design-type-static .projdetail__title { font-size: 2.6rem; }
-body.design-type-static .catdetail__title { font-size: 2.4rem; }
-body.design-type-static .block-cta h2 { font-size: 2.8rem; }
-body.design-type-static .cms-columns__col .cms-block--cta .block-cta h2 { font-size: 1.6rem; }
+body.design-type-static .content-pagehead__title { font-size: var(--step-8); }
+body.design-type-static .newslist-lead__title { font-size: var(--step-5); }
+body.design-type-static .projdetail__title { font-size: var(--step-8); }
+body.design-type-static .catdetail__title { font-size: var(--step-8); }
+body.design-type-static .block-cta h2 { font-size: var(--step-9); }
+body.design-type-static .cms-columns__col .cms-block--cta .block-cta h2 { font-size: var(--step-4); }
 body.design-type-static .site-content > section.cms-block--cta:first-of-type .block-cta h2,
-body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 { font-size: 3.4rem; }
+body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 { font-size: var(--step-10); }
 body.design-type-static .site-content > section.cms-block--cta:first-of-type .block-cta p,
-body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta p { font-size: 1.2rem; }
-body.design-type-static .block-news__title { font-size: 2rem; }
-body.design-type-static .content-list__head h1 { font-size: 2.4rem; }
-body.design-type-static .news-index__title { font-size: 2.5rem; }
-body.design-type-static .news-single h1 { font-size: 2.6rem; }
-body.design-type-static .block-contact-cards__title { font-size: 2rem; }
-body.design-type-static .block-categories__title { font-size: 2rem; }
+body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta p { font-size: var(--step-2); }
+body.design-type-static .block-news__title { font-size: var(--step-6); }
+body.design-type-static .content-list__head h1 { font-size: var(--step-8); }
+body.design-type-static .news-index__title { font-size: var(--step-8); }
+body.design-type-static .news-single h1 { font-size: var(--step-8); }
+body.design-type-static .block-contact-cards__title { font-size: var(--step-6); }
+body.design-type-static .block-categories__title { font-size: var(--step-6); }
 body.design-type-static .block-counters__title,
 body.design-type-static .block-team__title,
 body.design-type-static .block-projects__title,
-body.design-type-static .section-title { font-size: 2.1rem !important; }
+body.design-type-static .section-title { font-size: var(--step-6) !important; }
 
 /* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
    чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем). */
 @media (max-width: 640px) {
     body.design-type-static .counter__value,
-    body.design-type-static .counter__suffix { font-size: 1.75rem !important; }
-    body.design-type-static h1 { font-size: 1.8rem; }
-    body.design-type-static h2 { font-size: 1.45rem; }
-    body.design-type-static h3 { font-size: 1.2rem; }
-    body.design-type-static .block-hero--media .block-hero__title { font-size: 2.2rem !important; }
-    body.design-type-static .block-hero__title { font-size: 2rem; }
-    body.design-type-static .section-head__title { font-size: 1.5rem !important; }
-    body.design-type-static .timeline-cta__title { font-size: 1.3rem; }
-    body.design-type-static .profile__name { font-size: 1.8rem; }
-    body.design-type-static .block-featband__title { font-size: 1.5rem; }
-    body.design-type-static .block-banner--light .block-banner__title { font-size: 1.9rem; }
-    body.design-type-static .block-banner__title { font-size: 1.6rem; }
+    body.design-type-static .counter__suffix { font-size: var(--step-5) !important; }
+    body.design-type-static h1 { font-size: var(--step-5); }
+    body.design-type-static h2 { font-size: var(--step-3); }
+    body.design-type-static h3 { font-size: var(--step-2); }
+    body.design-type-static .block-hero--media .block-hero__title { font-size: var(--step-6) !important; }
+    body.design-type-static .block-hero__title { font-size: var(--step-6); }
+    body.design-type-static .section-head__title { font-size: var(--step-4) !important; }
+    body.design-type-static .timeline-cta__title { font-size: var(--step-2); }
+    body.design-type-static .profile__name { font-size: var(--step-5); }
+    body.design-type-static .block-featband__title { font-size: var(--step-4); }
+    body.design-type-static .block-banner--light .block-banner__title { font-size: var(--step-5); }
+    body.design-type-static .block-banner__title { font-size: var(--step-4); }
     body.design-type-static .textimage__title,
-    body.design-type-static .block-map__title { font-size: 1.4rem; }
+    body.design-type-static .block-map__title { font-size: var(--step-3); }
     body.design-type-static .listing__title,
-    body.design-type-static .content-pagehead__title { font-size: 1.9rem; }
-    body.design-type-static .newslist-lead__title { font-size: 1.3rem; }
-    body.design-type-static .projdetail__title { font-size: 1.8rem; }
-    body.design-type-static .catdetail__title { font-size: 1.7rem; }
-    body.design-type-static .block-cta h2 { font-size: 1.8rem; }
+    body.design-type-static .content-pagehead__title { font-size: var(--step-5); }
+    body.design-type-static .newslist-lead__title { font-size: var(--step-2); }
+    body.design-type-static .projdetail__title { font-size: var(--step-5); }
+    body.design-type-static .catdetail__title { font-size: var(--step-5); }
+    body.design-type-static .block-cta h2 { font-size: var(--step-5); }
     body.design-type-static .site-content > section.cms-block--cta:first-of-type .block-cta h2,
-    body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 { font-size: 2rem; }
-    body.design-type-static .block-news__title { font-size: 1.5rem; }
-    body.design-type-static .content-list__head h1 { font-size: 1.7rem; }
-    body.design-type-static .news-index__title { font-size: 1.8rem; }
-    body.design-type-static .news-single h1 { font-size: 1.7rem; }
-    body.design-type-static .block-contact-cards__title { font-size: 1.5rem; }
-    body.design-type-static .block-categories__title { font-size: 1.4rem; }
+    body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 { font-size: var(--step-6); }
+    body.design-type-static .block-news__title { font-size: var(--step-4); }
+    body.design-type-static .content-list__head h1 { font-size: var(--step-5); }
+    body.design-type-static .news-index__title { font-size: var(--step-5); }
+    body.design-type-static .news-single h1 { font-size: var(--step-5); }
+    body.design-type-static .block-contact-cards__title { font-size: var(--step-4); }
+    body.design-type-static .block-categories__title { font-size: var(--step-3); }
     body.design-type-static .block-counters__title,
     body.design-type-static .block-team__title,
     body.design-type-static .block-projects__title,
-    body.design-type-static .section-title { font-size: 1.5rem !important; }
+    body.design-type-static .section-title { font-size: var(--step-4) !important; }
 }
 
 
@@ -2149,7 +2169,7 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
    ============================================================================ */
 
 /* --- Хлебные крошки --- */
-.crumbs, .content-crumbs { color: var(--gov-muted); font-size: .9rem; }
+.crumbs, .content-crumbs { color: var(--gov-muted); font-size: var(--step--2); }
 .crumbs a, .content-crumbs a { color: var(--gov-teal-text); }
 /* Цель нажатия не ниже 24×24 CSS-пикселей (WCAG 2.2, 2.5.8). Высоту даёт
    inline-flex с min-height: вид строки при этом не меняется. */
@@ -2171,14 +2191,14 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 /* Editorial content lives in rich-content.css. */
 .newsdetail-article { min-width: 0; }
 .newsdetail-subscribe { background: var(--gov-navy); border-radius: var(--radius, 12px); padding: 26px 24px; color: #fff; }
-.newsdetail-subscribe__title { font-size: 1.1rem; margin: 0 0 10px; color: #fff; }
-.newsdetail-subscribe__text { color: rgba(255,255,255,.8); font-size: .875rem; line-height: 1.5; margin: 0 0 16px; }
+.newsdetail-subscribe__title { font-size: var(--step-1); margin: 0 0 10px; color: #fff; }
+.newsdetail-subscribe__text { color: rgba(255,255,255,.8); font-size: var(--step--2); line-height: 1.5; margin: 0 0 16px; }
 .newsdetail-subscribe__row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .newsdetail-subscribe__row input { min-height: 44px; padding: 0 14px; border-radius: var(--btn-radius, 8px); border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; }
 .newsdetail-subscribe__row input::placeholder { color: rgba(255,255,255,.55); }
-.newsdetail-subscribe__row button { min-width: 48px; min-height: 44px; border: 0; border-radius: var(--btn-radius, 8px); background: var(--gov-teal); color: #fff; font-size: 1.15rem; cursor: pointer; transition: filter .15s ease; }
+.newsdetail-subscribe__row button { min-width: 48px; min-height: 44px; border: 0; border-radius: var(--btn-radius, 8px); background: var(--gov-teal); color: #fff; font-size: var(--step-1); cursor: pointer; transition: filter .15s ease; }
 .newsdetail-subscribe__row button:hover { filter: brightness(1.08); }
-.newsdetail-subscribe__consent { display: flex; gap: 9px; align-items: flex-start; margin-top: 12px; color: rgba(255,255,255,.75); font-size: .78rem; line-height: 1.5; cursor: pointer; }
+.newsdetail-subscribe__consent { display: flex; gap: 9px; align-items: flex-start; margin-top: 12px; color: rgba(255,255,255,.75); font-size: var(--step--4); line-height: 1.5; cursor: pointer; }
 .newsdetail-subscribe__consent input { margin-top: 2px; accent-color: var(--gov-teal); }
 .newsdetail-subscribe--fallback { margin-top: 20px; }
 .albums-grid {
@@ -2272,21 +2292,21 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 .album-card__cover--empty,
 .project-card__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
 .relnews-card__date,
-.album-card__meta { color: var(--gov-muted); font-size: .8125rem; font-weight: 600; }
+.album-card__meta { color: var(--gov-muted); font-size: var(--step--3); font-weight: 600; }
 .album-card__body { display: flex; flex-direction: column; gap: 6px; padding: 2px 2px 4px; flex: 1; }
-.album-card__title { font-size: 1rem; font-weight: 700; color: var(--gov-title); margin: 0; line-height: 1.35; transition: color 0.2s ease; }
+.album-card__title { font-size: var(--step-0); font-weight: 700; color: var(--gov-title); margin: 0; line-height: 1.35; transition: color 0.2s ease; }
 .album-card:hover .album-card__title { color: var(--gov-teal); }
 .adjnews { display: flex; align-items: center; gap: 18px; padding: 18px 20px; background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 14px); text-decoration: none; color: var(--gov-ink); transition: box-shadow .2s ease, border-color .2s ease; }
 .adjnews:hover { box-shadow: 0 12px 30px rgba(19,42,92,.1); border-color: color-mix(in srgb, var(--gov-navy) 22%, var(--gov-border)); }
 .adjnews--next { text-align: right; justify-content: flex-end; }
 .adjnews--empty { border: 0; background: transparent; }
-.adjnews__arrow { font-size: 1.3rem; color: var(--gov-teal-text); flex: 0 0 auto; }
+.adjnews__arrow { font-size: var(--step-2); color: var(--gov-teal-text); flex: 0 0 auto; }
 .adjnews__media { width: 92px; aspect-ratio: 4/3; border-radius: var(--radius-sm, 10px); background: var(--gov-navy) center/cover no-repeat; flex: 0 0 auto; object-fit: cover; }
 .adjnews__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
 .adjnews__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.adjnews__label { text-transform: uppercase; font-size: 0.7rem; letter-spacing: .08em; font-weight: 700; color: var(--gov-muted); }
-.adjnews__date { color: var(--gov-muted); font-size: .8125rem; }
-.adjnews__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: .95rem; }
+.adjnews__label { text-transform: uppercase; font-size: var(--step--4); letter-spacing: .08em; font-weight: 700; color: var(--gov-muted); }
+.adjnews__date { color: var(--gov-muted); font-size: var(--step--3); }
+.adjnews__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
 .adjnews:hover .adjnews__title { color: var(--gov-teal); }
 @media (prefers-reduced-motion: reduce) {
     .newsdetail-photos__item, .adjnews, .relnews-card { transition: none; }
@@ -2307,8 +2327,8 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 }
 @media (max-width: 900px) { .block-banner--light { grid-template-columns: 1fr; } .block-banner--light .block-banner__photo { display: none; } }
 .block-banner--light .block-banner__inner { padding: clamp(20px, 4vw, 48px) 0; text-align: left; }
-.block-banner--light .block-banner__title { color: var(--gov-title); font-size: clamp(1.9rem, 3.4vw, 2.7rem); line-height: 1.15; margin: 0 0 16px; }
-.block-banner--light .block-banner__text { color: var(--gov-muted); opacity: 1; font-size: 1rem; line-height: 1.6; margin: 0 0 22px; }
+.block-banner--light .block-banner__title { color: var(--gov-title); font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); line-height: 1.15; margin: 0 0 16px; }
+.block-banner--light .block-banner__text { color: var(--gov-muted); opacity: 1; font-size: var(--step-0); line-height: 1.6; margin: 0 0 22px; }
 .block-banner--light .block-banner__button { 
     display: inline-block; padding: 13px 26px; background: var(--gov-navy); color: #fff; 
     border-radius: var(--btn-radius, 8px); font-weight: 700; text-decoration: none; 
@@ -2333,7 +2353,7 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 /* Якорная навигация (вкладки-разделы). */
 .block-anchornav { display: flex; gap: 26px; overflow-x: auto; border-bottom: 1px solid var(--gov-border); scrollbar-width: none; }
 .block-anchornav::-webkit-scrollbar { display: none; }
-.block-anchornav__link { padding: 14px 2px; white-space: nowrap; text-decoration: none; color: var(--gov-muted); font-weight: 700; font-size: .95rem; border-bottom: 3px solid transparent; margin-bottom: -1px; transition: color 0.3s ease, border-color 0.3s ease; }
+.block-anchornav__link { padding: 14px 2px; white-space: nowrap; text-decoration: none; color: var(--gov-muted); font-weight: 700; font-size: var(--step--1); border-bottom: 3px solid transparent; margin-bottom: -1px; transition: color 0.3s ease, border-color 0.3s ease; }
 .block-anchornav__link.is-active, .block-anchornav__link:hover { color: var(--gov-title); border-bottom-color: var(--gov-teal); }
 
 /* Этапы реализации — горизонтальный таймлайн со статусами. */
@@ -2457,17 +2477,17 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
     box-shadow: 0 0 0 3px var(--gov-bg), 0 0 10px color-mix(in srgb, var(--gov-muted) 28%, transparent);
 }
 .stage__year { 
-    font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: 1.25rem; 
+    font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: var(--step-2); 
     color: var(--gov-title); 
     transition: color 0.3s ease;
 }
 .stage:hover .stage__year {
     color: var(--gov-teal-text);
 }
-.stage__label { color: var(--gov-muted); font-size: .8125rem; text-transform: uppercase; letter-spacing: .05em; }
-.stage__title { font-weight: 700; color: var(--gov-title); font-size: .98rem; }
-.stage__text { color: var(--gov-muted); font-size: .875rem; line-height: 1.5; flex: 1; }
-.stage__status { align-self: flex-start; padding: 5px 12px; border-radius: 999px; font-size: .78rem; font-weight: 700; background: color-mix(in srgb, var(--gov-navy) 7%, var(--gov-bg)); color: var(--gov-muted); transition: background 0.3s, color 0.3s; }
+.stage__label { color: var(--gov-muted); font-size: var(--step--3); text-transform: uppercase; letter-spacing: .05em; }
+.stage__title { font-weight: 700; color: var(--gov-title); font-size: var(--step-0); }
+.stage__text { color: var(--gov-muted); font-size: var(--step--2); line-height: 1.5; flex: 1; }
+.stage__status { align-self: flex-start; padding: 5px 12px; border-radius: 999px; font-size: var(--step--4); font-weight: 700; background: color-mix(in srgb, var(--gov-navy) 7%, var(--gov-bg)); color: var(--gov-muted); transition: background 0.3s, color 0.3s; }
 .stage--done .stage__status { background: color-mix(in srgb, var(--gov-teal) 14%, var(--gov-bg)); color: color-mix(in srgb, var(--gov-teal-text) 82%, #000); }
 .stage--active .stage__status { background: color-mix(in srgb, #2f80ed 13%, var(--gov-bg)); color: #2465c6; }
 /* Тёмная тема: синий текста рассчитан на светлый фон, на тёмном он давал
@@ -2483,14 +2503,14 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 .block-textimage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(28px, 4vw, 56px); align-items: center; }
 @media (max-width: 900px) { .block-textimage { grid-template-columns: 1fr; } }
 .block-textimage--no-image { grid-template-columns: 1fr; }
-.textimage__title { position: relative; font-size: clamp(1.4rem, 2.4vw, 1.9rem); margin: 0 0 18px; padding-left: 16px; }
+.textimage__title { position: relative; font-size: clamp(var(--step-3), 2.4vw, var(--step-5)); margin: 0 0 18px; padding-left: 16px; }
 .textimage__title::before { content: ''; position: absolute; left: 0; top: .18em; bottom: .18em; width: 4px; border-radius: 2px; background: var(--gov-teal); }
 .textimage__text { color: var(--gov-muted); line-height: 1.6; margin-bottom: 24px; }
 .textimage__features { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 18px; }
 .textimage__feature { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .textimage__feature-icon { color: var(--gov-teal); }
 .textimage__feature-icon svg { width: 30px; height: 30px; }
-.textimage__feature-label { font-weight: 700; color: var(--gov-title); font-size: .875rem; line-height: 1.35; }
+.textimage__feature-label { font-weight: 700; color: var(--gov-title); font-size: var(--step--2); line-height: 1.35; }
 .textimage__media { display: block; aspect-ratio: 16/11; border-radius: var(--radius); background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; }
 
 /* Сетка документов. */
@@ -2499,7 +2519,7 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 @media (max-width: 560px) { .docslist-grid { grid-template-columns: 1fr; } }
 
 /* Карта с меткой. */
-.block-map__title { font-size: clamp(1.4rem, 2.4vw, 1.9rem); margin: 0 0 20px; }
+.block-map__title { font-size: clamp(var(--step-3), 2.4vw, var(--step-5)); margin: 0 0 20px; }
 .block-map__canvas { position: relative; border-radius: var(--radius); overflow: hidden; min-height: 380px; background: color-mix(in srgb, var(--gov-navy) 6%, var(--gov-bg)); }
 .block-map__frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .block-map__image { position: absolute; inset: 0; background: var(--block-map-image) center/cover no-repeat; }
@@ -2566,9 +2586,9 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
     box-shadow: 0 16px 36px rgba(19,42,92,.12);
     border-color: var(--gov-teal);
 }
-.block-map__card-title { font-weight: 700; color: var(--gov-title); font-size: .95rem; line-height: 1.35; }
-.block-map__card-address { color: var(--gov-muted); font-size: .875rem; line-height: 1.5; }
-.block-map__card-link { color: var(--gov-teal-text); font-size: 0.85rem; font-weight: 700; text-decoration: none; }
+.block-map__card-title { font-weight: 700; color: var(--gov-title); font-size: var(--step--1); line-height: 1.35; }
+.block-map__card-address { color: var(--gov-muted); font-size: var(--step--2); line-height: 1.5; }
+.block-map__card-link { color: var(--gov-teal-text); font-size: var(--step--2); font-weight: 700; text-decoration: none; }
 
 /* ==========================================================================
    Списочные страницы: «Все новости», «Все проекты».
@@ -2577,8 +2597,8 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
    контент, упирающийся в тёмный футер, выглядит так же сломанно, как
    крошки, прилипшие к шапке. */
 .listing { display: flex; flex-direction: column; gap: clamp(26px, 3.4vw, 44px); padding-block: 0 28px; }
-.listing__title { font-size: clamp(1.9rem, 3.4vw, 2.6rem); margin: 0 0 10px; }
-.listing__lead { color: var(--gov-muted); font-size: 1rem; line-height: 1.6; margin: 0; }
+.listing__title { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 10px; }
+.listing__lead { color: var(--gov-muted); font-size: var(--step-0); line-height: 1.6; margin: 0; }
 
 /* Заголовок + лид простой страницы (без hero-шапки). */
 /* Боковые отступы задаёт контейнер страницы, поэтому у шапки раздела их нет:
@@ -2593,8 +2613,8 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
    в ch обрывала строку раньше абзаца под ней и выглядела случайной. */
 .block-text__title { max-width: none; }
 .content-pagehead__inner { max-width: var(--container-max); margin: 0 auto; }
-.content-pagehead__title { font-size: clamp(1.9rem, 3.4vw, 2.6rem); margin: 0 0 10px; color: var(--gov-title); }
-.content-pagehead__lead { color: var(--gov-muted); font-size: 1.05rem; line-height: 1.6; margin: 0; }
+.content-pagehead__title { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 10px; color: var(--gov-title); }
+.content-pagehead__lead { color: var(--gov-muted); font-size: var(--step-0); line-height: 1.6; margin: 0; }
 
 /* Крупная первая новость. */
 .newslist-lead {
@@ -2656,9 +2676,9 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
     gap: 12px;
     padding: clamp(20px, 3vw, 36px);
 }
-.newslist__date { color: var(--gov-muted); font-size: .85rem; font-weight: 600; }
-.newslist-lead__title { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: clamp(1.3rem, 2.2vw, 1.8rem); color: var(--gov-title); line-height: 1.25; margin: 0; }
-.newslist-lead__excerpt { color: var(--gov-muted); line-height: 1.6; font-size: 0.98rem; }
+.newslist__date { color: var(--gov-muted); font-size: var(--step--2); font-weight: 600; }
+.newslist-lead__title { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: clamp(var(--step-2), 2.2vw, var(--step-5)); color: var(--gov-title); line-height: 1.25; margin: 0; }
+.newslist-lead__excerpt { color: var(--gov-muted); line-height: 1.6; font-size: var(--step-0); }
 .newslist-lead:hover .newslist-lead__title { color: var(--gov-teal); }
 
 /* Сетка новостей (3 колонки на десктопе для оптимальной ширины и читаемости карточек). */
@@ -2679,20 +2699,20 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 .projects-grid--compact { grid-template-columns: repeat(4, 1fr); }
 @media (max-width: 1000px) { .projects-grid--compact { grid-template-columns: repeat(2, 1fr); } }
 .imgcard--project { min-height: 300px; }
-.imgcard__desc { color: rgba(255,255,255,.82); font-size: .875rem; line-height: 1.5; }
+.imgcard__desc { color: rgba(255,255,255,.82); font-size: var(--step--2); line-height: 1.5; }
 
 /* Детальная проекта. */
 .projdetail { display: flex; flex-direction: column; gap: clamp(28px, 4vw, 48px); padding-block: 10px clamp(40px, 5vw, 64px); }
 .projdetail-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: clamp(24px, 3.4vw, 48px); align-items: center; }
 @media (max-width: 900px) { .projdetail-head { grid-template-columns: 1fr; } }
 .projdetail-head--no-media { grid-template-columns: 1fr; }
-.projdetail__title { font-size: clamp(1.8rem, 3.2vw, 2.6rem); line-height: 1.15; margin: 14px 0 0; }
+.projdetail__title { font-size: clamp(var(--step-5), 3.2vw, var(--step-8)); line-height: 1.15; margin: 14px 0 0; }
 .projdetail__media { display: block; aspect-ratio: 16/9; border-radius: var(--radius); background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; }
 .projdetail__content { width: 100%; max-width: none; }
 
 /* ===== Рубрикатор по бейджам (страница «Новости») ===== */
 .listing-filter { display: flex; flex-wrap: wrap; gap: 10px; margin-top: -8px; }
-.listing-filter__item { display: inline-flex; align-items: center; min-height: 40px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--gov-border); background: var(--gov-surface); color: var(--gov-title); font-weight: 600; font-size: .9rem; text-decoration: none; transition: border-color .15s ease, color .15s ease; }
+.listing-filter__item { display: inline-flex; align-items: center; min-height: 40px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--gov-border); background: var(--gov-surface); color: var(--gov-title); font-weight: 600; font-size: var(--step--2); text-decoration: none; transition: border-color .15s ease, color .15s ease; }
 .listing-filter__item:hover { border-color: var(--gov-teal); color: var(--gov-teal-text); }
 .listing-filter__item.is-active { background: var(--gov-navy); border-color: var(--gov-title); color: #fff; }
 
@@ -2738,9 +2758,9 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
     transform: none !important;
 }
 .counter:last-child { border-right: 0; }
-.counter__value, .counter__suffix { color: var(--counters-text, var(--gov-title)); font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; font-size: clamp(1.75rem, 3.2vw, 2.5rem); line-height: 1; }
+.counter__value, .counter__suffix { color: var(--counters-text, var(--gov-title)); font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; font-size: clamp(var(--step-5), 3.2vw, var(--step-8)); line-height: 1; }
 /* Плотный межстрочный: подпись из 2–3 слов не должна «рассыпаться». */
-.counter__label { color: var(--counters-text, var(--gov-muted)); font-size: .9rem; line-height: 1.35; margin: 4px 0 0; transition: color 0.3s ease; }
+.counter__label { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--2); line-height: 1.35; margin: 4px 0 0; transition: color 0.3s ease; }
 .counter:hover .counter__label { color: var(--counters-text, var(--gov-title)); }
 .block-counters[style*="--counters-text"] .counter__label { opacity: .78; }
 @media (max-width: 720px) { .counter { border-right: 0; border-bottom: 1px solid var(--gov-border); padding: 14px 0; } .counter:last-child { border-bottom: 0; } }
@@ -2759,7 +2779,7 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 /* Лид героя набирается тем же кеглем, что и лиды разделов
    (.listing__lead, .newsdetail-phero__lead) — 1.02rem. Раньше он
    дорастал до 1.18–1.22rem и выбивался из общей шкалы. */
-.block-hero__subtitle { color: var(--hero-text, var(--gov-muted)); font-size: 1rem; }
+.block-hero__subtitle { color: var(--hero-text, var(--gov-muted)); font-size: var(--step-0); }
 
 /* --- Убираем «кричащий» градиентный герой старой темы (design 2.0) --- */
 .site-content > section.cms-block--cta:first-of-type .block-cta,
@@ -2838,15 +2858,15 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 }
 .block-hero--media .block-hero__inner { position: relative; width: 100%; max-width: var(--container-max); margin: 0 auto; padding: 0 20px; z-index: 3; }
 .block-hero--media .block-hero__text { max-width: var(--hero-text-width, 620px); }
-.block-hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; color: var(--gov-teal-text); font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; font-size: 0.8125rem; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 18px; }
+.block-hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; color: var(--gov-teal-text); font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; font-size: var(--step--3); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 18px; }
 .block-hero__eyebrow::before { content: ''; width: 34px; height: 2px; background: var(--gov-teal); }
 /* Над фотографией акцентный надзаголовок не добирает контраста даже при
    плотном затемнении: чтобы вытянуть его до 4.5:1, снимок пришлось бы
    закрасить почти полностью. Цветным остаётся штрих, сам текст идёт
    цветом остального текста hero. */
 .block-hero--media .block-hero__eyebrow { color: var(--hero-text, #fff); }
-.block-hero--media .block-hero__title { color: var(--hero-text, #fff); font-size: clamp(2.5rem, 5.5vw, 4rem) !important; line-height: 1.1; margin: 0 0 20px; font-weight: 700; letter-spacing: -0.02em; }
-.block-hero--media .block-hero__subtitle { color: var(--hero-text, rgba(255,255,255,.85)); font-size: 1rem; max-width: 520px; }
+.block-hero--media .block-hero__title { color: var(--hero-text, #fff); font-size: clamp(var(--step-8), 5.5vw, var(--step-11)) !important; line-height: 1.1; margin: 0 0 20px; font-weight: 700; letter-spacing: -0.02em; }
+.block-hero--media .block-hero__subtitle { color: var(--hero-text, rgba(255,255,255,.85)); font-size: var(--step-0); max-width: 520px; }
 .block-hero__actions { display: flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 16px !important; margin-top: 30px; }
 .block-hero__button { 
     display: inline-flex !important; 
@@ -2863,7 +2883,7 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
     background: var(--gov-navy); 
     color: #fff; 
     text-transform: uppercase; 
-    font-size: 0.8125rem; 
+    font-size: var(--step--3); 
     letter-spacing: .06em; 
     font-weight: 700; 
     border-radius: var(--btn-radius, 9999px); 
@@ -2939,7 +2959,7 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(255, 255, 255, 0.08);
 }
-.block-hero__play { display: inline-flex !important; align-items: center !important; gap: 12px; color: #fff; text-decoration: none; font-size: 0.8125rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; }
+.block-hero__play { display: inline-flex !important; align-items: center !important; gap: 12px; color: #fff; text-decoration: none; font-size: var(--step--3); letter-spacing: .06em; text-transform: uppercase; font-weight: 700; }
 .block-hero__play-icon { 
     display: grid; 
     place-items: center; 
@@ -3013,7 +3033,7 @@ body.design-type-static .section-title { font-size: 2.1rem !important; }
 .block-hero .content-crumbs--on-hero {
     position: absolute; top: 0; left: 0; right: 0; z-index: 4;
     width: 100%; max-width: var(--container-max); margin: 0 auto;
-    padding: clamp(14px, 2vw, 22px) 20px 0; font-size: .9rem;
+    padding: clamp(14px, 2vw, 22px) 20px 0; font-size: var(--step--2);
 }
 /* По умолчанию — тёмные (для hero без фото/видео, светлая секция). */
 .block-hero .content-crumbs--on-hero a,
@@ -3080,7 +3100,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 /* Заголовок секции: серифный + ссылка «Все …». */
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 26px; flex-wrap: wrap; }
 .section-head__copy { flex: 1 1 520px; min-width: 0; }
-.section-head__title { font-size: clamp(1.8rem, 3.5vw, 2.2rem) !important; margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+.section-head__title { font-size: clamp(var(--step-5), 3.5vw, var(--step-7)) !important; margin: 0; font-weight: 700; letter-spacing: -0.02em; }
 .section-head__description,
 .block-advantages__description,
 .block-featband__description,
@@ -3088,7 +3108,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     max-width: 860px;
     margin-top: 10px;
     color: var(--gov-muted);
-    font-size: var(--font-size-body, 1rem);
+    font-size: var(--font-size-body, var(--step-0));
     line-height: 1.65;
 }
 .section-head__description p,
@@ -3102,7 +3122,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .cms-block--bg-navy :is(.section-head__description, .block-advantages__description, .block-featband__description, .block-timeline__description) {
     color: rgba(255, 255, 255, .82);
 }
-.section-head__all { color: var(--gov-teal-text); font-family: var(--font-family, 'PT Sans', sans-serif); font-size: 0.9rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.section-head__all { color: var(--gov-teal-text); font-family: var(--font-family, 'PT Sans', sans-serif); font-size: var(--step--2); font-weight: 700; text-decoration: none; white-space: nowrap; }
 
 /* Приоритетные направления — карточки иконка+заголовок+текст+стрелка. */
 .cards-grid { display: grid; grid-template-columns: repeat(var(--cards-cols, 5), minmax(0, 1fr)); gap: 20px; }
@@ -3143,7 +3163,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 }
 .feature-card__num {
     font-family: var(--font-heading, 'PT Serif', serif);
-    font-size: 1.4rem;
+    font-size: var(--step-3);
     font-weight: 800;
     color: color-mix(in srgb, var(--gov-navy) 25%, transparent);
     letter-spacing: -0.02em;
@@ -3260,7 +3280,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .feature-card__title {
     font-family: var(--font-heading, 'PT Serif', serif);
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: var(--step-1);
     color: var(--gov-title);
     line-height: 1.3;
     margin: 0;
@@ -3282,7 +3302,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .feature-card:hover .feature-card__arrow {
     transform: translateX(4px);
 }
-.feature-card__text { color: var(--gov-muted, #475569); font-size: .92rem; line-height: 1.55; margin: 0; flex: 1; }
+.feature-card__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: 1.55; margin: 0; flex: 1; }
 
 /* Проекты — карточки с фото и тёмным градиентом. */
 .imgcards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
@@ -3310,8 +3330,8 @@ span.imgcard__media::after {
    светлом фото (небо, снег, стекло) белый заголовок терял контраст. */
 .imgcard__overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,26,48,0) 22%, rgba(11,26,48,.55) 58%, rgba(11,26,48,.92) 100%); transition: opacity .5s ease; }
 .imgcard__body { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px; display: flex; flex-direction: column; gap: 10px; transform: translateY(2px); transition: transform .55s cubic-bezier(.22, 1, .36, 1); }
-.imgcard__title { margin: 0; font-family: var(--font-heading, var(--font-family)); font-weight: 700; font-size: 1.1rem; line-height: 1.25; color: #fff !important; }
-.imgcard__more { display: inline-flex; align-items: center; font-size: 0.85rem; font-weight: 700; color: rgba(255,255,255,.9); transition: color .3s ease, transform .45s cubic-bezier(.22, 1, .36, 1); }
+.imgcard__title { margin: 0; font-family: var(--font-heading, var(--font-family)); font-weight: 700; font-size: var(--step-1); line-height: 1.25; color: #fff !important; }
+.imgcard__more { display: inline-flex; align-items: center; font-size: var(--step--2); font-weight: 700; color: rgba(255,255,255,.9); transition: color .3s ease, transform .45s cubic-bezier(.22, 1, .36, 1); }
 /* Карточка целиком — ссылка, а «Подробнее» внутри неё был мёртвым текстом:
    при наведении не менялось ничего, кроме масштаба фото. Специфичность здесь
    выше правила-переопределения цвета ниже по файлу, поэтому порядок не важен. */
@@ -3330,7 +3350,7 @@ span.imgcard__media::after {
 .section-head__tools { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; max-width: 100%; }
 .carousel-nav { display: inline-flex; gap: 8px; }
 .carousel-nav[hidden] { display: none; }
-.carousel-nav__btn { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gov-border); background: var(--gov-surface); color: var(--gov-title); font-size: 1.4rem; line-height: 1; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease; }
+.carousel-nav__btn { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gov-border); background: var(--gov-surface); color: var(--gov-title); font-size: var(--step-3); line-height: 1; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease; }
 .carousel-nav__btn:hover { background: var(--gov-navy); color: #fff; border-color: var(--gov-title); }
 .carousel-nav__btn[disabled] { opacity: .35; cursor: default; }
 .carousel-nav__btn[disabled]:hover { background: var(--gov-surface); color: var(--gov-title); border-color: var(--gov-border); }
@@ -3445,7 +3465,7 @@ span.imgcard__media::after {
     transform: scale(1.1);
     box-shadow: 0 0 15px var(--gov-teal);
 }
-.mediacard__duration { position: absolute; right: 10px; bottom: 10px; background: rgba(11,26,48,.8); color: #fff; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; }
+.mediacard__duration { position: absolute; right: 10px; bottom: 10px; background: rgba(11,26,48,.8); color: #fff; font-size: var(--step--4); padding: 2px 8px; border-radius: 4px; }
 .mediacard__title { 
     display: block; font-weight: 700; font-family: var(--font-heading, 'PT Serif', serif); 
     color: var(--gov-title); line-height: 1.35; 
@@ -3454,7 +3474,7 @@ span.imgcard__media::after {
 .mediacard:hover .mediacard__title {
     color: var(--gov-teal-text);
 }
-.mediacard__date { display: block; color: var(--gov-muted); font-size: .85rem; margin-top: 4px; }
+.mediacard__date { display: block; color: var(--gov-muted); font-size: var(--step--2); margin-top: 4px; }
 
 /* --- Блочные опции: независимые отступы, фон секции, полноширинная подложка --- */
 /* Переменные --block-pad-top/bottom переопределяют пресет отступов. */
@@ -3521,7 +3541,7 @@ span.imgcard__media::after {
 .person-card__placeholder svg { opacity: .55; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease; }
 .person-card:hover .person-card__placeholder svg { transform: scale(1.15); color: var(--gov-teal); }
 .person-card__vacant {
-    text-transform: uppercase; font-size: 0.75rem; letter-spacing: .08em; font-weight: 700;
+    text-transform: uppercase; font-size: var(--step--4); letter-spacing: .08em; font-weight: 700;
     color: var(--gov-muted);
     /* Подпись уходит под эмблему: по центру она ложилась прямо на гирих. */
     position: absolute; left: 0; right: 0; bottom: 16px; text-align: center;
@@ -3531,10 +3551,10 @@ span.imgcard__media::after {
    центру внизу карточки оставалась дыра высотой со строку. */
 .person-card--vacant .person-card__body { justify-content: center; }
 .person-card--vacant .person-card__role { flex: 0 0 auto; }
-.person-card__name { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: 1.05rem; color: var(--gov-title); transition: color 0.3s ease; }
+.person-card__name { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: var(--step-0); color: var(--gov-title); transition: color 0.3s ease; }
 .person-card:hover .person-card__name { color: var(--gov-teal-text); }
-.person-card__role { color: var(--gov-muted); font-size: .9rem; line-height: 1.35; flex: 1; }
-.person-card__more { color: var(--gov-teal-text); font-size: 0.85rem; font-weight: 700; text-decoration: none; margin-top: 8px; transition: transform 0.3s ease, color 0.3s ease; display: inline-block; }
+.person-card__role { color: var(--gov-muted); font-size: var(--step--2); line-height: 1.35; flex: 1; }
+.person-card__more { color: var(--gov-teal-text); font-size: var(--step--2); font-weight: 700; text-decoration: none; margin-top: 8px; transition: transform 0.3s ease, color 0.3s ease; display: inline-block; }
 .person-card:hover .person-card__more { transform: translateX(4px); }
 .person-card--vacant { border: 1.5px dashed var(--gov-border); background: color-mix(in srgb, var(--gov-navy) 2%, var(--gov-surface)); }
 .person-card--vacant:hover { border-color: var(--gov-teal); background-color: color-mix(in srgb, var(--gov-teal) 4%, var(--gov-surface)); }
@@ -3543,7 +3563,7 @@ span.imgcard__media::after {
 /* История — таймлайн + CTA-карточка с фоном. */
 /* История — таймлайн + CTA-карточка с фоном. */
 .block-timeline__head { margin-bottom: 26px; }
-.block-timeline__title { margin: 0; color: var(--gov-title); font-size: var(--font-size-h2, clamp(1.5rem, 2.6vw, 2rem)); font-weight: 700; line-height: 1.25; letter-spacing: -.02em; }
+.block-timeline__title { margin: 0; color: var(--gov-title); font-size: var(--font-size-h2, clamp(var(--step-4), 2.6vw, var(--step-6))); font-weight: 700; line-height: 1.25; letter-spacing: -.02em; }
 .block-timeline__layout { min-width: 0; }
 .block-timeline--with-cta .block-timeline__layout { display: grid; grid-template-columns: 1fr 1.1fr; gap: 28px; align-items: stretch; }
 @media (max-width: 900px) { .block-timeline--with-cta .block-timeline__layout { grid-template-columns: 1fr; } }
@@ -3603,16 +3623,16 @@ span.imgcard__media::after {
 .timeline-item--planned:hover::before { border-color: var(--gov-muted); }
 .timeline-item__year { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; color: var(--gov-title); transition: color 0.25s ease; }
 .timeline-item:hover .timeline-item__year { color: var(--gov-teal-text); }
-.timeline-item__text { color: var(--gov-muted); font-size: .92rem; line-height: 1.5; transition: color 0.25s ease; }
+.timeline-item__text { color: var(--gov-muted); font-size: var(--step--1); line-height: 1.5; transition: color 0.25s ease; }
 .timeline-item:hover .timeline-item__text { color: var(--gov-title); }
-.timeline-card__button { display: inline-block; margin-top: 24px; padding: 11px 22px; border: 1px solid var(--gov-navy); border-radius: var(--btn-radius, 8px); color: var(--gov-title); font-weight: 700; font-size: .9rem; text-decoration: none; transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease; }
+.timeline-card__button { display: inline-block; margin-top: 24px; padding: 11px 22px; border: 1px solid var(--gov-navy); border-radius: var(--btn-radius, 8px); color: var(--gov-title); font-weight: 700; font-size: var(--step--2); text-decoration: none; transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease; }
 .timeline-card__button:hover { background: var(--gov-teal); border-color: var(--gov-teal); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(23,153,155, 0.25); }
 .timeline-cta { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--timeline-cta-image, var(--gov-navy)) center/cover no-repeat; display: flex; align-items: flex-start; min-height: 320px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .timeline-cta__overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(15,33,60,.92) 25%, rgba(15,33,60,.55) 100%); }
 .timeline-cta__body { position: relative; padding: 36px; color: #fff; display: flex; flex-direction: column; gap: 14px; max-width: 480px; }
-.timeline-cta__title { font-size: clamp(1.3rem, 2vw, 1.7rem); margin: 0; color: #fff; }
+.timeline-cta__title { font-size: clamp(var(--step-2), 2vw, var(--step-5)); margin: 0; color: #fff; }
 .timeline-cta__text { margin: 0; color: rgba(255,255,255,.85); line-height: 1.55; }
-.timeline-cta__button { display: inline-block; align-self: flex-start; margin-top: 8px; padding: 12px 22px; border: 1px solid rgba(255,255,255,.7); border-radius: var(--btn-radius, 8px); color: #fff; font-weight: 700; font-size: .9rem; text-decoration: none; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
+.timeline-cta__button { display: inline-block; align-self: flex-start; margin-top: 8px; padding: 12px 22px; border: 1px solid rgba(255,255,255,.7); border-radius: var(--btn-radius, 8px); color: #fff; font-weight: 700; font-size: var(--step--2); text-decoration: none; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
 .timeline-cta__button:hover { background: var(--gov-teal); border-color: var(--gov-teal); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(23,153,155, 0.3); }
 
 /* Новости + документы (две колонки). */
@@ -3624,8 +3644,8 @@ span.imgcard__media::after {
 .newsdocs-item__media { display: block; aspect-ratio: 4/3; border-radius: var(--radius-sm, 8px); background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; }
 .newsdocs-item__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
 .newsdocs-item__body { display: flex; flex-direction: column; gap: 5px; }
-.newsdocs-item__date { color: var(--gov-muted); font-size: .8125rem; }
-.newsdocs-item__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: .95rem; }
+.newsdocs-item__date { color: var(--gov-muted); font-size: var(--step--3); }
+.newsdocs-item__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
 .newsdocs-item:hover .newsdocs-item__title { color: var(--gov-teal); }
 .newsdocs-docs { display: flex; flex-direction: column; gap: 14px; }
 .doc-card { 
@@ -3646,9 +3666,9 @@ span.imgcard__media::after {
     color: #fff;
 }
 .doc-card__body { display: flex; flex-direction: column; gap: 4px; }
-.doc-card__title { font-weight: 700; color: var(--gov-title); font-size: .95rem; line-height: 1.35; transition: color 0.3s ease; }
+.doc-card__title { font-weight: 700; color: var(--gov-title); font-size: var(--step--1); line-height: 1.35; transition: color 0.3s ease; }
 .doc-card:hover .doc-card__title { color: var(--gov-teal-text); }
-.doc-card__meta { color: var(--gov-muted); font-size: .8125rem; text-transform: uppercase; letter-spacing: .04em; }
+.doc-card__meta { color: var(--gov-muted); font-size: var(--step--3); text-transform: uppercase; letter-spacing: .04em; }
 .doc-card__dl { 
     color: var(--gov-title); 
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease; 
@@ -3677,11 +3697,11 @@ span.imgcard__media::after {
     background: rgba(255, 255, 255, 0.08);
 }
 .ctaband__body { display: flex; flex-direction: column; gap: 6px; }
-.ctaband__title { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: 1.3rem; }
+.ctaband__title { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: var(--step-2); }
 .ctaband__text { color: rgba(255,255,255,.82); line-height: 1.5; }
 .ctaband__button { 
     display: inline-block; padding: 13px 26px; background: #fff; color: var(--gov-navy); 
-    border-radius: var(--btn-radius, 8px); font-weight: 700; font-size: .92rem; text-decoration: none; 
+    border-radius: var(--btn-radius, 8px); font-weight: 700; font-size: var(--step--1); text-decoration: none; 
     transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease, background-color 0.3s ease; 
 }
 .ctaband__button:hover { 
@@ -3706,16 +3726,16 @@ span.imgcard__media::after {
     mask: var(--gov-emblem) center / 52% no-repeat;
 }
 .profile__photo--empty > * { position: relative; z-index: 1; }
-.profile__name { font-size: clamp(1.8rem, 3.4vw, 2.5rem); margin: 0 0 12px; }
-.profile__position { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; color: var(--gov-teal-text, #0284c7); font-size: 1.15rem; line-height: 1.35; margin-bottom: 18px; }
-.profile__text { color: var(--gov-ink); line-height: 1.65; margin: 0 0 22px; font-size: 1rem; }
+.profile__name { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 12px; }
+.profile__position { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; color: var(--gov-teal-text, #0284c7); font-size: var(--step-1); line-height: 1.35; margin-bottom: 18px; }
+.profile__text { color: var(--gov-ink); line-height: 1.65; margin: 0 0 22px; font-size: var(--step-0); }
 .profile__contacts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
-.profile__contact { display: flex; align-items: center; gap: 10px; color: var(--gov-ink); font-size: .95rem; }
+.profile__contact { display: flex; align-items: center; gap: 10px; color: var(--gov-ink); font-size: var(--step--1); }
 .profile__contact svg { color: var(--gov-teal-text, #0284c7); flex: 0 0 auto; }
 .profile__contact-label { color: var(--gov-muted, #475569); font-weight: 600; }
 .profile__contact a { color: var(--gov-title); font-weight: 700; text-decoration: none; }
 .profile__contact a:hover { color: var(--gov-teal-text, #0284c7); }
-.profile__button { display: inline-block; padding: 13px 26px; background: var(--gov-navy); color: #fff; border-radius: var(--btn-radius, 8px); font-weight: 700; font-size: .92rem; text-decoration: none; transition: opacity .15s ease; }
+.profile__button { display: inline-block; padding: 13px 26px; background: var(--gov-navy); color: #fff; border-radius: var(--btn-radius, 8px); font-weight: 700; font-size: var(--step--1); text-decoration: none; transition: opacity .15s ease; }
 .profile__button:hover { opacity: .92; }
 
 /* Полоса компетенций (navy, 4 колонки с разделителями). */
@@ -3727,10 +3747,10 @@ span.imgcard__media::after {
 @media (max-width: 1000px) { .featband__item:nth-child(odd) { border-left: 0; } .featband__item:nth-child(n+3) { border-top: 1px solid rgba(255,255,255,.14); } }
 .featband__icon { color: rgba(255,255,255,.95); }
 .featband__icon svg { width: 30px; height: 30px; }
-.featband__name { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: 1.05rem; color: #ffffff; }
-.featband__text { color: rgba(255,255,255,.92); font-size: .92rem; line-height: 1.5; }
+.featband__name { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: var(--step-0); color: #ffffff; }
+.featband__text { color: rgba(255,255,255,.92); font-size: var(--step--1); line-height: 1.5; }
 .block-featband__head { margin-bottom: 26px; }
-.block-featband__title { margin: 0; font-size: var(--font-size-h2, clamp(1.5rem, 2.6vw, 2rem)); }
+.block-featband__title { margin: 0; font-size: var(--font-size-h2, clamp(var(--step-4), 2.6vw, var(--step-6))); }
 
 /* Биография + образование (две колонки). */
 /* Список карьеры длиннее карточки образования, поэтому боковая колонка
@@ -3738,7 +3758,7 @@ span.imgcard__media::after {
    пикселей пустоты. */
 .block-bio { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: start; }
 @media (max-width: 900px) { .block-bio { grid-template-columns: 1fr; } }
-.bio__title { font-size: 1.5rem; margin: 0 0 18px; }
+.bio__title { font-size: var(--step-4); margin: 0 0 18px; }
 .bio__text { color: var(--gov-muted); line-height: 1.6; margin-bottom: 26px; }
 .bio-career { list-style: none; margin: 0; padding: 0; position: relative; }
 .bio-career::before { content: ''; position: absolute; left: 4px; top: 8px; bottom: 8px; width: 2px; background: color-mix(in srgb, var(--gov-navy) 15%, transparent); }
@@ -3748,13 +3768,13 @@ span.imgcard__media::after {
 .bio-career__item { position: relative; display: grid; grid-template-columns: minmax(110px, max-content) 1fr; gap: 14px; padding: 0 0 20px 26px; }
 .bio-career__item:last-child { padding-bottom: 0; }
 .bio-career__item::before { content: ''; position: absolute; left: 0; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--gov-navy); }
-.bio-career__years { font-weight: 700; color: var(--gov-title); font-size: .92rem; overflow-wrap: anywhere; }
+.bio-career__years { font-weight: 700; color: var(--gov-title); font-size: var(--step--1); overflow-wrap: anywhere; }
 @media (max-width: 560px) {
     /* На узком экране годы уходят строкой над должностью: две колонки там
        оставляют должности 40% ширины и рвут её на отдельные слова. */
     .bio-career__item { grid-template-columns: 1fr; gap: 4px; }
 }
-.bio-career__text { color: var(--gov-muted); font-size: .92rem; line-height: 1.5; }
+.bio-career__text { color: var(--gov-muted); font-size: var(--step--1); line-height: 1.5; }
 .bio-side { display: flex; flex-direction: column; gap: 26px; }
 @media (min-width: 901px) {
     .bio-side { position: sticky; top: 92px; }
@@ -3766,16 +3786,16 @@ span.imgcard__media::after {
 .bio-edu__list { list-style: none; margin: 0; padding: 0; }
 .bio-edu__item { position: relative; padding: 0 0 18px 24px; display: flex; flex-direction: column; gap: 3px; }
 .bio-edu__item::before { content: ''; position: absolute; left: 0; top: 6px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--gov-teal); }
-.bio-edu__years { color: var(--gov-muted); font-size: .85rem; }
-.bio-edu__degree { font-weight: 700; color: var(--gov-title); font-size: .95rem; }
-.bio-edu__org { color: var(--gov-muted); font-size: .875rem; }
+.bio-edu__years { color: var(--gov-muted); font-size: var(--step--2); }
+.bio-edu__degree { font-weight: 700; color: var(--gov-title); font-size: var(--step--1); }
+.bio-edu__org { color: var(--gov-muted); font-size: var(--step--2); }
 .bio-extra { margin-top: 8px; }
-.bio-extra__title { font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; color: var(--gov-title); font-size: 1rem; margin: 0 0 10px; }
-.bio-extra__list { margin: 0; padding-left: 18px; color: var(--gov-muted); font-size: .9rem; line-height: 1.5; display: flex; flex-direction: column; gap: 6px; }
+.bio-extra__title { font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; color: var(--gov-title); font-size: var(--step-0); margin: 0 0 10px; }
+.bio-extra__list { margin: 0; padding-left: 18px; color: var(--gov-muted); font-size: var(--step--2); line-height: 1.5; display: flex; flex-direction: column; gap: 6px; }
 .bio-quote { position: relative; margin: 0; background: var(--gov-navy); border-radius: var(--radius); padding: 30px 30px 26px; color: #fff; }
-.bio-quote__mark { font-family: var(--font-heading, 'PT Serif', serif); font-size: 2.6rem; line-height: 1; color: var(--gov-teal); display: block; margin-bottom: 8px; }
-.bio-quote__text { margin: 0 0 12px; font-size: 1rem; line-height: 1.6; border: 0; padding: 0; }
-.bio-quote__author { color: rgba(255,255,255,.75); font-size: .9rem; }
+.bio-quote__mark { font-family: var(--font-heading, 'PT Serif', serif); font-size: var(--step-8); line-height: 1; color: var(--gov-teal); display: block; margin-bottom: 8px; }
+.bio-quote__text { margin: 0 0 12px; font-size: var(--step-0); line-height: 1.6; border: 0; padding: 0; }
+.bio-quote__author { color: rgba(255,255,255,.75); font-size: var(--step--2); }
 .newsdetail__badge { display: inline-block; padding: 6px 14px; border-radius: 999px; background: color-mix(in srgb, var(--gov-teal) 12%, transparent); color: var(--gov-teal-text); text-transform: uppercase; font-size: 11.5px; letter-spacing: .1em; font-weight: 700; }
 .news-lead-rich > :first-child { margin-top: 0; }
 .news-lead-rich > :last-child { margin-bottom: 0; }
@@ -3853,9 +3873,9 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
         color-mix(in srgb, var(--gov-navy) 82%, transparent) 58%,
         transparent);
 }
-.newsfeat-lead__title { font-family: var(--font-heading, var(--font-family)); font-weight: 700; font-size: 1.35rem; color: #fff !important; line-height: 1.32; }
+.newsfeat-lead__title { font-family: var(--font-heading, var(--font-family)); font-weight: 700; font-size: var(--step-3); color: #fff !important; line-height: 1.32; }
 .newsfeat-lead__excerpt {
-    color: rgba(255,255,255,.86); line-height: 1.5; font-size: .92rem;
+    color: rgba(255,255,255,.86); line-height: 1.5; font-size: var(--step--1);
     display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
 }
 /* На широком экране плитка тянется ровно на высоту правой колонки — колонки
@@ -3872,7 +3892,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 /* Разделение колонок — отступом, без вертикальной линии: линий в блоке и так много. */
 .newsfeat-side__texts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; border-top: 1px solid color-mix(in srgb, var(--gov-border) 55%, transparent); padding-top: 20px; }
 @media (max-width: 560px) { .newsfeat-side__texts { grid-template-columns: 1fr; } }
-.newsfeat__date { color: var(--gov-muted); font-size: .8125rem; }
+.newsfeat__date { color: var(--gov-muted); font-size: var(--step--3); }
 /* Обязательно ПОСЛЕ базового правила: специфичность одинаковая, решает порядок. */
 .newsfeat__date--on-media {
     align-self: flex-start;
@@ -3881,14 +3901,14 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     background: var(--gov-navy);
     color: #fff;
 }
-.newsfeat__more { color: var(--gov-teal-text); font-size: 0.85rem; font-weight: 700; }
+.newsfeat__more { color: var(--gov-teal-text); font-size: var(--step--2); font-weight: 700; }
 .newsfeat-mini { display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: var(--gov-ink); }
 .newsfeat-mini__thumb { display: block; width: 100%; aspect-ratio: 16/10; min-height: 150px; border-radius: var(--radius-sm, 8px); overflow: hidden; background: var(--gov-navy); }
 .newsfeat-mini__media { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) !important; }
 .newsfeat-mini:hover .newsfeat-mini__media { transform: scale(1.04) !important; }
 .newsfeat-mini__media--empty { display: block; width: 100%; height: 100%; background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
 .newsfeat-mini__body { display: flex; flex-direction: column; gap: 6px; }
-.newsfeat-mini__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: .95rem; }
+.newsfeat-mini__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
 .newsfeat-text { display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: var(--gov-ink); }
 
 /* Рубрика карточки. На фото — плашка (нужен свой фон для читаемости),
@@ -3900,17 +3920,17 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .news-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; min-width: 0; }
 .news-badge {
     display: inline-flex; align-items: center; gap: 7px; min-width: 0; max-width: 100%;
-    color: var(--gov-teal-text); font-size: .8125rem; font-weight: 700; line-height: 1.3;
+    color: var(--gov-teal-text); font-size: var(--step--3); font-weight: 700; line-height: 1.3;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .news-badge::before { content: ""; flex: none; width: 14px; height: 2px; background: currentColor; }
 /* На обложке акцентный цвет не держит контраст — метка становится белой. */
 .news-badge--on-media { color: #fff; }
-.newsfeat-text__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: .95rem; }
+.newsfeat-text__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
 .newsfeat-mini:hover .newsfeat-mini__title, .newsfeat-text:hover .newsfeat-text__title { color: var(--color-accent, var(--gov-teal)); }
 /* Заголовок лида белый на фото — при наведении оставляем чистым белый при зуме обложки */
 .newsfeat-lead:hover .newsfeat-lead__title { text-decoration: none !important; }
-@media (max-width: 560px) { .newsfeat-lead__over { padding: 14px; } .newsfeat-lead__title { font-size: 1.1rem; } }
+@media (max-width: 560px) { .newsfeat-lead__over { padding: 14px; } .newsfeat-lead__title { font-size: var(--step-1); } }
 
 /* --- Медиа-галерея: переключатели --- */
 .media-tabs { 
@@ -3936,7 +3956,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     padding: 0 16px;
     cursor: pointer;
     text-transform: none;
-    font-size: 0.8125rem;
+    font-size: var(--step--3);
     font-weight: 700;
     color: var(--gov-muted);
     border-radius: calc(var(--radius-sm, 10px) - 3px);
@@ -3980,7 +4000,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 body.design-catalog-cards_lg .catlist { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--card-gap, 24px); }
 body.design-catalog-cards_sm .catlist { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
 body.design-catalog-cards_sm .catcard { padding: 16px; }
-body.design-catalog-cards_sm .catcard__title { font-size: 1rem; }
+body.design-catalog-cards_sm .catcard__title { font-size: var(--step-0); }
 body.design-catalog-list .catlist { display: flex; flex-direction: column; gap: 12px; }
 body.design-catalog-list .catcard { display: flex; flex-direction: row; align-items: flex-start; padding: 16px 20px; }
 @media (max-width: 900px) {
@@ -4052,7 +4072,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     border-radius: 999px;
     background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 12%, transparent);
     color: var(--gov-teal-text);
-    font-size: .78rem;
+    font-size: var(--step--4);
     font-weight: 700;
     letter-spacing: .02em;
 }
@@ -4063,13 +4083,13 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .catcard__created {
     margin-left: auto;
     color: var(--gov-muted);
-    font-size: .8125rem;
+    font-size: var(--step--3);
     font-weight: 500;
 }
 
 .catcard__title {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: var(--step-2);
     font-weight: 700;
     line-height: 1.35;
     letter-spacing: var(--heading-letter-spacing, -0.015em);
@@ -4105,14 +4125,14 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 }
 .catcard__meta-item i {
     font-style: normal;
-    font-size: .70rem;
+    font-size: var(--step--4);
     font-weight: 700;
     letter-spacing: .05em;
     text-transform: uppercase;
     color: var(--gov-muted);
 }
 .catcard__meta-item span {
-    font-size: .875rem;
+    font-size: var(--step--2);
     font-weight: 600;
     color: var(--gov-title);
     line-height: 1.3;
@@ -4121,7 +4141,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .catcard__excerpt {
     margin: 0;
     color: var(--gov-muted);
-    font-size: .875rem;
+    font-size: var(--step--2);
     line-height: 1.5;
 }
 
@@ -4142,7 +4162,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     border-radius: var(--radius-sm, 6px);
     background: color-mix(in srgb, var(--color-primary, var(--gov-navy)) 6%, transparent);
     color: var(--gov-title);
-    font-size: .8125rem;
+    font-size: var(--step--3);
     font-weight: 600;
 }
 .catcard__more {
@@ -4152,7 +4172,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     margin-left: auto;
     color: var(--gov-teal-text);
     font-weight: 700;
-    font-size: .875rem;
+    font-size: var(--step--2);
     text-decoration: none;
     transition: color 0.2s ease;
 }
@@ -4174,9 +4194,9 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .catcard--with-image .catcard__datebox { grid-column: 1; }
 .catcard--with-image .catcard__main { grid-column: 2; }
 .catcard__datebox { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 74px; min-height: 84px; padding: 10px 6px; border-radius: var(--radius, 12px); background: var(--gov-navy); color: #fff; text-align: center; }
-.catcard__datebox b { font-family: var(--font-heading, 'PT Serif', serif); font-size: 1.7rem; line-height: 1; }
-.catcard__datebox i { font-style: normal; font-size: .72rem; font-weight: 700; letter-spacing: .08em; margin-top: 4px; }
-.catcard__datebox em { font-style: normal; font-size: .72rem; opacity: .75; }
+.catcard__datebox b { font-family: var(--font-heading, 'PT Serif', serif); font-size: var(--step-5); line-height: 1; }
+.catcard__datebox i { font-style: normal; font-size: var(--step--4); font-weight: 700; letter-spacing: .08em; margin-top: 4px; }
+.catcard__datebox em { font-style: normal; font-size: var(--step--4); opacity: .75; }
 @media (max-width: 560px) {
     .catcard__event-media { height: 180px; }
 }
@@ -4362,7 +4382,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .counter__value, .counter__suffix {
     font-family: var(--font-heading, var(--font-family)) !important;
     font-weight: var(--heading-font-weight, 800) !important;
-    font-size: clamp(2rem, 3.5vw, 2.7rem) !important;
+    font-size: clamp(var(--step-6), 3.5vw, var(--step-8)) !important;
     /* Сплошной цвет вместо градиента: градиент по тексту перекрывал «Цвет
        текста» блока — что бы редактор ни выбрал, цифры оставались прежними. */
     color: var(--counters-text, var(--gov-title)) !important;
@@ -4372,7 +4392,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 
 .counter__label {
     color: var(--counters-text, var(--gov-muted)) !important;
-    font-size: 0.95rem !important;
+    font-size: var(--step--1) !important;
     font-weight: 500 !important;
     transition: color 0.3s ease !important;
 }
@@ -4462,7 +4482,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .feature-card::after {
     content: "0" counter(cards-counter) !important;
     display: none !important;
-    font-size: 1.4rem;
+    font-size: var(--step-3);
     font-weight: 800;
 }
 .feature-card:hover {
@@ -4487,48 +4507,48 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 /* Деталка записи каталога. */
 .catdetail { display: flex; flex-direction: column; gap: clamp(24px, 3.4vw, 40px); padding-block: 10px clamp(40px, 5vw, 64px); }
 .catdetail__head { max-width: 900px; }
-.catdetail__eyebrow { display: inline-block; color: var(--gov-teal-text); font-size: .8125rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-.catdetail__title { margin: 12px 0 10px; font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.15; color: var(--gov-title); }
-.catdetail__date { color: var(--gov-muted); font-size: .9rem; }
+.catdetail__eyebrow { display: inline-block; color: var(--gov-teal-text); font-size: var(--step--3); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.catdetail__title { margin: 12px 0 10px; font-size: clamp(var(--step-5), 3vw, var(--step-8)); line-height: 1.15; color: var(--gov-title); }
+.catdetail__date { color: var(--gov-muted); font-size: var(--step--2); }
 .catdetail__event-banner { width: 100%; margin: 0; overflow: hidden; border-radius: clamp(14px, 2vw, 22px); aspect-ratio: 16 / 7; background: var(--gov-bg); box-shadow: var(--card-shadow); }
 .catdetail__event-banner picture { display: block; width: 100%; height: 100%; }
 .catdetail__event-image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--media-object-position, center); }
 .catdetail__grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: clamp(24px, 3.4vw, 48px); align-items: start; }
 @media (max-width: 900px) { .catdetail__grid { grid-template-columns: 1fr; } }
 .catdetail__body { display: flex; flex-direction: column; gap: 26px; }
-.catdetail__subtitle { margin: 0 0 10px; font-size: 1.2rem; color: var(--gov-title); }
+.catdetail__subtitle { margin: 0 0 10px; font-size: var(--step-2); color: var(--gov-title); }
 .catdetail__text { color: var(--gov-ink, #2b3b4e); line-height: 1.6; }
 .catdetail__text img { max-width: 100%; border-radius: var(--radius, 12px); }
 .catdetail__empty { color: var(--gov-muted); }
 .catdetail__card { position: sticky; top: 90px; display: flex; flex-direction: column; gap: 16px; padding: 24px; }
-.catdetail__card-title { margin: 0; font-size: 1.05rem; color: var(--gov-title); }
+.catdetail__card-title { margin: 0; font-size: var(--step-0); color: var(--gov-title); }
 .catdetail__facts { display: flex; flex-direction: column; gap: 12px; margin: 0; }
-.catdetail__fact dt { font-size: .75rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--gov-muted); }
+.catdetail__fact dt { font-size: var(--step--4); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--gov-muted); }
 .catdetail__fact dd { margin: 2px 0 0; color: var(--gov-title); font-weight: 600; }
 .catdetail__download { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: var(--radius-sm, 10px); background: var(--gov-navy); color: #fff; font-weight: 700; text-decoration: none; }
 button.catdetail__download { border: none; cursor: pointer; font-family: inherit; font-size: inherit; width: 100%; }
 .catdetail__download:hover { background: var(--gov-teal); }
-.catdetail__back { color: var(--gov-teal-text); font-weight: 600; font-size: .9rem; text-decoration: none; }
+.catdetail__back { color: var(--gov-teal-text); font-weight: 600; font-size: var(--step--2); text-decoration: none; }
 .catdetail__back:hover { text-decoration: underline; }
 
 /* Календарь мероприятий. */
 .gcal-nav { display: flex; align-items: center; gap: 14px; }
 .gcal-nav__btn { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 10px); background: var(--gov-surface); color: var(--gov-title); font-weight: 700; text-decoration: none; }
 .gcal-nav__btn:hover { border-color: var(--gov-teal); color: var(--gov-teal-text); }
-.gcal-nav__label { font-family: var(--font-heading, 'PT Serif', serif); font-size: 1.25rem; color: var(--gov-title); text-transform: capitalize; }
-.gcal-nav__all { margin-left: auto; color: var(--gov-teal-text); font-weight: 700; font-size: .9rem; text-decoration: none; }
+.gcal-nav__label { font-family: var(--font-heading, 'PT Serif', serif); font-size: var(--step-2); color: var(--gov-title); text-transform: capitalize; }
+.gcal-nav__all { margin-left: auto; color: var(--gov-teal-text); font-weight: 700; font-size: var(--step--2); text-decoration: none; }
 .gcal-scroll { overflow-x: auto; }
 .gcal { width: 100%; min-width: 720px; border-collapse: collapse; border: 1px solid var(--gov-border); border-radius: var(--radius, 14px); overflow: hidden; background: var(--gov-surface); }
-.gcal th { padding: 12px 10px; background: var(--gov-navy); color: #fff; font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; text-align: left; }
+.gcal th { padding: 12px 10px; background: var(--gov-navy); color: #fff; font-size: var(--step--4); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; text-align: left; }
 .gcal__cell { vertical-align: top; width: 14.28%; height: 96px; padding: 10px; border: 1px solid var(--gov-border); }
 .gcal__cell--empty { background: color-mix(in srgb, var(--gov-surface) 55%, var(--gov-bg)); }
 .gcal__cell--today { box-shadow: inset 0 0 0 2px var(--gov-teal); }
 .gcal__cell--today .gcal__day { color: var(--gov-teal-text); }
 .gcal__day { display: block; font-weight: 700; color: var(--gov-title); margin-bottom: 6px; }
-.gcal__event { display: block; margin-top: 4px; padding: 5px 8px; border-radius: var(--radius-sm, 8px); background: rgba(23, 153, 155, .12); color: var(--gov-teal-text); font-size: .78rem; font-weight: 600; line-height: 1.35; text-decoration: none; }
+.gcal__event { display: block; margin-top: 4px; padding: 5px 8px; border-radius: var(--radius-sm, 8px); background: rgba(23, 153, 155, .12); color: var(--gov-teal-text); font-size: var(--step--4); font-weight: 600; line-height: 1.35; text-decoration: none; }
 .gcal__event:hover { background: var(--gov-teal); color: #fff; }
 .gcal-list { display: flex; flex-direction: column; gap: 14px; }
-.gcal-list__title { margin: 0; font-size: 1.3rem; color: var(--gov-title); }
+.gcal-list__title { margin: 0; font-size: var(--step-2); color: var(--gov-title); }
 .gcal-list__items { display: flex; flex-direction: column; gap: 0; margin: 0; padding: 0; list-style: none; border: 1px solid var(--gov-border); border-radius: var(--radius, 14px); background: var(--gov-surface); overflow: hidden; }
 .gcal-list__item { display: flex; align-items: center; gap: 14px; padding: 16px 22px; }
 .gcal-list__item + .gcal-list__item { border-top: 1px solid var(--gov-border); }
@@ -4537,10 +4557,10 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 .gcal-list__image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--media-object-position, center); }
 .gcal-list__body { display: flex; flex: 1; min-width: 0; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
 .gcal-list__date { font-weight: 700; color: var(--gov-title); font-variant-numeric: tabular-nums; }
-.gcal-list__time { color: var(--gov-teal-text); font-weight: 700; font-size: .875rem; }
+.gcal-list__time { color: var(--gov-teal-text); font-weight: 700; font-size: var(--step--2); }
 .gcal-list__link { color: var(--gov-title); font-weight: 600; text-decoration: none; }
 .gcal-list__link:hover { color: var(--gov-teal-text); }
-.gcal-list__loc { color: var(--gov-muted); font-size: .875rem; }
+.gcal-list__loc { color: var(--gov-muted); font-size: var(--step--2); }
 @media (max-width: 560px) {
     .gcal-list__item { align-items: flex-start; padding: 14px; }
     .gcal-list__media { flex-basis: 78px; height: 60px; }
@@ -4604,9 +4624,9 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 .footer-subscribe { display: flex; flex-wrap: wrap; margin-top: 12px; max-width: 320px; }
 .footer-subscribe input[type=email] { flex: 1; min-width: 0; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff; border-radius: 8px 0 0 8px; padding: 11px 14px; }
 .footer-subscribe input[type=email]::placeholder { color: rgba(255,255,255,.55); }
-.footer-subscribe button { border: 0; background: var(--gov-teal); color: #fff; padding: 0 18px; border-radius: 0 8px 8px 0; cursor: pointer; font-size: 1.125rem; }
+.footer-subscribe button { border: 0; background: var(--gov-teal); color: #fff; padding: 0 18px; border-radius: 0 8px 8px 0; cursor: pointer; font-size: var(--step-1); }
 .footer-subscribe button:hover { background: color-mix(in srgb, var(--gov-teal) 85%, #000); }
-.footer-subscribe__consent { display: flex; flex: 1 0 100%; align-items: flex-start; gap: 8px; margin-top: 10px; color: rgba(255,255,255,.72); font-size: .75rem; line-height: 1.45; cursor: pointer; }
+.footer-subscribe__consent { display: flex; flex: 1 0 100%; align-items: flex-start; gap: 8px; margin-top: 10px; color: rgba(255,255,255,.72); font-size: var(--step--4); line-height: 1.45; cursor: pointer; }
 .footer-subscribe__consent input { flex: 0 0 auto; margin-top: 2px; accent-color: var(--gov-teal); }
 .site-footer--columns .site-footer__col--subscribe .site-footer__line { color: rgba(255,255,255,.72); }
 
@@ -4623,7 +4643,7 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 .widget--accent .widget__title::after { content: ''; position: absolute; left: 0; bottom: 0; width: 44px; height: 3px; border-radius: 2px; background: var(--gov-teal); }
 
 /* ===== Кнопка webpush-подписки (футер) ===== */
-.push-optin { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; min-height: 40px; padding: 0 16px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: .875rem; font-weight: 600; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+.push-optin { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; min-height: 40px; padding: 0 16px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: var(--step--2); font-weight: 600; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
 .push-optin:hover { border-color: var(--gov-teal); background: rgba(23,153,155,.15); }
 .push-optin.is-on { border-color: var(--gov-teal); background: var(--gov-teal); }
 .push-optin[disabled] { opacity: .6; cursor: default; }
@@ -4631,7 +4651,7 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 /* ===== Капча публичных форм ===== */
 .captcha-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .captcha-row__img { border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 10px); background: var(--gov-bg); }
-.captcha-row__refresh { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 10px); background: var(--gov-surface); color: var(--gov-title); font-size: 1.2rem; cursor: pointer; }
+.captcha-row__refresh { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 10px); background: var(--gov-surface); color: var(--gov-title); font-size: var(--step-2); cursor: pointer; }
 .captcha-row__refresh:hover { border-color: var(--gov-teal); color: var(--gov-teal-text); }
 .captcha-row input {
     width: 130px;
@@ -5000,7 +5020,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow.is-open .s
     color: var(--gov-title);
     border: 1px solid var(--gov-border);
     box-shadow: 0 10px 30px rgba(11, 26, 48, 0.18);
-    font-size: 0.875rem;
+    font-size: var(--step--2);
     font-weight: 600;
     pointer-events: auto;
     animation: toast-slide-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
@@ -5081,14 +5101,14 @@ body.quick-search-active { overflow: hidden; }
     flex: 1;
     border: 0 !important;
     background: transparent !important;
-    font-size: 1.1rem;
+    font-size: var(--step-1);
     font-weight: 500;
     color: var(--gov-title);
     outline: none !important;
     box-shadow: none !important;
 }
 .site-quick-search__badge {
-    font-size: 0.75rem;
+    font-size: var(--step--4);
     font-weight: 700;
     padding: 3px 7px;
     border-radius: var(--radius-sm, 6px);
@@ -5100,7 +5120,7 @@ body.quick-search-active { overflow: hidden; }
     border: 0;
     background: transparent;
     color: var(--gov-muted);
-    font-size: 1.5rem;
+    font-size: var(--step-4);
     line-height: 1;
     cursor: pointer;
     padding: 0 4px;
@@ -5111,12 +5131,12 @@ body.quick-search-active { overflow: hidden; }
     gap: 18px;
     padding: 12px 20px;
     background: var(--gov-bg);
-    font-size: 0.8125rem;
+    font-size: var(--step--3);
     color: var(--gov-muted);
 }
 .site-quick-search__hint kbd {
     font-family: inherit;
-    font-size: 0.75rem;
+    font-size: var(--step--4);
     font-weight: 700;
     background: var(--gov-surface);
     border: 1px solid var(--gov-border);
@@ -5198,7 +5218,7 @@ body.quick-search-active { overflow: hidden; }
 }
 .widget-latest-news__title,
 .widget-latest-news a {
-    font-size: 0.92rem;
+    font-size: var(--step--1);
     line-height: 1.4;
     font-weight: 600;
     color: var(--gov-title, #0f172a);
@@ -5211,7 +5231,7 @@ body.quick-search-active { overflow: hidden; }
 }
 .widget-latest-news__date,
 .widget-latest-news time {
-    font-size: 0.78rem;
+    font-size: var(--step--4);
     color: var(--gov-muted, #64748b);
     display: block;
 }
@@ -5370,7 +5390,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 }
 .site-submenu__link {
     color: var(--submenu-color, var(--gov-title));
-    font-size: var(--submenu-font-size, .875rem);
+    font-size: var(--submenu-font-size, var(--step--2));
     text-transform: var(--submenu-text-transform, none);
 }
 
@@ -5405,7 +5425,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
         );
         border-radius: 0;
         color: var(--submenu-color, var(--gov-title));
-        font-size: var(--submenu-font-size, .875rem);
+        font-size: var(--submenu-font-size, var(--step--2));
         font-weight: 600;
         line-height: 1.35;
         text-transform: var(--submenu-text-transform, none);
@@ -5583,7 +5603,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .act-card__number {
     font-family: var(--font-family, 'PT Sans', sans-serif);
     font-weight: 700;
-    font-size: var(--font-size-meta, .8125rem);
+    font-size: var(--font-size-meta, var(--step--3));
     letter-spacing: var(--meta-letter-spacing, .08em);
     text-transform: uppercase;
     /* Тёмный текст, а не акцентный: контрастный оттенок акцента рассчитан на
@@ -5594,7 +5614,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     border-radius: 999px;
     background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 14%, transparent);
 }
-.act-card__date { color: var(--gov-muted); font-size: var(--font-size-meta, .85rem); }
+.act-card__date { color: var(--gov-muted); font-size: var(--font-size-meta, var(--step--2)); }
 .act-card__foot {
     display: flex;
     flex-wrap: wrap;
@@ -5606,9 +5626,9 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     border-top: 1px solid var(--gov-border);
 }
 /* Длинное описание источника не должно выдавливать кнопку за карточку. */
-.act-card__meta { display: inline-flex; align-items: center; gap: 6px; min-width: 0; flex: 1 1 auto; color: var(--gov-muted); font-size: var(--font-size-meta, .8125rem); text-transform: uppercase; letter-spacing: var(--meta-letter-spacing, .04em); }
+.act-card__meta { display: inline-flex; align-items: center; gap: 6px; min-width: 0; flex: 1 1 auto; color: var(--gov-muted); font-size: var(--font-size-meta, var(--step--3)); text-transform: uppercase; letter-spacing: var(--meta-letter-spacing, .04em); }
 .act-card__meta-icon { flex: none; }
-.act-card__action { display: inline-flex; align-items: center; gap: 6px; flex: none; color: var(--gov-teal-text); font-weight: 700; font-size: var(--font-size-btn, .875rem); }
+.act-card__action { display: inline-flex; align-items: center; gap: 6px; flex: none; color: var(--gov-teal-text); font-weight: 700; font-size: var(--font-size-btn, var(--step--2)); }
 .act-card:hover .act-card__action { gap: 9px; }
 @media (prefers-reduced-motion: reduce) {
     .act-card, .act-card__action { transition: none; }
@@ -5669,7 +5689,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .newsdetail:not(.newsdetail--premium) .newsdetail-article__content {
     width: 100%;
     max-width: none;
-    font-size: clamp(1rem, 1.1vw, 1.1rem);
+    font-size: clamp(var(--step-0), 1.1vw, var(--step-1));
     line-height: 1.74;
 }
 
@@ -5750,12 +5770,12 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 
 /* --- FAQ / Аккордеон вопросов --- */
 .block-faq { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 100%; }
-.block-faq__title { font-size: clamp(1.6rem, 2.8vw, 2.2rem); margin: 0 0 10px; color: var(--gov-title); text-align: left; }
+.block-faq__title { font-size: clamp(var(--step-4), 2.8vw, var(--step-7)); margin: 0 0 10px; color: var(--gov-title); text-align: left; }
 .faq-tools { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; width: 100%; }
 .faq-tools__search, .faq-tools__category select {
     display: flex; align-items: center; gap: 10px; padding: 10px 16px;
     border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 8px);
-    background: var(--gov-surface); color: var(--gov-ink); font-size: 0.92rem;
+    background: var(--gov-surface); color: var(--gov-ink); font-size: var(--step--1);
 }
 .faq-tools__search input { border: 0; background: transparent; outline: none; color: var(--gov-ink); width: 100%; font: inherit; }
 .block-faq__list { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 100%; margin: 0; }
@@ -5769,7 +5789,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
 }
 .faq-item__q {
-    padding: 20px 24px; font-weight: 700; font-size: 1.05rem;
+    padding: 20px 24px; font-weight: 700; font-size: var(--step-0);
     color: var(--gov-title); cursor: pointer; list-style: none;
     display: flex; justify-content: space-between; align-items: center; gap: 16px;
     transition: color 0.2s ease; user-select: none; width: 100%;
@@ -5798,12 +5818,12 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 }
 .faq-item__q:hover { color: var(--gov-teal-text, #0284c7); }
 .faq-item__a {
-    padding: 0 24px 22px; color: var(--gov-ink); font-size: 0.98rem; line-height: 1.65;
+    padding: 0 24px 22px; color: var(--gov-ink); font-size: var(--step-0); line-height: 1.65;
     border-top: 1px solid color-mix(in srgb, var(--gov-border) 60%, transparent);
     margin-top: 4px; padding-top: 16px;
 }
 .faq-item__category {
-    font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    font-size: var(--step--4); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
     padding: 4px 10px; border-radius: 999px; background: color-mix(in srgb, var(--gov-teal) 10%, transparent);
     color: var(--gov-teal-text, #0284c7); margin-left: auto;
 }
@@ -5824,7 +5844,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .document-tools__search, .document-tools__filter select {
     display: flex; align-items: center; gap: 10px; padding: 10px 16px;
     border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 8px);
-    background: var(--gov-surface); color: var(--gov-ink); font-size: 0.9rem;
+    background: var(--gov-surface); color: var(--gov-ink); font-size: var(--step--2);
 }
 .document-tools__search input { border: 0; background: transparent; outline: none; color: var(--gov-ink); font: inherit; }
 
@@ -5851,9 +5871,9 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .doc-card[data-document-kind="xls"] .doc-card__icon,
 .doc-card[data-document-kind="xlsx"] .doc-card__icon { background: #f0fdf4; color: #16a34a; }
 
-.doc-card__title { font-weight: 700; font-size: 0.95rem; color: var(--gov-title); line-height: 1.35; display: block; }
+.doc-card__title { font-weight: 700; font-size: var(--step--1); color: var(--gov-title); line-height: 1.35; display: block; }
 .doc-card:hover .doc-card__title { color: var(--gov-teal-text, #0284c7); }
-.doc-card__meta { display: block; color: var(--gov-muted, #475569); font-size: 0.8125rem; font-weight: 600; margin-top: 3px; }
+.doc-card__meta { display: block; color: var(--gov-muted, #475569); font-size: var(--step--3); font-weight: 600; margin-top: 3px; }
 .doc-card__dl {
     display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
     background: color-mix(in srgb, var(--gov-navy) 6%, transparent); color: var(--gov-title);
@@ -5877,13 +5897,13 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .block-advantages__icon {
     display: grid; place-items: center; width: 50px; height: 50px;
     border-radius: var(--radius-sm, 10px); background: color-mix(in srgb, var(--gov-teal) 14%, transparent);
-    color: var(--gov-teal-text, #0284c7); font-size: 1.4rem; font-weight: 700;
+    color: var(--gov-teal-text, #0284c7); font-size: var(--step-3); font-weight: 700;
 }
 /* Заголовок блока — как у остальных секций: 1.1rem читался подписью, а не
    названием раздела, и ломал иерархию страницы. */
 .block-advantages__head { margin-bottom: 26px; }
-.block-advantages__title { margin: 0; color: var(--gov-title); font-size: var(--font-size-h2, clamp(1.5rem, 2.6vw, 2rem)); font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; }
-.block-advantages__text { color: var(--gov-muted, #475569); font-size: 0.92rem; line-height: 1.55; margin: 0; }
+.block-advantages__title { margin: 0; color: var(--gov-title); font-size: var(--font-size-h2, clamp(var(--step-4), 2.6vw, var(--step-6))); font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; }
+.block-advantages__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: 1.55; margin: 0; }
 
 /* --- Контактные карточки / Отделы (Contact Cards Block) --- */
 .contact-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; }
@@ -5898,8 +5918,8 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
     box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
 }
-.contact-card__title { font-weight: 700; font-size: 1.1rem; color: var(--gov-title); margin: 0; }
-.contact-card__item { display: flex; align-items: center; gap: 10px; color: var(--gov-ink); font-size: 0.95rem; }
+.contact-card__title { font-weight: 700; font-size: var(--step-1); color: var(--gov-title); margin: 0; }
+.contact-card__item { display: flex; align-items: center; gap: 10px; color: var(--gov-ink); font-size: var(--step--1); }
 .contact-card__item svg { color: var(--gov-teal-text, #0284c7); flex-shrink: 0; }
 .contact-card__item a { color: var(--gov-title); font-weight: 700; text-decoration: none; }
 .contact-card__item a:hover { color: var(--gov-teal-text, #0284c7); }
@@ -5967,7 +5987,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     margin: 0;
     color: var(--gov-title);
     font-family: var(--font-heading, 'PT Serif', serif);
-    font-size: 1.1rem;
+    font-size: var(--step-1);
     font-weight: 700;
     line-height: 1.3;
 }
@@ -5977,7 +5997,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .feature-card.act-card .feature-card__text {
     margin: 0;
     color: var(--gov-muted, #475569);
-    font-size: var(--font-size-card-text, .92rem);
+    font-size: var(--font-size-card-text, var(--step--1));
     line-height: 1.55;
 }
 
@@ -6022,7 +6042,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .stage-item__num {
     display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%;
     background: var(--gov-surface); border: 2px solid var(--gov-teal);
-    color: var(--gov-teal-text, #0284c7); font-weight: 800; font-size: 1.1rem;
+    color: var(--gov-teal-text, #0284c7); font-weight: 800; font-size: var(--step-1);
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 .stage-item--active .stage-item__num {
@@ -6032,8 +6052,8 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     padding: 20px 24px; border: 1px solid var(--gov-border); border-radius: var(--radius, 14px);
     background: var(--gov-surface); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
 }
-.stage-item__title { font-weight: 700; font-size: 1.05rem; color: var(--gov-title); margin: 0 0 6px; }
-.stage-item__text { color: var(--gov-muted, #475569); font-size: 0.92rem; line-height: 1.55; margin: 0; }
+.stage-item__title { font-weight: 700; font-size: var(--step-0); color: var(--gov-title); margin: 0 0 6px; }
+.stage-item__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: 1.55; margin: 0; }
 
 /* Пульсация текущего этапа отключается при системном запросе «меньше
    движения». Правило стоит в конце файла намеренно: выше определения

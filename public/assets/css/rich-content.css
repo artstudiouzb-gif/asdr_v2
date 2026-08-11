@@ -13,7 +13,7 @@
     --rich-tint: color-mix(in srgb, var(--rich-title) 5%, var(--rich-surface));
     color: var(--rich-ink);
     font-family: var(--font-family, 'PT Sans', system-ui, -apple-system, 'Segoe UI', sans-serif);
-    font-size: var(--font-size-body, 1rem);
+    font-size: var(--font-size-body, var(--step-0));
     line-height: 1.75;
     overflow-wrap: break-word;
     text-wrap: pretty;
@@ -41,11 +41,11 @@
     scroll-margin-block-start: 7rem;
 }
 
-:where(.rich-content) h2 { font-size: var(--font-size-h2, 1.75rem); }
-:where(.rich-content) h3 { font-size: var(--font-size-h3, 1.4rem); }
-:where(.rich-content) h4 { font-size: var(--font-size-h4, 1.2rem); }
-:where(.rich-content) h5 { font-size: var(--font-size-h5, 1rem); }
-:where(.rich-content) h6 { font-size: var(--font-size-h6, .92rem); }
+:where(.rich-content) h2 { font-size: var(--font-size-h2, var(--step-5)); }
+:where(.rich-content) h3 { font-size: var(--font-size-h3, var(--step-3)); }
+:where(.rich-content) h4 { font-size: var(--font-size-h4, var(--step-2)); }
+:where(.rich-content) h5 { font-size: var(--font-size-h5, var(--step-0)); }
+:where(.rich-content) h6 { font-size: var(--font-size-h6, var(--step--1)); }
 
 :where(.rich-content) p { margin-block: 0 1.1em; }
 /* Полужирный — это выделение, а не смена цвета: синий <strong> в тексте
@@ -129,7 +129,7 @@
     right: 1.2rem;
     color: var(--rich-accent, #0d9488);
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: var(--font-size-h1, 4.25rem);
+    font-size: var(--font-size-h1, var(--step-11));
     line-height: 1;
     opacity: 0.2;
     pointer-events: none;
@@ -152,7 +152,7 @@
     margin-block-start: 0.9rem;
     color: var(--rich-muted, #64748b);
     font-family: var(--font-family, system-ui, sans-serif);
-    font-size: var(--font-size-meta, .85rem);
+    font-size: var(--font-size-meta, var(--step--2));
     font-style: normal;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -173,7 +173,7 @@
     border-block: 2px solid var(--rich-accent, #0d9488);
     padding: 1.6rem 1rem;
     text-align: center;
-    font-size: var(--font-size-h3, 1.2rem);
+    font-size: var(--font-size-h3, var(--step-2));
     font-weight: 600;
 }
 :where(.rich-content) blockquote.pullquote::before,
@@ -228,7 +228,7 @@
     border-inline-start: 3px solid var(--rich-accent, #0d9488);
     border-radius: 0 var(--radius-sm, 8px) var(--radius-sm, 8px) 0;
     color: var(--rich-muted, #475569);
-    font-size: var(--font-size-meta, .85rem);
+    font-size: var(--font-size-meta, var(--step--2));
     line-height: 1.55;
     text-align: start;
     font-weight: 500;
@@ -264,7 +264,7 @@
     border-spacing: 0;
     border-radius: var(--radius-sm, 8px);
     background: var(--rich-surface);
-    font-size: var(--font-size-card-text, .95rem);
+    font-size: var(--font-size-card-text, var(--step--1));
     line-height: 1.45;
 }
 
@@ -314,11 +314,11 @@
    по-разному. Текст статьи набран единообразно. */
 
 @media (max-width: 720px) {
-    :where(.rich-content) { font-size: var(--font-size-body, 1rem); }
-    :where(.rich-content) h2 { font-size: var(--font-size-h2, 1.5rem); }
-    :where(.rich-content) h3 { font-size: var(--font-size-h3, 1.3rem); }
+    :where(.rich-content) { font-size: var(--font-size-body, var(--step-0)); }
+    :where(.rich-content) h2 { font-size: var(--font-size-h2, var(--step-4)); }
+    :where(.rich-content) h3 { font-size: var(--font-size-h3, var(--step-2)); }
     :where(.rich-content) blockquote { padding: 1.1rem 2.8rem 1.1rem 1.15rem; }
-    :where(.rich-content) blockquote::before { inset-inline-end: .65rem; font-size: var(--font-size-h1, 3rem); }
+    :where(.rich-content) blockquote::before { inset-inline-end: .65rem; font-size: var(--font-size-h1, var(--step-9)); }
     :where(.rich-content) table { display: block; max-inline-size: 100%; overflow-x: auto; scrollbar-width: thin; }
     :where(.rich-content) th,
     :where(.rich-content) td { min-inline-size: 8rem; }
