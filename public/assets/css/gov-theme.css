@@ -30,6 +30,9 @@
        на тёмной (чтобы навигационные заголовки карточек не пропадали). */
     --gov-title: var(--gov-navy);
     --gov-teal-text: var(--gov-teal-dark, #0284c7); /* WCAG AA: 5.4:1 контрастность на белом фоне */
+    /* Заливка, на которой читается белый текст. Без своего акцента совпадает
+       с текстовым вариантом бирюзы — у него те же 5.4:1 к белому. */
+    --accent-fill-strong: var(--gov-teal-dark, #0284c7);
     /* Текст на подложке из самого акцента (плашки, бейджи, номера): она
        темнее поверхности, и --gov-teal-text на ней не добирает до 4.5:1. */
     --gov-teal-on-tint: var(--gov-teal-tint-light, #00697d);
@@ -866,6 +869,16 @@ body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__trigger:ho
 .site-header__logo-light { display: none; }
 body .site-header--transparent:not(.is-scrolled) .site-header__logo-light { display: block; }
 body .site-header--transparent:not(.is-scrolled) .site-header__logo:has(.site-header__logo-light) img.site-header__logo-std { display: none; }
+/* Тёмная тема — тот же случай, что и прозрачная шапка: фон тёмный, и обычный
+   логотип на нём тонет. Раньше подмена работала только на прозрачной шапке, и
+   в тёмной теме оставался вариант для светлого фона. Условие :has() важно:
+   если светлого логотипа не загрузили, обычный обязан остаться. */
+:root[data-theme="dark"] .site-header__logo-light { display: block; }
+:root[data-theme="dark"] .site-header__logo:has(.site-header__logo-light) img.site-header__logo-std { display: none; }
+@media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] .site-header__logo-light { display: block; }
+    :root[data-theme="auto"] .site-header__logo:has(.site-header__logo-light) img.site-header__logo-std { display: none; }
+}
 .site-header--transparent:not(.is-scrolled) .site-header__logo:not(:has(img))::before { background: #fff; }
 .site-header--transparent:not(.is-scrolled) .site-menu__link:hover,
 .site-header--transparent:not(.is-scrolled) .site-menu__link:focus-visible,

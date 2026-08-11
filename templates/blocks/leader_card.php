@@ -46,19 +46,33 @@ $duties = trim((string) ($data['duties'] ?? ''));
 
 $tabs = [];
 if ($facts !== []) {
-    $tabs[] = ['key' => 'facts', 'title' => trim((string) ($data['facts_title'] ?? '')) ?: t('Основная информация')];
+    $tabs[] = ['key' => 'facts', 'title' => trim((string) ($data['facts_title'] ?? '')) ?: t('Основная информация'), 'icon' => trim((string) ($data['facts_icon'] ?? ''))];
 }
 if ($bio !== '') {
-    $tabs[] = ['key' => 'bio', 'title' => trim((string) ($data['bio_title'] ?? '')) ?: t('Биография')];
+    $tabs[] = ['key' => 'bio', 'title' => trim((string) ($data['bio_title'] ?? '')) ?: t('Биография'), 'icon' => trim((string) ($data['bio_icon'] ?? ''))];
 }
 if ($duties !== '') {
-    $tabs[] = ['key' => 'duties', 'title' => trim((string) ($data['duties_title'] ?? '')) ?: t('Функции')];
+    $tabs[] = ['key' => 'duties', 'title' => trim((string) ($data['duties_title'] ?? '')) ?: t('Функции'), 'icon' => trim((string) ($data['duties_icon'] ?? ''))];
 }
+
+// «Только иконки» применяется, лишь когда иконка есть у КАЖДОЙ показанной
+// вкладки: иначе одна из них осталась бы пустым прямоугольником. Настройку в
+// этом случае молча игнорируем — предупреждать редактора негде, а сломанная
+// вкладка хуже неприменённой настройки.
+$iconsOnly = !empty($data['mobile_icons_only'])
+    && $tabs !== []
+    && array_filter($tabs, static fn (array $tab): bool => $tab['icon'] === '') === [];
+
+// Тег имени и уровень заголовков вкладок связаны: если имя — заголовок, то
+// разделы карточки должны идти ровно на уровень ниже. Иначе получается скачок
+// (h2 → h4 или h1 → h3), а его помечает axe и путается скринридер.
+$nameTag = in_array($data['name_tag'] ?? 'p', ['p', 'h2', 'h3'], true) ? (string) $data['name_tag'] : 'p';
+$panelTag = $nameTag === 'h3' ? 'h4' : 'h3';
 
 $panelId = static fn (string $key): string => 'leader-' . (int) $blockId . '-' . $key;
 $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES);
 ?>
-<div class="leader-card"<?= $tabs !== [] ? ' data-leader-card' : '' ?>>
+<div class="leader-card<?= $iconsOnly ? ' leader-card--mobile-icons' : '' ?>"<?= $tabs !== [] ? ' data-leader-card' : '' ?>>
     <div class="leader-card__side">
         <?php if ($photo !== ''): ?>
             <div class="leader-card__photo">
@@ -67,7 +81,7 @@ $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES)
         <?php endif; ?>
 
         <div class="leader-card__ident">
-            <?php if ($name !== ''): ?><p class="leader-card__name"><?= $esc($name) ?></p><?php endif; ?>
+            <?php if ($name !== ''): ?><<?= $nameTag ?> class="leader-card__name"><?= $esc($name) ?></<?= $nameTag ?>><?php endif; ?>
             <?php if ($position !== ''): ?><p class="leader-card__position"><?= nl2br($esc($position)) ?></p><?php endif; ?>
         </div>
 
@@ -118,13 +132,18 @@ $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES)
                 <?php foreach ($tabs as $index => $tab): ?>
                     <a class="leader-card__tab<?= $index === 0 ? ' is-active' : '' ?>"
                        href="#<?= $esc($panelId($tab['key'])) ?>"
-                       data-leader-tab="<?= $esc($tab['key']) ?>"><?= $esc($tab['title']) ?></a>
+                       <?= $iconsOnly ? 'title="' . $esc($tab['title']) . '" ' : '' ?>data-leader-tab="<?= $esc($tab['key']) ?>">
+                        <?php if ($tab['icon'] !== ''): ?>
+                            <span class="leader-card__tab-icon" aria-hidden="true"><?= Icon::render($tab['icon'], 18) ?></span>
+                        <?php endif; ?>
+                        <span class="leader-card__tab-text"><?= $esc($tab['title']) ?></span>
+                    </a>
                 <?php endforeach; ?>
             </nav>
 
             <?php foreach ($tabs as $tab): ?>
                 <section class="leader-card__panel" id="<?= $esc($panelId($tab['key'])) ?>" data-leader-panel="<?= $esc($tab['key']) ?>">
-                    <h3 class="leader-card__panel-title"><?= $esc($tab['title']) ?></h3>
+                    <<?= $panelTag ?> class="leader-card__panel-title"><?= $esc($tab['title']) ?></<?= $panelTag ?>>
 
                     <?php if ($tab['key'] === 'facts'): ?>
                         <dl class="leader-card__facts">

@@ -1088,6 +1088,16 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php if ($type === 'leader_card'): ?>
             <?= \App\Core\AdminUi::imageField('photo', (string) ($data['photo'] ?? ''), ['label' => 'Фото руководителя']) ?>
             <div class="form-field"><label for="lc_name">Имя</label><input type="text" id="lc_name" name="name" value="<?= htmlspecialchars($data['name'] ?? '', ENT_QUOTES) ?>" placeholder="Фамилия Имя Отчество"></div>
+            <?php $lcTag = in_array($data['name_tag'] ?? 'p', ['p', 'h2', 'h3'], true) ? $data['name_tag'] : 'p'; ?>
+            <div class="form-field">
+                <label for="lc_name_tag">Тег имени</label>
+                <select id="lc_name_tag" name="name_tag">
+                    <option value="p" <?= $lcTag === 'p' ? 'selected' : '' ?>>Обычный текст (не заголовок)</option>
+                    <option value="h2" <?= $lcTag === 'h2' ? 'selected' : '' ?>>Заголовок H2</option>
+                    <option value="h3" <?= $lcTag === 'h3' ? 'selected' : '' ?>>Заголовок H3</option>
+                </select>
+                <span class="form-hint">Заголовок ставится, когда карточка — самостоятельный раздел страницы. Уровни не должны перескакивать: под H1 страницы идёт H2, под ним H3. Заголовки вкладок подстроятся на уровень ниже сами.</span>
+            </div>
             <div class="form-field"><label for="lc_position">Должность</label><textarea id="lc_position" name="position" rows="2" placeholder="Директор Агентства…"><?= htmlspecialchars($data['position'] ?? '', ENT_QUOTES) ?></textarea></div>
             <div class="form-field"><label for="lc_phone">Телефон</label><input type="text" id="lc_phone" name="phone" value="<?= htmlspecialchars($data['phone'] ?? '', ENT_QUOTES) ?>" placeholder="+998 71 203 10 00"></div>
             <div class="form-field"><label for="lc_email">E-mail</label><input type="text" id="lc_email" name="email" value="<?= htmlspecialchars($data['email'] ?? '', ENT_QUOTES) ?>"></div>
@@ -1103,6 +1113,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
 
             <hr>
             <div class="form-field"><label for="lc_facts_title">Вкладка 1 — заголовок</label><input type="text" id="lc_facts_title" name="facts_title" value="<?= htmlspecialchars($data['facts_title'] ?? 'Основная информация', ENT_QUOTES) ?>"></div>
+            <?= \App\Core\AdminUi::iconField('facts_icon', $data['facts_icon'] ?? '', ['id' => 'lc_facts_icon', 'label' => 'Вкладка 1 — иконка']) ?>
             <div>
                 <label>Строки первой вкладки</label>
                 <div data-repeater="items">
@@ -1126,11 +1137,19 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
 
             <hr>
             <div class="form-field"><label for="lc_bio_title">Вкладка 2 — заголовок</label><input type="text" id="lc_bio_title" name="bio_title" value="<?= htmlspecialchars($data['bio_title'] ?? 'Биография', ENT_QUOTES) ?>"></div>
+            <?= \App\Core\AdminUi::iconField('bio_icon', $data['bio_icon'] ?? '', ['id' => 'lc_bio_icon', 'label' => 'Вкладка 2 — иконка']) ?>
             <div class="form-field"><label for="lc_bio">Вкладка 2 — текст</label><textarea id="lc_bio" name="bio" rows="6" data-wysiwyg><?= htmlspecialchars($data['bio'] ?? '', ENT_QUOTES) ?></textarea></div>
 
             <hr>
             <div class="form-field"><label for="lc_duties_title">Вкладка 3 — заголовок</label><input type="text" id="lc_duties_title" name="duties_title" value="<?= htmlspecialchars($data['duties_title'] ?? 'Функции', ENT_QUOTES) ?>"></div>
+            <?= \App\Core\AdminUi::iconField('duties_icon', $data['duties_icon'] ?? '', ['id' => 'lc_duties_icon', 'label' => 'Вкладка 3 — иконка']) ?>
             <div class="form-field"><label for="lc_duties">Вкладка 3 — текст</label><textarea id="lc_duties" name="duties" rows="6" data-wysiwyg><?= htmlspecialchars($data['duties'] ?? '', ENT_QUOTES) ?></textarea></div>
+            <hr>
+            <div class="form-field form-field--checkbox">
+                <input type="checkbox" id="lc_mobile_icons_only" name="mobile_icons_only" value="1" <?= !empty($data['mobile_icons_only']) ? 'checked' : '' ?>>
+                <label for="lc_mobile_icons_only">На узком экране оставить во вкладках только иконки</label>
+            </div>
+            <p class="form-hint">Экономит место, когда заголовки длинные. Работает, только если иконка задана у каждой показанной вкладки — иначе получилась бы пустая вкладка, и настройка молча не применится. Подписи остаются доступны скринридеру.</p>
             <p class="form-hint">Вкладка без заголовка и без содержимого не показывается. Цвет активной вкладки берётся из акцента сайта («Дизайн сайта»), отдельной настройки у блока нет.</p>
         <?php endif; ?>
 

@@ -5,16 +5,16 @@
 
 .leader-card {
     display: grid;
-    /* 440px = портрет 170 + колонка данных ~250 + промежуток: при меньшем
-       значении должность ломалась по одному слову в строку. */
-    grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+    /* 500px = портрет 190 + колонка данных ~290 + промежуток. Уже этого
+       должность и приёмные часы начинают ломаться по одному слову в строку. */
+    grid-template-columns: minmax(0, 500px) minmax(0, 1fr);
     gap: clamp(20px, 3vw, 36px);
     align-items: stretch;
     padding: clamp(18px, 2.4vw, 28px);
-    /* Карточка — своя подложка, а не тот же белый, что у панели внутри: когда
-       на странице три руководителя подряд, одинаковый фон сливал их в одно
-       полотно. Оттенок берётся от границы темы, поэтому работает и в тёмной. */
-    background: color-mix(in srgb, var(--gov-border) 26%, var(--gov-surface));
+    /* Белая подложка: фон страницы серый, и карточки отделяются друг от друга
+       им, а не собственным оттенком. Внутреннюю панель от карточки отличает
+       рамка и заливка полосы вкладок, поэтому второй уровень серого не нужен. */
+    background: var(--gov-surface);
     border: 1px solid var(--gov-border);
     border-radius: var(--radius, 14px);
     box-shadow: var(--card-shadow, 0 2px 8px rgba(15, 23, 42, 0.03));
@@ -24,7 +24,7 @@
 /* --- Левая колонка: портрет и данные рядом, как в макете --- */
 .leader-card__side {
     display: grid;
-    grid-template-columns: minmax(0, 170px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 190px) minmax(0, 1fr);
     grid-template-areas: "photo ident" "photo info";
     grid-template-rows: auto 1fr;
     gap: 14px 18px;
@@ -59,6 +59,7 @@
    остаётся около 180px, и «Полвонзода» уходило за край карточки. */
 .leader-card__name,
 .leader-card__position { overflow-wrap: break-word; }
+h2.leader-card__name, h3.leader-card__name { font-family: inherit; }
 .leader-card__name { margin: 0; font-size: var(--step-3); font-weight: 700; color: var(--gov-title); line-height: 1.2; letter-spacing: -0.01em; }
 .leader-card__position { margin: 0; font-size: var(--step--1); line-height: 1.45; color: var(--gov-teal-text); }
 
@@ -116,6 +117,7 @@
     position: relative;
     display: inline-flex;
     align-items: center;
+    gap: 9px;
     padding: 14px 22px;
     color: var(--gov-muted);
     font-weight: 700;
@@ -128,15 +130,16 @@
     background: var(--gov-surface);
     color: var(--gov-teal-text);
 }
-/* Активная вкладка залита акцентом сайта; цвет текста на заливке считает
-   AccentContrast и отдаёт переменной --on-accent — подбирать его руками
-   нельзя, акцент настраивается в админке. */
+/* Активная вкладка: белые текст и иконка — это требование оформления, поэтому
+   заливка берётся не сырым акцентом, а его затемнённым вариантом
+   (--accent-fill-strong), на котором белый гарантированно даёт 4.5:1. На сыром
+   акценте белый давал 3.27:1 — такую пару axe справедливо считает ошибкой. */
 .leader-card__tab.is-active {
     z-index: 1;
-    background: var(--color-accent, var(--gov-navy));
-    color: var(--on-accent, #fff);
+    background: var(--accent-fill-strong, var(--gov-navy));
+    color: #fff;
 }
-.leader-card__tab.is-active:hover { color: var(--on-accent, #fff); }
+.leader-card__tab.is-active:hover { color: #fff; }
 /* Скошенный правый край — «язычок» вкладки из макета. Отдельный элемент, а не
    clip-path: полигон срезал бы левый край вкладки. Декоративен, поэтому при
    переносе вкладок на вторую строку убирается — иначе налезал бы на соседнюю. */
@@ -150,11 +153,31 @@
     background: inherit;
     transform: skewX(14deg);
 }
+.leader-card__tab-icon { display: inline-flex; flex: none; }
+
 @media (max-width: 640px) {
     .leader-card__name { font-size: var(--step-1); }
     .leader-card__position { font-size: var(--step--2); }
     .leader-card__tab { padding: 12px 16px; }
     .leader-card__tab.is-active::after { content: none; }
+
+    /* Режим «только иконки». Подпись не удаляется, а прячется визуально:
+       скринридер и поиск по странице должны видеть название вкладки. Ширина
+       под палец — 48px, это больше минимума WCAG 2.2 (24px). */
+    /* Вкладки делят ширину поровну — получается segmented control, а не
+       три значка, прижатых к левому краю с пустотой справа. */
+    .leader-card--mobile-icons .leader-card__tabs { flex-wrap: nowrap; }
+    .leader-card--mobile-icons .leader-card__tab {
+        flex: 1 1 0;
+        justify-content: center;
+        min-width: 48px;
+        padding: 13px 10px;
+        gap: 0;
+    }
+    .leader-card--mobile-icons .leader-card__tab-text {
+        position: absolute; width: 1px; height: 1px; margin: -1px;
+        overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+    }
 }
 @media (prefers-reduced-motion: reduce) { .leader-card__tab { transition: none; } }
 

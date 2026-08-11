@@ -61,11 +61,12 @@ final class BlockTypeRegistry
         'docs_list' => ['variant' => 'grid', 'title' => '', 'all_text' => '', 'all_url' => '', 'columns' => 4, 'search_enabled' => true, 'items' => []],
         'map_point' => ['title' => '', 'image' => '', 'embed_url' => '', 'load_mode' => 'click', 'card_title' => '', 'address' => '', 'copy_enabled' => true, 'button_text' => '', 'button_url' => ''],
         'org_structure' => ['title' => '', 'layout' => 'tree', 'columns' => 4, 'council' => '', 'head_title' => 'Директор', 'head_name' => '', 'head_url' => '', 'side_items' => '', 'branches' => [], 'collapsible' => false, 'notes' => '', 'footnote' => ''],
-        'leader_card' => ['photo' => '', 'name' => '', 'position' => '', 'phone' => '', 'email' => '', 'hours' => '',
+        'leader_card' => ['photo' => '', 'name' => '', 'name_tag' => 'p', 'position' => '', 'phone' => '', 'email' => '', 'hours' => '',
             'facebook' => '', 'x' => '', 'linkedin' => '', 'instagram' => '', 'telegram' => '',
-            'facts_title' => 'Основная информация', 'items' => [],
-            'bio_title' => 'Биография', 'bio' => '',
-            'duties_title' => 'Функции', 'duties' => ''],
+            'facts_title' => 'Основная информация', 'facts_icon' => '', 'items' => [],
+            'bio_title' => 'Биография', 'bio_icon' => '', 'bio' => '',
+            'duties_title' => 'Функции', 'duties_icon' => '', 'duties' => '',
+            'mobile_icons_only' => false],
     ];
 
     /** Короткие русские названия для сообщений редактору. */
