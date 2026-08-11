@@ -15,6 +15,10 @@ require __DIR__ . '/../layout/header.php';
 /** @var int $total */
 /** @var int $pages */
 /** @var array $langCounts */
+/** @var array $categories список категорий для фильтра */
+/** @var array<int,string> $categoryNames id категории → название на языке списка */
+$categories = $categories ?? [];
+$categoryNames = $categoryNames ?? [];
 $langs = Language::active();
 ?>
 
