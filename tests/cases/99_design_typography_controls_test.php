@@ -106,7 +106,9 @@ test('точные размеры сохраняются и переопреде
     assert_contains('--base-line-height:1.35', $css);
     assert_contains('--font-size-h1:34px', $css);
     assert_contains('--font-size-card-text:14px', $css);
-    assert_contains('h1,', $css);
+    // Голого «h1» в списке группы больше нет: уровень заголовка задаёт
+    // отдельное правило ниже, с исключением компонентных классов.
+    assert_contains(':root body h1[class]', $css);
     assert_contains('font-size:var(--font-size-h1) !important;}', $css);
     assert_contains('.stage__text', $css);
     assert_contains('font-size:var(--font-size-card-text) !important;}', $css);
@@ -167,7 +169,9 @@ test('HTML-уровень заголовка главнее компонентн
     $css = DesignSettings::typographyCss();
 
     $componentRule = strpos($css, '.newsdetail-card__title');
-    $semanticRule = strpos($css, ':root body h3[class],:root body h3:not([class])');
+    // Правило по тегу теперь исключает классы, явно отнесённые к компонентным
+    // группам, поэтому между «h3[class]» и запятой стоит :not(…).
+    $semanticRule = strpos($css, ':root body h3[class]:not(');
     assert_true($componentRule !== false, 'класс карточки должен быть связан с настройкой H3');
     assert_true($semanticRule !== false, 'для H3 нужна финальная защита от классовых переопределений');
     assert_true($semanticRule > $componentRule, 'семантическое правило H3 должно выводиться последним');

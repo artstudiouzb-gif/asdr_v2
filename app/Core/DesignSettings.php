@@ -411,12 +411,12 @@ final class DesignSettings
      * компонентные clamp()-размеры тем (панель a11y всё равно сильнее).
      */
     public const TYPO_SIZES = [
-        'fs_h1' => ['Заголовок H1', 'h1, .block-hero__title, .content-pagehead__title, .profile__name, .listing__title, .projdetail__title, .catdetail__title, .translation-notice__title, .newsdetail__title, .newsdetail-phero__title, .reader-mode__headline', '42'],
-        'fs_h2' => ['Заголовок H2', 'h2, .section-title, .block-title, .block-text__title, .bio__title, .content-list__head h1, .block-news__title, .block-categories__title, .block-contact-cards__title, .block-counters__title, .block-projects__title, .block-team__title, .block-faq__title, .block-testimonials__title, .block-advantages__title, .block-banner__title, .block-featband__title, .block-map__title, .block-partners__title, .textimage__title, .subscribe-block__title, .section-head__title, .newslist-lead__title, .gcal-list__title, .album-card__title, .catcard__title, .catdetail__subtitle, .catdetail__card-title, .block-timeline__title', '32'],
-        'fs_h3' => ['Заголовок H3', 'h3, .card__title, .feature-card__title, .contact-card__title, .imgcard__title, .newsfeat-lead__title, .newsfeat-mini__title, .newsfeat-text__title, .orgstruct__head-name, .person-card__name, .timeline-item__year, .timeline-cta__title, .ctaband__title, .profile__position, .featband__name, .bio-career__title, .bio-quote__mark, .widget__title, .bio-extra__title, .relnews-card__title, .adjnews__title, .block-team__group-title, .newsdetail-card__title, .newsdetail-timeline__title, .newsdetail-subscribe__title, .news-poll-card__question', '24'],
-        'fs_h4' => ['Заголовок H4', 'h4, .block-team__unit-title, .newsdetail-timeline__heading', '20'],
-        'fs_h5' => ['Заголовок H5', 'h5', '18'],
-        'fs_h6' => ['Заголовок H6', 'h6', '16'],
+        'fs_h1' => ['Заголовок H1', '.block-hero__title, .content-pagehead__title, .profile__name, .listing__title, .projdetail__title, .catdetail__title, .translation-notice__title, .newsdetail__title, .newsdetail-phero__title, .reader-mode__headline', '42'],
+        'fs_h2' => ['Заголовок H2', '.section-title, .block-title, .block-text__title, .bio__title, .content-list__head h1, .block-news__title, .block-categories__title, .block-contact-cards__title, .block-counters__title, .block-projects__title, .block-team__title, .block-faq__title, .block-testimonials__title, .block-advantages__title, .block-banner__title, .block-featband__title, .block-map__title, .block-partners__title, .textimage__title, .subscribe-block__title, .section-head__title, .newslist-lead__title, .catdetail__subtitle, .block-timeline__title', '32'],
+        'fs_h3' => ['Заголовок H3', '.newsfeat-lead__title, .orgstruct__head-name, .timeline-item__year, .timeline-cta__title, .ctaband__title, .profile__position, .featband__name, .bio-career__title, .bio-quote__mark, .widget__title, .bio-extra__title, .block-team__group-title, .newsdetail-card__title, .newsdetail-timeline__title, .newsdetail-subscribe__title', '24'],
+        'fs_h4' => ['Заголовок H4', '.block-team__unit-title, .newsdetail-timeline__heading', '20'],
+        'fs_h5' => ['Заголовок H5', '', '18'],
+        'fs_h6' => ['Заголовок H6', '', '16'],
         'fs_lead' => ['Вводный и крупный текст', '.content-pagehead__lead, .content-list__lead, .listing__lead, .block-hero__lead, .block-hero__subtitle, .block-banner__text, .newsdetail__lead, .newsdetail-phero__lead, .newslist-lead__excerpt, .newsfeat-lead__excerpt, .profile__text, .bio-quote__text, .rich-content--lead', '17'],
         'fs_card_title' => ['Заголовки карточек и этапов', '.card__title, .content-card__title, .feature-card__title, .contact-card__title, .stage__title, .stage-item__title, .person-card__name, .doc-card__title, .repo-card__title, .news-card__title, .project-card__title, .album-card__title, .relnews-card__title, .adjnews__title, .imgcard__title, .newsfeat-mini__title, .newsfeat-text__title, .newsdocs-item__title, .catcard__title, .catdetail__card-title, .faq-item__q, .news-poll-card__question, .newsdetail-doc__title, .block-map__card-title, .gcal-list__title, .widget-latest-news__title, .bio-edu__degree', '16'],
         'fs_card_text' => ['Текст карточек и этапов', '.feature-card__text, .stage__text, .stage-item__text, .person-card__role, .act-card__desc, .doc-card__desc, .repo-card__desc, .news-card__desc, .news-card__excerpt, .project-card__desc, .relnews-card__excerpt, .imgcard__desc, .catcard__excerpt, .timeline-item__text, .featband__text, .bio-career__text, .newsdetail-timeline__desc, .newsdetail-points__item, .faq-item__a, .block-advantages__text, .contact-card__item, .block-map__card-address', '14'],
@@ -517,6 +517,30 @@ final class DesignSettings
         return self::normalizePixelValue($raw, 8, 96);
     }
 
+    /**
+     * `:not(...)` со всеми классами компонентных групп типографики.
+     *
+     * Нужен правилу по тегу заголовка: элемент, чей класс владелец явно
+     * отнёс к «Заголовкам карточек», «Служебным подписям» и прочим группам,
+     * должен слушаться этой группы, а не уровня заголовка. Берём только
+     * простые селекторы вида «.class» — составные вроде «.a .b» в :not()
+     * значили бы не то, что ожидается.
+     */
+    private static function componentTitleExclusion(): string
+    {
+        $classes = [];
+        foreach (['fs_lead', 'fs_card_title', 'fs_card_text', 'fs_meta', 'fs_menu', 'fs_topbar'] as $group) {
+            foreach (explode(',', self::TYPO_SIZES[$group][1] ?? '') as $selector) {
+                $selector = trim($selector);
+                if (preg_match('/^\.[A-Za-z0-9_-]+$/', $selector) === 1) {
+                    $classes[$selector] = true;
+                }
+            }
+        }
+
+        return $classes === [] ? '' : ':not(' . implode(',', array_keys($classes)) . ')';
+    }
+
     /** CSS-правила для заданных размеров по элементам ('' — ничего не задано). */
     public static function typographyCss(): string
     {
@@ -533,15 +557,23 @@ final class DesignSettings
         }
 
         // Компонентный класс не должен менять семантический уровень заголовка:
-        // <h3 class="..."> всегда получает настройку H3, даже если класс по
-        // ошибке попал в другую группу. :root + [class]/:not([class]) дают
-        // правилу достаточную специфичность против компонентных селекторов.
+        // <h3 class="..."> получает настройку H3, даже если класс по ошибке
+        // попал в другую группу. :root + [class]/:not([class]) дают правилу
+        // достаточную специфичность против компонентных селекторов.
+        //
+        // Исключение — классы, явно перечисленные в компонентных группах
+        // («Заголовки карточек» и т.п.). Заголовок карточки остаётся <h2> по
+        // структуре страницы (h1 → h3 axe считает пропуском уровня), но
+        // размер ему задаёт своя группа, а не настройка H2: иначе увеличение
+        // H2 раздувало и карточки в списках.
+        $componentExclusion = self::componentTitleExclusion();
         foreach (['fs_h1' => 'h1', 'fs_h2' => 'h2', 'fs_h3' => 'h3', 'fs_h4' => 'h4', 'fs_h5' => 'h5', 'fs_h6' => 'h6'] as $key => $tag) {
             if (($sizes[$key] ?? '') === '') {
                 continue;
             }
             $variable = '--font-size-' . substr($key, 3);
-            $headingRules .= ':root body ' . $tag . '[class],:root body ' . $tag . ':not([class]){font-size:var(' . $variable . ') !important;}';
+            $headingRules .= ':root body ' . $tag . '[class]' . $componentExclusion
+                . ',:root body ' . $tag . ':not([class]){font-size:var(' . $variable . ') !important;}';
         }
 
         // Служебные подписи используют отдельный tracking-токен: интервал
