@@ -2870,21 +2870,6 @@
         }).observe(document.body, { childList: true, subtree: true });
     }
 
-    // Интерактивный «прожектор» (Spotlight) для карточек, кнопок и полей ввода в админке
-    document.addEventListener('mousemove', function (e) {
-        var el = e.target.closest(
-            '.stat-card, .design-card, .hb-behavior-card, .fb-card, .preset-card, .form-card, ' +
-            '.design-preset, .revision-item, .audit-item, .block-list-item, .menu-node__inner, ' +
-            '.btn, input[type="text"], input[type="email"], input[type="password"], input[type="search"], textarea, select'
-        );
-        if (!el) { return; }
-        var rect = el.getBoundingClientRect();
-        var x = e.clientX - rect.left;
-        var y = e.clientY - rect.top;
-        el.style.setProperty('--mouse-x', x + 'px');
-        el.style.setProperty('--mouse-y', y + 'px');
-    });
-
     // --- Автоматические уведомления и подсветка при пропуске обязательных полей ---
     (function () {
         function showNotificationToast(msg, type) {

@@ -1665,8 +1665,7 @@
                 var el = e.target.closest(
                     '.cat-tile, .contact-card, .project-card, .team-card, .feature-card, .news-card, .person-card, .album-card, .doc-card, .act-card, .catcard, .testimonial, .block-advantages__item, .mediacard, .imgcard, .faq-item, .stage, .timeline-item, ' +
                     '.btn, .block-cta__button, .btn-cta, .block-hero__button, .timeline-card__button, .timeline-cta__button, ' +
-                    '.a11y-toggle, .site-theme-toggle, .site-search-toggle, ' +
-                    'input[type="text"], input[type="email"], input[type="password"], input[type="search"]:not(.site-search input), textarea, select'
+                    '.a11y-toggle, .site-theme-toggle, .site-search-toggle'
                 );
                 if (!el) { return; }
                 var rect = el.getBoundingClientRect();

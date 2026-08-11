@@ -2545,13 +2545,12 @@ body.design-header-dark .a11y-toggle:hover,
     opacity: 1;
 }
 
-/* --- Интерактивный Spotlight-блик для полей ввода (без псевдоэлементов) --- */
+/* Полям ввода прожектор не полагается: в форме важна разборчивость поля, а не
+   украшение, и градиент под курсором заставлял браузер перерисовывать фон
+   поля на каждое движение мыши. Переход по рамке и тени оставлен — он
+   показывает фокус. Карточки и кнопки прожектор сохраняют. */
 input[type="text"], input[type="email"], input[type="password"], input[type="search"], textarea, select {
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-image 0.3s ease;
-}
-input[type="text"]:hover, input[type="email"]:hover, input[type="password"]:hover, input[type="search"]:hover, textarea:hover, select:hover,
-input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="search"]:focus, textarea:focus, select:focus {
-    background-image: radial-gradient(180px circle at var(--mouse-x, 0) var(--mouse-y, 0), color-mix(in srgb, var(--color-accent, #2f6fed) 6%, transparent), transparent 100%) !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
     .cat-tile::before, .contact-card::before, .project-card::before, .team-card::before,
@@ -2564,10 +2563,6 @@ input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focu
     .timeline-cta__button::before, .a11y-toggle::before,
     .site-theme-toggle::before, .site-search-toggle::before {
         display: none;
-    }
-    input[type="text"], input[type="email"], input[type="password"],
-    input[type="search"], textarea, select {
-        background-image: none !important;
     }
 }
 /* Предложение открыть материал на доступном языке без скрытого fallback. */

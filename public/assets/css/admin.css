@@ -3255,37 +3255,12 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
 .repeater-media input[type="text"] { flex: 1; min-width: 0; }
 .repeater-media .btn { white-space: nowrap; }
 
-/* --- Интерактивный Spotlight-блик при наведении (Админ-панель) --- */
-.stat-card, .design-card, .hb-behavior-card, .fb-card, .preset-card, .form-card, 
-.design-preset, .revision-item, .audit-item, .block-list-item, .menu-node__inner, .btn {
-    position: relative;
-    overflow: hidden;
-}
-.stat-card::before, .design-card::before, .hb-behavior-card::before, .fb-card::before, .preset-card::before, .form-card::before, 
-.design-preset::before, .revision-item::before, .audit-item::before, .block-list-item::before, .menu-node__inner::before, .btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: radial-gradient(220px circle at var(--mouse-x, 0) var(--mouse-y, 0), color-mix(in srgb, var(--admin-accent, #5b52e5) 7%, transparent), transparent 80%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-    z-index: 1;
-}
-.stat-card:hover::before, .design-card:hover::before, .hb-behavior-card:hover::before, .fb-card:hover::before, .preset-card:hover::before, .form-card:hover::before, 
-.design-preset:hover::before, .revision-item:hover::before, .audit-item:hover::before, .block-list-item:hover::before, .menu-node__inner:hover::before, .btn:hover::before {
-    opacity: 1;
-}
-
-/* --- Интерактивный Spotlight-блик для полей ввода в админке --- */
-.admin-main input[type="text"], .admin-main input[type="email"], .admin-main input[type="password"], .admin-main input[type="search"], .admin-main textarea, .admin-main select {
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-image 0.3s ease;
-}
-.admin-main input[type="text"]:hover, .admin-main input[type="email"]:hover, .admin-main input[type="password"]:hover, .admin-main input[type="search"]:hover, .admin-main textarea:hover, .admin-main select:hover,
-.admin-main input[type="text"]:focus, .admin-main input[type="email"]:focus, .admin-main input[type="password"]:focus, .admin-main input[type="search"]:focus, .admin-main textarea:focus, .admin-main select:focus {
-    background-image: radial-gradient(180px circle at var(--mouse-x, 0) var(--mouse-y, 0), color-mix(in srgb, var(--admin-accent, #5b52e5) 6%, transparent), transparent 100%) !important;
-}
+/* Прожектор в админке снят целиком: карточки, кнопки и поля ввода. Эффект
+   декоративный, а платили за него дважды — псевдоэлемент с радиальным
+   градиентом на каждой карточке и обработчик mousemove без throttle, который
+   писал две CSS-переменные на каждое событие мыши. Позиционирование и
+   overflow, добавленные вместе с эффектом, сняты тем же движением: до него их
+   здесь не было. На публичной части прожектор у карточек и кнопок остаётся. */
 
 /* --- Уведомления о пропущенных обязательных полях (Form Validation Toast) --- */
 .is-invalid {
