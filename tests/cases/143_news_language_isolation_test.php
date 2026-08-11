@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Core\Database;
 use App\Models\News;
+use App\Models\NewsCategory;
 use App\Models\NewsTranslation;
 
 test('Новости: публичные списки, рубрики и связанные материалы изолированы по языку', function (): void {
@@ -14,16 +15,24 @@ test('Новости: публичные списки, рубрики и свя�
     $ids = [];
     $insert = $pdo->prepare(
         "INSERT INTO news
-            (title, slug, badge, excerpt, content, status, published_at, lang, translation_group_id, views, created_at)
+            (title, slug, badge, category_id, excerpt, content, status, published_at, lang, translation_group_id, views, created_at)
          VALUES
-            (:title, :slug, :badge, :excerpt, :content, :status, NOW(), :lang, :group_id, :views, NOW())"
+            (:title, :slug, :badge, :category_id, :excerpt, :content, :status, NOW(), :lang, :group_id, :views, NOW())"
     );
+
+    // Рубрика у каждой записи своя: так фильтр по категории проверяется на
+    // языковую изоляцию — рубрика одна на все языки, а видимость записи нет.
+    $catIds = [];
+    foreach (['iso-ru', 'iso-uz', 'legacy', 'shadow', 'draft'] as $key) {
+        $catIds[$key] = (int) NewsCategory::create('Рубрика ' . $key . ' ' . $suffix);
+    }
 
     try {
         $insert->execute([
             ':title' => 'RU independent ' . $suffix,
             ':slug' => 'news-lang-ru-' . $suffix,
             ':badge' => 'ISO-RU-' . $suffix,
+            ':category_id' => $catIds['iso-ru'],
             ':excerpt' => 'RU excerpt',
             ':content' => '<p>RU content</p>',
             ':status' => 'published',
@@ -38,6 +47,7 @@ test('Новости: публичные списки, рубрики и свя�
             ':title' => 'UZ independent ' . $suffix,
             ':slug' => 'news-lang-uz-' . $suffix,
             ':badge' => 'ISO-UZ-' . $suffix,
+            ':category_id' => $catIds['iso-uz'],
             ':excerpt' => 'UZ excerpt',
             ':content' => '<p>UZ content</p>',
             ':status' => 'published',
@@ -52,6 +62,7 @@ test('Новости: публичные списки, рубрики и свя�
             ':title' => 'RU legacy ' . $suffix,
             ':slug' => 'news-lang-legacy-' . $suffix,
             ':badge' => 'LEGACY-RU-' . $suffix,
+            ':category_id' => $catIds['legacy'],
             ':excerpt' => 'Legacy RU excerpt',
             ':content' => '<p>Legacy RU content</p>',
             ':status' => 'published',
@@ -71,6 +82,7 @@ test('Новости: публичные списки, рубрики и свя�
             ':title' => 'RU shadowed ' . $suffix,
             ':slug' => 'news-lang-shadowed-' . $suffix,
             ':badge' => 'SHADOW-RU-' . $suffix,
+            ':category_id' => $catIds['shadow'],
             ':excerpt' => 'Shadow RU excerpt',
             ':content' => '<p>Shadow RU content</p>',
             ':status' => 'published',
@@ -90,6 +102,7 @@ test('Новости: публичные списки, рубрики и свя�
             ':title' => 'UZ draft ' . $suffix,
             ':slug' => 'news-lang-draft-' . $suffix,
             ':badge' => 'DRAFT-UZ-' . $suffix,
+            ':category_id' => $catIds['draft'],
             ':excerpt' => 'Draft UZ excerpt',
             ':content' => '<p>Draft UZ content</p>',
             ':status' => 'draft',
@@ -100,34 +113,41 @@ test('Новости: публичные списки, рубрики и свя�
         $draftUzId = (int) $pdo->lastInsertId();
         $ids[] = $draftUzId;
 
-        $ruRows = News::published(10, 0, 'ru', 'ISO-RU-' . $suffix);
+        $ruRows = News::published(10, 0, 'ru', $catIds['iso-ru']);
         assert_same([$ruId], array_map(static fn (array $row): int => (int) $row['id'], $ruRows));
-        assert_same(1, News::publishedCount('ISO-RU-' . $suffix, 'ru'));
-        assert_same(0, News::publishedCount('ISO-RU-' . $suffix, 'uz'));
+        assert_same(1, News::publishedCount($catIds['iso-ru'], 'ru'));
+        // Рубрика общая для языков, но RU-запись на UZ не показывается:
+        // у неё есть самостоятельная узбекская версия.
+        assert_same(0, News::publishedCount($catIds['iso-ru'], 'uz'));
 
-        $uzRows = News::published(10, 0, 'uz', 'ISO-UZ-' . $suffix);
+        $uzRows = News::published(10, 0, 'uz', $catIds['iso-uz']);
         assert_same([$uzId], array_map(static fn (array $row): int => (int) $row['id'], $uzRows));
-        assert_same(1, News::publishedCount('ISO-UZ-' . $suffix, 'uz'));
-        assert_same(0, News::publishedCount('ISO-UZ-' . $suffix, 'ru'));
+        assert_same(1, News::publishedCount($catIds['iso-uz'], 'uz'));
+        assert_same(0, News::publishedCount($catIds['iso-uz'], 'ru'));
 
-        $legacyRows = News::published(10, 0, 'uz', 'LEGACY-UZ-' . $suffix);
+        $legacyRows = News::published(10, 0, 'uz', $catIds['legacy']);
         assert_same(1, count($legacyRows), 'legacy-перевод остаётся доступен до создания независимой записи');
         assert_same($legacyId, (int) $legacyRows[0]['id']);
         assert_same('UZ legacy ' . $suffix, (string) $legacyRows[0]['title']);
-        assert_same(0, News::publishedCount('LEGACY-RU-' . $suffix, 'uz'));
 
-        assert_same([], News::published(10, 0, 'uz', 'SHADOW-UZ-' . $suffix), 'legacy скрыт независимым черновиком');
-        assert_same(0, News::publishedCount('SHADOW-UZ-' . $suffix, 'uz'));
-        assert_same(0, News::publishedCount('DRAFT-UZ-' . $suffix, 'uz'));
+        assert_same([], News::published(10, 0, 'uz', $catIds['shadow']), 'legacy скрыт независимым черновиком');
+        assert_same(0, News::publishedCount($catIds['shadow'], 'uz'));
+        assert_same(0, News::publishedCount($catIds['draft'], 'uz'));
 
-        $ruBadges = News::distinctBadges('ru');
-        $uzBadges = News::distinctBadges('uz');
-        assert_true(in_array('ISO-RU-' . $suffix, $ruBadges, true));
-        assert_false(in_array('ISO-UZ-' . $suffix, $ruBadges, true));
-        assert_true(in_array('ISO-UZ-' . $suffix, $uzBadges, true));
-        assert_true(in_array('LEGACY-UZ-' . $suffix, $uzBadges, true));
-        assert_false(in_array('ISO-RU-' . $suffix, $uzBadges, true));
-        assert_false(in_array('SHADOW-UZ-' . $suffix, $uzBadges, true));
+        $ruCats = array_map(
+            static fn (array $row): int => (int) $row['id'],
+            News::publishedCategories('ru')
+        );
+        $uzCats = array_map(
+            static fn (array $row): int => (int) $row['id'],
+            News::publishedCategories('uz')
+        );
+        assert_true(in_array($catIds['iso-ru'], $ruCats, true));
+        assert_false(in_array($catIds['iso-uz'], $ruCats, true));
+        assert_true(in_array($catIds['iso-uz'], $uzCats, true));
+        assert_true(in_array($catIds['legacy'], $uzCats, true), 'legacy-перевод даёт рубрику узбекскому рубрикатору');
+        assert_false(in_array($catIds['iso-ru'], $uzCats, true));
+        assert_false(in_array($catIds['shadow'], $uzCats, true));
 
         $resolvedUz = News::findPublishedBySlug('news-lang-ru-' . $suffix, 'uz');
         assert_true($resolvedUz !== null);
@@ -162,14 +182,17 @@ test('Новости: публичные списки, рубрики и свя�
         assert_false(in_array($ruId, $topUzIds, true));
 
         $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Site/NewsController.php');
-        assert_contains('News::distinctBadges($lang)', $controller);
-        assert_contains('News::publishedCount($badge !== \'\' ? $badge : null, $lang)', $controller);
+        assert_contains('News::publishedCategories($lang)', $controller);
+        assert_contains('News::publishedCount($categoryId > 0 ? $categoryId : null, $lang)', $controller);
         assert_contains('$requestedSlug !== $canonicalSlug', $controller, 'Чужой slug перенаправляется на canonical slug выбранного языка');
         assert_contains("Locale::url('news/' . \$canonicalSlug, \$lang)", $controller, 'Canonical redirect сохраняет языковой префикс');
     } finally {
         if ($ids !== []) {
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
             $pdo->prepare("DELETE FROM news WHERE id IN ({$placeholders})")->execute($ids);
+        }
+        foreach ($catIds ?? [] as $catId) {
+            NewsCategory::delete((int) $catId);
         }
     }
 });

@@ -508,10 +508,15 @@ final class BlockController
                     'group_by_department' => !empty($_POST['group_by_department']),
                 ];
             case 'projects_list':
+                return [
+                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    'limit' => max(0, (int) ($_POST['limit'] ?? 0)),
+                ];
             case 'news_latest':
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'limit' => max(0, (int) ($_POST['limit'] ?? 0)),
+                    'category' => max(0, (int) ($_POST['category'] ?? 0)),
                 ];
             case 'partners':
                 $items = [];
@@ -605,6 +610,7 @@ final class BlockController
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => (trim((string) ($_POST['all_url'] ?? '')) !== '' && \App\Core\UrlGuard::isSafeLink(trim((string) ($_POST['all_url'] ?? '')))) ? trim((string) ($_POST['all_url'] ?? '')) : '',
                     'limit' => max(2, min(12, (int) ($_POST['limit'] ?? 6))),
+                    'category' => max(0, (int) ($_POST['category'] ?? 0)),
                 ];
             case 'person_cards':
                 $items = [];
@@ -684,6 +690,7 @@ final class BlockController
                     'news_all_text' => trim((string) ($_POST['news_all_text'] ?? '')),
                     'news_all_url' => $this->safeUrlField('news_all_url'),
                     'limit' => max(1, min(6, (int) ($_POST['limit'] ?? 3))),
+                    'category' => max(0, (int) ($_POST['category'] ?? 0)),
                     'docs_title' => TextProcessor::typographPlain(trim((string) ($_POST['docs_title'] ?? '')), $locale),
                     'docs_all_text' => trim((string) ($_POST['docs_all_text'] ?? '')),
                     'docs_all_url' => $this->safeUrlField('docs_all_url'),

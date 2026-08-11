@@ -400,6 +400,30 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
         <?php endif; ?>
 
+        <?php if (in_array($type, ['news_latest', 'news_feature', 'news_docs'], true)): ?>
+            <?php
+            // Выборка по рубрике: один и тот же список для всех трёх блоков
+            // новостей — иначе редактор искал бы поле в разных местах формы.
+            $blockCategories = \App\Models\NewsCategory::all();
+            $blockCategory = (int) ($data['category'] ?? 0);
+            ?>
+            <div class="form-field">
+                <label for="news_block_category">Категория новостей</label>
+                <select id="news_block_category" name="category">
+                    <option value="0">Все категории</option>
+                    <?php foreach ($blockCategories as $blockCat): ?>
+                        <option value="<?= (int) $blockCat['id'] ?>" <?= $blockCategory === (int) $blockCat['id'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars((string) $blockCat['name'], ENT_QUOTES) ?><?= (int) $blockCat['is_active'] === 1 ? '' : ' (скрыта)' ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">
+                    Блок покажет новости только этой рубрики. «Все категории» — без ограничения.
+                    Порядок вывода не меняется: сначала свежие. Названия рубрики и новостей берутся на языке страницы.
+                </span>
+            </div>
+        <?php endif; ?>
+
         <?php if ($type === 'team_list'): ?>
             <?php $teamDepartments = $departments ?? []; ?>
             <div class="form-field">

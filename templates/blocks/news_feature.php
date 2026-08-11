@@ -23,6 +23,8 @@ $fmt = static fn (string $d): string => DateFormatter::short($d);
 // Рубрика — только если она реально заполнена: метка, одинаковая у всех
 // карточек, ничего не сообщает и лишь спорит с заголовком за внимание.
 $badge = static fn (array $i): string => trim((string) ($i['badge'] ?? ''));
+// Категория — рубрика новости; метка (badge) живёт отдельно и не обязательна.
+$category = static fn (array $i): string => trim((string) ($i['category'] ?? ''));
 ?>
 <div class="block-newsfeat">
     <div class="section-head">
@@ -44,6 +46,7 @@ $badge = static fn (array $i): string => trim((string) ($i['badge'] ?? ''));
                 <span class="newsfeat-lead__over">
                     <span class="news-meta">
                         <?php if (!empty($featured['published_at'])): ?><time class="newsfeat__date newsfeat__date--on-media"><?= htmlspecialchars($fmt((string) $featured['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                        <?php if ($category($featured) !== ''): ?><span class="news-category news-category--on-media"><?= htmlspecialchars($category($featured), ENT_QUOTES) ?></span><?php endif; ?>
                         <?php if ($badge($featured) !== ''): ?><span class="news-badge news-badge--on-media"><?= htmlspecialchars($badge($featured), ENT_QUOTES) ?></span><?php endif; ?>
                     </span>
                     <span class="newsfeat-lead__title"><?= htmlspecialchars((string) $featured['title'], ENT_QUOTES) ?></span>
@@ -67,6 +70,7 @@ $badge = static fn (array $i): string => trim((string) ($i['badge'] ?? ''));
                             <span class="newsfeat-mini__body">
                                 <span class="news-meta">
                                     <?php if (!empty($item['published_at'])): ?><time class="newsfeat__date"><?= htmlspecialchars($fmt((string) $item['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                                    <?php if ($category($item) !== ''): ?><span class="news-category"><?= htmlspecialchars($category($item), ENT_QUOTES) ?></span><?php endif; ?>
                                     <?php if ($badge($item) !== ''): ?><span class="news-badge"><?= htmlspecialchars($badge($item), ENT_QUOTES) ?></span><?php endif; ?>
                                 </span>
                                 <span class="newsfeat-mini__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></span>
@@ -81,7 +85,8 @@ $badge = static fn (array $i): string => trim((string) ($i['badge'] ?? ''));
                         <a class="newsfeat-text" href="<?= htmlspecialchars((string) $item['url'], ENT_QUOTES) ?>">
                             <span class="news-meta">
                                 <?php if (!empty($item['published_at'])): ?><time class="newsfeat__date"><?= htmlspecialchars($fmt((string) $item['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
-                                <?php if ($badge($item) !== ''): ?><span class="news-badge"><?= htmlspecialchars($badge($item), ENT_QUOTES) ?></span><?php endif; ?>
+                                <?php if ($category($item) !== ''): ?><span class="news-category"><?= htmlspecialchars($category($item), ENT_QUOTES) ?></span><?php endif; ?>
+                                    <?php if ($badge($item) !== ''): ?><span class="news-badge"><?= htmlspecialchars($badge($item), ENT_QUOTES) ?></span><?php endif; ?>
                             </span>
                             <span class="newsfeat-text__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></span>
                         </a>

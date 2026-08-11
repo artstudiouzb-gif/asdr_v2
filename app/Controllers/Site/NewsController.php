@@ -22,23 +22,31 @@ final class NewsController
         $perPage = 13; // 1 крупная + 12 в сетке
         $page = max(1, (int) ($_GET['page'] ?? 1));
 
-        // Рубрикатор по бейджам (бейдж задаётся в админке у каждой новости).
-        $badges = News::distinctBadges($lang);
-        $badge = trim((string) ($_GET['badge'] ?? ''));
-        if ($badge !== '' && !in_array($badge, $badges, true)) {
-            $badge = '';
+        // Рубрикатор по категориям. В адресе — slug, а не идентификатор:
+        // ссылка остаётся читаемой и переживает пересоздание категории.
+        $categories = News::publishedCategories($lang);
+        $categorySlug = trim((string) ($_GET['category'] ?? ''));
+        $categoryId = 0;
+        foreach ($categories as $category) {
+            if ((string) $category['slug'] === $categorySlug) {
+                $categoryId = (int) $category['id'];
+                break;
+            }
+        }
+        if ($categoryId === 0) {
+            $categorySlug = '';
         }
 
-        $total = News::publishedCount($badge !== '' ? $badge : null, $lang);
+        $total = News::publishedCount($categoryId > 0 ? $categoryId : null, $lang);
         $pages = max(1, (int) ceil($total / $perPage));
         $page = min($page, $pages);
 
         $vars = [
-            'items' => News::published($perPage, ($page - 1) * $perPage, $lang, $badge !== '' ? $badge : null),
+            'items' => News::published($perPage, ($page - 1) * $perPage, $lang, $categoryId > 0 ? $categoryId : null),
             'page' => $page,
             'pages' => $pages,
-            'badges' => $badges,
-            'badge' => $badge,
+            'categories' => $categories,
+            'category' => $categorySlug,
         ];
 
         // AJAX-фильтрация: тот же список, но без шапки и подвала.

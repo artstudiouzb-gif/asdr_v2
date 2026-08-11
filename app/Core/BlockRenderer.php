@@ -450,6 +450,26 @@ final class BlockRenderer
     /** Совместимый фасад: названия хранятся в BlockTypeRegistry. */
     public const TYPE_LABELS = BlockTypeRegistry::TYPE_LABELS;
 
+    /**
+     * Адрес ссылки «Все новости» у блоков новостей. Если блок ограничен
+     * рубрикой, ссылка ведёт в ту же рубрику: иначе посетитель, кликнув «Все»
+     * под подборкой одной рубрики, попадал бы в общую ленту и терял контекст.
+     */
+    private static function newsAllUrl(string $lang, int $categoryId): string
+    {
+        $url = Locale::url('news', $lang);
+        if ($categoryId <= 0) {
+            return $url;
+        }
+
+        $category = \App\Models\NewsCategory::find($categoryId);
+        if ($category === null || (int) $category['is_active'] !== 1) {
+            return $url;
+        }
+
+        return $url . '?category=' . rawurlencode((string) $category['slug']);
+    }
+
     private static function enrichData(string $type, array $data): array
     {
         if ($type === 'form' && !empty($data['form_id'])) {
@@ -505,8 +525,9 @@ final class BlockRenderer
                 $limit = 3;
             }
             $lang = Locale::current();
+            $category = (int) ($data['category'] ?? 0);
             $items = [];
-            foreach (\App\Models\News::published($limit, 0, $lang) as $row) {
+            foreach (\App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null) as $row) {
                 $items[] = [
                     'title' => (string) $row['title'],
                     'slug' => (string) $row['slug'],
@@ -517,7 +538,7 @@ final class BlockRenderer
                 ];
             }
             $data['news'] = $items;
-            $data['all_url'] = Locale::url('news', $lang);
+            $data['all_url'] = self::newsAllUrl($lang, $category);
         }
 
         // Блок «Новости и аналитика»: крупная главная новость + список (для
@@ -528,21 +549,29 @@ final class BlockRenderer
                 $limit = 6;
             }
             $lang = Locale::current();
+            $category = (int) ($data['category'] ?? 0);
+            $rows = \App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null);
+            $categoryNames = \App\Models\NewsCategory::namesForIds(
+                array_map(static fn (array $row): int => (int) ($row['category_id'] ?? 0), $rows),
+                $lang
+            );
             $items = [];
-            foreach (\App\Models\News::published($limit, 0, $lang) as $row) {
+            foreach ($rows as $row) {
+                $rowCategory = (int) ($row['category_id'] ?? 0);
                 $items[] = [
                     'title' => (string) $row['title'],
                     'slug' => (string) $row['slug'],
                     'published_at' => (string) ($row['published_at'] ?? ''),
                     'excerpt' => (string) ($row['excerpt'] ?? ''),
                     'badge' => trim((string) ($row['badge'] ?? '')),
+                    'category' => $rowCategory > 0 ? (string) ($categoryNames[$rowCategory] ?? '') : '',
                     'cover' => \App\Models\News::getCoverImage($row),
                     'url' => Locale::url('news/' . $row['slug'], $lang),
                 ];
             }
             $data['news'] = $items;
             if (($data['all_url'] ?? '') === '') {
-                $data['all_url'] = Locale::url('news', $lang);
+                $data['all_url'] = self::newsAllUrl($lang, $category);
             }
         }
 
@@ -554,8 +583,9 @@ final class BlockRenderer
                 $limit = 3;
             }
             $lang = Locale::current();
+            $category = (int) ($data['category'] ?? 0);
             $items = [];
-            foreach (\App\Models\News::published($limit, 0, $lang) as $row) {
+            foreach (\App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null) as $row) {
                 $items[] = [
                     'title' => (string) $row['title'],
                     'published_at' => (string) ($row['published_at'] ?? ''),
@@ -565,7 +595,7 @@ final class BlockRenderer
             }
             $data['news'] = $items;
             if (($data['news_all_url'] ?? '') === '') {
-                $data['news_all_url'] = Locale::url('news', $lang);
+                $data['news_all_url'] = self::newsAllUrl($lang, $category);
             }
         }
 

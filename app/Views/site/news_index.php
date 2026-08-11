@@ -6,12 +6,12 @@ use App\Core\Locale;
 /** @var array $items */
 /** @var int $page */
 /** @var int $pages */
-/** @var list<string> $badges */
-/** @var string $badge */
+/** @var list<array<string,mixed>> $categories */
+/** @var string $category slug выбранной рубрики */
 $page = $page ?? 1;
 $pages = $pages ?? 1;
-$badges = $badges ?? [];
-$badge = $badge ?? '';
+$categories = $categories ?? [];
+$category = $category ?? '';
 
 $metaTitle = 'Новости';
 $metaDescription = 'Официальные новости и аналитические материалы Агентства.';
@@ -31,11 +31,11 @@ require __DIR__ . '/_crumbs.php';
         <p class="listing__lead"><?= htmlspecialchars(t('Официальные сообщения, события и аналитические материалы Агентства.'), ENT_QUOTES) ?></p>
     </div>
 
-    <?php if ($badges !== []): ?>
+    <?php if ($categories !== []): ?>
         <nav class="listing-filter" aria-label="<?= htmlspecialchars(t('Рубрики'), ENT_QUOTES) ?>">
-            <a class="listing-filter__item<?= $badge === '' ? ' is-active' : '' ?>" href="<?= htmlspecialchars(Locale::url('news'), ENT_QUOTES) ?>"><?= htmlspecialchars(t('Все материалы'), ENT_QUOTES) ?></a>
-            <?php foreach ($badges as $b): ?>
-                <a class="listing-filter__item<?= $b === $badge ? ' is-active' : '' ?>" href="<?= htmlspecialchars(Locale::url('news') . '?badge=' . rawurlencode($b), ENT_QUOTES) ?>"><?= htmlspecialchars($b, ENT_QUOTES) ?></a>
+            <a class="listing-filter__item<?= $category === '' ? ' is-active' : '' ?>" href="<?= htmlspecialchars(Locale::url('news'), ENT_QUOTES) ?>"><?= htmlspecialchars(t('Все материалы'), ENT_QUOTES) ?></a>
+            <?php foreach ($categories as $c): ?>
+                <a class="listing-filter__item<?= (string) $c['slug'] === $category ? ' is-active' : '' ?>" href="<?= htmlspecialchars(Locale::url('news') . '?category=' . rawurlencode((string) $c['slug']), ENT_QUOTES) ?>"><?= htmlspecialchars((string) $c['name'], ENT_QUOTES) ?></a>
             <?php endforeach; ?>
         </nav>
     <?php endif; ?>
@@ -44,7 +44,7 @@ require __DIR__ . '/_crumbs.php';
     <?php // Область результатов: её же отдаёт контроллер как фрагмент при
           // AJAX-фильтрации, поэтому разметка живёт в одном партиале. ?>
     <div class="listing__results" data-listing-results>
-        <?= \App\Core\View::renderPartial('site/_news_list', compact('items', 'page', 'pages', 'badge')) ?>
+        <?= \App\Core\View::renderPartial('site/_news_list', compact('items', 'page', 'pages', 'category')) ?>
     </div>
 </div>
 <?php require __DIR__ . '/_footer.php'; ?>

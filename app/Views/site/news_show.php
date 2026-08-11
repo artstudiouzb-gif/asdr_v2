@@ -25,6 +25,19 @@ $leadHtml = NewsLead::html($news['lead_html'] ?? null, $news['excerpt'] ?? null)
 $ogType = 'article';
 $ogImage = News::getCoverImage($news) ?? '';
 
+// Рубрика новости на языке страницы; ссылка ведёт в отфильтрованную ленту.
+$newsCategory = null;
+if (!empty($news['category_id'])) {
+    $categoryRow = \App\Models\NewsCategory::find((int) $news['category_id']);
+    if ($categoryRow !== null) {
+        $categoryRow = \App\Models\NewsCategory::localize($categoryRow, $lang);
+        $newsCategory = [
+            'name' => (string) $categoryRow['name'],
+            'url' => Locale::url('news') . '?category=' . rawurlencode((string) $categoryRow['slug']),
+        ];
+    }
+}
+
 AssetCollector::requireJs('news');
 
 require __DIR__ . '/_header.php';
@@ -211,8 +224,11 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
         <span class="newsdetail-phero__overlay"></span>
         <div class="newsdetail-phero__body">
             <?php require __DIR__ . '/_crumbs.php'; ?>
+            <?php if ($newsCategory !== null): ?>
+                <a class="newsdetail__badge newsdetail__badge--onDark" href="<?= htmlspecialchars($newsCategory['url'], ENT_QUOTES) ?>"><?= htmlspecialchars($newsCategory['name'], ENT_QUOTES) ?></a>
+            <?php endif; ?>
             <?php if (!empty($news['badge'])): ?>
-                <span class="newsdetail__badge newsdetail__badge--onDark"><?= htmlspecialchars((string) $news['badge'], ENT_QUOTES) ?></span>
+                <span class="news-badge news-badge--on-media"><?= htmlspecialchars((string) $news['badge'], ENT_QUOTES) ?></span>
             <?php endif; ?>
             <div class="newsdetail__meta newsdetail__meta--onDark">
                 <?php if ($dateLong !== ''): ?>
@@ -245,8 +261,11 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <a class="newsdetail-back-pill" href="<?= htmlspecialchars($homeUrl, ENT_QUOTES) ?>" title="<?= htmlspecialchars(t('Назад'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Назад'), ENT_QUOTES) ?>">
                     <?= \App\Core\Icon::render('arrow-left', 16, 'ui-icon', 1.8) ?>
                 </a>
+                <?php if ($newsCategory !== null): ?>
+                    <a class="newsdetail__badge" href="<?= htmlspecialchars($newsCategory['url'], ENT_QUOTES) ?>"><?= htmlspecialchars($newsCategory['name'], ENT_QUOTES) ?></a>
+                <?php endif; ?>
                 <?php if (!empty($news['badge'])): ?>
-                    <span class="newsdetail__badge"><?= htmlspecialchars((string) $news['badge'], ENT_QUOTES) ?></span>
+                    <span class="news-badge"><?= htmlspecialchars((string) $news['badge'], ENT_QUOTES) ?></span>
                 <?php endif; ?>
                 <div class="newsdetail__meta">
                     <?php if ($dateLong !== ''): ?>

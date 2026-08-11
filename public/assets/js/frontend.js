@@ -1454,7 +1454,7 @@
                 root.querySelectorAll('.listing-filter__item').forEach(function (link) {
                     var href = new URL(link.getAttribute('href'), location.href);
                     var same = href.pathname === target.pathname
-                        && (href.searchParams.get('badge') || '') === (target.searchParams.get('badge') || '');
+                        && (href.searchParams.get('category') || '') === (target.searchParams.get('category') || '');
                     link.classList.toggle('is-active', same);
                 });
                 var reset = root.querySelector('[data-listing-reset]');

@@ -26,7 +26,7 @@ test('Fragment: режим включается только параметро�
 test('Партиал списка новостей: карточки, пагинация и пустое состояние (БД)', function () {
     ensure_test_db(); // Locale::url() спрашивает у БД язык по умолчанию
     $items = [
-        ['slug' => 'first', 'title' => 'Первая новость', 'excerpt' => 'Аннотация', 'published_at' => '2026-07-01 10:00', 'badge' => 'Экономика', 'image' => ''],
+        ['slug' => 'first', 'title' => 'Первая новость', 'excerpt' => 'Аннотация', 'published_at' => '2026-07-01 10:00', 'badge' => 'Важно', 'image' => ''],
         ['slug' => 'second', 'title' => 'Вторая новость', 'excerpt' => '', 'published_at' => '2026-07-02 10:00', 'badge' => '', 'image' => ''],
     ];
 
@@ -35,23 +35,23 @@ test('Партиал списка новостей: карточки, пагин
         'items' => $items,
         'page' => 1,
         'pages' => 2,
-        'badge' => 'Экономика',
+        'category' => 'ekonomika',
     ]);
     assert_contains('Первая новость', $html);
     assert_contains('Вторая новость', $html);
     assert_not_contains('newslist-lead', $html, 'в рубрике крупной новости быть не должно');
     assert_contains('listing-pager', $html, 'при двух страницах нужна пагинация');
-    assert_contains('badge=', $html, 'пагинация сохраняет выбранную рубрику');
+    assert_contains('category=', $html, 'пагинация сохраняет выбранную рубрику');
     // Фрагмент — только результаты, без обвязки страницы.
     assert_not_contains('<html', $html);
     assert_not_contains('listing-filter', $html);
 
     // Первая страница общего списка — первая новость крупной.
-    $home = View::renderPartial('site/_news_list', ['items' => $items, 'page' => 1, 'pages' => 1, 'badge' => '']);
+    $home = View::renderPartial('site/_news_list', ['items' => $items, 'page' => 1, 'pages' => 1, 'category' => '']);
     assert_contains('newslist-lead', $home);
     assert_not_contains('listing-pager', $home, 'одна страница — пагинация не нужна');
 
-    $empty = View::renderPartial('site/_news_list', ['items' => [], 'page' => 1, 'pages' => 1, 'badge' => '']);
+    $empty = View::renderPartial('site/_news_list', ['items' => [], 'page' => 1, 'pages' => 1, 'category' => '']);
     assert_contains('listing__empty', $empty);
 });
 

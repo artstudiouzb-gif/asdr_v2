@@ -330,30 +330,6 @@ final class News
     }
 
     /**
-     * Выражение локализованного бейджа для фильтров и рубрикатора.
-     *
-     * @param array<string, string> $params
-     */
-    private static function publicBadgeExpression(
-        string $lang,
-        string $alias,
-        ?string $translationAlias,
-        string $paramName,
-        array &$params
-    ): string {
-        if ($translationAlias === null) {
-            return "{$alias}.badge";
-        }
-
-        $params[$paramName] = $lang;
-
-        return "CASE
-            WHEN {$alias}.lang = :{$paramName} THEN {$alias}.badge
-            ELSE COALESCE(NULLIF(TRIM({$translationAlias}.badge), ''), {$alias}.badge)
-        END";
-    }
-
-    /**
      * Накладывает legacy-перевод только на резервные базовые строки. Поля
      * самостоятельной языковой записи никогда не заменяются legacy-данными.
      *
@@ -387,11 +363,16 @@ final class News
 
     /**
      * Опубликованные новости, локализованные под указанный язык.
+     *
+     * Фильтр по категории — сравнение идентификатора, а не текста: рубрика
+     * одна на все языковые версии новости, переводится только её название.
+     * Прежний фильтр по бейджу сравнивал строки и требовал разбора перевода
+     * прямо в SQL.
      */
-    public static function published(int $limit = 20, int $offset = 0, ?string $lang = null, ?string $badge = null): array
+    public static function published(int $limit = 20, int $offset = 0, ?string $lang = null, ?int $categoryId = null): array
     {
         $lang = $lang ?? Language::defaultCode();
-        $cacheKey = implode('|', [$limit, $offset, $lang, $badge ?? '']);
+        $cacheKey = implode('|', [$limit, $offset, $lang, $categoryId ?? 0]);
         if (isset(self::$publishedRequestCache[$cacheKey])) {
             return self::$publishedRequestCache[$cacheKey];
         }
@@ -400,16 +381,9 @@ final class News
         $params = $parts['params'];
         $where = "n.status = 'published' AND n.published_at <= NOW() AND n.deleted_at IS NULL
                   AND {$parts['where']}";
-        if ($badge !== null && $badge !== '') {
-            $badgeExpression = self::publicBadgeExpression(
-                $lang,
-                'n',
-                $parts['translation_alias'],
-                'published_badge_lang',
-                $params
-            );
-            $where .= " AND {$badgeExpression} = :badge";
-            $params['badge'] = $badge;
+        if ($categoryId !== null && $categoryId > 0) {
+            $where .= ' AND n.category_id = :category';
+            $params['category'] = $categoryId;
         }
         $stmt = Database::pdo()->prepare(
             "SELECT n.*,
@@ -430,24 +404,17 @@ final class News
         return self::$publishedRequestCache[$cacheKey] = self::localizePublicRows($stmt->fetchAll(), $lang);
     }
 
-    /** Количество опубликованных новостей одного языка, опционально по бейджу. */
-    public static function publishedCount(?string $badge = null, ?string $lang = null): int
+    /** Количество опубликованных новостей одного языка, опционально по категории. */
+    public static function publishedCount(?int $categoryId = null, ?string $lang = null): int
     {
         $lang = $lang ?? Language::defaultCode();
         $parts = self::publicLanguageParts($lang, 'n', 'counted');
         $params = $parts['params'];
         $where = "n.status = 'published' AND n.published_at <= NOW() AND n.deleted_at IS NULL
                   AND {$parts['where']}";
-        if ($badge !== null && $badge !== '') {
-            $badgeExpression = self::publicBadgeExpression(
-                $lang,
-                'n',
-                $parts['translation_alias'],
-                'counted_badge_lang',
-                $params
-            );
-            $where .= " AND {$badgeExpression} = :badge";
-            $params[':badge'] = $badge;
+        if ($categoryId !== null && $categoryId > 0) {
+            $where .= ' AND n.category_id = :category';
+            $params[':category'] = $categoryId;
         }
 
         $stmt = Database::pdo()->prepare(
@@ -459,35 +426,35 @@ final class News
     }
 
     /**
-     * Список бейджей опубликованных новостей (для фильтра-рубрикатора на
-     * странице «Новости»; бейдж задаётся в админке у каждой новости).
+     * Категории, у которых есть опубликованные новости на этом языке —
+     * рубрикатор страницы «Новости».
      *
-     * @return list<string>
+     * Считается по языковой выборке, а не по всей таблице: иначе на узбекской
+     * версии предлагалась бы рубрика, в которой на этом языке нет ни одной
+     * новости, и фильтр приводил бы к пустой ленте.
+     *
+     * @return list<array<string, mixed>>
      */
-    public static function distinctBadges(?string $lang = null): array
+    public static function publishedCategories(?string $lang = null): array
     {
         $lang = $lang ?? Language::defaultCode();
-        $parts = self::publicLanguageParts($lang, 'n', 'badges');
-        $params = $parts['params'];
-        $badgeExpression = self::publicBadgeExpression(
-            $lang,
-            'n',
-            $parts['translation_alias'],
-            'badges_target_lang',
-            $params
-        );
+        $parts = self::publicLanguageParts($lang, 'n', 'cats');
         $stmt = Database::pdo()->prepare(
-            "SELECT DISTINCT {$badgeExpression} AS localized_badge
+            "SELECT DISTINCT n.category_id
              FROM news n{$parts['join']}
              WHERE n.status = 'published' AND n.published_at <= NOW() AND n.deleted_at IS NULL
-               AND {$parts['where']}
-             ORDER BY localized_badge"
+               AND n.category_id IS NOT NULL
+               AND {$parts['where']}"
         );
-        $stmt->execute($params);
+        $stmt->execute($parts['params']);
+        $ids = array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN));
+        if ($ids === []) {
+            return [];
+        }
 
         return array_values(array_filter(
-            $stmt->fetchAll(\PDO::FETCH_COLUMN),
-            static fn (mixed $badge): bool => is_string($badge) && trim($badge) !== ''
+            NewsCategory::all($lang, true),
+            static fn (array $category): bool => in_array((int) $category['id'], $ids, true)
         ));
     }
 
