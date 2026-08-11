@@ -1109,6 +1109,18 @@ body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: rg
     transform: translateY(-50%) scaleX(1) !important;
 }
 
+/* Переключатель прячем, пока поле раскрыто: своё дело он сделал, а закрывает
+   поиск крестик. Раньше он оставался на месте и лежал ровно под крестиком —
+   две лупы на экране разом, одна из них невидимо перекрыта. */
+.site-search-wrap.is-expanded .site-search-toggle,
+.site-search-wrap:has(.site-search.is-open) .site-search-toggle {
+    opacity: 0;
+    pointer-events: none;
+    /* visibility, а не только opacity: иначе кнопка остаётся в порядке
+       обхода с клавиатуры, и Tab уводит фокус на невидимый элемент. */
+    visibility: hidden;
+}
+
 .site-search-wrap .site-search:focus-within {
     border-color: var(--gov-teal, #0ea5e9) !important;
     box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--gov-teal, #0ea5e9) 20%, transparent), 0 10px 30px rgba(15, 27, 45, 0.16) !important;
