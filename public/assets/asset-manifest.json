@@ -51,11 +51,11 @@
     },
     "/assets/css/blocks/leader-card.css": {
       "path": "/assets/css/blocks/leader-card.min.css",
-      "sourceSha256": "e21f749563c4ddbbd8c3fac7acf33f6fd9a7adfed3526d869439ed1ccb90315c",
-      "sha256": "ff37700a920d903d7ee9ead4196556ee46c4848537b8f2392b9b9ceff0da6735",
-      "raw": 4889,
-      "gzip": 1363,
-      "brotli": 1157
+      "sourceSha256": "39690ccbf3a5d1cd379c721d061adeea0b60b69b5686c75fd043da6952865bde",
+      "sha256": "124397337965d922e9875b9bdb929a3f4dcb167c287fbad2243541a8652d2890",
+      "raw": 5101,
+      "gzip": 1412,
+      "brotli": 1191
     },
     "/assets/js/blocks/slider.js": {
       "path": "/assets/js/blocks/slider.min.js",
