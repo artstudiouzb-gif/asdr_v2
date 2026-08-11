@@ -495,7 +495,8 @@ final class BlockController
                 }
                 $gap = in_array($_POST['gap'] ?? 'medium', ['small', 'medium', 'large'], true)
                     ? (string) $_POST['gap'] : 'medium';
-                return ['columns' => $cols, 'gap' => $gap];
+                $ratio = \App\Core\ColumnRatio::normalize((string) ($_POST['ratio'] ?? ''), $cols);
+                return ['columns' => $cols, 'gap' => $gap, 'ratio' => $ratio];
             case 'testimonials':
                 return TestimonialsBlockNormalizer::normalize($_POST, $locale);
             case 'counters':

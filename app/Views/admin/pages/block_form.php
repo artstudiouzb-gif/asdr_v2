@@ -289,6 +289,21 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </select>
             </div>
             <div class="form-field">
+                <?php $colRatio = (string) ($data['ratio'] ?? ''); ?>
+                <label for="ratio">Ширина колонок</label>
+                <select id="ratio" name="ratio">
+                    <option value="">Одинаковые</option>
+                    <?php foreach (\App\Core\ColumnRatio::OPTIONS as $ratioCols => $ratioList): ?>
+                        <optgroup label="Для <?= (int) $ratioCols ?> колонок">
+                            <?php foreach ($ratioList as $ratioValue): ?>
+                                <option value="<?= htmlspecialchars($ratioValue, ENT_QUOTES) ?>" <?= $colRatio === $ratioValue ? 'selected' : '' ?>><?= htmlspecialchars(\App\Core\ColumnRatio::label($ratioValue), ENT_QUOTES) ?></option>
+                            <?php endforeach; ?>
+                        </optgroup>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">Доли ширины: «2 : 1» — первая колонка вдвое шире второй. Число долей должно совпадать с числом колонок, иначе колонки останутся равными. На телефоне колонки в любом случае идут одна под другой.</span>
+            </div>
+            <div class="form-field">
                 <label for="gap">Промежуток между колонками</label>
                 <select id="gap" name="gap">
                     <?php foreach (['small' => 'Малый', 'medium' => 'Средний', 'large' => 'Большой'] as $gv => $gl): ?>

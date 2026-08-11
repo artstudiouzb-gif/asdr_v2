@@ -413,6 +413,16 @@ final class BlockRenderer
             $colsHtml
         );
 
+        // Пропорции колонок — scoped CSS, а не инлайн-стиль (инлайн в блоках
+        // запрещён тестами и требовал бы послабления в CSP).
+        $template = ColumnRatio::template((string) ($data['ratio'] ?? ''), $count);
+        if ($template !== '' && !empty($block['id'])) {
+            // Только с 721px: ниже общая тема кладёт колонки в одну, и правило
+            // с id-селектором перебивало бы её по специфичности.
+            $cssParts[] = '@media (min-width: 721px){#block-' . (int) $block['id']
+                . ' .cms-columns{grid-template-columns:' . $template . '}}';
+        }
+
         return [$html, implode("\n", $cssParts)];
     }
 

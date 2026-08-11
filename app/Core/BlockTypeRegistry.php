@@ -36,7 +36,7 @@ final class BlockTypeRegistry
         'advantages' => ['variant' => 'grid', 'title' => '', 'description' => '', 'items' => []],
         'slider' => ['slides' => []],
         'form' => ['form_id' => null],
-        'columns' => ['columns' => 2, 'gap' => 'medium'],
+        'columns' => ['columns' => 2, 'gap' => 'medium', 'ratio' => ''],
         'testimonials' => ['title' => '', 'items' => []],
         'counters' => ['title' => '', 'card_bg' => '', 'text_color' => '', 'icon_size' => 28, 'icon_bg' => 'on', 'icon_position' => 'left', 'text_align' => 'left', 'items' => []],
         'team_list' => ['title' => '', 'limit' => 0, 'department' => '', 'group_by_department' => false],
