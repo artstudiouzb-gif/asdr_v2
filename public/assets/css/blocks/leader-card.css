@@ -22,13 +22,26 @@
 .leader-card__side {
     display: grid;
     grid-template-columns: minmax(0, 170px) minmax(0, 1fr);
-    gap: 18px;
+    grid-template-areas: "photo ident" "photo info";
+    grid-template-rows: auto 1fr;
+    gap: 14px 18px;
     align-items: start;
     min-width: 0;
 }
-/* Одной колонкой карточка становится там же, где ломается вся сетка блока,
-   плюс на самых узких экранах, где портрет и текст рядом уже не помещаются. */
-@media (max-width: 640px) { .leader-card__side { grid-template-columns: minmax(0, 110px) minmax(0, 1fr); gap: 14px; } }
+.leader-card__photo { grid-area: photo; }
+.leader-card__ident { grid-area: ident; }
+.leader-card__info { grid-area: info; }
+/* На узком экране рядом с портретом остаётся только имя с должностью, а
+   контакты уходят под них во всю ширину: в колонке шириной с ладонь телефон
+   и ряд значков переносились по одному в строку. */
+@media (max-width: 640px) {
+    .leader-card__side {
+        grid-template-columns: minmax(0, 110px) minmax(0, 1fr);
+        grid-template-areas: "photo ident" "info info";
+        grid-template-rows: auto auto;
+        gap: 14px;
+    }
+}
 .leader-card__info { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .leader-card__photo {
     border-radius: var(--radius-sm, 8px);

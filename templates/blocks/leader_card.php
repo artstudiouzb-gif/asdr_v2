@@ -66,11 +66,12 @@ $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES)
             </div>
         <?php endif; ?>
 
-        <div class="leader-card__info">
         <div class="leader-card__ident">
             <?php if ($name !== ''): ?><p class="leader-card__name"><?= $esc($name) ?></p><?php endif; ?>
             <?php if ($position !== ''): ?><p class="leader-card__position"><?= nl2br($esc($position)) ?></p><?php endif; ?>
         </div>
+
+        <div class="leader-card__info">
 
         <?php if ($phone !== '' || $email !== ''): ?>
             <ul class="leader-card__contacts">
