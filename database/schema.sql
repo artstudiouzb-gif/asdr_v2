@@ -40,6 +40,31 @@ CREATE TABLE IF NOT EXISTS login_attempts (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
+-- Категории новостей (slug один на все языки, название переводится)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS news_categories (
+    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(150) NOT NULL COMMENT 'название на основном языке',
+    slug        VARCHAR(150) NOT NULL COMMENT 'один на все языки: адрес и выборки',
+    is_active   TINYINT(1) NOT NULL DEFAULT 1,
+    sort_order  INT NOT NULL DEFAULT 0,
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_news_categories_slug (slug),
+    KEY idx_news_categories_order (is_active, sort_order, name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS news_category_translations (
+    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    category_id INT UNSIGNED NOT NULL,
+    lang        VARCHAR(8) NOT NULL,
+    name        VARCHAR(150) NULL,
+    UNIQUE KEY uq_news_category_translations (category_id, lang),
+    CONSTRAINT fk_news_category_translations_category
+        FOREIGN KEY (category_id) REFERENCES news_categories(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
 -- Новости
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS news (
@@ -48,7 +73,8 @@ CREATE TABLE IF NOT EXISTS news (
     slug            VARCHAR(255) NOT NULL,
     excerpt         TEXT NULL,
     lead_html       LONGTEXT NULL COMMENT 'форматированный лид; excerpt — его текстовая версия',
-    badge           VARCHAR(100) NULL COMMENT 'бейдж категории детальной страницы',
+    badge           VARCHAR(100) NULL COMMENT 'визуальная метка («Важно», «Анонс»); не категория',
+    category_id     INT UNSIGNED NULL COMMENT 'категория новости',
     content         LONGTEXT NULL,
     image           VARCHAR(255) NULL,
     video_url       VARCHAR(255) NULL,
@@ -79,8 +105,10 @@ CREATE TABLE IF NOT EXISTS news (
     translation_group_id INT UNSIGNED NULL,
     UNIQUE KEY uq_news_slug_lang (slug, lang),
     KEY idx_news_listing (status, deleted_at, published_at),
+    KEY idx_news_category_listing (category_id, status, deleted_at, published_at),
     KEY idx_news_lang_group (translation_group_id, lang),
-    CONSTRAINT fk_news_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL
+    CONSTRAINT fk_news_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_news_category FOREIGN KEY (category_id) REFERENCES news_categories(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Переводы новостей (для НЕ-дефолтных языков)
@@ -1134,7 +1162,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_03_notification_center.sql'),
     ('2026_08_05_page_custom_assets.sql'),
     ('2026_08_11_web_vitals.sql'),
-    ('2026_08_11_public_listing_indexes.sql')
+    ('2026_08_11_public_listing_indexes.sql'),
+    ('2026_08_11_news_categories.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (
