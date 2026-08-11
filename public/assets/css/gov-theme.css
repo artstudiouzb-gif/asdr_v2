@@ -2425,9 +2425,9 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 }
 .stage--done.stage--next-done::before { background: var(--gov-teal); }
 .stage--done.stage--next-active::before {
-    background: linear-gradient(90deg, var(--gov-teal) 0%, #2f80ed 100%);
+    background: linear-gradient(90deg, var(--gov-teal) 0%, var(--color-accent, var(--gov-teal)) 100%);
 }
-.stage--active.stage--next-active::before { background: #2f80ed; }
+.stage--active.stage--next-active::before { background: var(--color-accent, var(--gov-teal)); }
 @media (max-width: 1000px) and (min-width: 561px) {
     /* В два столбца (правило выше) отрезки соединяли бы этапы из разных
        строк — прячем их, точки остаются. */
@@ -2477,18 +2477,25 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .stage--done:hover .stage__dot { box-shadow: 0 0 0 3px var(--gov-bg), 0 0 12px rgba(23, 153, 155, 0.5); }
 .stage--active .stage__dot {
     background: var(--gov-surface);
-    border-color: #2f80ed;
-    box-shadow: 0 0 0 4px color-mix(in srgb, #2f80ed 18%, transparent);
+    border-color: var(--color-accent, var(--gov-teal));
+    /* Крупнее соседей — текущий этап должен читаться сразу. Через transform,
+       а не через размер: это не сдвигает точку с линии и не вызывает
+       перекомпоновку. */
+    transform: scale(1.2);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 26%, transparent);
     /* Текущий этап дышит кольцом: анимируется только тень, поэтому нет ни
        перекомпоновки, ни рывков. Медленно и без вспышек — мигание чаще трёх
        раз в секунду запрещено (WCAG 2.3.1), здесь один цикл в 2.6 секунды. */
     animation: gov-pulse-ring 2.6s ease-in-out infinite;
 }
 @keyframes gov-pulse-ring {
-    0%, 100% { box-shadow: 0 0 0 4px color-mix(in srgb, #2f80ed 18%, transparent); }
-    50% { box-shadow: 0 0 0 9px color-mix(in srgb, #2f80ed 5%, transparent); }
+    0%, 100% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 26%, transparent); }
+    50% { box-shadow: 0 0 0 15px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 7%, transparent); }
 }
-.stage--active:hover .stage__dot { box-shadow: 0 0 0 5px color-mix(in srgb, #2f80ed 22%, transparent), 0 0 14px rgba(47, 128, 237, 0.28); }
+.stage--active:hover .stage__dot {
+    transform: scale(1.4);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 30%, transparent), 0 0 14px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 28%, transparent);
+}
 .stage--planned .stage__dot {
     background: var(--gov-surface);
     border-color: color-mix(in srgb, var(--gov-muted) 48%, var(--gov-border));
@@ -2510,7 +2517,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .stage__text { color: var(--gov-muted); font-size: var(--step--2); line-height: 1.5; flex: 1; }
 .stage__status { align-self: flex-start; padding: 5px 12px; border-radius: 999px; font-size: var(--step--4); font-weight: 700; background: color-mix(in srgb, var(--gov-navy) 7%, var(--gov-bg)); color: var(--gov-muted); transition: background 0.3s, color 0.3s; }
 .stage--done .stage__status { background: color-mix(in srgb, var(--gov-teal) 14%, var(--gov-bg)); color: color-mix(in srgb, var(--gov-teal-text) 82%, #000); }
-.stage--active .stage__status { background: color-mix(in srgb, #2f80ed 13%, var(--gov-bg)); color: #2465c6; }
+.stage--active .stage__status { background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 13%, var(--gov-bg)); color: #2465c6; }
 /* Тёмная тема: синий текста рассчитан на светлый фон, на тёмном он давал
    3.22:1. Берём светлый оттенок той же линейки. */
 :root[data-theme="dark"] .stage--active .stage__status { color: #9dc1f7; }
@@ -3608,9 +3615,9 @@ span.imgcard__media::after {
 }
 .timeline-item--done.timeline-item--next-done::after { background: var(--gov-teal); }
 .timeline-item--done.timeline-item--next-active::after {
-    background: linear-gradient(180deg, var(--gov-teal) 0%, #2f80ed 100%);
+    background: linear-gradient(180deg, var(--gov-teal) 0%, var(--color-accent, var(--gov-teal)) 100%);
 }
-.timeline-item--active.timeline-item--next-active::after { background: #2f80ed; }
+.timeline-item--active.timeline-item--next-active::after { background: var(--color-accent, var(--gov-teal)); }
 .timeline-item::before {
     content: '';
     position: absolute;
@@ -3631,9 +3638,25 @@ span.imgcard__media::after {
 }
 .timeline-item--active::before {
     background: var(--gov-bg);
-    border-color: #2f80ed;
-    box-shadow: 0 0 0 4px color-mix(in srgb, #2f80ed 18%, transparent);
+    border-color: var(--color-accent, var(--gov-teal));
+    /* Как и у этапов: текущая точка крупнее и с более заметным кольцом. */
+    transform: scale(1.2);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 26%, transparent);
     animation: gov-pulse-ring 2.6s ease-in-out infinite;
+}
+/* Хвост шкалы после последнего пункта: сплошная линия обрывалась на
+   последней точке. Пунктир читается как «продолжение следует». Хронология
+   вертикальная, поэтому и хвост вертикальный. */
+.timeline-item:last-child::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    left: 5px;
+    top: 16px;
+    height: 34px;
+    width: 0;
+    border-left: 2px dashed color-mix(in srgb, var(--color-accent, var(--gov-teal)) 45%, var(--gov-border));
+    pointer-events: none;
 }
 .timeline-item--planned::before {
     background: var(--gov-bg);
@@ -3643,7 +3666,10 @@ span.imgcard__media::after {
     transform: scale(1.3);
 }
 .timeline-item--done:hover::before { box-shadow: 0 0 0 5px color-mix(in srgb, var(--gov-teal) 20%, transparent); }
-.timeline-item--active:hover::before { box-shadow: 0 0 0 6px color-mix(in srgb, #2f80ed 20%, transparent); }
+.timeline-item--active:hover::before {
+    transform: scale(1.4);
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 30%, transparent);
+}
 .timeline-item--planned:hover::before { border-color: var(--gov-muted); }
 .timeline-item__year { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; color: var(--gov-title); transition: color 0.25s ease; }
 .timeline-item:hover .timeline-item__year { color: var(--gov-teal-text); }
