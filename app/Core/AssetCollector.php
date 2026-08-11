@@ -55,6 +55,12 @@ final class AssetCollector
      */
     private const THEME_PART_MAP = [
         'news_detail' => '/assets/css/blocks/news-detail.css',
+        // Блок новостей в варианте «карточки» построен на тех же .relnews-card,
+        // что и лента: стили лежат в этой же части темы. Ключ — тип блока,
+        // поэтому подключение идёт от списка типов страницы и переживает кэш
+        // блоков (внутри шаблона регистрировать нельзя — из кэша он не
+        // выполняется вовсе).
+        'news_feature' => '/assets/css/blocks/news-detail.css',
         'org_structure' => '/assets/css/blocks/org-structure.css',
     ];
 

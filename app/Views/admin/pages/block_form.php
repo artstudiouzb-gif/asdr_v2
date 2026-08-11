@@ -865,7 +865,16 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'news_feature'): ?>
-            <div class="form-field"><label for="nf_limit">Сколько новостей показывать</label><input type="number" id="nf_limit" name="limit" min="2" max="12" value="<?= (int) ($data['limit'] ?? 6) ?>"><span class="form-hint">1 крупная + список. Берутся опубликованные новости.</span></div>
+            <?php $nfVariant = ($data['variant'] ?? 'cards') === 'mosaic' ? 'mosaic' : 'cards'; ?>
+            <div class="form-field">
+                <label for="nf_variant">Макет блока</label>
+                <select id="nf_variant" name="variant">
+                    <option value="cards" <?= $nfVariant === 'cards' ? 'selected' : '' ?>>Карточки — крупная новость и ряд карточек</option>
+                    <option value="mosaic" <?= $nfVariant === 'mosaic' ? 'selected' : '' ?>>Мозаика — крупная с текстом на фото и колонка справа</option>
+                </select>
+                <span class="form-hint">«Карточки» повторяют вид страницы новостей. «Мозаика» плотнее: помещает больше материалов на ту же высоту.</span>
+            </div>
+            <div class="form-field"><label for="nf_limit">Сколько новостей показывать</label><input type="number" id="nf_limit" name="limit" min="2" max="12" value="<?= (int) ($data['limit'] ?? 5) ?>"><span class="form-hint">Всего, вместе с крупной. Для макета «Карточки» ряд заполняется без остатка при 5 или 9 (1 крупная + 4 или 8), для «Мозаики» — при 6.</span></div>
             <div class="form-field"><label for="nf_all_text">Ссылка «Все …» — текст</label><input type="text" id="nf_all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все новости"></div>
             <div class="form-field"><label for="nf_all_url">Ссылка «Все …» — URL (пусто = /news)</label><input type="text" id="nf_all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
         <?php endif; ?>

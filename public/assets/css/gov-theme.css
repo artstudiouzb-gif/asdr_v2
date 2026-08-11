@@ -2744,8 +2744,24 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .relnews-card:hover .card-more__arrow { transform: translateX(4px); }
 @media (prefers-reduced-motion: reduce) { .card-more__arrow { transition: none; } }
 
-/* Кнопка под подборкой новостей на странице: ведёт в общую ленту. */
+/* Кнопка под подборкой новостей: ведёт в общую ленту. Светлая, а не тёмная
+   заливка — рядом уже стоит тёмная плашка метки, и вторая тяжёлая кнопка
+   перетягивала бы внимание с самих новостей. */
 .newsfeat-more { display: flex; justify-content: center; margin-top: clamp(20px, 2.6vw, 32px); }
+.newsfeat-more__btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 28px; border-radius: 999px;
+    border: 1px solid var(--gov-border); background: var(--gov-surface);
+    color: var(--gov-title); font-weight: 700; font-size: var(--step--1);
+    text-decoration: none;
+    transition: border-color .2s ease, box-shadow .2s ease, color .2s ease;
+}
+.newsfeat-more__btn:hover {
+    border-color: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 45%, var(--gov-border));
+    color: var(--color-accent, var(--gov-teal-text));
+    box-shadow: var(--shadow-3);
+}
+.newsfeat-more__btn:hover .card-more__arrow { transform: translateX(4px); }
 
 /* Пагинация. */
 .listing-pager { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
@@ -4007,6 +4023,37 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .newsfeat-mini__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
 .newsfeat-text { display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: var(--gov-ink); }
 
+/* Макет «мозаика»: правая колонка — карточки на подложке. Без подложки они
+   читались как продолжение крупной новости, а не как отдельные материалы. */
+.block-newsfeat--mosaic .newsfeat-mini,
+.block-newsfeat--mosaic .newsfeat-text {
+    background: var(--gov-surface);
+    border: 1px solid var(--gov-border);
+    border-radius: var(--radius, 14px);
+    overflow: hidden;
+    transition: border-color .25s ease, box-shadow .25s ease;
+}
+.block-newsfeat--mosaic .newsfeat-mini:hover,
+.block-newsfeat--mosaic .newsfeat-text:hover {
+    border-color: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 35%, var(--gov-border));
+    box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
+}
+.block-newsfeat--mosaic .newsfeat-mini { gap: 0; }
+.block-newsfeat--mosaic .newsfeat-mini__thumb { border-radius: 0; }
+.block-newsfeat--mosaic .newsfeat-mini__body { padding: 14px; gap: 8px; height: 100%; }
+.block-newsfeat--mosaic .newsfeat-mini__excerpt,
+.block-newsfeat--mosaic .newsfeat-text__excerpt { color: var(--gov-muted); font-size: var(--step--2); line-height: 1.5; }
+.block-newsfeat--mosaic .newsfeat-text { padding: 14px; gap: 8px; }
+/* Стрелка вместо подписи: у компактной карточки на «Читать подробнее» нет
+   места, а показать, что это ссылка, всё равно нужно. */
+.block-newsfeat--mosaic .newsfeat-text__arrow {
+    margin-top: auto; color: var(--color-accent, var(--gov-teal-text));
+    font-weight: 700; font-size: var(--step-0);
+}
+.block-newsfeat--mosaic .newsfeat-side__texts { border-top: 0; padding-top: 0; }
+/* Ссылка поверх обложки: черта и текст светлые, иначе тонут в затемнении. */
+.card-more--on-media { border-top-color: rgba(255, 255, 255, 0.28); color: #fff; }
+
 /* Рубрика карточки. На фото — плашка (нужен свой фон для читаемости),
    без фото — просто набранная метка. */
 /* Рубрика — типографская метка с акцентной чертой, а не залитая плашка:
@@ -4020,9 +4067,12 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
    Обрезка требует inline-block: у inline-flex (базовый вид рубрики) текст —
    анонимный флекс-элемент, и text-overflow до него не доходит, из-за чего
    вместо многоточия получался обрыв слова у самого края карточки. */
-.news-card .news-meta { flex-wrap: nowrap; }
-.news-card .news-category { display: inline-block; vertical-align: middle; }
-.news-card .news-category::before {
+.news-card .news-meta,
+.newsfeat-text .news-meta { flex-wrap: nowrap; }
+.news-card .news-category,
+.newsfeat-text .news-category { display: inline-block; vertical-align: middle; }
+.news-card .news-category::before,
+.newsfeat-text .news-category::before {
     display: inline-block; vertical-align: middle; margin-right: 7px;
 }
 .news-category {
@@ -4052,7 +4102,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     padding: 5px 12px; border-radius: 999px;
     background: var(--news-badge-bg, var(--gov-navy));
     color: var(--news-badge-fg, #fff);
-    box-shadow: 0 6px 18px -8px rgba(15, 23, 42, 0.55);
+    box-shadow: var(--shadow-2);
 }
 .newsfeat-text__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
 .newsfeat-mini:hover .newsfeat-mini__title, .newsfeat-text:hover .newsfeat-text__title { color: var(--color-accent, var(--gov-teal)); }

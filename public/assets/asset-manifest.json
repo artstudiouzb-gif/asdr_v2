@@ -13,11 +13,11 @@
       "/assets/css/public-layout-polish.css",
       "/assets/css/public-editorial-pages.css"
     ],
-    "sourceSha256": "4225137950aeac9e30ec89fee505c770d6e54df654cc23997445a8217264ff20",
-    "sha256": "7f84f45d9ddf73c55e8c6ae60a759c7726320ee5534532135e445e84dd54f835",
-    "raw": 383747,
-    "gzip": 62753,
-    "brotli": 49227
+    "sourceSha256": "6be5526bf6cb67a4a6734f7bd573f25cf8068340714d0eb3427519fc0f10040c",
+    "sha256": "d26066c00e7de74e6aa9fac53486f68e0978f06475b34371e3feb07626403136",
+    "raw": 385554,
+    "gzip": 62956,
+    "brotli": 49403
   },
   "js": {
     "path": "/assets/js/public.min.js",

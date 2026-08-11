@@ -606,6 +606,7 @@ final class BlockController
                 ];
             case 'news_feature':
                 return [
+                    'variant' => ($_POST['variant'] ?? 'cards') === 'mosaic' ? 'mosaic' : 'cards',
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => (trim((string) ($_POST['all_url'] ?? '')) !== '' && \App\Core\UrlGuard::isSafeLink(trim((string) ($_POST['all_url'] ?? '')))) ? trim((string) ($_POST['all_url'] ?? '')) : '',
