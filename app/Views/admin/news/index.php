@@ -29,6 +29,12 @@ $langs = Language::active();
         <option value="all" <?= $filters['lang'] === 'all' ? 'selected' : '' ?>>Все языки</option>
         <?php foreach ($langs as $l): ?><option value="<?= htmlspecialchars($l['code'], ENT_QUOTES) ?>" <?= $filters['lang'] === $l['code'] ? 'selected' : '' ?>><?= $l['code'] === Language::defaultCode() ? 'Основной: ' : '' ?><?= htmlspecialchars($l['name'], ENT_QUOTES) ?></option><?php endforeach; ?>
     </select></div>
+    <div class="list-filter"><label for="news_category">Категория</label><select id="news_category" name="category">
+        <?php $categoryFilter = (string) ($filters['category'] ?? ''); ?>
+        <option value="">Все категории</option>
+        <option value="none" <?= $categoryFilter === 'none' ? 'selected' : '' ?>>Без категории</option>
+        <?php foreach ($categories as $c): ?><option value="<?= (int) $c['id'] ?>" <?= $categoryFilter === (string) (int) $c['id'] ? 'selected' : '' ?>><?= htmlspecialchars((string) $c['name'], ENT_QUOTES) ?></option><?php endforeach; ?>
+    </select></div>
     <div class="list-filter"><label for="news_from">Дата от</label><input type="date" id="news_from" name="from" value="<?= htmlspecialchars($filters['from'], ENT_QUOTES) ?>"></div>
     <div class="list-filter"><label for="news_to">Дата до</label><input type="date" id="news_to" name="to" value="<?= htmlspecialchars($filters['to'], ENT_QUOTES) ?>"></div>
     <div class="list-filter"><label for="news_sort">Сортировка</label><select id="news_sort" name="sort">
@@ -60,6 +66,7 @@ $langs = Language::active();
         <tr>
             <th class="u-inline-5aec6ffae3"><input type="checkbox" data-select-all form="bulkform" aria-label="Выбрать все"></th>
             <th>Заголовок</th>
+            <th>Категория</th>
             <th>Языки</th>
             <th>Статус</th>
             <th>Дата публикации</th>
@@ -69,7 +76,7 @@ $langs = Language::active();
     </thead>
     <tbody>
         <?php if (empty($items)): ?>
-            <tr><td colspan="7" class="data-table__empty">Новостей не найдено.</td></tr>
+            <tr><td colspan="8" class="data-table__empty">Новостей не найдено.</td></tr>
         <?php endif; ?>
         <?php
         // Языки контента для всех строк одним запросом (без N+1) и список
@@ -89,6 +96,14 @@ $langs = Language::active();
                     <div>
                         <a class="data-table__primary" href="/admin/news/<?= (int) $item['id'] ?>/edit"><?= htmlspecialchars($item['title'], ENT_QUOTES) ?></a>
                     </div>
+                </td>
+                <td class="u-inline-a9efa5449f">
+                    <?php $itemCategory = (int) ($item['category_id'] ?? 0); ?>
+                    <?php if ($itemCategory > 0 && isset($categoryNames[$itemCategory])): ?>
+                        <a href="/admin/news?<?= htmlspecialchars(http_build_query(array_merge($filterParams, ['category' => $itemCategory, 'page' => null])), ENT_QUOTES) ?>"><?= htmlspecialchars($categoryNames[$itemCategory], ENT_QUOTES) ?></a>
+                    <?php else: ?>
+                        —
+                    <?php endif; ?>
                 </td>
                 <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', ['siteLangs' => $siteLangs, 'has' => $langMap[(int) $item['id']] ?? [], 'module' => 'news', 'origId' => (int) $item['id']]) ?></td>
                 <td>

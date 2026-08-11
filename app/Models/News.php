@@ -168,6 +168,13 @@ final class News
             $where[] = 'n.status = :status';
             $params[':status'] = (string) $filters['status'];
         }
+        $categoryFilter = (string) ($filters['category'] ?? '');
+        if ($categoryFilter === 'none') {
+            $where[] = 'n.category_id IS NULL';
+        } elseif ((int) $categoryFilter > 0) {
+            $where[] = 'n.category_id = :category';
+            $params[':category'] = (int) $categoryFilter;
+        }
         if (($filters['q'] ?? '') !== '') {
             $where[] = '(n.title LIKE :q_title OR n.slug LIKE :q_slug'
                 . ' OR EXISTS (SELECT 1 FROM news_translations nqs WHERE nqs.news_id = n.id AND nqs.title LIKE :q_translation))';

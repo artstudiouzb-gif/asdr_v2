@@ -85,6 +85,9 @@ final class AdminListQuery
             'q' => $filters['q'] !== '' ? $filters['q'] : null,
             'status' => $filters['status'] !== '' ? $filters['status'] : null,
             'lang' => $filters['lang'] ?? Language::defaultCode(),
+            // Категория есть только у списка новостей; для остальных списков
+            // ключа нет — значение отсеется как null.
+            'category' => ($filters['category'] ?? '') !== '' ? (string) $filters['category'] : null,
             'sort' => $filters['sort'] ?? null,
             'from' => $filters['from'] !== '' ? $filters['from'] : null,
             'to' => $filters['to'] !== '' ? $filters['to'] : null,
@@ -97,7 +100,7 @@ final class AdminListQuery
     public static function returnPath(string $path, mixed $rawQuery): string
     {
         parse_str(mb_substr((string) $rawQuery, 0, 1000), $input);
-        $allowed = ['q', 'status', 'lang', 'sort', 'from', 'to', 'page', 'per_page'];
+        $allowed = ['q', 'status', 'lang', 'category', 'sort', 'from', 'to', 'page', 'per_page'];
         $params = [];
         foreach ($allowed as $key) {
             if (!isset($input[$key]) || !is_scalar($input[$key])) {

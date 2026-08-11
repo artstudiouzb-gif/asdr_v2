@@ -37,15 +37,32 @@ final class NewsController
             'newest',
             true
         );
+        // Категория — фильтр только этого списка, поэтому её не нормализует
+        // общий AdminListQuery: остальным спискам такой ключ не нужен.
+        // Значения: '' — не фильтровать, 'none' — без категории, иначе id.
+        $category = trim((string) ($_GET['category'] ?? ''));
+        $filters['category'] = $category === 'none' ? 'none' : ((int) $category > 0 ? (string) (int) $category : '');
+
         $total = News::adminCount($filters);
         [$filters, $pages] = AdminListQuery::fitPage($filters, $total);
+        $items = News::adminList($filters);
+
+        // Названия категорий берём на языке, выбранном фильтром списка: рядом
+        // уже стоят заголовки новостей на этом же языке.
+        $categoryLang = $filters['lang'] !== 'all' ? $filters['lang'] : Language::defaultCode();
+
         View::render('admin/news/index', [
-            'items' => News::adminList($filters),
+            'items' => $items,
             'filters' => $filters,
             'filterParams' => AdminListQuery::urlParams($filters),
             'total' => $total,
             'pages' => $pages,
             'langCounts' => News::langCounts(),
+            'categories' => \App\Models\NewsCategory::all($categoryLang),
+            'categoryNames' => \App\Models\NewsCategory::namesForIds(
+                array_map(static fn (array $item): int => (int) ($item['category_id'] ?? 0), $items),
+                $categoryLang
+            ),
         ]);
     }
 
