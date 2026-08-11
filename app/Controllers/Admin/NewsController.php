@@ -594,6 +594,9 @@ final class NewsController
     {
         return [
             'badge' => trim((string) ($_POST['badge'] ?? '')),
+            // Галочка «Цвет темы» у поля цвета важнее самого поля: браузер
+            // всегда присылает какое-то значение из <input type="color">.
+            'badge_color' => empty($_POST['badge_color_off']) ? (string) ($_POST['badge_color'] ?? '') : '',
             'key_points' => trim((string) ($_POST['key_points'] ?? '')),
             'event_meta' => trim((string) ($_POST['event_meta'] ?? '')),
             'docs' => $this->parseDocs((array) ($_POST['docs'] ?? [])),

@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS news (
     excerpt         TEXT NULL,
     lead_html       LONGTEXT NULL COMMENT 'форматированный лид; excerpt — его текстовая версия',
     badge           VARCHAR(100) NULL COMMENT 'визуальная метка («Важно», «Анонс»); не категория',
+    badge_color     VARCHAR(9) NULL COMMENT 'цвет фона метки (#rrggbb); пусто — цвет темы',
     category_id     INT UNSIGNED NULL COMMENT 'категория новости',
     content         LONGTEXT NULL,
     image           VARCHAR(255) NULL,
@@ -1163,7 +1164,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_05_page_custom_assets.sql'),
     ('2026_08_11_web_vitals.sql'),
     ('2026_08_11_public_listing_indexes.sql'),
-    ('2026_08_11_news_categories.sql')
+    ('2026_08_11_news_categories.sql'),
+    ('2026_08_11_news_badge_color.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

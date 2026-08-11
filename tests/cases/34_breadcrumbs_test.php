@@ -31,12 +31,33 @@ test('Ведущая новость на главной — цельная пл�
     assert_contains('.newsfeat-grid { align-items: stretch; }', (string) $css);
 });
 
-test('Рубрика на карточке новости выводится только когда заполнена', function () {
+test('Метка на карточке новости выводится только когда заполнена', function () {
     $tpl = (string) file_get_contents(APP_ROOT . '/templates/blocks/news_feature.php');
     // Одинаковая метка у всех карточек — шум, а не рубрикация: фолбэка быть не должно.
     assert_not_contains("t('Новость')", $tpl);
-    assert_contains("\$badge = static fn (array \$i): string => trim((string) (\$i['badge'] ?? ''));", $tpl);
-    assert_contains("if (\$badge(\$featured) !== ''):", $tpl);
+    assert_contains('NewsBadge::render', $tpl, 'метка рендерится общим помощником');
+
+    // Пустая метка не должна оставлять на карточке пустую плашку.
+    assert_same('', \App\Core\NewsBadge::render('', '#c0392b'));
+    assert_same('', \App\Core\NewsBadge::render('   '));
+    assert_contains('news-badge', \App\Core\NewsBadge::render('Важно'));
+});
+
+test('Цвет метки: нормализация, контрастный текст и безопасное значение', function () {
+    assert_same('#c0392b', \App\Core\NewsBadge::normalizeColor('#C0392B'));
+    assert_same('#aabbcc', \App\Core\NewsBadge::normalizeColor('abc'), 'короткая запись разворачивается');
+    // Мусор не попадает в разметку: пустой цвет = значение из темы.
+    assert_same('', \App\Core\NewsBadge::normalizeColor('red; background:url(x)'));
+    assert_same('', \App\Core\NewsBadge::normalizeColor(''));
+    assert_same('', \App\Core\NewsBadge::styleAttr('не цвет'));
+
+    // Цвет текста считается, а не задаётся: на тёмном фоне светлый, на светлом тёмный.
+    assert_same('#ffffff', \App\Core\NewsBadge::textColor('#0b1a30'));
+    assert_same('#0b1a30', \App\Core\NewsBadge::textColor('#ffe066'));
+
+    $attr = \App\Core\NewsBadge::styleAttr('#0b1a30');
+    assert_contains('--news-badge-bg:#0b1a30', $attr);
+    assert_contains('--news-badge-fg:#ffffff', $attr);
 });
 
 test('Публичные календарь и альбомы не содержат непереведённых основных подписей', function () {

@@ -399,9 +399,24 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
 
                 <div class="form-field">
                     <label for="badge">Метка</label>
-                    <input type="text" id="badge" name="badge" value="<?= htmlspecialchars($news['badge'] ?? '', ENT_QUOTES) ?>" placeholder="Например: Важно">
+                    <input type="text" id="badge" name="badge" list="news-badge-presets" value="<?= htmlspecialchars($news['badge'] ?? '', ENT_QUOTES) ?>" placeholder="Например: Важно">
+                    <datalist id="news-badge-presets">
+                        <?php foreach (\App\Core\NewsBadge::PRESETS as $badgePreset): ?>
+                            <option value="<?= htmlspecialchars($badgePreset, ENT_QUOTES) ?>"></option>
+                        <?php endforeach; ?>
+                    </datalist>
                     <span class="form-hint">Необязательная пометка на карточке. Это не рубрика.</span>
                 </div>
+                <?= \App\Core\AdminUi::colorField(
+                    'badge_color',
+                    (string) ($news['badge_color'] ?? ''),
+                    'Цвет метки',
+                    '#c0392b',
+                    'Цвет темы'
+                ) ?>
+                <p class="form-hint">
+                    Цвет текста подбирается автоматически по контрасту с фоном — выбрать нечитаемое сочетание нельзя.
+                </p>
             </div>
 
             <!-- Главная обложка статьи -->

@@ -95,6 +95,10 @@ $langs = Language::active();
                 <td class="data-table__flex">
                     <div>
                         <a class="data-table__primary" href="/admin/news/<?= (int) $item['id'] ?>/edit"><?= htmlspecialchars($item['title'], ENT_QUOTES) ?></a>
+                        <?php if (trim((string) ($item['badge'] ?? '')) !== ''): ?>
+                            <?php // Метка показывается своим цветом: иначе редактор увидит её только на сайте. ?>
+                            <span class="news-mark"<?= \App\Core\NewsBadge::styleAttr($item['badge_color'] ?? null) ?>><?= htmlspecialchars((string) $item['badge'], ENT_QUOTES) ?></span>
+                        <?php endif; ?>
                     </div>
                 </td>
                 <td class="u-inline-a9efa5449f">

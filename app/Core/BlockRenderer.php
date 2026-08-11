@@ -564,6 +564,7 @@ final class BlockRenderer
                     'published_at' => (string) ($row['published_at'] ?? ''),
                     'excerpt' => (string) ($row['excerpt'] ?? ''),
                     'badge' => trim((string) ($row['badge'] ?? '')),
+                    'badge_color' => (string) ($row['badge_color'] ?? ''),
                     'category' => $rowCategory > 0 ? (string) ($categoryNames[$rowCategory] ?? '') : '',
                     'cover' => \App\Models\News::getCoverImage($row),
                     'url' => Locale::url('news/' . $row['slug'], $lang),

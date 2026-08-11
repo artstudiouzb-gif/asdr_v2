@@ -83,14 +83,18 @@ test('Языковые блоки несут собственные рубрик
     \App\Models\Language::flush();
 
     try {
+        // Рубрика поста — категория: её название переводится, а сама она
+        // одна на все языковые версии новости.
+        $categoryId = (int) \App\Models\NewsCategory::create('Tadbirlar ' . uniqid());
+        \App\Models\NewsCategoryTranslation::upsert($categoryId, 'ru', 'Мероприятия');
+
         $id = \App\Models\News::create([
             'title' => 'Uzbek sarlavha', 'slug' => 'meta-lang-' . uniqid(), 'excerpt' => 'Uzbek anons',
-            'content' => 'matn', 'status' => 'published', 'badge' => 'Tadbirlar',
+            'content' => 'matn', 'status' => 'published', 'category_id' => $categoryId,
             'published_at' => '2026-08-01 10:00:00',
         ]);
         \App\Models\NewsTranslation::upsert($id, 'ru', [
             'title' => 'Русский заголовок', 'excerpt' => 'Русский анонс', 'content' => 'текст',
-            'badge' => 'Мероприятия',
         ]);
 
         $langs = SocialSettings::buildPost(\App\Models\News::findById($id))['langs'];

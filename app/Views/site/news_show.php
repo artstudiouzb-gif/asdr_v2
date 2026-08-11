@@ -227,9 +227,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             <?php if ($newsCategory !== null): ?>
                 <a class="newsdetail__badge newsdetail__badge--onDark" href="<?= htmlspecialchars($newsCategory['url'], ENT_QUOTES) ?>"><?= htmlspecialchars($newsCategory['name'], ENT_QUOTES) ?></a>
             <?php endif; ?>
-            <?php if (!empty($news['badge'])): ?>
-                <span class="news-badge news-badge--on-media"><?= htmlspecialchars((string) $news['badge'], ENT_QUOTES) ?></span>
-            <?php endif; ?>
+            <?= \App\Core\NewsBadge::render($news['badge'] ?? '', $news['badge_color'] ?? null, true) ?>
             <div class="newsdetail__meta newsdetail__meta--onDark">
                 <?php if ($dateLong !== ''): ?>
                     <span class="newsdetail__meta-item"><?= $eventIcons[0] ?><time datetime="<?= htmlspecialchars(substr($date, 0, 10), ENT_QUOTES) ?>"><?= htmlspecialchars($dateLong, ENT_QUOTES) ?></time></span>
@@ -264,9 +262,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <?php if ($newsCategory !== null): ?>
                     <a class="newsdetail__badge" href="<?= htmlspecialchars($newsCategory['url'], ENT_QUOTES) ?>"><?= htmlspecialchars($newsCategory['name'], ENT_QUOTES) ?></a>
                 <?php endif; ?>
-                <?php if (!empty($news['badge'])): ?>
-                    <span class="news-badge"><?= htmlspecialchars((string) $news['badge'], ENT_QUOTES) ?></span>
-                <?php endif; ?>
+                <?= \App\Core\NewsBadge::render($news['badge'] ?? '', $news['badge_color'] ?? null) ?>
                 <div class="newsdetail__meta">
                     <?php if ($dateLong !== ''): ?>
                         <span class="newsdetail__meta-item"><?= $eventIcons[0] ?><time datetime="<?= htmlspecialchars(substr($date, 0, 10), ENT_QUOTES) ?>"><?= htmlspecialchars($dateLong, ENT_QUOTES) ?></time></span>

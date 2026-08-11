@@ -942,12 +942,14 @@ final class News
     public static function updateExtras(int $id, array $data): void
     {
         $stmt = Database::pdo()->prepare(
-            'UPDATE news SET badge = :badge, press_release_url = :press_release_url,
+            'UPDATE news SET badge = :badge, badge_color = :badge_color, press_release_url = :press_release_url,
              key_points = :key_points, event_meta = :event_meta, docs = :docs,
              source_note = :source_note WHERE id = :id'
         );
+        $badgeColor = \App\Core\NewsBadge::normalizeColor($data['badge_color'] ?? '');
         $stmt->execute([
             ':badge' => ($data['badge'] ?? '') !== '' ? $data['badge'] : null,
+            ':badge_color' => $badgeColor !== '' ? $badgeColor : null,
             ':press_release_url' => ($data['press_release_url'] ?? '') !== '' ? $data['press_release_url'] : null,
             ':key_points' => ($data['key_points'] ?? '') !== '' ? $data['key_points'] : null,
             ':event_meta' => ($data['event_meta'] ?? '') !== '' ? $data['event_meta'] : null,

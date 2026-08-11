@@ -308,7 +308,9 @@ final class SocialSettings
             'image_url' => $cover,
             'title' => $title,
             'hashtags' => $hashtags,
-            'category' => trim((string) ($news['badge'] ?? '')),
+            // Рубрика поста — категория новости, а не метка: метка («Важно»)
+            // говорит о срочности, а не о том, про что материал.
+            'category' => self::categoryName($news, Language::defaultCode()),
             'date' => $date,
             'gallery' => $gallery,
             'gallery_meta' => $galleryMeta,
@@ -325,6 +327,20 @@ final class SocialSettings
      * @param array<string,mixed> $news
      * @return list<array{code:string,label:string,title:string,excerpt:string,lead_html:string,link:string,read_more:string}>
      */
+    /**
+     * Название категории новости на указанном языке. Пустая строка, если
+     * рубрики нет — строка над заголовком тогда просто не выводится.
+     */
+    private static function categoryName(array $row, string $lang): string
+    {
+        $categoryId = (int) ($row['category_id'] ?? 0);
+        if ($categoryId <= 0) {
+            return '';
+        }
+
+        return trim((string) (\App\Models\NewsCategory::namesForIds([$categoryId], $lang)[$categoryId] ?? ''));
+    }
+
     private static function languageBlocks(array $news, string $base): array
     {
         $default = Language::defaultCode();
@@ -383,7 +399,7 @@ final class SocialSettings
                 // перевод базового slug.
                 'link' => $link,
                 'read_more' => $meta[$code]['read_more'] ?? ('Read (' . strtoupper($code) . ') →'),
-                'category' => trim((string) ($row['badge'] ?? '')),
+                'category' => self::categoryName($row, $code),
                 'date' => $published !== '' ? DateFormatter::long($published, $code) : '',
                 'hashtags' => (string) (News::cleanHashtags($row['hashtags'] ?? null) ?? ''),
             ];

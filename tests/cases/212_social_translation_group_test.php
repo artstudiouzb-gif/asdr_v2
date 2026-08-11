@@ -27,9 +27,13 @@ function group_news_pair(): array
         'content' => 'текст', 'status' => 'published',
         'published_at' => '2026-08-01 10:00:00', 'lang' => 'ru',
     ]);
-    // Рубрика в create() не участвует — проставляем отдельно, как и админка.
-    $pdo->prepare("UPDATE news SET badge = 'Tadbirlar' WHERE id = :id")->execute([':id' => $uzId]);
-    $pdo->prepare("UPDATE news SET badge = 'Мероприятия' WHERE id = :id")->execute([':id' => $ruId]);
+    // Рубрика — одна категория на обе записи: у неё общий id, а название
+    // переводится. Раньше её изображал текст в badge, который приходилось
+    // дублировать в каждой языковой версии.
+    $categoryId = (int) \App\Models\NewsCategory::create('Tadbirlar ' . $suffix);
+    \App\Models\NewsCategoryTranslation::upsert($categoryId, 'ru', 'Мероприятия');
+    $pdo->prepare('UPDATE news SET category_id = :c WHERE id IN (:a, :b)')
+        ->execute([':c' => $categoryId, ':a' => $uzId, ':b' => $ruId]);
     // Связываем: так их и связывает админка при добавлении языковой версии.
     $pdo->prepare('UPDATE news SET translation_group_id = :g WHERE id IN (:a, :b)')
         ->execute([':g' => $uzId, ':a' => $uzId, ':b' => $ruId]);

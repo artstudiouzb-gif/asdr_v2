@@ -54,7 +54,7 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
                 <span class="news-meta">
                     <?php if (!empty($featured['published_at'])): ?><time class="newslist__date"><?= htmlspecialchars($fmt((string) $featured['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
                     <?php if ($categoryOf($featured) !== ''): ?><span class="news-category"><?= htmlspecialchars($categoryOf($featured), ENT_QUOTES) ?></span><?php endif; ?>
-                    <?php if (!empty($featured['badge'])): ?><span class="news-badge"><?= htmlspecialchars((string) $featured['badge'], ENT_QUOTES) ?></span><?php endif; ?>
+                    <?= \App\Core\NewsBadge::render($featured['badge'] ?? '', $featured['badge_color'] ?? null) ?>
                 </span>
                 <h2 class="newslist-lead__title"><?= htmlspecialchars((string) $featured['title'], ENT_QUOTES) ?></h2>
                 <?php if (!empty($featured['excerpt'])): ?><span class="newslist-lead__excerpt"><?= htmlspecialchars(excerpt((string) $featured['excerpt'], 280), ENT_QUOTES) ?></span><?php endif; ?>
@@ -74,7 +74,7 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
                 <span class="news-meta">
                     <?php if (!empty($item['published_at'])): ?><time class="relnews-card__date"><?= htmlspecialchars($fmt((string) $item['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
                     <?php if ($categoryOf($item) !== ''): ?><span class="news-category"><?= htmlspecialchars($categoryOf($item), ENT_QUOTES) ?></span><?php endif; ?>
-                    <?php if (!empty($item['badge'])): ?><span class="news-badge"><?= htmlspecialchars((string) $item['badge'], ENT_QUOTES) ?></span><?php endif; ?>
+                    <?= \App\Core\NewsBadge::render($item['badge'] ?? '', $item['badge_color'] ?? null) ?>
                 </span>
                 <h3 class="relnews-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
                 <?php if (!empty($item['excerpt'])): ?><span class="relnews-card__excerpt"><?= htmlspecialchars(excerpt((string) $item['excerpt'], 180), ENT_QUOTES) ?></span><?php endif; ?>
