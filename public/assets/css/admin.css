@@ -2341,10 +2341,15 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 /* ============================================================================
    Двухколоночная раскладка редактора (в духе Statamic)
    ============================================================================ */
-.entry-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
+/* Действующая декларация: выше в файле есть ещё одна, она перекрыта этой. */
+/* Ширина боковой колонки тянется вместе с окном: при 340px три кнопки обложки
+   не помещались в строку и «Удалить» вылезала за карточку на 138px, а на
+   широком мониторе колонка зря оставалась узкой. Нижняя граница — прежние
+   340px, так что на 1280px ничего не меняется. */
+.entry-grid { display: grid; grid-template-columns: minmax(0, 1fr) clamp(340px, 24vw, 460px); gap: 20px; align-items: start; }
 .entry-main { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .entry-main .form-card { max-width: none; }
-.entry-side { display: flex; flex-direction: column; gap: 20px; position: sticky; top: calc(var(--admin-topbar-h) + 20px); }
+.entry-side { display: flex; flex-direction: column; gap: 20px; position: sticky; top: calc(var(--admin-topbar-h) + 20px); min-width: 0; }
 .entry-side .form-card { max-width: none; }
 .news-detail-sidebar h2 { margin: 0; }
 .news-detail-sidebar__pick { align-self: flex-start; }
@@ -5190,6 +5195,11 @@ body.auth-page {
     opacity: .45;
     cursor: not-allowed;
 }
+/* Три кнопки в одну строку в боковой колонке не помещались: «Удалить»
+   вылезала за карточку на 138px. Разрешаем перенос и даём кнопкам сжиматься. */
+.sidebar-cover-actions {
+    flex-wrap: wrap;
+}
 
 .admin-progress__bar {
     width: var(--progress-width, 0%);
@@ -6689,6 +6699,14 @@ body.auth-page label,
 .multilang-editing { flex-wrap: wrap; }
 .multilang-editing > div { min-width: 0; flex-wrap: wrap; }
 .multilang-editing > span { flex: 0 0 auto; }
+
+/* Строки списка языков: название слева, действие справа. Названию разрешаем
+   сжиматься, кнопке — нет, строке — переноситься. Одного лишь gap мало: без
+   этих правил зазор выталкивал содержимое за пределы строки. */
+.multilang-translation-list > div { flex-wrap: wrap; gap: 10px; }
+.multilang-translation-list > div > :first-child { min-width: 0; flex: 1 1 auto; }
+.multilang-translation-list > div > :last-child { flex: 0 0 auto; }
+
 
 /* Спрайт иконок вставляется сразу после <body>. Правило есть в frontend.css,
    но админка его не грузит — и строчный <svg> создавал строку высотой в

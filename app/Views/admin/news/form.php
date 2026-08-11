@@ -399,7 +399,7 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                     </div>
 
                     <!-- Кнопки выбора, загрузки и удаления СНИЗУ обложки -->
-                    <div class="u-inline-78cead6503">
+                    <div class="u-inline-78cead6503 sidebar-cover-actions">
                         <button type="button" class="btn btn--small btn--secondary u-inline-8c735c029d" data-media-pick data-media-target="#image_url" data-media-type="image">
                             <?= \App\Core\AdminUi::icon('image', 15) ?>
                             Медиабиблиотека
