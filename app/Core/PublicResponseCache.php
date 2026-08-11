@@ -26,8 +26,15 @@ final class PublicResponseCache
         '/admin/settings/demo-content', '/admin/redirects', '/admin/languages',
     ];
 
+    /**
+     * Решение apply(): ответ годится в общий кеш. Нужно sendConditional(),
+     * чтобы не выдавать ETag там, где ответ приватный или некэшируемый.
+     */
+    private static bool $cacheable = false;
+
     public static function apply(string $template): void
     {
+        self::$cacheable = false;
         if (!str_starts_with($template, 'site/')) {
             return;
         }
@@ -82,6 +89,76 @@ final class PublicResponseCache
         // может, поэтому узбекские ответы по-прежнему зависят от cookie.
         $varyCookie = Locale::current() === 'uz';
         header('Vary: Accept-Encoding' . ($varyCookie ? ', Cookie' : ''));
+        self::$cacheable = true;
+    }
+
+    /**
+     * Условный ответ: ETag от готовой страницы и `304` при совпадении.
+     *
+     * Когда истекает max-age, браузер идёт перепроверять — и сейчас получает
+     * всю страницу заново, даже если она не изменилась. С ETag он получает
+     * пустой `304`: тело (десятки килобайт) не передаётся вовсе.
+     *
+     * Хеш считается **от готового тела**, а не от времени файла кэша блоков.
+     * Это принципиально: страница с формой получает свежий CSRF-токен на
+     * каждый запрос, и по mtime кэша ей бы выдали `304` с чужим токеном.
+     * Хеш тела в этом случае просто не совпадёт — форма приедет целиком, как и
+     * должна. Никаких списков исключений вести не нужно.
+     *
+     * Экономится трафик, а не процессор: страница всё равно собирается, чтобы
+     * посчитать хеш. Процессор снимает дисковый кэш блоков и общий кеш на CDN.
+     *
+     * @return bool true — ответ уже отправлен, тело печатать не нужно.
+     */
+    public static function sendConditional(string $html): bool
+    {
+        if (!self::$cacheable || headers_sent()) {
+            return false;
+        }
+        if (!in_array(strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')), ['GET', 'HEAD'], true)) {
+            return false;
+        }
+
+        // 32 шестнадцатеричных знака: коллизия невероятна, а заголовок короче.
+        $etag = '"' . substr(hash('sha256', $html), 0, 32) . '"';
+        header('ETag: ' . $etag);
+
+        if (!self::etagMatches((string) ($_SERVER['HTTP_IF_NONE_MATCH'] ?? ''), $etag)) {
+            return false;
+        }
+
+        http_response_code(304);
+        header_remove('Content-Type');
+        header_remove('Content-Length');
+
+        return true;
+    }
+
+    /**
+     * Сверка `If-None-Match`. Заголовок содержит список, значения могут быть
+     * помечены слабыми (`W/"…"`) — для нашего сравнения это тот же тег.
+     */
+    public static function etagMatches(string $header, string $etag): bool
+    {
+        $header = trim($header);
+        if ($header === '') {
+            return false;
+        }
+        if ($header === '*') {
+            return true;
+        }
+
+        foreach (explode(',', $header) as $candidate) {
+            $candidate = trim($candidate);
+            if (str_starts_with($candidate, 'W/')) {
+                $candidate = substr($candidate, 2);
+            }
+            if ($candidate === $etag) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

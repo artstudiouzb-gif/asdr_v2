@@ -53,6 +53,9 @@ final class View
             $html = UzCyrillic::html($html);
         }
         PublicResponseCache::apply($template);
+        if (PublicResponseCache::sendConditional($html)) {
+            return;
+        }
         echo $html;
     }
 

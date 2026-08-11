@@ -86,3 +86,42 @@ test('Анонимному посетителю публичка не завод
     $toolbar = (string) file_get_contents(APP_ROOT . '/app/Core/AppToolbar.php');
     assert_contains('Auth::sessionUser()', $toolbar, 'бар администратора спрашивает сессию');
 });
+
+test('Сверка If-None-Match: строгий тег, слабый, список и звёздочка', function (): void {
+    $etag = '"abc123"';
+
+    assert_true(PublicResponseCache::etagMatches('"abc123"', $etag), 'строгий тег');
+    // Слабый тег означает лишь «семантически то же представление». Для сверки
+    // с 304 это тот же тег: прокси и Firefox присылают его именно так.
+    assert_true(PublicResponseCache::etagMatches('W/"abc123"', $etag), 'слабый тег');
+    assert_true(PublicResponseCache::etagMatches('"other", W/"abc123"', $etag), 'список');
+    assert_true(PublicResponseCache::etagMatches('*', $etag), 'звёздочка — любой тег');
+
+    assert_false(PublicResponseCache::etagMatches('', $etag), 'пустой заголовок');
+    assert_false(PublicResponseCache::etagMatches('"abc124"', $etag), 'чужой тег');
+    // Подстрока не должна засчитываться: иначе «"abc"» открыл бы «"abc123"».
+    assert_false(PublicResponseCache::etagMatches('"abc"', $etag), 'подстрока не совпадение');
+});
+
+test('ETag считается от готового тела, а не от времени кэша блоков', function (): void {
+    $source = (string) file_get_contents(APP_ROOT . '/app/Core/PublicResponseCache.php');
+
+    // Тело — единственный корректный источник хеша: страница с формой
+    // получает свежий CSRF-токен на каждый запрос, и по mtime файла кэша ей
+    // выдали бы 304 с чужим токеном. Ошибка тихая — ловим её тестом.
+    assert_true(
+        preg_match('/function sendConditional\(string \$html\).*?hash\(\'sha256\', \$html\)/s', $source) === 1,
+        'sendConditional обязан хешировать переданное тело'
+    );
+    assert_false(
+        str_contains($source, 'filemtime'),
+        'время файла кэша не годится: оно не различает страницы с живым токеном'
+    );
+
+    // Печатать тело после 304 нельзя — иначе экономии нет, а ответ битый.
+    $view = (string) file_get_contents(APP_ROOT . '/app/Core/View.php');
+    assert_true(
+        preg_match('/PublicResponseCache::sendConditional\(\$html\)\)\s*\{\s*return;/s', $view) === 1,
+        'View::render обязан выйти без вывода тела, когда отправлен 304'
+    );
+});
