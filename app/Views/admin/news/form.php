@@ -118,33 +118,6 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                     <input class="u-inline-bc64d2d1e3" type="text" name="title" value="<?= htmlspecialchars($news['title'] ?? '', ENT_QUOTES) ?>" placeholder="Введите заголовок новости" required>
                 </div>
 
-                <?php
-                $newsCategories = \App\Models\NewsCategory::all();
-                $selectedCategory = (int) ($news['category_id'] ?? 0);
-                ?>
-                <div class="form-field u-inline-79a1c5a5db">
-                    <label class="u-inline-e925a44577" for="category_id">Категория</label>
-                    <select id="category_id" name="category_id">
-                        <option value="0">— без категории —</option>
-                        <?php foreach ($newsCategories as $newsCategory): ?>
-                            <option value="<?= (int) $newsCategory['id'] ?>" <?= $selectedCategory === (int) $newsCategory['id'] ? 'selected' : '' ?>>
-                                <?= htmlspecialchars((string) $newsCategory['name'], ENT_QUOTES) ?><?= (int) $newsCategory['is_active'] === 1 ? '' : ' (скрыта)' ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <span class="form-hint">
-                        Рубрика ленты: по ней работают фильтр в списке и выборка в блоке «Новости».
-                        <a href="/admin/news-categories">Управление категориями</a>.
-                        Категория общая для всех языковых версий новости — переводится название самой категории.
-                    </span>
-                </div>
-
-                <div class="form-field u-inline-79a1c5a5db">
-                    <label class="u-inline-e925a44577" for="badge">Метка</label>
-                    <input type="text" id="badge" name="badge" value="<?= htmlspecialchars($news['badge'] ?? '', ENT_QUOTES) ?>" placeholder="Например: Важно, Новое, Анонс">
-                    <span class="form-hint">Необязательная пометка поверх карточки. Это не категория: рубрику задаёт список выше.</span>
-                </div>
-
                 <div class="form-field u-inline-79a1c5a5db">
                     <div class="u-inline-a42388f688">
                         <label class="u-inline-2e190aa086" for="news_lead_html">Лид (анонс)</label>
@@ -394,6 +367,42 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
         <!-- Правая колонка настройки публикации -->
         <aside class="entry-side">
             <?= \App\Core\TranslationGroupHelper::renderSidebarMetaBox('news', $news ?? []) ?>
+
+            <!-- Рубрика и метка: свойства публикации, а не текст статьи, поэтому
+                 стоят в сайдбаре рядом с языком и обложкой. -->
+            <?php
+            $newsCategories = \App\Models\NewsCategory::all();
+            $selectedCategory = (int) ($news['category_id'] ?? 0);
+            ?>
+            <div class="form-card u-inline-c18e1e5580">
+                <h3 class="u-inline-3e52776664">
+                    <?= \App\Core\AdminUi::icon('folder', 18) ?>
+                    Рубрика и метка
+                </h3>
+
+                <div class="form-field">
+                    <label for="category_id">Категория</label>
+                    <select id="category_id" name="category_id">
+                        <option value="0">— без категории —</option>
+                        <?php foreach ($newsCategories as $newsCategory): ?>
+                            <option value="<?= (int) $newsCategory['id'] ?>" <?= $selectedCategory === (int) $newsCategory['id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars((string) $newsCategory['name'], ENT_QUOTES) ?><?= (int) $newsCategory['is_active'] === 1 ? '' : ' (скрыта)' ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <span class="form-hint">
+                        Рубрика ленты: фильтр в списке и выборка в блоке «Новости».
+                        Общая для всех языковых версий — переводится название самой категории.
+                        <a href="/admin/news-categories">Управление категориями</a>.
+                    </span>
+                </div>
+
+                <div class="form-field">
+                    <label for="badge">Метка</label>
+                    <input type="text" id="badge" name="badge" value="<?= htmlspecialchars($news['badge'] ?? '', ENT_QUOTES) ?>" placeholder="Например: Важно">
+                    <span class="form-hint">Необязательная пометка на карточке. Это не рубрика.</span>
+                </div>
+            </div>
 
             <!-- Главная обложка статьи -->
             <div class="form-card u-inline-c18e1e5580">
