@@ -697,6 +697,30 @@ final class BlockController
                     'docs_all_url' => $this->safeUrlField('docs_all_url'),
                     'docs' => $docs,
                 ];
+            case 'icon_text':
+                $iconRows = [];
+                foreach ((array) ($_POST['items'] ?? []) as $item) {
+                    $rows = trim((string) ($item['rows'] ?? ''));
+                    $icon = \App\Core\Icon::cleanName($item['icon_svg'] ?? '');
+                    if ($rows === '' && $icon === '') {
+                        continue;
+                    }
+                    $iconRows[] = [
+                        'icon_svg' => $icon,
+                        // Пустой цвет = оттенок акцента сайта. Мусор в поле не
+                        // должен попасть в разметку, поэтому нормализуем тем же
+                        // помощником, что и цвет метки новости.
+                        'icon_color' => \App\Core\NewsBadge::normalizeColor($item['icon_color'] ?? ''),
+                        'rows' => TextProcessor::typographPlain($rows, $locale),
+                    ];
+                }
+
+                return [
+                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
+                    'columns' => max(1, min(4, (int) ($_POST['columns'] ?? 3))),
+                    'items' => $iconRows,
+                ];
             case 'leader_card':
                 $facts = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {

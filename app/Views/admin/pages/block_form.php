@@ -31,7 +31,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <input type="text" id="title" name="title" value="<?= htmlspecialchars($block['title'] ?? '', ENT_QUOTES) ?>">
         </div>
 
-        <?php if (in_array($type, ['text', 'cta', 'advantages', 'testimonials', 'counters', 'team_list', 'projects_list', 'news_latest', 'partners', 'faq', 'subscribe', 'contact_cards', 'hero', 'cards_grid', 'media_gallery', 'news_feature', 'person_cards', 'timeline', 'stages', 'text_image', 'docs_list', 'map_point', 'org_structure'], true)): ?>
+        <?php if (in_array($type, ['text', 'cta', 'advantages', 'testimonials', 'counters', 'team_list', 'projects_list', 'news_latest', 'partners', 'faq', 'subscribe', 'contact_cards', 'hero', 'cards_grid', 'media_gallery', 'news_feature', 'person_cards', 'timeline', 'stages', 'text_image', 'docs_list', 'map_point', 'org_structure', 'icon_text'], true)): ?>
             <div class="form-field">
                 <label for="title_field"><?= in_array($type, ['advantages', 'timeline', 'stages'], true) ? 'Заголовок раздела' : 'Заголовок, показываемый на сайте' ?></label>
                 <input type="text" id="title_field" name="title_field" value="<?= htmlspecialchars($data['title'] ?? '', ENT_QUOTES) ?>">
@@ -1082,6 +1082,42 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="docs"><?= \App\Core\AdminUi::icon('plus') ?>Добавить документ</button></div>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($type === 'icon_text'): ?>
+            <div class="form-field"><label for="it_description">Описание под заголовком</label><textarea id="it_description" name="description" rows="2"><?= htmlspecialchars($data['description'] ?? '', ENT_QUOTES) ?></textarea></div>
+            <div class="form-field">
+                <label for="it_columns">Колонок</label>
+                <select id="it_columns" name="columns">
+                    <?php foreach ([1, 2, 3, 4] as $itCols): ?>
+                        <option value="<?= $itCols ?>" <?= (int) ($data['columns'] ?? 3) === $itCols ? 'selected' : '' ?>><?= $itCols ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div>
+                <label>Карточки</label>
+                <div data-repeater="items">
+                    <?php foreach (($data['items'] ?? []) as $i => $item): ?>
+                        <div class="repeater-row">
+                            <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
+                            <div class="form-field"><label>Цвет иконки</label><input type="text" name="items[<?= $i ?>][icon_color]" value="<?= htmlspecialchars($item['icon_color'] ?? '', ENT_QUOTES) ?>" placeholder="#3f9c5a — пусто = цвет сайта"></div>
+                            <div class="form-field">
+                                <label>Строки</label>
+                                <textarea name="items[<?= $i ?>][rows]" rows="3" placeholder="Телефон доверия | (71) 202-06-00"><?= htmlspecialchars($item['rows'] ?? '', ENT_QUOTES) ?></textarea>
+                                <span class="form-hint">По строке на пару: подпись, вертикальная черта, значение. Строка без черты выводится подписью.</span>
+                            </div>
+                            <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <template data-repeater-template="items">
+                    <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
+                    <div class="form-field"><label>Цвет иконки</label><input type="text" name="items[__INDEX__][icon_color]" placeholder="#3f9c5a — пусто = цвет сайта"></div>
+                    <div class="form-field"><label>Строки</label><textarea name="items[__INDEX__][rows]" rows="3" placeholder="Телефон доверия | (71) 202-06-00"></textarea></div>
+                    <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
+                </template>
+                <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить карточку</button></div>
             </div>
         <?php endif; ?>
 

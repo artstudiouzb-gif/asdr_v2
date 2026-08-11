@@ -67,6 +67,7 @@ final class BlockTypeRegistry
             'bio_title' => 'Биография', 'bio_icon' => '', 'bio' => '',
             'duties_title' => 'Функции', 'duties_icon' => '', 'duties' => '',
             'mobile_icons_only' => false],
+        'icon_text' => ['title' => '', 'description' => '', 'columns' => 3, 'items' => []],
     ];
 
     /** Короткие русские названия для сообщений редактору. */
@@ -85,6 +86,7 @@ final class BlockTypeRegistry
         'anchor_nav' => 'Якорная навигация', 'stages' => 'Этапы', 'text_image' => 'Текст с фото',
         'docs_list' => 'Список документов', 'map_point' => 'Карта', 'org_structure' => 'Оргструктура',
         'leader_card' => 'Карточка руководителя',
+        'icon_text' => 'Иконка и текст',
     ];
 
     /**
@@ -115,6 +117,7 @@ final class BlockTypeRegistry
         'map_point' => 'Карта с меткой',
         'org_structure' => 'Структура организации (оргсхема)',
         'leader_card' => 'Карточка руководителя (с вкладками)',
+        'icon_text' => 'Иконка и текст (контакты, телефоны)',
     ];
 
     /** @return list<string> */

@@ -132,6 +132,16 @@ final class BlockSamples
                 ['year' => '2025', 'text' => 'Следующий этап.', 'status' => 'done'],
                 ['year' => '2026', 'text' => 'Текущий этап.', 'status' => 'active'],
             ]],
+            'icon_text' => [
+                'title' => 'Полезные телефоны',
+                'description' => '',
+                'columns' => 3,
+                'items' => [
+                    ['icon_svg' => 'scale', 'icon_color' => '', 'rows' => "Телефон доверия | (71) 202-06-00"],
+                    ['icon_svg' => 'id-badge', 'icon_color' => '', 'rows' => "Социальная карта | 1070\nТелефон доверия по вопросам насилия | 1146"],
+                    ['icon_svg' => 'bell', 'icon_color' => '', 'rows' => "Канцелярия (для юридических лиц) | (71) 239-59-22"],
+                ],
+            ],
             'leader_card' => [
                 'photo' => '', 'name' => 'Фамилия Имя Отчество',
                 'position' => 'Должность руководителя',

@@ -6282,3 +6282,38 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     .stage--active .stage__dot,
     .timeline-item--active::before { animation: none; }
 }
+/* ==========================================================================
+   Блок «Иконка и текст»: карточки с иконкой и парами «подпись → значение».
+   Типовое место — полезные телефоны поверх фонового снимка, поэтому карточка
+   непрозрачная: полупрозрачная подложка на светлом фото теряет читаемость.
+   ========================================================================== */
+.icon-text__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1000px) { .icon-text__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 720px) { .icon-text__grid { grid-template-columns: 1fr; } }
+.icon-text__card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 20px;
+    background: var(--gov-surface);
+    border: 1px solid var(--gov-border);
+    border-radius: var(--radius, 14px);
+    box-shadow: var(--shadow-1);
+}
+/* Плитка иконки: оттенок берётся из --icon-text-accent, а он по умолчанию —
+   акцент сайта. Свой цвет карточки задаётся в админке и приходит scoped CSS. */
+.icon-text__icon {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm, 10px);
+    background: color-mix(in srgb, var(--icon-text-accent, var(--color-accent, var(--gov-teal))) 14%, var(--gov-surface));
+    color: var(--icon-text-accent, var(--gov-teal-text));
+}
+.icon-text__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.icon-text__label { margin: 0; color: var(--gov-muted); font-size: var(--step--2); line-height: 1.4; }
+.icon-text__value { margin: 0 0 6px; color: var(--gov-title); font-size: var(--step-1); font-weight: 700; line-height: 1.25; }
+.icon-text__value:last-child { margin-bottom: 0; }
+.block-icon-text__empty { color: var(--gov-muted); margin: 0; }
