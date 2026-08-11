@@ -697,6 +697,42 @@ final class BlockController
                     'docs_all_url' => $this->safeUrlField('docs_all_url'),
                     'docs' => $docs,
                 ];
+            case 'leader_card':
+                $facts = [];
+                foreach ((array) ($_POST['items'] ?? []) as $item) {
+                    $label = trim((string) ($item['label'] ?? ''));
+                    $value = trim((string) ($item['value'] ?? ''));
+                    if ($label === '' && $value === '') {
+                        continue;
+                    }
+                    $facts[] = [
+                        'icon_svg' => \App\Core\Icon::cleanName($item['icon_svg'] ?? ''),
+                        'label' => TextProcessor::typographPlain($label, $locale),
+                        'value' => TextProcessor::typographPlain($value, $locale),
+                    ];
+                }
+
+                return [
+                    'photo' => trim((string) ($_POST['photo'] ?? '')),
+                    'name' => TextProcessor::typographPlain(trim((string) ($_POST['name'] ?? '')), $locale),
+                    'position' => TextProcessor::typographPlain(trim((string) ($_POST['position'] ?? '')), $locale),
+                    'phone' => trim((string) ($_POST['phone'] ?? '')),
+                    'email' => trim((string) ($_POST['email'] ?? '')),
+                    'hours' => TextProcessor::typographPlain(trim((string) ($_POST['hours'] ?? '')), $locale),
+                    // Соцсети — только безопасные ссылки: адрес приходит из формы
+                    // и попадает в href, javascript: там быть не должно.
+                    'facebook' => $this->safeUrlField('facebook'),
+                    'x' => $this->safeUrlField('x'),
+                    'linkedin' => $this->safeUrlField('linkedin'),
+                    'instagram' => $this->safeUrlField('instagram'),
+                    'telegram' => $this->safeUrlField('telegram'),
+                    'facts_title' => TextProcessor::typographPlain(trim((string) ($_POST['facts_title'] ?? '')), $locale),
+                    'items' => $facts,
+                    'bio_title' => TextProcessor::typographPlain(trim((string) ($_POST['bio_title'] ?? '')), $locale),
+                    'bio' => TextProcessor::process((string) ($_POST['bio'] ?? ''), $locale),
+                    'duties_title' => TextProcessor::typographPlain(trim((string) ($_POST['duties_title'] ?? '')), $locale),
+                    'duties' => TextProcessor::process((string) ($_POST['duties'] ?? ''), $locale),
+                ];
             case 'person_profile':
                 return [
                     'photo' => trim((string) ($_POST['photo'] ?? '')),

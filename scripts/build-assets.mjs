@@ -29,8 +29,10 @@ const jsSources = [
 const blockSources = [
     'public/assets/css/blocks/news-detail.css',
     'public/assets/css/blocks/org-structure.css',
+    'public/assets/css/blocks/leader-card.css',
     'public/assets/js/blocks/slider.js',
     'public/assets/js/blocks/anchor_nav.js',
+    'public/assets/js/blocks/leader_card.js',
     'public/assets/js/news.js',
 ];
 

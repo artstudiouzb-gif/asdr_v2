@@ -61,6 +61,11 @@ final class BlockTypeRegistry
         'docs_list' => ['variant' => 'grid', 'title' => '', 'all_text' => '', 'all_url' => '', 'columns' => 4, 'search_enabled' => true, 'items' => []],
         'map_point' => ['title' => '', 'image' => '', 'embed_url' => '', 'load_mode' => 'click', 'card_title' => '', 'address' => '', 'copy_enabled' => true, 'button_text' => '', 'button_url' => ''],
         'org_structure' => ['title' => '', 'layout' => 'tree', 'columns' => 4, 'council' => '', 'head_title' => 'Директор', 'head_name' => '', 'head_url' => '', 'side_items' => '', 'branches' => [], 'collapsible' => false, 'notes' => '', 'footnote' => ''],
+        'leader_card' => ['photo' => '', 'name' => '', 'position' => '', 'phone' => '', 'email' => '', 'hours' => '',
+            'facebook' => '', 'x' => '', 'linkedin' => '', 'instagram' => '', 'telegram' => '',
+            'facts_title' => 'Основная информация', 'items' => [],
+            'bio_title' => 'Биография', 'bio' => '',
+            'duties_title' => 'Функции', 'duties' => ''],
     ];
 
     /** Короткие русские названия для сообщений редактору. */
@@ -78,6 +83,7 @@ final class BlockTypeRegistry
         'bio_education' => 'Биография и образование',
         'anchor_nav' => 'Якорная навигация', 'stages' => 'Этапы', 'text_image' => 'Текст с фото',
         'docs_list' => 'Список документов', 'map_point' => 'Карта', 'org_structure' => 'Оргструктура',
+        'leader_card' => 'Карточка руководителя',
     ];
 
     /**
@@ -107,6 +113,7 @@ final class BlockTypeRegistry
         'docs_list' => 'Документы (сетка)',
         'map_point' => 'Карта с меткой',
         'org_structure' => 'Структура организации (оргсхема)',
+        'leader_card' => 'Карточка руководителя (с вкладками)',
     ];
 
     /** @return list<string> */
