@@ -2628,7 +2628,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .listing { display: flex; flex-direction: column; gap: clamp(26px, 3.4vw, 44px); padding-block: 0 28px; }
 /* Надзаголовок раздела: называет рубрику сайта, а не страницу. */
 .listing__eyebrow {
-    margin: 0 0 6px; color: var(--color-accent, var(--gov-teal-text));
+    margin: 0 0 6px; color: var(--gov-teal-text);
     font-size: var(--step--2); font-weight: 700; letter-spacing: .04em;
 }
 .listing__title { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 10px; }
@@ -2736,7 +2736,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
     /* Растягиваем явно: у крупной карточки тело выровнено по flex-start, и без
        этого черта шла бы только под текстом ссылки, а не через всю панель. */
     align-self: stretch;
-    color: var(--color-accent, var(--gov-teal-text));
+    color: var(--gov-teal-text);
     font-weight: 700; font-size: var(--step--2);
 }
 .card-more__arrow { transition: transform 0.2s ease; }
@@ -2758,7 +2758,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 }
 .newsfeat-more__btn:hover {
     border-color: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 45%, var(--gov-border));
-    color: var(--color-accent, var(--gov-teal-text));
+    color: var(--gov-teal-text);
     box-shadow: var(--shadow-3);
 }
 .newsfeat-more__btn:hover .card-more__arrow { transform: translateX(4px); }
@@ -4047,7 +4047,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 /* Стрелка вместо подписи: у компактной карточки на «Читать подробнее» нет
    места, а показать, что это ссылка, всё равно нужно. */
 .block-newsfeat--mosaic .newsfeat-text__arrow {
-    margin-top: auto; color: var(--color-accent, var(--gov-teal-text));
+    margin-top: auto; color: var(--gov-teal-text);
     font-weight: 700; font-size: var(--step-0);
 }
 .block-newsfeat--mosaic .newsfeat-side__texts { border-top: 0; padding-top: 0; }
