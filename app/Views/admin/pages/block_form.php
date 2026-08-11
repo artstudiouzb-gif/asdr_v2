@@ -223,10 +223,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <div data-repeater="slides">
                     <?php foreach (($data['slides'] ?? []) as $i => $slide): ?>
                         <div class="repeater-row">
-                            <div class="form-field">
-                                <label>Ссылка на изображение</label>
-                                <input type="text" name="slides[<?= $i ?>][image]" value="<?= htmlspecialchars($slide['image'] ?? '', ENT_QUOTES) ?>" placeholder="/uploads/public/....jpg">
-                            </div>
+                            <?= \App\Core\AdminUi::imageField('slides[' . $i . '][image]', (string) ($slide['image'] ?? ''), ['label' => 'Изображение слайда']) ?>
                             <div class="form-field">
                                 <label>Alt-текст</label>
                                 <input type="text" name="slides[<?= $i ?>][alt]" value="<?= htmlspecialchars($slide['alt'] ?? '', ENT_QUOTES) ?>">
@@ -240,10 +237,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php endforeach; ?>
                 </div>
                 <template data-repeater-template="slides">
-                    <div class="form-field">
-                        <label>Ссылка на изображение</label>
-                        <input type="text" name="slides[__INDEX__][image]" placeholder="/uploads/public/....jpg">
-                    </div>
+                    <?= \App\Core\AdminUi::imageField('slides[__INDEX__][image]', '', ['label' => 'Изображение слайда']) ?>
                     <div class="form-field">
                         <label>Alt-текст</label>
                         <input type="text" name="slides[__INDEX__][alt]">
@@ -314,7 +308,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                             <div class="form-field"><label>Цитата</label><textarea name="items[<?= $i ?>][quote]"><?= htmlspecialchars($item['quote'] ?? '', ENT_QUOTES) ?></textarea></div>
                             <div class="form-field"><label>Имя</label><input type="text" name="items[<?= $i ?>][name]" value="<?= htmlspecialchars($item['name'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Компания</label><input type="text" name="items[<?= $i ?>][company]" value="<?= htmlspecialchars($item['company'] ?? '', ENT_QUOTES) ?>"></div>
-                            <div class="form-field"><label>Фото (URL)</label><input type="text" name="items[<?= $i ?>][photo]" value="<?= htmlspecialchars($item['photo'] ?? '', ENT_QUOTES) ?>" data-media-target="items[<?= $i ?>][photo]"><button type="button" class="btn btn--small" data-media-pick data-media-target="[name='items[<?= $i ?>][photo]']">Из медиатеки</button></div>
+                            <?= \App\Core\AdminUi::imageField('items[' . $i . '][photo]', (string) ($item['photo'] ?? ''), ['label' => 'Фото']) ?>
                             <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить отзыв</button>
                         </div>
                     <?php endforeach; ?>
@@ -323,7 +317,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <div class="form-field"><label>Цитата</label><textarea name="items[__INDEX__][quote]"></textarea></div>
                     <div class="form-field"><label>Имя</label><input type="text" name="items[__INDEX__][name]"></div>
                     <div class="form-field"><label>Компания</label><input type="text" name="items[__INDEX__][company]"></div>
-                    <div class="form-field"><label>Фото (URL)</label><input type="text" name="items[__INDEX__][photo]"></div>
+                    <?= \App\Core\AdminUi::imageField('items[__INDEX__][photo]', '', ['label' => 'Фото']) ?>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить отзыв</button>
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить отзыв</button></div>
@@ -440,7 +434,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <div data-repeater="items">
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
-                            <div class="form-field"><label>Ссылка на логотип</label><input type="text" name="items[<?= $i ?>][logo]" value="<?= htmlspecialchars($item['logo'] ?? '', ENT_QUOTES) ?>" placeholder="/uploads/public/logo.png"></div>
+                            <?= \App\Core\AdminUi::imageField('items[' . $i . '][logo]', (string) ($item['logo'] ?? ''), ['label' => 'Логотип']) ?>
                             <div class="form-field"><label>Название</label><input type="text" name="items[<?= $i ?>][name]" value="<?= htmlspecialchars($item['name'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Ссылка (необязательно)</label><input type="text" name="items[<?= $i ?>][url]" value="<?= htmlspecialchars($item['url'] ?? '', ENT_QUOTES) ?>" placeholder="https://..."></div>
                             <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
@@ -448,7 +442,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php endforeach; ?>
                 </div>
                 <template data-repeater-template="items">
-                    <div class="form-field"><label>Ссылка на логотип</label><input type="text" name="items[__INDEX__][logo]" placeholder="/uploads/public/logo.png"></div>
+                    <?= \App\Core\AdminUi::imageField('items[__INDEX__][logo]', '', ['label' => 'Логотип']) ?>
                     <div class="form-field"><label>Название</label><input type="text" name="items[__INDEX__][name]"></div>
                     <div class="form-field"><label>Ссылка (необязательно)</label><input type="text" name="items[__INDEX__][url]" placeholder="https://..."></div>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
@@ -945,7 +939,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <div data-repeater="items">
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
-                            <div class="form-field"><label>Фото (URL)</label><input type="text" name="items[<?= $i ?>][photo]" value="<?= htmlspecialchars($item['photo'] ?? '', ENT_QUOTES) ?>" placeholder="/uploads/public/..."></div>
+                            <?= \App\Core\AdminUi::imageField('items[' . $i . '][photo]', (string) ($item['photo'] ?? ''), ['label' => 'Фото']) ?>
                             <div class="form-field"><label>Имя</label><input type="text" name="items[<?= $i ?>][name]" value="<?= htmlspecialchars($item['name'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Должность</label><input type="text" name="items[<?= $i ?>][role]" value="<?= htmlspecialchars($item['role'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Ссылка «Подробнее»</label><input type="text" name="items[<?= $i ?>][url]" value="<?= htmlspecialchars($item['url'] ?? '', ENT_QUOTES) ?>"></div>
@@ -954,7 +948,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php endforeach; ?>
                 </div>
                 <template data-repeater-template="items">
-                    <div class="form-field"><label>Фото (URL)</label><input type="text" name="items[__INDEX__][photo]" placeholder="/uploads/public/..."></div>
+                    <?= \App\Core\AdminUi::imageField('items[__INDEX__][photo]', '', ['label' => 'Фото']) ?>
                     <div class="form-field"><label>Имя</label><input type="text" name="items[__INDEX__][name]"></div>
                     <div class="form-field"><label>Должность</label><input type="text" name="items[__INDEX__][role]"></div>
                     <div class="form-field"><label>Ссылка «Подробнее»</label><input type="text" name="items[__INDEX__][url]"></div>
@@ -1012,7 +1006,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <div class="form-field"><label for="cta_text">CTA — текст</label><textarea id="cta_text" name="cta_text" rows="2"><?= htmlspecialchars($data['cta_text'] ?? '', ENT_QUOTES) ?></textarea></div>
             <div class="form-field"><label for="cta_button_text">CTA — текст кнопки</label><input type="text" id="cta_button_text" name="cta_button_text" value="<?= htmlspecialchars($data['cta_button_text'] ?? '', ENT_QUOTES) ?>"></div>
             <div class="form-field"><label for="cta_button_url">CTA — ссылка кнопки</label><input type="text" id="cta_button_url" name="cta_button_url" value="<?= htmlspecialchars($data['cta_button_url'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="cta_image">CTA — фоновое фото (URL)</label><input type="text" id="cta_image" name="cta_image" value="<?= htmlspecialchars($data['cta_image'] ?? '', ENT_QUOTES) ?>" placeholder="/uploads/public/..."></div>
+            <?= \App\Core\AdminUi::imageField('cta_image', (string) ($data['cta_image'] ?? ''), ['label' => 'CTA — фоновое фото']) ?>
         <?php endif; ?>
 
         <?php if ($type === 'news_docs'): ?>
@@ -1059,7 +1053,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'person_profile'): ?>
-            <div class="form-field"><label for="photo">Фото (URL)</label><input type="text" id="photo" name="photo" value="<?= htmlspecialchars($data['photo'] ?? '', ENT_QUOTES) ?>" placeholder="/uploads/public/..."></div>
+            <?= \App\Core\AdminUi::imageField('photo', (string) ($data['photo'] ?? ''), ['label' => 'Фото']) ?>
             <div class="form-field"><label for="name">Имя</label><input type="text" id="name" name="name" value="<?= htmlspecialchars($data['name'] ?? '', ENT_QUOTES) ?>"></div>
             <div class="form-field"><label for="position">Должность</label><input type="text" id="position" name="position" value="<?= htmlspecialchars($data['position'] ?? '', ENT_QUOTES) ?>"></div>
             <div class="form-field"><label for="text">Описание</label><textarea id="text" name="text" rows="4"><?= htmlspecialchars($data['text'] ?? '', ENT_QUOTES) ?></textarea></div>
