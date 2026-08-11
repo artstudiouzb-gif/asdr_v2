@@ -1287,12 +1287,21 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
     /* Геометрия — на самой панели, а вот display трогать здесь нельзя:
        скрытием/раскрытием управляет frontend.css, и display:grid без условия
        сделал бы подменю всегда видимым. */
+    /* Точка отсчёта для панели — контейнер шапки, а не то, что рядом
+       случайно оказалось позиционированным. Иначе ширина панели равнялась
+       ширине этого предка: при узком контейнере меню три колонки сжимались
+       до ~80px и заголовки переносились по буквам («Страт/егия»). */
+    .site-header__inner { position: relative; }
+    .site-header__inner .site-header__zone:has(.site-menu__item--mega),
+    .site-header__inner .hdr-util:has(.site-menu__item--mega),
+    .site-header__inner .site-menu:has(.site-menu__item--mega) { position: static; }
     .site-submenu--mega {
         grid-template-columns: repeat(var(--mega-cols, 3), minmax(0, 1fr));
         gap: 2px 10px;
         left: 0;
         right: 0;
         width: min(100%, var(--container-max));
+        max-width: calc(100vw - 32px);
         margin-inline: auto;
         padding: 14px;
     }
@@ -5432,6 +5441,14 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     }
     .site-submenu::before {
         display: none;
+    }
+
+    /* Страховка на случай раскладки шапки, которую мы не предусмотрели:
+       панель мега-меню не должна становиться уже читаемого минимума. Правило
+       стоит после общего .site-submenu, иначе то перебивало бы его своим
+       min-width: var(--submenu-width). */
+    .site-menu .site-submenu--mega {
+        min-width: min(640px, calc(100vw - 32px));
     }
     .site-submenu::after {
         top: -12px;
