@@ -129,6 +129,15 @@ $router->post('/admin/news/{id}/duplicate', [AdminNewsController::class, 'duplic
 $router->post('/admin/news/{id}/social', [AdminNewsController::class, 'pushSocial']);
 $router->get('/admin/news/{id}/social-preview', [AdminNewsController::class, 'socialPreview']);
 
+// --- Admin: категории новостей ---
+// Регистрируются после /admin/news/*, но конфликта нет: адрес другой
+// («news-categories»), а не вложенный сегмент новостей.
+$router->get('/admin/news-categories', [\App\Controllers\Admin\NewsCategoryController::class, 'index']);
+$router->post('/admin/news-categories/create', [\App\Controllers\Admin\NewsCategoryController::class, 'store']);
+$router->get('/admin/news-categories/{id}/edit', [\App\Controllers\Admin\NewsCategoryController::class, 'edit']);
+$router->post('/admin/news-categories/{id}/update', [\App\Controllers\Admin\NewsCategoryController::class, 'update']);
+$router->post('/admin/news-categories/{id}/delete', [\App\Controllers\Admin\NewsCategoryController::class, 'destroy']);
+
 // --- Admin: страницы + конструктор блоков ---
 $router->get('/admin/pages', [AdminPageController::class, 'index']);
 $router->get('/admin/pages/create', [AdminPageController::class, 'create']);

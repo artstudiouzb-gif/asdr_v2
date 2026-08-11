@@ -19,6 +19,7 @@ final class PublicResponseCache
     /** @var list<string> */
     private const CONTENT_ADMIN_PATHS = [
         '/admin/pages', '/admin/blocks', '/admin/snippets', '/admin/news',
+        '/admin/news-categories',
         '/admin/projects', '/admin/team', '/admin/albums', '/admin/videos',
         '/admin/content', '/admin/content-types', '/admin/menu', '/admin/header',
         '/admin/footer', '/admin/widgets', '/admin/design', '/admin/settings',

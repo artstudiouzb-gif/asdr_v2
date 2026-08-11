@@ -18,6 +18,7 @@ $navUser = Auth::user();
 // переменные вьюхи (header.php подключается в общую область видимости).
 $navContent = [
     'news' => ['/admin/news', t('Новости')],
+    'news_categories' => ['/admin/news-categories', t('Категории новостей')],
     'pages' => ['/admin/pages', t('Страницы')],
     'projects' => ['/admin/projects', t('Проекты')],
     'team' => ['/admin/team', t('Команда')],
