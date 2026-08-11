@@ -40,6 +40,7 @@ final class DemoSeeder
                 'team' => 0,
                 'pages' => 0,
                 'menu' => 0,
+                'news_categories' => 0,
             ];
 
             self::seedAssets($pdo, $c);
@@ -649,7 +650,13 @@ final class DemoSeeder
         ];
         // Рубрика демо-новостей — категория, а не текст в бейдже: справочник
         // нужен свежей установке сразу, иначе фильтр ленты нечем наполнить.
-        $categoryIds = self::seedNewsCategories($pdo, $news, $c);
+        //
+        // Заводим только те рубрики, которым действительно найдётся новость.
+        // Иначе повторный запуск на установке, где демо-новости уже есть,
+        // добавлял рубрики-пустышки: сами новости пропускаются (NOT EXISTS),
+        // а рядом с уже перенесённой «Мероприятие» появлялись «Мероприятия» и
+        // «Карьера» без единой записи.
+        $categoryIds = self::seedNewsCategories($pdo, self::newsNeedingCategory($pdo, $news), $c);
 
         $ins = $pdo->prepare(
             "INSERT INTO news (title, slug, excerpt, category_id, content, image, hashtags, layout_type, sidebar_layout, meta_title, meta_description, status, published_at, lang, created_at)
@@ -676,6 +683,15 @@ final class DemoSeeder
                 ':s2' => $n['slug'],
             ]);
             $c['news'] += $ins->rowCount();
+
+            if ($ins->rowCount() === 0 && isset($categoryIds[$n['category']])) {
+                self::attachCategoryToExisting(
+                    $pdo,
+                    (string) $n['slug'],
+                    $categoryIds[$n['category']],
+                    [(string) $n['category'], (string) ($n['uz_category'] ?? '')]
+                );
+            }
 
             if (!empty($n['gallery']) && self::tableExists($pdo, 'news_images')) {
                 $galleryIdStmt = $pdo->prepare("SELECT id FROM news WHERE slug = :slug AND lang = 'ru' LIMIT 1");
@@ -723,6 +739,83 @@ final class DemoSeeder
      *
      * @param list<array{0:string,1:string,2:string}> $images путь, подпись, автор
      */
+    /**
+     * Проставляет рубрику демо-новости, которая уже есть в базе, но осталась
+     * без категории (установка старше категорий). Заполняется только пустое
+     * поле — чужой выбор рубрики демо-контент не переписывает.
+     *
+     * Заодно снимается старый бейдж, если в нём лежит та же рубрика: раньше он
+     * её и изображал, а теперь карточка показала бы рубрику дважды — один раз
+     * категорией, второй раз меткой. Сравнение точное и только с названиями из
+     * фикстуры: собственную метку редактора («Важно») это не трогает.
+     *
+     * @param list<string> $rubricNames названия рубрики на всех языках фикстуры
+     */
+    private static function attachCategoryToExisting(PDO $pdo, string $slug, int $categoryId, array $rubricNames): void
+    {
+        $idStmt = $pdo->prepare("SELECT id FROM news WHERE slug = :slug AND lang = 'ru' AND deleted_at IS NULL LIMIT 1");
+        $idStmt->execute([':slug' => $slug]);
+        $newsId = $idStmt->fetchColumn();
+        if ($newsId === false) {
+            return;
+        }
+        $newsId = (int) $newsId;
+
+        // Языковые версии — отдельные записи одной группы: рубрика у группы
+        // общая, поэтому проставляем её всем, а не только русской записи.
+        $groupSql = '(n.id = :id OR n.translation_group_id = :gid)';
+        $pdo->prepare(
+            "UPDATE news n SET n.category_id = :cat
+             WHERE {$groupSql} AND n.category_id IS NULL AND n.deleted_at IS NULL"
+        )->execute([':cat' => $categoryId, ':id' => $newsId, ':gid' => $newsId]);
+
+        $names = array_values(array_filter(array_map('trim', $rubricNames), static fn (string $v): bool => $v !== ''));
+        if ($names === []) {
+            return;
+        }
+        $placeholders = implode(',', array_fill(0, count($names), '?'));
+
+        $pdo->prepare(
+            "UPDATE news n SET n.badge = NULL
+             WHERE (n.id = ? OR n.translation_group_id = ?) AND n.deleted_at IS NULL AND n.badge IN ({$placeholders})"
+        )->execute([$newsId, $newsId, ...$names]);
+
+        if (self::tableExists($pdo, 'news_translations')) {
+            $pdo->prepare(
+                "UPDATE news_translations SET badge = NULL
+                 WHERE news_id = ? AND badge IN ({$placeholders})"
+            )->execute([$newsId, ...$names]);
+        }
+    }
+
+    /**
+     * Отбирает записи фикстуры, которым рубрика действительно нужна: новость
+     * ещё не создана либо создана, но осталась без категории. Для остальных
+     * заводить рубрику нельзя — она повиснет пустой.
+     *
+     * @param array<int, array<string, mixed>> $news
+     * @return array<int, array<string, mixed>>
+     */
+    private static function newsNeedingCategory(PDO $pdo, array $news): array
+    {
+        if (!self::tableExists($pdo, 'news_categories')) {
+            return [];
+        }
+
+        $check = $pdo->prepare(
+            "SELECT category_id FROM news WHERE slug = :slug AND lang = 'ru' AND deleted_at IS NULL LIMIT 1"
+        );
+
+        return array_values(array_filter($news, static function (array $item) use ($check): bool {
+            $check->execute([':slug' => (string) ($item['slug'] ?? '')]);
+            $row = $check->fetch();
+
+            // Новости нет — она будет создана с рубрикой; есть без рубрики —
+            // рубрику проставим; есть с рубрикой — не трогаем.
+            return $row === false || $row['category_id'] === null;
+        }));
+    }
+
     /**
      * Категории демо-новостей: справочник рубрик с узбекскими переводами.
      * Повторный запуск ничего не дублирует — существующие берутся по slug.
@@ -826,10 +919,14 @@ final class DemoSeeder
             . '<p>По итогам заседания ответственным ведомствам и регионам даны поручения по ускорению реализации проектов и обеспечению своевременного достижения ключевых показателей.</p>';
 
         // Рубрика — категория «Мероприятия»; метка остаётся меткой и показывает
-        // редактору, как выглядит выделенная новость.
+        // редактору, как выглядит выделенная новость. Рубрику заводим только
+        // если этой новости ещё нет или она осталась без категории — иначе
+        // повторный запуск плодит пустые рубрики.
         $categoryId = self::seedNewsCategories(
             $pdo,
-            [['category' => 'Мероприятия', 'uz_category' => 'Tadbirlar']],
+            self::newsNeedingCategory($pdo, [
+                ['slug' => $slug, 'category' => 'Мероприятия', 'uz_category' => 'Tadbirlar'],
+            ]),
             $c
         )['Мероприятия'] ?? null;
 
@@ -858,6 +955,10 @@ final class DemoSeeder
             ':s2' => $slug,
         ]);
         $c['news'] += $ins->rowCount();
+
+        if ($ins->rowCount() === 0 && $categoryId !== null) {
+            self::attachCategoryToExisting($pdo, $slug, $categoryId, ['Мероприятие', 'Мероприятия', 'Tadbirlar']);
+        }
 
         // Фотогалерея новости — если таблица есть и запись только что создана.
         $newsId = $pdo->prepare('SELECT id FROM news WHERE slug = :s LIMIT 1');

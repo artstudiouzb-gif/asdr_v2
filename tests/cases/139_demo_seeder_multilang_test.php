@@ -108,3 +108,55 @@ test('DemoSeeder создает демо-данные с многоязычны�
         assert_true($count > 0, "{$table}: созданы узбекские переводы");
     }
 });
+
+test('DemoSeeder: повторный запуск не плодит пустые рубрики (БД)', function (): void {
+    ensure_test_db();
+
+    $pdo = \App\Core\Database::pdo();
+    DemoSeeder::run($pdo);
+    $before = (int) $pdo->query('SELECT COUNT(*) FROM news_categories')->fetchColumn();
+
+    // Второй запуск: новости уже есть и пропускаются (NOT EXISTS). Рубрики к
+    // ним заводить нельзя — они повиснут без единой записи. Раньше так и было:
+    // рядом с «Мероприятие» появлялись «Мероприятия» и «Карьера» с нулём новостей.
+    DemoSeeder::run($pdo);
+
+    assert_same($before, (int) $pdo->query('SELECT COUNT(*) FROM news_categories')->fetchColumn(), 'новых рубрик не добавилось');
+
+    // Проверяем только рубрики демо-комплекта: в общей тестовой базе живут
+    // ещё и рубрики соседних тестов, и они к DemoSeeder отношения не имеют.
+    $demoSlugs = "'meropriyatiya','cifrovizaciya','regionalnoe-razvitie','analitika','zelenaya-ekonomika','karera'";
+    assert_same(
+        0,
+        (int) $pdo->query(
+            "SELECT COUNT(*) FROM news_categories c
+             WHERE c.slug IN ({$demoSlugs})
+               AND NOT EXISTS (SELECT 1 FROM news n WHERE n.category_id = c.id AND n.deleted_at IS NULL)"
+        )->fetchColumn(),
+        'демо-рубрик без новостей быть не должно'
+    );
+});
+
+test('DemoSeeder: старой демо-новости проставляется рубрика, дубль-бейдж снимается (БД)', function (): void {
+    ensure_test_db();
+
+    $pdo = \App\Core\Database::pdo();
+    DemoSeeder::run($pdo);
+
+    // Приводим базу к виду установки, которая старше категорий: рубрика лежит
+    // текстом в бейдже, категории нет.
+    $pdo->exec('DELETE FROM news_categories');
+    $pdo->exec('UPDATE news SET category_id = NULL, badge = NULL');
+    $pdo->prepare("UPDATE news SET badge = 'Цифровизация' WHERE slug = :slug AND lang = 'ru'")
+        ->execute([':slug' => 'platforma-monitoringa-reform']);
+
+    DemoSeeder::run($pdo);
+
+    $row = $pdo->query(
+        "SELECT category_id, badge FROM news WHERE slug = 'platforma-monitoringa-reform' AND lang = 'ru' LIMIT 1"
+    )->fetch();
+
+    assert_true((int) ($row['category_id'] ?? 0) > 0, 'рубрика проставлена существующей новости');
+    // Иначе карточка показала бы рубрику дважды: категорией и меткой.
+    assert_same(null, $row['badge'], 'старый бейдж-рубрика снят');
+});
