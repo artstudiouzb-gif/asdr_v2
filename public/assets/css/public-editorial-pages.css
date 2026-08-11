@@ -71,7 +71,7 @@
     max-width: 680px;
     margin: 12px 0 0;
     color: var(--editorial-muted);
-    font-size: var(--font-size-lead, 1.02rem);
+    font-size: var(--font-size-lead, 1rem);
     line-height: 1.55;
 }
 
@@ -163,7 +163,7 @@
     margin-top: 0;
     max-width: 760px;
     color: var(--gov-title);
-    font-size: var(--font-size-lead, 1.12rem);
+    font-size: var(--font-size-lead, 1.1rem);
     line-height: 1.62;
 }
 
@@ -329,7 +329,7 @@
 .editorial-page__content .block-advantages__item:not(.feature-card) h3 {
     margin: 0 0 7px;
     color: var(--gov-title);
-    font-size: var(--font-size-card-title, .91rem);
+    font-size: var(--font-size-card-title, .9rem);
     line-height: 1.3;
 }
 
@@ -337,7 +337,7 @@
 .editorial-page__content .block-advantages__item:not(.feature-card) p {
     margin: 0;
     color: var(--editorial-muted);
-    font-size: var(--font-size-card-text, .76rem);
+    font-size: var(--font-size-card-text, .75rem);
     line-height: 1.48;
 }
 
@@ -375,7 +375,7 @@
 .editorial-page__content .stage__title {
     margin-top: 9px;
     color: var(--gov-title);
-    font-size: var(--font-size-card-title, .79rem);
+    font-size: var(--font-size-card-title, .78rem);
     line-height: 1.36;
 }
 
@@ -524,7 +524,7 @@
     border-radius: var(--radius-sm, 8px);
     background: color-mix(in srgb, var(--gov-navy) 82%, transparent);
     color: #fff;
-    font-size: var(--font-size-meta, .76rem);
+    font-size: var(--font-size-meta, .75rem);
     line-height: 1.4;
     backdrop-filter: blur(8px);
 }
@@ -552,7 +552,7 @@
     gap: 10px;
     min-width: 0;
     color: var(--gov-title);
-    font-size: var(--font-size-card-title, .96rem);
+    font-size: var(--font-size-card-title, .95rem);
     font-weight: 700;
 }
 
@@ -656,7 +656,7 @@
     gap: 13px;
     min-width: 0;
     color: var(--gov-title);
-    font-size: var(--font-size-card-title, .94rem);
+    font-size: var(--font-size-card-title, .95rem);
     font-weight: 600;
     line-height: 1.42;
 }
@@ -797,7 +797,7 @@
 .editorial-page__content .block-stages--history .stage__text {
     max-width: 31ch;
     margin-top: 14px;
-    font-size: var(--font-size-card-text, .88rem);
+    font-size: var(--font-size-card-text, .875rem);
     line-height: 1.62;
 }
 
@@ -855,7 +855,7 @@
 }
 
 .editorial-page__content .block-docslist--acts-editorial .act-card__date {
-    font-size: var(--font-size-meta, .8rem);
+    font-size: var(--font-size-meta, .8125rem);
 }
 
 .editorial-page__content .block-docslist--acts-editorial .act-card__desc {
@@ -917,7 +917,7 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
-        font-size: var(--font-size-card-title, .88rem);
+        font-size: var(--font-size-card-title, .875rem);
     }
 
     .editorial-page__content .block-text__principle:not(:last-child)::after {
@@ -1008,14 +1008,14 @@
 
 .editorial-page__content .person-card__name {
     color: var(--gov-title);
-    font-size: var(--font-size-card-title, .91rem);
+    font-size: var(--font-size-card-title, .9rem);
     line-height: 1.3;
 }
 
 .editorial-page__content .person-card__role {
     margin-top: 7px;
     color: var(--editorial-muted);
-    font-size: var(--font-size-card-text, .76rem);
+    font-size: var(--font-size-card-text, .75rem);
     line-height: 1.42;
 }
 
@@ -1109,7 +1109,7 @@
     margin: 0;
     color: var(--gov-title);
     font-family: var(--font-heading, var(--font-family));
-    font-size: var(--font-size-h1, clamp(2.25rem, 4vw, 3.35rem));
+    font-size: var(--font-size-h1, clamp(2.25rem, 4vw, 3.4rem));
     line-height: 1.04;
     letter-spacing: -.045em;
 }
@@ -1128,7 +1128,7 @@
     padding-top: 22px;
     border-top: 1px solid var(--editorial-line);
     color: var(--gov-ink);
-    font-size: var(--font-size-lead, 1.02rem);
+    font-size: var(--font-size-lead, 1rem);
     line-height: 1.72;
 }
 
@@ -1220,7 +1220,7 @@
 
 .editorial-page__content .bio-career__years {
     color: var(--gov-title);
-    font-size: var(--font-size-meta, .88rem);
+    font-size: var(--font-size-meta, .875rem);
     font-weight: 800;
     line-height: 1.5;
 }
@@ -1306,7 +1306,7 @@
 }
 
 .editorial-page__content .bio-edu__years {
-    font-size: var(--font-size-meta, .82rem);
+    font-size: var(--font-size-meta, .8125rem);
 }
 
 .editorial-page__content .bio-edu__degree {
@@ -1421,7 +1421,7 @@ html[data-theme="dark"] .content-pagehead__emblem {
 
         .content-pagehead--editorial .content-pagehead__lead {
         max-width: 30ch;
-        font-size: var(--font-size-lead, .88rem);
+        font-size: var(--font-size-lead, .875rem);
     }
 
     .editorial-page__content > .cms-block:first-child.cms-block--text,

@@ -395,7 +395,7 @@ html[data-a11y-reading="on"] .cms-block {
 }
 .a11y-group__hint {
     margin: 10px 0 0;
-    font-size: .86rem;
+    font-size: .875rem;
     color: var(--text-muted, #666);
 }
 .a11y-group__row {
@@ -500,7 +500,7 @@ html[data-a11y-reading="on"] .cms-block {
 }
 .a11y-drawer__note {
     margin: 10px 0 0;
-    font-size: .82rem;
+    font-size: .8125rem;
     color: var(--text-muted, #666);
 }
 

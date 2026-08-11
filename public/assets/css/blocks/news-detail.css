@@ -157,7 +157,7 @@ body.design-type-static .newsdetail-phero__title { font-size: 3rem; }
 }
 
 .newsdetail-card { background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 12px); padding: 22px; }
-.newsdetail-card__title { font-size: 1.08rem; margin: 0 0 16px; }
+.newsdetail-card__title { font-size: 1.1rem; margin: 0 0 16px; }
 .newsdetail-card--thesis-inline {
     margin-bottom: 30px;
     border: 1px solid var(--gov-border);
@@ -190,7 +190,7 @@ body.design-type-static .newsdetail-phero__title { font-size: 3rem; }
 .newsdetail-doc { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 10px); text-decoration: none; color: var(--gov-ink); background: var(--gov-surface); transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease; }
 .newsdetail-doc:hover { border-color: var(--gov-teal); box-shadow: 0 8px 24px rgba(19,42,92,.08); background: var(--gov-surface); }
 .newsdetail-doc__icon { color: var(--gov-teal); }
-.newsdetail-doc__title { display: block; font-weight: 700; font-size: .88rem; color: var(--gov-title); line-height: 1.35; }
+.newsdetail-doc__title { display: block; font-weight: 700; font-size: .875rem; color: var(--gov-title); line-height: 1.35; }
 .newsdetail-doc__meta { display: block; color: var(--gov-muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; margin-top: 3px; }
 .newsdetail-doc__dl { color: var(--gov-title); }
 
@@ -222,7 +222,7 @@ body.design-type-static .newsdetail-phero__title { font-size: 3rem; }
     font-weight: 700;
     color: var(--gov-title);
     line-height: 1.35;
-    font-size: .96rem;
+    font-size: .95rem;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
@@ -275,7 +275,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .newsdetail-phero .content-crumbs a:hover { color: #fff; }
 .newsdetail-phero .content-crumbs span { color: rgba(255, 255, 255, .68); }
 .newsdetail-phero__title { font-size: clamp(1.9rem, 3.6vw, 3rem); line-height: 1.15; margin: 0; color: #fff; max-width: 22ch; letter-spacing: -.01em; }
-.newsdetail-phero__lead { color: rgba(255,255,255,.85); font-size: 1.02rem; line-height: 1.6; margin: 0; max-width: 48ch; }
+.newsdetail-phero__lead { color: rgba(255,255,255,.85); font-size: 1rem; line-height: 1.6; margin: 0; max-width: 48ch; }
 .newsdetail-phero__lead a { color: #fff; text-decoration-color: rgba(255,255,255,.55); }
 /* Мета (дата·чтение·просмотры) и источник на фото-hero — светлые. Базовые серые
    .newsdetail__meta/__source идут ниже по файлу и при равной специфичности
@@ -307,8 +307,8 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .newsdetail-toc__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
 .newsdetail-toc__list a { display: flex; gap: 10px; align-items: baseline; color: var(--gov-ink); text-decoration: none; font-size: .9rem; line-height: 1.35; }
 .newsdetail-toc__list a:hover { color: var(--gov-teal-text); }
-.newsdetail-toc__num { color: var(--gov-teal-on-tint, #00697d); font-weight: 700; font-size: .8rem; }
-.relnews-card__excerpt { color: var(--gov-muted); font-size: .86rem; line-height: 1.5; }
+.newsdetail-toc__num { color: var(--gov-teal-on-tint, #00697d); font-weight: 700; font-size: .8125rem; }
+.relnews-card__excerpt { color: var(--gov-muted); font-size: .875rem; line-height: 1.5; }
 /* Премиум-hero новости — полноширинный тёмный экран; прижимаем к шапке,
    убирая верхний отступ контента (иначе светлая полоса-зазор). */
 .site-content:has(> .newsdetail--premium) { padding-top: 0; }
@@ -326,14 +326,14 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
    контейнеру, как у остального текста. */
 .newsdetail__lead {
     color: var(--gov-ink, #1f2b3d);
-    font-size: 1.025rem;
+    font-size: 1rem;
     /* 1.6 — то, чем реально набран текст статьи: правило `p { line-height }`
        из базовой таблицы перебивает :where(.rich-content) с нулевым весом. */
     line-height: 1.6;
     font-weight: 500;
     margin: 0;
 }
-.newsdetail__meta { display: flex; flex-wrap: wrap; gap: 8px; color: var(--gov-muted); font-size: .82rem; margin-top: 4px; }
+.newsdetail__meta { display: flex; flex-wrap: wrap; gap: 8px; color: var(--gov-muted); font-size: .8125rem; margin-top: 4px; }
 .newsdetail__meta-item { display: inline-flex; align-items: center; gap: 6px; background: rgba(0, 0, 0, 0.03); padding: 5px 12px; border-radius: var(--radius-sm, 8px); transition: background .15s ease, color .15s ease; }
 :root[data-theme="dark"] .newsdetail__meta-item { background: rgba(255, 255, 255, 0.05); }
 .newsdetail__meta-item:hover { background: rgba(0, 0, 0, 0.055); color: var(--gov-title); }
@@ -352,11 +352,11 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .newsdetail-gallery__main { position: relative; aspect-ratio: 16/9; border-radius: var(--radius, 14px); overflow: hidden; background: #16283f; }
 .newsdetail-gallery__slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .35s ease; }
 .newsdetail-gallery__slide.is-active { opacity: 1; }
-.newsdetail-gallery__nav { position: absolute; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255,255,255,.92); color: var(--gov-navy); font-size: 1.375rem; cursor: pointer; transition: background .15s ease; z-index: 2; }
+.newsdetail-gallery__nav { position: absolute; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255,255,255,.92); color: var(--gov-navy); font-size: 1.4rem; cursor: pointer; transition: background .15s ease; z-index: 2; }
 .newsdetail-gallery__nav:hover { background: #fff; }
 .newsdetail-gallery__nav--prev { left: 16px; }
 .newsdetail-gallery__nav--next { right: 16px; }
-.newsdetail-gallery__counter { position: absolute; right: 16px; bottom: 14px; padding: 5px 12px; border-radius: 999px; background: rgba(11,26,48,.72); color: #fff; font-size: .8rem; z-index: 2; }
+.newsdetail-gallery__counter { position: absolute; right: 16px; bottom: 14px; padding: 5px 12px; border-radius: 999px; background: rgba(11,26,48,.72); color: #fff; font-size: .8125rem; z-index: 2; }
 .newsdetail-gallery__thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
 .newsdetail-gallery__thumb,
 button.newsdetail-gallery__thumb {
@@ -410,7 +410,7 @@ button.newsdetail-gallery__thumb:hover {
     border: 1px solid color-mix(in srgb, var(--gov-border, #cbd5e1) 80%, transparent);
     background: var(--gov-surface, #ffffff);
     color: var(--gov-title, #0f172a);
-    font-size: 0.82rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     text-decoration: none;
     line-height: 1;
@@ -614,7 +614,7 @@ button.newsdetail-gallery__thumb:hover {
     align-items: center;
     gap: 10px 16px;
     margin: 0;
-    font-size: .84rem;
+    font-size: .85rem;
 }
 .newsdetail:not(.newsdetail--premium) .newsdetail__meta-item {
     padding: 0;
@@ -638,7 +638,7 @@ button.newsdetail-gallery__thumb:hover {
     max-width: none;
     margin: 2px 0 0;
     color: var(--gov-ink);
-    font-size: clamp(1.02rem, 1.35vw, 1.16rem);
+    font-size: clamp(1rem, 1.35vw, 1.15rem);
     line-height: 1.68;
 }
 .newsdetail:not(.newsdetail--premium) .newsdetail__source { margin-top: -4px; }
@@ -798,7 +798,7 @@ button.newsdetail-gallery__thumb:hover {
     border-radius: var(--radius-sm, 8px);
     background: color-mix(in srgb, var(--gov-teal) 13%, var(--gov-surface));
     color: var(--gov-teal-on-tint, #00697d);
-    font-size: .74rem;
+    font-size: .75rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
 }
@@ -842,7 +842,7 @@ button.newsdetail-gallery__thumb:hover {
     border-radius: var(--btn-radius, 10px);
     background: var(--gov-surface);
     color: var(--gov-title);
-    font-size: .84rem;
+    font-size: .85rem;
     font-weight: 700;
     text-decoration: none;
 }
@@ -974,7 +974,7 @@ button.newsdetail-gallery__thumb:hover {
         width: 100%;
         max-width: none;
         margin: 0;
-        font-size: clamp(1.8rem, 8.8vw, 2.55rem);
+        font-size: clamp(1.8rem, 8.8vw, 2.5rem);
         line-height: 1.06;
     }
     .newsdetail:not(.newsdetail--premium) .newsdetail__lead {

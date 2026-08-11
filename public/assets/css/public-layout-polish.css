@@ -169,7 +169,7 @@
 
 .site-content:has(> .content-pagehead) .block-text__title {
     margin: 0 0 18px;
-    font-size: var(--font-size-h2, clamp(1.65rem, 2.5vw, 2.05rem));
+    font-size: var(--font-size-h2, clamp(1.6rem, 2.5vw, 2.05rem));
     line-height: 1.18;
     letter-spacing: -.025em;
 }
@@ -219,7 +219,7 @@
 .block-advantages__item:not(.feature-card) h3,
 .block-advantages__item:not(.feature-card) .card__title {
     margin: 0;
-    font-size: var(--font-size-card-title, 1.08rem);
+    font-size: var(--font-size-card-title, 1.1rem);
     line-height: 1.28;
 }
 
@@ -282,7 +282,7 @@
 }
 
 .person-card__name {
-    font-size: var(--font-size-card-title, 1.08rem);
+    font-size: var(--font-size-card-title, 1.1rem);
     line-height: 1.3;
 }
 
@@ -343,7 +343,7 @@
 
 .profile__position {
     margin-bottom: 16px;
-    font-size: var(--font-size-h3, clamp(1.02rem, 1.45vw, 1.18rem));
+    font-size: var(--font-size-h3, clamp(1rem, 1.45vw, 1.2rem));
     line-height: 1.45;
 }
 
@@ -422,12 +422,12 @@
 }
 
 .bio-career__years {
-    font-size: var(--font-size-meta, .94rem);
+    font-size: var(--font-size-meta, .95rem);
     line-height: 1.45;
 }
 
 .bio-career__text {
-    font-size: var(--font-size-card-text, .96rem);
+    font-size: var(--font-size-card-text, .95rem);
     line-height: 1.58;
 }
 

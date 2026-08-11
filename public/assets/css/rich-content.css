@@ -13,7 +13,7 @@
     --rich-tint: color-mix(in srgb, var(--rich-title) 5%, var(--rich-surface));
     color: var(--rich-ink);
     font-family: var(--font-family, 'PT Sans', system-ui, -apple-system, 'Segoe UI', sans-serif);
-    font-size: var(--font-size-body, 1.025rem);
+    font-size: var(--font-size-body, 1rem);
     line-height: 1.75;
     overflow-wrap: break-word;
     text-wrap: pretty;
@@ -43,7 +43,7 @@
 
 :where(.rich-content) h2 { font-size: var(--font-size-h2, 1.75rem); }
 :where(.rich-content) h3 { font-size: var(--font-size-h3, 1.4rem); }
-:where(.rich-content) h4 { font-size: var(--font-size-h4, 1.18rem); }
+:where(.rich-content) h4 { font-size: var(--font-size-h4, 1.2rem); }
 :where(.rich-content) h5 { font-size: var(--font-size-h5, 1rem); }
 :where(.rich-content) h6 { font-size: var(--font-size-h6, .92rem); }
 
@@ -264,7 +264,7 @@
     border-spacing: 0;
     border-radius: var(--radius-sm, 8px);
     background: var(--rich-surface);
-    font-size: var(--font-size-card-text, .94rem);
+    font-size: var(--font-size-card-text, .95rem);
     line-height: 1.45;
 }
 
@@ -316,7 +316,7 @@
 @media (max-width: 720px) {
     :where(.rich-content) { font-size: var(--font-size-body, 1rem); }
     :where(.rich-content) h2 { font-size: var(--font-size-h2, 1.5rem); }
-    :where(.rich-content) h3 { font-size: var(--font-size-h3, 1.28rem); }
+    :where(.rich-content) h3 { font-size: var(--font-size-h3, 1.3rem); }
     :where(.rich-content) blockquote { padding: 1.1rem 2.8rem 1.1rem 1.15rem; }
     :where(.rich-content) blockquote::before { inset-inline-end: .65rem; font-size: var(--font-size-h1, 3rem); }
     :where(.rich-content) table { display: block; max-inline-size: 100%; overflow-x: auto; scrollbar-width: thin; }

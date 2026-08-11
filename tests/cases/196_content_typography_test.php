@@ -33,7 +33,7 @@ test('Лид новости набран как текст статьи и за�
     // Ширина — по контейнеру: раньше лид обрывался на 52ch и выглядел вдвое
     // уже текста под ним.
     assert_not_contains('max-width', $rule);
-    assert_contains('font-size: 1.025rem;', $rule);
+    assert_contains('font-size: 1rem;', $rule);
     assert_contains('line-height: 1.6;', $rule);
 
     $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/rich-content.css');

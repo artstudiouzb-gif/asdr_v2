@@ -95,7 +95,7 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
 .orgstruct__aside-item {
     padding: 12px 20px; border: 1px solid var(--gov-border); border-left: 4px solid var(--org-flag);
     border-radius: var(--radius); background: var(--gov-surface); color: var(--gov-title);
-    font-size: clamp(0.82rem, calc(var(--org-font) * 0.88), 0.96rem); font-weight: 600;
+    font-size: clamp(0.8125rem, calc(var(--org-font) * 0.88), 0.95rem); font-weight: 600;
     box-shadow: 0 8px 22px -16px color-mix(in srgb, var(--gov-navy) 35%, transparent);
     transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease;
 }
@@ -151,7 +151,7 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
     position: relative; padding: 13px 16px;
     background: var(--gov-surface);
     border: 1px solid var(--gov-border); border-left: 3px solid var(--gov-teal); border-radius: 0 8px 8px 0;
-    color: var(--gov-ink); font-size: clamp(0.82rem, calc(var(--org-font) * 0.88), 0.96rem); line-height: 1.5;
+    color: var(--gov-ink); font-size: clamp(0.8125rem, calc(var(--org-font) * 0.88), 0.95rem); line-height: 1.5;
     box-shadow: 0 6px 18px -14px color-mix(in srgb, var(--gov-navy) 40%, transparent);
     transition: transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
 }
@@ -170,7 +170,7 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
     display: flex; flex-direction: column; gap: 5px;
     margin: 8px 0 0; padding: 0 0 0 10px; list-style: none;
     border-left: 1px dashed var(--gov-muted);
-    font-size: clamp(0.75rem, calc(var(--org-font) * 0.82), 0.88rem); color: var(--gov-muted, #475569); font-weight: 400;
+    font-size: clamp(0.75rem, calc(var(--org-font) * 0.82), 0.875rem); color: var(--gov-muted, #475569); font-weight: 400;
 }
 .orgstruct__subunit::before { content: '• '; }
 .orgstruct__link { color: inherit; text-decoration: none; }
