@@ -857,12 +857,27 @@ final class News
         return $counts;
     }
 
+    /**
+     * Категория новости: 0 и пустая строка означают «без категории».
+     * Несуществующий id тоже гасим в NULL — иначе внешний ключ уронил бы
+     * сохранение целой новости из-за одного выпадающего списка.
+     */
+    private static function normalizeCategoryId(mixed $value): ?int
+    {
+        $id = (int) $value;
+        if ($id <= 0) {
+            return null;
+        }
+
+        return NewsCategory::find($id) !== null ? $id : null;
+    }
+
     public static function create(array $data): int
     {
         $lang = (string) ($data['lang'] ?? Language::defaultCode());
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO news (title, slug, excerpt, lead_html, content, image, video_url, audio_url, audio_title, hashtags, timeline_json, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
-             VALUES (:title, :slug, :excerpt, :lead_html, :content, :image, :video_url, :audio_url, :audio_title, :hashtags, :timeline_json, :layout_type, :sidebar_layout, :focal_x, :focal_y, :meta_title, :meta_description, :status, :published_at, :author_id, :lang, NULL, NOW())'
+            'INSERT INTO news (title, slug, excerpt, lead_html, content, image, video_url, audio_url, audio_title, hashtags, timeline_json, layout_type, sidebar_layout, focal_x, focal_y, category_id, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
+             VALUES (:title, :slug, :excerpt, :lead_html, :content, :image, :video_url, :audio_url, :audio_title, :hashtags, :timeline_json, :layout_type, :sidebar_layout, :focal_x, :focal_y, :category_id, :meta_title, :meta_description, :status, :published_at, :author_id, :lang, NULL, NOW())'
         );
         $stmt->execute([
             ':title' => $data['title'],
@@ -880,6 +895,7 @@ final class News
             ':sidebar_layout' => $data['sidebar_layout'] ?? 'right_sidebar',
             ':focal_x' => $data['focal_x'] ?? null,
             ':focal_y' => $data['focal_y'] ?? null,
+            ':category_id' => self::normalizeCategoryId($data['category_id'] ?? null),
             ':meta_title' => $data['meta_title'] ?? null,
             ':meta_description' => $data['meta_description'] ?? null,
             ':status' => $data['status'],
@@ -902,7 +918,7 @@ final class News
              image = :image, video_url = :video_url, audio_url = :audio_url, audio_title = :audio_title, hashtags = :hashtags,
              timeline_json = :timeline_json,
              layout_type = :layout_type, sidebar_layout = :sidebar_layout,
-             focal_x = :focal_x, focal_y = :focal_y,
+             focal_x = :focal_x, focal_y = :focal_y, category_id = :category_id,
              meta_title = :meta_title, meta_description = :meta_description,
              status = :status, published_at = :published_at, lock_version = lock_version + 1
              WHERE id = :id' . ($expectedLockVersion !== null ? ' AND lock_version = :expected_lock_version' : '')
@@ -923,6 +939,7 @@ final class News
             ':sidebar_layout' => $data['sidebar_layout'] ?? 'right_sidebar',
             ':focal_x' => $data['focal_x'] ?? null,
             ':focal_y' => $data['focal_y'] ?? null,
+            ':category_id' => self::normalizeCategoryId($data['category_id'] ?? null),
             ':meta_title' => $data['meta_title'] ?? null,
             ':meta_description' => $data['meta_description'] ?? null,
             ':status' => $data['status'],

@@ -278,8 +278,8 @@ final class TranslationGroupHelper
             );
             if ($table === 'news') {
                 $ins = $pdo->prepare(
-                    "INSERT INTO news (title, slug, excerpt, lead_html, badge, content, image, video_url, audio_url, audio_title, hashtags, press_release_url, key_points, event_meta, timeline_json, docs, source_note, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
-                      VALUES (:t, :s, :e, :lh, :b, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, 'draft', NOW(), :auth, :lang, :gid, NOW())"
+                    "INSERT INTO news (title, slug, excerpt, lead_html, badge, category_id, content, image, video_url, audio_url, audio_title, hashtags, press_release_url, key_points, event_meta, timeline_json, docs, source_note, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
+                      VALUES (:t, :s, :e, :lh, :b, :cat, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, 'draft', NOW(), :auth, :lang, :gid, NOW())"
                 );
                 $ins->execute([
                     ':t' => '',
@@ -287,6 +287,10 @@ final class TranslationGroupHelper
                     ':e' => null,
                     ':lh' => null,
                     ':b' => null,
+                    // Категория — та же рубрика на другом языке, поэтому
+                    // наследуется (в отличие от текстов, которые переводчик
+                    // пишет с нуля). Переводится название самой категории.
+                    ':cat' => !empty($orig['category_id']) ? (int) $orig['category_id'] : null,
                     ':c' => null,
                     ':img' => $orig['image'] ?? null,
                     ':v' => $orig['video_url'] ?? null,

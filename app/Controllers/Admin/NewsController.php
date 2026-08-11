@@ -694,6 +694,7 @@ final class NewsController
             'sidebar_layout' => $sidebarLayout,
             'focal_x' => $focalX,
             'focal_y' => $focalY,
+            'category_id' => (int) ($_POST['category_id'] ?? 0),
             'meta_title' => $metaTitle !== '' ? $metaTitle : null,
             'meta_description' => $metaDescription !== '' ? $metaDescription : null,
             'status' => $status,
