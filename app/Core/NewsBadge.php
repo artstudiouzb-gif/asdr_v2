@@ -88,4 +88,24 @@ final class NewsBadge
             htmlspecialchars($text, ENT_QUOTES)
         );
     }
+
+    /**
+     * Метка углом на обложке карточки. Отдельный вид, а не модификатор
+     * render(): здесь метка позиционируется поверх картинки, и без своего
+     * цвета ей нужен непрозрачный фон — на светлом снимке полупрозрачная
+     * плашка становится нечитаемой.
+     */
+    public static function renderOverlay(mixed $text, mixed $color = null): string
+    {
+        $text = trim((string) $text);
+        if ($text === '') {
+            return '';
+        }
+
+        return sprintf(
+            '<span class="news-badge news-badge--overlay"%s>%s</span>',
+            self::styleAttr($color),
+            htmlspecialchars($text, ENT_QUOTES)
+        );
+    }
 }

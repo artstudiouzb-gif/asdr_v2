@@ -2626,6 +2626,11 @@ body.design-type-static .section-title { font-size: var(--step-6); }
    контент, упирающийся в тёмный футер, выглядит так же сломанно, как
    крошки, прилипшие к шапке. */
 .listing { display: flex; flex-direction: column; gap: clamp(26px, 3.4vw, 44px); padding-block: 0 28px; }
+/* Надзаголовок раздела: называет рубрику сайта, а не страницу. */
+.listing__eyebrow {
+    margin: 0 0 6px; color: var(--color-accent, var(--gov-teal-text));
+    font-size: var(--step--2); font-weight: 700; letter-spacing: .04em;
+}
 .listing__title { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 10px; }
 .listing__lead { color: var(--gov-muted); font-size: var(--step-0); line-height: 1.6; margin: 0; }
 
@@ -2710,10 +2715,37 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .newslist-lead__excerpt { color: var(--gov-muted); line-height: 1.6; font-size: var(--step-0); }
 .newslist-lead:hover .newslist-lead__title { color: var(--gov-teal); }
 
-/* Сетка новостей (3 колонки на десктопе для оптимальной ширины и читаемости карточек). */
-.newslist-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+/* Обёртка обложки: система координат для метки-плашки. Отдельный элемент
+   нужен потому, что саму <picture> собирает Media::picture(), и вложить в неё
+   что-либо шаблон не может. */
+.news-cover { position: relative; display: block; }
+.newslist-lead .news-cover { height: 100%; }
+
+/* Сетка новостей: 4 колонки на широком экране, дальше по общей шкале точек. */
+.newslist-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+@media (max-width: 1100px) { .newslist-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 1000px) { .newslist-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .newslist-grid { grid-template-columns: 1fr; } }
+
+/* «Читать подробнее» — завершение карточки. Отделено чертой сверху и всегда
+   прижато к низу, поэтому у карточек разной высоты ссылки стоят в одну линию. */
+.card-more {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: auto; padding-top: 14px;
+    border-top: 1px solid var(--gov-border);
+    /* Растягиваем явно: у крупной карточки тело выровнено по flex-start, и без
+       этого черта шла бы только под текстом ссылки, а не через всю панель. */
+    align-self: stretch;
+    color: var(--color-accent, var(--gov-teal-text));
+    font-weight: 700; font-size: var(--step--2);
+}
+.card-more__arrow { transition: transform 0.2s ease; }
+.newslist-lead:hover .card-more__arrow,
+.relnews-card:hover .card-more__arrow { transform: translateX(4px); }
+@media (prefers-reduced-motion: reduce) { .card-more__arrow { transition: none; } }
+
+/* Кнопка под подборкой новостей на странице: ведёт в общую ленту. */
+.newsfeat-more { display: flex; justify-content: center; margin-top: clamp(20px, 2.6vw, 32px); }
 
 /* Пагинация. */
 .listing-pager { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
@@ -4013,6 +4045,15 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .news-badge--on-media { background: var(--news-badge-bg, rgba(255, 255, 255, 0.22)); color: var(--news-badge-fg, #fff); }
+/* Метка углом обложки. Фон по умолчанию непрозрачный: полупрозрачная плашка
+   на светлом снимке теряет читаемость, а снимок редактор выбирает любой. */
+.news-badge--overlay {
+    position: absolute; top: 12px; left: 12px; z-index: 2;
+    padding: 5px 12px; border-radius: 999px;
+    background: var(--news-badge-bg, var(--gov-navy));
+    color: var(--news-badge-fg, #fff);
+    box-shadow: 0 6px 18px -8px rgba(15, 23, 42, 0.55);
+}
 .newsfeat-text__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
 .newsfeat-mini:hover .newsfeat-mini__title, .newsfeat-text:hover .newsfeat-text__title { color: var(--color-accent, var(--gov-teal)); }
 /* Заголовок лида белый на фото — при наведении оставляем чистым белый при зуме обложки */

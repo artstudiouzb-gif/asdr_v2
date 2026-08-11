@@ -45,19 +45,22 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
     <?php if ($featured !== null): ?>
         <?php $fc = News::getCoverImage($featured); ?>
         <a class="newslist-lead" href="<?= htmlspecialchars(Locale::url('news/' . $featured['slug']), ENT_QUOTES) ?>">
-            <?php if ($fc !== null): ?>
-                <?= \App\Core\Media::picture($fc, (string) $featured['title'], null, null, 'newslist-lead__img', false, '(max-width: 900px) 100vw, 55vw', false, 'newslist-lead__media') ?>
-            <?php else: ?>
-                <span class="newslist-lead__media newslist-lead__media--empty" aria-hidden="true"></span>
-            <?php endif; ?>
+            <span class="news-cover">
+                <?php if ($fc !== null): ?>
+                    <?= \App\Core\Media::picture($fc, (string) $featured['title'], null, null, 'newslist-lead__img', false, '(max-width: 900px) 100vw, 55vw', false, 'newslist-lead__media') ?>
+                <?php else: ?>
+                    <span class="newslist-lead__media newslist-lead__media--empty" aria-hidden="true"></span>
+                <?php endif; ?>
+                <?= \App\Core\NewsBadge::renderOverlay($featured['badge'] ?? '', $featured['badge_color'] ?? null) ?>
+            </span>
             <span class="newslist-lead__body">
                 <span class="news-meta">
                     <?php if (!empty($featured['published_at'])): ?><time class="newslist__date"><?= htmlspecialchars($fmt((string) $featured['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
                     <?php if ($categoryOf($featured) !== ''): ?><span class="news-category"><?= htmlspecialchars($categoryOf($featured), ENT_QUOTES) ?></span><?php endif; ?>
-                    <?= \App\Core\NewsBadge::render($featured['badge'] ?? '', $featured['badge_color'] ?? null) ?>
                 </span>
                 <h2 class="newslist-lead__title"><?= htmlspecialchars((string) $featured['title'], ENT_QUOTES) ?></h2>
                 <?php if (!empty($featured['excerpt'])): ?><span class="newslist-lead__excerpt"><?= htmlspecialchars(excerpt((string) $featured['excerpt'], 280), ENT_QUOTES) ?></span><?php endif; ?>
+                <span class="card-more"><?= htmlspecialchars(t('Читать подробнее'), ENT_QUOTES) ?><span class="card-more__arrow" aria-hidden="true">→</span></span>
             </span>
         </a>
     <?php endif; ?>
@@ -66,18 +69,21 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
         <?php foreach ($grid as $item): ?>
             <?php $c = News::getCoverImage($item); ?>
             <a class="relnews-card" href="<?= htmlspecialchars(Locale::url('news/' . $item['slug']), ENT_QUOTES) ?>">
-                <?php if ($c !== null): ?>
-                    <?= \App\Core\Media::picture($c, (string) $item['title'], null, null, 'relnews-card__img', true, '(max-width: 700px) 100vw, 33vw', false, 'relnews-card__media') ?>
-                <?php else: ?>
-                    <span class="relnews-card__media relnews-card__media--empty" aria-hidden="true"></span>
-                <?php endif; ?>
+                <span class="news-cover">
+                    <?php if ($c !== null): ?>
+                        <?= \App\Core\Media::picture($c, (string) $item['title'], null, null, 'relnews-card__img', true, '(max-width: 700px) 100vw, 25vw', false, 'relnews-card__media') ?>
+                    <?php else: ?>
+                        <span class="relnews-card__media relnews-card__media--empty" aria-hidden="true"></span>
+                    <?php endif; ?>
+                    <?= \App\Core\NewsBadge::renderOverlay($item['badge'] ?? '', $item['badge_color'] ?? null) ?>
+                </span>
                 <span class="news-meta">
                     <?php if (!empty($item['published_at'])): ?><time class="relnews-card__date"><?= htmlspecialchars($fmt((string) $item['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
                     <?php if ($categoryOf($item) !== ''): ?><span class="news-category"><?= htmlspecialchars($categoryOf($item), ENT_QUOTES) ?></span><?php endif; ?>
-                    <?= \App\Core\NewsBadge::render($item['badge'] ?? '', $item['badge_color'] ?? null) ?>
                 </span>
                 <h3 class="relnews-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
                 <?php if (!empty($item['excerpt'])): ?><span class="relnews-card__excerpt"><?= htmlspecialchars(excerpt((string) $item['excerpt'], 180), ENT_QUOTES) ?></span><?php endif; ?>
+                <span class="card-more"><?= htmlspecialchars(t('Читать подробнее'), ENT_QUOTES) ?><span class="card-more__arrow" aria-hidden="true">→</span></span>
             </a>
         <?php endforeach; ?>
     </div>

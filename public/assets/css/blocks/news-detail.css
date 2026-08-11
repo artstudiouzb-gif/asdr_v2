@@ -901,6 +901,10 @@ button.newsdetail-gallery__thumb:hover {
 .relnews-card__title,
 .relnews-card__excerpt { margin-inline: 14px; }
 .relnews-card__title { margin-bottom: 5px; }
+/* Карточка ленты обходится без бокового паддинга (обложка идёт от края до
+   края), поэтому внутренние элементы отступают сами. Ссылке нужен тот же
+   отступ, иначе черта и текст упирались в границу карточки. */
+.relnews-card .card-more { margin-inline: 14px; }
 
 @media (max-width: 1000px) {
     .newsdetail:not(.newsdetail--premium) { display: flex; }
