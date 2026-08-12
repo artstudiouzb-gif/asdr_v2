@@ -135,6 +135,7 @@ return [
     'Предыдущая новость' => 'Oldingi yangilik',
     'Следующая новость' => 'Keyingi yangilik',
     'из' => 'dan',
+    'Оценка' => 'Baho',
     'Новости и аналитика' => 'Yangiliklar va tahlil',
     'Официальные сообщения, события и аналитические материалы Агентства.' => 'Agentlikning rasmiy xabarlari, tadbirlari va tahliliy materiallari.',
     'Проекты и инициативы' => 'Loyihalar va tashabbuslar',

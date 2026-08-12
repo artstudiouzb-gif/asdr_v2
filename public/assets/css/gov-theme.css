@@ -2551,9 +2551,16 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 }
 
 /* Текст + фото («О проекте»). */
-.block-textimage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(28px, 4vw, 56px); align-items: center; }
+/* Доля кадра настраивается в блоке — долями fr, а не процентами: проценты
+   вместе с gap дают переполнение по ширине. Без настройки соотношение прежнее. */
+.block-textimage { display: grid; grid-template-columns: minmax(0, var(--textimage-info, 1fr)) minmax(0, var(--textimage-visual, 1.05fr)); gap: clamp(28px, 4vw, 56px); align-items: center; }
 @media (max-width: 900px) { .block-textimage { grid-template-columns: 1fr; } }
 .block-textimage--no-image { grid-template-columns: 1fr; }
+/* Пропорция кадра: снимки разной высоты рвали ряд рядом с текстом. */
+.block-textimage--ratio-16-9 .textimage__media img { aspect-ratio: 16 / 9; object-fit: cover; }
+.block-textimage--ratio-4-3 .textimage__media img { aspect-ratio: 4 / 3; object-fit: cover; }
+.block-textimage--ratio-1-1 .textimage__media img { aspect-ratio: 1 / 1; object-fit: cover; }
+.textimage__button { margin-top: 22px; align-self: start; }
 .textimage__title { position: relative; font-size: clamp(var(--step-3), 2.4vw, var(--step-5)); margin: 0 0 18px; padding-left: 16px; }
 .textimage__title::before { content: ''; position: absolute; left: 0; top: .18em; bottom: .18em; width: 4px; border-radius: 2px; background: var(--gov-teal); }
 .textimage__text { color: var(--gov-muted); line-height: 1.6; margin-bottom: 24px; }
@@ -3617,6 +3624,9 @@ span.imgcard__media::after {
    любом числе карточек, а хвост последнего ряда не оставляет дыр. */
 .persons-grid { display: grid; grid-template-columns: repeat(var(--grid-track, 4), minmax(0, 1fr)); gap: 20px; }
 .persons-grid > .person-card { grid-column: span var(--grid-span, 1); }
+/* Контакты в карточке персоны: телефон и почта кликабельны. */
+.person-card__contacts { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+.person-card__contact { font-size: var(--step--2); color: var(--gov-muted); overflow-wrap: anywhere; }
 @media (max-width: 1000px) {
     .persons-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .persons-grid > .person-card { grid-column: auto; }
@@ -6300,6 +6310,16 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     border-radius: var(--radius, 14px);
     box-shadow: var(--shadow-1);
 }
+/* Варианты вёрстки. «Без рамок» снимает карточку — остаётся иконка с текстом,
+   так блок не спорит с соседними карточными секциями. «В строку» ставит
+   пункты подряд одной лентой: типовое применение — короткие реквизиты. */
+.block-icon-text--plain .icon-text__card { background: none; border: 0; box-shadow: none; padding: 0; }
+.block-icon-text--inline .icon-text__grid { display: flex; flex-wrap: wrap; gap: 12px 32px; }
+.block-icon-text--inline .icon-text__card { flex: 0 1 auto; padding: 0; background: none; border: 0; box-shadow: none; }
+.block-icon-text--inline .icon-text__icon { width: 36px; height: 36px; }
+.block-icon-text--align-center .icon-text__card { flex-direction: column; align-items: center; text-align: center; }
+.block-icon-text--align-center .icon-text__grid { justify-content: center; }
+
 /* Плитка иконки: оттенок берётся из --icon-text-accent, а он по умолчанию —
    акцент сайта. Свой цвет карточки задаётся в админке и приходит scoped CSS. */
 .icon-text__icon {

@@ -76,8 +76,12 @@ test('CTA normalizer: сохраняет медиа-вариант, изобра
 
 test('Subscribe normalizer: сохраняет простой текстовый контракт', function () {
     assert_same([
+        'variant' => 'band',
         'title' => 'Подписка',
         'text' => 'Получайте новости',
+        'image' => '',
+        'placeholder' => '',
+        'note' => '',
         'button_text' => 'Подписаться',
     ], SubscribeBlockNormalizer::normalize([
         'title_field' => '  Подписка  ',

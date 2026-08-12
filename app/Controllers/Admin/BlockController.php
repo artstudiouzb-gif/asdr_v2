@@ -556,6 +556,13 @@ final class BlockController
                 }
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
+                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
+                    'all_url' => $this->safeUrlField('all_url'),
+                    'columns' => \App\Core\BlockData\BlockDataInput::int($_POST, 'columns', 3, 8, 6),
+                    'logo_size' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'logo_size', ['small', 'medium', 'large'], 'medium'),
+                    'grayscale' => !empty($_POST['grayscale']),
+                    'autoplay' => \App\Core\BlockData\BlockDataInput::int($_POST, 'autoplay', 0, 30, 0),
                     'items' => $items,
                 ];
             case 'subscribe':
@@ -648,13 +655,17 @@ final class BlockController
                         'photo' => trim((string) ($item['photo'] ?? '')),
                         'name' => TextProcessor::typographPlain($name, $locale),
                         'role' => TextProcessor::typographPlain($role, $locale),
+                        'phone' => trim((string) ($item['phone'] ?? '')),
+                        'email' => trim((string) ($item['email'] ?? '')),
                         'url' => $url,
                     ];
                 }
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => $this->safeUrlField('all_url'),
+                    'columns' => \App\Core\BlockData\BlockDataInput::int($_POST, 'columns', 2, 5, 4),
                     'items' => $items,
                 ];
             case 'timeline':
@@ -735,8 +746,10 @@ final class BlockController
                 }
 
                 return [
+                    'variant' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'variant', ['cards', 'plain', 'inline'], 'cards'),
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
+                    'align' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'align', ['left', 'center'], 'left'),
                     'columns' => max(1, min(4, (int) ($_POST['columns'] ?? 3))),
                     'items' => $iconRows,
                 ];
@@ -919,6 +932,11 @@ final class BlockController
                     'image_position' => \App\Core\MediaPosition::normalize($_POST['image_position'] ?? null),
                     'image_position_mobile' => \App\Core\MediaPosition::normalize($_POST['image_position_mobile'] ?? null),
                     'image_side' => ($_POST['image_side'] ?? 'right') === 'left' ? 'left' : 'right',
+                    'image_ratio' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'image_ratio', ['auto', '16-9', '4-3', '1-1'], 'auto'),
+                    // Доля ширины под кадр: остальное занимает текстовая колонка.
+                    'image_width' => \App\Core\BlockData\BlockDataInput::int($_POST, 'image_width', 30, 60, 50),
+                    'button_text' => trim((string) ($_POST['button_text'] ?? '')),
+                    'button_url' => $this->safeUrlField('button_url'),
                     'items' => $items,
                 ];
             case 'docs_list':

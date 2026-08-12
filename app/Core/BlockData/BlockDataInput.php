@@ -37,6 +37,30 @@ final class BlockDataInput
         return $url !== '' && UrlGuard::isSafeMedia($url) ? $url : '';
     }
 
+    /**
+     * Значение из закрытого списка. Чужое или отсутствующее заменяется
+     * умолчанием: в data блока не должно попадать ничего, чего не знает шаблон.
+     *
+     * @param array<string, mixed> $input
+     * @param list<string> $allowed
+     */
+    public static function enum(array $input, string $field, array $allowed, string $default): string
+    {
+        $value = self::trimmed($input, $field);
+
+        return in_array($value, $allowed, true) ? $value : $default;
+    }
+
+    /** @param array<string, mixed> $input */
+    public static function int(array $input, string $field, int $min, int $max, int $default): int
+    {
+        if (!isset($input[$field]) || !is_scalar($input[$field]) || self::trimmed($input, $field) === '') {
+            return $default;
+        }
+
+        return max($min, min($max, (int) $input[$field]));
+    }
+
     /** @param array<string, mixed> $input */
     public static function optionalColor(array $input, string $field): string
     {

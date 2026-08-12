@@ -1,5 +1,6 @@
 <?php
 /** @var array $data */
+/** @var int $blockId */
 $title = trim((string) ($data['title'] ?? ''));
 $rawText = trim((string) ($data['text'] ?? ''));
 // Новые записи содержат безопасный HTML из WYSIWYG. Старые записи могли
@@ -13,9 +14,26 @@ if ($textIsPlain) {
 $image = trim((string) ($data['image'] ?? ''));
 $items = $data['items'] ?? [];
 $imageSide = ($data['image_side'] ?? 'right') === 'left' ? 'left' : 'right';
+$ratio = in_array($data['image_ratio'] ?? 'auto', ['auto', '16-9', '4-3', '1-1'], true)
+    ? (string) $data['image_ratio']
+    : 'auto';
 $mediaClasses = \App\Core\MediaPosition::classes($data['image_position'] ?? null, $data['image_position_mobile'] ?? null);
+$buttonText = trim((string) ($data['button_text'] ?? ''));
+$buttonUrl = trim((string) ($data['button_url'] ?? ''));
+if ($buttonUrl !== '' && !\App\Core\UrlGuard::isSafeLink($buttonUrl)) {
+    $buttonUrl = '';
+}
+
+// Доля ширины под кадр — долями fr в scoped CSS блока: инлайн-стили в блоках
+// запрещены тестами.
+$templateCss = '';
+$visualWidth = max(30, min(60, (int) ($data['image_width'] ?? 50)));
+if ($image !== '' && $visualWidth !== 50) {
+    $templateCss = '@media (min-width:901px){#block-' . (int) $blockId
+        . ' .block-textimage{--textimage-info:' . (100 - $visualWidth) . 'fr;--textimage-visual:' . $visualWidth . 'fr}}';
+}
 ?>
-<div class="block-textimage block-textimage--image-<?= $imageSide ?><?= $image !== '' ? '' : ' block-textimage--no-image' ?>">
+<div class="block-textimage block-textimage--image-<?= $imageSide ?> block-textimage--ratio-<?= htmlspecialchars($ratio, ENT_QUOTES) ?><?= $image !== '' ? '' : ' block-textimage--no-image' ?>">
     <div class="textimage__info">
         <?php if ($title !== ''): ?><h2 class="textimage__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
         <?php if ($text !== ''): ?><div class="textimage__text rich-content"><?= $text ?></div><?php endif; ?>
@@ -29,10 +47,13 @@ $mediaClasses = \App\Core\MediaPosition::classes($data['image_position'] ?? null
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
+        <?php if ($buttonText !== '' && $buttonUrl !== ''): ?>
+            <a class="btn btn--primary textimage__button" href="<?= htmlspecialchars($buttonUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($buttonText, ENT_QUOTES) ?></a>
+        <?php endif; ?>
     </div>
     <?php if ($image !== ''): ?>
         <div class="textimage__visual">
-            <?= \App\Core\Media::picture($image, $title, null, null, 'textimage__media ' . $mediaClasses, true, '(max-width: 800px) 100vw, 50vw') ?>
+            <?= \App\Core\Media::picture($image, $title, null, null, 'textimage__media ' . $mediaClasses, true, '(max-width: 900px) 100vw, ' . $visualWidth . 'vw') ?>
         </div>
     <?php endif; ?>
 </div>

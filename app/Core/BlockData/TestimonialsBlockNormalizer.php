@@ -27,13 +27,20 @@ final class TestimonialsBlockNormalizer
             $items[] = [
                 'quote' => BlockDataInput::plain($item, 'quote', $locale),
                 'name' => BlockDataInput::plain($item, 'name', $locale),
+                'role' => BlockDataInput::plain($item, 'role', $locale),
                 'company' => BlockDataInput::plain($item, 'company', $locale),
                 'photo' => BlockDataInput::safeLink($item['photo'] ?? ''),
+                // 0 — оценка не указана и звёзды не выводятся вовсе.
+                'rating' => BlockDataInput::int($item, 'rating', 0, 5, 0),
             ];
         }
 
         return [
+            'variant' => BlockDataInput::enum($input, 'variant', ['carousel', 'grid'], 'carousel'),
             'title' => BlockDataInput::plain($input, 'title_field', $locale),
+            'description' => BlockDataInput::plain($input, 'description', $locale),
+            'columns' => BlockDataInput::int($input, 'columns', 2, 4, 3),
+            'autoplay' => BlockDataInput::int($input, 'autoplay', 0, 30, 0),
             'items' => $items,
         ];
     }

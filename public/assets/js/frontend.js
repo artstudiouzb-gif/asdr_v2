@@ -1055,6 +1055,47 @@
             window.addEventListener('resize', measure);
         }
         sync(true);
+
+        // Автопрокрутка: секунды в data-carousel-autoplay, пусто или 0 —
+        // выключена. Полоса, которая едет сама, мешает читать, поэтому она
+        // замирает под курсором, при фокусе внутри, во время ручной прокрутки
+        // и у тех, кто просил меньше движения. Дойдя до конца, возвращается в
+        // начало: иначе карусель просто останавливалась бы на последней карточке.
+        var autoplayDelay = Number(root.getAttribute('data-carousel-autoplay')) * 1000;
+        var autoplayTimer = null;
+
+        var stopAutoplay = function () {
+            if (autoplayTimer === null) { return; }
+            window.clearInterval(autoplayTimer);
+            autoplayTimer = null;
+        };
+
+        var startAutoplay = function () {
+            if (autoplayTimer !== null || !autoplayDelay || motionPreference.matches || document.hidden) { return; }
+            autoplayTimer = window.setInterval(function () {
+                if (positions.length < 2) { return; }
+                if (closestPage() >= positions.length - 1) {
+                    scrollToPosition(0);
+                } else {
+                    go(1);
+                }
+            }, autoplayDelay);
+        };
+
+        if (autoplayDelay && !motionPreference.matches) {
+            root.addEventListener('mouseenter', stopAutoplay);
+            root.addEventListener('mouseleave', startAutoplay);
+            root.addEventListener('focusin', stopAutoplay);
+            root.addEventListener('focusout', function (event) {
+                if (!root.contains(event.relatedTarget)) { startAutoplay(); }
+            });
+            track.addEventListener('pointerdown', stopAutoplay, { passive: true });
+            track.addEventListener('wheel', stopAutoplay, { passive: true });
+            document.addEventListener('visibilitychange', function () {
+                if (document.hidden) { stopAutoplay(); } else { startAutoplay(); }
+            });
+            startAutoplay();
+        }
     });
 
     // Детальная новость: слайдер медиа-модуля (главное фото + миниатюры + счётчик).

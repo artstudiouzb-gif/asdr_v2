@@ -750,7 +750,24 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     pointer-events: none;
 }
 .testimonial__name { display: block; font-weight: 700; color: var(--gov-title); }
+.testimonial__role { display: block; color: var(--text-muted); font-size: var(--step--2); }
 .testimonial__company { color: var(--text-muted); font-size: var(--step--2); }
+/* Вариант «сетка»: отзывы стоят рядами, а не едут полосой. Карточка теряет
+   flex-basis полосы, иначе в сетке она осталась бы фиксированной ширины. */
+.block-testimonials__grid { display: grid; grid-template-columns: repeat(var(--grid-track, 3), minmax(0, 1fr)); gap: 24px; }
+.block-testimonials__grid > .testimonial { grid-column: span var(--grid-span, 1); flex: none; scroll-snap-align: none; }
+@media (max-width: 900px) {
+    .block-testimonials__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .block-testimonials__grid > .testimonial { grid-column: auto; }
+}
+@media (max-width: 720px) {
+    .block-testimonials__grid { grid-template-columns: minmax(0, 1fr); }
+}
+/* Оценка: пять контурных значков, набранные заливаются акцентом. */
+.testimonial__rating { display: flex; justify-content: center; gap: 2px; margin-bottom: 12px; }
+.testimonial__star { display: inline-flex; color: var(--border-color, #e3e6ea); }
+.testimonial__star.is-on { color: var(--color-accent, #e63946); }
+.testimonial__star.is-on svg { fill: currentColor; }
 
 .block-counters__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 24px; text-align: center; }
 .counter__value, .counter__suffix { font-size: clamp(var(--step-6), 5vw, var(--step-10)); font-weight: 800; color: var(--color-accent, #e63946); line-height: 1; }
@@ -1090,7 +1107,23 @@ h1, h2 { letter-spacing: -.015em; }
 .block-partners__title { text-align: center; margin: 0 0 28px; }
 /* Логотипы не растягиваются на всю ширину: при двух партнёрах ряд
    центрируется, а не липнет к левому краю с пустотой справа. */
-.block-partners__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 200px)); gap: var(--card-gap, 24px); align-items: center; justify-content: center; }
+.block-partners__grid { display: grid; grid-template-columns: repeat(var(--partners-cols, auto-fit), minmax(0, 200px)); gap: var(--card-gap, 24px); align-items: center; justify-content: center; }
+/* Высота логотипа: у партнёров разные пропорции, и без общей высоты ряд
+   получался рваным. Обесцвечивание снимается при наведении — так пёстрые
+   логотипы не спорят с оформлением страницы, но остаются узнаваемыми. */
+.block-partners--logo-small .block-partners__logo { max-height: 36px; }
+.block-partners--logo-medium .block-partners__logo { max-height: 52px; }
+.block-partners--logo-large .block-partners__logo { max-height: 72px; }
+.block-partners__logo { width: auto; object-fit: contain; }
+.block-partners--grayscale .block-partners__logo { filter: grayscale(1); opacity: .75; transition: filter .2s ease, opacity .2s ease; }
+.block-partners--grayscale .block-partners__item:hover .block-partners__logo,
+.block-partners--grayscale .block-partners__item:focus-visible .block-partners__logo { filter: grayscale(0); opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+    .block-partners--grayscale .block-partners__logo { transition: none; }
+}
+@media (max-width: 900px) {
+    .block-partners__grid { grid-template-columns: repeat(auto-fit, minmax(140px, 200px)); }
+}
 .block-testimonials > .section-head,
 .block-partners > .section-head { margin-bottom: 28px; }
 .block-testimonials__title,
@@ -1495,6 +1528,24 @@ body.design-header-dark .site-burger, body.design-header-accent .site-burger { c
 }
 .subscribe-block__title { margin: 0 0 8px; }
 .subscribe-block__text { margin: 0 0 18px; color: var(--text-muted); }
+.subscribe-block__note { margin: 14px 0 0; color: var(--text-muted); font-size: var(--step--2); }
+/* Варианты оформления. «Полоса» — во всю ширину раздела, «карточка» — узкий
+   блок по центру (прежний вид), «на фоне» — поверх изображения с затемнением,
+   чтобы текст читался на любом снимке. */
+.subscribe-block--band { max-width: none; }
+.subscribe-block--image {
+    max-width: none;
+    position: relative;
+    border: 0;
+    background-image: linear-gradient(color-mix(in srgb, #0b1a30 62%, transparent), color-mix(in srgb, #0b1a30 62%, transparent)), var(--subscribe-image);
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+}
+.subscribe-block--image .subscribe-block__title,
+.subscribe-block--image .subscribe-block__text,
+.subscribe-block--image .subscribe-block__note,
+.subscribe-block--image .subscribe-block__consent { color: #fff; }
 .subscribe-block__form { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .subscribe-block__form input[type=email] { 
     flex: 1 1 260px; max-width: 340px; padding: 12px 18px; 

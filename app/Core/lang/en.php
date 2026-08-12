@@ -135,6 +135,7 @@ return [
     'Предыдущая новость' => 'Previous news',
     'Следующая новость' => 'Next news',
     'из' => 'of',
+    'Оценка' => 'Rating',
     'Новости и аналитика' => 'News and analytics',
     'Официальные сообщения, события и аналитические материалы Агентства.' => 'Official announcements, events and analytical materials of the Agency.',
     'Проекты и инициативы' => 'Projects and initiatives',

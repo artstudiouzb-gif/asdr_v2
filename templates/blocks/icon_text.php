@@ -14,6 +14,10 @@ use App\Core\Icon;
  */
 $title = trim((string) ($data['title'] ?? ''));
 $description = trim((string) ($data['description'] ?? ''));
+$variant = in_array($data['variant'] ?? 'cards', ['cards', 'plain', 'inline'], true)
+    ? (string) $data['variant']
+    : 'cards';
+$align = ($data['align'] ?? 'left') === 'center' ? 'center' : 'left';
 $columns = max(1, min(4, (int) ($data['columns'] ?? 3)));
 $items = array_values(array_filter(
     (array) ($data['items'] ?? []),
@@ -29,13 +33,12 @@ if ($columns !== 3) {
         . ' .icon-text__grid{grid-template-columns:repeat(' . $columns . ',minmax(0,1fr));}}';
 }
 ?>
-<div class="block-icon-text">
-    <?php if ($title !== '' || $description !== ''): ?>
-        <div class="section-head section-head--stacked">
-            <?php if ($title !== ''): ?><h2 class="section-head__title"><?= $esc($title) ?></h2><?php endif; ?>
-            <?php if ($description !== ''): ?><p class="section-head__description"><?= $esc($description) ?></p><?php endif; ?>
-        </div>
-    <?php endif; ?>
+<div class="block-icon-text block-icon-text--<?= $esc($variant) ?> block-icon-text--align-<?= $esc($align) ?>">
+    <?= \App\Core\SectionHead::render([
+        'title' => $title,
+        'description' => $description,
+        'class' => 'section-head--stacked',
+    ]) ?>
 
     <?php if ($items === []): ?>
         <p class="block-icon-text__empty"><?= $esc(t('Карточки ещё не добавлены.')) ?></p>
