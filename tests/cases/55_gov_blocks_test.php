@@ -115,6 +115,8 @@ test('Блок media_gallery: переключатели видео/фото п�
         ],
     ])])['html'];
     assert_contains('media-tabs', $out);
+    assert_contains('section-head block-mediagallery__head', $out);
+    assert_contains('media-tabs__tab-text', $out);
     assert_contains('data-media-kind="video"', $out);
     assert_contains('data-media-kind="photo"', $out);
     assert_contains('data-media-grid', $out);

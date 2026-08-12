@@ -51,11 +51,19 @@
     },
     "/assets/css/blocks/leader-card.css": {
       "path": "/assets/css/blocks/leader-card.min.css",
-      "sourceSha256": "69e392e879f15668392584a2455e9a9b20d97587a77c452920c54105367d7d96",
-      "sha256": "7b39134df9038c8d36b5fc442544c9e08c96f67ad3e16de00b6d3178f3b811ad",
-      "raw": 5531,
-      "gzip": 1500,
-      "brotli": 1265
+      "sourceSha256": "5a97691bb5b6aa9e6eeff4c126946444be9e41ac87d995791e577416dc4393a8",
+      "sha256": "747c35e6dc1614510c6a1548778dab2795c689cb3e3d03eb312a5082f6f5cd11",
+      "raw": 9928,
+      "gzip": 2369,
+      "brotli": 2019
+    },
+    "/assets/css/blocks/media-gallery.css": {
+      "path": "/assets/css/blocks/media-gallery.min.css",
+      "sourceSha256": "3e45c13268fec7237a6bb330b611e9bccb5f9544f0d289b407a2c245e4a738b1",
+      "sha256": "d59892f085151f34328c5820461c27fa45983b59886963fa36ce72ff17538034",
+      "raw": 3986,
+      "gzip": 1235,
+      "brotli": 1014
     },
     "/assets/js/blocks/slider.js": {
       "path": "/assets/js/blocks/slider.min.js",

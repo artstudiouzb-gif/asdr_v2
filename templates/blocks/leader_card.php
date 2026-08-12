@@ -63,6 +63,13 @@ $iconsOnly = !empty($data['mobile_icons_only'])
     && $tabs !== []
     && array_filter($tabs, static fn (array $tab): bool => $tab['icon'] === '') === [];
 
+// Если разделов больше трёх, активная вкладка сохраняет название, а
+// неактивные становятся компактными и показывают только иконки. Режим
+// включается лишь при наличии иконки у каждой вкладки, чтобы не создавать
+// пустые кнопки при неполной настройке редактора.
+$manyTabs = count($tabs) > 3
+    && array_filter($tabs, static fn (array $tab): bool => $tab['icon'] === '') === [];
+
 // Тег имени и уровень заголовков вкладок связаны: если имя — заголовок, то
 // разделы карточки должны идти ровно на уровень ниже. Иначе получается скачок
 // (h2 → h4 или h1 → h3), а его помечает axe и путается скринридер.
@@ -72,11 +79,11 @@ $panelTag = $nameTag === 'h3' ? 'h4' : 'h3';
 $panelId = static fn (string $key): string => 'leader-' . (int) $blockId . '-' . $key;
 $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES);
 ?>
-<div class="leader-card<?= $iconsOnly ? ' leader-card--mobile-icons' : '' ?>"<?= $tabs !== [] ? ' data-leader-card' : '' ?>>
+<div class="leader-card<?= $iconsOnly ? ' leader-card--mobile-icons' : '' ?><?= $manyTabs ? ' leader-card--many-tabs' : '' ?>" data-tab-count="<?= count($tabs) ?>"<?= $tabs !== [] ? ' data-leader-card' : '' ?>>
     <div class="leader-card__side">
         <?php if ($photo !== ''): ?>
             <div class="leader-card__photo">
-                <?= \App\Core\Media::picture($photo, $name, null, null, 'leader-card__img', false, '(max-width: 720px) 40vw, 260px') ?>
+                <?= \App\Core\Media::picture($photo, $name, null, null, 'leader-card__img', false, '(max-width: 720px) 70vw, 320px') ?>
             </div>
         <?php endif; ?>
 
@@ -91,13 +98,13 @@ $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES)
             <ul class="leader-card__contacts">
                 <?php if ($phone !== ''): ?>
                     <li class="leader-card__contact">
-                        <span class="leader-card__contact-icon" aria-hidden="true"><?= Icon::render('phone', 18) ?></span>
+                        <span class="leader-card__contact-icon" aria-hidden="true"><?= Icon::render('phone', 20) ?></span>
                         <a href="tel:<?= $esc(preg_replace('/[^0-9+]/', '', $phone) ?? '') ?>"><?= $esc($phone) ?></a>
                     </li>
                 <?php endif; ?>
                 <?php if ($email !== ''): ?>
                     <li class="leader-card__contact">
-                        <span class="leader-card__contact-icon" aria-hidden="true"><?= Icon::render('mail', 18) ?></span>
+                        <span class="leader-card__contact-icon" aria-hidden="true"><?= Icon::render('mail', 20) ?></span>
                         <a href="mailto:<?= $esc($email) ?>"><?= $esc($email) ?></a>
                     </li>
                 <?php endif; ?>
@@ -119,7 +126,7 @@ $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES)
 
         <?php if ($hours !== ''): ?>
             <p class="leader-card__hours">
-                <span class="leader-card__contact-icon" aria-hidden="true"><?= Icon::render('clock', 18) ?></span>
+                <span class="leader-card__contact-icon" aria-hidden="true"><?= Icon::render('clock', 20) ?></span>
                 <?= $esc(t('Приёмные часы')) ?>: <?= $esc($hours) ?>
             </p>
         <?php endif; ?>
@@ -132,9 +139,9 @@ $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES)
                 <?php foreach ($tabs as $index => $tab): ?>
                     <a class="leader-card__tab<?= $index === 0 ? ' is-active' : '' ?>"
                        href="#<?= $esc($panelId($tab['key'])) ?>"
-                       <?= $iconsOnly ? 'title="' . $esc($tab['title']) . '" ' : '' ?>data-leader-tab="<?= $esc($tab['key']) ?>">
+                       <?= $iconsOnly || $manyTabs ? 'title="' . $esc($tab['title']) . '" ' : '' ?>data-leader-tab="<?= $esc($tab['key']) ?>">
                         <?php if ($tab['icon'] !== ''): ?>
-                            <span class="leader-card__tab-icon" aria-hidden="true"><?= Icon::render($tab['icon'], 18) ?></span>
+                            <span class="leader-card__tab-icon" aria-hidden="true"><?= Icon::render($tab['icon'], 20) ?></span>
                         <?php endif; ?>
                         <span class="leader-card__tab-text"><?= $esc($tab['title']) ?></span>
                     </a>
