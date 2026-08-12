@@ -1,8 +1,10 @@
-/* Leader card tabs: stacking fix and CodePen-inspired depth.
-   Loaded after the theme part so the shaped tab silhouette stays readable. */
+/* Leader card tabs: stacking, centering and CodePen-inspired depth.
+   This small override is loaded after the main leader-card theme part. */
 .leader-card__tab {
     z-index: 2;
     isolation: isolate;
+    justify-content: center;
+    text-align: center;
 }
 .leader-card__tab.is-active { z-index: 3; }
 
@@ -11,19 +13,27 @@
     position: relative;
     z-index: 1;
 }
+.leader-card__tab-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 
+/* The shaped background is masked, so drop-shadow follows the sloped wings.
+   Side shadows are intentionally stronger than the old 8-10% version: on the
+   pale inactive tabs they need to remain visible against the white card. */
 .leader-card__tab::before {
     filter:
         drop-shadow(0 -1px 0 var(--color-accent, var(--gov-teal)))
         drop-shadow(1px 0 0 var(--color-accent, var(--gov-teal)))
         drop-shadow(-1px 0 0 var(--color-accent, var(--gov-teal)))
-        drop-shadow(0 1px 0 var(--color-accent, var(--gov-teal)))
-        drop-shadow(3px 2px 5px rgba(15, 23, 42, .10))
-        drop-shadow(-3px 2px 5px rgba(15, 23, 42, .10));
+        drop-shadow(3px 3px 6px rgba(15, 23, 42, .18))
+        drop-shadow(-3px 3px 6px rgba(15, 23, 42, .18))
+        drop-shadow(0 4px 5px rgba(15, 23, 42, .10));
 }
 .leader-card__tab.is-active::before {
     filter:
-        drop-shadow(3px 2px 5px rgba(15, 23, 42, .12))
-        drop-shadow(-3px 2px 5px rgba(15, 23, 42, .12))
-        drop-shadow(0 4px 6px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 14%, transparent));
+        drop-shadow(3px 3px 7px rgba(15, 23, 42, .22))
+        drop-shadow(-3px 3px 7px rgba(15, 23, 42, .22))
+        drop-shadow(0 5px 7px rgba(15, 23, 42, .14));
 }
