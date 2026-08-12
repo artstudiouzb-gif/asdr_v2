@@ -14,9 +14,12 @@ foreach ($items as $it) {
 $hasVideo = $videoCount > 0;
 $hasPhoto = $photoCount > 0;
 $showTabs = $hasVideo && $hasPhoto;
-// На desktop медиатека всегда держит четыре колонки. Количество публикаций
-// управляет числом карточек, а не геометрией сетки; адаптив 2/1 задаёт CSS.
-$initialColumns = 4;
+// Логический класс количества колонок сохраняем для адаптива и обратной
+// совместимости. На desktop отдельный постоянный класс ниже фиксирует 4
+// колонки независимо от количества публикаций в активной вкладке.
+$initialKind = $hasVideo ? 'video' : 'photo';
+$initialCount = $initialKind === 'video' ? $videoCount : $photoCount;
+$initialColumns = max(1, min(4, $initialCount));
 ?>
 <div class="block-mediagallery" data-media-gallery>
     <div class="section-head block-mediagallery__head">
@@ -32,7 +35,7 @@ $initialColumns = 4;
     <?php if (empty($items)): ?>
         <p class="block-mediagallery__empty"><?= htmlspecialchars(t('Материалы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
-        <div class="mediagallery-grid mediagallery-grid--cols-<?= $initialColumns ?>" data-media-grid>
+        <div class="mediagallery-grid mediagallery-grid--desktop-4 mediagallery-grid--cols-<?= $initialColumns ?>" data-media-grid>
             <?php foreach ($items as $item): ?>
                 <?php
                 $url = trim((string) ($item['url'] ?? ''));
