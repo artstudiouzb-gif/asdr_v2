@@ -14,8 +14,9 @@ foreach ($items as $it) {
 $hasVideo = $videoCount > 0;
 $hasPhoto = $photoCount > 0;
 $showTabs = $hasVideo && $hasPhoto;
-$initialCount = $hasVideo ? $videoCount : $photoCount;
-$initialColumns = max(1, min(4, $initialCount));
+// На desktop медиатека всегда держит четыре колонки. Количество публикаций
+// управляет числом карточек, а не геометрией сетки; адаптив 2/1 задаёт CSS.
+$initialColumns = 4;
 ?>
 <div class="block-mediagallery" data-media-gallery>
     <div class="section-head block-mediagallery__head">
@@ -53,7 +54,7 @@ $initialColumns = max(1, min(4, $initialCount));
                 ?>
                 <<?= $tag ?> class="mediacard mediacard--<?= $kind ?>" data-media-kind="<?= $kind ?>"<?= $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"' : '' ?>>
                     <span class="mediacard__media">
-                        <?php if ($img !== ''): ?><?= \App\Core\Media::picture($img, (string) $item['title'], null, null, 'mediacard__img', true, '(max-width: 700px) 100vw, 33vw') ?><?php endif; ?>
+                        <?php if ($img !== ''): ?><?= \App\Core\Media::picture($img, (string) $item['title'], null, null, 'mediacard__img', true, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw') ?><?php endif; ?>
                         <span class="mediacard__play mediacard__play--<?= $kind ?>" aria-hidden="true">
                             <?php if ($kind === 'photo'): ?>
                                 <?= \App\Core\Icon::render('photo', 24) ?>
