@@ -45,7 +45,8 @@ $getFallbackIcon = static function (string $cardTitle): ?string {
                     <?php endif; ?>
                     <?php foreach (preg_split('/\R/', (string) ($item['lines'] ?? '')) ?: [] as $line): ?>
                         <?php $line = trim($line); if ($line === '') { continue; } ?>
-                        <p class="feature-card__text contact-card__line"><?= htmlspecialchars($line, ENT_QUOTES) ?></p>
+                        <?php // Номера и адреса почты становятся ссылками: с телефона по ним звонят и пишут в одно касание. ?>
+                        <p class="feature-card__text contact-card__line"><?= \App\Core\ContactLink::linkify($line) ?></p>
                     <?php endforeach; ?>
                     <?php $linkUrl = trim((string) ($item['link_url'] ?? '')); ?>
                     <?php if ($linkUrl !== '' && \App\Core\UrlGuard::isSafeLink($linkUrl) && !empty($item['link_text'])): ?>

@@ -366,6 +366,17 @@ summary:focus-visible {
 .block-slider { position: relative; overflow: hidden; border-radius: 12px; }
 .block-slider__slide { display: none; }
 .block-slider__slide.is-active { display: block; }
+.block-slider__link { display: block; color: inherit; text-decoration: none; }
+/* Единая пропорция кадра: без неё слайды разной высоты дёргали страницу
+   при каждом переключении. «auto» оставляет исходные размеры снимка. */
+.block-slider--ratio-16-9 { --slider-ratio: 16 / 9; }
+.block-slider--ratio-4-3 { --slider-ratio: 4 / 3; }
+.block-slider--ratio-21-9 { --slider-ratio: 21 / 9; }
+.block-slider__slide img { display: block; width: 100%; }
+.block-slider:not(.block-slider--ratio-auto) .block-slider__slide img {
+    aspect-ratio: var(--slider-ratio, 16 / 9);
+    object-fit: cover;
+}
 .block-slider__nav { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; pointer-events: none; padding: 0 12px; }
 .block-slider__nav button {
     pointer-events: auto;
@@ -746,7 +757,17 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .counter__suffix { margin-left: 2px; }
 .counter__label { margin-top: 8px; color: var(--text-muted); }
 
-.block-team__grid, .block-projects__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+.block-team__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+/* Проекты: колонки задаёт редактор, последний ряд дотягивает GridBalance. */
+.block-projects__grid { display: grid; grid-template-columns: repeat(var(--grid-track, 3), minmax(0, 1fr)); gap: 24px; }
+.block-projects__grid > .project-card { grid-column: span var(--grid-span, 1); }
+@media (max-width: 900px) {
+    .block-projects__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .block-projects__grid > .project-card { grid-column: auto; }
+}
+@media (max-width: 720px) {
+    .block-projects__grid { grid-template-columns: minmax(0, 1fr); }
+}
 .team-card { text-align: center; }
 .team-card__photo { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: var(--radius-sm, 12px); margin-bottom: 12px; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
 .team-card:hover .team-card__photo { transform: scale(1.04); }
@@ -956,7 +977,14 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .block-news__title { margin: 0; }
 .block-news__all { color: var(--color-accent, #e63946); text-decoration: none; font-weight: 600; white-space: nowrap; }
 .block-news__empty { color: var(--text-muted); }
-.block-news__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 22px; }
+/* Число колонок и растяжка последнего ряда приходят из GridBalance:
+   три новости в сетке auto-fill расползались по ширине неравномерно. */
+.block-news__grid { display: grid; grid-template-columns: repeat(var(--grid-track, 3), minmax(0, 1fr)); gap: 22px; }
+.block-news__grid > .news-card { grid-column: span var(--grid-span, 1); }
+@media (max-width: 900px) {
+    .block-news__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .block-news__grid > .news-card { grid-column: auto; }
+}
 .news-card { border: 1px solid var(--border-color, #e3e6ea); border-radius: 10px; overflow: hidden; background: var(--surface, #fff); transition: box-shadow .15s ease, transform .15s ease; }
 .news-card:hover { box-shadow: 0 8px 26px rgba(0,0,0,.08); transform: translateY(-2px); }
 .news-card__link { display: flex; flex-direction: column; height: 100%; text-decoration: none; color: inherit; }
@@ -2309,6 +2337,10 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
     color: var(--color-accent, #2f6fed);
 }
 .contact-card__line { margin: 2px 0; color: var(--text-muted); }
+/* Кликабельные номер и почта внутри строки контакта: подчёркивание появляется
+   при наведении, чтобы строка не выглядела сплошной ссылкой. */
+.contact-link { color: inherit; text-decoration: none; border-bottom: 1px dotted currentColor; }
+.contact-link:hover, .contact-link:focus-visible { color: var(--color-accent, #e63946); border-bottom-style: solid; }
 .contact-card__link { 
     display: inline-block; margin-top: 12px; font-weight: 600; color: var(--color-accent, #2f6fed); text-decoration: none; 
     transition: transform 0.3s ease, color 0.3s ease;

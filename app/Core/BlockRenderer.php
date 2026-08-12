@@ -537,9 +537,14 @@ final class BlockRenderer
                 : [];
         }
         if ($type === 'projects_list') {
-            $items = \App\Models\Project::published(Locale::current());
+            $lang = Locale::current();
+            $items = \App\Models\Project::published($lang);
             $limit = (int) ($data['limit'] ?? 0);
             $data['projects'] = $limit > 0 ? array_slice($items, 0, $limit) : $items;
+            // Ссылка «все» ведёт в раздел проектов, пока редактор не задал свою.
+            if (trim((string) ($data['all_url'] ?? '')) === '') {
+                $data['all_url'] = Locale::url('projects', $lang);
+            }
         }
 
         // Блок «Последние новости»: локализованная лента для главной/любой
@@ -567,7 +572,11 @@ final class BlockRenderer
                 ];
             }
             $data['news'] = $items;
-            $data['all_url'] = self::newsAllUrl($lang, $category);
+            // Ручной адрес не затираем: редактор мог увести «Все новости» на
+            // свою страницу-подборку.
+            if (trim((string) ($data['all_url'] ?? '')) === '') {
+                $data['all_url'] = self::newsAllUrl($lang, $category);
+            }
         }
 
         // Блок «Новости и аналитика»: крупная главная новость + список (для

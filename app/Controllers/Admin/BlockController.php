@@ -474,13 +474,26 @@ final class BlockController
                     if ($image === '') {
                         continue;
                     }
+                    $slideUrl = trim((string) ($slide['url'] ?? ''));
                     $slides[] = [
                         'image' => $image,
                         'alt' => trim((string) ($slide['alt'] ?? '')),
                         'caption' => trim((string) ($slide['caption'] ?? '')),
+                        'url' => ($slideUrl !== '' && \App\Core\UrlGuard::isSafeLink($slideUrl)) ? $slideUrl : '',
                     ];
                 }
-                return ['slides' => $slides];
+                $sliderRatio = (string) ($_POST['ratio'] ?? '16-9');
+                if (!in_array($sliderRatio, ['16-9', '4-3', '21-9', 'auto'], true)) {
+                    $sliderRatio = '16-9';
+                }
+                return [
+                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    // 0 — автопрокрутка выключена; верхний предел бережёт от
+                    // «слайд раз в час», который читается как поломка.
+                    'autoplay' => max(0, min(30, (int) ($_POST['autoplay'] ?? 0))),
+                    'ratio' => $sliderRatio,
+                    'slides' => $slides,
+                ];
             case 'form':
                 $formId = (int) ($_POST['form_id'] ?? 0);
                 $layout = in_array($_POST['layout'] ?? '1col', ['1col', '2col'], true) ? (string) $_POST['layout'] : '1col';
@@ -511,11 +524,16 @@ final class BlockController
             case 'projects_list':
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
+                    'all_url' => $this->safeUrlField('all_url'),
+                    'columns' => max(2, min(4, (int) ($_POST['columns'] ?? 3))),
                     'limit' => max(0, (int) ($_POST['limit'] ?? 0)),
                 ];
             case 'news_latest':
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
+                    'all_url' => $this->safeUrlField('all_url'),
                     'limit' => max(0, (int) ($_POST['limit'] ?? 0)),
                     'category' => max(0, (int) ($_POST['category'] ?? 0)),
                 ];

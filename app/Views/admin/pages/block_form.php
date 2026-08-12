@@ -31,7 +31,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <input type="text" id="title" name="title" value="<?= htmlspecialchars($block['title'] ?? '', ENT_QUOTES) ?>">
         </div>
 
-        <?php if (in_array($type, ['text', 'cta', 'advantages', 'testimonials', 'counters', 'team_list', 'projects_list', 'news_latest', 'partners', 'faq', 'subscribe', 'contact_cards', 'hero', 'cards_grid', 'media_gallery', 'news_feature', 'person_cards', 'timeline', 'stages', 'text_image', 'docs_list', 'map_point', 'org_structure', 'icon_text'], true)): ?>
+        <?php if (in_array($type, ['text', 'cta', 'advantages', 'slider', 'testimonials', 'counters', 'team_list', 'projects_list', 'news_latest', 'partners', 'faq', 'subscribe', 'contact_cards', 'hero', 'cards_grid', 'media_gallery', 'news_feature', 'person_cards', 'timeline', 'stages', 'text_image', 'docs_list', 'map_point', 'org_structure', 'icon_text'], true)): ?>
             <div class="form-field">
                 <label for="title_field"><?= in_array($type, ['advantages', 'timeline', 'stages'], true) ? 'Заголовок раздела' : 'Заголовок, показываемый на сайте' ?></label>
                 <input type="text" id="title_field" name="title_field" value="<?= htmlspecialchars($data['title'] ?? '', ENT_QUOTES) ?>">
@@ -218,6 +218,20 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'slider'): ?>
+            <div class="form-field">
+                <label for="slider_ratio">Пропорция кадра</label>
+                <select id="slider_ratio" name="ratio">
+                    <?php foreach (['16-9' => '16:9 — широкий кадр', '4-3' => '4:3 — классический', '21-9' => '21:9 — панорама', 'auto' => 'Как у изображения'] as $value => $label): ?>
+                        <option value="<?= $value ?>" <?= ($data['ratio'] ?? '16-9') === $value ? 'selected' : '' ?>><?= $label ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">Общая пропорция удерживает высоту слайдера: при варианте «как у изображения» страница подпрыгивает на каждом переключении, если снимки разного размера.</span>
+            </div>
+            <div class="form-field">
+                <label for="slider_autoplay">Автопрокрутка, секунд (0 — выключена)</label>
+                <input type="number" id="slider_autoplay" name="autoplay" min="0" max="30" value="<?= (int) ($data['autoplay'] ?? 0) ?>">
+                <span class="form-hint">Прокрутка останавливается при наведении, фокусе внутри слайдера и у посетителей, которые просили меньше движения в системе.</span>
+            </div>
             <div>
                 <label>Слайды</label>
                 <div data-repeater="slides">
@@ -232,6 +246,10 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                                 <label>Подпись</label>
                                 <input type="text" name="slides[<?= $i ?>][caption]" value="<?= htmlspecialchars($slide['caption'] ?? '', ENT_QUOTES) ?>">
                             </div>
+                            <div class="form-field">
+                                <label>Ссылка со слайда (необязательно)</label>
+                                <input type="text" name="slides[<?= $i ?>][url]" value="<?= htmlspecialchars($slide['url'] ?? '', ENT_QUOTES) ?>" placeholder="/projects/example">
+                            </div>
                             <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить слайд</button>
                         </div>
                     <?php endforeach; ?>
@@ -245,6 +263,10 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <div class="form-field">
                         <label>Подпись</label>
                         <input type="text" name="slides[__INDEX__][caption]">
+                    </div>
+                    <div class="form-field">
+                        <label>Ссылка со слайда (необязательно)</label>
+                        <input type="text" name="slides[__INDEX__][url]" placeholder="/projects/example">
                     </div>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить слайд</button>
                 </template>
@@ -412,6 +434,28 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                         Блок выводит опубликованные записи раздела «<?= $type === 'team_list' ? 'Команда' : 'Проекты' ?>» по порядку сортировки.
                     <?php endif; ?>
                 </span>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($type === 'projects_list' || $type === 'news_latest'): ?>
+            <?php $allPlaceholder = $type === 'news_latest' ? 'Все новости' : 'Все проекты'; ?>
+            <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="<?= $allPlaceholder ?>"></div>
+            <div class="form-field">
+                <label for="all_url">Ссылка «Все …» — URL</label>
+                <input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>">
+                <span class="form-hint">Пусто — блок сам подставит адрес раздела<?= $type === 'news_latest' ? ' (с учётом выбранной рубрики)' : '' ?>. Ссылка показывается и без заголовка блока.</span>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($type === 'projects_list'): ?>
+            <div class="form-field">
+                <label for="projects_columns">Колонок в сетке</label>
+                <select id="projects_columns" name="columns">
+                    <?php foreach ([2, 3, 4] as $n): ?>
+                        <option value="<?= $n ?>" <?= (int) ($data['columns'] ?? 3) === $n ? 'selected' : '' ?>><?= $n ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">Если проектов не хватает на полный ряд, последние карточки растягиваются — пустых мест справа не остаётся. На узких экранах колонок всегда меньше.</span>
             </div>
         <?php endif; ?>
 

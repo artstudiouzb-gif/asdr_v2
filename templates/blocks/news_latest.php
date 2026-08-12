@@ -1,16 +1,21 @@
 <?php
 /** @var array $data */
-$title = $data['title'] ?? '';
-$news = $data['news'] ?? [];
-$allUrl = $data['all_url'] ?? '/news';
+/** @var int $blockId */
+$news = is_array($data['news'] ?? null) ? $data['news'] : [];
+// Шапка секции — общая для всех блоков: ссылка «Все новости» больше не
+// привязана к заголовку и остаётся на месте у безымянной секции.
+$head = \App\Core\SectionHead::render([
+    'title' => (string) ($data['title'] ?? ''),
+    'all_text' => (string) ($data['all_text'] ?? ''),
+    'all_url' => (string) ($data['all_url'] ?? ''),
+    'class' => 'block-news__head',
+    // Легаси-класс сохраняем: на нём висят правила статичной темы.
+    'title_class' => 'block-news__title',
+]);
+$templateCss = \App\Core\GridBalance::css($blockId, '.block-news__grid', '.news-card', count($news), 3);
 ?>
 <div class="block-news">
-    <?php if ($title !== ''): ?>
-        <div class="block-news__head">
-            <h2 class="block-news__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2>
-            <a class="block-news__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars(t('Все новости'), ENT_QUOTES) ?> →</a>
-        </div>
-    <?php endif; ?>
+    <?= $head ?>
     <?php if (empty($news)): ?>
         <p class="block-news__empty"><?= htmlspecialchars(t('Новостей пока нет.'), ENT_QUOTES) ?></p>
     <?php else: ?>
