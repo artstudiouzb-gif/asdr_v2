@@ -108,6 +108,17 @@ jobs:
         run: npm run check:styles
       - name: Check JavaScript syntax
         run: find public/assets/js -not -path '*/vendor/*' -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Build exact generated assets for handoff
+        run: npm run build:assets
+      - name: Upload generated tab assets
+        uses: actions/upload-artifact@v7
+        with:
+          name: generated-tab-assets
+          path: |
+            public/assets/css/blocks/leader-card.min.css
+            public/assets/css/blocks/media-gallery.min.css
+            public/assets/asset-manifest.json
+          if-no-files-found: error
 
   browser-smoke:
     name: Browser smoke (Chromium)
