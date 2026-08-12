@@ -1,11 +1,7 @@
 /* Media gallery layout polish loaded after generated design CSS.
    Desktop keeps a stable four-column rhythm; tablet/mobile stay responsive. */
 @media (min-width: 1001px) {
-    .mediagallery-grid,
-    .mediagallery-grid--cols-1,
-    .mediagallery-grid--cols-2,
-    .mediagallery-grid--cols-3,
-    .mediagallery-grid--cols-4 {
+    .mediagallery-grid--desktop-4 {
         --media-columns: 4;
         grid-template-columns: repeat(4, minmax(0, 1fr));
     }
