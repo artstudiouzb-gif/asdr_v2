@@ -5,13 +5,30 @@ $description = trim(\App\Core\HtmlSanitizer::sanitizeText((string) ($data['descr
 $items = $data['items'] ?? [];
 $variant = in_array($data['variant'] ?? 'grid', ['grid', 'indexed', 'band'], true) ? (string) $data['variant'] : 'grid';
 
+// Шапка секции — общая: заголовок, вводный текст и ссылка «Все …».
+$head = \App\Core\SectionHead::render([
+    'title' => (string) $title,
+    'description' => $description,
+    'description_html' => true,
+    'all_text' => (string) ($data['all_text'] ?? ''),
+    'all_url' => (string) ($data['all_url'] ?? ''),
+    'class' => $variant === 'band' ? 'block-featband__head' : 'block-advantages__head',
+    // Легаси-классы сохраняем: на них висят правила темы.
+    'title_class' => $variant === 'band' ? 'block-featband__title' : 'block-advantages__title',
+    'description_class' => $variant === 'band' ? 'block-featband__description' : 'block-advantages__description',
+]);
+
 if ($variant !== 'band') {
-    // До пяти карточек — один ряд: пять направлений идут пятёркой, как на
-    // макете. Дальше колонки подбираются так, чтобы в последнем ряду не
-    // осталась одинокая карточка, а карточки хвоста растягиваются на всю
-    // ширину — иначе справа зияет пустая ячейка.
+    // Колонки задаёт редактор; 0 — прежнее поведение: до пяти карточек один
+    // ряд (пять направлений идут пятёркой, как на макете), дальше число
+    // подбирается так, чтобы в последнем ряду не осталась одинокая карточка.
+    // Карточки хвоста растягиваются на всю ширину — иначе справа зияет пустая
+    // ячейка.
     $count = count($items);
-    $columns = $count <= 5 ? $count : \App\Core\GridBalance::columnsFor($count);
+    $columns = max(0, min(5, (int) ($data['columns'] ?? 0)));
+    if ($columns === 0) {
+        $columns = $count <= 5 ? $count : \App\Core\GridBalance::columnsFor($count);
+    }
     $templateCss = \App\Core\GridBalance::css(
         $blockId,
         '.block-advantages__grid',
@@ -23,12 +40,7 @@ if ($variant !== 'band') {
 ?>
 <?php if ($variant === 'band'): ?>
 <div class="block-featband">
-    <?php if ($title !== '' || $description !== ''): ?>
-        <div class="block-featband__head">
-            <?php if ($title !== ''): ?><h2 class="block-featband__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
-            <?php if ($description !== ''): ?><div class="block-featband__description rich-content"><?= $description ?></div><?php endif; ?>
-        </div>
-    <?php endif; ?>
+    <?= $head ?>
     <?php if (empty($items)): ?>
         <p class="block-featband__empty"><?= htmlspecialchars(t('Элементы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
@@ -45,15 +57,19 @@ if ($variant !== 'band') {
 </div>
 <?php else: ?>
 <div class="block-advantages block-advantages--<?= htmlspecialchars($variant, ENT_QUOTES) ?>">
-    <?php if ($title !== '' || $description !== ''): ?>
-        <div class="block-advantages__head">
-            <?php if ($title !== ''): ?><h2 class="block-advantages__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
-            <?php if ($description !== ''): ?><div class="block-advantages__description rich-content"><?= $description ?></div><?php endif; ?>
-        </div>
-    <?php endif; ?>
+    <?= $head ?>
     <div class="block-advantages__grid">
         <?php foreach ($items as $index => $item): ?>
-            <article class="feature-card block-advantages__item">
+            <?php
+            $itemUrl = trim((string) ($item['url'] ?? ''));
+            if ($itemUrl !== '' && !\App\Core\UrlGuard::isSafeLink($itemUrl)) {
+                $itemUrl = '';
+            }
+            // Карточка со ссылкой кликается целиком — отдельная подпись
+            // «Подробнее» съедала бы высоту и дублировала заголовок.
+            $itemTag = $itemUrl !== '' ? 'a' : 'article';
+            ?>
+            <<?= $itemTag ?> class="feature-card block-advantages__item<?= $itemUrl !== '' ? ' block-advantages__item--link' : '' ?>"<?= $itemUrl !== '' ? ' href="' . htmlspecialchars($itemUrl, ENT_QUOTES) . '"' : '' ?>>
                 <div class="feature-card__top">
                     <?php if (!empty($item['icon_svg'])): ?>
                         <span class="feature-card__icon block-advantages__icon block-advantages__icon--svg" aria-hidden="true"><?= \App\Core\Icon::render($item['icon_svg'], 22) ?></span>
@@ -64,7 +80,7 @@ if ($variant !== 'band') {
                 </div>
                 <h3 class="feature-card__title"><?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?></h3>
                 <p class="feature-card__text"><?= htmlspecialchars($item['text'] ?? '', ENT_QUOTES) ?></p>
-            </article>
+            </<?= $itemTag ?>>
         <?php endforeach; ?>
     </div>
 </div>

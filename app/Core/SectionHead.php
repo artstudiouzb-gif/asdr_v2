@@ -26,7 +26,8 @@ final class SectionHead
      *     tools?: string,
      *     class?: string,
      *     level?: string,
-     *     title_class?: string
+     *     title_class?: string,
+     *     description_class?: string
      * } $options
      */
     public static function render(array $options = []): string
@@ -71,8 +72,10 @@ final class SectionHead
             if ($description !== '') {
                 // HTML пропускаем только по явному флагу: вызывающий обязан
                 // подать уже очищенную разметку (TextProcessor/HtmlSanitizer).
-                $html .= '<div class="section-head__description'
-                    . (($options['description_html'] ?? false) ? ' rich-content' : '') . '">'
+                $descriptionClass = trim('section-head__description '
+                    . (($options['description_html'] ?? false) ? 'rich-content ' : '')
+                    . (string) ($options['description_class'] ?? ''));
+                $html .= '<div class="' . htmlspecialchars($descriptionClass, ENT_QUOTES) . '">'
                     . (($options['description_html'] ?? false)
                         ? $description
                         : '<p>' . htmlspecialchars($description, ENT_QUOTES) . '</p>')

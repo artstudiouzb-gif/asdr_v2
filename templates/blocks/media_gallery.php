@@ -15,28 +15,45 @@ $hasVideo = $videoCount > 0;
 $hasPhoto = $photoCount > 0;
 $showTabs = $hasVideo && $hasPhoto;
 
-// Логический класс количества колонок нужен адаптиву. На desktop отдельный
-// постоянный класс фиксирует четыре колонки независимо от числа публикаций.
+// Логический класс количества колонок нужен адаптиву: на узких экранах их
+// меньше, а на десктопе ряд держит заданное редактором число.
 $initialKind = $hasVideo ? 'video' : 'photo';
 $initialCount = $initialKind === 'video' ? $videoCount : $photoCount;
+$columns = max(2, min(5, (int) ($data['columns'] ?? 4)));
 $initialColumns = max(1, min(4, $initialCount));
+$ratio = in_array($data['ratio'] ?? '16-9', ['16-9', '4-3', '1-1'], true)
+    ? (string) $data['ratio']
+    : '16-9';
+
+// Число колонок десктопа — в scoped CSS блока: раньше оно было прибито
+// четвёркой в теме и не настраивалось.
+$templateCss = '@media (min-width:1001px){#block-' . (int) $blockId
+    . ' .mediagallery-grid{--media-desktop-cols:' . $columns . '}}';
+
+$tabsHtml = '';
+if ($showTabs) {
+    ob_start(); ?>
+    <div class="media-tabs" role="group" aria-label="<?= htmlspecialchars(t('Фильтр медиа'), ENT_QUOTES) ?>">
+        <span class="media-tabs__indicator" aria-hidden="true"></span>
+        <button type="button" class="media-tabs__tab is-active" data-media-tab="video" aria-pressed="true"><span class="media-tabs__tab-text"><?= htmlspecialchars(t('Видео'), ENT_QUOTES) ?></span></button>
+        <button type="button" class="media-tabs__tab" data-media-tab="photo" aria-pressed="false"><span class="media-tabs__tab-text"><?= htmlspecialchars(t('Фото'), ENT_QUOTES) ?></span></button>
+    </div>
+    <?php $tabsHtml = (string) ob_get_clean();
+}
 ?>
 <div class="block-mediagallery" data-media-gallery>
-    <div class="section-head block-mediagallery__head">
-        <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
-        <?php if ($showTabs): ?>
-            <div class="media-tabs" role="group" aria-label="<?= htmlspecialchars(t('Фильтр медиа'), ENT_QUOTES) ?>">
-                <span class="media-tabs__indicator" aria-hidden="true"></span>
-                <button type="button" class="media-tabs__tab is-active" data-media-tab="video" aria-pressed="true"><span class="media-tabs__tab-text"><?= htmlspecialchars(t('Видео'), ENT_QUOTES) ?></span></button>
-                <button type="button" class="media-tabs__tab" data-media-tab="photo" aria-pressed="false"><span class="media-tabs__tab-text"><?= htmlspecialchars(t('Фото'), ENT_QUOTES) ?></span></button>
-            </div>
-        <?php endif; ?>
-        <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
-    </div>
+    <?= \App\Core\SectionHead::render([
+        'title' => (string) $title,
+        'description' => (string) ($data['description'] ?? ''),
+        'all_text' => $allText,
+        'all_url' => $allUrl,
+        'tools' => $tabsHtml,
+        'class' => 'block-mediagallery__head',
+    ]) ?>
     <?php if (empty($items)): ?>
         <p class="block-mediagallery__empty"><?= htmlspecialchars(t('Материалы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
-        <div class="mediagallery-grid mediagallery-grid--desktop-4 mediagallery-grid--cols-<?= $initialColumns ?>" data-media-grid>
+        <div class="mediagallery-grid mediagallery-grid--desktop-4 mediagallery-grid--ratio-<?= htmlspecialchars($ratio, ENT_QUOTES) ?> mediagallery-grid--cols-<?= $initialColumns ?>" data-media-grid>
             <?php foreach ($items as $item): ?>
                 <?php
                 $url = trim((string) ($item['url'] ?? ''));

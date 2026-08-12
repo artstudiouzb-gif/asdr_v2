@@ -34,6 +34,7 @@ final class AdvantagesBlockNormalizer
                 'icon_svg' => $iconSvg,
                 'title' => BlockDataInput::plain($item, 'title', $locale),
                 'text' => BlockDataInput::plain($item, 'text', $locale),
+                'url' => BlockDataInput::safeLink($item['url'] ?? ''),
             ];
         }
 
@@ -46,6 +47,10 @@ final class AdvantagesBlockNormalizer
                 HtmlSanitizer::sanitizeText((string) ($input['description'] ?? '')),
                 $locale,
             ),
+            'all_text' => BlockDataInput::trimmed($input, 'all_text'),
+            'all_url' => BlockDataInput::safeLink($input['all_url'] ?? ''),
+            // 0 — колонки подбираются по числу карточек (прежнее поведение).
+            'columns' => BlockDataInput::int($input, 'columns', 0, 5, 0),
             'items' => $items,
         ];
     }

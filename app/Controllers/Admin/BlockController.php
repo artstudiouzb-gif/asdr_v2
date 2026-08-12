@@ -600,7 +600,8 @@ final class BlockController
                         'url' => $url,
                     ];
                 }
-                $cols = (int) ($_POST['columns'] ?? 5);
+                // Медиатека держит ритм четырёх колонок, карточки — пяти.
+                $cols = (int) ($_POST['columns'] ?? ($type === 'media_gallery' ? 4 : 5));
                 // Источник данных: «Проекты» (cards_grid с фото) или «Фотоальбомы»
                 // (media_gallery) собирают карточки из отмеченных «на главной»
                 // записей автоматически; иначе — ручной список items.
@@ -616,7 +617,7 @@ final class BlockController
                 if ($source === 'projects') {
                     $variant = 'image';
                 }
-                return [
+                $collected = [
                     'variant' => $variant,
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
@@ -630,6 +631,13 @@ final class BlockController
                     'image_position_mobile' => \App\Core\MediaPosition::normalize($_POST['image_position_mobile'] ?? null),
                     'items' => $items,
                 ];
+                if ($type === 'media_gallery') {
+                    // Медиагалерея делит поля с карточками, но у неё свои
+                    // вводный текст и пропорция плитки.
+                    $collected['description'] = TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale);
+                    $collected['ratio'] = \App\Core\BlockData\BlockDataInput::enum($_POST, 'ratio', ['16-9', '4-3', '1-1'], '16-9');
+                }
+                return $collected;
             case 'news_feature':
                 return [
                     'variant' => ($_POST['variant'] ?? 'cards') === 'mosaic' ? 'mosaic' : 'cards',
@@ -799,6 +807,7 @@ final class BlockController
             case 'person_profile':
                 return [
                     'photo' => trim((string) ($_POST['photo'] ?? '')),
+                    'photo_side' => ($_POST['photo_side'] ?? 'left') === 'right' ? 'right' : 'left',
                     'name' => TextProcessor::typographPlain(trim((string) ($_POST['name'] ?? '')), $locale),
                     'position' => TextProcessor::typographPlain(trim((string) ($_POST['position'] ?? '')), $locale),
                     'text' => TextProcessor::typographPlain(trim((string) ($_POST['text'] ?? '')), $locale),
@@ -808,6 +817,13 @@ final class BlockController
                     'email_label' => trim((string) ($_POST['email_label'] ?? 'E-mail:')),
                     'button_text' => trim((string) ($_POST['button_text'] ?? '')),
                     'button_url' => $this->safeUrlField('button_url'),
+                    'button2_text' => trim((string) ($_POST['button2_text'] ?? '')),
+                    'button2_url' => $this->safeUrlField('button2_url'),
+                    'telegram' => $this->safeUrlField('telegram'),
+                    'facebook' => $this->safeUrlField('facebook'),
+                    'linkedin' => $this->safeUrlField('linkedin'),
+                    'x' => $this->safeUrlField('x'),
+                    'instagram' => $this->safeUrlField('instagram'),
                 ];
             case 'bio_education':
                 $collect = static function (string $key, array $fields) use ($locale): array {
@@ -897,6 +913,7 @@ final class BlockController
                         'text' => TextProcessor::typographPlain(trim((string) ($item['text'] ?? '')), $locale),
                         'status' => in_array($item['status'] ?? '', ['done', 'active', 'planned'], true) ? $item['status'] : 'planned',
                         'status_text' => trim((string) ($item['status_text'] ?? '')),
+                        'url' => \App\Core\BlockData\BlockDataInput::safeLink($item['url'] ?? ''),
                     ];
                 }
                 return [
@@ -908,6 +925,9 @@ final class BlockController
                     ),
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => $this->safeUrlField('all_url'),
+                    // 0 — колонок ровно по числу этапов (прежнее поведение).
+                    'columns' => \App\Core\BlockData\BlockDataInput::int($_POST, 'columns', 0, 5, 0),
+                    'autoplay' => \App\Core\BlockData\BlockDataInput::int($_POST, 'autoplay', 0, 30, 0),
                     'items' => $items,
                 ];
             case 'text_image':

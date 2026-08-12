@@ -5,9 +5,36 @@ $phone = trim((string) ($data['phone'] ?? ''));
 $email = trim((string) ($data['email'] ?? ''));
 $btnText = trim((string) ($data['button_text'] ?? ''));
 $btnUrl = trim((string) ($data['button_url'] ?? ''));
+$btn2Text = trim((string) ($data['button2_text'] ?? ''));
+$btn2Url = trim((string) ($data['button2_url'] ?? ''));
 $hasContacts = $phone !== '' || $email !== '';
+$photoSide = ($data['photo_side'] ?? 'left') === 'right' ? 'right' : 'left';
+
+// Соцсети: показываем только заполненные и только с безопасным адресом.
+$socialIcons = [
+    'telegram' => 'brand-telegram',
+    'facebook' => 'brand-facebook',
+    'linkedin' => 'brand-linkedin',
+    'x' => 'brand-x',
+    'instagram' => 'brand-instagram',
+];
+$socialLabels = [
+    'telegram' => 'Telegram',
+    'facebook' => 'Facebook',
+    'linkedin' => 'LinkedIn',
+    'x' => 'X',
+    'instagram' => 'Instagram',
+];
+$socials = [];
+foreach ($socialIcons as $key => $icon) {
+    $url = trim((string) ($data[$key] ?? ''));
+    if ($url === '' || !\App\Core\UrlGuard::isSafeLink($url)) {
+        continue;
+    }
+    $socials[] = ['url' => $url, 'icon' => $icon, 'label' => $socialLabels[$key]];
+}
 ?>
-<div class="block-profile">
+<div class="block-profile block-profile--photo-<?= $photoSide ?>">
     <div class="profile__media">
         <?php if ($photo !== ''): ?>
             <?= \App\Core\Media::picture($photo, (string) ($data['name'] ?? ''), null, null, 'profile__img', false, '(max-width: 700px) 100vw, 35vw', false, 'profile__photo') ?>
@@ -40,8 +67,24 @@ $hasContacts = $phone !== '' || $email !== '';
                 </span>
             <?php endif; ?>
         </div><?php endif; ?>
-        <?php if ($btnText !== '' && $btnUrl !== ''): ?>
-            <a class="profile__button" href="<?= htmlspecialchars($btnUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($btnText, ENT_QUOTES) ?> →</a>
+        <?php if ($socials !== []): ?>
+            <div class="profile__socials">
+                <?php foreach ($socials as $social): ?>
+                    <a class="profile__social" href="<?= htmlspecialchars($social['url'], ENT_QUOTES) ?>" target="_blank" rel="noopener me" aria-label="<?= htmlspecialchars($social['label'], ENT_QUOTES) ?>">
+                        <?= \App\Core\Icon::render($social['icon'], 20) ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+        <?php if (($btnText !== '' && $btnUrl !== '') || ($btn2Text !== '' && $btn2Url !== '')): ?>
+            <div class="profile__buttons">
+                <?php if ($btnText !== '' && $btnUrl !== ''): ?>
+                    <a class="profile__button" href="<?= htmlspecialchars($btnUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($btnText, ENT_QUOTES) ?> →</a>
+                <?php endif; ?>
+                <?php if ($btn2Text !== '' && $btn2Url !== ''): ?>
+                    <a class="profile__button profile__button--secondary" href="<?= htmlspecialchars($btn2Url, ENT_QUOTES) ?>"><?= htmlspecialchars($btn2Text, ENT_QUOTES) ?> →</a>
+                <?php endif; ?>
+            </div>
         <?php endif; ?>
     </div>
 </div>

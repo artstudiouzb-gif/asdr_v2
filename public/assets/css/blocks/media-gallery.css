@@ -79,13 +79,24 @@
 }
 
 /* Количество публикаций не меняет desktop-геометрию: медиатека держит
-   постоянный ритм четырёх колонок, а адаптивные классы продолжают работать
-   ниже 1001px. */
+   постоянный ритм колонок (по умолчанию четырёх, число задаёт блок через
+   --media-desktop-cols), а адаптивные классы продолжают работать ниже 1001px. */
 @media (min-width: 1001px) {
     .mediagallery-grid--desktop-4 {
-        --media-columns: 4;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        --media-columns: var(--media-desktop-cols, 4);
+        grid-template-columns: repeat(var(--media-desktop-cols, 4), minmax(0, 1fr));
     }
+}
+
+/* Пропорция плитки: обложки видео и фотоальбомов приходят разного размера,
+   и без общей пропорции ряд получался рваным. */
+.mediagallery-grid--ratio-16-9 .mediacard__media { --mediacard-ratio: 16 / 9; }
+.mediagallery-grid--ratio-4-3 .mediacard__media { --mediacard-ratio: 4 / 3; }
+.mediagallery-grid--ratio-1-1 .mediacard__media { --mediacard-ratio: 1 / 1; }
+.mediagallery-grid .mediacard__img {
+    aspect-ratio: var(--mediacard-ratio, 16 / 9);
+    object-fit: cover;
+    width: 100%;
 }
 
 /* Фото оформлены как карточки новостей: изображение до внешнего края карточки,

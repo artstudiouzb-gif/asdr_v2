@@ -181,6 +181,18 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <option value="band" <?= ($data['variant'] ?? 'grid') === 'band' ? 'selected' : '' ?>>Компактная полоса</option>
                 </select>
             </div>
+            <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все направления"></div>
+            <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
+            <div class="form-field">
+                <label for="adv_columns">Колонок в сетке</label>
+                <select id="adv_columns" name="columns">
+                    <option value="0" <?= (int) ($data['columns'] ?? 0) === 0 ? 'selected' : '' ?>>Автоматически по числу карточек</option>
+                    <?php foreach ([2, 3, 4, 5] as $n): ?>
+                        <option value="<?= $n ?>" <?= (int) ($data['columns'] ?? 0) === $n ? 'selected' : '' ?>><?= $n ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">Автоматический режим не оставляет в последнем ряду одинокую карточку. Не действует в варианте «Компактная полоса».</span>
+            </div>
             <div>
                 <label>Пункты преимуществ</label>
                 <div data-repeater="items">
@@ -195,6 +207,10 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                                 <label>Текст</label>
                                 <textarea name="items[<?= $i ?>][text]"><?= htmlspecialchars($item['text'] ?? '', ENT_QUOTES) ?></textarea>
                             </div>
+                            <div class="form-field">
+                                <label>Ссылка (необязательно — карточка станет кликабельной)</label>
+                                <input type="text" name="items[<?= $i ?>][url]" value="<?= htmlspecialchars($item['url'] ?? '', ENT_QUOTES) ?>">
+                            </div>
                             <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить пункт</button>
                         </div>
                     <?php endforeach; ?>
@@ -208,6 +224,10 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <div class="form-field">
                         <label>Текст</label>
                         <textarea name="items[__INDEX__][text]"></textarea>
+                    </div>
+                    <div class="form-field">
+                        <label>Ссылка (необязательно — карточка станет кликабельной)</label>
+                        <input type="text" name="items[__INDEX__][url]">
                     </div>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить пункт</button>
                 </template>
@@ -1018,6 +1038,22 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <div class="form-field"><label for="nf_all_url">Ссылка «Все …» — URL (пусто = /news)</label><input type="text" id="nf_all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
         <?php endif; ?>
 
+        <?php if ($type === 'media_gallery'): ?>
+            <div class="form-field">
+                <label for="mg_description">Описание раздела</label>
+                <textarea id="mg_description" name="description" rows="2"><?= htmlspecialchars($data['description'] ?? '', ENT_QUOTES) ?></textarea>
+            </div>
+            <div class="form-field">
+                <label for="mg_ratio">Пропорция плитки</label>
+                <select id="mg_ratio" name="ratio">
+                    <?php foreach (['16-9' => '16:9 — как у видео', '4-3' => '4:3 — классическая', '1-1' => '1:1 — квадрат'] as $value => $label): ?>
+                        <option value="<?= $value ?>" <?= ($data['ratio'] ?? '16-9') === $value ? 'selected' : '' ?>><?= $label ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">Обложки видео и фотоальбомов приходят разного размера — общая пропорция выравнивает ряд.</span>
+            </div>
+        <?php endif; ?>
+
         <?php if (in_array($type, ['cards_grid', 'media_gallery'], true)): ?>
             <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все направления"></div>
             <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
@@ -1056,6 +1092,14 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?= \App\Core\AdminUi::colorField('text_color', $data['text_color'] ?? '', 'Цвет текста и иконок', '#173a63') ?>
                 </div>
                 <?= \App\Core\AdminUi::mediaPositionFields($data['image_position'] ?? 'center-center', $data['image_position_mobile'] ?? 'center-center') ?>
+            <?php else: ?>
+                <div class="form-field">
+                    <label for="columns">Плиток в ряду</label>
+                    <select id="columns" name="columns">
+                        <?php foreach ([2, 3, 4, 5] as $n): ?><option value="<?= $n ?>" <?= (int) ($data['columns'] ?? 4) === $n ? 'selected' : '' ?>><?= $n ?></option><?php endforeach; ?>
+                    </select>
+                    <span class="form-hint">Действует на широких экранах; ниже 1000px число колонок подбирается автоматически.</span>
+                </div>
             <?php endif; ?>
             <div>
                 <label>Элементы</label>
@@ -1372,6 +1416,19 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <div class="form-field"><label for="email">E-mail</label><input type="text" id="email" name="email" value="<?= htmlspecialchars($data['email'] ?? '', ENT_QUOTES) ?>"></div>
             <div class="form-field"><label for="button_text">Кнопка — текст</label><input type="text" id="button_text" name="button_text" value="<?= htmlspecialchars($data['button_text'] ?? '', ENT_QUOTES) ?>" placeholder="Обратиться к руководителю"></div>
             <div class="form-field"><label for="button_url">Кнопка — ссылка</label><input type="text" id="button_url" name="button_url" value="<?= htmlspecialchars($data['button_url'] ?? '', ENT_QUOTES) ?>"></div>
+            <div class="form-field"><label for="button2_text">Вторая кнопка — текст</label><input type="text" id="button2_text" name="button2_text" value="<?= htmlspecialchars($data['button2_text'] ?? '', ENT_QUOTES) ?>" placeholder="Биография"></div>
+            <div class="form-field"><label for="button2_url">Вторая кнопка — ссылка</label><input type="text" id="button2_url" name="button2_url" value="<?= htmlspecialchars($data['button2_url'] ?? '', ENT_QUOTES) ?>"><span class="form-hint">Вторая кнопка оформляется контуром — как второстепенное действие.</span></div>
+            <div class="form-field">
+                <label for="pp_photo_side">Сторона фото</label>
+                <select id="pp_photo_side" name="photo_side">
+                    <option value="left" <?= ($data['photo_side'] ?? 'left') === 'left' ? 'selected' : '' ?>>Слева</option>
+                    <option value="right" <?= ($data['photo_side'] ?? 'left') === 'right' ? 'selected' : '' ?>>Справа</option>
+                </select>
+                <span class="form-hint">На узких экранах фото в любом случае встаёт над текстом.</span>
+            </div>
+            <?php foreach (['telegram' => 'Telegram', 'facebook' => 'Facebook', 'linkedin' => 'LinkedIn', 'x' => 'X', 'instagram' => 'Instagram'] as $ppSocial => $ppLabel): ?>
+                <div class="form-field"><label for="pp_<?= $ppSocial ?>"><?= $ppLabel ?></label><input type="text" id="pp_<?= $ppSocial ?>" name="<?= $ppSocial ?>" value="<?= htmlspecialchars($data[$ppSocial] ?? '', ENT_QUOTES) ?>" placeholder="https://..."></div>
+            <?php endforeach; ?>
         <?php endif; ?>
 
         <?php if ($type === 'bio_education'): ?>
@@ -1525,6 +1582,20 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <div class="form-field"><label for="stages_variant">Вариант отображения</label><select id="stages_variant" name="variant"><option value="default" <?= ($data['variant'] ?? 'default') === 'default' ? 'selected' : '' ?>>Этапы реализации</option><option value="history" <?= ($data['variant'] ?? 'default') === 'history' ? 'selected' : '' ?>>История организации</option></select></div>
             <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все этапы"></div>
             <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
+            <div class="form-field">
+                <label for="stages_columns">Этапов в ряду</label>
+                <select id="stages_columns" name="columns">
+                    <option value="0" <?= (int) ($data['columns'] ?? 0) === 0 ? 'selected' : '' ?>>Автоматически по числу этапов</option>
+                    <?php foreach ([2, 3, 4, 5] as $n): ?>
+                        <option value="<?= $n ?>" <?= (int) ($data['columns'] ?? 0) === $n ? 'selected' : '' ?>><?= $n ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">Если этапов больше, ряд превращается в прокручиваемую полосу.</span>
+            </div>
+            <div class="form-field">
+                <label for="stages_autoplay">Автопрокрутка, секунд (0 — выключена)</label>
+                <input type="number" id="stages_autoplay" name="autoplay" min="0" max="30" value="<?= (int) ($data['autoplay'] ?? 0) ?>">
+            </div>
             <div>
                 <label>Этапы</label>
                 <div data-repeater="items">
@@ -1540,6 +1611,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                                 <?php endforeach; ?>
                             </select></div>
                             <div class="form-field"><label>Свой текст статуса (необязательно)</label><input type="text" name="items[<?= $i ?>][status_text]" value="<?= htmlspecialchars($item['status_text'] ?? '', ENT_QUOTES) ?>"></div>
+                            <div class="form-field"><label>Ссылка с этапа (необязательно)</label><input type="text" name="items[<?= $i ?>][url]" value="<?= htmlspecialchars($item['url'] ?? '', ENT_QUOTES) ?>"></div>
                             <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить этап</button>
                         </div>
                     <?php endforeach; ?>
@@ -1551,6 +1623,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <div class="form-field"><label>Текст</label><textarea name="items[__INDEX__][text]"></textarea></div>
                     <div class="form-field"><label>Статус</label><select name="items[__INDEX__][status]"><option value="done">Завершён</option><option value="active">В процессе</option><option value="planned" selected>Запланирован</option></select></div>
                     <div class="form-field"><label>Свой текст статуса</label><input type="text" name="items[__INDEX__][status_text]"></div>
+                    <div class="form-field"><label>Ссылка с этапа (необязательно)</label><input type="text" name="items[__INDEX__][url]"></div>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить этап</button>
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить этап</button></div>
