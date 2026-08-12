@@ -18,12 +18,12 @@ $initialCount = $hasVideo ? $videoCount : $photoCount;
 $initialColumns = max(1, min(4, $initialCount));
 ?>
 <div class="block-mediagallery" data-media-gallery>
-    <div class="section-head">
+    <div class="section-head block-mediagallery__head">
         <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
         <?php if ($showTabs): ?>
             <div class="media-tabs" role="group" aria-label="<?= htmlspecialchars(t('Фильтр медиа'), ENT_QUOTES) ?>">
-                <button type="button" class="media-tabs__tab is-active" data-media-tab="video" aria-pressed="true"><?= htmlspecialchars(t('Видео'), ENT_QUOTES) ?></button>
-                <button type="button" class="media-tabs__tab" data-media-tab="photo" aria-pressed="false"><?= htmlspecialchars(t('Фото'), ENT_QUOTES) ?></button>
+                <button type="button" class="media-tabs__tab is-active" data-media-tab="video" aria-pressed="true"><span class="media-tabs__tab-text"><?= htmlspecialchars(t('Видео'), ENT_QUOTES) ?></span></button>
+                <button type="button" class="media-tabs__tab" data-media-tab="photo" aria-pressed="false"><span class="media-tabs__tab-text"><?= htmlspecialchars(t('Фото'), ENT_QUOTES) ?></span></button>
             </div>
         <?php endif; ?>
         <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>

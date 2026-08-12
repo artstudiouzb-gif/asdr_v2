@@ -64,6 +64,7 @@ final class AssetCollector
         'news_feature' => '/assets/css/blocks/news-detail.css',
         'org_structure' => '/assets/css/blocks/org-structure.css',
         'leader_card' => '/assets/css/blocks/leader-card.css',
+        'media_gallery' => '/assets/css/blocks/media-gallery.css',
     ];
 
     /** @var array<string, bool> */
