@@ -55,32 +55,21 @@ if ($duties !== '') {
     $tabs[] = ['key' => 'duties', 'title' => trim((string) ($data['duties_title'] ?? '')) ?: t('Функции'), 'icon' => trim((string) ($data['duties_icon'] ?? ''))];
 }
 
-// «Только иконки» применяется, лишь когда иконка есть у КАЖДОЙ показанной
-// вкладки: иначе одна из них осталась бы пустым прямоугольником. Настройку в
-// этом случае молча игнорируем — предупреждать редактора негде, а сломанная
-// вкладка хуже неприменённой настройки.
+// Мобильный режим «только иконки» применяем лишь когда иконка есть у каждой
+// показанной вкладки. Иначе одна из кнопок стала бы визуально пустой.
 $iconsOnly = !empty($data['mobile_icons_only'])
     && $tabs !== []
     && array_filter($tabs, static fn (array $tab): bool => $tab['icon'] === '') === [];
 
-// Если разделов больше трёх, активная вкладка сохраняет название, а
-// неактивные становятся компактными и показывают только иконки. Режим
-// включается лишь при наличии иконки у каждой вкладки, чтобы не создавать
-// пустые кнопки при неполной настройке редактора.
-$manyTabs = count($tabs) > 3
-    && array_filter($tabs, static fn (array $tab): bool => $tab['icon'] === '') === [];
-
 // Тег имени и уровень заголовков вкладок связаны: если имя — заголовок, то
-// разделы карточки должны идти ровно на уровень ниже. Иначе получается скачок
-// (h2 → h4 или h1 → h3), а его помечает axe и путается скринридер.
+// разделы карточки должны идти ровно на уровень ниже.
 $nameTag = in_array($data['name_tag'] ?? 'p', ['p', 'h2', 'h3'], true) ? (string) $data['name_tag'] : 'p';
 $panelTag = $nameTag === 'h3' ? 'h4' : 'h3';
 
 $panelId = static fn (string $key): string => 'leader-' . (int) $blockId . '-' . $key;
 $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES);
 ?>
-<link rel="stylesheet" href="<?= $esc(\App\Core\Asset::url('/assets/css/blocks/leader-card-tabs-fix.css')) ?>">
-<div class="leader-card<?= $iconsOnly ? ' leader-card--mobile-icons' : '' ?><?= $manyTabs ? ' leader-card--many-tabs' : '' ?>" data-tab-count="<?= count($tabs) ?>"<?= $tabs !== [] ? ' data-leader-card' : '' ?>>
+<div class="leader-card<?= $iconsOnly ? ' leader-card--mobile-icons' : '' ?>" data-tab-count="<?= count($tabs) ?>"<?= $tabs !== [] ? ' data-leader-card' : '' ?>>
     <div class="leader-card__side">
         <?php if ($photo !== ''): ?>
             <div class="leader-card__photo">
@@ -94,7 +83,6 @@ $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES)
         </div>
 
         <div class="leader-card__info">
-
         <?php if ($phone !== '' || $email !== ''): ?>
             <ul class="leader-card__contacts">
                 <?php if ($phone !== ''): ?>
@@ -137,10 +125,11 @@ $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES)
     <?php if ($tabs !== []): ?>
         <div class="leader-card__main">
             <nav class="leader-card__tabs" data-leader-tablist aria-label="<?= $esc(t('Разделы карточки')) ?>">
+                <span class="leader-card__tab-indicator" aria-hidden="true"></span>
                 <?php foreach ($tabs as $index => $tab): ?>
                     <a class="leader-card__tab<?= $index === 0 ? ' is-active' : '' ?>"
                        href="#<?= $esc($panelId($tab['key'])) ?>"
-                       <?= $iconsOnly || $manyTabs ? 'title="' . $esc($tab['title']) . '" ' : '' ?>data-leader-tab="<?= $esc($tab['key']) ?>">
+                       <?= $iconsOnly ? 'title="' . $esc($tab['title']) . '" ' : '' ?>data-leader-tab="<?= $esc($tab['key']) ?>">
                         <?php if ($tab['icon'] !== ''): ?>
                             <span class="leader-card__tab-icon" aria-hidden="true"><?= Icon::render($tab['icon'], 20) ?></span>
                         <?php endif; ?>
