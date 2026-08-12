@@ -89,14 +89,16 @@
 }
 
 /* Пропорция плитки: обложки видео и фотоальбомов приходят разного размера,
-   и без общей пропорции ряд получался рваным. */
-.mediagallery-grid--ratio-16-9 .mediacard__media { --mediacard-ratio: 16 / 9; }
-.mediagallery-grid--ratio-4-3 .mediacard__media { --mediacard-ratio: 4 / 3; }
-.mediagallery-grid--ratio-1-1 .mediacard__media { --mediacard-ratio: 1 / 1; }
+   и без общей пропорции ряд получался рваным. Пропорцию держит сама плитка —
+   на картинке внутри она бесполезна: высоту кадра задаёт контейнер, а
+   изображение просто вписывается в него. */
+.mediagallery-grid--ratio-16-9 .mediacard__media { aspect-ratio: 16 / 9; }
+.mediagallery-grid--ratio-4-3 .mediacard__media { aspect-ratio: 4 / 3; }
+.mediagallery-grid--ratio-1-1 .mediacard__media { aspect-ratio: 1 / 1; }
 .mediagallery-grid .mediacard__img {
-    aspect-ratio: var(--mediacard-ratio, 16 / 9);
-    object-fit: cover;
     width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* Фото оформлены как карточки новостей: изображение до внешнего края карточки,

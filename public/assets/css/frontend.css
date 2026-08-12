@@ -763,11 +763,12 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 @media (max-width: 720px) {
     .block-testimonials__grid { grid-template-columns: minmax(0, 1fr); }
 }
-/* Оценка: пять контурных значков, набранные заливаются акцентом. */
-.testimonial__rating { display: flex; justify-content: center; gap: 2px; margin-bottom: 12px; }
-.testimonial__star { display: inline-flex; color: var(--border-color, #e3e6ea); }
+/* Оценка: пять значков, набранные — акцентом, остальные приглушены. Заливку
+   не используем: у символа спрайта fill="none" стоит на самом <symbol> и
+   перебивает наследование внутрь <use>, поэтому звёзды различаются цветом. */
+.testimonial__rating { display: flex; justify-content: center; gap: 3px; margin-bottom: 12px; }
+.testimonial__star { display: inline-flex; color: color-mix(in srgb, var(--text-muted, #6b7280) 45%, transparent); }
 .testimonial__star.is-on { color: var(--color-accent, #e63946); }
-.testimonial__star.is-on svg { fill: currentColor; }
 
 .block-counters__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 24px; text-align: center; }
 .counter__value, .counter__suffix { font-size: clamp(var(--step-6), 5vw, var(--step-10)); font-weight: 800; color: var(--color-accent, #e63946); line-height: 1; }
