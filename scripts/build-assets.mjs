@@ -22,6 +22,10 @@ const jsSources = [
     'public/assets/js/forms.js',
 ];
 
+// Ассеты, подключаемые не на каждой странице (AssetCollector: JS_MAP, CSS_MAP,
+// THEME_PART_MAP), в общий бандл не входят. Раньше они и не минифицировались —
+// отдавались исходниками. Здесь они проходят ту же обработку, что и бандлы, и
+// попадают в манифест отдельным разделом.
 const blockSources = [
     'public/assets/css/blocks/news-detail.css',
     'public/assets/css/blocks/org-structure.css',
@@ -41,16 +45,37 @@ const outputs = {
     manifest: 'public/assets/asset-manifest.json',
 };
 
+// Потолки сжатого размера общих бандлов — тех, что грузит каждый посетитель
+// на каждой странице.
+//
+// Превышение валит `npm run build:assets --check` (то есть CI), но не обычную
+// сборку: раньше исключение бросалось в любом режиме, и очередное дополнение
+// темы ломало сборку прямо в работе — поэтому порог тогда и сняли. Теперь
+// разработчик видит предупреждение и работает дальше, а поймать рост обязан
+// CI, где правка видна целиком и понятно, чем платим.
+//
+// Потолок опускают по мере чистки, а не поднимают под факт. Поднять можно —
+// но в том же коммите объяснить, чем рост оправдан. «Подняли, чтобы прошло» —
+// не объяснение: смысл порога в том, чтобы разговор о бюджете состоялся до
+// слияния, а не задним числом, как это вышло с 419 КБ, набранными полутора
+// десятками дизайн-коммитов подряд.
 const budgets = {
-    cssBrotli: 52 * 1024,
-    jsBrotli: 15 * 1024,
+    cssBrotli: 52 * 1024, // факт на момент установки порога — 49.3 КБ
+    jsBrotli: 15 * 1024, // факт — 13.3 КБ
 };
+
+// Файлы отдельных блоков грузятся только на страницах, где такой блок есть,
+// поэтому их бюджет мягкий (предупреждение в любом режиме): рост здесь платит
+// часть посетителей, а не все. Порог ловит аварию вроде случайно попавшего в
+// исходники несжатого вендорного файла.
 const blockBudgetBrotli = 8 * 1024;
+
 const checkOnly = process.argv.includes('--check');
 
 async function readSources(paths) {
     return Promise.all(paths.map(async (path) => ({
         path,
+        // Keep fingerprints and generated artifacts identical on Windows and Linux.
         content: (await readFile(path, 'utf8')).replace(/\r\n?/g, '\n'),
     })));
 }
@@ -61,7 +86,9 @@ function sizeReport(content) {
         raw: input.length,
         gzip: gzipSync(input, { level: 9 }).length,
         brotli: brotliCompressSync(input, {
-            params: { [zlibConstants.BROTLI_PARAM_QUALITY]: 11 },
+            params: {
+                [zlibConstants.BROTLI_PARAM_QUALITY]: 11,
+            },
         }).length,
     };
 }
@@ -84,6 +111,11 @@ function sourceFingerprint(sources) {
 async function buildCss(sources) {
     const input = sources.map(({ path, content }) => `/* ${path} */\n${content}`).join('\n');
     const result = new CleanCSS({
+        // Level 2 доводит оптимизацию до слияния и удаления дублирующихся
+        // правил (около 8 KiB на текущем наборе). Реструктуризацию отключаем
+        // осознанно: она переупорядочивает правила и при равной специфичности
+        // способна изменить победителя каскада — для темы с большим числом
+        // переопределений это неприемлемый риск ради нескольких байт.
         level: {
             1: {},
             2: { restructureRules: false, mergeSemantically: false },
@@ -102,9 +134,13 @@ async function buildCss(sources) {
 async function buildJs(sources) {
     const input = Object.fromEntries(sources.map(({ path, content }) => [path, content]));
     const result = await minify(input, {
-        compress: { passes: 2 },
+        compress: {
+            passes: 2,
+        },
         mangle: true,
-        format: { comments: false },
+        format: {
+            comments: false,
+        },
     });
 
     if (!result.code) {
@@ -124,15 +160,17 @@ async function verifyOrWrite(path, content) {
     try {
         current = (await readFile(path, 'utf8')).replace(/\r\n?/g, '\n');
     } catch {
-        current = '';
+        throw new Error(`${path} is missing. Run npm run build:assets.`);
     }
     if (current !== content) {
-        console.log(`ASSET_PAYLOAD_BEGIN ${path}`);
-        console.log(Buffer.from(content, 'utf8').toString('base64'));
-        console.log(`ASSET_PAYLOAD_END ${path}`);
+        throw new Error(`${path} is stale. Run npm run build:assets.`);
     }
 }
 
+/**
+ * Минифицирует один файл блока. CSS проходит тот же CleanCSS, что и бандл;
+ * JS — тот же terser. Возвращает запись для манифеста.
+ */
 async function buildBlockAsset(path) {
     const [{ content }] = await readSources([path]);
     const isCss = path.endsWith('.css');
@@ -173,6 +211,9 @@ const manifest = `${JSON.stringify({
         sha256: sha256(js),
         ...jsSize,
     },
+    // Ключ — исходный путь (как он записан в AssetCollector), значение —
+    // минифицированный файл. FrontendAssets::blockAsset() подставляет его,
+    // когда включена сборка бандлов.
     blocks,
 }, null, 2)}\n`;
 await Promise.all([
@@ -189,12 +230,18 @@ for (const [source, entry] of Object.entries(blocks)) {
     console.log(`  блок ${source} -> ${entry.raw} raw / ${entry.gzip} gzip / ${entry.brotli} brotli`);
 }
 
+// Мягкий бюджет блочных файлов: предупреждение в любом режиме.
 for (const [source, entry] of Object.entries(blocks)) {
     if (entry.brotli > blockBudgetBrotli) {
-        console.warn(`  ВНИМАНИЕ: ${source} ${entry.brotli} Б brotli — выше ориентира ${blockBudgetBrotli} Б.`);
+        console.warn(
+            `  ВНИМАНИЕ: ${source} ${entry.brotli} Б brotli — выше ориентира ${blockBudgetBrotli} Б.`
+        );
     }
 }
 
+// Жёсткий бюджет общих бандлов. В обычной сборке — предупреждение (файлы уже
+// записаны, работа не встаёт), в режиме проверки — ошибка с ненулевым кодом,
+// чтобы правка не уехала в main незамеченной.
 const overruns = [];
 if (cssSize.brotli > budgets.cssBrotli) {
     overruns.push(`CSS ${cssSize.brotli} Б brotli — выше бюджета ${budgets.cssBrotli} Б`);
@@ -208,6 +255,10 @@ if (overruns.length > 0) {
         for (const message of overruns) {
             console.error(`  ПРЕВЫШЕН БЮДЖЕТ: ${message}.`);
         }
+        console.error(
+            '  Уменьшите бандл или поднимите порог в scripts/build-assets.mjs,\n'
+            + '  объяснив в том же коммите, чем рост оправдан.'
+        );
         process.exitCode = 1;
     } else {
         for (const message of overruns) {
