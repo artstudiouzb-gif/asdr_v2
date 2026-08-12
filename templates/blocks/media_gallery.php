@@ -14,7 +14,11 @@ foreach ($items as $it) {
 $hasVideo = $videoCount > 0;
 $hasPhoto = $photoCount > 0;
 $showTabs = $hasVideo && $hasPhoto;
-$initialCount = $hasVideo ? $videoCount : $photoCount;
+// Логический класс количества колонок сохраняем для адаптива и обратной
+// совместимости. На desktop отдельный постоянный класс ниже фиксирует 4
+// колонки независимо от количества публикаций в активной вкладке.
+$initialKind = $hasVideo ? 'video' : 'photo';
+$initialCount = $initialKind === 'video' ? $videoCount : $photoCount;
 $initialColumns = max(1, min(4, $initialCount));
 ?>
 <div class="block-mediagallery" data-media-gallery>
@@ -31,7 +35,7 @@ $initialColumns = max(1, min(4, $initialCount));
     <?php if (empty($items)): ?>
         <p class="block-mediagallery__empty"><?= htmlspecialchars(t('Материалы ещё не добавлены.'), ENT_QUOTES) ?></p>
     <?php else: ?>
-        <div class="mediagallery-grid mediagallery-grid--cols-<?= $initialColumns ?>" data-media-grid>
+        <div class="mediagallery-grid mediagallery-grid--desktop-4 mediagallery-grid--cols-<?= $initialColumns ?>" data-media-grid>
             <?php foreach ($items as $item): ?>
                 <?php
                 $url = trim((string) ($item['url'] ?? ''));
@@ -53,7 +57,7 @@ $initialColumns = max(1, min(4, $initialCount));
                 ?>
                 <<?= $tag ?> class="mediacard mediacard--<?= $kind ?>" data-media-kind="<?= $kind ?>"<?= $url !== '' ? ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"' : '' ?>>
                     <span class="mediacard__media">
-                        <?php if ($img !== ''): ?><?= \App\Core\Media::picture($img, (string) $item['title'], null, null, 'mediacard__img', true, '(max-width: 700px) 100vw, 33vw') ?><?php endif; ?>
+                        <?php if ($img !== ''): ?><?= \App\Core\Media::picture($img, (string) $item['title'], null, null, 'mediacard__img', true, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw') ?><?php endif; ?>
                         <span class="mediacard__play mediacard__play--<?= $kind ?>" aria-hidden="true">
                             <?php if ($kind === 'photo'): ?>
                                 <?= \App\Core\Icon::render('photo', 24) ?>
