@@ -141,9 +141,9 @@ $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES)
                        href="#<?= $esc($panelId($tab['key'])) ?>"
                        <?= $iconsOnly || $manyTabs ? 'title="' . $esc($tab['title']) . '" ' : '' ?>data-leader-tab="<?= $esc($tab['key']) ?>">
                         <?php if ($tab['icon'] !== ''): ?>
-                            <span class="leader-card__tab-icon" aria-hidden="true"><?= Icon::render($tab['icon'], 20) ?></span>
+                            <span class="leader-card__tab-icon" style="position:relative;z-index:1" aria-hidden="true"><?= Icon::render($tab['icon'], 20) ?></span>
                         <?php endif; ?>
-                        <span class="leader-card__tab-text"><?= $esc($tab['title']) ?></span>
+                        <span class="leader-card__tab-text" style="position:relative;z-index:1"><?= $esc($tab['title']) ?></span>
                     </a>
                 <?php endforeach; ?>
             </nav>
