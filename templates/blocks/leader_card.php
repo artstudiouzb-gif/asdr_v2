@@ -79,6 +79,7 @@ $panelTag = $nameTag === 'h3' ? 'h4' : 'h3';
 $panelId = static fn (string $key): string => 'leader-' . (int) $blockId . '-' . $key;
 $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES);
 ?>
+<link rel="stylesheet" href="<?= $esc(\App\Core\Asset::url('/assets/css/blocks/leader-card-tabs-fix.css')) ?>">
 <div class="leader-card<?= $iconsOnly ? ' leader-card--mobile-icons' : '' ?><?= $manyTabs ? ' leader-card--many-tabs' : '' ?>" data-tab-count="<?= count($tabs) ?>"<?= $tabs !== [] ? ' data-leader-card' : '' ?>>
     <div class="leader-card__side">
         <?php if ($photo !== ''): ?>
@@ -141,9 +142,9 @@ $esc = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES)
                        href="#<?= $esc($panelId($tab['key'])) ?>"
                        <?= $iconsOnly || $manyTabs ? 'title="' . $esc($tab['title']) . '" ' : '' ?>data-leader-tab="<?= $esc($tab['key']) ?>">
                         <?php if ($tab['icon'] !== ''): ?>
-                            <span class="leader-card__tab-icon" style="position:relative;z-index:1" aria-hidden="true"><?= Icon::render($tab['icon'], 20) ?></span>
+                            <span class="leader-card__tab-icon" aria-hidden="true"><?= Icon::render($tab['icon'], 20) ?></span>
                         <?php endif; ?>
-                        <span class="leader-card__tab-text" style="position:relative;z-index:1"><?= $esc($tab['title']) ?></span>
+                        <span class="leader-card__tab-text"><?= $esc($tab['title']) ?></span>
                     </a>
                 <?php endforeach; ?>
             </nav>
