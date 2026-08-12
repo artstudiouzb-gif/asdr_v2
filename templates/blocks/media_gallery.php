@@ -14,9 +14,9 @@ foreach ($items as $it) {
 $hasVideo = $videoCount > 0;
 $hasPhoto = $photoCount > 0;
 $showTabs = $hasVideo && $hasPhoto;
-// Логический класс количества колонок сохраняем для адаптива и обратной
-// совместимости. На desktop отдельный постоянный класс ниже фиксирует 4
-// колонки независимо от количества публикаций в активной вкладке.
+
+// Логический класс количества колонок нужен адаптиву. На desktop отдельный
+// постоянный класс фиксирует четыре колонки независимо от числа публикаций.
 $initialKind = $hasVideo ? 'video' : 'photo';
 $initialCount = $initialKind === 'video' ? $videoCount : $photoCount;
 $initialColumns = max(1, min(4, $initialCount));
@@ -26,6 +26,7 @@ $initialColumns = max(1, min(4, $initialCount));
         <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
         <?php if ($showTabs): ?>
             <div class="media-tabs" role="group" aria-label="<?= htmlspecialchars(t('Фильтр медиа'), ENT_QUOTES) ?>">
+                <span class="media-tabs__indicator" aria-hidden="true"></span>
                 <button type="button" class="media-tabs__tab is-active" data-media-tab="video" aria-pressed="true"><span class="media-tabs__tab-text"><?= htmlspecialchars(t('Видео'), ENT_QUOTES) ?></span></button>
                 <button type="button" class="media-tabs__tab" data-media-tab="photo" aria-pressed="false"><span class="media-tabs__tab-text"><?= htmlspecialchars(t('Фото'), ENT_QUOTES) ?></span></button>
             </div>

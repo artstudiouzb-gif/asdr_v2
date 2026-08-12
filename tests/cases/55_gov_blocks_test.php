@@ -21,7 +21,6 @@ test('Блок hero: титул, подзаголовок, фон-фото, бе
     assert_contains('fetchpriority="high"', $out);
     assert_contains('href="/news"', $out);
 
-    // Небезопасная ссылка кнопки не выводится.
     $bad = BlockRenderer::render(['id' => 21, 'type' => 'hero', 'custom_css' => null, 'data' => json_encode([
         'title' => 'T', 'button_text' => 'X', 'button_url' => 'javascript:alert(1)',
     ])])['html'];
@@ -38,7 +37,6 @@ test('Компактные карточки: плитки, первая акти
     assert_contains('cms-block--cards_grid', $out);
     assert_contains('cat-tile is-active', $out);
     assert_contains('href="/news"', $out);
-    // Пункт без URL — span, не ссылка.
     assert_contains('<span class="cat-tile"', $out);
 });
 
@@ -68,7 +66,6 @@ test('Блок hero: видео-фон и надзаголовок; безопа
     assert_contains('/uploads/public/hero.mp4', $out);
     assert_contains('block-hero__eyebrow', $out);
     assert_contains('block-hero__play', $out);
-    // Небезопасная вторая кнопка не рендерится.
     assert_true(!str_contains($out, 'block-hero__button--ghost'), 'javascript: вторая кнопка отсеяна');
 });
 
@@ -97,7 +94,6 @@ test('Варианты cards_grid и media_gallery: обёртки и содер
 
 test('Блок news_feature: обёртка, заголовок секции и ссылка «Все» (лента из БД)', function () {
     ensure_test_db();
-    // Енрич подтягивает новости из БД; заголовок/ссылка секции рендерятся всегда.
     $out = \App\Core\BlockRenderer::render(['id' => 30, 'type' => 'news_feature', 'custom_css' => null, 'data' => json_encode([
         'title' => 'Новости и аналитика', 'all_text' => 'Все новости', 'all_url' => '/news', 'limit' => 6,
     ])])['html'];
@@ -116,16 +112,18 @@ test('Блок media_gallery: переключатели видео/фото п�
     ])])['html'];
     assert_contains('media-tabs', $out);
     assert_contains('section-head block-mediagallery__head', $out);
+    assert_contains('media-tabs__indicator', $out);
     assert_contains('media-tabs__tab-text', $out);
     assert_contains('data-media-kind="video"', $out);
     assert_contains('data-media-kind="photo"', $out);
     assert_contains('data-media-grid', $out);
     assert_contains('mediagallery-grid--cols-1', $out);
 
-    $css = theme_css();
-    assert_contains('.media-tabs__tab::after', $css);
-    assert_contains('.media-tabs__tab.is-active::after', $css);
-    assert_contains('.mediagallery-grid--cols-3 { --media-columns: 3; }', $css);
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/media-gallery.css');
+    assert_contains('.media-tabs__indicator', $css);
+    assert_contains('.mediagallery-grid--desktop-4', $css);
+    assert_not_contains('mask:', $css);
+    assert_not_contains('media-tab-wing-offset', $css);
 
     $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js');
     assert_contains("grid.classList.add('mediagallery-grid--cols-'", $js);
