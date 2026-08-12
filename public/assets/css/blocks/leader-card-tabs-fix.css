@@ -1,0 +1,29 @@
+/* Leader card tabs: stacking fix and CodePen-inspired depth.
+   Loaded after the theme part so the shaped tab silhouette stays readable. */
+.leader-card__tab {
+    z-index: 2;
+    isolation: isolate;
+}
+.leader-card__tab.is-active { z-index: 3; }
+
+.leader-card__tab-icon,
+.leader-card__tab-text {
+    position: relative;
+    z-index: 1;
+}
+
+.leader-card__tab::before {
+    filter:
+        drop-shadow(0 -1px 0 var(--color-accent, var(--gov-teal)))
+        drop-shadow(1px 0 0 var(--color-accent, var(--gov-teal)))
+        drop-shadow(-1px 0 0 var(--color-accent, var(--gov-teal)))
+        drop-shadow(0 1px 0 var(--color-accent, var(--gov-teal)))
+        drop-shadow(3px 2px 5px rgba(15, 23, 42, .10))
+        drop-shadow(-3px 2px 5px rgba(15, 23, 42, .10));
+}
+.leader-card__tab.is-active::before {
+    filter:
+        drop-shadow(3px 2px 5px rgba(15, 23, 42, .12))
+        drop-shadow(-3px 2px 5px rgba(15, 23, 42, .12))
+        drop-shadow(0 4px 6px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 14%, transparent));
+}
