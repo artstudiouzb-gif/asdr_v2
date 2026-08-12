@@ -36,7 +36,7 @@
     width: calc((100% - 10px) / 2);
     border-radius: 999px;
     background: var(--accent-fill-strong, var(--color-accent, var(--gov-teal)));
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 26%, transparent);
+    box-shadow: var(--shadow-2);
     pointer-events: none;
     transition: transform .42s cubic-bezier(.25, 1, .3, 1);
 }
