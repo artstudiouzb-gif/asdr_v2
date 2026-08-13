@@ -1200,6 +1200,7 @@ final class DemoSeeder
                  SELECT 1 FROM pages chk WHERE chk.slug = :s2 AND chk.entity_type = 'project'
              )"
         );
+        $galleryByProject = [];
         foreach ($projects as $i => $project) {
             $ins->execute([
                 ':t' => $project[1],
@@ -1242,6 +1243,7 @@ final class DemoSeeder
                     'text' => '',
                 ];
             }
+            $galleryByProject[$project[0]] = $galleryItems;
             self::seedProjectBlock($pdo, (int) $projectId, 'ru', 'media_gallery', 'Фотографии проекта', [
                 'title' => 'Фотографии проекта',
                 'source' => 'manual',
@@ -1295,6 +1297,24 @@ final class DemoSeeder
             $uzId = $uzStmt->fetchColumn();
             if ($uzId !== false) {
                 self::seedProjectBody($pdo, (int) $uzId, 'uz', $data[1]);
+                // У узбекской записи свой стек блоков: собираем его так же
+                // полно, как русский, иначе UZ-версия выглядит обрезанной.
+                self::seedProjectBlock($pdo, (int) $uzId, 'uz', 'media_gallery', 'Loyiha suratlari', [
+                    'title' => 'Loyiha suratlari',
+                    'source' => 'manual',
+                    'items' => $galleryByProject[$slug] ?? [],
+                ]);
+                self::seedProjectBlock($pdo, (int) $uzId, 'uz', 'icon_text', 'Loyiha ko‘rsatkichlari', [
+                    'variant' => 'plain',
+                    'title' => 'Loyiha ko‘rsatkichlari',
+                    'columns' => 2,
+                    'items' => [[
+                        'icon_svg' => '',
+                        'icon_color' => '',
+                        'rows' => "Holati | Amalga oshirilmoqda\nDavri | 2026–2030\nDaraja | Milliy"
+                            . "\nAsosiy natija | «O‘zbekiston–2030» strategiyasi maqsadlariga o‘lchanadigan hissa",
+                    ]],
+                ]);
             }
         }
     }

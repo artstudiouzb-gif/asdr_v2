@@ -200,7 +200,12 @@ final class ContentRevision
             if ($type === 'page' && !empty($snapshot['entity']['is_home'])) {
                 $pdo->prepare('UPDATE pages SET is_home = 0 WHERE id <> :id')->execute([':id' => $entityId]);
             }
-            self::updateRow($cfg['table'], $cfg['columns'], $entityId, (array) ($snapshot['entity'] ?? []));
+            self::updateRow(
+                $cfg['table'],
+                $cfg['columns'],
+                $entityId,
+                self::withLegacyColumns($type, (array) ($snapshot['entity'] ?? []))
+            );
             $pdo->prepare('UPDATE ' . $cfg['table'] . ' SET lock_version = lock_version + 1 WHERE id = :id')
                 ->execute([':id' => $entityId]);
 
@@ -250,6 +255,33 @@ final class ContentRevision
             'entity' => array_intersect_key($entity, array_flip($cfg['columns'])),
             'children' => $children,
         ];
+    }
+
+    /**
+     * Старые имена колонок в снимках: актуальная колонка → как она называлась
+     * раньше. Снимки, снятые до переезда проектов в pages, хранят анонс под
+     * именем `description`; без сопоставления восстановление затёрло бы его
+     * пустым значением.
+     *
+     * @var array<string, array<string, string>>
+     */
+    private const LEGACY_COLUMNS = [
+        'project' => ['lead' => 'description'],
+    ];
+
+    /**
+     * @param array<string, mixed> $entity
+     * @return array<string, mixed>
+     */
+    private static function withLegacyColumns(string $type, array $entity): array
+    {
+        foreach (self::LEGACY_COLUMNS[$type] ?? [] as $column => $legacy) {
+            if (!array_key_exists($column, $entity) && array_key_exists($legacy, $entity)) {
+                $entity[$column] = $entity[$legacy];
+            }
+        }
+
+        return $entity;
     }
 
     private static function updateRow(string $table, array $columns, int $id, array $data): void

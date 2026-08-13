@@ -44,7 +44,7 @@ final class BlockTypeRegistry
         'testimonials' => ['variant' => 'carousel', 'title' => '', 'description' => '', 'columns' => 3, 'autoplay' => 0, 'items' => []],
         'counters' => ['title' => '', 'card_bg' => '', 'text_color' => '', 'icon_size' => 28, 'icon_bg' => 'on', 'icon_position' => 'left', 'text_align' => 'left', 'items' => []],
         'team_list' => ['title' => '', 'limit' => 0, 'department' => '', 'group_by_department' => false],
-        'projects_list' => ['title' => '', 'all_text' => '', 'all_url' => '', 'columns' => 3, 'limit' => 3],
+        'projects_list' => ['variant' => 'grid', 'title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 3, 'limit' => 3, 'autoplay' => 0],
         'news_latest' => ['title' => 'Последние новости', 'all_text' => 'Все новости', 'all_url' => '', 'limit' => 3, 'category' => 0],
         'partners' => ['title' => 'Партнёры', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 6, 'logo_size' => 'medium', 'grayscale' => true, 'autoplay' => 0, 'items' => []],
         'subscribe' => ['variant' => 'band', 'title' => 'Подписка на новости', 'text' => 'Получайте дайджест новостей на почту раз в неделю.', 'image' => '', 'placeholder' => '', 'note' => '', 'button_text' => 'Подписаться'],

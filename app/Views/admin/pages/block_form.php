@@ -548,6 +548,29 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'projects_list'): ?>
+            <?php $projVariant = (string) ($data['variant'] ?? 'grid'); ?>
+            <div class="form-field">
+                <label for="projects_variant">Вариант отображения</label>
+                <select id="projects_variant" name="variant">
+                    <?php foreach ([
+                        'grid' => 'Сетка карточек',
+                        'list' => 'Список — фото слева, текст справа',
+                        'carousel' => 'Полоса с прокруткой',
+                    ] as $pv => $pl): ?>
+                        <option value="<?= $pv ?>" <?= $projVariant === $pv ? 'selected' : '' ?>><?= $pl ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">В списке помещается более длинный анонс, в полосе карточки листаются стрелками и свайпом.</span>
+            </div>
+            <div class="form-field">
+                <label for="projects_description">Описание раздела</label>
+                <input type="text" id="projects_description" name="description" value="<?= htmlspecialchars($data['description'] ?? '', ENT_QUOTES) ?>" placeholder="Одна строка под заголовком">
+            </div>
+            <div class="form-field">
+                <label for="projects_autoplay">Автопрокрутка полосы, секунд</label>
+                <input type="number" id="projects_autoplay" name="autoplay" min="0" max="30" value="<?= (int) ($data['autoplay'] ?? 0) ?>">
+                <span class="form-hint">0 — без автопрокрутки. Работает только у варианта «полоса»; движение замирает под курсором и у посетителей, просивших меньше анимации.</span>
+            </div>
             <div class="form-field">
                 <label for="projects_columns">Колонок в сетке</label>
                 <select id="projects_columns" name="columns">

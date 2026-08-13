@@ -252,3 +252,43 @@ test('Иконка и текст: у старых блоков позицию и
     $legacyLeft = variant_block('icon_text', ['align' => 'left', 'items' => $items], 746);
     assert_contains('block-icon-text--icon-left', $legacyLeft['html']);
 });
+
+test('Проекты: варианты вёрстки — сетка, список и полоса с прокруткой (БД)', function () {
+    ensure_test_db();
+    $pdo = \App\Core\Database::pdo();
+    $pdo->exec("DELETE FROM pages WHERE entity_type = 'project'");
+
+    // Блок собирает проекты сам, поэтому заводим их в базе.
+    $insert = $pdo->prepare(
+        "INSERT INTO pages (title, slug, entity_type, `lead`, status, is_featured, sort_order, lang)
+         VALUES (?, ?, 'project', ?, 'published', 1, ?, 'ru')"
+    );
+    foreach (['alpha', 'beta', 'gamma', 'delta', 'epsilon'] as $i => $slug) {
+        $insert->execute([ucfirst($slug), 'variant-' . $slug, 'Анонс ' . $slug, $i]);
+    }
+
+    // Сетка — прежнее поведение: колонки редактора и ряды без дыр (пятёрка
+    // карточек ложится 3+2, хвост растягивается).
+    $grid = variant_block('projects_list', ['columns' => 3, 'limit' => 5], 720);
+    assert_contains('block-projects block-projects--grid', $grid['html']);
+    assert_contains('--grid-track', $grid['css'], 'у сетки считаются дорожки');
+    assert_not_contains('data-carousel', $grid['html']);
+
+    $list = variant_block('projects_list', ['variant' => 'list', 'limit' => 5], 721);
+    assert_contains('block-projects--list', $list['html']);
+    assert_same('', $list['css'], 'списку дорожки сетки не нужны');
+
+    $carousel = variant_block('projects_list', ['variant' => 'carousel', 'autoplay' => 6, 'limit' => 5], 722);
+    assert_contains('block-projects--carousel', $carousel['html']);
+    assert_contains('data-carousel-autoplay="6"', $carousel['html']);
+    assert_contains('data-carousel-track', $carousel['html']);
+    assert_same(5, substr_count($carousel['html'], 'data-carousel-item'));
+
+    // Один проект листать нечем: полосу не включаем, стрелки не рисуем.
+    $pdo->exec("DELETE FROM pages WHERE entity_type = 'project' AND slug <> 'variant-alpha'");
+    $single = variant_block('projects_list', ['variant' => 'carousel', 'limit' => 5], 723);
+    assert_not_contains('data-carousel-track', $single['html']);
+    assert_not_contains('carousel-nav', $single['html']);
+
+    $pdo->exec("DELETE FROM pages WHERE entity_type = 'project'");
+});

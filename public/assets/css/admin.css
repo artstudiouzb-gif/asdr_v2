@@ -1225,6 +1225,14 @@ body.theme-dark .alert--success,
 .form-field--checkbox { flex-direction: row; align-items: center; gap: 10px; }
 .form-field--checkbox input { width: auto; }
 .form-hint { font-size: 12px; color: var(--admin-muted); }
+/* Переключатель языка стека блоков: у каждого языка свой набор блоков. */
+.block-lang-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    flex-wrap: wrap;
+}
 .form-actions { display: flex; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
 .form-actions--sticky {
     position: fixed; bottom: 0;

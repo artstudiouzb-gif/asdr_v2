@@ -576,11 +576,21 @@ final class BlockController
                 ];
             case 'projects_list':
                 return [
+                    'variant' => \App\Core\BlockData\BlockDataInput::enum(
+                        $_POST,
+                        'variant',
+                        ['grid', 'list', 'carousel'],
+                        'grid'
+                    ),
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
+                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
                     'all_text' => trim((string) ($_POST['all_text'] ?? '')),
                     'all_url' => $this->safeUrlField('all_url'),
                     'columns' => max(2, min(4, (int) ($_POST['columns'] ?? 3))),
                     'limit' => max(0, (int) ($_POST['limit'] ?? 0)),
+                    // 0 — без автопрокрутки; верхняя граница та же, что у
+                    // остальных каруселей.
+                    'autoplay' => \App\Core\BlockData\BlockDataInput::int($_POST, 'autoplay', 0, 30, 0),
                 ];
             case 'news_latest':
                 return [

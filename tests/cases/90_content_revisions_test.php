@@ -44,6 +44,53 @@ test('content revisions: project snapshot restores the record row', function ():
     }
 });
 
+test('content revisions: снимок, снятый до слияния, восстанавливает анонс из description', function (): void {
+    if (!Database::isConnected()) {
+        return;
+    }
+
+    $pdo = Database::pdo();
+    $slug = 'legacy-revision-' . bin2hex(random_bytes(4));
+    $pdo->prepare(
+        "INSERT INTO pages (title, slug, entity_type, `lead`, status, created_at)
+         VALUES ('Новый заголовок', :slug, 'project', 'Новый анонс', 'draft', NOW())"
+    )->execute([':slug' => $slug]);
+    $id = (int) $pdo->lastInsertId();
+
+    try {
+        // Такой снимок оставила прежняя модель: у проекта была своя таблица,
+        // и анонс назывался description.
+        $snapshot = json_encode([
+            'version' => 1,
+            'entity' => [
+                'title' => 'Старый заголовок',
+                'slug' => $slug,
+                'description' => 'Старый анонс',
+                'cover_image' => null,
+                'status' => 'draft',
+                'is_featured' => 0,
+                'sort_order' => 0,
+            ],
+            'children' => [],
+        ], JSON_UNESCAPED_UNICODE);
+        $pdo->prepare(
+            "INSERT INTO content_revisions (entity_type, entity_id, snapshot, snapshot_hash, created_by, created_at)
+             VALUES ('project', :id, :snapshot, :hash, NULL, NOW())"
+        )->execute([':id' => $id, ':snapshot' => $snapshot, ':hash' => hash('sha256', (string) $snapshot)]);
+        $revisionId = (int) $pdo->lastInsertId();
+
+        $restored = ContentRevision::restore($revisionId, null);
+        assert_same('project', $restored['type'] ?? null);
+
+        $row = $pdo->query('SELECT title, `lead` FROM pages WHERE id = ' . $id)->fetch();
+        assert_same('Старый заголовок', $row['title'] ?? null);
+        assert_same('Старый анонс', $row['lead'] ?? null, 'анонс восстановлен из старого имени колонки');
+    } finally {
+        $pdo->prepare("DELETE FROM content_revisions WHERE entity_type = 'project' AND entity_id = :id")->execute([':id' => $id]);
+        $pdo->prepare('DELETE FROM pages WHERE id = :id')->execute([':id' => $id]);
+    }
+});
+
 test('content revision UI exposes history links and local draft safeguards', function (): void {
     $root = dirname(__DIR__, 2);
     $pageForm = (string) file_get_contents($root . '/app/Views/admin/pages/form.php');
