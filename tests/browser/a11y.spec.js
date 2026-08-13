@@ -28,7 +28,15 @@ const PAGES = [
 for (const [name, url] of PAGES) {
     for (const theme of ['light', 'dark']) {
         test(`доступность: ${name} (${theme})`, async ({ page }) => {
-            await page.goto(url, { waitUntil: 'domcontentloaded' });
+            const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+
+            // Минимальная фикстура CI содержит только главную; новости, проекты
+            // и каталог появляются с демо-комплектом. Пропуск делаем видимым:
+            // иначе аудит молча проверял бы страницу ошибки вместо страницы.
+            test.skip(
+                response !== null && response.status() === 404,
+                `${url} — нет в этой сборке контента`
+            );
             if (theme === 'dark') {
                 await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
                 await page.waitForTimeout(200);

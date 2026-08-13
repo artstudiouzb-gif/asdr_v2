@@ -3359,12 +3359,15 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     font-family: var(--font-heading, 'PT Serif', serif);
     font-size: var(--step-3);
     font-weight: 800;
-    color: color-mix(in srgb, var(--gov-navy) 25%, transparent);
+    /* 25 % давали 1.65:1 — на телефоне номер попадает под порог крупного
+       текста (3:1) и axe его ловил. 55 % оставляют номер вторым планом, но
+       делают его различимым. */
+    color: color-mix(in srgb, var(--gov-navy) 55%, transparent);
     letter-spacing: -0.02em;
     line-height: 1;
 }
 :root[data-theme="dark"] .feature-card__num {
-    color: color-mix(in srgb, #ffffff 25%, transparent);
+    color: color-mix(in srgb, #ffffff 45%, transparent);
 }
 .feature-card__icon {
     display: grid;
