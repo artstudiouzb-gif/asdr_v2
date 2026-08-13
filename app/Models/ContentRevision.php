@@ -257,7 +257,9 @@ final class ContentRevision
         $sets = [];
         $params = [':id' => $id];
         foreach ($columns as $column) {
-            $sets[] = $column . ' = :' . $column;
+            // Имена колонок в обратных кавычках: `lead` — зарезервированное
+            // слово в MySQL 8 (оконная функция LEAD), без них запрос падает.
+            $sets[] = '`' . $column . '` = :' . $column;
             $params[':' . $column] = $data[$column] ?? null;
         }
         Database::pdo()->prepare('UPDATE ' . $table . ' SET ' . implode(', ', $sets) . ' WHERE id = :id')->execute($params);
@@ -271,7 +273,7 @@ final class ContentRevision
             $params[':' . $column] = $data[$column] ?? null;
         }
         Database::pdo()->prepare(
-            'INSERT INTO ' . $table . ' (' . implode(', ', $allColumns) . ') VALUES ('
+            'INSERT INTO ' . $table . ' (`' . implode('`, `', $allColumns) . '`) VALUES ('
             . implode(', ', array_map(static fn (string $c): string => ':' . $c, $allColumns)) . ')'
         )->execute($params);
     }

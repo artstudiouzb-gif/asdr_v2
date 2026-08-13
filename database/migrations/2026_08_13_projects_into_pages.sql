@@ -109,12 +109,14 @@ FROM project_translations pt
 WHERE TRIM(COALESCE(pt.title, '')) <> ''
   AND pt.lang <> base.lang
   -- Своя запись этого языка уже могла существовать (механизм «отдельная
-  -- запись»): второй такой же создавать нельзя.
+  -- запись»): второй такой же создавать нельзя. Сверяемся с уже перенесёнными
+  -- строками pages, а не со старой таблицей: там другие идентификаторы групп.
   AND NOT EXISTS (
-      SELECT 1 FROM projects other
-      WHERE COALESCE(NULLIF(other.translation_group_id, 0), other.id)
-            = COALESCE(NULLIF(base.translation_group_id, 0), base.id)
+      SELECT 1 FROM (SELECT id, lang, entity_type, translation_group_id FROM pages) other
+      WHERE other.entity_type = 'project'
         AND other.lang = pt.lang
+        AND COALESCE(NULLIF(other.translation_group_id, 0), other.id)
+            = COALESCE(NULLIF(base.translation_group_id, 0), base.id)
   );
 
 -- Тело перевода — текстовый блок его собственной записи.
