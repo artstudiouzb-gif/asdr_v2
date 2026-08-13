@@ -23,12 +23,16 @@
 }
 
 /* Тёмная тема: явное переключение через data-theme="dark". */
+/* Тёмная гамма одна на весь фронт: базовые переменные повторяют ступени темы
+   (--gov-bg / --gov-surface / --gov-border из gov-theme.css). Раньше база была
+   нейтрально-серой (#14161c), а карточки темы — синими: на одной странице
+   встречались два разных тона, и это читалось как грязь. */
 :root[data-theme="dark"] {
-    --bg-primary: #14161c;
-    --bg-surface: #1d212b;
-    --text-main: #eceef3;
-    --text-muted: #9aa2b1;
-    --border-color: #2b303c;
+    --bg-primary: #151c29;
+    --bg-surface: #212a3b;
+    --text-main: #f2f6fa;
+    --text-muted: #adb8c7;
+    --border-color: #38445a;
 }
 
 /* Нативные контролы (поля ввода, скроллбары, выпадающие списки) браузер
@@ -41,11 +45,11 @@
 /* Авто-тема: следуем системным настройкам, если тема не задана явно. */
 @media (prefers-color-scheme: dark) {
     :root[data-theme="auto"] {
-        --bg-primary: #14161c;
-        --bg-surface: #1d212b;
-        --text-main: #eceef3;
-        --text-muted: #9aa2b1;
-        --border-color: #2b303c;
+        --bg-primary: #151c29;
+        --bg-surface: #212a3b;
+        --text-main: #f2f6fa;
+        --text-muted: #adb8c7;
+        --border-color: #38445a;
     }
 }
 
@@ -1085,7 +1089,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     --shadow-md: 0 6px 22px rgba(16,24,40,.08);
     --shadow-lg: 0 18px 48px rgba(16,24,40,.12);
 }
-:root[data-theme="dark"] { --surface: #1d212b; }
+:root[data-theme="dark"] { --surface: #212a3b; }
 
 /* Ширина контейнеров из настроек */
 .site-header__inner, .site-content, .layout { max-width: var(--container-max); }

@@ -96,3 +96,47 @@ test('Переключатель языков показывает коротк�
     assert_contains('Language::shortLabel($l)', $header);
     assert_not_contains("'short' => strtoupper(\$code)", $header, 'код языка вместо названия не возвращаем');
 });
+
+test('Тёмная тема: одна гамма у базы и темы, ступени различимы', function () {
+    $base = (string) file_get_contents(APP_ROOT . '/public/assets/css/frontend.css');
+    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+
+    // Нейтрально-серая база рядом с синими карточками темы и давала «грязь».
+    assert_not_contains('--bg-primary: #14161c', $base, 'у базы и темы должна быть одна тёмная гамма');
+    assert_contains('--bg-primary: #151c29', $base);
+    assert_contains('--gov-bg: #151c29', $theme);
+    assert_contains('--bg-surface: #212a3b', $base);
+    assert_contains('--gov-surface: #212a3b', $theme);
+
+    // Альтернативная подложка отличалась от карточки только тоном (1.01:1).
+    assert_not_contains('--gov-bg-alt: #1c2942', $theme);
+
+    $lum = static function (string $hex): float {
+        $hex = ltrim($hex, '#');
+        $channel = static function (float $c): float {
+            $c /= 255;
+
+            return $c <= 0.03928 ? $c / 12.92 : (($c + 0.055) / 1.055) ** 2.4;
+        };
+
+        return 0.2126 * $channel((float) hexdec(substr($hex, 0, 2)))
+            + 0.7152 * $channel((float) hexdec(substr($hex, 2, 2)))
+            + 0.0722 * $channel((float) hexdec(substr($hex, 4, 2)));
+    };
+    $ratio = static function (string $a, string $b) use ($lum): float {
+        $la = $lum($a);
+        $lb = $lum($b);
+
+        return (max($la, $lb) + 0.05) / (min($la, $lb) + 0.05);
+    };
+
+    // Мелкий текст на всех тёмных уровнях остаётся читаемым.
+    foreach (['#151c29', '#212a3b', '#293346'] as $background) {
+        assert_true(
+            $ratio('#adb8c7', $background) >= 4.5,
+            'приглушённый текст на ' . $background . ': ' . round($ratio('#adb8c7', $background), 2) . ':1'
+        );
+    }
+    // Уровни различаются светлотой, а не только тоном.
+    assert_true($ratio('#212a3b', '#293346') >= 1.1, 'подложка не отличается от карточки');
+});

@@ -116,16 +116,22 @@
     --shadow-4: 0 24px 60px rgba(15, 23, 42, 0.16);
 }
 :root[data-theme="dark"] {
-    /* Премиальная глубокая тёмная тема — тёмно-синий полночный сланец */
+    /* Тёмная тема: одна синевато-сланцевая гамма, ступени по светлоте ровные.
+       Прежняя выглядела грязноватой по двум причинам. Первая — фон #0b1120
+       почти чёрный и заметно синее карточек #1e293b: рядом стояли два разных
+       оттенка, и подложка читалась как грязь, а не как уровень. Вторая —
+       альтернативная подложка #1c2942 совпадала с карточкой по светлоте
+       (контраст 1.01), то есть отличалась только цветом. Теперь фон чуть
+       светлее, а уровни различаются светлотой при одном тоне. */
     color-scheme: dark;
-    --gov-bg: #0b1120;
-    --gov-surface: #1e293b;
-    --gov-border: #334155;
-    --gov-ink: #f8fafc;
+    --gov-bg: #151c29;
+    --gov-surface: #212a3b;
+    --gov-border: #38445a;
+    --gov-ink: #f2f6fa;
     /* Было #94a3b8 — на поверхности карточки мелкий текст (дата акта,
        подписи) давал 3.77:1 при норме 4.5. */
-    --gov-muted: #aab6c6;
-    --gov-title: #f8fafc;
+    --gov-muted: #adb8c7;
+    --gov-title: #f2f6fa;
     --gov-teal-text: var(--gov-teal-on-dark, var(--color-accent, #38bdf8));
     --gov-teal-on-tint: var(--gov-teal-on-dark, var(--color-accent, #6fd7e8));
 }
@@ -735,10 +741,12 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 .site-lang-dropdown__check { color: var(--gov-teal, #0d9488); flex-shrink: 0; }
 
 :root[data-theme="dark"] .site-lang-dropdown__trigger { color: var(--gov-ink, #f8fafc); border-color: rgba(255, 255, 255, 0.16); }
-:root[data-theme="dark"] .site-lang-dropdown__menu { background: #1e293b; border-color: rgba(255, 255, 255, 0.12); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4); }
+:root[data-theme="dark"] .site-lang-dropdown__menu { background: var(--gov-surface); border-color: rgba(255, 255, 255, 0.12); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4); }
 :root[data-theme="dark"] .site-lang-dropdown__item { color: #f1f5f9; }
 :root[data-theme="dark"] .site-lang-dropdown__item:hover { background: rgba(255, 255, 255, 0.08); color: var(--gov-teal-text, #3fc1c0); }
-:root[data-theme="dark"] .site-lang-dropdown__item.is-active { background: rgba(63, 193, 192, 0.18); color: var(--gov-teal-text, #3fc1c0); }
+/* Подсветка активного языка: 18 % акцента давали 4.09:1 при норме 4.5 —
+   светлее подложка, тусклее текст. 12 % возвращают 4.61:1. */
+:root[data-theme="dark"] .site-lang-dropdown__item.is-active { background: rgba(63, 193, 192, 0.12); color: var(--gov-teal-text, #3fc1c0); }
 .a11y-toggle, .site-theme-toggle, .site-search, .site-search input, .site-search-toggle { color: var(--gov-title); }
 .site-search { border: 1px solid var(--gov-border); border-radius: 999px; background: var(--gov-surface); }
 .site-search input { border: 0; background: transparent; background-image: none; border-radius: 0; }
@@ -1502,7 +1510,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
    демо). Раньше был не определён — везде брался светлый фолбэк #f8f9fa, из-за
    чего в тёмной теме подложка оставалась белой. */
 :root { --gov-bg-alt: #f8f9fa; }
-:root[data-theme="dark"] { --gov-bg-alt: #1c2942; }
+:root[data-theme="dark"] { --gov-bg-alt: #293346; }
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline-offset: 2px; border-radius: 4px; }
 .cms-block--bg-navy a:focus-visible, .block-ctaband a:focus-visible, .featband a:focus-visible, .timeline-cta a:focus-visible { outline-color: #fff; }
 .section-head__all, .newsfeat__more, .person-card__more, .imgcard__more { color: var(--gov-teal-text); }
@@ -1732,7 +1740,7 @@ body.reader-mode-active { overflow: hidden; }
 }
 .social-embed-card:hover .social-embed-card__btn { background: var(--gov-teal, #0d9488); color: #ffffff; }
 
-:root[data-theme="dark"] .social-embed-card { background: #1e293b; border-color: rgba(255, 255, 255, 0.1); }
+:root[data-theme="dark"] .social-embed-card { background: var(--gov-surface); border-color: rgba(255, 255, 255, 0.1); }
 :root[data-theme="dark"] .social-embed-card__title { color: #f8fafc; }
 :root[data-theme="dark"] .social-embed-card__url { color: #94a3b8; }
 :root[data-theme="dark"] .social-embed-card__btn { background: rgba(255, 255, 255, 0.1); color: var(--gov-teal-text, #3fc1c0); }
@@ -4308,7 +4316,11 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 }
 .media-tabs__tab.is-active { 
     color: #fff !important;
-    background: var(--color-accent, var(--gov-teal)) !important;
+    /* Белый на активной вкладке — требование оформления, поэтому берём
+       заливку, на которой он гарантированно читается: на чистом акценте
+       выходило 3.26:1 при норме 4.5. Подбирать оттенок руками нельзя —
+       акцент задаётся в админке. */
+    background: var(--accent-fill-strong, var(--color-accent, var(--gov-teal))) !important;
     box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 30%, transparent);
 }
 .media-tabs__tab:hover:not(.is-active) {
