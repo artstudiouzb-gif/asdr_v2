@@ -805,6 +805,27 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'hero'): ?>
+            <?= \App\Core\AdminUi::imageField('art_image', (string) ($data['art_image'] ?? ''), [
+                'label' => 'Картинка поверх фона (PNG/SVG)',
+                'hint' => 'Эмблема, логотип программы или иллюстрация. Показывается вместе с текстом, а не вместо фона. К слайд-шоу не применяется — там у каждого слайда своё медиа.',
+            ]) ?>
+            <div class="form-field">
+                <label for="hero_art_position">Где показывать картинку</label>
+                <select id="hero_art_position" name="art_position">
+                    <?php foreach (['above' => 'Над текстом', 'left' => 'Слева от текста', 'right' => 'Справа от текста'] as $ap => $al): ?>
+                        <option value="<?= $ap ?>" <?= (string) ($data['art_position'] ?? 'above') === $ap ? 'selected' : '' ?>><?= $al ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">На телефоне картинка в любом случае встаёт над текстом — сбоку ей не хватает ширины.</span>
+            </div>
+            <div class="form-field">
+                <label for="hero_art_size">Размер картинки</label>
+                <select id="hero_art_size" name="art_size">
+                    <?php foreach (['small' => 'Небольшая (до 64px)', 'medium' => 'Средняя (до 120px)', 'large' => 'Крупная (до 200px)'] as $az => $al): ?>
+                        <option value="<?= $az ?>" <?= (string) ($data['art_size'] ?? 'medium') === $az ? 'selected' : '' ?>><?= $al ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
             <div class="form-field"><label for="hero_width">Ширина секции</label>
                 <select id="hero_width" name="hero_width">
                     <option value="full" <?= ($data['width'] ?? 'full') === 'full' ? 'selected' : '' ?>>Во всю ширину экрана</option>

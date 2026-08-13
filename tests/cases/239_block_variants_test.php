@@ -292,3 +292,38 @@ test('Проекты: варианты вёрстки — сетка, списо
 
     $pdo->exec("DELETE FROM pages WHERE entity_type = 'project'");
 });
+
+test('Обложка: картинка поверх фона встаёт над текстом, слева или справа', function () {
+    $base = ['title' => 'Заголовок', 'art_image' => '/uploads/public/emblem.svg'];
+
+    $above = variant_block('hero', $base, 730);
+    assert_contains('block-hero__inner--art block-hero__inner--art-above', $above['html']);
+    assert_contains('class="block-hero__art"', $above['html']);
+    // Явная высота обязательна: SVG без пиксельных размеров схлопывается.
+    assert_contains('height="120"', $above['html']);
+
+    $left = variant_block('hero', $base + ['art_position' => 'left', 'art_size' => 'small'], 731);
+    assert_contains('block-hero__inner--art-left', $left['html']);
+    assert_contains('height="64"', $left['html']);
+    // Слева — картинка идёт до текста.
+    assert_true(
+        strpos($left['html'], 'block-hero__art') < strpos($left['html'], 'block-hero__text'),
+        'картинка слева выводится перед текстом'
+    );
+
+    $right = variant_block('hero', $base + ['art_position' => 'right', 'art_size' => 'large'], 732);
+    assert_contains('block-hero__inner--art-right', $right['html']);
+    assert_contains('height="200"', $right['html']);
+    assert_true(
+        strpos($right['html'], 'block-hero__art') > strpos($right['html'], 'block-hero__text'),
+        'картинка справа выводится после текста'
+    );
+
+    // Чужой адрес в поле картинки в разметку не попадает.
+    $unsafe = variant_block('hero', ['title' => 'Заголовок', 'art_image' => 'javascript:alert(1)'], 733);
+    assert_not_contains('block-hero__art', $unsafe['html']);
+
+    // Без картинки разметка обложки не меняется.
+    $plain = variant_block('hero', ['title' => 'Заголовок'], 734);
+    assert_not_contains('block-hero__inner--art', $plain['html']);
+});

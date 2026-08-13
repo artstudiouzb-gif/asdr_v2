@@ -11,6 +11,27 @@ $title = $data['title'] ?? '';
 $eyebrow = trim((string) ($data['eyebrow'] ?? ''));
 $subtitle = $data['subtitle'] ?? '';
 $image = trim((string) ($data['image'] ?? ''));
+// Картинка поверх фона (эмблема, логотип программы, иллюстрация): у неё своя
+// позиция относительно текста и свой размер. К слайд-шоу не применяется —
+// там у каждого слайда своё медиа.
+$artImage = trim((string) ($data['art_image'] ?? ''));
+$artPosition = (string) ($data['art_position'] ?? 'above');
+if (!in_array($artPosition, ['above', 'left', 'right'], true)) {
+    $artPosition = 'above';
+}
+$artSize = (string) ($data['art_size'] ?? 'medium');
+if (!in_array($artSize, ['small', 'medium', 'large'], true)) {
+    $artSize = 'medium';
+}
+// Явная высота обязательна: SVG без пиксельных размеров схлопывается, ширину
+// браузер считает из viewBox.
+$artHeights = ['small' => 64, 'medium' => 120, 'large' => 200];
+$artHtml = '';
+if ($artImage !== '' && UrlGuard::isSafeMedia($artImage)) {
+    $artHtml = '<span class="block-hero__art" aria-hidden="true"><img class="block-hero__art-img" src="'
+        . htmlspecialchars($artImage, ENT_QUOTES) . '" alt="" loading="lazy" decoding="async" height="'
+        . $artHeights[$artSize] . '"></span>';
+}
 $mediaPositionClasses = MediaPosition::classes($data['image_position'] ?? null, $data['image_position_mobile'] ?? null);
 
 // Тип фона: none | image | video | youtube.
@@ -311,7 +332,8 @@ $heroMedia = static function (string $type, string $image, string $videoFile, ?s
 <div class="block-hero<?= $hasMedia ? ' block-hero--media' : '' ?><?= (!$hasMedia && $heroBg === '') ? ' block-hero--plain' : '' ?><?= $heroBg !== '' ? ' block-hero--bgcolor' : '' ?><?= ($bgType === 'video' || $bgType === 'youtube') ? ' block-hero--video' : '' ?> block-hero--w-<?= $heroWidth ?> block-hero--h-<?= $heroHeight ?> block-hero--pos-<?= $textPos ?>">
     <?= $heroMedia($bgType, $image, $videoFile, $youtubeId, $mediaPositionClasses, false) ?>
     <?php if ($hasMedia && $overlayEnabled): ?><div class="block-hero__scrim<?= $overlaySolid ? ' block-hero__scrim--solid' : '' ?>" aria-hidden="true"></div><?php endif; ?>
-    <div class="block-hero__inner">
+    <div class="block-hero__inner<?= $artHtml !== '' ? ' block-hero__inner--art block-hero__inner--art-' . $artPosition . ' block-hero__inner--art-' . $artSize : '' ?>">
+        <?php if ($artHtml !== '' && $artPosition !== 'right'): ?><?= $artHtml ?><?php endif; ?>
         <div class="block-hero__text<?= $panelOn ? ' block-hero__text--panel' : '' ?>">
             <?php if ($eyebrow !== ''): ?><span class="block-hero__eyebrow"><?= htmlspecialchars($eyebrow, ENT_QUOTES) ?></span><?php endif; ?>
             <?php if ($title !== ''): ?><?php $hTag = $data['_heading_tag'] ?? 'h1'; ?><<?= $hTag ?> class="block-hero__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></<?= $hTag ?>><?php endif; ?>
@@ -334,6 +356,7 @@ $heroMedia = static function (string $type, string $image, string $videoFile, ?s
             </div>
             <?php endif; ?>
         </div>
+        <?php if ($artHtml !== '' && $artPosition === 'right'): ?><?= $artHtml ?><?php endif; ?>
     </div>
 </div>
 <?php endif; ?>

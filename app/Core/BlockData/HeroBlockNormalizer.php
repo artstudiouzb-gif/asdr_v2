@@ -85,6 +85,12 @@ final class HeroBlockNormalizer
             'overlay_color' => self::hexOrDefault($input['overlay_color'] ?? '', '#0b1a30'),
             'overlay_opacity' => self::percentage($input['overlay_opacity'] ?? null, 35),
             'text_position' => in_array($textPosition, ['left', 'center', 'right'], true) ? $textPosition : 'left',
+            // Картинка поверх фона: эмблема, логотип программы, иллюстрация.
+            // Кладётся рядом с текстом, а не под него, поэтому у неё своя
+            // позиция и размер.
+            'art_image' => BlockDataInput::safeMedia($input['art_image'] ?? ''),
+            'art_position' => BlockDataInput::enum($input, 'art_position', ['above', 'left', 'right'], 'above'),
+            'art_size' => BlockDataInput::enum($input, 'art_size', ['small', 'medium', 'large'], 'medium'),
             'text_width' => $textWidth,
             'text_color' => BlockDataInput::optionalColor($input, 'text_color'),
             'button_color' => BlockDataInput::optionalColor($input, 'button_color'),
