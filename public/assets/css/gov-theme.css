@@ -6407,14 +6407,18 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     background: color-mix(in srgb, var(--icon-text-accent, var(--color-accent, var(--gov-teal))) 14%, var(--gov-surface));
     color: var(--icon-text-accent, var(--gov-teal-text));
 }
-.icon-text__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.icon-text__body { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+/* Пара «подпись + значение» — отдельная строка. Промежуток между парами держит
+   gap списка, поэтому нижний отступ значения обнулён. */
+.icon-text__row { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.icon-text__row .icon-text__value { margin-bottom: 0; }
 /* Подпись и значение одной строкой: «Приёмная: +998 71 200-00-00». Перенос
    разрешён — длинный номер на узком экране уходит на вторую строку целиком,
    а не рвётся посередине. */
-.block-icon-text--rows-inline .icon-text__body { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
-.block-icon-text--rows-inline .icon-text__value { margin-bottom: 0; font-size: var(--step-0); }
+.block-icon-text--rows-inline .icon-text__row { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.block-icon-text--rows-inline .icon-text__value { font-size: var(--step-0); }
 .block-icon-text--rows-inline .icon-text__label { flex: none; }
-.block-icon-text--rows-inline.block-icon-text--align-center .icon-text__body { justify-content: center; }
+.block-icon-text--rows-inline.block-icon-text--align-center .icon-text__row { justify-content: center; }
 .icon-text__label { margin: 0; color: var(--gov-muted); font-size: var(--step--2); line-height: 1.4; }
 .icon-text__value { margin: 0 0 6px; color: var(--gov-title); font-size: var(--step-1); font-weight: 700; line-height: 1.25; }
 .icon-text__value:last-child { margin-bottom: 0; }

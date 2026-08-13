@@ -78,10 +78,15 @@ if ($columns !== 3) {
                             }
                             $parts = array_map('trim', explode('|', $row, 2));
                             ?>
-                            <p class="icon-text__label"><?= $esc($parts[0]) ?></p>
-                            <?php if (($parts[1] ?? '') !== ''): ?>
-                                <p class="icon-text__value"><?= $esc($parts[1]) ?></p>
-                            <?php endif; ?>
+                            <?php // Каждая пара — своя строка: без обёртки в режиме
+                                  // «в одну строку» подписи и значения разных пар
+                                  // сливались в общий поток и переносились вперемешку. ?>
+                            <span class="icon-text__row">
+                                <p class="icon-text__label"><?= $esc($parts[0]) ?></p>
+                                <?php if (($parts[1] ?? '') !== ''): ?>
+                                    <p class="icon-text__value"><?= $esc($parts[1]) ?></p>
+                                <?php endif; ?>
+                            </span>
                         <?php endforeach; ?>
                     </div>
                 </div>
