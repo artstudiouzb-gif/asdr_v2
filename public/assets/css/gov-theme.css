@@ -37,7 +37,7 @@
        темнее поверхности, и --gov-teal-text на ней не добирает до 4.5:1. */
     --gov-teal-on-tint: var(--gov-teal-tint-light, #00697d);
     --radius: 12px;
-    --container-max: 1200px;
+    --container-max: 1440px;
     /* Эмблема агентства: восьмиконечная звезда-гирих. Отдельным файлом,
        а не data-URI: маска в 5 КБ раздувала бы каждый билд CSS. */
     --gov-emblem: url("../img/emblem.svg");
@@ -555,14 +555,14 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-dot .site-men
 /* === Header Container Modes === */
 /* 1. Boxed Container Mode (По ширине контента) */
 .site-header--container-container {
-    max-width: var(--container-max, 1280px);
+    max-width: var(--container-max, 1440px);
     margin-inline: auto;
 }
 
 /* 2. Floating Glass Container Mode (Вариант 1) & Sticky Header Adaptability */
 .site-header--container-floating {
     margin: 16px auto;
-    max-width: min(calc(100% - 40px), var(--container-max, 1280px));
+    max-width: min(calc(100% - 40px), var(--container-max, 1440px));
     border-radius: var(--header-floating-radius, 18px);
     transition: background-color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
@@ -602,7 +602,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-dot .site-men
 /* 4. Липкая парящая шапка при прокрутке вниз (Sticky Scrolled State) */
 body .site-header--container-floating.site-header--sticky.is-scrolled {
     margin: 10px auto !important;
-    max-width: min(calc(100% - 32px), var(--container-max, 1280px)) !important;
+    max-width: min(calc(100% - 32px), var(--container-max, 1440px)) !important;
     border-radius: 50px !important;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22) !important;
 }

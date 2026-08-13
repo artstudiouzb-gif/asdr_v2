@@ -88,8 +88,10 @@ final class DesignSettings
             'label' => 'Ширина контейнера',
             'hint' => 'Максимальная ширина основного содержимого. Ниже можно задать свою точную ширину.',
             'group' => 'Общие',
-            'choices' => ['narrow' => 'Узкий', 'standard' => 'Стандарт', 'wide' => 'Широкий', 'ultra' => 'Очень широкий', 'full' => 'На всю ширину'],
-            'default' => 'ultra',
+            'choices' => ['narrow' => 'Узкий (1200px)', 'standard' => 'Стандарт (1440px)', 'wide' => 'Широкий (1500px)', 'ultra' => 'Очень широкий (1700px)', 'full' => 'На всю ширину'],
+            // Умолчание — «Стандарт»: прежнее умолчание «Очень широкий» давало
+            // те же 1440px, и после смены шкалы сайт молча уехал бы до 1700.
+            'default' => 'standard',
         ],
         'radius' => [
             'label' => 'Скругление углов',
@@ -1107,8 +1109,8 @@ final class DesignSettings
     public static function containerWidth(?array $v = null): string
     {
         $v = $v ?? self::current();
-        $preset = ['narrow' => '1080px', 'standard' => '1200px', 'wide' => '1360px', 'ultra' => '1440px', 'full' => 'none'];
-        $container = $preset[$v['container'] ?? 'standard'] ?? '1200px';
+        $preset = ['narrow' => '1200px', 'standard' => '1440px', 'wide' => '1500px', 'ultra' => '1700px', 'full' => 'none'];
+        $container = $preset[$v['container'] ?? 'standard'] ?? '1440px';
         // Своя точная ширина имеет приоритет над пресетом (число трактуем как px).
         $custom = self::containerCustom();
 

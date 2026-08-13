@@ -54,7 +54,7 @@ test('FooterConfig: виджет subscribe валиден', function () {
 
 test('Footer: нижняя строка использует общую ширину сайта', function () {
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/frontend.css');
-    assert_contains('max-width: var(--container-max, 1200px);', $css);
+    assert_contains('max-width: var(--container-max, 1440px);', $css);
     assert_contains('padding: 0 20px;', $css);
     assert_not_contains('max-width: var(--content-width, 1200px);', $css);
 });
