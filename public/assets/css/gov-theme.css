@@ -124,9 +124,9 @@
        (контраст 1.01), то есть отличалась только цветом. Теперь фон чуть
        светлее, а уровни различаются светлотой при одном тоне. */
     color-scheme: dark;
-    --gov-bg: #151c29;
-    --gov-surface: #212a3b;
-    --gov-border: #38445a;
+    --gov-bg: #1a2230;
+    --gov-surface: #273143;
+    --gov-border: #3f4d64;
     --gov-ink: #f2f6fa;
     /* Было #94a3b8 — на поверхности карточки мелкий текст (дата акта,
        подписи) давал 3.77:1 при норме 4.5. */
@@ -1510,7 +1510,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
    демо). Раньше был не определён — везде брался светлый фолбэк #f8f9fa, из-за
    чего в тёмной теме подложка оставалась белой. */
 :root { --gov-bg-alt: #f8f9fa; }
-:root[data-theme="dark"] { --gov-bg-alt: #293346; }
+:root[data-theme="dark"] { --gov-bg-alt: #303c50; }
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline-offset: 2px; border-radius: 4px; }
 .cms-block--bg-navy a:focus-visible, .block-ctaband a:focus-visible, .featband a:focus-visible, .timeline-cta a:focus-visible { outline-color: #fff; }
 .section-head__all, .newsfeat__more, .person-card__more, .imgcard__more { color: var(--gov-teal-text); }

@@ -28,11 +28,11 @@
    нейтрально-серой (#14161c), а карточки темы — синими: на одной странице
    встречались два разных тона, и это читалось как грязь. */
 :root[data-theme="dark"] {
-    --bg-primary: #151c29;
-    --bg-surface: #212a3b;
+    --bg-primary: #1a2230;
+    --bg-surface: #273143;
     --text-main: #f2f6fa;
     --text-muted: #adb8c7;
-    --border-color: #38445a;
+    --border-color: #3f4d64;
 }
 
 /* Нативные контролы (поля ввода, скроллбары, выпадающие списки) браузер
@@ -45,11 +45,11 @@
 /* Авто-тема: следуем системным настройкам, если тема не задана явно. */
 @media (prefers-color-scheme: dark) {
     :root[data-theme="auto"] {
-        --bg-primary: #151c29;
-        --bg-surface: #212a3b;
+        --bg-primary: #1a2230;
+        --bg-surface: #273143;
         --text-main: #f2f6fa;
         --text-muted: #adb8c7;
-        --border-color: #38445a;
+        --border-color: #3f4d64;
     }
 }
 
@@ -1089,7 +1089,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     --shadow-md: 0 6px 22px rgba(16,24,40,.08);
     --shadow-lg: 0 18px 48px rgba(16,24,40,.12);
 }
-:root[data-theme="dark"] { --surface: #212a3b; }
+:root[data-theme="dark"] { --surface: #273143; }
 
 /* Ширина контейнеров из настроек */
 .site-header__inner, .site-content, .layout { max-width: var(--container-max); }

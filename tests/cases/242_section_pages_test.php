@@ -103,10 +103,10 @@ test('Тёмная тема: одна гамма у базы и темы, сту
 
     // Нейтрально-серая база рядом с синими карточками темы и давала «грязь».
     assert_not_contains('--bg-primary: #14161c', $base, 'у базы и темы должна быть одна тёмная гамма');
-    assert_contains('--bg-primary: #151c29', $base);
-    assert_contains('--gov-bg: #151c29', $theme);
-    assert_contains('--bg-surface: #212a3b', $base);
-    assert_contains('--gov-surface: #212a3b', $theme);
+    assert_contains('--bg-primary: #1a2230', $base);
+    assert_contains('--gov-bg: #1a2230', $theme);
+    assert_contains('--bg-surface: #273143', $base);
+    assert_contains('--gov-surface: #273143', $theme);
 
     // Альтернативная подложка отличалась от карточки только тоном (1.01:1).
     assert_not_contains('--gov-bg-alt: #1c2942', $theme);
@@ -131,12 +131,12 @@ test('Тёмная тема: одна гамма у базы и темы, сту
     };
 
     // Мелкий текст на всех тёмных уровнях остаётся читаемым.
-    foreach (['#151c29', '#212a3b', '#293346'] as $background) {
+    foreach (['#1a2230', '#273143', '#303c50'] as $background) {
         assert_true(
             $ratio('#adb8c7', $background) >= 4.5,
             'приглушённый текст на ' . $background . ': ' . round($ratio('#adb8c7', $background), 2) . ':1'
         );
     }
     // Уровни различаются светлотой, а не только тоном.
-    assert_true($ratio('#212a3b', '#293346') >= 1.1, 'подложка не отличается от карточки');
+    assert_true($ratio('#273143', '#303c50') >= 1.1, 'подложка не отличается от карточки');
 });
