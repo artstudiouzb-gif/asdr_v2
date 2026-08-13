@@ -89,9 +89,9 @@ test('Project::availableLangsForIds + localize: перевод title/description
     $pdo = Database::pdo();
     $default = \App\Models\Language::defaultCode();
 
-    $pdo->exec("INSERT INTO projects (title, slug, description, status) VALUES ('Проект RU', 'proj-langs-1', 'Описание RU', 'published')");
+    $pdo->exec("INSERT INTO pages (title, slug, entity_type, `lead`, status) VALUES ('Проект RU', 'proj-langs-1', 'project', 'Описание RU', 'published')");
     $p1 = (int) $pdo->lastInsertId();
-    $pdo->exec("INSERT INTO projects (title, slug, description, status) VALUES ('Без перевода', 'proj-langs-2', 'Только RU', 'published')");
+    $pdo->exec("INSERT INTO pages (title, slug, entity_type, `lead`, status) VALUES ('Без перевода', 'proj-langs-2', 'project', 'Только RU', 'published')");
     $p2 = (int) $pdo->lastInsertId();
 
     // p1: узбекский перевод только заголовка (описание пустое → фолбэк).

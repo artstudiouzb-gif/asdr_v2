@@ -33,7 +33,7 @@ test('Language Badges Accuracy: зеленый индикатор выводит
     assert_false(isset($pageMap[$pageRuId]['uz']), 'НЕТ UZ для страницы без перевода');
 
     // 3. Проект без перевода на узбекский
-    $stmt = $pdo->prepare("INSERT INTO projects (title, slug, status, lang) VALUES ('Проект RU', 'project-badge-ru-only', 'published', 'ru')");
+    $stmt = $pdo->prepare("INSERT INTO pages (title, slug, entity_type, status, lang) VALUES ('Проект RU', 'project-badge-ru-only', 'project', 'published', 'ru')");
     $stmt->execute();
     $projRuId = (int) $pdo->lastInsertId();
 

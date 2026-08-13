@@ -12,6 +12,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var array<int,array<string,mixed>> $tree */
 /** @var array<int,array<string,mixed>> $items */
 /** @var array<int,array<string,mixed>> $pages */
+/** @var array<int,array<string,mixed>> $projects */
 /** @var array<int,array<string,mixed>> $languages */
 
 $urlTypeLabels = [
@@ -34,8 +35,10 @@ foreach ($items as $menuItem) {
  * Поля создания и редактирования. Основные настройки остаются на виду,
  * оформление и мега-меню находятся в раскрываемом блоке.
  */
+$projects = $projects ?? [];
 $renderFields = static function (?array $item, bool $isCreate = false) use (
     $pages,
+    $projects,
     $parentCandidates
 ): string {
     $item ??= [];
@@ -99,18 +102,32 @@ $renderFields = static function (?array $item, bool $isCreate = false) use (
             <label for="<?= $prefix ?>_page">Страница</label>
             <select id="<?= $prefix ?>_page" name="page_slug" data-menu-page-select>
                 <option value="">— выберите страницу —</option>
-                <?php foreach ($pages as $page): ?>
-                    <?php $pageLang = (string) ($page['lang'] ?? Language::defaultCode()); ?>
-                    <option value="<?= htmlspecialchars((string) $page['slug'], ENT_QUOTES) ?>"
-                            data-title="<?= htmlspecialchars((string) $page['title'], ENT_QUOTES) ?>"
-                            data-lang="<?= htmlspecialchars($pageLang, ENT_QUOTES) ?>"
-                            <?= $urlType === 'page'
-                                && $urlValue === (string) $page['slug']
-                                && $pageLang === $langCode
-                                ? 'selected' : '' ?>>
-                        <?= htmlspecialchars((string) $page['title'], ENT_QUOTES) ?>
-                        — /<?= htmlspecialchars((string) $page['slug'], ENT_QUOTES) ?>
-                    </option>
+                <?php
+                // Проект — такая же запись, только с адресом /projects/…, поэтому
+                // он выбирается здесь же, отдельной группой.
+                $pageGroups = ['Страницы' => $pages, 'Проекты' => $projects];
+                foreach ($pageGroups as $groupLabel => $groupItems):
+                    if ($groupItems === []) { continue; }
+                ?>
+                <optgroup label="<?= htmlspecialchars($groupLabel, ENT_QUOTES) ?>">
+                    <?php foreach ($groupItems as $page): ?>
+                        <?php
+                        $pageLang = (string) ($page['lang'] ?? Language::defaultCode());
+                        $isProject = (string) ($page['entity_type'] ?? 'page') === 'project';
+                        $optionValue = ($isProject ? 'projects/' : '') . (string) $page['slug'];
+                        ?>
+                        <option value="<?= htmlspecialchars($optionValue, ENT_QUOTES) ?>"
+                                data-title="<?= htmlspecialchars((string) $page['title'], ENT_QUOTES) ?>"
+                                data-lang="<?= htmlspecialchars($pageLang, ENT_QUOTES) ?>"
+                                <?= $urlType === 'page'
+                                    && $urlValue === $optionValue
+                                    && $pageLang === $langCode
+                                    ? 'selected' : '' ?>>
+                            <?= htmlspecialchars((string) $page['title'], ENT_QUOTES) ?>
+                            — /<?= htmlspecialchars($optionValue, ENT_QUOTES) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </optgroup>
                 <?php endforeach; ?>
             </select>
             <span class="form-hint">Только опубликованные страницы выбранного языка.</span>

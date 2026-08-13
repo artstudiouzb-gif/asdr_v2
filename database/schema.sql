@@ -201,9 +201,13 @@ CREATE TABLE IF NOT EXISTS pages (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title           VARCHAR(255) NOT NULL COMMENT 'заголовок на языке по умолчанию',
     slug            VARCHAR(255) NOT NULL,
+    entity_type     ENUM('page', 'project') NOT NULL DEFAULT 'page' COMMENT 'подтип записи: обычная страница или проект',
     meta_title      VARCHAR(255) NULL,
     meta_description VARCHAR(500) NULL,
-    `lead`          TEXT NULL COMMENT 'видимый лид/подзаголовок страницы',
+    `lead`          TEXT NULL COMMENT 'видимый лид/подзаголовок страницы; у проекта — анонс для карточки',
+    cover_image     VARCHAR(255) NULL COMMENT 'обложка (проекты)',
+    is_featured     TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'показывать на главном (проекты)',
+    sort_order      INT NOT NULL DEFAULT 0 COMMENT 'ручной порядок (проекты)',
     status          ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
     is_home         TINYINT(1) NOT NULL DEFAULT 0,
     layout_type     ENUM('no_sidebar', 'left_sidebar', 'right_sidebar') NOT NULL DEFAULT 'no_sidebar',
@@ -218,9 +222,10 @@ CREATE TABLE IF NOT EXISTS pages (
     lang            VARCHAR(8) NOT NULL DEFAULT 'ru',
     translation_group_id INT UNSIGNED NULL,
     parent_id       INT UNSIGNED NULL COMMENT 'родительская страница; URL страницы остаётся плоским',
-    UNIQUE KEY uq_pages_slug_lang (slug, lang),
+    UNIQUE KEY uq_pages_type_slug_lang (entity_type, slug, lang),
     KEY idx_pages_lang_group (translation_group_id, lang),
     KEY idx_pages_parent (parent_id),
+    KEY idx_pages_projects (entity_type, status, deleted_at, is_featured, sort_order),
     CONSTRAINT fk_pages_parent FOREIGN KEY (parent_id) REFERENCES pages(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -300,56 +305,67 @@ CREATE TABLE IF NOT EXISTS content_revisions (
 
 -- ---------------------------------------------------------------------------
 -- Проекты (портфолио)
+--
+-- Проект — это страница с подтипом (pages.entity_type = 'project'): у него тот
+-- же конструктор блоков, те же ревизии и тот же механизм переводов, что и у
+-- страницы. Своими остаются только обложка, отметка «на главном», ручной
+-- порядок (колонки pages) плюс галерея и произвольные поля ниже.
+--
+-- `projects` и `project_translations` — представления над pages: читающий код
+-- (поиск, карта сайта, счётчики) обращается к ним по-прежнему. Писать через
+-- них нельзя: INSERT не проставит entity_type и создал бы обычную страницу,
+-- поэтому запись идёт в pages (см. App\Models\Project).
 -- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS projects (
-    id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    title           VARCHAR(255) NOT NULL,
-    slug            VARCHAR(255) NOT NULL,
-    description     LONGTEXT NULL,
-    cover_image     VARCHAR(255) NULL,
-    status          ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
-    is_featured     TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'показывать на главной (блок Проекты)',
-    sort_order      INT NOT NULL DEFAULT 0,
-    created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    lock_version    INT UNSIGNED NOT NULL DEFAULT 1,
-    deleted_at      DATETIME NULL COMMENT 'мягкое удаление (корзина)',
-    lang            VARCHAR(8) NOT NULL DEFAULT 'ru',
-    translation_group_id INT UNSIGNED NULL,
-    UNIQUE KEY uq_projects_slug_lang (slug, lang),
-    KEY idx_projects_lang_group (translation_group_id, lang),
-    KEY idx_projects_listing (status, deleted_at, is_featured, sort_order, created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE OR REPLACE VIEW projects AS
+SELECT
+    p.id,
+    p.title,
+    p.slug,
+    p.`lead` AS description,
+    p.cover_image,
+    p.status,
+    p.is_featured,
+    p.sort_order,
+    p.created_at,
+    p.updated_at,
+    p.lock_version,
+    p.deleted_at,
+    p.lang,
+    p.translation_group_id
+FROM pages p
+WHERE p.entity_type = 'project'
+-- WITH CHECK OPTION: вставка через представление не проставила бы entity_type и
+-- молча создала обычную страницу. Пусть лучше падает с ошибкой.
+WITH CHECK OPTION;
+
+CREATE OR REPLACE VIEW project_translations AS
+SELECT
+    pt.id,
+    pt.page_id AS project_id,
+    pt.lang,
+    pt.title,
+    pt.`lead` AS description
+FROM page_translations pt
+    JOIN pages p ON p.id = pt.page_id AND p.entity_type = 'project';
 
 -- Галерея изображений проекта
 CREATE TABLE IF NOT EXISTS project_images (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    project_id      INT UNSIGNED NOT NULL,
+    project_id      INT UNSIGNED NOT NULL COMMENT 'id страницы-проекта',
     file_path       VARCHAR(255) NOT NULL,
     caption         VARCHAR(255) NULL,
     sort_order      INT NOT NULL DEFAULT 0,
-    CONSTRAINT fk_project_images_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+    CONSTRAINT fk_project_images_project FOREIGN KEY (project_id) REFERENCES pages(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Кастомные поля проекта (произвольные пары ключ-значение: заказчик, год, площадь и т.д.)
 CREATE TABLE IF NOT EXISTS project_fields (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    project_id      INT UNSIGNED NOT NULL,
+    project_id      INT UNSIGNED NOT NULL COMMENT 'id страницы-проекта',
     field_key       VARCHAR(100) NOT NULL,
     field_value     TEXT NULL,
     sort_order      INT NOT NULL DEFAULT 0,
-    CONSTRAINT fk_project_fields_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Переводы проектов (заголовок и описание на неосновных языках)
-CREATE TABLE IF NOT EXISTS project_translations (
-    id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    project_id   INT UNSIGNED NOT NULL,
-    lang         VARCHAR(8) NOT NULL,
-    title        VARCHAR(255) NULL,
-    description  LONGTEXT NULL,
-    UNIQUE KEY uq_project_translations (project_id, lang),
-    CONSTRAINT fk_project_translations_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+    CONSTRAINT fk_project_fields_project FOREIGN KEY (project_id) REFERENCES pages(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
@@ -970,8 +986,6 @@ UPDATE news SET translation_group_id = id
 WHERE translation_group_id IS NULL OR translation_group_id = 0;
 UPDATE pages SET translation_group_id = id
 WHERE translation_group_id IS NULL OR translation_group_id = 0;
-UPDATE projects SET translation_group_id = id
-WHERE translation_group_id IS NULL OR translation_group_id = 0;
 
 
 
@@ -1165,7 +1179,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_11_web_vitals.sql'),
     ('2026_08_11_public_listing_indexes.sql'),
     ('2026_08_11_news_categories.sql'),
-    ('2026_08_11_news_badge_color.sql')
+    ('2026_08_11_news_badge_color.sql'),
+    ('2026_08_13_projects_into_pages.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

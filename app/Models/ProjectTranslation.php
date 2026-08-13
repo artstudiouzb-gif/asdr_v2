@@ -60,12 +60,18 @@ final class ProjectTranslation
         return $result;
     }
 
+    /**
+     * Перевод проекта хранится там же, где перевод страницы: `description` —
+     * это анонс карточки (`page_translations.lead`). Тело переводится блоками
+     * своего языка, поэтому здесь его нет. Мета-поля не трогаем: их правит
+     * форма страницы, и затирать их отсюда нельзя.
+     */
     public static function upsert(int $projectId, string $lang, array $data): void
     {
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO project_translations (project_id, lang, title, description)
+            'INSERT INTO page_translations (page_id, lang, title, `lead`)
              VALUES (:project_id, :lang, :title, :description)
-             ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description)'
+             ON DUPLICATE KEY UPDATE title = VALUES(title), `lead` = VALUES(`lead`)'
         );
         $stmt->execute([
             ':project_id' => $projectId,

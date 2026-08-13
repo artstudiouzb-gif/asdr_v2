@@ -26,8 +26,7 @@ final class TranslationGroupMigration
         $pdo->exec("UPDATE pages SET lang = 'ru' WHERE lang IS NULL OR lang = ''");
         $pdo->exec("UPDATE pages SET translation_group_id = id WHERE translation_group_id IS NULL OR translation_group_id = 0");
 
-        $pdo->exec("UPDATE projects SET lang = 'ru' WHERE lang IS NULL OR lang = ''");
-        $pdo->exec("UPDATE projects SET translation_group_id = id WHERE translation_group_id IS NULL OR translation_group_id = 0");
+        // Проекты — строки той же таблицы pages, отдельная нормализация им не нужна.
 
         // 2. Миграция news_translations в независимые строки таблицы news
         try {
@@ -129,13 +128,19 @@ final class TranslationGroupMigration
                     }
 
                     $newSlug = ($orig['slug'] ?? 'page') . '-' . strtolower($lang);
+                    // entity_type переносим как есть: проект — это страница с
+                    // подтипом, и его языковая версия обязана остаться проектом.
                     $ins = $pdo->prepare(
-                        "INSERT INTO pages (title, slug, meta_title, meta_description, `lead`, status, is_home, layout_type, hide_chrome, transparent_header, lang, translation_group_id, created_at)
-                         VALUES (:t, :s, :mt, :md, :l, :st, 0, :lt, :hc, :th, :lang, :gid, NOW())"
+                        "INSERT INTO pages (title, slug, entity_type, meta_title, meta_description, `lead`, cover_image, is_featured, sort_order, status, is_home, layout_type, hide_chrome, transparent_header, lang, translation_group_id, created_at)
+                         VALUES (:t, :s, :et, :mt, :md, :l, :ci, :if, :so, :st, 0, :lt, :hc, :th, :lang, :gid, NOW())"
                     );
                     $ins->execute([
                         ':t' => $title,
                         ':s' => $newSlug,
+                        ':et' => $orig['entity_type'] ?? 'page',
+                        ':ci' => $orig['cover_image'] ?? null,
+                        ':if' => $orig['is_featured'] ?? 0,
+                        ':so' => $orig['sort_order'] ?? 0,
                         ':mt' => $pt['meta_title'] ?? $orig['meta_title'] ?? null,
                         ':md' => $pt['meta_description'] ?? $orig['meta_description'] ?? null,
                         ':l' => $pt['lead'] ?? $orig['lead'] ?? null,
@@ -152,53 +157,10 @@ final class TranslationGroupMigration
             Logger::swallowed('TranslationGroupMigration: перенос page_translations в отдельные записи не завершён', $e);
         }
 
-        // 4. Миграция project_translations в независимые строки таблицы projects
-        try {
-            if ((bool) $pdo->query("SHOW TABLES LIKE 'project_translations'")->fetchColumn()) {
-                $rows = $pdo->query("SELECT * FROM project_translations")->fetchAll();
-                foreach ($rows as $prt) {
-                    $origId = (int) $prt['project_id'];
-                    $lang = (string) $prt['lang'];
-                    $title = trim((string) ($prt['title'] ?? ''));
-                    if ($title === '' || $lang === '' || $lang === 'ru') {
-                        continue;
-                    }
-
-                    $existStmt = $pdo->prepare("SELECT id FROM projects WHERE translation_group_id = :gid AND lang = :lang AND deleted_at IS NULL LIMIT 1");
-                    $existStmt->execute([':gid' => $origId, ':lang' => $lang]);
-                    $exists = $existStmt->fetchColumn();
-                    if ($exists !== false) {
-                        continue;
-                    }
-
-                    $origStmt = $pdo->prepare("SELECT * FROM projects WHERE id = :id LIMIT 1");
-                    $origStmt->execute([':id' => $origId]);
-                    $orig = $origStmt->fetch();
-                    if (!$orig) {
-                        continue;
-                    }
-
-                    $newSlug = ($orig['slug'] ?? 'project') . '-' . strtolower($lang);
-                    $ins = $pdo->prepare(
-                        "INSERT INTO projects (title, slug, description, cover_image, status, is_featured, sort_order, lang, translation_group_id, created_at)
-                         VALUES (:t, :s, :d, :ci, :st, :if, :so, :lang, :gid, NOW())"
-                    );
-                    $ins->execute([
-                        ':t' => $title,
-                        ':s' => $newSlug,
-                        ':d' => $prt['description'] ?? $orig['description'] ?? null,
-                        ':ci' => $orig['cover_image'] ?? null,
-                        ':st' => $orig['status'] ?? 'published',
-                        ':if' => $orig['is_featured'] ?? 0,
-                        ':so' => $orig['sort_order'] ?? 0,
-                        ':lang' => $lang,
-                        ':gid' => $origId,
-                    ]);
-                }
-            }
-        } catch (\Throwable $e) {
-            Logger::swallowed('TranslationGroupMigration: перенос project_translations в отдельные записи не завершён', $e);
-        }
+        // Шага «перенос project_translations» больше нет: проект — это страница
+        // с подтипом, и его перевод хранится там же, где перевод страницы
+        // (page_translations + блоки своего языка). Отдельный перенос повторно
+        // создавал бы языковые копии проектов.
 
         self::$migrated = true;
     }

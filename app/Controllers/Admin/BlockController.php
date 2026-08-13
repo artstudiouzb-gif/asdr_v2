@@ -51,14 +51,14 @@ final class BlockController
 
         if (!BlockTypeRegistry::has($type)) {
             Flash::error('Неизвестный тип блока.');
-            header('Location: /admin/pages/' . $pageId . '/edit?block_lang=' . urlencode($lang));
+            header('Location: ' . self::ownerEditUrl($pageId, $lang));
             exit;
         }
 
         // Блок сырого HTML может создавать только супер-администратор.
         if ($type === 'html' && !Auth::isSuperAdmin()) {
             Flash::error('Блок «HTML-код» доступен только супер-администратору.');
-            header('Location: /admin/pages/' . $pageId . '/edit?block_lang=' . urlencode($lang));
+            header('Location: ' . self::ownerEditUrl($pageId, $lang));
             exit;
         }
 
@@ -66,7 +66,7 @@ final class BlockController
         // если пришли parent_block_id + column_index (номер колонки/вкладки).
         $parentBlockId = null;
         $columnIndex = 0;
-        $redirectTo = '/admin/pages/' . $pageId . '/edit?block_lang=' . urlencode($lang);
+        $redirectTo = self::ownerEditUrl($pageId, $lang);
         if (!empty($_POST['parent_block_id'])) {
             $parent = Block::findById((int) $_POST['parent_block_id']);
             if (!$parent || (int) $parent['page_id'] !== $pageId
@@ -389,7 +389,24 @@ final class BlockController
 
     private function pageEditUrl(array $block): string
     {
-        return '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . urlencode((string) $block['lang']);
+        return self::ownerEditUrl((int) $block['page_id'], (string) $block['lang']);
+    }
+
+    /**
+     * Куда возвращаться после действия над блоком.
+     *
+     * Проект — страница с подтипом, и конструктор у него встроен в свою форму:
+     * возвращать редактора в раздел «Страницы» после правки блока проекта
+     * значило бы уводить его из того раздела, где он работает.
+     */
+    public static function ownerEditUrl(int $pageId, string $lang): string
+    {
+        $page = Page::findById($pageId);
+        $section = ($page !== null && (string) ($page['entity_type'] ?? 'page') === 'project')
+            ? '/admin/projects/'
+            : '/admin/pages/';
+
+        return $section . $pageId . '/edit?block_lang=' . urlencode($lang);
     }
 
     /** Валидный #RRGGBB в нижнем регистре или пустая строка (значение по умолчанию). */

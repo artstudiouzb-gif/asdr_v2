@@ -8,8 +8,21 @@ use App\Core\ConcurrencyException;
 use App\Core\Database;
 use App\Core\Logger;
 
+/**
+ * Проект — страница с подтипом (`pages.entity_type = 'project'`).
+ *
+ * Читающие запросы обращаются к представлению `projects` над pages: там уже
+ * отфильтрован тип, а `lead` отдаётся под прежним именем `description` (это
+ * анонс для карточки; тело проекта живёт в блоках). Писать через представление
+ * нельзя — INSERT не проставил бы тип и создал обычную страницу, поэтому
+ * запись идёт прямо в pages.
+ */
 final class Project
 {
+    /** Тело проекта редактируется конструктором блоков этой же записи. */
+    public const ENTITY_TYPE = 'project';
+
+
     public static function all(): array
     {
         $stmt = Database::pdo()->query('SELECT * FROM projects WHERE deleted_at IS NULL ORDER BY sort_order ASC, created_at DESC');
@@ -129,34 +142,46 @@ final class Project
         if (!in_array($status, ['draft', 'published'], true)) {
             return;
         }
-        $stmt = Database::pdo()->prepare('UPDATE projects SET status = :s WHERE id = :id AND deleted_at IS NULL');
+        $stmt = Database::pdo()->prepare(
+            "UPDATE pages SET status = :s WHERE id = :id AND entity_type = 'project' AND deleted_at IS NULL"
+        );
         $stmt->execute([':s' => $status, ':id' => $id]);
         self::bustPageCache();
     }
 
-    /** Полная копия проекта с изображениями и полями (черновик, slug -copy). */
+    /** Полная копия проекта: блоки, переводы, галерея и поля (черновик, slug -copy). */
     public static function duplicate(int $id): ?int
     {
-        $project = self::findById($id);
-        if (!$project) {
+        // Копируем строку pages целиком: у проекта те же служебные колонки, что
+        // и у страницы, и терять их при копии незачем.
+        $page = Page::findById($id);
+        if (!$page || (string) ($page['entity_type'] ?? '') !== self::ENTITY_TYPE) {
             return null;
         }
 
         $pdo = Database::pdo();
         $pdo->beginTransaction();
         try {
+            $lang = (string) ($page['lang'] ?? Language::defaultCode());
             $newSlug = \App\Core\Duplicator::uniqueCopySlug(
-                (string) $project['slug'],
-                static fn (string $s) => self::slugExists($s)
+                (string) $page['slug'],
+                static fn (string $s) => self::slugExists($s, null, $lang)
             );
-            $newId = \App\Core\Duplicator::copyRow('projects', $project, [
+            $newId = \App\Core\Duplicator::copyRow('pages', $page, [
                 'slug' => $newSlug,
                 'status' => 'draft',
+                'is_home' => 0,
                 'deleted_at' => null,
+                'translation_group_id' => null,
             ]);
+            $pdo->prepare(
+                'UPDATE pages SET translation_group_id = id
+                 WHERE id = :id AND (translation_group_id IS NULL OR translation_group_id = 0)'
+            )->execute([':id' => $newId]);
+            \App\Core\Duplicator::copyChildren('blocks', 'page_id', $id, $newId);
+            \App\Core\Duplicator::copyChildren('page_translations', 'page_id', $id, $newId);
             \App\Core\Duplicator::copyChildren('project_images', 'project_id', $id, $newId);
             \App\Core\Duplicator::copyChildren('project_fields', 'project_id', $id, $newId);
-            \App\Core\Duplicator::copyChildren('project_translations', 'project_id', $id, $newId);
 
             $pdo->commit();
 
@@ -169,14 +194,18 @@ final class Project
 
     public static function restore(int $id): void
     {
-        $stmt = Database::pdo()->prepare('UPDATE projects SET deleted_at = NULL WHERE id = :id');
+        $stmt = Database::pdo()->prepare(
+            "UPDATE pages SET deleted_at = NULL WHERE id = :id AND entity_type = 'project'"
+        );
         $stmt->execute([':id' => $id]);
         self::bustPageCache();
     }
 
     public static function forceDelete(int $id): void
     {
-        $stmt = Database::pdo()->prepare('DELETE FROM projects WHERE id = :id');
+        $stmt = Database::pdo()->prepare(
+            "DELETE FROM pages WHERE id = :id AND entity_type = 'project'"
+        );
         $stmt->execute([':id' => $id]);
         ContentRevision::deleteForEntity('project', $id);
         self::bustPageCache();
@@ -611,8 +640,8 @@ final class Project
     {
         $lang = (string) ($data['lang'] ?? Language::defaultCode());
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO projects (title, slug, description, cover_image, status, is_featured, sort_order, lang, translation_group_id, created_at)
-             VALUES (:title, :slug, :description, :cover_image, :status, :is_featured, :sort_order, :lang, NULL, NOW())'
+            "INSERT INTO pages (title, slug, entity_type, `lead`, cover_image, status, is_featured, sort_order, layout_type, lang, translation_group_id, created_at)
+             VALUES (:title, :slug, 'project', :description, :cover_image, :status, :is_featured, :sort_order, 'no_sidebar', :lang, NULL, NOW())"
         );
         $stmt->execute([
             ':title' => $data['title'],
@@ -625,8 +654,12 @@ final class Project
             ':lang' => $lang,
         ]);
 
+        // id читаем до сброса кэша: bustPageCache() ходит в settings и обнуляет
+        // last insert id на холодном кэше.
         $id = (int) Database::pdo()->lastInsertId();
-        Database::pdo()->prepare('UPDATE projects SET translation_group_id = id WHERE id = :id AND (translation_group_id IS NULL OR translation_group_id = 0)')->execute([':id' => $id]);
+        Database::pdo()->prepare(
+            'UPDATE pages SET translation_group_id = id WHERE id = :id AND (translation_group_id IS NULL OR translation_group_id = 0)'
+        )->execute([':id' => $id]);
         self::bustPageCache();
 
         return $id;
@@ -635,10 +668,10 @@ final class Project
     public static function update(int $id, array $data, ?int $expectedLockVersion = null): void
     {
         $stmt = Database::pdo()->prepare(
-            'UPDATE projects SET title = :title, slug = :slug, description = :description,
+            "UPDATE pages SET title = :title, slug = :slug, `lead` = :description,
              cover_image = :cover_image, status = :status, is_featured = :is_featured,
              sort_order = :sort_order, lock_version = lock_version + 1
-             WHERE id = :id' . ($expectedLockVersion !== null ? ' AND lock_version = :expected_lock_version' : '')
+             WHERE id = :id AND entity_type = 'project'" . ($expectedLockVersion !== null ? ' AND lock_version = :expected_lock_version' : '')
         );
         $params = [
             ':title' => $data['title'],
@@ -663,7 +696,9 @@ final class Project
     public static function delete(int $id): void
     {
         // Мягкое удаление: проект отправляется в корзину.
-        $stmt = Database::pdo()->prepare('UPDATE projects SET deleted_at = NOW() WHERE id = :id');
+        $stmt = Database::pdo()->prepare(
+            "UPDATE pages SET deleted_at = NOW() WHERE id = :id AND entity_type = 'project'"
+        );
         $stmt->execute([':id' => $id]);
         self::bustPageCache();
     }

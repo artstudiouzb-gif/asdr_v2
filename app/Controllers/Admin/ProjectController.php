@@ -231,7 +231,9 @@ final class ProjectController
     {
         $title = trim((string) ($_POST['title'] ?? ''));
         $slugInput = trim((string) ($_POST['slug'] ?? ''));
-        $description = (string) ($_POST['description'] ?? '');
+        // Анонс для карточки: короткий текст без разметки. Тело проекта живёт
+        // в блоках, поэтому HTML здесь только мешал бы вёрстке списков.
+        $description = self::excerptInput((string) ($_POST['description'] ?? ''));
         $status = (isset($_POST['publish_action']) || ($_POST['status'] ?? 'draft') === 'published') ? 'published' : 'draft';
         $sortOrder = (int) ($_POST['sort_order'] ?? 0);
 
@@ -256,6 +258,14 @@ final class ProjectController
         ];
 
         return [$data, null];
+    }
+
+    /** Анонс проекта: разметка снимается, пробелы схлопываются, длина 300. */
+    private static function excerptInput(string $value): string
+    {
+        $text = trim((string) preg_replace('/\s+/u', ' ', strip_tags($value)));
+
+        return mb_substr($text, 0, 300);
     }
 
     private function collectImages(): array
@@ -291,7 +301,7 @@ final class ProjectController
             $t = (array) ($input[$code] ?? []);
             $out[$code] = [
                 'title' => trim((string) ($t['title'] ?? '')),
-                'description' => trim((string) ($t['description'] ?? '')),
+                'description' => self::excerptInput((string) ($t['description'] ?? '')),
             ];
         }
 

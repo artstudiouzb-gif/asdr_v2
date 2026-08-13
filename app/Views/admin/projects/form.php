@@ -84,8 +84,9 @@ foreach ($groupedFields as $f) {
                 </div>
 
                 <div class="form-field">
-                    <label class="u-inline-e925a44577">Подробное описание проекта (Визуальный редактор)</label>
-                    <textarea class="u-inline-67cd735ee7" id="description" name="description" data-wysiwyg><?= htmlspecialchars($project['description'] ?? '', ENT_QUOTES) ?></textarea>
+                    <label class="u-inline-e925a44577">Анонс для карточки</label>
+                    <textarea id="description" name="description" rows="3" placeholder="Одно-два предложения: их видно в списке проектов и в блоке «Проекты» на страницах"><?= htmlspecialchars($project['description'] ?? '', ENT_QUOTES) ?></textarea>
+                    <span class="form-hint">Короткий текст без оформления, до 300 знаков. Само содержимое проекта собирается ниже в конструкторе блоков.</span>
                 </div>
             </div>
 
@@ -363,6 +364,16 @@ foreach ($groupedFields as $f) {
         </aside>
     </div>
 </form>
+
+<?php if ($isEdit): ?>
+    <?php
+    // Содержимое проекта — те же блоки, что и у страницы: проект это страница
+    // с подтипом. Конструктор один и тот же, поэтому подключаем его партиал.
+    $page = $project;
+    $blockEditorTitle = 'Содержимое проекта';
+    require __DIR__ . '/../pages/_block_editor.php';
+    ?>
+<?php endif; ?>
 
 <div class="form-actions form-actions--sticky">
     <?php if (($project['status'] ?? 'draft') !== 'published'): ?>

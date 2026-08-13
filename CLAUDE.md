@@ -96,6 +96,18 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   посетителей. `BlockRenderer::renderPage()` отдаёт `expires_at` (ближайшая
   граница расписания), `PageController` по ней пересобирает кэш — иначе баннер
   «до 30 июля» висел бы и 31-го.
+- **Проект — это страница с подтипом** (`pages.entity_type` = `page|project`).
+  У проекта тот же конструктор блоков, те же ревизии и тот же механизм
+  переводов; своими остались обложка, «показать на главном», ручной порядок
+  (колонки `pages`), галерея (`project_images`) и произвольные поля
+  (`project_fields`). `projects` и `project_translations` — **представления**
+  над `pages`/`page_translations` для читающего кода (поиск, карта сайта,
+  счётчики); писать через них нельзя (`WITH CHECK OPTION`), запись идёт в
+  `pages` с `entity_type='project'` — см. `App\Models\Project`. Адреса не
+  изменились: `/projects/{slug}`, раздел админки — отдельный, конструктор
+  встроен в форму проекта (общий партиал `admin/pages/_block_editor.php`).
+  `pages.lead` у проекта — анонс для карточки, тело живёт в блоках. Любой
+  новый запрос-список по `pages` обязан фильтровать `entity_type`.
 - **Модели** — `app/Models/*` (Project, News, PhotoAlbum, TeamMember, Page,
   MenuItem, Setting, …). Много `SELECT *`; статусы published/draft, мягкое удаление.
 - **i18n публички**: `App\Core\Lang` + глобальный `t()` (`app/Core/helpers.php`),

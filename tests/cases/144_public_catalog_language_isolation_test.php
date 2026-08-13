@@ -13,9 +13,10 @@ test('Проекты: публичные списки и блоки не сме�
     $prefix = 'strict-project-' . bin2hex(random_bytes(4));
 
     $insert = $pdo->prepare(
-        "INSERT INTO projects
-            (title, slug, description, status, is_featured, lang, translation_group_id)
-         VALUES (?, ?, ?, ?, 1, ?, ?)"
+        // Проект — страница с подтипом: запись идёт в pages, анонс в lead.
+        "INSERT INTO pages
+            (title, slug, entity_type, `lead`, status, is_featured, lang, translation_group_id)
+         VALUES (?, ?, 'project', ?, ?, 1, ?, ?)"
     );
 
     $insert->execute(['RU independent', $prefix . '-independent', 'RU body', 'published', 'ru', null]);

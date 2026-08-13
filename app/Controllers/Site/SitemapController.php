@@ -36,7 +36,7 @@ final class SitemapController
         header('Content-Type: application/xml; charset=utf-8');
 
         $baseUrl = AppUrl::base();
-        $pages = Database::pdo()->query("SELECT p.* FROM pages p WHERE p.status = 'published' AND p.deleted_at IS NULL ORDER BY p.updated_at DESC")->fetchAll();
+        $pages = Database::pdo()->query("SELECT p.* FROM pages p WHERE p.status = 'published' AND p.deleted_at IS NULL AND p.entity_type = 'page' ORDER BY p.updated_at DESC")->fetchAll();
         $news = Database::pdo()->query("SELECT n.* FROM news n WHERE n.status = 'published' AND n.published_at <= NOW() AND n.deleted_at IS NULL ORDER BY n.published_at DESC LIMIT 1000")->fetchAll();
         $projects = Database::pdo()->query("SELECT pr.* FROM projects pr WHERE pr.status = 'published' AND pr.deleted_at IS NULL ORDER BY pr.updated_at DESC")->fetchAll();
 

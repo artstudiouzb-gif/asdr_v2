@@ -45,7 +45,7 @@ final class MenuItem
                 if ($page === null) {
                     continue;
                 }
-                $row['url_value'] = (string) $page['slug'];
+                $row['url_value'] = Page::menuTargetValue($page);
             }
             $rows[] = $row;
         }

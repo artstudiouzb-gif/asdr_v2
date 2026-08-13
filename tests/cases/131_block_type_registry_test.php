@@ -66,7 +66,9 @@ test('Реестр блоков: каждому обычному типу соо
 
 test('Реестр блоков: форма и контроллер не содержат собственных списков типов', function () {
     $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/BlockController.php');
-    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/form.php');
+    // Список типов для конструктора живёт в общем партиале: его подключают и
+    // форма страницы, и форма проекта.
+    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/_block_editor.php');
 
     assert_not_contains('private const TYPES', $controller);
     assert_contains('BlockTypeRegistry::has($type)', $controller);

@@ -95,10 +95,10 @@ final class DemoSeeder
             'pages',
             'content_entry_translations',
             'content_entries',
+            // projects / project_translations — представления над pages, чистить
+            // их отдельно нечего: строки уходят вместе со страницами выше.
             'project_images',
             'project_fields',
-            'project_translations',
-            'projects',
             'photo_album_images',
             'photo_album_translations',
             'photo_albums',
@@ -1168,7 +1168,7 @@ final class DemoSeeder
 
     private static function seedProjects(PDO $pdo, array &$c): void
     {
-        if (!self::tableExists($pdo, 'projects')) {
+        if (!self::tableExists($pdo, 'pages')) {
             return;
         }
 
@@ -1184,13 +1184,22 @@ final class DemoSeeder
             'zelenaya-energetika' => '/uploads/public/demo-green-energy.jpg',
             'investicii-prioritetnye-otrasli' => '/uploads/public/demo-strategy-meeting.jpg',
         ];
+        // Проект — страница с подтипом: сама запись идёт в pages, тело проекта
+        // становится текстовым блоком, анонс для карточки — в lead.
         $ins = $pdo->prepare(
-            "INSERT INTO projects (title, slug, description, cover_image, status, is_featured, sort_order, created_at)
-             SELECT :t, :s, :d, :i, 'published', 1, :o, NOW()
+            "INSERT INTO pages (title, slug, entity_type, `lead`, cover_image, status, is_featured, sort_order, layout_type, lang, created_at)
+             SELECT :t, :s, 'project', :d, :i, 'published', 1, :o, 'no_sidebar', 'ru', NOW()
              FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM projects WHERE slug = :s2)"
         );
         foreach ($projects as $i => $project) {
-            $ins->execute([':t' => $project[1], ':s' => $project[0], ':d' => $project[3], ':i' => $projectImages[$project[0]] ?? $project[2], ':o' => $i, ':s2' => $project[0]]);
+            $ins->execute([
+                ':t' => $project[1],
+                ':s' => $project[0],
+                ':d' => self::projectLead($project[3]),
+                ':i' => $projectImages[$project[0]] ?? $project[2],
+                ':o' => $i,
+                ':s2' => $project[0],
+            ]);
             $c['projects'] += $ins->rowCount();
 
             $pidStmt = $pdo->prepare('SELECT id FROM projects WHERE slug = :s LIMIT 1');
@@ -1199,6 +1208,12 @@ final class DemoSeeder
             if ($projectId === false) {
                 continue;
             }
+
+            $pdo->prepare(
+                'UPDATE pages SET translation_group_id = id
+                 WHERE id = :id AND (translation_group_id IS NULL OR translation_group_id = 0)'
+            )->execute([':id' => (int) $projectId]);
+            self::seedProjectBody($pdo, (int) $projectId, 'ru', $project[3]);
 
             if (self::tableExists($pdo, 'project_images')) {
                 $imageIns = $pdo->prepare(
@@ -1255,11 +1270,11 @@ final class DemoSeeder
             }
         }
 
-        if (self::tableExists($pdo, 'project_translations')) {
+        if (self::tableExists($pdo, 'page_translations')) {
             $transIns = $pdo->prepare(
-                'INSERT INTO project_translations (project_id, lang, title, description)
+                'INSERT INTO page_translations (page_id, lang, title, `lead`)
                  SELECT :pid, "uz", :t, :d
-                 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM project_translations WHERE project_id = :pid2 AND lang = "uz")'
+                 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM page_translations WHERE page_id = :pid2 AND lang = "uz")'
             );
             $uzProjects = [
                 'cifrovaya-transformaciya' => ['Raqamli transformatsiya va innovatsiyalarni rivojlantirish', '<h2>Loyiha haqida</h2><p>Loyiha davlat xizmatlarini raqamlashtirish va ma’lumotlar infratuzilmasini rivojlantirishni birlashtiradi.</p>'],
@@ -1272,10 +1287,50 @@ final class DemoSeeder
                 $pidStmt->execute([':s' => $slug]);
                 $pid = $pidStmt->fetchColumn();
                 if ($pid !== false) {
-                    $transIns->execute([':pid' => (int) $pid, ':t' => $data[0], ':d' => $data[1], ':pid2' => (int) $pid]);
+                    $transIns->execute([
+                        ':pid' => (int) $pid,
+                        ':t' => $data[0],
+                        ':d' => self::projectLead($data[1]),
+                        ':pid2' => (int) $pid,
+                    ]);
+                    self::seedProjectBody($pdo, (int) $pid, 'uz', $data[1]);
                 }
             }
         }
+    }
+
+    /** Короткий анонс проекта для карточки: разметка снимается, текст режется. */
+    private static function projectLead(string $html): string
+    {
+        $text = trim((string) preg_replace('/\s+/u', ' ', strip_tags($html)));
+
+        return mb_substr($text, 0, 300);
+    }
+
+    /**
+     * Тело демо-проекта: один текстовый блок нужного языка. Повторный запуск
+     * посева ничего не дублирует — блок ставится только если стек пуст.
+     */
+    private static function seedProjectBody(PDO $pdo, int $pageId, string $lang, string $html): void
+    {
+        if (!self::tableExists($pdo, 'blocks') || trim($html) === '') {
+            return;
+        }
+
+        $exists = $pdo->prepare('SELECT 1 FROM blocks WHERE page_id = :id AND lang = :lang LIMIT 1');
+        $exists->execute([':id' => $pageId, ':lang' => $lang]);
+        if ($exists->fetchColumn() !== false) {
+            return;
+        }
+
+        $pdo->prepare(
+            "INSERT INTO blocks (page_id, lang, type, data, custom_css, sort_order, is_active, created_at)
+             VALUES (:id, :lang, 'text', :data, '', 0, 1, NOW())"
+        )->execute([
+            ':id' => $pageId,
+            ':lang' => $lang,
+            ':data' => json_encode(['variant' => 'default', 'content' => $html], JSON_UNESCAPED_UNICODE),
+        ]);
     }
 
     private static function seedMedia(PDO $pdo, array &$c): void

@@ -16,8 +16,8 @@ test('content revisions: project snapshot restores row, images and fields', func
     $pdo = Database::pdo();
     $slug = 'revision-test-' . bin2hex(random_bytes(4));
     $pdo->prepare(
-        "INSERT INTO projects (title, slug, description, status, is_featured, sort_order, created_at)
-         VALUES ('Версия 1', :slug, 'Описание 1', 'draft', 0, 1, NOW())"
+        "INSERT INTO pages (title, slug, entity_type, `lead`, status, is_featured, sort_order, created_at)
+         VALUES ('Версия 1', :slug, 'project', 'Описание 1', 'draft', 0, 1, NOW())"
     )->execute([':slug' => $slug]);
     $id = (int) $pdo->lastInsertId();
 

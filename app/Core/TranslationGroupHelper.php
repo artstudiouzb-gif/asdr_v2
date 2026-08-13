@@ -105,7 +105,7 @@ final class TranslationGroupHelper
                         $homeStmt = $pdo->prepare(
                             "SELECT id FROM pages
                              WHERE (is_home = 1 OR slug = 'home' OR lang = :default_lang)
-                               AND deleted_at IS NULL
+                               AND entity_type = 'page' AND deleted_at IS NULL
                              ORDER BY is_home DESC, id ASC LIMIT 1"
                         );
                         $homeStmt->execute([':default_lang' => $defaultLang]);
@@ -332,9 +332,11 @@ final class TranslationGroupHelper
                     ':parent_id' => !empty($orig['parent_id']) ? (int) $orig['parent_id'] : null,
                 ]);
             } else {
+                // Проект — страница с подтипом: запись идёт в pages, анонс
+                // карточки живёт в lead, тело копируется блоками ниже.
                 $ins = $pdo->prepare(
-                    "INSERT INTO projects (title, slug, description, cover_image, status, is_featured, sort_order, lang, translation_group_id, created_at)
-                     VALUES (:t, :s, :d, :ci, 'draft', :if, :so, :lang, :gid, NOW())"
+                    "INSERT INTO pages (title, slug, entity_type, `lead`, cover_image, status, is_featured, sort_order, layout_type, lang, translation_group_id, created_at)
+                     VALUES (:t, :s, 'project', :d, :ci, 'draft', :if, :so, 'no_sidebar', :lang, :gid, NOW())"
                 );
                 $ins->execute([
                     ':t' => ($orig['title'] ?? '') . ' (' . strtoupper($targetLang) . ')',
@@ -349,7 +351,7 @@ final class TranslationGroupHelper
             }
 
             $newId = (int) $pdo->lastInsertId();
-            if ($table === 'pages' && $newId > 0) {
+            if (in_array($table, ['pages', 'projects'], true) && $newId > 0) {
                 self::copyBlocksForTranslation($pdo, $originalId, $newId, $targetLang);
             }
 
