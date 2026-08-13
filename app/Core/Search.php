@@ -18,7 +18,7 @@ final class Search
         $sources = [
             ['label' => 'Страница', 'table' => 'pages', 'expr' => "CONCAT_WS(' ', title, slug)", 'title' => 'title', 'where' => "deleted_at IS NULL AND entity_type = 'page'", 'url' => '/admin/pages/%d/edit'],
             ['label' => 'Новость', 'table' => 'news', 'expr' => "CONCAT_WS(' ', title, slug)", 'title' => 'title', 'where' => 'deleted_at IS NULL', 'url' => '/admin/news/%d/edit'],
-            ['label' => 'Проект', 'table' => 'projects', 'expr' => "CONCAT_WS(' ', title, slug)", 'title' => 'title', 'where' => 'deleted_at IS NULL', 'url' => '/admin/projects/%d/edit'],
+            ['label' => 'Проект', 'table' => 'pages', 'expr' => "CONCAT_WS(' ', title, slug)", 'title' => 'title', 'where' => "deleted_at IS NULL AND entity_type = 'project'", 'url' => '/admin/projects/%d/edit'],
             ['label' => 'Файл', 'table' => 'files', 'expr' => 'original_name', 'title' => 'original_name', 'where' => '1=1', 'url' => '/admin/files'],
         ];
 
@@ -100,13 +100,15 @@ final class Search
 
         // Projects
         try {
-            $expr = "CONCAT_WS(' ', p.title, p.slug, p.description, t.title, t.description)";
+            // Проект — страница с подтипом, языковая версия у него отдельной
+            // записью: ищем сразу в записях нужного языка.
+            $expr = "CONCAT_WS(' ', p.title, p.slug, p.`lead`)";
             [$condition, $params] = self::condition($expr, $groups);
             $stmt = $pdo->prepare(
-                "SELECT COALESCE(NULLIF(t.title, ''), p.title) AS title, p.slug,
-                        COALESCE(NULLIF(t.description, ''), p.description, '') AS body, '' AS excerpt, p.created_at AS sort_date
-                 FROM projects p LEFT JOIN project_translations t ON t.project_id = p.id AND t.lang = ?
-                 WHERE p.deleted_at IS NULL AND p.status = 'published' AND {$condition}
+                "SELECT p.title, p.slug, COALESCE(p.`lead`, '') AS body, '' AS excerpt, p.created_at AS sort_date
+                 FROM pages p
+                 WHERE p.entity_type = 'project' AND p.deleted_at IS NULL
+                   AND p.status = 'published' AND p.lang = ? AND {$condition}
                  ORDER BY p.sort_order ASC, p.created_at DESC LIMIT ?"
             );
             self::bindSeq($stmt, [$lang, ...$params, $candidateLimit]);

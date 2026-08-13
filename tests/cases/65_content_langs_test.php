@@ -84,33 +84,34 @@ test('Вью списка страниц: колонка «Языки» и ба�
     assert_contains('admin/layout/lang_badges', $view);
 });
 
-test('Project::availableLangsForIds + localize: перевод title/description с фолбэком (БД)', function () {
+test('Проекты: языки записи считаются по группе переводов (БД)', function () {
     ensure_test_db();
     $pdo = Database::pdo();
     $default = \App\Models\Language::defaultCode();
 
-    $pdo->exec("INSERT INTO pages (title, slug, entity_type, `lead`, status) VALUES ('Проект RU', 'proj-langs-1', 'project', 'Описание RU', 'published')");
+    $pdo->exec("INSERT INTO pages (title, slug, entity_type, `lead`, status, lang) VALUES ('Проект RU', 'proj-langs-1', 'project', 'Описание RU', 'published', '{$default}')");
     $p1 = (int) $pdo->lastInsertId();
-    $pdo->exec("INSERT INTO pages (title, slug, entity_type, `lead`, status) VALUES ('Без перевода', 'proj-langs-2', 'project', 'Только RU', 'published')");
+    $pdo->exec("UPDATE pages SET translation_group_id = {$p1} WHERE id = {$p1}");
+    $pdo->exec("INSERT INTO pages (title, slug, entity_type, `lead`, status, lang) VALUES ('Без перевода', 'proj-langs-2', 'project', 'Только RU', 'published', '{$default}')");
     $p2 = (int) $pdo->lastInsertId();
+    $pdo->exec("UPDATE pages SET translation_group_id = {$p2} WHERE id = {$p2}");
 
-    // p1: узбекский перевод только заголовка (описание пустое → фолбэк).
-    \App\Models\ProjectTranslation::upsert($p1, 'uz', ['title' => 'Loyiha UZ', 'description' => '']);
+    // Узбекская версия — отдельная запись той же группы с тем же адресом.
+    $pdo->exec("INSERT INTO pages (title, slug, entity_type, `lead`, status, lang, translation_group_id) VALUES ('Loyiha UZ', 'proj-langs-1', 'project', 'UZ anons', 'published', 'uz', {$p1})");
+    $uz = (int) $pdo->lastInsertId();
 
     $map = \App\Models\Project::availableLangsForIds([$p1, $p2]);
     assert_true(in_array('uz', $map[$p1], true), 'p1: узбекский доступен');
     assert_same([$default], $map[$p2], 'p2: только основной');
 
-    // Локализация: заголовок из перевода, описание — фолбэк к основному.
     $row = \App\Models\Project::findPublishedBySlug('proj-langs-1', 'uz');
     assert_same('Loyiha UZ', $row['title']);
-    assert_same('Описание RU', $row['description'], 'пустой перевод описания откатывается к основному');
+    assert_same('UZ anons', $row['description'], 'анонс берётся у записи своего языка');
 
-    // Основной язык не трогает строку.
     $base = \App\Models\Project::findPublishedBySlug('proj-langs-1', $default);
     assert_same('Проект RU', $base['title']);
 
-    $pdo->exec("DELETE FROM projects WHERE id IN ({$p1}, {$p2})");
+    $pdo->exec("DELETE FROM pages WHERE id IN ({$p1}, {$p2}, {$uz})");
 });
 
 test('Вью списка проектов: колонка «Языки» и батч-запрос языков', function () {

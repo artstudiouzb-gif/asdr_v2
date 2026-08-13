@@ -31,13 +31,12 @@ final class ContentRevision
                 ['table' => 'news_polls', 'fk' => 'news_id', 'columns' => ['question', 'options_json']],
             ],
         ],
+        // Проект — строка pages с подтипом: анонс карточки лежит в lead, а
+        // содержимое живёт в блоках со своей историей версий.
         'project' => [
-            'table' => 'projects',
-            'columns' => ['title', 'slug', 'description', 'cover_image', 'status', 'is_featured', 'sort_order'],
-            'children' => [
-                ['table' => 'project_images', 'fk' => 'project_id', 'columns' => ['file_path', 'caption', 'sort_order']],
-                ['table' => 'project_fields', 'fk' => 'project_id', 'columns' => ['field_key', 'field_value', 'sort_order']],
-            ],
+            'table' => 'pages',
+            'columns' => ['title', 'slug', 'lead', 'cover_image', 'status', 'is_featured', 'sort_order'],
+            'children' => [],
         ],
     ];
 

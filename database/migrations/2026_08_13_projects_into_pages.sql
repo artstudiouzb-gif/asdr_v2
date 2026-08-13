@@ -6,13 +6,13 @@
 -- выгоды: после слияния у проекта тот же редактор, что и у страницы.
 --
 -- Что остаётся прежним: адреса (/projects/{slug}), раздел «Проекты» в админке,
--- галерея и произвольные поля проекта, блоки projects_list и cards_grid.
+-- отметка «на главном», ручной порядок и блоки projects_list и cards_grid.
+-- Галерея и свободные поля становятся блоками — на сайте они и так не
+-- выводились, а редактировать их теперь незачем.
 --
--- Совместимость: `projects` и `project_translations` остаются как VIEW над
--- новыми таблицами — читающий код (поиск, карта сайта, счётчики, помощники
--- переводов) продолжает работать без правок. Пишущий код переведён на pages;
--- вставка через VIEW запрещена бы молча создала обычную страницу, поэтому
--- INSERT'ы в проекты переписаны на pages с entity_type='project'.
+-- После миграции следов старой модели не остаётся: таблицы `projects`,
+-- `project_translations`, `project_images` и `project_fields` удаляются, а весь
+-- код обращается к `pages` с фильтром по типу.
 
 -- 1. Поля, которые есть у проекта, но не было у страницы -------------------
 ALTER TABLE pages
@@ -136,57 +136,70 @@ FROM project_translations pt
                   AND tgt.slug = base.slug
 WHERE TRIM(COALESCE(pt.description, '')) <> '';
 
--- 5. Галерея, поля и ревизии переезжают на новые id --------------------------
-ALTER TABLE project_images DROP FOREIGN KEY fk_project_images_project;
-ALTER TABLE project_fields DROP FOREIGN KEY fk_project_fields_project;
-
-UPDATE project_images pi JOIN pages tgt ON tgt.legacy_project_id = pi.project_id
-SET pi.project_id = tgt.id;
-UPDATE project_fields pf JOIN pages tgt ON tgt.legacy_project_id = pf.project_id
-SET pf.project_id = tgt.id;
+-- 5. Галерея и свободные поля становятся блоками ------------------------------
+-- На публичной части они не выводились никогда, а редактировать их теперь
+-- незачем: содержимое проекта собирается блоками. Данные не теряем — галерея
+-- превращается в блок «Медиагалерея», пары «ключ | значение» — в блок
+-- «Иконка и текст» с заголовком по группе.
 UPDATE content_revisions cr JOIN pages tgt ON tgt.legacy_project_id = cr.entity_id
 SET cr.entity_id = tgt.id
 WHERE cr.entity_type = 'project';
 
-ALTER TABLE project_images
-    ADD CONSTRAINT fk_project_images_project FOREIGN KEY (project_id) REFERENCES pages(id) ON DELETE CASCADE;
-ALTER TABLE project_fields
-    ADD CONSTRAINT fk_project_fields_project FOREIGN KEY (project_id) REFERENCES pages(id) ON DELETE CASCADE;
+INSERT INTO blocks (page_id, lang, type, title, data, custom_css, sort_order, is_active, created_at)
+SELECT
+    tgt.id,
+    tgt.lang,
+    'media_gallery',
+    'Фотографии проекта',
+    JSON_OBJECT(
+        'title', 'Фотографии проекта',
+        'source', 'manual',
+        'items', JSON_ARRAYAGG(JSON_OBJECT(
+            'kind', 'photo',
+            'title', COALESCE(pi.caption, ''),
+            'image', pi.file_path,
+            'url', '',
+            'meta', '',
+            'text', ''
+        ))
+    ),
+    '',
+    100,
+    1,
+    NOW()
+FROM project_images pi
+    JOIN pages tgt ON tgt.legacy_project_id = pi.project_id
+GROUP BY tgt.id, tgt.lang;
 
--- 6. Старые таблицы уступают место совместимым представлениям ----------------
+INSERT INTO blocks (page_id, lang, type, title, data, custom_css, sort_order, is_active, created_at)
+SELECT
+    tgt.id,
+    tgt.lang,
+    'icon_text',
+    'Характеристики проекта',
+    JSON_OBJECT(
+        'variant', 'plain',
+        'title', 'Характеристики проекта',
+        'columns', 2,
+        'items', JSON_ARRAY(JSON_OBJECT(
+            'icon_svg', '',
+            'icon_color', '',
+            'rows', GROUP_CONCAT(CONCAT(pf.field_key, ' | ', COALESCE(pf.field_value, '')) ORDER BY pf.sort_order, pf.id SEPARATOR '\n')
+        ))
+    ),
+    '',
+    101,
+    1,
+    NOW()
+FROM project_fields pf
+    JOIN pages tgt ON tgt.legacy_project_id = pf.project_id
+WHERE TRIM(COALESCE(pf.field_value, '')) <> ''
+GROUP BY tgt.id, tgt.lang;
+
+-- 6. Старых таблиц и совместимых представлений не остаётся -------------------
+DROP TABLE project_images;
+DROP TABLE project_fields;
 DROP TABLE project_translations;
 DROP TABLE projects;
-
-CREATE OR REPLACE VIEW projects AS
-SELECT
-    p.id,
-    p.title,
-    p.slug,
-    p.`lead` AS description,
-    p.cover_image,
-    p.status,
-    p.is_featured,
-    p.sort_order,
-    p.created_at,
-    p.updated_at,
-    p.lock_version,
-    p.deleted_at,
-    p.lang,
-    p.translation_group_id
-FROM pages p
-WHERE p.entity_type = 'project'
--- WITH CHECK OPTION: вставка через представление не проставила бы entity_type и
--- молча создала обычную страницу. Пусть лучше падает с ошибкой.
-WITH CHECK OPTION;
-
-CREATE OR REPLACE VIEW project_translations AS
-SELECT
-    pt.id,
-    pt.page_id AS project_id,
-    pt.lang,
-    pt.title,
-    pt.`lead` AS description
-FROM page_translations pt
-    JOIN pages p ON p.id = pt.page_id AND p.entity_type = 'project';
 
 ALTER TABLE pages DROP COLUMN legacy_project_id;

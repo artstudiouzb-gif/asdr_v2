@@ -44,5 +44,5 @@ test('Language Badges Accuracy: зеленый индикатор выводит
     // Очистка
     $pdo->exec("DELETE FROM news WHERE id = {$newsRuId}");
     $pdo->exec("DELETE FROM pages WHERE id = {$pageRuId}");
-    $pdo->exec("DELETE FROM projects WHERE id = {$projRuId}");
+    $pdo->exec("DELETE FROM pages WHERE id = {$projRuId}");
 });

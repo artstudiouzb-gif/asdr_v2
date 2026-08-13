@@ -16,7 +16,7 @@ test('Project::forHome отдаёт отмеченные «на главной»
     }
     $pdo = Database::pdo();
     // Чистая площадка: снимаем все отметки, затем проверяем откат.
-    $pdo->exec('UPDATE projects SET is_featured = 0');
+    $pdo->exec("UPDATE pages SET is_featured = 0 WHERE entity_type = 'project'");
 
     $slug = '_fh_' . bin2hex(random_bytes(3));
     $id = Project::create([
@@ -36,7 +36,7 @@ test('Project::forHome отдаёт отмеченные «на главной»
 
     // Снимаем отметку — forHome должен вернуть откат (последние опубликованные),
     // блок не пустой.
-    $pdo->exec('UPDATE projects SET is_featured = 0');
+    $pdo->exec("UPDATE pages SET is_featured = 0 WHERE entity_type = 'project'");
     $fallback = Project::forHome(6);
     assert_true(count($fallback) >= 1, 'откат на последние опубликованные не пуст');
 

@@ -27,7 +27,8 @@ final class TranslationGroupHelper
             return;
         }
 
-        $tables = ['news', 'pages', 'projects'];
+        // Проекты живут в pages, отдельной таблицы у них нет.
+        $tables = ['news', 'pages'];
         $pdo = Database::pdo();
         $missing = [];
         foreach ($tables as $table) {
@@ -57,13 +58,17 @@ final class TranslationGroupHelper
         self::ensureSchema();
 
         $defaultLang = Language::defaultCode();
-        $tables = ['pages', 'news', 'projects'];
+        $tables = ['pages', 'news'];
         $pdo = Database::pdo();
 
         foreach ($tables as $table) {
+            // Связывание по похожим заголовкам — приём для старых страниц и
+            // новостей. Проекты (тот же pages) под него не попадают: у них
+            // языковая версия всегда заводится с готовой группой.
+            $typeWhere = $table === 'pages' ? " AND entity_type = 'page'" : '';
             try {
                 // Ищем все записи, где lang != defaultLang и (translation_group_id IS NULL или translation_group_id = id)
-                $stmt = $pdo->prepare("SELECT id, title, slug, lang" . ($table === 'pages' ? ', is_home' : '') . " FROM {$table} WHERE lang != :default_lang AND (translation_group_id IS NULL OR translation_group_id = 0 OR translation_group_id = id) AND deleted_at IS NULL");
+                $stmt = $pdo->prepare("SELECT id, title, slug, lang" . ($table === 'pages' ? ', is_home' : '') . " FROM {$table} WHERE lang != :default_lang AND (translation_group_id IS NULL OR translation_group_id = 0 OR translation_group_id = id) AND deleted_at IS NULL{$typeWhere}");
                 $stmt->execute([':default_lang' => $defaultLang]);
                 $unlinked = $stmt->fetchAll();
 
@@ -81,7 +86,7 @@ final class TranslationGroupHelper
                     $stmtMatch = $pdo->prepare(
                         "SELECT id FROM {$table} 
                          WHERE lang = :default_lang 
-                           AND deleted_at IS NULL 
+                           AND deleted_at IS NULL{$typeWhere}
                            AND (title = :clean_title OR slug = :clean_slug OR title = :orig_title OR slug = :orig_slug)
                          ORDER BY id ASC LIMIT 1"
                     );
@@ -140,11 +145,27 @@ final class TranslationGroupHelper
     /**
      * @return array<string, array<string, mixed>> переводы с ключом — кодом языка (например, 'ru' => [...], 'uz' => [...])
      */
-    public static function getTranslations(string $table, int $recordId): array
+    /**
+     * Физическая таблица и условие подтипа для раздела админки: проект — это
+     * строка pages с entity_type='project', отдельной таблицы у него нет.
+     *
+     * @return array{0:string,1:string}
+     */
+    private static function tableFor(string $module): array
+    {
+        return match ($module) {
+            'projects' => ['pages', " AND entity_type = 'project'"],
+            'pages' => ['pages', " AND entity_type = 'page'"],
+            default => ['news', ''],
+        };
+    }
+
+    public static function getTranslations(string $module, int $recordId): array
     {
         self::ensureSchema();
 
-        $stmt = Database::pdo()->prepare("SELECT * FROM {$table} WHERE id = :id LIMIT 1");
+        [$table, $typeWhere] = self::tableFor($module);
+        $stmt = Database::pdo()->prepare("SELECT * FROM {$table} WHERE id = :id{$typeWhere} LIMIT 1");
         $stmt->execute([':id' => $recordId]);
         $row = $stmt->fetch();
         if (!$row) {
@@ -153,7 +174,8 @@ final class TranslationGroupHelper
 
         $groupId = (int) ($row['translation_group_id'] ?? $recordId);
         $stmtGroup = Database::pdo()->prepare(
-            "SELECT * FROM {$table} WHERE (translation_group_id = :gid OR id = :gid2) AND deleted_at IS NULL"
+            "SELECT * FROM {$table} WHERE (translation_group_id = :gid OR id = :gid2)
+               AND deleted_at IS NULL{$typeWhere}"
         );
         $stmtGroup->execute([':gid' => $groupId, ':gid2' => $groupId]);
 
@@ -181,13 +203,15 @@ final class TranslationGroupHelper
     /**
      * Создаёт новую отдельную запись-перевод для выбранного языка.
      */
-    public static function createTranslation(string $table, int $originalId, string $targetLang): int
+    public static function createTranslation(string $module, int $originalId, string $targetLang): int
     {
         self::ensureSchema();
 
-        if (!in_array($table, ['news', 'pages', 'projects'], true)) {
-            throw new \InvalidArgumentException("Неподдерживаемая таблица {$table}");
+        if (!in_array($module, ['news', 'pages', 'projects'], true)) {
+            throw new \InvalidArgumentException("Неподдерживаемый раздел {$module}");
         }
+
+        [$table, $typeWhere] = self::tableFor($module);
 
         $pdo = Database::pdo();
         $ownsTransaction = !$pdo->inTransaction();
@@ -199,7 +223,7 @@ final class TranslationGroupHelper
             $groupStmt = $pdo->prepare(
                 "SELECT COALESCE(NULLIF(translation_group_id, 0), id)
                  FROM {$table}
-                 WHERE id = :id AND deleted_at IS NULL
+                 WHERE id = :id AND deleted_at IS NULL{$typeWhere}
                  LIMIT 1"
             );
             $groupStmt->execute([':id' => $originalId]);
@@ -216,7 +240,7 @@ final class TranslationGroupHelper
             $groupLock = $pdo->prepare(
                 "SELECT id
                  FROM {$table}
-                 WHERE id = :id OR translation_group_id = :id2
+                 WHERE (id = :id OR translation_group_id = :id2){$typeWhere}
                  ORDER BY id
                  FOR UPDATE"
             );
@@ -228,7 +252,7 @@ final class TranslationGroupHelper
             $stmt = $pdo->prepare(
                 "SELECT *
                  FROM {$table}
-                 WHERE id = :id AND deleted_at IS NULL
+                 WHERE id = :id AND deleted_at IS NULL{$typeWhere}
                  LIMIT 1
                  FOR UPDATE"
             );
@@ -249,7 +273,7 @@ final class TranslationGroupHelper
                  FROM {$table}
                  WHERE translation_group_id = :gid
                    AND lang = :lang
-                   AND deleted_at IS NULL
+                   AND deleted_at IS NULL{$typeWhere}
                  LIMIT 1
                  FOR UPDATE"
             );
@@ -263,20 +287,25 @@ final class TranslationGroupHelper
                 return (int) $existingId;
             }
 
-            $slugBase = $table === 'news'
-                ? self::NEWS_TRANSLATION_DRAFT_SLUG_PREFIX . bin2hex(random_bytes(6))
-                : (string) ($orig['slug'] ?? 'item') . '-' . $targetLang;
+            $slugBase = match ($module) {
+                // Черновик перевода новости не должен занимать читаемый адрес.
+                'news' => self::NEWS_TRANSLATION_DRAFT_SLUG_PREFIX . bin2hex(random_bytes(6)),
+                // У языковой версии проекта адрес тот же: уникальность slug
+                // считается в пределах пары «тип + язык».
+                'projects' => (string) ($orig['slug'] ?? 'project'),
+                default => (string) ($orig['slug'] ?? 'item') . '-' . $targetLang,
+            };
             $newSlug = Slug::unique(
                 $slugBase,
-                static function (string $candidate, ?int $_excludeId) use ($pdo, $table, $targetLang): bool {
+                static function (string $candidate, ?int $_excludeId) use ($pdo, $table, $typeWhere, $targetLang): bool {
                     $check = $pdo->prepare(
-                        "SELECT COUNT(*) FROM {$table} WHERE slug = :slug AND lang = :lang AND deleted_at IS NULL"
+                        "SELECT COUNT(*) FROM {$table} WHERE slug = :slug AND lang = :lang AND deleted_at IS NULL{$typeWhere}"
                     );
                     $check->execute([':slug' => $candidate, ':lang' => $targetLang]);
                     return (int) $check->fetchColumn() > 0;
                 }
             );
-            if ($table === 'news') {
+            if ($module === 'news') {
                 $ins = $pdo->prepare(
                     "INSERT INTO news (title, slug, excerpt, lead_html, badge, category_id, content, image, video_url, audio_url, audio_title, hashtags, press_release_url, key_points, event_meta, timeline_json, docs, source_note, layout_type, sidebar_layout, focal_x, focal_y, meta_title, meta_description, status, published_at, author_id, lang, translation_group_id, created_at)
                       VALUES (:t, :s, :e, :lh, :b, :cat, :c, :img, :v, :a, :at, :h, :pr, :kp, :em, :tj, :dc, :sn, :lt, :sl, :fx, :fy, :mt, :md, 'draft', NOW(), :auth, :lang, :gid, NOW())"
@@ -313,7 +342,7 @@ final class TranslationGroupHelper
                     ':lang' => $targetLang,
                     ':gid' => $groupId,
                 ]);
-            } elseif ($table === 'pages') {
+            } elseif ($module === 'pages') {
                 $ins = $pdo->prepare(
                     "INSERT INTO pages (title, slug, meta_title, meta_description, `lead`, status, is_home, layout_type, hide_chrome, transparent_header, lang, translation_group_id, parent_id, created_at)
                      VALUES (:t, :s, :mt, :md, :l, 'draft', 0, :lt, :hc, :th, :lang, :gid, :parent_id, NOW())"
@@ -351,7 +380,7 @@ final class TranslationGroupHelper
             }
 
             $newId = (int) $pdo->lastInsertId();
-            if (in_array($table, ['pages', 'projects'], true) && $newId > 0) {
+            if (in_array($module, ['pages', 'projects'], true) && $newId > 0) {
                 self::copyBlocksForTranslation($pdo, $originalId, $newId, $targetLang);
             }
 
@@ -474,10 +503,7 @@ final class TranslationGroupHelper
 
         $recordId = (int) ($currentRecord['id'] ?? 0);
         $currentLang = (string) ($currentRecord['lang'] ?? Language::defaultCode());
-        $tableMap = ['news' => 'news', 'pages' => 'pages', 'projects' => 'projects'];
-        $table = $tableMap[$module] ?? 'news';
-
-        $translations = $recordId > 0 ? self::getTranslations($table, $recordId) : [];
+        $translations = $recordId > 0 ? self::getTranslations($module, $recordId) : [];
         $languages = Language::active();
         $defaultCode = Language::defaultCode();
 

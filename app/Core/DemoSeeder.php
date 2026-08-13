@@ -95,10 +95,6 @@ final class DemoSeeder
             'pages',
             'content_entry_translations',
             'content_entries',
-            // projects / project_translations — представления над pages, чистить
-            // их отдельно нечего: строки уходят вместе со страницами выше.
-            'project_images',
-            'project_fields',
             'photo_album_images',
             'photo_album_translations',
             'photo_albums',
@@ -168,9 +164,6 @@ final class DemoSeeder
             'news_polls' => 1,
             'pages' => 12,
             'blocks' => 40,
-            // Проектов вдвое больше минимума: у каждого своя узбекская запись,
-            // как и у страниц. Отдельной таблицы переводов у них больше нет.
-            'projects' => 8,
             'content_entries' => 14,
             'content_entry_translations' => 14,
             'photo_albums' => 3,
@@ -183,6 +176,17 @@ final class DemoSeeder
             'team_member_translations' => 6,
             'menu_items' => 40,
         ];
+
+        // Проекты — строки pages, отдельной таблицы у них нет: считаем по типу.
+        // У каждого проекта своя узбекская запись, как и у страниц.
+        if (self::tableExists($pdo, 'pages')) {
+            $projects = (int) $pdo->query(
+                "SELECT COUNT(*) FROM pages WHERE entity_type = 'project'"
+            )->fetchColumn();
+            if ($projects < 8) {
+                $issues[] = "проекты: {$projects}, ожидалось не менее 8";
+            }
+        }
 
         foreach ($minimums as $table => $minimum) {
             if (!self::tableExists($pdo, $table)) {
@@ -1207,7 +1211,7 @@ final class DemoSeeder
             ]);
             $c['projects'] += $ins->rowCount();
 
-            $pidStmt = $pdo->prepare('SELECT id FROM projects WHERE slug = :s LIMIT 1');
+            $pidStmt = $pdo->prepare("SELECT id FROM pages WHERE entity_type = 'project' AND slug = :s LIMIT 1");
             $pidStmt->execute([':s' => $project[0]]);
             $projectId = $pidStmt->fetchColumn();
             if ($projectId === false) {

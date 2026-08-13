@@ -88,8 +88,7 @@ final class MediaCleaner
         $exactQueries = [
             'SELECT COUNT(*) FROM news WHERE image = :exact',
             'SELECT COUNT(*) FROM news_images WHERE path = :exact',
-            'SELECT COUNT(*) FROM projects WHERE cover_image = :exact',
-            'SELECT COUNT(*) FROM project_images WHERE file_path = :exact',
+            "SELECT COUNT(*) FROM pages WHERE entity_type = 'project' AND cover_image = :exact",
             'SELECT COUNT(*) FROM team_members WHERE photo = :exact',
             'SELECT COUNT(*) FROM settings WHERE `value` = :exact',
         ];
