@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 test('public editorial surfaces use the shared rich content class', function (): void {
     $root = dirname(__DIR__, 2);
+    // Страницы проектов в списке нет намеренно: их тело собирается блоками,
+    // а rich-content живёт в шаблоне блока «Текст».
     $files = [
         '/templates/blocks/text.php',
         '/templates/blocks/text_image.php',
         '/templates/blocks/faq.php',
         '/app/Views/site/news_show.php',
-        '/app/Views/site/project_show.php',
         '/app/Views/site/content_show.php',
     ];
 

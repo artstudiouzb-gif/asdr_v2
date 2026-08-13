@@ -112,7 +112,9 @@ final class PageController
         Auth::requireLogin();
 
         $page = Page::findById((int) $params['id']);
-        if (!$page) {
+        // Проект — запись той же таблицы, но у него свой раздел и своя форма:
+        // открывать его как страницу нельзя, иначе редактор увидит чужие поля.
+        if (!$page || (string) ($page['entity_type'] ?? 'page') !== 'page') {
             http_response_code(404);
             View::render('errors/404');
             return;
@@ -247,7 +249,7 @@ final class PageController
 
         $id = (int) $params['id'];
         $page = Page::findById($id);
-        if (!$page) {
+        if (!$page || (string) ($page['entity_type'] ?? 'page') !== 'page') {
             http_response_code(404);
             View::render('errors/404');
             return;

@@ -34,6 +34,15 @@ final class ProjectController
         Locale::setContentLangs($available);
         Locale::setAlternatePaths(\App\Core\TranslationGroupHelper::publishedPaths('projects', (int) $project['id'], 'projects/'));
 
-        View::render('site/project_show', ['project' => $project]);
+        // Содержимое проекта — блоки той же записи: проект это страница с
+        // подтипом, и собирается он тем же конвейером, что и страница.
+        $rendered = \App\Core\PageBlocks::compile((int) $project['id'], Locale::current());
+
+        View::render('site/project_show', [
+            'project' => $project,
+            'content' => $rendered['html'],
+            'blockCss' => $rendered['css'],
+            'preloadImages' => $rendered['preload_images'],
+        ]);
     }
 }

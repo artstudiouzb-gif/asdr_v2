@@ -15,7 +15,9 @@ final class Page
 
     public static function all(): array
     {
-        $stmt = Database::pdo()->query('SELECT * FROM pages WHERE deleted_at IS NULL ORDER BY created_at DESC');
+        $stmt = Database::pdo()->query(
+            "SELECT * FROM pages WHERE deleted_at IS NULL AND entity_type = 'page' ORDER BY created_at DESC"
+        );
 
         return $stmt->fetchAll();
     }
@@ -24,7 +26,13 @@ final class Page
      * Список с фильтрами админки (задача 91). deleted_at IS NULL всегда.
      * $lang (не-дефолтный) ограничивает страницами, имеющими перевод.
      */
-    public static function filter(?string $status = null, ?string $lang = null): array
+    /**
+     * Список страниц для выпадающих списков (меню, выбор родителя).
+     *
+     * $entityType: 'page' — обычные страницы (по умолчанию), 'project' — только
+     * проекты, 'all' — и то и другое (конструктор меню предлагает оба раздела).
+     */
+    public static function filter(?string $status = null, ?string $lang = null, string $entityType = 'page'): array
     {
         $sql = 'SELECT p.* FROM pages p';
         $params = [];
@@ -33,6 +41,10 @@ final class Page
             $params[':lang'] = $lang;
         }
         $sql .= ' WHERE p.deleted_at IS NULL';
+        if ($entityType === 'page' || $entityType === 'project') {
+            $sql .= ' AND p.entity_type = :entity_type';
+            $params[':entity_type'] = $entityType;
+        }
         if ($status === 'published' || $status === 'draft') {
             $sql .= ' AND p.status = :status';
             $params[':status'] = $status;
@@ -105,7 +117,8 @@ final class Page
     {
         $from = 'FROM pages p';
         $params = [];
-        $where = ['p.deleted_at IS NULL'];
+        // Проекты живут в этой же таблице, но у них свой раздел админки.
+        $where = ['p.deleted_at IS NULL', "p.entity_type = 'page'"];
 
         $langFilter = (string) ($filters['lang'] ?? '');
         if ($langFilter !== '' && $langFilter !== 'all') {
@@ -189,7 +202,9 @@ final class Page
 
     public static function trashed(): array
     {
-        $stmt = Database::pdo()->query('SELECT * FROM pages WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC');
+        $stmt = Database::pdo()->query(
+            "SELECT * FROM pages WHERE deleted_at IS NOT NULL AND entity_type = 'page' ORDER BY deleted_at DESC"
+        );
 
         return $stmt->fetchAll();
     }
@@ -213,7 +228,8 @@ final class Page
 
         // 1. Ищем точное совпадение по slug и запрашиваемому языку
         $stmtExact = Database::pdo()->prepare(
-            "SELECT * FROM pages WHERE slug = :slug AND lang = :lang AND status = 'published' AND deleted_at IS NULL LIMIT 1"
+            "SELECT * FROM pages WHERE slug = :slug AND lang = :lang AND entity_type = 'page'
+               AND status = 'published' AND deleted_at IS NULL LIMIT 1"
         );
         $stmtExact->execute([':slug' => $slug, ':lang' => $lang]);
         $exactRow = $stmtExact->fetch();
@@ -223,7 +239,8 @@ final class Page
 
         // 2. Ищем любой первичный материал по slug
         $stmt = Database::pdo()->prepare(
-            "SELECT * FROM pages WHERE slug = :slug AND status = 'published' AND deleted_at IS NULL LIMIT 1"
+            "SELECT * FROM pages WHERE slug = :slug AND entity_type = 'page'
+               AND status = 'published' AND deleted_at IS NULL LIMIT 1"
         );
         $stmt->execute([':slug' => $slug]);
         $row = $stmt->fetch();
@@ -235,7 +252,8 @@ final class Page
         // Если у страницы есть связанный независимый пост на запрашиваемом языке
         $groupId = (int) ($row['translation_group_id'] ?? $row['id']);
         $stmtTrans = Database::pdo()->prepare(
-            "SELECT * FROM pages WHERE (translation_group_id = :gid OR id = :gid2) AND lang = :lang AND status = 'published' AND deleted_at IS NULL LIMIT 1"
+            "SELECT * FROM pages WHERE (translation_group_id = :gid OR id = :gid2) AND lang = :lang
+               AND entity_type = 'page' AND status = 'published' AND deleted_at IS NULL LIMIT 1"
         );
         $stmtTrans->execute([':gid' => $groupId, ':gid2' => $groupId, ':lang' => $lang]);
         $transRow = $stmtTrans->fetch();
@@ -253,9 +271,20 @@ final class Page
      * контент основной записи как fallback: меню языка должно вести только
      * на самостоятельную опубликованную версию этого языка.
      */
+    /**
+     * Цель пункта меню по адресу из формы.
+     *
+     * Проект адресуется как `projects/<slug>` — тем же значением, каким пункт
+     * меню и хранится, поэтому публичная ссылка собирается без особых случаев.
+     */
     public static function findPublishedMenuTarget(string $slug, string $lang): ?array
     {
         $slug = ltrim(trim($slug), '/');
+        $entityType = 'page';
+        if (str_starts_with($slug, 'projects/')) {
+            $entityType = 'project';
+            $slug = substr($slug, strlen('projects/'));
+        }
         if ($slug === '' || !Language::isActive($lang)) {
             return null;
         }
@@ -263,11 +292,11 @@ final class Page
         $pdo = Database::pdo();
         $stmtExact = $pdo->prepare(
             "SELECT * FROM pages
-             WHERE slug = :slug AND lang = :lang
+             WHERE slug = :slug AND lang = :lang AND entity_type = :entity_type
                AND status = 'published' AND deleted_at IS NULL
              LIMIT 1"
         );
-        $stmtExact->execute([':slug' => $slug, ':lang' => $lang]);
+        $stmtExact->execute([':slug' => $slug, ':lang' => $lang, ':entity_type' => $entityType]);
         $exact = $stmtExact->fetch();
         if ($exact) {
             return $exact;
@@ -275,11 +304,16 @@ final class Page
 
         $stmtSource = $pdo->prepare(
             "SELECT * FROM pages
-             WHERE slug = :slug AND status = 'published' AND deleted_at IS NULL
+             WHERE slug = :slug AND entity_type = :entity_type
+               AND status = 'published' AND deleted_at IS NULL
              ORDER BY (lang = :default_lang) DESC, id ASC
              LIMIT 1"
         );
-        $stmtSource->execute([':slug' => $slug, ':default_lang' => Language::defaultCode()]);
+        $stmtSource->execute([
+            ':slug' => $slug,
+            ':entity_type' => $entityType,
+            ':default_lang' => Language::defaultCode(),
+        ]);
         $source = $stmtSource->fetch();
         if (!$source) {
             return null;
@@ -289,7 +323,8 @@ final class Page
         $stmtTarget = $pdo->prepare(
             "SELECT * FROM pages
              WHERE (id = :group_id OR translation_group_id = :translation_group_id)
-               AND lang = :lang AND status = 'published' AND deleted_at IS NULL
+               AND lang = :lang AND entity_type = :entity_type
+               AND status = 'published' AND deleted_at IS NULL
              ORDER BY id ASC
              LIMIT 1"
         );
@@ -297,10 +332,21 @@ final class Page
             ':group_id' => $groupId,
             ':translation_group_id' => $groupId,
             ':lang' => $lang,
+            ':entity_type' => $entityType,
         ]);
         $target = $stmtTarget->fetch();
 
         return $target ?: null;
+    }
+
+    /** Значение пункта меню для найденной цели: у проекта адрес с префиксом. */
+    public static function menuTargetValue(array $target): string
+    {
+        $slug = (string) ($target['slug'] ?? '');
+
+        return (string) ($target['entity_type'] ?? 'page') === 'project'
+            ? 'projects/' . $slug
+            : $slug;
     }
 
     public static function findHome(?string $lang = null): ?array
@@ -314,7 +360,7 @@ final class Page
                     (SELECT COUNT(*) FROM blocks b WHERE b.page_id = p.id AND b.is_active = 1) AS blocks_count
              FROM pages p
              WHERE (p.is_home = 1 OR p.slug = 'home')
-               AND p.lang = :lang
+               AND p.lang = :lang AND p.entity_type = 'page'
                AND p.status = 'published' AND p.deleted_at IS NULL
              ORDER BY p.is_home DESC, (blocks_count > 0) DESC, p.id DESC
              LIMIT 1"
@@ -332,6 +378,7 @@ final class Page
                     (SELECT COUNT(*) FROM blocks b WHERE b.page_id = p.id AND b.is_active = 1) AS blocks_count
              FROM pages p
              WHERE (p.is_home = 1 OR p.slug = 'home')
+               AND p.entity_type = 'page'
                AND p.status = 'published' AND p.deleted_at IS NULL
              ORDER BY (p.lang = :default_lang) DESC, p.is_home DESC, (blocks_count > 0) DESC, p.id DESC
              LIMIT 1"
@@ -341,7 +388,8 @@ final class Page
 
         if (!$row) {
             $stmtFallback = Database::pdo()->query(
-                "SELECT * FROM pages WHERE status = 'published' AND deleted_at IS NULL ORDER BY id ASC LIMIT 1"
+                "SELECT * FROM pages WHERE status = 'published' AND entity_type = 'page'
+                   AND deleted_at IS NULL ORDER BY id ASC LIMIT 1"
             );
             $row = $stmtFallback->fetch();
             if (!$row) {
@@ -356,7 +404,8 @@ final class Page
         // 3. Локализация главной страницы для запрошенного языка через группу переводов
         $groupId = (int) ($row['translation_group_id'] ?? $row['id']);
         $stmtTrans = Database::pdo()->prepare(
-            "SELECT * FROM pages WHERE (translation_group_id = :gid OR id = :gid2) AND lang = :lang AND status = 'published' AND deleted_at IS NULL LIMIT 1"
+            "SELECT * FROM pages WHERE (translation_group_id = :gid OR id = :gid2) AND lang = :lang
+               AND entity_type = 'page' AND status = 'published' AND deleted_at IS NULL LIMIT 1"
         );
         $stmtTrans->execute([':gid' => $groupId, ':gid2' => $groupId, ':lang' => $targetLang]);
         $transRow = $stmtTrans->fetch();
@@ -410,7 +459,8 @@ final class Page
     {
         if (self::$homeSlugCache === null) {
             $slug = Database::pdo()->query(
-                "SELECT slug FROM pages WHERE is_home = 1 AND status = 'published' AND deleted_at IS NULL LIMIT 1"
+                "SELECT slug FROM pages WHERE is_home = 1 AND entity_type = 'page'
+                   AND status = 'published' AND deleted_at IS NULL LIMIT 1"
             )->fetchColumn();
             self::$homeSlugCache = $slug !== false ? (string) $slug : '';
         }
@@ -465,10 +515,10 @@ final class Page
     public static function parentOptions(?int $excludeId = null): array
     {
         $rows = Database::pdo()->query(
-            'SELECT id, title, slug, is_home, parent_id, translation_group_id
+            "SELECT id, title, slug, is_home, parent_id, translation_group_id
              FROM pages
-             WHERE deleted_at IS NULL
-             ORDER BY title ASC, id ASC'
+             WHERE deleted_at IS NULL AND entity_type = 'page'
+             ORDER BY title ASC, id ASC"
         )->fetchAll();
 
         $byId = [];
@@ -912,11 +962,17 @@ final class Page
         $stmt->execute([':id' => $id]);
     }
 
-    public static function slugExists(string $slug, ?int $excludeId = null, ?string $lang = null): bool
-    {
+    public static function slugExists(
+        string $slug,
+        ?int $excludeId = null,
+        ?string $lang = null,
+        string $entityType = 'page'
+    ): bool {
         $lang = $lang ?? Language::defaultCode();
-        $sql = 'SELECT COUNT(*) FROM pages WHERE slug = :slug AND lang = :lang AND deleted_at IS NULL';
-        $params = [':slug' => $slug, ':lang' => $lang];
+        // Адрес уникален внутри своего типа: /about и /projects/about не спорят.
+        $sql = 'SELECT COUNT(*) FROM pages WHERE slug = :slug AND lang = :lang
+                AND entity_type = :entity_type AND deleted_at IS NULL';
+        $params = [':slug' => $slug, ':lang' => $lang, ':entity_type' => $entityType];
 
         if ($excludeId !== null) {
             $sql .= ' AND id <> :id';
@@ -938,7 +994,7 @@ final class Page
             $code = (string) $l['code'];
             $stmt = $pdo->prepare(
                 "SELECT COUNT(*) FROM pages p
-                 WHERE p.deleted_at IS NULL
+                 WHERE p.deleted_at IS NULL AND p.entity_type = 'page'
                    AND (p.lang = :code
                      OR (p.lang <> :code_neq
                          AND (EXISTS (SELECT 1 FROM page_translations pt WHERE pt.page_id = p.id AND pt.lang = :code_pt AND TRIM(COALESCE(pt.title, '')) <> '')

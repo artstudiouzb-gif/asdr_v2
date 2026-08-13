@@ -30,12 +30,14 @@ final class Translations
      * Таблица переводов и её ключ на владельца. Ключ массива — таблица самой
      * сущности, она же используется в адресах админки.
      *
-     * @var array<string, array{0:string, 1:string}>
+     * @var array<string, array{0:string|null, 1:string|null}>
      */
     private const TRANSLATION_TABLES = [
         'news' => ['news_translations', 'news_id'],
         'pages' => ['page_translations', 'page_id'],
-        'projects' => ['project_translations', 'project_id'],
+        // У проектов своей таблицы переводов нет: языковая версия — отдельная
+        // запись pages того же типа.
+        'projects' => [null, null],
         'photo_albums' => ['photo_album_translations', 'album_id'],
         'videos' => ['video_translations', 'video_id'],
         'team_members' => ['team_member_translations', 'member_id'],
@@ -175,13 +177,29 @@ final class Translations
         return $row;
     }
 
+    /**
+     * Физическая таблица и условие подтипа: проект — строка pages с
+     * entity_type='project'.
+     *
+     * @return array{0:string,1:string}
+     */
+    private static function source(string $table): array
+    {
+        return match ($table) {
+            'projects' => ['pages', " AND entity_type = 'project'"],
+            'pages' => ['pages', " AND entity_type = 'page'"],
+            default => [$table, ''],
+        };
+    }
+
     /** @return array<string,mixed>|null */
     private static function baseRow(string $table, int $id): ?array
     {
         if ($id <= 0 || !isset(self::TRANSLATION_TABLES[$table]) || !Database::isConnected()) {
             return null;
         }
-        $stmt = Database::pdo()->prepare("SELECT * FROM {$table} WHERE id = :id LIMIT 1");
+        [$source, $typeWhere] = self::source($table);
+        $stmt = Database::pdo()->prepare("SELECT * FROM {$source} WHERE id = :id{$typeWhere} LIMIT 1");
         $stmt->execute([':id' => $id]);
         $row = $stmt->fetch();
 
@@ -197,16 +215,17 @@ final class Translations
     private static function linkedRows(string $table, int $id): array
     {
         $pdo = Database::pdo();
+        [$source, $typeWhere] = self::source($table);
         $stmt = $pdo->prepare(
-            "SELECT COALESCE(NULLIF(translation_group_id, 0), id) FROM {$table} WHERE id = :id LIMIT 1"
+            "SELECT COALESCE(NULLIF(translation_group_id, 0), id) FROM {$source} WHERE id = :id{$typeWhere} LIMIT 1"
         );
         $stmt->execute([':id' => $id]);
         $groupId = (int) ($stmt->fetchColumn() ?: $id);
 
         $stmtGroup = $pdo->prepare(
-            "SELECT * FROM {$table}
+            "SELECT * FROM {$source}
              WHERE COALESCE(NULLIF(translation_group_id, 0), id) = :group_id
-               AND deleted_at IS NULL
+               AND deleted_at IS NULL{$typeWhere}
              ORDER BY id"
         );
         $stmtGroup->execute([':group_id' => $groupId]);
@@ -231,6 +250,9 @@ final class Translations
     private static function translationRows(string $table, int $id): array
     {
         [$translationTable, $ownerKey] = self::TRANSLATION_TABLES[$table];
+        if ($translationTable === null || $ownerKey === null) {
+            return [];
+        }
 
         try {
             $stmt = Database::pdo()->prepare(

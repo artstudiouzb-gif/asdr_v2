@@ -31,13 +31,12 @@ final class ContentRevision
                 ['table' => 'news_polls', 'fk' => 'news_id', 'columns' => ['question', 'options_json']],
             ],
         ],
+        // Проект — строка pages с подтипом: анонс карточки лежит в lead, а
+        // содержимое живёт в блоках со своей историей версий.
         'project' => [
-            'table' => 'projects',
-            'columns' => ['title', 'slug', 'description', 'cover_image', 'status', 'is_featured', 'sort_order'],
-            'children' => [
-                ['table' => 'project_images', 'fk' => 'project_id', 'columns' => ['file_path', 'caption', 'sort_order']],
-                ['table' => 'project_fields', 'fk' => 'project_id', 'columns' => ['field_key', 'field_value', 'sort_order']],
-            ],
+            'table' => 'pages',
+            'columns' => ['title', 'slug', 'lead', 'cover_image', 'status', 'is_featured', 'sort_order'],
+            'children' => [],
         ],
     ];
 
@@ -258,7 +257,9 @@ final class ContentRevision
         $sets = [];
         $params = [':id' => $id];
         foreach ($columns as $column) {
-            $sets[] = $column . ' = :' . $column;
+            // Имена колонок в обратных кавычках: `lead` — зарезервированное
+            // слово в MySQL 8 (оконная функция LEAD), без них запрос падает.
+            $sets[] = '`' . $column . '` = :' . $column;
             $params[':' . $column] = $data[$column] ?? null;
         }
         Database::pdo()->prepare('UPDATE ' . $table . ' SET ' . implode(', ', $sets) . ' WHERE id = :id')->execute($params);
@@ -272,7 +273,7 @@ final class ContentRevision
             $params[':' . $column] = $data[$column] ?? null;
         }
         Database::pdo()->prepare(
-            'INSERT INTO ' . $table . ' (' . implode(', ', $allColumns) . ') VALUES ('
+            'INSERT INTO ' . $table . ' (`' . implode('`, `', $allColumns) . '`) VALUES ('
             . implode(', ', array_map(static fn (string $c): string => ':' . $c, $allColumns)) . ')'
         )->execute($params);
     }

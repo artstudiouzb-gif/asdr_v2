@@ -47,7 +47,7 @@ test('Блоки team_list/projects_list выводят опубликованн
     ensure_test_db();
     $pdo = Database::pdo();
     $pdo->exec('DELETE FROM team_members');
-    $pdo->exec('DELETE FROM projects');
+    $pdo->exec("DELETE FROM pages WHERE entity_type = 'project'");
 
     for ($i = 1; $i <= 3; $i++) {
         TeamMember::create([
@@ -70,5 +70,5 @@ test('Блоки team_list/projects_list выводят опубликованн
     assert_true(!str_contains($proj, 'Черновик'), 'черновик проекта не выводится');
 
     $pdo->exec('DELETE FROM team_members');
-    $pdo->exec('DELETE FROM projects');
+    $pdo->exec("DELETE FROM pages WHERE entity_type = 'project'");
 });

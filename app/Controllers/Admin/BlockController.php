@@ -51,32 +51,35 @@ final class BlockController
 
         if (!BlockTypeRegistry::has($type)) {
             Flash::error('Неизвестный тип блока.');
-            header('Location: /admin/pages/' . $pageId . '/edit?block_lang=' . urlencode($lang));
+            header('Location: ' . self::ownerEditUrl($pageId, $lang));
             exit;
         }
 
         // Блок сырого HTML может создавать только супер-администратор.
         if ($type === 'html' && !Auth::isSuperAdmin()) {
             Flash::error('Блок «HTML-код» доступен только супер-администратору.');
-            header('Location: /admin/pages/' . $pageId . '/edit?block_lang=' . urlencode($lang));
+            header('Location: ' . self::ownerEditUrl($pageId, $lang));
             exit;
         }
 
-        // Вложенность в колонки (группа 4.1): блок можно добавить внутрь блока
-        // columns, передав parent_block_id + column_index.
+        // Вложенность в контейнер (колонки, вкладки): блок добавляется внутрь,
+        // если пришли parent_block_id + column_index (номер колонки/вкладки).
         $parentBlockId = null;
         $columnIndex = 0;
-        $redirectTo = '/admin/pages/' . $pageId . '/edit?block_lang=' . urlencode($lang);
+        $redirectTo = self::ownerEditUrl($pageId, $lang);
         if (!empty($_POST['parent_block_id'])) {
             $parent = Block::findById((int) $_POST['parent_block_id']);
-            if (!$parent || (int) $parent['page_id'] !== $pageId || (string) $parent['type'] !== 'columns') {
-                Flash::error('Некорректный родительский блок для колонки.');
+            if (!$parent || (int) $parent['page_id'] !== $pageId
+                || !BlockTypeRegistry::isContainer((string) $parent['type'])
+            ) {
+                Flash::error('Некорректный родительский блок.');
                 header('Location: ' . $redirectTo);
                 exit;
             }
-            // Запрет columns-в-columns.
-            if ($type === 'columns') {
-                Flash::error('Блок «Колонки» нельзя вкладывать в колонки.');
+            // Запрет контейнера в контейнере.
+            if (BlockTypeRegistry::isContainer($type)) {
+                Flash::error('Блок «' . (BlockTypeRegistry::TYPE_LABELS[$type] ?? $type)
+                    . '» нельзя вкладывать в колонки или вкладки.');
                 header('Location: ' . $redirectTo);
                 exit;
             }
@@ -386,7 +389,24 @@ final class BlockController
 
     private function pageEditUrl(array $block): string
     {
-        return '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . urlencode((string) $block['lang']);
+        return self::ownerEditUrl((int) $block['page_id'], (string) $block['lang']);
+    }
+
+    /**
+     * Куда возвращаться после действия над блоком.
+     *
+     * Проект — страница с подтипом, и конструктор у него встроен в свою форму:
+     * возвращать редактора в раздел «Страницы» после правки блока проекта
+     * значило бы уводить его из того раздела, где он работает.
+     */
+    public static function ownerEditUrl(int $pageId, string $lang): string
+    {
+        $page = Page::findById($pageId);
+        $section = ($page !== null && (string) ($page['entity_type'] ?? 'page') === 'project')
+            ? '/admin/projects/'
+            : '/admin/pages/';
+
+        return $section . $pageId . '/edit?block_lang=' . urlencode($lang);
     }
 
     /** Валидный #RRGGBB в нижнем регистре или пустая строка (значение по умолчанию). */
@@ -510,6 +530,39 @@ final class BlockController
                     ? (string) $_POST['gap'] : 'medium';
                 $ratio = \App\Core\ColumnRatio::normalize((string) ($_POST['ratio'] ?? ''), $cols);
                 return ['columns' => $cols, 'gap' => $gap, 'ratio' => $ratio];
+            case 'tabs':
+                // Содержимое вкладок — вложенные блоки, здесь только подписи.
+                $tabItems = [];
+                foreach ((array) ($_POST['items'] ?? []) as $item) {
+                    if (!is_array($item)) {
+                        continue;
+                    }
+                    $tabTitle = \App\Core\BlockData\BlockDataInput::plain($item, 'title', $locale);
+                    if ($tabTitle === '') {
+                        continue;
+                    }
+                    $tabItems[] = ['title' => $tabTitle, 'icon' => \App\Core\Icon::cleanName($item['icon'] ?? '')];
+                }
+                return [
+                    'variant' => \App\Core\BlockData\BlockDataInput::enum(
+                        $_POST,
+                        'variant',
+                        ['segmented', 'underline', 'vertical'],
+                        'segmented'
+                    ),
+                    'align' => \App\Core\BlockData\BlockDataInput::enum(
+                        $_POST,
+                        'align',
+                        ['left', 'center', 'stretch'],
+                        'left'
+                    ),
+                    'title' => \App\Core\BlockData\BlockDataInput::plain($_POST, 'title_field', $locale),
+                    'description' => TextProcessor::process(
+                        \App\Core\HtmlSanitizer::sanitizeText((string) ($_POST['description'] ?? '')),
+                        $locale,
+                    ),
+                    'items' => array_slice($tabItems, 0, 10),
+                ];
             case 'testimonials':
                 return TestimonialsBlockNormalizer::normalize($_POST, $locale);
             case 'counters':

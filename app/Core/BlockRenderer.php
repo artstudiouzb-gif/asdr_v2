@@ -176,6 +176,8 @@ final class BlockRenderer
         $templateCss = '';
         if ($type === 'columns') {
             [$html, $childrenCss] = self::renderColumns($block, $data);
+        } elseif ($type === 'tabs') {
+            [$html, $childrenCss] = self::renderTabs($block, $data);
         } else {
             $templateFile = BlockTypeRegistry::templateFile($type);
             if ($templateFile !== null && is_file($templateFile)) {
@@ -367,40 +369,13 @@ final class BlockRenderer
             $gap = 'medium';
         }
 
-        // Дочерние блоки доступны только при наличии реального id (в рендере из БД).
-        $children = [];
-        if (!empty($block['id']) && class_exists(\App\Models\Block::class)) {
-            $children = \App\Models\Block::childrenOf((int) $block['id'], true);
-        }
-
-        // Группируем по колонкам 0..count-1.
-        $byColumn = array_fill(0, $count, []);
-        foreach ($children as $child) {
-            $col = (int) ($child['column_index'] ?? 0);
-            if ($col < 0 || $col >= $count) {
-                $col = 0;
-            }
-            // Защита от вложенности columns-в-columns.
-            if ((string) $child['type'] === 'columns') {
-                continue;
-            }
-            $byColumn[$col][] = $child;
-        }
+        $byColumn = self::containerChildren($block, $count);
 
         $cssParts = [];
         $colsHtml = '';
         for ($i = 0; $i < $count; $i++) {
-            $inner = '';
-            foreach ($byColumn[$i] as $child) {
-                $rendered = self::render($child);
-                if (!empty($rendered['hidden'])) {
-                    continue;
-                }
-                $inner .= $rendered['html'];
-                if ($rendered['css'] !== '') {
-                    $cssParts[] = $rendered['css'];
-                }
-            }
+            [$inner, $innerCss] = self::renderContainerCell($byColumn[$i]);
+            $cssParts = array_merge($cssParts, $innerCss);
             $colsHtml .= "    <div class=\"cms-columns__col\">\n"
                 . trim($inner)
                 . "\n    </div>\n";
@@ -422,6 +397,161 @@ final class BlockRenderer
             $cssParts[] = '@media (min-width: 721px){#block-' . (int) $block['id']
                 . ' .cms-columns{grid-template-columns:' . $template . '}}';
         }
+
+        return [$html, implode("\n", $cssParts)];
+    }
+
+    /**
+     * Дочерние блоки контейнера, разложенные по ячейкам: у «Колонок» ячейка —
+     * колонка, у «Вкладок» — вкладка (в обоих случаях это `column_index`).
+     *
+     * Ячейка вне диапазона схлопывается в первую: число колонок или вкладок
+     * могли уменьшить уже после того, как в дальнюю что-то положили, и молча
+     * терять этот блок нельзя — редактор увидел бы пропажу без объяснения.
+     *
+     * @param array<string,mixed> $block
+     * @return array<int, list<array<string,mixed>>>
+     */
+    private static function containerChildren(array $block, int $count): array
+    {
+        // Дочерние блоки доступны только при наличии реального id (в рендере из БД).
+        $children = [];
+        if (!empty($block['id']) && class_exists(\App\Models\Block::class)) {
+            $children = \App\Models\Block::childrenOf((int) $block['id'], true);
+        }
+
+        $count = max(1, $count);
+        $byIndex = array_fill(0, $count, []);
+        foreach ($children as $child) {
+            // Защита от контейнера в контейнере (колонки в колонках, вкладки
+            // во вкладках): такие дети сюда попасть не должны, но данные могли
+            // приехать из старого дампа.
+            if (BlockTypeRegistry::isContainer((string) $child['type'])) {
+                continue;
+            }
+            $index = (int) ($child['column_index'] ?? 0);
+            if ($index < 0 || $index >= $count) {
+                $index = 0;
+            }
+            $byIndex[$index][] = $child;
+        }
+
+        return $byIndex;
+    }
+
+    /**
+     * Содержимое одной ячейки контейнера: вложенные блоки рендерятся обычным
+     * render() — со своими вариантами, отступами и scoped-стилями.
+     *
+     * @param list<array<string,mixed>> $children
+     * @return array{0:string,1:list<string>} [html, css вложенных блоков]
+     */
+    private static function renderContainerCell(array $children): array
+    {
+        $html = '';
+        $cssParts = [];
+        foreach ($children as $child) {
+            $rendered = self::render($child);
+            if (!empty($rendered['hidden'])) {
+                continue;
+            }
+            $html .= $rendered['html'];
+            if ($rendered['css'] !== '') {
+                $cssParts[] = $rendered['css'];
+            }
+        }
+
+        return [$html, $cssParts];
+    }
+
+    /**
+     * Рендер блока «Вкладки»: подписи хранит сам блок, содержимое каждой
+     * вкладки — вложенные блоки любого типа (`column_index` = номер вкладки).
+     *
+     * Разметка приходит рабочей и без JavaScript: вкладки — обычные ссылки на
+     * заголовки разделов, все панели видны. Скрипт `blocks/tabs.js` уже поверх
+     * этого прячет неактивные панели и расставляет роли ARIA. Обещать роль
+     * `tab` в статике нельзя — без скрипта переключения не будет.
+     *
+     * @param array<string,mixed> $block
+     * @param array<string,mixed> $data
+     * @return array{0:string,1:string} [html, css дочерних блоков]
+     */
+    private static function renderTabs(array $block, array $data): array
+    {
+        $blockId = (int) ($block['id'] ?? 0);
+
+        $variant = (string) ($data['variant'] ?? 'segmented');
+        if (!in_array($variant, ['segmented', 'underline', 'vertical'], true)) {
+            $variant = 'segmented';
+        }
+        $align = (string) ($data['align'] ?? 'left');
+        if (!in_array($align, ['left', 'center', 'stretch'], true)) {
+            $align = 'left';
+        }
+
+        $items = [];
+        foreach ((array) ($data['items'] ?? []) as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $title = trim((string) ($item['title'] ?? ''));
+            if ($title === '') {
+                continue;
+            }
+            $items[] = ['title' => $title, 'icon' => Icon::cleanName($item['icon'] ?? '')];
+        }
+        // Вкладок больше десятка не бывает осмысленно, а полоса из них
+        // разъезжается на любой ширине.
+        $items = array_slice($items, 0, 10);
+        if ($items === []) {
+            return ['', ''];
+        }
+
+        $byTab = self::containerChildren($block, count($items));
+
+        $listHtml = '';
+        $panelsHtml = '';
+        $cssParts = [];
+        foreach ($items as $index => $item) {
+            $panelId = 'block-' . $blockId . '-tab-' . ($index + 1);
+            $title = htmlspecialchars($item['title'], ENT_QUOTES);
+            $icon = $item['icon'] !== ''
+                ? '<span class="cms-tabs__tab-icon" aria-hidden="true">' . Icon::render($item['icon'], 18) . '</span>'
+                : '';
+
+            $listHtml .= '        <a class="cms-tabs__tab' . ($index === 0 ? ' is-active' : '')
+                . '" href="#' . $panelId . '" data-tabs-tab="' . $index . '">'
+                . $icon . '<span class="cms-tabs__tab-text">' . $title . '</span></a>' . "\n";
+
+            [$inner, $innerCss] = self::renderContainerCell($byTab[$index]);
+            $cssParts = array_merge($cssParts, $innerCss);
+
+            $panelsHtml .= '        <div class="cms-tabs__panel" id="' . $panelId
+                . '" data-tabs-panel="' . $index . '">' . "\n"
+                // Заголовок панели нужен версии без JavaScript: там панели идут
+                // подряд, и без него не видно, где кончается одна вкладка.
+                . '            <h3 class="cms-tabs__panel-title">' . $title . '</h3>' . "\n"
+                . trim($inner) . "\n"
+                . '        </div>' . "\n";
+        }
+
+        $head = SectionHead::render([
+            'title' => (string) ($data['title'] ?? ''),
+            'description' => (string) ($data['description'] ?? ''),
+            'description_html' => true,
+        ]);
+
+        $html = '<div class="cms-tabs cms-tabs--' . $variant . ' cms-tabs--align-' . $align
+            . '" data-tabs data-tab-count="' . count($items) . '">' . "\n"
+            . ($head !== '' ? '    ' . $head . "\n" : '')
+            // Список и панели лежат в общей обёртке: у варианта «список слева»
+            // они становятся сеткой, а шапка секции обязана остаться над ними.
+            . '    <div class="cms-tabs__body">' . "\n"
+            . '    <div class="cms-tabs__list" data-tabs-list>' . "\n" . $listHtml . '    </div>' . "\n"
+            . '    <div class="cms-tabs__panels">' . "\n" . $panelsHtml . '    </div>' . "\n"
+            . '    </div>' . "\n"
+            . '</div>';
 
         return [$html, implode("\n", $cssParts)];
     }

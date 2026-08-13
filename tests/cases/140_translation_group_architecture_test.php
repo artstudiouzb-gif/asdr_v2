@@ -121,7 +121,7 @@ test('Публичные языки проекта учитывают публи
 
     assert_false(in_array('uz', Project::availableLangs($origId), true), 'Черновик проекта не объявляется на сайте');
     \App\Core\Database::pdo()
-        ->prepare("UPDATE projects SET status = 'published' WHERE id = :id")
+        ->prepare("UPDATE pages SET status = 'published' WHERE id = :id AND entity_type = 'project'")
         ->execute([':id' => $uzId]);
     assert_true(in_array('uz', Project::availableLangs($origId), true), 'Опубликованный перевод доступен от оригинала');
     assert_true(in_array('uz', Project::availableLangs($uzId), true), 'Опубликованный перевод доступен от языковой версии');

@@ -15,9 +15,6 @@ use App\Core\Slug;
 use App\Core\View;
 use App\Models\Language;
 use App\Models\Project;
-use App\Models\ProjectField;
-use App\Models\ProjectImage;
-use App\Models\ProjectTranslation;
 use App\Models\ContentRevision;
 
 final class ProjectController
@@ -60,7 +57,7 @@ final class ProjectController
     public function create(): void
     {
         Auth::requireLogin();
-        View::render('admin/projects/form', ['project' => null, 'images' => [], 'fields' => [], 'translations' => [], 'error' => null]);
+        View::render('admin/projects/form', ['project' => null, 'error' => null]);
     }
 
     public function store(): void
@@ -69,28 +66,17 @@ final class ProjectController
         Csrf::verifyRequest();
 
         [$data, $error] = $this->collectInput(null);
-        $translations = $this->collectTranslations();
 
         if ($error !== null) {
             View::render('admin/projects/form', [
                 'project' => $data,
-                'images' => $this->collectImages(),
-                'fields' => $this->collectFields(),
-                'translations' => $translations,
                 'error' => $error,
             ]);
             return;
         }
 
-        $images = $this->collectImages();
-        $fields = $this->collectFields();
-        $id = Database::transaction(static function (\PDO $_pdo) use ($data, $images, $fields, $translations): int {
-            $id = Project::create($data);
-            ProjectImage::replaceAll($id, $images);
-            ProjectField::replaceAll($id, $fields);
-            self::saveTranslations($id, $translations);
-
-            return $id;
+        $id = Database::transaction(static function (\PDO $_pdo) use ($data): int {
+            return Project::create($data);
         });
 
         Flash::success('Проект создан.');
@@ -111,9 +97,6 @@ final class ProjectController
 
         View::render('admin/projects/form', [
             'project' => $project,
-            'images' => ProjectImage::forProject((int) $project['id']),
-            'fields' => ProjectField::forProject((int) $project['id']),
-            'translations' => ProjectTranslation::forProject((int) $project['id']),
             'error' => null,
         ]);
     }
@@ -158,46 +141,31 @@ final class ProjectController
         if (!ContentRevision::isFresh('project', $id, (string) ($_POST['expected_updated_at'] ?? ''))) {
             View::render('admin/projects/form', [
                 'project' => $project,
-                'images' => ProjectImage::forProject($id),
-                'fields' => ProjectField::forProject($id),
-                'translations' => ProjectTranslation::forProject($id),
                 'error' => 'Проект уже был изменён в другой вкладке или другим пользователем. Текущие данные перезагружены; восстановите локальный черновик и проверьте изменения.',
             ]);
             return;
         }
 
         [$data, $error] = $this->collectInput($id, $project);
-        $translations = $this->collectTranslations();
 
         if ($error !== null) {
             View::render('admin/projects/form', [
                 'project' => array_merge($project, $data),
-                'images' => $this->collectImages(),
-                'fields' => $this->collectFields(),
-                'translations' => $translations,
                 'error' => $error,
             ]);
             return;
         }
 
-        $images = $this->collectImages();
-        $fields = $this->collectFields();
         $expectedVersion = (int) ($_POST['expected_lock_version'] ?? 0);
         try {
-            Database::transaction(static function (\PDO $_pdo) use ($id, $data, $images, $fields, $translations, $expectedVersion): void {
+            Database::transaction(static function (\PDO $_pdo) use ($id, $data, $expectedVersion): void {
                 ContentRevision::capture('project', $id, Auth::id());
                 Project::update($id, $data, $expectedVersion);
-                ProjectImage::replaceAll($id, $images);
-                ProjectField::replaceAll($id, $fields);
-                self::saveTranslations($id, $translations);
             });
         } catch (ConcurrencyException) {
             $project = Project::findById($id) ?? $project;
             View::render('admin/projects/form', [
                 'project' => $project,
-                'images' => ProjectImage::forProject($id),
-                'fields' => ProjectField::forProject($id),
-                'translations' => ProjectTranslation::forProject($id),
                 'error' => 'Проект уже был изменён в другой вкладке или другим пользователем. Текущие данные перезагружены; восстановите локальный черновик и проверьте изменения.',
             ]);
             return;
@@ -231,7 +199,9 @@ final class ProjectController
     {
         $title = trim((string) ($_POST['title'] ?? ''));
         $slugInput = trim((string) ($_POST['slug'] ?? ''));
-        $description = (string) ($_POST['description'] ?? '');
+        // Анонс для карточки: короткий текст без разметки. Тело проекта живёт
+        // в блоках, поэтому HTML здесь только мешал бы вёрстке списков.
+        $description = self::excerptInput((string) ($_POST['description'] ?? ''));
         $status = (isset($_POST['publish_action']) || ($_POST['status'] ?? 'draft') === 'published') ? 'published' : 'draft';
         $sortOrder = (int) ($_POST['sort_order'] ?? 0);
 
@@ -258,80 +228,14 @@ final class ProjectController
         return [$data, null];
     }
 
-    private function collectImages(): array
+    /** Анонс проекта: разметка снимается, пробелы схлопываются, длина 300. */
+    private static function excerptInput(string $value): string
     {
-        $images = [];
-        foreach ((array) ($_POST['gallery'] ?? []) as $image) {
-            $path = trim((string) ($image['file_path'] ?? ''));
-            if ($path === '') {
-                continue;
-            }
-            $images[] = ['file_path' => $path, 'caption' => trim((string) ($image['caption'] ?? ''))];
-        }
+        // Теги заменяем пробелом, а не вырезаем: вставка разметки иначе
+        // склеивает соседние слова.
+        $text = strip_tags((string) preg_replace('/<[^>]*>/', ' ', $value));
+        $text = trim((string) preg_replace('/\s+/u', ' ', $text));
 
-        return $images;
-    }
-
-    /**
-     * Переводы из полей translations[<lang>][title|description] для всех
-     * НЕ-основных активных языков. Ключ — код языка.
-     *
-     * @return array<string, array{title: string, description: string}>
-     */
-    private function collectTranslations(): array
-    {
-        $defaultCode = Language::defaultCode();
-        $input = (array) ($_POST['translations'] ?? []);
-        $out = [];
-        foreach (Language::active() as $lang) {
-            $code = (string) $lang['code'];
-            if ($code === $defaultCode) {
-                continue;
-            }
-            $t = (array) ($input[$code] ?? []);
-            $out[$code] = [
-                'title' => trim((string) ($t['title'] ?? '')),
-                'description' => trim((string) ($t['description'] ?? '')),
-            ];
-        }
-
-        return $out;
-    }
-
-    /**
-     * @param array<string, array{title: string, description: string}> $translations
-     */
-    private static function saveTranslations(int $projectId, array $translations): void
-    {
-        foreach ($translations as $code => $t) {
-            ProjectTranslation::upsert($projectId, (string) $code, [
-                'title' => $t['title'] ?? '',
-                'description' => $t['description'] ?? '',
-            ]);
-        }
-    }
-
-    private function collectFields(): array
-    {
-        $fields = [];
-        foreach ((array) ($_POST['custom_fields'] ?? []) as $field) {
-            $key = trim((string) ($field['key'] ?? ''));
-            if ($key === '') {
-                continue;
-            }
-            $valRu = trim((string) ($field['value'] ?? ''));
-            $valUz = trim((string) ($field['value_uz'] ?? ''));
-            $valEn = trim((string) ($field['value_en'] ?? ''));
-
-            $fields[] = ['field_key' => $key, 'field_value' => $valRu];
-            if ($valUz !== '') {
-                $fields[] = ['field_key' => $key . ' [uz]', 'field_value' => $valUz];
-            }
-            if ($valEn !== '') {
-                $fields[] = ['field_key' => $key . ' [en]', 'field_value' => $valEn];
-            }
-        }
-
-        return $fields;
+        return mb_substr($text, 0, 300);
     }
 }

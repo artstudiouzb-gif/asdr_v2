@@ -6,9 +6,8 @@ use App\Core\Database;
 use App\Core\ConcurrencyException;
 use App\Models\ContentRevision;
 use App\Models\Project;
-use App\Models\ProjectField;
 
-test('content revisions: project snapshot restores row, images and fields', function (): void {
+test('content revisions: project snapshot restores the record row', function (): void {
     if (!Database::isConnected()) {
         return;
     }
@@ -16,40 +15,32 @@ test('content revisions: project snapshot restores row, images and fields', func
     $pdo = Database::pdo();
     $slug = 'revision-test-' . bin2hex(random_bytes(4));
     $pdo->prepare(
-        "INSERT INTO projects (title, slug, description, status, is_featured, sort_order, created_at)
-         VALUES ('Версия 1', :slug, 'Описание 1', 'draft', 0, 1, NOW())"
+        "INSERT INTO pages (title, slug, entity_type, `lead`, status, is_featured, sort_order, created_at)
+         VALUES ('Версия 1', :slug, 'project', 'Описание 1', 'draft', 0, 1, NOW())"
     )->execute([':slug' => $slug]);
     $id = (int) $pdo->lastInsertId();
 
     try {
-        $pdo->prepare("INSERT INTO project_images (project_id, file_path, caption, sort_order) VALUES (:id, '/one.jpg', 'Фото 1', 0)")
-            ->execute([':id' => $id]);
-        $pdo->prepare("INSERT INTO project_fields (project_id, field_key, field_value, sort_order) VALUES (:id, 'year', '2025', 0)")
-            ->execute([':id' => $id]);
-
         $revisionId = ContentRevision::capture('project', $id, null);
         assert_true(is_int($revisionId) && $revisionId > 0);
 
-        $pdo->prepare("UPDATE projects SET title = 'Версия 2', description = 'Описание 2' WHERE id = :id")
-            ->execute([':id' => $id]);
-        $pdo->prepare('DELETE FROM project_images WHERE project_id = :id')->execute([':id' => $id]);
-        $pdo->prepare("UPDATE project_fields SET field_value = '2030' WHERE project_id = :id")
+        $pdo->prepare("UPDATE pages SET title = 'Версия 2', `lead` = 'Описание 2' WHERE id = :id")
             ->execute([':id' => $id]);
 
         $restored = ContentRevision::restore((int) $revisionId, null);
         assert_same('project', $restored['type'] ?? null);
 
-        $project = $pdo->query('SELECT * FROM projects WHERE id = ' . $id)->fetch();
+        // Содержимое проекта живёт в блоках со своей историей версий, поэтому
+        // снимок записи возвращает паспорт: заголовок, адрес и анонс.
+        $project = $pdo->query('SELECT * FROM pages WHERE id = ' . $id)->fetch();
         assert_same('Версия 1', $project['title'] ?? null);
-        assert_same('Описание 1', $project['description'] ?? null);
-        assert_same('/one.jpg', $pdo->query('SELECT file_path FROM project_images WHERE project_id = ' . $id)->fetchColumn());
-        assert_same('2025', $pdo->query('SELECT field_value FROM project_fields WHERE project_id = ' . $id)->fetchColumn());
+        assert_same('Описание 1', $project['lead'] ?? null);
 
         assert_false(ContentRevision::isFresh('project', $id, '2000-01-01 00:00:00'));
         assert_true(ContentRevision::isFresh('project', $id, (string) $project['updated_at']));
     } finally {
         $pdo->prepare("DELETE FROM content_revisions WHERE entity_type = 'project' AND entity_id = :id")->execute([':id' => $id]);
-        $pdo->prepare('DELETE FROM projects WHERE id = :id')->execute([':id' => $id]);
+        $pdo->prepare('DELETE FROM pages WHERE id = :id')->execute([':id' => $id]);
     }
 });
 
@@ -81,7 +72,6 @@ test('content save: stale lock_version rolls back parent and children', function
         'description' => null, 'cover_image' => null, 'status' => 'draft',
         'is_featured' => false, 'sort_order' => 0,
     ]);
-    ProjectField::replaceAll($id, [['field_key' => 'year', 'field_value' => '2026']]);
     $version = (int) Project::findById($id)['lock_version'];
     $data = [
         'title' => 'CAS first', 'slug' => Project::findById($id)['slug'],
@@ -94,14 +84,12 @@ test('content save: stale lock_version rolls back parent and children', function
         try {
             Database::transaction(static function (\PDO $_pdo) use ($id, $data, $version): void {
                 Project::update($id, array_merge($data, ['title' => 'CAS stale']), $version);
-                ProjectField::replaceAll($id, [['field_key' => 'year', 'field_value' => '2030']]);
             });
         } catch (ConcurrencyException) {
             $failed = true;
         }
         assert_true($failed, 'устаревшее сохранение отклонено');
         assert_same('CAS first', Project::findById($id)['title']);
-        assert_same('2026', $pdo->query('SELECT field_value FROM project_fields WHERE project_id = ' . $id)->fetchColumn());
     } finally {
         Project::forceDelete($id);
     }

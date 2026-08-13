@@ -70,54 +70,9 @@ final class PageController
         Locale::setContentLangs(Page::availableLangs((int) $page['id']));
         Locale::setAlternatePaths(\App\Core\TranslationGroupHelper::publishedPaths('pages', (int) $page['id']));
 
-        // Скомпилированные блоки (HTML + scoped CSS) кэшируются на диск и
-        // сбрасываются при изменении страницы/блоков в админке. Кэш и его TTL
-        // управляются в разделе «Производительность».
-        $build = static function () use ($page, $lang): array {
-            $blocks = Block::forPageLocalized((int) $page['id'], $lang);
-            return BlockRenderer::renderPage($blocks);
-        };
-        if (\App\Models\Setting::get('perf_page_cache', '1') === '1') {
-            $ttl = max(0, (int) \App\Models\Setting::get('perf_cache_ttl', '0'));
-            $cacheKey = 'page:' . (int) $page['id'] . ':' . $lang;
-            $rendered = \App\Core\Cache::remember($cacheKey, $build, $ttl);
-
-            // У блоков с расписанием кэш живёт только до ближайшей границы
-            // показа: иначе баннер «до 30 июля» остался бы висеть 31-го.
-            $expiresAt = is_array($rendered) ? ($rendered['expires_at'] ?? null) : null;
-            if ($expiresAt !== null && (int) $expiresAt <= time()) {
-                \App\Core\Cache::forget($cacheKey);
-                $rendered = \App\Core\Cache::remember($cacheKey, $build, $ttl);
-            }
-        } else {
-            $rendered = $build();
-        }
-
-        // Кэш страниц общий для всех посетителей, а CSRF-токен и метка времени
-        // honeypot — сессионные: подставляем живые значения при каждой отдаче,
-        // иначе формы у второго посетителя падают с 419.
-        if (!empty($rendered['html']) && str_contains((string) $rendered['html'], 'name="csrf_token"')) {
-            $rendered['html'] = preg_replace(
-                '/(name="csrf_token" value=")[^"]*(")/',
-                '${1}' . htmlspecialchars(\App\Core\Csrf::token(), ENT_QUOTES) . '${2}',
-                (string) $rendered['html']
-            );
-            $rendered['html'] = preg_replace(
-                '/(name="hp_ts" value=")[^"]*(")/',
-                '${1}' . time() . '${2}',
-                (string) $rendered['html']
-            );
-        }
-
-        // Совместимость с другими доверенными HTML-фрагментами: если они
-        // содержат script, nonce должен быть одноразовым для текущего запроса.
-        // Блок «Произвольный HTML» сам по себе script уже не пропускает.
-        $rendered['html'] = \App\Core\SecurityHeaders::injectScriptNonce((string) $rendered['html']);
-
-        // Ассеты блоков регистрируются и на попадании в кэш, и при промахе.
-        foreach ($rendered['assets'] ?? [] as $assetType) {
-            \App\Core\AssetCollector::requireJs($assetType);
-        }
+        // Сборка блоков (кэш, свежий CSRF, nonce, ассеты) общая со страницей
+        // проекта — она живёт в App\Core\PageBlocks.
+        $rendered = \App\Core\PageBlocks::compile((int) $page['id'], $lang);
 
         $layoutType = $page['layout_type'] ?? 'no_sidebar';
         // Виджеты собираются вне кэша блоков: правка виджета видна сразу.

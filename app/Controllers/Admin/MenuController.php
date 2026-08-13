@@ -20,7 +20,10 @@ final class MenuController
         View::render('admin/menu/index', [
             'tree' => MenuItem::allTree(),
             'items' => MenuItem::all(),
+            // Проекты — такие же записи pages, и в меню их ставят так же часто,
+            // как обычные страницы: показываем оба списка одним выбором.
             'pages' => Page::filter('published'),
+            'projects' => Page::filter('published', null, 'project'),
             'languages' => Language::active(),
         ]);
     }
@@ -216,7 +219,7 @@ final class MenuController
             if ($page === null) {
                 return [[], 'Для выбранного языка нет опубликованной версии этой страницы.'];
             }
-            $urlValue = (string) $page['slug'];
+            $urlValue = Page::menuTargetValue($page);
         }
         if ($urlType === 'custom' && $urlValue === '') {
             return [[], 'Укажите URL для пункта меню.'];

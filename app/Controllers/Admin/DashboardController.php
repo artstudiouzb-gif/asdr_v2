@@ -20,8 +20,8 @@ final class DashboardController
         $counts = [
             'news' => (int) Database::pdo()->query('SELECT COUNT(*) FROM news WHERE deleted_at IS NULL')->fetchColumn(),
             'news_drafts' => (int) Database::pdo()->query("SELECT COUNT(*) FROM news WHERE status = 'draft' AND deleted_at IS NULL")->fetchColumn(),
-            'pages' => (int) Database::pdo()->query('SELECT COUNT(*) FROM pages WHERE deleted_at IS NULL')->fetchColumn(),
-            'projects' => (int) Database::pdo()->query('SELECT COUNT(*) FROM projects WHERE deleted_at IS NULL')->fetchColumn(),
+            'pages' => (int) Database::pdo()->query("SELECT COUNT(*) FROM pages WHERE deleted_at IS NULL AND entity_type = 'page'")->fetchColumn(),
+            'projects' => (int) Database::pdo()->query("SELECT COUNT(*) FROM pages WHERE entity_type = 'project' AND deleted_at IS NULL")->fetchColumn(),
             'team' => (int) Database::pdo()->query('SELECT COUNT(*) FROM team_members')->fetchColumn(),
             'forms' => (int) Database::pdo()->query('SELECT COUNT(*) FROM forms')->fetchColumn(),
             'submissions_unread' => $canManageSubmissions
@@ -52,7 +52,7 @@ final class DashboardController
             $recentItems = Database::pdo()->query(
                 "(SELECT 'news' AS kind, id, title, status, updated_at FROM news WHERE deleted_at IS NULL ORDER BY updated_at DESC LIMIT 6)
                  UNION ALL
-                 (SELECT 'page' AS kind, id, title, status, updated_at FROM pages WHERE deleted_at IS NULL ORDER BY updated_at DESC LIMIT 6)
+                 (SELECT 'page' AS kind, id, title, status, updated_at FROM pages WHERE deleted_at IS NULL AND entity_type = 'page' ORDER BY updated_at DESC LIMIT 6)
                  ORDER BY updated_at DESC LIMIT 6"
             )->fetchAll();
         } catch (\Throwable $e) {

@@ -12,36 +12,30 @@ test('Проекты: публичные списки и блоки не сме�
     $pdo = Database::pdo();
     $prefix = 'strict-project-' . bin2hex(random_bytes(4));
 
+    // Языковая версия проекта — отдельная запись pages того же типа, связанная
+    // через translation_group_id. Другого механизма у проектов нет.
     $insert = $pdo->prepare(
-        "INSERT INTO projects
-            (title, slug, description, status, is_featured, lang, translation_group_id)
-         VALUES (?, ?, ?, ?, 1, ?, ?)"
+        "INSERT INTO pages
+            (title, slug, entity_type, `lead`, status, is_featured, lang, translation_group_id)
+         VALUES (?, ?, 'project', ?, ?, 1, ?, ?)"
     );
+    $linkGroup = $pdo->prepare('UPDATE pages SET translation_group_id = ? WHERE id = ?');
 
     $insert->execute(['RU independent', $prefix . '-independent', 'RU body', 'published', 'ru', null]);
     $independentBase = (int) $pdo->lastInsertId();
-    $pdo->prepare('UPDATE projects SET translation_group_id = ? WHERE id = ?')
-        ->execute([$independentBase, $independentBase]);
+    $linkGroup->execute([$independentBase, $independentBase]);
     $insert->execute(['UZ independent', $prefix . '-independent', 'UZ body', 'published', 'uz', $independentBase]);
     $independentUz = (int) $pdo->lastInsertId();
 
-    $insert->execute(['RU legacy', $prefix . '-legacy', 'Legacy RU body', 'published', 'ru', null]);
-    $legacyBase = (int) $pdo->lastInsertId();
-    $pdo->prepare('UPDATE projects SET translation_group_id = ? WHERE id = ?')
-        ->execute([$legacyBase, $legacyBase]);
-    \App\Models\ProjectTranslation::upsert($legacyBase, 'uz', [
-        'title' => 'UZ legacy',
-        'description' => '',
-    ]);
+    // Русский проект без узбекской версии в узбекский список не попадает.
+    $insert->execute(['RU only', $prefix . '-ru-only', 'RU only body', 'published', 'ru', null]);
+    $ruOnly = (int) $pdo->lastInsertId();
+    $linkGroup->execute([$ruOnly, $ruOnly]);
 
+    // Черновик языковой версии не публикуется и не делает язык доступным.
     $insert->execute(['RU shadowed', $prefix . '-shadowed', 'Shadowed RU body', 'published', 'ru', null]);
     $shadowedBase = (int) $pdo->lastInsertId();
-    $pdo->prepare('UPDATE projects SET translation_group_id = ? WHERE id = ?')
-        ->execute([$shadowedBase, $shadowedBase]);
-    \App\Models\ProjectTranslation::upsert($shadowedBase, 'uz', [
-        'title' => 'Old UZ legacy',
-        'description' => 'Old body',
-    ]);
+    $linkGroup->execute([$shadowedBase, $shadowedBase]);
     $insert->execute(['UZ draft', $prefix . '-shadowed', 'Draft body', 'draft', 'uz', $shadowedBase]);
     $shadowDraft = (int) $pdo->lastInsertId();
 
@@ -51,24 +45,26 @@ test('Проекты: публичные списки и блоки не сме�
         $uzById[(int) $row['id']] = $row;
     }
     assert_same('UZ independent', $uzById[$independentUz]['title']);
+    assert_same('UZ body', $uzById[$independentUz]['description'], 'анонс отдаётся под именем description');
     assert_true(!isset($uzById[$independentBase]), 'RU-версия независимого проекта не дублируется');
-    assert_same('UZ legacy', $uzById[$legacyBase]['title']);
-    assert_same('Legacy RU body', $uzById[$legacyBase]['description'], 'частичный legacy-перевод сохраняет фолбэк поля');
-    assert_true(!isset($uzById[$shadowedBase]), 'черновик независимого перевода подавляет устаревший legacy-перевод');
+    assert_true(!isset($uzById[$ruOnly]), 'проект без узбекской версии в узбекский список не попадает');
     assert_true(!isset($uzById[$shadowDraft]), 'черновик не публикуется');
 
     $homeIds = array_map(static fn (array $row): int => (int) $row['id'], Project::forHome(24, 'uz'));
     assert_true(in_array($independentUz, $homeIds, true), 'языковая выборка работает и для проектного блока');
     assert_true(!in_array($independentBase, $homeIds, true), 'проектный блок не дублирует RU-версию');
-    assert_true(!in_array($shadowedBase, $homeIds, true), 'проектный блок не показывает устаревший legacy-перевод');
 
     $found = Project::findPublishedBySlug($prefix . '-independent', 'uz');
     assert_same($independentUz, (int) ($found['id'] ?? 0));
+    // Узбекской версии нет — посетителю показываем русскую, а не 404.
+    $fallback = Project::findPublishedBySlug($prefix . '-ru-only', 'uz');
+    assert_same($ruOnly, (int) ($fallback['id'] ?? 0));
+
     assert_true(in_array('uz', Project::availableLangs($independentBase), true));
     assert_true(!in_array('uz', Project::availableLangs($shadowedBase), true), 'черновик не делает язык доступным');
 
-    $ids = implode(',', [$independentBase, $independentUz, $legacyBase, $shadowedBase, $shadowDraft]);
-    $pdo->exec("DELETE FROM projects WHERE id IN ({$ids})");
+    $ids = implode(',', [$independentBase, $independentUz, $ruOnly, $shadowedBase, $shadowDraft]);
+    $pdo->exec("DELETE FROM pages WHERE id IN ({$ids})");
 });
 
 test('Документы и вакансии: список, поиск, сортировка и счётчик используют текущий язык', function () {

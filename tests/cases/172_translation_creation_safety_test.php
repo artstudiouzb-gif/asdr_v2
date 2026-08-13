@@ -75,7 +75,9 @@ test('Миграция целостности восстанавливает н�
         $schema,
         'чистая установка отмечает миграцию применённой'
     );
-    foreach (['news', 'pages', 'projects'] as $table) {
+    // Проекты живут в pages (entity_type='project'), отдельной нормализации им
+    // не нужно — их корни выставляет тот же UPDATE по pages.
+    foreach (['news', 'pages'] as $table) {
         assert_contains(
             "UPDATE {$table} SET translation_group_id = id",
             $schema,

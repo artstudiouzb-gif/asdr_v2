@@ -99,7 +99,9 @@ final class AgencyContentSeeder
                     $lang = (string) $lang;
                     $data = (array) $data;
 
-                    $find = $pdo->prepare('SELECT id FROM pages WHERE slug = :slug AND lang = :lang LIMIT 1');
+                    $find = $pdo->prepare(
+                        "SELECT id FROM pages WHERE slug = :slug AND lang = :lang AND entity_type = 'page' LIMIT 1"
+                    );
                     $find->execute([':slug' => $slug, ':lang' => $lang]);
                     $pageId = (int) ($find->fetchColumn() ?: 0);
 

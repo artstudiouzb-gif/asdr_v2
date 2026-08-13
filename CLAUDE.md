@@ -51,7 +51,7 @@ root@127.0.0.1 без пароля. Если админ-пароль неизв�
 
 ## Проверки (вместо ручного клика)
 ```bash
-# Полный прогон: 1036 сценариев; без TEST_DB_* 172 DB-сценария пропускаются
+# Полный прогон: 1135 сценариев; без TEST_DB_* 178 DB-сценариев пропускаются
 TEST_DB_HOST=127.0.0.1 TEST_DB_DATABASE=asdr_test TEST_DB_USERNAME=root TEST_DB_PASSWORD= php tests/run.php
 
 # Smoke-обход всего сайта (HTTP+PHP-фаталы), RU+UZ, публичка и вся админка.
@@ -83,6 +83,12 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   тянут данные из БД), шаблоны — `templates/blocks/*.php`, редактор полей —
   `app/Views/admin/pages/block_form.php`, сохранение (whitelist полей) —
   `app/Controllers/Admin/BlockController.php::collectData()`.
+- **Контейнеры** (`BlockTypeRegistry::CONTAINER_TYPES` = `columns`, `tabs`):
+  содержимое — вложенные блоки (`blocks.parent_block_id` + `column_index` =
+  номер колонки/вкладки), шаблона нет, рендер программный
+  (`BlockRenderer::renderColumns/renderTabs`). Контейнер в контейнер не
+  вкладывается. Вкладки без JS показывают все панели подряд; переключение
+  надстраивает `public/assets/js/blocks/tabs.js`. Подробности — docs/BLOCKS.md.
 - **Условия показа блока** — `App\Core\BlockVisibility` (ключи `_visible_from`,
   `_visible_to`, `_visible_device` в data блока). Расписание считается на
   сервере: блок вне окна вообще не попадает в HTML. Устройство — классами
@@ -90,6 +96,25 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   посетителей. `BlockRenderer::renderPage()` отдаёт `expires_at` (ближайшая
   граница расписания), `PageController` по ней пересобирает кэш — иначе баннер
   «до 30 июля» висел бы и 31-го.
+- **Проект — это страница с подтипом** (`pages.entity_type` = `page|project`).
+  Отдельных таблиц у проектов нет: и чтение, и запись идут в `pages` с фильтром
+  по типу (`App\Models\Project`). Обложка, «показать на главном» и ручной
+  порядок — колонки `pages`; `pages.lead` у проекта это анонс для карточки, а
+  тело собирается блоками тем же конструктором, что и у страниц (общий партиал
+  `admin/pages/_block_editor.php`). Форма проекта: паспорт (название, адрес,
+  анонс, обложка, статус, порядок, «на главном») плюс конструктор — второго
+  места для содержимого нет.
+  **Различаются записи по `entity_type`**: свой раздел админки и своя форма у
+  каждого типа, форма страницы отдаёт 404 на проект (и наоборот, `Project::`
+  не видит страниц), публичный адрес страницы — `/slug`, проекта —
+  `/projects/slug`, slug уникален внутри типа. Любой новый список по `pages`
+  обязан фильтровать тип.
+  **Язык у проекта один механизм** — отдельная запись своего языка
+  (`lang` + `translation_group_id`, кнопка «Создать перевод» в сайдбаре),
+  slug у версий общий. Старых таблиц (`projects`, `project_translations`,
+  `project_images`, `project_fields`) не осталось: миграция
+  `2026_08_13_projects_into_pages.sql` переносит галерею и свободные поля в
+  блоки и удаляет их, свежая установка их и не создаёт.
 - **Модели** — `app/Models/*` (Project, News, PhotoAlbum, TeamMember, Page,
   MenuItem, Setting, …). Много `SELECT *`; статусы published/draft, мягкое удаление.
 - **i18n публички**: `App\Core\Lang` + глобальный `t()` (`app/Core/helpers.php`),

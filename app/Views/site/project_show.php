@@ -4,9 +4,14 @@ use App\Core\Locale;
 use App\Models\Project;
 
 /** @var array $project */
+/** @var string $content */
+/** @var string $blockCss */
+$content = $content ?? '';
 $metaTitle = (string) $project['title'];
 $metaDescription = mb_substr(strip_tags((string) ($project['description'] ?? '')), 0, 200);
 $ogImage = trim((string) ($project['cover_image'] ?? ''));
+// Scoped CSS блоков проекта уходит в <head> тем же путём, что и у страницы.
+$extraHeadCss = $blockCss ?? '';
 require __DIR__ . '/_header.php';
 
 $crumbs = [
@@ -32,7 +37,13 @@ $others = array_values(array_filter(
             <?= \App\Core\Media::picture($cover, (string) $project['title'], null, null, 'projdetail__media', false, '(max-width: 900px) 100vw, 55vw') ?>
         <?php endif; ?>
     </div>
-    <div class="projdetail__content newsdetail-article__content rich-content"><?= $project['description'] ?></div>
+    <?php $lead = trim((string) ($project['description'] ?? '')); ?>
+    <?php if ($lead !== ''): ?>
+        <p class="projdetail__lead"><?= htmlspecialchars($lead, ENT_QUOTES) ?></p>
+    <?php endif; ?>
+    <?php if (trim($content) !== ''): ?>
+        <div class="projdetail__content"><?= $content ?></div>
+    <?php endif; ?>
 
     <?php if (!empty($others)): ?>
         <section class="projdetail-related">

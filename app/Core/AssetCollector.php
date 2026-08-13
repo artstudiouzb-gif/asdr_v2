@@ -23,6 +23,7 @@ final class AssetCollector
         'anchor_nav' => '/assets/js/blocks/anchor_nav.js',
         'news' => '/assets/js/news.js',
         'leader_card' => '/assets/js/blocks/leader_card.js',
+        'tabs' => '/assets/js/blocks/tabs.js',
     ];
 
     /**
@@ -42,6 +43,7 @@ final class AssetCollector
         'org_structure' => '/assets/css/blocks/org-structure.css',
         'leader_card' => '/assets/css/blocks/leader-card.css',
         'media_gallery' => '/assets/css/blocks/media-gallery.css',
+        'tabs' => '/assets/css/blocks/tabs.css',
     ];
 
     /** @var array<string, bool> */
