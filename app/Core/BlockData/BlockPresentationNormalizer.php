@@ -28,6 +28,9 @@ final class BlockPresentationNormalizer
     /** @var list<string> */
     private const PADDINGS = ['default', 'none', 'small', 'medium', 'large'];
 
+    /** Минимальная высота секции: пусто — по содержимому. */
+    private const MIN_HEIGHTS = ['small', 'medium', 'large', 'screen'];
+
     /** Способ залить фон секции: пресет темы, свой цвет, градиент, фото, узор. */
     private const BACKGROUND_MODES = ['preset', 'color', 'gradient', 'image', 'pattern'];
 
@@ -150,6 +153,13 @@ final class BlockPresentationNormalizer
             '_visible_to' => BlockVisibility::normalize(self::scalarString($input['visible_to'] ?? null)),
             '_visible_device' => in_array($device, ['desktop', 'mobile'], true) ? $device : '',
         ];
+
+        // Короткая секция обрезает фотографию-фон до полоски, поэтому высоту
+        // можно задать отдельно от отступов.
+        $minHeight = self::scalarString($input['min_height'] ?? null);
+        if (in_array($minHeight, self::MIN_HEIGHTS, true)) {
+            $normalized['_min_height'] = $minHeight;
+        }
 
         $normalized += self::background($input);
 

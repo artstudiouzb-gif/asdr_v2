@@ -127,3 +127,72 @@ test('Подвал использует тот же фон, эмблема бе�
 
     assert_same('', BlockBackground::cssFor('.site-footer', ['_bg_mode' => 'preset']));
 });
+
+test('Минимальная высота секции: класс из белого списка, мусор игнорируется', function () {
+    $data = BlockPresentationNormalizer::normalize(['min_height' => 'medium']);
+    assert_same('medium', $data['_min_height']);
+    assert_false(isset(BlockPresentationNormalizer::normalize(['min_height' => 'огромная'])['_min_height']));
+
+    $rendered = BlockRenderer::render([
+        'id' => 791,
+        'type' => 'text',
+        'data' => json_encode(array_merge(['content' => 'Текст'], $data), JSON_UNESCAPED_UNICODE),
+        'custom_css' => '',
+    ]);
+    assert_contains('cms-block--minh-medium', (string) $rendered['html']);
+
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    assert_contains('.cms-block--minh-medium { min-height: 480px; }', $css);
+});
+
+test('Редактора предупреждают о тяжёлом фоне', function () {
+    $uploads = rtrim((string) \App\Core\Config::get('paths.public_uploads', ''), '/');
+    $name = '/hint-heavy-' . uniqid() . '.jpg';
+    file_put_contents($uploads . $name, str_repeat('x', 600 * 1024));
+
+    $hints = \App\Core\BlockHints::forBlock('text', [
+        '_bg_mode' => 'image',
+        '_bg_image' => '/uploads/public' . $name,
+    ]);
+    assert_true($hints !== [], 'фон на 600 КБ должен вызывать предупреждение');
+    assert_contains('не грузится лениво', $hints[0]);
+
+    // Лёгкий файл не тревожит: предупреждение на каждый фон обесценило бы его.
+    // Отдельный файл, а не перезапись: filesize() кэширует размер, и в CI
+    // проверка «полегчал» видела прежние 600 КБ.
+    $light = '/hint-light-' . uniqid() . '.jpg';
+    file_put_contents($uploads . $light, str_repeat('x', 100 * 1024));
+    assert_same([], \App\Core\BlockHints::forBlock('text', [
+        '_bg_mode' => 'image',
+        '_bg_image' => '/uploads/public' . $light,
+    ]));
+
+    unlink($uploads . $name);
+    unlink($uploads . $light);
+});
+
+test('Сгенерированная тема не тянет переменные с относительными адресами', function () {
+    // `--gov-emblem` объявлена как url('../img/emblem.svg') в файле темы; в
+    // сгенерированном CSS (он лежит в /uploads/public/generated-css/) такой
+    // адрес разрешается от него — на этом однажды пропала маска в подвале.
+    $generated = \App\Core\SiteThemeCss::build(
+        \App\Core\DesignSettings::current(),
+        \App\Core\HeaderConfig::get(),
+        false
+    );
+
+    assert_not_contains('var(--gov-emblem)', $generated);
+    assert_same(
+        0,
+        preg_match('#url\((["\']?)\.\.?/#', $generated),
+        'относительный url() в сгенерированной теме разрешается не от файла темы'
+    );
+
+    // Поля форм админки показывают только выбранный режим фона.
+    $adminJs = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin.js');
+    assert_contains('data-bg-group', $adminJs);
+    foreach (['pages/block_form.php', 'footer/index.php'] as $view) {
+        $markup = (string) file_get_contents(APP_ROOT . '/app/Views/admin/' . $view);
+        assert_contains('data-bg-group', $markup, $view . ': поля фона не разбиты по режимам');
+    }
+});

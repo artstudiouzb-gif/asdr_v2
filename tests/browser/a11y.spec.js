@@ -16,12 +16,27 @@ const PAGES = [
     ['лента новостей', '/news'],
     ['поиск', '/search?q=%D1%81%D1%82%D1%80%D0%B0%D1%82%D0%B5%D0%B3%D0%B8%D1%8F'],
     ['узбекская версия', '/uz'],
+    // Формы и таблицы — там нарушений больше всего: у полей теряются подписи,
+    // у ячеек — заголовки. Детальная новость и проект добавлены как самые
+    // читаемые страницы сайта.
+    ['детальная новость', '/news/ekspertnyy-kadrovyy-rezerv'],
+    ['проект', '/projects/cifrovaya-transformaciya'],
+    ['каталог документов', '/catalog/documenty'],
+    ['контакты с формой', '/kontakty'],
 ];
 
 for (const [name, url] of PAGES) {
     for (const theme of ['light', 'dark']) {
         test(`доступность: ${name} (${theme})`, async ({ page }) => {
-            await page.goto(url, { waitUntil: 'domcontentloaded' });
+            const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+
+            // Минимальная фикстура CI содержит только главную; новости, проекты
+            // и каталог появляются с демо-комплектом. Пропуск делаем видимым:
+            // иначе аудит молча проверял бы страницу ошибки вместо страницы.
+            test.skip(
+                response !== null && response.status() === 404,
+                `${url} — нет в этой сборке контента`
+            );
             if (theme === 'dark') {
                 await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
                 await page.waitForTimeout(200);

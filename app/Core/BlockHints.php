@@ -69,6 +69,13 @@ final class BlockHints
             }
         }
 
+        // Фон-фотография грузится сразу, без ленивой загрузки: тяжёлый файл
+        // тормозит первую отрисовку, а редактор об этом не узнает.
+        $backgroundHint = self::heavyBackgroundHint($data);
+        if ($backgroundHint !== null) {
+            $hints[] = $backgroundHint;
+        }
+
         // Блок формы без выбранной формы виден только как заглушка.
         if ($type === 'form' && (int) ($data['form_id'] ?? 0) === 0) {
             $hints[] = 'Форма не выбрана — на сайте вместо неё будет предупреждение. Выберите форму в поле блока.';
@@ -85,6 +92,42 @@ final class BlockHints
         }
 
         return $hints;
+    }
+
+    /**
+     * Вес фотографии-фона. Порог — 400 КБ: столько «стоит» приличный кадр
+     * после сжатия, дальше начинается заметная задержка первой отрисовки.
+     *
+     * @param array<string,mixed> $data
+     */
+    private static function heavyBackgroundHint(array $data): ?string
+    {
+        if (($data['_bg_mode'] ?? '') !== 'image') {
+            return null;
+        }
+        $url = trim((string) ($data['_bg_image'] ?? ''));
+        if ($url === '') {
+            return null;
+        }
+
+        $prefix = rtrim((string) Config::get('paths.public_uploads_url', '/uploads/public'), '/');
+        $base = rtrim((string) Config::get('paths.public_uploads', ''), '/');
+        if ($base === '' || !str_starts_with($url, $prefix . '/')) {
+            return null;
+        }
+
+        $path = $base . substr(preg_replace('/[?#].*$/', '', $url) ?? $url, strlen($prefix));
+        if (!is_file($path)) {
+            return null;
+        }
+
+        $size = (int) filesize($path);
+        if ($size <= 400 * 1024) {
+            return null;
+        }
+
+        return 'Фон секции весит ' . round($size / 1048576, 1) . ' МБ. Фон не грузится лениво: '
+            . 'страница будет ждать этот файл. Уменьшите кадр или возьмите более сжатый.';
     }
 
     /**

@@ -43,7 +43,10 @@
     .system-error--403 p { color: #666; margin: 12px 0 24px; }
     .system-error--403 a { color: #4361ee; text-decoration: none; }
 
-.system-error--404 { --navy: #173a63; --teal: #17999b; --ink: #1f2b3d; --muted: #667182; --bg: #f4f6f9; --line: #e5e9f0; }
+/* Бирюзовый темнее фирменного: на светлом фоне страницы ошибки он служит и
+   цветом ссылок (3.2:1), и заливкой кнопки поиска под белым текстом (3.46:1) —
+   обе пары не добирали до 4.5. Теперь 5.27 и 5.7. */
+.system-error--404 { --navy: #173a63; --teal: #0f7275; --ink: #1f2b3d; --muted: #667182; --bg: #f4f6f9; --line: #e5e9f0; }
     .system-error--404,
     .system-error--404 * { box-sizing: border-box; }
     .system-error--404 { margin: 0; font-family: 'PT Sans', 'Segoe UI', Roboto, Arial, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.6; }
