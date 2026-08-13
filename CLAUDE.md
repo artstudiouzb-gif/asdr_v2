@@ -108,6 +108,12 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   встроен в форму проекта (общий партиал `admin/pages/_block_editor.php`).
   `pages.lead` у проекта — анонс для карточки, тело живёт в блоках. Любой
   новый запрос-список по `pages` обязан фильтровать `entity_type`.
+  В форме проекта остались только паспорт (название, адрес, анонс, обложка,
+  статус, порядок, «на главном») и конструктор: галерея (`project_images`) и
+  свободные поля (`project_fields`) больше не редактируются — на сайте они
+  никогда и не выводились. Данные переносит в блоки разовый
+  `php database/migrate_project_extras_to_blocks.php` (есть `--dry-run`);
+  таблицы пока оставлены как архив.
 - **Модели** — `app/Models/*` (Project, News, PhotoAlbum, TeamMember, Page,
   MenuItem, Setting, …). Много `SELECT *`; статусы published/draft, мягкое удаление.
 - **i18n публички**: `App\Core\Lang` + глобальный `t()` (`app/Core/helpers.php`),

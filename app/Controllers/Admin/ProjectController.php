@@ -15,8 +15,6 @@ use App\Core\Slug;
 use App\Core\View;
 use App\Models\Language;
 use App\Models\Project;
-use App\Models\ProjectField;
-use App\Models\ProjectImage;
 use App\Models\ProjectTranslation;
 use App\Models\ContentRevision;
 
@@ -60,7 +58,7 @@ final class ProjectController
     public function create(): void
     {
         Auth::requireLogin();
-        View::render('admin/projects/form', ['project' => null, 'images' => [], 'fields' => [], 'translations' => [], 'error' => null]);
+        View::render('admin/projects/form', ['project' => null, 'translations' => [], 'error' => null]);
     }
 
     public function store(): void
@@ -74,20 +72,14 @@ final class ProjectController
         if ($error !== null) {
             View::render('admin/projects/form', [
                 'project' => $data,
-                'images' => $this->collectImages(),
-                'fields' => $this->collectFields(),
                 'translations' => $translations,
                 'error' => $error,
             ]);
             return;
         }
 
-        $images = $this->collectImages();
-        $fields = $this->collectFields();
-        $id = Database::transaction(static function (\PDO $_pdo) use ($data, $images, $fields, $translations): int {
+        $id = Database::transaction(static function (\PDO $_pdo) use ($data, $translations): int {
             $id = Project::create($data);
-            ProjectImage::replaceAll($id, $images);
-            ProjectField::replaceAll($id, $fields);
             self::saveTranslations($id, $translations);
 
             return $id;
@@ -111,8 +103,6 @@ final class ProjectController
 
         View::render('admin/projects/form', [
             'project' => $project,
-            'images' => ProjectImage::forProject((int) $project['id']),
-            'fields' => ProjectField::forProject((int) $project['id']),
             'translations' => ProjectTranslation::forProject((int) $project['id']),
             'error' => null,
         ]);
@@ -158,8 +148,6 @@ final class ProjectController
         if (!ContentRevision::isFresh('project', $id, (string) ($_POST['expected_updated_at'] ?? ''))) {
             View::render('admin/projects/form', [
                 'project' => $project,
-                'images' => ProjectImage::forProject($id),
-                'fields' => ProjectField::forProject($id),
                 'translations' => ProjectTranslation::forProject($id),
                 'error' => 'Проект уже был изменён в другой вкладке или другим пользователем. Текущие данные перезагружены; восстановите локальный черновик и проверьте изменения.',
             ]);
@@ -172,31 +160,23 @@ final class ProjectController
         if ($error !== null) {
             View::render('admin/projects/form', [
                 'project' => array_merge($project, $data),
-                'images' => $this->collectImages(),
-                'fields' => $this->collectFields(),
                 'translations' => $translations,
                 'error' => $error,
             ]);
             return;
         }
 
-        $images = $this->collectImages();
-        $fields = $this->collectFields();
         $expectedVersion = (int) ($_POST['expected_lock_version'] ?? 0);
         try {
-            Database::transaction(static function (\PDO $_pdo) use ($id, $data, $images, $fields, $translations, $expectedVersion): void {
+            Database::transaction(static function (\PDO $_pdo) use ($id, $data, $translations, $expectedVersion): void {
                 ContentRevision::capture('project', $id, Auth::id());
                 Project::update($id, $data, $expectedVersion);
-                ProjectImage::replaceAll($id, $images);
-                ProjectField::replaceAll($id, $fields);
                 self::saveTranslations($id, $translations);
             });
         } catch (ConcurrencyException) {
             $project = Project::findById($id) ?? $project;
             View::render('admin/projects/form', [
                 'project' => $project,
-                'images' => ProjectImage::forProject($id),
-                'fields' => ProjectField::forProject($id),
                 'translations' => ProjectTranslation::forProject($id),
                 'error' => 'Проект уже был изменён в другой вкладке или другим пользователем. Текущие данные перезагружены; восстановите локальный черновик и проверьте изменения.',
             ]);
@@ -271,20 +251,6 @@ final class ProjectController
         return mb_substr($text, 0, 300);
     }
 
-    private function collectImages(): array
-    {
-        $images = [];
-        foreach ((array) ($_POST['gallery'] ?? []) as $image) {
-            $path = trim((string) ($image['file_path'] ?? ''));
-            if ($path === '') {
-                continue;
-            }
-            $images[] = ['file_path' => $path, 'caption' => trim((string) ($image['caption'] ?? ''))];
-        }
-
-        return $images;
-    }
-
     /**
      * Переводы из полей translations[<lang>][title|description] для всех
      * НЕ-основных активных языков. Ключ — код языка.
@@ -322,29 +288,5 @@ final class ProjectController
                 'description' => $t['description'] ?? '',
             ]);
         }
-    }
-
-    private function collectFields(): array
-    {
-        $fields = [];
-        foreach ((array) ($_POST['custom_fields'] ?? []) as $field) {
-            $key = trim((string) ($field['key'] ?? ''));
-            if ($key === '') {
-                continue;
-            }
-            $valRu = trim((string) ($field['value'] ?? ''));
-            $valUz = trim((string) ($field['value_uz'] ?? ''));
-            $valEn = trim((string) ($field['value_en'] ?? ''));
-
-            $fields[] = ['field_key' => $key, 'field_value' => $valRu];
-            if ($valUz !== '') {
-                $fields[] = ['field_key' => $key . ' [uz]', 'field_value' => $valUz];
-            }
-            if ($valEn !== '') {
-                $fields[] = ['field_key' => $key . ' [en]', 'field_value' => $valEn];
-            }
-        }
-
-        return $fields;
     }
 }

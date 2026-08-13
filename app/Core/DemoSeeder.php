@@ -169,8 +169,6 @@ final class DemoSeeder
             'pages' => 12,
             'blocks' => 40,
             'projects' => 4,
-            'project_images' => 8,
-            'project_fields' => 16,
             'project_translations' => 4,
             'content_entries' => 14,
             'content_entry_translations' => 14,
@@ -1221,59 +1219,42 @@ final class DemoSeeder
             )->execute([':id' => (int) $projectId]);
             self::seedProjectBody($pdo, (int) $projectId, 'ru', $project[3]);
 
-            if (self::tableExists($pdo, 'project_images')) {
-                $imageIns = $pdo->prepare(
-                    "INSERT INTO project_images (project_id, file_path, caption, sort_order)
-                     SELECT :pid, :path, :caption, :sort
-                     FROM DUAL
-                     WHERE NOT EXISTS (
-                         SELECT 1 FROM project_images WHERE project_id = :pid2 AND file_path = :path2
-                     )"
-                );
-                $gallery = array_values(array_unique([
-                    $projectImages[$project[0]] ?? $project[2],
-                    '/uploads/public/demo-strategy-meeting.jpg',
-                    '/uploads/public/demo-urban-development.jpg',
-                ]));
-                foreach ($gallery as $sort => $path) {
-                    $imageIns->execute([
-                        ':pid' => (int) $projectId,
-                        ':path' => $path,
-                        ':caption' => $project[1],
-                        ':sort' => $sort,
-                        ':pid2' => (int) $projectId,
-                        ':path2' => $path,
-                    ]);
-                }
-            }
-
-            if (self::tableExists($pdo, 'project_fields')) {
-                $fieldIns = $pdo->prepare(
-                    "INSERT INTO project_fields (project_id, field_key, field_value, sort_order)
-                     SELECT :pid, :field_key, :field_value, :sort
-                     FROM DUAL
-                     WHERE NOT EXISTS (
-                         SELECT 1 FROM project_fields WHERE project_id = :pid2 AND field_key = :field_key2
-                     )"
-                );
-                $fields = [
-                    'Статус' => 'В реализации',
-                    'Период' => '2026–2030',
-                    'Уровень' => $i % 2 === 0 ? 'Национальный' : 'Межрегиональный',
-                    'Ключевой результат' => 'Измеримый вклад в достижение целей Стратегии «Узбекистан–2030»',
+            // Фотографии и характеристики проекта — блоки его же страницы:
+            // отдельных разделов формы под них больше нет.
+            $gallery = array_values(array_unique([
+                $projectImages[$project[0]] ?? $project[2],
+                '/uploads/public/demo-strategy-meeting.jpg',
+                '/uploads/public/demo-urban-development.jpg',
+            ]));
+            $galleryItems = [];
+            foreach ($gallery as $path) {
+                $galleryItems[] = [
+                    'kind' => 'photo',
+                    'title' => $project[1],
+                    'image' => $path,
+                    'url' => '',
+                    'meta' => '',
+                    'text' => '',
                 ];
-                $fieldOrder = 0;
-                foreach ($fields as $fieldKey => $value) {
-                    $fieldIns->execute([
-                        ':pid' => (int) $projectId,
-                        ':field_key' => $fieldKey,
-                        ':field_value' => $value,
-                        ':sort' => $fieldOrder++,
-                        ':pid2' => (int) $projectId,
-                        ':field_key2' => $fieldKey,
-                    ]);
-                }
             }
+            self::seedProjectBlock($pdo, (int) $projectId, 'ru', 'media_gallery', 'Фотографии проекта', [
+                'title' => 'Фотографии проекта',
+                'source' => 'manual',
+                'items' => $galleryItems,
+            ]);
+
+            self::seedProjectBlock($pdo, (int) $projectId, 'ru', 'icon_text', 'Характеристики проекта', [
+                'variant' => 'plain',
+                'title' => 'Характеристики проекта',
+                'columns' => 2,
+                'items' => [[
+                    'icon_svg' => '',
+                    'icon_color' => '',
+                    'rows' => "Статус | В реализации\nПериод | 2026–2030\nУровень | "
+                        . ($i % 2 === 0 ? 'Национальный' : 'Межрегиональный')
+                        . "\nКлючевой результат | Измеримый вклад в достижение целей Стратегии «Узбекистан–2030»",
+                ]],
+            ]);
         }
 
         if (self::tableExists($pdo, 'page_translations')) {
@@ -1314,6 +1295,45 @@ final class DemoSeeder
         $text = trim((string) preg_replace('/\s+/u', ' ', $text));
 
         return mb_substr($text, 0, 300);
+    }
+
+    /**
+     * Дополнительный блок демо-проекта (галерея, характеристики). Повторный
+     * запуск ничего не дублирует — блок ставится по внутреннему названию.
+     *
+     * @param array<string, mixed> $data
+     */
+    private static function seedProjectBlock(
+        PDO $pdo,
+        int $pageId,
+        string $lang,
+        string $type,
+        string $title,
+        array $data
+    ): void {
+        if (!self::tableExists($pdo, 'blocks')) {
+            return;
+        }
+
+        $exists = $pdo->prepare('SELECT 1 FROM blocks WHERE page_id = :id AND title = :title LIMIT 1');
+        $exists->execute([':id' => $pageId, ':title' => $title]);
+        if ($exists->fetchColumn() !== false) {
+            return;
+        }
+
+        $sort = (int) $pdo->query('SELECT COALESCE(MAX(sort_order), 0) + 1 FROM blocks WHERE page_id = ' . $pageId)
+            ->fetchColumn();
+        $pdo->prepare(
+            "INSERT INTO blocks (page_id, lang, type, title, data, custom_css, sort_order, is_active, created_at)
+             VALUES (:id, :lang, :type, :title, :data, '', :sort, 1, NOW())"
+        )->execute([
+            ':id' => $pageId,
+            ':lang' => $lang,
+            ':type' => $type,
+            ':title' => $title,
+            ':data' => json_encode($data, JSON_UNESCAPED_UNICODE),
+            ':sort' => $sort,
+        ]);
     }
 
     /**
