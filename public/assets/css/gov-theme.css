@@ -298,7 +298,6 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     -webkit-mask: var(--gov-emblem) center/contain no-repeat; mask: var(--gov-emblem) center/contain no-repeat;
 }
 .site-nav { border-top: 1px solid var(--gov-border); position: relative; }
-body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-top-color: var(--gov-border); }
 
 .site-menu { display: flex; gap: var(--menu-gap-current, var(--menu-gap, 18px)); flex-wrap: wrap; align-items: center; }
 
@@ -831,8 +830,9 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 .site-nav__extra--center { margin: 0 auto; }
 .site-nav__extra .site-search input { max-width: 160px; }
 
-/* --- Поведение шапки: липкая и прозрачная (Pro Max; body-префикс перебивает
-   легаси-режимы design-header-* из старой дизайн-системы) --- */
+/* --- Поведение шапки: липкая и прозрачная. Режимы задаёт конструктор шапки
+   (.site-header--sticky/--transparent); прежние классы design-header-* из
+   раздела «Дизайн» удалены вместе с настройками, которые их не выводили. --- */
 body .site-header--sticky { position: sticky; top: var(--hdr-panel-height, 0px); z-index: 200; }
 body .site-header--sticky.is-scrolled { box-shadow: 0 8px 28px rgba(11,26,48,.14); }
 

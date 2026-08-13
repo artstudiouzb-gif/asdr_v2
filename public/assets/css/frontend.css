@@ -1116,24 +1116,6 @@ body.design-catalog-cards_sm .content-cards { display: grid; grid-template-colum
 body.design-catalog-cards_sm .content-card { padding: 16px 18px; }
 body.design-catalog-list .content-cards { display: flex; flex-direction: column; }
 
-/* --- Шапка: стиль и фиксация из настроек --- */
-body.design-header-sticky .site-header {
-    position: sticky; top: 0; z-index: 50;
-    background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
-    backdrop-filter: saturate(1.4) blur(10px);
-    box-shadow: var(--shadow-sm);
-}
-body.design-header-dark .site-header { background: #14161c; }
-body.design-header-dark .site-header .site-menu__link,
-body.design-header-dark .site-header .site-header__logo span,
-body.design-header-dark .site-header a { color: #f3f5f9; }
-body.design-header-accent .site-header { background: linear-gradient(90deg, var(--color-primary, #1a1a1a), color-mix(in srgb, var(--color-primary, #1a1a1a) 70%, var(--color-accent, #e63946))); }
-body.design-header-accent .site-header .site-menu__link,
-body.design-header-accent .site-header .site-header__logo span,
-body.design-header-accent .site-header a { color: #fff; }
-body.design-header-accent .site-search { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.3); }
-body.design-header-accent .site-search input { color: #fff; }
-body.design-header-accent .site-search input::placeholder { color: rgba(255,255,255,.75); }
 
 /* --- Современная отделка --- */
 .site-header { border-bottom: 1px solid var(--border-color); }
@@ -1280,7 +1262,6 @@ body.design-cards-flat .block-partners__item { border: 1px solid var(--border-co
 
 /* Плавающий сайдбар — липнет при прокрутке; неподвижный — обычный поток. */
 body.design-sidebar-floating .layout__sidebar { position: sticky; top: 20px; align-self: start; }
-body.design-header-sticky.design-sidebar-floating .layout__sidebar { top: calc(var(--sticky-offset, 76px)); }
 @media (max-width: 900px) { body.design-sidebar-floating .layout__sidebar { position: static; } }
 
 /* --- Тип поиска: в строке vs выпадающий (настройки дизайна) --- */
@@ -1450,7 +1431,6 @@ body.design-detail-sidebar .content-detail__aside .content-detail__row dt { colo
 body.mobile-menu-open .site-burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 body.mobile-menu-open .site-burger span:nth-child(2) { opacity: 0; }
 body.mobile-menu-open .site-burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-body.design-header-dark .site-burger, body.design-header-accent .site-burger { color: #fff; border-color: rgba(255,255,255,.4); }
 
 @media (max-width: 720px) {
     /* Режим «Бургер-меню»: меню скрыто, раскрывается панелью под шапкой. */
@@ -1474,15 +1454,6 @@ body.design-header-dark .site-burger, body.design-header-accent .site-burger { c
     body.design-mmenu-burger .site-menu__link { display: block; padding: 12px 8px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
     body.design-mmenu-burger .site-menu__item { width: 100%; }
     body.design-mmenu-burger .site-header { position: relative; }
-    body.design-header-dark.design-mmenu-burger .site-menu,
-    body.design-header-accent.design-mmenu-burger .site-menu { background: var(--bg-primary); }
-    body.design-header-dark.design-mmenu-burger .site-menu__link,
-    body.design-header-accent.design-mmenu-burger .site-menu__link { color: var(--text-main); }
-
-    /* Мобильная шапка: фиксированная поверх контента при прокрутке. */
-    body.design-mheader-fixed .site-header { position: sticky; top: 0; z-index: 50; background: var(--bg-primary); }
-    body.design-mheader-fixed.design-header-dark .site-header { background: #14161c; }
-    body.design-mheader-static .site-header { position: relative; }
 }
 
 /* --- Календарь мероприятий --- */
@@ -1684,13 +1655,6 @@ p { line-height: var(--base-line-height, 1.6); }
 
 /* --- Шапка: глубина, аккуратные ссылки меню --- */
 .site-header { position: relative; z-index: 40; }
-body.design-header-accent .site-header {
-    background:
-        radial-gradient(900px 300px at 85% -80%, color-mix(in srgb, var(--color-accent, #5b52e5) 32%, transparent), transparent 70%),
-        linear-gradient(120deg, var(--ink) 0%, color-mix(in srgb, var(--color-primary, #1f4b8e) 84%, #000) 100%);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, .07) inset, 0 10px 30px rgba(8, 12, 34, .25);
-}
-body.design-header-dark .site-header { box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 10px 30px rgba(0,0,0,.35); }
 .site-menu__link {
     position: relative; padding: 8px 2px; border-radius: 6px;
     transition: opacity .15s ease;
@@ -1896,9 +1860,6 @@ body.design-header-dark .site-header { box-shadow: 0 1px 0 rgba(255,255,255,.06)
 .site-nav--align-right .site-menu { justify-content: flex-end; }
 .site-nav .site-menu__link { padding: 13px 2px; }
 .site-nav .site-menu__link::after { bottom: 8px; }
-/* Акцентная/тёмная шапка: разделитель полос — полупрозрачный белый. */
-body.design-header-accent .site-nav,
-body.design-header-dark .site-nav { border-top-color: rgba(255, 255, 255, .14); }
 
 /* На мобильных навигация сворачивается в бургер — полоса не должна занимать
    место и рисовать пустой разделитель (меню всплывает поверх контента). */
@@ -2591,14 +2552,6 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
     transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
     color: var(--gov-ink, var(--text-main)) !important; /* По умолчанию темные */
 }
-
-/* Белый цвет для кнопок в темных/акцентных шапках и в прозрачной шапке (пока не прокручена) */
-body.design-header-accent .site-search-toggle,
-body.design-header-accent .site-theme-toggle,
-body.design-header-accent .a11y-toggle,
-body.design-header-dark .site-search-toggle,
-body.design-header-dark .site-theme-toggle,
-body.design-header-dark .a11y-toggle,
 .site-header--transparent:not(.is-scrolled) .site-search-toggle,
 .site-header--transparent:not(.is-scrolled) .site-theme-toggle,
 .site-header--transparent:not(.is-scrolled) .a11y-toggle {
@@ -2613,14 +2566,6 @@ body.design-header-dark .a11y-toggle,
     color: var(--gov-teal, var(--color-accent)) !important;
     transform: scale(1.1) !important;
 }
-
-/* Ховер для темных/акцентных/прозрачных шапок (остается белым со светлым фоном) */
-body.design-header-accent .site-search-toggle:hover,
-body.design-header-accent .site-theme-toggle:hover,
-body.design-header-accent .a11y-toggle:hover,
-body.design-header-dark .site-search-toggle:hover,
-body.design-header-dark .site-theme-toggle:hover,
-body.design-header-dark .a11y-toggle:hover,
 .site-header--transparent:not(.is-scrolled) .site-search-toggle:hover,
 .site-header--transparent:not(.is-scrolled) .site-theme-toggle:hover,
 .site-header--transparent:not(.is-scrolled) .a11y-toggle:hover {

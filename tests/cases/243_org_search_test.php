@@ -83,3 +83,39 @@ test('Ссылки на состав сектора собираются по д
     $pdo->exec('DELETE FROM blocks WHERE page_id = ' . (int) $pageId);
     $pdo->exec('DELETE FROM pages WHERE id = ' . (int) $pageId);
 });
+
+test('Раздел «Дизайн» не предлагает настроек, которыми не управляет', function () {
+    $options = (new ReflectionClass(\App\Core\DesignSettings::class))->getConstant('OPTIONS');
+
+    // Шапка, подвал и мобильные зоны настраиваются в своих конструкторах:
+    // классы design-header-*/mheader-*/footer-* больше не выводятся, и поля
+    // в «Дизайне» ничего не меняли. Шаблон сайта был выбором из одного пункта.
+    foreach (['site_template', 'header_style', 'header_sticky', 'search_type', 'footer_style', 'mobile_menu', 'mobile_header'] as $dead) {
+        assert_false(isset($options[$dead]), 'настройка «' . $dead . '» ничем не управляет');
+    }
+
+    // Пресеты не должны тащить удалённые ключи обратно.
+    foreach ((new ReflectionClass(\App\Core\DesignSettings::class))->getConstant('PRESETS') as $name => $preset) {
+        foreach (array_keys($preset['values']) as $key) {
+            assert_true(isset($options[$key]), 'пресет «' . $name . '» задаёт неизвестную настройку ' . $key);
+        }
+    }
+
+    // Каждая оставшаяся настройка должна иметь потребителя: класс на <body>,
+    // переменную темы или чтение в коде.
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css')
+        . file_get_contents(APP_ROOT . '/public/assets/css/frontend.css');
+    $body = \App\Core\DesignSettings::bodyClasses(['catalog_layout' => 'list', 'sidebar_position' => 'fixed',
+        'card_style' => 'flat', 'detail_layout' => 'sidebar', 'type_scale' => 'static', 'scroll_top' => 'on']);
+    foreach (['design-catalog-list', 'design-sidebar-fixed', 'design-cards-flat', 'design-detail-sidebar',
+              'design-type-static', 'design-scrolltop'] as $class) {
+        assert_contains($class, $body);
+        assert_contains($class, $css, 'класс ' . $class . ' выводится, но не оформлен');
+    }
+
+    // Мёртвых правил под удалённые настройки в теме не осталось.
+    foreach (['design-header-light', 'design-header-dark', 'design-header-accent',
+              'design-mheader-', 'design-footer-minimal', 'design-mmenu-wrap'] as $stale) {
+        assert_not_contains($stale, $css, 'правило под удалённую настройку: ' . $stale);
+    }
+});
