@@ -89,6 +89,10 @@ final class HeroBlockNormalizer
             // Кладётся рядом с текстом, а не под него, поэтому у неё своя
             // позиция и размер.
             'art_image' => BlockDataInput::safeMedia($input['art_image'] ?? ''),
+            // Пустое описание = картинка декоративная. Для логотипа программы
+            // текст обязателен: без него он пропадает и для скринридера, и
+            // для поиска.
+            'art_alt' => BlockDataInput::plain($input, 'art_alt', $locale),
             'art_position' => BlockDataInput::enum($input, 'art_position', ['above', 'left', 'right'], 'above'),
             'art_size' => BlockDataInput::enum($input, 'art_size', ['small', 'medium', 'large'], 'medium'),
             'text_width' => $textWidth,

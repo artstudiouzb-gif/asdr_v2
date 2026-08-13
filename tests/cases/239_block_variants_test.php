@@ -326,4 +326,34 @@ test('Обложка: картинка поверх фона встаёт над
     // Без картинки разметка обложки не меняется.
     $plain = variant_block('hero', ['title' => 'Заголовок'], 734);
     assert_not_contains('block-hero__inner--art', $plain['html']);
+
+    // Без описания картинка декоративная и спрятана от скринридера.
+    assert_contains('class="block-hero__art" aria-hidden="true"', $above['html']);
+    assert_contains('alt=""', $above['html']);
+
+    // С описанием это содержимое: alt заполнен, aria-hidden снят.
+    $described = variant_block('hero', $base + ['art_alt' => 'Логотип программы'], 735);
+    assert_contains('alt="Логотип программы"', $described['html']);
+    assert_not_contains('class="block-hero__art" aria-hidden="true"', $described['html']);
+});
+
+test('Меньше движения: видео и автопрокрутка спрашивают общий признак, а не только медиазапрос', function () {
+    $themeInit = (string) file_get_contents(APP_ROOT . '/public/assets/js/theme-init.js');
+    $frontend = (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js');
+    $slider = (string) file_get_contents(APP_ROOT . '/public/assets/js/blocks/slider.js');
+    $a11y = (string) file_get_contents(APP_ROOT . '/public/assets/js/a11y.js');
+
+    // Общий признак учитывает и системную просьбу, и тумблер панели: CSS гасит
+    // только анимации, а видео и таймеры о нём не знают.
+    assert_contains('window.asdrReduceMotion', $themeInit);
+    assert_contains("data-a11y-motion", $themeInit);
+
+    // Потребители спрашивают признак, а не медиазапрос напрямую.
+    assert_contains('window.asdrReduceMotion', $frontend);
+    assert_contains('window.asdrReduceMotion', $slider);
+    assert_not_contains("var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;", $slider);
+
+    // Панель сообщает о смене настройки, иначе фон продолжит крутиться.
+    assert_contains('asdr:motion-change', $a11y);
+    assert_contains('asdr:motion-change', $frontend);
 });

@@ -810,6 +810,11 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 'hint' => 'Эмблема, логотип программы или иллюстрация. Показывается вместе с текстом, а не вместо фона. К слайд-шоу не применяется — там у каждого слайда своё медиа.',
             ]) ?>
             <div class="form-field">
+                <label for="hero_art_alt">Описание картинки</label>
+                <input type="text" id="hero_art_alt" name="art_alt" value="<?= htmlspecialchars($data['art_alt'] ?? '', ENT_QUOTES) ?>" placeholder="например: Логотип программы «Цифровой Узбекистан»">
+                <span class="form-hint">Пусто — картинка считается украшением и скрыта от скринридера. Если на ней есть текст или смысл (логотип, эмблема программы), опишите её словами.</span>
+            </div>
+            <div class="form-field">
                 <label for="hero_art_position">Где показывать картинку</label>
                 <select id="hero_art_position" name="art_position">
                     <?php foreach (['above' => 'Над текстом', 'left' => 'Слева от текста', 'right' => 'Справа от текста'] as $ap => $al): ?>

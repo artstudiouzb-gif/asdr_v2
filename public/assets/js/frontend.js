@@ -69,11 +69,24 @@
     (function () {
         var videos = document.querySelectorAll('[data-hero-background-video]');
         if (!videos.length) { return; }
-        var reduceMotion = window.matchMedia
-            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var reduceMotion = function () {
+            return window.asdrReduceMotion
+                ? window.asdrReduceMotion()
+                : !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        };
+
+        // Тумблер «остановка анимаций» меняется на лету: по событию панели
+        // ставим фон на паузу, иначе обещание интерфейса не выполняется.
+        document.addEventListener('asdr:motion-change', function () {
+            if (!reduceMotion()) { return; }
+            videos.forEach(function (video) {
+                video.pause();
+                video.removeAttribute('autoplay');
+            });
+        });
 
         videos.forEach(function (video) {
-            if (reduceMotion) {
+            if (reduceMotion()) {
                 video.pause();
                 video.removeAttribute('autoplay');
                 video.setAttribute('preload', 'none');
@@ -868,9 +881,15 @@
         var items = Array.prototype.slice.call(track ? track.querySelectorAll('[data-carousel-item]') : []);
         if (!track || !nav || !prev || !next || items.length < 2) { return; }
 
-        var motionPreference = window.matchMedia
-            ? window.matchMedia('(prefers-reduced-motion: reduce)')
-            : { matches: false };
+        // Не кэшируем: настройку «остановка анимаций» переключают во время
+        // просмотра, и запомненное значение оставило бы карусель ехать.
+        var motionPreference = {
+            get matches() {
+                return window.asdrReduceMotion
+                    ? window.asdrReduceMotion()
+                    : !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+            },
+        };
         var positions = [0];
         var renderedDotsKey = '';
         var frame = null;

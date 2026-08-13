@@ -6,7 +6,13 @@
 (function () {
     'use strict';
 
-    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Проверяем при каждом тике: «остановка анимаций» в панели настроек
+    // переключается на лету, а закэшированное значение этого не заметит.
+    var reduceMotion = function () {
+        return window.asdrReduceMotion
+            ? window.asdrReduceMotion()
+            : !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    };
 
     function initSlider(root, options) {
         var slides = root.querySelectorAll(options.slide);
@@ -93,7 +99,7 @@
         var timer = null;
 
         function startAuto() {
-            if (timer !== null || !delay || reduceMotion || document.hidden) { return; }
+            if (timer !== null || !delay || reduceMotion() || document.hidden) { return; }
             timer = window.setInterval(function () { show(current + 1, false); }, delay);
         }
 
@@ -103,7 +109,7 @@
             timer = null;
         }
 
-        if (delay && !reduceMotion) {
+        if (delay && !reduceMotion()) {
             // Пауза, пока посетитель читает слайд: курсор над ним, фокус внутри
             // или вкладка ушла в фон.
             root.addEventListener('mouseenter', stopAuto);

@@ -26,10 +26,14 @@ if (!in_array($artSize, ['small', 'medium', 'large'], true)) {
 // Явная высота обязательна: SVG без пиксельных размеров схлопывается, ширину
 // браузер считает из viewBox.
 $artHeights = ['small' => 64, 'medium' => 120, 'large' => 200];
+$artAlt = trim((string) ($data['art_alt'] ?? ''));
 $artHtml = '';
 if ($artImage !== '' && UrlGuard::isSafeMedia($artImage)) {
-    $artHtml = '<span class="block-hero__art" aria-hidden="true"><img class="block-hero__art-img" src="'
-        . htmlspecialchars($artImage, ENT_QUOTES) . '" alt="" loading="lazy" decoding="async" height="'
+    // Без описания картинка декоративная и скрыта от скринридера; с описанием
+    // это содержимое, и прятать его нельзя.
+    $artHtml = '<span class="block-hero__art"' . ($artAlt === '' ? ' aria-hidden="true"' : '')
+        . '><img class="block-hero__art-img" src="' . htmlspecialchars($artImage, ENT_QUOTES)
+        . '" alt="' . htmlspecialchars($artAlt, ENT_QUOTES) . '" loading="lazy" decoding="async" height="'
         . $artHeights[$artSize] . '"></span>';
 }
 $mediaPositionClasses = MediaPosition::classes($data['image_position'] ?? null, $data['image_position_mobile'] ?? null);

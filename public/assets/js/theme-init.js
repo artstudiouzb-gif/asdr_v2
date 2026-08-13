@@ -87,3 +87,26 @@
         // Cookie недоступны — остаётся то, что напечатал сервер.
     }
 })();
+
+/**
+ * Признак «посетитель просил меньше движения».
+ *
+ * Источников два: системная настройка браузера и тумблер «остановка анимаций»
+ * в панели настроек отображения (атрибут data-a11y-motion="off"). CSS гасит
+ * только animation и transition — видео и таймеры автопрокрутки о нём не
+ * знают, поэтому скрипты спрашивают этот помощник, а не медиазапрос.
+ *
+ * Проверяется при каждом вызове: настройку меняют на лету, и закэшированное
+ * значение оставило бы фон крутиться после нажатия тумблера.
+ */
+window.asdrReduceMotion = function () {
+    try {
+        if (document.documentElement.getAttribute('data-a11y-motion') === 'off') {
+            return true;
+        }
+
+        return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    } catch (error) {
+        return false;
+    }
+};
