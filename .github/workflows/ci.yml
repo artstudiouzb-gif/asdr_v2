@@ -171,6 +171,9 @@ jobs:
           cp config/config.example.php config/config.php
           mkdir -p storage/logs storage/cache storage/protected_uploads
           touch storage/installed.lock
+          # Демо-комплект: без него новости, проекты, каталог и контакты
+          # отвечают 404, и axe проверял бы страницу ошибки вместо страницы.
+          php database/seed_demo.php
 
       - name: Install browser test dependencies
         run: |

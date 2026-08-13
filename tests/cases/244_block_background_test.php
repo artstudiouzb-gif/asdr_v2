@@ -158,13 +158,17 @@ test('Редактора предупреждают о тяжёлом фоне',
     assert_contains('не грузится лениво', $hints[0]);
 
     // Лёгкий файл не тревожит: предупреждение на каждый фон обесценило бы его.
-    file_put_contents($uploads . $name, str_repeat('x', 100 * 1024));
+    // Отдельный файл, а не перезапись: filesize() кэширует размер, и в CI
+    // проверка «полегчал» видела прежние 600 КБ.
+    $light = '/hint-light-' . uniqid() . '.jpg';
+    file_put_contents($uploads . $light, str_repeat('x', 100 * 1024));
     assert_same([], \App\Core\BlockHints::forBlock('text', [
         '_bg_mode' => 'image',
-        '_bg_image' => '/uploads/public' . $name,
+        '_bg_image' => '/uploads/public' . $light,
     ]));
 
     unlink($uploads . $name);
+    unlink($uploads . $light);
 });
 
 test('Сгенерированная тема не тянет переменные с относительными адресами', function () {
