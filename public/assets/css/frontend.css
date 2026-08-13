@@ -798,7 +798,59 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .project-card__title { font-weight: 700; padding: 12px 14px 0; transition: color 0.3s ease; }
 .project-card:hover .project-card__title { color: var(--color-accent, #e63946); }
 .project-card__desc { padding: 6px 14px 14px; margin: 0; color: var(--text-muted); font-size: var(--step--2); }
+/* Список: фото слева, текст справа. Место под длинный анонс — ради него
+   вариант и нужен. */
+.block-projects--list .block-projects__grid { grid-template-columns: minmax(0, 1fr); }
+.block-projects--list .project-card {
+    display: grid;
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    align-items: stretch;
+    gap: 0;
+}
+.block-projects--list .project-card__cover { height: 100%; aspect-ratio: 4/3; }
+.block-projects--list .project-card__body { padding: 4px 4px 4px 6px; }
+@media (max-width: 720px) {
+    .block-projects--list .project-card { grid-template-columns: minmax(0, 1fr); }
+    .block-projects--list .project-card__cover { aspect-ratio: 16/10; }
+}
+
+/* Полоса: карточки одной ширины, листаются свайпом и стрелками. */
+.block-projects--carousel .block-projects__grid {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 4px;
+}
+.block-projects--carousel .project-card {
+    flex: 0 0 clamp(240px, 28vw, 340px);
+    scroll-snap-align: start;
+}
+@media (max-width: 720px) {
+    .block-projects--carousel .project-card { flex: 0 0 85%; }
+}
+
 .block-team__empty, .block-projects__empty { text-align: center; color: var(--text-muted); }
+
+/* Обложка: картинка поверх фона (эмблема, логотип программы, иллюстрация).
+   Позиция задаётся относительно текста, размер — высотой картинки. */
+.block-hero__inner--art { display: flex; gap: clamp(16px, 3vw, 40px); }
+.block-hero__inner--art-above { flex-direction: column; align-items: flex-start; }
+.block-hero__inner--art-left,
+.block-hero__inner--art-right { flex-direction: row; align-items: center; }
+.block-hero__inner--art-left .block-hero__text,
+.block-hero__inner--art-right .block-hero__text { flex: 1 1 auto; min-width: 0; }
+.block-hero__art { flex: 0 0 auto; display: inline-flex; }
+.block-hero__art-img { display: block; width: auto; max-width: 100%; height: auto; }
+.block-hero__inner--art-small .block-hero__art-img { max-height: 64px; }
+.block-hero__inner--art-medium .block-hero__art-img { max-height: 120px; }
+.block-hero__inner--art-large .block-hero__art-img { max-height: 200px; }
+/* На телефоне картинка всегда над текстом: рядом с ним ей не хватает ширины. */
+@media (max-width: 720px) {
+    .block-hero__inner--art { flex-direction: column; align-items: flex-start; }
+    .block-hero__inner--art-large .block-hero__art-img { max-height: 140px; }
+}
+
 
 /* Команда по подразделениям: сектор — заголовок с якорем, отделы и группы
    внутри сектора — подзаголовок со своей сеткой карточек. */

@@ -85,6 +85,19 @@ final class HeroBlockNormalizer
             'overlay_color' => self::hexOrDefault($input['overlay_color'] ?? '', '#0b1a30'),
             'overlay_opacity' => self::percentage($input['overlay_opacity'] ?? null, 35),
             'text_position' => in_array($textPosition, ['left', 'center', 'right'], true) ? $textPosition : 'left',
+            // Вертикаль: у высокой обложки текст часто прижимают к низу, чтобы
+            // не закрывать лицо на фото или небо в кадре.
+            'text_align_y' => BlockDataInput::enum($input, 'text_align_y', ['top', 'center', 'bottom'], 'center'),
+            // Картинка поверх фона: эмблема, логотип программы, иллюстрация.
+            // Кладётся рядом с текстом, а не под него, поэтому у неё своя
+            // позиция и размер.
+            'art_image' => BlockDataInput::safeMedia($input['art_image'] ?? ''),
+            // Пустое описание = картинка декоративная. Для логотипа программы
+            // текст обязателен: без него он пропадает и для скринридера, и
+            // для поиска.
+            'art_alt' => BlockDataInput::plain($input, 'art_alt', $locale),
+            'art_position' => BlockDataInput::enum($input, 'art_position', ['above', 'left', 'right'], 'above'),
+            'art_size' => BlockDataInput::enum($input, 'art_size', ['small', 'medium', 'large'], 'medium'),
             'text_width' => $textWidth,
             'text_color' => BlockDataInput::optionalColor($input, 'text_color'),
             'button_color' => BlockDataInput::optionalColor($input, 'button_color'),
@@ -151,6 +164,16 @@ final class HeroBlockNormalizer
                 'text_position' => in_array($slide['text_position'] ?? '', ['left', 'center', 'right'], true)
                     ? (string) $slide['text_position']
                     : '',
+                // Оформление слайда: пустое значение = «как у обложки». Так
+                // редактор задаёт затемнение и подложку там, где они нужны
+                // (светлое фото), не трогая остальные слайды.
+                'overlay' => BlockDataInput::enum($slide, 'overlay', ['on', 'off'], ''),
+                'overlay_mode' => BlockDataInput::enum($slide, 'overlay_mode', ['gradient', 'solid'], ''),
+                'panel' => BlockDataInput::enum($slide, 'panel', ['on', 'off'], ''),
+                'art_image' => BlockDataInput::safeMedia($slide['art_image'] ?? ''),
+                'art_alt' => trim((string) ($slide['art_alt'] ?? '')),
+                'art_position' => BlockDataInput::enum($slide, 'art_position', ['above', 'left', 'right'], ''),
+                'art_size' => BlockDataInput::enum($slide, 'art_size', ['small', 'medium', 'large'], ''),
                 '_visible_from' => \App\Core\BlockVisibility::normalize($slide['_visible_from'] ?? ''),
                 '_visible_to' => \App\Core\BlockVisibility::normalize($slide['_visible_to'] ?? ''),
             ];

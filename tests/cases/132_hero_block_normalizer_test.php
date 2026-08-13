@@ -59,6 +59,13 @@ test('Hero normalizer: формирует стабильный JSON-контра
         'overlay_color' => '#abcdef',
         'overlay_opacity' => 100,
         'text_position' => 'left',
+        'text_align_y' => 'center',
+        // Картинка поверх фона: без адреса поле пустое, позиция и размер
+        // всегда в контракте — шаблон не должен угадывать умолчания.
+        'art_image' => '',
+        'art_alt' => '',
+        'art_position' => 'above',
+        'art_size' => 'medium',
         'text_width' => '10%',
         'text_color' => '#112233',
         'button_color' => '',

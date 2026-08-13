@@ -252,3 +252,147 @@ test('Иконка и текст: у старых блоков позицию и
     $legacyLeft = variant_block('icon_text', ['align' => 'left', 'items' => $items], 746);
     assert_contains('block-icon-text--icon-left', $legacyLeft['html']);
 });
+
+test('Проекты: варианты вёрстки — сетка, список и полоса с прокруткой (БД)', function () {
+    ensure_test_db();
+    $pdo = \App\Core\Database::pdo();
+    $pdo->exec("DELETE FROM pages WHERE entity_type = 'project'");
+
+    // Блок собирает проекты сам, поэтому заводим их в базе.
+    $insert = $pdo->prepare(
+        "INSERT INTO pages (title, slug, entity_type, `lead`, status, is_featured, sort_order, lang)
+         VALUES (?, ?, 'project', ?, 'published', 1, ?, 'ru')"
+    );
+    foreach (['alpha', 'beta', 'gamma', 'delta', 'epsilon'] as $i => $slug) {
+        $insert->execute([ucfirst($slug), 'variant-' . $slug, 'Анонс ' . $slug, $i]);
+    }
+
+    // Сетка — прежнее поведение: колонки редактора и ряды без дыр (пятёрка
+    // карточек ложится 3+2, хвост растягивается).
+    $grid = variant_block('projects_list', ['columns' => 3, 'limit' => 5], 720);
+    assert_contains('block-projects block-projects--grid', $grid['html']);
+    assert_contains('--grid-track', $grid['css'], 'у сетки считаются дорожки');
+    assert_not_contains('data-carousel', $grid['html']);
+
+    $list = variant_block('projects_list', ['variant' => 'list', 'limit' => 5], 721);
+    assert_contains('block-projects--list', $list['html']);
+    assert_same('', $list['css'], 'списку дорожки сетки не нужны');
+
+    $carousel = variant_block('projects_list', ['variant' => 'carousel', 'autoplay' => 6, 'limit' => 5], 722);
+    assert_contains('block-projects--carousel', $carousel['html']);
+    assert_contains('data-carousel-autoplay="6"', $carousel['html']);
+    assert_contains('data-carousel-track', $carousel['html']);
+    assert_same(5, substr_count($carousel['html'], 'data-carousel-item'));
+
+    // Один проект листать нечем: полосу не включаем, стрелки не рисуем.
+    $pdo->exec("DELETE FROM pages WHERE entity_type = 'project' AND slug <> 'variant-alpha'");
+    $single = variant_block('projects_list', ['variant' => 'carousel', 'limit' => 5], 723);
+    assert_not_contains('data-carousel-track', $single['html']);
+    assert_not_contains('carousel-nav', $single['html']);
+
+    $pdo->exec("DELETE FROM pages WHERE entity_type = 'project'");
+});
+
+test('Обложка: картинка поверх фона встаёт над текстом, слева или справа', function () {
+    $base = ['title' => 'Заголовок', 'art_image' => '/uploads/public/emblem.svg'];
+
+    $above = variant_block('hero', $base, 730);
+    assert_contains('block-hero__inner--art block-hero__inner--art-above', $above['html']);
+    assert_contains('class="block-hero__art"', $above['html']);
+    // Явная высота обязательна: SVG без пиксельных размеров схлопывается.
+    assert_contains('height="120"', $above['html']);
+
+    $left = variant_block('hero', $base + ['art_position' => 'left', 'art_size' => 'small'], 731);
+    assert_contains('block-hero__inner--art-left', $left['html']);
+    assert_contains('height="64"', $left['html']);
+    // Слева — картинка идёт до текста.
+    assert_true(
+        strpos($left['html'], 'block-hero__art') < strpos($left['html'], 'block-hero__text'),
+        'картинка слева выводится перед текстом'
+    );
+
+    $right = variant_block('hero', $base + ['art_position' => 'right', 'art_size' => 'large'], 732);
+    assert_contains('block-hero__inner--art-right', $right['html']);
+    assert_contains('height="200"', $right['html']);
+    assert_true(
+        strpos($right['html'], 'block-hero__art') > strpos($right['html'], 'block-hero__text'),
+        'картинка справа выводится после текста'
+    );
+
+    // Чужой адрес в поле картинки в разметку не попадает.
+    $unsafe = variant_block('hero', ['title' => 'Заголовок', 'art_image' => 'javascript:alert(1)'], 733);
+    assert_not_contains('block-hero__art', $unsafe['html']);
+
+    // Без картинки разметка обложки не меняется.
+    $plain = variant_block('hero', ['title' => 'Заголовок'], 734);
+    assert_not_contains('block-hero__inner--art', $plain['html']);
+
+    // Без описания картинка декоративная и спрятана от скринридера.
+    assert_contains('class="block-hero__art" aria-hidden="true"', $above['html']);
+    assert_contains('alt=""', $above['html']);
+
+    // С описанием это содержимое: alt заполнен, aria-hidden снят.
+    $described = variant_block('hero', $base + ['art_alt' => 'Логотип программы'], 735);
+    assert_contains('alt="Логотип программы"', $described['html']);
+    assert_not_contains('class="block-hero__art" aria-hidden="true"', $described['html']);
+});
+
+test('Меньше движения: видео и автопрокрутка спрашивают общий признак, а не только медиазапрос', function () {
+    $themeInit = (string) file_get_contents(APP_ROOT . '/public/assets/js/theme-init.js');
+    $frontend = (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js');
+    $slider = (string) file_get_contents(APP_ROOT . '/public/assets/js/blocks/slider.js');
+    $a11y = (string) file_get_contents(APP_ROOT . '/public/assets/js/a11y.js');
+
+    // Общий признак учитывает и системную просьбу, и тумблер панели: CSS гасит
+    // только анимации, а видео и таймеры о нём не знают.
+    assert_contains('window.asdrReduceMotion', $themeInit);
+    assert_contains("data-a11y-motion", $themeInit);
+
+    // Потребители спрашивают признак, а не медиазапрос напрямую.
+    assert_contains('window.asdrReduceMotion', $frontend);
+    assert_contains('window.asdrReduceMotion', $slider);
+    assert_not_contains("var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;", $slider);
+
+    // Панель сообщает о смене настройки, иначе фон продолжит крутиться.
+    assert_contains('asdr:motion-change', $a11y);
+    assert_contains('asdr:motion-change', $frontend);
+});
+
+test('Обложка: вертикаль текста и оформление слайда наследуется от блока', function () {
+    // Вертикаль: класс на корне, умолчание — по центру.
+    $bottom = variant_block('hero', ['title' => 'Заголовок', 'text_align_y' => 'bottom'], 740);
+    assert_contains('block-hero--y-bottom', $bottom['html']);
+    $default = variant_block('hero', ['title' => 'Заголовок'], 741);
+    assert_contains('block-hero--y-center', $default['html']);
+    $broken = variant_block('hero', ['title' => 'Заголовок', 'text_align_y' => 'вниз'], 742);
+    assert_contains('block-hero--y-center', $broken['html'], 'мусор заменяется умолчанием');
+
+    // Слайд без своих настроек берёт оформление обложки.
+    $inherited = variant_block('hero', [
+        'overlay_enabled' => true,
+        'overlay_mode' => 'solid',
+        'panel_enabled' => true,
+        'art_image' => '/uploads/public/emblem.svg',
+        'slides' => [
+            ['title' => 'Первый', 'image' => '/uploads/public/one.jpg'],
+            ['title' => 'Второй', 'image' => '/uploads/public/two.jpg'],
+        ],
+    ], 743);
+    assert_same(2, substr_count($inherited['html'], 'block-hero__scrim--solid'), 'затемнение обложки на обоих слайдах');
+    assert_same(2, substr_count($inherited['html'], 'block-hero__text--panel'), 'подложка обложки на обоих слайдах');
+    assert_same(2, substr_count($inherited['html'], 'block-hero__art-img'), 'картинка обложки повторяется на слайдах');
+
+    // Слайд может переопределить каждую настройку по отдельности.
+    $own = variant_block('hero', [
+        'overlay_enabled' => true,
+        'overlay_mode' => 'solid',
+        'panel_enabled' => true,
+        'slides' => [
+            ['title' => 'Первый', 'image' => '/uploads/public/one.jpg', 'overlay' => 'off', 'panel' => 'off'],
+            ['title' => 'Второй', 'image' => '/uploads/public/two.jpg', 'overlay_mode' => 'gradient'],
+        ],
+    ], 744);
+    assert_same(1, substr_count($own['html'], 'block-hero__scrim'), 'слайд с выключенным затемнением остаётся без него');
+    assert_same(0, substr_count($own['html'], 'block-hero__scrim--solid'), 'второй слайд перешёл на градиент');
+    assert_same(1, substr_count($own['html'], 'block-hero__text--panel'), 'подложка снята только у первого слайда');
+});

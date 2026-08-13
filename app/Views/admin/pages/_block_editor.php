@@ -42,6 +42,26 @@ foreach ($blocks as $b) {
 }
 ?>
     <h2 class="u-inline-9f7cb1fbb6"><?= htmlspecialchars($blockEditorTitle, ENT_QUOTES) ?></h2>
+    <?php
+    // Переключатель языка стека — только у страниц. У проекта языковая версия
+    // это отдельная запись, и переключают её кнопкой в сайдбаре: два разных
+    // переключателя на одной форме путали бы.
+    $isPageRecord = (string) ($page['entity_type'] ?? 'page') === 'page';
+    $blockLanguages = $isPageRecord ? \App\Models\Language::active() : [];
+    ?>
+    <?php if (count($blockLanguages) > 1): ?>
+        <div class="block-lang-switch">
+            <span class="form-hint">Язык блоков:</span>
+            <?php foreach ($blockLanguages as $blockLanguage): ?>
+                <?php $code = (string) $blockLanguage['code']; ?>
+                <a class="btn btn--small<?= $code === $blockLang ? ' btn--primary' : ' btn--secondary' ?>"
+                   href="/admin/pages/<?= (int) $page['id'] ?>/edit?block_lang=<?= urlencode($code) ?>"
+                   <?= $code === $blockLang ? 'aria-current="true"' : '' ?>>
+                    <?= strtoupper(htmlspecialchars($code, ENT_QUOTES)) ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
     <p class="form-hint">У каждого языка свой независимый стек блоков. Если стек языка пуст, на сайте показывается стек основного языка.</p>
 
     <?php if (!empty($usingFallback)): ?>

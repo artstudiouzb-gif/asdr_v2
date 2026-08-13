@@ -93,6 +93,9 @@
         return raw.indexOf('=') !== -1 && new URLSearchParams(raw).get(name) !== null;
     }
 
+    /** Прежнее значение «остановки анимаций»: событие шлём только на смену. */
+    var previousMotion = root.getAttribute('data-a11y-motion') === 'off' ? 'off' : 'on';
+
     /** Значения по умолчанию в разметку не пишем: обычная страница — обычная. */
     function applyState(rawState) {
         var state = effectiveState(rawState);
@@ -113,6 +116,16 @@
 
         var toggle = document.querySelector('.a11y-toggle');
         if (toggle) { toggle.classList.toggle('is-active', changed); }
+
+        // Движение останавливают не только CSS-правила: фоновое видео обложки
+        // и автопрокрутка каруселей живут в скриптах и узнают о выборе
+        // посетителя по этому событию.
+        if (previousMotion !== state.motion) {
+            previousMotion = state.motion;
+            document.dispatchEvent(new CustomEvent('asdr:motion-change', {
+                detail: { motion: state.motion },
+            }));
+        }
 
         syncControls(state);
     }

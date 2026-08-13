@@ -11,6 +11,40 @@ $title = $data['title'] ?? '';
 $eyebrow = trim((string) ($data['eyebrow'] ?? ''));
 $subtitle = $data['subtitle'] ?? '';
 $image = trim((string) ($data['image'] ?? ''));
+$textAlignY = (string) ($data['text_align_y'] ?? 'center');
+if (!in_array($textAlignY, ['top', 'center', 'bottom'], true)) {
+    $textAlignY = 'center';
+}
+// Картинка поверх фона (эмблема, логотип программы, иллюстрация): у неё своя
+// позиция относительно текста и свой размер. К слайд-шоу не применяется —
+// там у каждого слайда своё медиа.
+$artImage = trim((string) ($data['art_image'] ?? ''));
+$artPosition = (string) ($data['art_position'] ?? 'above');
+if (!in_array($artPosition, ['above', 'left', 'right'], true)) {
+    $artPosition = 'above';
+}
+$artSize = (string) ($data['art_size'] ?? 'medium');
+if (!in_array($artSize, ['small', 'medium', 'large'], true)) {
+    $artSize = 'medium';
+}
+// Явная высота обязательна: SVG без пиксельных размеров схлопывается, ширину
+// браузер считает из viewBox.
+$artHeights = ['small' => 64, 'medium' => 120, 'large' => 200];
+$artAlt = trim((string) ($data['art_alt'] ?? ''));
+// Одна сборка на обложку и на слайды: у слайда своя картинка, но правила те же.
+$heroArt = static function (string $image, string $alt, string $size) use ($artHeights): string {
+    if ($image === '' || !UrlGuard::isSafeMedia($image)) {
+        return '';
+    }
+
+    // Без описания картинка декоративная и скрыта от скринридера; с описанием
+    // это содержимое, и прятать его нельзя.
+    return '<span class="block-hero__art"' . ($alt === '' ? ' aria-hidden="true"' : '')
+        . '><img class="block-hero__art-img" src="' . htmlspecialchars($image, ENT_QUOTES)
+        . '" alt="' . htmlspecialchars($alt, ENT_QUOTES) . '" loading="lazy" decoding="async" height="'
+        . ($artHeights[$size] ?? $artHeights['medium']) . '"></span>';
+};
+$artHtml = $heroArt($artImage, $artAlt, $artSize);
 $mediaPositionClasses = MediaPosition::classes($data['image_position'] ?? null, $data['image_position_mobile'] ?? null);
 
 // Тип фона: none | image | video | youtube.
@@ -224,7 +258,7 @@ $heroMedia = static function (string $type, string $image, string $videoFile, ?s
     $slideCount = count($slides);
     $headingTag = $data['_heading_tag'] ?? 'h1';
 ?>
-<div class="block-hero block-hero--media block-hero--slider block-hero--w-<?= $heroWidth ?> block-hero--h-<?= $heroHeight ?> block-hero--pos-<?= $textPos ?>"
+<div class="block-hero block-hero--media block-hero--slider block-hero--w-<?= $heroWidth ?> block-hero--h-<?= $heroHeight ?> block-hero--pos-<?= $textPos ?> block-hero--y-<?= $textAlignY ?>"
      data-hero-slider<?= $autoplay > 0 ? ' data-autoplay="' . $autoplay . '"' : '' ?>
      role="region" aria-roledescription="<?= htmlspecialchars(t('Карусель'), ENT_QUOTES) ?>"
      aria-label="<?= htmlspecialchars($title !== '' ? (string) $title : t('Обложка'), ENT_QUOTES) ?>"<?= $slideCount > 1 ? ' tabindex="0"' : '' ?>>
@@ -248,21 +282,41 @@ $heroMedia = static function (string $type, string $image, string $videoFile, ?s
             $slideBtn2Icon = $heroButtonIcon((string) ($slide['button2_icon'] ?? ''), '');
             $slideBtnUrl = trim((string) ($slide['button_url'] ?? ''));
             $slideBtn2Url = trim((string) ($slide['button2_url'] ?? ''));
+            // Оформление слайда: пусто — как у обложки. Светлому фото нужно
+            // своё затемнение, тёмному — никакого, и раньше выбора не было.
+            $slideOverlay = (string) ($slide['overlay'] ?? '');
+            $slideOverlayOn = $slideOverlay === 'on' ? true : ($slideOverlay === 'off' ? false : $overlayEnabled);
+            $slideOverlayMode = (string) ($slide['overlay_mode'] ?? '');
+            $slideOverlaySolid = $slideOverlayMode === 'solid'
+                ? true
+                : ($slideOverlayMode === 'gradient' ? false : $overlaySolid);
+            $slidePanel = (string) ($slide['panel'] ?? '');
+            $slidePanelOn = $slidePanel === 'on' ? true : ($slidePanel === 'off' ? false : $panelOn);
+            $slideArtImage = trim((string) ($slide['art_image'] ?? ''));
+            $slideArtHtml = $slideArtImage !== ''
+                ? $heroArt(
+                    $slideArtImage,
+                    trim((string) ($slide['art_alt'] ?? '')),
+                    (string) ($slide['art_size'] ?: $artSize)
+                )
+                : $artHtml;
+            $slideArtPosition = (string) ($slide['art_position'] ?: $artPosition);
             ?>
             <div class="block-hero__slide block-hero--pos-<?= $slidePos ?><?= $index === 0 ? ' is-active' : '' ?>"
                  role="group" aria-roledescription="<?= htmlspecialchars(t('Слайд'), ENT_QUOTES) ?>"
                  aria-label="<?= ($index + 1) . ' ' . htmlspecialchars(t('из'), ENT_QUOTES) . ' ' . $slideCount ?>"
                  aria-hidden="<?= $index === 0 ? 'false' : 'true' ?>">
                 <?= $heroMedia($slideMediaType, $slideImage, $slideVideo, $slideYoutubeId, $slideMediaClasses, $index !== 0) ?>
-                <?php if ($overlayEnabled): ?><div class="block-hero__scrim<?= $overlaySolid ? ' block-hero__scrim--solid' : '' ?>" aria-hidden="true"></div><?php endif; ?>
+                <?php if ($slideOverlayOn): ?><div class="block-hero__scrim<?= $slideOverlaySolid ? ' block-hero__scrim--solid' : '' ?>" aria-hidden="true"></div><?php endif; ?>
                 <?php if ($slideLink !== '' && UrlGuard::isSafeLink($slideLink)): ?>
                     <?php // Ссылка-подложка: кликабелен весь слайд, при этом кнопки
                           // остаются самостоятельными ссылками, а не вложенными. ?>
                     <a class="block-hero__slide-cover" href="<?= htmlspecialchars($slideLink, ENT_QUOTES) ?>"
                        tabindex="-1" aria-hidden="true"></a>
                 <?php endif; ?>
-                <div class="block-hero__inner">
-                    <div class="block-hero__text<?= $panelOn ? ' block-hero__text--panel' : '' ?>">
+                <div class="block-hero__inner<?= $slideArtHtml !== '' ? ' block-hero__inner--art block-hero__inner--art-' . $slideArtPosition . ' block-hero__inner--art-' . ($slide['art_size'] ?: $artSize) : '' ?>">
+                    <?php if ($slideArtHtml !== '' && $slideArtPosition !== 'right'): ?><?= $slideArtHtml ?><?php endif; ?>
+                    <div class="block-hero__text<?= $slidePanelOn ? ' block-hero__text--panel' : '' ?>">
                         <?php if (!empty($slide['eyebrow'])): ?><span class="block-hero__eyebrow"><?= htmlspecialchars((string) $slide['eyebrow'], ENT_QUOTES) ?></span><?php endif; ?>
                         <?php if ($slideTitle !== ''): ?>
                             <?php $tag = $index === 0 ? $headingTag : 'h2'; ?>
@@ -286,6 +340,7 @@ $heroMedia = static function (string $type, string $image, string $videoFile, ?s
                         </div>
                         <?php endif; ?>
                     </div>
+                    <?php if ($slideArtHtml !== '' && $slideArtPosition === 'right'): ?><?= $slideArtHtml ?><?php endif; ?>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -308,10 +363,11 @@ $heroMedia = static function (string $type, string $image, string $videoFile, ?s
 <?php else: ?>
 <?php // Без медиа и без своего фона hero — это просто шапка страницы:
       // карточка с рамкой и подложкой в этой роли читается как чужой блок. ?>
-<div class="block-hero<?= $hasMedia ? ' block-hero--media' : '' ?><?= (!$hasMedia && $heroBg === '') ? ' block-hero--plain' : '' ?><?= $heroBg !== '' ? ' block-hero--bgcolor' : '' ?><?= ($bgType === 'video' || $bgType === 'youtube') ? ' block-hero--video' : '' ?> block-hero--w-<?= $heroWidth ?> block-hero--h-<?= $heroHeight ?> block-hero--pos-<?= $textPos ?>">
+<div class="block-hero<?= $hasMedia ? ' block-hero--media' : '' ?><?= (!$hasMedia && $heroBg === '') ? ' block-hero--plain' : '' ?><?= $heroBg !== '' ? ' block-hero--bgcolor' : '' ?><?= ($bgType === 'video' || $bgType === 'youtube') ? ' block-hero--video' : '' ?> block-hero--w-<?= $heroWidth ?> block-hero--h-<?= $heroHeight ?> block-hero--pos-<?= $textPos ?> block-hero--y-<?= $textAlignY ?>">
     <?= $heroMedia($bgType, $image, $videoFile, $youtubeId, $mediaPositionClasses, false) ?>
     <?php if ($hasMedia && $overlayEnabled): ?><div class="block-hero__scrim<?= $overlaySolid ? ' block-hero__scrim--solid' : '' ?>" aria-hidden="true"></div><?php endif; ?>
-    <div class="block-hero__inner">
+    <div class="block-hero__inner<?= $artHtml !== '' ? ' block-hero__inner--art block-hero__inner--art-' . $artPosition . ' block-hero__inner--art-' . $artSize : '' ?>">
+        <?php if ($artHtml !== '' && $artPosition !== 'right'): ?><?= $artHtml ?><?php endif; ?>
         <div class="block-hero__text<?= $panelOn ? ' block-hero__text--panel' : '' ?>">
             <?php if ($eyebrow !== ''): ?><span class="block-hero__eyebrow"><?= htmlspecialchars($eyebrow, ENT_QUOTES) ?></span><?php endif; ?>
             <?php if ($title !== ''): ?><?php $hTag = $data['_heading_tag'] ?? 'h1'; ?><<?= $hTag ?> class="block-hero__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></<?= $hTag ?>><?php endif; ?>
@@ -334,6 +390,7 @@ $heroMedia = static function (string $type, string $image, string $videoFile, ?s
             </div>
             <?php endif; ?>
         </div>
+        <?php if ($artHtml !== '' && $artPosition === 'right'): ?><?= $artHtml ?><?php endif; ?>
     </div>
 </div>
 <?php endif; ?>
