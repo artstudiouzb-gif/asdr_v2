@@ -31,7 +31,6 @@ if (!isset($blocks)) {
         $usingFallback = !empty($blocks);
     }
 }
-$blocks = $blocks ?? [];
 $blockTypeLabels = BlockTypeRegistry::editorLabels();
 
 // Дочерние блоки контейнеров (колонки, вкладки): подгружаем детей каждого.

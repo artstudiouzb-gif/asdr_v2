@@ -254,6 +254,7 @@ final class DemoSeeder
                  FROM blocks b
                  INNER JOIN pages p ON p.id = b.page_id
                  WHERE p.deleted_at IS NULL
+                   AND p.entity_type = \'page\'
                    AND b.lang <> \'\'
                    AND b.lang <> p.lang'
             )->fetchColumn();
@@ -279,12 +280,15 @@ final class DemoSeeder
         }
 
         if (self::tableExists($pdo, 'menu_items') && self::tableExists($pdo, 'pages')) {
+            // Пункт меню на проект хранится как projects/<slug> — при сверке
+            // отрезаем префикс и ищем запись нужного типа.
             $brokenTargets = (int) $pdo->query(
                 "SELECT COUNT(*)
                  FROM menu_items mi
                  LEFT JOIN pages p
                    ON mi.url_type = 'page'
-                  AND p.slug = mi.url_value
+                  AND p.slug = IF(mi.url_value LIKE 'projects/%', SUBSTRING(mi.url_value, 10), mi.url_value)
+                  AND p.entity_type = IF(mi.url_value LIKE 'projects/%', 'project', 'page')
                   AND p.lang = mi.lang
                   AND p.status = 'published'
                   AND p.deleted_at IS NULL
