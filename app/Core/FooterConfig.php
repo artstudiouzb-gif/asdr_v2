@@ -38,6 +38,9 @@ final class FooterConfig
         ],
         // Плейсхолдеры: {year} — текущий год, {site} — название сайта.
         'bottom' => '© {year} {site}',
+        // Фон подвала: те же режимы, что и у секции страницы (цвет, градиент,
+        // фотография, узор). Пустой режим — как было, из темы.
+        'background' => ['_bg_mode' => 'preset'],
     ];
 
     public static function get(): array
@@ -75,12 +78,35 @@ final class FooterConfig
         return trim(strip_tags($out));
     }
 
+    /**
+     * Хранимые ключи фона (`_bg_*`) обратно в вид формы: нормализатор работает
+     * с тем, что прислал редактор, и второй его копии заводить не за чем.
+     *
+     * @param array<string, mixed> $background
+     * @return array<string, mixed>
+     */
+    private static function backgroundInput(array $background): array
+    {
+        $input = [];
+        foreach ($background as $key => $value) {
+            $input[ltrim((string) $key, '_')] = $value;
+        }
+
+        return $input;
+    }
+
     private static function mergeDefaults(array $config): array
     {
         $result = self::DEFAULTS;
 
         $result['style'] = in_array($config['style'] ?? '', self::STYLES, true)
             ? $config['style'] : self::DEFAULTS['style'];
+        // Фон приходит уже нормализованным (ключи с `_`), но конфиг правят и
+        // руками — прогоняем через тот же нормализатор, что и у блоков.
+        $background = is_array($config['background'] ?? null) ? $config['background'] : [];
+        $result['background'] = \App\Core\BlockData\BlockPresentationNormalizer::background(
+            self::backgroundInput($background)
+        );
 
         if (isset($config['columns']) && is_array($config['columns'])) {
             $columns = [];

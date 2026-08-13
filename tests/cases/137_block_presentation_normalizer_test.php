@@ -16,6 +16,8 @@ test('Block presentation normalizer: формирует прежние знач�
         '_visible_from' => '',
         '_visible_to' => '',
         '_visible_device' => '',
+        // Своя заливка секции не задана — режим «пресет темы».
+        '_bg_mode' => 'preset',
     ], BlockPresentationNormalizer::normalize([]));
 });
 
@@ -31,6 +33,7 @@ test('Block presentation normalizer: сохраняет допустимые н�
         '_visible_from' => '2026-07-24 10:15',
         '_visible_to' => '2026-07-25 18:30',
         '_visible_device' => 'mobile',
+        '_bg_mode' => 'preset',
     ], BlockPresentationNormalizer::normalize([
         'spacing' => 'max',
         'reveal_type' => 'slide-up',

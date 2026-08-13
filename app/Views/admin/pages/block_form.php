@@ -2114,6 +2114,90 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <select id="bg" name="bg">
                 <?php foreach ($bgOpts as $v => $l): ?><option value="<?= $v ?>" <?= $bg === $v ? 'selected' : '' ?>><?= $l ?></option><?php endforeach; ?>
             </select>
+            <span class="form-hint">Пресеты темы. Ниже можно задать свою заливку — она отменяет пресет.</span>
+        </div>
+
+        <?php
+        // Своя заливка секции: цвет, градиент, фотография или узор. Режим один:
+        // два фона на секции дают кашу, и какой из них главный — не угадать.
+        $bgMode = (string) ($data['_bg_mode'] ?? 'preset');
+        $bgModeOpts = [
+            'preset' => 'Пресет темы (как выше)',
+            'color' => 'Свой цвет',
+            'gradient' => 'Градиент',
+            'image' => 'Фотография или плитка-узор',
+            'pattern' => 'Встроенный узор',
+        ];
+        $bgPatterns = ['dots' => 'Точки', 'grid' => 'Сетка', 'diagonal' => 'Диагональ', 'emblem' => 'Гирих (эмблема)'];
+        $bgRepeat = (string) ($data['_bg_repeat'] ?? 'cover');
+        ?>
+        <div class="form-field">
+            <label for="bg_mode">Своя заливка</label>
+            <select id="bg_mode" name="bg_mode">
+                <?php foreach ($bgModeOpts as $v => $l): ?><option value="<?= $v ?>" <?= $bgMode === $v ? 'selected' : '' ?>><?= $l ?></option><?php endforeach; ?>
+            </select>
+        </div>
+        <?= \App\Core\AdminUi::colorField('bg_color', $data['_bg_color'] ?? '', 'Цвет фона (для «Свой цвет» и подложки узора)', '#0f2b46', 'Не задан') ?>
+        <div class="form-grid-2col">
+            <?= \App\Core\AdminUi::colorField('bg_gradient_from', $data['_bg_gradient_from'] ?? '', 'Градиент: от', '#0f2b46', 'Не задан') ?>
+            <?= \App\Core\AdminUi::colorField('bg_gradient_to', $data['_bg_gradient_to'] ?? '', 'Градиент: до', '#009bbe', 'Не задан') ?>
+        </div>
+        <div class="form-field">
+            <label for="bg_gradient_angle">Градиент: угол (градусы)</label>
+            <input type="number" id="bg_gradient_angle" name="bg_gradient_angle" min="0" max="360" step="5" value="<?= (int) ($data['_bg_gradient_angle'] ?? 135) ?>">
+        </div>
+        <?= \App\Core\AdminUi::imageField('bg_image', (string) ($data['_bg_image'] ?? ''), [
+            'label' => 'Фон: изображение',
+            'hint' => 'Фотография во всю секцию или небольшая плитка узора (PNG/SVG). Фон не грузится лениво — не ставьте тяжёлые файлы.',
+        ]) ?>
+        <div class="form-field">
+            <label for="bg_repeat">Изображение: как показывать</label>
+            <select id="bg_repeat" name="bg_repeat">
+                <option value="cover" <?= $bgRepeat !== 'tile' ? 'selected' : '' ?>>Фотография — на всю секцию</option>
+                <option value="tile" <?= $bgRepeat === 'tile' ? 'selected' : '' ?>>Плитка — повторять узором</option>
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="bg_tile_size">Плитка: размер, px</label>
+            <input type="number" id="bg_tile_size" name="bg_tile_size" min="16" max="600" step="4" value="<?= (int) ($data['_bg_tile_size'] ?? 120) ?>">
+        </div>
+        <div class="form-field">
+            <label for="bg_position">Фотография: часть кадра</label>
+            <select id="bg_position" name="bg_position">
+                <?php foreach (\App\Core\MediaPosition::VALUES as $pos): ?>
+                    <option value="<?= $pos ?>" <?= (string) ($data['_bg_position'] ?? 'center-center') === $pos ? 'selected' : '' ?>><?= $pos ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="bg_overlay">Фотография: затемнение, %</label>
+            <input type="number" id="bg_overlay" name="bg_overlay" min="0" max="80" step="5" value="<?= (int) ($data['_bg_overlay'] ?? 45) ?>">
+            <span class="form-hint">Без затемнения текст на светлом снимке читается через раз.</span>
+        </div>
+        <div class="form-field form-field--checkbox">
+            <input type="checkbox" id="bg_fixed" name="bg_fixed" value="1" <?= !empty($data['_bg_fixed']) ? 'checked' : '' ?>>
+            <label for="bg_fixed">Фотография не двигается при прокрутке (только на компьютере)</label>
+        </div>
+        <div class="form-field">
+            <label for="bg_pattern">Встроенный узор</label>
+            <select id="bg_pattern" name="bg_pattern">
+                <?php foreach ($bgPatterns as $v => $l): ?><option value="<?= $v ?>" <?= (string) ($data['_bg_pattern'] ?? 'dots') === $v ? 'selected' : '' ?>><?= $l ?></option><?php endforeach; ?>
+            </select>
+        </div>
+        <div class="form-grid-2col">
+            <?= \App\Core\AdminUi::colorField('bg_pattern_color', $data['_bg_pattern_color'] ?? '', 'Цвет узора', '#009bbe', 'Акцент сайта') ?>
+            <div class="form-field">
+                <label for="bg_pattern_size">Узор: шаг, px</label>
+                <input type="number" id="bg_pattern_size" name="bg_pattern_size" min="8" max="240" step="2" value="<?= (int) ($data['_bg_pattern_size'] ?? 28) ?>">
+            </div>
+        </div>
+        <div class="form-field">
+            <label for="bg_pattern_opacity">Узор: заметность, %</label>
+            <input type="number" id="bg_pattern_opacity" name="bg_pattern_opacity" min="3" max="60" step="1" value="<?= (int) ($data['_bg_pattern_opacity'] ?? 22) ?>">
+        </div>
+        <div class="form-field form-field--checkbox">
+            <input type="checkbox" id="bg_light_text" name="bg_light_text" value="1" <?= !empty($data['_bg_light_text']) ? 'checked' : '' ?>>
+            <label for="bg_light_text">Светлый текст на этой секции (для тёмного фона и фотографий)</label>
         </div>
         <div class="form-field">
             <label for="surface">Тип контейнера секции</label>

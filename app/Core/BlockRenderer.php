@@ -230,7 +230,15 @@ final class BlockRenderer
         $fullwidth = !empty($data['_fullwidth']);
         $padMap = ['none' => '0', 'small' => 'var(--space-small)', 'medium' => 'var(--space-premium)', 'large' => 'var(--space-max)'];
         $extraClass = '';
-        if ($bg !== 'none') {
+        // Своя заливка (цвет, градиент, фото, узор) отменяет пресет темы: два
+        // фона на одной секции дают кашу.
+        $background = BlockBackground::build($data, $blockId);
+        if ($background['class'] !== '') {
+            $extraClass .= $background['class'];
+            if ($background['css'] !== '') {
+                $scopedCss = $scopedCss !== '' ? $scopedCss . "\n" . $background['css'] : $background['css'];
+            }
+        } elseif ($bg !== 'none') {
             $extraClass .= ' cms-block--bg cms-block--bg-' . $bg;
         }
         if ($fullwidth) {

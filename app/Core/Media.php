@@ -164,6 +164,35 @@ final class Media
      * Ранний preload использует тот же responsive WebP-набор, что и <picture>,
      * поэтому браузер не скачивает полноразмерный JPEG параллельно с WebP.
      */
+    /**
+     * Значение для `background-image`: WebP-вариант с откатом на исходный файл.
+     *
+     * Фон секции не грузится лениво и не умеет `srcset`, поэтому единственный
+     * способ не отдавать тяжёлый JPEG — `image-set()`: браузер выберет WebP,
+     * а старый возьмёт исходник из второго источника.
+     */
+    public static function cssImageSet(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '' || !UrlGuard::isSafeMedia($url)) {
+            return '';
+        }
+
+        $escape = static fn (string $path): string => str_replace(['\\', '"'], ['\\\\', '\\"'], $path);
+        // CDN-префикс дописывает Asset::rewriteMedia() уже по готовой странице,
+        // как и для <img>: здесь остаётся обычный путь.
+        $original = 'url("' . $escape($url) . '")';
+
+        $variants = self::webpVariants($url);
+        $webp = $variants['w1600'] ?? $variants['full'] ?? null;
+        if ($webp === null) {
+            return $original;
+        }
+
+        return 'image-set(url("' . $escape($webp) . '") type("image/webp"), '
+            . $original . ' type("image/jpeg"))';
+    }
+
     public static function preloadLink(string $url, string $sizes = '100vw'): string
     {
         $url = trim($url);
