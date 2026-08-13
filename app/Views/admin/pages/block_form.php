@@ -805,6 +805,15 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'hero'): ?>
+            <div class="form-field">
+                <label for="hero_text_align_y">Текст по вертикали</label>
+                <select id="hero_text_align_y" name="text_align_y">
+                    <?php foreach (['top' => 'Сверху', 'center' => 'По центру', 'bottom' => 'Снизу'] as $ay => $al): ?>
+                        <option value="<?= $ay ?>" <?= (string) ($data['text_align_y'] ?? 'center') === $ay ? 'selected' : '' ?>><?= $al ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">Заметно на высокой обложке: текст можно увести вниз, чтобы не закрывать лицо на фото.</span>
+            </div>
             <?= \App\Core\AdminUi::imageField('art_image', (string) ($data['art_image'] ?? ''), [
                 'label' => 'Картинка поверх фона (PNG/SVG)',
                 'hint' => 'Эмблема, логотип программы или иллюстрация. Показывается вместе с текстом, а не вместо фона. К слайд-шоу не применяется — там у каждого слайда своё медиа.',
@@ -1055,8 +1064,9 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <h3 class="form-subtitle">Слайды</h3>
             <p class="form-hint u-inline-291b7bbb01">
                 Заполните слайды, чтобы обложка стала слайдером: до <?= \App\Core\BlockData\HeroBlockNormalizer::MAX_SLIDES ?> штук.
-                Оформление (высота, затемнение, подложка, цвета) остаётся общим, у слайда своё — текст, картинка,
-                кнопки, ссылка и срок показа. Пока слайдов нет, обложка работает как раньше.
+                Высота и цвета остаются общими; затемнение, подложку и картинку поверх фона слайд может
+                переопределить — по умолчанию берёт их у обложки. Своё у слайда — текст, фон, кнопки,
+                ссылка и срок показа. Пока слайдов нет, обложка работает как раньше.
             </p>
             <div class="form-field">
                 <label for="hero_autoplay">Автопрокрутка, секунд</label>
@@ -1099,6 +1109,33 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                        <?php
+                        // Оформление слайда: «как у обложки» — значение по
+                        // умолчанию, чтобы правки не пришлось повторять у
+                        // каждого слайда.
+                        $slideChoices = [
+                            'overlay' => ['label' => 'Затемнение фона', 'options' => ['' => 'Как у обложки', 'on' => 'Включить', 'off' => 'Выключить']],
+                            'overlay_mode' => ['label' => 'Тип затемнения', 'options' => ['' => 'Как у обложки', 'gradient' => 'Градиент', 'solid' => 'Сплошное']],
+                            'panel' => ['label' => 'Подложка под текстом', 'options' => ['' => 'Как у обложки', 'on' => 'Включить', 'off' => 'Выключить']],
+                            'art_position' => ['label' => 'Где картинка поверх фона', 'options' => ['' => 'Как у обложки', 'above' => 'Над текстом', 'left' => 'Слева', 'right' => 'Справа']],
+                            'art_size' => ['label' => 'Размер картинки', 'options' => ['' => 'Как у обложки', 'small' => 'Небольшая', 'medium' => 'Средняя', 'large' => 'Крупная']],
+                        ];
+                        ?>
+                        <?= \App\Core\AdminUi::imageField('slides[' . $i . '][art_image]', (string) ($slide['art_image'] ?? ''), [
+                            'label' => 'Картинка поверх фона (PNG/SVG)',
+                            'hint' => 'Пусто — берётся картинка обложки, если она задана.',
+                        ]) ?>
+                        <?= $slideField($i, 'art_alt', 'Описание картинки', (string) ($slide['art_alt'] ?? ''), 'text', 'Пусто — картинка считается украшением.') ?>
+                        <?php foreach ($slideChoices as $choiceKey => $choice): ?>
+                            <div class="form-field">
+                                <label for="slide_<?= $i ?>_<?= $choiceKey ?>"><?= htmlspecialchars($choice['label'], ENT_QUOTES) ?></label>
+                                <select id="slide_<?= $i ?>_<?= $choiceKey ?>" name="slides[<?= $i ?>][<?= $choiceKey ?>]">
+                                    <?php foreach ($choice['options'] as $val => $label): ?>
+                                        <option value="<?= $val ?>" <?= (string) ($slide[$choiceKey] ?? '') === (string) $val ? 'selected' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        <?php endforeach; ?>
                         <?= $slideField($i, '_visible_from', 'Показывать с', \App\Core\BlockVisibility::forInput($slide['_visible_from'] ?? ''), 'datetime-local', 'Пусто — сразу.') ?>
                         <?= $slideField($i, '_visible_to', 'Показывать до', \App\Core\BlockVisibility::forInput($slide['_visible_to'] ?? ''), 'datetime-local', 'Пусто — бессрочно. Слайд исчезнет сам, кэш страницы пересоберётся.') ?>
                         <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить слайд</button>

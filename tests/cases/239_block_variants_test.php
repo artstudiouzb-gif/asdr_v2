@@ -357,3 +357,42 @@ test('Меньше движения: видео и автопрокрутка с
     assert_contains('asdr:motion-change', $a11y);
     assert_contains('asdr:motion-change', $frontend);
 });
+
+test('Обложка: вертикаль текста и оформление слайда наследуется от блока', function () {
+    // Вертикаль: класс на корне, умолчание — по центру.
+    $bottom = variant_block('hero', ['title' => 'Заголовок', 'text_align_y' => 'bottom'], 740);
+    assert_contains('block-hero--y-bottom', $bottom['html']);
+    $default = variant_block('hero', ['title' => 'Заголовок'], 741);
+    assert_contains('block-hero--y-center', $default['html']);
+    $broken = variant_block('hero', ['title' => 'Заголовок', 'text_align_y' => 'вниз'], 742);
+    assert_contains('block-hero--y-center', $broken['html'], 'мусор заменяется умолчанием');
+
+    // Слайд без своих настроек берёт оформление обложки.
+    $inherited = variant_block('hero', [
+        'overlay_enabled' => true,
+        'overlay_mode' => 'solid',
+        'panel_enabled' => true,
+        'art_image' => '/uploads/public/emblem.svg',
+        'slides' => [
+            ['title' => 'Первый', 'image' => '/uploads/public/one.jpg'],
+            ['title' => 'Второй', 'image' => '/uploads/public/two.jpg'],
+        ],
+    ], 743);
+    assert_same(2, substr_count($inherited['html'], 'block-hero__scrim--solid'), 'затемнение обложки на обоих слайдах');
+    assert_same(2, substr_count($inherited['html'], 'block-hero__text--panel'), 'подложка обложки на обоих слайдах');
+    assert_same(2, substr_count($inherited['html'], 'block-hero__art-img'), 'картинка обложки повторяется на слайдах');
+
+    // Слайд может переопределить каждую настройку по отдельности.
+    $own = variant_block('hero', [
+        'overlay_enabled' => true,
+        'overlay_mode' => 'solid',
+        'panel_enabled' => true,
+        'slides' => [
+            ['title' => 'Первый', 'image' => '/uploads/public/one.jpg', 'overlay' => 'off', 'panel' => 'off'],
+            ['title' => 'Второй', 'image' => '/uploads/public/two.jpg', 'overlay_mode' => 'gradient'],
+        ],
+    ], 744);
+    assert_same(1, substr_count($own['html'], 'block-hero__scrim'), 'слайд с выключенным затемнением остаётся без него');
+    assert_same(0, substr_count($own['html'], 'block-hero__scrim--solid'), 'второй слайд перешёл на градиент');
+    assert_same(1, substr_count($own['html'], 'block-hero__text--panel'), 'подложка снята только у первого слайда');
+});
