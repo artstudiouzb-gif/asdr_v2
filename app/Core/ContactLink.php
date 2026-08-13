@@ -18,6 +18,32 @@ final class ContactLink
     private const MIN_PHONE_DIGITS = 7;
 
     /**
+     * Мини-иконка для строки контакта — по её содержимому, а не по подписи:
+     * «Приёмная: +998 …» получает трубку, «info@…» конверт, «Пн–Пт 9:00–18:00»
+     * часы. Строка без узнаваемого содержимого остаётся без значка — лучше
+     * пусто, чем случайная картинка.
+     */
+    public static function iconFor(string $line): ?string
+    {
+        if (preg_match('~[\w.+-]+@[\w-]+(?:\.[\w-]+)+~u', $line) === 1) {
+            return 'mail';
+        }
+
+        // Часы работы проверяем до телефона: «9:00–18:00» состоит из цифр и
+        // под шаблон номера тоже подходит.
+        if (preg_match('~\d{1,2}[:.]\d{2}~u', $line) === 1) {
+            return 'clock';
+        }
+
+        if (preg_match('~\+?\d[\d\s\-()]{5,}\d~u', $line, $m) === 1
+            && strlen((string) preg_replace('/\D+/', '', $m[0])) >= self::MIN_PHONE_DIGITS) {
+            return 'phone';
+        }
+
+        return null;
+    }
+
+    /**
      * Готовая к выводу строка: экранированная, с ссылками на номера и почту.
      */
     public static function linkify(string $line): string

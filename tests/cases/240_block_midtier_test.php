@@ -64,6 +64,26 @@ test('Преимущества: карточка со ссылкой клика�
     assert_not_contains('block-advantages__item--link', $unsafe['html']);
 });
 
+test('Преимущества: вариант «в одну строку» ставит заголовок рядом с иконкой', function () {
+    $items = [['icon_svg' => 'star', 'title' => 'Первое', 'text' => 'Описание.']];
+
+    $inline = midtier_block('advantages', ['variant' => 'inline', 'items' => $items], 805);
+    assert_contains('block-advantages--inline', $inline['html']);
+    // Заголовок внутри верхней строки, рядом с иконкой и номером.
+    assert_true(
+        (bool) preg_match('#feature-card__top.*?feature-card__title.*?feature-card__num.*?</div>#s', $inline['html']),
+        'заголовок должен стоять в одной строке с иконкой и номером'
+    );
+
+    // В обычном варианте заголовок остаётся под верхней строкой.
+    $grid = midtier_block('advantages', ['variant' => 'grid', 'items' => $items], 806);
+    assert_not_contains('block-advantages--inline', $grid['html']);
+    assert_true(
+        (bool) preg_match('#feature-card__num.*?</div>.*?feature-card__title#s', $grid['html']),
+        'в варианте «карточки» заголовок идёт после верхней строки'
+    );
+});
+
 test('Преимущества: нормализатор чистит колонки, ссылку блока и ссылку карточки', function () {
     $data = AdvantagesBlockNormalizer::normalize([
         'variant' => 'grid',

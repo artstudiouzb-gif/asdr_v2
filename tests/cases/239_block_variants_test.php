@@ -196,3 +196,41 @@ test('Иконка и текст: вариант вёрстки и выравн�
     assert_contains('block-icon-text--cards', $default['html']);
     assert_contains('block-icon-text--align-left', $default['html']);
 });
+
+test('Иконка и текст: позиция иконки не зависит от выравнивания', function () {
+    $items = [['icon_svg' => 'phone', 'rows' => "Приёмная | +998 71 200-00-00"]];
+
+    // Сочетание, недоступное раньше: иконка сверху, а текст по левому краю.
+    $mixed = variant_block('icon_text', ['icon_position' => 'top', 'align' => 'left', 'items' => $items], 742);
+    assert_contains('block-icon-text--icon-top', $mixed['html']);
+    assert_contains('block-icon-text--align-left', $mixed['html']);
+
+    $right = variant_block('icon_text', ['icon_position' => 'right', 'items' => $items], 743);
+    assert_contains('block-icon-text--icon-right', $right['html']);
+
+    // Значение вне списка откатывается к «слева».
+    $bogus = variant_block('icon_text', ['icon_position' => 'снизу', 'items' => $items], 744);
+    assert_contains('block-icon-text--icon-left', $bogus['html']);
+});
+
+test('Иконка и текст: подпись и значение можно поставить в одну строку', function () {
+    $items = [['icon_svg' => 'phone', 'rows' => "Приёмная: | +998 71 200-00-00"]];
+
+    $inline = variant_block('icon_text', ['rows_layout' => 'inline', 'items' => $items], 747);
+    assert_contains('block-icon-text--rows-inline', $inline['html']);
+
+    // По умолчанию подпись остаётся над значением.
+    $stacked = variant_block('icon_text', ['items' => $items], 748);
+    assert_contains('block-icon-text--rows-stacked', $stacked['html']);
+});
+
+test('Иконка и текст: у старых блоков позицию иконки задаёт прежнее выравнивание', function () {
+    $items = [['icon_svg' => 'phone', 'rows' => "Приёмная | +998 71 200-00-00"]];
+
+    // Блок сохранён до появления icon_position: «по центру» означало иконку сверху.
+    $legacyCenter = variant_block('icon_text', ['align' => 'center', 'items' => $items], 745);
+    assert_contains('block-icon-text--icon-top', $legacyCenter['html']);
+
+    $legacyLeft = variant_block('icon_text', ['align' => 'left', 'items' => $items], 746);
+    assert_contains('block-icon-text--icon-left', $legacyLeft['html']);
+});

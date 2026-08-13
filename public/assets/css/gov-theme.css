@@ -3302,6 +3302,18 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     width: 100%;
     margin-bottom: 4px;
 }
+/* Вариант «в одну строку»: иконка и заголовок стоят рядом, номер уходит
+   вправо. Карточка выходит ниже — в ряд помещается больше пунктов.
+   Заголовок тянется на всю свободную ширину, иначе space-between родителя
+   отбрасывает его в середину строки. */
+.block-advantages--inline .feature-card__top,
+.block-contact-cards--inline .feature-card__top { align-items: center; gap: 14px; margin-bottom: 8px; }
+.block-advantages--inline .feature-card__top .feature-card__title,
+.block-contact-cards--inline .feature-card__top .feature-card__title { margin: 0; flex: 1 1 auto; min-width: 0; text-align: left; }
+.block-advantages--inline .feature-card__num,
+.block-contact-cards--inline .feature-card__num { margin-left: auto; }
+.block-advantages--inline .feature-card__spacer,
+.block-contact-cards--inline .feature-card__spacer { display: none; }
 .feature-card__num {
     font-family: var(--font-heading, 'PT Serif', serif);
     font-size: var(--step-3);
@@ -6372,7 +6384,15 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .block-icon-text--inline .icon-text__grid { display: flex; flex-wrap: wrap; gap: 12px 32px; }
 .block-icon-text--inline .icon-text__card { flex: 0 1 auto; padding: 0; background: none; border: 0; box-shadow: none; }
 .block-icon-text--inline .icon-text__icon { width: 36px; height: 36px; }
-.block-icon-text--align-center .icon-text__card { flex-direction: column; align-items: center; text-align: center; }
+
+/* Позиция иконки и выравнивание текста — независимые настройки. Раньше их
+   тянуло одно поле: «по центру» заодно поднимало иконку наверх, и получить
+   «иконка сверху, текст слева» было нельзя. */
+.block-icon-text--icon-left .icon-text__card { flex-direction: row; }
+.block-icon-text--icon-right .icon-text__card { flex-direction: row-reverse; }
+.block-icon-text--icon-top .icon-text__card { flex-direction: column; }
+.block-icon-text--align-center .icon-text__card { text-align: center; }
+.block-icon-text--align-center.block-icon-text--icon-top .icon-text__card { align-items: center; }
 .block-icon-text--align-center .icon-text__grid { justify-content: center; }
 
 /* Плитка иконки: оттенок берётся из --icon-text-accent, а он по умолчанию —
@@ -6388,6 +6408,13 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     color: var(--icon-text-accent, var(--gov-teal-text));
 }
 .icon-text__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+/* Подпись и значение одной строкой: «Приёмная: +998 71 200-00-00». Перенос
+   разрешён — длинный номер на узком экране уходит на вторую строку целиком,
+   а не рвётся посередине. */
+.block-icon-text--rows-inline .icon-text__body { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.block-icon-text--rows-inline .icon-text__value { margin-bottom: 0; font-size: var(--step-0); }
+.block-icon-text--rows-inline .icon-text__label { flex: none; }
+.block-icon-text--rows-inline.block-icon-text--align-center .icon-text__body { justify-content: center; }
 .icon-text__label { margin: 0; color: var(--gov-muted); font-size: var(--step--2); line-height: 1.4; }
 .icon-text__value { margin: 0 0 6px; color: var(--gov-title); font-size: var(--step-1); font-weight: 700; line-height: 1.25; }
 .icon-text__value:last-child { margin-bottom: 0; }

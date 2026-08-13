@@ -3,7 +3,7 @@
 $title = $data['title'] ?? '';
 $description = trim(\App\Core\HtmlSanitizer::sanitizeText((string) ($data['description'] ?? '')));
 $items = $data['items'] ?? [];
-$variant = in_array($data['variant'] ?? 'grid', ['grid', 'indexed', 'band'], true) ? (string) $data['variant'] : 'grid';
+$variant = in_array($data['variant'] ?? 'grid', ['grid', 'indexed', 'inline', 'band'], true) ? (string) $data['variant'] : 'grid';
 
 // Шапка секции — общая: заголовок, вводный текст и ссылка «Все …».
 $head = \App\Core\SectionHead::render([
@@ -70,15 +70,23 @@ if ($variant !== 'band') {
             $itemTag = $itemUrl !== '' ? 'a' : 'article';
             ?>
             <<?= $itemTag ?> class="feature-card block-advantages__item<?= $itemUrl !== '' ? ' block-advantages__item--link' : '' ?>"<?= $itemUrl !== '' ? ' href="' . htmlspecialchars($itemUrl, ENT_QUOTES) . '"' : '' ?>>
+                <?php // Вариант «в строку»: иконка и заголовок стоят рядом, номер
+                      // уходит вправо. В остальных вариантах иконка занимает
+                      // отдельную строку над заголовком. ?>
                 <div class="feature-card__top">
                     <?php if (!empty($item['icon_svg'])): ?>
                         <span class="feature-card__icon block-advantages__icon block-advantages__icon--svg" aria-hidden="true"><?= \App\Core\Icon::render($item['icon_svg'], 22) ?></span>
                     <?php else: ?>
                         <span class="feature-card__spacer"></span>
                     <?php endif; ?>
+                    <?php if ($variant === 'inline'): ?>
+                        <h3 class="feature-card__title"><?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?></h3>
+                    <?php endif; ?>
                     <span class="feature-card__num block-advantages__index" aria-hidden="true"><?= str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) ?></span>
                 </div>
-                <h3 class="feature-card__title"><?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?></h3>
+                <?php if ($variant !== 'inline'): ?>
+                    <h3 class="feature-card__title"><?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?></h3>
+                <?php endif; ?>
                 <p class="feature-card__text"><?= htmlspecialchars($item['text'] ?? '', ENT_QUOTES) ?></p>
             </<?= $itemTag ?>>
         <?php endforeach; ?>

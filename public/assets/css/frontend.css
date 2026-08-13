@@ -2389,6 +2389,13 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
     color: var(--color-accent, #2f6fed);
 }
 .contact-card__line { margin: 2px 0; color: var(--text-muted); }
+/* Мини-иконка у строки контакта: подбирается по содержимому строки. Иконка
+   не переносится вместе с текстом — она в своей колонке. */
+.contact-card__line--icon { display: flex; align-items: flex-start; gap: 8px; }
+.contact-card__line-icon { flex: none; display: inline-flex; margin-top: 2px; color: var(--color-accent, #e63946); }
+.contact-card__line-text { min-width: 0; }
+/* Своя картинка вместо иконки Tabler: размер тот же, что у значка темы. */
+.contact-card__icon-img { width: var(--feature-card-icon-size, 22px); height: var(--feature-card-icon-size, 22px); object-fit: contain; }
 /* Кликабельные номер и почта внутри строки контакта: подчёркивание появляется
    при наведении, чтобы строка не выглядела сплошной ссылкой. */
 .contact-link { color: inherit; text-decoration: none; border-bottom: 1px dotted currentColor; }

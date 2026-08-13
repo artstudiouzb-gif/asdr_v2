@@ -757,6 +757,8 @@ final class BlockController
                     'variant' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'variant', ['cards', 'plain', 'inline'], 'cards'),
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
+                    'icon_position' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'icon_position', ['left', 'top', 'right'], 'left'),
+                    'rows_layout' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'rows_layout', ['stacked', 'inline'], 'stacked'),
                     'align' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'align', ['left', 'center'], 'left'),
                     'columns' => max(1, min(4, (int) ($_POST['columns'] ?? 3))),
                     'items' => $iconRows,

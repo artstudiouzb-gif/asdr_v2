@@ -18,6 +18,15 @@ $variant = in_array($data['variant'] ?? 'cards', ['cards', 'plain', 'inline'], t
     ? (string) $data['variant']
     : 'cards';
 $align = ($data['align'] ?? 'left') === 'center' ? 'center' : 'left';
+// Подпись и значение: в столбик или одной строкой рядом с иконкой
+// («Приёмная: +998 71 200-00-00»).
+$rowsLayout = ($data['rows_layout'] ?? 'stacked') === 'inline' ? 'inline' : 'stacked';
+// Позиция иконки — отдельная настройка. У блоков, сохранённых до её появления,
+// её задавало выравнивание: «по центру» означало иконку сверху.
+$iconPosition = (string) ($data['icon_position'] ?? '');
+if (!in_array($iconPosition, ['left', 'top', 'right'], true)) {
+    $iconPosition = $align === 'center' ? 'top' : 'left';
+}
 $columns = max(1, min(4, (int) ($data['columns'] ?? 3)));
 $items = array_values(array_filter(
     (array) ($data['items'] ?? []),
@@ -33,7 +42,7 @@ if ($columns !== 3) {
         . ' .icon-text__grid{grid-template-columns:repeat(' . $columns . ',minmax(0,1fr));}}';
 }
 ?>
-<div class="block-icon-text block-icon-text--<?= $esc($variant) ?> block-icon-text--align-<?= $esc($align) ?>">
+<div class="block-icon-text block-icon-text--<?= $esc($variant) ?> block-icon-text--icon-<?= $esc($iconPosition) ?> block-icon-text--align-<?= $esc($align) ?> block-icon-text--rows-<?= $esc($rowsLayout) ?>">
     <?= \App\Core\SectionHead::render([
         'title' => $title,
         'description' => $description,

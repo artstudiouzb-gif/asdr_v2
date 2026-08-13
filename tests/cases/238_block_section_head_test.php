@@ -67,6 +67,67 @@ test('Контакты: телефон и почта становятся ссы
     assert_not_contains('<script>', $unsafe);
 });
 
+test('Контакты: мини-иконка подбирается по содержимому строки', function () {
+    assert_same('phone', ContactLink::iconFor('Приёмная: +998 71 200-00-00'));
+    assert_same('mail', ContactLink::iconFor('info@asr.uz'));
+    assert_same('clock', ContactLink::iconFor('Пн–Пт 9:00–18:00'));
+    // Часы важнее телефона: «9:00–18:00» под шаблон номера тоже подходит.
+    assert_same('clock', ContactLink::iconFor('Обед 13:00–14:00'));
+    assert_same(null, ContactLink::iconFor('Ташкент, ул. Примерная, 1'));
+});
+
+test('Контакты: вариант в строку, размер иконки, подложка и своя картинка', function () {
+    $items = [[
+        'title' => 'Телефон',
+        'icon_svg' => 'phone',
+        'lines' => "Приёмная: +998 71 200-00-00\nПн–Пт 9:00–18:00",
+    ]];
+
+    $block = BlockRenderer::render([
+        'id' => 830,
+        'type' => 'contact_cards',
+        'data' => json_encode([
+            'variant' => 'inline',
+            'icon_size' => 30,
+            'icon_bg' => 'off',
+            'line_icons' => true,
+            'items' => $items,
+        ], JSON_UNESCAPED_UNICODE),
+        'custom_css' => '',
+    ]);
+    $html = (string) $block['html'];
+
+    assert_contains('block-contact-cards--inline', $html);
+    assert_contains('block-contact-cards--icon-bg-off', $html);
+    assert_contains('--feature-card-icon-size:30px', (string) $block['css']);
+    // Без подложки плитка исчезает — остаётся только значок.
+    assert_contains('background:none', (string) $block['css']);
+    assert_not_contains('width:52px', (string) $block['css']);
+    assert_contains('contact-card__line-icon', $html);
+    assert_contains('contact-card__line--icon', $html);
+
+    // Выключенные мини-иконки строк не рисуются.
+    $noIcons = BlockRenderer::render([
+        'id' => 831,
+        'type' => 'contact_cards',
+        'data' => json_encode(['line_icons' => false, 'items' => $items], JSON_UNESCAPED_UNICODE),
+        'custom_css' => '',
+    ]);
+    assert_not_contains('contact-card__line-icon', (string) $noIcons['html']);
+
+    // Своя картинка вытесняет иконку Tabler, небезопасный адрес отбрасывается.
+    $custom = BlockRenderer::render([
+        'id' => 832,
+        'type' => 'contact_cards',
+        'data' => json_encode([
+            'items' => [['title' => 'Телефон', 'icon_svg' => 'phone', 'icon_image' => '/uploads/public/icon.svg', 'lines' => '+998 71 200-00-00']],
+        ], JSON_UNESCAPED_UNICODE),
+        'custom_css' => '',
+    ]);
+    assert_contains('contact-card__icon-img', (string) $custom['html']);
+    assert_not_contains('contact-card__icon-svg', (string) $custom['html']);
+});
+
 test('Слайдер: пропорция, автопрокрутка и ссылка со слайда', function () {
     $rendered = BlockRenderer::render([
         'id' => 810,

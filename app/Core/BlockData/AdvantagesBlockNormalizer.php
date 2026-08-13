@@ -41,7 +41,7 @@ final class AdvantagesBlockNormalizer
         $variant = (string) ($input['variant'] ?? 'grid');
 
         return [
-            'variant' => in_array($variant, ['grid', 'indexed', 'band'], true) ? $variant : 'grid',
+            'variant' => in_array($variant, ['grid', 'indexed', 'inline', 'band'], true) ? $variant : 'grid',
             'title' => BlockDataInput::plain($input, 'title_field', $locale),
             'description' => TextProcessor::process(
                 HtmlSanitizer::sanitizeText((string) ($input['description'] ?? '')),

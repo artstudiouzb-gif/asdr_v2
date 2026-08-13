@@ -45,7 +45,7 @@ final class BlockTypeRegistry
         'partners' => ['title' => 'Партнёры', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 6, 'logo_size' => 'medium', 'grayscale' => true, 'autoplay' => 0, 'items' => []],
         'subscribe' => ['variant' => 'band', 'title' => 'Подписка на новости', 'text' => 'Получайте дайджест новостей на почту раз в неделю.', 'image' => '', 'placeholder' => '', 'note' => '', 'button_text' => 'Подписаться'],
         'faq' => ['title' => '', 'search_enabled' => true, 'single_open' => false, 'items' => []],
-        'contact_cards' => ['title' => '', 'items' => []],
+        'contact_cards' => ['variant' => 'cards', 'title' => '', 'line_icons' => true, 'icon_size' => 22, 'icon_bg' => 'on', 'items' => []],
         'hero' => ['title' => '', 'eyebrow' => '', 'subtitle' => '', 'bg_type' => 'none', 'image' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'video_url' => '', 'youtube_url' => '', 'bg_color' => '', 'width' => 'full', 'height' => 'regular', 'custom_height' => '720px', 'overlay_enabled' => false, 'overlay_mode' => 'gradient', 'overlay_direction' => 'auto', 'overlay_color' => '#0b1a30', 'overlay_opacity' => 35, 'text_position' => 'left', 'text_width' => '', 'text_color' => '', 'button_color' => '', 'panel_enabled' => false, 'panel_color' => '#0b1a30', 'panel_opacity' => 0, 'button_text' => '', 'button_url' => '', 'button_icon' => '', 'button_icon_image' => '', 'button2_text' => '', 'button2_url' => '', 'button2_icon' => '', 'button2_icon_image' => '', 'video_button_text' => '', 'video_button_url' => '', 'slides' => [], 'autoplay' => 0],
         'cards_grid' => ['variant' => 'icon', 'title' => '', 'all_text' => '', 'all_url' => '', 'columns' => 5, 'card_bg' => '', 'text_color' => '', 'source' => 'manual', 'limit' => 6, 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'items' => []],
         'media_gallery' => ['title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'source' => 'manual', 'limit' => 8, 'columns' => 4, 'ratio' => '16-9', 'items' => []],
@@ -67,7 +67,10 @@ final class BlockTypeRegistry
             'bio_title' => 'Биография', 'bio_icon' => '', 'bio' => '',
             'duties_title' => 'Функции', 'duties_icon' => '', 'duties' => '',
             'mobile_icons_only' => false],
-        'icon_text' => ['variant' => 'cards', 'title' => '', 'description' => '', 'align' => 'left', 'columns' => 3, 'items' => []],
+        // icon_position по умолчанию пуст намеренно: у блоков, сохранённых до
+        // появления поля, позицию иконки задавало выравнивание, и подстановка
+        // «слева» дефолтом сдвинула бы иконку на всех таких страницах.
+        'icon_text' => ['variant' => 'cards', 'title' => '', 'description' => '', 'icon_position' => '', 'align' => 'left', 'rows_layout' => 'stacked', 'columns' => 3, 'items' => []],
     ];
 
     /** Короткие русские названия для сообщений редактору. */

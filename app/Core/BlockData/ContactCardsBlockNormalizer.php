@@ -30,6 +30,9 @@ final class ContactCardsBlockNormalizer
 
             $items[] = [
                 'icon_svg' => $iconSvg,
+                // Своя картинка (SVG или PNG из медиабиблиотеки) важнее ключа
+                // Tabler — та же логика, что у кнопок обложки.
+                'icon_image' => BlockDataInput::safeMedia($item['icon_image'] ?? ''),
                 'title' => BlockDataInput::plain($item, 'title', $locale),
                 'lines' => $lines,
                 'link_url' => BlockDataInput::safeLink($item['link_url'] ?? ''),
@@ -38,7 +41,11 @@ final class ContactCardsBlockNormalizer
         }
 
         return [
+            'variant' => BlockDataInput::enum($input, 'variant', ['cards', 'inline'], 'cards'),
             'title' => BlockDataInput::plain($input, 'title_field', $locale),
+            'line_icons' => !empty($input['line_icons']),
+            'icon_size' => BlockDataInput::int($input, 'icon_size', 16, 64, 22),
+            'icon_bg' => BlockDataInput::enum($input, 'icon_bg', ['on', 'off'], 'on'),
             'items' => $items,
         ];
     }

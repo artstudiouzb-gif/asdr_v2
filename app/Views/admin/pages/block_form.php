@@ -178,8 +178,10 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <select id="advantages_variant" name="variant">
                     <option value="grid" <?= ($data['variant'] ?? 'grid') === 'grid' ? 'selected' : '' ?>>Карточки</option>
                     <option value="indexed" <?= ($data['variant'] ?? 'grid') === 'indexed' ? 'selected' : '' ?>>Карточки с нумерацией</option>
+                    <option value="inline" <?= ($data['variant'] ?? 'grid') === 'inline' ? 'selected' : '' ?>>Иконка и заголовок в одну строку</option>
                     <option value="band" <?= ($data['variant'] ?? 'grid') === 'band' ? 'selected' : '' ?>>Компактная полоса</option>
                 </select>
+                <span class="form-hint">В варианте «в одну строку» иконка стоит рядом с заголовком, а не над ним — карточка получается ниже, и в ряд их влезает больше.</span>
             </div>
             <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все направления"></div>
             <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
@@ -678,12 +680,38 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'contact_cards'): ?>
+            <div class="form-field">
+                <label for="cc_variant">Вариант отображения</label>
+                <select id="cc_variant" name="variant">
+                    <option value="cards" <?= ($data['variant'] ?? 'cards') === 'cards' ? 'selected' : '' ?>>Иконка над заголовком</option>
+                    <option value="inline" <?= ($data['variant'] ?? 'cards') === 'inline' ? 'selected' : '' ?>>Иконка и заголовок в одну строку</option>
+                </select>
+                <span class="form-hint">Во втором варианте карточка ниже — в ряд их влезает больше.</span>
+            </div>
+            <div class="form-field">
+                <label for="cc_icon_size">Размер иконки, px</label>
+                <input type="number" id="cc_icon_size" name="icon_size" min="16" max="64" value="<?= (int) ($data['icon_size'] ?? 22) ?>">
+            </div>
+            <div class="form-field">
+                <label for="cc_icon_bg">Подложка под иконкой</label>
+                <select id="cc_icon_bg" name="icon_bg">
+                    <option value="on" <?= ($data['icon_bg'] ?? 'on') !== 'off' ? 'selected' : '' ?>>Есть — иконка в плитке</option>
+                    <option value="off" <?= ($data['icon_bg'] ?? 'on') === 'off' ? 'selected' : '' ?>>Нет — только иконка</option>
+                </select>
+                <span class="form-hint">Без подложки иконка стоит на фоне карточки. Размер плитки подстраивается под размер иконки.</span>
+            </div>
+            <div class="form-field form-field--checkbox">
+                <input type="checkbox" id="cc_line_icons" name="line_icons" value="1" <?= (!array_key_exists('line_icons', $data) || !empty($data['line_icons'])) ? 'checked' : '' ?>>
+                <label for="cc_line_icons">Мини-иконки у строк контактов</label>
+                <span class="form-hint">Подбираются по содержимому строки: трубка к номеру, конверт к почте, часы к режиму работы. Строка без узнаваемого содержимого остаётся без значка.</span>
+            </div>
             <div>
                 <label>Контактные карточки (адрес, телефон, e-mail, часы работы…)</label>
                 <div data-repeater="items">
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
                             <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
+                            <?= \App\Core\AdminUi::imageField("items[{$i}][icon_image]", (string) ($item['icon_image'] ?? ''), ['label' => 'Своя иконка (картинка)', 'hint' => 'Заполнено — используется вместо иконки Tabler.']) ?>
                             <div class="form-field"><label>Заголовок</label><input type="text" name="items[<?= $i ?>][title]" value="<?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?>" placeholder="напр. Телефон"></div>
                             <div class="form-field"><label>Строки (по одной на строку)</label><textarea name="items[<?= $i ?>][lines]" placeholder="+998 71 000-00-00&#10;info@example.uz"><?= htmlspecialchars($item['lines'] ?? '', ENT_QUOTES) ?></textarea></div>
                             <div class="form-field"><label>Ссылка (URL)</label><input type="text" name="items[<?= $i ?>][link_url]" value="<?= htmlspecialchars($item['link_url'] ?? '', ENT_QUOTES) ?>" placeholder="tel:+998710000000 / mailto: / https://"></div>
@@ -694,6 +722,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </div>
                 <template data-repeater-template="items">
                     <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
+                    <?= \App\Core\AdminUi::imageField('items[__INDEX__][icon_image]', '', ['label' => 'Своя иконка (картинка)', 'hint' => 'Заполнено — используется вместо иконки Tabler.']) ?>
                     <div class="form-field"><label>Заголовок</label><input type="text" name="items[__INDEX__][title]" placeholder="напр. Телефон"></div>
                     <div class="form-field"><label>Строки (по одной на строку)</label><textarea name="items[__INDEX__][lines]"></textarea></div>
                     <div class="form-field"><label>Ссылка (URL)</label><input type="text" name="items[__INDEX__][link_url]"></div>
@@ -1296,8 +1325,33 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </select>
                 <span class="form-hint">«Без рамок» стоит выбрать, если рядом уже есть карточные секции — иначе блоки спорят друг с другом.</span>
             </div>
+            <?php
+            // Позиция иконки появилась позже выравнивания: у блоков, сохранённых
+            // до неё, «по центру» означало иконку сверху — подставляем то же.
+            $itIconPos = (string) ($data['icon_position'] ?? '');
+            if (!in_array($itIconPos, ['left', 'top', 'right'], true)) {
+                $itIconPos = ($data['align'] ?? 'left') === 'center' ? 'top' : 'left';
+            }
+            ?>
             <div class="form-field">
-                <label for="it_align">Выравнивание</label>
+                <label for="it_icon_position">Позиция иконки</label>
+                <select id="it_icon_position" name="icon_position">
+                    <?php foreach (['left' => 'Слева от текста', 'top' => 'Над текстом', 'right' => 'Справа от текста'] as $value => $label): ?>
+                        <option value="<?= $value ?>" <?= $itIconPos === $value ? 'selected' : '' ?>><?= $label ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">Не зависит от выравнивания: можно поставить иконку над текстом, оставив сам текст по левому краю.</span>
+            </div>
+            <div class="form-field">
+                <label for="it_rows_layout">Подпись и значение</label>
+                <select id="it_rows_layout" name="rows_layout">
+                    <option value="stacked" <?= ($data['rows_layout'] ?? 'stacked') === 'stacked' ? 'selected' : '' ?>>В столбик — подпись над значением</option>
+                    <option value="inline" <?= ($data['rows_layout'] ?? 'stacked') === 'inline' ? 'selected' : '' ?>>В одну строку — «Приёмная: +998 71 200-00-00»</option>
+                </select>
+                <span class="form-hint">В одну строку удобно для коротких реквизитов. Двоеточие после подписи ставится вручную в поле строк.</span>
+            </div>
+            <div class="form-field">
+                <label for="it_align">Выравнивание текста</label>
                 <select id="it_align" name="align">
                     <option value="left" <?= ($data['align'] ?? 'left') === 'left' ? 'selected' : '' ?>>По левому краю</option>
                     <option value="center" <?= ($data['align'] ?? 'left') === 'center' ? 'selected' : '' ?>>По центру</option>
