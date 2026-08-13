@@ -88,7 +88,10 @@ final class OrgTree
     private static function rows(string $raw): array
     {
         $rows = [];
-        foreach (preg_split('/\R/', $raw) ?: [] as $line) {
+        // Строки режем явным набором переводов строки, а не `\R`: без модификатора
+        // `u` он матчит байт 0x85, а это второй байт кириллической «х» —
+        // «Бухгалтерия» разваливалась на «Бу» и «галтерия».
+        foreach (preg_split('/\r\n|\n|\r/', $raw) ?: [] as $line) {
             if (trim($line) === '') {
                 continue;
             }

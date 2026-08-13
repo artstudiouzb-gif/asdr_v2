@@ -107,6 +107,15 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
     content: ''; position: absolute; left: 50%; top: -46px; width: 2px; height: 46px;
     background: var(--org-line); transform: translateX(-50%);
 }
+/* Схема без руководителя: общего родителя нет, поэтому ни ствола, ни
+   перекладины, ни отводов — иначе линии сходятся к пустому месту. */
+.orgstruct--nohead .orgstruct__branches { margin-top: 0; }
+.orgstruct--nohead .orgstruct__branches::before,
+.orgstruct--nohead .orgstruct__council::after,
+.orgstruct--nohead .orgstruct__row::before,
+.orgstruct--nohead .orgstruct__row + .orgstruct__row::after,
+.orgstruct--nohead .orgstruct__branch::before { display: none; }
+.orgstruct--nohead .orgstruct__row { padding-top: 0; }
 .orgstruct__row {
     position: relative; display: grid; margin: 0; padding: 0; list-style: none;
     grid-template-columns: repeat(var(--orgstruct-cols, 4), minmax(0, 1fr));
@@ -181,7 +190,9 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
 .orgstruct__subunit::before { content: '• '; }
 /* Третий уровень и глубже: та же пунктирная связь, только сдвинута — иначе
    сектор внутри отдела читается как соседний отдел. */
-.orgstruct__subunits--deep { margin-top: 6px; padding-left: 12px; }
+/* Размер шрифта здесь не трогаем: он берётся из шкалы --step-*, а уровень
+   различает отступ. */
+.orgstruct__subunits--deep { margin-top: 6px; padding-left: 16px; }
 .orgstruct__subunit--accent { color: var(--gov-title); font-weight: 700; }
 /* Длинные названия подразделений — норма для госоргана: строки уравниваем,
    переносы разрешаем, иначе колонка расползается по одному слову. */
@@ -232,9 +243,19 @@ body.design-type-static .orgstruct__note { font-size: 13px; line-height: 1.5; }
 .orgstruct--spine .orgstruct__row { display: flex; list-style: none; flex-direction: column; gap: 26px; padding-top: 26px; }
 .orgstruct--spine .orgstruct__row::before,
 .orgstruct--spine .orgstruct__row + .orgstruct__row::after { display: none; }
-.orgstruct--spine .orgstruct__branch { padding-left: 26px; border-left: 2px solid var(--org-line); gap: 14px; }
+.orgstruct--spine { --org-spine-x: 14px; align-items: stretch; }
+/* Руководитель встаёт на ту же ось, что и ветки: центрированная карточка
+   оставляла ствол висеть посреди пустого места. */
+.orgstruct--spine .orgstruct__top { justify-content: flex-start; }
+.orgstruct--spine .orgstruct__branches::before { left: var(--org-spine-x); transform: none; }
+.orgstruct--spine .orgstruct__branches::after {
+    content: ''; position: absolute; left: var(--org-spine-x); top: 0; bottom: 0;
+    width: 2px; background: var(--org-line);
+}
+.orgstruct--spine.orgstruct--nohead .orgstruct__branches::after { top: 26px; }
+.orgstruct--spine .orgstruct__branch { padding-left: 40px; border-left: 0; gap: 14px; }
 .orgstruct--spine .orgstruct__branch::before {
-    content: ''; position: absolute; left: 0; top: 26px; width: 18px; height: 2px; transform: none;
+    content: ''; position: absolute; left: var(--org-spine-x); top: 26px; width: 26px; height: 2px; transform: none;
 }
 .orgstruct--spine .orgstruct__deputy { text-align: left; align-items: flex-start; }
 .orgstruct--spine .orgstruct__units { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
@@ -246,13 +267,19 @@ body.design-type-static .orgstruct__note { font-size: 13px; line-height: 1.5; }
     .orgstruct__head-row { flex-direction: column; align-items: stretch; width: 100%; gap: 26px; }
     .orgstruct__aside { margin: 0; }
     .orgstruct__aside::before { left: 50%; top: -26px; width: 2px; height: 26px; }
-    .orgstruct__branches { margin-top: 34px; gap: 26px; }
-    .orgstruct__branches::before { top: -34px; height: 34px; }
-    /* В один столбец перекладина и отводы веток не нужны. */
+    .orgstruct__branches { margin-top: 30px; gap: 26px; }
+    /* В один столбец соединители не нужны: карточки идут подряд, а обрывки
+       вертикальных линий между ними складываются в «цепочку», которая на глаз
+       проходит сквозь карточки и читается как сбой вёрстки. Иерархию на узком
+       экране держат вложенность и отступы. */
     .orgstruct__row { grid-template-columns: 1fr; gap: 26px; padding-top: 0; }
     .orgstruct__row::before,
     .orgstruct__row + .orgstruct__row::after,
-    .orgstruct__branch::before { display: none; }
+    .orgstruct__branch::before,
+    .orgstruct__branches::before,
+    .orgstruct__council::after,
+    .orgstruct__aside::before,
+    .orgstruct__branch .orgstruct__units::before { display: none; }
     .orgstruct--spine .orgstruct__branch { padding-left: 16px; }
     .orgstruct--spine .orgstruct__branch::before { display: block; }
     .orgstruct__notes { grid-template-columns: 1fr; }
@@ -292,6 +319,7 @@ body.design-type-static .orgstruct__note { font-size: 13px; line-height: 1.5; }
     .orgstruct__row + .orgstruct__row::after,
     .orgstruct__branch::before,
     .orgstruct__branch .orgstruct__units::before,
+    .orgstruct--spine .orgstruct__branches::after,
     .orgstruct__council::after,
     .orgstruct__aside::before {
         background: #000 !important;

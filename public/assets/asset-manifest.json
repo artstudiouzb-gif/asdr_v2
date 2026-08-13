@@ -43,11 +43,11 @@
     },
     "/assets/css/blocks/org-structure.css": {
       "path": "/assets/css/blocks/org-structure.min.css",
-      "sourceSha256": "714fe6c6267a1bedd92792a6551bf73f75003b39d25a228f12cf78f5eba5fa05",
-      "sha256": "7afcd0841fbe8c0fa51b96dfa44635e0e8cb7b0433d11eecd7379bf4e68e3814",
-      "raw": 11824,
-      "gzip": 2447,
-      "brotli": 2090
+      "sourceSha256": "c368528a577c4c2ab0cf7089dc5ab30e2eca641840242e51951fb8d1b6488c56",
+      "sha256": "4f6f0cf448fa4bd8716e73bd2d05b53bda21a440ae18d3c917b1d536338c742f",
+      "raw": 12723,
+      "gzip": 2543,
+      "brotli": 2180
     },
     "/assets/css/blocks/leader-card.css": {
       "path": "/assets/css/blocks/leader-card.min.css",

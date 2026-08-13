@@ -67,6 +67,9 @@ $notes = $orgParseLines((string) ($data['notes'] ?? ''));
 $footnote = trim((string) ($data['footnote'] ?? ''));
 $collapsible = !empty($data['collapsible']);
 $headTag = $headUrl !== '' ? 'a' : 'div';
+// Схема без руководителя — обычное дело: совет и департаменты без общего
+// начальника наверху. Пустая тёмная плашка в этом случае читалась как брак.
+$hasHeadCard = $headTitle !== '' || $headName !== '';
 
 // Ветки нормализуем заранее: пустые отбрасываем, чтобы ряды считались верно.
 $branches = [];
@@ -116,7 +119,7 @@ $branchIndex = 0;
         <div class="section-head"><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2></div>
     <?php endif; ?>
 
-    <div class="orgstruct orgstruct--<?= $layout ?><?= $collapsible ? ' orgstruct--collapsible' : '' ?>"<?= $collapsible ? ' data-org-collapsible' : '' ?>>
+    <div class="orgstruct orgstruct--<?= $layout ?><?= $collapsible ? ' orgstruct--collapsible' : '' ?><?= $hasHeadCard ? '' : ' orgstruct--nohead' ?>"<?= $collapsible ? ' data-org-collapsible' : '' ?>>
         <?php if ($council !== []): ?>
             <ul class="orgstruct__council" role="list">
                 <?php foreach ($council as $item): ?>
@@ -125,12 +128,15 @@ $branchIndex = 0;
             </ul>
         <?php endif; ?>
 
+        <?php if ($hasHeadCard || $sideItems !== []): ?>
         <div class="orgstruct__top">
             <div class="orgstruct__head-row">
+                <?php if ($hasHeadCard): ?>
                 <<?= $headTag ?><?= $headUrl !== '' ? ' href="' . htmlspecialchars($headUrl, ENT_QUOTES) . '"' : '' ?> class="orgstruct__head">
                     <?php if ($headTitle !== ''): ?><span class="orgstruct__head-role"><?= htmlspecialchars($headTitle, ENT_QUOTES) ?></span><?php endif; ?>
                     <?php if ($headName !== ''): ?><span class="orgstruct__head-name"><?= htmlspecialchars($headName, ENT_QUOTES) ?></span><?php endif; ?>
                 </<?= $headTag ?>>
+                <?php endif; ?>
                 <?php if ($sideItems !== []): ?>
                     <ul class="orgstruct__aside" role="list">
                         <?php foreach ($sideItems as $side): ?>
@@ -140,6 +146,7 @@ $branchIndex = 0;
                 <?php endif; ?>
             </div>
         </div>
+        <?php endif; ?>
 
         <?php if ($branches !== []): ?>
             <div class="orgstruct__branches">

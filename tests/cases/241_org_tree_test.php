@@ -75,3 +75,42 @@ test('Блок оргструктуры рисует вложенность лю
     $css = (string) file_get_contents(__DIR__ . '/../../public/assets/css/blocks/org-structure.css');
     assert_contains('.orgstruct__branch .orgstruct__units::before', $css);
 });
+
+test('Кириллическая «х» не разрывает строку списка', function () {
+    // `\R` без модификатора `u` матчит байт 0x85 — второй байт буквы «х»,
+    // и «Бухгалтерия» разваливалась на «Бу» и «галтерия» (в оргструктуре и
+    // в строках контактных карточек — там был тот же split).
+    $tree = OrgTree::parse("Управление делами\n  Бухгалтерия\n  Кадры");
+    assert_same(1, count($tree));
+    assert_same('Бухгалтерия', $tree[0]['children'][0]['label']);
+    assert_same('Кадры', $tree[0]['children'][1]['label']);
+
+    foreach (['contact_cards.php'] as $file) {
+        $tpl = (string) file_get_contents(APP_ROOT . '/templates/blocks/' . $file);
+        assert_not_contains("preg_split('/\\R/'", $tpl, $file . ': перевод строки режется по байтам');
+    }
+});
+
+test('Схема без руководителя: ни пустой карточки, ни линий в пустоту', function () {
+    $rendered = BlockRenderer::render([
+        'id' => 771,
+        'type' => 'org_structure',
+        'data' => json_encode([
+            'head_title' => '',
+            'head_name' => '',
+            'branches' => [
+                ['title' => 'Департамент А', 'units' => "Отдел А1"],
+                ['title' => 'Департамент Б', 'units' => "Отдел Б1"],
+            ],
+        ], JSON_UNESCAPED_UNICODE),
+        'custom_css' => '',
+    ]);
+    $html = (string) $rendered['html'];
+
+    assert_not_contains('orgstruct__head"', $html, 'пустая тёмная плашка читается как брак');
+    assert_contains('orgstruct--nohead', $html);
+
+    // Ствол, перекладина и отводы в этом режиме отключены стилями.
+    $css = (string) file_get_contents(__DIR__ . '/../../public/assets/css/blocks/org-structure.css');
+    assert_contains('.orgstruct--nohead .orgstruct__row::before', $css);
+});
