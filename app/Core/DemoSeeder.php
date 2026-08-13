@@ -168,8 +168,9 @@ final class DemoSeeder
             'news_polls' => 1,
             'pages' => 12,
             'blocks' => 40,
-            'projects' => 4,
-            'project_translations' => 4,
+            // Проектов вдвое больше минимума: у каждого своя узбекская запись,
+            // как и у страниц. Отдельной таблицы переводов у них больше нет.
+            'projects' => 8,
             'content_entries' => 14,
             'content_entry_translations' => 14,
             'photo_albums' => 3,
@@ -1257,31 +1258,39 @@ final class DemoSeeder
             ]);
         }
 
-        if (self::tableExists($pdo, 'page_translations')) {
-            $transIns = $pdo->prepare(
-                'INSERT INTO page_translations (page_id, lang, title, `lead`)
-                 SELECT :pid, "uz", :t, :d
-                 FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM page_translations WHERE page_id = :pid2 AND lang = "uz")'
-            );
-            $uzProjects = [
-                'cifrovaya-transformaciya' => ['Raqamli transformatsiya va innovatsiyalarni rivojlantirish', '<h2>Loyiha haqida</h2><p>Loyiha davlat xizmatlarini raqamlashtirish va ma’lumotlar infratuzilmasini rivojlantirishni birlashtiradi.</p>'],
-                'transportnaya-infrastruktura' => ['Transport va logistika infratuzilmasini rivojlantirish', '<h2>Loyiha haqida</h2><p>Transport yo‘laklari va shahar mobilligini rivojlantirish bo‘yicha majmuaviy dastur.</p>'],
-                'zelenaya-energetika' => ['Qayta tiklanuvchi energiya manbalari ulushini oshirish', '<h2>Loyiha haqida</h2><p>Quyosh va shamol energiyasini rivojlantirish hamda energiya samaradorligini oshirish tashabbusi.</p>'],
-                'investicii-prioritetnye-otrasli' => ['Ustuvor tarmoqlarga investitsiyalarni jalb qilish', '<h2>Loyiha haqida</h2><p>Shaffof investitsiya takliflari portfelini shakllantirish va loyihalarni kuzatib borish.</p>'],
-            ];
-            foreach ($uzProjects as $slug => $data) {
-                $pidStmt = $pdo->prepare('SELECT id FROM projects WHERE slug = :s LIMIT 1');
-                $pidStmt->execute([':s' => $slug]);
-                $pid = $pidStmt->fetchColumn();
-                if ($pid !== false) {
-                    $transIns->execute([
-                        ':pid' => (int) $pid,
-                        ':t' => $data[0],
-                        ':d' => self::projectLead($data[1]),
-                        ':pid2' => (int) $pid,
-                    ]);
-                    self::seedProjectBody($pdo, (int) $pid, 'uz', $data[1]);
-                }
+        // Узбекская версия проекта — отдельная запись своего языка, связанная
+        // через translation_group_id: ровно так её и заводит редактор кнопкой
+        // «Создать перевод», и только так её видно в разделе «Проекты».
+        $uzProjects = [
+            'cifrovaya-transformaciya' => ['Raqamli transformatsiya va innovatsiyalarni rivojlantirish', '<h2>Loyiha haqida</h2><p>Loyiha davlat xizmatlarini raqamlashtirish va ma’lumotlar infratuzilmasini rivojlantirishni birlashtiradi.</p>'],
+            'transportnaya-infrastruktura' => ['Transport va logistika infratuzilmasini rivojlantirish', '<h2>Loyiha haqida</h2><p>Transport yo‘laklari va shahar mobilligini rivojlantirish bo‘yicha majmuaviy dastur.</p>'],
+            'zelenaya-energetika' => ['Qayta tiklanuvchi energiya manbalari ulushini oshirish', '<h2>Loyiha haqida</h2><p>Quyosh va shamol energiyasini rivojlantirish hamda energiya samaradorligini oshirish tashabbusi.</p>'],
+            'investicii-prioritetnye-otrasli' => ['Ustuvor tarmoqlarga investitsiyalarni jalb qilish', '<h2>Loyiha haqida</h2><p>Shaffof investitsiya takliflari portfelini shakllantirish va loyihalarni kuzatib borish.</p>'],
+        ];
+        $uzIns = $pdo->prepare(
+            "INSERT INTO pages (title, slug, entity_type, `lead`, cover_image, status, is_featured, sort_order, layout_type, lang, translation_group_id, created_at)
+             SELECT :t, base.slug, 'project', :d, base.cover_image, 'published', base.is_featured, base.sort_order, 'no_sidebar', 'uz',
+                    COALESCE(NULLIF(base.translation_group_id, 0), base.id), NOW()
+             FROM pages base
+             WHERE base.id = :base_id
+               AND NOT EXISTS (
+                   SELECT 1 FROM pages chk WHERE chk.entity_type = 'project' AND chk.lang = 'uz' AND chk.slug = base.slug
+               )"
+        );
+        foreach ($uzProjects as $slug => $data) {
+            $baseStmt = $pdo->prepare("SELECT id FROM pages WHERE entity_type = 'project' AND lang = 'ru' AND slug = :s LIMIT 1");
+            $baseStmt->execute([':s' => $slug]);
+            $baseId = $baseStmt->fetchColumn();
+            if ($baseId === false) {
+                continue;
+            }
+            $uzIns->execute([':t' => $data[0], ':d' => self::projectLead($data[1]), ':base_id' => (int) $baseId]);
+
+            $uzStmt = $pdo->prepare("SELECT id FROM pages WHERE entity_type = 'project' AND lang = 'uz' AND slug = :s LIMIT 1");
+            $uzStmt->execute([':s' => $slug]);
+            $uzId = $uzStmt->fetchColumn();
+            if ($uzId !== false) {
+                self::seedProjectBody($pdo, (int) $uzId, 'uz', $data[1]);
             }
         }
     }

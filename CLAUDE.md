@@ -113,7 +113,11 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   свободные поля (`project_fields`) больше не редактируются — на сайте они
   никогда и не выводились. Данные переносит в блоки разовый
   `php database/migrate_project_extras_to_blocks.php` (есть `--dry-run`);
-  таблицы пока оставлены как архив.
+  таблицы пока оставлены как архив. **Язык у проекта один механизм** —
+  отдельная запись своего языка (`lang` + `translation_group_id`, кнопка
+  «Создать перевод» в сайдбаре), slug у версий общий. Форма проекта в
+  `page_translations` больше не пишет; чтение старых строк через
+  представление `project_translations` осталось ради ранее заведённых данных.
 - **Модели** — `app/Models/*` (Project, News, PhotoAlbum, TeamMember, Page,
   MenuItem, Setting, …). Много `SELECT *`; статусы published/draft, мягкое удаление.
 - **i18n публички**: `App\Core\Lang` + глобальный `t()` (`app/Core/helpers.php`),

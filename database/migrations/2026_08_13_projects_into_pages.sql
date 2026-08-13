@@ -81,23 +81,47 @@ FROM pages tgt
     JOIN projects src ON src.id = tgt.legacy_project_id
 WHERE TRIM(COALESCE(src.description, '')) <> '';
 
--- 4. Переводы: заголовок — в page_translations, описание — в блок языка ------
-INSERT INTO page_translations (page_id, lang, title, `lead`)
+-- 4. Переводы проекта — отдельные записи своего языка ------------------------
+-- Редактор работает с языками именно так: у языковой версии своя карточка в
+-- разделе, связанная через translation_group_id (кнопка «Создать перевод»).
+-- Slug при этом остаётся общим: он уникален в пределах пары «тип + язык».
+INSERT INTO pages (
+    title, slug, entity_type, `lead`, cover_image, is_featured, sort_order,
+    status, is_home, layout_type, lang, translation_group_id, created_at, updated_at
+)
 SELECT
-    tgt.id,
-    pt.lang,
     pt.title,
-    NULLIF(TRIM(LEFT(REGEXP_REPLACE(REGEXP_REPLACE(COALESCE(pt.description, ''), '<[^>]*>', ' '), '[[:space:]]+', ' '), 300)), '')
+    base.slug,
+    'project',
+    NULLIF(TRIM(LEFT(REGEXP_REPLACE(REGEXP_REPLACE(COALESCE(pt.description, ''), '<[^>]*>', ' '), '[[:space:]]+', ' '), 300)), ''),
+    base.cover_image,
+    base.is_featured,
+    base.sort_order,
+    base.status,
+    0,
+    'no_sidebar',
+    pt.lang,
+    COALESCE(NULLIF(base.translation_group_id, 0), base.id),
+    base.created_at,
+    base.updated_at
 FROM project_translations pt
-    JOIN pages tgt ON tgt.legacy_project_id = pt.project_id
-ON DUPLICATE KEY UPDATE
-    title = VALUES(title),
-    `lead` = VALUES(`lead`);
+    JOIN pages base ON base.legacy_project_id = pt.project_id
+WHERE TRIM(COALESCE(pt.title, '')) <> ''
+  AND pt.lang <> base.lang
+  -- Своя запись этого языка уже могла существовать (механизм «отдельная
+  -- запись»): второй такой же создавать нельзя.
+  AND NOT EXISTS (
+      SELECT 1 FROM projects other
+      WHERE COALESCE(NULLIF(other.translation_group_id, 0), other.id)
+            = COALESCE(NULLIF(base.translation_group_id, 0), base.id)
+        AND other.lang = pt.lang
+  );
 
+-- Тело перевода — текстовый блок его собственной записи.
 INSERT INTO blocks (page_id, lang, type, title, data, custom_css, sort_order, is_active, created_at)
 SELECT
     tgt.id,
-    pt.lang,
+    tgt.lang,
     'text',
     NULL,
     JSON_OBJECT('variant', 'default', 'content', pt.description),
@@ -106,7 +130,10 @@ SELECT
     1,
     NOW()
 FROM project_translations pt
-    JOIN pages tgt ON tgt.legacy_project_id = pt.project_id
+    JOIN pages base ON base.legacy_project_id = pt.project_id
+    JOIN pages tgt ON tgt.entity_type = 'project'
+                  AND tgt.lang = pt.lang
+                  AND tgt.slug = base.slug
 WHERE TRIM(COALESCE(pt.description, '')) <> '';
 
 -- 5. Галерея, поля и ревизии переезжают на новые id --------------------------

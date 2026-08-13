@@ -15,7 +15,6 @@ use App\Core\Slug;
 use App\Core\View;
 use App\Models\Language;
 use App\Models\Project;
-use App\Models\ProjectTranslation;
 use App\Models\ContentRevision;
 
 final class ProjectController
@@ -58,7 +57,7 @@ final class ProjectController
     public function create(): void
     {
         Auth::requireLogin();
-        View::render('admin/projects/form', ['project' => null, 'translations' => [], 'error' => null]);
+        View::render('admin/projects/form', ['project' => null, 'error' => null]);
     }
 
     public function store(): void
@@ -67,22 +66,17 @@ final class ProjectController
         Csrf::verifyRequest();
 
         [$data, $error] = $this->collectInput(null);
-        $translations = $this->collectTranslations();
 
         if ($error !== null) {
             View::render('admin/projects/form', [
                 'project' => $data,
-                'translations' => $translations,
                 'error' => $error,
             ]);
             return;
         }
 
-        $id = Database::transaction(static function (\PDO $_pdo) use ($data, $translations): int {
-            $id = Project::create($data);
-            self::saveTranslations($id, $translations);
-
-            return $id;
+        $id = Database::transaction(static function (\PDO $_pdo) use ($data): int {
+            return Project::create($data);
         });
 
         Flash::success('Проект создан.');
@@ -103,7 +97,6 @@ final class ProjectController
 
         View::render('admin/projects/form', [
             'project' => $project,
-            'translations' => ProjectTranslation::forProject((int) $project['id']),
             'error' => null,
         ]);
     }
@@ -148,19 +141,16 @@ final class ProjectController
         if (!ContentRevision::isFresh('project', $id, (string) ($_POST['expected_updated_at'] ?? ''))) {
             View::render('admin/projects/form', [
                 'project' => $project,
-                'translations' => ProjectTranslation::forProject($id),
                 'error' => 'Проект уже был изменён в другой вкладке или другим пользователем. Текущие данные перезагружены; восстановите локальный черновик и проверьте изменения.',
             ]);
             return;
         }
 
         [$data, $error] = $this->collectInput($id, $project);
-        $translations = $this->collectTranslations();
 
         if ($error !== null) {
             View::render('admin/projects/form', [
                 'project' => array_merge($project, $data),
-                'translations' => $translations,
                 'error' => $error,
             ]);
             return;
@@ -168,16 +158,14 @@ final class ProjectController
 
         $expectedVersion = (int) ($_POST['expected_lock_version'] ?? 0);
         try {
-            Database::transaction(static function (\PDO $_pdo) use ($id, $data, $translations, $expectedVersion): void {
+            Database::transaction(static function (\PDO $_pdo) use ($id, $data, $expectedVersion): void {
                 ContentRevision::capture('project', $id, Auth::id());
                 Project::update($id, $data, $expectedVersion);
-                self::saveTranslations($id, $translations);
             });
         } catch (ConcurrencyException) {
             $project = Project::findById($id) ?? $project;
             View::render('admin/projects/form', [
                 'project' => $project,
-                'translations' => ProjectTranslation::forProject($id),
                 'error' => 'Проект уже был изменён в другой вкладке или другим пользователем. Текущие данные перезагружены; восстановите локальный черновик и проверьте изменения.',
             ]);
             return;
@@ -249,44 +237,5 @@ final class ProjectController
         $text = trim((string) preg_replace('/\s+/u', ' ', $text));
 
         return mb_substr($text, 0, 300);
-    }
-
-    /**
-     * Переводы из полей translations[<lang>][title|description] для всех
-     * НЕ-основных активных языков. Ключ — код языка.
-     *
-     * @return array<string, array{title: string, description: string}>
-     */
-    private function collectTranslations(): array
-    {
-        $defaultCode = Language::defaultCode();
-        $input = (array) ($_POST['translations'] ?? []);
-        $out = [];
-        foreach (Language::active() as $lang) {
-            $code = (string) $lang['code'];
-            if ($code === $defaultCode) {
-                continue;
-            }
-            $t = (array) ($input[$code] ?? []);
-            $out[$code] = [
-                'title' => trim((string) ($t['title'] ?? '')),
-                'description' => self::excerptInput((string) ($t['description'] ?? '')),
-            ];
-        }
-
-        return $out;
-    }
-
-    /**
-     * @param array<string, array{title: string, description: string}> $translations
-     */
-    private static function saveTranslations(int $projectId, array $translations): void
-    {
-        foreach ($translations as $code => $t) {
-            ProjectTranslation::upsert($projectId, (string) $code, [
-                'title' => $t['title'] ?? '',
-                'description' => $t['description'] ?? '',
-            ]);
-        }
     }
 }

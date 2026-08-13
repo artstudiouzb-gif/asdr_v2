@@ -9,7 +9,6 @@ $activeNav = 'projects';
 require __DIR__ . '/../layout/header.php';
 
 /** @var array|null $project */
-/** @var array $translations */
 /** @var string|null $error */
 
 $defaultCode = Language::defaultCode();
