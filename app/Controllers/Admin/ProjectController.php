@@ -263,7 +263,10 @@ final class ProjectController
     /** Анонс проекта: разметка снимается, пробелы схлопываются, длина 300. */
     private static function excerptInput(string $value): string
     {
-        $text = trim((string) preg_replace('/\s+/u', ' ', strip_tags($value)));
+        // Теги заменяем пробелом, а не вырезаем: вставка разметки иначе
+        // склеивает соседние слова.
+        $text = strip_tags((string) preg_replace('/<[^>]*>/', ' ', $value));
+        $text = trim((string) preg_replace('/\s+/u', ' ', $text));
 
         return mb_substr($text, 0, 300);
     }

@@ -1308,7 +1308,10 @@ final class DemoSeeder
     /** Короткий анонс проекта для карточки: разметка снимается, текст режется. */
     private static function projectLead(string $html): string
     {
-        $text = trim((string) preg_replace('/\s+/u', ' ', strip_tags($html)));
+        // Теги заменяем пробелом, а не вырезаем: иначе «</h2><p>» склеивает
+        // заголовок со следующим предложением в одно слово.
+        $text = strip_tags((string) preg_replace('/<[^>]*>/', ' ', $html));
+        $text = trim((string) preg_replace('/\s+/u', ' ', $text));
 
         return mb_substr($text, 0, 300);
     }
