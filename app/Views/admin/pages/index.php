@@ -77,6 +77,10 @@ $langs = Language::active();
                     <?php if ($isItemHome): ?>
                         <span class="badge badge--accent badge--home" title="<?= htmlspecialchars(t('Главная страница'), ENT_QUOTES) ?>"><?= AdminUi::icon('home', 14) ?></span>
                     <?php endif; ?>
+                    <?php $itemSection = (string) ($item['section'] ?? ''); ?>
+                    <?php if (isset(\App\Models\Page::SECTIONS[$itemSection])): ?>
+                        <span class="badge" title="Шапка раздела: страница отдаёт разделу заголовок, лид и SEO">Раздел: <?= htmlspecialchars(\App\Models\Page::SECTIONS[$itemSection], ENT_QUOTES) ?></span>
+                    <?php endif; ?>
                 </td>
                 <td>
                     <?php if (!empty($item['parent_title'])): ?>

@@ -2868,6 +2868,9 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 
 /* AJAX-фильтрация: пока грузится новый список, старый приглушается. Клики по
    нему в это время не нужны — ответ всё равно перерисует область. */
+/* Блоки страницы-раздела идут под списком и отделяются от него линией:
+   иначе первая же секция читается как продолжение ленты. */
+.listing__section-blocks { margin-top: clamp(32px, 4vw, 56px); border-top: 1px solid var(--gov-border); }
 .listing__results { transition: opacity .18s ease; }
 .listing--loading .listing__results { opacity: .45; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .listing__results { transition: none; } }

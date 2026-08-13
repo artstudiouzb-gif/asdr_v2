@@ -47,6 +47,9 @@ final class NewsController
             'pages' => $pages,
             'categories' => $categories,
             'category' => $categorySlug,
+            // Заголовок, лид, SEO и блоки под лентой берутся из страницы,
+            // назначенной шапкой раздела в админке (может не быть вовсе).
+            'sectionPage' => \App\Core\SectionPage::render('news', $lang),
         ];
 
         // AJAX-фильтрация: тот же список, но без шапки и подвала.

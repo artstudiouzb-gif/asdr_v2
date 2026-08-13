@@ -484,9 +484,18 @@ final class PageController
             $customJs = trim((string) ($existing['custom_js'] ?? ''));
         }
 
+        // Шапка раздела: одна страница на раздел и язык — иначе на сайте
+        // выигрывала бы случайная. Занятое место освобождаем молча, это
+        // осознанное действие редактора.
+        $section = (string) ($_POST['section'] ?? '');
+        if (!isset(Page::SECTIONS[$section])) {
+            $section = '';
+        }
+
         $data = [
             'title' => $title,
             'slug' => $slug,
+            'section' => $section,
             'meta_title' => $metaTitle !== '' ? $metaTitle : null,
             'meta_description' => $metaDescription !== '' ? $metaDescription : null,
             'lead' => $lead !== '' ? $lead : null,

@@ -13,8 +13,18 @@ $pages = $pages ?? 1;
 $categories = $categories ?? [];
 $category = $category ?? '';
 
-$metaTitle = 'Новости';
-$metaDescription = 'Официальные новости и аналитические материалы Агентства.';
+/** @var array|null $sectionPage шапка раздела из админки (может отсутствовать) */
+$sectionPage = $sectionPage ?? null;
+$sectionTitle = (string) ($sectionPage['title'] ?? '');
+$sectionLead = (string) ($sectionPage['lead'] ?? '');
+$sectionMetaTitle = (string) ($sectionPage['meta_title'] ?? '');
+$metaTitle = $sectionMetaTitle !== '' ? $sectionMetaTitle : ($sectionTitle !== '' ? $sectionTitle : 'Новости');
+$metaDescription = (string) ($sectionPage['meta_description'] ?? '');
+if ($metaDescription === '') {
+    $metaDescription = $sectionLead !== '' ? $sectionLead : 'Официальные новости и аналитические материалы Агентства.';
+}
+// Стили блоков раздела уезжают в <head> тем же путём, что и у страницы.
+$extraHeadCss = (string) ($sectionPage['css'] ?? '');
 AssetCollector::requireJs('news');
 require __DIR__ . '/_header.php';
 
@@ -27,8 +37,8 @@ require __DIR__ . '/_crumbs.php';
 ?>
 <div class="listing" data-listing>
     <div class="listing__head">
-        <h1 class="listing__title"><?= htmlspecialchars(t('Новости и аналитика'), ENT_QUOTES) ?></h1>
-        <p class="listing__lead"><?= htmlspecialchars(t('Официальные сообщения, события и аналитические материалы Агентства.'), ENT_QUOTES) ?></p>
+        <h1 class="listing__title"><?= htmlspecialchars($sectionTitle !== '' ? $sectionTitle : t('Новости и аналитика'), ENT_QUOTES) ?></h1>
+        <p class="listing__lead"><?= htmlspecialchars($sectionLead !== '' ? $sectionLead : t('Официальные сообщения, события и аналитические материалы Агентства.'), ENT_QUOTES) ?></p>
     </div>
 
     <?php if ($categories !== []): ?>
@@ -49,5 +59,10 @@ require __DIR__ . '/_crumbs.php';
     <div class="listing__results" data-listing-results>
         <?= \App\Core\View::renderPartial('site/_news_list', compact('items', 'page', 'pages', 'category')) ?>
     </div>
+
+    <?php // Блоки страницы-раздела — под лентой: наверху уже её шапка. ?>
+    <?php if (!empty($sectionPage['content'])): ?>
+        <div class="listing__section-blocks"><?= $sectionPage['content'] ?></div>
+    <?php endif; ?>
 </div>
 <?php require __DIR__ . '/_footer.php'; ?>

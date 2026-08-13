@@ -203,6 +203,7 @@ CREATE TABLE IF NOT EXISTS pages (
     title           VARCHAR(255) NOT NULL COMMENT 'заголовок на языке по умолчанию',
     slug            VARCHAR(255) NOT NULL,
     entity_type     ENUM('page', 'project') NOT NULL DEFAULT 'page' COMMENT 'подтип записи: обычная страница или проект',
+    section         VARCHAR(20) NOT NULL DEFAULT '' COMMENT 'раздел, шапкой которого служит страница: news|projects',
     meta_title      VARCHAR(255) NULL,
     meta_description VARCHAR(500) NULL,
     `lead`          TEXT NULL COMMENT 'видимый лид/подзаголовок страницы; у проекта — анонс для карточки',
@@ -227,6 +228,7 @@ CREATE TABLE IF NOT EXISTS pages (
     KEY idx_pages_lang_group (translation_group_id, lang),
     KEY idx_pages_parent (parent_id),
     KEY idx_pages_projects (entity_type, status, deleted_at, is_featured, sort_order),
+    KEY idx_pages_section (section, lang, status),
     CONSTRAINT fk_pages_parent FOREIGN KEY (parent_id) REFERENCES pages(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1127,7 +1129,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_11_news_categories.sql'),
     ('2026_08_11_news_badge_color.sql'),
     ('2026_08_13_projects_into_pages.sql'),
-    ('2026_08_13_news_category_icon.sql')
+    ('2026_08_13_news_category_icon.sql'),
+    ('2026_08_13_page_sections.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

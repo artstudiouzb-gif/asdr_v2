@@ -349,6 +349,51 @@ final class Page
             : $slug;
     }
 
+    /** Ключ раздела из формы: чужое значение — обычная страница. */
+    private static function normalizeSection(mixed $section): string
+    {
+        $section = (string) $section;
+
+        return isset(self::SECTIONS[$section]) ? $section : '';
+    }
+
+    /** Разделы, у которых может быть своя страница-шапка. */
+    public const SECTIONS = ['news' => 'Новости', 'projects' => 'Проекты'];
+
+    /**
+     * Страница-шапка раздела (`/news`, `/projects`): заголовок, лид, SEO и
+     * блоки под списком. Языковая версия ищется своя, при её отсутствии —
+     * запись основного языка: пустой раздел хуже чужого языка в заголовке.
+     */
+    public static function forSection(string $section, ?string $lang = null): ?array
+    {
+        if (!isset(self::SECTIONS[$section])) {
+            return null;
+        }
+
+        $targetLang = $lang ?? \App\Core\Locale::current();
+        $stmt = Database::pdo()->prepare(
+            "SELECT * FROM pages
+             WHERE section = :section AND entity_type = 'page'
+               AND status = 'published' AND deleted_at IS NULL
+             ORDER BY (lang = :lang) DESC, (lang = :default_lang) DESC, id ASC
+             LIMIT 1"
+        );
+        $stmt->execute([
+            ':section' => $section,
+            ':lang' => $targetLang,
+            ':default_lang' => Language::defaultCode(),
+        ]);
+        $row = $stmt->fetch();
+        if (!$row) {
+            return null;
+        }
+
+        // Запись другого языка всё равно прогоняем через перевод полей: у
+        // страниц бывает и связанная запись (её найдёт запрос выше), и перевод.
+        return (string) ($row['lang'] ?? '') === $targetLang ? $row : self::localize($row, $targetLang);
+    }
+
     public static function findHome(?string $lang = null): ?array
     {
         $targetLang = $lang ?? \App\Core\Locale::current();
@@ -858,13 +903,22 @@ final class Page
                     ->execute([':lang' => $lang]);
             }
 
+            // Шапка раздела одна на язык: иначе на сайте выигрывала бы
+            // случайная запись, а редактор об этом не узнал бы.
+            $section = self::normalizeSection($data['section'] ?? '');
+            if ($section !== '') {
+                $pdo->prepare("UPDATE pages SET section = '' WHERE section = :section AND lang = :lang")
+                    ->execute([':section' => $section, ':lang' => $lang]);
+            }
+
             $stmt = $pdo->prepare(
-                'INSERT INTO pages (title, slug, meta_title, meta_description, `lead`, status, is_home, layout_type, hide_chrome, transparent_header, custom_css, custom_js, lang, translation_group_id, parent_id, created_at)
-                 VALUES (:title, :slug, :meta_title, :meta_description, :lead, :status, :is_home, :layout_type, :hide_chrome, :transparent_header, :custom_css, :custom_js, :lang, NULL, :parent_id, NOW())'
+                'INSERT INTO pages (title, slug, section, meta_title, meta_description, `lead`, status, is_home, layout_type, hide_chrome, transparent_header, custom_css, custom_js, lang, translation_group_id, parent_id, created_at)
+                 VALUES (:title, :slug, :section, :meta_title, :meta_description, :lead, :status, :is_home, :layout_type, :hide_chrome, :transparent_header, :custom_css, :custom_js, :lang, NULL, :parent_id, NOW())'
             );
             $stmt->execute([
                 ':title' => $data['title'],
                 ':slug' => $data['slug'],
+                ':section' => self::normalizeSection($data['section'] ?? ''),
                 ':meta_title' => $data['meta_title'] ?? null,
                 ':meta_description' => $data['meta_description'] ?? null,
                 ':lead' => $data['lead'] ?? null,
@@ -919,8 +973,16 @@ final class Page
                     ->execute([':lang' => $targetLang]);
             }
 
+            // Шапка раздела одна на язык — освобождаем её у соседей.
+            $section = self::normalizeSection($data['section'] ?? '');
+            if ($section !== '') {
+                $sectionLang = (string) ($data['lang'] ?? $currentRow['lang'] ?? Language::defaultCode());
+                $pdo->prepare("UPDATE pages SET section = '' WHERE section = :section AND lang = :lang AND id <> :id")
+                    ->execute([':section' => $section, ':lang' => $sectionLang, ':id' => $id]);
+            }
+
             $stmt = $pdo->prepare(
-                'UPDATE pages SET title = :title, slug = :slug, meta_title = :meta_title,
+                'UPDATE pages SET title = :title, slug = :slug, section = :section, meta_title = :meta_title,
                  meta_description = :meta_description, `lead` = :lead, status = :status, is_home = :is_home,
                  layout_type = :layout_type, hide_chrome = :hide_chrome,
                  transparent_header = :transparent_header, custom_css = :custom_css, custom_js = :custom_js, parent_id = :parent_id' . (isset($data['lang']) ? ', lang = :lang' : '') . ', lock_version = lock_version + 1
@@ -929,6 +991,7 @@ final class Page
             $params = [
                 ':title' => $data['title'],
                 ':slug' => $data['slug'],
+                ':section' => $section,
                 ':meta_title' => $data['meta_title'] ?? null,
                 ':meta_description' => $data['meta_description'] ?? null,
                 ':lead' => $data['lead'] ?? null,

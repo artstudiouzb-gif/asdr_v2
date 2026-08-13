@@ -14,7 +14,11 @@ final class ProjectController
 {
     public function index(): void
     {
-        View::render('site/projects_index', ['items' => Project::published(Locale::current())]);
+        $lang = Locale::current();
+        View::render('site/projects_index', [
+            'items' => Project::published($lang),
+            'sectionPage' => \App\Core\SectionPage::render('projects', $lang),
+        ]);
     }
 
     public function show(array $params): void
