@@ -3487,3 +3487,30 @@ document.addEventListener('change', function (event) {
     field.selectionStart = field.selectionEnd = field.value.length;
     picker.value = '';
 });
+
+/* Фон секции и подвала: показываем поля только выбранного режима. Раньше все
+   двенадцать полей висели разом, и было не понять, какие из них сейчас
+   работают. Без скрипта видно всё — форма остаётся рабочей. */
+(function () {
+    var apply = function (select) {
+        var mode = select.value || 'preset';
+        var scope = select.closest('form') || document;
+        scope.querySelectorAll('[data-bg-group]').forEach(function (group) {
+            var modes = group.getAttribute('data-bg-group').split(' ');
+            group.hidden = modes.indexOf(mode) === -1;
+        });
+    };
+
+    var init = function () {
+        document.querySelectorAll('select[name="bg_mode"]').forEach(function (select) {
+            apply(select);
+            select.addEventListener('change', function () { apply(select); });
+        });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();

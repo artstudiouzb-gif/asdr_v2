@@ -2137,7 +2137,10 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <?php foreach ($bgModeOpts as $v => $l): ?><option value="<?= $v ?>" <?= $bgMode === $v ? 'selected' : '' ?>><?= $l ?></option><?php endforeach; ?>
             </select>
         </div>
+        <div data-bg-group="color pattern">
         <?= \App\Core\AdminUi::colorField('bg_color', $data['_bg_color'] ?? '', 'Цвет фона (для «Свой цвет» и подложки узора)', '#0f2b46', 'Не задан') ?>
+        </div>
+        <div data-bg-group="gradient">
         <div class="form-grid-2col">
             <?= \App\Core\AdminUi::colorField('bg_gradient_from', $data['_bg_gradient_from'] ?? '', 'Градиент: от', '#0f2b46', 'Не задан') ?>
             <?= \App\Core\AdminUi::colorField('bg_gradient_to', $data['_bg_gradient_to'] ?? '', 'Градиент: до', '#009bbe', 'Не задан') ?>
@@ -2146,6 +2149,8 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <label for="bg_gradient_angle">Градиент: угол (градусы)</label>
             <input type="number" id="bg_gradient_angle" name="bg_gradient_angle" min="0" max="360" step="5" value="<?= (int) ($data['_bg_gradient_angle'] ?? 135) ?>">
         </div>
+        </div>
+        <div data-bg-group="image">
         <?= \App\Core\AdminUi::imageField('bg_image', (string) ($data['_bg_image'] ?? ''), [
             'label' => 'Фон: изображение',
             'hint' => 'Фотография во всю секцию или небольшая плитка узора (PNG/SVG). Фон не грузится лениво — не ставьте тяжёлые файлы.',
@@ -2178,6 +2183,8 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <input type="checkbox" id="bg_fixed" name="bg_fixed" value="1" <?= !empty($data['_bg_fixed']) ? 'checked' : '' ?>>
             <label for="bg_fixed">Фотография не двигается при прокрутке (только на компьютере)</label>
         </div>
+        </div>
+        <div data-bg-group="pattern">
         <div class="form-field">
             <label for="bg_pattern">Встроенный узор</label>
             <select id="bg_pattern" name="bg_pattern">
@@ -2195,9 +2202,22 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <label for="bg_pattern_opacity">Узор: заметность, %</label>
             <input type="number" id="bg_pattern_opacity" name="bg_pattern_opacity" min="3" max="60" step="1" value="<?= (int) ($data['_bg_pattern_opacity'] ?? 22) ?>">
         </div>
+        </div>
+        <div data-bg-group="color gradient image pattern">
         <div class="form-field form-field--checkbox">
             <input type="checkbox" id="bg_light_text" name="bg_light_text" value="1" <?= !empty($data['_bg_light_text']) ? 'checked' : '' ?>>
             <label for="bg_light_text">Светлый текст на этой секции (для тёмного фона и фотографий)</label>
+        </div>
+        <div class="form-field">
+            <label for="min_height">Минимальная высота секции</label>
+            <select id="min_height" name="min_height">
+                <?php $minH = (string) ($data['_min_height'] ?? ''); ?>
+                <?php foreach (['' => 'По содержимому', 'small' => 'Небольшая (320px)', 'medium' => 'Средняя (480px)', 'large' => 'Крупная (640px)', 'screen' => 'На весь экран'] as $v => $l): ?>
+                    <option value="<?= $v ?>" <?= $minH === $v ? 'selected' : '' ?>><?= $l ?></option>
+                <?php endforeach; ?>
+            </select>
+            <span class="form-hint">Короткая секция обрезает фотографию-фон до полоски — здесь задаётся минимум.</span>
+        </div>
         </div>
         <div class="form-field">
             <label for="surface">Тип контейнера секции</label>

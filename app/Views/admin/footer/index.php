@@ -119,7 +119,10 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
                     </select>
                     <span class="form-hint">Фон подвала не грузится лениво — тяжёлую фотографию сюда лучше не ставить.</span>
                 </div>
+                <div data-bg-group="color pattern">
                 <?= \App\Core\AdminUi::colorField('bg_color', $fbg['_bg_color'] ?? '', 'Цвет фона (и подложка узора)', '#0f2b46', 'Из темы') ?>
+                </div>
+                <div data-bg-group="gradient">
                 <div class="form-grid-2col">
                     <?= \App\Core\AdminUi::colorField('bg_gradient_from', $fbg['_bg_gradient_from'] ?? '', 'Градиент: от', '#0f2b46', 'Не задан') ?>
                     <?= \App\Core\AdminUi::colorField('bg_gradient_to', $fbg['_bg_gradient_to'] ?? '', 'Градиент: до', '#009bbe', 'Не задан') ?>
@@ -128,6 +131,8 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
                     <label for="bg_gradient_angle">Градиент: угол</label>
                     <input type="number" id="bg_gradient_angle" name="bg_gradient_angle" min="0" max="360" step="5" value="<?= (int) ($fbg['_bg_gradient_angle'] ?? 135) ?>">
                 </div>
+                </div>
+                <div data-bg-group="image">
                 <?= \App\Core\AdminUi::imageField('bg_image', (string) ($fbg['_bg_image'] ?? ''), [
                     'label' => 'Фон: изображение',
                     'hint' => 'Фотография во всю ширину или небольшая плитка узора (PNG/SVG).',
@@ -149,6 +154,8 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
                         <input type="number" id="bg_overlay" name="bg_overlay" min="0" max="80" step="5" value="<?= (int) ($fbg['_bg_overlay'] ?? 45) ?>">
                     </div>
                 </div>
+                </div>
+                <div data-bg-group="pattern">
                 <div class="form-field">
                     <label for="bg_pattern">Встроенный узор</label>
                     <select id="bg_pattern" name="bg_pattern">
@@ -165,6 +172,7 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
                 <div class="form-field">
                     <label for="bg_pattern_opacity">Узор: заметность, %</label>
                     <input type="number" id="bg_pattern_opacity" name="bg_pattern_opacity" min="3" max="60" step="1" value="<?= (int) ($fbg['_bg_pattern_opacity'] ?? 22) ?>">
+                </div>
                 </div>
 
                 <label for="bottom">Копирайт / текст</label>

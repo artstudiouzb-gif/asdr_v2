@@ -2365,6 +2365,11 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 }
 
 .newsdetail__badge--onDark { background: rgba(23,153,155,.25); color: #7fd8d9; }
+/* В тёмной теме бейдж лежит на карточке, и подложка из 12 % акцента выходила
+   светлее, чем рассчитан --gov-teal-on-dark: 4.49:1 при норме 4.5. Делаем
+   подложку прозрачнее — цвет текста остаётся общим для всей тёмной темы. */
+:root[data-theme="dark"] .newsdetail:not(.newsdetail--premium) .newsdetail__badge,
+:root[data-theme="dark"] .newsdetail__badge { background: color-mix(in srgb, var(--gov-teal) 6%, var(--gov-surface)); }
 
 /* Светлый сплит-баннер (страницы «О нас», «Контакты»). */
 .block-banner--light { 
@@ -3736,6 +3741,17 @@ span.imgcard__media::after {
 .cms-block--fullwidth.cms-block--bg-tint::before { background: color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)); }
 .cms-block--fullwidth.cms-block--bg-navy::before { background: var(--gov-navy); }
 
+/* Минимальная высота секции: нужна фотографии-фону — по содержимому секция
+   сжимается до полоски, и от кадра остаётся горизонт. Содержимое центрируется
+   по вертикали, иначе текст прилипает к верхней грани. */
+.cms-block--minh-small, .cms-block--minh-medium, .cms-block--minh-large, .cms-block--minh-screen {
+    display: flex; flex-direction: column; justify-content: center;
+}
+.cms-block--minh-small { min-height: 320px; }
+.cms-block--minh-medium { min-height: 480px; }
+.cms-block--minh-large { min-height: 640px; }
+.cms-block--minh-screen { min-height: 100svh; }
+
 /* Своя заливка секции: цвет, градиент, фотография или узор. Значения приходят
    переменными в scoped CSS блока (--block-bg и соседние), поэтому в разметке
    инлайн-стилей нет. Пресет темы при своей заливке не применяется — режим
@@ -4145,7 +4161,10 @@ span.imgcard__media::after {
 .bio-quote__mark { font-family: var(--font-heading, 'PT Serif', serif); font-size: var(--step-8); line-height: 1; color: var(--gov-teal); display: block; margin-bottom: 8px; }
 .bio-quote__text { margin: 0 0 12px; font-size: var(--step-0); line-height: var(--base-line-height, 1.6); border: 0; padding: 0; }
 .bio-quote__author { color: rgba(255,255,255,.75); font-size: var(--step--2); }
-.newsdetail__badge { display: inline-block; padding: 6px 14px; border-radius: 999px; background: color-mix(in srgb, var(--gov-teal) 12%, transparent); color: var(--gov-teal-text); text-transform: uppercase; font-size: 11.5px; letter-spacing: .1em; font-weight: 700; }
+/* Цвет текста — вариант «на подложке из акцента» (--gov-teal-on-tint): на
+   заливке в 12 % акцента обычный --gov-teal-text давал 2.85:1 при норме 4.5,
+   axe ловил это на детальной новости и странице проекта. */
+.newsdetail__badge { display: inline-block; padding: 6px 14px; border-radius: 999px; background: color-mix(in srgb, var(--gov-teal) 12%, transparent); color: var(--gov-teal-on-tint, #00697d); text-transform: uppercase; font-size: 11.5px; letter-spacing: .1em; font-weight: 700; }
 /* Рубрика на детальной — ссылка в отфильтрованную ленту. Подчёркивание
    появляется только при наведении: иначе плашка выглядит сломанной. */
 a.newsdetail__badge { text-decoration: none; }

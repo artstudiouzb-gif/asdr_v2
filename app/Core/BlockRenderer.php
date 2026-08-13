@@ -247,6 +247,10 @@ final class BlockRenderer
         if ($surface === 'card') {
             $extraClass .= ' cms-block--surface-card';
         }
+        $minHeight = (string) ($data['_min_height'] ?? '');
+        if (in_array($minHeight, ['small', 'medium', 'large', 'screen'], true)) {
+            $extraClass .= ' cms-block--minh-' . $minHeight;
+        }
         // Ограничение по устройству — только CSS: кэш страницы общий, серверное
         // ветвление по User-Agent сделало бы его непригодным.
         $extraClass .= BlockVisibility::deviceClass($data);
