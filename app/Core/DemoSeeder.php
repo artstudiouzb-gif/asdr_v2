@@ -1189,7 +1189,9 @@ final class DemoSeeder
         $ins = $pdo->prepare(
             "INSERT INTO pages (title, slug, entity_type, `lead`, cover_image, status, is_featured, sort_order, layout_type, lang, created_at)
              SELECT :t, :s, 'project', :d, :i, 'published', 1, :o, 'no_sidebar', 'ru', NOW()
-             FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM projects WHERE slug = :s2)"
+             FROM DUAL WHERE NOT EXISTS (
+                 SELECT 1 FROM pages chk WHERE chk.slug = :s2 AND chk.entity_type = 'project'
+             )"
         );
         foreach ($projects as $i => $project) {
             $ins->execute([
