@@ -31,7 +31,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <input type="text" id="title" name="title" value="<?= htmlspecialchars($block['title'] ?? '', ENT_QUOTES) ?>">
         </div>
 
-        <?php if (in_array($type, ['text', 'cta', 'advantages', 'slider', 'testimonials', 'counters', 'team_list', 'projects_list', 'news_latest', 'partners', 'faq', 'subscribe', 'contact_cards', 'hero', 'cards_grid', 'media_gallery', 'news_feature', 'person_cards', 'timeline', 'stages', 'text_image', 'docs_list', 'map_point', 'org_structure', 'icon_text'], true)): ?>
+        <?php if (in_array($type, ['text', 'cta', 'advantages', 'slider', 'testimonials', 'counters', 'team_list', 'projects_list', 'news_latest', 'partners', 'faq', 'subscribe', 'contact_cards', 'hero', 'cards_grid', 'media_gallery', 'news_feature', 'person_cards', 'timeline', 'stages', 'text_image', 'docs_list', 'map_point', 'org_structure', 'icon_text', 'tabs'], true)): ?>
             <div class="form-field">
                 <label for="title_field"><?= in_array($type, ['advantages', 'timeline', 'stages'], true) ? 'Заголовок раздела' : 'Заголовок, показываемый на сайте' ?></label>
                 <input type="text" id="title_field" name="title_field" value="<?= htmlspecialchars($data['title'] ?? '', ENT_QUOTES) ?>">
@@ -355,6 +355,54 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php endforeach; ?>
                 </select>
                 <span class="form-hint">Наполнение колонок настраивается на странице: кнопка «+ блок» в каждой колонке.</span>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($type === 'tabs'): ?>
+            <?php $tabsVariant = (string) ($data['variant'] ?? 'segmented'); ?>
+            <div class="form-field">
+                <label for="tabs_variant">Вариант отображения</label>
+                <select id="tabs_variant" name="variant">
+                    <?php foreach ([
+                        'segmented' => 'Переключатель — вкладки в общей дорожке',
+                        'underline' => 'Подчёркивание — активная вкладка с чертой',
+                        'vertical' => 'Список слева, содержимое справа',
+                    ] as $tv => $tl): ?>
+                        <option value="<?= $tv ?>" <?= $tabsVariant === $tv ? 'selected' : '' ?>><?= $tl ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">На телефоне вертикальный вариант тоже показывает вкладки сверху — сбоку для них нет места.</span>
+            </div>
+            <div class="form-field">
+                <label for="tabs_align">Положение полосы вкладок</label>
+                <select id="tabs_align" name="align">
+                    <?php foreach (['left' => 'Слева', 'center' => 'По центру', 'stretch' => 'На всю ширину'] as $av => $al): ?>
+                        <option value="<?= $av ?>" <?= (string) ($data['align'] ?? 'left') === $av ? 'selected' : '' ?>><?= $al ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="tabs_description">Описание раздела</label>
+                <textarea id="tabs_description" name="description" rows="3" data-wysiwyg><?= htmlspecialchars($data['description'] ?? '', ENT_QUOTES) ?></textarea>
+            </div>
+            <div>
+                <label>Вкладки</label>
+                <div data-repeater="items">
+                    <?php foreach (($data['items'] ?? []) as $i => $item): ?>
+                        <div class="repeater-row">
+                            <div class="form-field"><label>Название вкладки</label><input type="text" name="items[<?= $i ?>][title]" value="<?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?>"></div>
+                            <?= \App\Core\AdminUi::iconField("items[{$i}][icon]", $item['icon'] ?? '', ['label' => 'Иконка (необязательно)']) ?>
+                            <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить вкладку</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <template data-repeater-template="items">
+                    <div class="form-field"><label>Название вкладки</label><input type="text" name="items[__INDEX__][title]"></div>
+                    <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon]', '', ['label' => 'Иконка (необязательно)']) ?>
+                    <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить вкладку</button>
+                </template>
+                <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить вкладку</button></div>
+                <span class="form-hint">Содержимое вкладок наполняется на странице: под блоком появится колонка на каждую вкладку с кнопкой «+ блок». Внутрь можно положить любой блок — текст, галерею, документы, форму. Вкладка без названия не выводится; порядок вкладок здесь задаёт и порядок колонок наполнения.</span>
             </div>
         <?php endif; ?>
 

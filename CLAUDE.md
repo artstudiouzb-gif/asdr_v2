@@ -51,7 +51,7 @@ root@127.0.0.1 без пароля. Если админ-пароль неизв�
 
 ## Проверки (вместо ручного клика)
 ```bash
-# Полный прогон: 1036 сценариев; без TEST_DB_* 172 DB-сценария пропускаются
+# Полный прогон: 1134 сценария; без TEST_DB_* 178 DB-сценариев пропускаются
 TEST_DB_HOST=127.0.0.1 TEST_DB_DATABASE=asdr_test TEST_DB_USERNAME=root TEST_DB_PASSWORD= php tests/run.php
 
 # Smoke-обход всего сайта (HTTP+PHP-фаталы), RU+UZ, публичка и вся админка.
@@ -83,6 +83,12 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   тянут данные из БД), шаблоны — `templates/blocks/*.php`, редактор полей —
   `app/Views/admin/pages/block_form.php`, сохранение (whitelist полей) —
   `app/Controllers/Admin/BlockController.php::collectData()`.
+- **Контейнеры** (`BlockTypeRegistry::CONTAINER_TYPES` = `columns`, `tabs`):
+  содержимое — вложенные блоки (`blocks.parent_block_id` + `column_index` =
+  номер колонки/вкладки), шаблона нет, рендер программный
+  (`BlockRenderer::renderColumns/renderTabs`). Контейнер в контейнер не
+  вкладывается. Вкладки без JS показывают все панели подряд; переключение
+  надстраивает `public/assets/js/blocks/tabs.js`. Подробности — docs/BLOCKS.md.
 - **Условия показа блока** — `App\Core\BlockVisibility` (ключи `_visible_from`,
   `_visible_to`, `_visible_device` в data блока). Расписание считается на
   сервере: блок вне окна вообще не попадает в HTML. Устройство — классами

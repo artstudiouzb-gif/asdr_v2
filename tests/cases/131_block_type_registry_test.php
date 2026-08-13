@@ -16,7 +16,7 @@ use App\Core\BlockTypeRegistry;
  */
 const EXPECTED_BLOCK_TYPES = [
     'text', 'html', 'cta', 'advantages',
-    'slider', 'form', 'columns', 'testimonials',
+    'slider', 'form', 'columns', 'tabs', 'testimonials',
     'counters', 'team_list', 'projects_list', 'news_latest',
     'partners', 'subscribe', 'faq', 'contact_cards',
     'hero', 'cards_grid', 'media_gallery', 'news_feature',
@@ -51,7 +51,9 @@ test('Реестр блоков: совместимые фасады ренде�
 test('Реестр блоков: каждому обычному типу соответствует шаблон', function () {
     foreach (BlockTypeRegistry::types() as $type) {
         $template = BlockTypeRegistry::templateFile($type);
-        if ($type === 'columns') {
+        // Контейнеры (колонки, вкладки) рендерятся программно: их содержимое —
+        // вложенные блоки, шаблона у них нет.
+        if (BlockTypeRegistry::isContainer($type)) {
             assert_same(null, $template);
             continue;
         }

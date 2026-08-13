@@ -65,6 +65,14 @@
       "gzip": 1201,
       "brotli": 989
     },
+    "/assets/css/blocks/tabs.css": {
+      "path": "/assets/css/blocks/tabs.min.css",
+      "sourceSha256": "6be31cc08fb18abc94419351e840ab426c7c8a59b51d193b5f47c17f3e8c3ead",
+      "sha256": "826dca717cae7abdb4d0abb189f9a5f21ba596c3724f7793f6240a1f9069b6dd",
+      "raw": 2739,
+      "gzip": 891,
+      "brotli": 720
+    },
     "/assets/js/blocks/slider.js": {
       "path": "/assets/js/blocks/slider.min.js",
       "sourceSha256": "3fae00144897417bb9aefb9d4cefd840a6cf63ced534fe018d8fc4b2b654a936",
@@ -88,6 +96,14 @@
       "raw": 1724,
       "gzip": 744,
       "brotli": 621
+    },
+    "/assets/js/blocks/tabs.js": {
+      "path": "/assets/js/blocks/tabs.min.js",
+      "sourceSha256": "9ae8f76f11d0ffe8959b95c21af2b8557e063210f95064a34d2fa8089cbd72f5",
+      "sha256": "e774238fb82528608f4c6d0476f3b250f2979cecb6b44ece4f13594e778311fb",
+      "raw": 1715,
+      "gzip": 744,
+      "brotli": 623
     },
     "/assets/js/news.js": {
       "path": "/assets/js/news.min.js",

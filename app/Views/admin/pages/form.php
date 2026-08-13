@@ -22,10 +22,10 @@ $languages = Language::active();
 
 $blockTypeLabels = BlockTypeRegistry::editorLabels();
 
-// Дочерние блоки колонок (группа 4.1): подгружаем детей каждого columns-блока.
+// Дочерние блоки контейнеров (колонки, вкладки): подгружаем детей каждого.
 $columnsChildren = [];
 foreach ($blocks as $b) {
-    if ($b['type'] === 'columns') {
+    if (BlockTypeRegistry::isContainer((string) $b['type'])) {
         $columnsChildren[(int) $b['id']] = \App\Models\Block::childrenOf((int) $b['id']);
     }
 }
@@ -186,17 +186,33 @@ foreach ($blocks as $b) {
                 </form>
             </div>
         </div>
-        <?php if ($block['type'] === 'columns'):
+        <?php if (BlockTypeRegistry::isContainer((string) $block['type'])):
             $cdata = json_decode((string) $block['data'], true) ?: [];
-            $colCount = (int) ($cdata['columns'] ?? 2);
-            if ($colCount < 2 || $colCount > 4) { $colCount = 2; }
+            // Ячейка наполнения — колонка у «Колонок» и вкладка у «Вкладок»:
+            // хранятся они одинаково (column_index), различаются подписи.
+            $cellTitles = [];
+            if ($block['type'] === 'tabs') {
+                foreach ((array) ($cdata['items'] ?? []) as $tab) {
+                    $tabTitle = trim((string) ($tab['title'] ?? ''));
+                    if ($tabTitle !== '') { $cellTitles[] = $tabTitle; }
+                }
+                $cellTitles = array_slice($cellTitles, 0, 10);
+            } else {
+                $colCount = (int) ($cdata['columns'] ?? 2);
+                if ($colCount < 2 || $colCount > 4) { $colCount = 2; }
+                for ($ci = 0; $ci < $colCount; $ci++) { $cellTitles[] = 'Колонка ' . ($ci + 1); }
+            }
+            $colCount = count($cellTitles);
             $kids = $columnsChildren[(int) $block['id']] ?? [];
         ?>
         <div class="columns-editor u-inline-8bccce3cd1">
-            <div class="columns-editor__grid columns-editor__grid--<?= $colCount ?>">
+            <?php if ($colCount === 0): ?>
+            <p class="form-hint">Вкладок пока нет: добавьте их в настройках блока — после этого здесь появится место для наполнения каждой вкладки.</p>
+            <?php endif; ?>
+            <div class="columns-editor__grid columns-editor__grid--<?= max(2, min(4, $colCount)) ?>">
                 <?php for ($ci = 0; $ci < $colCount; $ci++): ?>
                     <div class="columns-editor__col">
-                        <div class="columns-editor__col-title">Колонка <?= $ci + 1 ?></div>
+                        <div class="columns-editor__col-title"><?= htmlspecialchars($cellTitles[$ci], ENT_QUOTES) ?></div>
                         <?php foreach ($kids as $kid): if ((int) $kid['column_index'] !== $ci) { continue; } ?>
                             <div class="columns-editor__child">
                                 <span><?= htmlspecialchars($kid['title'] ?: ($blockTypeLabels[$kid['type']] ?? $kid['type']), ENT_QUOTES) ?></span>
@@ -215,7 +231,7 @@ foreach ($blocks as $b) {
                             <input type="hidden" name="column_index" value="<?= $ci ?>">
                             <select name="type" aria-label="Тип вложенного блока">
                                 <?php foreach ($blockTypeLabels as $t => $lbl):
-                                    if ($t === 'columns') { continue; } // без columns-в-columns
+                                    if (BlockTypeRegistry::isContainer($t)) { continue; } // контейнер в контейнер не кладём
                                     if ($t === 'html' && !\App\Core\Auth::isSuperAdmin()) { continue; }
                                 ?>
                                     <option value="<?= htmlspecialchars($t, ENT_QUOTES) ?>"><?= htmlspecialchars($lbl, ENT_QUOTES) ?></option>

@@ -37,6 +37,10 @@ final class BlockTypeRegistry
         'slider' => ['title' => '', 'autoplay' => 0, 'ratio' => '16-9', 'slides' => []],
         'form' => ['form_id' => null],
         'columns' => ['columns' => 2, 'gap' => 'medium', 'ratio' => ''],
+        // Вкладки — такой же контейнер, как columns: содержимое вкладки это
+        // вложенные блоки любого типа (column_index = номер вкладки), а сам
+        // блок хранит только подписи вкладок и оформление.
+        'tabs' => ['variant' => 'segmented', 'title' => '', 'description' => '', 'align' => 'left', 'items' => []],
         'testimonials' => ['variant' => 'carousel', 'title' => '', 'description' => '', 'columns' => 3, 'autoplay' => 0, 'items' => []],
         'counters' => ['title' => '', 'card_bg' => '', 'text_color' => '', 'icon_size' => 28, 'icon_bg' => 'on', 'icon_position' => 'left', 'text_align' => 'left', 'items' => []],
         'team_list' => ['title' => '', 'limit' => 0, 'department' => '', 'group_by_department' => false],
@@ -77,7 +81,7 @@ final class BlockTypeRegistry
     public const TYPE_LABELS = [
         'text' => 'Текст', 'html' => 'Произвольный HTML', 'cta' => 'Призыв к действию',
         'advantages' => 'Преимущества', 'slider' => 'Слайдер',
-        'form' => 'Форма', 'columns' => 'Колонки', 'testimonials' => 'Отзывы',
+        'form' => 'Форма', 'columns' => 'Колонки', 'tabs' => 'Вкладки', 'testimonials' => 'Отзывы',
         'counters' => 'Счётчики', 'team_list' => 'Команда', 'projects_list' => 'Проекты',
         'news_latest' => 'Последние новости', 'partners' => 'Партнёры',
         'subscribe' => 'Подписка', 'faq' => 'Вопросы и ответы', 'contact_cards' => 'Контакты',
@@ -98,6 +102,7 @@ final class BlockTypeRegistry
      */
     private const EDITOR_LABEL_OVERRIDES = [
         'cta' => 'Призыв к действию (CTA)',
+        'tabs' => 'Вкладки (любые блоки внутри)',
         'team_list' => 'Список команды',
         'projects_list' => 'Список проектов',
         'partners' => 'Партнёры (логотипы)',
@@ -146,9 +151,23 @@ final class BlockTypeRegistry
         return array_replace(self::TYPE_LABELS, self::EDITOR_LABEL_OVERRIDES);
     }
 
+    /**
+     * Контейнеры: содержимое — вложенные блоки, а не поля формы. Шаблона у них
+     * нет (рендер программный, с рекурсией), и вкладывать контейнер в контейнер
+     * нельзя — иначе редактор получает дерево, которое некому показать.
+     *
+     * @var list<string>
+     */
+    public const CONTAINER_TYPES = ['columns', 'tabs'];
+
+    public static function isContainer(string $type): bool
+    {
+        return in_array($type, self::CONTAINER_TYPES, true);
+    }
+
     public static function templateFile(string $type): ?string
     {
-        if (!self::has($type) || $type === 'columns') {
+        if (!self::has($type) || self::isContainer($type)) {
             return null;
         }
 
