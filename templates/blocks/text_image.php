@@ -48,7 +48,10 @@ if ($image !== '' && $visualWidth !== 50) {
             </div>
         <?php endif; ?>
         <?php if ($buttonText !== '' && $buttonUrl !== ''): ?>
-            <a class="btn btn--primary textimage__button" href="<?= htmlspecialchars($buttonUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($buttonText, ENT_QUOTES) ?></a>
+            <?php // Своя кнопка, а не общий .btn: тот навязывает градиент и белый
+                  // текст через !important, но не задаёт ни display, ни отступы —
+                  // получалась строчная ссылка с подложкой впритык к буквам. ?>
+            <a class="textimage__button" href="<?= htmlspecialchars($buttonUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($buttonText, ENT_QUOTES) ?></a>
         <?php endif; ?>
     </div>
     <?php if ($image !== ''): ?>

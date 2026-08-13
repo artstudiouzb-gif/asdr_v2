@@ -2566,7 +2566,33 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .block-textimage--ratio-16-9 .textimage__media img { aspect-ratio: 16 / 9; object-fit: cover; }
 .block-textimage--ratio-4-3 .textimage__media img { aspect-ratio: 4 / 3; object-fit: cover; }
 .block-textimage--ratio-1-1 .textimage__media img { aspect-ratio: 1 / 1; object-fit: cover; }
-.textimage__button { margin-top: 22px; align-self: start; }
+/* Кнопка под текстом: заливка навью, как у профиля руководителя. Общий .btn
+   здесь не годится — он даёт цвет, но не геометрию. */
+.textimage__button {
+    display: inline-block;
+    margin-top: 22px;
+    padding: 13px 26px;
+    border: 1px solid var(--gov-navy);
+    border-radius: var(--btn-radius, 8px);
+    background: var(--gov-navy);
+    color: #fff;
+    font-weight: 700;
+    font-size: var(--step--1);
+    text-decoration: none;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.textimage__button:hover,
+.textimage__button:focus-visible {
+    background: var(--gov-teal);
+    border-color: var(--gov-teal);
+    transform: translateY(-2px);
+    /* Ступень тени из набора --shadow-1..4, своих значений не заводим. */
+    box-shadow: var(--shadow-3);
+}
+@media (prefers-reduced-motion: reduce) {
+    .textimage__button { transition: none; }
+    .textimage__button:hover, .textimage__button:focus-visible { transform: none; }
+}
 .textimage__title { position: relative; font-size: clamp(var(--step-3), 2.4vw, var(--step-5)); margin: 0 0 18px; padding-left: 16px; }
 .textimage__title::before { content: ''; position: absolute; left: 0; top: .18em; bottom: .18em; width: 4px; border-radius: 2px; background: var(--gov-teal); }
 .textimage__text { color: var(--gov-muted); line-height: 1.6; margin-bottom: 24px; }
