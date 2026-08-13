@@ -47,7 +47,8 @@ final class Media
         bool $lazy = true,
         string $sizes = '(max-width: 800px) 100vw, 800px',
         bool $highPriority = false,
-        string $pictureClass = ''
+        string $pictureClass = '',
+        ?string $mobileUrl = null
     ): string {
         $url = trim((string) $url);
         if ($url === '' || !UrlGuard::isSafeMedia($url)) {
@@ -103,14 +104,21 @@ final class Media
         $img = '<img src="' . htmlspecialchars($url, ENT_QUOTES) . '" alt="' . $altAttr . '"'
             . $classAttr . $sizeAttr . $loadingAttr . $priorityAttr . $styleAttr . '>';
 
-        $variants = self::webpVariants($url);
-        if ($variants === null) {
-            return $pictureClass !== '' ? '<picture' . $pictureClassAttr . '>' . $img . '</picture>' : $img;
-        }
+        // Отдельный кадр для телефона: источник с медиазапросом идёт первым,
+        // и браузер скачивает ровно одну картинку — ту, что подойдёт экрану.
+        $mobileSources = self::mobileSources($mobileUrl, $sizes);
 
-        $srcset = self::webpSrcset($variants);
+        $variants = self::webpVariants($url);
+        $srcset = $variants !== null ? self::webpSrcset($variants) : [];
         if ($srcset === []) {
-            return $pictureClass !== '' ? '<picture' . $pictureClassAttr . '>' . $img . '</picture>' : $img;
+            if ($mobileSources === '' && $pictureClass === '') {
+                return $img;
+            }
+            if ($pictureClass === '') {
+                $pictureClassAttr = ' class="media-picture"';
+            }
+
+            return '<picture' . $pictureClassAttr . '>' . $mobileSources . $img . '</picture>';
         }
 
         if ($pictureClass === '') {
@@ -118,10 +126,38 @@ final class Media
         }
 
         return '<picture' . $pictureClassAttr . '>'
+            . $mobileSources
             . '<source type="image/webp" srcset="' . implode(', ', $srcset) . '" '
             . 'sizes="' . htmlspecialchars($sizes, ENT_QUOTES) . '">'
             . $img
             . '</picture>';
+    }
+
+    /**
+     * Источники для узкого экрана: сначала WebP-набор мобильного файла, затем
+     * он же как есть. Оба с медиазапросом, поэтому на десктопе не скачиваются.
+     */
+    private static function mobileSources(?string $mobileUrl, string $sizes): string
+    {
+        $mobileUrl = trim((string) $mobileUrl);
+        if ($mobileUrl === '' || !UrlGuard::isSafeMedia($mobileUrl)) {
+            return '';
+        }
+
+        // Граница та же, что у мобильной раскладки блоков: 720px.
+        $media = '(max-width: 720px)';
+        $sizesAttr = ' sizes="' . htmlspecialchars($sizes, ENT_QUOTES) . '"';
+        $html = '';
+
+        $variants = self::webpVariants($mobileUrl);
+        $srcset = $variants !== null ? self::webpSrcset($variants) : [];
+        if ($srcset !== []) {
+            $html .= '<source media="' . $media . '" type="image/webp" srcset="'
+                . implode(', ', $srcset) . '"' . $sizesAttr . '>';
+        }
+
+        return $html . '<source media="' . $media . '" srcset="'
+            . htmlspecialchars($mobileUrl, ENT_QUOTES) . '">';
     }
 
     /**

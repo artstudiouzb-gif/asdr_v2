@@ -805,6 +805,43 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'hero'): ?>
+            <?= \App\Core\AdminUi::imageField('image_mobile', (string) ($data['image_mobile'] ?? ''), [
+                'label' => 'Кадр для телефона',
+                'hint' => 'Пусто — на телефоне показывается общий кадр. Пригодится, когда широкое фото на узком экране режется до полоски.',
+            ]) ?>
+            <div class="form-field">
+                <label for="hero_video_mobile">Фоновое видео на телефоне</label>
+                <select id="hero_video_mobile" name="video_mobile">
+                    <option value="poster" <?= (string) ($data['video_mobile'] ?? 'poster') !== 'play' ? 'selected' : '' ?>>Показывать постер (экономит трафик)</option>
+                    <option value="play" <?= (string) ($data['video_mobile'] ?? 'poster') === 'play' ? 'selected' : '' ?>>Проигрывать видео</option>
+                </select>
+                <span class="form-hint">Постер берётся из поля «Изображение» (а если задан кадр для телефона — из него).</span>
+            </div>
+            <?php
+            $heroMobileHeight = (string) ($data['height_mobile'] ?? '');
+            $heroMobileCustom = (string) ($data['custom_height_mobile'] ?? '');
+            preg_match('/^(\d+(?:\.\d+)?)(px|vh|dvh|rem)$/', $heroMobileCustom, $heroMobileParts);
+            ?>
+            <div class="form-field">
+                <label for="hero_height_mobile">Высота на телефоне</label>
+                <select id="hero_height_mobile" name="hero_height_mobile">
+                    <?php foreach (['' => 'Как на десктопе', 'regular' => 'Обычная', 'full' => 'На весь экран', 'custom' => 'Своя'] as $mh => $ml): ?>
+                        <option value="<?= $mh ?>" <?= $heroMobileHeight === $mh ? 'selected' : '' ?>><?= $ml ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="hero_height_mobile_value">Своя высота на телефоне</label>
+                <div class="image-field__controls">
+                    <input type="number" id="hero_height_mobile_value" name="hero_height_mobile_value" min="20" max="2000" step="1" value="<?= htmlspecialchars($heroMobileParts[1] ?? '420', ENT_QUOTES) ?>">
+                    <select name="hero_height_mobile_unit" aria-label="Единица измерения">
+                        <?php foreach (['px', 'vh', 'dvh', 'rem'] as $unit): ?>
+                            <option value="<?= $unit ?>" <?= ($heroMobileParts[2] ?? 'px') === $unit ? 'selected' : '' ?>><?= $unit ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <span class="form-hint">Действует, когда выбрана «Своя» высота на телефоне.</span>
+            </div>
             <div class="form-field">
                 <label for="hero_text_align_y">Текст по вертикали</label>
                 <select id="hero_text_align_y" name="text_align_y">

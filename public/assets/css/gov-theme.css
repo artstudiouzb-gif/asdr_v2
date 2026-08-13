@@ -4043,6 +4043,7 @@ a.newsdetail__badge:hover { background: color-mix(in srgb, var(--color-accent, v
 .block-hero--h-full.block-hero--media { min-height: calc(100dvh - 180px); display: flex; align-items: center; }
 body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-full { min-height: 100dvh; }
 .block-hero--h-custom { min-height: var(--hero-custom-height, 720px); }
+
 .block-hero--h-custom.block-hero--media { display: flex; align-items: center; }
 
 /* ============================================================================
