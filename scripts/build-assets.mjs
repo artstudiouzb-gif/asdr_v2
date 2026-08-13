@@ -36,6 +36,7 @@ const blockSources = [
     'public/assets/js/blocks/anchor_nav.js',
     'public/assets/js/blocks/leader_card.js',
     'public/assets/js/blocks/tabs.js',
+    'public/assets/js/blocks/org_structure.js',
     'public/assets/js/news.js',
 ];
 

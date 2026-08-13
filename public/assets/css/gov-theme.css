@@ -2844,7 +2844,11 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 @media (max-width: 560px) { .projects-grid { grid-template-columns: 1fr; } }
 .projects-grid--compact { grid-template-columns: repeat(4, 1fr); }
 @media (max-width: 1000px) { .projects-grid--compact { grid-template-columns: repeat(2, 1fr); } }
+/* Карточка проекта в списке раздела: подпись под снимком, как в блоке
+   «Карточки». Текст поверх фото на светлом небе не читался, а затемнение
+   спасало через раз — оно зависит от того, что на фотографии. */
 .imgcard--project { min-height: 300px; }
+.imgcard--project.imgcard--below { min-height: 0; }
 .imgcard__desc { color: rgba(255,255,255,.82); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); }
 
 /* Детальная проекта. */

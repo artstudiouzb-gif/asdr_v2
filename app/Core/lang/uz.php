@@ -405,4 +405,7 @@ return [
     'Смотреть в Instagram' => 'Instagramda ko‘rish',
     'Публикация в Facebook' => 'Facebook posti',
     'Смотреть в Facebook' => 'Facebookda ko‘rish',
+    'Поиск по схеме' => 'Sxema bo‘yicha qidiruv',
+    'Название отдела или сектора' => 'Bo‘lim yoki sektor nomi',
+    'Найдено: %d' => 'Topildi: %d',
 ];

@@ -2019,6 +2019,29 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <label for="side_items">Органы сбоку от руководителя (по одному на строку)</label>
                 <textarea id="side_items" name="side_items" rows="3" placeholder="Советник"><?= htmlspecialchars($data['side_items'] ?? '', ENT_QUOTES) ?></textarea>
             </div>
+            <?php
+            // Готовые ссылки на состав сектора: адрес собирается по данным
+            // команды, а не переписывается руками (переименование сектора
+            // раньше молча ломало ссылку).
+            $teamAnchors = \App\Core\TeamAnchors::options();
+            $sectorPicker = '';
+            if ($teamAnchors !== []) {
+                ob_start(); ?>
+                <div class="form-field">
+                    <label>Вставить ссылку на состав сектора</label>
+                    <select data-org-sector-insert>
+                        <option value="">— выберите сектор —</option>
+                        <?php foreach ($teamAnchors as $anchor): ?>
+                            <option value="<?= htmlspecialchars($anchor['name'] . ' | ' . $anchor['path'], ENT_QUOTES) ?>" <?= $anchor['path'] === '' ? 'disabled' : '' ?>>
+                                <?= htmlspecialchars($anchor['name'], ENT_QUOTES) ?> (<?= (int) $anchor['count'] ?>)<?= $anchor['path'] === '' ? ' — нет страницы с блоком «Команда»' : '' ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <span class="form-hint">Строка добавится в поле выше. Секторы берутся из карточек сотрудников, адрес — из страницы с блоком «Команда» и включённой группировкой.</span>
+                </div>
+                <?php $sectorPicker = (string) ob_get_clean();
+            }
+            ?>
             <div>
                 <label>Ветки (заместители / блоки подразделений)</label>
                 <span class="form-hint">Ветку можно оставить без должности — тогда подразделения подчиняются руководителю напрямую.</span>
@@ -2028,7 +2051,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                             <div class="form-field"><label>Должность</label><input type="text" name="branches[<?= $i ?>][title]" value="<?= htmlspecialchars($branch['title'] ?? '', ENT_QUOTES) ?>" placeholder="Первый заместитель директора"></div>
                             <div class="form-field"><label>Ф.И.О. (необязательно)</label><input type="text" name="branches[<?= $i ?>][name]" value="<?= htmlspecialchars($branch['name'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Ссылка на профиль (необязательно)</label><input type="text" name="branches[<?= $i ?>][url]" value="<?= htmlspecialchars($branch['url'] ?? '', ENT_QUOTES) ?>" placeholder="/rukovodstvo/..."></div>
-                            <div class="form-field"><label>Подразделения (по одному на строку)</label><textarea name="branches[<?= $i ?>][units]" rows="5" placeholder="Отдел стратегического планирования&#10;  Сектор прогнозов&#10;Отдел анализа и мониторинга"><?= htmlspecialchars($branch['units'] ?? '', ENT_QUOTES) ?></textarea><span class="form-hint">Отступ в начале строки = уровень вложенности (до четырёх): «Департамент», под ним с отступом «Отдел», ещё глубже «Сектор». <code>| /адрес</code> — ссылка, <code>*</code> в начале — акцентный пункт.</span></div>
+                            <div class="form-field"><label>Подразделения (по одному на строку)</label><textarea name="branches[<?= $i ?>][units]" rows="5" placeholder="Отдел стратегического планирования&#10;  Сектор прогнозов&#10;Отдел анализа и мониторинга"><?= htmlspecialchars($branch['units'] ?? '', ENT_QUOTES) ?></textarea><?= $sectorPicker ?><span class="form-hint">Отступ в начале строки = уровень вложенности (до четырёх): «Департамент», под ним с отступом «Отдел», ещё глубже «Сектор». <code>| /адрес</code> — ссылка, <code>*</code> в начале — акцентный пункт.</span></div>
                             <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить ветку</button>
                         </div>
                     <?php endforeach; ?>
@@ -2037,7 +2060,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <div class="form-field"><label>Должность</label><input type="text" name="branches[__INDEX__][title]" placeholder="Заместитель директора"></div>
                     <div class="form-field"><label>Ф.И.О. (необязательно)</label><input type="text" name="branches[__INDEX__][name]"></div>
                     <div class="form-field"><label>Ссылка на профиль (необязательно)</label><input type="text" name="branches[__INDEX__][url]" placeholder="/rukovodstvo/..."></div>
-                    <div class="form-field"><label>Подразделения (по одному на строку)</label><textarea name="branches[__INDEX__][units]" rows="5" placeholder="Отдел стратегического планирования&#10;  Сектор прогнозов"></textarea><span class="form-hint">Отступ в начале строки = уровень вложенности (до четырёх): «Департамент», под ним с отступом «Отдел», ещё глубже «Сектор». <code>| /адрес</code> — ссылка, <code>*</code> в начале — акцентный пункт.</span></div>
+                    <div class="form-field"><label>Подразделения (по одному на строку)</label><textarea name="branches[__INDEX__][units]" rows="5" placeholder="Отдел стратегического планирования&#10;  Сектор прогнозов"></textarea><?= $sectorPicker ?><span class="form-hint">Отступ в начале строки = уровень вложенности (до четырёх): «Департамент», под ним с отступом «Отдел», ещё глубже «Сектор». <code>| /адрес</code> — ссылка, <code>*</code> в начале — акцентный пункт.</span></div>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить ветку</button>
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="branches"><?= \App\Core\AdminUi::icon('plus') ?>Добавить ветку</button></div>
@@ -2045,6 +2068,10 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <div class="form-field form-field--checkbox">
                 <input type="checkbox" id="collapsible" name="collapsible" value="1" <?= !empty($data['collapsible']) ? 'checked' : '' ?>>
                 <label for="collapsible">Сворачивать подразделения на всех экранах (на телефоне схема сворачивается всегда)</label>
+            </div>
+            <div class="form-field form-field--checkbox">
+                <input type="checkbox" id="org_search" name="org_search" value="1" <?= !empty($data['search']) ? 'checked' : '' ?>>
+                <label for="org_search">Поиск по схеме (поле над схемой; полезно, когда узлов больше трёх десятков)</label>
             </div>
             <div class="form-field">
                 <label for="notes">Примечания карточками под схемой (по одному на строку)</label>

@@ -404,4 +404,7 @@ return [
     'Смотреть в Instagram' => 'View on Instagram',
     'Публикация в Facebook' => 'Facebook post',
     'Смотреть в Facebook' => 'View on Facebook',
+    'Поиск по схеме' => 'Search the chart',
+    'Название отдела или сектора' => 'Department or unit name',
+    'Найдено: %d' => 'Found: %d',
 ];

@@ -24,6 +24,7 @@ final class AssetCollector
         'news' => '/assets/js/news.js',
         'leader_card' => '/assets/js/blocks/leader_card.js',
         'tabs' => '/assets/js/blocks/tabs.js',
+        'org_structure' => '/assets/js/blocks/org_structure.js',
     ];
 
     /**
