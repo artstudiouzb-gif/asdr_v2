@@ -12,6 +12,7 @@ final class Language
         'id' => 0,
         'code' => 'ru',
         'name' => 'Русский',
+        'short_name' => 'Рус',
         'is_default' => 1,
         'is_active' => 1,
         'sort_order' => 0,
@@ -71,6 +72,36 @@ final class Language
         return self::$defaultCache;
     }
 
+    /**
+     * Короткое название языка для компактного переключателя.
+     *
+     * Пусто — берём первые буквы названия, а не код: «Рус» читается как язык,
+     * «RU» — как технический идентификатор.
+     *
+     * @param array<string, mixed> $language
+     */
+    public static function shortLabel(array $language): string
+    {
+        $short = trim((string) ($language['short_name'] ?? ''));
+        if ($short !== '') {
+            return $short;
+        }
+
+        $name = trim((string) ($language['name'] ?? ''));
+
+        return $name !== ''
+            ? mb_convert_case(mb_substr($name, 0, 3), MB_CASE_TITLE, 'UTF-8')
+            : strtoupper((string) ($language['code'] ?? ''));
+    }
+
+    /** @param array<string, mixed> $data */
+    private static function shortNameFor(array $data): string
+    {
+        $short = trim((string) ($data['short_name'] ?? ''));
+
+        return mb_substr($short, 0, 16);
+    }
+
     public static function defaultCode(): string
     {
         return (string) self::default()['code'];
@@ -118,12 +149,13 @@ final class Language
                 $pdo->exec('UPDATE languages SET is_default = 0');
             }
             $stmt = $pdo->prepare(
-                'INSERT INTO languages (code, name, is_default, is_active, sort_order, created_at)
-                 VALUES (:code, :name, :is_default, :is_active, :sort_order, NOW())'
+                'INSERT INTO languages (code, name, short_name, is_default, is_active, sort_order, created_at)
+                 VALUES (:code, :name, :short_name, :is_default, :is_active, :sort_order, NOW())'
             );
             $stmt->execute([
                 ':code' => $data['code'],
                 ':name' => $data['name'],
+                ':short_name' => self::shortNameFor($data),
                 ':is_default' => !empty($data['is_default']) ? 1 : 0,
                 ':is_active' => !empty($data['is_active']) ? 1 : 0,
                 ':sort_order' => (int) ($data['sort_order'] ?? 0),
@@ -149,12 +181,13 @@ final class Language
                 $pdo->exec('UPDATE languages SET is_default = 0');
             }
             $stmt = $pdo->prepare(
-                'UPDATE languages SET code = :code, name = :name, is_default = :is_default,
-                 is_active = :is_active, sort_order = :sort_order WHERE id = :id'
+                'UPDATE languages SET code = :code, name = :name, short_name = :short_name,
+                 is_default = :is_default, is_active = :is_active, sort_order = :sort_order WHERE id = :id'
             );
             $stmt->execute([
                 ':code' => $data['code'],
                 ':name' => $data['name'],
+                ':short_name' => self::shortNameFor($data),
                 ':is_default' => !empty($data['is_default']) ? 1 : 0,
                 ':is_active' => !empty($data['is_active']) ? 1 : 0,
                 ':sort_order' => (int) ($data['sort_order'] ?? 0),

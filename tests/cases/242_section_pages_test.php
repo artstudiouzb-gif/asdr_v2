@@ -82,3 +82,17 @@ test('Страница-раздел отдаёт заголовок, SEO и бл
     $pdo->exec('DELETE FROM blocks WHERE page_id = ' . (int) $id);
     $pdo->exec('DELETE FROM pages WHERE id = ' . (int) $id);
 });
+
+test('Переключатель языков показывает короткое название, а не код', function () {
+    // Заполненное поле берётся как есть.
+    assert_same('Рус', \App\Models\Language::shortLabel(['code' => 'ru', 'name' => 'Русский', 'short_name' => 'Рус']));
+    // Пусто — первые буквы названия: «Eng», а не «EN».
+    assert_same('Eng', \App\Models\Language::shortLabel(['code' => 'en', 'name' => 'English', 'short_name' => '']));
+    assert_same('Oʻz', \App\Models\Language::shortLabel(['code' => 'uz', 'name' => 'Oʻzbekcha']));
+    // Названия нет вовсе — остаётся код, иначе метка была бы пустой.
+    assert_same('KK', \App\Models\Language::shortLabel(['code' => 'kk', 'name' => '']));
+
+    $header = (string) file_get_contents(APP_ROOT . '/app/Views/site/_header.php');
+    assert_contains('Language::shortLabel($l)', $header);
+    assert_not_contains("'short' => strtoupper(\$code)", $header, 'код языка вместо названия не возвращаем');
+});

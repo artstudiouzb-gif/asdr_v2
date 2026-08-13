@@ -102,6 +102,7 @@ final class LanguageController
         return [[
             'code' => $code,
             'name' => $name,
+            'short_name' => trim((string) ($_POST['short_name'] ?? '')),
             'is_default' => !empty($_POST['is_default']),
             'is_active' => !empty($_POST['is_active']),
             'sort_order' => (int) ($_POST['sort_order'] ?? 0),

@@ -181,6 +181,7 @@ CREATE TABLE IF NOT EXISTS languages (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     code            VARCHAR(8) NOT NULL COMMENT 'ISO-код: ru, uz, en',
     name            VARCHAR(60) NOT NULL COMMENT 'отображаемое название: Русский, Oʻzbekcha',
+    short_name      VARCHAR(16) NOT NULL DEFAULT '' COMMENT 'короткое название для переключателя: Рус, Oʻzb',
     is_default      TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'язык по умолчанию (URL без префикса)',
     is_active       TINYINT(1) NOT NULL DEFAULT 1,
     sort_order      INT NOT NULL DEFAULT 0,
@@ -188,9 +189,9 @@ CREATE TABLE IF NOT EXISTS languages (
     UNIQUE KEY uq_languages_code (code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO languages (code, name, is_default, is_active, sort_order) VALUES
-    ('ru', 'Русский', 1, 1, 0),
-    ('uz', 'Oʻzbekcha', 0, 1, 1)
+INSERT INTO languages (code, name, short_name, is_default, is_active, sort_order) VALUES
+    ('ru', 'Русский', 'Рус', 1, 1, 0),
+    ('uz', 'Oʻzbekcha', 'Oʻzb', 0, 1, 1)
 ON DUPLICATE KEY UPDATE code = code;
 
 -- ---------------------------------------------------------------------------
@@ -1130,7 +1131,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_11_news_badge_color.sql'),
     ('2026_08_13_projects_into_pages.sql'),
     ('2026_08_13_news_category_icon.sql'),
-    ('2026_08_13_page_sections.sql')
+    ('2026_08_13_page_sections.sql'),
+    ('2026_08_13_language_short_name.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

@@ -19,7 +19,7 @@ require __DIR__ . '/../layout/header.php';
 <div class="table-responsive language-settings-table-wrap">
     <table class="data-table language-settings-table u-inline-5370cbf1a7">
         <thead>
-            <tr><th>Код</th><th>Название</th><th>По умолчанию</th><th>Активен</th><th>Порядок</th><th class="language-settings-table__actions-head">Действия</th></tr>
+            <tr><th>Код</th><th>Название</th><th>Короткое</th><th>По умолчанию</th><th>Активен</th><th>Порядок</th><th class="language-settings-table__actions-head">Действия</th></tr>
         </thead>
         <tbody>
             <?php foreach ($items as $item): ?>
@@ -27,6 +27,7 @@ require __DIR__ . '/../layout/header.php';
                 <tr>
                     <td><input class="u-inline-1a91ef9eca" type="text" name="code" value="<?= htmlspecialchars($item['code'], ENT_QUOTES) ?>" form="<?= $f ?>"></td>
                     <td><input type="text" name="name" value="<?= htmlspecialchars($item['name'], ENT_QUOTES) ?>" form="<?= $f ?>"></td>
+                    <td><input class="u-inline-1a91ef9eca" type="text" name="short_name" value="<?= htmlspecialchars((string) ($item['short_name'] ?? ''), ENT_QUOTES) ?>" placeholder="<?= htmlspecialchars(\App\Models\Language::shortLabel($item), ENT_QUOTES) ?>" form="<?= $f ?>"></td>
                     <td class="u-inline-dac4fe6c9b"><input type="checkbox" name="is_default" value="1" <?= $item['is_default'] ? 'checked' : '' ?> form="<?= $f ?>"></td>
                     <td class="u-inline-dac4fe6c9b"><input type="checkbox" name="is_active" value="1" <?= $item['is_active'] ? 'checked' : '' ?> form="<?= $f ?>"></td>
                     <td><input class="u-inline-d26d79f4c2" type="number" name="sort_order" value="<?= (int) $item['sort_order'] ?>" form="<?= $f ?>"></td>
@@ -56,6 +57,12 @@ require __DIR__ . '/../layout/header.php';
         <div class="form-field">
             <label for="name">Название</label>
             <input type="text" id="name" name="name" placeholder="English" required>
+        </div>
+
+        <div class="form-field">
+            <label for="short_name">Короткое название</label>
+            <input type="text" id="short_name" name="short_name" placeholder="Eng" maxlength="16">
+            <span class="form-hint">Показывается в компактном переключателе языков. Пусто — возьмутся первые буквы названия.</span>
         </div>
         <div class="form-field">
             <label for="sort_order">Порядок</label>
