@@ -84,19 +84,14 @@ final class DesignSettings
             'choices' => ['pt' => 'PT Sans', 'inter' => 'Inter', 'system' => 'Системный', 'serif' => 'С засечками', 'custom' => 'Свой шрифт'],
             'default' => 'custom',
         ],
-        'site_template' => [
-            'label' => 'Шаблон сайта',
-            'hint' => 'Основной визуальный стиль и сетка сайта. Официальная государственная тема (gov-theme).',
-            'group' => 'Общие',
-            'choices' => ['gov' => 'Официальный (Гос-тема)'],
-            'default' => 'gov',
-        ],
         'container' => [
             'label' => 'Ширина контейнера',
             'hint' => 'Максимальная ширина основного содержимого. Ниже можно задать свою точную ширину.',
             'group' => 'Общие',
-            'choices' => ['narrow' => 'Узкий', 'standard' => 'Стандарт', 'wide' => 'Широкий', 'ultra' => 'Очень широкий', 'full' => 'На всю ширину'],
-            'default' => 'ultra',
+            'choices' => ['narrow' => 'Узкий (1200px)', 'standard' => 'Стандарт (1440px)', 'wide' => 'Широкий (1500px)', 'ultra' => 'Очень широкий (1700px)', 'full' => 'На всю ширину'],
+            // Умолчание — «Стандарт»: прежнее умолчание «Очень широкий» давало
+            // те же 1440px, и после смены шкалы сайт молча уехал бы до 1700.
+            'default' => 'standard',
         ],
         'radius' => [
             'label' => 'Скругление углов',
@@ -196,54 +191,12 @@ final class DesignSettings
             'choices' => ['cards_lg' => 'Большие карточки', 'cards_sm' => 'Компактные карточки', 'list' => 'Списком'],
             'default' => 'cards_lg',
         ],
-        'header_style' => [
-            'label' => 'Стиль шапки',
-            'hint' => 'Оформление верхней шапки сайта.',
-            'group' => 'Шапка',
-            'choices' => ['light' => 'Светлая', 'dark' => 'Тёмная', 'accent' => 'Цветная'],
-            'default' => 'light',
-        ],
-        'header_sticky' => [
-            'label' => 'Фиксированная шапка',
-            'hint' => 'Шапка остаётся вверху при прокрутке.',
-            'group' => 'Шапка',
-            'choices' => ['on' => 'Включена', 'off' => 'Выключена'],
-            'default' => 'on',
-        ],
-        'search_type' => [
-            'label' => 'Тип поиска',
-            'hint' => 'Поле поиска в строке шапки или выпадающая панель по клику.',
-            'group' => 'Шапка',
-            'choices' => ['inline' => 'В строке', 'overlay' => 'Выпадающий'],
-            'default' => 'inline',
-        ],
         'detail_layout' => [
             'label' => 'Шаблон детальной страницы',
             'hint' => 'Как показывать карточку записи каталога.',
             'group' => 'Каталог',
             'choices' => ['plain' => 'В одну колонку', 'sidebar' => 'С боковой панелью'],
             'default' => 'plain',
-        ],
-        'footer_style' => [
-            'label' => 'Футер',
-            'hint' => 'Простой копирайт или многоколоночный подвал.',
-            'group' => 'Футер',
-            'choices' => ['minimal' => 'Минимальный', 'columns' => 'Колонками'],
-            'default' => 'columns',
-        ],
-        'mobile_menu' => [
-            'label' => 'Меню на мобильных',
-            'hint' => 'Как показывать главное меню на телефонах.',
-            'group' => 'Мобильная версия',
-            'choices' => ['burger' => 'Бургер-меню', 'wrap' => 'В строку (перенос)'],
-            'default' => 'burger',
-        ],
-        'mobile_header' => [
-            'label' => 'Мобильная шапка',
-            'hint' => 'Поведение шапки на телефонах при прокрутке.',
-            'group' => 'Мобильная версия',
-            'choices' => ['fixed' => 'Фиксированная', 'static' => 'Обычная'],
-            'default' => 'fixed',
         ],
     ];
 
@@ -254,22 +207,22 @@ final class DesignSettings
         'classic' => [
             'label' => 'Классический',
             'desc' => 'Строгий официальный стиль, умеренные отступы.',
-            'values' => ['site_template' => 'gov', 'container' => 'standard', 'radius' => 'small', 'card_gap' => 'sm', 'density' => 'standard', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'header_style' => 'light', 'header_sticky' => 'on', 'search_type' => 'inline', 'detail_layout' => 'plain', 'footer_style' => 'columns', 'mobile_menu' => 'burger', 'mobile_header' => 'fixed', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'gov_blue', 'font_style' => 'system'],
+            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'sm', 'density' => 'standard', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'plain', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'gov_blue', 'font_style' => 'system'],
         ],
         'modern' => [
             'label' => 'Современный',
             'desc' => 'Крупные скругления, воздух, акцентная шапка.',
-            'values' => ['site_template' => 'gov', 'container' => 'wide', 'radius' => 'large', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'lg', 'line_height' => 'relaxed', 'heading_line_height' => 'tight', 'heading_font_weight' => '800', 'heading_letter_spacing' => 'tight', 'button' => 'pill', 'card_style' => 'elevated', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'header_style' => 'accent', 'header_sticky' => 'on', 'search_type' => 'overlay', 'detail_layout' => 'sidebar', 'footer_style' => 'columns', 'mobile_menu' => 'burger', 'mobile_header' => 'fixed', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'violet', 'font_style' => 'inter'],
+            'values' => ['container' => 'wide', 'radius' => 'large', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'lg', 'line_height' => 'relaxed', 'heading_line_height' => 'tight', 'heading_font_weight' => '800', 'heading_letter_spacing' => 'tight', 'button' => 'pill', 'card_style' => 'elevated', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'sidebar', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'violet', 'font_style' => 'inter'],
         ],
         'minimal' => [
             'label' => 'Минимал',
             'desc' => 'Прямые углы, максимум воздуха, список в каталоге.',
-            'values' => ['site_template' => 'gov', 'container' => 'narrow', 'radius' => 'none', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'square', 'card_style' => 'flat', 'sidebar_position' => 'fixed', 'catalog_layout' => 'list', 'header_style' => 'light', 'header_sticky' => 'off', 'search_type' => 'overlay', 'detail_layout' => 'plain', 'footer_style' => 'minimal', 'mobile_menu' => 'burger', 'mobile_header' => 'static', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'graphite', 'font_style' => 'serif'],
+            'values' => ['container' => 'narrow', 'radius' => 'none', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'square', 'card_style' => 'flat', 'sidebar_position' => 'fixed', 'catalog_layout' => 'list', 'detail_layout' => 'plain', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'graphite', 'font_style' => 'serif'],
         ],
         'compact' => [
             'label' => 'Компактный',
             'desc' => 'Плотная сетка, маленькие карточки — много данных.',
-            'values' => ['site_template' => 'gov', 'container' => 'standard', 'radius' => 'small', 'card_gap' => 'xs', 'density' => 'compact', 'font_size' => 'sm', 'line_height' => 'tight', 'heading_line_height' => 'tight', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'tight', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'fixed', 'catalog_layout' => 'cards_sm', 'header_style' => 'light', 'header_sticky' => 'on', 'search_type' => 'inline', 'detail_layout' => 'sidebar', 'footer_style' => 'columns', 'mobile_menu' => 'burger', 'mobile_header' => 'fixed', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'classic_red', 'font_style' => 'system'],
+            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'xs', 'density' => 'compact', 'font_size' => 'sm', 'line_height' => 'tight', 'heading_line_height' => 'tight', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'tight', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'fixed', 'catalog_layout' => 'cards_sm', 'detail_layout' => 'sidebar', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'classic_red', 'font_style' => 'system'],
         ],
     ];
 
@@ -1156,8 +1109,8 @@ final class DesignSettings
     public static function containerWidth(?array $v = null): string
     {
         $v = $v ?? self::current();
-        $preset = ['narrow' => '1080px', 'standard' => '1200px', 'wide' => '1360px', 'ultra' => '1440px', 'full' => 'none'];
-        $container = $preset[$v['container'] ?? 'standard'] ?? '1200px';
+        $preset = ['narrow' => '1200px', 'standard' => '1440px', 'wide' => '1500px', 'ultra' => '1700px', 'full' => 'none'];
+        $container = $preset[$v['container'] ?? 'standard'] ?? '1440px';
         // Своя точная ширина имеет приоритет над пресетом (число трактуем как px).
         $custom = self::containerCustom();
 

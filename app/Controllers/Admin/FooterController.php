@@ -36,6 +36,9 @@ final class FooterController
             'style' => $_POST['style'] ?? 'columns',
             'columns' => $columns,
             'bottom' => $_POST['bottom'] ?? '',
+            // Фон подвала описывают те же поля, что и фон секции страницы,
+            // поэтому и разбирает их тот же нормализатор.
+            'background' => \App\Core\BlockData\BlockPresentationNormalizer::background($_POST),
         ]);
 
         Flash::success('Подвал сохранён.');

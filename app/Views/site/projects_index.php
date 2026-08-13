@@ -34,13 +34,12 @@ require __DIR__ . '/_crumbs.php';
         <div class="projects-grid">
             <?php foreach ($items as $item): ?>
                 <?php $cover = trim((string) ($item['cover_image'] ?? '')); ?>
-                <a class="imgcard imgcard--project" href="<?= htmlspecialchars(Locale::url('projects/' . $item['slug']), ENT_QUOTES) ?>">
+                <a class="imgcard imgcard--project imgcard--below" href="<?= htmlspecialchars(Locale::url('projects/' . $item['slug']), ENT_QUOTES) ?>">
                     <?php if ($cover !== ''): ?>
                         <?= \App\Core\Media::picture($cover, (string) $item['title'], null, null, 'imgcard__media', true, '(max-width: 700px) 100vw, 50vw') ?>
                     <?php else: ?>
                         <span class="imgcard__media" aria-hidden="true"></span>
                     <?php endif; ?>
-                    <span class="imgcard__overlay"></span>
                     <span class="imgcard__body">
                         <h3 class="imgcard__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
                         <?php if (!empty($item['description'])): ?>

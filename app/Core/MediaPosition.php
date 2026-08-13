@@ -26,6 +26,16 @@ final class MediaPosition
         return in_array($value, self::VALUES, true) ? $value : 'center-center';
     }
 
+    /**
+     * Пресет как значение `background-position`: «left-top» → «left top».
+     * Нужно фонам секций — там кадрирование задаётся не классом на картинке,
+     * а переменной в scoped CSS блока.
+     */
+    public static function cssValue(mixed $value): string
+    {
+        return str_replace('-', ' ', self::normalize($value));
+    }
+
     public static function classes(mixed $desktop, mixed $mobile = null): string
     {
         $desktop = self::normalize($desktop);

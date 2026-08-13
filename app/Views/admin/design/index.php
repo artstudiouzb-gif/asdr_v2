@@ -160,7 +160,8 @@ foreach ($options as $key => $opt) {
         <section class="design-section">
             <h2 class="design-section__title">Настройки макета и сетки</h2>
             <?php foreach ($grouped['Общие'] ?? [] as $key => $opt): ?>
-                <?php if (in_array($key, ['palette', 'site_template', 'font_style'], true)) { continue; } ?>
+                <?php // Палитра и шрифт — на своей вкладке, здесь только сетка. ?>
+                <?php if (in_array($key, ['palette', 'font_style'], true)) { continue; } ?>
                 <div class="design-opt">
                     <div class="design-opt__label">
                         <span><?= htmlspecialchars($opt['label'], ENT_QUOTES) ?></span>
@@ -584,7 +585,9 @@ foreach ($options as $key => $opt) {
                 </a>
             </div>
             <?php foreach ($grouped as $groupName => $groupOpts): ?>
-                <?php if (in_array($groupName, ['Общие', 'Типографика', 'Цвета и шрифт', 'Шапка', 'Футер', 'Мобильная версия'], true)) { continue; } ?>
+                <?php // Шапка, подвал и мобильные зоны живут в своих конструкторах
+                      // (ссылки выше), поэтому здесь только оставшиеся группы. ?>
+                <?php if (in_array($groupName, ['Общие', 'Типографика', 'Цвета и шрифт'], true)) { continue; } ?>
                 <?php foreach ($groupOpts as $key => $opt): ?>
                     <div class="design-opt">
                         <div class="design-opt__label">

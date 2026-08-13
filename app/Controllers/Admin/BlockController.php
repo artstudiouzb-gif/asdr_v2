@@ -1111,6 +1111,7 @@ final class BlockController
                     'side_items' => trim((string) ($_POST['side_items'] ?? '')),
                     'branches' => $branches,
                     'collapsible' => !empty($_POST['collapsible']),
+                    'search' => !empty($_POST['org_search']),
                     'notes' => trim((string) ($_POST['notes'] ?? '')),
                     'footnote' => TextProcessor::typographPlain(trim((string) ($_POST['footnote'] ?? '')), $locale),
                 ];

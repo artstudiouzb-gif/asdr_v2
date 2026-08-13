@@ -2475,8 +2475,6 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .design-card__preview--catalog_layout-cards_lg::after,
 .design-card__preview--catalog_layout-cards_sm::after { content:''; position:absolute; inset:8px; background: repeating-linear-gradient(90deg,#dfe3ea 0 30%,transparent 30% 34%); }
 .design-card__preview--catalog_layout-list::after { content:''; position:absolute; inset:8px; background: repeating-linear-gradient(#dfe3ea 0 30%,transparent 30% 50%); }
-.design-card__preview--header_style-dark { background:#16161d; }
-.design-card__preview--header_style-accent { background: var(--admin-accent, #5b52e5); }
 .design-card__preview--button-pill::after { content:''; position:absolute; left:16px; top:18px; width:52px; height:16px; border-radius:999px; background: var(--admin-accent,#5b52e5); }
 .design-card__preview--button-rounded::after { content:''; position:absolute; left:16px; top:18px; width:52px; height:16px; border-radius:6px; background: var(--admin-accent,#5b52e5); }
 .design-card__preview--button-square::after { content:''; position:absolute; left:16px; top:18px; width:52px; height:16px; border-radius:0; background: var(--admin-accent,#5b52e5); }
@@ -2536,10 +2534,6 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .design-card__preview--palette-custom { background: repeating-conic-gradient(#e8eaf0 0 25%, #f7f8fa 0 50%) 0 0 / 16px 16px; }
 
 /* Превью шаблонов */
-.design-card__preview--site_template-gov { background: linear-gradient(135deg, #173a63 0%, #173a63 50%, #ffffff 50%, #ffffff 100%); }
-.design-card__preview--site_template-modern_gov { background: linear-gradient(135deg, #2563eb 0%, #2563eb 50%, #f8fafc 50%, #f8fafc 100%); }
-.design-card__preview--site_template-gov::before,
-.design-card__preview--site_template-modern_gov::before { background: none; }
 
 /* Превью шрифтов: образец «Аа» нужным стеком */
 .design-card__preview--font_style-inter::before,

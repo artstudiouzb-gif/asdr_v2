@@ -11,10 +11,12 @@ use App\Core\HeaderConfig;
  */
 
 test('По умолчанию: широкий контейнер и кнопки-капсулы', function () {
-    assert_same('ultra', DesignSettings::OPTIONS['container']['default']);
+    // Умолчание — «Стандарт»: после пересборки шкалы «Очень широкий» стал
+    // 1700px, и прежнее умолчание молча расширило бы готовые сайты.
+    assert_same('standard', DesignSettings::OPTIONS['container']['default']);
     assert_same('pill', DesignSettings::OPTIONS['button']['default']);
 
-    $css = DesignSettings::cssVariables(['container' => 'ultra', 'button' => 'pill']);
+    $css = DesignSettings::cssVariables(['container' => 'standard', 'button' => 'pill']);
     assert_contains('--container-max:1440px', $css);
     assert_contains('--btn-radius:999px', $css);
 });

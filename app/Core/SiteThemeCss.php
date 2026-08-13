@@ -146,6 +146,15 @@ final class SiteThemeCss
         )) . "}\n";
         $css .= DesignSettings::cssVariables($designValues) . "\n";
         $css .= self::headerRules($styles);
+        // Фон подвала настраивается в его конструкторе теми же режимами, что и
+        // фон секции страницы; правило живёт здесь, потому что подвал общий.
+        $footerBackground = BlockBackground::cssFor(
+            '.site-footer',
+            (array) (FooterConfig::get()['background'] ?? [])
+        );
+        if ($footerBackground !== '') {
+            $css .= $footerBackground . "\n";
+        }
         $css = self::fontFaceRule() . $css;
 
         $globalCss = (string) Setting::get('custom_css_global', '');

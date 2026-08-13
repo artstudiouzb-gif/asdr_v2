@@ -37,7 +37,7 @@
        темнее поверхности, и --gov-teal-text на ней не добирает до 4.5:1. */
     --gov-teal-on-tint: var(--gov-teal-tint-light, #00697d);
     --radius: 12px;
-    --container-max: 1200px;
+    --container-max: 1440px;
     /* Эмблема агентства: восьмиконечная звезда-гирих. Отдельным файлом,
        а не data-URI: маска в 5 КБ раздувала бы каждый билд CSS. */
     --gov-emblem: url("../img/emblem.svg");
@@ -298,7 +298,6 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     -webkit-mask: var(--gov-emblem) center/contain no-repeat; mask: var(--gov-emblem) center/contain no-repeat;
 }
 .site-nav { border-top: 1px solid var(--gov-border); position: relative; }
-body.design-header-accent .site-nav, body.design-header-dark .site-nav { border-top-color: var(--gov-border); }
 
 .site-menu { display: flex; gap: var(--menu-gap-current, var(--menu-gap, 18px)); flex-wrap: wrap; align-items: center; }
 
@@ -556,14 +555,14 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-dot .site-men
 /* === Header Container Modes === */
 /* 1. Boxed Container Mode (По ширине контента) */
 .site-header--container-container {
-    max-width: var(--container-max, 1280px);
+    max-width: var(--container-max, 1440px);
     margin-inline: auto;
 }
 
 /* 2. Floating Glass Container Mode (Вариант 1) & Sticky Header Adaptability */
 .site-header--container-floating {
     margin: 16px auto;
-    max-width: min(calc(100% - 40px), var(--container-max, 1280px));
+    max-width: min(calc(100% - 40px), var(--container-max, 1440px));
     border-radius: var(--header-floating-radius, 18px);
     transition: background-color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
@@ -603,7 +602,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-dot .site-men
 /* 4. Липкая парящая шапка при прокрутке вниз (Sticky Scrolled State) */
 body .site-header--container-floating.site-header--sticky.is-scrolled {
     margin: 10px auto !important;
-    max-width: min(calc(100% - 32px), var(--container-max, 1280px)) !important;
+    max-width: min(calc(100% - 32px), var(--container-max, 1440px)) !important;
     border-radius: 50px !important;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22) !important;
 }
@@ -831,8 +830,9 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 .site-nav__extra--center { margin: 0 auto; }
 .site-nav__extra .site-search input { max-width: 160px; }
 
-/* --- Поведение шапки: липкая и прозрачная (Pro Max; body-префикс перебивает
-   легаси-режимы design-header-* из старой дизайн-системы) --- */
+/* --- Поведение шапки: липкая и прозрачная. Режимы задаёт конструктор шапки
+   (.site-header--sticky/--transparent); прежние классы design-header-* из
+   раздела «Дизайн» удалены вместе с настройками, которые их не выводили. --- */
 body .site-header--sticky { position: sticky; top: var(--hdr-panel-height, 0px); z-index: 200; }
 body .site-header--sticky.is-scrolled { box-shadow: 0 8px 28px rgba(11,26,48,.14); }
 
@@ -2844,7 +2844,11 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 @media (max-width: 560px) { .projects-grid { grid-template-columns: 1fr; } }
 .projects-grid--compact { grid-template-columns: repeat(4, 1fr); }
 @media (max-width: 1000px) { .projects-grid--compact { grid-template-columns: repeat(2, 1fr); } }
+/* Карточка проекта в списке раздела: подпись под снимком, как в блоке
+   «Карточки». Текст поверх фото на светлом небе не читался, а затемнение
+   спасало через раз — оно зависит от того, что на фотографии. */
 .imgcard--project { min-height: 300px; }
+.imgcard--project.imgcard--below { min-height: 0; }
 .imgcard__desc { color: rgba(255,255,255,.82); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); }
 
 /* Детальная проекта. */
@@ -3731,6 +3735,75 @@ span.imgcard__media::after {
 .cms-block--fullwidth.cms-block--bg-light::before { background: var(--gov-surface); }
 .cms-block--fullwidth.cms-block--bg-tint::before { background: color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)); }
 .cms-block--fullwidth.cms-block--bg-navy::before { background: var(--gov-navy); }
+
+/* Своя заливка секции: цвет, градиент, фотография или узор. Значения приходят
+   переменными в scoped CSS блока (--block-bg и соседние), поэтому в разметке
+   инлайн-стилей нет. Пресет темы при своей заливке не применяется — режим
+   один, иначе на секции оказывались бы два фона сразу. */
+.cms-block--bg-custom {
+    background: var(--block-bg, transparent);
+    background-size: var(--block-bg-size, cover);
+    background-position: var(--block-bg-position, center center);
+    background-repeat: var(--block-bg-repeat, no-repeat);
+}
+.cms-block--fullwidth.cms-block--bg-custom { background: transparent !important; }
+.cms-block--fullwidth.cms-block--bg-custom::before {
+    background: var(--block-bg, transparent);
+    background-size: var(--block-bg-size, cover);
+    background-position: var(--block-bg-position, center center);
+    background-repeat: var(--block-bg-repeat, no-repeat);
+}
+/* Затемнение поверх фотографии: без него текст читается через раз — зависит
+   от того, что на снимке. Слой лежит под контентом секции. */
+.cms-block--bg-overlay::after {
+    content: ''; position: absolute; inset: 0; z-index: -1;
+    background: color-mix(in srgb, var(--gov-navy) calc(var(--block-bg-overlay, .45) * 100%), transparent);
+}
+.cms-block--fullwidth.cms-block--bg-overlay::after { left: calc(50% - 50vw); width: 100vw; }
+/* Фиксированный фон — только на десктопе: в iOS Safari `fixed` рисует кадр с
+   зумом и дёргается при инерционной прокрутке. */
+@media (min-width: 901px) and (hover: hover) {
+    .cms-block--bg-fixed { background-attachment: fixed; }
+    .cms-block--fullwidth.cms-block--bg-fixed::before { background-attachment: fixed; }
+}
+
+/* Узоры: рисуются градиентами, файлов не требуют. Цвет и прозрачность узора
+   приходят одной переменной --block-pattern-ink, шаг — --block-pattern-size. */
+.cms-block--bg-pattern { background-color: var(--block-bg, var(--gov-surface)); }
+.cms-block--bg-pattern::before,
+.cms-block--fullwidth.cms-block--bg-pattern::before {
+    background-color: var(--block-bg, var(--gov-surface));
+    background-size: var(--block-pattern-size, 28px) var(--block-pattern-size, 28px);
+}
+.cms-block--bg-pattern-dots,
+.cms-block--fullwidth.cms-block--bg-pattern-dots::before {
+    background-image: radial-gradient(var(--block-pattern-ink) 1.5px, transparent 1.6px);
+    background-size: var(--block-pattern-size, 28px) var(--block-pattern-size, 28px);
+}
+.cms-block--bg-pattern-grid,
+.cms-block--fullwidth.cms-block--bg-pattern-grid::before {
+    background-image:
+        linear-gradient(to right, var(--block-pattern-ink) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--block-pattern-ink) 1px, transparent 1px);
+    background-size: var(--block-pattern-size, 28px) var(--block-pattern-size, 28px);
+}
+.cms-block--bg-pattern-diagonal,
+.cms-block--fullwidth.cms-block--bg-pattern-diagonal::before {
+    background-image: repeating-linear-gradient(45deg,
+        var(--block-pattern-ink) 0, var(--block-pattern-ink) 1px,
+        transparent 1px, transparent calc(var(--block-pattern-size, 28px) / 2));
+}
+/* Фирменный узор — та же эмблема-гирих, что и в остальных местах: файл
+   настраивается в «Дизайне», поэтому берём его маской, а не картинкой. Слой
+   отдельный (::after): заливку секции держит ::before, и подмешивать узор в
+   ту же краску нельзя — базовый цвет пропадал. */
+.cms-block--bg-pattern-emblem::after {
+    content: ''; position: absolute; inset: 0; z-index: -1;
+    background: var(--block-pattern-ink);
+    -webkit-mask: var(--gov-emblem) 0 0 / var(--block-pattern-size, 28px) var(--block-pattern-size, 28px) repeat;
+    mask: var(--gov-emblem) 0 0 / var(--block-pattern-size, 28px) var(--block-pattern-size, 28px) repeat;
+}
+.cms-block--fullwidth.cms-block--bg-pattern-emblem::after { left: calc(50% - 50vw); width: 100vw; }
 
 /* Руководство — карточки персон (вакантные с плейсхолдером). */
 /* Дорожки считает App\Core\GridBalance — сетка занимает всю ширину при

@@ -23,7 +23,7 @@ test('DesignSettings::cssVariables формирует корректные пе�
         'container' => 'wide', 'radius' => 'large', 'card_gap' => 'lg', 'density' => 'spacious',
         'button' => 'pill', 'catalog_layout' => 'cards_lg', 'header_style' => 'accent', 'header_sticky' => 'on',
     ]);
-    assert_contains('--container-max:1360px', $css);
+    assert_contains('--container-max:1500px', $css);
     assert_contains('--radius:22px', $css);
     assert_contains('--card-gap:32px', $css);
     assert_contains('--btn-radius:999px', $css);

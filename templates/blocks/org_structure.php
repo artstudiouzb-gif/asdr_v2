@@ -66,6 +66,7 @@ $sideItems = $orgParseLines((string) ($data['side_items'] ?? ''));
 $notes = $orgParseLines((string) ($data['notes'] ?? ''));
 $footnote = trim((string) ($data['footnote'] ?? ''));
 $collapsible = !empty($data['collapsible']);
+$searchEnabled = !empty($data['search']);
 $headTag = $headUrl !== '' ? 'a' : 'div';
 // Схема без руководителя — обычное дело: совет и департаменты без общего
 // начальника наверху. Пустая тёмная плашка в этом случае читалась как брак.
@@ -114,9 +115,21 @@ foreach ($rows as $rowIndex => $row) {
 }
 $branchIndex = 0;
 ?>
-<div class="block-orgstruct">
+<div class="block-orgstruct"<?= $searchEnabled ? ' data-org-structure' : '' ?>>
     <?php if ($title !== ''): ?>
         <div class="section-head"><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2></div>
+    <?php endif; ?>
+
+    <?php // Поле приходит скрытым и открывается скриптом: без JS фильтровать
+          // нечем, а пустая строка поиска на странице только сбивает. ?>
+    <?php if ($searchEnabled): ?>
+        <div class="orgstruct-search" data-org-search hidden>
+            <label class="orgstruct-search__label" for="org-search-<?= (int) $blockId ?>"><?= htmlspecialchars(t('Поиск по схеме'), ENT_QUOTES) ?></label>
+            <input type="search" id="org-search-<?= (int) $blockId ?>" class="orgstruct-search__input" placeholder="<?= htmlspecialchars(t('Название отдела или сектора'), ENT_QUOTES) ?>" autocomplete="off">
+            <span class="orgstruct-search__status" data-org-search-status role="status" aria-live="polite"
+                  data-found="<?= htmlspecialchars(t('Найдено: %d'), ENT_QUOTES) ?>"
+                  data-empty="<?= htmlspecialchars(t('Ничего не найдено'), ENT_QUOTES) ?>"></span>
+        </div>
     <?php endif; ?>
 
     <div class="orgstruct orgstruct--<?= $layout ?><?= $collapsible ? ' orgstruct--collapsible' : '' ?><?= $hasHeadCard ? '' : ' orgstruct--nohead' ?>"<?= $collapsible ? ' data-org-collapsible' : '' ?>>
