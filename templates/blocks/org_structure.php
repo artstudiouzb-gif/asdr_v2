@@ -4,11 +4,10 @@
  * советниками сбоку, ветками заместителей и их подразделениями.
  * Чистый CSS без JS; на мобильных ветки складываются в столбец.
  *
- * Разметка списков (подразделения, органы при руководителе, примечания):
- *   Название               — обычный пункт
- *   Название | /url        — пункт-ссылка
- *   * Название             — акцентный пункт (проектный офис)
- *   - Название             — вложенная группа внутри предыдущего пункта
+ * Разметка списков (подразделения, органы при руководителе, примечания)
+ * разбирает App\Core\OrgTree: отступ = уровень вложенности (до четырёх),
+ * `|` — ссылка, `*` — акцентный пункт, `-` в начале строки — прежний способ
+ * вложить пункт в предыдущий.
  *
  * @var array $data
  */
@@ -16,54 +15,7 @@
 use App\Core\Icon;
 use App\Core\UrlGuard;
 
-/**
- * Разбор построчного поля в дерево пунктов: label/url/accent/children.
- *
- * @return list<array{label: string, url: string, accent: bool, children: list<array{label: string, url: string}>}>
- */
-$orgParseLines = static function (string $raw): array {
-    $items = [];
-    foreach (explode("\n", $raw) as $line) {
-        $line = trim($line);
-        if ($line === '') {
-            continue;
-        }
-
-        // Маркер вложенности: пункт уходит в подгруппу предыдущего.
-        $nested = false;
-        if (preg_match('/^[-–—•]\s*(.+)$/u', $line, $m) === 1) {
-            $nested = true;
-            $line = trim($m[1]);
-        }
-
-        // Маркер акцента (проектный офис и т.п.).
-        $accent = false;
-        if (!$nested && preg_match('/^\*\s*(.+)$/u', $line, $m) === 1) {
-            $accent = true;
-            $line = trim($m[1]);
-        }
-
-        $url = '';
-        if (str_contains($line, '|')) {
-            [$line, $url] = array_map('trim', explode('|', $line, 2));
-        }
-        if ($line === '') {
-            continue;
-        }
-        if ($url !== '' && !UrlGuard::isSafeLink($url)) {
-            $url = '';
-        }
-
-        if ($nested && $items !== []) {
-            $items[count($items) - 1]['children'][] = ['label' => $line, 'url' => $url];
-            continue;
-        }
-
-        $items[] = ['label' => $line, 'url' => $url, 'accent' => $accent, 'children' => []];
-    }
-
-    return $items;
-};
+$orgParseLines = static fn (string $raw): array => \App\Core\OrgTree::parse($raw);
 
 /** Пункт списка: ссылка, если задан безопасный URL, иначе текст. */
 $orgItemInner = static function (array $item): string {
@@ -72,6 +24,31 @@ $orgItemInner = static function (array $item): string {
     return ($item['url'] ?? '') !== ''
         ? '<a class="orgstruct__link" href="' . htmlspecialchars((string) $item['url'], ENT_QUOTES) . '">' . $label . '</a>'
         : $label;
+};
+
+/**
+ * Список подразделений любой глубины. Уровень идёт классом, а не отступом
+ * в разметке: вложенность должна читаться и в свёрнутом виде, и на печати.
+ */
+$orgRenderItems = static function (array $items, int $level, string $id = '', string $label = '') use (&$orgRenderItems, $orgItemInner): string {
+    if ($items === []) {
+        return '';
+    }
+
+    $listClass = $level === 0 ? 'orgstruct__units' : 'orgstruct__subunits';
+    $itemClass = $level === 0 ? 'orgstruct__unit' : 'orgstruct__subunit';
+    $html = '<ul class="' . $listClass . ($level > 1 ? ' orgstruct__subunits--deep' : '') . '"'
+        . ($id !== '' ? ' id="' . htmlspecialchars($id, ENT_QUOTES) . '" data-org-units' : '')
+        . ($label !== '' ? ' aria-label="' . htmlspecialchars($label, ENT_QUOTES) . '"' : '')
+        . ' role="list">';
+    foreach ($items as $item) {
+        $html .= '<li class="' . $itemClass . (!empty($item['accent']) ? ' ' . $itemClass . '--accent' : '') . '">'
+            . $orgItemInner($item)
+            . $orgRenderItems(is_array($item['children'] ?? null) ? $item['children'] : [], $level + 1)
+            . '</li>';
+    }
+
+    return $html . '</ul>';
 };
 
 $title = trim((string) ($data['title'] ?? ''));
@@ -190,20 +167,7 @@ $branchIndex = 0;
                                     </div>
                                 <?php endif; ?>
                                 <?php if ($branch['units'] !== []): ?>
-                                    <ul class="orgstruct__units" id="<?= $branchId ?>" data-org-units role="list"<?= $hasHead ? ' aria-label="' . htmlspecialchars(trim($branch['title'] . ' ' . $branch['name']), ENT_QUOTES) . '"' : '' ?>>
-                                        <?php foreach ($branch['units'] as $unit): ?>
-                                            <li class="orgstruct__unit<?= $unit['accent'] ? ' orgstruct__unit--accent' : '' ?>">
-                                                <?= $orgItemInner($unit) ?>
-                                                <?php if ($unit['children'] !== []): ?>
-                                                    <ul class="orgstruct__subunits" role="list">
-                                                        <?php foreach ($unit['children'] as $child): ?>
-                                                            <li class="orgstruct__subunit"><?= $orgItemInner($child) ?></li>
-                                                        <?php endforeach; ?>
-                                                    </ul>
-                                                <?php endif; ?>
-                                            </li>
-                                        <?php endforeach; ?>
-                                    </ul>
+                                    <?= $orgRenderItems($branch['units'], 0, $branchId, $hasHead ? trim($branch['title'] . ' ' . $branch['name']) : '') ?>
                                 <?php endif; ?>
                             </li>
                         <?php endforeach; ?>

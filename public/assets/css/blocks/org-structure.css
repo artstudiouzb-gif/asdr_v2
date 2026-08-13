@@ -146,7 +146,13 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
 .orgstruct__deputy-role { color: var(--gov-title); font-weight: 700; font-size: clamp(var(--step--2), calc(var(--org-font) * 0.94), var(--step-0)); line-height: 1.35; }
 .orgstruct__deputy-name { color: var(--gov-muted, #475569); font-size: clamp(var(--step--4), calc(var(--org-font) * 0.85), var(--step--2)); }
 
-.orgstruct__units { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none; }
+/* Связь «заместитель → его подразделения»: без неё между карточкой и первой
+   плиткой просто зазор, и подчинение приходится додумывать. */
+.orgstruct__units { position: relative; display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.orgstruct__branch .orgstruct__units::before {
+    content: ''; position: absolute; left: 50%; top: -12px; width: 2px; height: 12px;
+    background: var(--org-line); transform: translateX(-50%);
+}
 .orgstruct__unit {
     position: relative; padding: 13px 16px;
     background: var(--gov-surface);
@@ -173,6 +179,16 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
     font-size: clamp(var(--step--4), calc(var(--org-font) * 0.82), var(--step--2)); color: var(--gov-muted, #475569); font-weight: 400;
 }
 .orgstruct__subunit::before { content: '• '; }
+/* Третий уровень и глубже: та же пунктирная связь, только сдвинута — иначе
+   сектор внутри отдела читается как соседний отдел. */
+.orgstruct__subunits--deep { margin-top: 6px; padding-left: 12px; }
+.orgstruct__subunit--accent { color: var(--gov-title); font-weight: 700; }
+/* Длинные названия подразделений — норма для госоргана: строки уравниваем,
+   переносы разрешаем, иначе колонка расползается по одному слову. */
+.orgstruct__head-name,
+.orgstruct__deputy-role,
+.orgstruct__unit,
+.orgstruct__subunit { text-wrap: balance; hyphens: auto; }
 .orgstruct__link { color: inherit; text-decoration: none; }
 .orgstruct__link:hover { color: var(--gov-teal-text, #0284c7); text-decoration: underline; }
 
@@ -222,6 +238,8 @@ body.design-type-static .orgstruct__note { font-size: 13px; line-height: 1.5; }
 }
 .orgstruct--spine .orgstruct__deputy { text-align: left; align-items: flex-start; }
 .orgstruct--spine .orgstruct__units { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+/* В компактном макете подчинение уже показывает ствол слева от ветки. */
+.orgstruct--spine .orgstruct__branch .orgstruct__units::before { display: none; }
 
 @media (max-width: 900px) {
     .orgstruct__head { padding: 18px 22px; min-width: 0; width: 100%; }
@@ -273,6 +291,7 @@ body.design-type-static .orgstruct__note { font-size: 13px; line-height: 1.5; }
     .orgstruct__row::before,
     .orgstruct__row + .orgstruct__row::after,
     .orgstruct__branch::before,
+    .orgstruct__branch .orgstruct__units::before,
     .orgstruct__council::after,
     .orgstruct__aside::before {
         background: #000 !important;
