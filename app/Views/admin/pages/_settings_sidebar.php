@@ -52,6 +52,17 @@ $isHomePage = \App\Models\Page::isHomePage($page ?? []);
             <span class="form-hint">Содержимое сайдбара из раздела «Виджеты».</span>
         </div>
 
+        <div class="form-field">
+            <label class="u-inline-0b87e9e0af" for="section">Шапка раздела</label>
+            <select id="section" name="section">
+                <option value="">— обычная страница —</option>
+                <?php foreach (\App\Models\Page::SECTIONS as $sectionKey => $sectionLabel): ?>
+                    <option value="<?= htmlspecialchars($sectionKey, ENT_QUOTES) ?>" <?= (string) ($page['section'] ?? '') === $sectionKey ? 'selected' : '' ?>><?= htmlspecialchars($sectionLabel, ENT_QUOTES) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <span class="form-hint">Страница отдаёт разделу заголовок, лид и SEO, а её блоки выводятся под списком. Собственный адрес у такой страницы остаётся.</span>
+        </div>
+
         <div class="page-settings-sidebar__options u-inline-d498835cbd">
             <div class="form-field form-field--checkbox">
                 <input type="checkbox" id="is_home" name="is_home" value="1" <?= $isHomePage ? 'checked' : '' ?>>

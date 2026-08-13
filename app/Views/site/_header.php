@@ -309,7 +309,9 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
         }
         $langOptions[] = [
             'name' => (string) $l['name'],
-            'short' => strtoupper($code),
+            // Короткое название языка, а не его код: «Рус» читается как язык,
+            // «RU» — как технический идентификатор.
+            'short' => \App\Models\Language::shortLabel($l),
             'href' => $href,
             'active' => $code === $currentLang && !($code === 'uz' && $uzCyrillicOn),
         ];
@@ -320,7 +322,7 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
         $uzHref = Locale::url(Locale::alternatePath('uz'), 'uz') . '?' . \App\Core\LocalePreference::QUERY . '=uz';
         $langOptions[] = [
             'name' => 'Ўзбекча',
-            'short' => 'ЎЗ',
+            'short' => 'Ўзб',
             'href' => '/script/cyrl?to=' . rawurlencode($uzHref),
             'active' => $uzCyrillicOn,
         ];
@@ -328,7 +330,7 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
 
     if ($uzCyrillicOn) {
         $currentName = 'Ўзбекча';
-        $currentCode = 'ЎЗ';
+        $currentCode = 'Ўзб';
     }
 
     // Названия языков не переводятся транслитерацией: «O‘zbekcha» должно
@@ -344,7 +346,8 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
     } else {
         $triggerLabel = match ($format) {
             'name' => $currentName,
-            default => strtoupper($currentCode),
+            // Компактный вид: короткое название текущего языка.
+            default => $uzCyrillicOn ? $currentCode : \App\Models\Language::shortLabel($currentObj),
         };
 
         $globeSvg = \App\Core\Icon::render('world', 15, 'site-lang-dropdown__globe');

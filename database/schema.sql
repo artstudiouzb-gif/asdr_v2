@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS news_categories (
     id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(150) NOT NULL COMMENT 'название на основном языке',
     slug        VARCHAR(150) NOT NULL COMMENT 'один на все языки: адрес и выборки',
+    icon        VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'ключ иконки Tabler',
     is_active   TINYINT(1) NOT NULL DEFAULT 1,
     sort_order  INT NOT NULL DEFAULT 0,
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -180,6 +181,7 @@ CREATE TABLE IF NOT EXISTS languages (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     code            VARCHAR(8) NOT NULL COMMENT 'ISO-код: ru, uz, en',
     name            VARCHAR(60) NOT NULL COMMENT 'отображаемое название: Русский, Oʻzbekcha',
+    short_name      VARCHAR(16) NOT NULL DEFAULT '' COMMENT 'короткое название для переключателя: Рус, Oʻzb',
     is_default      TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'язык по умолчанию (URL без префикса)',
     is_active       TINYINT(1) NOT NULL DEFAULT 1,
     sort_order      INT NOT NULL DEFAULT 0,
@@ -187,9 +189,9 @@ CREATE TABLE IF NOT EXISTS languages (
     UNIQUE KEY uq_languages_code (code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO languages (code, name, is_default, is_active, sort_order) VALUES
-    ('ru', 'Русский', 1, 1, 0),
-    ('uz', 'Oʻzbekcha', 0, 1, 1)
+INSERT INTO languages (code, name, short_name, is_default, is_active, sort_order) VALUES
+    ('ru', 'Русский', 'Рус', 1, 1, 0),
+    ('uz', 'Oʻzbekcha', 'Oʻzb', 0, 1, 1)
 ON DUPLICATE KEY UPDATE code = code;
 
 -- ---------------------------------------------------------------------------
@@ -202,6 +204,7 @@ CREATE TABLE IF NOT EXISTS pages (
     title           VARCHAR(255) NOT NULL COMMENT 'заголовок на языке по умолчанию',
     slug            VARCHAR(255) NOT NULL,
     entity_type     ENUM('page', 'project') NOT NULL DEFAULT 'page' COMMENT 'подтип записи: обычная страница или проект',
+    section         VARCHAR(20) NOT NULL DEFAULT '' COMMENT 'раздел, шапкой которого служит страница: news|projects',
     meta_title      VARCHAR(255) NULL,
     meta_description VARCHAR(500) NULL,
     `lead`          TEXT NULL COMMENT 'видимый лид/подзаголовок страницы; у проекта — анонс для карточки',
@@ -226,6 +229,7 @@ CREATE TABLE IF NOT EXISTS pages (
     KEY idx_pages_lang_group (translation_group_id, lang),
     KEY idx_pages_parent (parent_id),
     KEY idx_pages_projects (entity_type, status, deleted_at, is_featured, sort_order),
+    KEY idx_pages_section (section, lang, status),
     CONSTRAINT fk_pages_parent FOREIGN KEY (parent_id) REFERENCES pages(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1125,7 +1129,10 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_11_public_listing_indexes.sql'),
     ('2026_08_11_news_categories.sql'),
     ('2026_08_11_news_badge_color.sql'),
-    ('2026_08_13_projects_into_pages.sql')
+    ('2026_08_13_projects_into_pages.sql'),
+    ('2026_08_13_news_category_icon.sql'),
+    ('2026_08_13_page_sections.sql'),
+    ('2026_08_13_language_short_name.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

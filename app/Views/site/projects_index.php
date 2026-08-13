@@ -3,8 +3,18 @@
 use App\Core\Locale;
 
 /** @var array $items */
-$metaTitle = t('Проекты');
-$metaDescription = t('Проекты и инициативы Агентства.');
+/** @var array|null $sectionPage шапка раздела из админки (может отсутствовать) */
+$sectionPage = $sectionPage ?? null;
+$sectionTitle = (string) ($sectionPage['title'] ?? '');
+$sectionLead = (string) ($sectionPage['lead'] ?? '');
+$sectionMetaTitle = (string) ($sectionPage['meta_title'] ?? '');
+$metaTitle = $sectionMetaTitle !== '' ? $sectionMetaTitle : ($sectionTitle !== '' ? $sectionTitle : t('Проекты'));
+$metaDescription = (string) ($sectionPage['meta_description'] ?? '');
+if ($metaDescription === '') {
+    $metaDescription = $sectionLead !== '' ? $sectionLead : t('Проекты и инициативы Агентства.');
+}
+// Стили блоков раздела уезжают в <head> тем же путём, что и у страницы.
+$extraHeadCss = (string) ($sectionPage['css'] ?? '');
 require __DIR__ . '/_header.php';
 
 $crumbs = [
@@ -15,8 +25,8 @@ require __DIR__ . '/_crumbs.php';
 ?>
 <div class="listing">
     <div class="listing__head">
-        <h1 class="listing__title"><?= htmlspecialchars(t('Проекты и инициативы'), ENT_QUOTES) ?></h1>
-        <p class="listing__lead"><?= htmlspecialchars(t('Стратегические проекты, которые Агентство реализует для устойчивого развития страны.'), ENT_QUOTES) ?></p>
+        <h1 class="listing__title"><?= htmlspecialchars($sectionTitle !== '' ? $sectionTitle : t('Проекты и инициативы'), ENT_QUOTES) ?></h1>
+        <p class="listing__lead"><?= htmlspecialchars($sectionLead !== '' ? $sectionLead : t('Стратегические проекты, которые Агентство реализует для устойчивого развития страны.'), ENT_QUOTES) ?></p>
     </div>
     <?php if (empty($items)): ?>
         <p class="listing__empty"><?= htmlspecialchars(t('Проекты ещё не опубликованы.'), ENT_QUOTES) ?></p>
@@ -41,6 +51,11 @@ require __DIR__ . '/_crumbs.php';
                 </a>
             <?php endforeach; ?>
         </div>
+    <?php endif; ?>
+
+    <?php // Блоки страницы-раздела — под списком: наверху уже его шапка. ?>
+    <?php if (!empty($sectionPage['content'])): ?>
+        <div class="listing__section-blocks"><?= $sectionPage['content'] ?></div>
     <?php endif; ?>
 </div>
 <?php require __DIR__ . '/_footer.php'; ?>

@@ -85,7 +85,21 @@
             });
         });
 
+        // Телефон: если редактор выбрал «показывать постер», ролик не грузим и
+        // не запускаем — остаётся кадр из poster.
+        var posterOnly = function (video) {
+            return video.getAttribute('data-hero-video-mobile') === 'poster'
+                && window.matchMedia
+                && window.matchMedia('(max-width: 720px)').matches;
+        };
+
         videos.forEach(function (video) {
+            if (posterOnly(video)) {
+                video.pause();
+                video.removeAttribute('autoplay');
+                video.setAttribute('preload', 'none');
+                return;
+            }
             if (reduceMotion()) {
                 video.pause();
                 video.removeAttribute('autoplay');

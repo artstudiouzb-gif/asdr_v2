@@ -180,7 +180,7 @@ final class Redirect
     {
         $added = 0;
         $skipped = 0;
-        foreach (preg_split('/\R/', $text) ?: [] as $line) {
+        foreach (preg_split('/\r\n|\n|\r/', $text) ?: [] as $line) {
             if (trim($line) === '' || str_starts_with(trim($line), '#')) {
                 continue;
             }

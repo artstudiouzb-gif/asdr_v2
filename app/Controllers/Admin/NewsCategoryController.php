@@ -99,7 +99,8 @@ final class NewsCategoryController
             $name,
             (string) ($_POST['slug'] ?? ''),
             !empty($_POST['is_active']),
-            (int) ($_POST['sort_order'] ?? 0)
+            (int) ($_POST['sort_order'] ?? 0),
+            (string) ($_POST['icon'] ?? '')
         );
         $this->saveTranslations($id);
 

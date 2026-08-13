@@ -156,7 +156,7 @@ final class NewsCategory
         return $names;
     }
 
-    public static function create(string $name, string $slug = '', bool $active = true, int $sortOrder = 0): ?int
+    public static function create(string $name, string $slug = '', bool $active = true, int $sortOrder = 0, string $icon = ''): ?int
     {
         $name = trim($name);
         if ($name === '') {
@@ -168,11 +168,12 @@ final class NewsCategory
             static fn (string $s, ?int $exclude): bool => self::slugExists($s, $exclude)
         );
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO news_categories (name, slug, is_active, sort_order) VALUES (:n, :s, :a, :o)'
+            'INSERT INTO news_categories (name, slug, icon, is_active, sort_order) VALUES (:n, :s, :i, :a, :o)'
         );
         $stmt->execute([
             ':n' => mb_substr($name, 0, 150),
             ':s' => mb_substr($slug, 0, 150),
+            ':i' => \App\Core\Icon::cleanName($icon),
             ':a' => $active ? 1 : 0,
             ':o' => $sortOrder,
         ]);
@@ -184,7 +185,7 @@ final class NewsCategory
         return $id;
     }
 
-    public static function update(int $id, string $name, string $slug, bool $active, int $sortOrder): void
+    public static function update(int $id, string $name, string $slug, bool $active, int $sortOrder, string $icon = ''): void
     {
         $name = trim($name);
         if ($name === '') {
@@ -197,11 +198,12 @@ final class NewsCategory
             $id
         );
         $stmt = Database::pdo()->prepare(
-            'UPDATE news_categories SET name = :n, slug = :s, is_active = :a, sort_order = :o WHERE id = :id'
+            'UPDATE news_categories SET name = :n, slug = :s, icon = :i, is_active = :a, sort_order = :o WHERE id = :id'
         );
         $stmt->execute([
             ':n' => mb_substr($name, 0, 150),
             ':s' => mb_substr($slug, 0, 150),
+            ':i' => \App\Core\Icon::cleanName($icon),
             ':a' => $active ? 1 : 0,
             ':o' => $sortOrder,
             ':id' => $id,

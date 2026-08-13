@@ -23,12 +23,16 @@
 }
 
 /* Тёмная тема: явное переключение через data-theme="dark". */
+/* Тёмная гамма одна на весь фронт: базовые переменные повторяют ступени темы
+   (--gov-bg / --gov-surface / --gov-border из gov-theme.css). Раньше база была
+   нейтрально-серой (#14161c), а карточки темы — синими: на одной странице
+   встречались два разных тона, и это читалось как грязь. */
 :root[data-theme="dark"] {
-    --bg-primary: #14161c;
-    --bg-surface: #1d212b;
-    --text-main: #eceef3;
-    --text-muted: #9aa2b1;
-    --border-color: #2b303c;
+    --bg-primary: #1a2230;
+    --bg-surface: #273143;
+    --text-main: #f2f6fa;
+    --text-muted: #adb8c7;
+    --border-color: #3f4d64;
 }
 
 /* Нативные контролы (поля ввода, скроллбары, выпадающие списки) браузер
@@ -41,11 +45,11 @@
 /* Авто-тема: следуем системным настройкам, если тема не задана явно. */
 @media (prefers-color-scheme: dark) {
     :root[data-theme="auto"] {
-        --bg-primary: #14161c;
-        --bg-surface: #1d212b;
-        --text-main: #eceef3;
-        --text-muted: #9aa2b1;
-        --border-color: #2b303c;
+        --bg-primary: #1a2230;
+        --bg-surface: #273143;
+        --text-main: #f2f6fa;
+        --text-muted: #adb8c7;
+        --border-color: #3f4d64;
     }
 }
 
@@ -733,7 +737,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     border-color: var(--gov-teal);
 }
 .testimonial__quote { 
-    margin: 0 0 16px; font-style: italic; font-size: var(--step-0); line-height: 1.6; color: var(--gov-title, #1e293b); 
+    margin: 0 0 16px; font-style: italic; font-size: var(--step-0); line-height: var(--base-line-height, 1.6); color: var(--gov-title, #1e293b); 
     position: relative;
 }
 .testimonial__quote::before {
@@ -926,7 +930,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     padding: 0 24px 22px;
     color: var(--gov-muted, #666);
     font-size: var(--step--1);
-    line-height: 1.6;
+    line-height: var(--base-line-height, 1.6);
     animation: faq-fade-in 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 @keyframes faq-fade-in {
@@ -957,7 +961,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .content-card__title a:hover { color: var(--color-accent, #e63946); }
 .content-card__meta { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--text-muted); font-size: var(--step--1); margin-bottom: 10px; }
 .content-card__meta-item b { font-weight: 600; color: var(--color-primary, #1a1a1a); }
-.content-card__excerpt { margin: 0 0 14px; color: var(--text-muted); line-height: 1.5; }
+.content-card__excerpt { margin: 0 0 14px; color: var(--text-muted); line-height: var(--base-line-height, 1.5); }
 .content-card__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
 .content-card__file a { color: var(--color-accent, #e63946); text-decoration: none; }
 .content-card__more { margin-left: auto; color: var(--color-accent, #e63946); text-decoration: none; font-weight: 600; }
@@ -970,7 +974,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .content-detail__fields { margin: 24px 0 0; display: grid; gap: 2px; }
 .content-detail__row { display: grid; grid-template-columns: 220px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border-color, #eee); }
 .content-detail__row dt { font-weight: 600; color: var(--color-primary, #1a1a1a); margin: 0; }
-.content-detail__row dd { margin: 0; color: var(--text-color, #222); line-height: 1.6; }
+.content-detail__row dd { margin: 0; color: var(--text-color, #222); line-height: var(--base-line-height, 1.6); }
 .content-detail__row--textarea { grid-template-columns: 1fr; }
 .content-detail__row--textarea dt { margin-bottom: 6px; }
 .content-detail__download { display: inline-block; background: var(--color-accent, #e63946); color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; }
@@ -1065,7 +1069,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .news-card__date { color: var(--text-muted); font-size: var(--step--3); }
 .news-card__title { font-weight: 600; font-size: var(--step-1); color: var(--color-primary, #1a1a1a); line-height: 1.35; }
 .news-card:hover .news-card__title { color: var(--color-accent, #e63946); }
-.news-card__excerpt { color: var(--text-muted); font-size: var(--step--1); line-height: 1.5; }
+.news-card__excerpt { color: var(--text-muted); font-size: var(--step--1); line-height: var(--base-line-height, 1.5); }
 
 /* ============================================================================
    Тема-билдер: применение переменных дизайна + современная отделка фронтенда.
@@ -1085,7 +1089,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     --shadow-md: 0 6px 22px rgba(16,24,40,.08);
     --shadow-lg: 0 18px 48px rgba(16,24,40,.12);
 }
-:root[data-theme="dark"] { --surface: #1d212b; }
+:root[data-theme="dark"] { --surface: #273143; }
 
 /* Ширина контейнеров из настроек */
 .site-header__inner, .site-content, .layout { max-width: var(--container-max); }
@@ -1629,7 +1633,7 @@ body.design-header-dark .site-burger, body.design-header-accent .site-burger { c
     max-width: 680px;
     margin: 4px auto 0;
     font-size: var(--step--3);
-    line-height: 1.45;
+    line-height: var(--base-line-height, 1.45);
     text-align: left;
 }
 .subscribe-block__consent input { flex: 0 0 auto; margin-top: 3px; }
@@ -1676,7 +1680,7 @@ h6 { font-size: var(--step--1); line-height: 1.35; margin: 1rem 0 0.5rem; }
     letter-spacing: -.02em !important;
 }
 h1, .news-index__title, .content-list__head h1 { font-weight: 800; }
-p { line-height: 1.6; }
+p { line-height: var(--base-line-height, 1.6); }
 
 /* --- Шапка: глубина, аккуратные ссылки меню --- */
 .site-header { position: relative; z-index: 40; }
@@ -1946,7 +1950,7 @@ body.design-header-dark .site-nav { border-top-color: rgba(255, 255, 255, .14); 
     background: color-mix(in srgb, var(--color-primary, #1f4b8e) 8%, transparent);
     color: var(--color-primary, #1f4b8e); font-weight: 600; font-size: var(--step--3);
 }
-.news-single__content { font-size: var(--step-0); line-height: 1.6; }
+.news-single__content { font-size: var(--step-0); line-height: var(--base-line-height, 1.6); }
 .news-single__content > :first-child { margin-top: 0; }
 .news-single__content img { border-radius: var(--radius, 12px); }
 .news-single__back { margin-top: 36px; }
@@ -2488,7 +2492,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .block-hero__inner { position: relative; width: 100%; }
 .block-hero__text { max-width: var(--hero-text-width, 560px); }
 .block-hero__title { font-size: clamp(var(--step-6), 5vw, var(--step-10)); color: var(--color-primary, #223d79); margin: 0 0 16px; line-height: 1.15; text-wrap: balance; }
-.block-hero__subtitle { font-size: clamp(var(--step-0), 1.6vw, var(--step-2)); color: var(--text-muted); max-width: 480px; margin: 0; line-height: 1.6; }
+.block-hero__subtitle { font-size: clamp(var(--step-0), 1.6vw, var(--step-2)); color: var(--text-muted); max-width: 480px; margin: 0; line-height: var(--base-line-height, 1.6); }
 .block-hero__button {
     /* Без margin-top: кнопки всегда внутри .block-hero__actions (flex,
        align-items:center) — собственный отступ ломал вертикальную центровку
@@ -2768,7 +2772,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="sea
     margin: 0 auto 28px;
     color: var(--gov-muted, #5d6c7c);
     font-size: 17px;
-    line-height: 1.65;
+    line-height: var(--base-line-height, 1.65);
 }
 
 .translation-notice__actions {

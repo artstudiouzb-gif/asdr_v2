@@ -49,6 +49,22 @@ final class HeroBlockNormalizer
             : ($heightUnit === 'rem' ? [10.0, 120.0] : [20.0, 150.0]);
         $heightValue = max($heightLimits[0], min($heightLimits[1], $heightValue));
 
+        // Телефон: своя высота (пусто = как на десктопе) и свой кадр. Широкий
+        // кадр 21:9 на узком экране режется до полоски, а общей высотой это
+        // лечится только ценой десктопа.
+        $mobileHeightMode = BlockDataInput::enum($input, 'hero_height_mobile', ['regular', 'full', 'custom'], '');
+        $mobileHeight = '';
+        if ($mobileHeightMode === 'custom') {
+            $mobileUnit = BlockDataInput::enum($input, 'hero_height_mobile_unit', ['px', 'vh', 'dvh', 'rem'], 'px');
+            $mobileValue = is_numeric($input['hero_height_mobile_value'] ?? null)
+                ? (float) $input['hero_height_mobile_value']
+                : 420.0;
+            $mobileLimits = $mobileUnit === 'px' ? [160.0, 1200.0]
+                : ($mobileUnit === 'rem' ? [10.0, 80.0] : [20.0, 150.0]);
+            $mobileValue = max($mobileLimits[0], min($mobileLimits[1], $mobileValue));
+            $mobileHeight = self::number($mobileValue) . $mobileUnit;
+        }
+
         $rawOverlayDirection = (string) ($input['overlay_direction'] ?? 'auto');
         $overlayMode = (string) ($input['overlay_mode'] ?? 'gradient');
         $overlayMode = in_array($overlayMode, ['solid', 'gradient'], true) ? $overlayMode : 'gradient';
@@ -75,6 +91,13 @@ final class HeroBlockNormalizer
             'subtitle' => BlockDataInput::plain($input, 'subtitle', $locale),
             'bg_type' => $bgType,
             'image' => $image,
+            // Кадр для телефона: пусто — показываем общий.
+            'image_mobile' => BlockDataInput::safeMedia($input['image_mobile'] ?? ''),
+            // Фоновое видео на мобильном интернете весит дороже, чем стоит:
+            // по умолчанию телефону достаётся постер.
+            'video_mobile' => BlockDataInput::enum($input, 'video_mobile', ['poster', 'play'], 'poster'),
+            'height_mobile' => $mobileHeightMode,
+            'custom_height_mobile' => $mobileHeight,
             'image_position' => MediaPosition::normalize($input['image_position'] ?? null),
             'image_position_mobile' => MediaPosition::normalize($input['image_position_mobile'] ?? null),
             'video_url' => $videoUrl,

@@ -805,6 +805,43 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'hero'): ?>
+            <?= \App\Core\AdminUi::imageField('image_mobile', (string) ($data['image_mobile'] ?? ''), [
+                'label' => 'Кадр для телефона',
+                'hint' => 'Пусто — на телефоне показывается общий кадр. Пригодится, когда широкое фото на узком экране режется до полоски.',
+            ]) ?>
+            <div class="form-field">
+                <label for="hero_video_mobile">Фоновое видео на телефоне</label>
+                <select id="hero_video_mobile" name="video_mobile">
+                    <option value="poster" <?= (string) ($data['video_mobile'] ?? 'poster') !== 'play' ? 'selected' : '' ?>>Показывать постер (экономит трафик)</option>
+                    <option value="play" <?= (string) ($data['video_mobile'] ?? 'poster') === 'play' ? 'selected' : '' ?>>Проигрывать видео</option>
+                </select>
+                <span class="form-hint">Постер берётся из поля «Изображение» (а если задан кадр для телефона — из него).</span>
+            </div>
+            <?php
+            $heroMobileHeight = (string) ($data['height_mobile'] ?? '');
+            $heroMobileCustom = (string) ($data['custom_height_mobile'] ?? '');
+            preg_match('/^(\d+(?:\.\d+)?)(px|vh|dvh|rem)$/', $heroMobileCustom, $heroMobileParts);
+            ?>
+            <div class="form-field">
+                <label for="hero_height_mobile">Высота на телефоне</label>
+                <select id="hero_height_mobile" name="hero_height_mobile">
+                    <?php foreach (['' => 'Как на десктопе', 'regular' => 'Обычная', 'full' => 'На весь экран', 'custom' => 'Своя'] as $mh => $ml): ?>
+                        <option value="<?= $mh ?>" <?= $heroMobileHeight === $mh ? 'selected' : '' ?>><?= $ml ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="hero_height_mobile_value">Своя высота на телефоне</label>
+                <div class="image-field__controls">
+                    <input type="number" id="hero_height_mobile_value" name="hero_height_mobile_value" min="20" max="2000" step="1" value="<?= htmlspecialchars($heroMobileParts[1] ?? '420', ENT_QUOTES) ?>">
+                    <select name="hero_height_mobile_unit" aria-label="Единица измерения">
+                        <?php foreach (['px', 'vh', 'dvh', 'rem'] as $unit): ?>
+                            <option value="<?= $unit ?>" <?= ($heroMobileParts[2] ?? 'px') === $unit ? 'selected' : '' ?>><?= $unit ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <span class="form-hint">Действует, когда выбрана «Своя» высота на телефоне.</span>
+            </div>
             <div class="form-field">
                 <label for="hero_text_align_y">Текст по вертикали</label>
                 <select id="hero_text_align_y" name="text_align_y">
@@ -1242,6 +1279,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                         <option value="icon" <?= ($data['variant'] ?? 'icon') === 'icon' ? 'selected' : '' ?>>Иконка, заголовок и текст</option>
                         <option value="compact" <?= ($data['variant'] ?? 'icon') === 'compact' ? 'selected' : '' ?>>Компактные категории</option>
                         <option value="image" <?= ($data['variant'] ?? 'icon') === 'image' ? 'selected' : '' ?>>Карточки с фотографией</option>
+                        <option value="image_below" <?= ($data['variant'] ?? 'icon') === 'image_below' ? 'selected' : '' ?>>Фото сверху, заголовок и текст под ним</option>
                     </select>
                     <span class="form-hint">Один набор данных можно показать как карточки с иконками, категории или карточки с фотографиями.</span>
                 </div>
@@ -1990,7 +2028,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                             <div class="form-field"><label>Должность</label><input type="text" name="branches[<?= $i ?>][title]" value="<?= htmlspecialchars($branch['title'] ?? '', ENT_QUOTES) ?>" placeholder="Первый заместитель директора"></div>
                             <div class="form-field"><label>Ф.И.О. (необязательно)</label><input type="text" name="branches[<?= $i ?>][name]" value="<?= htmlspecialchars($branch['name'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Ссылка на профиль (необязательно)</label><input type="text" name="branches[<?= $i ?>][url]" value="<?= htmlspecialchars($branch['url'] ?? '', ENT_QUOTES) ?>" placeholder="/rukovodstvo/..."></div>
-                            <div class="form-field"><label>Подразделения (по одному на строку)</label><textarea name="branches[<?= $i ?>][units]" rows="5" placeholder="Отдел стратегического планирования&#10;Отдел анализа и мониторинга"><?= htmlspecialchars($branch['units'] ?? '', ENT_QUOTES) ?></textarea></div>
+                            <div class="form-field"><label>Подразделения (по одному на строку)</label><textarea name="branches[<?= $i ?>][units]" rows="5" placeholder="Отдел стратегического планирования&#10;  Сектор прогнозов&#10;Отдел анализа и мониторинга"><?= htmlspecialchars($branch['units'] ?? '', ENT_QUOTES) ?></textarea><span class="form-hint">Отступ в начале строки = уровень вложенности (до четырёх): «Департамент», под ним с отступом «Отдел», ещё глубже «Сектор». <code>| /адрес</code> — ссылка, <code>*</code> в начале — акцентный пункт.</span></div>
                             <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить ветку</button>
                         </div>
                     <?php endforeach; ?>
@@ -1999,7 +2037,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <div class="form-field"><label>Должность</label><input type="text" name="branches[__INDEX__][title]" placeholder="Заместитель директора"></div>
                     <div class="form-field"><label>Ф.И.О. (необязательно)</label><input type="text" name="branches[__INDEX__][name]"></div>
                     <div class="form-field"><label>Ссылка на профиль (необязательно)</label><input type="text" name="branches[__INDEX__][url]" placeholder="/rukovodstvo/..."></div>
-                    <div class="form-field"><label>Подразделения (по одному на строку)</label><textarea name="branches[__INDEX__][units]" rows="5"></textarea></div>
+                    <div class="form-field"><label>Подразделения (по одному на строку)</label><textarea name="branches[__INDEX__][units]" rows="5" placeholder="Отдел стратегического планирования&#10;  Сектор прогнозов"></textarea><span class="form-hint">Отступ в начале строки = уровень вложенности (до четырёх): «Департамент», под ним с отступом «Отдел», ещё глубже «Сектор». <code>| /адрес</code> — ссылка, <code>*</code> в начале — акцентный пункт.</span></div>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить ветку</button>
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="branches"><?= \App\Core\AdminUi::icon('plus') ?>Добавить ветку</button></div>

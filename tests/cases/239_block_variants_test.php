@@ -396,3 +396,104 @@ test('Обложка: вертикаль текста и оформление с
     assert_same(0, substr_count($own['html'], 'block-hero__scrim--solid'), 'второй слайд перешёл на градиент');
     assert_same(1, substr_count($own['html'], 'block-hero__text--panel'), 'подложка снята только у первого слайда');
 });
+
+test('Обложка: у телефона своя высота, свой кадр и постер вместо видео', function () {
+    // Кадр для телефона — источник с медиазапросом впереди десктопного.
+    $mobile = variant_block('hero', [
+        'title' => 'Заголовок',
+        'bg_type' => 'image',
+        'image' => '/uploads/public/wide.jpg',
+        'image_mobile' => '/uploads/public/tall.jpg',
+    ], 745);
+    assert_contains('<source media="(max-width: 720px)"', $mobile['html']);
+    assert_contains('/uploads/public/tall.jpg', $mobile['html']);
+    assert_true(
+        strpos($mobile['html'], 'tall.jpg') < strpos($mobile['html'], '<img'),
+        'мобильный источник стоит до <img>, иначе браузер его не выберет'
+    );
+
+    // Без мобильного кадра лишних источников не появляется.
+    $plain = variant_block('hero', [
+        'title' => 'Заголовок',
+        'bg_type' => 'image',
+        'image' => '/uploads/public/wide.jpg',
+    ], 746);
+    assert_not_contains('media="(max-width: 720px)"', $plain['html']);
+
+    // Чужой адрес в мобильном поле игнорируется, как и в остальных медиаполях.
+    $unsafe = variant_block('hero', [
+        'title' => 'Заголовок',
+        'bg_type' => 'image',
+        'image' => '/uploads/public/wide.jpg',
+        'image_mobile' => 'javascript:alert(1)',
+    ], 747);
+    assert_not_contains('media="(max-width: 720px)"', $unsafe['html']);
+
+    // Высота телефона — отдельным медиазапросом в scoped CSS блока.
+    $height = variant_block('hero', [
+        'title' => 'Заголовок',
+        'height' => 'full',
+        'height_mobile' => 'custom',
+        'custom_height_mobile' => '420px',
+    ], 748);
+    assert_contains('block-hero--h-full', $height['html'], 'десктопная высота не меняется');
+    assert_contains('@media (max-width:720px)', $height['css']);
+    assert_contains('min-height:420px', $height['css']);
+    $badHeight = variant_block('hero', [
+        'title' => 'Заголовок',
+        'height_mobile' => 'custom',
+        'custom_height_mobile' => '420 пикселей',
+    ], 749);
+    assert_not_contains('@media (max-width:720px)', $badHeight['css'], 'мусор в высоте не попадает в CSS');
+
+    // Видео на телефоне: по умолчанию только постер, файл не скачивается.
+    $video = variant_block('hero', [
+        'title' => 'Заголовок',
+        'bg_type' => 'video',
+        'video_url' => '/uploads/public/bg.mp4',
+        'image' => '/uploads/public/poster.jpg',
+    ], 750);
+    assert_contains('data-hero-video-mobile="poster"', $video['html']);
+    assert_contains('poster="/uploads/public/poster.jpg"', $video['html']);
+    $playing = variant_block('hero', [
+        'title' => 'Заголовок',
+        'bg_type' => 'video',
+        'video_url' => '/uploads/public/bg.mp4',
+        'video_mobile' => 'play',
+    ], 751);
+    assert_not_contains('data-hero-video-mobile', $playing['html']);
+
+    // Решение принимает фронтенд по ширине окна — иначе кэш страницы общий.
+    $frontend = (string) file_get_contents(__DIR__ . '/../../public/assets/js/frontend.js');
+    assert_contains('data-hero-video-mobile', $frontend);
+    assert_contains('(max-width: 720px)', $frontend);
+});
+
+test('Карточки с фото: вариант «текст под фото» без затемнения поверх снимка', function () {
+    $items = [[
+        'title' => 'Проект',
+        'text' => 'Описание проекта',
+        'image' => '/uploads/public/one.jpg',
+        'url' => '/projects/one',
+    ]];
+
+    $below = variant_block('cards_grid', ['variant' => 'image_below', 'items' => $items], 760);
+    assert_contains('block-imgcards--below', $below['html']);
+    assert_contains('imgcard imgcard--below', $below['html']);
+    assert_not_contains('imgcard__overlay', $below['html'], 'текст лежит на подложке, затемнение не нужно');
+    assert_contains('imgcard__text', $below['html']);
+
+    // Прежний вариант не изменился: подпись остаётся на снимке под градиентом.
+    $over = variant_block('cards_grid', ['variant' => 'image', 'items' => $items], 761);
+    assert_contains('imgcard__overlay', $over['html']);
+    assert_not_contains('imgcard--below', $over['html']);
+
+    // Мусор в варианте — это карточки с иконками, а не пустая секция.
+    $broken = variant_block('cards_grid', ['variant' => 'фото снизу', 'items' => $items], 762);
+    assert_contains('block-cards', $broken['html']);
+
+    // Источник «Проекты» больше не навязывает подпись поверх фото: вариант
+    // с текстом под снимком контроллер обязан сохранить.
+    $controller = (string) file_get_contents(__DIR__ . '/../../app/Controllers/Admin/BlockController.php');
+    assert_contains("in_array(\$variant, ['image', 'image_below'], true)", $controller);
+});

@@ -9,7 +9,11 @@ $title = trim((string) ($data['title'] ?? ''));
 $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
 $items = is_array($data['items'] ?? null) ? $data['items'] : [];
-$variant = in_array($data['variant'] ?? 'icon', ['icon', 'compact', 'image'], true) ? (string) $data['variant'] : 'icon';
+$variant = in_array($data['variant'] ?? 'icon', ['icon', 'compact', 'image', 'image_below'], true) ? (string) $data['variant'] : 'icon';
+// «Текст под фото» — та же карточка, только подпись выносится из-под градиента
+// на подложку: длинный анонс на снимке читается плохо, что бы ни делали с
+// затемнением.
+$imageBelow = $variant === 'image_below';
 $columns = max(2, min(5, (int) ($data['columns'] ?? 5)));
 $mediaClasses = MediaPosition::classes($data['image_position'] ?? null, $data['image_position_mobile'] ?? null);
 $cardBg = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['card_bg'] ?? '')) ? (string) $data['card_bg'] : '';
@@ -51,9 +55,9 @@ if ($variant === 'icon' && $visualStyle === 'new') {
     $templateCss .= $scope . ' .block-cards--style-new .feature-card__text{color:var(--cards-text,var(--gov-text,#334155));max-width:34ch;}';
 }
 ?>
-<?php if ($variant === 'image'): ?>
+<?php if ($variant === 'image' || $imageBelow): ?>
     <?php $carousel = count($items) > 1; $desktopCarousel = count($items) > 4; ?>
-    <div class="block-imgcards"<?= $carousel ? ' data-carousel' : '' ?>>
+    <div class="block-imgcards<?= $imageBelow ? ' block-imgcards--below' : '' ?>"<?= $carousel ? ' data-carousel' : '' ?>>
         <div class="section-head">
             <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
             <div class="section-head__tools">
@@ -74,16 +78,16 @@ if ($variant === 'icon' && $visualStyle === 'new') {
                 <?php foreach ($items as $item): ?>
                     <?php $url = trim((string) ($item['url'] ?? '')); $image = trim((string) ($item['image'] ?? '')); ?>
                     <?php if ($url !== ''): ?>
-                    <a class="imgcard"<?= $carousel ? ' data-carousel-item' : '' ?> href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                    <a class="imgcard<?= $imageBelow ? ' imgcard--below' : '' ?>"<?= $carousel ? ' data-carousel-item' : '' ?> href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
                     <?php else: ?>
-                    <div class="imgcard"<?= $carousel ? ' data-carousel-item' : '' ?>>
+                    <div class="imgcard<?= $imageBelow ? ' imgcard--below' : '' ?>"<?= $carousel ? ' data-carousel-item' : '' ?>>
                     <?php endif; ?>
                         <?php if ($image !== ''): ?>
                             <?= Media::picture($image, (string) ($item['title'] ?? ''), null, null, 'imgcard__media ' . $mediaClasses, true, '(max-width: 700px) 100vw, 25vw') ?>
                         <?php else: ?>
                             <span class="imgcard__media" aria-hidden="true"></span>
                         <?php endif; ?>
-                        <span class="imgcard__overlay"></span>
+                        <?php if (!$imageBelow): ?><span class="imgcard__overlay"></span><?php endif; ?>
                         <span class="imgcard__body">
                             <span class="imgcard__title"><?= htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES) ?></span>
                             <?php if (!empty($item['text'])): ?><span class="imgcard__text"><?= htmlspecialchars((string) $item['text'], ENT_QUOTES) ?></span><?php endif; ?>

@@ -80,7 +80,7 @@ if ($iconBg === 'off') {
                     <?php if ($variant !== 'inline' && !empty($item['title'])): ?>
                         <h3 class="feature-card__title contact-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
                     <?php endif; ?>
-                    <?php foreach (preg_split('/\R/', (string) ($item['lines'] ?? '')) ?: [] as $line): ?>
+                    <?php foreach (preg_split('/\r\n|\n|\r/', (string) ($item['lines'] ?? '')) ?: [] as $line): ?>
                         <?php $line = trim($line); if ($line === '') { continue; } ?>
                         <?php // Номера и адреса почты становятся ссылками: с телефона по ним звонят и пишут в одно касание. ?>
                         <?php $lineIcon = $lineIcons ? \App\Core\ContactLink::iconFor($line) : null; ?>

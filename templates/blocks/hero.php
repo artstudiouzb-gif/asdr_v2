@@ -157,6 +157,17 @@ if ($textWidth !== '' && preg_match('/^(\d+(?:\.\d+)?)(px|%|vw)$/', $textWidth, 
 }
 
 $heroWidth = ($data['width'] ?? 'full') === 'standard' ? 'standard' : 'full';
+// Телефон: своя высота и свой кадр. Пусто — всё как на десктопе.
+$mobileHeightMode = (string) ($data['height_mobile'] ?? '');
+if (!in_array($mobileHeightMode, ['regular', 'full', 'custom'], true)) {
+    $mobileHeightMode = '';
+}
+$mobileImage = trim((string) ($data['image_mobile'] ?? ''));
+if ($mobileImage !== '' && !UrlGuard::isSafeMedia($mobileImage)) {
+    $mobileImage = '';
+}
+$mobileVideo = (string) ($data['video_mobile'] ?? 'poster');
+$mobileVideo = $mobileVideo === 'play' ? 'play' : 'poster';
 $heroHeight = in_array($data['height'] ?? 'regular', ['regular', 'full', 'custom'], true) ? $data['height'] : 'regular';
 $customHeight = (string) ($data['custom_height'] ?? '720px');
 if ($heroHeight === 'custom' && preg_match('/^(\d+(?:\.\d+)?)(px|vh|dvh|rem)$/', $customHeight, $heightParts)) {
@@ -188,7 +199,24 @@ $autoplay = max(0, (int) ($data['autoplay'] ?? 0));
 $scrimStyle = '--hero-scrim-rgb:' . $hex2rgb($ovColor)
     . ';--hero-scrim-a:' . $ovOpacity
     . ';--hero-scrim-direction:' . $overlayAngle . ';';
+// Мобильная высота — отдельным медиазапросом: класс общий, значение своё.
+$mobileHeightCss = '';
+if ($mobileHeightMode === 'custom') {
+    $mobileCustom = (string) ($data['custom_height_mobile'] ?? '');
+    if (preg_match('/^(\d+(?:\.\d+)?)(px|vh|dvh|rem)$/', $mobileCustom) === 1) {
+        $mobileHeightCss = '@media (max-width:720px){#block-' . $blockId
+            . ' .block-hero{min-height:' . $mobileCustom . '}}';
+    }
+} elseif ($mobileHeightMode === 'full') {
+    $mobileHeightCss = '@media (max-width:720px){#block-' . $blockId
+        . ' .block-hero{min-height:100dvh}}';
+} elseif ($mobileHeightMode === 'regular') {
+    $mobileHeightCss = '@media (max-width:720px){#block-' . $blockId
+        . ' .block-hero{min-height:clamp(360px,70vw,460px)}}';
+}
+
 $templateCss = ($heroRootStyle !== '' ? '#block-' . $blockId . ' .block-hero{' . $heroRootStyle . '}' : '')
+    . ($mobileHeightCss !== '' ? "\n" . $mobileHeightCss : '')
     . (($hasMedia || $isSlider) && $overlayEnabled ? "\n#block-" . $blockId . ' .block-hero__scrim{' . $scrimStyle . '}' : '')
     . ($textStyle !== '' ? "\n#block-" . $blockId . ' .block-hero__text{' . $textStyle . '}' : '');
 
@@ -217,7 +245,16 @@ $youtubeEmbed = static function (string $id): string {
  * обложки и для слайда карусели — различаются только источники и приоритет
  * загрузки ($lazy у слайдов, кроме первого).
  */
-$heroMedia = static function (string $type, string $image, string $videoFile, ?string $ytId, string $posClasses, bool $lazy) use ($youtubeEmbed): string {
+$heroMedia = static function (
+    string $type,
+    string $image,
+    string $videoFile,
+    ?string $ytId,
+    string $posClasses,
+    bool $lazy,
+    string $mobileImage = '',
+    bool $videoPosterOnMobile = false
+) use ($youtubeEmbed): string {
     if ($type === 'video' && $videoFile !== '') {
         // Отложенное видео стартует не по атрибуту autoplay, а из frontend.js,
         // когда слайд действительно показан: иначе карусель тянула бы все
@@ -228,6 +265,10 @@ $heroMedia = static function (string $type, string $image, string $videoFile, ?s
             . ' disablepictureinpicture disableremoteplayback'
             . ' controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"'
             . ' tabindex="-1"' . ($image !== '' ? ' poster="' . htmlspecialchars($image, ENT_QUOTES) . '"' : '')
+            // На телефоне ролик можно не проигрывать: остаётся постер, а сам
+            // файл не скачивается — фон-видео на мобильном трафике стоит
+            // дороже, чем даёт. Решение принимает frontend.js по ширине окна.
+            . ($videoPosterOnMobile ? ' data-hero-video-mobile="poster"' : '')
             . ' aria-hidden="true"><source src="' . htmlspecialchars($videoFile, ENT_QUOTES) . '" type="video/mp4"></video>';
     }
 
@@ -247,7 +288,18 @@ $heroMedia = static function (string $type, string $image, string $videoFile, ?s
     }
 
     if ($type === 'image' && $image !== '') {
-        return Media::picture($image, '', null, null, 'block-hero__image ' . $posClasses, $lazy, '100vw', true, 'block-hero__media ' . $posClasses);
+        return Media::picture(
+            $image,
+            '',
+            null,
+            null,
+            'block-hero__image ' . $posClasses,
+            $lazy,
+            '100vw',
+            true,
+            'block-hero__media ' . $posClasses,
+            $mobileImage !== '' ? $mobileImage : null
+        );
     }
 
     return '';
@@ -364,7 +416,7 @@ $heroMedia = static function (string $type, string $image, string $videoFile, ?s
 <?php // Без медиа и без своего фона hero — это просто шапка страницы:
       // карточка с рамкой и подложкой в этой роли читается как чужой блок. ?>
 <div class="block-hero<?= $hasMedia ? ' block-hero--media' : '' ?><?= (!$hasMedia && $heroBg === '') ? ' block-hero--plain' : '' ?><?= $heroBg !== '' ? ' block-hero--bgcolor' : '' ?><?= ($bgType === 'video' || $bgType === 'youtube') ? ' block-hero--video' : '' ?> block-hero--w-<?= $heroWidth ?> block-hero--h-<?= $heroHeight ?> block-hero--pos-<?= $textPos ?> block-hero--y-<?= $textAlignY ?>">
-    <?= $heroMedia($bgType, $image, $videoFile, $youtubeId, $mediaPositionClasses, false) ?>
+    <?= $heroMedia($bgType, $image, $videoFile, $youtubeId, $mediaPositionClasses, false, $mobileImage, $mobileVideo === 'poster') ?>
     <?php if ($hasMedia && $overlayEnabled): ?><div class="block-hero__scrim<?= $overlaySolid ? ' block-hero__scrim--solid' : '' ?>" aria-hidden="true"></div><?php endif; ?>
     <div class="block-hero__inner<?= $artHtml !== '' ? ' block-hero__inner--art block-hero__inner--art-' . $artPosition . ' block-hero__inner--art-' . $artSize : '' ?>">
         <?php if ($artHtml !== '' && $artPosition !== 'right'): ?><?= $artHtml ?><?php endif; ?>

@@ -22,8 +22,10 @@
 
 [data-visual-system] .section-head__title {
     position: relative;
-    max-inline-size: 24ch;
     padding-inline-start: 18px;
+    /* Жёсткого предела в символах здесь нет: 24ch резали заголовок в узкую
+       колонку даже там, где строка помещалась целиком, а по-русски и по-узбекски
+       слова длиннее. Ровные строки даёт text-wrap: balance, ширину — колонка. */
     text-wrap: balance;
 }
 
@@ -34,7 +36,7 @@
     inset-inline-start: 0;
     inline-size: 3px;
     border-radius: 999px;
-    background: var(--gov-teal);
+    background: var(--color-accent, var(--gov-teal));
 }
 
 [data-visual-system] .cms-block--bg-navy .section-head {

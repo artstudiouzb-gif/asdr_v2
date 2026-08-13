@@ -49,6 +49,11 @@ test('Hero normalizer: формирует стабильный JSON-контра
         'subtitle' => 'Подзаголовок',
         'bg_type' => 'image',
         'image' => '/uploads/public/hero.jpg',
+        // Телефон: свой кадр, своя высота и режим фонового видео.
+        'image_mobile' => '',
+        'video_mobile' => 'poster',
+        'height_mobile' => '',
+        'custom_height_mobile' => '',
         'image_position' => 'center-center',
         'image_position_mobile' => 'center-center',
         'video_url' => '',

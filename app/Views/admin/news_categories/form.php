@@ -33,6 +33,10 @@ $translationLangs = array_values(array_filter(
             <input type="text" id="slug" name="slug" value="<?= htmlspecialchars((string) $category['slug'], ENT_QUOTES) ?>">
             <span class="form-hint">Один для всех языков: это идентификатор в адресах и выборках, а не текст для чтения. Занятый адрес получит числовой суффикс.</span>
         </div>
+        <?= AdminUi::iconField('icon', (string) ($category['icon'] ?? ''), [
+            'label' => 'Иконка рубрики',
+            'hint' => 'Показывается рядом с названием в рубрикаторе на сайте. Без иконки рубрика выводится одним названием.',
+        ]) ?>
         <div class="form-field">
             <label for="sort_order">Порядок сортировки</label>
             <input type="number" id="sort_order" name="sort_order" value="<?= (int) ($category['sort_order'] ?? 0) ?>">
