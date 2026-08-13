@@ -41,7 +41,11 @@ final class GridBalance
         $scope = '#block-' . $blockId . ' ';
         $remainder = $count % $columns;
 
-        if ($remainder === 0 || $count <= $columns) {
+        // Одинокий хвост не растягиваем: карточка во всю ширину ряда читается
+        // как ошибка вёрстки, а не как приём — пустой слот справа спокойнее.
+        // Автоподбор колонок (columnsFor) до такого случая не доводит, остаток
+        // в одну карточку возможен только при выборе колонок вручную.
+        if ($remainder === 0 || $remainder === 1 || $count <= $columns) {
             // Ряды и так заполнены: одна дорожка на карточку.
             return $scope . $gridSelector . '{--grid-track:' . min($count, $columns) . ';--grid-span:1}';
         }

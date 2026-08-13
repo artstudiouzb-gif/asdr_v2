@@ -376,7 +376,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                         <option value="<?= $n ?>" <?= (int) ($data['columns'] ?? 3) === $n ? 'selected' : '' ?>><?= $n ?></option>
                     <?php endforeach; ?>
                 </select>
-                <span class="form-hint">Работает в варианте «Сетка». Если отзывов не хватает на полный ряд, последние карточки растягиваются.</span>
+                <span class="form-hint">Работает в варианте «Сетка». Если в последнем ряду остаётся две-три карточки, они растягиваются на всю ширину; одинокую карточку блок не растягивает.</span>
             </div>
             <div class="form-field">
                 <label for="t_autoplay">Автопрокрутка, секунд (0 — выключена)</label>
@@ -505,7 +505,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                         <option value="<?= $n ?>" <?= (int) ($data['columns'] ?? 3) === $n ? 'selected' : '' ?>><?= $n ?></option>
                     <?php endforeach; ?>
                 </select>
-                <span class="form-hint">Если проектов не хватает на полный ряд, последние карточки растягиваются — пустых мест справа не остаётся. На узких экранах колонок всегда меньше.</span>
+                <span class="form-hint">Если в последнем ряду остаётся две-три карточки, они растягиваются на всю ширину; одинокую карточку блок не растягивает. На узких экранах колонок всегда меньше.</span>
             </div>
         <?php endif; ?>
 
@@ -1161,7 +1161,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                         <option value="<?= $n ?>" <?= (int) ($data['columns'] ?? 4) === $n ? 'selected' : '' ?>><?= $n ?></option>
                     <?php endforeach; ?>
                 </select>
-                <span class="form-hint">Если персон не хватает на полный ряд, последние карточки растягиваются — пустых мест справа не остаётся.</span>
+                <span class="form-hint">Если в последнем ряду остаётся две-три карточки, они растягиваются на всю ширину; одинокую карточку блок не растягивает.</span>
             </div>
             <div>
                 <label>Персоны (без фото и имени — карточка «Вакантно»)</label>

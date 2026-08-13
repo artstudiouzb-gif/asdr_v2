@@ -117,16 +117,29 @@ test('Карточки персон: колонки настраиваются, 
     // Две карточки в ряд: сетка сжимается до двух дорожек, дыры справа нет.
     assert_contains('--grid-track:2', $block['css']);
 
-    // Четыре карточки в трёх колонках: хвост последнего ряда растягивается.
-    $tail = variant_block('person_cards', [
+    // Четыре карточки в трёх колонках: в хвосте одна. Растягивать её на весь
+    // ряд нельзя — это читается как ошибка вёрстки, а не как приём.
+    $lonely = variant_block('person_cards', [
         'columns' => 3,
         'items' => [
             ['name' => 'A', 'role' => 'r'], ['name' => 'B', 'role' => 'r'],
             ['name' => 'C', 'role' => 'r'], ['name' => 'D', 'role' => 'r'],
         ],
     ], 721);
-    assert_contains('--grid-span:1', $tail['css']);
-    assert_contains(':nth-last-child(-n+1)', $tail['css']);
+    assert_contains('--grid-track:3', $lonely['css']);
+    assert_not_contains('nth-last-child', $lonely['css']);
+
+    // Пять карточек в трёх колонках: в хвосте две — они делят ряд поровну.
+    $tail = variant_block('person_cards', [
+        'columns' => 3,
+        'items' => [
+            ['name' => 'A', 'role' => 'r'], ['name' => 'B', 'role' => 'r'],
+            ['name' => 'C', 'role' => 'r'], ['name' => 'D', 'role' => 'r'],
+            ['name' => 'E', 'role' => 'r'],
+        ],
+    ], 722);
+    assert_contains('--grid-span:2', $tail['css']);
+    assert_contains(':nth-last-child(-n+2)', $tail['css']);
 });
 
 test('Подписка: вариант «на фоне» без картинки становится полосой', function () {
