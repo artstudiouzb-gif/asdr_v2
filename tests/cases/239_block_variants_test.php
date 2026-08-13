@@ -468,3 +468,32 @@ test('Обложка: у телефона своя высота, свой кад
     assert_contains('data-hero-video-mobile', $frontend);
     assert_contains('(max-width: 720px)', $frontend);
 });
+
+test('Карточки с фото: вариант «текст под фото» без затемнения поверх снимка', function () {
+    $items = [[
+        'title' => 'Проект',
+        'text' => 'Описание проекта',
+        'image' => '/uploads/public/one.jpg',
+        'url' => '/projects/one',
+    ]];
+
+    $below = variant_block('cards_grid', ['variant' => 'image_below', 'items' => $items], 760);
+    assert_contains('block-imgcards--below', $below['html']);
+    assert_contains('imgcard imgcard--below', $below['html']);
+    assert_not_contains('imgcard__overlay', $below['html'], 'текст лежит на подложке, затемнение не нужно');
+    assert_contains('imgcard__text', $below['html']);
+
+    // Прежний вариант не изменился: подпись остаётся на снимке под градиентом.
+    $over = variant_block('cards_grid', ['variant' => 'image', 'items' => $items], 761);
+    assert_contains('imgcard__overlay', $over['html']);
+    assert_not_contains('imgcard--below', $over['html']);
+
+    // Мусор в варианте — это карточки с иконками, а не пустая секция.
+    $broken = variant_block('cards_grid', ['variant' => 'фото снизу', 'items' => $items], 762);
+    assert_contains('block-cards', $broken['html']);
+
+    // Источник «Проекты» больше не навязывает подпись поверх фото: вариант
+    // с текстом под снимком контроллер обязан сохранить.
+    $controller = (string) file_get_contents(__DIR__ . '/../../app/Controllers/Admin/BlockController.php');
+    assert_contains("in_array(\$variant, ['image', 'image_below'], true)", $controller);
+});

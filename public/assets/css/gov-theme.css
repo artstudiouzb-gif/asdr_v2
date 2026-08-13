@@ -202,7 +202,7 @@ h1, h2, h3, h4, h5, h6,
     color: var(--gov-title);
     letter-spacing: var(--heading-letter-spacing, -0.02em);
     font-weight: var(--heading-font-weight, 700);
-    line-height: var(--heading-line-height, 1.25);
+    line-height: 1.25;
 }
 :root[data-theme="dark"] h1, :root[data-theme="dark"] h2, :root[data-theme="dark"] h3 { color: var(--gov-ink); }
 a { color: var(--gov-teal); }
@@ -1686,7 +1686,7 @@ body.reader-mode-active { overflow: hidden; }
     margin: 0 0 16px; letter-spacing: -0.02em;
 }
 .reader-mode__submeta { font-size: calc(0.875rem * var(--reader-scale, 1)); opacity: 0.7; margin-bottom: 24px; font-weight: 600; }
-.reader-mode__lead { font-size: calc(1.25rem * var(--reader-scale, 1)); font-weight: 500; line-height: 1.6; margin-bottom: 32px; opacity: 0.9; }
+.reader-mode__lead { font-size: calc(1.25rem * var(--reader-scale, 1)); font-weight: 500; line-height: var(--base-line-height, 1.6); margin-bottom: 32px; opacity: 0.9; }
 .reader-mode__body { font-size: calc(1.125rem * var(--reader-scale, 1)); }
 .reader-mode__cover {
     width: 100%; max-height: 480px; object-fit: cover;
@@ -1850,7 +1850,7 @@ body.lightbox-active { overflow: hidden; }
 .push-prompt-card__header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .push-prompt-card__icon { font-size: var(--step-2); line-height: 1; }
 .push-prompt-card__title { font-weight: 700; font-size: var(--step--1); color: var(--gov-title, #1e293b); }
-.push-prompt-card__text { font-size: var(--step--3); line-height: 1.5; color: var(--gov-subtext, #64748b); margin-bottom: 14px; }
+.push-prompt-card__text { font-size: var(--step--3); line-height: var(--base-line-height, 1.5); color: var(--gov-subtext, #64748b); margin-bottom: 14px; }
 .push-prompt-card__actions { display: flex; align-items: center; gap: 8px; }
 
 :root[data-theme="dark"] .push-prompt-card {
@@ -2235,13 +2235,13 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .newsdetail-article { min-width: 0; }
 .newsdetail-subscribe { background: var(--gov-navy); border-radius: var(--radius, 12px); padding: 26px 24px; color: #fff; }
 .newsdetail-subscribe__title { font-size: var(--step-1); margin: 0 0 10px; color: #fff; }
-.newsdetail-subscribe__text { color: rgba(255,255,255,.8); font-size: var(--step--2); line-height: 1.5; margin: 0 0 16px; }
+.newsdetail-subscribe__text { color: rgba(255,255,255,.8); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); margin: 0 0 16px; }
 .newsdetail-subscribe__row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .newsdetail-subscribe__row input { min-height: 44px; padding: 0 14px; border-radius: var(--btn-radius, 8px); border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; }
 .newsdetail-subscribe__row input::placeholder { color: rgba(255,255,255,.55); }
 .newsdetail-subscribe__row button { min-width: 48px; min-height: 44px; border: 0; border-radius: var(--btn-radius, 8px); background: var(--gov-teal); color: #fff; font-size: var(--step-1); cursor: pointer; transition: filter .15s ease; }
 .newsdetail-subscribe__row button:hover { filter: brightness(1.08); }
-.newsdetail-subscribe__consent { display: flex; gap: 9px; align-items: flex-start; margin-top: 12px; color: rgba(255,255,255,.75); font-size: var(--step--4); line-height: 1.5; cursor: pointer; }
+.newsdetail-subscribe__consent { display: flex; gap: 9px; align-items: flex-start; margin-top: 12px; color: rgba(255,255,255,.75); font-size: var(--step--4); line-height: var(--base-line-height, 1.5); cursor: pointer; }
 .newsdetail-subscribe__consent input { margin-top: 2px; accent-color: var(--gov-teal); }
 .newsdetail-subscribe--fallback { margin-top: 20px; }
 .albums-grid {
@@ -2372,7 +2372,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 @media (max-width: 900px) { .block-banner--light { grid-template-columns: 1fr; } .block-banner--light .block-banner__photo { display: none; } }
 .block-banner--light .block-banner__inner { padding: clamp(20px, 4vw, 48px) 0; text-align: left; }
 .block-banner--light .block-banner__title { color: var(--gov-title); font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); line-height: 1.15; margin: 0 0 16px; }
-.block-banner--light .block-banner__text { color: var(--gov-muted); opacity: 1; font-size: var(--step-0); line-height: 1.6; margin: 0 0 22px; }
+.block-banner--light .block-banner__text { color: var(--gov-muted); opacity: 1; font-size: var(--step-0); line-height: var(--base-line-height, 1.6); margin: 0 0 22px; }
 .block-banner--light .block-banner__button { 
     display: inline-block; padding: 13px 26px; background: var(--gov-navy); color: #fff; 
     border-radius: var(--btn-radius, 8px); font-weight: 700; text-decoration: none; 
@@ -2543,7 +2543,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 }
 .stage__label { color: var(--gov-muted); font-size: var(--step--3); text-transform: uppercase; letter-spacing: .05em; }
 .stage__title { font-weight: 700; color: var(--gov-title); font-size: var(--step-0); }
-.stage__text { color: var(--gov-muted); font-size: var(--step--2); line-height: 1.5; flex: 1; }
+.stage__text { color: var(--gov-muted); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); flex: 1; }
 .stage__status { align-self: flex-start; padding: 5px 12px; border-radius: 999px; font-size: var(--step--4); font-weight: 700; background: color-mix(in srgb, var(--gov-navy) 7%, var(--gov-bg)); color: var(--gov-muted); transition: background 0.3s, color 0.3s; }
 .stage--done .stage__status { background: color-mix(in srgb, var(--gov-teal) 14%, var(--gov-bg)); color: color-mix(in srgb, var(--gov-teal-text) 82%, #000); }
 .stage--active .stage__status { background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 13%, var(--gov-bg)); color: #2465c6; }
@@ -2595,7 +2595,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 }
 .textimage__title { position: relative; font-size: clamp(var(--step-3), 2.4vw, var(--step-5)); margin: 0 0 18px; padding-left: 16px; }
 .textimage__title::before { content: ''; position: absolute; left: 0; top: .18em; bottom: .18em; width: 4px; border-radius: 2px; background: var(--gov-teal); }
-.textimage__text { color: var(--gov-muted); line-height: 1.6; margin-bottom: 24px; }
+.textimage__text { color: var(--gov-muted); line-height: var(--base-line-height, 1.6); margin-bottom: 24px; }
 .textimage__features { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 18px; }
 .textimage__feature { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .textimage__feature-icon { color: var(--gov-teal); }
@@ -2693,7 +2693,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
     font-size: var(--step--2); font-weight: 700; letter-spacing: .04em;
 }
 .listing__title { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 10px; }
-.listing__lead { color: var(--gov-muted); font-size: var(--step-0); line-height: 1.6; margin: 0; }
+.listing__lead { color: var(--gov-muted); font-size: var(--step-0); line-height: var(--base-line-height, 1.6); margin: 0; }
 
 /* Заголовок + лид простой страницы (без hero-шапки). */
 /* Боковые отступы задаёт контейнер страницы, поэтому у шапки раздела их нет:
@@ -2709,7 +2709,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .block-text__title { max-width: none; }
 .content-pagehead__inner { max-width: var(--container-max); margin: 0 auto; }
 .content-pagehead__title { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 10px; color: var(--gov-title); }
-.content-pagehead__lead { color: var(--gov-muted); font-size: var(--step-0); line-height: 1.6; margin: 0; }
+.content-pagehead__lead { color: var(--gov-muted); font-size: var(--step-0); line-height: var(--base-line-height, 1.6); margin: 0; }
 
 /* Крупная первая новость. */
 .newslist-lead {
@@ -2773,7 +2773,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 }
 .newslist__date { color: var(--gov-muted); font-size: var(--step--2); font-weight: 600; }
 .newslist-lead__title { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: clamp(var(--step-2), 2.2vw, var(--step-5)); color: var(--gov-title); line-height: 1.25; margin: 0; }
-.newslist-lead__excerpt { color: var(--gov-muted); line-height: 1.6; font-size: var(--step-0); }
+.newslist-lead__excerpt { color: var(--gov-muted); line-height: var(--base-line-height, 1.6); font-size: var(--step-0); }
 .newslist-lead:hover .newslist-lead__title { color: var(--gov-teal); }
 
 /* Обёртка обложки: система координат для метки-плашки. Отдельный элемент
@@ -2837,7 +2837,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .projects-grid--compact { grid-template-columns: repeat(4, 1fr); }
 @media (max-width: 1000px) { .projects-grid--compact { grid-template-columns: repeat(2, 1fr); } }
 .imgcard--project { min-height: 300px; }
-.imgcard__desc { color: rgba(255,255,255,.82); font-size: var(--step--2); line-height: 1.5; }
+.imgcard__desc { color: rgba(255,255,255,.82); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); }
 
 /* Детальная проекта. */
 .projdetail { display: flex; flex-direction: column; gap: clamp(28px, 4vw, 48px); padding-block: 10px clamp(40px, 5vw, 64px); }
@@ -2852,13 +2852,18 @@ body.design-type-static .section-title { font-size: var(--step-6); }
     margin: 0 0 var(--space-small, 24px);
     color: var(--gov-muted);
     font-size: var(--step-1);
-    line-height: 1.55;
+    line-height: var(--base-line-height, 1.55);
 }
 
 /* ===== Рубрикатор по бейджам (страница «Новости») ===== */
 .listing-filter { display: flex; flex-wrap: wrap; gap: 10px; margin-top: -8px; }
 .listing-filter__item { display: inline-flex; align-items: center; min-height: 40px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--gov-border); background: var(--gov-surface); color: var(--gov-title); font-weight: 600; font-size: var(--step--2); text-decoration: none; transition: border-color .15s ease, color .15s ease; }
 .listing-filter__item:hover { border-color: var(--gov-teal); color: var(--gov-teal-text); }
+/* Значок рубрики: слева от названия, с левым отступом чуть меньше — иначе
+   кнопка с иконкой выглядит шире соседних. */
+.listing-filter__item--icon { gap: 8px; padding-left: 14px; }
+.listing-filter__icon { display: inline-flex; color: var(--color-accent, var(--gov-teal)); }
+.listing-filter__item.is-active .listing-filter__icon { color: currentColor; }
 .listing-filter__item.is-active { background: var(--gov-navy); border-color: var(--gov-title); color: #fff; }
 
 /* AJAX-фильтрация: пока грузится новый список, старый приглушается. Клики по
@@ -3471,7 +3476,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .feature-card:hover .feature-card__arrow {
     transform: translateX(4px);
 }
-.feature-card__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: 1.55; margin: 0; flex: 1; }
+.feature-card__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: var(--base-line-height, 1.55); margin: 0; flex: 1; }
 
 /* Проекты — карточки с фото и тёмным градиентом. */
 .imgcards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
@@ -3501,6 +3506,43 @@ span.imgcard__media::after {
 .imgcard__body { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px; display: flex; flex-direction: column; gap: 10px; transform: translateY(2px); transition: transform .55s cubic-bezier(.22, 1, .36, 1); }
 .imgcard__title { margin: 0; font-family: var(--font-heading, var(--font-family)); font-weight: 700; font-size: var(--step-1); line-height: 1.25; color: #fff; }
 .imgcard__more { display: inline-flex; align-items: center; font-size: var(--step--2); font-weight: 700; color: rgba(255,255,255,.9); transition: color .3s ease, transform .45s cubic-bezier(.22, 1, .36, 1); }
+/* Вариант «фото сверху, текст под ним»: снимок занимает верх карточки, подпись
+   уходит на подложку. Тот же список карточек, поэтому классы общие — меняется
+   только раскладка и цвета текста. */
+.imgcard--below {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--gov-surface);
+    border: 1px solid var(--gov-border);
+    color: var(--gov-ink);
+}
+.imgcard--below .imgcard__media {
+    position: relative;
+    inset: auto;
+    aspect-ratio: 16 / 10;
+    height: auto;
+    border-radius: 0;
+}
+.imgcard--below .imgcard__body {
+    position: static;
+    padding: 18px 20px 20px;
+    transform: none;
+    flex: 1;
+}
+.imgcard--below .imgcard__title { color: var(--gov-title); }
+.imgcard--below .imgcard__text,
+.imgcard--below .imgcard__desc {
+    color: var(--gov-muted);
+    font-size: var(--step--1);
+    line-height: var(--base-line-height, 1.5);
+}
+.imgcard--below .imgcard__more { margin-top: auto; color: var(--gov-teal-text); }
+@media (hover: hover) and (pointer: fine) {
+    .imgcard--below:hover .imgcard__more,
+    .imgcard--below:focus-visible .imgcard__more { color: var(--color-accent, var(--gov-teal)); }
+}
+
 /* Карточка целиком — ссылка, а «Подробнее» внутри неё был мёртвым текстом:
    при наведении не менялось ничего, кроме масштаба фото. Специфичность здесь
    выше правила-переопределения цвета ниже по файлу, поэтому порядок не важен. */
@@ -3823,7 +3865,7 @@ span.imgcard__media::after {
 .timeline-item--planned:hover::before { border-color: var(--gov-muted); }
 .timeline-item__year { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; color: var(--gov-title); transition: color 0.25s ease; }
 .timeline-item:hover .timeline-item__year { color: var(--gov-teal-text); }
-.timeline-item__text { color: var(--gov-muted); font-size: var(--step--1); line-height: 1.5; transition: color 0.25s ease; }
+.timeline-item__text { color: var(--gov-muted); font-size: var(--step--1); line-height: var(--base-line-height, 1.5); transition: color 0.25s ease; }
 .timeline-item:hover .timeline-item__text { color: var(--gov-title); }
 .timeline-card__button { display: inline-block; margin-top: 24px; padding: 11px 22px; border: 1px solid var(--gov-navy); border-radius: var(--btn-radius, 8px); color: var(--gov-title); font-weight: 700; font-size: var(--step--2); text-decoration: none; transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease; }
 .timeline-card__button:hover { background: var(--gov-teal); border-color: var(--gov-teal); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(23,153,155, 0.25); }
@@ -3831,7 +3873,7 @@ span.imgcard__media::after {
 .timeline-cta__overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(15,33,60,.92) 25%, rgba(15,33,60,.55) 100%); }
 .timeline-cta__body { position: relative; padding: 36px; color: #fff; display: flex; flex-direction: column; gap: 14px; max-width: 480px; }
 .timeline-cta__title { font-size: clamp(var(--step-2), 2vw, var(--step-5)); margin: 0; color: #fff; }
-.timeline-cta__text { margin: 0; color: rgba(255,255,255,.85); line-height: 1.55; }
+.timeline-cta__text { margin: 0; color: rgba(255,255,255,.85); line-height: var(--base-line-height, 1.55); }
 .timeline-cta__button { display: inline-block; align-self: flex-start; margin-top: 8px; padding: 12px 22px; border: 1px solid rgba(255,255,255,.7); border-radius: var(--btn-radius, 8px); color: #fff; font-weight: 700; font-size: var(--step--2); text-decoration: none; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
 .timeline-cta__button:hover { background: var(--gov-teal); border-color: var(--gov-teal); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(23,153,155, 0.3); }
 
@@ -3898,7 +3940,7 @@ span.imgcard__media::after {
 }
 .ctaband__body { display: flex; flex-direction: column; gap: 6px; }
 .ctaband__title { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: var(--step-2); }
-.ctaband__text { color: rgba(255,255,255,.82); line-height: 1.5; }
+.ctaband__text { color: rgba(255,255,255,.82); line-height: var(--base-line-height, 1.5); }
 .ctaband__button { 
     display: inline-block; padding: 13px 26px; background: #fff; color: var(--gov-navy); 
     border-radius: var(--btn-radius, 8px); font-weight: 700; font-size: var(--step--1); text-decoration: none; 
@@ -3928,7 +3970,7 @@ span.imgcard__media::after {
 .profile__photo--empty > * { position: relative; z-index: 1; }
 .profile__name { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 12px; }
 .profile__position { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; color: var(--gov-teal-text, #0284c7); font-size: var(--step-1); line-height: 1.35; margin-bottom: 18px; }
-.profile__text { color: var(--gov-ink); line-height: 1.65; margin: 0 0 22px; font-size: var(--step-0); }
+.profile__text { color: var(--gov-ink); line-height: var(--base-line-height, 1.65); margin: 0 0 22px; font-size: var(--step-0); }
 .profile__contacts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
 .profile__contact { display: flex; align-items: center; gap: 10px; color: var(--gov-ink); font-size: var(--step--1); }
 .profile__contact svg { color: var(--gov-teal-text, #0284c7); flex: 0 0 auto; }
@@ -3971,7 +4013,7 @@ span.imgcard__media::after {
 .featband__icon { color: rgba(255,255,255,.95); }
 .featband__icon svg { width: 30px; height: 30px; }
 .featband__name { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: var(--step-0); color: #ffffff; }
-.featband__text { color: rgba(255,255,255,.92); font-size: var(--step--1); line-height: 1.5; }
+.featband__text { color: rgba(255,255,255,.92); font-size: var(--step--1); line-height: var(--base-line-height, 1.5); }
 .block-featband__head { margin-bottom: 26px; }
 .block-featband__title { margin: 0; font-size: var(--font-size-h2, clamp(var(--step-4), 2.6vw, var(--step-6))); }
 
@@ -3982,7 +4024,7 @@ span.imgcard__media::after {
 .block-bio { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: start; }
 @media (max-width: 900px) { .block-bio { grid-template-columns: 1fr; } }
 .bio__title { font-size: var(--step-4); margin: 0 0 18px; }
-.bio__text { color: var(--gov-muted); line-height: 1.6; margin-bottom: 26px; }
+.bio__text { color: var(--gov-muted); line-height: var(--base-line-height, 1.6); margin-bottom: 26px; }
 .bio-career { list-style: none; margin: 0; padding: 0; position: relative; }
 .bio-career::before { content: ''; position: absolute; left: 4px; top: 8px; bottom: 8px; width: 2px; background: color-mix(in srgb, var(--gov-navy) 15%, transparent); }
 /* Колонка годов не фиксированная: длинная подпись вроде «2026 — н.в.» или
@@ -3997,7 +4039,7 @@ span.imgcard__media::after {
        оставляют должности 40% ширины и рвут её на отдельные слова. */
     .bio-career__item { grid-template-columns: 1fr; gap: 4px; }
 }
-.bio-career__text { color: var(--gov-muted); font-size: var(--step--1); line-height: 1.5; }
+.bio-career__text { color: var(--gov-muted); font-size: var(--step--1); line-height: var(--base-line-height, 1.5); }
 .bio-side { display: flex; flex-direction: column; gap: 26px; }
 @media (min-width: 901px) {
     .bio-side { position: sticky; top: 92px; }
@@ -4014,10 +4056,10 @@ span.imgcard__media::after {
 .bio-edu__org { color: var(--gov-muted); font-size: var(--step--2); }
 .bio-extra { margin-top: 8px; }
 .bio-extra__title { font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; color: var(--gov-title); font-size: var(--step-0); margin: 0 0 10px; }
-.bio-extra__list { margin: 0; padding-left: 18px; color: var(--gov-muted); font-size: var(--step--2); line-height: 1.5; display: flex; flex-direction: column; gap: 6px; }
+.bio-extra__list { margin: 0; padding-left: 18px; color: var(--gov-muted); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); display: flex; flex-direction: column; gap: 6px; }
 .bio-quote { position: relative; margin: 0; background: var(--gov-navy); border-radius: var(--radius); padding: 30px 30px 26px; color: #fff; }
 .bio-quote__mark { font-family: var(--font-heading, 'PT Serif', serif); font-size: var(--step-8); line-height: 1; color: var(--gov-teal); display: block; margin-bottom: 8px; }
-.bio-quote__text { margin: 0 0 12px; font-size: var(--step-0); line-height: 1.6; border: 0; padding: 0; }
+.bio-quote__text { margin: 0 0 12px; font-size: var(--step-0); line-height: var(--base-line-height, 1.6); border: 0; padding: 0; }
 .bio-quote__author { color: rgba(255,255,255,.75); font-size: var(--step--2); }
 .newsdetail__badge { display: inline-block; padding: 6px 14px; border-radius: 999px; background: color-mix(in srgb, var(--gov-teal) 12%, transparent); color: var(--gov-teal-text); text-transform: uppercase; font-size: 11.5px; letter-spacing: .1em; font-weight: 700; }
 /* Рубрика на детальной — ссылка в отфильтрованную ленту. Подчёркивание
@@ -4103,7 +4145,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 }
 .newsfeat-lead__title { font-family: var(--font-heading, var(--font-family)); font-weight: 700; font-size: var(--step-3); color: #fff; line-height: 1.32; }
 .newsfeat-lead__excerpt {
-    color: rgba(255,255,255,.86); line-height: 1.5; font-size: var(--step--1);
+    color: rgba(255,255,255,.86); line-height: var(--base-line-height, 1.5); font-size: var(--step--1);
     display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
 }
 /* На широком экране плитка тянется ровно на высоту правой колонки — колонки
@@ -4158,7 +4200,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .block-newsfeat--mosaic .newsfeat-mini__thumb { border-radius: 0; }
 .block-newsfeat--mosaic .newsfeat-mini__body { padding: 14px; gap: 8px; height: 100%; }
 .block-newsfeat--mosaic .newsfeat-mini__excerpt,
-.block-newsfeat--mosaic .newsfeat-text__excerpt { color: var(--gov-muted); font-size: var(--step--2); line-height: 1.5; }
+.block-newsfeat--mosaic .newsfeat-text__excerpt { color: var(--gov-muted); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); }
 .block-newsfeat--mosaic .newsfeat-text { padding: 14px; gap: 8px; }
 /* Стрелка вместо подписи: у компактной карточки на «Читать подробнее» нет
    места, а показать, что это ссылка, всё равно нужно. */
@@ -4231,8 +4273,6 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    margin-right: auto;
-    margin-left: 20px;
     background: color-mix(in srgb, var(--gov-border) 16%, var(--gov-bg));
     padding: 3px;
     border: 1px solid var(--gov-border);
@@ -4272,7 +4312,6 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     color: var(--gov-title);
     background: color-mix(in srgb, var(--gov-border) 35%, transparent);
 }
-@media (max-width: 560px) { .media-tabs { margin-left: 0; } }
 .mediacard__play--photo svg { width: 22px; height: 22px; }
 
 /* ===== Каталог (вакансии, тендеры, документы, мероприятия) ===== */
@@ -4436,7 +4475,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     margin: 0;
     color: var(--gov-muted);
     font-size: var(--step--2);
-    line-height: 1.5;
+    line-height: var(--base-line-height, 1.5);
 }
 
 .catcard__foot {
@@ -4811,7 +4850,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 @media (max-width: 900px) { .catdetail__grid { grid-template-columns: 1fr; } }
 .catdetail__body { display: flex; flex-direction: column; gap: 26px; }
 .catdetail__subtitle { margin: 0 0 10px; font-size: var(--step-2); color: var(--gov-title); }
-.catdetail__text { color: var(--gov-ink, #2b3b4e); line-height: 1.6; }
+.catdetail__text { color: var(--gov-ink, #2b3b4e); line-height: var(--base-line-height, 1.6); }
 .catdetail__text img { max-width: 100%; border-radius: var(--radius, 12px); }
 .catdetail__empty { color: var(--gov-muted); }
 .catdetail__card { position: sticky; top: 90px; display: flex; flex-direction: column; gap: 16px; padding: 24px; }
@@ -4920,7 +4959,7 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 .footer-subscribe input[type=email]::placeholder { color: rgba(255,255,255,.55); }
 .footer-subscribe button { border: 0; background: var(--gov-teal); color: #fff; padding: 0 18px; border-radius: 0 8px 8px 0; cursor: pointer; font-size: var(--step-1); }
 .footer-subscribe button:hover { background: color-mix(in srgb, var(--gov-teal) 85%, #000); }
-.footer-subscribe__consent { display: flex; flex: 1 0 100%; align-items: flex-start; gap: 8px; margin-top: 10px; color: rgba(255,255,255,.72); font-size: var(--step--4); line-height: 1.45; cursor: pointer; }
+.footer-subscribe__consent { display: flex; flex: 1 0 100%; align-items: flex-start; gap: 8px; margin-top: 10px; color: rgba(255,255,255,.72); font-size: var(--step--4); line-height: var(--base-line-height, 1.45); cursor: pointer; }
 .footer-subscribe__consent input { flex: 0 0 auto; margin-top: 2px; accent-color: var(--gov-teal); }
 .site-footer--columns .site-footer__col--subscribe .site-footer__line { color: rgba(255,255,255,.72); }
 
@@ -6131,7 +6170,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 }
 .faq-item__q:hover { color: var(--gov-teal-text, #0284c7); }
 .faq-item__a {
-    padding: 0 24px 22px; color: var(--gov-ink); font-size: var(--step-0); line-height: 1.65;
+    padding: 0 24px 22px; color: var(--gov-ink); font-size: var(--step-0); line-height: var(--base-line-height, 1.65);
     border-top: 1px solid color-mix(in srgb, var(--gov-border) 60%, transparent);
     margin-top: 4px; padding-top: 16px;
 }
@@ -6216,7 +6255,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
    названием раздела, и ломал иерархию страницы. */
 .block-advantages__head { margin-bottom: 26px; }
 .block-advantages__title { margin: 0; color: var(--gov-title); font-size: var(--font-size-h2, clamp(var(--step-4), 2.6vw, var(--step-6))); font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; }
-.block-advantages__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: 1.55; margin: 0; }
+.block-advantages__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: var(--base-line-height, 1.55); margin: 0; }
 
 /* --- Контактные карточки / Отделы (Contact Cards Block) --- */
 .contact-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; }
@@ -6311,13 +6350,21 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     margin: 0;
     color: var(--gov-muted, #475569);
     font-size: var(--font-size-card-text, var(--step--1));
-    line-height: 1.55;
+    line-height: var(--base-line-height, 1.55);
 }
+
+/* Интервал между строками контактов одинаков во всех карточках ряда.
+   У `.feature-card__text` есть `flex: 1`, и свободная высота карточки делилась
+   между строками: в «Телефоне» без ссылки внизу зазор выходил заметно больше,
+   чем в «Адресе» со ссылкой. Строки не растягиваем, а низ добирает ссылка —
+   заодно ссылки выравниваются по нижней грани ряда. */
+.feature-card.contact-card .feature-card__text { flex: 0 0 auto; }
+.feature-card.contact-card .contact-card__link { margin-top: auto; }
 
 .feature-card.act-card .act-card__desc {
     font-family: var(--font-family, 'PT Sans', sans-serif);
     font-weight: 400;
-    line-height: 1.6;
+    line-height: var(--base-line-height, 1.6);
 }
 
 .feature-card.act-card .act-card__emblem {
@@ -6366,7 +6413,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     background: var(--gov-surface); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
 }
 .stage-item__title { font-weight: 700; font-size: var(--step-0); color: var(--gov-title); margin: 0 0 6px; }
-.stage-item__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: 1.55; margin: 0; }
+.stage-item__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: var(--base-line-height, 1.55); margin: 0; }
 
 /* Пульсация текущего этапа отключается при системном запросе «меньше
    движения». Правило стоит в конце файла намеренно: выше определения

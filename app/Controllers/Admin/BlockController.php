@@ -674,10 +674,14 @@ final class BlockController
                 } elseif ($type === 'media_gallery' && in_array($_POST['source'] ?? '', ['albums', 'videos', 'media'], true)) {
                     $source = (string) $_POST['source'];
                 }
-                $variant = $type === 'cards_grid' && in_array($_POST['variant'] ?? 'icon', ['icon', 'compact', 'image'], true)
+                $variant = $type === 'cards_grid'
+                    && in_array($_POST['variant'] ?? 'icon', ['icon', 'compact', 'image', 'image_below'], true)
                     ? (string) $_POST['variant']
                     : 'icon';
-                if ($source === 'projects') {
+                // Проекты собираются с обложками, поэтому вариант без фото им не
+                // подходит; но выбор между текстом на фото и текстом под ним
+                // остаётся за редактором.
+                if ($source === 'projects' && !in_array($variant, ['image', 'image_below'], true)) {
                     $variant = 'image';
                 }
                 $collected = [

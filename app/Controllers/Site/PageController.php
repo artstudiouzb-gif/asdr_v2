@@ -28,7 +28,7 @@ final class PageController
             return;
         }
 
-        $this->renderPage($page, $lang);
+        $this->renderPage($page, $lang, true);
     }
 
     public function show(array $params): void
@@ -63,12 +63,22 @@ final class PageController
         $this->renderPage($page, $lang);
     }
 
-    private function renderPage(array $page, string $lang): void
+    private function renderPage(array $page, string $lang, bool $isHome = false): void
     {
         // Переключатель языков и hreflang показывают только языки, на которых
         // страница реально наполнена (перевод или собственный стек блоков).
-        Locale::setContentLangs(Page::availableLangs((int) $page['id']));
-        Locale::setAlternatePaths(\App\Core\TranslationGroupHelper::publishedPaths('pages', (int) $page['id']));
+        $langs = Page::availableLangs((int) $page['id']);
+        Locale::setContentLangs($langs);
+        // У главной адрес всегда корневой («/» и «/uz»). Пути из группы
+        // переводов дали бы «/uz/home»: адрес рабочий, но отвечает редиректом
+        // на корень — и переключатель, и hreflang вели бы через лишний шаг.
+        // Признак берём от маршрута: у языковой версии-записи `is_home` своего
+        // флага может не быть, а живёт она всё равно в корне своего языка.
+        Locale::setAlternatePaths(
+            $isHome || !empty($page['is_home'])
+                ? array_fill_keys($langs, '/')
+                : \App\Core\TranslationGroupHelper::publishedPaths('pages', (int) $page['id'])
+        );
 
         // Сборка блоков (кэш, свежий CSRF, nonce, ассеты) общая со страницей
         // проекта — она живёт в App\Core\PageBlocks.

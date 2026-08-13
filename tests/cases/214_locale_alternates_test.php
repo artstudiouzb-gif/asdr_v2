@@ -58,3 +58,20 @@ test('Шапка строит hreflang и переключатель по пут
     // вернуться: он и давал редирект.
     assert_not_contains('Locale::url(Locale::path(), (string) $hrefLang[\'code\'])', $header);
 });
+
+test('Главная объявляет корневые адреса, а не slug страницы', function () {
+    $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Site/PageController.php');
+
+    // Признак главной приходит от маршрута: у языковой версии-записи своего
+    // флага is_home может не быть, а живёт она всё равно в корне языка.
+    assert_contains('$this->renderPage($page, $lang, true)', $controller);
+    assert_contains("\$isHome || !empty(\$page['is_home'])", $controller);
+    assert_contains("array_fill_keys(\$langs, '/')", $controller);
+
+    // Корневой путь под префиксом языка даёт «/uz», а не «/uz/home».
+    Locale::setPath('/');
+    Locale::setAlternatePaths(['ru' => '/', 'uz' => '/']);
+    assert_same('/uz', Locale::url(Locale::alternatePath('uz'), 'uz'));
+    assert_same('/', Locale::url(Locale::alternatePath('ru'), 'ru'));
+    Locale::setAlternatePaths([]);
+});

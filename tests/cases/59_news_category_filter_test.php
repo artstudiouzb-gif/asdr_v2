@@ -103,3 +103,22 @@ test('Категория переводится, а slug остаётся общ
 
     NewsCategory::delete($id);
 });
+
+test('У рубрики своя иконка: хранится ключом Tabler и выводится в рубрикаторе (БД)', function () {
+    ensure_test_db();
+
+    // Ключ чистится тем же правилом, что и в блоках: чужой мусор не сохраняется.
+    $id = (int) NewsCategory::create('Рубрика с иконкой', '', true, 0, 'building-bank');
+    assert_same('building-bank', (string) NewsCategory::find($id)['icon']);
+
+    NewsCategory::update($id, 'Рубрика с иконкой', (string) NewsCategory::find($id)['slug'], true, 0, '<script>');
+    assert_same('', (string) NewsCategory::find($id)['icon'], 'непригодный ключ иконки не сохраняется');
+
+    // Иконка — украшение рядом с названием, поэтому скрыта от диктора.
+    $view = (string) file_get_contents(APP_ROOT . '/app/Views/site/news_index.php');
+    assert_contains('listing-filter__icon', $view);
+    assert_contains('aria-hidden="true"', $view);
+    assert_contains("Icon::cleanName(\$c['icon'] ?? '')", $view);
+
+    NewsCategory::delete($id);
+});

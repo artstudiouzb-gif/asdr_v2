@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS news_categories (
     id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(150) NOT NULL COMMENT 'название на основном языке',
     slug        VARCHAR(150) NOT NULL COMMENT 'один на все языки: адрес и выборки',
+    icon        VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'ключ иконки Tabler',
     is_active   TINYINT(1) NOT NULL DEFAULT 1,
     sort_order  INT NOT NULL DEFAULT 0,
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1125,7 +1126,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_11_public_listing_indexes.sql'),
     ('2026_08_11_news_categories.sql'),
     ('2026_08_11_news_badge_color.sql'),
-    ('2026_08_13_projects_into_pages.sql')
+    ('2026_08_13_projects_into_pages.sql'),
+    ('2026_08_13_news_category_icon.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

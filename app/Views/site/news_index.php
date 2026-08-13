@@ -35,7 +35,10 @@ require __DIR__ . '/_crumbs.php';
         <nav class="listing-filter" aria-label="<?= htmlspecialchars(t('Рубрики'), ENT_QUOTES) ?>">
             <a class="listing-filter__item<?= $category === '' ? ' is-active' : '' ?>" href="<?= htmlspecialchars(Locale::url('news'), ENT_QUOTES) ?>"><?= htmlspecialchars(t('Все материалы'), ENT_QUOTES) ?></a>
             <?php foreach ($categories as $c): ?>
-                <a class="listing-filter__item<?= (string) $c['slug'] === $category ? ' is-active' : '' ?>" href="<?= htmlspecialchars(Locale::url('news') . '?category=' . rawurlencode((string) $c['slug']), ENT_QUOTES) ?>"><?= htmlspecialchars((string) $c['name'], ENT_QUOTES) ?></a>
+                <?php // Иконка рубрики — украшение рядом с названием: название
+                      // читается и без неё, поэтому значок скрыт от диктора. ?>
+                <?php $icon = \App\Core\Icon::cleanName($c['icon'] ?? ''); ?>
+                <a class="listing-filter__item<?= (string) $c['slug'] === $category ? ' is-active' : '' ?><?= $icon !== '' ? ' listing-filter__item--icon' : '' ?>" href="<?= htmlspecialchars(Locale::url('news') . '?category=' . rawurlencode((string) $c['slug']), ENT_QUOTES) ?>"><?php if ($icon !== ''): ?><span class="listing-filter__icon" aria-hidden="true"><?= \App\Core\Icon::render($icon, 17, '', 1.8) ?></span><?php endif; ?><?= htmlspecialchars((string) $c['name'], ENT_QUOTES) ?></a>
             <?php endforeach; ?>
         </nav>
     <?php endif; ?>
