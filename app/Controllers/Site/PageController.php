@@ -56,6 +56,15 @@ final class PageController
             exit;
         }
 
+        // Шапка раздела — тот же случай: заголовок, лид и блоки этой страницы
+        // выводятся на /news или /projects, и со своим slug'ом получалось два
+        // адреса с одинаковым содержимым и canonical на самих себя.
+        $pageSection = Page::sectionOf($page, $lang);
+        if ($pageSection !== '') {
+            header('Location: ' . Page::sectionUrl($pageSection, $lang), true, 301);
+            exit;
+        }
+
         if (ContentLanguageNotice::renderIfMissing(Page::availableLangs((int) $page['id']), '/' . $slug)) {
             return;
         }
