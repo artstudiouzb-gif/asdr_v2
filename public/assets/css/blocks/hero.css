@@ -212,6 +212,44 @@
     z-index: 2;
 }
 
+/* --- Фоновая надпись ---
+   Крупное слово между фоном и текстом. Размер — доля ширины экрана, а не
+   ступень шрифта: шкала --step-* существует для читаемого текста, а это
+   декорация, которой положено расти вместе с экраном. Цвет наследуется от
+   текста обложки (--hero-fg), поэтому надпись остаётся видимой и на светлой
+   схеме, и на тёмной, а не только на синей. */
+.hero__watermark {
+    position: absolute;
+    z-index: 2;
+    max-width: 100%;
+    color: var(--hero-fg, #fff);
+    opacity: var(--hero-watermark-opacity, 0.12);
+    font-size: var(--hero-watermark-size, 22vw);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    /* Привязка к краю задаёт место грубо, смещение доводит его точно.
+       Проценты здесь считаются от самой надписи, поэтому шаг остаётся
+       соразмерным её размеру и на телефоне, и на большом экране. */
+    transform: translate(
+        calc(var(--hero-watermark-ax, 0%) + var(--hero-watermark-dx, 0%)),
+        calc(var(--hero-watermark-ay, 0%) + var(--hero-watermark-dy, 0%))
+    );
+    /* Слово шириной в экран лежит поверх фона: без этого оно перехватывало бы
+       клики по кнопкам и по ссылке слайда. */
+    pointer-events: none;
+    user-select: none;
+}
+
+.hero__watermark--x-left { left: 0; }
+.hero__watermark--x-center { left: 50%; --hero-watermark-ax: -50%; }
+.hero__watermark--x-right { right: 0; }
+
+.hero__watermark--y-top { top: 0; }
+.hero__watermark--y-middle { top: 50%; --hero-watermark-ay: -50%; }
+.hero__watermark--y-bottom { bottom: 0; }
+
 /* --- Контент --- */
 .hero__inner {
     position: relative;

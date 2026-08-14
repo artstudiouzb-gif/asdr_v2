@@ -31,6 +31,11 @@ final class BlockPresentationNormalizer
     /** Минимальная высота секции: пусто — по содержимому. */
     private const MIN_HEIGHTS = ['small', 'medium', 'large', 'screen'];
 
+    /** Привязка фоновой надписи к краю; точное место доводится смещением. */
+    private const WATERMARK_X = ['left', 'center', 'right'];
+
+    private const WATERMARK_Y = ['top', 'middle', 'bottom'];
+
     /** Способ залить фон секции: пресет темы, свой цвет, градиент, фото, узор. */
     private const BACKGROUND_MODES = ['preset', 'color', 'gradient', 'image', 'pattern'];
 
@@ -47,6 +52,16 @@ final class BlockPresentationNormalizer
      * @param array<string, mixed> $input
      * @return array<string, mixed>
      */
+    /** Целое в границах; пусто — умолчание, а не край диапазона. */
+    private static function ranged(mixed $value, int $min, int $max, int $default): int
+    {
+        if ($value === null || $value === '' || !is_numeric($value)) {
+            return $default;
+        }
+
+        return max($min, min($max, (int) $value));
+    }
+
     public static function background(array $input): array
     {
         $mode = self::scalarString($input['bg_mode'] ?? null, 'preset');
@@ -184,6 +199,25 @@ final class BlockPresentationNormalizer
             '_visible_to' => BlockVisibility::normalize(self::scalarString($input['visible_to'] ?? null)),
             '_visible_device' => in_array($device, ['desktop', 'mobile'], true) ? $device : '',
         ];
+
+        // Фоновая надпись секции — крупное слово за содержимым. Текст лежит
+        // в данных блока, а блоки у каждого языка свои, поэтому отдельной
+        // таблицы перевода тут не нужно: узбекская версия страницы правит
+        // свою надпись сама.
+        $watermark = trim(self::scalarString($input['watermark'] ?? null));
+        if ($watermark !== '') {
+            $normalized['_watermark'] = mb_substr($watermark, 0, 120);
+            // Размер и место — числами, а не пресетами: нужный кегль зависит
+            // от длины слова, и угадать его заранее нельзя.
+            $x = self::scalarString($input['watermark_x'] ?? null, 'center');
+            $y = self::scalarString($input['watermark_y'] ?? null, 'middle');
+            $normalized['_watermark_size'] = self::ranged($input['watermark_size'] ?? null, 2, 60, 22);
+            $normalized['_watermark_x'] = in_array($x, self::WATERMARK_X, true) ? $x : 'center';
+            $normalized['_watermark_y'] = in_array($y, self::WATERMARK_Y, true) ? $y : 'middle';
+            $normalized['_watermark_dx'] = self::ranged($input['watermark_dx'] ?? null, -100, 100, 0);
+            $normalized['_watermark_dy'] = self::ranged($input['watermark_dy'] ?? null, -100, 100, 0);
+            $normalized['_watermark_opacity'] = self::ranged($input['watermark_opacity'] ?? null, 0, 100, 12);
+        }
 
         // Короткая секция обрезает фотографию-фон до полоски, поэтому высоту
         // можно задать отдельно от отступов.

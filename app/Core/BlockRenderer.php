@@ -272,6 +272,19 @@ final class BlockRenderer
             $extraClass .= ' cms-block--pad-bottom-custom';
             $styleVars .= '--block-pad-bottom:' . $padMap[$padBottom] . ';';
         }
+        // Фоновая надпись секции: крупное слово за содержимым. Прозрачность
+        // своя у каждой секции, поэтому переменной в scoped CSS — инлайн-стили
+        // в блоках запрещены.
+        $watermark = trim((string) ($data['_watermark'] ?? ''));
+        if ($watermark !== '') {
+            $extraClass .= ' cms-block--has-watermark';
+            $styleVars .= '--block-watermark-opacity:'
+                . round(((int) ($data['_watermark_opacity'] ?? 12)) / 100, 3) . ';'
+                . '--block-watermark-size:' . ((int) ($data['_watermark_size'] ?? 22)) . 'vw;'
+                . '--block-watermark-dx:' . ((int) ($data['_watermark_dx'] ?? 0)) . '%;'
+                . '--block-watermark-dy:' . ((int) ($data['_watermark_dy'] ?? 0)) . '%;';
+        }
+
         if ($styleVars !== '') {
             $sectionCss = '#block-' . $blockId . '{' . $styleVars . '}';
             $scopedCss = $scopedCss !== '' ? $scopedCss . "\n" . $sectionCss : $sectionCss;
@@ -296,6 +309,7 @@ final class BlockRenderer
         $wrapped = "<section\n    "
             . implode("\n    ", $sectionAttributes)
             . "\n>\n"
+            . self::watermark($data, $watermark)
             . trim($html)
             . "\n</section>";
 
@@ -318,6 +332,31 @@ final class BlockRenderer
         }
 
         return ['html' => $wrapped, 'css' => $scopedCss, 'preload_image' => $preloadImage];
+    }
+
+    /**
+     * Фоновая надпись секции.
+     *
+     * Живёт по тем же правилам, что и у обложки: это декорация из текста,
+     * поэтому диктор её не читает (`aria-hidden`), а мышь сквозь неё проходит
+     * (`pointer-events` в CSS) — иначе слово шириной в секцию накрыло бы
+     * ссылки и кнопки внутри.
+     *
+     * @param array<string, mixed> $data
+     */
+    private static function watermark(array $data, string $text): string
+    {
+        if ($text === '') {
+            return '';
+        }
+
+        $x = (string) ($data['_watermark_x'] ?? 'center');
+        $y = (string) ($data['_watermark_y'] ?? 'middle');
+
+        return '<span class="cms-block__watermark cms-block__watermark--x-'
+            . htmlspecialchars($x, ENT_QUOTES) . ' cms-block__watermark--y-'
+            . htmlspecialchars($y, ENT_QUOTES) . '" aria-hidden="true">'
+            . htmlspecialchars($text, ENT_QUOTES) . "</span>\n";
     }
 
     /**

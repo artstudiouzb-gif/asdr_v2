@@ -2286,6 +2286,60 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         </div>
         <div data-bg-group="color gradient image pattern">
         <div class="form-field">
+            <label for="watermark">Фоновая надпись секции</label>
+            <input type="text" id="watermark" name="watermark" maxlength="120"
+                   value="<?= htmlspecialchars((string) ($data['_watermark'] ?? ''), ENT_QUOTES) ?>"
+                   placeholder="Например: TOP 5">
+            <span class="form-hint">
+                Крупное слово за содержимым секции — название раздела, цифра, аббревиатура.
+                Диктор его не читает, кликам не мешает. Пусто — надписи нет.
+            </span>
+        </div>
+        <div data-watermark-group>
+        <div class="form-field">
+            <label for="watermark_x">Привязка надписи по горизонтали</label>
+            <select id="watermark_x" name="watermark_x">
+                <?php $wmX = (string) ($data['_watermark_x'] ?? 'center'); ?>
+                <?php foreach (['left' => 'К левому краю', 'center' => 'По центру', 'right' => 'К правому краю'] as $v => $l): ?>
+                    <option value="<?= $v ?>" <?= $wmX === $v ? 'selected' : '' ?>><?= $l ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="watermark_y">Привязка надписи по вертикали</label>
+            <select id="watermark_y" name="watermark_y">
+                <?php $wmY = (string) ($data['_watermark_y'] ?? 'middle'); ?>
+                <?php foreach (['top' => 'К верху', 'middle' => 'По центру', 'bottom' => 'К низу'] as $v => $l): ?>
+                    <option value="<?= $v ?>" <?= $wmY === $v ? 'selected' : '' ?>><?= $l ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="watermark_size">Размер надписи, % ширины экрана</label>
+            <input type="number" id="watermark_size" name="watermark_size" min="2" max="60" step="1"
+                   value="<?= (int) ($data['_watermark_size'] ?? 22) ?>">
+            <span class="form-hint">22 % — слово примерно в треть экрана. Считается от ширины окна, поэтому на телефоне уменьшается само.</span>
+        </div>
+        <div class="form-field">
+            <label for="watermark_opacity">Заметность надписи, %</label>
+            <input type="number" id="watermark_opacity" name="watermark_opacity" min="0" max="100" step="1"
+                   value="<?= (int) ($data['_watermark_opacity'] ?? 12) ?>">
+            <span class="form-hint">12 % — фон. Выше 30 % надпись начинает спорить с заголовком секции.</span>
+        </div>
+        <div class="form-field">
+            <label for="watermark_dx">Сдвиг надписи вправо, %</label>
+            <input type="number" id="watermark_dx" name="watermark_dx" min="-100" max="100" step="1"
+                   value="<?= (int) ($data['_watermark_dx'] ?? 0) ?>">
+            <span class="form-hint">Отрицательное — влево. Процент от самой надписи, а не от экрана.</span>
+        </div>
+        <div class="form-field">
+            <label for="watermark_dy">Сдвиг надписи вниз, %</label>
+            <input type="number" id="watermark_dy" name="watermark_dy" min="-100" max="100" step="1"
+                   value="<?= (int) ($data['_watermark_dy'] ?? 0) ?>">
+            <span class="form-hint">Отрицательное — вверх.</span>
+        </div>
+        </div>
+        <div class="form-field">
             <label for="min_height">Минимальная высота секции</label>
             <select id="min_height" name="min_height">
                 <?php $minH = (string) ($data['_min_height'] ?? ''); ?>

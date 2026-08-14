@@ -108,6 +108,7 @@ CREATE TABLE IF NOT EXISTS hero_slide_translations (
     cta_text     VARCHAR(190) NULL,
     cta2_text    VARCHAR(190) NULL,
     art_alt      VARCHAR(255) NULL,
+    watermark    VARCHAR(120) NULL,
     UNIQUE KEY uq_hero_slide_translations (slide_id, lang),
     CONSTRAINT fk_hero_slide_translations_slide
         FOREIGN KEY (slide_id) REFERENCES hero_slides(id) ON DELETE CASCADE
@@ -1181,7 +1182,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_13_news_category_icon.sql'),
     ('2026_08_13_page_sections.sql'),
     ('2026_08_13_language_short_name.sql'),
-    ('2026_08_14_heroes.sql')
+    ('2026_08_14_heroes.sql'),
+    ('2026_08_14_hero_watermark.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (
