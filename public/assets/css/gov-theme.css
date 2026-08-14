@@ -2113,8 +2113,8 @@ body.lightbox-active { overflow: hidden; }
         color: var(--gov-teal-text, var(--gov-teal));
     }
 
-    .newsfeat-grid, .block-newsdocs { gap: 24px; }
-    .newsfeat-side__thumbs, .newsfeat-side__texts { gap: 18px; }
+    .newsfeat-grid, .block-newsdocs { gap: var(--card-gap, 20px); }
+    .newsfeat-side__thumbs, .newsfeat-side__texts { gap: var(--card-gap, 20px); }
     .news-index__grid, .block-news__grid {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -3361,7 +3361,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .section-head__all { color: var(--gov-teal-text); font-family: var(--font-family, 'Noto Sans', sans-serif); font-size: var(--step--2); font-weight: 700; text-decoration: none; white-space: nowrap; }
 
 /* Приоритетные направления — карточки иконка+заголовок+текст+стрелка. */
-.cards-grid { display: grid; grid-template-columns: repeat(var(--cards-cols, 5), minmax(0, 1fr)); gap: 20px; }
+.cards-grid { display: grid; grid-template-columns: repeat(var(--cards-cols, 5), minmax(0, 1fr)); gap: var(--card-gap, 20px); }
 @media (max-width: 1100px) { .cards-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } }
 @media (max-width: 720px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .cards-grid { grid-template-columns: 1fr; } }
@@ -3556,7 +3556,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .feature-card__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: var(--base-line-height, 1.55); margin: 0; flex: 1; }
 
 /* Проекты — карточки с фото и тёмным градиентом. */
-.imgcards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.imgcards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--card-gap, 20px); }
 @media (max-width: 1000px) { .imgcards-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .imgcards-grid { grid-template-columns: 1fr; } }
 .imgcard { position: relative; display: block; min-height: 240px; border-radius: var(--radius); overflow: hidden; text-decoration: none; color: #fff; isolation: isolate; }
@@ -4333,7 +4333,11 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .cat-tile__icon, .contact-card__icon { background: color-mix(in srgb, var(--gov-navy) 7%, transparent); color: var(--gov-title); }
 
 /* --- Блок «Новости и аналитика»: крупная + список (по эскизу) --- */
-.newsfeat-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; }
+/* Шаг сетки общий с соседними блоками: у мозаики он был свой (40px снаружи,
+   24px внутри), и её колонки промахивались мимо верхней сетки проектов на
+   десяток пикселей — расхождение слишком мелкое, чтобы читаться замыслом, и
+   слишком заметное, чтобы его не увидеть. */
+.newsfeat-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--card-gap, 20px); }
 @media (max-width: 900px) { .newsfeat-grid { grid-template-columns: 1fr; } }
 /* Лид — цельная плитка: рубрика, заголовок, лид и дата лежат на обложке.
    Разорванной связи «картинка отдельно, текст отдельно» больше нет. */
@@ -4391,11 +4395,11 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
    занимает больше половины картинки. */
 @media (max-width: 900px) { .newsfeat-lead__media { height: auto; min-height: 0; aspect-ratio: 16/10; } }
 @media (max-width: 560px) { .newsfeat-lead__media { aspect-ratio: 4/5; } }
-.newsfeat-side { display: flex; flex-direction: column; gap: 24px; }
-.newsfeat-side__thumbs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.newsfeat-side { display: flex; flex-direction: column; gap: var(--card-gap, 20px); }
+.newsfeat-side__thumbs { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--card-gap, 20px); }
 @media (max-width: 560px) { .newsfeat-side__thumbs { grid-template-columns: 1fr; } }
 /* Разделение колонок — отступом, без вертикальной линии: линий в блоке и так много. */
-.newsfeat-side__texts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; border-top: 1px solid color-mix(in srgb, var(--gov-border) 55%, transparent); padding-top: 20px; }
+.newsfeat-side__texts { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--card-gap, 20px); border-top: 1px solid color-mix(in srgb, var(--gov-border) 55%, transparent); padding-top: 20px; }
 @media (max-width: 560px) { .newsfeat-side__texts { grid-template-columns: 1fr; } }
 .newsfeat__date { color: var(--gov-muted); font-size: var(--step--3); }
 /* Обязательно ПОСЛЕ базового правила: специфичность одинаковая, решает порядок. */
@@ -4433,7 +4437,14 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 }
 .block-newsfeat--mosaic .newsfeat-mini { gap: 0; }
 .block-newsfeat--mosaic .newsfeat-mini__thumb { border-radius: 0; }
-.block-newsfeat--mosaic .newsfeat-mini__body { padding: 14px; gap: 8px; height: 100%; }
+.block-newsfeat--mosaic .newsfeat-mini__body { padding: 14px; gap: 8px; }
+/* Правая колонка тянется по высоте крупной новости, и лишнюю высоту нужно
+   куда-то деть. Раньше её добирал `height:100%` у body, и между описанием и
+   ссылкой «Читать подробнее» зияла дыра в сотню пикселей — внутри карточки
+   это читается как недоделка. Отдаём её промежутку между рядами: карточки
+   остаются плотными, фотографии — одной высоты, а увеличенный воздух между
+   рядом с фото и рядом без фото выглядит намеренным. */
+.block-newsfeat--mosaic .newsfeat-side { justify-content: space-between; }
 .block-newsfeat--mosaic .newsfeat-mini__excerpt,
 .block-newsfeat--mosaic .newsfeat-text__excerpt { color: var(--gov-muted); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); }
 .block-newsfeat--mosaic .newsfeat-text { padding: 14px; gap: 8px; }
