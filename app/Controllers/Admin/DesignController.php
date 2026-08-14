@@ -156,7 +156,7 @@ final class DesignController
             Setting::overrideInMemory('color_primary', $customPrimary);
             Setting::overrideInMemory('color_accent', $customAccent);
         }
-        $font = Setting::get('design_font_style', 'custom');
+        $font = DesignSettings::fontStyleKey((string) Setting::get('design_font_style', 'custom'));
         if ($font !== 'custom' && isset(DesignSettings::FONTS[$font])) {
             Setting::overrideInMemory('font_family', DesignSettings::FONTS[$font][1]);
         } elseif (trim((string) ($preview['font_family'] ?? '')) !== '') {

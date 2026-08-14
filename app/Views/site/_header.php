@@ -702,16 +702,13 @@ if (is_array($cdnParts) && in_array($cdnParts['scheme'] ?? '', ['http', 'https']
 <?php
 $fontPreloads = [];
 foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
-    // Порядок важен: «Inter Tight» содержит «Inter», поэтому длинные имена
-    // проверяются первыми и совпадение прерывает перебор.
+    // Только семейства из поставки: путь к файлу здесь захардкожен, а у
+    // скачанных на сервер шрифтов он свой (/uploads/public/fonts/<slug>/…).
+    // Порядок важен: «Noto Serif» содержит «Noto S», поэтому имена
+    // проверяются целиком и совпадение прерывает перебор.
     foreach ([
-        'Inter Tight' => '/assets/fonts/inter-tight/inter-tight-400-cyrillic.woff2',
         'Noto Serif' => '/assets/fonts/noto-serif/noto-serif-400-cyrillic.woff2',
-        'Inter' => '/assets/fonts/inter/inter-400-cyrillic.woff2',
-        'Manrope' => '/assets/fonts/manrope-400-cyrillic.woff2',
-        'Montserrat' => '/assets/fonts/montserrat-700-cyrillic.woff2',
-        'PT Serif' => '/assets/fonts/ptserif-700-cyrillic.woff2',
-        'PT Sans' => '/assets/fonts/ptsans-400-cyrillic.woff2',
+        'Noto Sans' => '/assets/fonts/noto-sans/noto-sans-400-cyrillic.woff2',
     ] as $family => $fontFile) {
         // Совпадать должно начало стека: семейство, которым реально набран
         // текст. Иначе запасное начертание («Inter Fallback») или дальний

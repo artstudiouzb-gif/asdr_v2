@@ -50,7 +50,7 @@ final class DesignSettings
         'montserrat' => ['Montserrat', "'Montserrat', 'Montserrat Fallback', system-ui, sans-serif", 'Montserrat:wght@400;600;700'],
         'roboto' => ['Roboto', "'Roboto', system-ui, sans-serif", 'Roboto:wght@400;500;700'],
         'open-sans' => ['Open Sans', "'Open Sans', system-ui, sans-serif", 'Open+Sans:wght@400;600;700'],
-        'noto-sans' => ['Noto Sans', "'Noto Sans', system-ui, sans-serif", 'Noto+Sans:wght@400;600;700'],
+        'noto-sans' => ['Noto Sans', "'Noto Sans', 'Noto Sans Fallback', system-ui, sans-serif", 'Noto+Sans:wght@400;600;700'],
         'source-sans' => ['Source Sans 3', "'Source Sans 3', system-ui, sans-serif", 'Source+Sans+3:wght@400;600;700'],
         'ibm-plex-sans' => ['IBM Plex Sans', "'IBM Plex Sans', system-ui, sans-serif", 'IBM+Plex+Sans:wght@400;600;700'],
         'manrope' => ['Manrope', "'Manrope', 'Manrope Fallback', system-ui, sans-serif", 'Manrope:wght@400;600;700'],
@@ -60,14 +60,35 @@ final class DesignSettings
         'golos' => ['Golos Text', "'Golos Text', system-ui, sans-serif", 'Golos+Text:wght@400;600;700'],
     ];
 
-    /** Шрифтовые пресеты: значение опции font_style => [подпись, CSS-стек]. */
+    /**
+     * Шрифтовые пресеты: значение опции font_style => [подпись, CSS-стек].
+     *
+     * В админке этот список подписан «Локальные — без внешних запросов»,
+     * поэтому называть здесь можно только семейства из поставки (Noto Sans,
+     * Noto Serif) и системные стеки. Пресет с чужим семейством выглядел бы
+     * рабочим, а рисовался бы Arial: файла нет, скачать его через font_style
+     * нечем — слуга каталога у пресета не бывает.
+     */
     public const FONTS = [
-        'pt' => ['PT Serif / PT Sans (гос)', "'PT Sans', 'PT Sans Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"],
-        'inter' => ['Inter', "'Inter', 'Inter Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"],
+        'noto' => ['Noto Sans', "'Noto Sans', 'Noto Sans Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"],
         'system' => ['Системный', "system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif"],
         'serif' => ['С засечками', "Georgia, 'Times New Roman', serif"],
         'custom' => ['Свой шрифт', ''],
     ];
+
+    /**
+     * Прежние значения font_style, оставшиеся в БД от набора шрифтов до
+     * перехода на Noto. Читаются как ближайший живой пресет: без этого
+     * сохранённый «inter» стал бы неизвестным ключом и молча превращался в
+     * «свой шрифт» с пустым стеком.
+     */
+    private const LEGACY_FONT_STYLES = ['pt' => 'noto', 'inter' => 'noto'];
+
+    /** Ключ пресета шрифта с учётом прежних значений. */
+    public static function fontStyleKey(string $style): string
+    {
+        return self::LEGACY_FONT_STYLES[$style] ?? $style;
+    }
 
     public const OPTIONS = [
         'palette' => [
@@ -81,7 +102,7 @@ final class DesignSettings
             'label' => 'Шрифт сайта',
             'hint' => 'Основной шрифт выбирается в едином списке базовых, внешних и собственных шрифтов ниже.',
             'group' => 'Цвета и шрифт',
-            'choices' => ['pt' => 'PT Sans', 'inter' => 'Inter', 'system' => 'Системный', 'serif' => 'С засечками', 'custom' => 'Свой шрифт'],
+            'choices' => ['noto' => 'Noto Sans', 'system' => 'Системный', 'serif' => 'С засечками', 'custom' => 'Свой шрифт'],
             'default' => 'custom',
         ],
         'container' => [
@@ -212,7 +233,7 @@ final class DesignSettings
         'modern' => [
             'label' => 'Современный',
             'desc' => 'Крупные скругления, воздух, акцентная шапка.',
-            'values' => ['container' => 'wide', 'radius' => 'large', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'lg', 'line_height' => 'relaxed', 'heading_line_height' => 'tight', 'heading_font_weight' => '800', 'heading_letter_spacing' => 'tight', 'button' => 'pill', 'card_style' => 'elevated', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'sidebar', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'violet', 'font_style' => 'inter'],
+            'values' => ['container' => 'wide', 'radius' => 'large', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'lg', 'line_height' => 'relaxed', 'heading_line_height' => 'tight', 'heading_font_weight' => '800', 'heading_letter_spacing' => 'tight', 'button' => 'pill', 'card_style' => 'elevated', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'sidebar', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'violet', 'font_style' => 'noto'],
         ],
         'minimal' => [
             'label' => 'Минимал',
@@ -286,7 +307,7 @@ final class DesignSettings
             return 'google:' . $google;
         }
 
-        $style = (string) Setting::get('design_font_style', 'custom');
+        $style = self::fontStyleKey((string) Setting::get('design_font_style', 'custom'));
         return 'style:' . (isset(self::FONTS[$style]) ? $style : 'custom');
     }
 
@@ -845,7 +866,7 @@ final class DesignSettings
             Setting::set('color_primary', $custom['color_primary']);
             Setting::set('color_accent', $custom['color_accent']);
         }
-        $font = (string) Setting::get('design_font_style', 'custom');
+        $font = self::fontStyleKey((string) Setting::get('design_font_style', 'custom'));
         if ($font !== 'custom' && isset(self::FONTS[$font])) {
             Setting::set('font_family', self::FONTS[$font][1]);
         } else {

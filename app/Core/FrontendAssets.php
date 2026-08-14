@@ -16,7 +16,9 @@ use App\Models\Setting;
 final class FrontendAssets
 {
     private const CSS_SOURCES = [
-        '/assets/css/fonts.css',
+        // Файлы самих шрифтов подключает LocalGoogleFonts отдельными ссылками
+        // (только выбранное семейство). Здесь — лишь метрики запасных
+        // начертаний, они нужны на каждой странице.
         '/assets/css/gov-fonts.css',
         '/assets/css/frontend.css',
         // Стили детальной новости живут в blocks/news-detail.css и в общий

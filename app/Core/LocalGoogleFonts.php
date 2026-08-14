@@ -30,9 +30,8 @@ final class LocalGoogleFonts
      * нужно, файлы уже лежат рядом (npm run sync:fonts).
      */
     private const BUNDLED = [
-        'inter' => 'inter',
+        'noto-sans' => 'noto-sans',
         'noto-serif' => 'noto-serif',
-        'inter-tight' => 'inter-tight',
     ];
 
     /** @param list<string> $slugs @return array{ok:bool,error:string} */

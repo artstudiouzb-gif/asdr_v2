@@ -4,7 +4,6 @@
   "css": {
     "path": "/assets/css/public.min.css",
     "sources": [
-      "/assets/css/fonts.css",
       "/assets/css/gov-fonts.css",
       "/assets/css/frontend.css",
       "/assets/css/gov-theme.css",
@@ -13,11 +12,11 @@
       "/assets/css/public-layout-polish.css",
       "/assets/css/public-editorial-pages.css"
     ],
-    "sourceSha256": "8b5a057152989099a5e27562f4a98eaa064f0f4dc75e3e730465fcfcccee4623",
-    "sha256": "d401ebef85be798d14bec99b4f37d65824bdac140bcab7c335aa4ef0baca4415",
-    "raw": 401403,
-    "gzip": 65550,
-    "brotli": 51131
+    "sourceSha256": "8a9e5801aa34e68d2f46fa8dd04d83e045c7009593e7df0278bfb6f720db3420",
+    "sha256": "12c866dede403e68d3e94898145f677b474325b44eb017b1611eef96dbcc23fe",
+    "raw": 394111,
+    "gzip": 65089,
+    "brotli": 50758
   },
   "js": {
     "path": "/assets/js/public.min.js",

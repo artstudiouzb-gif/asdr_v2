@@ -6,7 +6,6 @@ import CleanCSS from 'clean-css';
 import { minify } from 'terser';
 
 const cssSources = [
-    'public/assets/css/fonts.css',
     'public/assets/css/gov-fonts.css',
     'public/assets/css/frontend.css',
     'public/assets/css/gov-theme.css',

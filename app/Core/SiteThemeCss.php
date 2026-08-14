@@ -247,8 +247,8 @@ final class SiteThemeCss
     private const METRIC_FALLBACKS = ['PT Sans', 'PT Serif', 'Manrope', 'Montserrat', 'Inter Tight', 'Inter', 'Noto Serif'];
 
     /** Пара по умолчанию: Inter — текст, Noto Serif — заголовки. Обе в поставке. */
-    public const DEFAULT_BODY_FONT = "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
-    public const DEFAULT_HEADING_FONT = "'Noto Serif', Georgia, 'Times New Roman', serif";
+    public const DEFAULT_BODY_FONT = "'Noto Sans', 'Noto Sans Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+    public const DEFAULT_HEADING_FONT = "'Noto Serif', 'Noto Serif Fallback', Georgia, 'Times New Roman', serif";
 
     /**
      * Единственный источник шрифтовых стеков сайта.

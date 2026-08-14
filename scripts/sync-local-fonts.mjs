@@ -28,17 +28,17 @@ function extKeepText() {
 }
 
 /**
- * Шрифты, входящие в поставку. Остальные семейства из каталога
- * DesignSettings::GOOGLE_FONTS скачиваются на сервер при сохранении дизайна
- * (App\Core\LocalGoogleFonts). В поставке держим те, что нужны сразу после
- * установки: ими набран сайт по умолчанию.
+ * Шрифты, входящие в поставку, — ровно два: Noto Sans (текст) и Noto Serif
+ * (заголовки). Ими набран сайт по умолчанию, и они же покрывают узбекскую
+ * кириллицу одним семейством — у Noto полная поддержка U+0490-04FF.
  *
- * Пара по умолчанию — Inter (текст) и Noto Serif (заголовки). Inter Tight
- * остаётся как отдельный выбор в админке.
+ * Остальные семейства каталога DesignSettings::GOOGLE_FONTS в репозитории не
+ * лежат: их скачивает на сервер App\Core\LocalGoogleFonts при сохранении
+ * дизайна. Добавлять сюда новое семейство «на всякий случай» не нужно —
+ * каждое стоит ~90 КБ в поставке и ничего не даёт, пока не выбрано.
  */
 const fonts = [
-    { slug: 'inter-tight', family: 'Inter Tight', query: 'Inter+Tight:wght@400;500;600;700', weights: [400, 500, 600, 700] },
-    { slug: 'inter', family: 'Inter', query: 'Inter:wght@400;600;700', weights: [400, 600, 700] },
+    { slug: 'noto-sans', family: 'Noto Sans', query: 'Noto+Sans:wght@400;600;700', weights: [400, 600, 700] },
     { slug: 'noto-serif', family: 'Noto Serif', query: 'Noto+Serif:wght@400;600;700', weights: [400, 600, 700] },
 ];
 const subsets = ['cyrillic-ext', 'cyrillic', 'latin'];
