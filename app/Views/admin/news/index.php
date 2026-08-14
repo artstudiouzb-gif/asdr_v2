@@ -23,6 +23,7 @@ $langs = Language::active();
 ?>
 
 <?= AdminUi::renderLangSubsubsub($filters['lang'], $langCounts ?? [], '/admin/news', $filterParams) ?>
+<?= \App\Core\View::renderPartial('admin/layout/section_page_hint', ['section' => 'news']) ?>
 
 <form method="get" action="/admin/news" class="list-filters list-filters--panel">
     <div class="list-filter list-filter--search"><label for="news_q">Поиск</label><input type="search" id="news_q" name="q" value="<?= htmlspecialchars($filters['q'], ENT_QUOTES) ?>" placeholder="Заголовок или slug"></div>

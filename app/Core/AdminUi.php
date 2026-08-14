@@ -145,9 +145,33 @@ final class AdminUi
 
     public static function navigationIcon(string $name): string
     {
+        // Ключ раздела и имя иконки совпадают далеко не всегда, а неизвестный
+        // ключ Icon::render отдаёт пустой строкой — пункт меню оставался вовсе
+        // без иконки, и таких было девятнадцать из тридцати. Соответствие
+        // задаётся здесь явно; новый раздел без строки в этой карте иконки не
+        // получит (стережёт тест).
         $name = [
             'team' => 'users',
             'security' => 'shield',
+            'news_categories' => 'category',
+            'pages' => 'file-text',
+            'heroes' => 'slideshow',
+            'projects' => 'briefcase',
+            'albums' => 'photo',
+            'videos' => 'movie',
+            'subscribers' => 'mail',
+            'repository' => 'archive',
+            'design' => 'palette',
+            'widgets' => 'layout-grid',
+            'header' => 'layout-navbar',
+            'footer' => 'layout-bottombar',
+            'languages' => 'language',
+            'content_types' => 'list-details',
+            'telegram' => 'brand-telegram',
+            'webhooks' => 'webhook',
+            'redirects' => 'route',
+            'performance' => 'gauge',
+            'audit' => 'history',
         ][$name] ?? $name;
 
         return self::icon($name, 18, 'admin-nav-item__icon', 1.7);

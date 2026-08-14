@@ -238,11 +238,24 @@
             }
         }
 
+        /**
+         * Сколько держать текущий слайд. У слайда бывает своя длительность:
+         * короткая подпись и плотная инфографика читаются не за одно время,
+         * и одним интервалом на всю карусель это не выражается.
+         */
+        function slideInterval() {
+            var own = parseInt(slides[current].getAttribute('data-hero-slide-duration'), 10) || 0;
+
+            return own > 0 ? own : interval;
+        }
+
         function tick() {
             if (!autoplayAllowed()) {
                 return;
             }
-            var elapsed = (Date.now() - startedAt) / interval;
+            // Полоса прогресса считается по длительности текущего слайда:
+            // иначе на слайде со своим временем она уезжала бы вперёд показа.
+            var elapsed = (Date.now() - startedAt) / slideInterval();
             setProgress(elapsed > 1 ? 1 : elapsed);
             frame = window.requestAnimationFrame(tick);
         }
@@ -269,7 +282,7 @@
             }
             startedAt = Date.now();
             setProgress(0);
-            timer = window.setTimeout(function () { go(current + 1, false); }, interval);
+            timer = window.setTimeout(function () { go(current + 1, false); }, slideInterval());
             frame = window.requestAnimationFrame(tick);
         }
 

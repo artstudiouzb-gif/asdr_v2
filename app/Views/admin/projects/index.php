@@ -19,6 +19,7 @@ $langs = Language::active();
 ?>
 
 <?= AdminUi::renderLangSubsubsub($filters['lang'], $langCounts ?? [], '/admin/projects', $filterParams) ?>
+<?= \App\Core\View::renderPartial('admin/layout/section_page_hint', ['section' => 'projects']) ?>
 
 <form method="get" action="/admin/projects" class="list-filters list-filters--panel">
     <div class="list-filter list-filter--search"><label for="projects_q">Поиск</label><input type="search" id="projects_q" name="q" value="<?= htmlspecialchars($filters['q'], ENT_QUOTES) ?>" placeholder="Название, slug или описание"></div>

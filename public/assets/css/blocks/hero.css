@@ -35,9 +35,16 @@
     --hero-panel-bg: transparent;
     --hero-duration: 700ms;
     --hero-fit: cover;
+    /* Боковой отступ контента: тот же, что у контейнера страницы
+       (`.site-content`), — иначе у полноширинной обложки текст не совпадает по
+       вертикали с остальными блоками. */
+    --hero-gutter: 20px;
     /* Место под полосу навигации. Ноль, пока слайд один: резервировать пустоту
        под несуществующими стрелками незачем. */
     --hero-nav-space: 0px;
+    /* Насколько поднята полоса навигации над низом обложки. Нужна, когда
+       следующий блок надвинут на обложку (см. правило со «Счётчиками»). */
+    --hero-nav-bottom: 0px;
     --hero-progress: 0;
     /* Движение: 1 — обычный режим, 0 — «меньше движения». Множитель, а не
        отдельный набор правил: он гасит и длительность, и сдвиг разом. */
@@ -55,9 +62,26 @@
     color: var(--hero-fg);
 }
 
-.hero--carousel { --hero-nav-space: 76px; }
+.hero--carousel { --hero-nav-space: calc(76px + var(--hero-nav-bottom)); }
 .hero--nav-none.hero--no-arrows { --hero-nav-space: 0px; }
 .hero--w-standard { max-width: var(--container-max, 1440px); margin-inline: auto; }
+
+/*
+ * «Во всю ширину». Секция блока лежит внутри контейнера страницы
+ * (`.site-content` с max-width), поэтому обложка выходит из него сама — тем же
+ * приёмом, что и полноширинные блоки темы (`left: calc(50% - 50vw)`).
+ * Горизонтальной прокрутки это не даёт: на корне объявлен `overflow-x: clip`.
+ *
+ * Наружу выходит только фон: контент держит `max-width` у `.hero__inner`, а
+ * боковой отступ повторяет отступ контейнера страницы, поэтому заголовок
+ * стоит на одной вертикали с остальными блоками, а не съезжает.
+ */
+.hero--w-full {
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
+}
+.hero--w-full .hero__inner,
+.hero--w-full .hero__nav { padding-inline: var(--hero-gutter); }
 
 /* --- Слайды: все в одной ячейке сетки, высота — по самому высокому --- */
 .hero__slides {
@@ -297,7 +321,7 @@
     position: absolute;
     z-index: 4;
     inset-inline: 0;
-    bottom: 0;
+    bottom: var(--hero-nav-bottom);
     display: flex;
     align-items: center;
     gap: var(--space-xs);
@@ -328,6 +352,26 @@
 .hero__playpause:hover { background: color-mix(in srgb, var(--hero-fg) 18%, transparent); }
 .hero__arrow[disabled] { opacity: .45; cursor: default; }
 .hero--no-arrows .hero__arrow { display: none; }
+
+/*
+ * Стрелки проявляются по наведению — в покое они не спорят с фотографией.
+ *
+ * Скрытие включается ТОЛЬКО там, где наведение вообще есть (`hover: hover`):
+ * на сенсорном экране навести нечем, и постоянно спрятанные стрелки означали
+ * бы, что листать можно лишь свайпом. Фокус с клавиатуры показывает их так же,
+ * как курсор, — иначе управление стрелками пропадает у тех, кто не пользуется
+ * мышью. Скорость проявления привязана к общему множителю движения: при
+ * «меньше движения» стрелки появляются мгновенно, без анимации.
+ */
+@media (hover: hover) {
+    .hero--carousel .hero__arrow {
+        opacity: 0;
+        transition: opacity calc(200ms * var(--hero-motion)) ease, background-color .2s ease, border-color .2s ease;
+    }
+    .hero--carousel:hover .hero__arrow,
+    .hero--carousel:focus-within .hero__arrow,
+    .hero--carousel .hero__arrow:focus-visible { opacity: 1; }
+}
 
 .hero__playpause { margin-inline-start: auto; }
 .hero__playpause .hero__playpause-icon--play { display: none; }
@@ -456,10 +500,30 @@
     to { transform: scale(1.12); }
 }
 
+/*
+ * Соседний блок, надвинутый на низ обложки.
+ *
+ * Тема намеренно натягивает карточку «Счётчики» на обложку
+ * (`margin-top: clamp(-120px, -9vw, -80px)`) — у старой обложки под это был
+ * компенсирующий отступ. У новой его не было, и карточка накрывала полосу
+ * навигации: стрелки и счётчик просто пропадали с экрана.
+ *
+ * Поднимаем навигацию ровно на величину наезда плюс зазор и на столько же
+ * увеличиваем резерв под контентом, чтобы текст не наехал на саму полосу.
+ */
+.cms-block--hero:has(+ .cms-block--counters) .hero--carousel {
+    /* Величина наезда повторяет тему. Значение взято из правила, которое там
+       побеждает: наезд объявлен дважды, и позже идёт clamp(-100px,-7vw,-60px)
+       — оно же действует и на телефоне, где более ранняя попытка обнулить
+       margin-top проигрывает по порядку. */
+    --hero-overlap: clamp(60px, 7vw, 100px);
+    --hero-nav-bottom: calc(var(--hero-overlap) + 16px);
+}
+
 /* --- Мобильная раскладка --- */
 @media (max-width: 720px) {
+    .hero--carousel { --hero-nav-space: calc(68px + var(--hero-nav-bottom)); }
     .hero { --hero-text-width: 100%; }
-    .hero--carousel { --hero-nav-space: 68px; }
     .hero__inner { padding: var(--space-l) var(--space-s); padding-block-end: calc(var(--space-l) + var(--hero-nav-space)); }
     .hero__nav { padding: var(--space-xs) var(--space-s); gap: 8px; }
     .hero__arrow, .hero__playpause { width: 40px; height: 40px; }

@@ -62,6 +62,22 @@ $checkbox = static function (string $name, string $label, bool $checked, string 
     return $html . '</div>';
 };
 
+/**
+ * Свёрнутая группа настроек: заголовок, пояснение и текущее значение.
+ *
+ * Настроек у обложки четыре десятка, и развёрнутыми они дают полотно, в
+ * котором ничего не найти. Свёрнутая группа экономит место, но прячет
+ * состояние — поэтому в заголовке показываем то, что сейчас выбрано.
+ */
+$group = static function (string $title, string $hint, string $state, string $body): string {
+    $esc = static fn (string $v): string => htmlspecialchars($v, ENT_QUOTES);
+
+    return '<details class="form-section"><summary>' . $esc($title)
+        . ($hint !== '' ? ' <span class="form-section__hint">' . $esc($hint) . '</span>' : '')
+        . ($state !== '' ? '<span class="form-section__state">' . $esc($state) . '</span>' : '')
+        . '</summary><div class="form-section__body form-section__body--grid">' . $body . '</div></details>';
+};
+
 $sizeOptions = ['s' => 'Мелкий', 'm' => 'Средний', 'l' => 'Крупный', 'xl' => 'Очень крупный'];
 $subtitleSizes = ['s' => 'Мелкий', 'm' => 'Средний', 'l' => 'Крупный'];
 $posOptions = ['left' => 'Слева', 'center' => 'По центру', 'right' => 'Справа'];
@@ -194,7 +210,7 @@ $overlayDirections = [
 
     <div class="form-card">
         <?= AdminUi::cardHeader('Публикация', 'calendar-event') ?>
-        <div class="form-grid">
+        <div class="form-grid form-grid--dense">
             <div class="form-field">
                 <label for="hero_name">Название</label>
                 <input type="text" id="hero_name" name="name" value="<?= htmlspecialchars((string) $hero['name'], ENT_QUOTES) ?>" required>
@@ -231,10 +247,30 @@ $overlayDirections = [
         <?php endif; ?>
     </div>
 
+    <?php
+    // Короткие сводки текущих значений — их видно, не открывая группу.
+    $widthLabels = ['full' => 'Во всю ширину', 'standard' => 'По контейнеру'];
+    $navLabels = [
+        'none' => 'без индикатора', 'dots' => 'точки', 'counter' => 'счётчик',
+        'progress' => 'полоса', 'counter_progress' => 'счётчик и полоса', 'thumbs' => 'миниатюры',
+    ];
+    $transitionLabels = [
+        'fade' => 'Fade', 'slide' => 'Slide', 'fade_slide' => 'Fade + Slide', 'kenburns' => 'Ken Burns',
+    ];
+    $overlayLabels = ['none' => 'без затемнения', 'solid' => 'сплошное', 'gradient' => 'градиент'];
+    ?>
     <div class="form-card">
-        <?= AdminUi::cardHeader('Геометрия', 'ruler') ?>
-        <div class="form-grid">
-            <?= $select('width', 'Ширина секции', ['full' => 'Во всю ширину', 'standard' => 'По ширине контейнера'], (string) $settings['width']) ?>
+        <?= AdminUi::cardHeader('Оформление', 'palette') ?>
+        <p class="form-hint">
+            Группы свёрнуты, чтобы форму можно было окинуть взглядом: рядом с названием
+            каждой видно текущее значение. Открывайте ту, которую правите — остальные
+            настройки при сохранении не теряются.
+        </p>
+
+        <?php
+        ob_start(); ?>
+            <?= $select('width', 'Ширина секции', ['full' => 'Во всю ширину', 'standard' => 'По ширине контейнера'], (string) $settings['width'],
+                'Во всю ширину — фон уходит за края экрана, текст остаётся в рамках сайта.') ?>
             <?= $select('height', 'Высота', $heightOptions, (string) $settings['height']) ?>
             <div class="form-field">
                 <label for="height_value">Своя высота</label>
@@ -261,12 +297,12 @@ $overlayDirections = [
                     </select>
                 </span>
             </div>
-        </div>
-    </div>
+        <?php echo $group('Геометрия', 'ширина и высота, отдельно для телефона',
+            ($widthLabels[$settings['width']] ?? '') . ' · ' . ($heightOptions[$settings['height']] ?? ''),
+            (string) ob_get_clean()); ?>
 
-    <div class="form-card">
-        <?= AdminUi::cardHeader('Контент и типографика', 'align-left') ?>
-        <div class="form-grid">
+        <?php
+        ob_start(); ?>
             <?= $select('text_position', 'Текст по горизонтали', $posOptions, (string) $settings['text_position']) ?>
             <?= $select('text_align_y', 'Текст по вертикали', $yOptions, (string) $settings['text_align_y']) ?>
             <div class="form-field">
@@ -287,17 +323,19 @@ $overlayDirections = [
             <?= $select('text_align_y_mobile', 'Текст по вертикали (телефон)', ['' => 'Как на десктопе'] + $yOptions, (string) $settings['text_align_y_mobile']) ?>
             <?= $select('title_size_mobile', 'Размер заголовка (телефон)', ['' => 'Как на десктопе'] + $sizeOptions, (string) $settings['title_size_mobile']) ?>
             <?= $select('subtitle_size_mobile', 'Размер описания (телефон)', ['' => 'Как на десктопе'] + $subtitleSizes, (string) $settings['subtitle_size_mobile']) ?>
-        </div>
-    </div>
+        <?php echo $group('Контент и типографика', 'положение текста и размеры',
+            ($posOptions[$settings['text_position']] ?? '') . ' · заголовок ' . mb_strtolower((string) ($sizeOptions[$settings['title_size']] ?? '')),
+            (string) ob_get_clean()); ?>
 
-    <div class="form-card">
-        <?= AdminUi::cardHeader('Цветовая схема', 'palette') ?>
-        <p class="form-hint">
-            Схема обложки задаёт её фон и цвет её собственного текста. На вложенные
-            компоненты со своей поверхностью она не распространяется: белая карточка
-            внутри тёмной обложки сохраняет тёмный текст.
-        </p>
-        <div class="form-grid">
+        <?php
+        ob_start(); ?>
+            <div class="form-field form-field--wide">
+                <span class="form-hint">
+                    Схема обложки задаёт её фон и цвет её собственного текста. На вложенные
+                    компоненты со своей поверхностью она не распространяется: белая карточка
+                    внутри тёмной обложки сохраняет тёмный текст.
+                </span>
+            </div>
             <?= $select('scheme', 'Схема обложки', [
                 'light' => 'Light — светлый фон',
                 'dark' => 'Dark — тёмный фон',
@@ -319,13 +357,15 @@ $overlayDirections = [
                 <input type="color" id="scheme_text" name="scheme_text" value="<?= htmlspecialchars((string) $settings['scheme_text'], ENT_QUOTES) ?>">
             </div>
             <?= AdminUi::colorField('scheme_accent', (string) $settings['scheme_accent'], 'Цвет основной кнопки', '#173a63', 'Акцент из «Дизайна»') ?>
-        </div>
-    </div>
+        <?php echo $group('Цветовая схема', 'фон обложки и цвет её текста',
+            ucfirst((string) $settings['scheme']) . ' · текст ' . (string) $settings['content_scheme'],
+            (string) ob_get_clean()); ?>
 
-    <div class="form-card">
-        <?= AdminUi::cardHeader('Затемнение и подложка', 'contrast') ?>
-        <p class="form-hint">Затемнение лежит между фоном и текстом и отвечает за читаемость поверх любой фотографии.</p>
-        <div class="form-grid">
+        <?php
+        ob_start(); ?>
+            <div class="form-field form-field--wide">
+                <span class="form-hint">Затемнение лежит между фоном и текстом и отвечает за читаемость поверх любой фотографии.</span>
+            </div>
             <?= $select('overlay', 'Затемнение', [
                 'none' => 'Нет', 'solid' => 'Сплошное', 'gradient' => 'Градиент',
             ], (string) $settings['overlay']) ?>
@@ -347,13 +387,15 @@ $overlayDirections = [
                 <label for="panel_opacity">Плотность подложки, %</label>
                 <input type="number" id="panel_opacity" name="panel_opacity" min="0" max="100" value="<?= (int) $settings['panel_opacity'] ?>">
             </div>
-        </div>
-    </div>
+        <?php echo $group('Затемнение и подложка', 'читаемость текста поверх фотографии',
+            ($overlayLabels[$settings['overlay']] ?? '') . ((string) $settings['overlay'] !== 'none' ? ' ' . (int) $settings['overlay_opacity'] . '%' : ''),
+            (string) ob_get_clean()); ?>
 
-    <div class="form-card">
-        <?= AdminUi::cardHeader('Навигация', 'arrows-horizontal') ?>
-        <p class="form-hint">Навигация занимает собственную полосу внизу и не перекрывает текст и кнопки.</p>
-        <div class="form-grid">
+        <?php
+        ob_start(); ?>
+            <div class="form-field form-field--wide">
+                <span class="form-hint">Навигация занимает собственную полосу внизу и не перекрывает текст и кнопки. Стрелки проявляются по наведению, а на сенсорном экране видны всегда.</span>
+            </div>
             <?= $checkbox('nav_arrows', 'Стрелки «назад» и «вперёд»', (bool) $settings['nav_arrows']) ?>
             <?= $checkbox('nav_arrows_mobile', 'Стрелки на телефоне', (bool) $settings['nav_arrows_mobile']) ?>
             <?= $checkbox('nav_swipe', 'Свайп на сенсорном экране', (bool) $settings['nav_swipe']) ?>
@@ -365,17 +407,20 @@ $overlayDirections = [
                 'counter_progress' => 'Счётчик и полоса (рекомендуется)',
                 'thumbs' => 'Миниатюры',
             ], (string) $settings['nav_indicator']) ?>
-        </div>
-    </div>
+        <?php echo $group('Навигация', 'стрелки, индикатор, свайп',
+            ($settings['nav_arrows'] ? 'стрелки, ' : '') . ($navLabels[$settings['nav_indicator']] ?? ''),
+            (string) ob_get_clean()); ?>
 
-    <div class="form-card">
-        <?= AdminUi::cardHeader('Автопрокрутка', 'player-play') ?>
-        <p class="form-hint">
-            При включённой автопрокрутке в навигации появляется кнопка паузы — остановить
-            показ должен уметь любой посетитель, а не только тот, кто наведёт курсор.
-            Ручное переключение всегда пересчитывает таймер заново.
-        </p>
-        <div class="form-grid">
+        <?php
+        ob_start(); ?>
+            <div class="form-field form-field--wide">
+                <span class="form-hint">
+                    При включённой автопрокрутке в навигации появляется кнопка паузы — остановить
+                    показ должен уметь любой посетитель, а не только тот, кто наведёт курсор.
+                    Ручное переключение всегда пересчитывает таймер заново. Отдельному слайду
+                    можно задать свою длительность в его форме.
+                </span>
+            </div>
             <?= $checkbox('autoplay', 'Включить автопрокрутку', (bool) $settings['autoplay']) ?>
             <div class="form-field">
                 <label for="autoplay_interval">Интервал, секунд</label>
@@ -391,12 +436,12 @@ $overlayDirections = [
             </div>
             <?= $checkbox('autoplay_mobile', 'Автопрокрутка на телефоне', (bool) $settings['autoplay_mobile'],
                 'По умолчанию выключена: на узком экране слайд уезжает раньше, чем его успевают дочитать.') ?>
-        </div>
-    </div>
+        <?php echo $group('Автопрокрутка', 'интервал и паузы',
+            $settings['autoplay'] ? 'каждые ' . (int) $settings['autoplay_interval'] . ' с' : 'выключена',
+            (string) ob_get_clean()); ?>
 
-    <div class="form-card">
-        <?= AdminUi::cardHeader('Переход между слайдами', 'transition-right') ?>
-        <div class="form-grid">
+        <?php
+        ob_start(); ?>
             <?= $select('transition', 'Анимация', [
                 'fade' => 'Fade — проявление',
                 'slide' => 'Slide — сдвиг',
@@ -408,7 +453,9 @@ $overlayDirections = [
                 <label for="transition_duration">Длительность, мс</label>
                 <input type="number" id="transition_duration" name="transition_duration" min="150" max="2000" step="50" value="<?= (int) $settings['transition_duration'] ?>">
             </div>
-        </div>
+        <?php echo $group('Переход между слайдами', 'анимация смены',
+            ($transitionLabels[$settings['transition']] ?? '') . ' · ' . (int) $settings['transition_duration'] . ' мс',
+            (string) ob_get_clean()); ?>
     </div>
 
     <div class="form-actions">
