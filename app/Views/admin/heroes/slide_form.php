@@ -161,6 +161,10 @@ $ctaStyles = [
             </div>
             <?= $select('cta_style', 'Тип основной кнопки', $ctaStyles, (string) $data['cta_style']) ?>
             <?= AdminUi::iconField('cta_icon', (string) $data['cta_icon'], ['label' => 'Иконка основной кнопки']) ?>
+            <?= AdminUi::imageField('cta_image', (string) $data['cta_image'], [
+                'label' => 'Своя картинка вместо иконки',
+                'hint' => 'SVG или PNG, 20×20. Задана — используется вместо иконки набора. Цвет у картинки свой: под тип кнопки она не перекрашивается.',
+            ]) ?>
             <?= $checkbox('cta_new_tab', 'Открывать в новой вкладке', (bool) $data['cta_new_tab']) ?>
 
             <?= $checkbox('cta2_enabled', 'Показывать дополнительную кнопку', (bool) $data['cta2_enabled']) ?>
@@ -174,6 +178,10 @@ $ctaStyles = [
             </div>
             <?= $select('cta2_style', 'Тип дополнительной кнопки', $ctaStyles, (string) $data['cta2_style']) ?>
             <?= AdminUi::iconField('cta2_icon', (string) $data['cta2_icon'], ['label' => 'Иконка дополнительной кнопки']) ?>
+            <?= AdminUi::imageField('cta2_image', (string) $data['cta2_image'], [
+                'label' => 'Своя картинка вместо иконки',
+                'hint' => 'SVG или PNG, 20×20. Задана — используется вместо иконки набора.',
+            ]) ?>
             <?= $checkbox('cta2_new_tab', 'Открывать в новой вкладке', (bool) $data['cta2_new_tab']) ?>
         </div>
     </div>

@@ -2536,18 +2536,18 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 /* Превью шаблонов */
 
 /* Превью шрифтов: образец «Аа» нужным стеком */
-.design-card__preview--font_style-inter::before,
+.design-card__preview--font_style-noto::before,
 .design-card__preview--font_style-system::before,
 .design-card__preview--font_style-serif::before,
 .design-card__preview--font_style-custom::before { background: none; }
-.design-card__preview--font_style-inter::after,
+.design-card__preview--font_style-noto::after,
 .design-card__preview--font_style-system::after,
 .design-card__preview--font_style-serif::after,
 .design-card__preview--font_style-custom::after {
     content: 'Аа'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
     font-size: 24px; font-weight: 700; color: #1c2531;
 }
-.design-card__preview--font_style-inter::after { font-family: 'Inter', system-ui, sans-serif; }
+.design-card__preview--font_style-noto::after { font-family: 'Noto Sans', 'Noto Sans Fallback', system-ui, sans-serif; }
 .design-card__preview--font_style-system::after { font-family: system-ui, Arial, sans-serif; }
 .design-card__preview--font_style-serif::after { font-family: Georgia, 'Times New Roman', serif; }
 .design-card__preview--font_style-custom::after { content: 'Аа?'; font-family: inherit; color: #66707c; }

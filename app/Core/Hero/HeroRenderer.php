@@ -498,10 +498,21 @@ final class HeroRenderer
             return '';
         }
 
+        // Своя картинка побеждает иконку из набора: её ставят ради знака,
+        // которого в Tabler нет, и молча подменять его иконкой нельзя.
+        // Цвет у картинки собственный — под кнопку она не перекрашивается,
+        // в отличие от <use>, который берёт currentColor.
+        $image = trim((string) ($d[$key . '_image'] ?? ''));
         $icon = (string) $d[$key . '_icon'];
-        $iconHtml = $icon !== ''
-            ? '<span class="hero__cta-icon" aria-hidden="true">' . Icon::render($icon, 20) . '</span>'
-            : '';
+        if ($image !== '' && UrlGuard::isSafeMedia($image)) {
+            $iconHtml = '<span class="hero__cta-icon" aria-hidden="true">'
+                . '<img src="' . htmlspecialchars($image, ENT_QUOTES) . '" alt=""'
+                . ' width="20" height="20" loading="lazy" decoding="async"></span>';
+        } elseif ($icon !== '') {
+            $iconHtml = '<span class="hero__cta-icon" aria-hidden="true">' . Icon::render($icon, 20) . '</span>';
+        } else {
+            $iconHtml = '';
+        }
 
         return '<a class="hero__cta hero__cta--' . htmlspecialchars((string) $d[$key . '_style'], ENT_QUOTES)
             . ($iconHtml !== '' ? ' hero__cta--with-icon' : '') . '"'

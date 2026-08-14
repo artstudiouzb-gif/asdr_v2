@@ -315,6 +315,10 @@
 .hero__cta--ghost:hover { background: color-mix(in srgb, var(--hero-fg) 14%, transparent); }
 .hero__cta--link { padding-inline: 0; color: var(--hero-fg); text-decoration: underline; }
 .hero__cta-icon { display: inline-flex; }
+/* Своя картинка кнопки: держим её в тех же 20px, что и иконку набора, и не
+   даём растянуться — SVG без пиксельных размеров иначе занимает всю кнопку
+   (те же грабли, что с логотипом в шапке). */
+.hero__cta-icon img { width: 20px; height: 20px; object-fit: contain; display: block; }
 
 /* --- Навигация --- */
 .hero__nav {

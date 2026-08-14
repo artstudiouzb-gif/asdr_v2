@@ -6,34 +6,47 @@ use App\Core\DesignSettings;
 use App\Core\LocalGoogleFonts;
 use App\Models\Setting;
 
-test('Inter Tight входит в поставку локально со всеми узбекскими подмножествами', function (): void {
+test('в поставке ровно два семейства, оба со всеми узбекскими подмножествами', function (): void {
     $root = dirname(__DIR__, 2);
-    $css = (string) file_get_contents($root . '/public/assets/css/inter-tight.css');
 
-    assert_not_contains('https://', $css);
-    foreach (['cyrillic-ext', 'cyrillic', 'latin'] as $subset) {
-        foreach ([400, 500, 600, 700] as $weight) {
-            $pattern = '/\/\*\s*' . preg_quote($subset, '/') . '\s*\*\/\s*'
-                . '@font-face\s*\{(?=[^}]*font-family:\s*\'Inter Tight\';)'
-                . '(?=[^}]*font-weight:\s*' . $weight . ';)[^}]*'
-                . "url\\('\\.\\.\\/fonts\\/inter-tight\\/([^']+\\.woff2)'\\)[^}]*}/s";
-            assert_true((bool) preg_match($pattern, $css, $match), "нет Inter Tight {$weight} {$subset}");
-            $file = $root . '/public/assets/fonts/inter-tight/' . $match[1];
-            assert_true(is_file($file), "нет {$file}");
-            assert_same('wOF2', (string) file_get_contents($file, false, null, 0, 4));
+    // Поставка намеренно узкая: каждое семейство — около 90 КБ в репозитории,
+    // и лишнее там лежит мёртвым грузом. Остальной каталог скачивается на
+    // сервер по выбору в «Дизайне».
+    $bundled = ['noto-sans' => 'Noto Sans', 'noto-serif' => 'Noto Serif'];
+    $present = glob($root . '/public/assets/fonts/*', GLOB_ONLYDIR) ?: [];
+    assert_same(
+        array_keys($bundled),
+        array_map('basename', $present),
+        'набор шрифтов в поставке изменился'
+    );
+
+    foreach ($bundled as $slug => $family) {
+        $css = (string) file_get_contents($root . '/public/assets/css/' . $slug . '.css');
+        assert_not_contains('https://', $css);
+        foreach (['cyrillic-ext', 'cyrillic', 'latin'] as $subset) {
+            foreach ([400, 600, 700] as $weight) {
+                $pattern = '/\/\*\s*' . preg_quote($subset, '/') . '\s*\*\/\s*'
+                    . '@font-face\s*\{(?=[^}]*font-family:\s*\'' . preg_quote($family, '/') . '\';)'
+                    . '(?=[^}]*font-weight:\s*' . $weight . ';)[^}]*'
+                    . "url\\('\\.\\.\\/fonts\\/" . preg_quote($slug, '/') . "\\/([^']+\\.woff2)'\\)[^}]*}/s";
+                assert_true((bool) preg_match($pattern, $css, $match), "нет {$family} {$weight} {$subset}");
+                $file = $root . '/public/assets/fonts/' . $slug . '/' . $match[1];
+                assert_true(is_file($file), "нет {$file}");
+                assert_same('wOF2', (string) file_get_contents($file, false, null, 0, 4));
+            }
         }
     }
 });
 
 test('выбранный каталог подключается только локально и без повторов', function (): void {
-    $installed = LocalGoogleFonts::installSelected(['inter-tight', 'inter-tight']);
+    $installed = LocalGoogleFonts::installSelected(['noto-sans', 'noto-sans']);
     assert_true($installed['ok'], $installed['error']);
 
-    Setting::overrideInMemory('design_font_google_body', 'inter-tight');
-    Setting::overrideInMemory('design_font_google_heading', 'inter-tight');
+    Setting::overrideInMemory('design_font_google_body', 'noto-sans');
+    Setting::overrideInMemory('design_font_google_heading', 'noto-sans');
     $stylesheets = LocalGoogleFonts::stylesheetsForSelected();
     assert_same(1, count($stylesheets));
-    assert_contains('/assets/css/inter-tight.css', $stylesheets[0]);
+    assert_contains('/assets/css/noto-sans.css', $stylesheets[0]);
     assert_not_contains('googleapis.com', $stylesheets[0]);
     assert_not_contains('gstatic.com', $stylesheets[0]);
 });

@@ -112,30 +112,45 @@ test('Кириллица: теги, атрибуты и скрипты не пе
     assert_same('<kbd>Ctrl+K</kbd>', UzCyrillic::html('<kbd>Ctrl+K</kbd>'));
 });
 
-test('Кириллица: локальные шрифты содержат узбекский cyrillic-ext', function () {
+test('Кириллица: шрифты поставки объявляют узбекский cyrillic-ext', function () {
     $root = dirname(__DIR__, 2);
-    $styles = [
-        'fonts.css' => ['montserrat-cyrillic-ext.woff2', 'manrope-cyrillic-ext.woff2'],
-        'gov-fonts.css' => [
-            'ptsans-400-cyrillic-ext.woff2',
-            'ptsans-700-cyrillic-ext.woff2',
-            'ptserif-400-cyrillic-ext.woff2',
-            'ptserif-700-cyrillic-ext.woff2',
-        ],
-    ];
 
-    foreach ($styles as $stylesheet => $fontFiles) {
-        $css = (string) file_get_contents($root . '/public/assets/css/' . $stylesheet);
-        assert_contains('unicode-range: U+0460-052F', $css, "{$stylesheet}: нет расширенной кириллицы");
-        foreach ($fontFiles as $fontFile) {
-            assert_contains($fontFile, $css, "{$stylesheet}: не подключён {$fontFile}");
+    foreach (['noto-sans', 'noto-serif'] as $slug) {
+        $css = (string) file_get_contents($root . '/public/assets/css/' . $slug . '.css');
+        // Диапазон обрезан со всей исторической кириллицы до современных
+        // тюркских букв, поэтому дословного диапазона Google здесь нет.
+        assert_contains(
+            'unicode-range: U+0490-04FF',
+            $css,
+            "{$slug}: подмножество cyrillic-ext не объявлено"
+        );
+    }
+});
+
+test('Ни один публичный CSS не ссылается на отсутствующий файл шрифта', function () {
+    // Набор шрифтов в поставке менялся, и оборванный url() в @font-face
+    // проявляется только 404-м в консоли: текст рисуется системным, а тест
+    // на разметку этого не видит.
+    $root = dirname(__DIR__, 2);
+    $checked = 0;
+
+    foreach ((array) glob($root . '/public/assets/css/*.css') as $stylesheet) {
+        if (str_contains(basename((string) $stylesheet), '.min.')) {
+            continue;
+        }
+        $css = (string) file_get_contents((string) $stylesheet);
+        preg_match_all("~url\\('(\\.\\./fonts/[^']+)'\\)~", $css, $matches);
+        foreach ($matches[1] as $relative) {
+            $file = $root . '/public/assets/css/' . $relative;
             assert_true(
-                is_file($root . '/public/assets/fonts/' . $fontFile)
-                    && filesize($root . '/public/assets/fonts/' . $fontFile) > 0,
-                "шрифт {$fontFile} должен лежать в проекте"
+                is_file($file) && filesize($file) > 0,
+                basename((string) $stylesheet) . ": нет файла {$relative}"
             );
+            $checked++;
         }
     }
+
+    assert_true($checked >= 18, "проверено слишком мало ссылок на шрифты: {$checked}");
 });
 
 test('Панель: разметка, стили и скрипт согласованы', function () {

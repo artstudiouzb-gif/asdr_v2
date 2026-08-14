@@ -90,12 +90,17 @@ final class HeroSlideData
             'cta_url' => '',
             'cta_style' => 'primary',
             'cta_icon' => '',
+            // Своя картинка кнопки (SVG/PNG). Задана — побеждает иконку из
+            // набора: выбирают её осознанно, ради фирменного знака, которого
+            // в Tabler нет.
+            'cta_image' => '',
             'cta_new_tab' => false,
             'cta2_enabled' => false,
             'cta2_text' => '',
             'cta2_url' => '',
             'cta2_style' => 'ghost',
             'cta2_icon' => '',
+            'cta2_image' => '',
             'cta2_new_tab' => false,
 
             // --- Картинка поверх фона (эмблема, логотип программы) ---
@@ -199,12 +204,14 @@ final class HeroSlideData
             'cta_url' => BlockDataInput::safeLink($input['cta_url'] ?? ''),
             'cta_style' => BlockDataInput::enum($input, 'cta_style', self::CTA_STYLES, 'primary'),
             'cta_icon' => Icon::cleanName($input['cta_icon'] ?? ''),
+            'cta_image' => BlockDataInput::safeMedia($input['cta_image'] ?? ''),
             'cta_new_tab' => !empty($input['cta_new_tab']),
             'cta2_enabled' => !empty($input['cta2_enabled']),
             'cta2_text' => BlockDataInput::plain($input, 'cta2_text', $locale),
             'cta2_url' => BlockDataInput::safeLink($input['cta2_url'] ?? ''),
             'cta2_style' => BlockDataInput::enum($input, 'cta2_style', self::CTA_STYLES, 'ghost'),
             'cta2_icon' => Icon::cleanName($input['cta2_icon'] ?? ''),
+            'cta2_image' => BlockDataInput::safeMedia($input['cta2_image'] ?? ''),
             'cta2_new_tab' => !empty($input['cta2_new_tab']),
 
             'art_image' => BlockDataInput::safeMedia($input['art_image'] ?? ''),
@@ -335,6 +342,7 @@ final class HeroSlideData
             $d[$cta . '_url'] = BlockDataInput::safeLink($d[$cta . '_url'] ?? '');
             $d[$cta . '_style'] = $enum($d[$cta . '_style'] ?? '', self::CTA_STYLES, $cta === 'cta' ? 'primary' : 'ghost');
             $d[$cta . '_icon'] = Icon::cleanName($d[$cta . '_icon'] ?? '');
+            $d[$cta . '_image'] = BlockDataInput::safeMedia($d[$cta . '_image'] ?? '');
             $d[$cta . '_new_tab'] = !empty($d[$cta . '_new_tab']);
         }
 

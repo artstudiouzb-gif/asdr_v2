@@ -23,7 +23,7 @@
 
 body {
     margin: 0;
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Noto Sans', 'Noto Sans Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     background: var(--repo-bg);
     color: var(--repo-text);
     line-height: 1.55;
@@ -184,7 +184,7 @@ a:hover { text-decoration: underline; }
     box-shadow: var(--repo-shadow);
 }
 @media (max-width: 900px) { .rd-hero { grid-template-columns: 1fr; } .rd-hero__art { display: none; } }
-.rd-hero__title { font-family: var(--font-heading, 'PT Serif', Georgia, serif); color: var(--repo-navy); font-size: clamp(1.85rem, 3.5vw, 2.7rem); margin: 0 0 14px; line-height: 1.2; letter-spacing: -0.02em; }
+.rd-hero__title { font-family: var(--font-heading, 'Noto Serif', Georgia, serif); color: var(--repo-navy); font-size: clamp(1.85rem, 3.5vw, 2.7rem); margin: 0 0 14px; line-height: 1.2; letter-spacing: -0.02em; }
 .rd-hero__lead { color: var(--repo-muted); line-height: 1.65; max-width: 52ch; margin: 0 0 24px; font-size: 1.02rem; }
 .rd-search { display: grid; grid-template-columns: 1fr auto; gap: 10px; max-width: 540px; }
 .rd-search input {
@@ -237,7 +237,7 @@ a:hover { text-decoration: underline; }
 .rd-stat--amber .rd-stat__icon { background: #fffbeb; color: #d97706; }
 
 .rd-stat__body { display: flex; flex-direction: column; gap: 2px; }
-.rd-stat__num { font-family: var(--font-heading, 'PT Serif', Georgia, serif); font-weight: 800; font-size: 1.95rem; color: var(--repo-navy); line-height: 1.1; }
+.rd-stat__num { font-family: var(--font-heading, 'Noto Serif', Georgia, serif); font-weight: 800; font-size: 1.95rem; color: var(--repo-navy); line-height: 1.1; }
 .rd-stat__label { color: var(--repo-muted); font-size: 0.86rem; font-weight: 600; }
 
 .rd-hero__badge {
@@ -283,7 +283,7 @@ a:hover { text-decoration: underline; }
     margin-bottom: 4px;
 }
 .rd-empty-card__title {
-    font-family: var(--font-heading, 'PT Serif', Georgia, serif);
+    font-family: var(--font-heading, 'Noto Serif', Georgia, serif);
     font-size: 1.4rem;
     font-weight: 800;
     color: var(--repo-navy);
@@ -299,7 +299,7 @@ a:hover { text-decoration: underline; }
 .rd-empty-card__actions { margin-top: 8px; }
 
 .rd-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
-.rd-section-head h2 { font-family: var(--font-heading, 'PT Serif', Georgia, serif); color: var(--repo-navy); font-size: 1.35rem; margin: 0; font-weight: 700; }
+.rd-section-head h2 { font-family: var(--font-heading, 'Noto Serif', Georgia, serif); color: var(--repo-navy); font-size: 1.35rem; margin: 0; font-weight: 700; }
 .rd-reset { color: var(--repo-teal); font-weight: 700; font-size: 0.9rem; text-decoration: none; }
 .rd-reset:hover { text-decoration: underline; }
 
@@ -363,7 +363,7 @@ a:hover { text-decoration: underline; }
 
 .rd-doc__cat { color: var(--repo-teal); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
 .rd-doc__date { color: var(--repo-muted); font-size: 0.82rem; }
-.rd-doc__title { font-family: var(--font-heading, 'PT Serif', Georgia, serif); color: var(--repo-navy); font-size: 1.05rem; line-height: 1.38; margin: 0; flex: 1; font-weight: 700; }
+.rd-doc__title { font-family: var(--font-heading, 'Noto Serif', Georgia, serif); color: var(--repo-navy); font-size: 1.05rem; line-height: 1.38; margin: 0; flex: 1; font-weight: 700; }
 .rd-doc__meta { color: var(--repo-muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
 .rd-doc__desc { color: var(--repo-muted); font-size: 0.88rem; line-height: 1.5; margin: 0; }
 .rd-doc__actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
@@ -399,7 +399,7 @@ a:hover { text-decoration: underline; }
 .rd-modal::backdrop { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
 .rd-modal__card { display: flex; flex-direction: column; overflow: hidden; border-radius: 16px; }
 .rd-modal__head { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--repo-border); background: #f8fafc; }
-.rd-modal__head h3 { margin: 0; font-family: var(--font-heading, 'PT Serif', serif); color: var(--repo-navy); font-size: 1.15rem; font-weight: 700; }
+.rd-modal__head h3 { margin: 0; font-family: var(--font-heading, 'Noto Serif', serif); color: var(--repo-navy); font-size: 1.15rem; font-weight: 700; }
 .rd-modal__close { border: none; background: transparent; font-size: 1.25rem; font-weight: 700; cursor: pointer; color: var(--repo-muted); padding: 4px 8px; border-radius: 6px; }
 .rd-modal__close:hover { background: #e2e8f0; color: var(--repo-navy); }
 .rd-modal__body { padding: 20px; background: #fff; min-height: 250px; }
@@ -408,12 +408,12 @@ a:hover { text-decoration: underline; }
 .rd-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 @media (max-width: 900px) { .rd-columns { grid-template-columns: 1fr; } }
 .rd-col { background: var(--repo-surface); border: 1px solid var(--repo-border); border-radius: var(--repo-radius); padding: 24px; box-shadow: var(--repo-shadow); }
-.rd-col__title { font-family: var(--font-heading, 'PT Serif', Georgia, serif); color: var(--repo-navy); font-size: 1.15rem; margin: 0 0 16px; font-weight: 700; }
+.rd-col__title { font-family: var(--font-heading, 'Noto Serif', Georgia, serif); color: var(--repo-navy); font-size: 1.15rem; margin: 0 0 16px; font-weight: 700; }
 .rd-col__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
 .rd-col__list li { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; }
 .rd-col__num { font-weight: 800; color: var(--repo-teal); font-size: 0.98rem; padding-top: 2px; }
 .rd-col__date { display: flex; flex-direction: column; align-items: center; min-width: 44px; color: var(--repo-muted); font-size: 0.7rem; font-weight: 700; }
-.rd-col__date span { font-family: var(--font-heading, 'PT Serif', Georgia, serif); font-size: 1.25rem; color: var(--repo-navy); line-height: 1.1; font-weight: 800; }
+.rd-col__date span { font-family: var(--font-heading, 'Noto Serif', Georgia, serif); font-size: 1.25rem; color: var(--repo-navy); line-height: 1.1; font-weight: 800; }
 .rd-col__body { display: flex; flex-direction: column; gap: 4px; }
 .rd-col__body a { color: var(--repo-navy); font-weight: 700; font-size: 0.95rem; line-height: 1.4; text-decoration: none; }
 .rd-col__body a:hover { color: var(--repo-teal); text-decoration: underline; }
@@ -484,7 +484,7 @@ a:hover { text-decoration: underline; }
 .repo-logout-form { display: inline; margin: 0; }
 .repo-resend-form { margin-top: 12px; }
 .repo-field--narrow { max-width: 320px; margin-bottom: 12px; }
-.repo-card__title { margin-top: 0; font-family: var(--font-heading, 'PT Serif', Georgia, serif); color: var(--repo-navy); }
+.repo-card__title { margin-top: 0; font-family: var(--font-heading, 'Noto Serif', Georgia, serif); color: var(--repo-navy); }
 .repo-instruction-list { margin: 10px 0 14px; padding-left: 20px; line-height: 1.7; }
 .repo-topbar__brand { text-decoration: none; color: #ffffff; }
 .repo-topbar__brand:hover { text-decoration: none; opacity: 0.92; }

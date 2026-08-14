@@ -26,7 +26,8 @@ $a11y = [
     <meta name="robots" content="noindex, nofollow">
     <?= \App\Core\Icon::browserConfigHtml() ?>
     <title><?= htmlspecialchars($pageTitle ?? 'Файловый портал', ENT_QUOTES) ?> — <?= $repoName ?></title>
-    <link rel="stylesheet" href="/assets/css/fonts.css">
+    <link rel="stylesheet" href="/assets/css/noto-sans.css">
+    <link rel="stylesheet" href="/assets/css/noto-serif.css">
     <link rel="stylesheet" href="/assets/css/gov-theme.css?v=<?= file_exists(dirname(__DIR__, 3) . '/public/assets/css/gov-theme.css') ? filemtime(dirname(__DIR__, 3) . '/public/assets/css/gov-theme.css') : '2.0.1' ?>">
     <link rel="stylesheet" href="/assets/css/repo.css?v=<?= file_exists(dirname(__DIR__, 3) . '/public/assets/css/repo.css') ? filemtime(dirname(__DIR__, 3) . '/public/assets/css/repo.css') : '2.0.1' ?>">
     <link rel="stylesheet" href="/assets/css/a11y.css">

@@ -143,7 +143,7 @@
 body {
     background: var(--gov-bg);
     color: var(--gov-ink);
-    font-family: var(--font-family, 'Inter', 'Inter Fallback', system-ui, sans-serif);
+    font-family: var(--font-family, 'Noto Sans', 'Noto Sans Fallback', system-ui, sans-serif);
     font-size: var(--base-font-size, 16px);
     line-height: var(--base-line-height, 1.6);
     -webkit-font-smoothing: antialiased;
@@ -289,7 +289,7 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
 /* --- Шапка: белая, эмблема + название, uppercase-меню с teal-подчёркиванием --- */
 .site-header { background: var(--gov-surface); border-bottom: 1px solid var(--gov-border); box-shadow: none; }
 .site-header__inner { max-width: var(--container-max); }
-.site-header__logo { color: var(--gov-title); font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; gap: 12px; align-items: center; }
+.site-header__logo { color: var(--gov-title); font-family: var(--font-family, 'Noto Sans', sans-serif); font-weight: 700; gap: 12px; align-items: center; }
 .site-header__logo img, .site-header__logo span, .site-header__logo::before { transition: transform 0.25s ease, opacity 0.25s ease; }
 .site-header__logo:hover img, .site-header__logo:hover::before { transform: scale(1.03); }
 .site-header__logo:hover span { opacity: 0.88; }
@@ -2597,7 +2597,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
     box-shadow: 0 0 0 3px var(--gov-bg), 0 0 10px color-mix(in srgb, var(--gov-muted) 28%, transparent);
 }
 .stage__year { 
-    font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: var(--step-2); 
+    font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: var(--step-2); 
     color: var(--gov-title); 
     transition: color 0.3s ease;
 }
@@ -2835,7 +2835,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
     padding: clamp(20px, 3vw, 36px);
 }
 .newslist__date { color: var(--gov-muted); font-size: var(--step--2); font-weight: 600; }
-.newslist-lead__title { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: clamp(var(--step-2), 2.2vw, var(--step-5)); color: var(--gov-title); line-height: 1.25; margin: 0; }
+.newslist-lead__title { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: clamp(var(--step-2), 2.2vw, var(--step-5)); color: var(--gov-title); line-height: 1.25; margin: 0; }
 .newslist-lead__excerpt { color: var(--gov-muted); line-height: var(--base-line-height, 1.6); font-size: var(--step-0); }
 .newslist-lead:hover .newslist-lead__title { color: var(--gov-teal); }
 
@@ -2982,7 +2982,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
     transform: none !important;
 }
 .counter:last-child { border-right: 0; }
-.counter__value, .counter__suffix { color: var(--counters-text, var(--gov-title)) !important; font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; font-size: clamp(var(--step-5), 3.2vw, var(--step-8)); line-height: 1; }
+.counter__value, .counter__suffix { color: var(--counters-text, var(--gov-title)) !important; font-family: var(--font-family, 'Noto Sans', sans-serif); font-weight: 700; font-size: clamp(var(--step-5), 3.2vw, var(--step-8)); line-height: 1; }
 /* Плотный межстрочный: подпись из 2–3 слов не должна «рассыпаться». */
 .counter__label { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--2); line-height: 1.35; margin: 4px 0 0; transition: color 0.3s ease; }
 .counter:hover .counter__label { color: var(--counters-text, var(--gov-title)); }
@@ -3091,7 +3091,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 }
 .block-hero--media .block-hero__inner { position: relative; width: 100%; max-width: var(--container-max); margin: 0 auto; padding: 0 20px; z-index: 3; }
 .block-hero--media .block-hero__text { max-width: var(--hero-text-width, 620px); }
-.block-hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; color: var(--gov-teal-text); font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; font-size: var(--step--3); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 18px; }
+.block-hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; color: var(--gov-teal-text); font-family: var(--font-family, 'Noto Sans', sans-serif); font-weight: 700; font-size: var(--step--3); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 18px; }
 .block-hero__eyebrow::before { content: ''; width: 34px; height: 2px; background: var(--gov-teal); }
 /* Над фотографией акцентный надзаголовок не добирает контраста даже при
    плотном затемнении: чтобы вытянуть его до 4.5:1, снимок пришлось бы
@@ -3358,7 +3358,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .cms-block--bg-navy :is(.section-head__description, .block-advantages__description, .block-featband__description, .block-timeline__description) {
     color: var(--section-muted-fg);
 }
-.section-head__all { color: var(--gov-teal-text); font-family: var(--font-family, 'PT Sans', sans-serif); font-size: var(--step--2); font-weight: 700; text-decoration: none; white-space: nowrap; }
+.section-head__all { color: var(--gov-teal-text); font-family: var(--font-family, 'Noto Sans', sans-serif); font-size: var(--step--2); font-weight: 700; text-decoration: none; white-space: nowrap; }
 
 /* Приоритетные направления — карточки иконка+заголовок+текст+стрелка. */
 .cards-grid { display: grid; grid-template-columns: repeat(var(--cards-cols, 5), minmax(0, 1fr)); gap: 20px; }
@@ -3410,7 +3410,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .block-advantages--inline .feature-card__spacer,
 .block-contact-cards--inline .feature-card__spacer { display: none; }
 .feature-card__num {
-    font-family: var(--font-heading, 'PT Serif', serif);
+    font-family: var(--font-heading, 'Noto Serif', serif);
     font-size: var(--step-3);
     font-weight: 800;
     /* 25 % давали 1.65:1 — на телефоне номер попадает под порог крупного
@@ -3529,7 +3529,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     grid-row: 2;
 }
 .feature-card__title {
-    font-family: var(--font-heading, 'PT Serif', serif);
+    font-family: var(--font-heading, 'Noto Serif', serif);
     font-weight: 700;
     font-size: var(--step-1);
     color: var(--gov-title);
@@ -3762,7 +3762,7 @@ span.imgcard__media::after {
 }
 .mediacard__duration { position: absolute; right: 10px; bottom: 10px; background: rgba(11,26,48,.8); color: #fff; font-size: var(--step--4); padding: 2px 8px; border-radius: 4px; }
 .mediacard__title { 
-    display: block; font-weight: 700; font-family: var(--font-heading, 'PT Serif', serif); 
+    display: block; font-weight: 700; font-family: var(--font-heading, 'Noto Serif', serif); 
     color: var(--gov-title); line-height: 1.35; font-size: var(--step-0); 
     transition: color 0.3s ease;
 }
@@ -3957,7 +3957,7 @@ span.imgcard__media::after {
    центру внизу карточки оставалась дыра высотой со строку. */
 .person-card--vacant .person-card__body { justify-content: center; }
 .person-card--vacant .person-card__role { flex: 0 0 auto; }
-.person-card__name { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: var(--step-0); color: var(--gov-title); transition: color 0.3s ease; }
+.person-card__name { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: var(--step-0); color: var(--gov-title); transition: color 0.3s ease; }
 .person-card:hover .person-card__name { color: var(--gov-teal-text); }
 .person-card__role { color: var(--gov-muted); font-size: var(--step--2); line-height: 1.35; flex: 1; }
 .person-card__more { color: var(--gov-teal-text); font-size: var(--step--2); font-weight: 700; text-decoration: none; margin-top: 8px; transition: transform 0.3s ease, color 0.3s ease; display: inline-block; }
@@ -4046,7 +4046,7 @@ span.imgcard__media::after {
     box-shadow: 0 0 0 7px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 30%, transparent);
 }
 .timeline-item--planned:hover::before { border-color: var(--gov-muted); }
-.timeline-item__year { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; color: var(--gov-title); transition: color 0.25s ease; }
+.timeline-item__year { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; color: var(--gov-title); transition: color 0.25s ease; }
 .timeline-item:hover .timeline-item__year { color: var(--gov-teal-text); }
 .timeline-item__text { color: var(--gov-muted); font-size: var(--step--1); line-height: var(--base-line-height, 1.5); transition: color 0.25s ease; }
 .timeline-item:hover .timeline-item__text { color: var(--gov-title); }
@@ -4122,7 +4122,7 @@ span.imgcard__media::after {
     background: rgba(255, 255, 255, 0.08);
 }
 .ctaband__body { display: flex; flex-direction: column; gap: 6px; }
-.ctaband__title { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: var(--step-2); }
+.ctaband__title { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: var(--step-2); }
 .ctaband__text { color: rgba(255,255,255,.82); line-height: var(--base-line-height, 1.5); }
 .ctaband__button { 
     display: inline-block; padding: 13px 26px; background: #fff; color: var(--gov-navy); 
@@ -4152,7 +4152,7 @@ span.imgcard__media::after {
 }
 .profile__photo--empty > * { position: relative; z-index: 1; }
 .profile__name { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 12px; }
-.profile__position { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; color: var(--gov-teal-text, #0284c7); font-size: var(--step-1); line-height: 1.35; margin-bottom: 18px; }
+.profile__position { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; color: var(--gov-teal-text, #0284c7); font-size: var(--step-1); line-height: 1.35; margin-bottom: 18px; }
 .profile__text { color: var(--gov-ink); line-height: var(--base-line-height, 1.65); margin: 0 0 22px; font-size: var(--step-0); }
 .profile__contacts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
 .profile__contact { display: flex; align-items: center; gap: 10px; color: var(--gov-ink); font-size: var(--step--1); }
@@ -4195,7 +4195,7 @@ span.imgcard__media::after {
 @media (max-width: 1000px) { .featband__item:nth-child(odd) { border-left: 0; } .featband__item:nth-child(n+3) { border-top: 1px solid rgba(255,255,255,.14); } }
 .featband__icon { color: rgba(255,255,255,.95); }
 .featband__icon svg { width: 30px; height: 30px; }
-.featband__name { font-family: var(--font-heading, 'PT Serif', serif); font-weight: 700; font-size: var(--step-0); color: #ffffff; }
+.featband__name { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: var(--step-0); color: #ffffff; }
 .featband__text { color: rgba(255,255,255,.92); font-size: var(--step--1); line-height: var(--base-line-height, 1.5); }
 .block-featband__head { margin-bottom: 26px; }
 .block-featband__title { margin: 0; font-size: var(--font-size-h2, clamp(var(--step-4), 2.6vw, var(--step-6))); }
@@ -4238,10 +4238,10 @@ span.imgcard__media::after {
 .bio-edu__degree { font-weight: 700; color: var(--gov-title); font-size: var(--step--1); }
 .bio-edu__org { color: var(--gov-muted); font-size: var(--step--2); }
 .bio-extra { margin-top: 8px; }
-.bio-extra__title { font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; color: var(--section-title-fg); font-size: var(--step-0); margin: 0 0 10px; }
+.bio-extra__title { font-family: var(--font-family, 'Noto Sans', sans-serif); font-weight: 700; color: var(--section-title-fg); font-size: var(--step-0); margin: 0 0 10px; }
 .bio-extra__list { margin: 0; padding-left: 18px; color: var(--gov-muted); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); display: flex; flex-direction: column; gap: 6px; }
 .bio-quote { position: relative; margin: 0; background: var(--gov-navy); border-radius: var(--radius); padding: 30px 30px 26px; color: #fff; }
-.bio-quote__mark { font-family: var(--font-heading, 'PT Serif', serif); font-size: var(--step-8); line-height: 1; color: var(--gov-teal); display: block; margin-bottom: 8px; }
+.bio-quote__mark { font-family: var(--font-heading, 'Noto Serif', serif); font-size: var(--step-8); line-height: 1; color: var(--gov-teal); display: block; margin-bottom: 8px; }
 .bio-quote__text { margin: 0 0 12px; font-size: var(--step-0); line-height: var(--base-line-height, 1.6); border: 0; padding: 0; }
 .bio-quote__author { color: rgba(255,255,255,.75); font-size: var(--step--2); }
 /* Цвет текста — вариант «на подложке из акцента» (--gov-teal-on-tint): на
@@ -4481,7 +4481,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     color: var(--gov-muted);
     border-radius: calc(var(--radius-sm, 10px) - 3px);
     transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-    font-family: var(--font-family, 'PT Sans', sans-serif); 
+    font-family: var(--font-family, 'Noto Sans', sans-serif); 
 }
 .media-tabs__tab::after {
     display: none;
@@ -4717,7 +4717,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .catcard--with-image .catcard__datebox { grid-column: 1; }
 .catcard--with-image .catcard__main { grid-column: 2; }
 .catcard__datebox { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 74px; min-height: 84px; padding: 10px 6px; border-radius: var(--radius, 12px); background: var(--gov-navy); color: #fff; text-align: center; }
-.catcard__datebox b { font-family: var(--font-heading, 'PT Serif', serif); font-size: var(--step-5); line-height: 1; }
+.catcard__datebox b { font-family: var(--font-heading, 'Noto Serif', serif); font-size: var(--step-5); line-height: 1; }
 .catcard__datebox i { font-style: normal; font-size: var(--step--4); font-weight: 700; letter-spacing: .08em; margin-top: 4px; }
 .catcard__datebox em { font-style: normal; font-size: var(--step--4); opacity: .75; }
 @media (max-width: 560px) {
@@ -5058,7 +5058,7 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 .gcal-nav { display: flex; align-items: center; gap: 14px; }
 .gcal-nav__btn { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 10px); background: var(--gov-surface); color: var(--gov-title); font-weight: 700; text-decoration: none; }
 .gcal-nav__btn:hover { border-color: var(--gov-teal); color: var(--gov-teal-text); }
-.gcal-nav__label { font-family: var(--font-heading, 'PT Serif', serif); font-size: var(--step-2); color: var(--gov-title); text-transform: capitalize; }
+.gcal-nav__label { font-family: var(--font-heading, 'Noto Serif', serif); font-size: var(--step-2); color: var(--gov-title); text-transform: capitalize; }
 .gcal-nav__all { margin-left: auto; color: var(--gov-teal-text); font-weight: 700; font-size: var(--step--2); text-decoration: none; }
 .gcal-scroll { overflow-x: auto; }
 .gcal { width: 100%; min-width: 720px; border-collapse: collapse; border: 1px solid var(--gov-border); border-radius: var(--radius, 14px); overflow: hidden; background: var(--gov-surface); }
@@ -6143,7 +6143,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .act-card__head, .act-card__desc, .act-card__foot { position: relative; z-index: 1; }
 .act-card__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
 .act-card__number {
-    font-family: var(--font-family, 'PT Sans', sans-serif);
+    font-family: var(--font-family, 'Noto Sans', sans-serif);
     font-weight: 700;
     font-size: var(--font-size-meta, var(--step--3));
     letter-spacing: var(--meta-letter-spacing, .08em);
@@ -6188,7 +6188,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
        читается как часть фирменного слоя, а не как случайная сноска. */
     padding-inline-start: 12px;
     border-inline-start: 2px solid color-mix(in srgb, var(--color-accent, var(--gov-teal)) 50%, transparent);
-    font-family: var(--font-family, 'PT Sans', sans-serif);
+    font-family: var(--font-family, 'Noto Sans', sans-serif);
     font-size: 12px;
     line-height: 1.5;
     color: var(--gov-ink);
@@ -6528,7 +6528,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .feature-card.act-card .feature-card__title {
     margin: 0;
     color: var(--gov-title);
-    font-family: var(--font-heading, 'PT Serif', serif);
+    font-family: var(--font-heading, 'Noto Serif', serif);
     font-size: var(--step-1);
     font-weight: 700;
     line-height: 1.3;
@@ -6552,7 +6552,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .feature-card.contact-card .contact-card__link { margin-top: auto; }
 
 .feature-card.act-card .act-card__desc {
-    font-family: var(--font-family, 'PT Sans', sans-serif);
+    font-family: var(--font-family, 'Noto Sans', sans-serif);
     font-weight: 400;
     line-height: var(--base-line-height, 1.6);
 }
