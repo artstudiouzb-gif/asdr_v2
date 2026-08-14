@@ -171,6 +171,19 @@ $isPremium = $layout === 'premium';
 $hasMedia = !$isPremium && ($layout === 'video' || !empty($heroSlides));
 $hasKeyPoints = !empty($keyPoints);
 
+// Метка («Важно», «Анонс») — самый яркий элемент строки над заголовком: у
+// неё сплошная заливка, а рядом стоят спокойная рубрика, дата и счётчики.
+// В этом ряду она перетягивает внимание с самого заголовка, поэтому при
+// наличии фото или видео уезжает углом на медиа. Без медиа остаётся в
+// строке: иначе метка пропала бы совсем. Премиум-макет не трогаем — там
+// вся шапка и так лежит поверх обложки.
+$badgeInline = $hasMedia
+    ? ''
+    : \App\Core\NewsBadge::render($news['badge'] ?? '', $news['badge_color'] ?? null);
+$badgeOnMedia = $hasMedia
+    ? \App\Core\NewsBadge::renderOverlay($news['badge'] ?? '', $news['badge_color'] ?? null)
+    : '';
+
 // Оглавление статьи (премиум): собираем из <h2>/<h3> контента и проставляем id.
 $toc = [];
 $contentHtml = \App\Core\SocialEmbed::transform((string) $news['content']);
@@ -262,7 +275,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <?php if ($newsCategory !== null): ?>
                     <a class="newsdetail__badge" href="<?= htmlspecialchars($newsCategory['url'], ENT_QUOTES) ?>"><?= htmlspecialchars($newsCategory['name'], ENT_QUOTES) ?></a>
                 <?php endif; ?>
-                <?= \App\Core\NewsBadge::render($news['badge'] ?? '', $news['badge_color'] ?? null) ?>
+                <?= $badgeInline ?>
                 <div class="newsdetail__meta">
                     <?php if ($dateLong !== ''): ?>
                         <span class="newsdetail__meta-item"><?= $eventIcons[0] ?><time datetime="<?= htmlspecialchars(substr($date, 0, 10), ENT_QUOTES) ?>"><?= htmlspecialchars($dateLong, ENT_QUOTES) ?></time></span>
@@ -303,6 +316,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             <div class="newsdetail-media newsdetail-media--video">
                 <div class="news-video newsdetail-video skeleton" data-youtube="<?= htmlspecialchars($videoId, ENT_QUOTES) ?>" data-embed="<?= htmlspecialchars($embed, ENT_QUOTES) ?>" data-replay-label="<?= htmlspecialchars(t('Посмотреть ещё раз'), ENT_QUOTES) ?>">
                     <img class="news-video__thumb" src="<?= htmlspecialchars($cover !== '' ? $cover : $thumb, ENT_QUOTES) ?>" data-fallback="<?= htmlspecialchars($fallback, ENT_QUOTES) ?>" alt="<?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?>" loading="eager" decoding="async">
+                    <?= $badgeOnMedia ?>
                     <button type="button" class="news-video__play" aria-label="<?= htmlspecialchars(t('Смотреть видео'), ENT_QUOTES) ?>"></button>
                 </div>
             </div>
@@ -317,6 +331,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                         <button type="button" class="newsdetail-gallery__nav newsdetail-gallery__nav--next" data-ndg-next aria-label="<?= htmlspecialchars(t('Следующее фото'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('chevron-right', 22, 'ui-icon', 2) ?></button>
                         <span class="newsdetail-gallery__counter"><span data-ndg-current>1</span><span aria-hidden="true">/</span><?= count($heroSlides) ?></span>
                     <?php endif; ?>
+                    <?= $badgeOnMedia ?>
                 </div>
                 <?php
                 // Подпись и автор под галереей. Тексты всех слайдов уезжают в

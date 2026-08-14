@@ -43,6 +43,34 @@ test('Метка на карточке новости выводится тол�
     assert_contains('news-badge', \App\Core\NewsBadge::render('Важно'));
 });
 
+test('Метка детальной новости: углом на фото, а в строке — только без фото', function () {
+    $tpl = (string) file_get_contents(APP_ROOT . '/app/Views/site/news_show.php');
+
+    // В строке над заголовком метка была самым ярким элементом и спорила с
+    // самим заголовком. Она уезжает на медиа, но исчезнуть не должна:
+    // у новости без фото ей больше негде быть.
+    assert_true(
+        preg_match('/\$badgeInline\s*=\s*\$hasMedia\s*\?\s*\'\'\s*:/s', $tpl) === 1,
+        'в строке метка остаётся только когда медиа нет'
+    );
+    assert_true(
+        preg_match('/\$badgeOnMedia\s*=\s*\$hasMedia\s*\?\s*\\\\App\\\\Core\\\\NewsBadge::renderOverlay/s', $tpl) === 1,
+        'при наличии медиа метка рендерится накладкой'
+    );
+    // Обе ветки медиа — галерея и видео — должны получить метку.
+    assert_same(2, substr_count($tpl, '$badgeOnMedia ?>'), 'метка выводится и в галерее, и в видео');
+
+    // Накладка обязана быть непрозрачной и лежать поверх снимка: полупрозрачная
+    // плашка на светлом фото нечитаема, а фото редактор выбирает любое.
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    assert_true(
+        preg_match('/\.news-badge--overlay\s*\{[^}]*position:\s*absolute/', $css) === 1,
+        'накладка позиционируется поверх медиа'
+    );
+    assert_contains('news-badge--overlay', \App\Core\NewsBadge::renderOverlay('Важно'));
+    assert_same('', \App\Core\NewsBadge::renderOverlay('  '), 'пустая метка не оставляет плашку на фото');
+});
+
 test('Цвет метки: нормализация, контрастный текст и безопасное значение', function () {
     assert_same('#c0392b', \App\Core\NewsBadge::normalizeColor('#C0392B'));
     assert_same('#aabbcc', \App\Core\NewsBadge::normalizeColor('abc'), 'короткая запись разворачивается');
