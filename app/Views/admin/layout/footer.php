@@ -285,33 +285,53 @@ document.querySelectorAll('form[data-content-draft]').forEach(function (form) {
 });
 
 window.addEventListener('DOMContentLoaded', function () {
-    var success = document.querySelector('.admin-main > .alert--success');
-    if (!success) { return; }
+    /* Сообщение показываем тостом при любом исходе, а не только при успехе.
+       Раньше ошибку выводил только .alert наверху .admin-main, и она терялась:
+       обработчики возвращают на якорь (например /admin/telegram#telegram-channel),
+       браузер сразу уезжает к нужной секции — и сообщение остаётся выше экрана.
+       Со стороны это выглядело как «кнопка не работает». */
+    var alertBox = document.querySelector('.admin-main > .alert');
+    if (!alertBox) { return; }
 
-    var message = (success.textContent || '').trim();
+    var message = (alertBox.textContent || '').trim();
     if (!message) { return; }
 
+    var isError = alertBox.classList.contains('alert--error');
+    var kind = isError ? 'error' : (alertBox.classList.contains('alert--warning') ? 'warning' : 'success');
+
     var toast = document.createElement('div');
-    toast.className = 'admin-toast-notification admin-toast--success';
-    toast.setAttribute('role', 'status');
-    toast.setAttribute('aria-live', 'polite');
+    toast.className = 'admin-toast-notification admin-toast--' + kind;
+    toast.setAttribute('role', isError ? 'alert' : 'status');
+    toast.setAttribute('aria-live', isError ? 'assertive' : 'polite');
     var toastOkIcon = <?= json_encode(\App\Core\Icon::render('check', 16), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    /* У ошибки свой значок: галочка рядом с красным текстом читается как
+       «получилось» и сбивает с толку сильнее, чем отсутствие значка вообще.
+       Берём circle-x, а не alert-triangle: символы для спрайта собираются
+       регуляркой по готовому HTML, а внутри JS-строки кавычки экранированы и
+       она их не находит. Гарантированно попадают в спрайт только ключи из
+       Icon::RUNTIME_ICONS — circle-x там есть. */
+    var toastErrIcon = <?= json_encode(\App\Core\Icon::render('circle-x', 16), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
     var toastCloseIcon = <?= json_encode(\App\Core\Icon::render('x', 16), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
     toast.innerHTML = '<div class="u-inline-7e30d285d2">'
-        + '<span class="u-inline-4f1925a8a6" aria-hidden="true">' + toastOkIcon + '</span>'
+        + '<span class="u-inline-4f1925a8a6" aria-hidden="true">' + (isError ? toastErrIcon : toastOkIcon) + '</span>'
         + '<span class="u-inline-94c3db5540"></span>'
         + '</div>'
         + '<button class="u-inline-d8c73d8aa0" type="button" aria-label="Закрыть уведомление">' + toastCloseIcon + '</button>';
     toast.querySelector('.u-inline-94c3db5540').textContent = message;
     toast.querySelector('button').addEventListener('click', function () { toast.remove(); });
     document.body.appendChild(toast);
-    success.remove();
+    alertBox.remove();
 
     window.requestAnimationFrame(function () { toast.classList.add('is-visible'); });
+
+    /* Ошибка висит, пока её не закроют: в ней написано, что именно сделать
+       («добавьте бота администратором и напишите в канал»), и пятью секундами
+       такое не прочитать. Успех гасим сам — там читать нечего. */
+    if (isError) { return; }
     window.setTimeout(function () {
         toast.classList.remove('is-visible');
         window.setTimeout(function () { toast.remove(); }, 300);
-    }, 5000);
+    }, 6000);
 });
 /* Навигация админки: мобильная панель и запоминаемое сворачивание на десктопе. */
 (function () {
