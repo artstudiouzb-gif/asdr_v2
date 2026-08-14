@@ -4444,7 +4444,36 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
    это читается как недоделка. Отдаём её промежутку между рядами: карточки
    остаются плотными, фотографии — одной высоты, а увеличенный воздух между
    рядом с фото и рядом без фото выглядит намеренным. */
-.block-newsfeat--mosaic .newsfeat-side { justify-content: space-between; }
+/* Мозаика — одна сетка в четыре колонки на оба ряда, а не «крупная новость +
+   отдельная колонка справа». Прежняя раскладка растила крупную на всю высоту
+   двух рядов, и она задавливала остальные: половина ширины и вся высота блока.
+   Теперь она занимает две колонки только верхнего ряда.
+
+   Обёртки правой части распускаются в ячейки той же сетки (display: contents),
+   поэтому шаг между всеми карточками один и они стоят на общих колонках. */
+.block-newsfeat--mosaic .newsfeat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.block-newsfeat--mosaic .newsfeat-side,
+.block-newsfeat--mosaic .newsfeat-side__thumbs,
+.block-newsfeat--mosaic .newsfeat-side__texts { display: contents; }
+.block-newsfeat--mosaic .newsfeat-lead { grid-column: span 2; }
+/* Снимки маленьких карточек — та же пропорция, что у крупной. */
+.block-newsfeat--mosaic .newsfeat-mini__thumb { aspect-ratio: 16/9; }
+/* Карточки не растягиваются до высоты крупной новости. Растянуть их можно было
+   бы только за счёт чего-то одного: либо снимок перестаёт быть 16:9, либо
+   внутри карточки повисает пустота между описанием и ссылкой. Пропорция важнее
+   ровного нижнего края, поэтому карточка заканчивается там, где кончается её
+   содержимое. */
+.block-newsfeat--mosaic .newsfeat-grid { align-items: start; }
+.block-newsfeat--mosaic .newsfeat-mini { height: auto; }
+
+@media (max-width: 900px) {
+    .block-newsfeat--mosaic .newsfeat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .block-newsfeat--mosaic .newsfeat-lead { grid-column: span 2; }
+}
+@media (max-width: 560px) {
+    .block-newsfeat--mosaic .newsfeat-grid { grid-template-columns: minmax(0, 1fr); }
+    .block-newsfeat--mosaic .newsfeat-lead { grid-column: span 1; }
+}
 
 /* Крупная новость: фотография держит 16:9, а не растягивается по высоте
    правой колонки. Раньше media была height:100%, и снимок обрезался под почти
