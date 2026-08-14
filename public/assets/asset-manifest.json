@@ -13,11 +13,11 @@
       "/assets/css/public-layout-polish.css",
       "/assets/css/public-editorial-pages.css"
     ],
-    "sourceSha256": "405aa63dd12d11109637d6d67ded6a635f034d1af2910a291f811e011fa77cdc",
-    "sha256": "65c3d114843c0670f633310b6020309c1f6e22811dc01ce92b7676bd786cb2bb",
-    "raw": 399356,
-    "gzip": 65127,
-    "brotli": 50981
+    "sourceSha256": "ac99bce3f4c1eb264e711dc33aa976e1f432daac792852ab86e842fd2f534caf",
+    "sha256": "d95fed274f05b52f426ee05d2d4592f50fa747c1b294fa90fae8b82a2ba1066d",
+    "raw": 401358,
+    "gzip": 65551,
+    "brotli": 51127
   },
   "js": {
     "path": "/assets/js/public.min.js",
@@ -59,11 +59,11 @@
     },
     "/assets/css/blocks/media-gallery.css": {
       "path": "/assets/css/blocks/media-gallery.min.css",
-      "sourceSha256": "d31c4e1f63689402c03ec062d4217dd72861a52eb08b0ef52e55400830d7aa8d",
-      "sha256": "f8c4a4b9ad229357a3a788db4704cade782ed8f42358355599f794e8493ed295",
-      "raw": 3509,
-      "gzip": 1201,
-      "brotli": 989
+      "sourceSha256": "69f5b9293bfa22c06337849399cd3f564cf904183da347a6066fec66eb45df5a",
+      "sha256": "74333e76a44051372f984ccd469cdee689df11f7e7c1b049cbe97e56a34a6641",
+      "raw": 3736,
+      "gzip": 1236,
+      "brotli": 1024
     },
     "/assets/css/blocks/tabs.css": {
       "path": "/assets/css/blocks/tabs.min.css",
@@ -72,6 +72,14 @@
       "raw": 2739,
       "gzip": 891,
       "brotli": 720
+    },
+    "/assets/css/blocks/hero.css": {
+      "path": "/assets/css/blocks/hero.min.css",
+      "sourceSha256": "a3016ea660f35697a0be68d0741ac375f76b45bbc32ce2da6b9ca7dc187c3296",
+      "sha256": "90b91455017708002f2d70b065c8f6f502919108603fdfe5e6e85f32603998f9",
+      "raw": 10004,
+      "gzip": 2470,
+      "brotli": 2150
     },
     "/assets/js/blocks/slider.js": {
       "path": "/assets/js/blocks/slider.min.js",
@@ -112,6 +120,14 @@
       "raw": 2002,
       "gzip": 859,
       "brotli": 715
+    },
+    "/assets/js/blocks/hero.js": {
+      "path": "/assets/js/blocks/hero.min.js",
+      "sourceSha256": "5c3ca3ffba4eb87ff4d085005027a73af23ede03ce5e963e6160e1aa26d85db2",
+      "sha256": "65bf942f88bb4bb64d71654f61dbab12c21d8ae42f475e8c0a274ec7b8644bb1",
+      "raw": 6114,
+      "gzip": 2155,
+      "brotli": 1862
     },
     "/assets/js/news.js": {
       "path": "/assets/js/news.min.js",

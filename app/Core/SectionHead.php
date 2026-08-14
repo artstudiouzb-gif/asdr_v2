@@ -23,6 +23,7 @@ final class SectionHead
      *     description_html?: bool,
      *     all_text?: string,
      *     all_url?: string,
+     *     all_after_tools?: bool,
      *     tools?: string,
      *     class?: string,
      *     level?: string,
@@ -86,11 +87,16 @@ final class SectionHead
 
         if ($allUrl !== '' || $tools !== '') {
             $html .= '<div class="section-head__tools">';
-            if ($allUrl !== '') {
-                $html .= '<a class="section-head__all" href="' . htmlspecialchars($allUrl, ENT_QUOTES) . '">'
-                    . htmlspecialchars($allText, ENT_QUOTES) . ' →</a>';
-            }
-            $html .= $tools . '</div>';
+            $all = $allUrl !== ''
+                ? '<a class="section-head__all" href="' . htmlspecialchars($allUrl, ENT_QUOTES) . '">'
+                    . htmlspecialchars($allText, ENT_QUOTES) . ' →</a>'
+                : '';
+            // По умолчанию ссылка идёт первой — так у каруселей, где следом
+            // стоят стрелки. У переключателя вкладок порядок обратный: вкладки
+            // это навигация по содержимому, а ссылка «все» — выход из него, и
+            // читаться она должна после, у правого края строки.
+            $html .= ($options['all_after_tools'] ?? false) ? $tools . $all : $all . $tools;
+            $html .= '</div>';
         }
 
         return $html . '</div>';

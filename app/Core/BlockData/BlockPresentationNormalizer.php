@@ -70,8 +70,14 @@ final class BlockPresentationNormalizer
             $mode = 'preset';
         }
 
+        // Цвет текста от режима фона не зависит: он нужен и пресету navy, и
+        // секции вовсе без своей заливки. Раньше этот код стоял после выхода
+        // по «preset» и до таких секций просто не доходил — из-за чего у navy
+        // цвет текста было нечем настроить.
+        $colors = self::sectionColors($input);
+
         if ($mode === 'preset') {
-            return ['_bg_mode' => 'preset'];
+            return ['_bg_mode' => 'preset'] + $colors;
         }
 
         $data = ['_bg_mode' => $mode];
@@ -110,11 +116,36 @@ final class BlockPresentationNormalizer
             $data['_bg_pattern_opacity'] = max(3, min(60, (int) ($input['bg_pattern_opacity'] ?? 22)));
             $data['_bg_pattern_size'] = max(8, min(240, (int) ($input['bg_pattern_size'] ?? 28)));
         }
-        // Светлый текст нужен на любом тёмном фоне — и на своём цвете, и на
-        // градиенте, и на снимке: по цвету угадать нельзя, решает редактор.
-        $data['_bg_light_text'] = !empty($input['bg_light_text']);
+        return $data + $colors;
+    }
 
-        return $data;
+    /**
+     * Цвет текста секции и цвет вложенных карточек — два независимых уровня.
+     *
+     * Схема секции красит только её собственный текст; карточка со своей
+     * поверхностью объявляет цвета заново (App\Core\SectionColors::SURFACES),
+     * поэтому белый блок внутри тёмной секции остаётся с тёмным текстом.
+     *
+     * @param array<string, mixed> $input
+     * @return array<string, mixed>
+     */
+    private static function sectionColors(array $input): array
+    {
+        // По фону угадать нельзя: фотография бывает и светлой, и тёмной.
+        $textScheme = self::scalarString($input['bg_text_scheme'] ?? null, 'auto');
+        $textScheme = in_array($textScheme, \App\Core\SectionColors::TEXT_SCHEMES, true) ? $textScheme : 'auto';
+
+        $cardScheme = self::scalarString($input['bg_card_scheme'] ?? null, 'auto');
+        $cardScheme = in_array($cardScheme, \App\Core\SectionColors::CARD_SCHEMES, true) ? $cardScheme : 'auto';
+
+        return [
+            '_bg_text_scheme' => $textScheme,
+            '_bg_text_color' => self::color($input['bg_text_color'] ?? null),
+            '_bg_card_scheme' => $cardScheme,
+            // Прежний флажок «Светлый текст» держим в синхроне: на него смотрят
+            // страницы, сохранённые до появления настройки.
+            '_bg_light_text' => $textScheme === 'light',
+        ];
     }
 
     /** Цвет из формы: принимаем только #rrggbb, остальное — «не задан». */

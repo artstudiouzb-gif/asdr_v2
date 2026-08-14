@@ -35,24 +35,10 @@ final class BlockBackground
 
         $vars = [];
         $layers = [];
+        // Цвет текста секции считает SectionColors и подмешивает BlockRenderer:
+        // он нужен и секциям без своего фона (пресет navy), поэтому здесь его
+        // больше нет.
         $extraCss = '';
-
-        if (!empty($data['_bg_light_text'])) {
-            // Светлый текст задаём scoped CSS по id секции, а не классом
-            // тёмной секции: у той в комплекте своя заливка (--gov-navy), она
-            // перекрыла бы выбранный фон. Плюс на редакционных страницах цвет
-            // заголовков задан правилом из трёх классов — id его перебивает,
-            // класс бы не перебил.
-            $extraCss = $scope . '{color:rgba(255,255,255,.92)}'
-                . $scope . ' :is(h1,h2,h3,h4,h5,h6,[class$="__title"],[class*="__title "]){color:#fff}'
-                // Тело текста красится своими правилами (--gov-muted,
-                // .rich-content): без явного перечисления абзац остаётся
-                // тёмно-серым на тёмном фоне.
-                . $scope . ' :is(p,li,dd,dt,td,th,blockquote,figcaption,.rich-content,'
-                . '[class*="__text"],[class*="__desc"],[class*="__lead"],[class*="__excerpt"],'
-                . '[class*="__body"],[class*="__note"]){color:rgba(255,255,255,.88)}'
-                . $scope . ' :is(a,.section-head__all,[class*="__more"],[class*="__link"]){color:#fff}';
-        }
 
         if ($mode === 'color') {
             $vars['--block-bg'] = (string) ($data['_bg_color'] ?? '');

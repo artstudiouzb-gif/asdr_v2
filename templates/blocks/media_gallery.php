@@ -48,7 +48,10 @@ if ($showTabs) {
         'all_text' => $allText,
         'all_url' => $allUrl,
         'tools' => $tabsHtml,
-        'class' => 'block-mediagallery__head',
+        // Ссылка «Все материалы» стоит после вкладок и прижата к правому краю
+        // их строки: вкладки — навигация по содержимому, ссылка — выход из него.
+        'all_after_tools' => true,
+        'class' => 'block-mediagallery__head' . ($tabsHtml !== '' ? ' section-head--split-tools' : ''),
     ]) ?>
     <?php if (empty($items)): ?>
         <p class="block-mediagallery__empty"><?= htmlspecialchars(t('Материалы ещё не добавлены.'), ENT_QUOTES) ?></p>

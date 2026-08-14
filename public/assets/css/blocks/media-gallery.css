@@ -2,15 +2,27 @@
    руководителя. Визуальная система одна: спокойная дорожка, равные сегменты
    и один подвижный активный индикатор — без масок и фигурных псевдослоёв. */
 
+/* Шапка: заголовок слева, справа — строка «вкладки + ссылка «все»». Раньше
+   здесь была сетка из трёх колонок под разметку «заголовок / вкладки /
+   ссылка», но SectionHead давно заворачивает вкладки и ссылку в общий
+   .section-head__tools: третья колонка пустовала, а ссылка оказывалась левее
+   вкладок. Колонки теперь две, порядок внутри строки задаёт разметка. */
 .block-mediagallery__head {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 24px;
     border: 0;
 }
 .block-mediagallery__head .section-head__title { justify-self: start; }
-.block-mediagallery__head .section-head__all { justify-self: end; }
+.block-mediagallery__head .section-head__tools {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    flex-wrap: nowrap;
+}
+.block-mediagallery__head .section-head__all { flex: 0 0 auto; }
 
 .block-mediagallery__head .media-tabs {
     position: relative;
@@ -126,16 +138,20 @@
     }
 }
 
+/* Узкий экран: заголовок отдельной строкой, ниже — вкладки и прижатая к
+   правому краю ссылка «все», на одной строке. Раньше здесь вкладки
+   переносились в свою строку через grid-row: они были прямым потомком сетки
+   шапки; теперь они лежат внутри .section-head__tools, и раскладку задаёт
+   уже эта строка. */
 @media (max-width: 900px) {
     .block-mediagallery__head {
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 16px 20px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
     }
-    .block-mediagallery__head .media-tabs {
-        grid-column: 1 / -1;
-        grid-row: 2;
-        width: min(260px, 100%);
-    }
+    .block-mediagallery__head .section-head__tools { gap: 12px; }
+    .block-mediagallery__head .media-tabs { width: min(260px, 100%); flex: 0 1 auto; min-width: 0; }
+    /* Автоотступ съедает свободное место: вкладки уходят влево, ссылка — вправо. */
+    .block-mediagallery__head .section-head__all { margin-inline-start: auto; }
 }
 
 @media (max-width: 640px) {

@@ -1511,6 +1511,50 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
    чего в тёмной теме подложка оставалась белой. */
 :root { --gov-bg-alt: #f8f9fa; }
 :root[data-theme="dark"] { --gov-bg-alt: #303c50; }
+
+/*
+ * Цвет текста секции: значения по умолчанию — обычные цвета темы, поэтому вне
+ * тёмных секций переменные ничего не меняют. Тёмная секция переопределяет их
+ * у себя (пресет navy, «Светлый текст», свой цвет — App\Core\SectionColors).
+ */
+:root {
+    --section-fg: var(--text-primary);
+    --section-title-fg: var(--gov-title);
+    --section-muted-fg: var(--text-muted);
+    --section-link-fg: var(--gov-teal-text);
+}
+
+/*
+ * Компоненты со своей поверхностью цвет секции НЕ наследуют: белая карточка
+ * внутри navy-секции обязана остаться с тёмным текстом. Список один на весь
+ * фронт и продублирован в App\Core\SectionColors::SURFACES — их сверяет тест.
+ *
+ * Работает это не специфичностью, а наследованием: секция объявляет
+ * переменные себе, карточка — себе, и её поддерево видит уже свои значения.
+ */
+:is(.act-card, .album-card, .block-advantages__item, .block-testimonials__item, .cat-tile,
+    .catcard, .catdetail__card, .contact-card, .content-card, .doc-card, .faq-item,
+    .feature-card, .leader-card, .mediacard, .news-card, .news-poll-card, .newsdetail-card,
+    .newslist-lead, .person-card, .project-card, .relnews-card, .site-search-results__item,
+    .social-embed-card, .team-card, .testimonial, .timeline-card, .widget--style-card) {
+    --section-fg: var(--text-primary);
+    --section-title-fg: var(--gov-title);
+    --section-muted-fg: var(--text-muted);
+    --section-link-fg: var(--gov-teal-text);
+    /* Акцент ссылок на тёмной секции осветлён (--gov-teal-on-dark); на светлой
+       карточке он теряет контраст, поэтому возвращаем тёмный вариант. */
+    --gov-teal-text: var(--gov-teal-dark, #0284c7);
+    color: var(--section-fg);
+}
+
+:root[data-theme="dark"] :is(.act-card, .album-card, .block-advantages__item, .block-testimonials__item, .cat-tile,
+    .catcard, .catdetail__card, .contact-card, .content-card, .doc-card, .faq-item,
+    .feature-card, .leader-card, .mediacard, .news-card, .news-poll-card, .newsdetail-card,
+    .newslist-lead, .person-card, .project-card, .relnews-card, .site-search-results__item,
+    .social-embed-card, .team-card, .testimonial, .timeline-card, .widget--style-card) {
+    /* В тёмной теме поверхность карточки сама тёмная — акцент снова светлый. */
+    --gov-teal-text: var(--gov-teal-on-dark);
+}
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline-offset: 2px; border-radius: 4px; }
 .cms-block--bg-navy a:focus-visible, .block-ctaband a:focus-visible, .featband a:focus-visible, .timeline-cta a:focus-visible { outline-color: #fff; }
 .section-head__all, .newsfeat__more, .person-card__more, .imgcard__more { color: var(--gov-teal-text); }
@@ -2358,7 +2402,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .adjnews__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .adjnews__label { text-transform: uppercase; font-size: var(--step--4); letter-spacing: .08em; font-weight: 700; color: var(--gov-muted); }
 .adjnews__date { color: var(--gov-muted); font-size: var(--step--3); }
-.adjnews__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
+.adjnews__title { font-weight: 700; color: var(--section-title-fg); line-height: 1.35; font-size: var(--step--1); }
 .adjnews:hover .adjnews__title { color: var(--gov-teal); }
 @media (prefers-reduced-motion: reduce) {
     .newsdetail-photos__item, .adjnews, .relnews-card { transition: none; }
@@ -2555,7 +2599,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
     color: var(--gov-teal-text);
 }
 .stage__label { color: var(--gov-muted); font-size: var(--step--3); text-transform: uppercase; letter-spacing: .05em; }
-.stage__title { font-weight: 700; color: var(--gov-title); font-size: var(--step-0); }
+.stage__title { font-weight: 700; color: var(--section-title-fg); font-size: var(--step-0); }
 .stage__text { color: var(--gov-muted); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); flex: 1; }
 .stage__status { align-self: flex-start; padding: 5px 12px; border-radius: 999px; font-size: var(--step--4); font-weight: 700; background: color-mix(in srgb, var(--gov-navy) 7%, var(--gov-bg)); color: var(--gov-muted); transition: background 0.3s, color 0.3s; }
 .stage--done .stage__status { background: color-mix(in srgb, var(--gov-teal) 14%, var(--gov-bg)); color: color-mix(in srgb, var(--gov-teal-text) 82%, #000); }
@@ -2721,7 +2765,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
    в ch обрывала строку раньше абзаца под ней и выглядела случайной. */
 .block-text__title { max-width: none; }
 .content-pagehead__inner { max-width: var(--container-max); margin: 0 auto; }
-.content-pagehead__title { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 10px; color: var(--gov-title); }
+.content-pagehead__title { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 10px; color: var(--section-title-fg); }
 .content-pagehead__lead { color: var(--gov-muted); font-size: var(--step-0); line-height: var(--base-line-height, 1.6); margin: 0; }
 
 /* Крупная первая новость. */
@@ -3306,7 +3350,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .block-featband__description p:last-child,
 .block-timeline__description p:last-child { margin-bottom: 0; }
 .cms-block--bg-navy :is(.section-head__description, .block-advantages__description, .block-featband__description, .block-timeline__description) {
-    color: rgba(255, 255, 255, .82);
+    color: var(--section-muted-fg);
 }
 .section-head__all { color: var(--gov-teal-text); font-family: var(--font-family, 'PT Sans', sans-serif); font-size: var(--step--2); font-weight: 700; text-decoration: none; white-space: nowrap; }
 
@@ -3586,6 +3630,11 @@ span.imgcard__media::after {
 /* На узких экранах ссылка «Все …» и стрелки карусели не помещаются в одну
    строку: без переноса блок вылезал за окно и давал горизонтальный скролл. */
 .section-head__tools { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; max-width: 100%; }
+
+/* Шапка с переключателем вкладок: ссылка «все» стоит после вкладок и прижата
+   к правому краю их строки. На телефоне строка вкладок занимает всю ширину —
+   иначе ссылка переносится под них и выравнивание теряется. */
+.section-head--split-tools .section-head__all { margin-inline-start: auto; }
 .carousel-nav { display: inline-flex; gap: 8px; }
 .carousel-nav[hidden] { display: none; }
 .carousel-nav__btn { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gov-border); background: var(--gov-surface); color: var(--gov-title); font-size: var(--step-3); line-height: 1; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease; }
@@ -3736,9 +3785,30 @@ span.imgcard__media::after {
 .cms-block--bg { position: relative; z-index: 0; }
 .cms-block--bg-light { background: var(--gov-surface); }
 .cms-block--bg-tint { background: color-mix(in srgb, var(--gov-navy) 5%, var(--gov-bg)); }
-.cms-block--bg-navy { background: var(--gov-navy); color: rgba(255,255,255,.9); }
-.cms-block--bg-navy h1, .cms-block--bg-navy h2, .cms-block--bg-navy h3, .cms-block--bg-navy .section-head__title { color: #fff; }
-.cms-block--bg-navy .section-head__all { color: #fff; }
+/* Цвет текста секции — переменные, а не прямой color у потомков. Прямое
+   правило вида «.cms-block--bg-navy h3 { color:#fff }» добивало до заголовка
+   внутри белой карточки, и он становился белым на белом. Переменную же
+   карточка объявляет заново для своего поддерева (см. .cms-block--bg-navy
+   :is(…) ниже) — спорить о специфичности не с кем. */
+.cms-block--bg-navy {
+    background: var(--gov-navy);
+    --section-fg: rgba(255,255,255,.9);
+    --section-title-fg: #fff;
+    --section-muted-fg: rgba(255,255,255,.82);
+    --section-link-fg: #fff;
+    color: var(--section-fg);
+}
+.cms-block--bg-navy :is(h1, h2, h3, .section-head__title) { color: var(--section-title-fg); }
+/* Карточки темы полупрозрачны (стекло с размытием). Сквозь них просвечивает
+   navy, поверхность становится серо-синей, и тёмный текст карточки теряет
+   контраст. На тёмной секции делаем её непрозрачной: читаемость важнее
+   эффекта. То же самое для своего тёмного фона — App\Core\SectionColors. */
+.cms-block--bg-navy :is(.act-card, .album-card, .block-advantages__item, .block-testimonials__item, .cat-tile,
+    .catcard, .catdetail__card, .contact-card, .content-card, .doc-card, .faq-item,
+    .feature-card, .leader-card, .mediacard, .news-card, .news-poll-card, .newsdetail-card,
+    .newslist-lead, .person-card, .project-card, .relnews-card, .site-search-results__item,
+    .social-embed-card, .team-card, .testimonial, .timeline-card, .widget--style-card) { background-color: var(--gov-surface); }
+.cms-block--bg-navy .section-head__all { color: var(--section-link-fg); }
 
 .cms-block--fullwidth { background: transparent !important; }
 .cms-block--fullwidth::before {
@@ -3893,7 +3963,7 @@ span.imgcard__media::after {
 /* История — таймлайн + CTA-карточка с фоном. */
 /* История — таймлайн + CTA-карточка с фоном. */
 .block-timeline__head { margin-bottom: 26px; }
-.block-timeline__title { margin: 0; color: var(--gov-title); font-size: var(--font-size-h2, clamp(var(--step-4), 2.6vw, var(--step-6))); font-weight: 700; line-height: 1.25; letter-spacing: -.02em; }
+.block-timeline__title { margin: 0; color: var(--section-title-fg); font-size: var(--font-size-h2, clamp(var(--step-4), 2.6vw, var(--step-6))); font-weight: 700; line-height: 1.25; letter-spacing: -.02em; }
 .block-timeline__layout { min-width: 0; }
 .block-timeline--with-cta .block-timeline__layout { display: grid; grid-template-columns: 1fr 1.1fr; gap: 28px; align-items: stretch; }
 @media (max-width: 900px) { .block-timeline--with-cta .block-timeline__layout { grid-template-columns: 1fr; } }
@@ -3994,7 +4064,7 @@ span.imgcard__media::after {
 .newsdocs-item__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
 .newsdocs-item__body { display: flex; flex-direction: column; gap: 5px; }
 .newsdocs-item__date { color: var(--gov-muted); font-size: var(--step--3); }
-.newsdocs-item__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
+.newsdocs-item__title { font-weight: 700; color: var(--section-title-fg); line-height: 1.35; font-size: var(--step--1); }
 .newsdocs-item:hover .newsdocs-item__title { color: var(--gov-teal); }
 .newsdocs-docs { display: flex; flex-direction: column; gap: 14px; }
 .doc-card { 
@@ -4162,7 +4232,7 @@ span.imgcard__media::after {
 .bio-edu__degree { font-weight: 700; color: var(--gov-title); font-size: var(--step--1); }
 .bio-edu__org { color: var(--gov-muted); font-size: var(--step--2); }
 .bio-extra { margin-top: 8px; }
-.bio-extra__title { font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; color: var(--gov-title); font-size: var(--step-0); margin: 0 0 10px; }
+.bio-extra__title { font-family: var(--font-family, 'PT Sans', sans-serif); font-weight: 700; color: var(--section-title-fg); font-size: var(--step-0); margin: 0 0 10px; }
 .bio-extra__list { margin: 0; padding-left: 18px; color: var(--gov-muted); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); display: flex; flex-direction: column; gap: 6px; }
 .bio-quote { position: relative; margin: 0; background: var(--gov-navy); border-radius: var(--radius); padding: 30px 30px 26px; color: #fff; }
 .bio-quote__mark { font-family: var(--font-heading, 'PT Serif', serif); font-size: var(--step-8); line-height: 1; color: var(--gov-teal); display: block; margin-bottom: 8px; }
@@ -4955,7 +5025,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .catdetail { display: flex; flex-direction: column; gap: clamp(24px, 3.4vw, 40px); padding-block: 10px clamp(40px, 5vw, 64px); }
 .catdetail__head { max-width: 900px; }
 .catdetail__eyebrow { display: inline-block; color: var(--gov-teal-text); font-size: var(--step--3); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-.catdetail__title { margin: 12px 0 10px; font-size: clamp(var(--step-5), 3vw, var(--step-8)); line-height: 1.15; color: var(--gov-title); }
+.catdetail__title { margin: 12px 0 10px; font-size: clamp(var(--step-5), 3vw, var(--step-8)); line-height: 1.15; color: var(--section-title-fg); }
 .catdetail__date { color: var(--gov-muted); font-size: var(--step--2); }
 .catdetail__event-banner { width: 100%; margin: 0; overflow: hidden; border-radius: clamp(14px, 2vw, 22px); aspect-ratio: 16 / 7; background: var(--gov-bg); box-shadow: var(--card-shadow); }
 .catdetail__event-banner picture { display: block; width: 100%; height: 100%; }
@@ -4995,7 +5065,7 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 .gcal__event { display: block; margin-top: 4px; padding: 5px 8px; border-radius: var(--radius-sm, 8px); background: rgba(23, 153, 155, .12); color: var(--gov-teal-text); font-size: var(--step--4); font-weight: 600; line-height: 1.35; text-decoration: none; }
 .gcal__event:hover { background: var(--gov-teal); color: #fff; }
 .gcal-list { display: flex; flex-direction: column; gap: 14px; }
-.gcal-list__title { margin: 0; font-size: var(--step-2); color: var(--gov-title); }
+.gcal-list__title { margin: 0; font-size: var(--step-2); color: var(--section-title-fg); }
 .gcal-list__items { display: flex; flex-direction: column; gap: 0; margin: 0; padding: 0; list-style: none; border: 1px solid var(--gov-border); border-radius: var(--radius, 14px); background: var(--gov-surface); overflow: hidden; }
 .gcal-list__item { display: flex; align-items: center; gap: 14px; padding: 16px 22px; }
 .gcal-list__item + .gcal-list__item { border-top: 1px solid var(--gov-border); }
@@ -6236,7 +6306,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 
 /* --- FAQ / Аккордеон вопросов --- */
 .block-faq { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 100%; }
-.block-faq__title { font-size: clamp(var(--step-4), 2.8vw, var(--step-7)); margin: 0 0 10px; color: var(--gov-title); text-align: left; }
+.block-faq__title { font-size: clamp(var(--step-4), 2.8vw, var(--step-7)); margin: 0 0 10px; color: var(--section-title-fg); text-align: left; }
 .faq-tools { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; width: 100%; }
 .faq-tools__search, .faq-tools__category select {
     display: flex; align-items: center; gap: 10px; padding: 10px 16px;
@@ -6368,7 +6438,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 /* Заголовок блока — как у остальных секций: 1.1rem читался подписью, а не
    названием раздела, и ломал иерархию страницы. */
 .block-advantages__head { margin-bottom: 26px; }
-.block-advantages__title { margin: 0; color: var(--gov-title); font-size: var(--font-size-h2, clamp(var(--step-4), 2.6vw, var(--step-6))); font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; }
+.block-advantages__title { margin: 0; color: var(--section-title-fg); font-size: var(--font-size-h2, clamp(var(--step-4), 2.6vw, var(--step-6))); font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; }
 .block-advantages__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: var(--base-line-height, 1.55); margin: 0; }
 
 /* --- Контактные карточки / Отделы (Contact Cards Block) --- */
@@ -6526,7 +6596,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     padding: 20px 24px; border: 1px solid var(--gov-border); border-radius: var(--radius, 14px);
     background: var(--gov-surface); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
 }
-.stage-item__title { font-weight: 700; font-size: var(--step-0); color: var(--gov-title); margin: 0 0 6px; }
+.stage-item__title { font-weight: 700; font-size: var(--step-0); color: var(--section-title-fg); margin: 0 0 6px; }
 .stage-item__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: var(--base-line-height, 1.55); margin: 0; }
 
 /* Пульсация текущего этапа отключается при системном запросе «меньше

@@ -241,6 +241,13 @@ final class BlockRenderer
         } elseif ($bg !== 'none') {
             $extraClass .= ' cms-block--bg cms-block--bg-' . $bg;
         }
+        // Цвет текста секции и вложенных карточек. Считается для любого фона,
+        // в том числе для пресета navy и для секции вовсе без фона: редактор
+        // может задать цвет текста и там.
+        $sectionColors = SectionColors::build($data, $blockId);
+        if ($sectionColors !== '') {
+            $scopedCss = $scopedCss !== '' ? $scopedCss . "\n" . $sectionColors : $sectionColors;
+        }
         if ($fullwidth) {
             $extraClass .= ' cms-block--fullwidth';
         }
@@ -294,10 +301,19 @@ final class BlockRenderer
 
         $preloadImage = null;
         if ($type === 'hero') {
-            $heroImage = trim((string) ($data['image'] ?? ''));
-            $heroBgType = (string) ($data['bg_type'] ?? 'none');
-            if (in_array($heroBgType, ['image', 'youtube'], true) && $heroImage !== '') {
-                $preloadImage = $heroImage;
+            if (!empty($data['_hero_slides'])) {
+                // Кандидат в LCP — первый кадр обложки: у слайда это может быть
+                // и постер видео, поэтому спрашиваем не поле, а помощник.
+                $first = \App\Core\Hero\HeroSlideData::fallbackImage(
+                    (array) (($data['_hero_slides'][0]['data'] ?? []))
+                );
+                $preloadImage = $first !== '' ? $first : null;
+            } else {
+                $heroImage = trim((string) ($data['image'] ?? ''));
+                $heroBgType = (string) ($data['bg_type'] ?? 'none');
+                if (in_array($heroBgType, ['image', 'youtube'], true) && $heroImage !== '') {
+                    $preloadImage = $heroImage;
+                }
             }
         }
 
@@ -344,6 +360,13 @@ final class BlockRenderer
             // не нужен, и грузить его всем подряд незачем.
             if (str_contains($rendered['html'], 'data-hero-slider')) {
                 $assets['slider'] = true;
+            }
+            // Обложка как тип контента — свой скрипт и своя часть темы. Ключ не
+            // совпадает с типом блока намеренно: блок «Обложка» со старыми
+            // собственными настройками их не использует, и грузить их такой
+            // странице незачем.
+            if (str_contains($rendered['html'], 'data-hero-transition')) {
+                $assets['hero_slides'] = true;
             }
             if (!empty($rendered['preload_image']) && $preloadImages === []) {
                 // Одного LCP-кандидата достаточно: дополнительные high-priority
@@ -643,6 +666,30 @@ final class BlockRenderer
             $form = FormDef::findById((int) $data['form_id']);
             if ($form !== null) {
                 $data['form'] = $form;
+            }
+        }
+
+        // Блок-обёртка над обложкой (тип контента «Обложки»): содержимое живёт
+        // в отдельной записи, блок только выбирает, какую из них показать.
+        // Пустой ответ — нормальная ситуация (черновик, окно показа закрыто,
+        // обложку удалили): шаблон тогда рисует прежнюю обложку блока или, если
+        // и её нет, ничего.
+        if ($type === 'hero' && (int) ($data['hero_id'] ?? 0) > 0) {
+            $heroId = (int) $data['hero_id'];
+            $hero = \App\Models\Hero::find($heroId);
+            if ($hero !== null) {
+                // Границу расписания сообщаем и для скрытой обложки: та, что
+                // ещё не началась, обязана разморозить кэш к своему старту.
+                self::noteBoundary(\App\Models\Hero::boundary($hero));
+                self::noteBoundary(\App\Models\HeroSlide::boundary($heroId));
+            }
+            if ($hero !== null && \App\Models\Hero::isVisible($hero)) {
+                $slides = \App\Models\HeroSlide::forDisplay($heroId, Locale::current());
+                if ($slides !== []) {
+                    $data['_hero'] = $hero;
+                    $data['_hero_slides'] = $slides;
+                    $data['_hero_settings'] = \App\Models\Hero::settings($hero);
+                }
             }
         }
 

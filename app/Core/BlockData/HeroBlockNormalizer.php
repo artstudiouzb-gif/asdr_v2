@@ -82,7 +82,13 @@ final class HeroBlockNormalizer
 
         $textPosition = (string) ($input['text_position'] ?? 'left');
 
+        // Выбранная обложка (тип контента «Обложки»). Остальные поля всё равно
+        // сохраняем: редактор может вернуть блок к собственным настройкам, и
+        // терять при этом ранее набранный текст незачем.
+        $heroId = max(0, (int) ($input['hero_id'] ?? 0));
+
         return [
+            'hero_id' => $heroId,
             'title' => BlockDataInput::plain($input, 'title_field', $locale),
             'width' => ($input['hero_width'] ?? 'full') === 'standard' ? 'standard' : 'full',
             'height' => $heightMode,

@@ -80,19 +80,20 @@ test('Фон секции: классы и переменные для кажд�
 });
 
 test('Светлый текст задаётся по id секции, а не классом тёмной секции', function () {
-    $light = BlockBackground::build(
-        BlockPresentationNormalizer::normalize([
-            'bg_mode' => 'color', 'bg_color' => '#0f2b46', 'bg_light_text' => '1',
-        ]),
-        14
-    );
+    $data = BlockPresentationNormalizer::normalize([
+        'bg_mode' => 'color', 'bg_color' => '#0f2b46', 'bg_text_scheme' => 'light',
+    ]);
+    $background = BlockBackground::build($data, 14);
+    // Цвет текста считает SectionColors: он нужен и секциям без своего фона
+    // (пресет navy), поэтому в BlockBackground его больше нет.
+    $light = \App\Core\SectionColors::build($data, 14);
 
     // Класс тёмной секции принёс бы свою заливку (--gov-navy) и перекрыл
     // выбранный цвет; id перебивает и правила редакционных страниц.
-    assert_not_contains('cms-block--bg-navy', $light['class']);
-    assert_contains('#block-14{color:', $light['css']);
-    assert_contains('#block-14 :is(h1,h2,h3', $light['css']);
-    assert_contains('[class*="__text"]', $light['css'], 'тело текста тоже светлеет');
+    assert_not_contains('cms-block--bg-navy', $background['class']);
+    assert_contains('#block-14{--section-fg:', $light);
+    assert_contains('#block-14 :is(h1,h2,h3', $light);
+    assert_contains('[class*="__text"]', $light, 'тело текста тоже светлеет');
 });
 
 test('Свой фон отменяет пресет темы у секции', function () {

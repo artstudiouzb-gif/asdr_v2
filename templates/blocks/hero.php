@@ -5,8 +5,29 @@ use App\Core\Video;
 use App\Core\Media;
 use App\Core\AppUrl;
 use App\Core\MediaPosition;
+use App\Core\Hero\HeroRenderer;
 
 /** @var array $data */
+/** @var int $blockId */
+
+// Обложка выбрана в блоке (тип контента «Обложки»): содержимое и настройки
+// приходят из отдельной записи, собственные поля блока не участвуют — иначе
+// один и тот же текст пришлось бы держать в двух местах. Данные подставляет
+// BlockRenderer::enrichData().
+if (!empty($data['_hero']) && !empty($data['_hero_slides'])) {
+    $rendered = HeroRenderer::render(
+        (array) $data['_hero'],
+        (array) $data['_hero_slides'],
+        (array) ($data['_hero_settings'] ?? []),
+        $blockId,
+        (string) ($data['_heading_tag'] ?? 'h1')
+    );
+    $templateCss = $rendered['css'];
+    echo $rendered['html'];
+
+    return;
+}
+
 $title = $data['title'] ?? '';
 $eyebrow = trim((string) ($data['eyebrow'] ?? ''));
 $subtitle = $data['subtitle'] ?? '';

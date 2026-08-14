@@ -227,7 +227,7 @@ if ($adminCreds !== null) {
         $fail++;
     } else {
         $adminRoutes = [
-            '/admin', '/admin/news', '/admin/news-categories', '/admin/pages', '/admin/projects', '/admin/albums',
+            '/admin', '/admin/news', '/admin/news-categories', '/admin/pages', '/admin/heroes', '/admin/projects', '/admin/albums',
             '/admin/videos', '/admin/team', '/admin/forms', '/admin/languages', '/admin/menu', '/admin/header',
             '/admin/footer', '/admin/performance', '/admin/widgets', '/admin/trash',
             '/admin/audit', '/admin/audit/errors', '/admin/subscribers', '/admin/redirects', '/admin/users',

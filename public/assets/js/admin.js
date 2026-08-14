@@ -1890,6 +1890,74 @@
         }
     });
 
+    // --- Блок «Обложка»: выбранная обложка прячет собственные поля блока ---
+    // Поля остаются в форме и уходят на сервер: редактор может вернуться к
+    // «старому способу», и набранный текст при этом не теряется.
+    document.querySelectorAll('[data-hero-picker]').forEach(function (picker) {
+        var own = document.querySelector('[data-hero-own-fields]');
+        if (!own) { return; }
+        picker.addEventListener('change', function () {
+            own.hidden = picker.value !== '0' && picker.value !== '';
+        });
+    });
+
+    // --- Обложки: перетаскивание слайдов ---
+    // Порядок слайдов — это порядок показа на сайте, поэтому сохраняется он
+    // тем же явным действием, что и порядок блоков: копим перестановки,
+    // применяем по кнопке в панели порядка.
+    document.querySelectorAll('[data-hero-sortable]').forEach(function (list) {
+        var dragged = null;
+
+        list.querySelectorAll('.hero-slide-item').forEach(function (item) {
+            item.addEventListener('dragstart', function (e) {
+                dragged = item;
+                item.classList.add('is-dragging');
+                try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', ''); } catch (err) {}
+            });
+            item.addEventListener('dragend', function () {
+                item.classList.remove('is-dragging');
+                renumber();
+                ReorderBar.markDirty(saveOrder);
+            });
+        });
+
+        list.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            if (!dragged) { return; }
+            var after = null;
+            var items = Array.prototype.slice.call(list.querySelectorAll('.hero-slide-item:not(.is-dragging)'));
+            for (var i = 0; i < items.length; i++) {
+                var box = items[i].getBoundingClientRect();
+                if (e.clientY < box.top + box.height / 2) { after = items[i]; break; }
+            }
+            if (after == null) { list.appendChild(dragged); }
+            else { list.insertBefore(dragged, after); }
+        });
+
+        // Номера в списке — часть смысла («01», «02»), а не украшение:
+        // после перестановки они обязаны совпадать с новым порядком.
+        function renumber() {
+            Array.prototype.forEach.call(list.querySelectorAll('.hero-slide-item__num'), function (el, i) {
+                el.textContent = i < 9 ? '0' + (i + 1) : String(i + 1);
+            });
+        }
+
+        function saveOrder(done) {
+            var body = new URLSearchParams();
+            body.append('csrf_token', list.getAttribute('data-csrf'));
+            Array.prototype.forEach.call(list.querySelectorAll('.hero-slide-item'), function (el) {
+                body.append('order[]', el.getAttribute('data-hero-slide-id'));
+            });
+
+            fetch('/admin/heroes/' + list.getAttribute('data-hero-id') + '/slides/reorder', {
+                method: 'POST', body: body, credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            }).then(function (r) { return r.json(); })
+              .then(function (res) { done(!!res.ok, res.ok ? '' : 'Не удалось сохранить порядок слайдов.'); })
+              .catch(function () { done(false, 'Сетевая ошибка при сохранении порядка.'); });
+        }
+    });
+
     // --- Меню: визуальная сортировка и автосохранение вложенности ---
     document.querySelectorAll('[data-menu-sortable]').forEach(function (root) {
         var dragged = null, startParent = null, startNext = null, moved = false, saving = false;
