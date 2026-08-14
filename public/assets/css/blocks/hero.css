@@ -46,8 +46,8 @@
        (внутренние поля капсулы, рамка, отступы полосы). Обе величины —
        переменные, потому что от них считается место, зарезервированное под
        навигацию: разъедутся — текст обложки ляжет под кнопки. */
-    --hero-nav-btn: 34px;
-    --hero-nav-pad: 46px;
+    --hero-nav-btn: 28px;
+    --hero-nav-pad: 42px;
     /* Насколько поднята полоса навигации над низом обложки. Нужна, когда
        следующий блок надвинут на обложку (см. правило со «Счётчиками»). */
     --hero-nav-bottom: 0px;
@@ -132,9 +132,14 @@
     transform: translateX(calc(var(--hero-shift) * var(--hero-dir) * -1 * var(--hero-motion)));
 }
 
-.hero--y-top .hero__slide { align-items: start; }
-.hero--y-center .hero__slide { align-items: center; }
-.hero--y-bottom .hero__slide { align-items: end; }
+/* Класс вертикального выравнивания стоит на самом слайде, а не на корне
+   обложки: селектор `.hero--y-top .hero__slide` искал его у предка и не
+   совпадал никогда — настройка «по вертикали» молча не работала.
+   Горизонтальная позиция это переживала, потому что там класс на слайде,
+   а выравнивается вложенный .hero__inner. */
+.hero__slide.hero--y-top { align-items: start; }
+.hero__slide.hero--y-center { align-items: center; }
+.hero__slide.hero--y-bottom { align-items: end; }
 
 /* --- Слой фона --- */
 .hero__media {
@@ -356,13 +361,13 @@
 .hero__nav-bar {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-2xs);
+    gap: 2px;
     max-width: 100%;
     min-width: 0;
-    padding: 6px;
+    padding: 4px;
     border-radius: var(--radius-pill);
-    background: color-mix(in srgb, var(--hero-bg) 55%, transparent);
-    border: 1px solid color-mix(in srgb, var(--hero-fg) 18%, transparent);
+    background: color-mix(in srgb, var(--hero-bg) 30%, transparent);
+    border: 1px solid color-mix(in srgb, var(--hero-fg) 14%, transparent);
 }
 
 /* Кнопки внутри капсулы плоские: своя рамка у каждой превращала бы группу в
@@ -392,7 +397,7 @@
    вырастают до 44 px. Курсору такая площадь не нужна, а капсула от неё
    заметно полнеет — поэтому по типу указателя, а не по ширине экрана. */
 @media (pointer: coarse) {
-    .hero { --hero-nav-btn: 44px; }
+    .hero { --hero-nav-btn: 44px; --hero-nav-pad: 46px; }
 }
 .hero__playpause .hero__playpause-icon--play { display: none; }
 .hero__playpause[aria-pressed="true"] .hero__playpause-icon--play { display: inline-flex; }
@@ -410,11 +415,15 @@
     display: inline-flex;
     align-items: baseline;
     gap: 4px;
-    font-size: var(--step--1);
-    font-weight: 700;
+    font-size: var(--step--2);
+    /* Не жирный: счётчик — служебная подпись внутри капсулы, а не заголовок.
+       Моноширинные цифры оставлены, иначе капсула дёргается по ширине при
+       смене слайда. */
+    font-weight: 400;
     font-variant-numeric: tabular-nums;
     color: var(--hero-fg);
     flex: none;
+    padding-inline: 4px;
 }
 
 .hero__counter-sep,
@@ -559,9 +568,9 @@
     .hero--pos-m-right .hero__inner { justify-content: flex-end; text-align: end; }
     .hero--pos-m-center .hero__text { align-items: center; }
     .hero--pos-m-right .hero__text { align-items: flex-end; }
-    .hero--y-m-top .hero__slide { align-items: start; }
-    .hero--y-m-center .hero__slide { align-items: center; }
-    .hero--y-m-bottom .hero__slide { align-items: end; }
+    .hero__slide.hero--y-m-top { align-items: start; }
+    .hero__slide.hero--y-m-center { align-items: center; }
+    .hero__slide.hero--y-m-bottom { align-items: end; }
     /* Кнопки на узком экране растягиваются на строку: обрезанная CTA хуже,
        чем высокая колонка. */
     .hero__actions { width: 100%; }
@@ -569,7 +578,6 @@
 }
 
 @media (max-width: 480px) {
-    .hero__counter { font-size: var(--step--2); }
 }
 
 /*
