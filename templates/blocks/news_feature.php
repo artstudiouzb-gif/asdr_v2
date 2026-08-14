@@ -24,6 +24,13 @@ $badgeOnMedia = static fn (array $i): string => NewsBadge::render($i['badge'] ??
 $category = static fn (array $i): string => trim((string) ($i['category'] ?? ''));
 $more = '<span class="card-more">' . htmlspecialchars(t('Читать подробнее'), ENT_QUOTES)
     . '<span class="card-more__arrow" aria-hidden="true">→</span></span>';
+// В мозаике вся карточка — ссылка, поэтому подпись «Читать подробнее» лишняя:
+// остаётся одна стрелка как знак перехода. Диктору она не нужна — имя ссылке
+// даёт заголовок внутри неё, — поэтому целиком aria-hidden.
+if ($variant === 'mosaic') {
+    $more = '<span class="card-more card-more--arrow" aria-hidden="true">'
+        . '<span class="card-more__arrow">→</span></span>';
+}
 
 // Колонки мозаики задаёт тема (.block-newsfeat--mosaic): раскладка одна для
 // всех блоков этого варианта, поэтому scoped-правило только мешало бы — оно
