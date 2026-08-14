@@ -241,6 +241,13 @@ final class BlockRenderer
         } elseif ($bg !== 'none') {
             $extraClass .= ' cms-block--bg cms-block--bg-' . $bg;
         }
+        // Цвет текста секции и вложенных карточек. Считается для любого фона,
+        // в том числе для пресета navy и для секции вовсе без фона: редактор
+        // может задать цвет текста и там.
+        $sectionColors = SectionColors::build($data, $blockId);
+        if ($sectionColors !== '') {
+            $scopedCss = $scopedCss !== '' ? $scopedCss . "\n" . $sectionColors : $sectionColors;
+        }
         if ($fullwidth) {
             $extraClass .= ' cms-block--fullwidth';
         }

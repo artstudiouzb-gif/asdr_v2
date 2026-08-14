@@ -18,6 +18,13 @@ test('Block presentation normalizer: формирует прежние знач�
         '_visible_device' => '',
         // Своя заливка секции не задана — режим «пресет темы».
         '_bg_mode' => 'preset',
+        // Цвет текста секции и цвет вложенных карточек — два независимых
+        // уровня, и оба сохраняются при любом режиме фона (в том числе у
+        // пресета navy, где своей заливки нет).
+        '_bg_text_scheme' => 'auto',
+        '_bg_text_color' => '',
+        '_bg_card_scheme' => 'auto',
+        '_bg_light_text' => false,
     ], BlockPresentationNormalizer::normalize([]));
 });
 
@@ -34,8 +41,15 @@ test('Block presentation normalizer: сохраняет допустимые н�
         '_visible_to' => '2026-07-25 18:30',
         '_visible_device' => 'mobile',
         '_bg_mode' => 'preset',
+        '_bg_text_scheme' => 'light',
+        '_bg_text_color' => '',
+        '_bg_card_scheme' => 'auto',
+        '_bg_light_text' => true,
     ], BlockPresentationNormalizer::normalize([
         'spacing' => 'max',
+        // Пресет navy с собственным цветом текста: до исправления настройка
+        // до него не доходила — выход по «preset» стоял раньше.
+        'bg_text_scheme' => 'light',
         'reveal_type' => 'slide-up',
         'bg' => 'navy',
         'surface' => 'card',

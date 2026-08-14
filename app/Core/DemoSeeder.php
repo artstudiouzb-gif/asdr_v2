@@ -14,7 +14,7 @@ use PDO;
  */
 final class DemoSeeder
 {
-    private const DEMO_VERSION = '2026.08-v1';
+    private const DEMO_VERSION = '2026.08-v2';
 
     /** @return array<string,int> счётчики добавленного по разделам */
     public static function run(PDO $pdo): array
@@ -41,6 +41,7 @@ final class DemoSeeder
                 'pages' => 0,
                 'menu' => 0,
                 'news_categories' => 0,
+                'heroes' => 0,
             ];
 
             self::seedAssets($pdo, $c);
@@ -51,6 +52,7 @@ final class DemoSeeder
             self::seedForms($pdo, $c);
             self::seedTeam($pdo, $c);
             self::seedHome($pdo, $c);
+            self::seedHeroes($pdo, $c);
             self::seedPages($pdo, $c);
             self::seedMenu($pdo, $c);
             self::storeVersion($pdo);
@@ -82,6 +84,9 @@ final class DemoSeeder
         // Дочерние таблицы идут раньше родительских. Это позволяет выполнить
         // сброс без отключения FOREIGN_KEY_CHECKS и не скрывать реальные ошибки.
         $tables = [
+            'hero_slide_translations',
+            'hero_slides',
+            'heroes',
             'news_poll_votes',
             'news_polls',
             'news_images',
@@ -2134,6 +2139,167 @@ final class DemoSeeder
         $id = $stmt->fetchColumn();
 
         return $id !== false ? (int) $id : null;
+    }
+
+    /**
+     * Демо-обложка: отдельный тип контента со своим набором слайдов.
+     *
+     * Блок «Обложка» на главной перестаёт хранить содержимое и начинает
+     * ссылаться на эту запись — свежая установка сразу показывает, как обложка
+     * задумана: карусель, кадр-замена у видео и переводы слайдов. Обе языковые
+     * версии главной ссылаются на ОДНУ обложку: текст слайда переводится
+     * (hero_slide_translations), а медиа и раскладка у него общие.
+     */
+    private static function seedHeroes(PDO $pdo, array &$c): void
+    {
+        // Миграция обложек могла быть не накатана — демо-контент от этого
+        // падать не должен.
+        if (!self::tableExists($pdo, 'heroes') || !self::tableExists($pdo, 'hero_slides')) {
+            return;
+        }
+        // Идемпотентность: повторный запуск ничего не создаёт.
+        if ((int) $pdo->query('SELECT COUNT(*) FROM heroes WHERE deleted_at IS NULL')->fetchColumn() > 0) {
+            return;
+        }
+
+        $settings = \App\Core\Hero\HeroPresets::apply('navy', \App\Core\Hero\HeroSettings::defaults());
+        $settings['autoplay'] = true;
+        $settings['autoplay_interval'] = 7;
+        $settings['height'] = 'tall';
+
+        $insertHero = $pdo->prepare(
+            "INSERT INTO heroes (name, status, priority, preset, settings, created_at)
+             VALUES (:name, 'published', 10, 'navy', :settings, NOW())"
+        );
+        $insertHero->execute([
+            ':name' => 'Главная — обложка Агентства',
+            ':settings' => json_encode($settings, JSON_UNESCAPED_UNICODE),
+        ]);
+        $heroId = (int) $pdo->lastInsertId();
+        $c['heroes']++;
+
+        $slides = [
+            [
+                'ru' => [
+                    'eyebrow' => 'Цель. Действие. Результат.',
+                    'title' => 'От стратегической цели — к измеримому результату',
+                    'subtitle' => 'Агентство формирует единую систему стратегического планирования: от анализа и подготовки инициатив до координации, мониторинга и оценки достигнутых результатов.',
+                    'cta_text' => 'Об Агентстве',
+                    'cta2_text' => 'Узбекистан — 2030',
+                ],
+                'uz' => [
+                    'eyebrow' => 'Maqsad. Harakat. Natija.',
+                    'title' => 'Strategik maqsaddan — o‘lchanadigan natijaga',
+                    'subtitle' => 'Agentlik strategik rejalashtirishning yagona tizimini shakllantiradi: tahlil va tashabbuslarni tayyorlashdan tortib muvofiqlashtirish, monitoring va erishilgan natijalarni baholashgacha.',
+                    'cta_text' => 'Agentlik haqida',
+                    'cta2_text' => 'O‘zbekiston — 2030',
+                ],
+                'data' => [
+                    'media_type' => 'image',
+                    'image' => '/uploads/public/demo-agency-hero.jpg',
+                    'cta_enabled' => '1', 'cta_url' => '/o-nas', 'cta_icon' => 'arrow-right',
+                    'cta2_enabled' => '1', 'cta2_url' => '/strategiya-2030', 'cta2_style' => 'ghost',
+                ],
+            ],
+            [
+                'ru' => [
+                    'eyebrow' => 'Приоритеты',
+                    'title' => 'Цифровая трансформация государственных услуг',
+                    'subtitle' => 'Единая система показателей, межведомственный обмен данными и сокращение сроков предоставления услуг.',
+                    'cta_text' => 'Проекты',
+                    'cta2_text' => '',
+                ],
+                'uz' => [
+                    'eyebrow' => 'Ustuvor yo‘nalishlar',
+                    'title' => 'Davlat xizmatlarining raqamli transformatsiyasi',
+                    'subtitle' => 'Yagona ko‘rsatkichlar tizimi, idoralararo ma’lumot almashinuvi va xizmatlar muddatlarining qisqarishi.',
+                    'cta_text' => 'Loyihalar',
+                    'cta2_text' => '',
+                ],
+                'data' => [
+                    'media_type' => 'image',
+                    'image' => '/uploads/public/demo-urban-development.jpg',
+                    'overlay' => 'gradient', 'overlay_opacity' => '55',
+                    'cta_enabled' => '1', 'cta_url' => '/projects', 'cta_icon' => 'arrow-right',
+                ],
+            ],
+            [
+                'ru' => [
+                    'eyebrow' => 'Устойчивое развитие',
+                    'title' => 'Зелёная энергетика и рациональное природопользование',
+                    'subtitle' => 'Повышение энергоэффективности, развитие солнечной и ветровой генерации.',
+                    'cta_text' => 'Пресс-центр',
+                    'cta2_text' => '',
+                ],
+                'uz' => [
+                    'eyebrow' => 'Barqaror rivojlanish',
+                    'title' => 'Yashil energetika va tabiatdan oqilona foydalanish',
+                    'subtitle' => 'Energiya samaradorligini oshirish, quyosh va shamol generatsiyasini rivojlantirish.',
+                    'cta_text' => 'Matbuot markazi',
+                    'cta2_text' => '',
+                ],
+                'data' => [
+                    'media_type' => 'image',
+                    'image' => '/uploads/public/demo-green-energy.jpg',
+                    'cta_enabled' => '1', 'cta_url' => '/press-centr', 'cta_icon' => 'arrow-right',
+                ],
+            ],
+        ];
+
+        $insertSlide = $pdo->prepare(
+            'INSERT INTO hero_slides (hero_id, title, sort_order, is_active, data, created_at)
+             VALUES (:hero, :title, :sort, 1, :data, NOW())'
+        );
+        $insertTranslation = $pdo->prepare(
+            'INSERT INTO hero_slide_translations (slide_id, lang, eyebrow, title, subtitle, cta_text, cta2_text)
+             VALUES (:slide, :lang, :eyebrow, :title, :subtitle, :cta, :cta2)'
+        );
+
+        foreach ($slides as $order => $slide) {
+            $data = \App\Core\Hero\HeroSlideData::normalize(array_merge($slide['data'], [
+                'eyebrow' => $slide['ru']['eyebrow'],
+                'title' => $slide['ru']['title'],
+                'subtitle' => $slide['ru']['subtitle'],
+                'cta_text' => $slide['ru']['cta_text'],
+                'cta2_text' => $slide['ru']['cta2_text'],
+            ]));
+            $insertSlide->execute([
+                ':hero' => $heroId,
+                ':title' => $data['title'],
+                ':sort' => $order,
+                ':data' => json_encode($data, JSON_UNESCAPED_UNICODE),
+            ]);
+            $insertTranslation->execute([
+                ':slide' => (int) $pdo->lastInsertId(),
+                ':lang' => 'uz',
+                ':eyebrow' => $slide['uz']['eyebrow'],
+                ':title' => $slide['uz']['title'],
+                ':subtitle' => $slide['uz']['subtitle'],
+                ':cta' => $slide['uz']['cta_text'],
+                ':cta2' => $slide['uz']['cta2_text'] !== '' ? $slide['uz']['cta2_text'] : null,
+            ]);
+        }
+
+        // Блок «Обложка» на главной начинает ссылаться на запись. Собственные
+        // поля блока остаются в данных: редактор может вернуться к прежнему
+        // способу, ничего не потеряв.
+        $heroBlocks = $pdo->query(
+            "SELECT b.id, b.data FROM blocks b
+             INNER JOIN pages p ON p.id = b.page_id
+             WHERE b.type = 'hero' AND (p.is_home = 1 OR p.slug = 'home')"
+        )->fetchAll(PDO::FETCH_ASSOC);
+        $updateBlock = $pdo->prepare('UPDATE blocks SET data = :data WHERE id = :id');
+        foreach ($heroBlocks as $block) {
+            $data = json_decode((string) $block['data'], true);
+            if (!is_array($data)) {
+                $data = [];
+            }
+            $data['hero_id'] = $heroId;
+            $updateBlock->execute([
+                ':data' => json_encode($data, JSON_UNESCAPED_UNICODE),
+                ':id' => (int) $block['id'],
+            ]);
+        }
     }
 
     private static function tableExists(PDO $pdo, string $table): bool
