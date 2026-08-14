@@ -83,6 +83,61 @@ test('Страница-раздел отдаёт заголовок, SEO и бл
     $pdo->exec('DELETE FROM pages WHERE id = ' . (int) $id);
 });
 
+test('Страница-раздел: язык берётся из группы перевода, как у главной (БД)', function () {
+    ensure_test_db();
+    $pdo = \App\Core\Database::pdo();
+    $suffix = uniqid();
+
+    // Русская запись с ролью и её узбекская версия — отдельной записью со
+    // своим заголовком и своими блоками (механизм Б, как у всех страниц).
+    $ru = Page::create([
+        'title' => 'Пресс-центр', 'slug' => 'sec-g-' . $suffix, 'section' => 'news',
+        'lead' => 'Официальные сообщения', 'status' => 'published', 'lang' => 'ru',
+    ]);
+    $uz = Page::create([
+        'title' => 'Matbuot markazi', 'slug' => 'sec-g-' . $suffix, 'section' => '',
+        'lead' => 'Rasmiy xabarlar', 'status' => 'published', 'lang' => 'uz',
+    ]);
+    $pdo->prepare('UPDATE pages SET translation_group_id = :gid WHERE id IN (:ru, :uz)')
+        ->execute([':gid' => $ru, ':ru' => $ru, ':uz' => $uz]);
+
+    // Роль назначена только русской записи. Прежняя реализация искала запись с
+    // заполненной колонкой section, не находила её на узбекском и откатывалась
+    // на page_translations — на узбекской ленте выходил русский заголовок при
+    // живой узбекской странице.
+    assert_same('Пресс-центр', (string) Page::forSection('news', 'ru')['title']);
+    $uzHead = Page::forSection('news', 'uz');
+    assert_same('Matbuot markazi', (string) $uzHead['title'], 'узбекская лента берёт узбекскую запись');
+    assert_same($uz, (int) $uzHead['id'], 'блоки должны браться у записи своего языка');
+    assert_same('news', (string) $uzHead['section'], 'роль принадлежит группе, а не одной записи');
+
+    // Обе записи группы считаются шапкой раздела — от этого зависит редирект
+    // со своего адреса.
+    assert_same('news', Page::sectionOf(Page::findById($ru), 'ru'));
+    assert_same('news', Page::sectionOf(Page::findById($uz), 'uz'));
+    assert_contains('/news', Page::sectionUrl('news', 'ru'));
+    assert_same('', Page::sectionUrl('нет-такого', 'ru'));
+
+    $pdo->exec('DELETE FROM pages WHERE id IN (' . (int) $ru . ',' . (int) $uz . ')');
+});
+
+test('Страница-раздел: свой адрес отдаёт 301 на раздел, как у главной', function () {
+    // Заголовок, лид и блоки этой страницы выводятся на /news, и без редиректа
+    // получались два адреса с одинаковым содержимым и canonical на самих себя.
+    $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Site/PageController.php');
+    assert_contains('Page::sectionOf($page, $lang)', $controller, 'контроллер спрашивает раздел с учётом группы');
+    assert_contains('Page::sectionUrl($pageSection, $lang)', $controller);
+    assert_true(
+        preg_match('/sectionUrl\(\$pageSection, \$lang\), true, 301\)/', $controller) === 1,
+        'редирект должен быть постоянным (301), иначе поиск оставит оба адреса'
+    );
+
+    // Обычная страница остаётся на своём адресе: раздел ищется по группе, а не
+    // по факту «у страницы вообще есть блоки».
+    assert_same('', Page::sectionOf(['id' => 0, 'section' => '']));
+    assert_same('news', Page::sectionOf(['id' => 0, 'section' => 'news']));
+});
+
 test('Переключатель языков показывает короткое название, а не код', function () {
     // Заполненное поле берётся как есть.
     assert_same('Рус', \App\Models\Language::shortLabel(['code' => 'ru', 'name' => 'Русский', 'short_name' => 'Рус']));

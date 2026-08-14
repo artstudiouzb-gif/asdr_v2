@@ -60,7 +60,7 @@ $isHomePage = \App\Models\Page::isHomePage($page ?? []);
                     <option value="<?= htmlspecialchars($sectionKey, ENT_QUOTES) ?>" <?= (string) ($page['section'] ?? '') === $sectionKey ? 'selected' : '' ?>><?= htmlspecialchars($sectionLabel, ENT_QUOTES) ?></option>
                 <?php endforeach; ?>
             </select>
-            <span class="form-hint">Страница отдаёт разделу заголовок, лид и SEO, а её блоки выводятся под списком. Собственный адрес у такой страницы остаётся.</span>
+            <span class="form-hint">Страница отдаёт разделу заголовок, лид и SEO, а её блоки выводятся под списком. Работает как «Сделать главной»: назначить достаточно один раз, языковые версии подхватятся сами, а собственный адрес страницы начнёт вести на адрес раздела.</span>
         </div>
 
         <div class="page-settings-sidebar__options u-inline-d498835cbd">

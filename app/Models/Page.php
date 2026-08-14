@@ -362,8 +362,20 @@ final class Page
 
     /**
      * Страница-шапка раздела (`/news`, `/projects`): заголовок, лид, SEO и
-     * блоки под списком. Языковая версия ищется своя, при её отсутствии —
-     * запись основного языка: пустой раздел хуже чужого языка в заголовке.
+     * блоки под списком.
+     *
+     * Язык разрешается так же, как у главной (`findHome`), и это не
+     * косметика. Прежний вариант искал только запись с заполненной колонкой
+     * `section` и, не найдя её на нужном языке, откатывался на
+     * `page_translations`. Но страницы переводятся отдельной записью
+     * (механизм Б), а не полями, поэтому на узбекской странице выходил
+     * русский заголовок при живой узбекской версии той же страницы.
+     * Самостоятельная запись нужного языка обязана иметь приоритет —
+     * ровно как у новостей (см. News::publicScope).
+     *
+     * Следствие для редактора: роль достаточно назначить один раз, на любой
+     * языковой версии. Раньше её приходилось проставлять на каждой, и забытый
+     * язык молча показывал чужой текст.
      */
     public static function forSection(string $section, ?string $lang = null): ?array
     {
@@ -372,7 +384,10 @@ final class Page
         }
 
         $targetLang = $lang ?? \App\Core\Locale::current();
-        $stmt = Database::pdo()->prepare(
+        $pdo = Database::pdo();
+
+        // 1. Запись нужного языка, которой роль назначена напрямую.
+        $stmt = $pdo->prepare(
             "SELECT * FROM pages
              WHERE section = :section AND entity_type = 'page'
                AND status = 'published' AND deleted_at IS NULL
@@ -388,10 +403,77 @@ final class Page
         if (!$row) {
             return null;
         }
+        if ((string) ($row['lang'] ?? '') === $targetLang) {
+            return $row;
+        }
 
-        // Запись другого языка всё равно прогоняем через перевод полей: у
-        // страниц бывает и связанная запись (её найдёт запрос выше), и перевод.
-        return (string) ($row['lang'] ?? '') === $targetLang ? $row : self::localize($row, $targetLang);
+        // 2. Языковая версия из группы перевода: у страниц это отдельная
+        //    опубликованная запись со своими блоками.
+        $groupId = (int) ($row['translation_group_id'] ?? $row['id']);
+        $stmtGroup = $pdo->prepare(
+            "SELECT * FROM pages
+             WHERE (translation_group_id = :gid OR id = :gid2) AND lang = :lang
+               AND entity_type = 'page' AND status = 'published' AND deleted_at IS NULL
+             LIMIT 1"
+        );
+        $stmtGroup->execute([':gid' => $groupId, ':gid2' => $groupId, ':lang' => $targetLang]);
+        $groupRow = $stmtGroup->fetch();
+        if ($groupRow) {
+            // Роль принадлежит группе, а не конкретной записи: иначе вызывающий
+            // код решит, что нашёл обычную страницу.
+            $groupRow['section'] = $section;
+
+            return $groupRow;
+        }
+
+        // 3. Перевода-записи нет — остаются поля из page_translations.
+        //    Пустой раздел хуже чужого языка в заголовке.
+        return self::localize($row, $targetLang);
+    }
+
+    /**
+     * Раздел, шапкой которого служит страница, — с учётом группы перевода.
+     * Пусто, если страница не назначена шапкой ни одного раздела.
+     *
+     * @param array<string, mixed> $page
+     */
+    public static function sectionOf(array $page, ?string $lang = null): string
+    {
+        $own = self::normalizeSection($page['section'] ?? '');
+        if ($own !== '') {
+            return $own;
+        }
+
+        $id = (int) ($page['id'] ?? 0);
+        if ($id === 0) {
+            return '';
+        }
+
+        // Роль могла быть назначена соседней языковой версии: шапкой раздела
+        // служит вся группа перевода, а не конкретная запись. Достаточно одной
+        // выборки по группе — прогонять forSection по каждому разделу значило
+        // бы два лишних запроса на КАЖДОМ показе обычной страницы.
+        $groupId = (int) ($page['translation_group_id'] ?? $id);
+        $stmt = Database::pdo()->prepare(
+            "SELECT section FROM pages
+             WHERE (translation_group_id = :gid OR id = :gid2)
+               AND section <> '' AND entity_type = 'page'
+               AND status = 'published' AND deleted_at IS NULL
+             ORDER BY id ASC
+             LIMIT 1"
+        );
+        $stmt->execute([':gid' => $groupId, ':gid2' => $groupId]);
+        $section = $stmt->fetchColumn();
+
+        return $section !== false ? self::normalizeSection($section) : '';
+    }
+
+    /** Публичный адрес раздела: /news или /projects с учётом языка. */
+    public static function sectionUrl(string $section, ?string $lang = null): string
+    {
+        return isset(self::SECTIONS[$section])
+            ? \App\Core\Locale::url('/' . $section, $lang)
+            : '';
     }
 
     public static function findHome(?string $lang = null): ?array
