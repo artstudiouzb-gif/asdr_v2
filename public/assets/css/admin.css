@@ -3283,10 +3283,15 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     40%, 80% { transform: translateX(4px); }
 }
 
+/* Тост висит сверху по центру, а не в нижнем правом углу. Внизу справа он
+   оказывался вне поля зрения: нажимают кнопку в середине длинной формы, а
+   сообщение появляется в противоположном углу и через пять секунд исчезает.
+   Сверху по центру оно попадает в ту же зону, куда человек смотрит после
+   перезагрузки страницы. */
 .admin-toast-notification {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
+    top: 76px;
+    left: 50%;
     z-index: 999999;
     display: flex;
     align-items: center;
@@ -3297,15 +3302,15 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     color: #ffffff;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    max-width: 450px;
+    transform: translate(-50%, -12px);
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: min(560px, calc(100vw - 32px));
     font-family: inherit;
 }
 
 .admin-toast-notification.is-visible {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, 0);
 }
 
 .admin-toast--warning {
