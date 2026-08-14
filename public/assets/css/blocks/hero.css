@@ -339,6 +339,9 @@
     inset-inline: 0;
     bottom: var(--hero-nav-bottom);
     display: flex;
+    /* Капсула прижата к правому краю колонки: заголовок и кнопки обложки
+       стоят слева, и управление там же спорило бы с ними за один угол. */
+    justify-content: flex-end;
     width: 100%;
     max-width: var(--container-max, 1440px);
     margin-inline: auto;
