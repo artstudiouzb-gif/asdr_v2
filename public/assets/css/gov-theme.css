@@ -4457,7 +4457,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .block-newsfeat--mosaic .newsfeat-side__texts { display: contents; }
 .block-newsfeat--mosaic .newsfeat-lead { grid-column: span 2; }
 /* Снимки маленьких карточек — та же пропорция, что у крупной. */
-.block-newsfeat--mosaic .newsfeat-mini__thumb { aspect-ratio: 16/9; }
+.block-newsfeat--mosaic .newsfeat-mini__thumb { aspect-ratio: 16/10; }
 /* Ряд заканчивается ровно: карточки тянутся до высоты соседей. Разница теперь
    в пределах 40px — у крупной новости текст лежит поверх снимка, поэтому её
    высота равна высоте кадра, а у соседних складывается из такого же 16:9 и
@@ -4488,8 +4488,11 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .block-newsfeat--mosaic .newsfeat-lead__media {
     height: auto;
     min-height: 0;
-    aspect-ratio: 16/9;
+    aspect-ratio: 16/10;
 }
+/* У крупной новости «Читать подробнее» не нужна: по снимку с заголовком и так
+   понятно, что карточка кликабельна, а ссылка отнимала строку у заголовка. */
+.block-newsfeat--mosaic .newsfeat-lead .card-more { display: none; }
 /* В мозаике карточка держится на снимке, дате и заголовке — описание в ней
    лишнее: оно удлиняет карточки неодинаково и спорит с заголовком за внимание. */
 .block-newsfeat--mosaic .newsfeat-lead__excerpt,
