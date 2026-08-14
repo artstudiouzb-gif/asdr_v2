@@ -46,6 +46,9 @@
        следующий блок надвинут на обложку (см. правило со «Счётчиками»). */
     --hero-nav-bottom: 0px;
     --hero-progress: 0;
+    /* Видимая прозрачность полосы времени. Объявлена переменной, потому что
+       значение нужно в двух местах: в покое и при возврате после наведения. */
+    --hero-progress-shown: .55;
     /* Движение: 1 — обычный режим, 0 — «меньше движения». Множитель, а не
        отдельный набор правил: он гасит и длительность, и сдвиг разом. */
     --hero-motion: 1;
@@ -404,15 +407,22 @@
 .hero__counter-sep,
 .hero__counter-total { opacity: .6; }
 
+/* Полоса времени слайда — служебная деталь, а не содержание обложки. Она
+   единственная на первом экране движется непрерывно, и во всю ширину полосы
+   навигации перетягивала внимание с заголовка. Поэтому она короткая,
+   приглушённая и на мышке показывается по наведению — так же, как стрелки.
+   Скрывать её безопасно: она `aria-hidden`, а обязательная по WCAG 2.2.2
+   кнопка остановки автопрокрутки видна всегда и сюда не попадает. */
 .hero__progress {
     position: relative;
     display: block;
-    flex: 1 1 auto;
-    height: 3px;
-    min-width: 40px;
+    flex: 0 0 auto;
+    width: 56px;
+    height: 2px;
     border-radius: var(--radius-pill);
-    background: color-mix(in srgb, var(--hero-fg) 25%, transparent);
+    background: color-mix(in srgb, var(--hero-fg) 18%, transparent);
     overflow: hidden;
+    opacity: var(--hero-progress-shown);
 }
 
 .hero__progress-bar {
@@ -420,8 +430,17 @@
     inset: 0;
     transform: scaleX(var(--hero-progress));
     transform-origin: left center;
-    background: var(--hero-fg);
+    background: color-mix(in srgb, var(--hero-fg) 70%, transparent);
     border-radius: var(--radius-pill);
+}
+
+@media (hover: hover) {
+    .hero--carousel .hero__progress {
+        opacity: 0;
+        transition: opacity calc(200ms * var(--hero-motion)) ease;
+    }
+    .hero--carousel:hover .hero__progress,
+    .hero--carousel:focus-within .hero__progress { opacity: var(--hero-progress-shown); }
 }
 
 .hero__dots { display: inline-flex; gap: 8px; flex-wrap: wrap; }
