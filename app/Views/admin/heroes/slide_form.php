@@ -244,6 +244,21 @@ $ctaStyles = [
             <?= $select('text_align_y_mobile', 'Текст по вертикали (телефон)', $inherit + $yOptions, (string) $data['text_align_y_mobile']) ?>
             <?= $select('title_size_mobile', 'Размер заголовка (телефон)', $inherit + $sizeOptions, (string) $data['title_size_mobile']) ?>
             <?= $select('subtitle_size_mobile', 'Размер описания (телефон)', $inherit + $subtitleSizes, (string) $data['subtitle_size_mobile']) ?>
+            <?php
+            // Пусто — отступ берётся у обложки. Ноль здесь значимый: это
+            // «прижать вплотную», а не «как у обложки».
+            foreach ([
+                'gap_art' => 'Отступ над картинкой, px',
+                'gap_title' => 'Отступ над заголовком, px',
+                'gap_subtitle' => 'Отступ над описанием, px',
+                'gap_actions' => 'Отступ над кнопками, px',
+            ] as $gapKey => $gapLabel): ?>
+                <div class="form-field">
+                    <label for="<?= $gapKey ?>"><?= htmlspecialchars($gapLabel, ENT_QUOTES) ?></label>
+                    <input type="number" id="<?= $gapKey ?>" name="<?= $gapKey ?>" min="0" max="200" step="1"
+                           value="<?= $data[$gapKey] === '' ? '' : (int) $data[$gapKey] ?>" placeholder="как у обложки">
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 

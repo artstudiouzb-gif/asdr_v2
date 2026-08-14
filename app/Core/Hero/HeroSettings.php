@@ -54,6 +54,16 @@ final class HeroSettings
             'title_size_mobile' => '',
             'subtitle_size_mobile' => '',
 
+            // Отступ сверху у каждой части текстового блока, в пикселях.
+            // Умолчания повторяют прежнюю вёрстку (шаг шкалы 12px, у кнопок
+            // двойной), поэтому у обложек, сделанных до появления настройки,
+            // ничего не сдвинется. Первый элемент отступ не получает — его
+            // снимает CSS, иначе текст отъезжал бы от верхней границы.
+            'gap_title' => 12,
+            'gap_subtitle' => 12,
+            'gap_actions' => 24,
+            'gap_art' => 12,
+
             // --- Цвет ---
             // Схема обложки задаёт фон и цвет её собственного текста. Цвет
             // вложенных компонентов она НЕ навязывает: у белой карточки внутри
@@ -140,6 +150,10 @@ final class HeroSettings
             'subtitle_size' => BlockDataInput::enum($input, 'subtitle_size', ['s', 'm', 'l'], 'm'),
             'title_size_mobile' => BlockDataInput::enum($input, 'title_size_mobile', ['s', 'm', 'l', 'xl'], ''),
             'subtitle_size_mobile' => BlockDataInput::enum($input, 'subtitle_size_mobile', ['s', 'm', 'l'], ''),
+            'gap_title' => self::gap($input['gap_title'] ?? null, 12),
+            'gap_subtitle' => self::gap($input['gap_subtitle'] ?? null, 12),
+            'gap_actions' => self::gap($input['gap_actions'] ?? null, 24),
+            'gap_art' => self::gap($input['gap_art'] ?? null, 12),
 
             'scheme' => BlockDataInput::enum($input, 'scheme', self::SCHEMES, 'navy'),
             'scheme_bg' => self::hex($input['scheme_bg'] ?? '', '#0b1a30'),
@@ -201,6 +215,10 @@ final class HeroSettings
         $s['text_align_y_mobile'] = $enum($s['text_align_y_mobile'] ?? '', ['top', 'center', 'bottom'], '');
         $s['title_size'] = $enum($s['title_size'] ?? '', ['s', 'm', 'l', 'xl'], 'l');
         $s['subtitle_size'] = $enum($s['subtitle_size'] ?? '', ['s', 'm', 'l'], 'm');
+        $s['gap_title'] = self::gap($s['gap_title'] ?? null, 12);
+        $s['gap_subtitle'] = self::gap($s['gap_subtitle'] ?? null, 12);
+        $s['gap_actions'] = self::gap($s['gap_actions'] ?? null, 24);
+        $s['gap_art'] = self::gap($s['gap_art'] ?? null, 12);
         $s['title_size_mobile'] = $enum($s['title_size_mobile'] ?? '', ['s', 'm', 'l', 'xl'], '');
         $s['subtitle_size_mobile'] = $enum($s['subtitle_size_mobile'] ?? '', ['s', 'm', 'l'], '');
 
@@ -259,6 +277,23 @@ final class HeroSettings
         $limits = self::limitsFor($unit);
 
         return self::number(max($limits[0], min($limits[1], $value))) . $unit;
+    }
+
+    /**
+     * Отступ части текстового блока, px. Ноль — значимое значение («прижать
+     * вплотную»), поэтому пустая строка и ноль различаются: пусто читается
+     * как умолчание, а 0 сохраняется как есть.
+     */
+    private static function gap(mixed $value, int $default): int
+    {
+        if ($value === null || (is_string($value) && trim($value) === '')) {
+            return $default;
+        }
+        if (!is_numeric($value)) {
+            return $default;
+        }
+
+        return max(0, min(200, (int) $value));
     }
 
     /** @param list<string> $units */
