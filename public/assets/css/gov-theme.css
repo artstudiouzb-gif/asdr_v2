@@ -4445,6 +4445,42 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
    остаются плотными, фотографии — одной высоты, а увеличенный воздух между
    рядом с фото и рядом без фото выглядит намеренным. */
 .block-newsfeat--mosaic .newsfeat-side { justify-content: space-between; }
+
+/* Крупная новость: фотография держит 16:9, а не растягивается по высоте
+   правой колонки. Раньше media была height:100%, и снимок обрезался под почти
+   квадрат — у горизонтальных кадров срезало края, у портретных головы. Теперь
+   пропорция фиксирована, а разницу высоты добирает тёмная подложка под фото:
+   на ней и лежит текст. */
+.block-newsfeat--mosaic .newsfeat-lead__frame {
+    display: flex;
+    flex-direction: column;
+    background: var(--gov-navy);
+}
+.block-newsfeat--mosaic .newsfeat-lead__media {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 16/9;
+}
+/* Текст уходит из наложения на фото в собственную полосу под ним, но стык не
+   должен быть линией: полоса заходит на низ кадра и там растворяется. Градиент
+   идёт снизу вверх — внизу сплошной цвет под текстом, вверху прозрачность, за
+   которой виден снимок. Верхние 72px полосы съедены отрицательным отступом,
+   поэтому фотография сохраняет ровно 16:9, а не теряет часть высоты. */
+.block-newsfeat--mosaic .newsfeat-lead__over {
+    position: static;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    margin-top: -72px;
+    padding-top: 72px;
+    background: linear-gradient(to top,
+        var(--gov-navy) 0,
+        var(--gov-navy) calc(100% - 72px),
+        color-mix(in srgb, var(--gov-navy) 62%, transparent) calc(100% - 24px),
+        transparent 100%);
+}
+/* Описание в полосе можно показать целиком: место больше не отнимает кадр. */
+.block-newsfeat--mosaic .newsfeat-lead__excerpt { -webkit-line-clamp: 3; }
 .block-newsfeat--mosaic .newsfeat-mini__excerpt,
 .block-newsfeat--mosaic .newsfeat-text__excerpt { color: var(--gov-muted); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); }
 .block-newsfeat--mosaic .newsfeat-text { padding: 14px; gap: 8px; }
