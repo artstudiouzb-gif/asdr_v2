@@ -6772,3 +6772,40 @@ body.auth-page label,
     .hero-slide-item__body { flex-basis: 100%; order: 3; }
     .hero-slide-item__actions { flex-basis: 100%; order: 4; }
 }
+
+
+/* Плотная раскладка форм с большим числом коротких настроек.
+   .form-grid — это колонка: каждое поле занимает строку целиком, и форма
+   обложки вытягивалась в полотно под 2000px, где правая половина экрана
+   пустовала. Здесь короткие поля (селекты, числа, цвета) встают рядом. */
+.form-grid--dense,
+.form-section__body--grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px 20px;
+    align-items: start;
+}
+.form-grid--dense > input,
+.form-grid--dense > select,
+.form-grid--dense > textarea,
+.form-grid--dense .form-field input,
+.form-grid--dense .form-field select,
+.form-grid--dense .form-field textarea,
+.form-section__body--grid .form-field input,
+.form-section__body--grid .form-field select,
+.form-section__body--grid .form-field textarea { max-width: none; }
+.form-grid--dense .form-field--wide,
+.form-section__body--grid .form-field--wide { grid-column: 1 / -1; }
+
+/* Текущее значение рядом с названием свёрнутой группы: состояние видно, не
+   открывая её. Без этого свёрнутая форма экономит место, но прячет настройки. */
+.form-section__state {
+    margin-left: auto;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--admin-accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 45%;
+}

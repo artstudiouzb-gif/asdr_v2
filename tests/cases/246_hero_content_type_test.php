@@ -487,3 +487,89 @@ test('Обложка: перевод накладывается на текст,
 
     $pdo->exec('DELETE FROM heroes');
 });
+
+test('Слайд: своя длительность показа принимается и ограничивается', function () {
+    // Пусто или 0 — «как у обложки»: одним интервалом на всю карусель разное
+    // время чтения не выражается, но и обязательным поле быть не должно.
+    assert_same(0, HeroSlideData::normalize(['title' => 'Т'])['duration']);
+    assert_same(0, HeroSlideData::normalize(['title' => 'Т', 'duration' => ''])['duration']);
+    assert_same(0, HeroSlideData::normalize(['title' => 'Т', 'duration' => 'быстро'])['duration']);
+
+    assert_same(12, HeroSlideData::normalize(['title' => 'Т', 'duration' => '12'])['duration']);
+    // Слишком короткий слайд читается как сбой, а не как настройка.
+    assert_same(2, HeroSlideData::normalize(['title' => 'Т', 'duration' => '1'])['duration']);
+    assert_same(120, HeroSlideData::normalize(['title' => 'Т', 'duration' => '9999'])['duration']);
+
+    // Значение переживает чтение из БД.
+    assert_same(12, HeroSlideData::withDefaults(['duration' => 12])['duration']);
+});
+
+test('Разметка: длительность уходит в атрибут только когда она своя', function () {
+    $rendered = HeroRenderer::render(
+        ['id' => 1, 'name' => 'Тест'],
+        [
+            hero_test_slide(['title' => 'Свои 9 секунд', 'duration' => 9], 1),
+            hero_test_slide(['title' => 'Как у обложки'], 2),
+        ],
+        HeroSettings::withDefaults(['autoplay' => true, 'autoplay_interval' => 6]),
+        11
+    );
+
+    assert_contains('data-hero-slide-duration="9000"', $rendered['html'], 'секунды переводятся в миллисекунды');
+    assert_same(1, substr_count($rendered['html'], 'data-hero-slide-duration='),
+        'у слайда без своей длительности атрибута нет — он держится интервалом обложки');
+
+    $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/blocks/hero.js');
+    assert_contains("getAttribute('data-hero-slide-duration')", $js, 'таймер читает длительность слайда');
+    assert_contains('slideInterval()', $js, 'и полоса прогресса считает по ней же');
+});
+
+test('Ширина: обложка «во всю ширину» выходит из контейнера, контент остаётся в нём', function () {
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
+
+    // Раньше класс выводился, но правила под него не было вовсе — настройка
+    // «во всю ширину» не делала ничего.
+    assert_true(
+        preg_match('/\.hero--w-full\s*\{[^}]*margin-inline:\s*calc\(50%\s*-\s*50vw\)/', $css) === 1,
+        'обложка выходит из контейнера тем же приёмом, что и полноширинные блоки темы'
+    );
+    assert_true(
+        preg_match('/\.hero__inner\s*\{[^}]*max-width:\s*var\(--container-max/', $css) === 1,
+        'контент по-прежнему ограничен шириной сайта'
+    );
+    // Боковой отступ должен совпадать с контейнером страницы, иначе заголовок
+    // обложки не встаёт на одну вертикаль с остальными блоками.
+    assert_contains('.hero--w-full .hero__inner', $css);
+    assert_contains('--hero-gutter', $css);
+
+    // 100vw без этого даёт горизонтальную прокрутку на ширину скроллбара.
+    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    assert_contains('overflow-x: clip', $theme, 'корень обрезает выход за вьюпорт');
+});
+
+test('Навигация не уходит под надвинутый соседний блок', function () {
+    $hero = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
+    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+
+    // Тема надвигает карточку «Счётчики» на низ обложки. Полоса навигации
+    // оказывалась под ней, и стрелки со счётчиком пропадали с экрана.
+    assert_contains('bottom: var(--hero-nav-bottom);', $hero, 'смещение навигации вынесено в переменную');
+    assert_contains('.cms-block--hero:has(+ .cms-block--counters) .hero--carousel', $hero);
+    assert_contains('--hero-nav-space: calc(76px + var(--hero-nav-bottom))', $hero,
+        'резерв под контентом растёт вместе со смещением');
+
+    // Наезд в теме объявлен дважды; действует последнее объявление. Компенсация
+    // обязана повторять именно его — иначе навигация снова уедет под карточку.
+    preg_match_all(
+        '/\.cms-block--hero \+ \.cms-block--counters \.block-counters \{[^}]*margin-top:\s*([^;}]+)/',
+        $theme,
+        $m
+    );
+    assert_true($m[1] !== [], 'правило наезда найдено в теме');
+    $winning = trim((string) end($m[1]));
+    if (preg_match('/clamp\(\s*-(\d+)px\s*,\s*-([\d.]+)vw\s*,\s*-(\d+)px\s*\)/', $winning, $parts) === 1) {
+        $expected = 'clamp(' . $parts[3] . 'px, ' . $parts[2] . 'vw, ' . $parts[1] . 'px)';
+        assert_contains('--hero-overlap: ' . $expected, $hero,
+            'величина компенсации совпадает с действующим наездом темы (' . $winning . ')');
+    }
+});

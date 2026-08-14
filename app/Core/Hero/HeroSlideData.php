@@ -104,6 +104,12 @@ final class HeroSlideData
             'art_position' => 'above',
             'art_size' => 'medium',
 
+            // --- Показ ---
+            // Своя длительность показа, секунды. 0 — «как у обложки»: у
+            // текстового слайда и у слайда с плотной инфографикой разное время
+            // чтения, и одним интервалом на всю карусель это не выражается.
+            'duration' => 0,
+
             // --- Окно показа слайда ---
             '_visible_from' => '',
             '_visible_to' => '',
@@ -205,6 +211,8 @@ final class HeroSlideData
             'art_alt' => BlockDataInput::trimmed($input, 'art_alt'),
             'art_position' => BlockDataInput::enum($input, 'art_position', ['above', 'left', 'right'], 'above'),
             'art_size' => BlockDataInput::enum($input, 'art_size', ['small', 'medium', 'large'], 'medium'),
+
+            'duration' => self::duration($input['duration'] ?? null),
 
             '_visible_from' => BlockVisibility::normalize($input['_visible_from'] ?? ''),
             '_visible_to' => BlockVisibility::normalize($input['_visible_to'] ?? ''),
@@ -333,11 +341,29 @@ final class HeroSlideData
         $d['art_alt'] = $str($d['art_alt'] ?? '');
         $d['art_position'] = $enum($d['art_position'] ?? '', ['above', 'left', 'right'], 'above');
         $d['art_size'] = $enum($d['art_size'] ?? '', ['small', 'medium', 'large'], 'medium');
+        $d['duration'] = self::duration($d['duration'] ?? null);
 
         $d['_visible_from'] = BlockVisibility::normalize($d['_visible_from'] ?? '');
         $d['_visible_to'] = BlockVisibility::normalize($d['_visible_to'] ?? '');
 
         return $d;
+    }
+
+    /**
+     * Длительность показа слайда в секундах.
+     *
+     * 0 — «как у обложки». Ненулевое значение поднимаем до 2 секунд: меньше
+     * успевает только моргнуть, а такой слайд читается как сбой, а не как
+     * настройка.
+     */
+    private static function duration(mixed $value): int
+    {
+        if (!is_numeric($value)) {
+            return 0;
+        }
+        $seconds = (int) $value;
+
+        return $seconds <= 0 ? 0 : max(2, min(120, $seconds));
     }
 
     /** -1 = «как у обложки», 0…100 — своё значение. */

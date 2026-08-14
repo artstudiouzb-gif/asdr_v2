@@ -255,8 +255,21 @@ $ctaStyles = [
     </div>
 
     <div class="form-card">
-        <?= AdminUi::cardHeader('Окно показа слайда', 'clock') ?>
-        <p class="form-hint">Слайд вне своего окна вообще не попадает в разметку страницы. Кэш страницы пересобирается к границе окна автоматически.</p>
+        <?= AdminUi::cardHeader('Показ слайда', 'clock') ?>
+        <div class="form-grid">
+            <div class="form-field">
+                <label for="duration">Длительность показа, секунд</label>
+                <input type="number" id="duration" name="duration" min="0" max="120" step="1"
+                       value="<?= (int) $data['duration'] > 0 ? (int) $data['duration'] : '' ?>"
+                       placeholder="как у обложки">
+                <span class="form-hint">
+                    Пусто или 0 — слайд держится столько же, сколько остальные (интервал задан
+                    в настройках обложки). Своё значение нужно там, где времени на чтение
+                    требуется больше: длинный заголовок или плотная инфографика.
+                </span>
+            </div>
+        </div>
+        <p class="form-hint">Слайд вне окна показа вообще не попадает в разметку страницы. Кэш страницы пересобирается к границе окна автоматически.</p>
         <div class="form-grid">
             <div class="form-field">
                 <label for="_visible_from">Показывать с</label>

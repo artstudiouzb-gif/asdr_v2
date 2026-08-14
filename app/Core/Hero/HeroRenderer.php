@@ -284,6 +284,9 @@ final class HeroRenderer
         }
 
         $html = '<div class="' . implode(' ', $classes) . '" data-hero-slide data-hero-index="' . $index . '"'
+            // Своя длительность показа. Атрибута нет — слайд держится столько
+            // же, сколько остальные (интервал обложки).
+            . ((int) $d['duration'] > 0 ? ' data-hero-slide-duration="' . ((int) $d['duration'] * 1000) . '"' : '')
             . ' role="group" aria-roledescription="' . htmlspecialchars(t('Слайд'), ENT_QUOTES) . '"'
             . ' aria-label="' . ($index + 1) . ' ' . htmlspecialchars(t('из'), ENT_QUOTES) . ' ' . $count . '"'
             . ' aria-hidden="' . ($first ? 'false' : 'true') . '"'
