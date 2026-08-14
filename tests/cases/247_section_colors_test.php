@@ -220,3 +220,29 @@ test('Демо-контент: обложка главной — отдельн�
     \App\Core\DemoSeeder::run($pdo);
     assert_same(1, (int) $pdo->query('SELECT COUNT(*) FROM heroes WHERE deleted_at IS NULL')->fetchColumn());
 });
+
+test('Акцент на светлой карточке берётся из «Дизайна», а не из фиксированного цвета', function () {
+    // Тёмная секция переопределяет --gov-teal-text на светлый вариант, и белая
+    // карточка внутри неё его наследовала — на белом он нечитаем. Чинить это
+    // фиксированным цветом нельзя: акцент задаётся в админке. Поэтому есть
+    // отдельное имя, которое секции не трогают.
+    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    assert_contains('--gov-teal-text: var(--gov-teal-on-light);', $theme,
+        'карточка берёт акцент по имени, а не фиксированным цветом');
+    assert_contains('--gov-teal-on-light: var(--gov-teal-dark, #0284c7);', $theme,
+        'у имени есть статический откат для установки без сгенерированной темы');
+
+    $generator = (string) file_get_contents(APP_ROOT . '/app/Core/SiteThemeCss.php');
+    assert_contains("'--gov-teal-on-light' => AccentContrast::onLight(", $generator,
+        'настоящее значение считается по контрасту из настроек «Дизайна»');
+});
+
+test('Кнопка обложки: цвет текста на заливке акцентом считает тема', function () {
+    // Белый читается не на всяком акценте — axe ловил именно эту пару.
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
+    assert_contains('.hero__cta--primary { background: var(--hero-accent); color: var(--on-accent, #fff); }', $css);
+    assert_true(
+        preg_match('/\.hero__cta--primary\s*\{[^}]*color:\s*#fff\s*[;}]/', $css) !== 1,
+        'фиксированного белого у основной кнопки не осталось'
+    );
+});

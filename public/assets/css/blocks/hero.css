@@ -280,8 +280,11 @@
     transition: background-color .2s ease, color .2s ease, border-color .2s ease;
 }
 
-.hero__cta--primary { background: var(--hero-accent); color: #fff; }
-.hero__cta--primary:hover { background: color-mix(in srgb, var(--hero-accent) 84%, #000); }
+/* Цвет текста на заливке акцентом считает тема (--on-accent): белый читается
+   не на всяком акценте, а акцент задаётся в админке и подбирать пару на глаз
+   нельзя. axe ловил ровно этот случай. */
+.hero__cta--primary { background: var(--hero-accent); color: var(--on-accent, #fff); }
+.hero__cta--primary:hover { background: color-mix(in srgb, var(--hero-accent) 84%, #000); color: var(--on-accent, #fff); }
 .hero__cta--secondary { background: var(--hero-fg); color: var(--hero-bg); }
 .hero__cta--secondary:hover { background: color-mix(in srgb, var(--hero-fg) 86%, transparent); }
 .hero__cta--ghost { border-color: color-mix(in srgb, var(--hero-fg) 55%, transparent); color: var(--hero-fg); }

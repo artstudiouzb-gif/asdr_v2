@@ -31,6 +31,12 @@ final class SiteThemeCss
             '--gov-navy' => 'var(--color-primary)',
             '--gov-teal' => 'var(--color-accent)',
             '--gov-teal-text' => AccentContrast::onLight($accent, $colors['bg_surface']),
+            // Тот же акцент под отдельным именем. `--gov-teal-text` тёмная
+            // секция переопределяет на светлый вариант, и белая карточка
+            // внутри неё унаследовала бы его — на белом он нечитаем. Это имя
+            // секции не трогают, поэтому карточка берёт по нему свой цвет
+            // (App\Core\SectionColors::SURFACES в gov-theme.css).
+            '--gov-teal-on-light' => AccentContrast::onLight($accent, $colors['bg_surface']),
             '--gov-teal-on-dark' => AccentContrast::onDark($accent),
             // Текст на подложке, подмешанной из самого акцента (плашки тегов,
             // номера тезисов, бейджи опроса). Такая подложка темнее и
