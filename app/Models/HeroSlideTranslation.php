@@ -19,7 +19,7 @@ use App\Core\Database;
 final class HeroSlideTranslation
 {
     /** @var list<string> */
-    public const FIELDS = ['eyebrow', 'title', 'subtitle', 'cta_text', 'cta2_text', 'art_alt'];
+    public const FIELDS = ['eyebrow', 'title', 'subtitle', 'cta_text', 'cta2_text', 'art_alt', 'watermark'];
 
     /**
      * Все переводы одного слайда, по коду языка (для формы).
@@ -92,11 +92,12 @@ final class HeroSlideTranslation
         }
 
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO hero_slide_translations (slide_id, lang, eyebrow, title, subtitle, cta_text, cta2_text, art_alt)
-             VALUES (:id, :lang, :eyebrow, :title, :subtitle, :cta_text, :cta2_text, :art_alt)
+            'INSERT INTO hero_slide_translations (slide_id, lang, eyebrow, title, subtitle, cta_text, cta2_text, art_alt, watermark)
+             VALUES (:id, :lang, :eyebrow, :title, :subtitle, :cta_text, :cta2_text, :art_alt, :watermark)
              ON DUPLICATE KEY UPDATE eyebrow = VALUES(eyebrow), title = VALUES(title),
                  subtitle = VALUES(subtitle), cta_text = VALUES(cta_text),
-                 cta2_text = VALUES(cta2_text), art_alt = VALUES(art_alt)'
+                 cta2_text = VALUES(cta2_text), art_alt = VALUES(art_alt),
+                 watermark = VALUES(watermark)'
         );
         $stmt->execute([
             ':id' => $slideId,
@@ -107,6 +108,7 @@ final class HeroSlideTranslation
             ':cta_text' => $clean['cta_text'],
             ':cta2_text' => $clean['cta2_text'],
             ':art_alt' => $clean['art_alt'],
+            ':watermark' => $clean['watermark'],
         ]);
         Cache::forgetPrefix('page:');
     }
@@ -123,8 +125,8 @@ final class HeroSlideTranslation
     public static function copy(int $fromSlideId, int $toSlideId): void
     {
         Database::pdo()->prepare(
-            'INSERT INTO hero_slide_translations (slide_id, lang, eyebrow, title, subtitle, cta_text, cta2_text, art_alt)
-             SELECT :to, lang, eyebrow, title, subtitle, cta_text, cta2_text, art_alt
+            'INSERT INTO hero_slide_translations (slide_id, lang, eyebrow, title, subtitle, cta_text, cta2_text, art_alt, watermark)
+             SELECT :to, lang, eyebrow, title, subtitle, cta_text, cta2_text, art_alt, watermark
              FROM hero_slide_translations WHERE slide_id = :from
              ON DUPLICATE KEY UPDATE title = VALUES(title)'
         )->execute([':to' => $toSlideId, ':from' => $fromSlideId]);

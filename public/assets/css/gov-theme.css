@@ -3827,6 +3827,55 @@ span.imgcard__media::after {
 /* Минимальная высота секции: нужна фотографии-фону — по содержимому секция
    сжимается до полоски, и от кадра остаётся горизонт. Содержимое центрируется
    по вертикали, иначе текст прилипает к верхней грани. */
+/* --- Фоновая надпись секции ---
+   Крупное слово за содержимым: название раздела, цифра, аббревиатура. Размер
+   в процентах ширины экрана, а не ступень шрифта: шкала --step-* существует
+   для читаемого текста, а это декорация, которой положено расти вместе с
+   экраном. Цвет — заголовочный цвет секции, поэтому надпись работает и на
+   светлой секции, и на тёмной, и на синей. */
+.cms-block--has-watermark {
+    position: relative;
+    /* Слово шире секции обрезается её краем, а не растягивает страницу.
+       `clip`, а не `hidden`: `hidden` ломает липкое оглавление внутри. */
+    overflow-x: clip;
+}
+
+.cms-block__watermark {
+    position: absolute;
+    z-index: 0;
+    color: var(--section-title-fg, var(--gov-title));
+    opacity: var(--block-watermark-opacity, 0.12);
+    font-size: var(--block-watermark-size, 22vw);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    /* Привязка к краю задаёт место грубо, смещение доводит его точно.
+       Проценты считаются от самой надписи, поэтому шаг остаётся соразмерным
+       её размеру на любом экране. */
+    transform: translate(
+        calc(var(--block-watermark-ax, 0%) + var(--block-watermark-dx, 0%)),
+        calc(var(--block-watermark-ay, 0%) + var(--block-watermark-dy, 0%))
+    );
+    pointer-events: none;
+    user-select: none;
+}
+
+.cms-block__watermark--x-left { left: 0; }
+.cms-block__watermark--x-center { left: 50%; --block-watermark-ax: -50%; }
+.cms-block__watermark--x-right { right: 0; }
+
+.cms-block__watermark--y-top { top: 0; }
+.cms-block__watermark--y-middle { top: 50%; --block-watermark-ay: -50%; }
+.cms-block__watermark--y-bottom { bottom: 0; }
+
+/* Содержимое секции поднимается над надписью: без этого текст блока оказался
+   бы под ней и терял контраст. */
+.cms-block--has-watermark > *:not(.cms-block__watermark) {
+    position: relative;
+    z-index: 1;
+}
+
 .cms-block--minh-small, .cms-block--minh-medium, .cms-block--minh-large, .cms-block--minh-screen {
     display: flex; flex-direction: column; justify-content: center;
 }

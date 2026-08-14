@@ -86,6 +86,51 @@ $ctaStyles = [
                 <textarea id="subtitle" name="subtitle" rows="3"><?= $esc($data['subtitle']) ?></textarea>
             </div>
         </div>
+
+        <h3 class="form-subtitle">Фоновая надпись</h3>
+        <p class="form-hint">
+            Крупное слово за содержимым — приём с фирменных обложек: название программы
+            или направления во всю ширину, еле заметное. Диктор его не читает, кликам
+            не мешает. Пусто — надписи нет.
+        </p>
+        <div class="form-grid">
+            <div class="form-field">
+                <label for="watermark">Текст надписи</label>
+                <input type="text" id="watermark" name="watermark" value="<?= $esc($data['watermark']) ?>"
+                       maxlength="120" placeholder="Например: aerion">
+                <span class="form-hint">Одно-два слова: надпись не переносится, длинную обрежет край экрана.</span>
+            </div>
+            <?= $select('watermark_x', 'Привязка по горизонтали', [
+                'left' => 'К левому краю', 'center' => 'По центру', 'right' => 'К правому краю',
+            ], (string) $data['watermark_x']) ?>
+            <?= $select('watermark_y', 'Привязка по вертикали', [
+                'top' => 'К верху', 'middle' => 'По центру', 'bottom' => 'К низу',
+            ], (string) $data['watermark_y']) ?>
+            <div class="form-field">
+                <label for="watermark_size">Размер, % ширины экрана</label>
+                <input type="number" id="watermark_size" name="watermark_size" min="2" max="60" step="1"
+                       value="<?= (int) $data['watermark_size'] ?>">
+                <span class="form-hint">22 % — слово примерно в треть экрана. Считается от ширины окна, поэтому на телефоне надпись уменьшается сама.</span>
+            </div>
+            <div class="form-field">
+                <label for="watermark_opacity">Заметность, %</label>
+                <input type="number" id="watermark_opacity" name="watermark_opacity" min="0" max="100" step="1"
+                       value="<?= (int) $data['watermark_opacity'] ?>">
+                <span class="form-hint">12 % — фон. Выше 30 % надпись начинает спорить с заголовком.</span>
+            </div>
+            <div class="form-field">
+                <label for="watermark_dx">Сдвиг вправо, %</label>
+                <input type="number" id="watermark_dx" name="watermark_dx" min="-100" max="100" step="1"
+                       value="<?= (int) $data['watermark_dx'] ?>">
+                <span class="form-hint">Отрицательное — влево. Процент от самой надписи, а не от экрана.</span>
+            </div>
+            <div class="form-field">
+                <label for="watermark_dy">Сдвиг вниз, %</label>
+                <input type="number" id="watermark_dy" name="watermark_dy" min="-100" max="100" step="1"
+                       value="<?= (int) $data['watermark_dy'] ?>">
+                <span class="form-hint">Отрицательное — вверх.</span>
+            </div>
+        </div>
     </div>
 
     <div class="form-card">
@@ -305,6 +350,23 @@ $ctaStyles = [
         </div>
     </div>
 
+    <div class="form-card">
+        <?= AdminUi::cardHeader('Свой CSS-класс', 'code') ?>
+        <div class="form-grid">
+            <div class="form-field">
+                <label for="css_class">Класс слайда</label>
+                <input type="text" id="css_class" name="css_class" value="<?= $esc($data['css_class']) ?>"
+                       placeholder="hero-programma-2030">
+                <span class="form-hint">
+                    Запас на оформление, которого нет в полях выше. Класс вешается на слайд,
+                    а стили пишутся в поле «Свой CSS» у страницы: <code>.hero-programma-2030 .hero__title { … }</code>
+                    — так достаётся и заголовок, и описание, и кнопки. Несколько классов — через пробел.
+                    Допустимы латиница, цифры, дефис и подчёркивание; класс должен начинаться с буквы.
+                </span>
+            </div>
+        </div>
+    </div>
+
     <?php if ($translationLangs !== []): ?>
         <div class="form-card" id="translations">
             <?= AdminUi::cardHeader('Переводы текста', 'globe') ?>
@@ -345,6 +407,10 @@ $ctaStyles = [
                     <div class="form-field">
                         <label for="<?= $id ?>art">Описание картинки поверх фона</label>
                         <input type="text" id="<?= $id ?>art" name="<?= $key ?>[art_alt]" value="<?= $esc($tr['art_alt'] ?? '') ?>">
+                    </div>
+                    <div class="form-field">
+                        <label for="<?= $id ?>watermark">Фоновая надпись</label>
+                        <input type="text" id="<?= $id ?>watermark" name="<?= $key ?>[watermark]" value="<?= $esc($tr['watermark'] ?? '') ?>" maxlength="120">
                     </div>
                 </fieldset>
             <?php endforeach; ?>

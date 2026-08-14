@@ -287,6 +287,11 @@ final class HeroRenderer
         if ($panel) {
             $classes[] = 'hero__slide--panel';
         }
+        // Свой класс редактора идёт последним: по нему пишут стили в «Свой
+        // CSS» страницы, и он должен выигрывать у классов раскладки.
+        if ((string) $d['css_class'] !== '') {
+            $classes[] = (string) $d['css_class'];
+        }
         if ($d['text_position_mobile'] !== '') {
             $classes[] = 'hero--pos-m-' . $d['text_position_mobile'];
         } elseif ($s['text_position_mobile'] !== '') {
@@ -310,6 +315,7 @@ final class HeroRenderer
             . self::media($d, $first)
             . self::overlay($d, $s)
             . self::cover($d)
+            . self::watermark($d)
             . '<div class="hero__inner"><div class="hero__text">'
             . self::art($d)
             . self::text($d, $headingTag)
@@ -467,6 +473,28 @@ final class HeroRenderer
             . ' loading="lazy" decoding="async" height="' . ($heights[$d['art_size']] ?? 120) . '"></span>';
     }
 
+    /**
+     * Фоновая надпись — крупное слово за контентом.
+     *
+     * Лежит между фоном и текстом и ничего не перехватывает: `aria-hidden`
+     * убирает её у диктора (иначе он читает её посреди заголовка), а
+     * `pointer-events: none` в CSS — у мыши, иначе слово шириной в экран
+     * накрыло бы кнопки.
+     *
+     * @param array<string, mixed> $d
+     */
+    private static function watermark(array $d): string
+    {
+        $text = trim((string) $d['watermark']);
+        if ($text === '') {
+            return '';
+        }
+
+        return '<span class="hero__watermark hero__watermark--x-' . htmlspecialchars((string) $d['watermark_x'], ENT_QUOTES)
+            . ' hero__watermark--y-' . htmlspecialchars((string) $d['watermark_y'], ENT_QUOTES) . '"'
+            . ' aria-hidden="true">' . htmlspecialchars($text, ENT_QUOTES) . '</span>';
+    }
+
     /** @param array<string, mixed> $d */
     private static function text(array $d, string $headingTag): string
     {
@@ -576,6 +604,15 @@ final class HeroRenderer
             if ($d[$key] !== '') {
                 $vars[$var] = (int) $d[$key] . 'px';
             }
+        }
+
+        // Прозрачность фоновой надписи — своя у слайда, поэтому переменной в
+        // scoped CSS: инлайн-стили в блоках запрещены.
+        if (trim((string) $d['watermark']) !== '') {
+            $vars['--hero-watermark-opacity'] = (string) round(((int) $d['watermark_opacity']) / 100, 3);
+            $vars['--hero-watermark-size'] = (int) $d['watermark_size'] . 'vw';
+            $vars['--hero-watermark-dx'] = (int) $d['watermark_dx'] . '%';
+            $vars['--hero-watermark-dy'] = (int) $d['watermark_dy'] . '%';
         }
 
         $desktop = [];

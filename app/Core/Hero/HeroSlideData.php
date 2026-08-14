@@ -27,6 +27,11 @@ final class HeroSlideData
 
     public const CTA_STYLES = ['primary', 'secondary', 'ghost', 'link'];
 
+    /** Привязка фоновой надписи к краю; точное место доводится смещением. */
+    public const WATERMARK_X = ['left', 'center', 'right'];
+
+    public const WATERMARK_Y = ['top', 'middle', 'bottom'];
+
     /**
      * Значения по умолчанию — они же список допустимых ключей.
      *
@@ -39,6 +44,24 @@ final class HeroSlideData
             'eyebrow' => '',
             'title' => '',
             'subtitle' => '',
+
+            // --- Фоновая надпись (крупное слово за контентом) ---
+            // Декорация, но декорация из текста: переводится наравне с
+            // заголовком и прячется от диктора, иначе он прочитает её
+            // посреди заголовка. Размер задан в vw — она должна расти вместе
+            // с экраном, а не со шкалой шрифтов (шкала для читаемого текста).
+            'watermark' => '',
+            // Размер — проценты ширины экрана (vw). Числом, а не набором
+            // «средняя/крупная»: нужный кегль зависит от длины слова, и
+            // угадать его пресетом заранее нельзя.
+            'watermark_size' => 22,
+            // Привязка к краю плюс смещение в процентах от размера надписи:
+            // край задаёт грубо, смещение доводит до места.
+            'watermark_x' => 'center',
+            'watermark_y' => 'middle',
+            'watermark_dx' => 0,
+            'watermark_dy' => 0,
+            'watermark_opacity' => 12,
 
             // --- Фон ---
             'media_type' => 'none',
@@ -122,6 +145,14 @@ final class HeroSlideData
             // чтения, и одним интервалом на всю карусель это не выражается.
             'duration' => 0,
 
+            // --- Свой CSS-класс ---
+            // Аварийный выход для оформления, которого нет в полях: класс
+            // вешается на слайд, а стили пишутся в «Свой CSS» страницы
+            // (только супер-админ). Класс на слайде, а не на заголовке, —
+            // из него достаётся и заголовок (`.мой-класс .hero__title`),
+            // и всё остальное, а поле одно.
+            'css_class' => '',
+
             // --- Окно показа слайда ---
             '_visible_from' => '',
             '_visible_to' => '',
@@ -163,6 +194,14 @@ final class HeroSlideData
             'eyebrow' => BlockDataInput::plain($input, 'eyebrow', $locale),
             'title' => BlockDataInput::plain($input, 'title', $locale),
             'subtitle' => BlockDataInput::plain($input, 'subtitle', $locale),
+
+            'watermark' => BlockDataInput::plain($input, 'watermark', $locale),
+            'watermark_size' => self::ranged($input['watermark_size'] ?? null, 2, 60, 22),
+            'watermark_x' => BlockDataInput::enum($input, 'watermark_x', self::WATERMARK_X, 'center'),
+            'watermark_y' => BlockDataInput::enum($input, 'watermark_y', self::WATERMARK_Y, 'middle'),
+            'watermark_dx' => self::ranged($input['watermark_dx'] ?? null, -100, 100, 0),
+            'watermark_dy' => self::ranged($input['watermark_dy'] ?? null, -100, 100, 0),
+            'watermark_opacity' => self::percent($input['watermark_opacity'] ?? null, 12),
 
             'media_type' => $mediaType,
             'image' => $image,
@@ -231,6 +270,8 @@ final class HeroSlideData
             'art_size' => BlockDataInput::enum($input, 'art_size', ['small', 'medium', 'large'], 'medium'),
 
             'duration' => self::duration($input['duration'] ?? null),
+
+            'css_class' => self::cssClass($input['css_class'] ?? ''),
 
             '_visible_from' => BlockVisibility::normalize($input['_visible_from'] ?? ''),
             '_visible_to' => BlockVisibility::normalize($input['_visible_to'] ?? ''),
@@ -334,6 +375,14 @@ final class HeroSlideData
 
         $d['overlay'] = $enum($d['overlay'] ?? '', HeroSettings::OVERLAYS, '');
         $d['overlay_color'] = $hex($d['overlay_color'] ?? '');
+        $d['watermark_size'] = self::ranged($d['watermark_size'] ?? null, 2, 60, 22);
+        $d['watermark_x'] = $enum($d['watermark_x'] ?? '', self::WATERMARK_X, 'center');
+        $d['watermark_y'] = $enum($d['watermark_y'] ?? '', self::WATERMARK_Y, 'middle');
+        $d['watermark_dx'] = self::ranged($d['watermark_dx'] ?? null, -100, 100, 0);
+        $d['watermark_dy'] = self::ranged($d['watermark_dy'] ?? null, -100, 100, 0);
+        $d['watermark_opacity'] = self::percent($d['watermark_opacity'] ?? null, 12);
+        $d['css_class'] = self::cssClass($d['css_class'] ?? '');
+
         $d['overlay_opacity'] = self::optionalPercent($d['overlay_opacity'] ?? null);
         $d['overlay_direction'] = $enum($d['overlay_direction'] ?? '', HeroSettings::OVERLAY_DIRECTIONS, '');
         $d['panel'] = $enum($d['panel'] ?? '', ['on', 'off'], '');
@@ -403,6 +452,49 @@ final class HeroSlideData
     }
 
     /** -1 = «как у обложки», 0…100 — своё значение. */
+    /**
+     * Свой CSS-класс: имена через пробел, без всего, что могло бы закрыть
+     * атрибут. Это не код — стили пишутся в «Свой CSS» страницы, — но в
+     * атрибут значение попадает, поэтому набор символов ограничен жёстко.
+     */
+    private static function cssClass(mixed $value): string
+    {
+        $value = is_scalar($value) ? (string) $value : '';
+        $names = [];
+        foreach (preg_split('/\\s+/', trim($value)) ?: [] as $name) {
+            // Класс начинается с буквы: `123` и `--x` браузер за селектор не
+            // считает, а редактор потом ищет, почему стиль не применился.
+            if (preg_match('/^[A-Za-z][A-Za-z0-9_-]{0,63}$/', $name) === 1) {
+                $names[] = $name;
+            }
+            if (count($names) >= 5) {
+                break;
+            }
+        }
+
+        return implode(' ', array_unique($names));
+    }
+
+    /** Целое в границах; пусто — умолчание, а не край диапазона. */
+    private static function ranged(mixed $value, int $min, int $max, int $default): int
+    {
+        if ($value === null || $value === '' || !is_numeric($value)) {
+            return $default;
+        }
+
+        return max($min, min($max, (int) $value));
+    }
+
+    /** Проценты с умолчанием: пусто — умолчание, а не ноль. */
+    private static function percent(mixed $value, int $default): int
+    {
+        if ($value === null || $value === '' || !is_numeric($value)) {
+            return $default;
+        }
+
+        return max(0, min(100, (int) $value));
+    }
+
     private static function optionalPercent(mixed $value): int
     {
         if ($value === null || $value === '' || !is_numeric($value)) {

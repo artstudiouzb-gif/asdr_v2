@@ -64,6 +64,7 @@ final class HeroSlide
             'cta_text' => 'cta_text',
             'cta2_text' => 'cta2_text',
             'art_alt' => 'art_alt',
+            'watermark' => 'watermark',
         ];
         foreach ($map as $column => $field) {
             $value = trim((string) ($translation[$column] ?? ''));
