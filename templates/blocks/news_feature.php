@@ -96,8 +96,9 @@ $templateCss = '';
         <?php
         // Макет «мозаика»: крупная новость с текстом на обложке, справа две
         // карточки с фото и следом компактные строки без обложек.
+        // Ряды мозаики фиксированы: две карточки с фото и четыре без.
         $withThumb = array_slice($rest, 0, 2);
-        $textOnly = array_slice($rest, 2);
+        $textOnly = array_slice($rest, 2, 4);
         ?>
         <div class="newsfeat-grid">
             <a class="newsfeat-lead" href="<?= htmlspecialchars((string) $featured['url'], ENT_QUOTES) ?>">
