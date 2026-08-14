@@ -659,6 +659,22 @@ final class DemoSeeder
                 'uz_category' => 'Karyera',
                 'uz_hashtags' => '#karyera #ekspertlar',
             ],
+            // Седьмая новость нужна раскладке «мозаика»: она строится как
+            // 1 + 2 + 4, и при шести записях нижний ряд оставался неполным —
+            // на свежей установке блок выглядел бы недоделанным.
+            [
+                'title' => 'Подписаны новые соглашения о партнёрстве с зарубежными организациями',
+                'slug' => 'soglasheniya-o-partnerstve',
+                'excerpt' => 'Договорённости касаются обмена опытом в стратегическом планировании и совместных исследований.',
+                'category' => 'Международное сотрудничество',
+                'image' => '/uploads/public/hero-demo-g3.jpg',
+                'hashtags' => '#партнёрство #сотрудничество',
+                'layout' => 'standard',
+                'uz_title' => 'Xorijiy tashkilotlar bilan yangi hamkorlik bitimlari imzolandi',
+                'uz_excerpt' => 'Kelishuvlar strategik rejalashtirish sohasidagi tajriba almashish va qo‘shma tadqiqotlarga taalluqli.',
+                'uz_category' => 'Xalqaro hamkorlik',
+                'uz_hashtags' => '#hamkorlik #xalqaro',
+            ],
         ];
         // Рубрика демо-новостей — категория, а не текст в бейдже: справочник
         // нужен свежей установке сразу, иначе фильтр ленты нечем наполнить.
