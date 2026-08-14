@@ -323,7 +323,23 @@ $overlayDirections = [
             <?= $select('text_align_y_mobile', 'Текст по вертикали (телефон)', ['' => 'Как на десктопе'] + $yOptions, (string) $settings['text_align_y_mobile']) ?>
             <?= $select('title_size_mobile', 'Размер заголовка (телефон)', ['' => 'Как на десктопе'] + $sizeOptions, (string) $settings['title_size_mobile']) ?>
             <?= $select('subtitle_size_mobile', 'Размер описания (телефон)', ['' => 'Как на десктопе'] + $subtitleSizes, (string) $settings['subtitle_size_mobile']) ?>
-        <?php echo $group('Контент и типографика', 'положение текста и размеры',
+            <?php
+            // Расстояния между частями текста. Отступ задаётся сверху у каждой
+            // части: так «поднять кнопки» — это одно число, а не пересчёт всей
+            // колонки. У первой части отступ не действует.
+            foreach ([
+                'gap_art' => 'Отступ над картинкой, px',
+                'gap_title' => 'Отступ над заголовком, px',
+                'gap_subtitle' => 'Отступ над описанием, px',
+                'gap_actions' => 'Отступ над кнопками, px',
+            ] as $gapKey => $gapLabel): ?>
+                <div class="form-field">
+                    <label for="<?= $gapKey ?>"><?= htmlspecialchars($gapLabel, ENT_QUOTES) ?></label>
+                    <input type="number" id="<?= $gapKey ?>" name="<?= $gapKey ?>" min="0" max="200" step="1"
+                           value="<?= (int) $settings[$gapKey] ?>">
+                </div>
+            <?php endforeach; ?>
+        <?php echo $group('Контент и типографика', 'положение текста, размеры и отступы',
             ($posOptions[$settings['text_position']] ?? '') . ' · заголовок ' . mb_strtolower((string) ($sizeOptions[$settings['title_size']] ?? '')),
             (string) ob_get_clean()); ?>
 

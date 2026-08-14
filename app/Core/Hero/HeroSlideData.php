@@ -83,6 +83,13 @@ final class HeroSlideData
             'subtitle_size' => '',
             'title_size_mobile' => '',
             'subtitle_size_mobile' => '',
+            // Отступ сверху у части текста. Пусто — «как у обложки»;
+            // 0 — значимое значение «прижать вплотную», поэтому пустая
+            // строка и ноль здесь разное.
+            'gap_title' => '',
+            'gap_subtitle' => '',
+            'gap_actions' => '',
+            'gap_art' => '',
 
             // --- Кнопки ---
             'cta_enabled' => false,
@@ -198,6 +205,10 @@ final class HeroSlideData
             'subtitle_size' => BlockDataInput::enum($input, 'subtitle_size', ['s', 'm', 'l'], ''),
             'title_size_mobile' => BlockDataInput::enum($input, 'title_size_mobile', ['s', 'm', 'l', 'xl'], ''),
             'subtitle_size_mobile' => BlockDataInput::enum($input, 'subtitle_size_mobile', ['s', 'm', 'l'], ''),
+            'gap_title' => self::gap($input['gap_title'] ?? null),
+            'gap_subtitle' => self::gap($input['gap_subtitle'] ?? null),
+            'gap_actions' => self::gap($input['gap_actions'] ?? null),
+            'gap_art' => self::gap($input['gap_art'] ?? null),
 
             'cta_enabled' => !empty($input['cta_enabled']),
             'cta_text' => BlockDataInput::plain($input, 'cta_text', $locale),
@@ -333,6 +344,9 @@ final class HeroSlideData
         $d['text_align_y_mobile'] = $enum($d['text_align_y_mobile'] ?? '', ['top', 'center', 'bottom'], '');
         $d['title_size'] = $enum($d['title_size'] ?? '', ['s', 'm', 'l', 'xl'], '');
         $d['subtitle_size'] = $enum($d['subtitle_size'] ?? '', ['s', 'm', 'l'], '');
+        foreach (['gap_title', 'gap_subtitle', 'gap_actions', 'gap_art'] as $gap) {
+            $d[$gap] = self::gap($d[$gap] ?? null);
+        }
         $d['title_size_mobile'] = $enum($d['title_size_mobile'] ?? '', ['s', 'm', 'l', 'xl'], '');
         $d['subtitle_size_mobile'] = $enum($d['subtitle_size_mobile'] ?? '', ['s', 'm', 'l'], '');
 
@@ -364,6 +378,20 @@ final class HeroSlideData
      * успевает только моргнуть, а такой слайд читается как сбой, а не как
      * настройка.
      */
+    /**
+     * Отступ части текста у слайда: пусто — «как у обложки», иначе 0..200 px.
+     * Возвращает строку, потому что пустое значение обязано отличаться от
+     * нуля: ноль — это осознанное «прижать вплотную».
+     */
+    private static function gap(mixed $value): int|string
+    {
+        if ($value === null || (is_string($value) && trim($value) === '') || !is_numeric($value)) {
+            return '';
+        }
+
+        return max(0, min(200, (int) $value));
+    }
+
     private static function duration(mixed $value): int
     {
         if (!is_numeric($value)) {

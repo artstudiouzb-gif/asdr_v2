@@ -661,3 +661,103 @@ test('Кнопка слайда: опасный адрес картинки от
     ]);
     assert_same('https://cdn.example.com/brand-mark.svg', $cdn['cta_image'], 'картинка с CDN принимается');
 });
+
+test('Выравнивание слайда: класс и селектор стоят на одном элементе', function () {
+    // Классы позиции вешаются на сам слайд. Селектор вида
+    // `.hero--y-top .hero__slide` искал бы их у предка и не совпадал никогда —
+    // именно так настройка «по вертикали» год молчала, не выдавая ошибки.
+    $rendered = HeroRenderer::render(
+        ['id' => 1, 'name' => 'Тест'],
+        [hero_test_slide(['title' => 'Т'], 1)],
+        HeroSettings::withDefaults(['text_align_y' => 'bottom', 'text_position' => 'right']),
+        31
+    );
+    assert_true(
+        // Граница слова обязательна: «hero__slide» — часть «hero__slides»,
+        // и без неё сюда попадает класс обёртки, а не самого слайда.
+        preg_match('/<div class="([^"]*\bhero__slide\b[^"]*)"/', $rendered['html'], $m) === 1,
+        'слайд не отрендерился'
+    );
+    $slideClasses = $m[1];
+    assert_contains('hero--y-bottom', $slideClasses, 'класс вертикали — на слайде');
+    assert_contains('hero--pos-right', $slideClasses, 'класс горизонтали — на слайде');
+
+    // Комментарии убираем: в них разобран прежний неверный селектор, и поиск
+    // по сырому файлу нашёл бы объяснение вместо правила.
+    $css = (string) preg_replace(
+        '#/\*.*?\*/#s',
+        '',
+        (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css')
+    );
+
+    // Вертикаль настраивает сам слайд (он grid-контейнер), поэтому класс и
+    // свойство обязаны быть на одном элементе.
+    assert_true(
+        preg_match('/\.hero__slide\.hero--y-bottom\s*\{[^}]*align-items:\s*end/', $css) === 1,
+        'правило вертикали должно относиться к самому слайду'
+    );
+    assert_true(
+        preg_match('/\.hero--y-[a-z]+\s+\.hero__slide/', $css) !== 1,
+        'селектор ищет класс вертикали у предка — так он не совпадёт никогда'
+    );
+
+    // Горизонталь, наоборот, красит вложенный .hero__inner — там потомок
+    // настоящий, и селектор с пробелом правильный.
+    assert_true(
+        preg_match('/\.hero--pos-right\s+\.hero__inner\s*\{[^}]*justify-content:\s*flex-end/', $css) === 1,
+        'горизонталь выравнивает вложенный контейнер'
+    );
+});
+
+test('Отступы частей текста: умолчания сохраняют прежнюю вёрстку, ноль значим', function () {
+    $defaults = HeroSettings::defaults();
+    // Прежде расстояния держал общий gap шкалы (12px, у кнопок двойной).
+    // Умолчания обязаны его повторять, иначе у всех существующих обложек
+    // текст поедет в первый же деплой.
+    assert_same(12, $defaults['gap_title']);
+    assert_same(12, $defaults['gap_subtitle']);
+    assert_same(24, $defaults['gap_actions']);
+
+    // У обложки пустое поле — это «верни умолчание», значение всегда число.
+    assert_same(24, HeroSettings::normalize(['gap_actions' => ''])['gap_actions']);
+    assert_same(0, HeroSettings::normalize(['gap_actions' => '0'])['gap_actions'], 'ноль — осознанное «вплотную»');
+    assert_same(200, HeroSettings::normalize(['gap_actions' => '9999'])['gap_actions'], 'отступ ограничен сверху');
+    assert_same(0, HeroSettings::normalize(['gap_actions' => '-40'])['gap_actions'], 'отрицательного отступа не бывает');
+
+    // У слайда пустое поле — «как у обложки», и это НЕ то же самое, что ноль.
+    $slide = HeroSlideData::normalize(['title' => 'Т']);
+    assert_same('', $slide['gap_actions'], 'слайд по умолчанию наследует отступ обложки');
+    assert_same(0, HeroSlideData::normalize(['title' => 'Т', 'gap_actions' => '0'])['gap_actions']);
+    assert_same(40, HeroSlideData::normalize(['title' => 'Т', 'gap_actions' => '40'])['gap_actions']);
+
+    // Переменная обложки печатается всегда, переменная слайда — только когда
+    // слайд действительно отходит от общей настройки.
+    $inherit = HeroRenderer::render(
+        ['id' => 1, 'name' => 'Тест'],
+        [hero_test_slide(['title' => 'Т'], 1)],
+        HeroSettings::withDefaults(['gap_actions' => 48]),
+        41
+    );
+    assert_contains('--hero-gap-actions:48px', str_replace(' ', '', $inherit['css']));
+    assert_same(
+        1,
+        substr_count(str_replace(' ', '', $inherit['css']), '--hero-gap-actions:'),
+        'слайд без своей настройки переменную не переобъявляет'
+    );
+
+    $own = HeroRenderer::render(
+        ['id' => 1, 'name' => 'Тест'],
+        [hero_test_slide(['title' => 'Т', 'gap_actions' => 0], 1)],
+        HeroSettings::withDefaults(['gap_actions' => 48]),
+        42
+    );
+    assert_contains('--hero-gap-actions:0px', str_replace(' ', '', $own['css']), 'ноль у слайда доезжает до CSS');
+
+    // Первая часть текста отступ сверху не получает: настройка про расстояние
+    // МЕЖДУ частями, а не про отрыв от границы блока.
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
+    assert_true(
+        preg_match('/\.hero__text > :first-child\s*\{[^}]*margin-top:\s*0/', $css) === 1,
+        'у первой части текста верхнего отступа быть не должно'
+    );
+});
