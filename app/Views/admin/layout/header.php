@@ -20,6 +20,7 @@ $navContent = [
     'news' => ['/admin/news', t('Новости')],
     'news_categories' => ['/admin/news-categories', t('Категории новостей')],
     'pages' => ['/admin/pages', t('Страницы')],
+    'heroes' => ['/admin/heroes', t('Обложки')],
     'projects' => ['/admin/projects', t('Проекты')],
     'team' => ['/admin/team', t('Команда')],
 ];

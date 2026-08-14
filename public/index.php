@@ -138,6 +138,24 @@ $router->get('/admin/news-categories/{id}/edit', [\App\Controllers\Admin\NewsCat
 $router->post('/admin/news-categories/{id}/update', [\App\Controllers\Admin\NewsCategoryController::class, 'update']);
 $router->post('/admin/news-categories/{id}/delete', [\App\Controllers\Admin\NewsCategoryController::class, 'destroy']);
 
+// --- Admin: обложки (Hero) ---
+// Обложка — отдельный тип контента: блок страницы только выбирает, какую из
+// них вывести, поэтому у раздела свой адрес, а не вложенность в страницы.
+$router->get('/admin/heroes', [\App\Controllers\Admin\HeroController::class, 'index']);
+$router->post('/admin/heroes/create', [\App\Controllers\Admin\HeroController::class, 'store']);
+$router->get('/admin/heroes/{id}/edit', [\App\Controllers\Admin\HeroController::class, 'edit']);
+$router->post('/admin/heroes/{id}/update', [\App\Controllers\Admin\HeroController::class, 'update']);
+$router->post('/admin/heroes/{id}/preset', [\App\Controllers\Admin\HeroController::class, 'applyPreset']);
+$router->post('/admin/heroes/{id}/duplicate', [\App\Controllers\Admin\HeroController::class, 'duplicate']);
+$router->post('/admin/heroes/{id}/delete', [\App\Controllers\Admin\HeroController::class, 'destroy']);
+$router->post('/admin/heroes/{id}/slides/create', [\App\Controllers\Admin\HeroController::class, 'slideCreate']);
+$router->post('/admin/heroes/{id}/slides/reorder', [\App\Controllers\Admin\HeroController::class, 'reorder']);
+$router->get('/admin/heroes/{id}/slides/{slide}/edit', [\App\Controllers\Admin\HeroController::class, 'slideEdit']);
+$router->post('/admin/heroes/{id}/slides/{slide}/update', [\App\Controllers\Admin\HeroController::class, 'slideUpdate']);
+$router->post('/admin/heroes/{id}/slides/{slide}/duplicate', [\App\Controllers\Admin\HeroController::class, 'slideDuplicate']);
+$router->post('/admin/heroes/{id}/slides/{slide}/toggle', [\App\Controllers\Admin\HeroController::class, 'slideToggle']);
+$router->post('/admin/heroes/{id}/slides/{slide}/delete', [\App\Controllers\Admin\HeroController::class, 'slideDestroy']);
+
 // --- Admin: страницы + конструктор блоков ---
 $router->get('/admin/pages', [AdminPageController::class, 'index']);
 $router->get('/admin/pages/create', [AdminPageController::class, 'create']);

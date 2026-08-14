@@ -11,6 +11,10 @@ use App\Core\AssetCollector;
 const THEME_PART_FAMILIES = [
     'news-detail.css' => '/newsdetail|relnews/',
     'org-structure.css' => '/orgstruct/',
+    // Обложка. `.hero` не пересекается с `.block-hero` старого блока: там
+    // точка стоит перед «block», а не перед «hero». Шаги @keyframes своего
+    // семейства не имеют — разрешены явно и только они.
+    'hero.css' => '/\.hero|^(from|to|[\d.]+%)$/',
 ];
 
 /** Разбор CSS на правила верхнего уровня: [селектор без комментариев, тело]. */

@@ -66,6 +66,54 @@ CREATE TABLE IF NOT EXISTS news_category_translations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
+-- Обложки (Hero) — отдельный тип контента: запись со своим набором слайдов.
+-- Блок страницы только выбирает обложку (blocks.data.hero_id), поэтому одну
+-- обложку можно вывести на нескольких страницах, не размножая содержимое.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS heroes (
+    id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name           VARCHAR(190) NOT NULL COMMENT 'название для админки, на сайт не выводится',
+    status         VARCHAR(16) NOT NULL DEFAULT 'draft' COMMENT 'draft|published|scheduled',
+    published_from DATETIME NULL COMMENT 'начало показа (для scheduled)',
+    published_to   DATETIME NULL COMMENT 'конец показа (для scheduled)',
+    priority       INT NOT NULL DEFAULT 0 COMMENT 'больше — важнее при совпадении окон',
+    preset         VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'последний применённый пресет',
+    settings       LONGTEXT NULL COMMENT 'JSON: общие настройки обложки',
+    created_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at     DATETIME NULL,
+    KEY idx_heroes_listing (deleted_at, status, priority, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS hero_slides (
+    id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    hero_id    INT UNSIGNED NOT NULL,
+    title      VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'заголовок на основном языке (он же подпись в списке)',
+    sort_order INT NOT NULL DEFAULT 0,
+    is_active  TINYINT(1) NOT NULL DEFAULT 1,
+    data       LONGTEXT NULL COMMENT 'JSON: поля слайда',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_hero_slides_order (hero_id, sort_order, id),
+    CONSTRAINT fk_hero_slides_hero FOREIGN KEY (hero_id) REFERENCES heroes(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS hero_slide_translations (
+    id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    slide_id     INT UNSIGNED NOT NULL,
+    lang         VARCHAR(8) NOT NULL,
+    eyebrow      VARCHAR(255) NULL,
+    title        VARCHAR(255) NULL,
+    subtitle     TEXT NULL,
+    cta_text     VARCHAR(190) NULL,
+    cta2_text    VARCHAR(190) NULL,
+    art_alt      VARCHAR(255) NULL,
+    UNIQUE KEY uq_hero_slide_translations (slide_id, lang),
+    CONSTRAINT fk_hero_slide_translations_slide
+        FOREIGN KEY (slide_id) REFERENCES hero_slides(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
 -- Новости
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS news (
@@ -1132,7 +1180,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_13_projects_into_pages.sql'),
     ('2026_08_13_news_category_icon.sql'),
     ('2026_08_13_page_sections.sql'),
-    ('2026_08_13_language_short_name.sql')
+    ('2026_08_13_language_short_name.sql'),
+    ('2026_08_14_heroes.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

@@ -73,6 +73,14 @@
       "gzip": 891,
       "brotli": 720
     },
+    "/assets/css/blocks/hero.css": {
+      "path": "/assets/css/blocks/hero.min.css",
+      "sourceSha256": "a3016ea660f35697a0be68d0741ac375f76b45bbc32ce2da6b9ca7dc187c3296",
+      "sha256": "90b91455017708002f2d70b065c8f6f502919108603fdfe5e6e85f32603998f9",
+      "raw": 10004,
+      "gzip": 2470,
+      "brotli": 2150
+    },
     "/assets/js/blocks/slider.js": {
       "path": "/assets/js/blocks/slider.min.js",
       "sourceSha256": "bd765788826c91fa2e7fbbef6dd00d033d3a7925cfd509de82cb0b2ac6eeb5f9",
@@ -112,6 +120,14 @@
       "raw": 2002,
       "gzip": 859,
       "brotli": 715
+    },
+    "/assets/js/blocks/hero.js": {
+      "path": "/assets/js/blocks/hero.min.js",
+      "sourceSha256": "5c3ca3ffba4eb87ff4d085005027a73af23ede03ce5e963e6160e1aa26d85db2",
+      "sha256": "65bf942f88bb4bb64d71654f61dbab12c21d8ae42f475e8c0a274ec7b8644bb1",
+      "raw": 6114,
+      "gzip": 2155,
+      "brotli": 1862
     },
     "/assets/js/news.js": {
       "path": "/assets/js/news.min.js",

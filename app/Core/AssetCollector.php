@@ -25,6 +25,7 @@ final class AssetCollector
         'leader_card' => '/assets/js/blocks/leader_card.js',
         'tabs' => '/assets/js/blocks/tabs.js',
         'org_structure' => '/assets/js/blocks/org_structure.js',
+        'hero_slides' => '/assets/js/blocks/hero.js',
     ];
 
     /**
@@ -45,6 +46,7 @@ final class AssetCollector
         'leader_card' => '/assets/css/blocks/leader-card.css',
         'media_gallery' => '/assets/css/blocks/media-gallery.css',
         'tabs' => '/assets/css/blocks/tabs.css',
+        'hero_slides' => '/assets/css/blocks/hero.css',
     ];
 
     /** @var array<string, bool> */

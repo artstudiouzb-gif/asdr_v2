@@ -805,6 +805,47 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'hero'): ?>
+            <?php
+            // Обложка как тип контента. Выбрана — блок только размещает её, а
+            // поля ниже не участвуют в выводе: держать один и тот же текст в
+            // двух местах нельзя, они разойдутся. Поля при этом сохраняются,
+            // чтобы возврат к «своим настройкам» ничего не терял.
+            $heroSelected = (int) ($data['hero_id'] ?? 0);
+            $heroList = [];
+            try {
+                $heroList = \App\Models\Hero::all();
+                $heroSlideCounts = \App\Models\Hero::slideCounts();
+            } catch (\Throwable $e) {
+                $heroSlideCounts = []; // миграция обложек не накатана
+            }
+            ?>
+            <div class="form-field">
+                <label for="hero_id">Обложка</label>
+                <select id="hero_id" name="hero_id" data-hero-picker aria-describedby="hero_id_hint">
+                    <option value="0" <?= $heroSelected === 0 ? 'selected' : '' ?>>— собрать прямо в блоке (старый способ) —</option>
+                    <?php foreach ($heroList as $heroRow): ?>
+                        <?php $rowId = (int) $heroRow['id']; ?>
+                        <option value="<?= $rowId ?>" <?= $heroSelected === $rowId ? 'selected' : '' ?>>
+                            <?= htmlspecialchars((string) $heroRow['name'], ENT_QUOTES) ?>
+                            (<?= (int) ($heroSlideCounts[$rowId]['active'] ?? 0) ?> сл.<?= (string) $heroRow['status'] !== 'published' ? ', не опубликована' : '' ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint" id="hero_id_hint">
+                    Обложки создаются в разделе <a href="/admin/heroes">«Обложки»</a>: одну обложку можно вывести на нескольких
+                    страницах и править в одном месте. Когда обложка выбрана, поля ниже не выводятся —
+                    содержимое и оформление берутся из неё.
+                </span>
+            </div>
+            <?php if ($heroSelected > 0): ?>
+                <p class="form-hint">
+                    <a class="btn btn--small" href="/admin/heroes/<?= $heroSelected ?>/edit">Открыть обложку и её слайды →</a>
+                </p>
+            <?php endif; ?>
+            <?php // Собственные поля блока. При выбранной обложке они не участвуют
+                  // в выводе — прячем их, но оставляем в форме: возврат к
+                  // «старому способу» не должен терять набранное. ?>
+            <div data-hero-own-fields<?= $heroSelected > 0 ? ' hidden' : '' ?>>
             <?= \App\Core\AdminUi::imageField('image_mobile', (string) ($data['image_mobile'] ?? ''), [
                 'label' => 'Кадр для телефона',
                 'hint' => 'Пусто — на телефоне показывается общий кадр. Пригодится, когда широкое фото на узком экране режется до полоски.',
@@ -1220,6 +1261,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </template>
             <div class="repeater-actions">
                 <button type="button" class="btn btn--small" data-repeater-add="heroslides"><?= \App\Core\AdminUi::icon('plus') ?>Добавить слайд</button>
+            </div>
             </div>
         <?php endif; ?>
 
