@@ -25,6 +25,12 @@ if ($metaDescription === '') {
 }
 // Стили блоков раздела уезжают в <head> тем же путём, что и у страницы.
 $extraHeadCss = (string) ($sectionPage['css'] ?? '');
+
+// Соседние страницы ленты для <link rel="prev|next">: адрес тот же, что у
+// полосы страниц, поэтому строим его тем же способом.
+$pagerLink = static fn (int $p): string => Locale::url('news')
+    . (($p > 1 || $category !== '') ? '?' . http_build_query(array_filter(['category' => $category, 'page' => $p > 1 ? $p : null])) : '');
+['prev' => $pagerPrev, 'next' => $pagerNext] = \App\Core\Pager::relLinks($page, $pages, $pagerLink);
 AssetCollector::requireJs('news');
 require __DIR__ . '/_header.php';
 

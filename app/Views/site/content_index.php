@@ -14,6 +14,23 @@ use App\Core\Locale;
 
 $metaTitle = t((string) $type['name']);
 $metaDescription = t((string) ($type['description'] ?? ''));
+
+// Соседние страницы каталога для <link rel="prev|next">. Поиск и сортировка
+// в адресе сохраняются — иначе ссылка вела бы на другой список.
+$pagerQuery = static function (int $p) use ($q, $sort): string {
+    $params = array_filter([
+        'q' => $q !== '' ? $q : null,
+        'sort' => $sort !== 'new' ? $sort : null,
+        'page' => $p > 1 ? $p : null,
+    ], static fn ($value): bool => $value !== null && $value !== '');
+
+    return $params === [] ? '' : '?' . http_build_query($params);
+};
+['prev' => $pagerPrev, 'next' => $pagerNext] = \App\Core\Pager::relLinks(
+    $page,
+    $pages,
+    static fn (int $p): string => Locale::url('catalog/' . $type['slug']) . $pagerQuery($p)
+);
 require __DIR__ . '/_header.php';
 
 $crumbs = [
