@@ -610,7 +610,11 @@ final class HeroRenderer
             . ' aria-label="' . htmlspecialchars(t('Следующий слайд'), ENT_QUOTES) . '">'
             . Icon::render('chevron-right', 22) . '</button>';
 
-        $html = '<div class="hero__nav">';
+        // Внешний слой держит полосу на месте (ширина колонки сайта, отступ от
+        // низа), внутренний — сама капсула, которая обжимает содержимое.
+        // Двумя элементами, а не одним: капсуле нельзя задать и «во всю
+        // ширину контейнера», и «по содержимому» одновременно.
+        $html = '<div class="hero__nav"><div class="hero__nav-bar">';
         if ($arrows) {
             $html .= $prev;
         }
@@ -630,7 +634,7 @@ final class HeroRenderer
                 . '<span class="hero__playpause-icon hero__playpause-icon--play" aria-hidden="true">'
                 . Icon::render('player-play', 18) . '</span></button>';
         }
-        $html .= '</div>'
+        $html .= '</div></div>'
             . '<span class="visually-hidden" data-hero-status aria-live="polite"></span>';
 
         return $html;
@@ -654,7 +658,10 @@ final class HeroRenderer
             'dots' => self::dots($count),
             'counter' => $counter,
             'progress' => $progress,
-            'counter_progress' => $counter . $progress,
+            // Полоса идёт перед счётчиком: она показывает, сколько осталось до
+            // следующего слайда, а счётчик — где мы сейчас. Слева направо это
+            // читается как «время → позиция», а не наоборот.
+            'counter_progress' => $progress . $counter,
             'thumbs' => self::thumbs($slides),
             default => '',
         };
