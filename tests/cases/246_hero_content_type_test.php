@@ -573,3 +573,62 @@ test('Навигация не уходит под надвинутый сосе�
             'величина компенсации совпадает с действующим наездом темы (' . $winning . ')');
     }
 });
+
+test('Кнопка слайда: своя картинка побеждает иконку набора', function () {
+    // Иконка набора берёт currentColor и красится под тип кнопки; картинку
+    // ставят ради знака, которого в Tabler нет, поэтому подменять её иконкой
+    // нельзя — даже когда заполнены оба поля.
+    $both = HeroSlideData::normalize([
+        'title' => 'Т',
+        'cta_enabled' => '1',
+        'cta_text' => 'Подробнее',
+        'cta_url' => '/about',
+        'cta_icon' => 'arrow-right',
+        'cta_image' => '/uploads/public/brand-mark.svg',
+    ]);
+    assert_same('/uploads/public/brand-mark.svg', $both['cta_image']);
+    assert_same('arrow-right', $both['cta_icon'], 'иконка сохраняется: убрали картинку — она вернулась');
+
+    $rendered = HeroRenderer::render(
+        ['id' => 1, 'name' => 'Тест'],
+        [hero_test_slide($both, 1)],
+        HeroSettings::defaults(),
+        21
+    );
+    assert_contains('<img src="/uploads/public/brand-mark.svg"', $rendered['html']);
+    assert_contains('width="20" height="20"', $rendered['html'], 'без размеров SVG растягивается на всю кнопку');
+    assert_true(
+        strpos($rendered['html'], 'tabler-arrow-right') === false,
+        'при своей картинке иконка набора не выводится'
+    );
+    assert_contains('hero__cta--with-icon', $rendered['html']);
+});
+
+test('Кнопка слайда: опасный адрес картинки отбрасывается, остаётся иконка', function () {
+    // Абсолютный https здесь законен — медиа умеет жить на CDN, и остальные
+    // поля картинок ведут себя так же. Отсекается не чужой домен, а схема.
+    $data = HeroSlideData::normalize([
+        'title' => 'Т',
+        'cta_enabled' => '1',
+        'cta_text' => 'Подробнее',
+        'cta_url' => '/about',
+        'cta_icon' => 'arrow-right',
+        'cta_image' => 'javascript:alert(1)',
+    ]);
+    assert_same('', $data['cta_image'], 'адрес с исполняемой схемой не сохраняется');
+
+    $rendered = HeroRenderer::render(
+        ['id' => 1, 'name' => 'Тест'],
+        [hero_test_slide($data, 1)],
+        HeroSettings::defaults(),
+        22
+    );
+    assert_true(strpos($rendered['html'], 'javascript:') === false);
+    assert_contains('tabler-arrow-right', $rendered['html'], 'иконка набора отработала как запасной вариант');
+
+    $cdn = HeroSlideData::normalize([
+        'title' => 'Т',
+        'cta_image' => 'https://cdn.example.com/brand-mark.svg',
+    ]);
+    assert_same('https://cdn.example.com/brand-mark.svg', $cdn['cta_image'], 'картинка с CDN принимается');
+});
