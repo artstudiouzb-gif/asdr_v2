@@ -4464,6 +4464,11 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
    короткого текста под ним. Пока текст был вынесен в полосу под фото, крупная
    вырастала вдвое и растяжка оставляла в соседях дыру в сотню пикселей. */
 .block-newsfeat--mosaic .newsfeat-mini { height: 100%; }
+/* «Читать подробнее» прижата к нижнему краю карточки. Иначе она вставала сразу
+   под заголовком, и у карточек с разной длиной текста ссылки оказывались на
+   разной высоте — глаз читает это как сбитую сетку. */
+.block-newsfeat--mosaic .newsfeat-mini__body { flex: 1 1 auto; }
+.block-newsfeat--mosaic .newsfeat-mini__body .card-more { margin-top: auto; }
 
 @media (max-width: 900px) {
     .block-newsfeat--mosaic .newsfeat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
