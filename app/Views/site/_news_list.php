@@ -88,15 +88,5 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
         <?php endforeach; ?>
     </div>
 
-    <?php if ($pages > 1): ?>
-        <nav class="listing-pager" aria-label="<?= htmlspecialchars(t('Страницы'), ENT_QUOTES) ?>">
-            <?php for ($i = 1; $i <= $pages; $i++): ?>
-                <?php if ($i === $page): ?>
-                    <span class="listing-pager__item is-active" aria-current="page"><?= $i ?></span>
-                <?php else: ?>
-                    <a class="listing-pager__item" href="<?= htmlspecialchars($pageUrl($i), ENT_QUOTES) ?>"><?= $i ?></a>
-                <?php endif; ?>
-            <?php endfor; ?>
-        </nav>
-    <?php endif; ?>
+    <?php require __DIR__ . '/_pager.php'; ?>
 <?php endif; ?>

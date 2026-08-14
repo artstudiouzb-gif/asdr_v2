@@ -408,4 +408,6 @@ return [
     'Поиск по схеме' => 'Sxema bo‘yicha qidiruv',
     'Название отдела или сектора' => 'Bo‘lim yoki sektor nomi',
     'Найдено: %d' => 'Topildi: %d',
+    'Предыдущая страница' => 'Oldingi sahifa',
+    'Следующая страница' => 'Keyingi sahifa',
 ];

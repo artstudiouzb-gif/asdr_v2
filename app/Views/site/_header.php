@@ -634,6 +634,15 @@ if ($pageTitleText === '') {
 <meta name="description" content="<?= htmlspecialchars($metaDescription, ENT_QUOTES) ?>">
 <?php endif; ?>
 <link rel="canonical" href="<?= htmlspecialchars($canonicalUrl, ENT_QUOTES) ?>">
+<?php // Соседние страницы списка: поисковику это подсказка, что страницы
+      // связаны в ленту, а не дублируют друг друга. Значения ставит вью
+      // списка перед подключением шапки. ?>
+<?php if (!empty($pagerPrev)): ?>
+<link rel="prev" href="<?= htmlspecialchars($appUrl . $pagerPrev, ENT_QUOTES) ?>">
+<?php endif; ?>
+<?php if (!empty($pagerNext)): ?>
+<link rel="next" href="<?= htmlspecialchars($appUrl . $pagerNext, ENT_QUOTES) ?>">
+<?php endif; ?>
 <?php // hreflang: текущий путь на языках, где контент реально существует
       // ($hrefLangs отфильтрован по Locale::contentLangs выше),
       // + x-default (основной язык). Одинокий hreflang не выводим. ?>

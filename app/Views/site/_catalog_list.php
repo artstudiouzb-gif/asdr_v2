@@ -117,15 +117,7 @@ $qs = static function (array $overrides) use ($q, $sort): string {
         <?php endforeach; ?>
     </div>
 
-    <?php if ($pages > 1): ?>
-        <nav class="listing-pager" aria-label="<?= htmlspecialchars(t('Страницы'), ENT_QUOTES) ?>">
-            <?php for ($p = 1; $p <= $pages; $p++): ?>
-                <?php if ($p === $page): ?>
-                    <span class="listing-pager__item is-active" aria-current="page"><?= $p ?></span>
-                <?php else: ?>
-                    <a class="listing-pager__item" href="<?= htmlspecialchars($baseUrl . $qs(['page' => $p > 1 ? $p : null]), ENT_QUOTES) ?>"><?= $p ?></a>
-                <?php endif; ?>
-            <?php endfor; ?>
-        </nav>
-    <?php endif; ?>
+    <?php // Адрес страницы каталога сохраняет поиск и сортировку. ?>
+    <?php $pageUrl = static fn (int $p): string => $baseUrl . $qs(['page' => $p > 1 ? $p : null]); ?>
+    <?php require __DIR__ . '/_pager.php'; ?>
 <?php endif; ?>
