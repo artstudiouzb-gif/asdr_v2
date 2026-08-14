@@ -814,6 +814,12 @@ final class BlockRenderer
             if ($limit <= 0) {
                 $limit = 6;
             }
+            // У мозаики раскладка жёсткая: крупная новость на две колонки,
+            // рядом две с фото, снизу ряд из четырёх. Меньше семи — нижний ряд
+            // остаётся дырявым, больше — лишние не помещаются ни в один ряд.
+            if ((string) ($data['variant'] ?? 'cards') === 'mosaic') {
+                $limit = 7;
+            }
             $lang = Locale::current();
             $category = (int) ($data['category'] ?? 0);
             $rows = \App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null);

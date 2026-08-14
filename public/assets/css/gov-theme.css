@@ -4444,7 +4444,51 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
    это читается как недоделка. Отдаём её промежутку между рядами: карточки
    остаются плотными, фотографии — одной высоты, а увеличенный воздух между
    рядом с фото и рядом без фото выглядит намеренным. */
-.block-newsfeat--mosaic .newsfeat-side { justify-content: space-between; }
+/* Мозаика — одна сетка в четыре колонки на оба ряда, а не «крупная новость +
+   отдельная колонка справа». Прежняя раскладка растила крупную на всю высоту
+   двух рядов, и она задавливала остальные: половина ширины и вся высота блока.
+   Теперь она занимает две колонки только верхнего ряда.
+
+   Обёртки правой части распускаются в ячейки той же сетки (display: contents),
+   поэтому шаг между всеми карточками один и они стоят на общих колонках. */
+.block-newsfeat--mosaic .newsfeat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.block-newsfeat--mosaic .newsfeat-side,
+.block-newsfeat--mosaic .newsfeat-side__thumbs,
+.block-newsfeat--mosaic .newsfeat-side__texts { display: contents; }
+.block-newsfeat--mosaic .newsfeat-lead { grid-column: span 2; }
+/* Снимки маленьких карточек — та же пропорция, что у крупной. */
+.block-newsfeat--mosaic .newsfeat-mini__thumb { aspect-ratio: 16/9; }
+/* Ряд заканчивается ровно: карточки тянутся до высоты соседей. Разница теперь
+   в пределах 40px — у крупной новости текст лежит поверх снимка, поэтому её
+   высота равна высоте кадра, а у соседних складывается из такого же 16:9 и
+   короткого текста под ним. Пока текст был вынесен в полосу под фото, крупная
+   вырастала вдвое и растяжка оставляла в соседях дыру в сотню пикселей. */
+.block-newsfeat--mosaic .newsfeat-mini { height: 100%; }
+
+@media (max-width: 900px) {
+    .block-newsfeat--mosaic .newsfeat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .block-newsfeat--mosaic .newsfeat-lead { grid-column: span 2; }
+}
+@media (max-width: 560px) {
+    .block-newsfeat--mosaic .newsfeat-grid { grid-template-columns: minmax(0, 1fr); }
+    .block-newsfeat--mosaic .newsfeat-lead { grid-column: span 1; }
+}
+
+/* Крупная новость: снимок держит 16:9 и задаёт высоту карточки, а текст лежит
+   поверх него с затемнением снизу вверх. Так карточка получается вровень с
+   соседними: у них высота складывается из такого же 16:9 и текста под ним.
+   Растягивать снимок по высоте ряда (прежний height:100%) нельзя — кадр
+   обрезался почти в квадрат, и произвольные фотографии ломались каждая
+   по-своему. */
+.block-newsfeat--mosaic .newsfeat-lead__media {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 16/9;
+}
+/* В мозаике карточка держится на снимке, дате и заголовке — описание в ней
+   лишнее: оно удлиняет карточки неодинаково и спорит с заголовком за внимание. */
+.block-newsfeat--mosaic .newsfeat-lead__excerpt,
+.block-newsfeat--mosaic .newsfeat-mini__excerpt { display: none; }
 .block-newsfeat--mosaic .newsfeat-mini__excerpt,
 .block-newsfeat--mosaic .newsfeat-text__excerpt { color: var(--gov-muted); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); }
 .block-newsfeat--mosaic .newsfeat-text { padding: 14px; gap: 8px; }

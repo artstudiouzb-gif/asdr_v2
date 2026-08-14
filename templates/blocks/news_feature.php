@@ -25,12 +25,10 @@ $category = static fn (array $i): string => trim((string) ($i['category'] ?? '')
 $more = '<span class="card-more">' . htmlspecialchars(t('Читать подробнее'), ENT_QUOTES)
     . '<span class="card-more__arrow" aria-hidden="true">→</span></span>';
 
+// Колонки мозаики задаёт тема (.block-newsfeat--mosaic): раскладка одна для
+// всех блоков этого варианта, поэтому scoped-правило только мешало бы — оно
+// грузится последним и перебивало общую сетку в четыре колонки.
 $templateCss = '';
-if ($variant === 'mosaic') {
-    // На десктопе лид и правая колонка делят секцию поровну. Правило scoped
-    // конкретным блоком и не вмешивается в мобильный одноколоночный макет.
-    $templateCss = '@media (min-width:901px){#block-' . (int) $blockId . ' .newsfeat-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}}';
-}
 ?>
 <div class="block-newsfeat block-newsfeat--<?= $variant ?>">
     <div class="section-head">
@@ -98,8 +96,9 @@ if ($variant === 'mosaic') {
         <?php
         // Макет «мозаика»: крупная новость с текстом на обложке, справа две
         // карточки с фото и следом компактные строки без обложек.
+        // Ряды мозаики фиксированы: две карточки с фото и четыре без.
         $withThumb = array_slice($rest, 0, 2);
-        $textOnly = array_slice($rest, 2);
+        $textOnly = array_slice($rest, 2, 4);
         ?>
         <div class="newsfeat-grid">
             <a class="newsfeat-lead" href="<?= htmlspecialchars((string) $featured['url'], ENT_QUOTES) ?>">
