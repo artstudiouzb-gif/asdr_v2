@@ -62,7 +62,7 @@ if ($variant === 'band') {
         <div class="ctaband__lead">
             <span class="ctaband__icon" aria-hidden="true"><?= Icon::render($icon !== '' ? $icon : 'mail', 40, '', 1.5) ?></span>
             <span class="ctaband__body">
-                <?php if ($title !== ''): ?><span class="ctaband__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></span><?php endif; ?>
+                <?php if ($title !== ''): ?><span class="ctaband__title"><?= \App\Core\TitleMarkup::html($title) ?></span><?php endif; ?>
                 <?php if ($text !== ''): ?><span class="ctaband__text"><?= htmlspecialchars($text, ENT_QUOTES) ?></span><?php endif; ?>
             </span>
         </div>
@@ -73,7 +73,7 @@ if ($variant === 'band') {
 <?php elseif (str_starts_with($variant, 'media-')): ?>
     <div class="block-banner<?= $variant === 'media-light' ? ' block-banner--light' : ($image !== '' ? ' block-banner--image' : '') ?> <?= $mediaClasses ?>">
         <div class="block-banner__inner">
-            <?php if ($title !== ''): ?><h2 class="block-banner__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+            <?php if ($title !== ''): ?><h2 class="block-banner__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
             <?php if ($text !== ''): ?><p class="block-banner__text"><?= htmlspecialchars($text, ENT_QUOTES) ?></p><?php endif; ?>
             <?php if ($buttonText !== '' && $buttonUrl !== ''): ?>
                 <a class="block-banner__button" href="<?= htmlspecialchars($buttonUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($buttonText, ENT_QUOTES) ?></a>
@@ -83,7 +83,7 @@ if ($variant === 'band') {
     </div>
 <?php else: ?>
     <div class="block-cta">
-        <?php if ($title !== ''): ?><h2><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+        <?php if ($title !== ''): ?><h2><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
         <?php if ($text !== ''): ?><p><?= htmlspecialchars($text, ENT_QUOTES) ?></p><?php endif; ?>
         <?php if ($buttonText !== '' && $buttonUrl !== ''): ?>
             <a class="block-cta__button" href="<?= htmlspecialchars($buttonUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($buttonText, ENT_QUOTES) ?></a>

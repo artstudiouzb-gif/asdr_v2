@@ -74,6 +74,12 @@ final class SiteThemeCss
             '--space-max' => $spacings['space_max'],
             '--font-family' => $font,
             '--font-heading' => $heading,
+            // Рукописная роль объявляется всегда: не выбран шрифт — переменная
+            // повторяет заголовочный стек. Так `.tx-mark` и подпись не остаются
+            // с несуществующим семейством и не откатываются на курсив браузера.
+            '--font-script' => DesignSettings::scriptFontStack() !== ''
+                ? DesignSettings::scriptFontStack()
+                : $heading,
             '--header-logo-width' => (int) ($headerConfig['logo_width'] ?? 240) . 'px',
             '--header-logo-height' => (int) ($headerConfig['logo_height'] ?? 48) . 'px',
             '--header-elements-gap' => self::elementsGap((string) ($styles['elements_gap'] ?? 'normal')),

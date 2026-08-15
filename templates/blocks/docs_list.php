@@ -17,7 +17,7 @@ $templateCss = \App\Core\GridBalance::css($blockId, '.docslist-grid', '.doc-card
 ?>
 <div class="block-docslist block-docslist--<?= $variant ?>" data-document-list>
     <div class="section-head">
-        <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+        <?php if ($title !== ''): ?><h2 class="section-head__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
         <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
     </div>
     <?php if (empty($items)): ?>

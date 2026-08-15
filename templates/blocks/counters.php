@@ -20,7 +20,7 @@ $blockClasses = ($iconBackground === 'off' ? ' block-counters--icons-no-bg' : ''
     . ' block-counters--text-align-' . $textAlign;
 ?>
 <div class="block-counters<?= $blockClasses ?>">
-    <?php if ($title !== ''): ?><h2 class="block-counters__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+    <?php if ($title !== ''): ?><h2 class="block-counters__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
     <div class="block-counters__grid">
         <?php foreach ($items as $item):
             $value = (int) ($item['value'] ?? 0);

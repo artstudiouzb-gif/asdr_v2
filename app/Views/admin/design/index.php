@@ -308,6 +308,7 @@ foreach ($options as $key => $opt) {
             $lineHeightCustom = \App\Core\DesignSettings::lineHeightCustom();
             $bodyFontChoice = \App\Core\DesignSettings::bodyFontChoice();
             $gHeading = (string) \App\Models\Setting::get('design_font_google_heading', '');
+            $gScript = (string) \App\Models\Setting::get('design_font_script', '');
             ?>
             <input type="hidden" name="font_size" value="<?= htmlspecialchars((string) ($values['font_size'] ?? 'md'), ENT_QUOTES) ?>">
             <input type="hidden" name="line_height" value="<?= htmlspecialchars((string) ($values['line_height'] ?? 'normal'), ENT_QUOTES) ?>">
@@ -396,6 +397,41 @@ foreach ($options as $key => $opt) {
                             </optgroup>
                         </select>
                     </div>
+                    <div class="form-field design-manual__wide">
+                        <label for="design_font_script">Рукописный шрифт</label>
+                        <select id="design_font_script" name="font_script" data-design-preview-field>
+                            <option value="">Не использовать (как у заголовков)</option>
+                            <optgroup label="Каталог Google Fonts — локальные файлы">
+                                <?php foreach (\App\Core\DesignSettings::SCRIPT_FONTS as $slug => $fontData): ?>
+                                    <option value="<?= htmlspecialchars($slug, ENT_QUOTES) ?>"
+                                            data-font-family="<?= htmlspecialchars($fontData[1], ENT_QUOTES) ?>"
+                                            <?= $gScript === $slug ? 'selected' : '' ?>><?= htmlspecialchars($fontData[0], ENT_QUOTES) ?></option>
+                                <?php endforeach; ?>
+                            </optgroup>
+                        </select>
+                        <small class="form-hint">
+                            Им набираются короткие куски: выделенное звёздочками слово в заголовке
+                            (при выделении «Рукописный шрифт») и подпись под текстом. Для основного
+                            текста и заголовков он не используется.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <?php $titleMarkOption = $options['title_mark']; ?>
+            <div class="design-opt">
+                <div class="design-opt__label">
+                    <span><?= htmlspecialchars($titleMarkOption['label'], ENT_QUOTES) ?></span>
+                    <small><?= htmlspecialchars($titleMarkOption['hint'], ENT_QUOTES) ?></small>
+                </div>
+                <div class="design-opt__choices">
+                    <?php foreach ($titleMarkOption['choices'] as $val => $label): ?>
+                        <label class="design-card">
+                            <input type="radio" name="title_mark" value="<?= htmlspecialchars($val, ENT_QUOTES) ?>"
+                                   <?= ($values['title_mark'] ?? 'accent') === $val ? 'checked' : '' ?> data-design-preview-field>
+                            <span class="design-card__label"><?= htmlspecialchars($label, ENT_QUOTES) ?></span>
+                        </label>
+                    <?php endforeach; ?>
                 </div>
             </div>
 

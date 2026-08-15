@@ -61,6 +61,45 @@ final class DesignSettings
     ];
 
     /**
+     * Рукописные семейства — отдельный каталог, а не строки в GOOGLE_FONTS.
+     *
+     * Тот каталог предлагается для текста и заголовков всего сайта, и
+     * рукописное семейство там было бы ловушкой: выбрал «красиво» — получил
+     * нечитаемый сайт. Здесь у шрифта одна роль: выделенное слово в заголовке
+     * (`*слово*`) и подпись под текстом. Обе — короткие куски в несколько слов.
+     *
+     * В списке только семейства с подмножествами cyrillic-ext + cyrillic +
+     * latin: без cyrillic-ext не рисуются узбекские Ғғ Ққ Ҳҳ, а установка
+     * такого шрифта отвалится проверкой покрытия (Marck Script поэтому и не
+     * попал в список, хотя кириллица у него есть).
+     */
+    public const SCRIPT_FONTS = [
+        'caveat' => ['Caveat (от руки, разборчивый)', "'Caveat', 'Segoe Script', cursive", 'Caveat:wght@400;600;700'],
+        'bad-script' => ['Bad Script (почерк ручкой)', "'Bad Script', 'Segoe Script', cursive", 'Bad+Script:wght@400'],
+        'great-vibes' => ['Great Vibes (каллиграфия)', "'Great Vibes', cursive", 'Great+Vibes:wght@400'],
+        'pacifico' => ['Pacifico (вывеска)', "'Pacifico', cursive", 'Pacifico:wght@400'],
+    ];
+
+    /**
+     * Оба каталога одним списком: тот, кто скачивает файлы и собирает
+     * @font-face, различий между ролями не знает — ему нужен адрес.
+     *
+     * @return array<string, array{0:string,1:string,2:string}>
+     */
+    public static function fontCatalog(): array
+    {
+        return self::GOOGLE_FONTS + self::SCRIPT_FONTS;
+    }
+
+    /** Стек выбранного рукописного шрифта или '' — если он не выбран. */
+    public static function scriptFontStack(): string
+    {
+        $slug = (string) Setting::get('design_font_script', '');
+
+        return isset(self::SCRIPT_FONTS[$slug]) ? self::SCRIPT_FONTS[$slug][1] : '';
+    }
+
+    /**
      * Шрифтовые пресеты: значение опции font_style => [подпись, CSS-стек].
      *
      * В админке этот список подписан «Локальные — без внешних запросов»,
@@ -184,6 +223,18 @@ final class DesignSettings
             'choices' => ['fluid' => 'Плавающие', 'static' => 'Статичные'],
             'default' => 'fluid',
         ],
+        'title_mark' => [
+            'label' => 'Выделение в заголовках',
+            'hint' => 'Как выглядит слово, обёрнутое звёздочками: «Стратегия *развития*».',
+            'group' => 'Типографика',
+            'choices' => [
+                'accent' => 'Акцентный цвет',
+                'script' => 'Рукописный шрифт',
+                'underline' => 'Мазок под словом',
+                'off' => 'Без выделения',
+            ],
+            'default' => 'accent',
+        ],
         'button' => [
             'label' => 'Форма кнопок',
             'hint' => 'Стиль углов у кнопок и CTA.',
@@ -228,22 +279,22 @@ final class DesignSettings
         'classic' => [
             'label' => 'Классический',
             'desc' => 'Строгий официальный стиль, умеренные отступы.',
-            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'sm', 'density' => 'standard', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'plain', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'gov_blue', 'font_style' => 'system'],
+            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'sm', 'density' => 'standard', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'plain', 'title_mark' => 'accent', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'gov_blue', 'font_style' => 'system'],
         ],
         'modern' => [
             'label' => 'Современный',
             'desc' => 'Крупные скругления, воздух, акцентная шапка.',
-            'values' => ['container' => 'wide', 'radius' => 'large', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'lg', 'line_height' => 'relaxed', 'heading_line_height' => 'tight', 'heading_font_weight' => '800', 'heading_letter_spacing' => 'tight', 'button' => 'pill', 'card_style' => 'elevated', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'sidebar', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'violet', 'font_style' => 'noto'],
+            'values' => ['container' => 'wide', 'radius' => 'large', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'lg', 'line_height' => 'relaxed', 'heading_line_height' => 'tight', 'heading_font_weight' => '800', 'heading_letter_spacing' => 'tight', 'button' => 'pill', 'card_style' => 'elevated', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'sidebar', 'title_mark' => 'accent', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'violet', 'font_style' => 'noto'],
         ],
         'minimal' => [
             'label' => 'Минимал',
             'desc' => 'Прямые углы, максимум воздуха, список в каталоге.',
-            'values' => ['container' => 'narrow', 'radius' => 'none', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'square', 'card_style' => 'flat', 'sidebar_position' => 'fixed', 'catalog_layout' => 'list', 'detail_layout' => 'plain', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'graphite', 'font_style' => 'serif'],
+            'values' => ['container' => 'narrow', 'radius' => 'none', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'square', 'card_style' => 'flat', 'sidebar_position' => 'fixed', 'catalog_layout' => 'list', 'detail_layout' => 'plain', 'title_mark' => 'accent', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'graphite', 'font_style' => 'serif'],
         ],
         'compact' => [
             'label' => 'Компактный',
             'desc' => 'Плотная сетка, маленькие карточки — много данных.',
-            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'xs', 'density' => 'compact', 'font_size' => 'sm', 'line_height' => 'tight', 'heading_line_height' => 'tight', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'tight', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'fixed', 'catalog_layout' => 'cards_sm', 'detail_layout' => 'sidebar', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'classic_red', 'font_style' => 'system'],
+            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'xs', 'density' => 'compact', 'font_size' => 'sm', 'line_height' => 'tight', 'heading_line_height' => 'tight', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'tight', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'fixed', 'catalog_layout' => 'cards_sm', 'detail_layout' => 'sidebar', 'title_mark' => 'accent', 'type_scale' => 'fluid', 'scroll_top' => 'on', 'palette' => 'classic_red', 'font_style' => 'system'],
         ],
     ];
 
@@ -855,6 +906,13 @@ final class DesignSettings
             );
         }
 
+        // Рукописное семейство — своя роль со своим каталогом: им набирается
+        // выделенное слово в заголовке и подпись, а не текст сайта.
+        if (array_key_exists('font_script', $input)) {
+            $scriptSlug = (string) $input['font_script'];
+            Setting::set('design_font_script', isset(self::SCRIPT_FONTS[$scriptSlug]) ? $scriptSlug : '');
+        }
+
         // Материализация палитры/шрифта в реальные настройки сайта
         // (color_primary/color_accent/font_family, их читает фронтенд).
         $custom = self::customAppearance();
@@ -980,6 +1038,7 @@ final class DesignSettings
                 'default_theme' => Setting::get('default_theme', 'light'),
                 'font_google_heading' => Setting::get('design_font_google_heading', ''),
                 'font_google_body' => Setting::get('design_font_google_body', ''),
+                'font_script' => Setting::get('design_font_script', ''),
                 'font_size_custom' => Setting::get('design_font_size_custom', ''),
                 'radius_custom' => Setting::get('design_radius_custom', ''),
                 'newsdetail_padding_top' => Setting::get('design_newsdetail_padding_top', ''),
@@ -1047,6 +1106,7 @@ final class DesignSettings
         $appearanceInput = array_intersect_key($appearance, array_flip(array_merge([
             'color_primary', 'color_accent', 'font_family', 'font_face_name',
             'font_url', 'default_theme', 'font_google_heading', 'font_google_body',
+            'font_script',
             'font_size_custom', 'radius_custom', 'line_height_custom',
             'newsdetail_padding_top', 'newsdetail_padding_bottom',
             'heading_line_height_custom', 'meta_letter_spacing_custom', 'typo_scale',
@@ -1058,6 +1118,7 @@ final class DesignSettings
         $appearanceInput = array_merge([
             'font_google_heading' => '',
             'font_google_body' => '',
+            'font_script' => '',
             'font_size_custom' => '',
             'radius_custom' => '',
             'newsdetail_padding_top' => '',
@@ -1234,6 +1295,9 @@ final class DesignSettings
             preg_replace('/[^a-z]/', '', (string) ($v['card_style'] ?? 'soft')),
             preg_replace('/[^a-z]/', '', (string) ($v['detail_layout'] ?? 'plain'))
         )) . ' design-mmenu-burger'
+          . ' design-mark-' . (isset(self::OPTIONS['title_mark']['choices'][(string) ($v['title_mark'] ?? '')])
+              ? (string) $v['title_mark']
+              : 'accent')
           . (($v['type_scale'] ?? 'fluid') === 'static' ? ' design-type-static' : '')
           . (($v['scroll_top'] ?? 'on') === 'on' ? ' design-scrolltop' : '');
     }

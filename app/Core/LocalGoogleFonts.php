@@ -37,15 +37,18 @@ final class LocalGoogleFonts
     /** @param list<string> $slugs @return array{ok:bool,error:string} */
     public static function installSelected(array $slugs): array
     {
+        // Каталогов два (текстовые семейства и рукописные), а установка одна:
+        // отсюда виден общий список, роль слуга здесь уже не важна.
+        $catalog = DesignSettings::fontCatalog();
         foreach (array_values(array_unique($slugs)) as $slug) {
-            if ($slug === '' || !isset(DesignSettings::GOOGLE_FONTS[$slug])) {
+            if ($slug === '' || !isset($catalog[$slug])) {
                 continue;
             }
             if (isset(self::BUNDLED[$slug])) {
                 if (!self::bundledReady($slug)) {
                     return [
                         'ok' => false,
-                        'error' => 'Локальные файлы «' . DesignSettings::GOOGLE_FONTS[$slug][0] . '» отсутствуют.',
+                        'error' => 'Локальные файлы «' . $catalog[$slug][0] . '» отсутствуют.',
                     ];
                 }
                 continue;
@@ -57,7 +60,7 @@ final class LocalGoogleFonts
                 return [
                     'ok' => false,
                     'error' => 'Не удалось сохранить шрифт «'
-                        . DesignSettings::GOOGLE_FONTS[$slug][0]
+                        . $catalog[$slug][0]
                         . '» локально: ' . $error,
                 ];
             }
@@ -94,6 +97,13 @@ final class LocalGoogleFonts
             }
         }
 
+        // Рукописный шрифт подключается только когда он выбран: у роли нет
+        // умолчания и нет семейства в поставке. Не выбран — нет и запроса.
+        $script = (string) Setting::get('design_font_script', '');
+        if ($script !== '' && isset(DesignSettings::SCRIPT_FONTS[$script]) && self::installedReady($script)) {
+            $urls[$script] = Asset::url(self::PUBLIC_URL . '/' . $script . '/font.css');
+        }
+
         return array_values($urls);
     }
 
@@ -128,6 +138,8 @@ final class LocalGoogleFonts
             return null;
         }
 
+        $catalog = DesignSettings::fontCatalog();
+
         $root = self::root();
         $directory = $root . self::PUBLIC_DIR . '/' . $slug;
         if (!is_dir($directory) && !@mkdir($directory, 0755, true) && !is_dir($directory)) {
@@ -147,7 +159,7 @@ final class LocalGoogleFonts
                 return null;
             }
 
-            [, , $query] = DesignSettings::GOOGLE_FONTS[$slug];
+            [, , $query] = $catalog[$slug];
             $cssUrl = 'https://fonts.googleapis.com/css2?family=' . $query . '&display=swap';
             $response = Http::get($cssUrl, [
                 'User-Agent: ' . self::USER_AGENT,
@@ -246,7 +258,8 @@ final class LocalGoogleFonts
     /** @param list<array{subset:string,family:string,style:string,weight:string,url:string,unicode_range:string}> $faces */
     private static function coverageError(string $slug, array $faces): ?string
     {
-        [, , $query] = DesignSettings::GOOGLE_FONTS[$slug];
+        $catalog = DesignSettings::fontCatalog();
+        [, , $query] = $catalog[$slug];
         if (!preg_match('/^([^:]+):wght@([0-9;]+)$/', $query, $queryParts)) {
             return 'неверное описание семейства в каталоге';
         }

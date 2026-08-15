@@ -20,10 +20,10 @@ $templateCss = $imageCss !== ''
     : '';
 ?>
 <div class="block-map">
-    <?php if ($title !== ''): ?><h2 class="block-map__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+    <?php if ($title !== ''): ?><h2 class="block-map__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
     <div class="block-map__canvas">
         <?php if ($embedUrl !== '' && $loadMode === 'immediate'): ?>
-            <iframe class="block-map__frame" src="<?= htmlspecialchars($embedUrl, ENT_QUOTES) ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="<?= htmlspecialchars($title !== '' ? $title : t('Карта'), ENT_QUOTES) ?>"></iframe>
+            <iframe class="block-map__frame" src="<?= htmlspecialchars($embedUrl, ENT_QUOTES) ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="<?= htmlspecialchars($title !== '' ? \App\Core\TitleMarkup::plain($title) : t('Карта'), ENT_QUOTES) ?>"></iframe>
         <?php elseif ($embedUrl !== ''): ?>
             <div class="block-map__embed" data-map-embed data-map-src="<?= htmlspecialchars($embedUrl, ENT_QUOTES) ?>">
                 <span class="block-map__image<?= $image === '' ? ' block-map__image--empty' : '' ?>"></span>

@@ -40,7 +40,7 @@ $resolvedMediaType = match ($mediaType) {
 ?>
 <div class="block-text block-text--<?= htmlspecialchars($variant, ENT_QUOTES) ?>">
     <?php if ($title !== ''): ?>
-        <h2 class="block-text__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2>
+        <h2 class="block-text__title"><?= \App\Core\TitleMarkup::html($title) ?></h2>
     <?php endif; ?>
     <div class="block-text__layout">
         <?php if ($variant === 'intro'): ?>
