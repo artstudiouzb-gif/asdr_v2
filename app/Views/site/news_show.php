@@ -167,7 +167,10 @@ if ($layout === 'standard' || $layout === 'gallery') {
     $heroSlides = array_slice($slides, 0, 1);
 }
 
-$isPremium = $layout === 'premium';
+// «Карточка» — та же фото-обложка, но текст лежит в стеклянной панели.
+// Отдельного шаблона ей не нужно: содержимое то же, меняется только оформление.
+$isCard = $layout === 'card';
+$isPremium = $layout === 'premium' || $isCard;
 $hasMedia = !$isPremium && ($layout === 'video' || !empty($heroSlides));
 $hasKeyPoints = !empty($keyPoints);
 
@@ -233,7 +236,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
         </nav>
     <?php endif; ?>
     <?php if ($isPremium): ?>
-    <div class="newsdetail-phero"<?= $cover !== '' ? ' style="--news-cover-image:url(\'' . htmlspecialchars($cover, ENT_QUOTES) . '\')"' : '' ?>>
+    <div class="newsdetail-phero<?= $isCard ? ' newsdetail-phero--card' : '' ?>"<?= $cover !== '' ? ' style="--news-cover-image:url(\'' . htmlspecialchars($cover, ENT_QUOTES) . '\')"' : '' ?>>
         <span class="newsdetail-phero__overlay"></span>
         <div class="newsdetail-phero__body">
             <?php require __DIR__ . '/_crumbs.php'; ?>

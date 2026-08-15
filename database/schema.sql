@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS news (
     docs            TEXT NULL COMMENT 'JSON-список документов [{title, meta, url}]',
     source_note     VARCHAR(255) NULL COMMENT 'подпись источника (пресс-служба)',
     views           INT UNSIGNED NOT NULL DEFAULT 0,
-    layout_type     ENUM('standard','gallery','video','side_image','premium') NOT NULL DEFAULT 'standard',
+    layout_type     ENUM('standard','gallery','video','side_image','premium','card') NOT NULL DEFAULT 'standard',
     sidebar_layout  ENUM('no_sidebar','left_sidebar','right_sidebar') NOT NULL DEFAULT 'right_sidebar',
     focal_x         TINYINT UNSIGNED NULL COMMENT 'фокальная точка обложки X, %',
     focal_y         TINYINT UNSIGNED NULL COMMENT 'фокальная точка обложки Y, %',
@@ -1183,7 +1183,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_13_page_sections.sql'),
     ('2026_08_13_language_short_name.sql'),
     ('2026_08_14_heroes.sql'),
-    ('2026_08_14_hero_watermark.sql')
+    ('2026_08_14_hero_watermark.sql'),
+    ('2026_08_15_news_layout_card.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (
