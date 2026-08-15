@@ -2327,6 +2327,31 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <span class="form-hint">12 % — фон. Выше 30 % надпись начинает спорить с заголовком секции.</span>
         </div>
         <div class="form-field">
+            <label for="watermark_style">Начертание надписи</label>
+            <select id="watermark_style" name="watermark_style">
+                <?php $wmS = (string) ($data['_watermark_style'] ?? 'fill'); ?>
+                <?php foreach (['fill' => 'Заливка', 'outline' => 'Только контур'] as $v => $l): ?>
+                    <option value="<?= $v ?>" <?= $wmS === $v ? 'selected' : '' ?>><?= $l ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="watermark_font">Шрифт надписи</label>
+            <select id="watermark_font" name="watermark_font">
+                <?php $wmF = (string) ($data['_watermark_font'] ?? 'heading'); ?>
+                <?php foreach (['heading' => 'Заголовочный', 'body' => 'Основной'] as $v => $l): ?>
+                    <option value="<?= $v ?>" <?= $wmF === $v ? 'selected' : '' ?>><?= $l ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="watermark_stroke">Толщина контура, px</label>
+            <input type="number" id="watermark_stroke" name="watermark_stroke" min="1" max="12" step="1"
+                   value="<?= (int) ($data['_watermark_stroke'] ?? 2) ?>">
+            <span class="form-hint">Действует только при начертании «Только контур».</span>
+        </div>
+        <?= \App\Core\AdminUi::colorField('watermark_color', (string) ($data['_watermark_color'] ?? ''), 'Цвет надписи') ?>
+        <div class="form-field">
             <label for="watermark_dx">Сдвиг надписи вправо, %</label>
             <input type="number" id="watermark_dx" name="watermark_dx" min="-100" max="100" step="1"
                    value="<?= (int) ($data['_watermark_dx'] ?? 0) ?>">

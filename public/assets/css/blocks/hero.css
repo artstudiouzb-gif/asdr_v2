@@ -222,7 +222,10 @@
     position: absolute;
     z-index: 2;
     max-width: 100%;
-    color: var(--hero-fg, #fff);
+    /* Цвет по умолчанию — текст обложки: надпись видна на любой схеме.
+       Свой цвет редактора приходит переменной --hero-watermark-ink. */
+    color: var(--hero-watermark-ink, var(--hero-fg, #fff));
+    font-family: var(--hero-watermark-family, var(--font-heading, var(--font-family)));
     opacity: var(--hero-watermark-opacity, 0.12);
     font-size: var(--hero-watermark-size, 22vw);
     font-weight: 700;
@@ -241,6 +244,15 @@
     pointer-events: none;
     user-select: none;
 }
+
+/* Контур вместо заливки: буквы становятся полыми. Цвет уходит в обводку,
+   поэтому сам текст прозрачный — currentColor тут не годится, он был бы
+   прозрачным вместе с текстом. */
+.hero__watermark--outline {
+    color: transparent;
+    -webkit-text-stroke: var(--hero-watermark-stroke, 2px) var(--hero-watermark-ink, var(--hero-fg, #fff));
+}
+.hero__watermark--font-body { --hero-watermark-family: var(--font-family); }
 
 .hero__watermark--x-left { left: 0; }
 .hero__watermark--x-center { left: 50%; --hero-watermark-ax: -50%; }

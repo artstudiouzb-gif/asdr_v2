@@ -3843,7 +3843,8 @@ span.imgcard__media::after {
 .cms-block__watermark {
     position: absolute;
     z-index: 0;
-    color: var(--section-title-fg, var(--gov-title));
+    color: var(--block-watermark-ink, var(--section-title-fg, var(--gov-title)));
+    font-family: var(--block-watermark-family, var(--font-heading, var(--font-family)));
     opacity: var(--block-watermark-opacity, 0.12);
     font-size: var(--block-watermark-size, 22vw);
     font-weight: 800;
@@ -3860,6 +3861,14 @@ span.imgcard__media::after {
     pointer-events: none;
     user-select: none;
 }
+
+/* Контур вместо заливки: цвет уходит в обводку, сам текст прозрачный. */
+.cms-block__watermark--outline {
+    color: transparent;
+    -webkit-text-stroke: var(--block-watermark-stroke, 2px)
+        var(--block-watermark-ink, var(--section-title-fg, var(--gov-title)));
+}
+.cms-block__watermark--font-body { --block-watermark-family: var(--font-family); }
 
 .cms-block__watermark--x-left { left: 0; }
 .cms-block__watermark--x-center { left: 50%; --block-watermark-ax: -50%; }

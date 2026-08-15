@@ -36,6 +36,10 @@ final class BlockPresentationNormalizer
 
     private const WATERMARK_Y = ['top', 'middle', 'bottom'];
 
+    private const WATERMARK_STYLES = ['fill', 'outline'];
+
+    private const WATERMARK_FONTS = ['heading', 'body'];
+
     /** Способ залить фон секции: пресет темы, свой цвет, градиент, фото, узор. */
     private const BACKGROUND_MODES = ['preset', 'color', 'gradient', 'image', 'pattern'];
 
@@ -217,6 +221,13 @@ final class BlockPresentationNormalizer
             $normalized['_watermark_dx'] = self::ranged($input['watermark_dx'] ?? null, -100, 100, 0);
             $normalized['_watermark_dy'] = self::ranged($input['watermark_dy'] ?? null, -100, 100, 0);
             $normalized['_watermark_opacity'] = self::ranged($input['watermark_opacity'] ?? null, 0, 100, 12);
+            $style = self::scalarString($input['watermark_style'] ?? null, 'fill');
+            $font = self::scalarString($input['watermark_font'] ?? null, 'heading');
+            $normalized['_watermark_style'] = in_array($style, self::WATERMARK_STYLES, true) ? $style : 'fill';
+            $normalized['_watermark_font'] = in_array($font, self::WATERMARK_FONTS, true) ? $font : 'heading';
+            $normalized['_watermark_stroke'] = self::ranged($input['watermark_stroke'] ?? null, 1, 12, 2);
+            $color = trim(self::scalarString($input['watermark_color'] ?? null));
+            $normalized['_watermark_color'] = preg_match('/^#[0-9a-fA-F]{3,8}$/', $color) === 1 ? $color : '';
         }
 
         // Короткая секция обрезает фотографию-фон до полоски, поэтому высоту

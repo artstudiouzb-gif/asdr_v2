@@ -118,6 +118,19 @@ $ctaStyles = [
                        value="<?= (int) $data['watermark_opacity'] ?>">
                 <span class="form-hint">12 % — фон. Выше 30 % надпись начинает спорить с заголовком.</span>
             </div>
+            <?= $select('watermark_style', 'Начертание', [
+                'fill' => 'Заливка', 'outline' => 'Только контур',
+            ], (string) $data['watermark_style']) ?>
+            <?= $select('watermark_font', 'Шрифт надписи', [
+                'heading' => 'Заголовочный', 'body' => 'Основной',
+            ], (string) $data['watermark_font']) ?>
+            <div class="form-field">
+                <label for="watermark_stroke">Толщина контура, px</label>
+                <input type="number" id="watermark_stroke" name="watermark_stroke" min="1" max="12" step="1"
+                       value="<?= (int) $data['watermark_stroke'] ?>">
+                <span class="form-hint">Действует только при начертании «Только контур».</span>
+            </div>
+            <?= AdminUi::colorField('watermark_color', (string) $data['watermark_color'], 'Цвет надписи') ?>
             <div class="form-field">
                 <label for="watermark_dx">Сдвиг вправо, %</label>
                 <input type="number" id="watermark_dx" name="watermark_dx" min="-100" max="100" step="1"
