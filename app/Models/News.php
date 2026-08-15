@@ -562,7 +562,11 @@ final class News
             return $row;
         }
 
-        foreach (['title', 'badge', 'excerpt', 'lead_html', 'content', 'key_points', 'event_meta', 'timeline_json', 'docs', 'poll_question', 'poll_options_json'] as $field) {
+        foreach ([
+            'title', 'badge', 'excerpt', 'lead_html', 'content', 'key_points', 'event_meta',
+            'timeline_json', 'docs', 'poll_question', 'poll_options_json',
+            ...\App\Core\NewsCard::FIELDS,
+        ] as $field) {
             if (isset($translation[$field]) && $translation[$field] !== null && $translation[$field] !== '') {
                 $row[$field] = $translation[$field];
             }
@@ -944,6 +948,8 @@ final class News
         $stmt = Database::pdo()->prepare(
             'UPDATE news SET badge = :badge, badge_color = :badge_color, press_release_url = :press_release_url,
              key_points = :key_points, event_meta = :event_meta, docs = :docs,
+             card_title = :card_title, card_badge = :card_badge, card_stats = :card_stats,
+             card_signature = :card_signature, card_note = :card_note,
              source_note = :source_note WHERE id = :id'
         );
         $badgeColor = \App\Core\NewsBadge::normalizeColor($data['badge_color'] ?? '');
@@ -954,6 +960,11 @@ final class News
             ':key_points' => ($data['key_points'] ?? '') !== '' ? $data['key_points'] : null,
             ':event_meta' => ($data['event_meta'] ?? '') !== '' ? $data['event_meta'] : null,
             ':docs' => !empty($data['docs']) ? json_encode($data['docs'], JSON_UNESCAPED_UNICODE) : null,
+            ':card_title' => ($data['card_title'] ?? '') !== '' ? $data['card_title'] : null,
+            ':card_badge' => ($data['card_badge'] ?? '') !== '' ? $data['card_badge'] : null,
+            ':card_stats' => ($data['card_stats'] ?? '') !== '' ? $data['card_stats'] : null,
+            ':card_signature' => ($data['card_signature'] ?? '') !== '' ? $data['card_signature'] : null,
+            ':card_note' => ($data['card_note'] ?? '') !== '' ? $data['card_note'] : null,
             ':source_note' => ($data['source_note'] ?? '') !== '' ? $data['source_note'] : null,
             ':id' => $id,
         ]);

@@ -578,6 +578,67 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                 </div>
             </div>
 
+            <?php
+            // Обложка-карточка: поля работают только у макета «Карточка», но
+            // прячем их не насовсем — редактор должен видеть, что уже набрано,
+            // если макет переключили обратно.
+            $cardStats = \App\Core\NewsCard::stats($news['card_stats'] ?? '');
+            $cardStats = array_pad($cardStats, \App\Core\NewsCard::MAX_STATS, ['value' => '', 'label' => '']);
+            ?>
+            <div class="form-card">
+                <div class="u-inline-ab9be0ec4f">
+                    <span class="admin-section-icon admin-section-icon--info"><?= \App\Core\AdminUi::icon('photo', 22) ?></span>
+                    <h3>Обложка-карточка</h3>
+                </div>
+                <p class="form-hint">
+                    Работает при макете «Карточка». Всё, что здесь набрано, переводится вместе
+                    с новостью. В заголовке обложки можно выделить слово звёздочками: <code>*слово*</code>.
+                </p>
+                <div class="form-grid-2col">
+                    <div class="form-field">
+                        <label for="card_title">Заголовок на обложке</label>
+                        <input type="text" id="card_title" name="card_title" maxlength="200"
+                               value="<?= htmlspecialchars((string) ($news['card_title'] ?? ''), ENT_QUOTES) ?>"
+                               placeholder="пусто — обычный заголовок новости">
+                    </div>
+                    <div class="form-field">
+                        <label for="card_badge">Вторая плашка</label>
+                        <input type="text" id="card_badge" name="card_badge" maxlength="100"
+                               value="<?= htmlspecialchars((string) ($news['card_badge'] ?? ''), ENT_QUOTES) ?>"
+                               placeholder="Стратегический документ">
+                        <span class="form-hint">Рядом с обычной меткой, контуром без заливки.</span>
+                    </div>
+                </div>
+                <label>Показатели (до трёх)</label>
+                <div class="form-grid-2col">
+                    <?php foreach (array_slice($cardStats, 0, \App\Core\NewsCard::MAX_STATS) as $i => $stat): ?>
+                        <div class="form-field">
+                            <input type="text" name="card_stats[<?= $i ?>][value]" maxlength="24"
+                                   value="<?= htmlspecialchars((string) ($stat['value'] ?? ''), ENT_QUOTES) ?>" placeholder="34">
+                        </div>
+                        <div class="form-field">
+                            <input type="text" name="card_stats[<?= $i ?>][label]" maxlength="60"
+                                   value="<?= htmlspecialchars((string) ($stat['label'] ?? ''), ENT_QUOTES) ?>" placeholder="нормативных акта">
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <div class="form-grid-2col">
+                    <div class="form-field">
+                        <label for="card_signature">Подпись</label>
+                        <input type="text" id="card_signature" name="card_signature" maxlength="80"
+                               value="<?= htmlspecialchars((string) ($news['card_signature'] ?? ''), ENT_QUOTES) ?>"
+                               placeholder="Пресс-служба">
+                        <span class="form-hint">Набирается рукописным шрифтом из «Дизайна» → Типографика.</span>
+                    </div>
+                    <div class="form-field">
+                        <label for="card_note">Сноска внизу</label>
+                        <input type="text" id="card_note" name="card_note" maxlength="120"
+                               value="<?= htmlspecialchars((string) ($news['card_note'] ?? ''), ENT_QUOTES) ?>"
+                               placeholder="asdr.uz">
+                    </div>
+                </div>
+            </div>
+
             <?php require __DIR__ . '/_detail_sidebar.php'; ?>
 
             <?php if ($isEdit): ?>

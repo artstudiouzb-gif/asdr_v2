@@ -294,8 +294,64 @@ body.design-type-static .newsdetail-phero__title { font-size: var(--step-9); }
 }
 .newsdetail-phero--card .newsdetail-phero__title { font-size: var(--step-7); }
 
+/* Вторая плашка — контуром, а не заливкой: рядом с обычной меткой (у неё свой
+   цвет фона) две заливки спорят друг с другом за внимание. */
+.newsdetail-cover__tag {
+    display: inline-block;
+    padding: 5px 12px;
+    border: 1px solid rgba(255, 255, 255, .45);
+    border-radius: var(--radius-pill, 999px);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: #fff;
+}
+
+/* Показатели: числа в ряд с разделителями. Ряд переносится целыми парами,
+   поэтому подпись никогда не отрывается от своего числа. */
+.newsdetail-cover__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(16px, 3vw, 34px);
+    margin-top: 4px;
+}
+.newsdetail-cover__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-left: 14px;
+    border-left: 2px solid rgba(255, 255, 255, .28);
+}
+.newsdetail-cover__stat-value {
+    font-family: var(--font-heading, var(--font-family));
+    font-size: var(--step-5);
+    font-weight: 800;
+    line-height: 1.05;
+    /* Разряды «1 200» приходят с неразрывным пробелом, но подстраховка нужна
+       и для значений, набранных обычным. */
+    white-space: nowrap;
+}
+.newsdetail-cover__stat-label { font-size: var(--step--2); opacity: .82; }
+
+.newsdetail-cover__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 16px;
+    margin-top: 6px;
+}
+/* Подпись берёт рукописное семейство из «Дизайна». Шрифт не выбран —
+   переменная повторяет заголовочный стек, и подпись остаётся читаемой. */
+.newsdetail-cover__signature {
+    font-family: var(--font-script, var(--font-heading));
+    font-size: var(--step-3);
+    line-height: 1.1;
+}
+.newsdetail-cover__note { font-size: var(--step--2); opacity: .7; letter-spacing: .04em; }
+
 @media (max-width: 720px) {
     .newsdetail-phero--card .newsdetail-phero__body::before { inset: 12px; border-radius: 14px; }
+    .newsdetail-cover__stat-value { font-size: var(--step-4); }
 }
 
 .newsdetail-phero__body { position: relative; width: 100%; max-width: var(--container-max); margin: 0 auto; padding: clamp(40px, 6vw, 72px) 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }

@@ -244,6 +244,9 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <a class="newsdetail__badge newsdetail__badge--onDark" href="<?= htmlspecialchars($newsCategory['url'], ENT_QUOTES) ?>"><?= htmlspecialchars($newsCategory['name'], ENT_QUOTES) ?></a>
             <?php endif; ?>
             <?= \App\Core\NewsBadge::render($news['badge'] ?? '', $news['badge_color'] ?? null, true) ?>
+            <?php if ($isCard && trim((string) ($news['card_badge'] ?? '')) !== ''): ?>
+                <span class="newsdetail-cover__tag"><?= htmlspecialchars(trim((string) $news['card_badge']), ENT_QUOTES) ?></span>
+            <?php endif; ?>
             <div class="newsdetail__meta newsdetail__meta--onDark">
                 <?php if ($dateLong !== ''): ?>
                     <span class="newsdetail__meta-item"><?= $eventIcons[0] ?><time datetime="<?= htmlspecialchars(substr($date, 0, 10), ENT_QUOTES) ?>"><?= htmlspecialchars($dateLong, ENT_QUOTES) ?></time></span>
@@ -253,12 +256,45 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                     <span class="newsdetail__meta-item"><?= \App\Core\Icon::render('eye', 18, 'ui-icon', 1.6) ?><?= htmlspecialchars(trim(number_format($views, 0, '', ' ') . ' ' . t('просмотров')), ENT_QUOTES) ?></span>
                 <?php endif; ?>
             </div>
-            <h1 class="newsdetail-phero__title"><?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?></h1>
+            <?php
+            // Заголовок на обложке — отдельная короткая строка. Настоящий
+            // заголовок уходит в ленту, RSS и поиск, укорачивать его ради
+            // картинки нельзя. Звёздочки выделения работают только здесь.
+            $cardTitle = $isCard ? trim((string) ($news['card_title'] ?? '')) : '';
+            ?>
+            <h1 class="newsdetail-phero__title"><?= $cardTitle !== ''
+                ? \App\Core\TitleMarkup::html($cardTitle)
+                : htmlspecialchars((string) $news['title'], ENT_QUOTES) ?></h1>
             <?php if ($leadHtml !== ''): ?>
                 <div class="newsdetail-phero__lead news-lead-rich"><?= $leadHtml ?></div>
             <?php endif; ?>
+            <?php $cardStats = $isCard ? \App\Core\NewsCard::stats($news['card_stats'] ?? '') : []; ?>
+            <?php if ($cardStats !== []): ?>
+                <div class="newsdetail-cover__stats">
+                    <?php foreach ($cardStats as $cardStat): ?>
+                        <div class="newsdetail-cover__stat">
+                            <span class="newsdetail-cover__stat-value"><?= htmlspecialchars($cardStat['value'], ENT_QUOTES) ?></span>
+                            <span class="newsdetail-cover__stat-label"><?= htmlspecialchars($cardStat['label'], ENT_QUOTES) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
             <?php if (!empty($news['source_note'])): ?>
                 <p class="newsdetail__source newsdetail__source--onDark"><?= htmlspecialchars((string) $news['source_note'], ENT_QUOTES) ?></p>
+            <?php endif; ?>
+            <?php
+            $cardSignature = $isCard ? trim((string) ($news['card_signature'] ?? '')) : '';
+            $cardNote = $isCard ? trim((string) ($news['card_note'] ?? '')) : '';
+            ?>
+            <?php if ($cardSignature !== '' || $cardNote !== ''): ?>
+                <div class="newsdetail-cover__foot">
+                    <?php if ($cardSignature !== ''): ?>
+                        <span class="newsdetail-cover__signature"><?= htmlspecialchars($cardSignature, ENT_QUOTES) ?></span>
+                    <?php endif; ?>
+                    <?php if ($cardNote !== ''): ?>
+                        <span class="newsdetail-cover__note"><?= htmlspecialchars($cardNote, ENT_QUOTES) ?></span>
+                    <?php endif; ?>
+                </div>
             <?php endif; ?>
             <?php if ($videoUrl !== '' && $layout !== 'video'): ?>
                 <a class="newsdetail-phero__video" href="<?= htmlspecialchars($videoUrl, ENT_QUOTES) ?>" target="_blank" rel="noopener">
