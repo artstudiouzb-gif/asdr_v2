@@ -42,7 +42,7 @@ final class BlockTypeRegistry
         // блок хранит только подписи вкладок и оформление.
         'tabs' => ['variant' => 'segmented', 'title' => '', 'description' => '', 'align' => 'left', 'items' => []],
         'testimonials' => ['variant' => 'carousel', 'title' => '', 'description' => '', 'columns' => 3, 'autoplay' => 0, 'items' => []],
-        'counters' => ['title' => '', 'card_bg' => '', 'text_color' => '', 'icon_size' => 28, 'icon_bg' => 'on', 'icon_position' => 'left', 'text_align' => 'left', 'items' => []],
+        'counters' => ['title' => '', 'card_bg' => '', 'text_color' => '', 'icon_size' => 28, 'icon_bg' => 'on', 'icon_position' => 'left', 'text_align' => 'left', 'variant' => 'row', 'value_size' => 'normal', 'items' => []],
         'team_list' => ['title' => '', 'limit' => 0, 'department' => '', 'group_by_department' => false],
         'projects_list' => ['variant' => 'grid', 'title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 3, 'limit' => 3, 'autoplay' => 0],
         'news_latest' => ['title' => 'Последние новости', 'all_text' => 'Все новости', 'all_url' => '', 'limit' => 3, 'category' => 0],

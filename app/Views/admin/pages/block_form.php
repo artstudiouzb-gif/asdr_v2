@@ -499,24 +499,48 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </div>
             </div>
             <span class="form-hint">Размер, фон и расположение применяются только к иконкам этого блока; выравнивание — к числу и подписи.</span>
+            <div class="form-grid form-grid--2">
+                <div class="form-field">
+                    <label for="counters_variant">Вид блока</label>
+                    <select id="counters_variant" name="variant">
+                        <?php foreach (['row' => 'Полоса с разделителями', 'cards' => 'Отдельные карточки'] as $value => $label): ?>
+                            <option value="<?= $value ?>" <?= (string) ($data['variant'] ?? 'row') === $value ? 'selected' : '' ?>><?= $label ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="counters_value_size">Размер чисел</label>
+                    <select id="counters_value_size" name="value_size">
+                        <?php foreach (['normal' => 'Обычный', 'large' => 'Крупный'] as $value => $label): ?>
+                            <option value="<?= $value ?>" <?= (string) ($data['value_size'] ?? 'normal') === $value ? 'selected' : '' ?>><?= $label ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
             <div>
                 <label>Счётчики</label>
                 <div data-repeater="items">
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
                             <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
-                            <div class="form-field"><label>Число</label><input type="number" name="items[<?= $i ?>][value]" value="<?= (int) ($item['value'] ?? 0) ?>"></div>
+                            <div class="form-field"><label>Приставка (напр. более, до)</label><input type="text" name="items[<?= $i ?>][prefix]" maxlength="12" value="<?= htmlspecialchars($item['prefix'] ?? '', ENT_QUOTES) ?>"></div>
+                            <div class="form-field"><label>Значение</label><input type="text" name="items[<?= $i ?>][value]" maxlength="24" value="<?= htmlspecialchars((string) ($item['value'] ?? ''), ENT_QUOTES) ?>" placeholder="34"><span class="form-hint">Можно «1 200», «24/7», «№1». Отсчёт при появлении работает только для чистого числа.</span></div>
                             <div class="form-field"><label>Суффикс (напр. + или %)</label><input type="text" name="items[<?= $i ?>][suffix]" value="<?= htmlspecialchars($item['suffix'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Подпись</label><input type="text" name="items[<?= $i ?>][label]" value="<?= htmlspecialchars($item['label'] ?? '', ENT_QUOTES) ?>"></div>
+                            <div class="form-field"><label>Примечание</label><input type="text" name="items[<?= $i ?>][note]" maxlength="120" value="<?= htmlspecialchars($item['note'] ?? '', ENT_QUOTES) ?>" placeholder="по данным на 2026 год"></div>
+                            <div class="form-field"><label>Ссылка</label><input type="text" name="items[<?= $i ?>][link]" value="<?= htmlspecialchars($item['link'] ?? '', ENT_QUOTES) ?>" placeholder="/page"></div>
                             <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
                         </div>
                     <?php endforeach; ?>
                 </div>
                 <template data-repeater-template="items">
                     <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
-                    <div class="form-field"><label>Число</label><input type="number" name="items[__INDEX__][value]" value="0"></div>
+                    <div class="form-field"><label>Приставка (напр. более, до)</label><input type="text" name="items[__INDEX__][prefix]" maxlength="12"></div>
+                    <div class="form-field"><label>Значение</label><input type="text" name="items[__INDEX__][value]" maxlength="24" placeholder="34"></div>
                     <div class="form-field"><label>Суффикс (напр. + или %)</label><input type="text" name="items[__INDEX__][suffix]"></div>
                     <div class="form-field"><label>Подпись</label><input type="text" name="items[__INDEX__][label]"></div>
+                    <div class="form-field"><label>Примечание</label><input type="text" name="items[__INDEX__][note]" maxlength="120"></div>
+                    <div class="form-field"><label>Ссылка</label><input type="text" name="items[__INDEX__][link]" placeholder="/page"></div>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить счётчик</button></div>
