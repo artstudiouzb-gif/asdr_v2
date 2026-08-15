@@ -2348,7 +2348,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <label for="watermark_opacity">Заметность надписи, %</label>
             <input type="number" id="watermark_opacity" name="watermark_opacity" min="0" max="100" step="1"
                    value="<?= (int) ($data['_watermark_opacity'] ?? 12) ?>">
-            <span class="form-hint">12 % — фон. Выше 30 % надпись начинает спорить с заголовком секции.</span>
+            <span class="form-hint">12 % — фон. Выше 30 % надпись начинает спорить с заголовком секции, а выше 50 % текст поверх её штрихов теряет требуемый контраст 4.5:1 (замерено).</span>
         </div>
         <div class="form-field">
             <label for="watermark_style">Начертание надписи</label>
