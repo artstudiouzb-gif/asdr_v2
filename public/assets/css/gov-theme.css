@@ -4506,6 +4506,20 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
    стрелкой зияло 87px — больше, чем сам заголовок. Ровно две строки у обеих,
    чтобы карточки не расходились по высоте. В крупной новости оно тоже нужно:
    иначе главная запись показывала бы меньше, чем второстепенные рядом. */
+/* Текст крупной новости лежит в стеклянной панели, а не на сплошном
+   затемнении во всю ширину кадра: снимок остаётся виден, а читаемость даёт
+   панель. Размытие — прогрессивное улучшение, без него останется просто
+   полупрозрачная подложка. */
+.block-newsfeat--mosaic .newsfeat-lead__over {
+    inset: auto clamp(14px, 2vw, 22px) clamp(14px, 2vw, 22px);
+    border-radius: 16px;
+    padding: clamp(18px, 2.2vw, 26px);
+    background: rgba(18, 26, 50, .62);
+    border: 1px solid rgba(255, 255, 255, .14);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
 .block-newsfeat--mosaic .newsfeat-lead__excerpt,
 .block-newsfeat--mosaic .newsfeat-mini__excerpt {
     display: -webkit-box;

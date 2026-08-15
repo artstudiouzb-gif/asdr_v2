@@ -12,7 +12,7 @@ use App\Core\UzbekText;
 
 final class News
 {
-    public const LAYOUTS = ['standard', 'gallery', 'video', 'side_image', 'premium'];
+    public const LAYOUTS = ['standard', 'gallery', 'video', 'side_image', 'premium', 'card'];
 
     /** @var array<string, array<int, array<string, mixed>>> */
     private static array $publishedRequestCache = [];

@@ -20,6 +20,7 @@ $layoutLabels = [
     'video' => 'Видео (YouTube)',
     'side_image' => 'Изображение сбоку',
     'premium' => 'Премиум (тёмный hero)',
+    'card' => 'Карточка (текст в стеклянной панели на фото)',
 ];
 
 $action = $isEdit ? '/admin/news/' . (int) $news['id'] . '/edit' : '/admin/news/create';

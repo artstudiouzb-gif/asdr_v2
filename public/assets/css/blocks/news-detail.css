@@ -261,6 +261,43 @@ body.design-type-static .newsdetail-phero__title { font-size: var(--step-9); }
 .newsdetail--premium { margin-top: -1px; }
 .newsdetail-phero { position: relative; left: calc(50% - 50vw); width: 100vw; min-height: 480px; display: flex; align-items: center; background: var(--news-cover-image, var(--gov-navy)) center/cover no-repeat; color: #fff; }
 .newsdetail-phero__overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(9,22,42,.93) 20%, rgba(9,22,42,.55) 55%, rgba(9,22,42,.25) 100%); }
+/* Вариант «Карточка»: тот же фото-hero, но текст собран в стеклянную панель.
+   Смысл приёма — снимок остаётся виден целиком, а читаемость даёт панель, а не
+   сплошное затемнение всего кадра. Размытие — прогрессивное улучшение: старый
+   браузер покажет просто полупрозрачную подложку, ничего не сломается. */
+.newsdetail-phero--card .newsdetail-phero__overlay {
+    background: linear-gradient(to top, rgba(10, 16, 32, .55), rgba(10, 16, 32, .12) 55%, transparent);
+}
+/* Панель обнимает текст, а не тянется во всю ширину: пустая половина панели
+   справа читалась бы как незаполненный блок. */
+.newsdetail-phero--card .newsdetail-phero__body {
+    max-width: min(var(--container-max), 840px);
+    margin-inline: clamp(16px, 5vw, 90px) auto;
+    padding: clamp(28px, 4vw, 44px) clamp(24px, 3vw, 40px) clamp(30px, 4vw, 48px);
+}
+.newsdetail-phero--card .newsdetail-phero__body > * {
+    position: relative;
+    z-index: 1;
+}
+/* Панель рисуется псевдоэлементом: так она обнимает весь текст сразу и не
+   требует лишней обёртки в шаблоне. */
+.newsdetail-phero--card .newsdetail-phero__body::before {
+    content: "";
+    position: absolute;
+    inset: clamp(16px, 2.5vw, 26px) 0;
+    z-index: 0;
+    border-radius: 18px;
+    background: rgba(18, 26, 50, .62);
+    border: 1px solid rgba(255, 255, 255, .14);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+.newsdetail-phero--card .newsdetail-phero__title { font-size: var(--step-7); }
+
+@media (max-width: 720px) {
+    .newsdetail-phero--card .newsdetail-phero__body::before { inset: 12px; border-radius: 14px; }
+}
+
 .newsdetail-phero__body { position: relative; width: 100%; max-width: var(--container-max); margin: 0 auto; padding: clamp(40px, 6vw, 72px) 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
 /* Крошки внутри премиум-hero (вместо серой полосы над ним) — светлые на тёмном фоне.
    Прижаты к верху секции (как на обычном hero), а не в центрированном теле —
