@@ -292,7 +292,10 @@ body.design-type-static .newsdetail-phero__title { font-size: var(--step-9); }
     backdrop-filter: blur(18px) saturate(140%);
     -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
-.newsdetail-phero--card .newsdetail-phero__title { font-size: var(--step-7); }
+/* Кегль меньше, чем у «Премиума», но так же плавный: статичная ступень
+   оставляла на 320px те же 36px, что и на десктопе, — заголовок занимал
+   три строки из четырёх видимых в панели. */
+.newsdetail-phero--card .newsdetail-phero__title { font-size: clamp(var(--step-4), 3vw, var(--step-7)); }
 
 /* Вторая плашка — контуром, а не заливкой: рядом с обычной меткой (у неё свой
    цвет фона) две заливки спорят друг с другом за внимание. */
@@ -364,6 +367,19 @@ body.design-type-static .newsdetail-phero__title { font-size: var(--step-9); }
     padding: clamp(14px, 2vw, 22px) 20px 0; font-size: var(--step--2);
 }
 body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .content-crumbs { top: clamp(88px, 11vw, 130px); }
+/* На узком экране крошки переносятся на две-три строки, и вынутые из потока
+   они ложатся поверх метки и плашек: замерено 30px перекрытия на 640px и ниже
+   (дефект был и до макета «Карточка», на «Премиуме»). Возвращаем их в поток —
+   тогда они занимают своё место. Абсолютное положение на десктопе оставлено
+   намеренно: там крошки должны стоять вровень с крошками остальных страниц. */
+@media (max-width: 640px) {
+    .newsdetail-phero .content-crumbs {
+        position: static;
+        padding-inline: 0;
+        padding-bottom: 6px;
+    }
+    body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .content-crumbs { top: auto; }
+}
 .newsdetail-phero .content-crumbs a { color: rgba(255, 255, 255, .82); }
 .newsdetail-phero .content-crumbs a:hover { color: #fff; }
 .newsdetail-phero .content-crumbs span { color: rgba(255, 255, 255, .68); }
@@ -373,6 +389,12 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 /* Мета (дата·чтение·просмотры) и источник на фото-hero — светлые. Базовые серые
    .newsdetail__meta/__source идут ниже по файлу и при равной специфичности
    перебивали --onDark; поднимаем специфичность через .newsdetail-phero. */
+/* Та же история, что у меты, только про метку рубрики: .newsdetail__badge--onDark
+   объявлен в теме ВЫШЕ базового .newsdetail__badge и при равной специфичности
+   проигрывал ему — на фото-hero метка получала акцент, посчитанный для светлой
+   подложки, и давала 2.10:1 при норме 4.5:1 (замерено по пикселям). */
+.newsdetail-phero .newsdetail__badge--onDark { background: rgba(23,153,155,.25); color: #7fd8d9; }
+.newsdetail-phero a.newsdetail__badge--onDark:hover { background: rgba(23,153,155,.38); color: #fff; }
 .newsdetail-phero .newsdetail__meta--onDark { color: rgba(255,255,255,.88); }
 .newsdetail-phero .newsdetail__meta-item { background: rgba(255,255,255,.12); color: rgba(255,255,255,.9); }
 .newsdetail-phero .newsdetail__meta-item:hover { background: rgba(255,255,255,.22); color: #fff; }
