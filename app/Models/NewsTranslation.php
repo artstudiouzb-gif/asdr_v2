@@ -78,12 +78,16 @@ final class NewsTranslation
         }
 
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO news_translations (news_id, lang, title, badge, excerpt, lead_html, content, hashtags, key_points, event_meta, timeline_json, docs, poll_question, poll_options_json, meta_title, meta_description)
-             VALUES (:news_id, :lang, :title, :badge, :excerpt, :lead_html, :content, :hashtags, :key_points, :event_meta, :timeline_json, :docs, :poll_question, :poll_options_json, :meta_title, :meta_description)
+            'INSERT INTO news_translations (news_id, lang, title, badge, excerpt, lead_html, content, hashtags, key_points, event_meta, timeline_json, docs, poll_question, poll_options_json, meta_title, meta_description,
+                card_title, card_badge, card_stats, card_signature, card_note)
+             VALUES (:news_id, :lang, :title, :badge, :excerpt, :lead_html, :content, :hashtags, :key_points, :event_meta, :timeline_json, :docs, :poll_question, :poll_options_json, :meta_title, :meta_description,
+                :card_title, :card_badge, :card_stats, :card_signature, :card_note)
              ON DUPLICATE KEY UPDATE title = VALUES(title), badge = VALUES(badge), excerpt = VALUES(excerpt), lead_html = VALUES(lead_html),
                 content = VALUES(content), hashtags = VALUES(hashtags), key_points = VALUES(key_points), event_meta = VALUES(event_meta),
                 timeline_json = VALUES(timeline_json), docs = VALUES(docs), poll_question = VALUES(poll_question), poll_options_json = VALUES(poll_options_json),
-                meta_title = VALUES(meta_title), meta_description = VALUES(meta_description)'
+                meta_title = VALUES(meta_title), meta_description = VALUES(meta_description),
+                card_title = VALUES(card_title), card_badge = VALUES(card_badge), card_stats = VALUES(card_stats),
+                card_signature = VALUES(card_signature), card_note = VALUES(card_note)'
         );
         $stmt->execute([
             ':news_id' => $newsId,
@@ -102,6 +106,11 @@ final class NewsTranslation
             ':poll_options_json' => $pollOptionsJson,
             ':meta_title' => $data['meta_title'] ?? null,
             ':meta_description' => $data['meta_description'] ?? null,
+            ':card_title' => ($data['card_title'] ?? '') !== '' ? $data['card_title'] : null,
+            ':card_badge' => ($data['card_badge'] ?? '') !== '' ? $data['card_badge'] : null,
+            ':card_stats' => ($data['card_stats'] ?? '') !== '' ? $data['card_stats'] : null,
+            ':card_signature' => ($data['card_signature'] ?? '') !== '' ? $data['card_signature'] : null,
+            ':card_note' => ($data['card_note'] ?? '') !== '' ? $data['card_note'] : null,
         ]);
         \App\Core\Cache::forgetPrefix('page:');
     }

@@ -963,7 +963,9 @@ final class BlockRenderer
             if (!is_array($data) || !BlockVisibility::isVisible($data)) {
                 continue;
             }
-            $label = trim((string) ($data['title'] ?? ''));
+            // Пункт оглавления — текст ссылки, а не заголовок секции:
+            // звёздочки выделения снимаем, красить в оглавлении нечего.
+            $label = trim(TitleMarkup::plain((string) ($data['title'] ?? '')));
             if ($label === '') {
                 continue;
             }

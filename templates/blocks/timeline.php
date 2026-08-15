@@ -43,7 +43,7 @@ $templateCss = $ctaImageCss !== ''
 <div class="block-timeline<?= $hasCta ? ' block-timeline--with-cta' : '' ?>">
     <?php if ($title !== '' || $description !== ''): ?>
         <div class="block-timeline__head">
-            <?php if ($title !== ''): ?><h2 class="block-timeline__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+            <?php if ($title !== ''): ?><h2 class="block-timeline__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
             <?php if ($description !== ''): ?><div class="block-timeline__description rich-content"><?= $description ?></div><?php endif; ?>
         </div>
     <?php endif; ?>

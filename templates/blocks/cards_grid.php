@@ -59,7 +59,7 @@ if ($variant === 'icon' && $visualStyle === 'new') {
     <?php $carousel = count($items) > 1; $desktopCarousel = count($items) > 4; ?>
     <div class="block-imgcards<?= $imageBelow ? ' block-imgcards--below' : '' ?>"<?= $carousel ? ' data-carousel' : '' ?>>
         <div class="section-head">
-            <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+            <?php if ($title !== ''): ?><h2 class="section-head__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
             <div class="section-head__tools">
                 <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
                 <?php if ($carousel): ?>
@@ -100,7 +100,7 @@ if ($variant === 'icon' && $visualStyle === 'new') {
     </div>
 <?php elseif ($variant === 'compact'): ?>
     <div class="block-categories">
-        <?php if ($title !== ''): ?><h2 class="block-categories__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+        <?php if ($title !== ''): ?><h2 class="block-categories__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
         <?php if ($items === []): ?>
             <p class="block-categories__empty"><?= htmlspecialchars(t('Категории ещё не добавлены.'), ENT_QUOTES) ?></p>
         <?php else: ?>
@@ -123,7 +123,7 @@ if ($variant === 'icon' && $visualStyle === 'new') {
     <div class="block-cards<?= $cardClasses ?>">
         <?php if ($title !== '' || ($allText !== '' && $allUrl !== '')): ?>
             <div class="section-head">
-                <?php if ($title !== ''): ?><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+                <?php if ($title !== ''): ?><h2 class="section-head__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
                 <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
             </div>
         <?php endif; ?>

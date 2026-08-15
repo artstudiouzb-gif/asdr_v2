@@ -2180,6 +2180,41 @@ body.lightbox-active { overflow: hidden; }
 }
 
 /* ==========================================================================
+   Выделенное слово в заголовке: «Стратегия *развития*» → span.tx-mark.
+   Разметку ставит App\Core\TitleMarkup, вид выбирается в «Дизайне»
+   (Типографика → «Выделение в заголовках») классом body.design-mark-*.
+
+   Сам span не красится ничем по умолчанию — иначе при выборе «Без выделения»
+   пришлось бы отменять уже назначенный цвет, а отмена цвета на цветной секции
+   промахивается мимо нужного тона.
+   ========================================================================== */
+.tx-mark { font-style: inherit; }
+
+/* Акцент берётся тем же именем, что и ссылки: тёмная секция переопределяет
+   --gov-teal-text на светлый вариант, и выделение остаётся читаемым. */
+body.design-mark-accent .tx-mark { color: var(--gov-teal-text, var(--color-accent, #2f6fed)); }
+
+/* Рукописное семейство — своя роль в «Дизайне» (--font-script). Оно оптически
+   мельче наборного, поэтому кегль поднят; line-height наследуется, чтобы
+   строка заголовка не подпрыгивала относительно соседних. */
+body.design-mark-script .tx-mark {
+    font-family: var(--font-script, var(--font-heading));
+    font-weight: 400;
+    font-size: 1.12em;
+    letter-spacing: 0;
+    /* У рукописных семейств узкие боковые поля: без добавки слово слипается
+       со следующим словом заголовка. */
+    padding-inline: 0.08em;
+}
+
+/* Мазок — тень внутрь, а не фон и не подчёркивание: не меняет размеры строки,
+   не разрывается на переносе слова и не трогает цвет самого текста. */
+body.design-mark-underline .tx-mark {
+    box-shadow: inset 0 -0.18em 0 color-mix(in srgb, var(--color-accent, #2f6fed) 32%, transparent);
+    padding-inline: 0.05em;
+}
+
+/* ==========================================================================
    Статичные размеры заголовков (Дизайн → Типографика → «Статичные»).
    Плавающие clamp(min, Nvw, max) заменяются фиксированным размером (max)
    на десктопе и min на узких экранах — «спокойная» типографика без
@@ -2989,6 +3024,45 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .block-counters[style*="--counters-text"] .counter__label { opacity: .78; }
 @media (max-width: 720px) { .counter { border-right: 0; border-bottom: 1px solid var(--gov-border); padding: 14px 0; } .counter:last-child { border-bottom: 0; } }
 
+/* --- Показатели: приставка, примечание, ссылка, крупный кегль, карточки --- */
+
+/* Приставка («более», «до», «≈») набирается мельче числа и стоит на общей
+   с ним базовой линии: выравнивание задано у .counter__num. */
+.counter__prefix { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--1); font-weight: 600; }
+
+
+/* Примечание — третья строка после подписи: сноска к показателю
+   («по данным на 2026 год»), а не вторая подпись. */
+.counter__note { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--3); line-height: 1.35; margin: 4px 0 0; opacity: .8; }
+
+/* Показатель со ссылкой остаётся показателем: цвет наследуется, подчёркивания
+   нет — иначе в полосе появляется синяя строка поперёк остальных. */
+.counter--link { text-decoration: none; color: inherit; }
+.counter--link:hover .counter__label { color: var(--counters-text, var(--gov-title)); }
+.counter--link:focus-visible { outline: 3px solid var(--color-accent, #2f6fed); outline-offset: 3px; }
+
+/* Крупные числа требуют более широкой дорожки: «1 200» с приставкой не влезает
+   в 180px и вылезает за карточку — переносить его нельзя (см. nowrap выше). */
+.block-counters--size-large .block-counters__grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.block-counters--size-large .counter__value,
+.block-counters--size-large .counter__suffix { font-size: clamp(var(--step-6), 4vw, var(--step-9)); }
+
+/* Вариант «Карточки»: у каждого показателя своя поверхность вместо общей
+   полосы с разделителями. Разделители при этом надо снять — иначе у карточки
+   правая граница оказывается двойной. */
+.block-counters--cards .block-counters__grid { gap: var(--card-gap, 20px); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.block-counters--cards .counter {
+    border: 1px solid var(--gov-border);
+    border-radius: var(--radius, 14px);
+    padding: clamp(16px, 2vw, 24px);
+    background: var(--counters-bg, var(--gov-surface));
+}
+.block-counters--cards .counter:last-child { border-right: 1px solid var(--gov-border); }
+@media (max-width: 720px) {
+    .block-counters--cards .counter { border-bottom: 1px solid var(--gov-border); }
+    .block-counters--cards .counter:last-child { border-bottom: 1px solid var(--gov-border); }
+}
+
 /* --- Секции: серифные заголовки с teal-акцентом --- */
 .block-news__head::after, .news-index__head::after { background: var(--gov-teal); }
 .block-news__all, .content-card__more, .news-card__more { color: var(--gov-teal-text); }
@@ -3313,7 +3387,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     width: var(--counter-icon-size, 28px) !important;
     height: var(--counter-icon-size, 28px) !important;
 }
-.counter__num { display: flex; align-items: baseline; gap: 4px; }
+.counter__num { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
 .counter__body { display: flex; flex-direction: column; gap: 2px; }
 /* Мобильная иконка меньше и без сдвига — идёт после базовой, чтобы
    перекрыть её на узком экране (число там мельче). */

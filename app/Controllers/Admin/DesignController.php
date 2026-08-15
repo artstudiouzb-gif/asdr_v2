@@ -234,6 +234,7 @@ final class DesignController
             $selectedFonts[] = substr($bodyChoice, 7);
         }
         $selectedFonts[] = (string) ($_POST['font_google_heading'] ?? '');
+        $selectedFonts[] = (string) ($_POST['font_script'] ?? '');
         $fontInstall = LocalGoogleFonts::installSelected($selectedFonts);
         if (!$fontInstall['ok']) {
             Flash::error($fontInstall['error'] . ' Настройки не изменены.');
@@ -271,6 +272,7 @@ final class DesignController
             $fontInstall = LocalGoogleFonts::installSelected([
                 (string) ($appearance['font_google_body'] ?? ''),
                 (string) ($appearance['font_google_heading'] ?? ''),
+                (string) ($appearance['font_script'] ?? ''),
             ]);
             if (!$fontInstall['ok']) {
                 Flash::error($fontInstall['error'] . ' Конфигурация не применена.');

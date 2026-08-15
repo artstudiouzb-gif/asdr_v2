@@ -117,7 +117,7 @@ $branchIndex = 0;
 ?>
 <div class="block-orgstruct"<?= $searchEnabled ? ' data-org-structure' : '' ?>>
     <?php if ($title !== ''): ?>
-        <div class="section-head"><h2 class="section-head__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2></div>
+        <div class="section-head"><h2 class="section-head__title"><?= \App\Core\TitleMarkup::html($title) ?></h2></div>
     <?php endif; ?>
 
     <?php // Поле приходит скрытым и открывается скриптом: без JS фильтровать

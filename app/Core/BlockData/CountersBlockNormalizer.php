@@ -9,6 +9,21 @@ use App\Core\Icon;
 final class CountersBlockNormalizer
 {
     /**
+     * Пробел-разделитель разрядов делаем неразрывным.
+     *
+     * «1 200» — одно число, и переносить строку внутри него нельзя. Запрещать
+     * перенос всей ячейке (white-space: nowrap) — плохой размен: тогда длинное
+     * значение вылезает за край карточки вместо того, чтобы перенестись после
+     * приставки. Неразрывный пробел решает ровно ту задачу, которая есть.
+     */
+    private static function groupedNumber(string $value): string
+    {
+        return preg_match('/^\d[\d\s]*\d$/u', $value) === 1
+            ? (string) preg_replace('/\s+/u', "\u{00A0}", $value)
+            : $value;
+    }
+
+    /**
      * @param array<string, mixed> $input
      * @return array<string, mixed>
      */
@@ -28,11 +43,16 @@ final class CountersBlockNormalizer
 
             $iconSvg = Icon::cleanName($item['icon_svg'] ?? '');
 
-            $digits = preg_replace('/\D+/', '', $value) ?? '';
+            // Значение — строка, а не целое. Целым нельзя записать «1 200»,
+            // «24/7», «№1» и «4,5», а показатель бывает именно таким. Анимацию
+            // это не отменяет: шаблон включает её, когда в значении одни цифры.
             $items[] = [
-                'value' => (int) $digits,
+                'value' => self::groupedNumber(mb_substr($value, 0, 24)),
+                'prefix' => mb_substr(BlockDataInput::trimmed($item, 'prefix'), 0, 12),
                 'suffix' => BlockDataInput::trimmed($item, 'suffix'),
                 'label' => BlockDataInput::plain($item, 'label', $locale),
+                'note' => mb_substr(BlockDataInput::plain($item, 'note', $locale), 0, 120),
+                'link' => BlockDataInput::safeLink($item['link'] ?? ''),
                 'icon_svg' => $iconSvg,
             ];
         }
@@ -57,6 +77,8 @@ final class CountersBlockNormalizer
             'text_align' => in_array($textAlign, ['left', 'center', 'right'], true)
                 ? $textAlign
                 : 'left',
+            'variant' => BlockDataInput::enum($input, 'variant', ['row', 'cards'], 'row'),
+            'value_size' => BlockDataInput::enum($input, 'value_size', ['normal', 'large'], 'normal'),
             'items' => $items,
         ];
     }

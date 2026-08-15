@@ -533,7 +533,7 @@ final class NewsController
                 'poll_options_json' => $pollOptions,
                 'meta_title' => trim((string) ($t['meta_title'] ?? '')),
                 'meta_description' => trim((string) ($t['meta_description'] ?? '')),
-            ]);
+            ] + \App\Core\NewsCard::fromInput($t));
         }
 
         foreach (Language::active() as $lang) {
@@ -571,7 +571,7 @@ final class NewsController
                 'poll_options_json' => $pollOptions,
                 'meta_title' => trim((string) ($t['meta_title'] ?? '')),
                 'meta_description' => trim((string) ($t['meta_description'] ?? '')),
-            ]);
+            ] + \App\Core\NewsCard::fromInput($t));
         }
     }
 
@@ -601,7 +601,7 @@ final class NewsController
             'event_meta' => trim((string) ($_POST['event_meta'] ?? '')),
             'docs' => $this->parseDocs((array) ($_POST['docs'] ?? [])),
             'source_note' => trim((string) ($_POST['source_note'] ?? '')),
-        ];
+        ] + \App\Core\NewsCard::fromInput($_POST);
     }
 
     private function collectInput(?int $id, ?array $existing = null): array

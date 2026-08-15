@@ -125,6 +125,11 @@ CREATE TABLE IF NOT EXISTS news (
     lead_html       LONGTEXT NULL COMMENT 'форматированный лид; excerpt — его текстовая версия',
     badge           VARCHAR(100) NULL COMMENT 'визуальная метка («Важно», «Анонс»); не категория',
     badge_color     VARCHAR(9) NULL COMMENT 'цвет фона метки (#rrggbb); пусто — цвет темы',
+    card_title     VARCHAR(200) NULL COMMENT 'заголовок на обложке; пусто — обычный заголовок',
+    card_badge    VARCHAR(100) NULL COMMENT 'вторая плашка обложки (контурная)',
+    card_stats     TEXT NULL COMMENT 'показатели обложки: JSON [{value,label}], до трёх',
+    card_signature VARCHAR(80) NULL COMMENT 'подпись рукописным шрифтом',
+    card_note      VARCHAR(120) NULL COMMENT 'сноска внизу обложки',
     category_id     INT UNSIGNED NULL COMMENT 'категория новости',
     content         LONGTEXT NULL,
     image           VARCHAR(255) NULL,
@@ -169,6 +174,11 @@ CREATE TABLE IF NOT EXISTS news_translations (
     lang            VARCHAR(8) NOT NULL,
     title           VARCHAR(255) NULL,
     badge           VARCHAR(100) NULL COMMENT 'бейдж категории',
+    card_title     VARCHAR(200) NULL,
+    card_badge    VARCHAR(100) NULL,
+    card_stats     TEXT NULL,
+    card_signature VARCHAR(80) NULL,
+    card_note      VARCHAR(120) NULL,
     excerpt         TEXT NULL,
     lead_html       LONGTEXT NULL COMMENT 'форматированный лид перевода',
     content         LONGTEXT NULL,
@@ -1184,7 +1194,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_13_language_short_name.sql'),
     ('2026_08_14_heroes.sql'),
     ('2026_08_14_hero_watermark.sql'),
-    ('2026_08_15_news_layout_card.sql')
+    ('2026_08_15_news_layout_card.sql'),
+    ('2026_08_15_news_card_fields.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

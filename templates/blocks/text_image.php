@@ -35,7 +35,7 @@ if ($image !== '' && $visualWidth !== 50) {
 ?>
 <div class="block-textimage block-textimage--image-<?= $imageSide ?> block-textimage--ratio-<?= htmlspecialchars($ratio, ENT_QUOTES) ?><?= $image !== '' ? '' : ' block-textimage--no-image' ?>">
     <div class="textimage__info">
-        <?php if ($title !== ''): ?><h2 class="textimage__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></h2><?php endif; ?>
+        <?php if ($title !== ''): ?><h2 class="textimage__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
         <?php if ($text !== ''): ?><div class="textimage__text rich-content"><?= $text ?></div><?php endif; ?>
         <?php if (!empty($items)): ?>
             <div class="textimage__features">

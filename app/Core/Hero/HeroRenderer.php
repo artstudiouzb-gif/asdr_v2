@@ -8,6 +8,7 @@ use App\Core\AppUrl;
 use App\Core\Icon;
 use App\Core\Media;
 use App\Core\MediaPosition;
+use App\Core\TitleMarkup;
 use App\Core\UrlGuard;
 
 /**
@@ -121,7 +122,8 @@ final class HeroRenderer
         }
 
         $label = trim((string) ($hero['name'] ?? ''));
-        $firstTitle = trim((string) ($slides[0]['data']['title'] ?? ''));
+        // В aria-label уходит текст без звёздочек: диктору не нужна разметка.
+        $firstTitle = trim(TitleMarkup::plain((string) ($slides[0]['data']['title'] ?? '')));
         if ($firstTitle !== '') {
             $label = $firstTitle;
         }
@@ -505,7 +507,7 @@ final class HeroRenderer
             $html .= '<span class="hero__eyebrow">' . htmlspecialchars((string) $d['eyebrow'], ENT_QUOTES) . '</span>';
         }
         if ($d['title'] !== '') {
-            $title = htmlspecialchars((string) $d['title'], ENT_QUOTES);
+            $title = TitleMarkup::html((string) $d['title']);
             $url = (string) $d['link_url'];
             if ($url !== '' && UrlGuard::isSafeLink($url)) {
                 $title = '<a class="hero__title-link" href="' . htmlspecialchars($url, ENT_QUOTES) . '"'

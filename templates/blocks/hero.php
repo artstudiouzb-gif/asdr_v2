@@ -334,7 +334,7 @@ $heroMedia = static function (
 <div class="block-hero block-hero--media block-hero--slider block-hero--w-<?= $heroWidth ?> block-hero--h-<?= $heroHeight ?> block-hero--pos-<?= $textPos ?> block-hero--y-<?= $textAlignY ?>"
      data-hero-slider<?= $autoplay > 0 ? ' data-autoplay="' . $autoplay . '"' : '' ?>
      role="region" aria-roledescription="<?= htmlspecialchars(t('Карусель'), ENT_QUOTES) ?>"
-     aria-label="<?= htmlspecialchars($title !== '' ? (string) $title : t('Обложка'), ENT_QUOTES) ?>"<?= $slideCount > 1 ? ' tabindex="0"' : '' ?>>
+     aria-label="<?= htmlspecialchars($title !== '' ? \App\Core\TitleMarkup::plain((string) $title) : t('Обложка'), ENT_QUOTES) ?>"<?= $slideCount > 1 ? ' tabindex="0"' : '' ?>>
     <div class="block-hero__slides">
         <?php foreach ($slides as $index => $slide): ?>
             <?php
@@ -443,7 +443,7 @@ $heroMedia = static function (
         <?php if ($artHtml !== '' && $artPosition !== 'right'): ?><?= $artHtml ?><?php endif; ?>
         <div class="block-hero__text<?= $panelOn ? ' block-hero__text--panel' : '' ?>">
             <?php if ($eyebrow !== ''): ?><span class="block-hero__eyebrow"><?= htmlspecialchars($eyebrow, ENT_QUOTES) ?></span><?php endif; ?>
-            <?php if ($title !== ''): ?><?php $hTag = $data['_heading_tag'] ?? 'h1'; ?><<?= $hTag ?> class="block-hero__title"><?= htmlspecialchars($title, ENT_QUOTES) ?></<?= $hTag ?>><?php endif; ?>
+            <?php if ($title !== ''): ?><?php $hTag = $data['_heading_tag'] ?? 'h1'; ?><<?= $hTag ?> class="block-hero__title"><?= \App\Core\TitleMarkup::html($title) ?></<?= $hTag ?>><?php endif; ?>
             <?php if ($subtitle !== ''): ?><p class="block-hero__subtitle"><?= htmlspecialchars($subtitle, ENT_QUOTES) ?></p><?php endif; ?>
             <?php if (($btnText !== '' && $btnUrl !== '') || ($btn2Text !== '' && $btn2Url !== '') || ($vBtnText !== '')): ?>
             <div class="block-hero__actions">
