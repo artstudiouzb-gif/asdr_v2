@@ -188,7 +188,9 @@
     .mediacard.mediacard,
     .block-newsfeat--mosaic .newsfeat-lead,
     .block-newsfeat--mosaic .newsfeat-mini,
-    .block-newsfeat--mosaic .newsfeat-text
+    .block-newsfeat--mosaic .newsfeat-text,
+    .newslist-lead,
+    .newslist-grid .relnews-card
 ) {
     --feature-card-motion-duration: .62s;
     --feature-card-motion-ease: cubic-bezier(.16, 1, .3, 1);
@@ -213,7 +215,9 @@
     .mediacard.mediacard,
     .block-newsfeat--mosaic .newsfeat-lead,
     .block-newsfeat--mosaic .newsfeat-mini,
-    .block-newsfeat--mosaic .newsfeat-text
+    .block-newsfeat--mosaic .newsfeat-text,
+    .newslist-lead,
+    .newslist-grid .relnews-card
 )::before {
     content: '';
     position: absolute;
@@ -236,7 +240,9 @@
         .mediacard.mediacard,
         .block-newsfeat--mosaic .newsfeat-lead,
         .block-newsfeat--mosaic .newsfeat-mini,
-        .block-newsfeat--mosaic .newsfeat-text
+        .block-newsfeat--mosaic .newsfeat-text,
+    .newslist-lead,
+    .newslist-grid .relnews-card
     ):hover {
         background: var(--gov-surface);
         box-shadow: 0 16px 36px rgba(37, 99, 235, .12);
@@ -250,7 +256,9 @@
         .mediacard.mediacard,
         .block-newsfeat--mosaic .newsfeat-lead,
         .block-newsfeat--mosaic .newsfeat-mini,
-        .block-newsfeat--mosaic .newsfeat-text
+        .block-newsfeat--mosaic .newsfeat-text,
+    .newslist-lead,
+    .newslist-grid .relnews-card
     ):hover::before {
         opacity: 1;
     }
@@ -262,14 +270,18 @@
         .mediacard.mediacard,
         .block-newsfeat--mosaic .newsfeat-lead,
         .block-newsfeat--mosaic .newsfeat-mini,
-        .block-newsfeat--mosaic .newsfeat-text
+        .block-newsfeat--mosaic .newsfeat-text,
+    .newslist-lead,
+    .newslist-grid .relnews-card
     ),
     :is(
         .project-card.project-card,
         .mediacard.mediacard,
         .block-newsfeat--mosaic .newsfeat-lead,
         .block-newsfeat--mosaic .newsfeat-mini,
-        .block-newsfeat--mosaic .newsfeat-text
+        .block-newsfeat--mosaic .newsfeat-text,
+    .newslist-lead,
+    .newslist-grid .relnews-card
     )::before {
         transition: none;
     }
@@ -279,7 +291,9 @@
         .mediacard.mediacard,
         .block-newsfeat--mosaic .newsfeat-lead,
         .block-newsfeat--mosaic .newsfeat-mini,
-        .block-newsfeat--mosaic .newsfeat-text
+        .block-newsfeat--mosaic .newsfeat-text,
+    .newslist-lead,
+    .newslist-grid .relnews-card
     ):hover {
         transform: none;
     }

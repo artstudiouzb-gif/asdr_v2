@@ -136,13 +136,35 @@ test('Часть темы выводится после бандла, но до 
     assert_true($generated < $blocks, 'стили блоков остаются последними');
 });
 
-test('Новостные страницы запрашивают вынесенную часть темы', function (): void {
+test('Новостные страницы запрашивают свои части темы', function (): void {
     $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Site/NewsController.php');
+
+    // Детальная новость по-прежнему использует news_detail напрямую.
     assert_same(
-        2,
+        1,
         substr_count($controller, "requireThemePart('news_detail')"),
-        'и детальная новость, и список: список построен на .relnews-card'
+        'детальная новость запрашивает news_detail напрямую'
     );
+
+    // Лента теперь использует общий news_feature interaction, как на главной.
+    // AssetCollector должен через него подключить и relnews-базу, и block CSS.
+    assert_same(
+        1,
+        substr_count($controller, "requireJs('news_feature')"),
+        'список новостей запрашивает news_feature'
+    );
+
+    AssetCollector::reset();
+    AssetCollector::requireJs('news_feature');
+    assert_true(
+        preg_match('#/assets/css/blocks/news-detail(\.min)?\.css#', AssetCollector::renderThemeStyles()) === 1,
+        'news_feature подключает базовые стили relnews-card'
+    );
+    assert_true(
+        preg_match('#/assets/css/blocks/news-feature(\.min)?\.css#', AssetCollector::renderStyles()) === 1,
+        'news_feature подключает общий feature-card слой'
+    );
+    AssetCollector::reset();
 });
 
 test('Классы, живущие вне своего раздела, остались в общей теме', function (): void {
