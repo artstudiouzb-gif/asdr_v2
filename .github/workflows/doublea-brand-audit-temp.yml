@@ -1,0 +1,22 @@
+name: DoubleA brand audit temp
+
+on:
+  push:
+    branches:
+      - chore/doublea-brand-cleanup
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find old branding
+        shell: bash
+        run: |
+          echo '=== OLD BRAND MATCHES ==='
+          git grep -n -I -E 'ArtStudio|ARTSTUDIO|artstudio|Art Studio|ASDR|asdr' -- . \
+            ':(exclude).github/workflows/doublea-brand-audit-temp.yml' || true
+          echo '=== END MATCHES ==='
