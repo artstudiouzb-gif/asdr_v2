@@ -1,0 +1,244 @@
+name: Temporary card hover lift patch
+
+on:
+  push:
+    branches:
+      - feat/card-hover-lift-setting
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[card-lift-patch]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: feat/card-hover-lift-setting
+
+      - name: Apply configurable card lift patch
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected one match, found {count}')
+              p.write_text(text.replace(old, new, 1))
+
+          # Persisted, validated design setting.
+          replace_once(
+              'app/Core/DesignSettings.php',
+              """        foreach (self::OPTIONS as $key => $opt) {
+            $stored = (string) Setting::get('design_' . $key, '');
+            $values[$key] = isset($opt['choices'][$stored]) ? $stored : $opt['default'];
+        }
+
+        return $values;
+""",
+              """        foreach (self::OPTIONS as $key => $opt) {
+            $stored = (string) Setting::get('design_' . $key, '');
+            $values[$key] = isset($opt['choices'][$stored]) ? $stored : $opt['default'];
+        }
+        $values['card_hover_lift'] = (string) self::cardHoverLift();
+
+        return $values;
+"""
+          )
+          replace_once(
+              'app/Core/DesignSettings.php',
+              """    public static function normalizeRadius(string $raw): string
+    {
+        return self::normalizePixelValue($raw, 0, 48);
+    }
+
+    /**
+""",
+              """    public static function normalizeRadius(string $raw): string
+    {
+        return self::normalizePixelValue($raw, 0, 48);
+    }
+
+    /** Подъём feature-card и карточек, наследующих его hover, 0–20px. */
+    public static function cardHoverLift(): int
+    {
+        return self::normalizeCardHoverLift((string) Setting::get('design_card_hover_lift', '4'));
+    }
+
+    public static function normalizeCardHoverLift(string $raw): int
+    {
+        $raw = trim($raw);
+        if ($raw === '' || preg_match('/^\\d+$/', $raw) !== 1) {
+            return 4;
+        }
+
+        return max(0, min(20, (int) $raw));
+    }
+
+    /**
+"""
+          )
+          replace_once(
+              'app/Core/DesignSettings.php',
+              """        if (array_key_exists('radius_custom', $input)) {
+            Setting::set('design_radius_custom', self::normalizeRadius((string) $input['radius_custom']));
+        }
+        if (array_key_exists('newsdetail_padding_top', $input)) {
+""",
+              """        if (array_key_exists('radius_custom', $input)) {
+            Setting::set('design_radius_custom', self::normalizeRadius((string) $input['radius_custom']));
+        }
+        if (array_key_exists('card_hover_lift', $input)) {
+            Setting::set(
+                'design_card_hover_lift',
+                (string) self::normalizeCardHoverLift((string) $input['card_hover_lift'])
+            );
+        }
+        if (array_key_exists('newsdetail_padding_top', $input)) {
+"""
+          )
+
+          # Live preview must use the unsaved numeric value too.
+          replace_once(
+              'app/Controllers/Admin/DesignController.php',
+              """        if (array_key_exists('radius_custom', $preview)) {
+            Setting::overrideInMemory(
+                'design_radius_custom',
+                DesignSettings::normalizeRadius((string) $preview['radius_custom'])
+            );
+        }
+        foreach (['top', 'bottom'] as $edge) {
+""",
+              """        if (array_key_exists('radius_custom', $preview)) {
+            Setting::overrideInMemory(
+                'design_radius_custom',
+                DesignSettings::normalizeRadius((string) $preview['radius_custom'])
+            );
+        }
+        if (array_key_exists('card_hover_lift', $preview)) {
+            Setting::overrideInMemory(
+                'design_card_hover_lift',
+                (string) DesignSettings::normalizeCardHoverLift((string) $preview['card_hover_lift'])
+            );
+        }
+        foreach (['top', 'bottom'] as $edge) {
+"""
+          )
+
+          # Numeric control in Design -> Components.
+          replace_once(
+              'app/Views/admin/design/index.php',
+              """            <?php
+            $newsPaddingTop = preg_replace('/px$/', '', \\App\\Core\\DesignSettings::newsDetailPaddingTop());
+            $newsPaddingBottom = preg_replace('/px$/', '', \\App\\Core\\DesignSettings::newsDetailPaddingBottom());
+            ?>
+            <div class=\"design-opt\">
+                <div class=\"design-opt__label\">
+                    <span>Страница новости — отступ сверху</span>
+""",
+              """            <?php
+            $cardHoverLift = \\App\\Core\\DesignSettings::cardHoverLift();
+            $newsPaddingTop = preg_replace('/px$/', '', \\App\\Core\\DesignSettings::newsDetailPaddingTop());
+            $newsPaddingBottom = preg_replace('/px$/', '', \\App\\Core\\DesignSettings::newsDetailPaddingBottom());
+            ?>
+            <div class=\"design-opt\">
+                <div class=\"design-opt__label\">
+                    <span>Подъём карточек при наведении</span>
+                    <small>Вертикальный подъём feature-card, проектов, новостей и медиатеки. 0 px отключает движение; текущее стандартное значение — 4 px.</small>
+                </div>
+                <div class=\"design-opt__choices\">
+                    <input class=\"u-inline-e73ebf4146\" type=\"number\" name=\"card_hover_lift\" min=\"0\" max=\"20\" step=\"1\" inputmode=\"numeric\"
+                           value=\"<?= htmlspecialchars((string) $cardHoverLift, ENT_QUOTES) ?>\" data-design-preview-field>
+                </div>
+            </div>
+            <div class=\"design-opt\">
+                <div class=\"design-opt__label\">
+                    <span>Страница новости — отступ сверху</span>
+"""
+          )
+
+          # Publish the setting as one shared CSS variable.
+          replace_once(
+              'app/Core/SiteThemeCss.php',
+              """        $styles = (array) ($headerConfig['styles'] ?? []);
+
+        $variables = [
+""",
+              """        $styles = (array) ($headerConfig['styles'] ?? []);
+        $cardHoverLift = max(0, min(20, (int) ($designValues['card_hover_lift'] ?? DesignSettings::cardHoverLift())));
+        $cardHoverTranslate = $cardHoverLift === 0 ? '0px' : '-' . $cardHoverLift . 'px';
+
+        $variables = [
+"""
+          )
+          replace_once(
+              'app/Core/SiteThemeCss.php',
+              """            '--space-max' => $spacings['space_max'],
+            '--font-family' => $font,
+""",
+              """            '--space-max' => $spacings['space_max'],
+            '--feature-card-hover-lift' => $cardHoverTranslate,
+            '--font-family' => $font,
+"""
+          )
+
+          # Canonical feature-card and inherited homepage card families use it.
+          replace_once(
+              'public/assets/css/gov-theme.css',
+              """.feature-card.block-advantages__item:hover,
+.feature-card.contact-card:hover,
+.feature-card.act-card:hover {
+    transform: translateY(-4px);
+""",
+              """.feature-card.block-advantages__item:hover,
+.feature-card.contact-card:hover,
+.feature-card.act-card:hover {
+    transform: translateY(var(--feature-card-hover-lift, -4px));
+"""
+          )
+          replace_once(
+              'public/assets/css/blocks/news-feature.css',
+              """        box-shadow: 0 16px 36px rgba(37, 99, 235, .12);
+        transform: translateY(-4px);
+        border-color: var(--color-accent, var(--gov-teal));
+""",
+              """        box-shadow: 0 16px 36px rgba(37, 99, 235, .12);
+        transform: translateY(var(--feature-card-hover-lift, -4px));
+        border-color: var(--color-accent, var(--gov-teal));
+"""
+          )
+          # Keep the documentation accurate.
+          replace_once(
+              'public/assets/css/blocks/news-feature.css',
+              """ * -4px hover elevation, timing and 220px mouse-following spotlight.
+""",
+              """ * configurable hover elevation, timing and 220px mouse-following spotlight.
+"""
+          )
+
+          # Existing motion contract now checks the shared configurable token.
+          replace_once(
+              'tests/cases/119_premium_motion_test.php',
+              """        (bool) preg_match('/[^{}]*\\\\.mediacard\\\\.mediacard[^{}]*:hover[^{}]*\\\\{[^{}]*transform:\\\\s*translateY\\\\(-4px\\\\)/s', $govCss),
+        'Медиакарточка должна использовать тот же подъём -4px, что и feature-card'
+""",
+              """        (bool) preg_match('/[^{}]*\\\\.mediacard\\\\.mediacard[^{}]*:hover[^{}]*\\\\{[^{}]*transform:\\\\s*translateY\\\\(var\\\\(--feature-card-hover-lift, -4px\\\\)\\\\)/s', $govCss),
+        'Медиакарточка должна использовать настраиваемый подъём feature-card'
+"""
+          )
+          PY
+
+      - name: Commit patched files
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/tmp-card-hover-lift-patch.yml
+          git add app/Core/DesignSettings.php app/Core/SiteThemeCss.php app/Controllers/Admin/DesignController.php app/Views/admin/design/index.php public/assets/css/gov-theme.css public/assets/css/blocks/news-feature.css tests/cases/119_premium_motion_test.php
+          git commit -m "Add configurable card hover lift [card-lift-patch]"
+          git push origin HEAD:feat/card-hover-lift-setting
