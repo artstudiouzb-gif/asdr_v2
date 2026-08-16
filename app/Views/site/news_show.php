@@ -455,7 +455,17 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             <?php endif; ?>
         </div>
 
-        <aside class="newsdetail-side newsdetail-side--right">
+        <?php
+        // Сторона колонки — из настройки «Макет страницы с виджетами».
+        // Раньше здесь стоял жёсткий --right: выбор «Левый сайдбар» менял
+        // только то, ОТКУДА берутся виджеты, а показывались они всё равно
+        // справа. Порядок в разметке не трогаем — статья остаётся первой для
+        // диктора и клавиатуры, колонка уезжает влево средствами сетки.
+        $sideClass = ($sidebar['position'] ?? 'right') === 'left'
+            ? 'newsdetail-side--left'
+            : 'newsdetail-side--right';
+        ?>
+        <aside class="newsdetail-side <?= $sideClass ?>">
             <?php if ($hasKeyPoints): ?>
                 <div class="newsdetail-card newsdetail-card--summary">
                     <div class="newsdetail-card__heading">

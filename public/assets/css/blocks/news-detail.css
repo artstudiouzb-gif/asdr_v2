@@ -129,7 +129,9 @@ body.design-type-static .newsdetail-phero__title { font-size: var(--step-9); }
 @media (max-width: 1100px) { .newsdetail-body { grid-template-columns: minmax(0, 1fr) minmax(0, 340px); } .newsdetail-body .newsdetail-side:first-child { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 }
 
-@media (max-width: 720px) { .newsdetail-body { grid-template-columns: 1fr; } .newsdetail-body .newsdetail-side:first-child { grid-template-columns: 1fr; }
+/* Складываем колонку на 900px, а не на 720: при 340px фиксированного сайдбара
+   статья на 768px сжималась до 362px — 38 знаков в строке (замерено). */
+@media (max-width: 900px) { .newsdetail-body { grid-template-columns: 1fr; } .newsdetail-body .newsdetail-side:first-child { grid-template-columns: 1fr; }
 }
 
 .newsdetail-side { display: flex; flex-direction: column; gap: 22px; position: sticky; top: 24px; }
@@ -146,10 +148,38 @@ body.design-type-static .newsdetail-phero__title { font-size: var(--step-9); }
 :root[data-theme="dark"] .newsdetail-side--right {
     border-left-color: rgba(255, 255, 255, 0.1);
 }
-@media (max-width: 720px) {
-    .newsdetail-side--right {
+
+/* Левая колонка — то же оформление зеркально. Разметка не переставляется:
+   статья остаётся первой в DOM (диктор и Tab получают содержимое раньше
+   виджетов), а влево колонка уезжает средствами сетки. */
+.newsdetail-side--left:empty { display: none; }
+
+/* Всё «левое» оформление — только на широком экране. Правила стоят в файле
+   ПОСЛЕ блока max-width: 900px, поэтому без парного min-width они перебивали
+   складывание: на 390px сетка оставалась 340px + 1fr, статья схлопывалась в
+   ноль и появлялась прокрутка вбок на 146px (замерено). Пара 900/901 — из
+   общей шкалы точек перелома публички. */
+@media (min-width: 901px) {
+    .newsdetail-side--left {
+        position: relative;
+        padding-right: clamp(16px, 2.2vw, 32px);
+        border-right: 1px solid color-mix(in srgb, var(--gov-border, #cbd5e1) 75%, transparent);
+    }
+    :root[data-theme="dark"] .newsdetail-side--left {
+        border-right-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .newsdetail-body:has(.newsdetail-side--left) { grid-template-columns: minmax(0, 340px) minmax(0, 1fr); }
+    .newsdetail-body:has(.newsdetail-side--left) .newsdetail-side--left { grid-column: 1; grid-row: 1; }
+    .newsdetail-body:has(.newsdetail-side--left) .newsdetail-article { grid-column: 2; }
+}
+@media (max-width: 900px) {
+    .newsdetail-side--right,
+    .newsdetail-side--left {
         padding-left: 0;
+        padding-right: 0;
         border-left: 0;
+        border-right: 0;
         border-top: 1px solid color-mix(in srgb, var(--gov-border, #cbd5e1) 75%, transparent);
         padding-top: 24px;
         margin-top: 24px;
@@ -245,7 +275,7 @@ body.design-type-static .newsdetail-phero__title { font-size: var(--step-9); }
 .newsdetail-head--full { grid-template-columns: 1fr; }
 .newsdetail-head--full .newsdetail-head__info { max-width: 760px; }
 .newsdetail-body--no-left { grid-template-columns: minmax(0, 1fr) minmax(0, 340px); }
-@media (max-width: 720px) { .newsdetail-body--no-left { grid-template-columns: 1fr; }
+@media (max-width: 900px) { .newsdetail-body--no-left { grid-template-columns: 1fr; }
 }
 
 .newsdetail-share--inline { margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--gov-border); display: flex; align-items: center; gap: 18px; }
@@ -685,11 +715,26 @@ button.newsdetail-gallery__thumb:hover {
 .newsdetail:not(.newsdetail--premium) > :is(.newsdetail-photos, .newsdetail-related, .newsdetail-adjacent) {
     grid-column: 1 / -1;
 }
-.newsdetail:not(.newsdetail--premium):not(:has(.newsdetail-side--right > *)) {
+/* Одна колонка по центру — только когда боковой колонки нет ни с одной
+   стороны. Без второго :not() правило срабатывало и при левой колонке: сетка
+   схлопывалась в 900px, и карточки ложились поверх текста. */
+.newsdetail:not(.newsdetail--premium):not(:has(.newsdetail-side--right > *)):not(:has(.newsdetail-side--left > *)) {
     grid-template-columns: minmax(0, 900px);
     justify-content: center;
 }
 .newsdetail-side--right:empty { display: none; }
+
+/* Левая колонка у обычных макетов — зеркало правой. Переставить надо всё, что
+   размещено поимённо: саму колонку, шапку и статью. Ставим ПОСЛЕ правила выше,
+   иначе оно перебивает по порядку при равной специфичности. */
+@media (min-width: 901px) {
+    .newsdetail:not(.newsdetail--premium):has(.newsdetail-side--left) {
+        grid-template-columns: minmax(292px, 340px) minmax(0, 1fr);
+    }
+    .newsdetail:not(.newsdetail--premium):has(.newsdetail-side--left) > .newsdetail-head { grid-column: 2; }
+    .newsdetail:not(.newsdetail--premium):has(.newsdetail-side--left) .newsdetail-article { grid-column: 2; grid-row: 2; }
+    .newsdetail:not(.newsdetail--premium) .newsdetail-side--left { grid-column: 1; grid-row: 1 / span 2; }
+}
 
 /* Открытая редакционная шапка без внешнего контейнера-карточки. */
 .newsdetail:not(.newsdetail--premium) .newsdetail-head {
