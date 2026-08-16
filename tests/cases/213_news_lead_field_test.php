@@ -50,15 +50,17 @@ test('Форма даёт компактный редактор и три чес
     assert_not_contains('new DOMParser()', $admin, 'пользовательский текст не должен повторно интерпретироваться как HTML');
 });
 
-test('Полный лид хранится, а карточки показывают более полезные фрагменты', function () {
+test('Полный лид хранится, а карточки используют уместную для макета плотность', function () {
     $latest = (string) file_get_contents(APP_ROOT . '/templates/blocks/news_latest.php');
     $feature = (string) file_get_contents(APP_ROOT . '/templates/blocks/news_feature.php');
     $listing = (string) file_get_contents(APP_ROOT . '/app/Views/site/_news_list.php');
 
     assert_contains("excerpt((string) \$item['excerpt'], 180)", $latest);
     assert_contains("excerpt((string) \$featured['excerpt'], 260)", $feature);
-    assert_contains("excerpt((string) \$featured['excerpt'], 280)", $listing);
-    assert_contains("excerpt((string) \$item['excerpt'], 180)", $listing);
+
+    assert_not_contains('newslist-lead__excerpt', $listing, 'лента /news не дублирует лид описанием');
+    assert_not_contains('relnews-card__excerpt', $listing, 'обычные карточки /news не выводят описание');
+    assert_not_contains('card-more', $listing, 'вся карточка уже является ссылкой — отдельный CTA не нужен');
 });
 
 test('Сайт и Telegram получают одинаковую безопасную разметку лида', function () {
