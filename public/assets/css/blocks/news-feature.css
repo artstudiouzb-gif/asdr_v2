@@ -186,3 +186,105 @@
         padding: 14px;
     }
 }
+
+/* --------------------------------------------------------------------------
+ * Homepage card shell
+ *
+ * The homepage mixed four historically independent card systems: feature
+ * cards, projects, news mosaic and media gallery. Keep each component's inner
+ * layout, but make the outer interaction language one system: the same frame,
+ * radius, shadow depth, accent border and spotlight intensity.
+ * -------------------------------------------------------------------------- */
+:where(
+    .block-advantages__item,
+    .project-card,
+    .block-newsfeat--mosaic .newsfeat-lead,
+    .block-newsfeat--mosaic .newsfeat-mini,
+    .block-newsfeat--mosaic .newsfeat-text,
+    .mediacard
+) {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--gov-border);
+    border-bottom: 3px solid transparent;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-1);
+    backface-visibility: hidden;
+    transition:
+        box-shadow .46s ease,
+        border-color .46s ease,
+        border-bottom-color .46s ease;
+}
+
+/* One spotlight recipe for every homepage card. Existing feature/project/media
+ * cards already receive --mouse-x/--mouse-y from frontend.js; news cards get
+ * the same coordinates from the small news_feature block script. */
+:where(
+    .block-advantages__item,
+    .project-card,
+    .block-newsfeat--mosaic .newsfeat-lead,
+    .block-newsfeat--mosaic .newsfeat-mini,
+    .block-newsfeat--mosaic .newsfeat-text,
+    .mediacard
+)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+        220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        color-mix(in srgb, var(--color-accent, var(--gov-teal)) 7%, transparent),
+        transparent 80%
+    );
+    opacity: 0;
+    transition: opacity .5s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    :where(
+        .block-advantages__item,
+        .project-card,
+        .block-newsfeat--mosaic .newsfeat-lead,
+        .block-newsfeat--mosaic .newsfeat-mini,
+        .block-newsfeat--mosaic .newsfeat-text,
+        .mediacard
+    ):hover {
+        border-color: var(--color-accent, var(--gov-teal));
+        border-bottom-color: var(--color-accent, var(--gov-teal));
+        box-shadow: var(--shadow-3);
+    }
+
+    :where(
+        .block-advantages__item,
+        .project-card,
+        .block-newsfeat--mosaic .newsfeat-lead,
+        .block-newsfeat--mosaic .newsfeat-mini,
+        .block-newsfeat--mosaic .newsfeat-text,
+        .mediacard
+    ):hover::before {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :where(
+        .block-advantages__item,
+        .project-card,
+        .block-newsfeat--mosaic .newsfeat-lead,
+        .block-newsfeat--mosaic .newsfeat-mini,
+        .block-newsfeat--mosaic .newsfeat-text,
+        .mediacard
+    ),
+    :where(
+        .block-advantages__item,
+        .project-card,
+        .block-newsfeat--mosaic .newsfeat-lead,
+        .block-newsfeat--mosaic .newsfeat-mini,
+        .block-newsfeat--mosaic .newsfeat-text,
+        .mediacard
+    )::before {
+        transition: none;
+    }
+}
