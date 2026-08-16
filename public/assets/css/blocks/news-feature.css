@@ -1,14 +1,9 @@
-/* Homepage news feature — visual polish for the existing mosaic layout.
+/* Homepage news feature — editorial content styling for the existing mosaic.
  *
- * IMPORTANT: this file intentionally does not redefine the mosaic grid,
- * wrapper display modes, card placement, or responsive column rules. Those
- * remain owned by gov-theme.css so the proven CMS layout and breakpoints stay
- * unchanged. This layer only changes presentation.
+ * Card chrome is intentionally NOT overridden here. Borders, radii, shadows,
+ * hover/spotlight effects, overflow behaviour, layout and responsive rules stay
+ * owned by gov-theme.css and the shared card design system.
  */
-
-.block-newsfeat--mosaic {
-    --news-feature-border: color-mix(in srgb, var(--gov-border) 78%, transparent);
-}
 
 /* Section heading */
 .block-newsfeat--mosaic .section-head {
@@ -41,20 +36,10 @@
     text-underline-offset: 5px;
 }
 
-/* Featured story — keep the original footprint, replace the glass panel with
- * a clean bottom gradient so the photograph and headline read as one card. */
-.block-newsfeat--mosaic .newsfeat-lead {
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow-2);
-}
-
+/* Featured story: only the content overlay changes. The card itself keeps the
+ * standard frame, shadow, radius and spotlight/hover behaviour. */
 .block-newsfeat--mosaic .newsfeat-lead__frame {
     background: var(--gov-navy);
-}
-
-.block-newsfeat--mosaic .newsfeat-lead__media {
-    transition: transform .45s cubic-bezier(.2, .7, .2, 1);
 }
 
 .block-newsfeat--mosaic .newsfeat-lead__over {
@@ -64,7 +49,10 @@
     justify-content: flex-end;
     align-items: flex-start;
     gap: clamp(8px, .8vw, 12px);
-    padding: clamp(22px, 3vw, 42px);
+    /* Match the established lead/card content inset instead of enlarging it
+       with viewport width. This keeps the featured text aligned with the
+       compact cards below. */
+    padding: 22px;
     border: 0;
     border-radius: 0;
     background:
@@ -119,8 +107,7 @@
     color: rgba(255, 255, 255, .9);
 }
 
-/* The mockup is intentionally lighter: descriptions are omitted in the
- * homepage mosaic. Full text remains available on the news page. */
+/* Keep the homepage mosaic compact without changing the actual CMS content. */
 .block-newsfeat--mosaic .newsfeat-lead__excerpt,
 .block-newsfeat--mosaic .newsfeat-mini__excerpt,
 .block-newsfeat--mosaic .newsfeat-text__excerpt {
@@ -138,40 +125,9 @@
     font-weight: 700;
 }
 
-.block-newsfeat--mosaic .newsfeat-lead .card-more__arrow {
-    transition: transform .25s ease;
-}
-
-.block-newsfeat--mosaic .newsfeat-lead:hover .card-more__arrow {
-    transform: translateX(3px);
-}
-
-/* Secondary photo cards. Their original vertical 16:10 geometry is preserved;
- * only surface, spacing and type hierarchy are refined. */
-.block-newsfeat--mosaic .newsfeat-mini,
-.block-newsfeat--mosaic .newsfeat-text {
-    background: var(--gov-surface);
-    border: 1px solid var(--news-feature-border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-1);
-    overflow: hidden;
-    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
-}
-
-.block-newsfeat--mosaic .newsfeat-mini__thumb {
-    border-radius: 0;
-    overflow: hidden;
-}
-
-.block-newsfeat--mosaic .newsfeat-mini__media {
-    transition: transform .4s cubic-bezier(.2, .7, .2, 1);
-}
-
-.block-newsfeat--mosaic .newsfeat-mini__body {
-    padding: clamp(16px, 1.45vw, 22px);
-    gap: 10px;
-}
-
+/* Secondary card typography/content only. Card surfaces remain untouched so
+ * shared border, shadow and spotlight effects continue to work exactly as in
+ * the rest of the site. */
 .block-newsfeat--mosaic .newsfeat-mini__title {
     color: var(--gov-title);
     font-size: clamp(1rem, 1.08vw, 1.16rem);
@@ -192,16 +148,8 @@
     font-weight: 700;
 }
 
-.block-newsfeat--mosaic .newsfeat-mini .card-more__arrow {
-    transition: transform .25s ease;
-}
-
-/* Compact text cards — no decorative icon and no divider above the arrow. */
-.block-newsfeat--mosaic .newsfeat-text {
-    padding: clamp(16px, 1.45vw, 22px);
-    gap: 10px;
-}
-
+/* Compact text cards: retain the approved lighter internal presentation, but
+ * do not override their frame, shadow, radius or interaction surface. */
 .block-newsfeat--mosaic .newsfeat-text::before {
     content: none;
 }
@@ -231,53 +179,10 @@
     border-radius: 0;
     font-size: var(--step-1);
     line-height: 1;
-    transition: transform .25s ease;
 }
 
-/* Interaction */
-.block-newsfeat--mosaic .newsfeat-mini:hover,
-.block-newsfeat--mosaic .newsfeat-text:hover {
-    transform: translateY(-3px);
-    border-color: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 30%, var(--gov-border));
-    box-shadow: var(--shadow-2);
-}
-
-.block-newsfeat--mosaic .newsfeat-lead:hover .newsfeat-lead__media,
-.block-newsfeat--mosaic .newsfeat-mini:hover .newsfeat-mini__media {
-    transform: scale(1.025);
-}
-
-.block-newsfeat--mosaic .newsfeat-mini:hover .card-more__arrow,
-.block-newsfeat--mosaic .newsfeat-text:hover .newsfeat-text__arrow {
-    transform: translateX(3px);
-}
-
-.block-newsfeat--mosaic .newsfeat-mini:hover .newsfeat-mini__title,
-.block-newsfeat--mosaic .newsfeat-text:hover .newsfeat-text__title {
-    color: var(--gov-title);
-}
-
-.block-newsfeat--mosaic .newsfeat-lead:focus-visible,
-.block-newsfeat--mosaic .newsfeat-mini:focus-visible,
-.block-newsfeat--mosaic .newsfeat-text:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--color-accent, var(--gov-teal)) 48%, transparent);
-    outline-offset: 3px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .block-newsfeat--mosaic .newsfeat-lead__media,
-    .block-newsfeat--mosaic .newsfeat-mini__media,
-    .block-newsfeat--mosaic .newsfeat-mini,
-    .block-newsfeat--mosaic .newsfeat-text,
-    .block-newsfeat--mosaic .newsfeat-text__arrow,
-    .block-newsfeat--mosaic .card-more__arrow {
-        transition: none;
-    }
-
-    .block-newsfeat--mosaic .newsfeat-lead:hover .newsfeat-lead__media,
-    .block-newsfeat--mosaic .newsfeat-mini:hover .newsfeat-mini__media,
-    .block-newsfeat--mosaic .newsfeat-mini:hover,
-    .block-newsfeat--mosaic .newsfeat-text:hover {
-        transform: none;
+@media (max-width: 560px) {
+    .block-newsfeat--mosaic .newsfeat-lead__over {
+        padding: 14px;
     }
 }
