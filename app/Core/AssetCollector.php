@@ -49,6 +49,15 @@ final class AssetCollector
         'hero_slides' => '/assets/css/blocks/hero.css',
     ];
 
+    /**
+     * Дополнительные стили конкретного блока. В отличие от частей темы они
+     * выводятся через renderStyles() и могут точечно переопределить базовую
+     * композицию, не раздувая общий публичный CSS-бандл.
+     */
+    private const BLOCK_CSS_MAP = [
+        'news_feature' => '/assets/css/blocks/news-feature.css',
+    ];
+
     /** @var array<string, bool> */
     private static array $themeParts = [];
 
@@ -71,6 +80,9 @@ final class AssetCollector
     {
         if (isset(self::THEME_PART_MAP[$key])) {
             self::$themeParts[$key] = true;
+        }
+        if (isset(self::BLOCK_CSS_MAP[$key])) {
+            self::requireCss('block-' . $key, self::BLOCK_CSS_MAP[$key]);
         }
     }
 
