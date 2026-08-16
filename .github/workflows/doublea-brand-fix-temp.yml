@@ -1,0 +1,190 @@
+name: DoubleA brand fix temp
+
+on:
+  push:
+    branches:
+      - chore/doublea-brand-cleanup
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: ${{ !contains(github.event.head_commit.message, '[doublea-brand-fix]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply branding cleanup
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          files = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')
+          skip = {
+              '.github/workflows/doublea-brand-audit-temp.yml',
+              '.github/workflows/doublea-brand-fix-temp.yml',
+          }
+
+          common = [
+              ('ArtStudio CMS', 'DoubleA'),
+              ('ASDR CMS', 'DoubleA'),
+              ('ASDR-CMS', 'DoubleA-CMS'),
+              ('ArtStudio', 'DoubleA'),
+              ('ArtStudio.UZ', 'DoubleA.UZ'),
+              ('artstudio.uz', 'doublea.uz'),
+              ('artstudio_test', 'doublea_test'),
+              ('artstudio_cms', 'doublea_cms'),
+              ('artstudio_restore', 'doublea_restore'),
+              ('artstudio-webp', 'doublea-webp'),
+              ('artstudio_bktest', 'doublea_bktest'),
+              ('artstudio:', 'doublea:'),
+              ('artstudio.conf', 'doublea.conf'),
+              ('/var/www/artstudio/public', '/var/www/doublea.uz/public'),
+              ('artstudio/', 'doublea/'),
+              ('artstudio_uz', 'doublea_uz'),
+              ('asdr.uz', 'doublea.uz'),
+          ]
+
+          changed = []
+          for name in files:
+              if not name or name in skip:
+                  continue
+              path = Path(name)
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except (UnicodeDecodeError, OSError):
+                  continue
+              original = text
+              for old, new in common:
+                  text = text.replace(old, new)
+              if name != 'app/Core/SecretBox.php':
+                  text = text.replace('asdr-cms', 'doublea-cms')
+              if text != original:
+                  path.write_text(text, encoding='utf-8')
+                  changed.append(name)
+
+          exact = {
+              'app/Core/AdminBrand.php': [
+                  ("public const DEFAULT_NAME = 'ASDR';", "public const DEFAULT_NAME = 'DoubleA';"),
+                  ('стандартный брендинг DoubleA.', 'стандартный брендинг DoubleA.'),
+              ],
+              'app/Controllers/Admin/ProfileController.php': [
+                  ("? $host : 'ASDR';", "? $host : 'DoubleA';"),
+              ],
+              'app/Controllers/Site/ManifestController.php': [
+                  ("Setting::get('site_name', 'ASDR')", "Setting::get('site_name', 'DoubleA')"),
+              ],
+              'app/Core/DigestDispatcher.php': [
+                  ("Setting::getLocalized('site_name', $lang, 'ASDR')", "Setting::getLocalized('site_name', $lang, 'DoubleA')"),
+              ],
+              'app/Views/errors/maintenance.php': [
+                  ("Setting::get('site_name', 'ASDR')", "Setting::get('site_name', 'DoubleA')"),
+              ],
+              'app/Views/site/_footer.php': [
+                  ("Setting::get('site_name', 'ASDR')", "Setting::get('site_name', 'DoubleA')"),
+              ],
+              'app/Views/site/_header.php': [
+                  ("Setting::getLocalized('site_name', \\App\\Core\\Locale::current(), 'ASDR')", "Setting::getLocalized('site_name', \\App\\Core\\Locale::current(), 'DoubleA')"),
+              ],
+              'tests/cases/63_admin_brand_test.php': [
+                  ("assert_same('ASDR', AdminBrand::name());", "assert_same('DoubleA', AdminBrand::name());"),
+                  ("assert_same('A', AdminBrand::letter());", "assert_same('D', AdminBrand::letter());"),
+              ],
+              'README.md': [
+                  ('**609 тестовых сценариев**', '**1056 тестовых сценариев**'),
+              ],
+              'composer.json': [
+                  ('"name": "asdr/cms"', '"name": "doublea/cms"'),
+              ],
+              'package.json': [
+                  ('"name": "asdr-browser-tests"', '"name": "doublea-browser-tests"'),
+              ],
+              'package-lock.json': [
+                  ('"name": "asdr-browser-tests"', '"name": "doublea-browser-tests"'),
+              ],
+              'docs/DEV.md': [
+                  ('https://github.com/artstudiouzb-gif/asdr.git', 'https://github.com/artstudiouzb-gif/asdr_v2.git'),
+                  ('cd asdr\n', 'cd asdr_v2\n'),
+                  ('asdr/\n', 'asdr_v2/\n'),
+                  ('file:///C:/Users/Ulugbek/Documents/Codex/2026-07-26/new-chat/work/asdr/app/Core/BlockTypeRegistry.php', '../app/Core/BlockTypeRegistry.php'),
+              ],
+              'WORK_COMPLETED.md': [
+                  ('Проект: ASDR', 'Проект: DoubleA'),
+                  ('https://github.com/artstudiouzb-gif/asdr/', 'https://github.com/artstudiouzb-gif/asdr_v2/'),
+                  ('`/workspace/scratch/b0aa492a0086/asdr`', '`asdr_v2/`'),
+              ],
+          }
+
+          for name, replacements in exact.items():
+              path = Path(name)
+              if not path.exists():
+                  continue
+              text = path.read_text(encoding='utf-8')
+              original = text
+              for old, new in replacements:
+                  text = text.replace(old, new)
+              if text != original:
+                  path.write_text(text, encoding='utf-8')
+                  if name not in changed:
+                      changed.append(name)
+
+          print(f'Changed {len(changed)} files')
+          for name in changed:
+              print(name)
+          PY
+
+      - name: Rebuild production assets
+        shell: bash
+        run: |
+          npm ci
+          npm run build:assets
+          npm run check:assets
+
+      - name: Run test suite
+        shell: bash
+        run: php tests/run.php
+
+      - name: Verify old visible branding is gone
+        shell: bash
+        run: |
+          set -o pipefail
+          bad_file="$(mktemp)"
+          git grep -n -I -E 'ArtStudio|ARTSTUDIO|artstudio\.uz|artstudio[_:-]|/artstudio/|artstudio\.conf|ASDR CMS|ASDR-CMS' -- . \
+            ':(exclude).github/workflows/doublea-brand-audit-temp.yml' \
+            ':(exclude).github/workflows/doublea-brand-fix-temp.yml' > "$bad_file" || true
+          if [ -s "$bad_file" ]; then
+            echo 'Forbidden visible branding remains:'
+            cat "$bad_file"
+            exit 1
+          fi
+          legacy="$(git grep -n -I 'asdr-cms' -- . \
+            ':(exclude)app/Core/SecretBox.php' \
+            ':(exclude).github/workflows/doublea-brand-audit-temp.yml' \
+            ':(exclude).github/workflows/doublea-brand-fix-temp.yml' || true)"
+          if [ -n "$legacy" ]; then
+            echo 'Legacy release branding remains:'
+            echo "$legacy"
+            exit 1
+          fi
+          echo 'Visible legacy branding audit passed.'
+          echo 'Compatibility namespace app/Core/SecretBox.php::asdr-cms| intentionally preserved.'
+
+      - name: Commit branding cleanup
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- . \
+            ':(exclude).github/workflows/doublea-brand-audit-temp.yml' \
+            ':(exclude).github/workflows/doublea-brand-fix-temp.yml'
+          if git diff --cached --quiet; then
+            echo 'No branding changes to commit.'
+            exit 0
+          fi
+          git commit -m "chore: complete DoubleA branding cleanup [doublea-brand-fix]"
+          git push origin HEAD:chore/doublea-brand-cleanup
