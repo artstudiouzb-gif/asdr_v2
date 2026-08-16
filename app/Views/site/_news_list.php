@@ -59,8 +59,6 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
                     <?php if ($categoryOf($featured) !== ''): ?><span class="news-category"><?= htmlspecialchars($categoryOf($featured), ENT_QUOTES) ?></span><?php endif; ?>
                 </span>
                 <h2 class="newslist-lead__title"><?= htmlspecialchars((string) $featured['title'], ENT_QUOTES) ?></h2>
-                <?php if (!empty($featured['excerpt'])): ?><span class="newslist-lead__excerpt"><?= htmlspecialchars(excerpt((string) $featured['excerpt'], 280), ENT_QUOTES) ?></span><?php endif; ?>
-                <span class="card-more"><?= htmlspecialchars(t('Читать подробнее'), ENT_QUOTES) ?><span class="card-more__arrow" aria-hidden="true">→</span></span>
             </span>
         </a>
     <?php endif; ?>
@@ -82,8 +80,6 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
                     <?php if ($categoryOf($item) !== ''): ?><span class="news-category"><?= htmlspecialchars($categoryOf($item), ENT_QUOTES) ?></span><?php endif; ?>
                 </span>
                 <h3 class="relnews-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
-                <?php if (!empty($item['excerpt'])): ?><span class="relnews-card__excerpt"><?= htmlspecialchars(excerpt((string) $item['excerpt'], 180), ENT_QUOTES) ?></span><?php endif; ?>
-                <span class="card-more"><?= htmlspecialchars(t('Читать подробнее'), ENT_QUOTES) ?><span class="card-more__arrow" aria-hidden="true">→</span></span>
             </a>
         <?php endforeach; ?>
     </div>
