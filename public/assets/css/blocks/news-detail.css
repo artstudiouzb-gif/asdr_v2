@@ -913,8 +913,6 @@ button.newsdetail-gallery__thumb:hover {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding: 0;
-    border: 0;
 }
 .newsdetail-card {
     border-color: color-mix(in srgb, var(--gov-border) 82%, transparent);
