@@ -55,12 +55,12 @@ jobs:
         run: npm ci
       - name: Rebuild production assets
         run: npm run build:assets
-      - name: Commit generated assets and remove temporary workflow
+      - name: Commit source changes and remove temporary workflow
         shell: bash
         run: |
           rm .github/workflows/tmp-news-index-feature-card.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/Controllers/Site/NewsController.php public/assets/css/blocks/news-feature.css public/assets/css/blocks/news-feature.min.css public/assets/js/blocks/news_feature.js public/assets/js/blocks/news_feature.min.js public/assets/asset-manifest.json .github/workflows/tmp-news-index-feature-card.yml
+          git add app/Controllers/Site/NewsController.php public/assets/css/blocks/news-feature.css public/assets/js/blocks/news_feature.js public/assets/asset-manifest.json .github/workflows/tmp-news-index-feature-card.yml
           git commit -m "refactor(news): use feature-card interaction in listing [asset-rebuild]"
           git push
