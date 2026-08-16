@@ -36,8 +36,8 @@ jobs:
 
           css_path = Path('public/assets/css/blocks/news-feature.css')
           css = css_path.read_text()
-          needle = "    .block-newsfeat--mosaic .newsfeat-text\n)"
-          replacement = "    .block-newsfeat--mosaic .newsfeat-text,\n    .newslist-lead,\n    .newslist-grid .relnews-card\n)"
+          needle = "    .block-newsfeat--mosaic .newsfeat-text"
+          replacement = "    .block-newsfeat--mosaic .newsfeat-text,\n    .newslist-lead,\n    .newslist-grid .relnews-card"
           count = css.count(needle)
           if count != 7:
               raise SystemExit(f'Expected 7 shared feature-card selector groups, got {count}')
