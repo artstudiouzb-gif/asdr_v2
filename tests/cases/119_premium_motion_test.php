@@ -45,12 +45,12 @@ test('Счётчики без стекла и поворота, новости �
     assert_contains('transform: translateY(-1px)', $govCss);
 });
 
-test('Медиакарточки не поднимаются при наведении', function (): void {
+test('Медиакарточки наследуют hover feature-card и сохраняют zoom обложки', function (): void {
     $govCss = theme_css();
 
-    assert_false(
-        (bool) preg_match('/[^{}]*\.mediacard[^{}]*:hover[^{}]*\{[^{}]*transform:\s*translateY/s', $govCss),
-        'У медиакарточки не должно быть вертикального сдвига'
+    assert_true(
+        (bool) preg_match('/[^{}]*\\.mediacard\\.mediacard[^{}]*:hover[^{}]*\\{[^{}]*transform:\\s*translateY\\(-4px\\)/s', $govCss),
+        'Медиакарточка должна использовать тот же подъём -4px, что и feature-card'
     );
     assert_contains('.mediacard:hover .mediacard__img', $govCss);
     assert_contains('transform: scale(1.05)', $govCss);
