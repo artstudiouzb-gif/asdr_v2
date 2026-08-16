@@ -1,0 +1,29 @@
+name: Temporary card lift patch
+
+on:
+  push:
+    branches:
+      - feat/card-hover-lift-setting
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: feat/card-hover-lift-setting
+
+      - name: Apply patch
+        run: python3 .github/scripts/card-hover-lift-patch.py
+
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/tmp-card-lift.yml .github/scripts/card-hover-lift-patch.py
+          git add app/Core/DesignSettings.php app/Core/SiteThemeCss.php app/Controllers/Admin/DesignController.php app/Views/admin/design/index.php public/assets/css/gov-theme.css public/assets/css/blocks/news-feature.css tests/cases/119_premium_motion_test.php
+          git commit -m "Add configurable card hover lift [card-lift-patch]"
+          git push origin HEAD:feat/card-hover-lift-setting
