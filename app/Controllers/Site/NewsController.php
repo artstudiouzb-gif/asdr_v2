@@ -58,9 +58,10 @@ final class NewsController
             return;
         }
 
-        // Список новостей строится на карточках .relnews-card, а они лежат в
-        // вынесенной части темы вместе со стилями детальной новости.
-        \App\Core\AssetCollector::requireThemePart('news_detail');
+        // Лента использует тот же feature-card interaction, что новости на
+        // главной: общие рамка, акцентный край, hover и spotlight. Регистрация
+        // news_feature заодно подключает стили .relnews-card, нужные контенту.
+        \App\Core\AssetCollector::requireJs('news_feature');
 
         View::render('site/news_index', $vars);
     }

@@ -11,7 +11,8 @@
     var lastEvent = null;
     var selector = '.block-newsfeat--mosaic .newsfeat-lead, '
         + '.block-newsfeat--mosaic .newsfeat-mini, '
-        + '.block-newsfeat--mosaic .newsfeat-text';
+        + '.block-newsfeat--mosaic .newsfeat-text, '
+        + '.newslist-lead, .newslist-grid .relnews-card';
 
     document.addEventListener('mousemove', function (event) {
         lastEvent = event;
