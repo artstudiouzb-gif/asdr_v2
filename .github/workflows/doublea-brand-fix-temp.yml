@@ -35,18 +35,16 @@ jobs:
               ('ASDR CMS', 'DoubleA'),
               ('ASDR-CMS', 'DoubleA-CMS'),
               ('ArtStudio', 'DoubleA'),
+              ('ARTSTUDIO', 'DOUBLEA'),
               ('ArtStudio.UZ', 'DoubleA.UZ'),
               ('artstudio.uz', 'doublea.uz'),
-              ('artstudio_test', 'doublea_test'),
-              ('artstudio_cms', 'doublea_cms'),
-              ('artstudio_restore', 'doublea_restore'),
-              ('artstudio-webp', 'doublea-webp'),
-              ('artstudio_bktest', 'doublea_bktest'),
+              ('artstudio_', 'doublea_'),
+              ('artstudio-', 'doublea-'),
               ('artstudio:', 'doublea:'),
               ('artstudio.conf', 'doublea.conf'),
               ('/var/www/artstudio/public', '/var/www/doublea.uz/public'),
+              ('/artstudio/', '/doublea/'),
               ('artstudio/', 'doublea/'),
-              ('artstudio_uz', 'doublea_uz'),
               ('asdr.uz', 'doublea.uz'),
           ]
 
@@ -71,7 +69,6 @@ jobs:
           exact = {
               'app/Core/AdminBrand.php': [
                   ("public const DEFAULT_NAME = 'ASDR';", "public const DEFAULT_NAME = 'DoubleA';"),
-                  ('стандартный брендинг DoubleA.', 'стандартный брендинг DoubleA.'),
               ],
               'app/Controllers/Admin/ProfileController.php': [
                   ("? $host : 'ASDR';", "? $host : 'DoubleA';"),
