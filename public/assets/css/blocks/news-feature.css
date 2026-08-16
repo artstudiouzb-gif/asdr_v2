@@ -49,7 +49,10 @@
     justify-content: flex-end;
     align-items: flex-start;
     gap: clamp(8px, .8vw, 12px);
-    padding: clamp(22px, 3vw, 42px);
+    /* Match the established lead/card content inset instead of enlarging it
+       with viewport width. This keeps the featured text aligned with the
+       compact cards below. */
+    padding: 22px;
     border: 0;
     border-radius: 0;
     background:
@@ -176,4 +179,10 @@
     border-radius: 0;
     font-size: var(--step-1);
     line-height: 1;
+}
+
+@media (max-width: 560px) {
+    .block-newsfeat--mosaic .newsfeat-lead__over {
+        padding: 14px;
+    }
 }
