@@ -113,21 +113,27 @@
     object-fit: cover;
 }
 
-/* Фото оформлены как карточки новостей: изображение до внешнего края карточки,
-   без второй внутренней рамки; текст имеет собственные отступы. */
-.mediacard--photo {
+/* Фото и видео используют одну геометрию карточки: обложка идёт до внешнего
+   края, а заголовок и дата живут в отдельной текстовой зоне снизу. У видео
+   поверх обложки остаются только play и таймкод. */
+.mediacard--photo,
+.mediacard--video {
     gap: 0;
     padding: 0;
     overflow: hidden;
 }
-.mediacard--photo .mediacard__media {
+.mediacard--photo .mediacard__media,
+.mediacard--video .mediacard__media {
     border-radius: 0;
     box-shadow: none;
 }
 .mediacard--photo .mediacard__play { display: none; }
-.mediacard--photo .mediacard__title { margin: 12px 14px 0; }
-.mediacard--photo .mediacard__title:last-child { margin-bottom: 14px; }
-.mediacard--photo .mediacard__date { margin: 4px 14px 14px; }
+.mediacard--photo .mediacard__title,
+.mediacard--video .mediacard__title { margin: 12px 14px 0; }
+.mediacard--photo .mediacard__title:last-child,
+.mediacard--video .mediacard__title:last-child { margin-bottom: 14px; }
+.mediacard--photo .mediacard__date,
+.mediacard--video .mediacard__date { margin: 4px 14px 14px; }
 
 .mediacard {
     box-shadow: var(--shadow-1, 0 1px 2px rgba(15, 23, 42, .06), 0 1px 3px rgba(15, 23, 42, .10));
