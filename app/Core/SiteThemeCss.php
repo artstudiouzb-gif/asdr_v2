@@ -24,6 +24,8 @@ final class SiteThemeCss
         $spacings = DesignSettings::semanticSpacings();
         ['body' => $font, 'heading' => $heading] = self::fontStacks();
         $styles = (array) ($headerConfig['styles'] ?? []);
+        $cardHoverLift = max(0, min(20, (int) ($designValues['card_hover_lift'] ?? DesignSettings::cardHoverLift())));
+        $cardHoverTranslate = $cardHoverLift === 0 ? '0px' : '-' . $cardHoverLift . 'px';
 
         $variables = [
             '--color-primary' => $primary,
@@ -72,6 +74,7 @@ final class SiteThemeCss
             '--space-small' => $spacings['space_small'],
             '--space-premium' => $spacings['space_premium'],
             '--space-max' => $spacings['space_max'],
+            '--feature-card-hover-lift' => $cardHoverTranslate,
             '--font-family' => $font,
             '--font-heading' => $heading,
             // Рукописная роль объявляется всегда: не выбран шрифт — переменная

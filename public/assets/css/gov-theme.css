@@ -6760,7 +6760,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .feature-card.block-advantages__item:hover,
 .feature-card.contact-card:hover,
 .feature-card.act-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(var(--feature-card-hover-lift, -4px));
     border-color: var(--color-accent, var(--gov-teal));
     border-bottom-color: var(--color-accent, var(--gov-teal)) !important;
     background: var(--gov-surface);

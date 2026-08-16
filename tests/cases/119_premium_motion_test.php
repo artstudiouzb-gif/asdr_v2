@@ -49,9 +49,17 @@ test('Медиакарточки наследуют hover feature-card и сох
     $govCss = theme_css();
 
     assert_true(
-        (bool) preg_match('/[^{}]*\\.mediacard\\.mediacard[^{}]*:hover[^{}]*\\{[^{}]*transform:\\s*translateY\\(-4px\\)/s', $govCss),
-        'Медиакарточка должна использовать тот же подъём -4px, что и feature-card'
+        (bool) preg_match('/[^{}]*\\.mediacard\\.mediacard[^{}]*:hover[^{}]*\\{[^{}]*transform:\\s*translateY\\(var\\(--feature-card-hover-lift, -4px\\)\\)/s', $govCss),
+        'Медиакарточка должна использовать настраиваемый подъём feature-card'
     );
     assert_contains('.mediacard:hover .mediacard__img', $govCss);
     assert_contains('transform: scale(1.05)', $govCss);
+});
+
+test('Подъём карточек допускает отключение и пользовательское значение', function (): void {
+    assert_true(\App\Core\DesignSettings::normalizeCardHoverLift('0') === 0, '0 должен отключать подъём');
+    assert_true(\App\Core\DesignSettings::normalizeCardHoverLift('4') === 4, '4px — стандартное значение');
+    assert_true(\App\Core\DesignSettings::normalizeCardHoverLift('11') === 11, 'Пользовательское значение должно сохраняться');
+    assert_true(\App\Core\DesignSettings::normalizeCardHoverLift('99') === 20, 'Значение ограничивается безопасным максимумом');
+    assert_true(\App\Core\DesignSettings::normalizeCardHoverLift('-2') === 4, 'Некорректное значение возвращает стандартные 4px');
 });

@@ -585,9 +585,20 @@ foreach ($options as $key => $opt) {
         <section class="design-section">
             <h2 class="design-section__title">Настройки компонентов и страниц</h2>
             <?php
+            $cardHoverLift = \App\Core\DesignSettings::cardHoverLift();
             $newsPaddingTop = preg_replace('/px$/', '', \App\Core\DesignSettings::newsDetailPaddingTop());
             $newsPaddingBottom = preg_replace('/px$/', '', \App\Core\DesignSettings::newsDetailPaddingBottom());
             ?>
+            <div class="design-opt">
+                <div class="design-opt__label">
+                    <span>Подъём карточек при наведении</span>
+                    <small>Вертикальный подъём feature-card, проектов, новостей и медиатеки. 0 px отключает движение; текущее стандартное значение — 4 px.</small>
+                </div>
+                <div class="design-opt__choices">
+                    <input class="u-inline-e73ebf4146" type="number" name="card_hover_lift" min="0" max="20" step="1" inputmode="numeric"
+                           value="<?= htmlspecialchars((string) $cardHoverLift, ENT_QUOTES) ?>" data-design-preview-field>
+                </div>
+            </div>
             <div class="design-opt">
                 <div class="design-opt__label">
                     <span>Страница новости — отступ сверху</span>
