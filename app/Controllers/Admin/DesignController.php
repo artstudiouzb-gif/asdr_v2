@@ -77,6 +77,12 @@ final class DesignController
                 DesignSettings::normalizeRadius((string) $preview['radius_custom'])
             );
         }
+        if (array_key_exists('card_hover_lift', $preview)) {
+            Setting::overrideInMemory(
+                'design_card_hover_lift',
+                (string) DesignSettings::normalizeCardHoverLift((string) $preview['card_hover_lift'])
+            );
+        }
         foreach (['top', 'bottom'] as $edge) {
             $key = 'newsdetail_padding_' . $edge;
             if (array_key_exists($key, $preview)) {

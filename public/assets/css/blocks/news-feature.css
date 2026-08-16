@@ -181,7 +181,7 @@
  *
  * Do not redesign `feature-card`. Copy its existing Directions-card shell to
  * the other homepage card families: same border, 3px accent edge, shadow,
- * -4px hover elevation, timing and 220px mouse-following spotlight.
+ * configurable hover elevation, timing and 220px mouse-following spotlight.
  * -------------------------------------------------------------------------- */
 :is(
     .project-card.project-card,
@@ -240,7 +240,7 @@
     ):hover {
         background: var(--gov-surface);
         box-shadow: 0 16px 36px rgba(37, 99, 235, .12);
-        transform: translateY(-4px);
+        transform: translateY(var(--feature-card-hover-lift, -4px));
         border-color: var(--color-accent, var(--gov-teal));
         border-bottom-color: var(--color-accent, var(--gov-teal));
     }

@@ -306,6 +306,7 @@ final class DesignSettings
             $stored = (string) Setting::get('design_' . $key, '');
             $values[$key] = isset($opt['choices'][$stored]) ? $stored : $opt['default'];
         }
+        $values['card_hover_lift'] = (string) self::cardHoverLift();
 
         return $values;
     }
@@ -404,6 +405,22 @@ final class DesignSettings
     public static function normalizeRadius(string $raw): string
     {
         return self::normalizePixelValue($raw, 0, 48);
+    }
+
+    /** Подъём feature-card и карточек, наследующих его hover, 0–20px. */
+    public static function cardHoverLift(): int
+    {
+        return self::normalizeCardHoverLift((string) Setting::get('design_card_hover_lift', '4'));
+    }
+
+    public static function normalizeCardHoverLift(string $raw): int
+    {
+        $raw = trim($raw);
+        if ($raw === '' || preg_match('/^\d+$/', $raw) !== 1) {
+            return 4;
+        }
+
+        return max(0, min(20, (int) $raw));
     }
 
     /**
@@ -778,6 +795,12 @@ final class DesignSettings
         }
         if (array_key_exists('radius_custom', $input)) {
             Setting::set('design_radius_custom', self::normalizeRadius((string) $input['radius_custom']));
+        }
+        if (array_key_exists('card_hover_lift', $input)) {
+            Setting::set(
+                'design_card_hover_lift',
+                (string) self::normalizeCardHoverLift((string) $input['card_hover_lift'])
+            );
         }
         if (array_key_exists('newsdetail_padding_top', $input)) {
             Setting::set(
