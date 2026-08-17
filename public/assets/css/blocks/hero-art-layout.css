@@ -1,10 +1,7 @@
 /*
- * Foreground image/logo layout for Hero slides.
- *
- * This is the single sizing/layout layer for foreground Hero artwork. The
- * legacy max-height caps in hero.css remain harmless compatibility limits for
- * the three presets; explicit widths below prevent SVG/PNG from collapsing in
- * an auto grid track. Custom mode deliberately removes that height cap.
+ * Side layout for the foreground Hero image/logo plus non-default CTA image
+ * modes. Artwork width itself has one source: HeroRenderer's validated width
+ * attribute; this file never duplicates those preset/custom numbers.
  */
 
 .hero__text:has(> .hero__art--left),
@@ -52,32 +49,9 @@
     justify-self: end;
 }
 
-/* Presets have an explicit width: max-height alone let wide SVG logos shrink
-   unexpectedly when the side column was sized as `auto`. */
-.hero__art--small img {
-    width: 120px;
-    max-width: 100%;
-}
 
-.hero__art--medium img {
-    width: 220px;
-    max-width: 100%;
-}
-
-.hero__art--large img {
-    width: 360px;
-    max-width: 100%;
-}
-
-.hero__art--custom img {
-    max-width: 100%;
-    max-height: none;
-    height: auto;
-}
-
-/* A custom CTA image has three explicit modes. The default icon mode keeps
-   hero.css's 20×20 contract. Fill mode uses the button's whole inner height;
-   custom mode uses the safe width emitted by HeroRenderer. */
+/* Default icon mode is sized by HeroRenderer at 20×20. Fill/custom are the
+   only CSS overrides, so there is no second generic sizing rule to conflict. */
 .hero__cta--image-fill {
     padding-block: 0;
 }
@@ -87,20 +61,20 @@
 }
 
 .hero__cta--image-fill .hero__cta-icon {
-    align-self: stretch;
-    align-items: stretch;
+    align-self: center;
+    align-items: center;
 }
 
 .hero__cta--image-fill .hero__cta-icon img {
     width: auto;
-    height: 100%;
+    height: 44px;
     max-width: 180px;
     object-fit: contain;
 }
 
 .hero__cta--image-custom .hero__cta-icon img {
     height: auto;
-    max-height: 48px;
+    max-height: none;
     object-fit: contain;
 }
 

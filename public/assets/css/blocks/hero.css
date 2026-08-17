@@ -354,10 +354,7 @@
 }
 
 .hero__art { display: block; margin-top: var(--hero-gap-art); }
-.hero__art img { max-width: 100%; height: auto; }
-.hero__art--small img { max-height: 64px; }
-.hero__art--medium img { max-height: 120px; }
-.hero__art--large img { max-height: 200px; }
+.hero__art img { max-width: 100%; height: auto; object-fit: contain; }
 
 /* --- Кнопки --- */
 .hero__actions {

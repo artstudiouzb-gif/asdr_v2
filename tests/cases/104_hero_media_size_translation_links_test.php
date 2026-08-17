@@ -36,9 +36,11 @@ test('Hero editor: one sizing system and translated action URLs', function (): v
 
     assert_contains('hero__cta--image-', $renderer, 'renderer emits CTA image mode');
     assert_contains("'custom' => (int) $d['art_width']", $renderer, 'renderer uses custom logo width');
-    assert_not_contains('width: 20px; height: 20px;', $baseCss, 'base CSS no longer forces every CTA image to 20px');
-    assert_contains('.hero__art--large img', $layoutCss, 'single artwork sizing layer');
-    assert_contains('width: 360px;', $layoutCss, 'large artwork has stable width');
+    assert_not_contains('.hero__art--large img { max-height:', $baseCss, 'legacy max-height artwork sizing is removed');
+    assert_not_contains('.hero__art--large img', $layoutCss, 'side-layout CSS does not duplicate artwork width presets');
+    assert_contains("'large' => 360", $renderer, 'large artwork width has one renderer source');
+    assert_contains('.hero__cta--image-fill .hero__cta-icon img', $layoutCss, 'fill mode has a dedicated override');
+    assert_contains('height: 44px;', $layoutCss, 'fill mode occupies the button inner height');
 
     foreach (['cta_url', 'cta2_url', 'link_url'] as $field) {
         assert_contains("[{$field}]", $form, "translation UI includes {$field}");

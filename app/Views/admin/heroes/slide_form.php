@@ -157,7 +157,7 @@ $customDuration = (int) $data['duration'];
 $effectiveDuration = $customDuration > 0 ? $customDuration : $globalDuration;
 $durationState = $customDuration > 0
     ? $customDuration . ' с · своё значение'
-    : $globalDuration . ' с · из обложки';
+    : $globalDuration . ' с · общее значение';
 
 $artState = $hasArt
     ? ($artPositionLabels[(string) $data['art_position']] ?? 'Задана') . ' · ' . ($artSizeLabels[(string) $data['art_size']] ?? '')
@@ -603,7 +603,7 @@ $translationState = $hasTranslations ? 'Есть переводы' : 'Испол
                 <?php endforeach; ?>
             <?php echo $group(
                 'Переводы',
-                'только текстовые поля',
+                'текст и ссылки',
                 $translationState,
                 (string) ob_get_clean(),
                 $hasTranslations,
