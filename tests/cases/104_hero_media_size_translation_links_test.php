@@ -25,6 +25,7 @@ test('Hero editor: one sizing system and translated action URLs', function (): v
     $baseCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
     $translations = (string) file_get_contents(APP_ROOT . '/app/Models/HeroSlideTranslation.php');
     $slide = (string) file_get_contents(APP_ROOT . '/app/Models/HeroSlide.php');
+    $migration = (string) file_get_contents(APP_ROOT . '/database/migrations/2026_08_17_hero_translation_links.sql');
 
     assert_contains("'custom' => 'Свой размер'", $form, 'logo custom size');
     assert_contains('name="art_width"', $form, 'logo width field');
@@ -42,9 +43,11 @@ test('Hero editor: one sizing system and translated action URLs', function (): v
     assert_contains('.hero__cta--image-fill .hero__cta-icon img', $layoutCss, 'fill mode has a dedicated override');
     assert_contains('height: 44px;', $layoutCss, 'fill mode occupies the button inner height');
 
+    assert_contains('-- @post-schema', $migration, 'translation link migration runs after canonical schema');
     foreach (['cta_url', 'cta2_url', 'link_url'] as $field) {
         assert_contains("[{$field}]", $form, "translation UI includes {$field}");
         assert_contains("'{$field}'", $translations, "translation model stores {$field}");
         assert_contains("'{$field}' => '{$field}'", $slide, "display applies {$field}");
+        assert_contains("ADD COLUMN {$field}", $migration, "migration adds {$field}");
     }
 });
