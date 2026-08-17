@@ -21,7 +21,6 @@ test('Admin media: единый picker, 5x3 и progressive «Показать е
     assert_true(is_string($metadataLegacyCss));
     assert_true(is_string($dropzone));
 
-    assert_contains('aspect-ratio: 16 / 9', $workflowCss);
     assert_contains("image.loading = 'lazy'", $workflowJs);
 
     // Фотогалерея обязана использовать тот же MediaPicker, что одиночные поля.
@@ -40,6 +39,11 @@ test('Admin media: единый picker, 5x3 и progressive «Показать е
     assert_not_contains('applyPagination(', $workflowJs);
     assert_not_contains('setupPagedGrid(', $workflowJs);
 
+    // Workflow-слой больше вообще не вмешивается в геометрию media picker.
+    assert_not_contains('.media-modal__grid', $workflowCss);
+    assert_not_contains('.gallery-media-modal', $workflowCss);
+    assert_not_contains('media-client-pager', $workflowCss);
+
     // Progressive loading применяется только к основной сетке media-modal.
     assert_contains('var STEP = 15', $loadMore);
     assert_contains("button.textContent = 'Показать ещё'", $loadMore);
@@ -48,12 +52,13 @@ test('Admin media: единый picker, 5x3 и progressive «Показать е
     assert_not_contains('gallery-media-modal__grid', $loadMore);
     assert_not_contains('media-client-pager', $loadMore);
 
-    // Панель «Показать ещё» вынесена из CSS Grid, поэтому новые 15 фото
-    // образуют обычные новые ряды и больше не перекрываются второй системой.
+    // Единственный слой геометрии медиабиблиотеки.
+    assert_contains('aspect-ratio: 16 / 9', $unifiedCss);
     assert_contains('grid-template-columns: repeat(5, minmax(0, 1fr))', $unifiedCss);
     assert_contains('grid-auto-rows: max-content', $unifiedCss);
     assert_contains('.media-loadmore-bar', $unifiedCss);
     assert_not_contains('media-client-pager', $unifiedCss);
+    assert_not_contains('gallery-media-modal', $unifiedCss);
 
     assert_contains('news-gallery-editor', $workflowJs);
     assert_contains('Добавить фотографии', $workflowJs);
