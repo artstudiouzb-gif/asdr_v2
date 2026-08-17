@@ -36,15 +36,8 @@
     display: none !important;
 }
 
-/* Старый page-pager остаётся подключён как безопасный fallback внутри
-   workflow-слоя, но визуально и геометрически больше не участвует в сетке. */
-.media-modal__grid > .media-client-pager,
-.media-client-pager--legacy-hidden {
-    display: none !important;
-}
-
-/* Progressive control lives outside the grid. Therefore adding 15 more cards
-   only adds normal rows to the scroll content and never overlays thumbnails. */
+/* Progressive control lives outside the grid. Adding 15 more cards therefore
+   adds ordinary rows to the same scroll area and cannot overlap thumbnails. */
 .media-loadmore-bar {
     flex: 0 0 auto;
     display: flex;
