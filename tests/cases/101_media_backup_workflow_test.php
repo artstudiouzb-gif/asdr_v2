@@ -24,6 +24,7 @@ test('Admin media: превью 16:9, выдача по 15 и progressive «По
     assert_contains("pick.click()", $dropzone);
     assert_contains('Нажмите, чтобы выбрать из медиабиблиотеки, или перетащите фото сюда.', $dropzone);
     assert_contains('removeDuplicateHints', $dropzone);
+    assert_contains('setDragState(true)', $dropzone);
 });
 
 test('Admin backup: восстановление защищено подтверждением и страховочным бэкапом', function (): void {
