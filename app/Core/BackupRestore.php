@@ -106,9 +106,11 @@ final class BackupRestore
                 try {
                     self::rollbackSwap($swap);
                 } catch (\Throwable $swapError) {
-                    Logger::error('Не удалось откатить каталог uploads после ошибки restore', [
-                        'message' => $swapError->getMessage(),
-                    ]);
+                    Logger::error(
+                        'Не удалось откатить каталог uploads после ошибки restore',
+                        'error',
+                        ['message' => $swapError->getMessage()]
+                    );
                 }
             }
 
