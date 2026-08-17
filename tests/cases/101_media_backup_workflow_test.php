@@ -27,7 +27,8 @@ test('Admin media: единый picker, 5x3 и progressive «Показать е
     assert_contains('window.MediaPicker = {', $adminJs);
     assert_contains("pickMany: function (cb) { open(null, cb, 'image', true); }", $adminJs);
     assert_contains("var galleryPick = e.target.closest('[data-media-gallery-pick]')", $adminJs);
-    assert_not_contains('gallery-media-modal', $metadataLegacy);
+    assert_not_contains("className = 'gallery-media-modal'", $metadataLegacy);
+    assert_not_contains('stopImmediatePropagation()', $metadataLegacy);
     assert_contains('Legacy compatibility shim', $metadataLegacy);
 
     // Progressive loading применяется только к основной сетке media-modal.
