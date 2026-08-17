@@ -36,7 +36,7 @@ test('Hero editor: one sizing system and translated action URLs', function (): v
     assert_contains('Использовать общую настройку обложки', $form, 'inheritance wording is explicit');
 
     assert_contains('hero__cta--image-', $renderer, 'renderer emits CTA image mode');
-    assert_contains("'custom' => (int) $d['art_width']", $renderer, 'renderer uses custom logo width');
+    assert_contains("'custom' => (int) \$d['art_width']", $renderer, 'renderer uses custom logo width');
     assert_not_contains('.hero__art--large img { max-height:', $baseCss, 'legacy max-height artwork sizing is removed');
     assert_not_contains('.hero__art--large img', $layoutCss, 'side-layout CSS does not duplicate artwork width presets');
     assert_contains("'large' => 360", $renderer, 'large artwork width has one renderer source');
