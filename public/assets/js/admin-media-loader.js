@@ -52,11 +52,15 @@
     loadStyle('admin-workflow-fixes.css');
 
     // admin.js остаётся основным скриптом. Мост загружается строго после него,
-    // а финальный workflow-слой — после моста, чтобы не дублировать загрузку и
-    // только улучшать уже существующие медиакомпоненты.
+    // workflow улучшает существующие компоненты; затем подключаем интерактивную
+    // drop-zone галереи и progressive «Показать ещё» для медиабиблиотеки.
     load('admin.js', function () {
         load('admin-media-bridge.js', function () {
-            load('admin-workflow-fixes.js');
+            load('admin-workflow-fixes.js', function () {
+                load('admin-gallery-dropzone.js', function () {
+                    load('admin-media-loadmore.js');
+                });
+            });
         });
     });
 })();
