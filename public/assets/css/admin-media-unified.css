@@ -1,0 +1,96 @@
+/* Unified admin media picker: one grid for single and multiple selection. */
+
+.media-modal__grid {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    grid-auto-flow: row;
+    grid-auto-rows: max-content;
+    align-content: start;
+    gap: 12px !important;
+    padding: 16px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-gutter: stable;
+    overscroll-behavior: contain;
+}
+
+.media-modal__item {
+    width: 100%;
+    min-width: 0;
+    min-height: 0 !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9 !important;
+}
+
+.media-modal__item img {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+    object-fit: cover !important;
+}
+
+.media-modal__item[hidden] {
+    display: none !important;
+}
+
+/* Старый page-pager остаётся подключён как безопасный fallback внутри
+   workflow-слоя, но визуально и геометрически больше не участвует в сетке. */
+.media-modal__grid > .media-client-pager,
+.media-client-pager--legacy-hidden {
+    display: none !important;
+}
+
+/* Progressive control lives outside the grid. Therefore adding 15 more cards
+   only adds normal rows to the scroll content and never overlays thumbnails. */
+.media-loadmore-bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 50px;
+    padding: 8px 16px;
+    border-top: 1px solid var(--admin-border, #dce3ed);
+    background: var(--admin-surface, #fff);
+}
+
+.media-loadmore-bar[hidden] {
+    display: none !important;
+}
+
+.media-loadmore-bar__status {
+    color: var(--admin-muted, #64748b);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.media-loadmore-bar__button {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 900px) {
+    .media-modal__grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 680px) {
+    .media-modal__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        padding: 10px !important;
+    }
+
+    .media-loadmore-bar {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .media-loadmore-bar__button {
+        width: 100%;
+    }
+}
