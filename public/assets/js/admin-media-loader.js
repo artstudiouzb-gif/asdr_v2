@@ -27,12 +27,16 @@
         }
     }
 
-    function loadStyle(fileName) {
-        if (document.querySelector('link[data-admin-workflow-fixes]')) { return; }
+    function loadStyle(fileName, marker) {
+        var selector = 'link[data-admin-layer="' + marker + '"]';
+        if (document.querySelector(selector)) { return; }
         var link = document.createElement('link');
         link.rel = 'stylesheet';
         link.href = styleUrl(fileName);
-        link.setAttribute('data-admin-workflow-fixes', '');
+        link.setAttribute('data-admin-layer', marker);
+        if (marker === 'workflow') {
+            link.setAttribute('data-admin-workflow-fixes', '');
+        }
         document.head.appendChild(link);
     }
 
@@ -49,11 +53,12 @@
         document.head.appendChild(script);
     }
 
-    loadStyle('admin-workflow-fixes.css');
+    loadStyle('admin-workflow-fixes.css', 'workflow');
+    loadStyle('admin-media-unified.css', 'media-unified');
 
-    // admin.js остаётся основным скриптом. Мост загружается строго после него,
-    // workflow улучшает существующие компоненты; затем подключаем интерактивную
-    // drop-zone галереи и progressive «Показать ещё» для медиабиблиотеки.
+    // admin.js — единственный источник логики выбора медиа, включая
+    // MediaPicker.pickMany() для фотогалереи. Остальные слои только улучшают
+    // загрузку, представление галереи и progressive «Показать ещё».
     load('admin.js', function () {
         load('admin-media-bridge.js', function () {
             load('admin-workflow-fixes.js', function () {
