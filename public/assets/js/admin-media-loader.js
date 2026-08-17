@@ -17,6 +17,25 @@
         }
     }
 
+    function styleUrl(fileName) {
+        try {
+            var url = new URL('../css/' + fileName, currentUrl);
+            url.search = version.replace(/^\?/, '');
+            return url.toString();
+        } catch (error) {
+            return '/assets/css/' + fileName + version;
+        }
+    }
+
+    function loadStyle(fileName) {
+        if (document.querySelector('link[data-admin-workflow-fixes]')) { return; }
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = styleUrl(fileName);
+        link.setAttribute('data-admin-workflow-fixes', '');
+        document.head.appendChild(link);
+    }
+
     function load(fileName, done) {
         var script = document.createElement('script');
         script.src = siblingUrl(fileName);
@@ -30,9 +49,14 @@
         document.head.appendChild(script);
     }
 
+    loadStyle('admin-workflow-fixes.css');
+
     // admin.js остаётся основным скриптом. Мост загружается строго после него,
-    // чтобы переиспользовать уже существующую медиабиблиотеку и её модальное окно.
+    // а финальный workflow-слой — после моста, чтобы не дублировать загрузку и
+    // только улучшать уже существующие медиакомпоненты.
     load('admin.js', function () {
-        load('admin-media-bridge.js');
+        load('admin-media-bridge.js', function () {
+            load('admin-workflow-fixes.js');
+        });
     });
 })();
