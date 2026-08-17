@@ -14,9 +14,9 @@ use App\Core\Video;
  * Поля одного слайда обложки.
  *
  * Правило пустого значения: у настроек оформления пустая строка означает
- * «как у обложки», а не «выключено». Так редактор задаёт затемнение или свою
- * раскладку там, где они нужны (светлое фото, вертикальный кадр), не трогая
- * остальные слайды. Явное «нет» у затемнения — значение `none`.
+ * «использовать общую настройку обложки», а не «выключено». Так редактор
+ * задаёт исключения только для конкретного слайда. Явное «нет» у затемнения
+ * — значение `none`.
  */
 final class HeroSlideData
 {
@@ -26,6 +26,9 @@ final class HeroSlideData
     public const MOBILE_MEDIA = ['desktop', 'mobile_video', 'image'];
 
     public const CTA_STYLES = ['primary', 'secondary', 'ghost', 'link'];
+
+    /** Как отображать свою SVG/PNG-картинку внутри CTA. */
+    public const CTA_IMAGE_MODES = ['icon', 'fill', 'custom'];
 
     /** Привязка фоновой надписи к краю; точное место доводится смещением. */
     public const WATERMARK_X = ['left', 'center', 'right'];
@@ -52,27 +55,15 @@ final class HeroSlideData
             'subtitle' => '',
 
             // --- Фоновая надпись (крупное слово за контентом) ---
-            // Декорация, но декорация из текста: переводится наравне с
-            // заголовком и прячется от диктора, иначе он прочитает её
-            // посреди заголовка. Размер задан в vw — она должна расти вместе
-            // с экраном, а не со шкалой шрифтов (шкала для читаемого текста).
             'watermark' => '',
-            // Размер — проценты ширины экрана (vw). Числом, а не набором
-            // «средняя/крупная»: нужный кегль зависит от длины слова, и
-            // угадать его пресетом заранее нельзя.
             'watermark_size' => 22,
-            // Привязка к краю плюс смещение в процентах от размера надписи:
-            // край задаёт грубо, смещение доводит до места.
             'watermark_x' => 'center',
             'watermark_y' => 'middle',
             'watermark_dx' => 0,
             'watermark_dy' => 0,
             'watermark_opacity' => 12,
             'watermark_style' => 'fill',
-            // Толщина контура в пикселях; при заливке не используется.
             'watermark_stroke' => 2,
-            // Пусто — цвет текста обложки: надпись остаётся видимой на любой
-            // схеме, а не только на той, под которую её подобрали.
             'watermark_color' => '',
             'watermark_font' => 'heading',
 
@@ -87,8 +78,6 @@ final class HeroSlideData
             'video_mobile_url' => '',
             'youtube_url' => '',
             'youtube_id' => '',
-            // Постер обязателен для любого видео: он же кадр до старта, он же
-            // замена, когда автовоспроизведение заблокировано браузером.
             'poster' => '',
             'mobile_media' => 'image',
 
@@ -96,21 +85,21 @@ final class HeroSlideData
             'link_url' => '',
             'link_new_tab' => false,
 
-            // --- Цвет (пусто = как у обложки) ---
+            // --- Цвет (пусто = общая настройка обложки) ---
             'scheme' => '',
             'scheme_bg' => '',
             'scheme_text' => '',
             'scheme_accent' => '',
             'content_scheme' => '',
 
-            // --- Затемнение и подложка (пусто = как у обложки) ---
+            // --- Затемнение и подложка (пусто = общая настройка) ---
             'overlay' => '',
             'overlay_color' => '',
             'overlay_opacity' => -1,
             'overlay_direction' => '',
             'panel' => '',
 
-            // --- Раскладка (пусто = как у обложки) ---
+            // --- Раскладка (пусто = общая настройка) ---
             'text_position' => '',
             'text_align_y' => '',
             'text_position_mobile' => '',
@@ -119,9 +108,6 @@ final class HeroSlideData
             'subtitle_size' => '',
             'title_size_mobile' => '',
             'subtitle_size_mobile' => '',
-            // Отступ сверху у части текста. Пусто — «как у обложки»;
-            // 0 — значимое значение «прижать вплотную», поэтому пустая
-            // строка и ноль здесь разное.
             'gap_title' => '',
             'gap_subtitle' => '',
             'gap_actions' => '',
@@ -133,10 +119,9 @@ final class HeroSlideData
             'cta_url' => '',
             'cta_style' => 'primary',
             'cta_icon' => '',
-            // Своя картинка кнопки (SVG/PNG). Задана — побеждает иконку из
-            // набора: выбирают её осознанно, ради фирменного знака, которого
-            // в Tabler нет.
             'cta_image' => '',
+            'cta_image_mode' => 'icon',
+            'cta_image_width' => 80,
             'cta_new_tab' => false,
             'cta2_enabled' => false,
             'cta2_text' => '',
@@ -144,6 +129,8 @@ final class HeroSlideData
             'cta2_style' => 'ghost',
             'cta2_icon' => '',
             'cta2_image' => '',
+            'cta2_image_mode' => 'icon',
+            'cta2_image_width' => 80,
             'cta2_new_tab' => false,
 
             // --- Картинка поверх фона (эмблема, логотип программы) ---
@@ -151,19 +138,12 @@ final class HeroSlideData
             'art_alt' => '',
             'art_position' => 'above',
             'art_size' => 'medium',
+            'art_width' => 320,
 
             // --- Показ ---
-            // Своя длительность показа, секунды. 0 — «как у обложки»: у
-            // текстового слайда и у слайда с плотной инфографикой разное время
-            // чтения, и одним интервалом на всю карусель это не выражается.
             'duration' => 0,
 
             // --- Свой CSS-класс ---
-            // Аварийный выход для оформления, которого нет в полях: класс
-            // вешается на слайд, а стили пишутся в «Свой CSS» страницы
-            // (только супер-админ). Класс на слайде, а не на заголовке, —
-            // из него достаётся и заголовок (`.мой-класс .hero__title`),
-            // и всё остальное, а поле одно.
             'css_class' => '',
 
             // --- Окно показа слайда ---
@@ -196,8 +176,6 @@ final class HeroSlideData
         $video = BlockDataInput::safeMedia($input['video_url'] ?? '');
         $image = BlockDataInput::safeMedia($input['image'] ?? '');
 
-        // Заполненное медиа — явное намерение редактора, даже если список
-        // «Фон» остался в положении «без фона».
         $mediaType = BlockDataInput::enum($input, 'media_type', self::MEDIA_TYPES, 'none');
         if ($mediaType === 'none') {
             $mediaType = $youtubeId !== null ? 'youtube' : ($video !== '' ? 'video' : ($image !== '' ? 'image' : 'none'));
@@ -229,9 +207,6 @@ final class HeroSlideData
             'video_url' => $video,
             'video_mobile_url' => BlockDataInput::safeMedia($input['video_mobile_url'] ?? ''),
             'youtube_url' => $youtubeUrl,
-            // Идентификатор ролика вычисляем при сохранении: разбирать ссылку
-            // на каждом рендере страницы незачем, а ссылку редактор вводит в
-            // любом из привычных видов (watch?v=…, youtu.be/…, /embed/…).
             'youtube_id' => $youtubeId ?? '',
             'poster' => BlockDataInput::safeMedia($input['poster'] ?? ''),
             'mobile_media' => BlockDataInput::enum($input, 'mobile_media', self::MOBILE_MEDIA, 'image'),
@@ -247,8 +222,6 @@ final class HeroSlideData
 
             'overlay' => BlockDataInput::enum($input, 'overlay', HeroSettings::OVERLAYS, ''),
             'overlay_color' => BlockDataInput::optionalColor($input, 'overlay_color'),
-            // -1 — «непрозрачность как у обложки»; 0 это осмысленное значение
-            // (затемнение выключено ползунком), поэтому пустоту им не заменяем.
             'overlay_opacity' => self::optionalPercent($input['overlay_opacity'] ?? null),
             'overlay_direction' => BlockDataInput::enum($input, 'overlay_direction', HeroSettings::OVERLAY_DIRECTIONS, ''),
             'panel' => BlockDataInput::enum($input, 'panel', ['on', 'off'], ''),
@@ -272,6 +245,8 @@ final class HeroSlideData
             'cta_style' => BlockDataInput::enum($input, 'cta_style', self::CTA_STYLES, 'primary'),
             'cta_icon' => Icon::cleanName($input['cta_icon'] ?? ''),
             'cta_image' => BlockDataInput::safeMedia($input['cta_image'] ?? ''),
+            'cta_image_mode' => BlockDataInput::enum($input, 'cta_image_mode', self::CTA_IMAGE_MODES, 'icon'),
+            'cta_image_width' => self::ranged($input['cta_image_width'] ?? null, 20, 400, 80),
             'cta_new_tab' => !empty($input['cta_new_tab']),
             'cta2_enabled' => !empty($input['cta2_enabled']),
             'cta2_text' => BlockDataInput::plain($input, 'cta2_text', $locale),
@@ -279,29 +254,24 @@ final class HeroSlideData
             'cta2_style' => BlockDataInput::enum($input, 'cta2_style', self::CTA_STYLES, 'ghost'),
             'cta2_icon' => Icon::cleanName($input['cta2_icon'] ?? ''),
             'cta2_image' => BlockDataInput::safeMedia($input['cta2_image'] ?? ''),
+            'cta2_image_mode' => BlockDataInput::enum($input, 'cta2_image_mode', self::CTA_IMAGE_MODES, 'icon'),
+            'cta2_image_width' => self::ranged($input['cta2_image_width'] ?? null, 20, 400, 80),
             'cta2_new_tab' => !empty($input['cta2_new_tab']),
 
             'art_image' => BlockDataInput::safeMedia($input['art_image'] ?? ''),
             'art_alt' => BlockDataInput::trimmed($input, 'art_alt'),
             'art_position' => BlockDataInput::enum($input, 'art_position', ['above', 'left', 'right'], 'above'),
-            'art_size' => BlockDataInput::enum($input, 'art_size', ['small', 'medium', 'large'], 'medium'),
+            'art_size' => BlockDataInput::enum($input, 'art_size', ['small', 'medium', 'large', 'custom'], 'medium'),
+            'art_width' => self::ranged($input['art_width'] ?? null, 40, 1200, 320),
 
             'duration' => self::duration($input['duration'] ?? null),
-
             'css_class' => self::cssClass($input['css_class'] ?? ''),
-
             '_visible_from' => BlockVisibility::normalize($input['_visible_from'] ?? ''),
             '_visible_to' => BlockVisibility::normalize($input['_visible_to'] ?? ''),
         ]);
     }
 
-    /**
-     * Есть ли у слайда фон, который реально можно показать. Видео без постера
-     * тоже считается: постер лишь желателен, но его отсутствие не повод
-     * прятать слайд.
-     *
-     * @param array<string, mixed> $data
-     */
+    /** @param array<string, mixed> $data */
     public static function hasMedia(array $data): bool
     {
         return match ((string) ($data['media_type'] ?? 'none')) {
@@ -312,13 +282,7 @@ final class HeroSlideData
         };
     }
 
-    /**
-     * Картинка-замена: она же постер до старта видео, она же то, что видит
-     * посетитель, когда автовоспроизведение запрещено, видео отключено на
-     * телефоне или включено «меньше движения». Пустой обложки быть не должно.
-     *
-     * @param array<string, mixed> $data
-     */
+    /** @param array<string, mixed> $data */
     public static function fallbackImage(array $data): string
     {
         foreach (['poster', 'image', 'image_mobile'] as $key) {
@@ -331,12 +295,7 @@ final class HeroSlideData
         return '';
     }
 
-    /**
-     * Пустой слайд (редактор создал и не заполнил) на сайт не выпускаем:
-     * иначе карусель показывает чёрный кадр и считает его за слайд.
-     *
-     * @param array<string, mixed> $data
-     */
+    /** @param array<string, mixed> $data */
     public static function isEmpty(array $data): bool
     {
         return trim((string) ($data['title'] ?? '')) === ''
@@ -376,8 +335,6 @@ final class HeroSlideData
         $d['image_position_mobile'] = MediaPosition::normalize($d['image_position_mobile'] ?? null);
         $d['image_fit'] = $enum($d['image_fit'] ?? '', ['cover', 'contain'], 'cover');
         $d['youtube_url'] = $str($d['youtube_url'] ?? '');
-        // Идентификатор пересчитываем от ссылки: JSON мог приехать из старой
-        // версии или быть поправлен руками, и рассинхрон дал бы чужой ролик.
         $d['youtube_id'] = Video::youtubeId((string) $d['youtube_url']) ?? '';
         $d['mobile_media'] = $enum($d['mobile_media'] ?? '', self::MOBILE_MEDIA, 'image');
 
@@ -426,12 +383,15 @@ final class HeroSlideData
             $d[$cta . '_style'] = $enum($d[$cta . '_style'] ?? '', self::CTA_STYLES, $cta === 'cta' ? 'primary' : 'ghost');
             $d[$cta . '_icon'] = Icon::cleanName($d[$cta . '_icon'] ?? '');
             $d[$cta . '_image'] = BlockDataInput::safeMedia($d[$cta . '_image'] ?? '');
+            $d[$cta . '_image_mode'] = $enum($d[$cta . '_image_mode'] ?? '', self::CTA_IMAGE_MODES, 'icon');
+            $d[$cta . '_image_width'] = self::ranged($d[$cta . '_image_width'] ?? null, 20, 400, 80);
             $d[$cta . '_new_tab'] = !empty($d[$cta . '_new_tab']);
         }
 
         $d['art_alt'] = $str($d['art_alt'] ?? '');
         $d['art_position'] = $enum($d['art_position'] ?? '', ['above', 'left', 'right'], 'above');
-        $d['art_size'] = $enum($d['art_size'] ?? '', ['small', 'medium', 'large'], 'medium');
+        $d['art_size'] = $enum($d['art_size'] ?? '', ['small', 'medium', 'large', 'custom'], 'medium');
+        $d['art_width'] = self::ranged($d['art_width'] ?? null, 40, 1200, 320);
         $d['duration'] = self::duration($d['duration'] ?? null);
 
         $d['_visible_from'] = BlockVisibility::normalize($d['_visible_from'] ?? '');
@@ -440,18 +400,7 @@ final class HeroSlideData
         return $d;
     }
 
-    /**
-     * Длительность показа слайда в секундах.
-     *
-     * 0 — «как у обложки». Ненулевое значение поднимаем до 2 секунд: меньше
-     * успевает только моргнуть, а такой слайд читается как сбой, а не как
-     * настройка.
-     */
-    /**
-     * Отступ части текста у слайда: пусто — «как у обложки», иначе 0..200 px.
-     * Возвращает строку, потому что пустое значение обязано отличаться от
-     * нуля: ноль — это осознанное «прижать вплотную».
-     */
+    /** Отступ части текста: пусто — общая настройка, иначе 0..200 px. */
     private static function gap(mixed $value): int|string
     {
         if ($value === null || (is_string($value) && trim($value) === '') || !is_numeric($value)) {
@@ -461,6 +410,7 @@ final class HeroSlideData
         return max(0, min(200, (int) $value));
     }
 
+    /** 0 — общая длительность обложки. */
     private static function duration(mixed $value): int
     {
         if (!is_numeric($value)) {
@@ -471,19 +421,11 @@ final class HeroSlideData
         return $seconds <= 0 ? 0 : max(2, min(120, $seconds));
     }
 
-    /** -1 = «как у обложки», 0…100 — своё значение. */
-    /**
-     * Свой CSS-класс: имена через пробел, без всего, что могло бы закрыть
-     * атрибут. Это не код — стили пишутся в «Свой CSS» страницы, — но в
-     * атрибут значение попадает, поэтому набор символов ограничен жёстко.
-     */
     private static function cssClass(mixed $value): string
     {
         $value = is_scalar($value) ? (string) $value : '';
         $names = [];
-        foreach (preg_split('/\\s+/', trim($value)) ?: [] as $name) {
-            // Класс начинается с буквы: `123` и `--x` браузер за селектор не
-            // считает, а редактор потом ищет, почему стиль не применился.
+        foreach (preg_split('/\s+/', trim($value)) ?: [] as $name) {
             if (preg_match('/^[A-Za-z][A-Za-z0-9_-]{0,63}$/', $name) === 1) {
                 $names[] = $name;
             }
@@ -495,7 +437,7 @@ final class HeroSlideData
         return implode(' ', array_unique($names));
     }
 
-    /** Целое в границах; пусто — умолчание, а не край диапазона. */
+    /** Целое в границах; пусто — умолчание. */
     private static function ranged(mixed $value, int $min, int $max, int $default): int
     {
         if ($value === null || $value === '' || !is_numeric($value)) {
@@ -505,7 +447,6 @@ final class HeroSlideData
         return max($min, min($max, (int) $value));
     }
 
-    /** Проценты с умолчанием: пусто — умолчание, а не ноль. */
     private static function percent(mixed $value, int $default): int
     {
         if ($value === null || $value === '' || !is_numeric($value)) {
