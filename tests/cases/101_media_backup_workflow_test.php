@@ -9,7 +9,7 @@ test('Admin media: превью унифицированы до 16:9 и паги
     assert_true(is_string($js));
 
     assert_contains('aspect-ratio: 16 / 9', $css);
-    assert_contains('PAGE_SIZE = 24', $js);
+    assert_contains('PAGE_SIZE = 15', $js);
     assert_contains("image.loading = 'lazy'", $js);
     assert_contains('media-client-pager', $js);
     assert_contains('news-gallery-editor', $js);
