@@ -27,17 +27,23 @@
         }
     }
 
-    function loadStyle(fileName) {
-        var existing = Array.prototype.some.call(
-            document.querySelectorAll('link[data-admin-layer-style]'),
-            function (link) { return link.getAttribute('data-admin-layer-style') === fileName; }
-        );
-        if (existing) { return; }
-
+    // Сохраняем исторический marker: другие проверки и расширения админки
+    // могут использовать его как контракт загрузки workflow-стилей.
+    function loadWorkflowStyle() {
+        if (document.querySelector('link[data-admin-workflow-fixes]')) { return; }
         var link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = styleUrl(fileName);
-        link.setAttribute('data-admin-layer-style', fileName);
+        link.href = styleUrl('admin-workflow-fixes.css');
+        link.setAttribute('data-admin-workflow-fixes', '');
+        document.head.appendChild(link);
+    }
+
+    function loadSliderSettingsStyle() {
+        if (document.querySelector('link[data-admin-slider-settings-layout]')) { return; }
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = styleUrl('admin-slider-settings-layout.css');
+        link.setAttribute('data-admin-slider-settings-layout', '');
         document.head.appendChild(link);
     }
 
@@ -54,8 +60,8 @@
         document.head.appendChild(script);
     }
 
-    loadStyle('admin-workflow-fixes.css');
-    loadStyle('admin-slider-settings-layout.css');
+    loadWorkflowStyle();
+    loadSliderSettingsStyle();
 
     // admin.js остаётся основным скриптом. Мост загружается строго после него,
     // затем подключаются небольшие workflow-слои: они не меняют данные форм,
