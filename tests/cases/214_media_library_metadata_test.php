@@ -103,6 +103,8 @@ test('медиабиблиотека хранит редакционные ме�
 test('редактор галереи использует единый multiple-picker медиабиблиотеки', function (): void {
     $adminJs = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin.js');
     $legacyJs = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin-media-metadata.js');
+    $legacyCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/admin-media-metadata.css');
+    $workflowJs = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin-workflow-fixes.js');
     $loadMoreJs = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin-media-loadmore.js');
 
     assert_contains("pickMany: function (cb) { open(null, cb, 'image', true); }", $adminJs, 'множественный выбор принадлежит основной медиабиблиотеке');
@@ -111,16 +113,19 @@ test('редактор галереи использует единый multiple
     assert_contains("input.name = 'gallery_library[]'", $adminJs, 'в форму новости попадает ссылка на выбранный библиотечный файл');
     assert_not_contains("className = 'gallery-media-modal'", $legacyJs, 'второй gallery picker больше не создаётся');
     assert_not_contains('stopImmediatePropagation()', $legacyJs, 'legacy-слой больше не перехватывает штатный обработчик');
-    assert_contains('Legacy compatibility shim', $legacyJs, 'старый URL ассета остаётся безопасным для кэшей');
+    assert_contains('Legacy compatibility shim', $legacyJs, 'старый URL JS остаётся безопасным для старого кэша');
+    assert_contains('Legacy compatibility shim', $legacyCss, 'старый URL CSS остаётся безопасным для старого кэша');
+    assert_not_contains('.gallery-media-modal', $legacyCss, 'старые стили второго модального окна физически удалены');
+    assert_not_contains('media-client-pager', $workflowJs, 'старая пагинация физически удалена из workflow-слоя');
     assert_not_contains('gallery-media-modal__grid', $loadMoreJs, 'progressive loading обслуживает только основную медиабиблиотеку');
 });
 
-test('ассеты печати и медиа-редактора подключены после основных стилей', function (): void {
+test('устаревшие gallery-assets больше не подключаются в свежую админку', function (): void {
     assert_true(in_array('/assets/css/public-content-modes.css', FrontendAssets::styles(), true));
 
     $head = AdminBrand::styleTag();
-    assert_contains('admin-media-metadata.css', $head);
-    assert_contains('admin-media-metadata.js', $head);
+    assert_not_contains('admin-media-metadata.css', $head);
+    assert_not_contains('admin-media-metadata.js', $head);
 
     $printCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-content-modes.css');
     assert_contains('body > main.site-content', $printCss);
