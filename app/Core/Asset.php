@@ -29,20 +29,27 @@ final class Asset
         $root = defined('APP_ROOT') ? APP_ROOT : dirname(__DIR__, 2);
         $publicRoot = $root . '/public';
 
-        // Админский JS состоит из стабильного основного admin.js и небольшого
-        // мостика медиабиблиотеки. Footer по-прежнему запрашивает admin.js, а
-        // Asset прозрачно отдаёт loader, который последовательно подключает оба
-        // файла. В отпечаток включаем все три файла, поэтому CDN не оставит
-        // старую комбинацию после изменения любого из них.
+        // Админский JS состоит из стабильного основного admin.js и небольших
+        // workflow-слоёв. Footer по-прежнему запрашивает admin.js, а Asset
+        // прозрачно отдаёт loader. В отпечаток включаем все связанные файлы,
+        // чтобы CDN не оставлял старую комбинацию после изменения любого слоя.
         $fingerprintPaths = [$path];
         if ($path === '/assets/js/admin.js') {
             $loader = '/assets/js/admin-media-loader.js';
             $bridge = '/assets/js/admin-media-bridge.js';
-            if (is_file($publicRoot . $path)
-                && is_file($publicRoot . $loader)
-                && is_file($publicRoot . $bridge)) {
+            $workflowJs = '/assets/js/admin-workflow-fixes.js';
+            $workflowCss = '/assets/css/admin-workflow-fixes.css';
+            $adminBundle = ['/assets/js/admin.js', $loader, $bridge, $workflowJs, $workflowCss];
+            $bundleReady = true;
+            foreach ($adminBundle as $bundleFile) {
+                if (!is_file($publicRoot . $bundleFile)) {
+                    $bundleReady = false;
+                    break;
+                }
+            }
+            if ($bundleReady) {
                 $path = $loader;
-                $fingerprintPaths = ['/assets/js/admin.js', $loader, $bridge];
+                $fingerprintPaths = $adminBundle;
             }
         }
 

@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 
 use App\Core\Auth;
 use App\Core\Backup;
+use App\Core\BackupRestore;
 use App\Core\Csrf;
 use App\Core\Flash;
 
@@ -15,6 +16,11 @@ final class BackupController
     {
         Auth::requireSuperAdmin();
         Csrf::verifyRequest();
+
+        if ((string) ($_POST['backup_action'] ?? '') === 'restore') {
+            $this->restore();
+            return;
+        }
 
         try {
             $path = Backup::create();
@@ -38,6 +44,40 @@ final class BackupController
         readfile($path);
         @unlink($path);
         @unlink(Backup::checksumPath($path));
+        exit;
+    }
+
+    private function restore(): void
+    {
+        if (($_POST['restore_ack'] ?? '') !== '1') {
+            Flash::error('Подтвердите, что понимаете последствия восстановления.');
+            header('Location: /admin/settings#backup-section');
+            exit;
+        }
+
+        $upload = $_FILES['backup_file'] ?? null;
+        if (!is_array($upload)) {
+            Flash::error('Выберите ZIP-файл резервной копии.');
+            header('Location: /admin/settings#backup-section');
+            exit;
+        }
+
+        try {
+            $result = BackupRestore::restoreUploaded(
+                $upload,
+                (string) ($_POST['restore_confirm_code'] ?? '')
+            );
+            Flash::success(sprintf(
+                'Сайт восстановлен. Таблиц: %d, файлов: %d. Страховочная копия текущего состояния сохранена на сервере: %s',
+                (int) $result['restored_tables'],
+                (int) $result['restored_files'],
+                (string) $result['safety_backup']
+            ));
+        } catch (\Throwable $e) {
+            Flash::error($e->getMessage());
+        }
+
+        header('Location: /admin/settings#backup-section');
         exit;
     }
 }
