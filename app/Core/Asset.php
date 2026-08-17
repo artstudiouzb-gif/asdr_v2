@@ -25,16 +25,45 @@ final class Asset
             return self::$cache[$path];
         }
 
+        $cacheKey = $path;
         $root = defined('APP_ROOT') ? APP_ROOT : dirname(__DIR__, 2);
-        $file = $root . '/public' . $path;
+        $publicRoot = $root . '/public';
+
+        // Админский JS состоит из стабильного основного admin.js и небольшого
+        // мостика медиабиблиотеки. Footer по-прежнему запрашивает admin.js, а
+        // Asset прозрачно отдаёт loader, который последовательно подключает оба
+        // файла. В отпечаток включаем все три файла, поэтому CDN не оставит
+        // старую комбинацию после изменения любого из них.
+        $fingerprintPaths = [$path];
+        if ($path === '/assets/js/admin.js') {
+            $loader = '/assets/js/admin-media-loader.js';
+            $bridge = '/assets/js/admin-media-bridge.js';
+            if (is_file($publicRoot . $path)
+                && is_file($publicRoot . $loader)
+                && is_file($publicRoot . $bridge)) {
+                $path = $loader;
+                $fingerprintPaths = ['/assets/js/admin.js', $loader, $bridge];
+            }
+        }
 
         $out = $path;
-        if (is_file($file)) {
-            $stat = @stat($file);
-            if ($stat !== false) {
-                $v = substr(hash('crc32b', $stat['mtime'] . '-' . $stat['size']), 0, 8);
-                $out = $path . (str_contains($path, '?') ? '&' : '?') . 'v=' . $v;
+        $signature = '';
+        foreach ($fingerprintPaths as $fingerprintPath) {
+            $file = $publicRoot . $fingerprintPath;
+            if (!is_file($file)) {
+                $signature = '';
+                break;
             }
+            $stat = @stat($file);
+            if ($stat === false) {
+                $signature = '';
+                break;
+            }
+            $signature .= $fingerprintPath . ':' . $stat['mtime'] . '-' . $stat['size'] . ';';
+        }
+        if ($signature !== '') {
+            $v = substr(hash('crc32b', $signature), 0, 8);
+            $out = $path . (str_contains($path, '?') ? '&' : '?') . 'v=' . $v;
         }
 
         // CDN-префикс из настроек производительности (пусто — отдаём с этого же
@@ -44,7 +73,7 @@ final class Asset
             $out = $cdn . $out;
         }
 
-        return self::$cache[$path] = $out;
+        return self::$cache[$cacheKey] = $out;
     }
 
     public static function cdnBase(): string
