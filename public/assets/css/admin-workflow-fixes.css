@@ -1,133 +1,5 @@
-/* Media library + news gallery + backup restore UX fixes. */
-
-/* Keep media pickers compact and predictable regardless of library size. */
-.media-modal__dialog,
-.gallery-media-modal__dialog {
-    max-height: min(92vh, 900px);
-}
-
-.media-modal__grid,
-.gallery-media-modal__grid {
-    min-height: 280px;
-    max-height: min(62vh, 620px);
-    overflow-y: auto !important;
-    overflow-x: hidden;
-    align-content: start;
-    scrollbar-gutter: stable;
-    overscroll-behavior: contain;
-}
-
-.media-modal__grid {
-    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)) !important;
-    gap: 12px !important;
-    padding: 16px !important;
-}
-
-.gallery-media-modal__grid {
-    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)) !important;
-    gap: 12px !important;
-    padding: 16px !important;
-}
-
-/* All image cards use one editorial thumbnail ratio. */
-.media-modal__item,
-.gallery-media-card {
-    min-width: 0;
-}
-
-.media-modal__item {
-    aspect-ratio: 16 / 9 !important;
-    height: auto !important;
-    min-height: 0 !important;
-}
-
-.media-modal__item img,
-.gallery-media-card__image {
-    width: 100% !important;
-    height: 100% !important;
-    aspect-ratio: 16 / 9 !important;
-    object-fit: cover !important;
-    display: block;
-}
-
-.gallery-media-card {
-    display: grid;
-    grid-template-rows: auto auto;
-    align-self: start;
-}
-
-.gallery-media-card__image {
-    height: auto !important;
-}
-
-.gallery-media-card__body {
-    min-height: 0 !important;
-    padding: 7px 9px !important;
-}
-
-.media-modal__item[hidden],
-.gallery-media-card[hidden] {
-    display: none !important;
-}
-
-.media-modal__grid::-webkit-scrollbar,
-.gallery-media-modal__grid::-webkit-scrollbar {
-    width: 10px;
-}
-.media-modal__grid::-webkit-scrollbar-thumb,
-.gallery-media-modal__grid::-webkit-scrollbar-thumb {
-    border: 2px solid transparent;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--admin-muted, #64748b) 55%, transparent);
-    background-clip: padding-box;
-}
-
-.media-client-pager {
-    grid-column: 1 / -1;
-    position: sticky;
-    bottom: -1px;
-    z-index: 3;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 10px 12px;
-    margin-top: 2px;
-    border: 1px solid var(--admin-border, #dce3ed);
-    border-radius: 9px;
-    background: color-mix(in srgb, var(--admin-surface, #fff) 96%, transparent);
-    box-shadow: 0 -4px 18px rgba(15, 23, 42, .06);
-    backdrop-filter: blur(8px);
-}
-.media-client-pager__status {
-    color: var(--admin-muted, #64748b);
-    font-size: 12px;
-    font-weight: 600;
-}
-.media-client-pager__actions {
-    display: flex;
-    gap: 6px;
-}
-.media-client-pager__button {
-    min-width: 38px;
-    min-height: 34px;
-    padding: 6px 10px;
-    border: 1px solid var(--admin-border, #dce3ed);
-    border-radius: 7px;
-    background: var(--admin-surface, #fff);
-    color: var(--admin-text, #172033);
-    cursor: pointer;
-    font: inherit;
-    font-weight: 700;
-}
-.media-client-pager__button:hover:not(:disabled) {
-    border-color: var(--admin-accent, #2563eb);
-    color: var(--admin-accent, #2563eb);
-}
-.media-client-pager__button:disabled {
-    opacity: .42;
-    cursor: default;
-}
+/* News gallery editor + backup restore UX fixes.
+   Media picker geometry lives exclusively in admin-media-unified.css. */
 
 /* News gallery: make it a real editor section instead of one grey button. */
 .news-gallery-editor {
@@ -320,13 +192,6 @@
 }
 
 @media (max-width: 760px) {
-    .media-modal__grid,
-    .gallery-media-modal__grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        max-height: 58vh;
-        padding: 10px !important;
-        gap: 8px !important;
-    }
     .news-gallery-editor__head,
     .backup-restore-panel__head,
     .backup-restore-panel__actions {
@@ -338,12 +203,5 @@
     }
     .backup-restore-panel__grid {
         grid-template-columns: 1fr;
-    }
-    .media-client-pager {
-        align-items: stretch;
-        flex-direction: column;
-    }
-    .media-client-pager__actions {
-        justify-content: flex-end;
     }
 }
