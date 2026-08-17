@@ -38,9 +38,18 @@ final class Asset
             $loader = '/assets/js/admin-media-loader.js';
             $bridge = '/assets/js/admin-media-bridge.js';
             $workflowJs = '/assets/js/admin-workflow-fixes.js';
+            $galleryDropzoneJs = '/assets/js/admin-gallery-dropzone.js';
             $loadMoreJs = '/assets/js/admin-media-loadmore.js';
             $workflowCss = '/assets/css/admin-workflow-fixes.css';
-            $adminBundle = ['/assets/js/admin.js', $loader, $bridge, $workflowJs, $loadMoreJs, $workflowCss];
+            $adminBundle = [
+                '/assets/js/admin.js',
+                $loader,
+                $bridge,
+                $workflowJs,
+                $galleryDropzoneJs,
+                $loadMoreJs,
+                $workflowCss,
+            ];
             $bundleReady = true;
             foreach ($adminBundle as $bundleFile) {
                 if (!is_file($publicRoot . $bundleFile)) {
