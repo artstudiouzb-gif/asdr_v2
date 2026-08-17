@@ -19,7 +19,7 @@ test('Admin slider settings: compact layout layer is loaded and scoped', functio
     assert_contains('/assets/css/admin-slider-settings-layout.css', $asset);
 
     foreach ([
-        'Настройки слайдера',
+        'настройки слайдера',
         'Автопрокрутка',
         'Стрелки',
         'Пагинация',
