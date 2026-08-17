@@ -9,6 +9,7 @@ test('Admin media: единый picker, 5x3 и progressive «Показать е
     $adminJs = file_get_contents(APP_ROOT . '/public/assets/js/admin.js');
     $loadMore = file_get_contents(APP_ROOT . '/public/assets/js/admin-media-loadmore.js');
     $metadataLegacy = file_get_contents(APP_ROOT . '/public/assets/js/admin-media-metadata.js');
+    $metadataLegacyCss = file_get_contents(APP_ROOT . '/public/assets/css/admin-media-metadata.css');
     $dropzone = file_get_contents(APP_ROOT . '/public/assets/js/admin-gallery-dropzone.js');
 
     assert_true(is_string($workflowCss));
@@ -17,10 +18,10 @@ test('Admin media: единый picker, 5x3 и progressive «Показать е
     assert_true(is_string($adminJs));
     assert_true(is_string($loadMore));
     assert_true(is_string($metadataLegacy));
+    assert_true(is_string($metadataLegacyCss));
     assert_true(is_string($dropzone));
 
     assert_contains('aspect-ratio: 16 / 9', $workflowCss);
-    assert_contains('PAGE_SIZE = 15', $workflowJs);
     assert_contains("image.loading = 'lazy'", $workflowJs);
 
     // Фотогалерея обязана использовать тот же MediaPicker, что одиночные поля.
@@ -30,6 +31,14 @@ test('Admin media: единый picker, 5x3 и progressive «Показать е
     assert_not_contains("className = 'gallery-media-modal'", $metadataLegacy);
     assert_not_contains('stopImmediatePropagation()', $metadataLegacy);
     assert_contains('Legacy compatibility shim', $metadataLegacy);
+    assert_contains('Legacy compatibility shim', $metadataLegacyCss);
+    assert_not_contains('.gallery-media-modal', $metadataLegacyCss);
+
+    // Старый клиентский pager физически удалён из исполняемого workflow-кода.
+    assert_not_contains('PAGE_SIZE = 15', $workflowJs);
+    assert_not_contains('media-client-pager', $workflowJs);
+    assert_not_contains('applyPagination(', $workflowJs);
+    assert_not_contains('setupPagedGrid(', $workflowJs);
 
     // Progressive loading применяется только к основной сетке media-modal.
     assert_contains('var STEP = 15', $loadMore);
@@ -37,13 +46,14 @@ test('Admin media: единый picker, 5x3 и progressive «Показать е
     assert_contains("'Показано ' + shown + ' из ' + total", $loadMore);
     assert_contains("scope.querySelectorAll('.media-modal__grid').forEach(setup)", $loadMore);
     assert_not_contains('gallery-media-modal__grid', $loadMore);
+    assert_not_contains('media-client-pager', $loadMore);
 
     // Панель «Показать ещё» вынесена из CSS Grid, поэтому новые 15 фото
-    // образуют обычные новые ряды и больше не перекрываются sticky-панелью.
+    // образуют обычные новые ряды и больше не перекрываются второй системой.
     assert_contains('grid-template-columns: repeat(5, minmax(0, 1fr))', $unifiedCss);
     assert_contains('grid-auto-rows: max-content', $unifiedCss);
     assert_contains('.media-loadmore-bar', $unifiedCss);
-    assert_contains('.media-modal__grid > .media-client-pager', $unifiedCss);
+    assert_not_contains('media-client-pager', $unifiedCss);
 
     assert_contains('news-gallery-editor', $workflowJs);
     assert_contains('Добавить фотографии', $workflowJs);
