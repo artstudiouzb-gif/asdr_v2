@@ -51,6 +51,12 @@
         empty.setAttribute('title', 'Открыть медиабиблиотеку или перетащить фотографии');
         empty.style.cursor = 'pointer';
 
+        function setDragState(active) {
+            empty.classList.toggle('is-dragover', active);
+            empty.style.background = active ? 'rgba(37, 99, 235, .06)' : '';
+            empty.style.borderColor = active ? 'rgba(37, 99, 235, .65)' : '';
+        }
+
         function openLibrary(event) {
             if (event) {
                 event.preventDefault();
@@ -66,20 +72,20 @@
 
         empty.addEventListener('dragenter', function (event) {
             event.preventDefault();
-            empty.classList.add('is-dragover');
+            setDragState(true);
         });
         empty.addEventListener('dragover', function (event) {
             event.preventDefault();
             if (event.dataTransfer) { event.dataTransfer.dropEffect = 'copy'; }
-            empty.classList.add('is-dragover');
+            setDragState(true);
         });
         empty.addEventListener('dragleave', function (event) {
-            if (!empty.contains(event.relatedTarget)) { empty.classList.remove('is-dragover'); }
+            if (!empty.contains(event.relatedTarget)) { setDragState(false); }
         });
         empty.addEventListener('drop', function (event) {
             event.preventDefault();
             event.stopPropagation();
-            empty.classList.remove('is-dragover');
+            setDragState(false);
 
             var files = imageFiles(event.dataTransfer && event.dataTransfer.files);
             if (!files.length) {
