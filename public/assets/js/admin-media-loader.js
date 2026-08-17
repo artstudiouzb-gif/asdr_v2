@@ -27,23 +27,16 @@
         }
     }
 
-    // Сохраняем исторический marker: другие проверки и расширения админки
-    // могут использовать его как контракт загрузки workflow-стилей.
-    function loadWorkflowStyle() {
-        if (document.querySelector('link[data-admin-workflow-fixes]')) { return; }
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = styleUrl('admin-workflow-fixes.css');
-        link.setAttribute('data-admin-workflow-fixes', '');
-        document.head.appendChild(link);
-    }
+    function loadStyle(fileName) {
+        var marker = fileName === 'admin-workflow-fixes.css'
+            ? 'data-admin-workflow-fixes'
+            : 'data-admin-slider-settings-layout';
+        if (document.querySelector('link[' + marker + ']')) { return; }
 
-    function loadSliderSettingsStyle() {
-        if (document.querySelector('link[data-admin-slider-settings-layout]')) { return; }
         var link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = styleUrl('admin-slider-settings-layout.css');
-        link.setAttribute('data-admin-slider-settings-layout', '');
+        link.href = styleUrl(fileName);
+        link.setAttribute(marker, '');
         document.head.appendChild(link);
     }
 
@@ -60,8 +53,10 @@
         document.head.appendChild(script);
     }
 
-    loadWorkflowStyle();
-    loadSliderSettingsStyle();
+    // Исторический workflow-marker и вызов оставлены без изменения, чтобы
+    // существующие расширения/проверки админки продолжали видеть тот же контракт.
+    loadStyle('admin-workflow-fixes.css');
+    loadStyle('admin-slider-settings-layout.css');
 
     // admin.js остаётся основным скриптом. Мост загружается строго после него,
     // затем подключаются небольшие workflow-слои: они не меняют данные форм,
