@@ -28,11 +28,16 @@
     }
 
     function loadStyle(fileName) {
-        if (document.querySelector('link[data-admin-workflow-fixes]')) { return; }
+        var existing = Array.prototype.some.call(
+            document.querySelectorAll('link[data-admin-layer-style]'),
+            function (link) { return link.getAttribute('data-admin-layer-style') === fileName; }
+        );
+        if (existing) { return; }
+
         var link = document.createElement('link');
         link.rel = 'stylesheet';
         link.href = styleUrl(fileName);
-        link.setAttribute('data-admin-workflow-fixes', '');
+        link.setAttribute('data-admin-layer-style', fileName);
         document.head.appendChild(link);
     }
 
@@ -50,13 +55,16 @@
     }
 
     loadStyle('admin-workflow-fixes.css');
+    loadStyle('admin-slider-settings-layout.css');
 
     // admin.js остаётся основным скриптом. Мост загружается строго после него,
-    // а финальный workflow-слой — после моста, чтобы не дублировать загрузку и
-    // только улучшать уже существующие медиакомпоненты.
+    // затем подключаются небольшие workflow-слои: они не меняют данные форм,
+    // а улучшают поведение медиаполей и компоновку настроек.
     load('admin.js', function () {
         load('admin-media-bridge.js', function () {
-            load('admin-workflow-fixes.js');
+            load('admin-workflow-fixes.js', function () {
+                load('admin-slider-settings-layout.js');
+            });
         });
     });
 })();
