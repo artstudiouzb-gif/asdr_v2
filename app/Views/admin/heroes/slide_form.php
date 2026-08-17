@@ -72,7 +72,7 @@ $group = static function (
         . '</summary><div class="form-section__body form-section__body--grid">' . $body . '</div></details>';
 };
 
-$inherit = ['' => 'Как у обложки'];
+$inherit = ['' => 'Использовать общую настройку обложки'];
 $posOptions = ['left' => 'Слева', 'center' => 'По центру', 'right' => 'Справа'];
 $yOptions = ['top' => 'Сверху', 'center' => 'По центру', 'bottom' => 'Снизу'];
 $sizeOptions = ['s' => 'Мелкий', 'm' => 'Средний', 'l' => 'Крупный', 'xl' => 'Очень крупный'];
@@ -82,6 +82,11 @@ $ctaStyles = [
     'secondary' => 'Вторичная (светлая заливка)',
     'ghost' => 'Контурная',
     'link' => 'Ссылка',
+];
+$ctaImageModes = [
+    'icon' => 'Как иконка — 20 px',
+    'fill' => 'На всю высоту кнопки',
+    'custom' => 'Своя ширина',
 ];
 $cropOptions = [
     'left-top' => 'Слева сверху',
@@ -102,7 +107,7 @@ $mediaLabels = [
     'youtube' => 'YouTube',
 ];
 $artPositionLabels = ['above' => 'Над текстом', 'left' => 'Слева', 'right' => 'Справа'];
-$artSizeLabels = ['small' => 'маленькая', 'medium' => 'средняя', 'large' => 'крупная'];
+$artSizeLabels = ['small' => '120 px', 'medium' => '220 px', 'large' => '360 px', 'custom' => 'свой размер'];
 
 $hasArt = trim((string) $data['art_image']) !== '';
 $hasButtons = !empty($data['cta_enabled']) || !empty($data['cta2_enabled']) || trim((string) $data['link_url']) !== '';
@@ -166,9 +171,9 @@ $buttonsState = $buttonCount > 0 ? $buttonCount . ' кноп.' : 'Без кно�
 if (trim((string) $data['link_url']) !== '') {
     $buttonsState .= ' · весь слайд кликабелен';
 }
-$layoutState = $hasLayoutOverrides ? 'Есть свои настройки' : 'Как у обложки';
-$mobileState = $hasMobileOverrides ? 'Есть свои настройки' : 'Как у обложки';
-$colorState = $hasColorOverrides ? 'Есть свои настройки' : 'Как у обложки';
+$layoutState = $hasLayoutOverrides ? 'Есть свои настройки' : 'Общее значение';
+$mobileState = $hasMobileOverrides ? 'Есть свои настройки' : 'Общее значение';
+$colorState = $hasColorOverrides ? 'Есть свои настройки' : 'Общее значение';
 $watermarkState = $hasWatermark ? (string) $data['watermark'] : 'Не используется';
 $translationState = $hasTranslations ? 'Есть переводы' : 'Используется основной язык';
 ?>
@@ -183,7 +188,7 @@ $translationState = $hasTranslations ? 'Есть переводы' : 'Испол
         <?= AdminUi::cardHeader('Настройки слайда', 'slideshow') ?>
         <p class="form-hint">
             Обычно достаточно разделов «Основное», «Фон» и «Логотип / картинка».
-            В остальных разделах значение «Как у обложки» означает наследование общей настройки.
+            Пункт «Использовать общую настройку обложки» берёт значение из общих настроек Hero-блока.
             Если здесь задано своё значение, оно действует только для этого слайда и имеет приоритет.
         </p>
 
@@ -224,8 +229,14 @@ $translationState = $hasTranslations ? 'Есть переводы' : 'Испол
                 'above' => 'Над текстом', 'left' => 'Слева от текста', 'right' => 'Справа от текста',
             ], (string) $data['art_position'], 'При варианте «Справа» картинка прижимается к правому краю контентной области.') ?>
             <?= $select('art_size', 'Размер', [
-                'small' => 'Маленькая', 'medium' => 'Средняя', 'large' => 'Крупная',
+                'small' => 'Маленькая — 120 px', 'medium' => 'Средняя — 220 px',
+                'large' => 'Крупная — 360 px', 'custom' => 'Свой размер',
             ], (string) $data['art_size']) ?>
+            <div class="form-field">
+                <label for="art_width">Своя ширина логотипа, px</label>
+                <input type="number" id="art_width" name="art_width" min="40" max="1200" step="1" value="<?= (int) $data['art_width'] ?>">
+                <span class="form-hint">Используется только при размере «Свой размер». Высота рассчитывается автоматически.</span>
+            </div>
         <?php echo $group(
             'Логотип / картинка',
             'отдельный PNG или SVG рядом с текстом',
@@ -299,6 +310,12 @@ $translationState = $hasTranslations ? 'Есть переводы' : 'Испол
                 'label' => 'Своя картинка вместо иконки',
                 'hint' => 'SVG или PNG. Если задана, используется вместо иконки Tabler.',
             ]) ?>
+            <?= $select('cta_image_mode', 'Размер своей картинки', $ctaImageModes, (string) $data['cta_image_mode']) ?>
+            <div class="form-field">
+                <label for="cta_image_width">Своя ширина картинки, px</label>
+                <input type="number" id="cta_image_width" name="cta_image_width" min="20" max="400" step="1" value="<?= (int) $data['cta_image_width'] ?>">
+                <span class="form-hint">Работает в режиме «Своя ширина». «На всю высоту кнопки» использует высоту самой кнопки.</span>
+            </div>
             <?= $checkbox('cta_new_tab', 'Основную кнопку открывать в новой вкладке', (bool) $data['cta_new_tab']) ?>
 
             <?= $checkbox('cta2_enabled', 'Показывать дополнительную кнопку', (bool) $data['cta2_enabled']) ?>
@@ -316,6 +333,12 @@ $translationState = $hasTranslations ? 'Есть переводы' : 'Испол
                 'label' => 'Своя картинка вместо иконки',
                 'hint' => 'SVG или PNG. Если задана, используется вместо иконки Tabler.',
             ]) ?>
+            <?= $select('cta2_image_mode', 'Размер своей картинки', $ctaImageModes, (string) $data['cta2_image_mode']) ?>
+            <div class="form-field">
+                <label for="cta2_image_width">Своя ширина картинки, px</label>
+                <input type="number" id="cta2_image_width" name="cta2_image_width" min="20" max="400" step="1" value="<?= (int) $data['cta2_image_width'] ?>">
+                <span class="form-hint">Работает в режиме «Своя ширина». «На всю высоту кнопки» использует высоту самой кнопки.</span>
+            </div>
             <?= $checkbox('cta2_new_tab', 'Дополнительную кнопку открывать в новой вкладке', (bool) $data['cta2_new_tab']) ?>
 
             <div class="form-field form-field--wide">
@@ -335,7 +358,7 @@ $translationState = $hasTranslations ? 'Есть переводы' : 'Испол
         <?php
         ob_start(); ?>
             <div class="form-field form-field--wide">
-                <span class="form-hint">Оставьте «Как у обложки», если этот слайд не должен отличаться от остальных.</span>
+                <span class="form-hint">Оставьте «Использовать общую настройку обложки», если этот слайд не должен отличаться от остальных.</span>
             </div>
             <?= $select('text_position', 'Текст по горизонтали', $inherit + $posOptions, (string) $data['text_position']) ?>
             <?= $select('text_align_y', 'Текст по вертикали', $inherit + $yOptions, (string) $data['text_align_y']) ?>
@@ -350,7 +373,7 @@ $translationState = $hasTranslations ? 'Есть переводы' : 'Испол
                 <div class="form-field">
                     <label for="<?= $gapKey ?>"><?= $esc($gapLabel) ?></label>
                     <input type="number" id="<?= $gapKey ?>" name="<?= $gapKey ?>" min="0" max="200" step="1"
-                           value="<?= $data[$gapKey] === '' ? '' : (int) $data[$gapKey] ?>" placeholder="как у обложки">
+                           value="<?= $data[$gapKey] === '' ? '' : (int) $data[$gapKey] ?>" placeholder="общая настройка">
                     <?php if ($gapKey === 'gap_art'): ?><span class="form-hint">При боковом логотипе это расстояние между картинкой и текстом.</span><?php endif; ?>
                 </div>
             <?php endforeach; ?>
@@ -396,14 +419,14 @@ $translationState = $hasTranslations ? 'Есть переводы' : 'Испол
         <?php
         ob_start(); ?>
             <div class="form-field form-field--wide">
-                <span class="form-hint">Эти поля нужны только для исключений: например, один светлый кадр среди тёмных. В обычном случае оставьте «Как у обложки».</span>
+                <span class="form-hint">Эти поля нужны только для исключений: например, один светлый кадр среди тёмных. В обычном случае оставьте «Использовать общую настройку обложки».</span>
             </div>
             <?= $select('scheme', 'Цветовая схема', $inherit + [
                 'light' => 'Light', 'dark' => 'Dark', 'navy' => 'Navy', 'custom' => 'Custom',
             ], (string) $data['scheme']) ?>
-            <?= AdminUi::colorField('scheme_bg', (string) $data['scheme_bg'], 'Свой фон (Custom)', '#0b1a30', 'Как у обложки') ?>
-            <?= AdminUi::colorField('scheme_text', (string) $data['scheme_text'], 'Свой цвет текста (Custom)', '#ffffff', 'Как у обложки') ?>
-            <?= AdminUi::colorField('scheme_accent', (string) $data['scheme_accent'], 'Цвет основной кнопки', '#173a63', 'Как у обложки') ?>
+            <?= AdminUi::colorField('scheme_bg', (string) $data['scheme_bg'], 'Свой фон (Custom)', '#0b1a30', 'Общее значение') ?>
+            <?= AdminUi::colorField('scheme_text', (string) $data['scheme_text'], 'Свой цвет текста (Custom)', '#ffffff', 'Общее значение') ?>
+            <?= AdminUi::colorField('scheme_accent', (string) $data['scheme_accent'], 'Цвет основной кнопки', '#173a63', 'Общее значение') ?>
             <?= $select('content_scheme', 'Цвет текста', $inherit + [
                 'auto' => 'Auto — по фону и затемнению',
                 'light' => 'Light — светлый текст',
@@ -412,11 +435,11 @@ $translationState = $hasTranslations ? 'Есть переводы' : 'Испол
             <?= $select('overlay', 'Затемнение', $inherit + [
                 'none' => 'Нет', 'solid' => 'Сплошное', 'gradient' => 'Градиент',
             ], (string) $data['overlay']) ?>
-            <?= AdminUi::colorField('overlay_color', (string) $data['overlay_color'], 'Цвет затемнения', '#0b1a30', 'Как у обложки') ?>
+            <?= AdminUi::colorField('overlay_color', (string) $data['overlay_color'], 'Цвет затемнения', '#0b1a30', 'Общее значение') ?>
             <div class="form-field">
                 <label for="overlay_opacity">Плотность затемнения, %</label>
                 <input type="number" id="overlay_opacity" name="overlay_opacity" min="0" max="100"
-                       value="<?= (int) $data['overlay_opacity'] >= 0 ? (int) $data['overlay_opacity'] : '' ?>" placeholder="как у обложки">
+                       value="<?= (int) $data['overlay_opacity'] >= 0 ? (int) $data['overlay_opacity'] : '' ?>" placeholder="общая настройка">
             </div>
             <?= $select('overlay_direction', 'Направление градиента', $inherit + [
                 'auto' => 'Автоматически',
@@ -446,7 +469,7 @@ $translationState = $hasTranslations ? 'Есть переводы' : 'Испол
                 <label for="duration">Время показа этого слайда, секунд</label>
                 <input type="number" id="duration" name="duration" min="0" max="120" step="1"
                        value="<?= $customDuration > 0 ? $customDuration : '' ?>"
-                       placeholder="<?= $globalDuration ?> — из обложки">
+                       placeholder="<?= $globalDuration ?> — общее значение">
                 <span class="form-hint">
                     Сейчас действует: <strong><?= $effectiveDuration ?> с</strong> —
                     <?= $customDuration > 0 ? 'индивидуальное значение этого слайда.' : 'общая настройка обложки.' ?>
@@ -523,8 +546,8 @@ $translationState = $hasTranslations ? 'Есть переводы' : 'Испол
             <?php ob_start(); ?>
                 <div class="form-field form-field--wide">
                     <span class="form-hint">
-                        Переводится только текст. Фон, расположение и оформление общие для всех языков.
-                        Пустое поле использует текст основного языка <?= $esc(strtoupper($defaultCode)) ?>.
+                        Текст и ссылки можно задавать отдельно для каждого языка. Фон, расположение и оформление остаются общими.
+                        Пустое поле использует значение основного языка <?= $esc(strtoupper($defaultCode)) ?>.
                     </span>
                 </div>
                 <?php foreach ($translationLangs as $language): ?>
@@ -553,8 +576,20 @@ $translationState = $hasTranslations ? 'Есть переводы' : 'Испол
                             <input type="text" id="<?= $id ?>cta" name="<?= $key ?>[cta_text]" value="<?= $esc($tr['cta_text'] ?? '') ?>">
                         </div>
                         <div class="form-field">
+                            <label for="<?= $id ?>cta-url">Ссылка основной кнопки</label>
+                            <input type="text" id="<?= $id ?>cta-url" name="<?= $key ?>[cta_url]" value="<?= $esc($tr['cta_url'] ?? '') ?>" placeholder="пусто — ссылка основного языка">
+                        </div>
+                        <div class="form-field">
                             <label for="<?= $id ?>cta2">Текст дополнительной кнопки</label>
                             <input type="text" id="<?= $id ?>cta2" name="<?= $key ?>[cta2_text]" value="<?= $esc($tr['cta2_text'] ?? '') ?>">
+                        </div>
+                        <div class="form-field">
+                            <label for="<?= $id ?>cta2-url">Ссылка дополнительной кнопки</label>
+                            <input type="text" id="<?= $id ?>cta2-url" name="<?= $key ?>[cta2_url]" value="<?= $esc($tr['cta2_url'] ?? '') ?>" placeholder="пусто — ссылка основного языка">
+                        </div>
+                        <div class="form-field">
+                            <label for="<?= $id ?>slide-url">Ссылка со всего слайда</label>
+                            <input type="text" id="<?= $id ?>slide-url" name="<?= $key ?>[link_url]" value="<?= $esc($tr['link_url'] ?? '') ?>" placeholder="пусто — ссылка основного языка">
                         </div>
                         <div class="form-field">
                             <label for="<?= $id ?>art">Описание логотипа / картинки</label>

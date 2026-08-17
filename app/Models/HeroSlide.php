@@ -62,7 +62,10 @@ final class HeroSlide
             'title' => 'title',
             'subtitle' => 'subtitle',
             'cta_text' => 'cta_text',
+            'cta_url' => 'cta_url',
             'cta2_text' => 'cta2_text',
+            'cta2_url' => 'cta2_url',
+            'link_url' => 'link_url',
             'art_alt' => 'art_alt',
             'watermark' => 'watermark',
         ];
