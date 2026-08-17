@@ -57,6 +57,7 @@ final class AssetCollector
      */
     private const BLOCK_CSS_MAP = [
         'news_feature' => '/assets/css/blocks/news-feature.css',
+        'hero_slides' => '/assets/css/blocks/hero-art-layout.css',
     ];
 
     /** @var array<string, bool> */
