@@ -11,7 +11,7 @@
     // ---------------------------------------------------------------------
     // Media picker: predictable 16:9 thumbnails + client-side pagination.
     // ---------------------------------------------------------------------
-    var PAGE_SIZE = 24;
+    var PAGE_SIZE = 15;
     var pagedGrids = new WeakMap();
 
     function visibleCards(grid, selector) {
