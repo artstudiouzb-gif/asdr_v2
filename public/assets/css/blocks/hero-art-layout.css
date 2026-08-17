@@ -1,9 +1,7 @@
 /*
- * Side placement for the foreground image/logo in Hero slides.
- *
- * `art_position=left|right` is content layout, not a decorative overlay:
- * the image participates in the flow with the copy. The right variant spans
- * the content column so the image reaches the right edge of `.hero__inner`.
+ * Side layout for the foreground Hero image/logo plus non-default CTA image
+ * modes. Artwork width itself has one source: HeroRenderer's validated width
+ * attribute; this file never duplicates those preset/custom numbers.
  */
 
 .hero__text:has(> .hero__art--left),
@@ -49,6 +47,35 @@
 .hero__text > .hero__art--right {
     grid-column: 2;
     justify-self: end;
+}
+
+
+/* Default icon mode is sized by HeroRenderer at 20×20. Fill/custom are the
+   only CSS overrides, so there is no second generic sizing rule to conflict. */
+.hero__cta--image-fill {
+    padding-block: 0;
+}
+
+.hero__cta--image-fill > span:not(.hero__cta-icon) {
+    padding-block: 12px;
+}
+
+.hero__cta--image-fill .hero__cta-icon {
+    align-self: center;
+    align-items: center;
+}
+
+.hero__cta--image-fill .hero__cta-icon img {
+    width: auto;
+    height: 44px;
+    max-width: 180px;
+    object-fit: contain;
+}
+
+.hero__cta--image-custom .hero__cta-icon img {
+    height: auto;
+    max-height: none;
+    object-fit: contain;
 }
 
 /* On narrow screens the side-by-side composition becomes too cramped.

@@ -4,22 +4,27 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Core\BlockData\BlockDataInput;
 use App\Core\Cache;
 use App\Core\Database;
 
 /**
- * Перевод текста слайда (механизм А: база в `hero_slides.data`, языковые
- * варианты здесь).
+ * Перевод содержимого слайда.
  *
- * Отдельной обложки на язык нет намеренно: медиа, цвета и раскладка у слайда
- * одни и те же, и разводить их по языкам значило бы чинить композицию дважды.
- * Переводится только то, что читают, — надзаголовок, заголовок, описание,
- * подписи кнопок и описание картинки.
+ * Медиа, цвета и раскладка остаются общими для всех языков. Переводятся
+ * читаемые тексты и адреса действий: у RU/UZ версии одной кнопки могут быть
+ * разные целевые страницы.
  */
 final class HeroSlideTranslation
 {
     /** @var list<string> */
-    public const FIELDS = ['eyebrow', 'title', 'subtitle', 'cta_text', 'cta2_text', 'art_alt', 'watermark'];
+    public const FIELDS = [
+        'eyebrow', 'title', 'subtitle', 'cta_text', 'cta_url',
+        'cta2_text', 'cta2_url', 'link_url', 'art_alt', 'watermark',
+    ];
+
+    /** @var list<string> */
+    private const LINK_FIELDS = ['cta_url', 'cta2_url', 'link_url'];
 
     /**
      * Все переводы одного слайда, по коду языка (для формы).
@@ -70,21 +75,25 @@ final class HeroSlideTranslation
         return $result;
     }
 
-    /**
-     * @param array<string, mixed> $values
-     */
+    /** @param array<string, mixed> $values */
     public static function upsert(int $slideId, string $lang, array $values): void
     {
         $clean = [];
         foreach (self::FIELDS as $field) {
+            if (in_array($field, self::LINK_FIELDS, true)) {
+                $value = BlockDataInput::safeLink($values[$field] ?? '');
+                $clean[$field] = $value === '' ? null : mb_substr($value, 0, 2048);
+                continue;
+            }
+
             $value = trim((string) ($values[$field] ?? ''));
             $clean[$field] = $value === ''
                 ? null
                 : mb_substr($value, 0, $field === 'subtitle' ? 2000 : 255);
         }
 
-        // Полностью пустой перевод не храним: иначе колонка «Языки» показывала
-        // бы язык, на котором на самом деле ничего не переведено.
+        // Полностью пустой перевод не храним: язык без текста и без своей
+        // ссылки ничем не отличается от наследования основного языка.
         if (array_filter($clean, static fn (?string $v): bool => $v !== null) === []) {
             self::delete($slideId, $lang);
 
@@ -92,12 +101,15 @@ final class HeroSlideTranslation
         }
 
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO hero_slide_translations (slide_id, lang, eyebrow, title, subtitle, cta_text, cta2_text, art_alt, watermark)
-             VALUES (:id, :lang, :eyebrow, :title, :subtitle, :cta_text, :cta2_text, :art_alt, :watermark)
-             ON DUPLICATE KEY UPDATE eyebrow = VALUES(eyebrow), title = VALUES(title),
-                 subtitle = VALUES(subtitle), cta_text = VALUES(cta_text),
-                 cta2_text = VALUES(cta2_text), art_alt = VALUES(art_alt),
-                 watermark = VALUES(watermark)'
+            'INSERT INTO hero_slide_translations
+                (slide_id, lang, eyebrow, title, subtitle, cta_text, cta_url, cta2_text, cta2_url, link_url, art_alt, watermark)
+             VALUES
+                (:id, :lang, :eyebrow, :title, :subtitle, :cta_text, :cta_url, :cta2_text, :cta2_url, :link_url, :art_alt, :watermark)
+             ON DUPLICATE KEY UPDATE
+                eyebrow = VALUES(eyebrow), title = VALUES(title), subtitle = VALUES(subtitle),
+                cta_text = VALUES(cta_text), cta_url = VALUES(cta_url),
+                cta2_text = VALUES(cta2_text), cta2_url = VALUES(cta2_url),
+                link_url = VALUES(link_url), art_alt = VALUES(art_alt), watermark = VALUES(watermark)'
         );
         $stmt->execute([
             ':id' => $slideId,
@@ -106,7 +118,10 @@ final class HeroSlideTranslation
             ':title' => $clean['title'],
             ':subtitle' => $clean['subtitle'],
             ':cta_text' => $clean['cta_text'],
+            ':cta_url' => $clean['cta_url'],
             ':cta2_text' => $clean['cta2_text'],
+            ':cta2_url' => $clean['cta2_url'],
+            ':link_url' => $clean['link_url'],
             ':art_alt' => $clean['art_alt'],
             ':watermark' => $clean['watermark'],
         ]);
@@ -121,19 +136,24 @@ final class HeroSlideTranslation
         Cache::forgetPrefix('page:');
     }
 
-    /** Переводы вместе с копией слайда: дубль без них пришлось бы переводить заново. */
+    /** Переводы вместе с копией слайда: дубль сохраняет и языковые URL. */
     public static function copy(int $fromSlideId, int $toSlideId): void
     {
         Database::pdo()->prepare(
-            'INSERT INTO hero_slide_translations (slide_id, lang, eyebrow, title, subtitle, cta_text, cta2_text, art_alt, watermark)
-             SELECT :to, lang, eyebrow, title, subtitle, cta_text, cta2_text, art_alt, watermark
+            'INSERT INTO hero_slide_translations
+                (slide_id, lang, eyebrow, title, subtitle, cta_text, cta_url, cta2_text, cta2_url, link_url, art_alt, watermark)
+             SELECT :to, lang, eyebrow, title, subtitle, cta_text, cta_url, cta2_text, cta2_url, link_url, art_alt, watermark
              FROM hero_slide_translations WHERE slide_id = :from
-             ON DUPLICATE KEY UPDATE title = VALUES(title)'
+             ON DUPLICATE KEY UPDATE
+                eyebrow = VALUES(eyebrow), title = VALUES(title), subtitle = VALUES(subtitle),
+                cta_text = VALUES(cta_text), cta_url = VALUES(cta_url),
+                cta2_text = VALUES(cta2_text), cta2_url = VALUES(cta2_url),
+                link_url = VALUES(link_url), art_alt = VALUES(art_alt), watermark = VALUES(watermark)'
         )->execute([':to' => $toSlideId, ':from' => $fromSlideId]);
     }
 
     /**
-     * Языки, на которых у слайдов есть хоть какой-то текст (колонка «Языки»).
+     * Языки, на которых у слайда есть хоть одно собственное значение.
      *
      * @param array<int|string> $ids
      * @return array<int, list<string>>
@@ -164,7 +184,13 @@ final class HeroSlideTranslation
         $trans = Database::pdo()->prepare(
             "SELECT slide_id, lang FROM hero_slide_translations
              WHERE slide_id IN ({$in})
-               AND (TRIM(COALESCE(title, '')) <> '' OR TRIM(COALESCE(subtitle, '')) <> '')"
+               AND (
+                    TRIM(COALESCE(title, '')) <> '' OR TRIM(COALESCE(subtitle, '')) <> ''
+                    OR TRIM(COALESCE(cta_text, '')) <> '' OR TRIM(COALESCE(cta_url, '')) <> ''
+                    OR TRIM(COALESCE(cta2_text, '')) <> '' OR TRIM(COALESCE(cta2_url, '')) <> ''
+                    OR TRIM(COALESCE(link_url, '')) <> '' OR TRIM(COALESCE(art_alt, '')) <> ''
+                    OR TRIM(COALESCE(watermark, '')) <> ''
+               )"
         );
         $trans->execute($ids);
         foreach ($trans->fetchAll() as $row) {

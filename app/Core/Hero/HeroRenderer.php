@@ -463,18 +463,22 @@ final class HeroRenderer
             return '';
         }
         $alt = (string) $d['art_alt'];
-        $heights = ['small' => 64, 'medium' => 120, 'large' => 200];
+        $size = (string) $d['art_size'];
+        $width = match ($size) {
+            'small' => 120,
+            'large' => 360,
+            'custom' => (int) $d['art_width'],
+            default => 220,
+        };
 
-        // Без описания картинка декоративная и скрыта от диктора; с описанием
-        // это содержимое, и прятать его нельзя. Явная высота обязательна: SVG
-        // без пиксельных размеров схлопывается (ширина считается из viewBox).
-        return '<span class="hero__art hero__art--' . htmlspecialchars((string) $d['art_size'], ENT_QUOTES)
+        // Explicit width keeps wide SVG/PNG logos stable in the auto grid
+        // column. Height stays automatic, preserving the original ratio.
+        return '<span class="hero__art hero__art--' . htmlspecialchars($size, ENT_QUOTES)
             . ' hero__art--' . htmlspecialchars((string) $d['art_position'], ENT_QUOTES) . '"'
             . ($alt === '' ? ' aria-hidden="true"' : '') . '>'
             . '<img src="' . htmlspecialchars($image, ENT_QUOTES) . '" alt="' . htmlspecialchars($alt, ENT_QUOTES) . '"'
-            . ' loading="lazy" decoding="async" height="' . ($heights[$d['art_size']] ?? 120) . '"></span>';
+            . ' width="' . $width . '" loading="lazy" decoding="async"></span>';
     }
-
     /**
      * Фоновая надпись — крупное слово за контентом.
      *
@@ -545,16 +549,21 @@ final class HeroRenderer
             return '';
         }
 
-        // Своя картинка побеждает иконку из набора: её ставят ради знака,
-        // которого в Tabler нет, и молча подменять его иконкой нельзя.
-        // Цвет у картинки собственный — под кнопку она не перекрашивается,
-        // в отличие от <use>, который берёт currentColor.
         $image = trim((string) ($d[$key . '_image'] ?? ''));
         $icon = (string) $d[$key . '_icon'];
+        $imageMode = (string) ($d[$key . '_image_mode'] ?? 'icon');
+        $imageClass = '';
+
         if ($image !== '' && UrlGuard::isSafeMedia($image)) {
+            $imageClass = ' hero__cta--image-' . $imageMode;
+            $sizeAttrs = match ($imageMode) {
+                'fill' => ' height="44"',
+                'custom' => ' width="' . (int) $d[$key . '_image_width'] . '"',
+                default => ' width="20" height="20"',
+            };
             $iconHtml = '<span class="hero__cta-icon" aria-hidden="true">'
                 . '<img src="' . htmlspecialchars($image, ENT_QUOTES) . '" alt=""'
-                . ' width="20" height="20" loading="lazy" decoding="async"></span>';
+                . $sizeAttrs . ' loading="lazy" decoding="async"></span>';
         } elseif ($icon !== '') {
             $iconHtml = '<span class="hero__cta-icon" aria-hidden="true">' . Icon::render($icon, 20) . '</span>';
         } else {
@@ -562,12 +571,11 @@ final class HeroRenderer
         }
 
         return '<a class="hero__cta hero__cta--' . htmlspecialchars((string) $d[$key . '_style'], ENT_QUOTES)
-            . ($iconHtml !== '' ? ' hero__cta--with-icon' : '') . '"'
+            . ($iconHtml !== '' ? ' hero__cta--with-icon' : '') . $imageClass . '"'
             . ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"'
             . (!empty($d[$key . '_new_tab']) ? ' target="_blank" rel="noopener"' : '')
             . '>' . $iconHtml . '<span>' . htmlspecialchars($text, ENT_QUOTES) . '</span></a>';
     }
-
     /**
      * Переменные конкретного слайда: они нужны только там, где слайд отходит
      * от настроек обложки.
