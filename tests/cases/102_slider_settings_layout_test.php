@@ -13,7 +13,7 @@ test('Admin slider settings: compact layout layer is loaded and scoped', functio
     assert_true(is_string($script));
     assert_true(is_string($css));
 
-    assert_contains("styleUrl('admin-slider-settings-layout.css')", $loader);
+    assert_contains("loadStyle('admin-slider-settings-layout.css')", $loader);
     assert_contains("data-admin-slider-settings-layout", $loader);
     assert_contains("load('admin-slider-settings-layout.js')", $loader);
     assert_contains('/assets/js/admin-slider-settings-layout.js', $asset);
