@@ -28,15 +28,11 @@
     }
 
     function loadStyle(fileName) {
-        var marker = fileName === 'admin-workflow-fixes.css'
-            ? 'data-admin-workflow-fixes'
-            : 'data-admin-slider-settings-layout';
-        if (document.querySelector('link[' + marker + ']')) { return; }
-
+        if (document.querySelector('link[data-admin-workflow-fixes]')) { return; }
         var link = document.createElement('link');
         link.rel = 'stylesheet';
         link.href = styleUrl(fileName);
-        link.setAttribute(marker, '');
+        link.setAttribute('data-admin-workflow-fixes', '');
         document.head.appendChild(link);
     }
 
@@ -53,19 +49,14 @@
         document.head.appendChild(script);
     }
 
-    // Исторический workflow-marker и вызов оставлены без изменения, чтобы
-    // существующие расширения/проверки админки продолжали видеть тот же контракт.
     loadStyle('admin-workflow-fixes.css');
-    loadStyle('admin-slider-settings-layout.css');
 
     // admin.js остаётся основным скриптом. Мост загружается строго после него,
-    // затем подключаются небольшие workflow-слои: они не меняют данные форм,
-    // а улучшают поведение медиаполей и компоновку настроек.
+    // а финальный workflow-слой — после моста, чтобы не дублировать загрузку и
+    // только улучшать уже существующие медиакомпоненты.
     load('admin.js', function () {
         load('admin-media-bridge.js', function () {
-            load('admin-workflow-fixes.js', function () {
-                load('admin-slider-settings-layout.js');
-            });
+            load('admin-workflow-fixes.js');
         });
     });
 })();
