@@ -52,20 +52,10 @@
         return bar;
     }
 
-    function suppressLegacyPager(grid) {
-        grid.querySelectorAll('[data-media-client-pager]').forEach(function (pager) {
-            pager.hidden = true;
-            pager.classList.add('media-client-pager--legacy-hidden');
-            pager.setAttribute('aria-hidden', 'true');
-        });
-    }
-
     function render(state, reset) {
         var grid = state.grid;
         if (!grid || !grid.isConnected) { return; }
         if (reset) { state.limit = STEP; }
-
-        suppressLegacyPager(grid);
 
         var cards = cardsFor(grid);
         var total = cards.length;
@@ -137,15 +127,9 @@
         new MutationObserver(function (mutations) {
             var meaningful = mutations.some(function (mutation) {
                 if (mutation.type !== 'childList') { return false; }
-                var nodes = Array.prototype.slice.call(mutation.addedNodes)
-                    .concat(Array.prototype.slice.call(mutation.removedNodes));
-                return nodes.some(function (node) {
-                    return node.nodeType === 1
-                        && !(node.matches && node.matches('[data-media-client-pager]'));
-                });
+                return mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0;
             });
             if (meaningful) { schedule(state, true); }
-            else { suppressLegacyPager(grid); }
         }).observe(grid, { childList: true });
 
         schedule(state, true);
