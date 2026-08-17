@@ -70,14 +70,8 @@ final class AdminBrand
         $html .= '<link rel="stylesheet" data-admin-shell-stability-css="1" href="'
             . htmlspecialchars(Asset::url('/assets/css/admin-shell-stability.css'), ENT_QUOTES)
             . '">';
-        $html .= '<link rel="stylesheet" data-admin-media-metadata-css="1" href="'
-            . htmlspecialchars(Asset::url('/assets/css/admin-media-metadata.css'), ENT_QUOTES)
-            . '">';
         $html .= '<script nonce="' . htmlspecialchars(SecurityHeaders::nonce(), ENT_QUOTES)
             . '" src="' . htmlspecialchars(Asset::url('/assets/js/admin-notifications.js'), ENT_QUOTES)
-            . '" defer></script>';
-        $html .= '<script nonce="' . htmlspecialchars(SecurityHeaders::nonce(), ENT_QUOTES)
-            . '" src="' . htmlspecialchars(Asset::url('/assets/js/admin-media-metadata.js'), ENT_QUOTES)
             . '" defer></script>';
 
         return $html;

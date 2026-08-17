@@ -41,6 +41,7 @@ final class Asset
             $galleryDropzoneJs = '/assets/js/admin-gallery-dropzone.js';
             $loadMoreJs = '/assets/js/admin-media-loadmore.js';
             $workflowCss = '/assets/css/admin-workflow-fixes.css';
+            $unifiedMediaCss = '/assets/css/admin-media-unified.css';
             $adminBundle = [
                 '/assets/js/admin.js',
                 $loader,
@@ -49,6 +50,7 @@ final class Asset
                 $galleryDropzoneJs,
                 $loadMoreJs,
                 $workflowCss,
+                $unifiedMediaCss,
             ];
             $bundleReady = true;
             foreach ($adminBundle as $bundleFile) {
