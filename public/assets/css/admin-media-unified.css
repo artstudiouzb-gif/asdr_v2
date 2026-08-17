@@ -1,5 +1,146 @@
-/* Unified admin media picker: one grid for single and multiple selection. */
+/* Unified admin media visuals.
+ * The standalone media library and every MediaPicker modal share one
+ * thumbnail contract: 16:9 preview, filename overlay and the same selected
+ * state. Context may change the number of columns, never the card itself.
+ */
 
+:root {
+    --admin-media-thumb-radius: 10px;
+    --admin-media-thumb-border: 2px solid transparent;
+    --admin-media-thumb-bg: #e8eef5;
+    --admin-media-thumb-shadow: 0 1px 4px rgba(15, 23, 42, .10);
+    --admin-media-thumb-shadow-hover: 0 7px 18px rgba(15, 23, 42, .15);
+    --admin-media-thumb-caption-bg: linear-gradient(180deg, rgba(15, 23, 42, .16), rgba(15, 23, 42, .88));
+    --admin-media-thumb-caption: #fff;
+}
+
+/* -------------------------------------------------------------------------
+ * Shared thumbnail card: /admin/files + modal MediaPicker.
+ * ---------------------------------------------------------------------- */
+.media-grid .media-card,
+.media-modal__grid .media-modal__item {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    min-height: 0 !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9 !important;
+    overflow: hidden;
+    border: var(--admin-media-thumb-border) !important;
+    border-radius: var(--admin-media-thumb-radius) !important;
+    background: var(--admin-media-thumb-bg) !important;
+    box-shadow: var(--admin-media-thumb-shadow) !important;
+    transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+.media-grid .media-card:hover,
+.media-modal__grid .media-modal__item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--admin-media-thumb-shadow-hover) !important;
+}
+
+.media-grid .media-card__thumb,
+.media-modal__grid .media-modal__item img {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+    object-fit: cover !important;
+}
+
+/* The standalone library already has a caption node. The modal picker keeps
+ * its lightweight DOM and renders the same footer from the button title. */
+.media-grid .media-card__caption,
+.media-modal__grid .media-modal__item:not(.media-modal__item--file)::before {
+    position: absolute;
+    z-index: 3;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    min-height: 27px;
+    padding: 7px 8px 6px;
+    overflow: hidden;
+    color: var(--admin-media-thumb-caption) !important;
+    background: var(--admin-media-thumb-caption-bg) !important;
+    font-size: 10px;
+    font-weight: 650;
+    line-height: 1.2;
+    text-align: left;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.media-modal__grid .media-modal__item:not(.media-modal__item--file)::before {
+    content: attr(title);
+    pointer-events: none;
+}
+
+/* One selected state in both contexts. */
+.media-grid .media-card.is-selected,
+.media-modal__grid .media-modal__item.is-selected {
+    border-color: var(--admin-accent, #2563eb) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent, #2563eb) 24%, transparent) !important;
+}
+
+/* /admin/files uses a real Tabler icon node. Keep it visually identical to
+ * the modal pseudo-check instead of maintaining two different designs. */
+.media-grid .media-card__check {
+    top: 7px !important;
+    right: 7px !important;
+    width: 23px !important;
+    height: 23px !important;
+    border: 2px solid #fff !important;
+    border-radius: 50% !important;
+    color: #fff !important;
+    background: var(--admin-accent, #2563eb) !important;
+    box-shadow: 0 2px 7px rgba(15, 23, 42, .30) !important;
+}
+
+/* MediaPicker did not have a check node at all. The selected class is already
+ * maintained by admin.js for both single and multiple selection, so the same
+ * visual marker can be derived without introducing another picker system. */
+.media-modal__grid .media-modal__item::after {
+    content: '✓';
+    position: absolute;
+    z-index: 5;
+    top: 7px;
+    right: 7px;
+    width: 23px;
+    height: 23px;
+    display: grid;
+    place-items: center;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--admin-accent, #2563eb);
+    box-shadow: 0 2px 7px rgba(15, 23, 42, .30);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1;
+    opacity: 0;
+    transform: scale(.78);
+    pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+}
+
+.media-modal__grid .media-modal__item.is-selected::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Non-image files keep their central icon/filename treatment, but inherit the
+ * exact same card shell and selected marker. */
+.media-modal__grid .media-modal__item--file {
+    padding: 12px !important;
+}
+
+.media-modal__item[hidden] {
+    display: none !important;
+}
+
+/* -------------------------------------------------------------------------
+ * Modal grid geometry. 15 initial items = five columns × three rows.
+ * ---------------------------------------------------------------------- */
 .media-modal__grid {
     flex: 1 1 auto;
     min-height: 0 !important;
@@ -15,25 +156,6 @@
     overflow-x: hidden !important;
     scrollbar-gutter: stable;
     overscroll-behavior: contain;
-}
-
-.media-modal__item {
-    width: 100%;
-    min-width: 0;
-    min-height: 0 !important;
-    height: auto !important;
-    aspect-ratio: 16 / 9 !important;
-}
-
-.media-modal__item img {
-    width: 100% !important;
-    height: 100% !important;
-    display: block;
-    object-fit: cover !important;
-}
-
-.media-modal__item[hidden] {
-    display: none !important;
 }
 
 /* Progressive control lives outside the grid. Adding 15 more cards therefore
