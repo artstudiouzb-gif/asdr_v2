@@ -13,8 +13,9 @@ final class WafGuard
     private const EXPLOIT_PATTERNS = [
         '/\b(union\s+select|select\s+.*\s+from\s+information_schema|benchmark\s*\(|pg_sleep\s*\()/i',
         '/<script\b[^>]*>.*?<\/script>/is',
-        '/\b(javascript:|vbscript:|onerror\s*=|onload\s*=)/i',
-        '/(\.\.\/|\.\.\\\\)/',
+        '/\b(javascript:|vbscript:|data:text\/html|onerror\s*=|onload\s*=)/i',
+        '/(\.\.\/|\.\.\\\\|%2e%2e%2f|%2e%2e\/|\.\.%2f|%2e%2e%5c|\0)/i',
+        '/\b(etc\/passwd|proc\/self\/environ|boot\.ini|windows\/system32)/i',
     ];
 
     public static function inspect(): void

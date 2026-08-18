@@ -366,14 +366,15 @@ $heroMedia = static function (
             $slidePanel = (string) ($slide['panel'] ?? '');
             $slidePanelOn = $slidePanel === 'on' ? true : ($slidePanel === 'off' ? false : $panelOn);
             $slideArtImage = trim((string) ($slide['art_image'] ?? ''));
+            $slideArtSize = (string) (($slide['art_size'] ?? '') ?: $artSize);
             $slideArtHtml = $slideArtImage !== ''
                 ? $heroArt(
                     $slideArtImage,
                     trim((string) ($slide['art_alt'] ?? '')),
-                    (string) ($slide['art_size'] ?: $artSize)
+                    $slideArtSize
                 )
                 : $artHtml;
-            $slideArtPosition = (string) ($slide['art_position'] ?: $artPosition);
+            $slideArtPosition = (string) (($slide['art_position'] ?? '') ?: $artPosition);
             ?>
             <div class="block-hero__slide block-hero--pos-<?= $slidePos ?><?= $index === 0 ? ' is-active' : '' ?>"
                  role="group" aria-roledescription="<?= htmlspecialchars(t('Слайд'), ENT_QUOTES) ?>"
@@ -387,7 +388,7 @@ $heroMedia = static function (
                     <a class="block-hero__slide-cover" href="<?= htmlspecialchars($slideLink, ENT_QUOTES) ?>"
                        tabindex="-1" aria-hidden="true"></a>
                 <?php endif; ?>
-                <div class="block-hero__inner<?= $slideArtHtml !== '' ? ' block-hero__inner--art block-hero__inner--art-' . $slideArtPosition . ' block-hero__inner--art-' . ($slide['art_size'] ?: $artSize) : '' ?>">
+                <div class="block-hero__inner<?= $slideArtHtml !== '' ? ' block-hero__inner--art block-hero__inner--art-' . $slideArtPosition . ' block-hero__inner--art-' . $slideArtSize : '' ?>">
                     <?php if ($slideArtHtml !== '' && $slideArtPosition !== 'right'): ?><?= $slideArtHtml ?><?php endif; ?>
                     <div class="block-hero__text<?= $slidePanelOn ? ' block-hero__text--panel' : '' ?>">
                         <?php if (!empty($slide['eyebrow'])): ?><span class="block-hero__eyebrow"><?= htmlspecialchars((string) $slide['eyebrow'], ENT_QUOTES) ?></span><?php endif; ?>

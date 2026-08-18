@@ -69,6 +69,21 @@ if (\App\Models\Setting::get('maintenance_mode', '0') === '1'
     exit;
 }
 
+// --- Динамический ресайзер миниатюр на лету (On-the-fly Media Thumbnailer) ---
+if (str_starts_with($requestPath, '/media/thumb/')) {
+    if (preg_match('#^/media/thumb/(\d+)x(\d+)/([a-z]+)/(\d+)/([a-f0-9]{16})/(.+)$#', $requestPath, $matches)) {
+        \App\Core\MediaResizer::handle(
+            (int) $matches[1],
+            (int) $matches[2],
+            (string) $matches[3],
+            (int) $matches[4],
+            (string) $matches[5],
+            rawurldecode((string) $matches[6])
+        );
+        exit;
+    }
+}
+
 $router = new Router();
 
 // --- Установщик после установки: аппаратно заблокирован (403) ---

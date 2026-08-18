@@ -46,26 +46,12 @@ final class FileController
         // Фильтр по типу: image (по умолчанию), svg, video, audio, document, all_files, all.
         $type = (string) ($_GET['type'] ?? 'image');
         $type = in_array($type, ['image', 'svg', 'video', 'audio', 'document', 'all_files', 'all'], true) ? $type : 'image';
-        $matches = static function (string $mime) use ($type): bool {
-            return match ($type) {
-                'svg' => $mime === 'image/svg+xml',
-                'video' => str_starts_with($mime, 'video/'),
-                'audio' => str_starts_with($mime, 'audio/'),
-                'document' => !str_starts_with($mime, 'image/') && !str_starts_with($mime, 'video/') && !str_starts_with($mime, 'audio/'),
-                'all_files' => true,
-                'all' => str_starts_with($mime, 'image/') || str_starts_with($mime, 'video/') || str_starts_with($mime, 'audio/'),
-                default => str_starts_with($mime, 'image/'),
-            };
-        };
+        $limit = max(1, min(500, (int) ($_GET['limit'] ?? 300)));
+        $offset = max(0, (int) ($_GET['offset'] ?? 0));
+        $query = trim((string) ($_GET['q'] ?? ''));
 
         $items = [];
-        foreach (FileEntry::all() as $file) {
-            if (($file['access_type'] ?? '') !== 'public') {
-                continue;
-            }
-            if (!$matches((string) $file['mime_type'])) {
-                continue;
-            }
+        foreach (FileEntry::libraryFiltered($type, $limit, $offset, $query) as $file) {
             $items[] = self::libraryItem($file);
         }
 

@@ -109,7 +109,8 @@ final class FormNotifier
 
     /**
      * Произвольное служебное уведомление тем же получателям (сбой автобэкапа
-     * и т.п.). Возвращает число успешных доставок.
+     * и т.п.). Отправляет сообщения параллельно через curl_multi для минимальной задержки.
+     * Возвращает число успешных доставок.
      */
     public static function broadcast(string $text): int
     {
@@ -117,12 +118,77 @@ final class FormNotifier
             return 0;
         }
 
-        $sent = 0;
-        foreach (self::chatIds() as $chatId) {
-            if (TelegramBot::sendMessage($chatId, $text)) {
-                $sent++;
-            }
+        $chatIds = self::chatIds();
+        if ($chatIds === []) {
+            return 0;
         }
+
+        if (count($chatIds) === 1) {
+            return TelegramBot::sendMessage($chatIds[0], $text) ? 1 : 0;
+        }
+
+        $token = trim(Setting::get('telegram_bot_token', ''));
+        if ($token === '') {
+            return 0;
+        }
+
+        $base = getenv('TELEGRAM_BOT_URL') ?: 'https://api.telegram.org';
+        $url = rtrim($base, '/') . '/bot' . $token . '/sendMessage';
+
+        $mh = curl_multi_init();
+        $handles = [];
+
+        foreach ($chatIds as $chatId) {
+            $ch = curl_init($url);
+            $payload = json_encode([
+                'chat_id' => $chatId,
+                'text' => $text,
+                'parse_mode' => 'HTML',
+            ], JSON_UNESCAPED_UNICODE);
+
+            curl_setopt_array($ch, [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $payload,
+                CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 3,
+                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+            ]);
+
+            curl_multi_add_handle($mh, $ch);
+            $handles[$chatId] = $ch;
+        }
+
+        $active = null;
+        do {
+            $status = curl_multi_exec($mh, $active);
+            if ($active) {
+                curl_multi_select($mh, 0.05);
+            }
+        } while ($active && $status === CURLM_OK);
+
+        $sent = 0;
+        foreach ($handles as $chatId => $ch) {
+            $response = curl_multi_getcontent($ch);
+            $httpCode = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+            $json = is_string($response) ? json_decode($response, true) : null;
+
+            if ($httpCode === 200 && is_array($json) && ($json['ok'] ?? false) === true) {
+                $sent++;
+            } else {
+                // Если HTML-парсинг не удался, пробуем чистый текст вторым шансом
+                if (TelegramBot::sendMessage($chatId, strip_tags($text), '')) {
+                    $sent++;
+                }
+            }
+
+            curl_multi_remove_handle($mh, $ch);
+            curl_close($ch);
+        }
+
+        curl_multi_close($mh);
 
         return $sent;
     }

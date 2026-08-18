@@ -163,6 +163,7 @@ final class PortalController
         header('Content-Length: ' . (string) filesize($fullPath));
         header('X-Content-Type-Options: nosniff');
         header('Cache-Control: private, max-age=3600');
+        header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox");
 
         readfile($fullPath);
         exit;

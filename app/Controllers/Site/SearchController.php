@@ -54,7 +54,7 @@ final class SearchController
             && RateLimiter::throttle('site_suggest', $_SERVER['REMOTE_ADDR'] ?? 'unknown', 90, 1)) {
             $results = Cache::remember(
                 'search-suggest:' . Locale::current() . ':' . hash('sha256', mb_strtolower($query)),
-                static fn (): array => array_slice(Search::site($query, 6), 0, 6),
+                static fn (): array => Search::quick($query, 6),
                 30
             );
         }

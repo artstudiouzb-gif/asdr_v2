@@ -14,9 +14,8 @@ if ($textIsPlain) {
 $image = trim((string) ($data['image'] ?? ''));
 $items = $data['items'] ?? [];
 $imageSide = ($data['image_side'] ?? 'right') === 'left' ? 'left' : 'right';
-$ratio = in_array($data['image_ratio'] ?? 'auto', ['auto', '16-9', '4-3', '1-1'], true)
-    ? (string) $data['image_ratio']
-    : 'auto';
+$rawRatio = (string) ($data['image_ratio'] ?? 'auto');
+$ratio = in_array($rawRatio, ['auto', '16-9', '4-3', '1-1'], true) ? $rawRatio : 'auto';
 $mediaClasses = \App\Core\MediaPosition::classes($data['image_position'] ?? null, $data['image_position_mobile'] ?? null);
 $buttonText = trim((string) ($data['button_text'] ?? ''));
 $buttonUrl = trim((string) ($data['button_url'] ?? ''));
