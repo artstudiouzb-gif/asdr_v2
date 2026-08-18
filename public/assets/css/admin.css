@@ -6888,4 +6888,42 @@ body.auth-page label,
     color: var(--admin-accent, #0d9488);
 }
 
+/* ========================================================================
+   Granular Demo Data Modules Selector
+   ======================================================================== */
+.demo-modules-selector {
+    margin: 14px 0 18px;
+    padding: 12px 14px;
+    background: var(--admin-hover, #f8fafc);
+    border: 1px solid var(--admin-border, #e2e8f0);
+    border-radius: 8px;
+}
+
+.demo-modules-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--admin-border, #e2e8f0);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.demo-modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px 12px;
+}
+
+.demo-module-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--admin-text, #334155);
+    cursor: pointer;
+}
+
+
 
