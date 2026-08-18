@@ -117,6 +117,11 @@ $router->post('/admin/revisions/{type}/{id}/{revisionId}/restore', [AdminContent
 
 // --- Admin: новости ---
 $router->get('/admin/news', [AdminNewsController::class, 'index']);
+$router->get('/admin/news/import', [\App\Controllers\Admin\NewsImportController::class, 'index']);
+$router->post('/admin/news/import/upload', [\App\Controllers\Admin\NewsImportController::class, 'uploadChunk']);
+$router->post('/admin/news/import/inspect', [\App\Controllers\Admin\NewsImportController::class, 'inspect']);
+$router->post('/admin/news/import/run', [\App\Controllers\Admin\NewsImportController::class, 'importBatch']);
+$router->post('/admin/news/import/discard', [\App\Controllers\Admin\NewsImportController::class, 'discard']);
 $router->get('/admin/news/create', [AdminNewsController::class, 'create']);
 $router->post('/admin/news/create', [AdminNewsController::class, 'store']);
 $router->get('/admin/news/{id}/edit', [AdminNewsController::class, 'edit']);

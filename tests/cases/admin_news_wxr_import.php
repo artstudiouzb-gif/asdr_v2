@@ -2,25 +2,31 @@
 
 declare(strict_types=1);
 
-test('admin WXR importer is super-admin and CSRF protected', function (): void {
+test('admin WXR importer is routed through the front controller and protected', function (): void {
     $root = dirname(__DIR__, 2);
     $controller = (string) file_get_contents($root . '/app/Controllers/Admin/NewsImportController.php');
-    $entry = (string) file_get_contents($root . '/public/admin/import-news.php');
+    $routes = (string) file_get_contents($root . '/public/index.php');
     $htaccess = (string) file_get_contents($root . '/public/.htaccess');
     $rootHtaccess = (string) file_get_contents($root . '/.htaccess');
     $newsIndex = (string) file_get_contents($root . '/app/Views/admin/news/index.php');
+    $view = (string) file_get_contents($root . '/app/Views/admin/news/import.php');
+    $script = (string) file_get_contents($root . '/public/assets/js/admin-news-import.js');
 
     assert_contains('Auth::requireSuperAdmin()', $controller);
     assert_contains('Csrf::verifyRequest()', $controller);
-    assert_contains("'upload' => \$controller->uploadChunk()", $entry);
-    assert_contains("'inspect' => \$controller->inspect()", $entry);
-    assert_contains("'import' => \$controller->importBatch()", $entry);
-    assert_contains('Backup::isWriteGuardActive()', $entry);
-    assert_contains('!^/admin/import-news\\.php$', $htaccess);
-    assert_contains('<Files "import-news.php">', $htaccess);
-    assert_contains('admin/import-news\\.php$', $rootHtaccess);
-    assert_contains('/admin/import-news.php', $newsIndex);
-    assert_not_contains('(index|download|import-news)\\.php$', $htaccess);
+    assert_contains("\$router->get('/admin/news/import', [\\App\\Controllers\\Admin\\NewsImportController::class, 'index'])", $routes);
+    assert_contains("\$router->post('/admin/news/import/upload', [\\App\\Controllers\\Admin\\NewsImportController::class, 'uploadChunk'])", $routes);
+    assert_contains("\$router->post('/admin/news/import/inspect', [\\App\\Controllers\\Admin\\NewsImportController::class, 'inspect'])", $routes);
+    assert_contains("\$router->post('/admin/news/import/run', [\\App\\Controllers\\Admin\\NewsImportController::class, 'importBatch'])", $routes);
+    assert_contains("\$router->post('/admin/news/import/discard', [\\App\\Controllers\\Admin\\NewsImportController::class, 'discard'])", $routes);
+    assert_contains('/admin/news/import', $newsIndex);
+    assert_contains('data-endpoint="/admin/news/import"', $view);
+    assert_contains("endpoint + '/' + encodeURIComponent(action)", $script);
+    assert_not_contains('/admin/import-news.php', $newsIndex);
+    assert_not_contains('/admin/import-news.php', $view);
+    assert_not_contains('/admin/import-news.php', $script);
+    assert_not_contains('import-news.php', $htaccess);
+    assert_not_contains('admin/import-news\\.php', $rootHtaccess);
     assert_not_contains('shell_exec(', $controller);
     assert_not_contains('exec(', $controller);
 });
@@ -47,6 +53,6 @@ test('admin WXR importer keeps verification separate from writes', function (): 
     assert_contains('Черновики — рекомендуется', $view);
     assert_contains('Создать резервную копию перед импортом', $view);
     assert_contains("jsonPost('inspect'", $script);
-    assert_contains("jsonPost('import'", $script);
+    assert_contains("jsonPost('run'", $script);
     assert_contains('1024 * 1024', $script);
 });

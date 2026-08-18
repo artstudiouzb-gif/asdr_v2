@@ -6,7 +6,7 @@ use App\Models\Language;
 
 $pageTitle = 'Новости';
 $activeNav = 'news';
-$pageActions = '<a href="/admin/import-news.php" class="btn">' . AdminUi::icon('database-import') . 'Импорт WXR/XML</a>'
+$pageActions = '<a href="/admin/news/import" class="btn">' . AdminUi::icon('database-import') . 'Импорт WXR/XML</a>'
     . '<a href="/admin/news/create" class="btn btn--primary">' . AdminUi::icon('plus') . 'Добавить новость</a>';
 require __DIR__ . '/../layout/header.php';
 

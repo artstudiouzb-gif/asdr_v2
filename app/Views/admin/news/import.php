@@ -14,7 +14,7 @@ require __DIR__ . '/../layout/header.php';
 ?>
 <link rel="stylesheet" href="<?= htmlspecialchars(Asset::url('/assets/css/admin-news-import.css'), ENT_QUOTES) ?>">
 
-<div class="news-import" data-news-import data-endpoint="/admin/import-news.php" data-max-mb="<?= (int) $maxUploadMb ?>" data-batch-size="<?= (int) $batchSize ?>">
+<div class="news-import" data-news-import data-endpoint="/admin/news/import" data-max-mb="<?= (int) $maxUploadMb ?>" data-batch-size="<?= (int) $batchSize ?>">
     <div class="form-card news-import__intro">
         <?= AdminUi::cardHeader('Импорт из WXR/XML', 'database-import') ?>
         <p>Загрузите стандартный WXR/XML-экспорт старого сайта. Система сначала только проверит файл и покажет план. Запись в базу начнётся только после отдельного подтверждения.</p>
@@ -123,7 +123,7 @@ require __DIR__ . '/../layout/header.php';
         <p data-done-text>Новости перенесены.</p>
         <div class="form-actions">
             <a href="/admin/news?status=draft" class="btn btn--primary">Открыть новости</a>
-            <a href="/admin/import-news.php" class="btn">Новый импорт</a>
+            <a href="/admin/news/import" class="btn">Новый импорт</a>
         </div>
     </div>
 
