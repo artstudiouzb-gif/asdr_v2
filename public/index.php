@@ -512,4 +512,8 @@ if (\App\Core\Session::hasCookie()
     }
 }
 
+if ($requestMethod === 'GET' && !str_starts_with($guardPath, '/admin') && !str_starts_with($guardPath, '/install') && !str_starts_with($guardPath, '/api')) {
+    header('Link: </assets/css/public.min.css>; rel=preload; as=style', false);
+}
+
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
