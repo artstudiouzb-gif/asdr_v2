@@ -9,6 +9,7 @@ use App\Core\AppUrl;
 use App\Core\Config;
 use App\Core\Fragment;
 use App\Core\Locale;
+use App\Core\OpenGraphHelper;
 use App\Core\View;
 use App\Models\News;
 use App\Models\NewsImage;
@@ -212,11 +213,32 @@ final class NewsController
         $adjacent = News::adjacent($news, $lang);
 
         $sidebar = \App\Core\WidgetRenderer::sidebarFor($news['sidebar_layout'] ?? 'right_sidebar', $lang);
+        $gallery = NewsImage::forNews((int) $news['id']);
+
+        // Все фото новости публикуем в Open Graph массивом: обложка первой,
+        // далее уникальные кадры галереи. Обычные соцсети смогут выбрать
+        // превью, а отдельный page-only helper использует те же og:image
+        // для нативного File[] share через системное меню устройства.
+        $socialImages = [];
+        $coverImage = News::getCoverImage($news);
+        if ($coverImage !== null && trim($coverImage) !== '') {
+            $socialImages[] = trim($coverImage);
+        }
+        foreach ($gallery as $image) {
+            $path = trim((string) ($image['path'] ?? ''));
+            if ($path !== '' && !in_array($path, $socialImages, true)) {
+                $socialImages[] = $path;
+            }
+        }
+        OpenGraphHelper::setAdditionalImages($socialImages);
 
         // Стили детальной новости (.newsdetail-*, .relnews-*) вынесены из
         // общего бандла: 42 КБ правил, нужных только здесь, приезжали на
         // каждую страницу сайта, включая главную.
         \App\Core\AssetCollector::requireThemePart('news_detail');
+        // Нативное системное «Поделиться» может передать все файлы галереи,
+        // в отличие от URL-share эндпоинтов отдельных соцсетей.
+        \App\Core\AssetCollector::requireJs('news_share_gallery');
         // Миниатюры галереи должны использовать тот же рабочий responsive-
         // источник, что и большой кадр. Это особенно важно для импортированных
         // фото, у которых WebP-вариант уже есть, а исходник недоступен.
@@ -224,7 +246,7 @@ final class NewsController
 
         View::render('site/news_show', [
             'news' => $news,
-            'gallery' => NewsImage::forNews((int) $news['id']),
+            'gallery' => $gallery,
             'related' => News::related((int) $news['id'], 4, $lang),
             'prevNews' => $adjacent['prev'],
             'nextNews' => $adjacent['next'],
