@@ -16,11 +16,11 @@ require __DIR__ . '/../layout/header.php';
 
 <div class="news-import" data-news-import data-endpoint="/admin/import-news.php" data-max-mb="<?= (int) $maxUploadMb ?>" data-batch-size="<?= (int) $batchSize ?>">
     <div class="form-card news-import__intro">
-        <?= AdminUi::cardHeader('Импорт из WordPress', 'database-import') ?>
-        <p>Загрузите стандартный экспорт WordPress WXR/XML. Система сначала только проверит файл и покажет план. Запись в базу начнётся только после отдельного подтверждения.</p>
+        <?= AdminUi::cardHeader('Импорт из WXR/XML', 'database-import') ?>
+        <p>Загрузите стандартный WXR/XML-экспорт старого сайта. Система сначала только проверит файл и покажет план. Запись в базу начнётся только после отдельного подтверждения.</p>
         <div class="news-import__safety">
             <span><?= AdminUi::icon('shield-check', 18) ?></span>
-            <div><strong>Безопасный режим</strong><small>Черновики WordPress и комментарии не импортируются. Неоднозначные WPML-переводы блокируют запуск.</small></div>
+            <div><strong>Безопасный режим</strong><small>Исходные черновики и комментарии не импортируются. Неоднозначные связи переводов блокируют запуск.</small></div>
         </div>
     </div>
 
@@ -30,7 +30,7 @@ require __DIR__ . '/../layout/header.php';
             <?= Csrf::field() ?>
             <label class="news-import__drop" data-drop-zone for="wxr_file">
                 <span class="news-import__drop-icon"><?= AdminUi::icon('file-type-xml', 34) ?></span>
-                <strong>Перетащите WordPress XML сюда</strong>
+                <strong>Перетащите WXR/XML сюда</strong>
                 <span>или нажмите, чтобы выбрать файл · максимум <?= (int) $maxUploadMb ?> МБ</span>
                 <input type="file" id="wxr_file" accept=".xml,text/xml,application/xml" data-file-input>
             </label>
