@@ -97,11 +97,20 @@ $currentLang = Locale::current();
             <span>Войти в систему</span>
             <?= \App\Core\AdminUi::icon('arrow-right', 18) ?>
         </button>
+
+        <div class="auth-divider">
+            <span class="auth-divider__label">или</span>
+        </div>
+
+        <button type="button" id="passkey-login-btn" class="auth-passkey-btn">
+            <?= \App\Core\AdminUi::icon('fingerprint', 18) ?>
+            <span>Войти с Passkey / Биометрией</span>
+        </button>
     </form>
 
     <div class="auth-security-badge">
         <?= \App\Core\AdminUi::icon('lock', 15) ?>
-        <span>Защищённое соединение 256-bit SSL &bull; 2FA</span>
+        <span>Защищённое соединение 256-bit SSL &bull; Passkeys &bull; 2FA</span>
     </div>
 </div>
 
@@ -143,6 +152,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+    }
+
+    // 3. WebAuthn / Passkeys Вход в 1 клик
+    var passkeyBtn = document.getElementById('passkey-login-btn');
+    if (passkeyBtn && window.PublicKeyCredential) {
+        passkeyBtn.addEventListener('click', async function() {
+            try {
+                passkeyBtn.disabled = true;
+                var res = await fetch('/admin/passkey/login/options');
+                if (!res.ok) throw new Error('Ошибка получения параметров входа');
+                var options = await res.json();
+
+                options.challenge = Uint8Array.from(atob(options.challenge.replace(/-/g, '+').replace(/_/g, '/')), function(c) { return c.charCodeAt(0); });
+                var credential = await navigator.credentials.get({ publicKey: options });
+
+                if (!credential) throw new Error('Биометрия не подтверждена');
+
+                var verifyRes = await fetch('/admin/passkey/login/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: credential.id })
+                });
+
+                var verifyData = await verifyRes.json();
+                if (verifyData.success && verifyData.redirect) {
+                    window.location.href = verifyData.redirect;
+                } else {
+                    alert(verifyData.error || 'Ошибка входа по Passkey');
+                }
+            } catch (err) {
+                if (err.name !== 'NotAllowedError') {
+                    alert('Не удалось войти по биометрии: ' + err.message);
+                }
+            } finally {
+                passkeyBtn.disabled = false;
+            }
+        });
+    } else if (passkeyBtn) {
+        passkeyBtn.style.display = 'none';
     }
 });
 </script>

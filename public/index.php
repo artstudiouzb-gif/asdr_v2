@@ -84,6 +84,17 @@ if (str_starts_with($requestPath, '/media/thumb/')) {
     }
 }
 
+// --- Динамический генератор брендированных OpenGraph-обложек ---
+if (str_starts_with($requestPath, '/og/news/')) {
+    if (preg_match('#^/og/news/([a-z0-9-]+)\.png$#i', $requestPath, $matches)) {
+        $news = \App\Models\News::findBySlug($matches[1]);
+        if ($news) {
+            \App\Core\OpenGraphImage::render((string) ($news['title'] ?? 'Новость'), (string) ($news['category_name'] ?? 'Новость'), (string) ($news['published_at'] ?? ''));
+            exit;
+        }
+    }
+}
+
 $router = new Router();
 
 // --- Установщик после установки: аппаратно заблокирован (403) ---
