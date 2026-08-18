@@ -47,7 +47,7 @@ final class NewsImportController
             $this->json(['ok' => false, 'error' => 'XML-файл слишком большой. Максимум ' . (int) floor(self::MAX_BYTES / 1048576) . ' МБ.'], 413);
         }
         if ($originalName === '' || strtolower(pathinfo($originalName, PATHINFO_EXTENSION)) !== 'xml') {
-            $this->json(['ok' => false, 'error' => 'Разрешены только файлы WordPress WXR с расширением .xml.'], 422);
+            $this->json(['ok' => false, 'error' => 'Разрешены только WXR/XML-файлы с расширением .xml.'], 422);
         }
         if (empty($_FILES['chunk']) || (int) ($_FILES['chunk']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
             $this->json(['ok' => false, 'error' => 'Не удалось получить часть загружаемого файла.'], 400);
@@ -154,7 +154,7 @@ final class NewsImportController
         }
         $data = LegacyWxrImporter::parse($xml);
         if ($data['posts'] === []) {
-            $this->json(['ok' => false, 'error' => 'В XML не найдено записей WordPress типа post. Проверьте WXR-экспорт.'], 422);
+            $this->json(['ok' => false, 'error' => 'В XML не найдено записей типа post. Проверьте WXR-экспорт.'], 422);
         }
 
         $langs = ['uz' => 'uz', 'ru' => 'ru', 'en' => 'en'];
