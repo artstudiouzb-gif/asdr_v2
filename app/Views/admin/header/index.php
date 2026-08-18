@@ -1078,10 +1078,11 @@ $heightSelect = function (string $name, string $current): string {
             </div>
         </div>
 
-        <div class="form-actions form-actions--sticky u-inline-3343fd6464">
-            <button type="submit" class="btn btn--primary btn--large u-inline-b3b6c6d715">
-                <?= AdminUi::icon('save') ?> Сохранить всю конфигурацию шапки
+        <div class="form-actions form-actions--sticky">
+            <button type="submit" class="btn btn--primary">
+                <?= AdminUi::icon('device-floppy', 18) ?> Сохранить конфигурацию шапки
             </button>
+            <span class="form-hint">Изменения структуры и стилей шапки применятся ко всему сайту.</span>
         </div>
     </form>
 </div>

@@ -2389,11 +2389,11 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .image-field {
     background: #ffffff;
     border: 1px solid var(--admin-border, #cbd5e1);
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 14px 16px;
     margin-bottom: 12px;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-    max-width: 680px;
+    width: 100%;
 }
 .image-field label {
     font-size: 13.5px;
@@ -2404,14 +2404,14 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 }
 .image-field__row {
     display: flex;
-    gap: 14px;
+    gap: 16px;
     align-items: center;
 }
 .image-field__preview {
     flex-shrink: 0;
-    width: 108px;
-    height: 72px;
-    border-radius: 6px;
+    width: 180px;
+    height: 110px;
+    border-radius: 4px;
     border: 1px solid var(--admin-border, #cbd5e1);
     background: var(--admin-surface-soft, #f8fafc);
     display: flex;
@@ -6685,8 +6685,8 @@ select {
     align-items: center !important;
 }
 .hero-slide-item__preview {
-    width: 76px !important;
-    height: 48px !important;
+    width: 120px !important;
+    height: 72px !important;
     border-radius: 4px !important;
     border: 1px solid #cbd5e1 !important;
     overflow: hidden !important;
