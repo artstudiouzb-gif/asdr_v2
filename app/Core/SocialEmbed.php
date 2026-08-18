@@ -17,6 +17,12 @@ final class SocialEmbed
             return $html;
         }
 
+        // Старый WXR-контент хранит абзацы как пустые строки и рассчитывает
+        // на wpautop при выводе. Восстанавливаем семантические <p> до поиска
+        // отдельно стоящих social-ссылок. Уже размеченный редактором HTML
+        // LegacyContentFormatter не меняет.
+        $html = LegacyContentFormatter::paragraphize($html);
+
         // 1. YouTube ссылки на отдельной строке или в абзаце
         $html = (string) preg_replace_callback(
             '/<p>\s*(?:<a[^>]*href="([^"]+)"[^>]*>)?\s*(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s<]+)\s*(?:<\/a>)?\s*<\/p>/i',
