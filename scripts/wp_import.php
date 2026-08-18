@@ -5,20 +5,23 @@ declare(strict_types=1);
 /**
  * Импорт новостей из старой CMS (REST API или WXR) с фотографиями.
  *
- * Запуск на сервере, где доступен старый сайт:
+ * Запуск:
  *   php scripts/wp_import.php https://asdr.gov.uz [опции]
+ *   php scripts/wp_import.php WordPress.xml [опции]
  *
  * Опции:
- *   --limit N        импортировать не более N новостей (0 = все)
- *   --status STATE   draft (по умолчанию) | published
+ *   --limit N        импортировать не более N базовых новостей (0 = все)
+ *   --status STATE   draft (по умолчанию) | published — статус НОВОЙ новости
  *   --author ID      id пользователя-автора (по умолчанию первый админ)
- *   --lang OLD:ART   язык (повторяемо): код языка источника → код языка ArtStudio.
- *                    Первый = основной, остальные пишутся переводами. Напр.:
- *                    --lang uz:uz --lang ru:ru   (двуязычный сайт)
- *   --dry-run        только показать, сколько будет импортировано, без записи
+ *   --lang OLD:ART   код языка источника → код языка ArtStudio (повторяемо).
+ *                    Первый язык считается основным. Например:
+ *                    --lang uz:uz --lang ru:ru --lang en:en
+ *   --uploads DIR    локальная папка старого wp-content/uploads; если файла
+ *                    там нет, импортёр попробует скачать его со старого сайта
+ *   --dry-run        построить полный план импорта без записи данных
  *
- * По умолчанию новости создаются ЧЕРНОВИКАМИ — просмотрите и опубликуйте в
- * админке (Новости). Повторный запуск не создаёт дубли (пропуск по slug).
+ * Для WXR импортируются только исходные записи status=publish. Исходные
+ * WordPress-черновики и комментарии намеренно не переносятся.
  */
 
 require __DIR__ . '/../app/Core/bootstrap.php';
@@ -29,7 +32,7 @@ use App\Core\LegacyCmsImporter;
 use App\Core\LegacyWxrImporter;
 
 $args = array_slice($argv, 1);
-$source = '';   // URL сайта ИЛИ путь к файлу экспорта .xml
+$source = '';
 $opts = ['status' => 'draft', 'limit' => 0, 'dryRun' => false, 'authorId' => null, 'langs' => [], 'uploadsDir' => null];
 
 for ($i = 0; $i < count($args); $i++) {
@@ -57,16 +60,13 @@ for ($i = 0; $i < count($args); $i++) {
 if ($source === '') {
     fwrite(STDERR, "Укажите адрес сайта ИЛИ файл экспорта .xml, напр.:\n"
         . "  php scripts/wp_import.php https://asdr.gov.uz --lang uz:uz --lang ru:ru --limit 20\n"
-        . "  php scripts/wp_import.php export.xml --lang uz:uz --lang ru:ru --uploads /path/wp-content/uploads\n");
+        . "  php scripts/wp_import.php WordPress.xml --lang uz:uz --lang ru:ru --lang en:en --dry-run\n"
+        . "  php scripts/wp_import.php WordPress.xml --lang uz:uz --lang ru:ru --lang en:en --uploads /path/wp-content/uploads\n");
     exit(2);
 }
 
-// Инициализация БД из конфигурации приложения.
-// bootstrap.php уже подключает БД в установленном приложении. Повторная
-// инициализация безопасна; используем тот же ключ, что и config.example.php.
 Database::init((array) Config::get('db'));
 
-// Автор по умолчанию — первый администратор.
 if ($opts['authorId'] === null) {
     try {
         $opts['authorId'] = (int) (Database::pdo()->query("SELECT id FROM users ORDER BY id ASC LIMIT 1")->fetchColumn() ?: 0) ?: null;
@@ -76,12 +76,20 @@ if ($opts['authorId'] === null) {
 
 $isFile = !str_starts_with($source, 'http');
 echo 'Импорт из ' . ($isFile ? "файла {$source}" : rtrim($source, '/'))
-    . " (статус: {$opts['status']}" . ($opts['dryRun'] ? ', dry-run' : '') . ")…\n";
+    . " (новый статус: {$opts['status']}" . ($opts['dryRun'] ? ', dry-run' : '') . ")…\n";
 $r = $isFile
     ? LegacyWxrImporter::importFile($source, $opts)
     : LegacyCmsImporter::importAll(rtrim($source, '/'), $opts);
 
 echo "\n────────────────────────────────────────\n";
+if ($isFile && array_key_exists('source_published', $r)) {
+    echo "Исходных опубликованных: {$r['source_published']}\n";
+    echo "Исходных черновиков:      {$r['source_drafts']} (не импортируются)\n";
+    echo "Комментариев в WXR:       {$r['source_comments']} (не импортируются)\n";
+    echo "Базовых новостей в плане: {$r['planned_news']}\n";
+    echo "Неопределённых переводов: {$r['unresolved']}\n";
+    echo "────────────────────────────────────────\n";
+}
 echo "Импортировано новостей: {$r['imported']}\n";
 echo "Пропущено (уже есть):   {$r['skipped']}\n";
 echo "Переводов добавлено:    {$r['translations']}\n";
@@ -93,6 +101,9 @@ if (!empty($r['errors'])) {
         echo "  • {$e}\n";
     }
 }
-echo "\nГотово. Черновики — в админке: Новости. Не забудьте сбросить кэш.\n";
+
+echo $opts['dryRun']
+    ? "\nDry-run завершён: база данных и медиа не изменены.\n"
+    : "\nГотово. Проверьте импорт в админке → Новости и сбросьте кэш.\n";
 
 exit(empty($r['errors']) ? 0 : 1);
