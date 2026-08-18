@@ -3636,10 +3636,9 @@ document.addEventListener('change', function (event) {
 
             var banner = document.createElement('div');
             banner.className = 'admin-draft-banner';
-            banner.style.cssText = 'background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 10px 16px; border-radius: 8px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; font-size: 13px;';
-            banner.innerHTML = '<span><b>Черновик:</b> найдены несохраненные изменения от ' + new Date(draft.time).toLocaleTimeString() + '</span>' +
-                '<div><button type="button" class="btn btn--sm btn--primary" data-action="restore" style="margin-right: 8px; padding: 4px 10px; font-size: 12px;">Восстановить</button>' +
-                '<button type="button" class="btn btn--sm btn--secondary" data-action="discard" style="padding: 4px 10px; font-size: 12px;">Отклонить</button></div>';
+            banner.innerHTML = '<span class="admin-draft-banner__text"><b>Черновик:</b> найдены несохраненные изменения от ' + new Date(draft.time).toLocaleTimeString() + '</span>' +
+                '<div class="admin-draft-banner__actions"><button type="button" class="btn btn--sm btn--primary" data-action="restore">Восстановить</button>' +
+                '<button type="button" class="btn btn--sm btn--secondary" data-action="discard">Отклонить</button></div>';
 
             banner.querySelector('[data-action="restore"]').addEventListener('click', function () {
                 Object.keys(draft.data).forEach(function (name) {
