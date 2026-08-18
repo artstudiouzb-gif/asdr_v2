@@ -3,22 +3,28 @@
 declare(strict_types=1);
 
 /**
- * Импорт новостей из старой CMS (REST API или WXR) с фотографиями.
+ * Импорт новостей из старой CMS (REST API или WordPress WXR) с фотографиями.
  *
- * Запуск на сервере, где доступен старый сайт:
- *   php scripts/wp_import.php https://asdr.gov.uz [опции]
+ * Примеры:
+ *   php scripts/wp_import.php https://old.example --lang uz:uz --lang ru:ru --limit 20
+ *   php scripts/wp_import.php export.xml --lang uz:uz --lang ru:ru --lang en:en --dry-run
+ *   php scripts/wp_import.php export.xml --lang uz:uz --lang ru:ru --lang en:en --status published
  *
  * Опции:
- *   --limit N        импортировать не более N новостей (0 = все)
- *   --status STATE   draft (по умолчанию) | published
- *   --author ID      id пользователя-автора (по умолчанию первый админ)
- *   --lang OLD:ART   язык (повторяемо): код языка источника → код языка ArtStudio.
- *                    Первый = основной, остальные пишутся переводами. Напр.:
- *                    --lang uz:uz --lang ru:ru   (двуязычный сайт)
- *   --dry-run        только показать, сколько будет импортировано, без записи
+ *   --limit N            не более N языковых групп новостей (0 = все)
+ *   --status STATE       draft (по умолчанию) | published — статус в новой CMS
+ *   --author ID          id пользователя-автора (по умолчанию первый админ)
+ *   --lang OLD:ART       код языка источника → код языка ArtStudio; повторяемо.
+ *                        Первый --lang считается основным языком WXR.
+ *   --uploads DIR        локальная копия wp-content/uploads (надёжнее сети)
+ *   --include-drafts     дополнительно включить WordPress-записи status=draft
+ *   --wpml-window N      окно безопасного WPML-сопоставления, минут (default 120)
+ *   --dry-run            только разобрать и проверить план, без записи/скачиваний
  *
- * По умолчанию новости создаются ЧЕРНОВИКАМИ — просмотрите и опубликуйте в
- * админке (Новости). Повторный запуск не создаёт дубли (пропуск по slug).
+ * Для WXR dry-run обязателен перед боевым переносом: если останутся переводы
+ * без основного языка или неоднозначные группы, импорт остановится до записи.
+ * При реальном WXR-импорте каждый язык создаётся отдельной связанной записью
+ * news: сохраняются собственные slug, дата, featured image и галерея языка.
  */
 
 require __DIR__ . '/../app/Core/bootstrap.php';
@@ -29,8 +35,17 @@ use App\Core\LegacyCmsImporter;
 use App\Core\LegacyWxrImporter;
 
 $args = array_slice($argv, 1);
-$source = '';   // URL сайта ИЛИ путь к файлу экспорта .xml
-$opts = ['status' => 'draft', 'limit' => 0, 'dryRun' => false, 'authorId' => null, 'langs' => [], 'uploadsDir' => null];
+$source = '';
+$opts = [
+    'status' => 'draft',
+    'limit' => 0,
+    'dryRun' => false,
+    'authorId' => null,
+    'langs' => [],
+    'uploadsDir' => null,
+    'includeDrafts' => false,
+    'pairWindowMinutes' => 120,
+];
 
 for ($i = 0; $i < count($args); $i++) {
     $a = $args[$i];
@@ -47,6 +62,10 @@ for ($i = 0; $i < count($args); $i++) {
         }
     } elseif ($a === '--uploads' && isset($args[$i + 1])) {
         $opts['uploadsDir'] = $args[++$i];
+    } elseif ($a === '--wpml-window' && isset($args[$i + 1])) {
+        $opts['pairWindowMinutes'] = max(1, (int) $args[++$i]);
+    } elseif ($a === '--include-drafts') {
+        $opts['includeDrafts'] = true;
     } elseif ($a === '--dry-run') {
         $opts['dryRun'] = true;
     } elseif (str_starts_with($a, 'http') || is_file($a) || str_ends_with(strtolower($a), '.xml')) {
@@ -55,44 +74,74 @@ for ($i = 0; $i < count($args); $i++) {
 }
 
 if ($source === '') {
-    fwrite(STDERR, "Укажите адрес сайта ИЛИ файл экспорта .xml, напр.:\n"
-        . "  php scripts/wp_import.php https://asdr.gov.uz --lang uz:uz --lang ru:ru --limit 20\n"
-        . "  php scripts/wp_import.php export.xml --lang uz:uz --lang ru:ru --uploads /path/wp-content/uploads\n");
+    fwrite(STDERR, "Укажите адрес сайта ИЛИ WXR-файл .xml, например:\n"
+        . "  php scripts/wp_import.php export.xml --lang uz:uz --lang ru:ru --lang en:en --dry-run\n");
     exit(2);
 }
 
-// Инициализация БД из конфигурации приложения.
-// bootstrap.php уже подключает БД в установленном приложении. Повторная
-// инициализация безопасна; используем тот же ключ, что и config.example.php.
 Database::init((array) Config::get('db'));
 
-// Автор по умолчанию — первый администратор.
 if ($opts['authorId'] === null) {
     try {
-        $opts['authorId'] = (int) (Database::pdo()->query("SELECT id FROM users ORDER BY id ASC LIMIT 1")->fetchColumn() ?: 0) ?: null;
+        $opts['authorId'] = (int) (Database::pdo()->query('SELECT id FROM users ORDER BY id ASC LIMIT 1')->fetchColumn() ?: 0) ?: null;
     } catch (\Throwable) {
     }
 }
 
 $isFile = !str_starts_with($source, 'http');
 echo 'Импорт из ' . ($isFile ? "файла {$source}" : rtrim($source, '/'))
-    . " (статус: {$opts['status']}" . ($opts['dryRun'] ? ', dry-run' : '') . ")…\n";
+    . " (статус в новой CMS: {$opts['status']}" . ($opts['dryRun'] ? ', dry-run' : '') . ")…\n";
+
 $r = $isFile
     ? LegacyWxrImporter::importFile($source, $opts)
     : LegacyCmsImporter::importAll(rtrim($source, '/'), $opts);
 
 echo "\n────────────────────────────────────────\n";
-echo "Импортировано новостей: {$r['imported']}\n";
-echo "Пропущено (уже есть):   {$r['skipped']}\n";
-echo "Переводов добавлено:    {$r['translations']}\n";
-echo "Перенесено картинок:    {$r['images']}\n";
-echo "Создано редиректов:     {$r['redirects']}\n";
+if ($isFile && array_key_exists('source_posts', $r)) {
+    $langs = is_array($r['by_language'] ?? null) ? $r['by_language'] : [];
+    $langText = [];
+    foreach ($langs as $code => $count) {
+        $langText[] = $code . '=' . (int) $count;
+    }
+    echo "WXR записей типа post:     " . (int) ($r['source_posts'] ?? 0) . "\n";
+    echo "Опубликованных в WP:      " . (int) ($r['source_published'] ?? 0) . "\n";
+    echo "Черновиков в WP:          " . (int) ($r['source_drafts'] ?? 0) . "\n";
+    echo "Выбрано записей:          " . (int) ($r['selected_posts'] ?? 0) . ($langText !== [] ? ' (' . implode(', ', $langText) . ')' : '') . "\n";
+    echo "Групп новостей:           " . (int) ($r['planned_news'] ?? 0) . "\n";
+    echo "Языковых переводов:       " . (int) ($r['planned_translations'] ?? 0) . "\n";
+    echo "Media attachments:        " . (int) ($r['attachments'] ?? 0) . "\n";
+    echo "Gallery shortcode:        " . (int) ($r['gallery_shortcodes'] ?? 0) . "\n";
+    echo "Фото из gallery:          " . (int) ($r['gallery_images'] ?? 0) . "\n";
+    echo "Комментарии пропущены:    " . (int) ($r['comments'] ?? 0) . "\n";
+    $matches = is_array($r['match_counts'] ?? null) ? $r['match_counts'] : [];
+    if ($matches !== []) {
+        echo 'Связи: Polylang=' . (int) ($matches['polylang'] ?? 0)
+            . ', дата=' . (int) ($matches['exact_date'] ?? 0)
+            . ', featured=' . (int) ($matches['featured_url'] ?? 0)
+            . ', близкое время=' . (int) ($matches['time_proximity'] ?? 0) . "\n";
+    }
+    echo "────────────────────────────────────────\n";
+}
+
+echo "Создано базовых новостей: " . (int) ($r['imported'] ?? 0) . "\n";
+echo "Пропущено существующих:   " . (int) ($r['skipped'] ?? 0) . "\n";
+echo "Создано переводов:        " . (int) ($r['translations'] ?? 0) . "\n";
+echo "Перенесено картинок:      " . (int) ($r['images'] ?? 0) . "\n";
+echo "Создано редиректов:       " . (int) ($r['redirects'] ?? 0) . "\n";
+
 if (!empty($r['errors'])) {
     echo "Ошибки (" . count($r['errors']) . "):\n";
-    foreach (array_slice($r['errors'], 0, 20) as $e) {
+    foreach (array_slice($r['errors'], 0, 30) as $e) {
         echo "  • {$e}\n";
     }
+    echo "\nИмпорт остановлен/завершён с ошибками. Исправьте план перед боевым переносом.\n";
+    exit(1);
 }
-echo "\nГотово. Черновики — в админке: Новости. Не забудьте сбросить кэш.\n";
 
-exit(empty($r['errors']) ? 0 : 1);
+if ($opts['dryRun']) {
+    echo "\nDry-run успешен: неоднозначных/осиротевших переводов и потерянных gallery attachments нет.\n";
+} else {
+    echo "\nГотово. Проверьте Новости и затем очистите кэш страницы.\n";
+}
+
+exit(0);
