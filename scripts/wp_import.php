@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Импорт новостей из старой CMS (REST API или WordPress WXR) с фотографиями.
+ * Импорт новостей из старой CMS (REST API или WXR) с фотографиями.
  *
  * Примеры:
  *   php scripts/wp_import.php https://old.example --lang uz:uz --lang ru:ru --limit 20
@@ -17,7 +17,7 @@ declare(strict_types=1);
  *   --lang OLD:ART       код языка источника → код языка ArtStudio; повторяемо.
  *                        Первый --lang считается основным языком WXR.
  *   --uploads DIR        локальная копия wp-content/uploads (надёжнее сети)
- *   --include-drafts     дополнительно включить WordPress-записи status=draft
+ *   --include-drafts     дополнительно включить исходные записи status=draft
  *   --wpml-window N      окно безопасного WPML-сопоставления, минут (default 120)
  *   --dry-run            только разобрать и проверить план, без записи/скачиваний
  *
