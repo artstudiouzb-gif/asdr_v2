@@ -3582,3 +3582,98 @@ document.addEventListener('change', function (event) {
         init();
     }
 })();
+
+/* ========================================================================
+   Enterprise Local Draft Auto-Recovery
+   (Защита от потери данных редактора при сетевых сбоях и конфликтах версий)
+   ======================================================================== */
+(function initLocalDraftRecovery() {
+    if (typeof window === 'undefined' || !window.localStorage) {
+        return;
+    }
+
+    var form = document.querySelector('.admin-form, form[data-draft-track]');
+    if (!form || form.getAttribute('method')?.toLowerCase() !== 'post') {
+        return;
+    }
+
+    var key = 'cms_draft_' + window.location.pathname.replace(/\/$/, '');
+    var timer = null;
+
+    function getFormData() {
+        var data = {};
+        var elements = form.querySelectorAll('input:not([type="hidden"]):not([type="password"]), textarea, select');
+        elements.forEach(function (el) {
+            if (el.name && !el.disabled) {
+                data[el.name] = el.value;
+            }
+        });
+        return data;
+    }
+
+    function saveDraft() {
+        try {
+            var payload = {
+                time: Date.now(),
+                data: getFormData()
+            };
+            localStorage.setItem(key, JSON.stringify(payload));
+        } catch (e) {}
+    }
+
+    function checkDraft() {
+        try {
+            var raw = localStorage.getItem(key);
+            if (!raw) return;
+            var draft = JSON.parse(raw);
+            if (!draft || !draft.data || !draft.time) return;
+
+            // Если черновику меньше 7 дней
+            if (Date.now() - draft.time > 7 * 86400 * 1000) {
+                localStorage.removeItem(key);
+                return;
+            }
+
+            var banner = document.createElement('div');
+            banner.className = 'admin-draft-banner';
+            banner.innerHTML = '<span class="admin-draft-banner__text"><b>Черновик:</b> найдены несохраненные изменения от ' + new Date(draft.time).toLocaleTimeString() + '</span>' +
+                '<div class="admin-draft-banner__actions"><button type="button" class="btn btn--sm btn--primary" data-action="restore">Восстановить</button>' +
+                '<button type="button" class="btn btn--sm btn--secondary" data-action="discard">Отклонить</button></div>';
+
+            banner.querySelector('[data-action="restore"]').addEventListener('click', function () {
+                Object.keys(draft.data).forEach(function (name) {
+                    var field = form.querySelector('[name="' + name + '"]');
+                    if (field && field.value !== draft.data[name]) {
+                        field.value = draft.data[name];
+                        field.dispatchEvent(new Event('input', { bubbles: true }));
+                        field.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                });
+                banner.remove();
+            });
+
+            banner.querySelector('[data-action="discard"]').addEventListener('click', function () {
+                localStorage.removeItem(key);
+                banner.remove();
+            });
+
+            form.parentNode.insertBefore(banner, form);
+        } catch (e) {}
+    }
+
+    form.addEventListener('input', function () {
+        clearTimeout(timer);
+        timer = setTimeout(saveDraft, 3000);
+    });
+
+    form.addEventListener('submit', function () {
+        localStorage.removeItem(key);
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkDraft);
+    } else {
+        checkDraft();
+    }
+})();
+

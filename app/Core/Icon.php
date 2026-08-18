@@ -103,6 +103,9 @@ final class Icon
 
     public static function cleanName(mixed $value): string
     {
+        if (!is_scalar($value) && $value !== null) {
+            return '';
+        }
         $name = strtolower(trim((string) $value));
         if ($name === '' || str_contains($name, '<') || strlen($name) > 80) {
             return '';

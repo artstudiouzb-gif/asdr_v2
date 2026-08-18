@@ -43,6 +43,12 @@ try {
         Logger::info('Очистка 404-трекера: удалены неактуальные пути', ['removed' => $nfRemoved]);
     }
 
+    // Очистка старых попыток входа (RateLimiter)
+    $rlRemoved = \App\Core\RateLimiter::purgeExpired(24);
+    if ($rlRemoved > 0) {
+        Logger::info('Очистка rate-limiter: удалены устаревшие попытки входа', ['removed' => $rlRemoved]);
+    }
+
     $days = (int) Setting::get('pii_retention_days', '0');
     if ($days <= 0) {
         fwrite(STDOUT, 'Срок хранения ПДн не задан (0) — очистка заявок отключена.' . PHP_EOL);

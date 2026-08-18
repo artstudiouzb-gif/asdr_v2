@@ -17,6 +17,48 @@ final class FileEntry
         return $stmt->fetchAll();
     }
 
+    /**
+     * Постраничная выборка файлов для модальной медиабиблиотеки с фильтром по типу и поиску.
+     */
+    public static function libraryFiltered(string $type = 'image', int $limit = 300, int $offset = 0, string $query = ''): array
+    {
+        $sql = "SELECT * FROM files WHERE access_type = 'public'";
+        $bind = [];
+
+        if ($query !== '') {
+            $sql .= ' AND original_name LIKE :q';
+            $bind[':q'] = '%' . $query . '%';
+        }
+
+        if ($type === 'svg') {
+            $sql .= " AND mime_type = 'image/svg+xml'";
+        } elseif ($type === 'video') {
+            $sql .= " AND mime_type LIKE 'video/%'";
+        } elseif ($type === 'audio') {
+            $sql .= " AND mime_type LIKE 'audio/%'";
+        } elseif ($type === 'document') {
+            $sql .= " AND mime_type NOT LIKE 'image/%' AND mime_type NOT LIKE 'video/%' AND mime_type NOT LIKE 'audio/%'";
+        } elseif ($type === 'all_files') {
+            // все публичные
+        } elseif ($type === 'all') {
+            $sql .= " AND (mime_type LIKE 'image/%' OR mime_type LIKE 'video/%' OR mime_type LIKE 'audio/%')";
+        } else {
+            // по умолчанию image
+            $sql .= " AND mime_type LIKE 'image/%'";
+        }
+
+        $sql .= ' ORDER BY created_at DESC LIMIT :limit OFFSET :offset';
+        $stmt = Database::pdo()->prepare($sql);
+        foreach ($bind as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
     public static function filtered(array $params, bool $includeProtected = true): array
     {
         $q = trim((string) ($params['q'] ?? ''));

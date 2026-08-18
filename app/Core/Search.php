@@ -44,6 +44,71 @@ final class Search
         return $results;
     }
 
+    /**
+     * Быстрый поиск для подсказок (live search suggest): ищет только по заголовкам,
+     * слагам и коротким лидам с минимальным LIMIT, не сканируя тяжелые тела статей.
+     *
+     * @return array<int,array{type:string,title:string,url:string,excerpt:string}>
+     */
+    public static function quick(string $term, int $limit = 6): array
+    {
+        $groups = SearchQuery::groups($term);
+        if (mb_strlen(trim($term)) < 2 || $groups === []) {
+            return [];
+        }
+        $pdo = Database::pdo();
+        $lang = Locale::current();
+        $results = [];
+
+        // News (быстрый поиск по заголовку и лиду)
+        try {
+            $expr = "CONCAT_WS(' ', n.title, n.slug, n.excerpt, t.title, t.excerpt)";
+            [$condition, $params] = self::condition($expr, $groups);
+            $stmt = $pdo->prepare(
+                "SELECT n.slug, COALESCE(NULLIF(t.title, ''), n.title) AS title,
+                        COALESCE(NULLIF(t.excerpt, ''), n.excerpt, '') AS excerpt, n.published_at AS sort_date
+                 FROM news n LEFT JOIN news_translations t ON t.news_id = n.id AND t.lang = ?
+                 WHERE n.deleted_at IS NULL AND n.status = 'published' AND n.published_at <= NOW() AND {$condition}
+                 ORDER BY n.published_at DESC LIMIT ?"
+            );
+            self::bindSeq($stmt, [$lang, ...$params, $limit]);
+            $stmt->execute();
+            foreach ($stmt->fetchAll() as $row) {
+                self::append($results, $term, 'Новость', $row, Locale::url('news/' . $row['slug'], $lang));
+            }
+        } catch (\Throwable $e) {
+            Logger::error('Quick search (news) failed: ' . $e->getMessage());
+        }
+
+        // Pages (быстрый поиск по заголовку и лиду)
+        try {
+            $expr = "CONCAT_WS(' ', p.title, p.slug, p.`lead`, t.title, t.`lead`)";
+            [$condition, $params] = self::condition($expr, $groups);
+            $stmt = $pdo->prepare(
+                "SELECT p.slug, COALESCE(NULLIF(t.title, ''), p.title) AS title,
+                        COALESCE(NULLIF(t.`lead`, ''), p.`lead`, '') AS excerpt, p.updated_at AS sort_date
+                 FROM pages p LEFT JOIN page_translations t ON t.page_id = p.id AND t.lang = ?
+                 WHERE p.deleted_at IS NULL AND p.entity_type = 'page'
+                   AND p.status = 'published' AND p.is_home = 0 AND {$condition}
+                 ORDER BY p.updated_at DESC LIMIT ?"
+            );
+            self::bindSeq($stmt, [$lang, ...$params, $limit]);
+            $stmt->execute();
+            foreach ($stmt->fetchAll() as $row) {
+                self::append($results, $term, 'Страница', $row, Locale::url((string) $row['slug'], $lang));
+            }
+        } catch (\Throwable $e) {
+            Logger::error('Quick search (pages) failed: ' . $e->getMessage());
+        }
+
+        usort($results, static fn (array $a, array $b): int => ($b['_score'] <=> $a['_score']) ?: strcmp((string) $b['_date'], (string) $a['_date']));
+
+        return array_map(static function (array $row): array {
+            unset($row['_score'], $row['_date']);
+            return $row;
+        }, array_slice($results, 0, $limit));
+    }
+
     /** @return array<int,array{type:string,title:string,url:string,excerpt:string}> */
     public static function site(string $term, int $limit = 40): array
     {

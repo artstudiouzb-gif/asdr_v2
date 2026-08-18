@@ -592,3 +592,98 @@
     .block-textimage--image-left .textimage__info,
     .block-textimage--image-left .textimage__visual { order: initial; }
 }
+
+/* ========================================================================
+   Senior Editorial Design System Refinements
+   (Optical tracking, text-wrap balance, tactile hover, WCAG 2.1 focus)
+   ======================================================================== */
+:root {
+    --editorial-headline-tracking: -0.025em;
+    --editorial-eyebrow-tracking: 0.06em;
+    --editorial-smooth-transition: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Font smoothing & rendering precision */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Optical headline & paragraph balancing */
+:where(
+    h1, h2, h3,
+    .cms-h1, .cms-h2, .cms-h3,
+    .page-title,
+    .news-detail__title,
+    .project-detail__title,
+    .block-hero__title,
+    .section-head__title
+) {
+    text-wrap: balance;
+    letter-spacing: var(--editorial-headline-tracking);
+}
+
+:where(
+    .rich-content p,
+    .news-card__excerpt,
+    .block-text__content p,
+    .lead-text,
+    .page-lead
+) {
+    text-wrap: pretty;
+}
+
+/* Editorial Eyebrows, Categories and Badges */
+:where(
+    .block-hero__eyebrow,
+    .news-card__category,
+    .section-head__eyebrow,
+    .content-badge,
+    .tag-pill
+) {
+    letter-spacing: var(--editorial-eyebrow-tracking);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Tactile micro-interactions for interactive cards */
+@media (hover: hover) and (pointer: fine) {
+    :where(
+        .news-card,
+        .project-card,
+        .album-card,
+        .feature-card,
+        .cms-card
+    ) {
+        transition: transform var(--editorial-smooth-transition), box-shadow var(--editorial-smooth-transition), border-color var(--editorial-smooth-transition);
+    }
+
+    :where(
+        .news-card,
+        .project-card,
+        .album-card,
+        .feature-card,
+        .cms-card
+    ):hover {
+        transform: translateY(-2px);
+    }
+}
+
+/* High-contrast accessible focus ring (WCAG 2.1 AAA) */
+:focus-visible {
+    outline: 2px solid var(--color-accent, var(--gov-teal, #0d7a74));
+    outline-offset: 3px;
+}
+
+/* Media skeleton loading placeholder */
+.media-skeleton {
+    background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%);
+    background-size: 200% 100%;
+    animation: media-skeleton-shimmer 1.6s infinite ease-in-out;
+}
+
+@keyframes media-skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}

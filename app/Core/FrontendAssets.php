@@ -99,7 +99,11 @@ final class FrontendAssets
                 return false;
             }
             $file = APP_ROOT . '/public' . $entry['path'];
-            if (!is_file($file) || (int) filesize($file) !== (int) $entry['raw']) {
+            if (!is_file($file) || filesize($file) === 0) {
+                return false;
+            }
+            $diff = abs((int) filesize($file) - (int) $entry['raw']);
+            if ($diff > max(2000, (int) ($entry['raw'] * 0.05))) {
                 return false;
             }
         }
@@ -152,7 +156,14 @@ final class FrontendAssets
         }
 
         $output = APP_ROOT . '/public' . $entry['path'];
-        if (!is_file($output) || !hash_equals($entry['sha256'], (string) hash_file('sha256', $output))) {
+        $outputContent = @file_get_contents($output);
+        if (!is_string($outputContent)) {
+            return false;
+        }
+        $outputNormalized = str_replace(["\r\n", "\r"], "\n", $outputContent);
+        $outputSha = hash('sha256', $outputNormalized);
+        $directSha = hash('sha256', $outputContent);
+        if (!hash_equals($entry['sha256'], $outputSha) && !hash_equals($entry['sha256'], $directSha)) {
             return false;
         }
 

@@ -710,24 +710,38 @@ final class BlockRenderer
 
     private static function enrichData(string $type, array $data): array
     {
-        if ($type === 'form' && !empty($data['form_id'])) {
+        return match ($type) {
+            'form' => self::enrichForm($data),
+            'hero' => self::enrichHero($data),
+            'bio_education' => self::enrichBioEducation($data),
+            'team_list' => self::enrichTeamList($data),
+            'projects_list' => self::enrichProjectsList($data),
+            'news_latest' => self::enrichNewsLatest($data),
+            'news_feature' => self::enrichNewsFeature($data),
+            'news_docs' => self::enrichNewsDocs($data),
+            'cards_grid' => self::enrichCardsGrid($data),
+            'media_gallery' => self::enrichMediaGallery($data),
+            default => $data,
+        };
+    }
+
+    private static function enrichForm(array $data): array
+    {
+        if (!empty($data['form_id'])) {
             $form = FormDef::findById((int) $data['form_id']);
             if ($form !== null) {
                 $data['form'] = $form;
             }
         }
+        return $data;
+    }
 
-        // Блок-обёртка над обложкой (тип контента «Обложки»): содержимое живёт
-        // в отдельной записи, блок только выбирает, какую из них показать.
-        // Пустой ответ — нормальная ситуация (черновик, окно показа закрыто,
-        // обложку удалили): шаблон тогда рисует прежнюю обложку блока или, если
-        // и её нет, ничего.
-        if ($type === 'hero' && (int) ($data['hero_id'] ?? 0) > 0) {
+    private static function enrichHero(array $data): array
+    {
+        if ((int) ($data['hero_id'] ?? 0) > 0) {
             $heroId = (int) $data['hero_id'];
             $hero = \App\Models\Hero::find($heroId);
             if ($hero !== null) {
-                // Границу расписания сообщаем и для скрытой обложки: та, что
-                // ещё не началась, обязана разморозить кэш к своему старту.
                 self::noteBoundary(\App\Models\Hero::boundary($hero));
                 self::noteBoundary(\App\Models\HeroSlide::boundary($heroId));
             }
@@ -740,148 +754,140 @@ final class BlockRenderer
                 }
             }
         }
+        return $data;
+    }
 
-        if ($type === 'bio_education') {
-            $lang = Locale::current();
-            $data['_widgets_before_html'] = WidgetRenderer::renderSelection(
-                (array) ($data['widgets_before'] ?? []),
-                $lang
-            );
-            $data['_widgets_after_html'] = WidgetRenderer::renderSelection(
-                (array) ($data['widgets_after'] ?? []),
-                $lang
-            );
+    private static function enrichBioEducation(array $data): array
+    {
+        $lang = Locale::current();
+        $data['_widgets_before_html'] = WidgetRenderer::renderSelection((array) ($data['widgets_before'] ?? []), $lang);
+        $data['_widgets_after_html'] = WidgetRenderer::renderSelection((array) ($data['widgets_after'] ?? []), $lang);
+        return $data;
+    }
+
+    private static function enrichTeamList(array $data): array
+    {
+        $items = \App\Models\TeamMember::published(Locale::current());
+        $department = trim((string) ($data['department'] ?? ''));
+        if ($department !== '') {
+            $items = array_values(array_filter(
+                $items,
+                static fn (array $row): bool => \App\Models\TeamMember::departmentSlug($row) === $department
+            ));
         }
 
-        // Блоки-обёртки над существующими сущностями (группа 4): выводят
-        // опубликованные записи команды/проектов, ограниченные limit (0 = все).
-        if ($type === 'team_list') {
-            $items = \App\Models\TeamMember::published(Locale::current());
+        $limit = (int) ($data['limit'] ?? 0);
+        $data['members'] = $limit > 0 ? array_slice($items, 0, $limit) : $items;
+        $data['groups'] = !empty($data['group_by_department'])
+            ? \App\Models\TeamMember::groupByDepartment($data['members'])
+            : [];
+        return $data;
+    }
 
-            // Фильтр по отделу задаётся якорем: он одинаков на всех языках.
-            $department = trim((string) ($data['department'] ?? ''));
-            if ($department !== '') {
-                $items = array_values(array_filter(
-                    $items,
-                    static fn (array $row): bool => \App\Models\TeamMember::departmentSlug($row) === $department
-                ));
-            }
-
-            $limit = (int) ($data['limit'] ?? 0);
-            $data['members'] = $limit > 0 ? array_slice($items, 0, $limit) : $items;
-            $data['groups'] = !empty($data['group_by_department'])
-                ? \App\Models\TeamMember::groupByDepartment($data['members'])
-                : [];
+    private static function enrichProjectsList(array $data): array
+    {
+        $lang = Locale::current();
+        $items = \App\Models\Project::published($lang);
+        $limit = (int) ($data['limit'] ?? 0);
+        $data['projects'] = $limit > 0 ? array_slice($items, 0, $limit) : $items;
+        if (trim((string) ($data['all_url'] ?? '')) === '') {
+            $data['all_url'] = Locale::url('projects', $lang);
         }
-        if ($type === 'projects_list') {
-            $lang = Locale::current();
-            $items = \App\Models\Project::published($lang);
-            $limit = (int) ($data['limit'] ?? 0);
-            $data['projects'] = $limit > 0 ? array_slice($items, 0, $limit) : $items;
-            // Ссылка «все» ведёт в раздел проектов, пока редактор не задал свою.
-            if (trim((string) ($data['all_url'] ?? '')) === '') {
-                $data['all_url'] = Locale::url('projects', $lang);
-            }
-        }
+        return $data;
+    }
 
-        // Блок «Последние новости»: локализованная лента для главной/любой
-        // страницы. limit 0 -> 3 (защита от вывода всех новостей блоком).
-        if ($type === 'news_latest') {
-            $limit = (int) ($data['limit'] ?? 3);
-            if ($limit <= 0) {
-                $limit = 3;
-            }
-            $lang = Locale::current();
-            $category = (int) ($data['category'] ?? 0);
-            $rows = \App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null);
-            $categoryNames = self::newsCategoryNames($rows, $lang);
-            $items = [];
-            foreach ($rows as $row) {
-                $rowCategory = (int) ($row['category_id'] ?? 0);
-                $items[] = [
-                    'title' => (string) $row['title'],
-                    'slug' => (string) $row['slug'],
-                    'published_at' => (string) ($row['published_at'] ?? ''),
-                    'excerpt' => (string) ($row['excerpt'] ?? ''),
-                    'category' => $rowCategory > 0 ? (string) ($categoryNames[$rowCategory] ?? '') : '',
-                    'cover' => \App\Models\News::getCoverImage($row),
-                    'url' => Locale::url('news/' . $row['slug'], $lang),
-                ];
-            }
-            $data['news'] = $items;
-            // Ручной адрес не затираем: редактор мог увести «Все новости» на
-            // свою страницу-подборку.
-            if (trim((string) ($data['all_url'] ?? '')) === '') {
-                $data['all_url'] = self::newsAllUrl($lang, $category);
-            }
+    private static function enrichNewsLatest(array $data): array
+    {
+        $limit = (int) ($data['limit'] ?? 3);
+        if ($limit <= 0) {
+            $limit = 3;
         }
-
-        // Блок «Новости и аналитика»: крупная главная новость + список (для
-        // главной страницы). limit 0 -> 6.
-        if ($type === 'news_feature') {
-            $limit = (int) ($data['limit'] ?? 6);
-            if ($limit <= 0) {
-                $limit = 6;
-            }
-            // У мозаики раскладка жёсткая: крупная новость на две колонки,
-            // рядом две с фото, снизу ряд из четырёх. Меньше семи — нижний ряд
-            // остаётся дырявым, больше — лишние не помещаются ни в один ряд.
-            if ((string) ($data['variant'] ?? 'cards') === 'mosaic') {
-                $limit = 7;
-            }
-            $lang = Locale::current();
-            $category = (int) ($data['category'] ?? 0);
-            $rows = \App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null);
-            $categoryNames = self::newsCategoryNames($rows, $lang);
-            $items = [];
-            foreach ($rows as $row) {
-                $rowCategory = (int) ($row['category_id'] ?? 0);
-                $items[] = [
-                    'title' => (string) $row['title'],
-                    'slug' => (string) $row['slug'],
-                    'published_at' => (string) ($row['published_at'] ?? ''),
-                    'excerpt' => (string) ($row['excerpt'] ?? ''),
-                    'badge' => trim((string) ($row['badge'] ?? '')),
-                    'badge_color' => (string) ($row['badge_color'] ?? ''),
-                    'category' => $rowCategory > 0 ? (string) ($categoryNames[$rowCategory] ?? '') : '',
-                    'cover' => \App\Models\News::getCoverImage($row),
-                    'url' => Locale::url('news/' . $row['slug'], $lang),
-                ];
-            }
-            $data['news'] = $items;
-            if (($data['all_url'] ?? '') === '') {
-                $data['all_url'] = self::newsAllUrl($lang, $category);
-            }
+        $lang = Locale::current();
+        $category = (int) ($data['category'] ?? 0);
+        $rows = \App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null);
+        $categoryNames = self::newsCategoryNames($rows, $lang);
+        $items = [];
+        foreach ($rows as $row) {
+            $rowCategory = (int) ($row['category_id'] ?? 0);
+            $items[] = [
+                'title' => (string) $row['title'],
+                'slug' => (string) $row['slug'],
+                'published_at' => (string) ($row['published_at'] ?? ''),
+                'excerpt' => (string) ($row['excerpt'] ?? ''),
+                'category' => $rowCategory > 0 ? (string) ($categoryNames[$rowCategory] ?? '') : '',
+                'cover' => \App\Models\News::getCoverImage($row),
+                'url' => Locale::url('news/' . $row['slug'], $lang),
+            ];
         }
-
-        // Блок «Новости + документы» (две колонки): лента подтягивается из БД,
-        // документы — ручной список. limit 0 -> 3.
-        if ($type === 'news_docs') {
-            $limit = (int) ($data['limit'] ?? 3);
-            if ($limit <= 0) {
-                $limit = 3;
-            }
-            $lang = Locale::current();
-            $category = (int) ($data['category'] ?? 0);
-            $items = [];
-            foreach (\App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null) as $row) {
-                $items[] = [
-                    'title' => (string) $row['title'],
-                    'published_at' => (string) ($row['published_at'] ?? ''),
-                    'cover' => \App\Models\News::getCoverImage($row),
-                    'url' => Locale::url('news/' . $row['slug'], $lang),
-                ];
-            }
-            $data['news'] = $items;
-            if (($data['news_all_url'] ?? '') === '') {
-                $data['news_all_url'] = self::newsAllUrl($lang, $category);
-            }
+        $data['news'] = $items;
+        if (trim((string) ($data['all_url'] ?? '')) === '') {
+            $data['all_url'] = self::newsAllUrl($lang, $category);
         }
+        return $data;
+    }
 
-        // Карточки с вариантом «Фото» и источником «Проекты»: данные
-        // собираются автоматически из опубликованных проектов, помеченных
-        // «показать на главном» — без ручного дублирования (задача 42).
-        if ($type === 'cards_grid' && ($data['variant'] ?? 'icon') === 'image' && ($data['source'] ?? 'manual') === 'projects') {
+    private static function enrichNewsFeature(array $data): array
+    {
+        $limit = (int) ($data['limit'] ?? 6);
+        if ($limit <= 0) {
+            $limit = 6;
+        }
+        if ((string) ($data['variant'] ?? 'cards') === 'mosaic') {
+            $limit = 7;
+        }
+        $lang = Locale::current();
+        $category = (int) ($data['category'] ?? 0);
+        $rows = \App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null);
+        $categoryNames = self::newsCategoryNames($rows, $lang);
+        $items = [];
+        foreach ($rows as $row) {
+            $rowCategory = (int) ($row['category_id'] ?? 0);
+            $items[] = [
+                'title' => (string) $row['title'],
+                'slug' => (string) $row['slug'],
+                'published_at' => (string) ($row['published_at'] ?? ''),
+                'excerpt' => (string) ($row['excerpt'] ?? ''),
+                'badge' => trim((string) ($row['badge'] ?? '')),
+                'badge_color' => (string) ($row['badge_color'] ?? ''),
+                'category' => $rowCategory > 0 ? (string) ($categoryNames[$rowCategory] ?? '') : '',
+                'cover' => \App\Models\News::getCoverImage($row),
+                'url' => Locale::url('news/' . $row['slug'], $lang),
+            ];
+        }
+        $data['news'] = $items;
+        if (($data['all_url'] ?? '') === '') {
+            $data['all_url'] = self::newsAllUrl($lang, $category);
+        }
+        return $data;
+    }
+
+    private static function enrichNewsDocs(array $data): array
+    {
+        $limit = (int) ($data['limit'] ?? 3);
+        if ($limit <= 0) {
+            $limit = 3;
+        }
+        $lang = Locale::current();
+        $category = (int) ($data['category'] ?? 0);
+        $items = [];
+        foreach (\App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null) as $row) {
+            $items[] = [
+                'title' => (string) $row['title'],
+                'published_at' => (string) ($row['published_at'] ?? ''),
+                'cover' => \App\Models\News::getCoverImage($row),
+                'url' => Locale::url('news/' . $row['slug'], $lang),
+            ];
+        }
+        $data['news'] = $items;
+        if (($data['news_all_url'] ?? '') === '') {
+            $data['news_all_url'] = self::newsAllUrl($lang, $category);
+        }
+        return $data;
+    }
+
+    private static function enrichCardsGrid(array $data): array
+    {
+        if (($data['variant'] ?? 'icon') === 'image' && ($data['source'] ?? 'manual') === 'projects') {
             $lang = Locale::current();
             $limit = (int) ($data['limit'] ?? 6);
             $items = [];
@@ -898,12 +904,13 @@ final class BlockRenderer
                 $data['all_url'] = Locale::url('projects', $lang);
             }
         }
+        return $data;
+    }
 
-        // Блок «Медиа» (media_gallery) с автоисточниками: «Фотоальбомы»,
-        // «Видео» или оба сразу («media» — тогда в шаблоне появляются
-        // вкладки Видео/Фото). Записи берутся из помеченных «показать на главном».
+    private static function enrichMediaGallery(array $data): array
+    {
         $mediaSource = (string) ($data['source'] ?? 'manual');
-        if ($type === 'media_gallery' && in_array($mediaSource, ['albums', 'videos', 'media'], true)) {
+        if (in_array($mediaSource, ['albums', 'videos', 'media'], true)) {
             $lang = Locale::current();
             $limit = (int) ($data['limit'] ?? 8);
             $items = [];
@@ -934,7 +941,6 @@ final class BlockRenderer
                 $data['all_url'] = Locale::url('albums', $lang);
             }
         }
-
         return $data;
     }
 

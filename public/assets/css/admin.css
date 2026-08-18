@@ -6814,3 +6814,26 @@ body.auth-page label,
     text-overflow: ellipsis;
     max-width: 45%;
 }
+
+/* ========================================================================
+   Local Draft Recovery Notification Banner
+   ======================================================================== */
+.admin-draft-banner {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    padding: 10px 16px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.admin-draft-banner__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+

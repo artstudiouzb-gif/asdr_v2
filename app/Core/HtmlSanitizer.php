@@ -12,7 +12,7 @@ namespace App\Core;
  */
 final class HtmlSanitizer
 {
-    /** Разрешённые теги (форматирование, ссылки, изображения, таблицы, списки, HTML5, SVG, формы). */
+    /** Разрешённые теги (форматирование, ссылки, изображения, таблицы, списки, HTML5, SVG). */
     private const ALLOWED_TAGS = [
         'p', 'br', 'hr', 'span', 'div', 'section', 'article', 'main', 'header', 'footer', 'aside', 'nav', 'details', 'summary',
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
@@ -20,7 +20,6 @@ final class HtmlSanitizer
         'ul', 'ol', 'li', 'blockquote', 'pre', 'code',
         'a', 'img', 'figure', 'figcaption', 'picture', 'source', 'video', 'audio', 'track',
         'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption',
-        'form', 'input', 'button', 'select', 'option', 'textarea', 'label',
         'svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'g', 'text', 'tspan', 'use', 'defs', 'clippath', 'mask',
         // Градиенты и переиспользуемые символы: разметка без скриптов и без
         // сетевых обращений. Без них вставленная в блок графика теряла заливку.
@@ -68,12 +67,6 @@ final class HtmlSanitizer
         'img' => ['src', 'alt', 'width', 'height', 'loading'],
         'td' => ['colspan', 'rowspan'],
         'th' => ['colspan', 'rowspan', 'scope'],
-        'input' => ['type', 'name', 'value', 'placeholder', 'checked', 'disabled', 'readonly', 'required', 'autocomplete'],
-        'button' => ['type', 'name', 'value', 'disabled'],
-        'select' => ['name', 'disabled', 'required', 'multiple'],
-        'option' => ['value', 'selected', 'disabled'],
-        'textarea' => ['name', 'rows', 'cols', 'placeholder', 'disabled', 'readonly', 'required'],
-        'label' => ['for'],
         'video' => ['src', 'poster', 'controls', 'autoplay', 'loop', 'muted', 'playsinline', 'width', 'height'],
         'audio' => ['src', 'controls', 'autoplay', 'loop', 'muted'],
         'source' => ['src', 'type', 'media'],

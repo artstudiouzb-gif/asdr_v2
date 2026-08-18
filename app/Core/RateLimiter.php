@@ -145,6 +145,24 @@ final class RateLimiter
     }
 
     /**
+     * Прямая принудительная очистка устаревших записей (для cron-задач).
+     */
+    public static function purgeExpired(int $olderThanHours = 24): int
+    {
+        try {
+            $stmt = Database::pdo()->prepare(
+                'DELETE FROM login_attempts WHERE attempted_at < (NOW() - INTERVAL :hours HOUR)'
+            );
+            $stmt->bindValue(':hours', $olderThanHours, \PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->rowCount();
+        } catch (\Throwable $e) {
+            Logger::error('login_attempts purgeExpired failed: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
      * Garbage collector: удаляет записи login_attempts старше суток и
      * ротирует лог-файлы. Вызывается вероятностно (не на каждый запрос),
      * чтобы не нагружать БД. Вероятность ~2% на успешный вход.
@@ -155,14 +173,7 @@ final class RateLimiter
             return;
         }
 
-        try {
-            Database::pdo()->exec(
-                'DELETE FROM login_attempts WHERE attempted_at < (NOW() - INTERVAL 1 DAY)'
-            );
-        } catch (\Throwable $e) {
-            Logger::error('login_attempts GC failed: ' . $e->getMessage());
-        }
-
+        self::purgeExpired(24);
         Logger::rotateAll();
     }
 }
