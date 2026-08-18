@@ -6,12 +6,15 @@ test('admin WXR importer is super-admin and CSRF protected', function (): void {
     $root = dirname(__DIR__, 2);
     $controller = (string) file_get_contents($root . '/app/Controllers/Admin/NewsImportController.php');
     $entry = (string) file_get_contents($root . '/public/admin/import-news.php');
+    $htaccess = (string) file_get_contents($root . '/public/.htaccess');
 
     assert_contains('Auth::requireSuperAdmin()', $controller);
     assert_contains('Csrf::verifyRequest()', $controller);
     assert_contains("'upload' => \$controller->uploadChunk()", $entry);
     assert_contains("'inspect' => \$controller->inspect()", $entry);
     assert_contains("'import' => \$controller->importBatch()", $entry);
+    assert_contains('(index|download|import-news)\\.php$', $htaccess);
+    assert_contains('<Files "import-news.php">', $htaccess);
     assert_not_contains('shell_exec(', $controller);
     assert_not_contains('exec(', $controller);
 });
