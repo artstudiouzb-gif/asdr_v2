@@ -41,7 +41,7 @@ final class LegacyContentFormatter
                 continue;
             }
 
-            // Одинарный перенос внутри legacy-абзаца WordPress показывал как
+            // Одинарный перенос внутри legacy-абзаца старый сайт показывал как
             // визуальный перенос. Сохраняем его, но не создаём лишние абзацы.
             $chunk = (string) preg_replace('/\n+/', "<br>\n", $chunk);
             $out[] = '<p>' . $chunk . '</p>';
