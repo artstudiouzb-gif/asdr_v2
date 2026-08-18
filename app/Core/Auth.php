@@ -242,7 +242,7 @@ final class Auth
         return true;
     }
 
-    private static function establishSession(array $user): void
+    public static function establishSession(array $user): void
     {
         session_regenerate_id(true);
         $_SESSION['user_id'] = (int) $user['id'];
