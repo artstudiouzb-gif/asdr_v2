@@ -8,6 +8,28 @@ use App\Models\Setting;
 
 final class OpenGraphHelper
 {
+    /** @var list<string> */
+    private static array $additionalImages = [];
+
+    /**
+     * Добавляет дополнительные OG-изображения для текущей страницы.
+     * Первый валидный URL остаётся приоритетным, остальные публикуются как
+     * повторные og:image — по спецификации Open Graph это массив значений.
+     *
+     * @param list<string> $images
+     */
+    public static function setAdditionalImages(array $images): void
+    {
+        $normalized = [];
+        foreach ($images as $image) {
+            $image = trim((string) $image);
+            if ($image !== '' && !in_array($image, $normalized, true)) {
+                $normalized[] = $image;
+            }
+        }
+        self::$additionalImages = $normalized;
+    }
+
     /**
      * Генерирует Open Graph и Twitter Card метаданные.
      *
@@ -31,12 +53,28 @@ final class OpenGraphHelper
             'Государственный портал Республики Узбекистан'
         );
 
-        $resolvedImage = self::resolveFirstImage($appUrl, [
+        // Дополнительные изображения живут только в рамках одного рендера.
+        // Это важно для long-running PHP-процессов и тестов, где static-состояние
+        // иначе могло бы попасть на следующую страницу.
+        $additionalImages = self::$additionalImages;
+        self::$additionalImages = [];
+
+        $resolvedImages = self::resolveImages($appUrl, [
             $image,
-            Setting::get('default_og_image', ''),
-            Setting::get('og_default_image', ''),
-            Setting::get('logo_url', ''),
+            ...$additionalImages,
         ]);
+
+        // Дефолтные изображения — только fallback. Если у страницы уже есть
+        // собственная обложка/галерея, логотип и общий OG в массив не подмешиваем.
+        if ($resolvedImages === []) {
+            $resolvedImages = self::resolveImages($appUrl, [
+                Setting::get('default_og_image', ''),
+                Setting::get('og_default_image', ''),
+                Setting::get('logo_url', ''),
+            ]);
+        }
+
+        $resolvedImage = $resolvedImages[0] ?? null;
 
         $locales = [
             'ru' => 'ru_RU',
@@ -57,14 +95,14 @@ final class OpenGraphHelper
 
         $html .= self::meta('property', 'og:url', $canonicalUrl);
 
-        if ($resolvedImage !== null) {
-            $html .= self::meta('property', 'og:image', $resolvedImage['url']);
-            if (str_starts_with($resolvedImage['url'], 'https://')) {
-                $html .= self::meta('property', 'og:image:secure_url', $resolvedImage['url']);
+        foreach ($resolvedImages as $resolvedOgImage) {
+            $html .= self::meta('property', 'og:image', $resolvedOgImage['url']);
+            if (str_starts_with($resolvedOgImage['url'], 'https://')) {
+                $html .= self::meta('property', 'og:image:secure_url', $resolvedOgImage['url']);
             }
-            if ($resolvedImage['width'] !== null && $resolvedImage['height'] !== null) {
-                $html .= self::meta('property', 'og:image:width', (string) $resolvedImage['width']);
-                $html .= self::meta('property', 'og:image:height', (string) $resolvedImage['height']);
+            if ($resolvedOgImage['width'] !== null && $resolvedOgImage['height'] !== null) {
+                $html .= self::meta('property', 'og:image:width', (string) $resolvedOgImage['width']);
+                $html .= self::meta('property', 'og:image:height', (string) $resolvedOgImage['height']);
             }
             $html .= self::meta('property', 'og:image:alt', $title);
         }
@@ -104,18 +142,23 @@ final class OpenGraphHelper
 
     /**
      * @param list<string> $candidates
-     * @return array{url:string,width:int|null,height:int|null}|null
+     * @return list<array{url:string,width:int|null,height:int|null}>
      */
-    private static function resolveFirstImage(string $appUrl, array $candidates): ?array
+    private static function resolveImages(string $appUrl, array $candidates): array
     {
+        $resolvedImages = [];
+        $seen = [];
+
         foreach ($candidates as $candidate) {
-            $resolved = self::resolveImage($appUrl, trim($candidate));
-            if ($resolved !== null) {
-                return $resolved;
+            $resolved = self::resolveImage($appUrl, trim((string) $candidate));
+            if ($resolved === null || isset($seen[$resolved['url']])) {
+                continue;
             }
+            $seen[$resolved['url']] = true;
+            $resolvedImages[] = $resolved;
         }
 
-        return null;
+        return $resolvedImages;
     }
 
     /** @return array{url:string,width:int|null,height:int|null}|null */
