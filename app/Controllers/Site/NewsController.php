@@ -217,7 +217,8 @@ final class NewsController
 
         // Все фото новости публикуем в Open Graph массивом: обложка первой,
         // далее уникальные кадры галереи. Обычные соцсети смогут выбрать
-        // превью, а news.js использует те же og:image для нативного File[] share.
+        // превью, а отдельный page-only helper использует те же og:image
+        // для нативного File[] share через системное меню устройства.
         $socialImages = [];
         $coverImage = News::getCoverImage($news);
         if ($coverImage !== null && trim($coverImage) !== '') {
@@ -235,6 +236,9 @@ final class NewsController
         // общего бандла: 42 КБ правил, нужных только здесь, приезжали на
         // каждую страницу сайта, включая главную.
         \App\Core\AssetCollector::requireThemePart('news_detail');
+        // Нативное системное «Поделиться» может передать все файлы галереи,
+        // в отличие от URL-share эндпоинтов отдельных соцсетей.
+        \App\Core\AssetCollector::requireJs('news_share_gallery');
         // Миниатюры галереи должны использовать тот же рабочий responsive-
         // источник, что и большой кадр. Это особенно важно для импортированных
         // фото, у которых WebP-вариант уже есть, а исходник недоступен.
