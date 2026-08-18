@@ -91,6 +91,23 @@ test('Демо Hero использует только существующие �
     }
 });
 
+test('Эталонный демо-комплект реально разворачивается на чистой актуальной БД', function (): void {
+    if ((string) (getenv('TEST_DB_DATABASE') ?: '') === '') {
+        skip_test('TEST_DB_* не заданы');
+    }
+
+    $output = [];
+    $exitCode = 0;
+    $command = escapeshellarg(PHP_BINARY)
+        . ' ' . escapeshellarg(APP_ROOT . '/tests/demo_seed_smoke.php')
+        . ' 2>&1';
+    exec($command, $output, $exitCode);
+
+    $text = implode("\n", $output);
+    assert_same(0, $exitCode, 'demo seed smoke failed: ' . $text);
+    assert_contains('Demo seed smoke OK', $text, 'demo seed smoke did not finish');
+});
+
 test('Веб-установка и CI используют единый MigrationRunner', function (): void {
     $bootstrap = (string) file_get_contents(APP_ROOT . '/app/Core/bootstrap.php');
     $loader = (string) file_get_contents(APP_ROOT . '/tests/load_schema.php');
