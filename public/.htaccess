@@ -10,7 +10,8 @@
     # отдавая 403 даже index.php. Внутренние переписывания не задеваются:
     # проверяется исходный REQUEST_URI, а не переписанный путь.
     RewriteCond %{REQUEST_URI} \.php$ [NC]
-    RewriteCond %{REQUEST_URI} !(^|/)(index|download|import-news)\.php$ [NC]
+    RewriteCond %{REQUEST_URI} !(^|/)(index|download)\.php$ [NC]
+    RewriteCond %{REQUEST_URI} !^/admin/import-news\.php$ [NC]
     RewriteRule .* - [F]
 
     # Существующие файлы и папки (assets, uploads) отдаются напрямую
