@@ -63,7 +63,7 @@
         if (!file) return;
         var maxMb = Number(root.getAttribute('data-max-mb') || 256);
         if (!/\.xml$/i.test(file.name)) {
-            showError('Выберите WordPress WXR-файл с расширением .xml.');
+            showError('Выберите WXR/XML-файл с расширением .xml.');
             return;
         }
         if (file.size < 1 || file.size > maxMb * 1048576) {
@@ -155,7 +155,7 @@
     function fillReport(value) {
         report = value;
         reportStage.hidden = false;
-        root.querySelector('[data-report-site]').textContent = value.site || 'WordPress';
+        root.querySelector('[data-report-site]').textContent = value.site || 'WXR/XML';
         Object.keys(value).forEach(function (key) {
             var field = root.querySelector('[data-stat="' + key + '"]');
             if (field) field.textContent = String(value[key]);
