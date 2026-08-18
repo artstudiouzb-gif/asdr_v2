@@ -10,7 +10,7 @@ use App\Models\Redirect;
 use App\Models\Language;
 
 /**
- * Импорт новостей из WordPress WXR с поддержкой Polylang и WPML-экспортов.
+ * Импорт новостей из WXR с поддержкой Polylang и WPML-экспортов.
  *
  * WXR не содержит байты изображений: медиа либо скачиваются с исходного сайта,
  * либо читаются из локальной копии wp-content/uploads (--uploads).
