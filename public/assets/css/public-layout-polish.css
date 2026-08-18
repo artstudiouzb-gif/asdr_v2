@@ -620,6 +620,39 @@
         0 0 0 1px rgba(15, 23, 42, 0.07);
 }
 
+/* ========================================================================
+   Executive Slate / Midnight Dark Theme (Soft, noble, non-pitch-black)
+   ======================================================================== */
+:root[data-theme="dark"] {
+    --gov-bg: #1e2638;
+    --gov-surface: #29354d;
+    --gov-border: rgba(255, 255, 255, 0.12);
+    --gov-ink: #f8fafc;
+    --gov-muted: #cbd5e1;
+    --gov-title: #ffffff;
+    
+    --elevation-flat: 0 0 0 1px rgba(255, 255, 255, 0.08);
+    --elevation-resting: 
+        0 1px 2px rgba(0, 0, 0, 0.25),
+        0 8px 24px -4px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    --elevation-hover: 
+        0 2px 6px rgba(0, 0, 0, 0.3),
+        0 18px 40px -8px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(255, 255, 255, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    --elevation-popover: 
+        0 4px 12px rgba(0, 0, 0, 0.35),
+        0 28px 60px -12px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme="dark"] img:not([src*=".svg"]),
+:root[data-theme="dark"] video {
+    filter: brightness(0.92) contrast(1.02);
+}
+
 /* Font smoothing & rendering precision */
 body {
     -webkit-font-smoothing: antialiased;
