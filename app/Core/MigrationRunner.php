@@ -39,40 +39,57 @@ final class MigrationRunner
      */
     public static function applyPending(PDO $pdo, string $migrationsDir, ?callable $reporter = null): array
     {
-        $pending = self::pending($pdo, $migrationsDir);
-        if ($pending === []) {
-            return [];
+        self::ensureMigrationsTable($pdo);
+
+        $database = (string) $pdo->query('SELECT DATABASE()')->fetchColumn();
+        $lockName = 'asdr_cms_migrations_' . substr(hash('sha256', $database), 0, 24);
+        $lockStmt = $pdo->prepare('SELECT GET_LOCK(:name, 30)');
+        $lockStmt->execute([':name' => $lockName]);
+        if ((int) $lockStmt->fetchColumn() !== 1) {
+            throw new RuntimeException('Не удалось получить блокировку миграций. Другой процесс ещё работает.');
         }
 
-        $record = $pdo->prepare(
-            'INSERT INTO migrations (filename, applied_at) VALUES (:filename, NOW())'
-        );
-        $appliedNow = [];
-
-        foreach ($pending as $file) {
-            $name = basename($file);
-            $sql = file_get_contents($file);
-            if ($sql === false || trim($sql) === '') {
-                throw new RuntimeException("Файл миграции {$name} пуст или недоступен.");
+        try {
+            // Pending вычисляем уже после получения блокировки: второй процесс
+            // мог успеть применить миграции, пока мы ждали GET_LOCK().
+            $pending = self::pending($pdo, $migrationsDir);
+            if ($pending === []) {
+                return [];
             }
 
-            if ($reporter !== null) {
-                $reporter('start', $name);
+            $record = $pdo->prepare(
+                'INSERT INTO migrations (filename, applied_at) VALUES (:filename, NOW())'
+            );
+            $appliedNow = [];
+
+            foreach ($pending as $file) {
+                $name = basename($file);
+                $sql = file_get_contents($file);
+                if ($sql === false || trim($sql) === '') {
+                    throw new RuntimeException("Файл миграции {$name} пуст или недоступен.");
+                }
+
+                if ($reporter !== null) {
+                    $reporter('start', $name);
+                }
+
+                // SQL-файлы миграций являются доверенной частью релиза.
+                // DDL MySQL выполняет неявный COMMIT, поэтому имя фиксируем
+                // только после успешного выполнения всего файла.
+                $pdo->exec($sql);
+                $record->execute([':filename' => $name]);
+                $appliedNow[] = $name;
+
+                if ($reporter !== null) {
+                    $reporter('done', $name);
+                }
             }
 
-            // SQL-файлы миграций являются доверенной частью релиза.
-            // DDL MySQL выполняет неявный COMMIT, поэтому имя фиксируем только
-            // после успешного выполнения всего файла.
-            $pdo->exec($sql);
-            $record->execute([':filename' => $name]);
-            $appliedNow[] = $name;
-
-            if ($reporter !== null) {
-                $reporter('done', $name);
-            }
+            return $appliedNow;
+        } finally {
+            $releaseStmt = $pdo->prepare('SELECT RELEASE_LOCK(:name)');
+            $releaseStmt->execute([':name' => $lockName]);
         }
-
-        return $appliedNow;
     }
 
     private static function ensureMigrationsTable(PDO $pdo): void
