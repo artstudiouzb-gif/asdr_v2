@@ -19,7 +19,6 @@ final class NewsController
     public function index(): void
     {
         $lang = Locale::current();
-        $perPage = 13; // 1 крупная + 12 в сетке
         $page = max(1, (int) ($_GET['page'] ?? 1));
 
         // Рубрикатор по категориям. В адресе — slug, а не идентификатор:
@@ -38,11 +37,31 @@ final class NewsController
         }
 
         $total = News::publishedCount($categoryId > 0 ? $categoryId : null, $lang);
-        $pages = max(1, (int) ceil($total / $perPage));
-        $page = min($page, $pages);
+
+        // В общем списке первая страница имеет отдельную композицию:
+        // 1 крупная новость + 12 карточек. На следующих страницах крупной
+        // карточки уже нет, поэтому отдаём ровно 12 элементов — четыре полных
+        // ряда по 3, без прежней одинокой 13-й карточки. В рубриках крупной
+        // новости тоже нет, поэтому там всегда по 12.
+        $gridPageSize = 12;
+        $hasLead = $categorySlug === '';
+        if ($hasLead) {
+            $firstPageSize = $gridPageSize + 1;
+            $pages = $total <= $firstPageSize
+                ? 1
+                : 1 + (int) ceil(($total - $firstPageSize) / $gridPageSize);
+            $page = min($page, $pages);
+            $perPage = $page === 1 ? $firstPageSize : $gridPageSize;
+            $offset = $page === 1 ? 0 : $firstPageSize + (($page - 2) * $gridPageSize);
+        } else {
+            $pages = max(1, (int) ceil($total / $gridPageSize));
+            $page = min($page, $pages);
+            $perPage = $gridPageSize;
+            $offset = ($page - 1) * $gridPageSize;
+        }
 
         $vars = [
-            'items' => News::published($perPage, ($page - 1) * $perPage, $lang, $categoryId > 0 ? $categoryId : null),
+            'items' => News::published($perPage, $offset, $lang, $categoryId > 0 ? $categoryId : null),
             'page' => $page,
             'pages' => $pages,
             'categories' => $categories,
@@ -62,6 +81,7 @@ final class NewsController
         // главной: общие рамка, акцентный край, hover и spotlight. Регистрация
         // news_feature заодно подключает стили .relnews-card, нужные контенту.
         \App\Core\AssetCollector::requireJs('news_feature');
+        \App\Core\AssetCollector::requireCss('news-index-pagination', '/assets/css/news-index-pagination.css');
 
         View::render('site/news_index', $vars);
     }
@@ -197,6 +217,10 @@ final class NewsController
         // общего бандла: 42 КБ правил, нужных только здесь, приезжали на
         // каждую страницу сайта, включая главную.
         \App\Core\AssetCollector::requireThemePart('news_detail');
+        // Миниатюры галереи должны использовать тот же рабочий responsive-
+        // источник, что и большой кадр. Это особенно важно для импортированных
+        // фото, у которых WebP-вариант уже есть, а исходник недоступен.
+        \App\Core\AssetCollector::requireJs('news_gallery_thumbnails');
 
         View::render('site/news_show', [
             'news' => $news,
