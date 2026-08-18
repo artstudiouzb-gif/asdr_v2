@@ -7,10 +7,17 @@ use App\Models\Setting;
 test('Подключение к БД не запускает миграции автоматически', function (): void {
     $source = (string) file_get_contents(APP_ROOT . '/app/Core/Database.php');
     assert_not_contains('runPendingMigrations', $source);
+    assert_not_contains('MigrationRunner', $source);
 
     $migrator = (string) file_get_contents(APP_ROOT . '/database/migrate.php');
-    assert_contains('GET_LOCK', $migrator);
-    assert_contains('RELEASE_LOCK', $migrator);
+    $runner = (string) file_get_contents(APP_ROOT . '/app/Core/MigrationRunner.php');
+
+    // Блокировка принадлежит единому runner, а CLI только делегирует ему
+    // выполнение. Так установленный сайт не мигрирует БД на каждом запросе,
+    // а clean-install и явный CLI используют один безопасный механизм.
+    assert_contains('GET_LOCK', $runner);
+    assert_contains('RELEASE_LOCK', $runner);
+    assert_contains('MigrationRunner::applyPending', $migrator);
     assert_contains('Миграции остановлены', $migrator);
 });
 
