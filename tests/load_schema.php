@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../app/Core/MigrationRunner.php';
+
 $dbName = $argv[1] ?? 'asdr_test';
 $host = getenv('TEST_DB_HOST') ?: (getenv('DB_HOST') ?: '127.0.0.1');
 $port = getenv('TEST_DB_PORT') ?: (getenv('DB_PORT') ?: '3306');
@@ -29,4 +31,9 @@ while ($stmt->nextRowset()) {
     // flush remaining statement sets
 }
 
-echo "Schema successfully loaded into {$dbName}!\n";
+$applied = \App\Core\MigrationRunner::applyPending(
+    $pdo,
+    __DIR__ . '/../database/migrations'
+);
+
+echo "Schema successfully loaded into {$dbName}; pending migrations applied: " . count($applied) . "!\n";
