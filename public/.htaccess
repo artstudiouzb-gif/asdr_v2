@@ -11,6 +11,7 @@
     # проверяется исходный REQUEST_URI, а не переписанный путь.
     RewriteCond %{REQUEST_URI} \.php$ [NC]
     RewriteCond %{REQUEST_URI} !(^|/)(index|download)\.php$ [NC]
+    RewriteCond %{REQUEST_URI} !^/admin/import-news\.php$ [NC]
     RewriteRule .* - [F]
 
     # Существующие файлы и папки (assets, uploads) отдаются напрямую
@@ -65,6 +66,9 @@ DirectoryIndex index.php
         <Files "download.php">
             Require all granted
         </Files>
+        <Files "import-news.php">
+            Require all granted
+        </Files>
     </IfModule>
     <IfModule !mod_authz_core.c>
         <Files "index.php">
@@ -72,6 +76,10 @@ DirectoryIndex index.php
             Allow from all
         </Files>
         <Files "download.php">
+            Order allow,deny
+            Allow from all
+        </Files>
+        <Files "import-news.php">
             Order allow,deny
             Allow from all
         </Files>
