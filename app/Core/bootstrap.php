@@ -114,12 +114,33 @@ if (is_file($configFile)) {
             throw $e;
         }
     } else {
-        // Установка ещё не завершена, но config.php уже есть (шаг после
-        // генерации конфига): подключаемся к БД мягко, без фатала.
+        // Установка ещё не завершена, но config.php уже есть (после шага БД).
+        // Сначала подключаемся мягко: если сервер БД недоступен, установщик сам
+        // покажет ошибку. Но если соединение есть, структура обязана быть
+        // доведена до текущей версии ДО открытия следующих шагов и демо-сидера.
+        $installDbConnected = false;
         try {
             Database::init($config['db']);
+            $installDbConnected = true;
         } catch (\Throwable $e) {
             // БД ещё может быть недоступна — установщик покажет ошибку сам.
+        }
+
+        if ($installDbConnected) {
+            try {
+                \App\Core\MigrationRunner::applyPending(
+                    Database::pdo(),
+                    APP_ROOT . '/database/migrations'
+                );
+            } catch (\Throwable $e) {
+                // Не продолжаем установку на частично обновлённой схеме:
+                // иначе ошибка проявится позже в моделях как Unknown column.
+                throw new \RuntimeException(
+                    'Не удалось применить обязательные миграции чистой установки: ' . $e->getMessage(),
+                    0,
+                    $e
+                );
+            }
         }
     }
 } else {
