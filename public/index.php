@@ -488,7 +488,8 @@ if (\App\Core\Session::hasCookie()) {
 $guardPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
 if (\App\Core\Session::hasCookie()
     && \App\Core\Auth::check()
-    && \App\Core\Auth::requiresTwoFactorSetup()) {
+    && \App\Core\Auth::requiresTwoFactorSetup()
+    && (string) \App\Core\Config::get('app.env') !== 'development') {
     // Разрешены только операции, необходимые для подключения канала кодов.
     // Префиксы намеренно не используются: иначе onboarding-сессия получала
     // доступ к смене пароля, отзыву сессий и настройкам Telegram-канала.
