@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * Запуск:
  *   php scripts/wp_import.php https://asdr.gov.uz [опции]
- *   php scripts/wp_import.php WordPress.xml [опции]
+ *   php scripts/wp_import.php export.xml [опции]
  *
  * Опции:
  *   --limit N        импортировать не более N базовых новостей (0 = все)
@@ -21,7 +21,7 @@ declare(strict_types=1);
  *   --dry-run        построить полный план импорта без записи данных
  *
  * Для WXR импортируются только исходные записи status=publish. Исходные
- * WordPress-черновики и комментарии намеренно не переносятся.
+ * черновики CMS и комментарии намеренно не переносятся.
  */
 
 require __DIR__ . '/../app/Core/bootstrap.php';
@@ -60,8 +60,8 @@ for ($i = 0; $i < count($args); $i++) {
 if ($source === '') {
     fwrite(STDERR, "Укажите адрес сайта ИЛИ файл экспорта .xml, напр.:\n"
         . "  php scripts/wp_import.php https://asdr.gov.uz --lang uz:uz --lang ru:ru --limit 20\n"
-        . "  php scripts/wp_import.php WordPress.xml --lang uz:uz --lang ru:ru --lang en:en --dry-run\n"
-        . "  php scripts/wp_import.php WordPress.xml --lang uz:uz --lang ru:ru --lang en:en --uploads /path/wp-content/uploads\n");
+        . "  php scripts/wp_import.php export.xml --lang uz:uz --lang ru:ru --lang en:en --dry-run\n"
+        . "  php scripts/wp_import.php export.xml --lang uz:uz --lang ru:ru --lang en:en --uploads /path/wp-content/uploads\n");
     exit(2);
 }
 
