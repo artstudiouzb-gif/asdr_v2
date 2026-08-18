@@ -81,6 +81,7 @@ final class NewsController
         // главной: общие рамка, акцентный край, hover и spotlight. Регистрация
         // news_feature заодно подключает стили .relnews-card, нужные контенту.
         \App\Core\AssetCollector::requireJs('news_feature');
+        \App\Core\AssetCollector::requireCss('news-index-pagination', '/assets/css/news-index-pagination.css');
 
         View::render('site/news_index', $vars);
     }
