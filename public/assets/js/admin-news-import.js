@@ -4,7 +4,7 @@
     var root = document.querySelector('[data-news-import]');
     if (!root) return;
 
-    var endpoint = root.getAttribute('data-endpoint') || '/admin/import-news.php';
+    var endpoint = root.getAttribute('data-endpoint') || '/admin/news/import';
     var form = root.querySelector('[data-upload-form]');
     var fileInput = root.querySelector('[data-file-input]');
     var dropZone = root.querySelector('[data-drop-zone]');
@@ -43,7 +43,7 @@
     }
 
     async function jsonPost(action, data) {
-        var response = await fetch(endpoint + '?action=' + encodeURIComponent(action), {
+        var response = await fetch(endpoint + '/' + encodeURIComponent(action), {
             method: 'POST',
             body: csrf(data || new FormData()),
             credentials: 'same-origin',
@@ -234,7 +234,7 @@
             fd.append('token', token);
             fd.append('status', status);
             fd.append('backup', first && backup ? '1' : '0');
-            var result = await jsonPost('import', fd);
+            var result = await jsonPost('run', fd);
             var batchErrors = result.batch && Array.isArray(result.batch.errors) ? result.batch.errors : [];
             if (batchErrors.length) {
                 batchErrors.forEach(function (message) { appendLog(message, true); });
