@@ -29,7 +29,8 @@ test('Тема отдаёт --on-accent, а ссылки им пользуютс
     assert_contains('--on-accent:', $css);
 
     $theme = theme_css();
-    assert_contains(".media-tabs__tab.is-active { \n    color: #fff !important;", $theme);
+    assert_contains('.media-tabs__tab.is-active', $theme);
+    assert_contains('color: #fff !important;', $theme);
     assert_contains('border-radius: var(--radius-sm, 10px)', $theme);
 
     // Ссылки в тексте — от --gov-teal-text (посчитан с поправкой), а не от

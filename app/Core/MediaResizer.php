@@ -165,4 +165,27 @@ final class MediaResizer
         readfile($file);
         exit;
     }
+
+    /**
+     * Очищает устаревшие миниатюры из дискового кэша.
+     */
+    public static function purgeCache(int $olderThanDays = 30): int
+    {
+        $cacheDir = APP_ROOT . '/storage/cache/thumbs';
+        if (!is_dir($cacheDir)) {
+            return 0;
+        }
+
+        $threshold = time() - (max(1, $olderThanDays) * 86400);
+        $count = 0;
+        foreach (glob($cacheDir . '/*.webp') ?: [] as $file) {
+            if (is_file($file) && filemtime($file) < $threshold) {
+                if (@unlink($file)) {
+                    $count++;
+                }
+            }
+        }
+
+        return $count;
+    }
 }
