@@ -468,6 +468,14 @@ final class News
     }
 
     /**
+     * Псевдоним для поиска опубликованной новости по слагу.
+     */
+    public static function findBySlug(string $slug, ?string $lang = null): ?array
+    {
+        return self::findPublishedBySlug($slug, $lang);
+    }
+
+    /**
      * Ищет опубликованную новость по слагу и локализует под язык.
      */
     public static function findPublishedBySlug(string $slug, ?string $lang = null): ?array
