@@ -98,6 +98,14 @@ require __DIR__ . '/layout/header.php';
                 <?php endif; ?>
             </div>
             <div class="u-inline-4588dc62ed">
+                <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('Очередь задач'), ENT_QUOTES) ?></div>
+                <span class="badge badge--published u-inline-e48b05836a"><?= \App\Core\AdminUi::icon('check', 13) ?> <?= (int) ($systemHealth['queue_pending'] ?? 0) ?> <?= htmlspecialchars(t('в очереди'), ENT_QUOTES) ?></span>
+            </div>
+            <div class="u-inline-4588dc62ed">
+                <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('Passkeys / Биометрия'), ENT_QUOTES) ?></div>
+                <span class="badge badge--published u-inline-e48b05836a"><?= \App\Core\AdminUi::icon('fingerprint', 13) ?> <?= (int) ($systemHealth['passkeys_count'] ?? 0) ?> <?= htmlspecialchars(t('ключей'), ENT_QUOTES) ?></span>
+            </div>
+            <div class="u-inline-4588dc62ed">
                 <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('Обслуживание'), ENT_QUOTES) ?></div>
                 <?php if (!empty($systemHealth['maintenance'])): ?>
                     <span class="badge badge--draft u-inline-e48b05836a"><?= htmlspecialchars(t('Включён'), ENT_QUOTES) ?></span>

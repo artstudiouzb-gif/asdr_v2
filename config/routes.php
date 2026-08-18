@@ -103,6 +103,12 @@ return static function (Router $router): void {
     $router->post('/admin/profile/sessions/revoke-others', [AdminProfileController::class, 'revokeOthers']);
     $router->post('/admin/profile/sessions/{id}/revoke', [AdminProfileController::class, 'revokeSession']);
 
+    // --- Admin: WebAuthn / Passkeys ---
+    $router->get('/admin/passkey/register/options', [\App\Controllers\Admin\PasskeyController::class, 'registerOptions']);
+    $router->post('/admin/passkey/register/verify', [\App\Controllers\Admin\PasskeyController::class, 'registerVerify']);
+    $router->get('/admin/passkey/login/options', [\App\Controllers\Admin\PasskeyController::class, 'loginOptions']);
+    $router->post('/admin/passkey/login/verify', [\App\Controllers\Admin\PasskeyController::class, 'loginVerify']);
+
     // --- Admin: дашборд ---
     $router->get('/admin', [DashboardController::class, 'index']);
 
