@@ -22,6 +22,7 @@ final class AssetCollector
         'slider' => '/assets/js/blocks/slider.js',
         'anchor_nav' => '/assets/js/blocks/anchor_nav.js',
         'news' => '/assets/js/news.js',
+        'news_share_gallery' => '/assets/js/news-share-gallery.js',
         'news_gallery_thumbnails' => '/assets/js/news-gallery-thumbnails.js',
         'news_feature' => '/assets/js/blocks/news_feature.js',
         'leader_card' => '/assets/js/blocks/leader_card.js',
