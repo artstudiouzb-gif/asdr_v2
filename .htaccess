@@ -18,11 +18,12 @@
     RewriteRule (^|/)\.(?!well-known(/|$)) - [F]
 
     # Любой .php вне public/ запрещён (config/config.php, database/*.php
-    # и т.д. не должны исполняться через веб). Исключения: index.php и
-    # download.php — виртуальные точки входа в корне: фронт-контроллер
-    # public/.htaccess (RewriteBase /) переписывает маршруты на /index.php,
-    # а правило проксирования ниже возвращает его в public/.
-    RewriteRule ^(?!public/|index\.php$|download\.php$).*\.php$ - [F]
+    # и т.д. не должны исполняться через веб). Исключения: index.php,
+    # download.php и точечный защищённый WXR-импорт в админке. Последний
+    # нужен для shared-hosting, где document root = корень проекта: запрос
+    # /admin/import-news.php здесь проксируется в public/admin/import-news.php,
+    # где повторно проходит SuperAdmin/CSRF/write-guard проверки.
+    RewriteRule ^(?!public/|index\.php$|download\.php$|admin/import-news\.php$).*\.php$ - [F]
 
     RewriteRule ^$ public/ [L]
 

@@ -7,6 +7,7 @@ test('admin WXR importer is super-admin and CSRF protected', function (): void {
     $controller = (string) file_get_contents($root . '/app/Controllers/Admin/NewsImportController.php');
     $entry = (string) file_get_contents($root . '/public/admin/import-news.php');
     $htaccess = (string) file_get_contents($root . '/public/.htaccess');
+    $rootHtaccess = (string) file_get_contents($root . '/.htaccess');
     $newsIndex = (string) file_get_contents($root . '/app/Views/admin/news/index.php');
 
     assert_contains('Auth::requireSuperAdmin()', $controller);
@@ -17,6 +18,7 @@ test('admin WXR importer is super-admin and CSRF protected', function (): void {
     assert_contains('Backup::isWriteGuardActive()', $entry);
     assert_contains('!^/admin/import-news\\.php$', $htaccess);
     assert_contains('<Files "import-news.php">', $htaccess);
+    assert_contains('admin/import-news\\.php$', $rootHtaccess);
     assert_contains('/admin/import-news.php', $newsIndex);
     assert_not_contains('(index|download|import-news)\\.php$', $htaccess);
     assert_not_contains('shell_exec(', $controller);
