@@ -230,6 +230,8 @@ final class PerformanceController
 
         $cfEnabled = \App\Core\Cloudflare::enabled();
         Cache::flush();
+        \App\Core\OpenGraphImage::purgeCache(0);
+        \App\Core\MediaResizer::purgeCache(0);
         $cfOk = $cfEnabled ? \App\Core\Cloudflare::purgeEverything() : null;
         $opcacheOk = function_exists('opcache_reset') ? @opcache_reset() : null;
 

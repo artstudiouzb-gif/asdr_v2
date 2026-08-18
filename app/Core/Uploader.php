@@ -124,8 +124,6 @@ final class Uploader
             throw new RuntimeException('Файл превышает максимальный размер ' . (int) round($maxSize / (1024 * 1024)) . ' МБ.');
         }
 
-        self::assertDiskSpace($accessType);
-
         $allowed = $allowCode ? self::ALLOWED + self::CODE_ALLOWED : self::ALLOWED;
         $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         if (!isset($allowed[$extension])) {
@@ -142,6 +140,8 @@ final class Uploader
         if (!self::mimeMatches($extension, $detectedMime, $sourcePath)) {
             throw new RuntimeException('Содержимое файла не соответствует расширению.');
         }
+
+        self::assertDiskSpace($accessType);
 
         $accessType = $accessType === 'protected' ? 'protected' : 'public';
         $storedName = self::generateSeoFileName($originalName, $extension);

@@ -75,6 +75,8 @@ final class JobQueue
             return [];
         }
 
+        self::recoverStuckJobs();
+
         $pdo = Database::pdo();
         $pdo->beginTransaction();
 
@@ -198,6 +200,42 @@ final class JobQueue
             return $stmt->rowCount();
         } catch (Throwable $e) {
             Logger::error('JobQueue::purgeCompleted failed: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Автоматически восстанавливает зависшие задачи (Crash/Zombie recovery).
+     * Если воркер аварийно упал и блокировка истекла дольше чем $timeoutSeconds,
+     * возвращает задачу в pending с увеличением счетчика попыток.
+     */
+    public static function recoverStuckJobs(int $timeoutSeconds = 600): int
+    {
+        if (!Database::isConnected()) {
+            return 0;
+        }
+
+        try {
+            $stmt = Database::pdo()->prepare(
+                "UPDATE jobs
+                 SET locked_until = NULL,
+                     attempts = attempts + 1,
+                     status = IF(attempts + 1 >= max_attempts, 'failed', 'pending'),
+                     last_error = 'Worker timeout / unhandled termination'
+                 WHERE locked_until IS NOT NULL
+                   AND locked_until < DATE_SUB(NOW(), INTERVAL :timeout SECOND)"
+            );
+            $stmt->bindValue(':timeout', max(60, $timeoutSeconds), PDO::PARAM_INT);
+            $stmt->execute();
+
+            $recovered = (int) $stmt->rowCount();
+            if ($recovered > 0) {
+                Logger::warning(sprintf('JobQueue: recovered %d stuck/zombie jobs.', $recovered));
+            }
+
+            return $recovered;
+        } catch (Throwable $e) {
+            Logger::error('JobQueue::recoverStuckJobs failed: ' . $e->getMessage());
             return 0;
         }
     }

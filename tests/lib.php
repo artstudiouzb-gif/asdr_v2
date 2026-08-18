@@ -217,7 +217,7 @@ function theme_css(): string
         $css .= (string) @file_get_contents($file) . "\n";
     }
 
-    return $css;
+    return str_replace("\r\n", "\n", $css);
 }
 
 /**
