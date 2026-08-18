@@ -251,4 +251,34 @@ final class PublicResponseCache
             }
         });
     }
+
+    /**
+     * Сохраняет снимок готовой страницы для отказоустойчивой отдачи при сбоях БД.
+     */
+    public static function saveSnapshot(string $path, string $lang, string $html): void
+    {
+        if (self::$cacheable && $html !== '') {
+            $key = 'stale_page:' . md5($path . ':' . $lang);
+            Cache::put($key, $html, 86400 * 7); // храним до 7 дней как аварийный снимок
+        }
+    }
+
+    /**
+     * Отдаёт аварийный снимок при временном отказе БД (Stale-While-Revalidate fallback).
+     */
+    public static function tryServeStale(string $path, string $lang): bool
+    {
+        $key = 'stale_page:' . md5($path . ':' . $lang);
+        $staleHtml = Cache::get($key);
+        if (is_string($staleHtml) && $staleHtml !== '') {
+            if (!headers_sent()) {
+                http_response_code(200);
+                header('X-Cache-Status: STALE-RECOVERED');
+                header('Cache-Control: public, max-age=30, stale-while-revalidate=60');
+            }
+            echo $staleHtml;
+            return true;
+        }
+        return false;
+    }
 }

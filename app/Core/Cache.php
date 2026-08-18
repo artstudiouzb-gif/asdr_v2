@@ -12,6 +12,18 @@ namespace App\Core;
  */
 final class Cache
 {
+    /** @var array<string, array{value: mixed, expires_at: int}> */
+    private static array $memoryCache = [];
+    private static ?bool $hasApcu = null;
+
+    private static function apcuEnabled(): bool
+    {
+        if (self::$hasApcu === null) {
+            self::$hasApcu = function_exists('apcu_fetch') && (bool) ini_get('apc.enabled') && (PHP_SAPI !== 'cli' || (bool) ini_get('apc.enable_cli'));
+        }
+        return self::$hasApcu;
+    }
+
     private static function dir(): string
     {
         return APP_ROOT . '/storage/cache';
@@ -34,10 +46,32 @@ final class Cache
      */
     private static function getFresh(string $key, int $ttl): mixed
     {
-        if ($ttl > 0) {
-            $path = self::pathFor($key);
-            if (is_file($path) && (time() - (int) @filemtime($path)) > $ttl) {
-                return null;
+        $path = self::pathFor($key);
+        if ($ttl > 0 && is_file($path) && (time() - (int) @filemtime($path)) > $ttl) {
+            unset(self::$memoryCache[$key]);
+            if (self::apcuEnabled()) {
+                apcu_delete('asdr:' . $key);
+            }
+            return null;
+        }
+
+        // 1. L1 Request Memory Cache
+        if (isset(self::$memoryCache[$key])) {
+            $item = self::$memoryCache[$key];
+            if ($item['expires_at'] === 0 || $item['expires_at'] >= time()) {
+                return $item['value'];
+            }
+            unset(self::$memoryCache[$key]);
+        }
+
+        // 2. L1.5 Shared APCu Cache
+        if (self::apcuEnabled()) {
+            $apcuKey = 'asdr:' . $key;
+            $success = false;
+            $val = apcu_fetch($apcuKey, $success);
+            if ($success && is_array($val) && isset($val['value'])) {
+                self::$memoryCache[$key] = ['value' => $val['value'], 'expires_at' => $ttl > 0 ? time() + $ttl : 0];
+                return $val['value'];
             }
         }
 
@@ -46,6 +80,24 @@ final class Cache
 
     public static function get(string $key): mixed
     {
+        if (isset(self::$memoryCache[$key])) {
+            $item = self::$memoryCache[$key];
+            if ($item['expires_at'] === 0 || $item['expires_at'] >= time()) {
+                return $item['value'];
+            }
+            unset(self::$memoryCache[$key]);
+        }
+
+        if (self::apcuEnabled()) {
+            $apcuKey = 'asdr:' . $key;
+            $success = false;
+            $val = apcu_fetch($apcuKey, $success);
+            if ($success && is_array($val) && isset($val['value'])) {
+                self::$memoryCache[$key] = ['value' => $val['value'], 'expires_at' => 0];
+                return $val['value'];
+            }
+        }
+
         $path = self::pathFor($key);
         if (!is_file($path)) {
             return null;
@@ -56,11 +108,23 @@ final class Cache
         }
         $data = @unserialize($raw, ['allowed_classes' => false]);
 
-        return $data === false && $raw !== serialize(false) ? null : $data;
+        $result = $data === false && $raw !== serialize(false) ? null : $data;
+        if ($result !== null) {
+            self::$memoryCache[$key] = ['value' => $result, 'expires_at' => 0];
+        }
+
+        return $result;
     }
 
-    public static function put(string $key, mixed $value): void
+    public static function put(string $key, mixed $value, int $ttl = 0): void
     {
+        $expiresAt = $ttl > 0 ? time() + $ttl : 0;
+        self::$memoryCache[$key] = ['value' => $value, 'expires_at' => $expiresAt];
+
+        if (self::apcuEnabled()) {
+            apcu_store('asdr:' . $key, ['value' => $value], $ttl);
+        }
+
         $path = self::pathFor($key);
         $dir = dirname($path);
         if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
@@ -135,6 +199,11 @@ final class Cache
 
     public static function forget(string $key): void
     {
+        unset(self::$memoryCache[$key]);
+        if (self::apcuEnabled()) {
+            apcu_delete('asdr:' . $key);
+        }
+
         $path = self::pathFor($key);
         if (is_file($path)) {
             @unlink($path);
@@ -148,6 +217,19 @@ final class Cache
     public static function forgetPrefix(string $prefix): void
     {
         $cleanPrefix = rtrim($prefix, ':');
+
+        // Очищаем L1 память для совпавших ключей
+        foreach (array_keys(self::$memoryCache) as $k) {
+            if (str_starts_with((string) $k, $cleanPrefix)) {
+                unset(self::$memoryCache[$k]);
+            }
+        }
+
+        if (self::apcuEnabled() && class_exists('\APCUIterator')) {
+            $iter = new \APCUIterator('/^asdr:' . preg_quote($cleanPrefix, '/') . '/');
+            apcu_delete($iter);
+        }
+
         $parts = array_values(array_filter(explode(':', $cleanPrefix), static fn ($s) => $s !== ''));
         $segments = array_map(
             static fn ($s) => preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) $s),
@@ -189,6 +271,11 @@ final class Cache
 
     public static function flush(): void
     {
+        self::$memoryCache = [];
+        if (self::apcuEnabled()) {
+            apcu_clear_cache();
+        }
+
         $dir = self::dir();
         if (!is_dir($dir)) {
             return;
