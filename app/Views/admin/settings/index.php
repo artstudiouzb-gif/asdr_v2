@@ -340,23 +340,59 @@ require __DIR__ . '/../layout/header.php';
     <div class="admin-card-grid">
         <div class="admin-demo-card">
             <h4 class="u-inline-ee3d7719a8">1. Безопасное дополнение (DEMO)</h4>
-            <p class="form-hint u-inline-7ca9af90e8">Добавляет недостающие демо-записи в пустые разделы. Ваши текущие записи, отредактированная главная страница и меню <strong>не изменяются и не удаляются</strong>.</p>
-            <form method="post" action="/admin/settings/demo-content" data-confirm="Дополнить демо-контентом разделы сайта?">
+            <p class="form-hint u-inline-7ca9af90e8">Добавляет недостающие демо-записи в выбранные разделы. Ваши текущие записи, отредактированная главная страница и меню <strong>не изменяются и не удаляются</strong>.</p>
+            <form method="post" action="/admin/settings/demo-content" data-confirm="Дополнить демо-контентом выбранные разделы сайта?">
                 <?= Csrf::field() ?>
+                
+                <div class="demo-modules-selector">
+                    <div class="demo-modules-head">
+                        <span>Выберите разделы для загрузки:</span>
+                    </div>
+                    <div class="demo-modules-grid">
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="news" checked> Новости и рубрики</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="pages" checked> Страницы</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="projects" checked> Проекты</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="entries" checked> Документы и тендеры</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="team" checked> Руководство</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="media" checked> Фотоальбомы и видео</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="forms" checked> Формы</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="menu" checked> Главное меню (стандарт)</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="home" checked> Главная страница</label>
+                    </div>
+                </div>
+
                 <div class="form-field u-inline-72d6c38e5f">
                     <label class="u-inline-f6909f80c2" for="demo_confirm_code">Код подтверждения</label>
                     <input type="text" id="demo_confirm_code" name="demo_confirm_code" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Введите DEMO">
                     <span class="form-hint">Для запуска введите <code>DEMO</code>.</span>
                 </div>
-                <button type="submit" class="btn btn--primary">Дополнить демо-данными</button>
+                <button type="submit" class="btn btn--primary">Дополнить выбранными данными</button>
             </form>
         </div>
 
         <div class="admin-demo-card admin-demo-card--danger">
             <h4 class="u-inline-ee3d7719a8">2. Полный сброс и перезагрузка (RESET + DEMO)</h4>
-            <p class="form-hint u-inline-7ca9af90e8"><strong>ВНИМАНИЕ!</strong> Сначала создаёт резервную копию, затем очищает все разделы сайта и создаёт заново полный двуязычный комплект RU/UZ: страницы, блоки, новости, проекты, документы, мероприятия, медиа, формы и многоуровневое меню. После загрузки автоматически проверяет целостность данных; при ошибке операция отменяется.</p>
+            <p class="form-hint u-inline-7ca9af90e8"><strong>ВНИМАНИЕ!</strong> Сначала создаёт резервную копию, затем очищает все разделы сайта и создаёт заново выбранные демо-модули RU/UZ. Меню создаётся стандартным (без мега-колонок).</p>
             <form method="post" action="/admin/settings/demo-reset" data-confirm="ВНИМАНИЕ: Все текущие новости, страницы, меню и каталог будут полностью очищены и заменены эталонным демо-комплектом. Продолжить?">
                 <?= Csrf::field() ?>
+
+                <div class="demo-modules-selector">
+                    <div class="demo-modules-head">
+                        <span>Модули для создания после сброса:</span>
+                    </div>
+                    <div class="demo-modules-grid">
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="news" checked> Новости и рубрики</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="pages" checked> Страницы</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="projects" checked> Проекты</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="entries" checked> Документы и тендеры</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="team" checked> Руководство</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="media" checked> Фотоальбомы и видео</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="forms" checked> Формы</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="menu" checked> Главное меню (стандарт)</label>
+                        <label class="demo-module-item"><input type="checkbox" name="modules[]" value="home" checked> Главная страница</label>
+                    </div>
+                </div>
+
                 <div class="form-field u-inline-72d6c38e5f">
                     <label class="u-inline-f6909f80c2" for="reset_confirm_code">Код подтверждения полным сбросом</label>
                     <input type="text" id="reset_confirm_code" name="demo_confirm_code" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Введите RESET">

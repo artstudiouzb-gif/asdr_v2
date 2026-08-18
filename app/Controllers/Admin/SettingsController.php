@@ -185,8 +185,12 @@ final class SettingsController
             exit;
         }
 
+        $modules = isset($_POST['modules']) && is_array($_POST['modules'])
+            ? array_values(array_filter(array_map('strval', $_POST['modules'])))
+            : null;
+
         try {
-            $c = DemoSeeder::run(Database::pdo());
+            $c = DemoSeeder::run(Database::pdo(), $modules);
             Cache::forgetPrefix('page:');
             $added = array_sum($c);
             Flash::success($added > 0
@@ -213,9 +217,13 @@ final class SettingsController
             exit;
         }
 
+        $modules = isset($_POST['modules']) && is_array($_POST['modules'])
+            ? array_values(array_filter(array_map('strval', $_POST['modules'])))
+            : null;
+
         try {
             $backupPath = Backup::create();
-            $c = DemoSeeder::resetAndRun(Database::pdo());
+            $c = DemoSeeder::resetAndRun(Database::pdo(), $modules);
             Cache::forgetPrefix('page:');
             Flash::success(sprintf('Резервная копия %s создана. Выполнен полный сброс, загрузка и проверка нового демо-комплекта! Создано: новости %d, документы %d, проекты %d, медиа %d, формы %d, вакансии %d, тендеры %d, мероприятия %d, руководство %d, страницы %d, меню %d.', basename($backupPath), $c['news'], $c['documenty'], $c['projects'], $c['albums'] + $c['videos'], $c['forms'], $c['vakansii'], $c['tendery'], $c['meropriyatiya'], $c['team'], $c['pages'], $c['menu']));
         } catch (\Throwable $e) {

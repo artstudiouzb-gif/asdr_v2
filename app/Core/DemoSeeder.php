@@ -17,12 +17,19 @@ final class DemoSeeder
     private const DEMO_VERSION = '2026.08-v2';
 
     /** @return array<string,int> счётчики добавленного по разделам */
-    public static function run(PDO $pdo): array
+    /**
+     * @param list<string>|null $modules Список модулей для загрузки (null / ['all'] = все)
+     * @return array<string,int> счётчики добавленного по разделам
+     */
+    public static function run(PDO $pdo, ?array $modules = null): array
     {
         $ownsTransaction = !$pdo->inTransaction();
         if ($ownsTransaction) {
             $pdo->beginTransaction();
         }
+
+        $all = $modules === null || in_array('all', $modules, true) || $modules === [];
+        $selected = static fn (string $mod): bool => $all || in_array($mod, $modules, true);
 
         try {
             $c = [
@@ -45,16 +52,36 @@ final class DemoSeeder
             ];
 
             self::seedAssets($pdo, $c);
-            self::seedNews($pdo, $c);
-            self::seedEntries($pdo, $c);
-            self::seedProjects($pdo, $c);
-            self::seedMedia($pdo, $c);
-            self::seedForms($pdo, $c);
-            self::seedTeam($pdo, $c);
-            self::seedHome($pdo, $c);
-            self::seedHeroes($pdo, $c);
-            self::seedPages($pdo, $c);
-            self::seedMenu($pdo, $c);
+            if ($selected('news')) {
+                self::seedNews($pdo, $c);
+            }
+            if ($selected('entries') || $selected('documents') || $selected('vacancies') || $selected('tenders') || $selected('events')) {
+                self::seedEntries($pdo, $c);
+            }
+            if ($selected('projects')) {
+                self::seedProjects($pdo, $c);
+            }
+            if ($selected('media') || $selected('albums') || $selected('videos')) {
+                self::seedMedia($pdo, $c);
+            }
+            if ($selected('forms')) {
+                self::seedForms($pdo, $c);
+            }
+            if ($selected('team')) {
+                self::seedTeam($pdo, $c);
+            }
+            if ($selected('home')) {
+                self::seedHome($pdo, $c);
+            }
+            if ($selected('heroes') || $selected('home')) {
+                self::seedHeroes($pdo, $c);
+            }
+            if ($selected('pages')) {
+                self::seedPages($pdo, $c);
+            }
+            if ($selected('menu')) {
+                self::seedMenu($pdo, $c);
+            }
             self::storeVersion($pdo);
 
             if ($ownsTransaction) {
@@ -74,7 +101,7 @@ final class DemoSeeder
      * Выполняет полный сброс разделов (очистку контента) и загрузку эталонного комплекта «с чистого листа».
      * @return array<string,int>
      */
-    public static function resetAndRun(PDO $pdo): array
+    public static function resetAndRun(PDO $pdo, ?array $modules = null): array
     {
         $ownsTransaction = !$pdo->inTransaction();
         if ($ownsTransaction) {
@@ -134,7 +161,7 @@ final class DemoSeeder
                 }
             }
 
-            $result = self::run($pdo);
+            $result = self::run($pdo, $modules);
             $issues = self::verify($pdo);
             if ($issues !== []) {
                 throw new \RuntimeException(
@@ -2043,7 +2070,7 @@ final class DemoSeeder
         }
         $menus = [
             'ru' => [
-                ['title' => 'Агентство', 'type' => 'page', 'value' => 'o-nas', 'mega' => 3, 'children' => [
+                ['title' => 'Агентство', 'type' => 'page', 'value' => 'o-nas', 'mega' => 0, 'children' => [
                     ['Об агентстве', 'page', 'o-nas'],
                     ['Руководство', 'page', 'rukovodstvo'],
                     ['Структура', 'page', 'struktura'],
@@ -2051,20 +2078,20 @@ final class DemoSeeder
                     ['Первый заместитель директора', 'page', 'pervyy-zamestitel-direktora'],
                     ['Противодействие коррупции', 'page', 'antikorrupciya'],
                 ]],
-                ['title' => 'Деятельность', 'type' => 'page', 'value' => 'napravleniya', 'mega' => 3, 'children' => [
+                ['title' => 'Деятельность', 'type' => 'page', 'value' => 'napravleniya', 'mega' => 0, 'children' => [
                     ['Стратегия «Узбекистан–2030»', 'page', 'strategiya-2030', '2030'],
                     ['Приоритетные направления', 'page', 'napravleniya'],
                     ['Устойчивый экономический рост', 'page', 'ustoychivyy-ekonomicheskiy-rost'],
                     ['Проекты и инициативы', 'custom', '/projects'],
                     ['Аналитика', 'page', 'analitika'],
                 ]],
-                ['title' => 'Пресс-центр', 'type' => 'page', 'value' => 'press-centr', 'mega' => 2, 'children' => [
+                ['title' => 'Пресс-центр', 'type' => 'page', 'value' => 'press-centr', 'mega' => 0, 'children' => [
                     ['Новости', 'news_index', ''],
                     ['Мероприятия', 'page', 'meropriyatiya'],
                     ['Фотоальбомы', 'custom', '/albums'],
                     ['Видеоматериалы', 'page', 'media'],
                 ]],
-                ['title' => 'Открытые данные', 'type' => 'custom', 'value' => '/catalog/documenty', 'mega' => 2, 'children' => [
+                ['title' => 'Открытые данные', 'type' => 'custom', 'value' => '/catalog/documenty', 'mega' => 0, 'children' => [
                     ['Документы', 'custom', '/catalog/documenty'],
                     ['Тендеры', 'custom', '/catalog/tendery'],
                     ['Вакансии', 'custom', '/catalog/vakansii'],
@@ -2072,7 +2099,7 @@ final class DemoSeeder
                 ['title' => 'Контакты', 'type' => 'page', 'value' => 'kontakty', 'mega' => 0, 'children' => []],
             ],
             'uz' => [
-                ['title' => 'Agentlik', 'type' => 'page', 'value' => 'o-nas', 'mega' => 3, 'children' => [
+                ['title' => 'Agentlik', 'type' => 'page', 'value' => 'o-nas', 'mega' => 0, 'children' => [
                     ['Agentlik haqida', 'page', 'o-nas'],
                     ['Rahbariyat', 'page', 'rukovodstvo'],
                     ['Tuzilma', 'page', 'struktura'],
@@ -2080,20 +2107,20 @@ final class DemoSeeder
                     ['Direktorning birinchi o‘rinbosari', 'page', 'pervyy-zamestitel-direktora'],
                     ['Korrupsiyaga qarshi kurash', 'page', 'antikorrupciya'],
                 ]],
-                ['title' => 'Faoliyat', 'type' => 'page', 'value' => 'napravleniya', 'mega' => 3, 'children' => [
+                ['title' => 'Faoliyat', 'type' => 'page', 'value' => 'napravleniya', 'mega' => 0, 'children' => [
                     ['«O‘zbekiston–2030» strategiyasi', 'page', 'strategiya-2030', '2030'],
                     ['Ustuvor yo‘nalishlar', 'page', 'napravleniya'],
                     ['Barqaror iqtisodiy o‘sish', 'page', 'ustoychivyy-ekonomicheskiy-rost'],
                     ['Loyihalar va tashabbuslar', 'custom', '/projects'],
                     ['Tahlil', 'page', 'analitika'],
                 ]],
-                ['title' => 'Matbuot markazi', 'type' => 'page', 'value' => 'press-centr', 'mega' => 2, 'children' => [
+                ['title' => 'Matbuot markazi', 'type' => 'page', 'value' => 'press-centr', 'mega' => 0, 'children' => [
                     ['Yangiliklar', 'news_index', ''],
                     ['Tadbirlar', 'page', 'meropriyatiya'],
                     ['Fotoalbomlar', 'custom', '/albums'],
                     ['Videomateriallar', 'page', 'media'],
                 ]],
-                ['title' => 'Ochiq ma’lumotlar', 'type' => 'custom', 'value' => '/catalog/documenty', 'mega' => 2, 'children' => [
+                ['title' => 'Ochiq ma’lumotlar', 'type' => 'custom', 'value' => '/catalog/documenty', 'mega' => 0, 'children' => [
                     ['Hujjatlar', 'custom', '/catalog/documenty'],
                     ['Tenderlar', 'custom', '/catalog/tendery'],
                     ['Bo‘sh ish o‘rinlari', 'custom', '/catalog/vakansii'],
