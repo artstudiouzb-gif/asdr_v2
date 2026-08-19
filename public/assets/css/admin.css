@@ -6357,12 +6357,85 @@ body, body.admin-body {
     padding: 10px 12px !important;
 }
 
-.filters-panel label, .form-field label, label.form-label, label {
+/* Полевые лейблы (исключая чекбоксы и радио) */
+.form-field > label:not(.colorfield__off):not(.checkbox-label),
+.filters-panel label:not(.colorfield__off):not(.checkbox-label),
+label.form-label,
+label:not(.colorfield__off):not(.form-field--checkbox):not(.checkbox-label):not([class*="checkbox"]):not([class*="toggle"]):not(:has(input[type="checkbox"])):not(:has(input[type="radio"])) {
     font-size: 13px !important;
     font-weight: 600 !important;
     color: #0f172a !important;
     margin-bottom: 6px !important;
     display: inline-block !important;
+}
+
+/* Строгое горизонтальное выравнивание чекбоксов и их текстов */
+.form-field--checkbox,
+.checkbox-field,
+.form-check,
+.colorfield__off,
+label.colorfield__off,
+label:has(input[type="checkbox"]),
+label:has(input[type="radio"]),
+label.checkbox-label {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #1e293b !important;
+    line-height: 1.4 !important;
+}
+
+.form-field--checkbox > label,
+.checkbox-field > label,
+.form-check > label,
+.colorfield__off > label {
+    display: inline !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #1e293b !important;
+    line-height: 1.4 !important;
+    cursor: pointer !important;
+    user-select: none !important;
+}
+
+.form-field--checkbox input[type="checkbox"],
+.checkbox-field input[type="checkbox"],
+.form-check input[type="checkbox"],
+.colorfield__off input[type="checkbox"],
+label.colorfield__off input[type="checkbox"],
+label input[type="checkbox"],
+label input[type="radio"] {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
+    max-width: 16px !important;
+    max-height: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    accent-color: #2563eb !important;
+    cursor: pointer !important;
+    vertical-align: middle !important;
+}
+
+.colorfield__off,
+label.colorfield__off {
+    gap: 6px !important;
+    margin-top: 6px !important;
+    font-size: 12.5px !important;
+    color: #475569 !important;
+    white-space: nowrap !important;
 }
 
 small, .form-hint, .help-block {
