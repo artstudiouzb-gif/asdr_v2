@@ -298,6 +298,7 @@ final class LegacyWxrImporter
         $status = ($opts['status'] ?? 'draft') === 'published' ? 'published' : 'draft';
         $authorId = $opts['authorId'] ?? null;
         $uploadsDir = $opts['uploadsDir'] ?? null;
+        LegacyCmsImporter::clearImageCache();
         $limit = (int) ($opts['limit'] ?? 0);
         $dryRun = !empty($opts['dryRun']);
         /** @var array<string,string> $langs */
@@ -409,18 +410,62 @@ final class LegacyWxrImporter
     /** @return list<int> */
     public static function extractGalleryIds(string $html): array
     {
-        if (!preg_match_all('/\[gallery\b[^\]]*\bids\s*=\s*(["\'])([^"\']+)\1[^\]]*\]/i', $html, $matches)) {
-            return [];
-        }
         $ids = [];
-        foreach ($matches[2] as $csv) {
-            foreach (explode(',', (string) $csv) as $id) {
+
+        // 1. Классический шорткод [gallery ids="1,2,3"] или [gallery ids='1,2,3']
+        if (preg_match_all('/\[gallery\b[^\]]*\bids\s*=\s*(["\'])([^"\']+)\1[^\]]*\]/i', $html, $matches)) {
+            foreach ($matches[2] as $csv) {
+                foreach (explode(',', (string) $csv) as $id) {
+                    $n = (int) trim($id);
+                    if ($n > 0) {
+                        $ids[$n] = $n;
+                    }
+                }
+            }
+        }
+
+        // 2. Gutenberg галерея <!-- wp:gallery {"ids":[1,2,3],...} -->
+        if (preg_match_all('/<!--\s*wp:gallery\b[^>]*?"ids"\s*:\s*\[([0-9,\s]+)\]/i', $html, $matches)) {
+            foreach ($matches[1] as $csv) {
+                foreach (explode(',', (string) $csv) as $id) {
+                    $n = (int) trim($id);
+                    if ($n > 0) {
+                        $ids[$n] = $n;
+                    }
+                }
+            }
+        }
+
+        // 3. Gutenberg одиночный блок <!-- wp:image {"id":123,...} -->
+        if (preg_match_all('/<!--\s*wp:image\b[^>]*?"id"\s*:\s*(\d+)/i', $html, $matches)) {
+            foreach ($matches[1] as $id) {
                 $n = (int) trim($id);
                 if ($n > 0) {
                     $ids[$n] = $n;
                 }
             }
         }
+
+        // 4. HTML-класс wp-image-123
+        if (preg_match_all('/\bwp-image-(\d+)\b/i', $html, $matches)) {
+            foreach ($matches[1] as $id) {
+                $n = (int) trim($id);
+                if ($n > 0) {
+                    $ids[$n] = $n;
+                }
+            }
+        }
+
+        // 5. HTML data-id="123"
+        if (preg_match_all('/\bdata-id\s*=\s*["\'](\d+)["\']/i', $html, $matches)) {
+            foreach ($matches[1] as $id) {
+                $n = (int) trim($id);
+                if ($n > 0) {
+                    $ids[$n] = $n;
+                }
+            }
+        }
+
         return array_values($ids);
     }
 
