@@ -173,6 +173,8 @@ jobs:
           touch storage/installed.lock
 
       - name: Install browser test dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           npm ci
           npx playwright install --with-deps chromium
