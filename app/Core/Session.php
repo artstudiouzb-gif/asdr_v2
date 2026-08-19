@@ -19,6 +19,8 @@ final class Session
             return;
         }
 
+        self::ensureSavePath();
+
         $lifetime = (int) Config::get('session.lifetime', 7200);
         $absoluteLifetime = max(
             $lifetime,
@@ -37,7 +39,17 @@ final class Session
             'samesite' => 'Lax',
         ]);
 
-        session_start();
+        try {
+            session_start();
+        } catch (\Throwable $e) {
+            $fallback = defined('APP_ROOT') ? APP_ROOT . '/storage/sessions' : sys_get_temp_dir();
+            if (!is_dir($fallback)) {
+                @mkdir($fallback, 0770, true);
+            }
+            session_save_path($fallback);
+            session_start();
+        }
+
         $now = time();
         $idleExpired = !empty($_SESSION['last_activity'])
             && $now - (int) $_SESSION['last_activity'] > $lifetime;
@@ -50,5 +62,45 @@ final class Session
         }
         $_SESSION['started_at'] ??= $now;
         $_SESSION['last_activity'] = $now;
+    }
+
+    /**
+     * Гарантирует доступность каталога для сохранения сессий.
+     * Защищает от сбоев Plesk/cPanel/Shared-хостингов, когда системный session.save_path
+     * недоступен или использует многоуровневые несуществующие пути.
+     */
+    public static function ensureSavePath(): void
+    {
+        $current = (string) session_save_path();
+        if (str_contains($current, ';')) {
+            $parts = explode(';', $current);
+            $checkPath = (string) end($parts);
+        } else {
+            $checkPath = $current;
+        }
+
+        $isUsable = false;
+        if ($checkPath !== '' && @is_dir($checkPath) && @is_writable($checkPath)) {
+            $testFile = rtrim($checkPath, '/\\') . '/.sess_check_' . uniqid('', true);
+            if (@file_put_contents($testFile, '1') !== false) {
+                @unlink($testFile);
+                $isUsable = true;
+            }
+        }
+
+        if (!$isUsable) {
+            $local = defined('APP_ROOT') ? APP_ROOT . '/storage/sessions' : dirname(__DIR__, 2) . '/storage/sessions';
+            if (!is_dir($local)) {
+                @mkdir($local, 0770, true);
+            }
+            if (is_dir($local) && is_writable($local)) {
+                session_save_path($local);
+            } else {
+                $temp = sys_get_temp_dir();
+                if (is_dir($temp) && is_writable($temp)) {
+                    session_save_path($temp);
+                }
+            }
+        }
     }
 }

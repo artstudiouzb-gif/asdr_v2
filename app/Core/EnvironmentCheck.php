@@ -57,6 +57,7 @@ final class EnvironmentCheck
         foreach ([
             APP_ROOT . '/storage/logs',
             APP_ROOT . '/storage/cache',
+            APP_ROOT . '/storage/sessions',
             APP_ROOT . '/storage/backups',
             APP_ROOT . '/storage/protected_uploads',
             APP_ROOT . '/public/uploads/public',
@@ -70,6 +71,7 @@ final class EnvironmentCheck
             'config/' => APP_ROOT . '/config',
             'storage/' => APP_ROOT . '/storage',
             'storage/logs/' => APP_ROOT . '/storage/logs',
+            'storage/sessions/' => APP_ROOT . '/storage/sessions',
             'public/uploads/public/' => APP_ROOT . '/public/uploads/public',
             'storage/protected_uploads/' => APP_ROOT . '/storage/protected_uploads',
         ];
