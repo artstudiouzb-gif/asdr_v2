@@ -7330,51 +7330,74 @@ body.auth-page label,
    WebAuthn / Passkeys Login Button & Divider
    ======================================================================== */
 .auth-divider {
-    margin: 18px 0;
-    text-align: center;
-    position: relative;
+    margin: 20px 0 !important;
+    text-align: center !important;
+    position: relative !important;
 }
 
 .auth-divider::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--admin-border, #e2e8f0);
+    content: "" !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 1px !important;
+    background: rgba(255, 255, 255, 0.12) !important;
 }
 
 .auth-divider__label {
-    position: relative;
-    background: var(--admin-card-bg, #ffffff);
-    padding: 0 12px;
-    color: var(--admin-muted, #94a3b8);
-    font-size: 12px;
-    font-weight: 500;
+    position: relative !important;
+    background: #1e293b !important;
+    padding: 2px 14px !important;
+    color: #94a3b8 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border-radius: 4px !important;
 }
 
 .auth-passkey-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 14px;
-    background: transparent;
-    border: 1px solid var(--admin-border, #cbd5e1);
-    border-radius: 8px;
-    color: var(--admin-text, #1e293b);
-    font-weight: 500;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 180ms ease;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    padding: 11px 16px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid #334155 !important;
+    border-radius: 4px !important;
+    color: #f1f5f9 !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
 }
 
 .auth-passkey-btn:hover {
-    background: var(--admin-hover, #f8fafc);
-    border-color: var(--admin-accent, #0d9488);
-    color: var(--admin-accent, #0d9488);
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: #64748b !important;
+    color: #ffffff !important;
+}
+
+.auth-passkey-btn svg {
+    color: #60a5fa !important;
+}
+
+.auth-security-badge {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    margin-top: 24px !important;
+    color: #94a3b8 !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+}
+
+.auth-security-badge svg {
+    color: #34d399 !important;
 }
 
 /* ========================================================================
