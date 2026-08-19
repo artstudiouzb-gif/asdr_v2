@@ -3583,6 +3583,31 @@ document.addEventListener('change', function (event) {
     }
 })();
 
+/* --- Фоновая надпись секции: показывать подгруппу настроек только при введённом тексте --- */
+(function () {
+    var apply = function (input) {
+        var form = input.closest('form') || document;
+        var group = form.querySelector('[data-watermark-group]');
+        if (group) {
+            group.hidden = !input.value.trim();
+        }
+    };
+
+    var init = function () {
+        document.querySelectorAll('input[name="watermark"]').forEach(function (input) {
+            apply(input);
+            input.addEventListener('input', function () { apply(input); });
+            input.addEventListener('change', function () { apply(input); });
+        });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+
 /* ========================================================================
    Enterprise Local Draft Auto-Recovery
    (Защита от потери данных редактора при сетевых сбоях и конфликтах версий)
