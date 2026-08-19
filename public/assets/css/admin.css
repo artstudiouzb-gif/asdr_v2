@@ -6369,15 +6369,14 @@ label:not(.colorfield__off):not(.form-field--checkbox):not(.checkbox-label):not(
     display: inline-block !important;
 }
 
-/* Строгое горизонтальное выравнивание чекбоксов и их текстов */
+/* Строгое горизонтальное выравнивание простых строчных чекбоксов */
 .form-field--checkbox,
 .checkbox-field,
 .form-check,
 .colorfield__off,
 label.colorfield__off,
-label:has(input[type="checkbox"]),
-label:has(input[type="radio"]),
-label.checkbox-label {
+label.checkbox-inline,
+label.radio-inline {
     display: inline-flex !important;
     flex-direction: row !important;
     align-items: center !important;
@@ -7585,37 +7584,45 @@ body.auth-page {
     margin-top: 14px !important;
 }
 
-.hdr-select-card {
+.hdr-select-card,
+label.hdr-select-card {
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 4px !important;
-    padding: 16px 18px !important;
+    padding: 18px 20px !important;
     cursor: pointer !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
-    gap: 6px !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
     position: relative !important;
     transition: all 0.15s ease !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02) !important;
+    box-sizing: border-box !important;
+    min-height: 90px !important;
+    width: 100% !important;
 }
 
-.hdr-select-card:hover {
+.hdr-select-card:hover,
+label.hdr-select-card:hover {
     border-color: #94a3b8 !important;
     background: #f8fafc !important;
 }
 
 .hdr-select-card.is-selected,
-.hdr-select-card:has(input:checked) {
+.hdr-select-card:has(input:checked),
+label.hdr-select-card:has(input:checked) {
     border-color: #2563eb !important;
     background: #f0f7ff !important;
     box-shadow: 0 0 0 1px #2563eb !important;
 }
 
-.hdr-select-card input[type="radio"] {
+.hdr-select-card input[type="radio"],
+label.hdr-select-card input[type="radio"] {
     position: absolute !important;
-    top: 16px !important;
-    right: 16px !important;
+    top: 18px !important;
+    right: 18px !important;
     margin: 0 !important;
     width: 16px !important;
     height: 16px !important;
@@ -7626,13 +7633,15 @@ body.auth-page {
     font-size: 14px !important;
     font-weight: 700 !important;
     color: #0f172a !important;
-    padding-right: 28px !important;
+    padding-right: 32px !important;
+    margin: 0 !important;
 }
 
 .hdr-select-card__desc {
     font-size: 12.5px !important;
     color: #475569 !important;
     line-height: 1.45 !important;
+    margin: 0 !important;
 }
 
 /* Карточки поведения при прокрутке (3. Поведение при прокрутке) */
@@ -7643,7 +7652,8 @@ body.auth-page {
     margin-top: 14px !important;
 }
 
-.hb-behavior-card {
+.hb-behavior-card,
+label.hb-behavior-card {
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
@@ -7652,18 +7662,23 @@ body.auth-page {
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 4px !important;
-    padding: 16px 18px !important;
+    padding: 18px 20px !important;
     cursor: pointer !important;
     transition: all 0.15s ease !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02) !important;
+    box-sizing: border-box !important;
+    min-height: 84px !important;
+    width: 100% !important;
 }
 
-.hb-behavior-card:hover {
+.hb-behavior-card:hover,
+label.hb-behavior-card:hover {
     border-color: #94a3b8 !important;
     background: #f8fafc !important;
 }
 
-.hb-behavior-card:has(input:checked) {
+.hb-behavior-card:has(input:checked),
+label.hb-behavior-card:has(input:checked) {
     border-color: #2563eb !important;
     background: #f0f7ff !important;
 }
@@ -7674,12 +7689,14 @@ body.auth-page {
     align-items: center !important;
     gap: 10px !important;
     width: 100% !important;
+    margin: 0 !important;
 }
 
 .hb-behavior-card__title {
     font-size: 13.5px !important;
     font-weight: 600 !important;
     color: #0f172a !important;
+    margin: 0 !important;
 }
 
 .hb-behavior-card__hint {
@@ -7687,6 +7704,7 @@ body.auth-page {
     color: #64748b !important;
     line-height: 1.45 !important;
     display: block !important;
+    margin: 0 !important;
 }
 
 /* 3. Нормализация глобальных отступов и контраста */
