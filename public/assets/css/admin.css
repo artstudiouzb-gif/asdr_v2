@@ -6357,11 +6357,11 @@ body, body.admin-body {
     padding: 10px 12px !important;
 }
 
-/* Полевые лейблы (исключая чекбоксы и радио) */
-.form-field > label:not(.colorfield__off):not(.checkbox-label),
-.filters-panel label:not(.colorfield__off):not(.checkbox-label),
-label.form-label,
-label:not(.colorfield__off):not(.form-field--checkbox):not(.checkbox-label):not([class*="checkbox"]):not([class*="toggle"]):not(:has(input[type="checkbox"])):not(:has(input[type="radio"])) {
+/* Полевые лейблы в светлой рабочей панели (исключая чекбоксы, радио, инсталлятор и экран авторизации) */
+.admin-layout .form-field > label:not(.colorfield__off):not(.checkbox-label),
+.admin-layout .filters-panel label:not(.colorfield__off):not(.checkbox-label),
+.admin-layout label.form-label,
+.admin-layout label:not(.colorfield__off):not(.form-field--checkbox):not(.checkbox-label):not([class*="checkbox"]):not([class*="toggle"]):not(:has(input[type="checkbox"])):not(:has(input[type="radio"])) {
     font-size: 13px !important;
     font-weight: 600 !important;
     color: #0f172a !important;
@@ -7509,19 +7509,31 @@ body.auth-page {
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5) !important;
 }
 
+body.auth-page .install-card label,
+body.auth-page .install-card .form-field label,
+body.auth-page .install-card .form-field > label,
+body.auth-page .install-card label.u-inline-aa1820469b,
+body.auth-page .auth-card label,
+body.auth-page .auth-card .form-field label,
+body.auth-page .auth-card .auth-field label,
+.install-wrapper label,
 .install-card label,
 .install-card .form-field label,
-.install-card label.form-label,
-.install-card .form-field > label {
-    color: #e2e8f0 !important;
+.install-card .form-field > label,
+.install-card label.u-inline-aa1820469b,
+.install-card label[class*="u-inline"] {
+    color: #f1f5f9 !important;
     font-size: 13.5px !important;
     font-weight: 600 !important;
     margin-bottom: 8px !important;
     display: inline-block !important;
 }
 
+body.auth-page .install-card label span,
+body.auth-page .install-card .form-field label span,
 .install-card label span,
-.install-card .form-field label span {
+.install-card .form-field label span,
+.install-card label .u-inline-9dd1207e58 {
     color: #f87171 !important;
     font-weight: 700 !important;
 }
