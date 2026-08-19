@@ -6357,12 +6357,84 @@ body, body.admin-body {
     padding: 10px 12px !important;
 }
 
-.filters-panel label, .form-field label, label.form-label, label {
+/* Полевые лейблы (исключая чекбоксы и радио) */
+.form-field > label:not(.colorfield__off):not(.checkbox-label),
+.filters-panel label:not(.colorfield__off):not(.checkbox-label),
+label.form-label,
+label:not(.colorfield__off):not(.form-field--checkbox):not(.checkbox-label):not([class*="checkbox"]):not([class*="toggle"]):not(:has(input[type="checkbox"])):not(:has(input[type="radio"])) {
     font-size: 13px !important;
     font-weight: 600 !important;
     color: #0f172a !important;
     margin-bottom: 6px !important;
     display: inline-block !important;
+}
+
+/* Строгое горизонтальное выравнивание простых строчных чекбоксов */
+.form-field--checkbox,
+.checkbox-field,
+.form-check,
+.colorfield__off,
+label.colorfield__off,
+label.checkbox-inline,
+label.radio-inline {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #1e293b !important;
+    line-height: 1.4 !important;
+}
+
+.form-field--checkbox > label,
+.checkbox-field > label,
+.form-check > label,
+.colorfield__off > label {
+    display: inline !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #1e293b !important;
+    line-height: 1.4 !important;
+    cursor: pointer !important;
+    user-select: none !important;
+}
+
+.form-field--checkbox input[type="checkbox"],
+.checkbox-field input[type="checkbox"],
+.form-check input[type="checkbox"],
+.colorfield__off input[type="checkbox"],
+label.colorfield__off input[type="checkbox"],
+label input[type="checkbox"],
+label input[type="radio"] {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
+    max-width: 16px !important;
+    max-height: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    accent-color: #2563eb !important;
+    cursor: pointer !important;
+    vertical-align: middle !important;
+}
+
+.colorfield__off,
+label.colorfield__off {
+    gap: 6px !important;
+    margin-top: 6px !important;
+    font-size: 12.5px !important;
+    color: #475569 !important;
+    white-space: nowrap !important;
 }
 
 small, .form-hint, .help-block {
@@ -7340,6 +7412,339 @@ body.auth-page label,
     font-size: 13px;
     color: var(--admin-text, #334155);
     cursor: pointer;
+}
+
+/* ============================================================================
+   WCAG AA Contrast, Spacing Normalization & Header Builder Refinement
+   ============================================================================ */
+
+/* 1. Форма входа (/admin/login) - Высокая контрастность и четкие отступы */
+body.auth-page {
+    background: #0b1120 !important;
+    color: #f8fafc !important;
+}
+
+.auth-card {
+    background: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 6px !important;
+    padding: 36px 32px !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+.auth-card h1 {
+    color: #ffffff !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+}
+
+.auth-card .auth-sub {
+    color: #cbd5e1 !important;
+    font-size: 13px !important;
+}
+
+.auth-card .auth-brand__name {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.auth-card .auth-field label {
+    color: #e2e8f0 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    margin-bottom: 6px !important;
+}
+
+.auth-card input[type="text"],
+.auth-card input[type="password"],
+.auth-card input[type="email"] {
+    background: #0f172a !important;
+    border: 1px solid #334155 !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+    font-size: 13.5px !important;
+    padding: 10px 40px !important;
+}
+
+.auth-card input:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+}
+
+.auth-card input::placeholder {
+    color: #64748b !important;
+}
+
+.auth-submit-btn {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border: 1px solid #2563eb !important;
+    border-radius: 4px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    padding: 10px 18px !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
+}
+
+.auth-submit-btn:hover {
+    background: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+}
+
+.auth-forgot-link {
+    color: #60a5fa !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+}
+
+.auth-site-link {
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+}
+
+.auth-site-link:hover {
+    color: #ffffff !important;
+}
+
+/* 2. Конструктор шапки сайта (/admin/header) - Четкий контраст и карточная структура */
+.hdr-workspace-header {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    padding: 18px 22px !important;
+    margin-bottom: 20px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02) !important;
+    color: #0f172a !important;
+}
+
+.hdr-workspace-header__title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 0 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.hdr-workspace-header__desc {
+    font-size: 13px !important;
+    color: #475569 !important;
+    margin: 0 !important;
+}
+
+.hdr-tabs-nav {
+    display: flex !important;
+    gap: 6px !important;
+    background: #f1f5f9 !important;
+    padding: 4px !important;
+    border-radius: 4px !important;
+    margin-bottom: 20px !important;
+    flex-wrap: wrap !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+.hdr-tab-btn {
+    flex: 1 1 auto !important;
+    min-width: 140px !important;
+    padding: 8px 16px !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    border-radius: 4px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    transition: all 0.15s ease !important;
+}
+
+.hdr-tab-btn:hover {
+    color: #0f172a !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+}
+
+.hdr-tab-btn.is-active {
+    background: #ffffff !important;
+    color: #2563eb !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+/* Карточки архитектуры шапки (1. Ширина и форма контейнера) */
+.hdr-card-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    gap: 16px !important;
+    margin-top: 14px !important;
+}
+
+.hdr-select-card,
+label.hdr-select-card {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    padding: 18px 20px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    position: relative !important;
+    transition: all 0.15s ease !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02) !important;
+    box-sizing: border-box !important;
+    min-height: 90px !important;
+    width: 100% !important;
+}
+
+.hdr-select-card:hover,
+label.hdr-select-card:hover {
+    border-color: #94a3b8 !important;
+    background: #f8fafc !important;
+}
+
+.hdr-select-card.is-selected,
+.hdr-select-card:has(input:checked),
+label.hdr-select-card:has(input:checked) {
+    border-color: #2563eb !important;
+    background: #f0f7ff !important;
+    box-shadow: 0 0 0 1px #2563eb !important;
+}
+
+.hdr-select-card input[type="radio"],
+label.hdr-select-card input[type="radio"] {
+    position: absolute !important;
+    top: 18px !important;
+    right: 18px !important;
+    margin: 0 !important;
+    width: 16px !important;
+    height: 16px !important;
+    accent-color: #2563eb !important;
+}
+
+.hdr-select-card__title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    padding-right: 32px !important;
+    margin: 0 !important;
+}
+
+.hdr-select-card__desc {
+    font-size: 12.5px !important;
+    color: #475569 !important;
+    line-height: 1.45 !important;
+    margin: 0 !important;
+}
+
+/* Карточки поведения при прокрутке (3. Поведение при прокрутке) */
+.hb-behavior__options {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    gap: 16px !important;
+    margin-top: 14px !important;
+}
+
+.hb-behavior-card,
+label.hb-behavior-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    padding: 18px 20px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02) !important;
+    box-sizing: border-box !important;
+    min-height: 84px !important;
+    width: 100% !important;
+}
+
+.hb-behavior-card:hover,
+label.hb-behavior-card:hover {
+    border-color: #94a3b8 !important;
+    background: #f8fafc !important;
+}
+
+.hb-behavior-card:has(input:checked),
+label.hb-behavior-card:has(input:checked) {
+    border-color: #2563eb !important;
+    background: #f0f7ff !important;
+}
+
+.hb-behavior-card .hb-switch {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.hb-behavior-card__title {
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+}
+
+.hb-behavior-card__hint {
+    font-size: 12px !important;
+    color: #64748b !important;
+    line-height: 1.45 !important;
+    display: block !important;
+    margin: 0 !important;
+}
+
+/* 3. Нормализация глобальных отступов и контраста */
+.form-card,
+.settings-card,
+.admin-card {
+    padding: 20px 24px !important;
+    margin-bottom: 20px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    background: #ffffff !important;
+}
+
+.form-card h2, .form-card h3,
+.settings-card h2, .settings-card h3,
+.admin-card h2, .admin-card h3 {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+}
+
+.form-hint, .help-block, .card-hint {
+    color: #64748b !important;
+    font-size: 12.5px !important;
+}
+
+/* Контраст для таблиц */
+.admin-table th,
+table.table th {
+    background: #f8fafc !important;
+    color: #334155 !important;
+    font-weight: 700 !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+    padding: 10px 14px !important;
+}
+
+.admin-table td,
+table.table td {
+    color: #0f172a !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 10px 14px !important;
 }
 
 
