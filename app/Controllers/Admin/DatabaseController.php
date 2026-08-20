@@ -28,8 +28,13 @@ final class DatabaseController
 
         $status = MigrationRunner::status($pdo, $migrationsDir);
 
-        $dbName = (string) $pdo->query('SELECT DATABASE()')->fetchColumn();
-        $dbVersion = (string) $pdo->query('SELECT VERSION()')->fetchColumn();
+        $dbStmt = $pdo->query('SELECT DATABASE()');
+        $dbName = (string) ($dbStmt ? $dbStmt->fetchColumn() : '');
+        $dbStmt?->closeCursor();
+
+        $verStmt = $pdo->query('SELECT VERSION()');
+        $dbVersion = (string) ($verStmt ? $verStmt->fetchColumn() : '');
+        $verStmt?->closeCursor();
 
         $tables = [];
         $totalSizeMb = 0.0;
@@ -46,6 +51,8 @@ final class DatabaseController
             ");
             $stmt->execute([':schema' => $dbName]);
             $tables = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $stmt->closeCursor();
+
             foreach ($tables as $t) {
                 $totalSizeMb += (float) ($t['size_mb'] ?? 0.0);
             }
@@ -101,20 +108,34 @@ final class DatabaseController
         Csrf::verifyRequest();
 
         $pdo = Database::pdo();
-        $dbName = (string) $pdo->query('SELECT DATABASE()')->fetchColumn();
 
         try {
+            $dbStmt = $pdo->query('SELECT DATABASE()');
+            $dbName = (string) ($dbStmt ? $dbStmt->fetchColumn() : '');
+            $dbStmt?->closeCursor();
+
             $stmt = $pdo->prepare("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = :schema AND TABLE_TYPE = 'BASE TABLE'");
             $stmt->execute([':schema' => $dbName]);
             $tables = $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
+            $stmt->closeCursor();
 
-            $optimized = 0;
+            $validTables = [];
             foreach ($tables as $table) {
                 $cleanName = preg_replace('/[^a-zA-Z0-9_]/', '', (string) $table);
                 if ($cleanName !== '') {
-                    $pdo->exec("OPTIMIZE TABLE `{$cleanName}`");
-                    $optimized++;
+                    $validTables[] = $cleanName;
                 }
+            }
+
+            $optimized = 0;
+            if ($validTables !== []) {
+                $tableList = implode(', ', array_map(static fn(string $t): string => "`{$t}`", $validTables));
+                $optStmt = $pdo->query("OPTIMIZE TABLE {$tableList}");
+                if ($optStmt !== false) {
+                    $optStmt->fetchAll(PDO::FETCH_ASSOC);
+                    $optStmt->closeCursor();
+                }
+                $optimized = count($validTables);
             }
 
             Flash::success(sprintf('Оптимизация и дефрагментация индексов успешно завершена для %d таблиц.', $optimized));

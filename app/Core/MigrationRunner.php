@@ -116,11 +116,17 @@ final class MigrationRunner
     {
         self::ensureMigrationsTable($pdo);
 
-        $database = (string) $pdo->query('SELECT DATABASE()')->fetchColumn();
+        $dbStmt = $pdo->query('SELECT DATABASE()');
+        $database = (string) ($dbStmt ? $dbStmt->fetchColumn() : '');
+        $dbStmt?->closeCursor();
+
         $lockName = 'asdr_cms_migrations_' . substr(hash('sha256', $database), 0, 24);
         $lockStmt = $pdo->prepare('SELECT GET_LOCK(:name, 30)');
         $lockStmt->execute([':name' => $lockName]);
-        if ((int) $lockStmt->fetchColumn() !== 1) {
+        $lockAcquired = (int) $lockStmt->fetchColumn() === 1;
+        $lockStmt->closeCursor();
+
+        if (!$lockAcquired) {
             throw new RuntimeException('Не удалось получить блокировку миграций. Другой процесс ещё работает.');
         }
 
@@ -128,20 +134,15 @@ final class MigrationRunner
             // Pending вычисляем уже после получения блокировки: второй процесс
             // мог успеть применить миграции, пока мы ждали GET_LOCK().
             $pending = self::pending($pdo, $migrationsDir);
-            if ($pending === []) {
-                return [];
-            }
-
-            $record = $pdo->prepare(
-                'INSERT INTO migrations (filename, applied_at) VALUES (:filename, NOW())'
-            );
             $appliedNow = [];
+
+            $record = $pdo->prepare('INSERT INTO migrations (filename) VALUES (:filename)');
 
             foreach ($pending as $file) {
                 $name = basename($file);
-                $sql = file_get_contents($file);
-                if ($sql === false || trim($sql) === '') {
-                    throw new RuntimeException("Файл миграции {$name} пуст или недоступен.");
+                $sql = (string) file_get_contents($file);
+                if (trim($sql) === '') {
+                    continue;
                 }
 
                 if ($reporter !== null) {
@@ -153,6 +154,7 @@ final class MigrationRunner
                 // только после успешного выполнения всего файла.
                 $pdo->exec($sql);
                 $record->execute([':filename' => $name]);
+                $record->closeCursor();
                 $appliedNow[] = $name;
 
                 if ($reporter !== null) {
@@ -164,6 +166,7 @@ final class MigrationRunner
         } finally {
             $releaseStmt = $pdo->prepare('SELECT RELEASE_LOCK(:name)');
             $releaseStmt->execute([':name' => $lockName]);
+            $releaseStmt->closeCursor();
         }
     }
 
