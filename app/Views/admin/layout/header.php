@@ -61,6 +61,7 @@ if ($navIsSuper) {
         'webhooks' => ['/admin/webhooks', t('Вебхуки')],
         'redirects' => ['/admin/redirects', t('Редиректы')],
         'performance' => ['/admin/performance', t('Производительность')],
+        'database' => ['/admin/database', t('База данных')],
         'security' => ['/admin/security', t('Безопасность')],
         'settings' => ['/admin/settings', t('Настройки')],
     ];
@@ -70,6 +71,15 @@ if ($navIsSuper) {
     ];
     $navTools['subscribers'] = ['/admin/subscribers', t('Подписчики')];
     $navTools['repository'] = ['/admin/repository', t('Репозиторий')];
+}
+
+$navPendingMigrationsCount = 0;
+if ($navIsSuper && \App\Core\Database::isConnected()) {
+    try {
+        $navPendingMigrationsCount = \App\Core\MigrationRunner::pendingCount(\App\Core\Database::pdo(), APP_ROOT . '/database/migrations');
+    } catch (\Throwable) {
+        $navPendingMigrationsCount = 0;
+    }
 }
 
 $navGroups = [
@@ -248,6 +258,9 @@ try {
                             <?php $navIc = str_starts_with($navKey, 'content:') ? 'content_types' : $navKey; ?>
                             <a href="<?= $navUrl ?>" class="admin-nav-item <?= $activeNav === $navKey ? 'is-active' : '' ?>" title="<?= htmlspecialchars($navText, ENT_QUOTES) ?>"<?= $activeNav === $navKey ? ' aria-current="page"' : '' ?>>
                                 <?= \App\Core\AdminUi::navigationIcon($navIc) ?><span><?= htmlspecialchars($navText, ENT_QUOTES) ?></span>
+                                <?php if ($navKey === 'database' && $navPendingMigrationsCount > 0): ?>
+                                    <span class="badge badge--danger badge--pill admin-ml-auto"><?= $navPendingMigrationsCount ?></span>
+                                <?php endif; ?>
                             </a>
                         <?php endforeach; ?>
                     </div>
@@ -298,6 +311,14 @@ try {
     <button type="button" class="admin-sidebar-backdrop" data-sidebar-backdrop aria-label="Закрыть меню" tabindex="-1"></button>
 
     <main class="admin-main" id="admin-content" tabindex="-1">
+        <?php if ($navPendingMigrationsCount > 0 && $activeNav !== 'database'): ?>
+            <div class="alert alert--warning admin-mb-16" role="status">
+                <div class="alert__content u-flex-between">
+                    <span><strong>Доступны обновления базы данных:</strong> обнаружено <?= $navPendingMigrationsCount ?> неприменённых <?= $navPendingMigrationsCount === 1 ? 'миграция' : 'миграций' ?>.</span>
+                    <a href="/admin/database" class="btn btn--small btn--primary admin-ml-12">Обновить БД</a>
+                </div>
+            </div>
+        <?php endif; ?>
         <?php foreach (Flash::pull() as $flash): ?>
             <div class="alert alert--<?= htmlspecialchars($flash['type'], ENT_QUOTES) ?>"
                  role="<?= ($flash['type'] ?? '') === 'error' ? 'alert' : 'status' ?>"

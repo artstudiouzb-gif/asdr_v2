@@ -277,6 +277,11 @@ $router->post('/admin/performance/reset-opcache', [\App\Controllers\Admin\Perfor
 $router->post('/admin/cloudflare/verify', [\App\Controllers\Admin\PerformanceController::class, 'cloudflareVerify']);
 $router->post('/admin/cloudflare/purge', [\App\Controllers\Admin\PerformanceController::class, 'cloudflarePurge']);
 
+// --- Admin: база данных и миграции ---
+$router->get('/admin/database', [\App\Controllers\Admin\DatabaseController::class, 'index']);
+$router->post('/admin/database/migrate', [\App\Controllers\Admin\DatabaseController::class, 'migrate']);
+$router->post('/admin/database/optimize', [\App\Controllers\Admin\DatabaseController::class, 'optimize']);
+
 // --- Admin: боковые виджеты ---
 $router->get('/admin/widgets', [AdminWidgetController::class, 'index']);
 $router->get('/admin/widgets/create', [AdminWidgetController::class, 'create']);
