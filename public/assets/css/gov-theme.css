@@ -3427,9 +3427,12 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     color: #fff;
     transform: none !important;
 }
-.counter__icon svg {
+.counter__icon svg,
+.counter__icon img,
+.counter__icon-img {
     width: var(--counter-icon-size, 28px) !important;
     height: var(--counter-icon-size, 28px) !important;
+    object-fit: contain;
 }
 .counter__num { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
 .counter__body { display: flex; flex-direction: column; gap: 2px; }

@@ -523,6 +523,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
                             <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
+                            <?= \App\Core\AdminUi::imageField("items[{$i}][icon_image]", (string) ($item['icon_image'] ?? ''), ['label' => 'Своя иконка (SVG / PNG / WebP)', 'hint' => 'Заполнено — используется вместо иконки Tabler.']) ?>
                             <div class="form-field"><label>Приставка (напр. более, до)</label><input type="text" name="items[<?= $i ?>][prefix]" maxlength="12" value="<?= htmlspecialchars($item['prefix'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Значение</label><input type="text" name="items[<?= $i ?>][value]" maxlength="24" value="<?= htmlspecialchars((string) ($item['value'] ?? ''), ENT_QUOTES) ?>" placeholder="34"><span class="form-hint">Можно «1 200», «24/7», «№1». Отсчёт при появлении работает только для чистого числа.</span></div>
                             <div class="form-field"><label>Суффикс (напр. + или %)</label><input type="text" name="items[<?= $i ?>][suffix]" value="<?= htmlspecialchars($item['suffix'] ?? '', ENT_QUOTES) ?>"></div>
@@ -535,6 +536,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </div>
                 <template data-repeater-template="items">
                     <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
+                    <?= \App\Core\AdminUi::imageField('items[__INDEX__][icon_image]', '', ['label' => 'Своя иконка (SVG / PNG / WebP)', 'hint' => 'Заполнено — используется вместо иконки Tabler.']) ?>
                     <div class="form-field"><label>Приставка (напр. более, до)</label><input type="text" name="items[__INDEX__][prefix]" maxlength="12"></div>
                     <div class="form-field"><label>Значение</label><input type="text" name="items[__INDEX__][value]" maxlength="24" placeholder="34"></div>
                     <div class="form-field"><label>Суффикс (напр. + или %)</label><input type="text" name="items[__INDEX__][suffix]"></div>
