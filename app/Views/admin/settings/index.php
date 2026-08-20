@@ -21,7 +21,7 @@ require __DIR__ . '/../layout/header.php';
     <a href="#settings-integrations"><?= AdminUi::icon('plug', 16) ?>Интеграции</a>
     <a href="#settings-analytics"><?= AdminUi::icon('stats', 16) ?>Аналитика</a>
     <a href="#settings-ai"><?= AdminUi::icon('seo', 16) ?>ИИ (AI)</a>
-    <a href="#settings-maintenance"><?= AdminUi::icon('tools', 16) ?>Обслуживание</a>
+    <a href="#import-section"><?= AdminUi::icon('database-import', 16) ?>Импорт новостей</a>
     <a href="#demo-section"><?= AdminUi::icon('database', 16) ?>Демо и RESET</a>
     <a href="#backup-section"><?= AdminUi::icon('save', 16) ?>Бэкап</a>
     <a href="/admin/database"><?= AdminUi::icon('database', 16) ?>Обновление БД</a>
@@ -470,6 +470,20 @@ require __DIR__ . '/../layout/header.php';
         <input class="u-inline-65e3af54b5" type="email" name="test_email" placeholder="ваш_email@example.com" required>
         <button type="submit" class="btn btn--outline"><?= AdminUi::icon('send', 16) ?>Отправить тестовое письмо</button>
     </form>
+</div>
+
+<!-- Импорт новостей WXR / XML -->
+<div class="settings-card admin-mt-24" id="import-section">
+    <div class="settings-card__header">
+        <div class="settings-card__icon"><?= AdminUi::icon('database-import', 20) ?></div>
+        <div>
+            <h3 class="settings-card__title">Импорт новостей (WXR / XML)</h3>
+            <p class="settings-card__subtitle">Пошаговый перенос новостей, категорий, изображений и связей переводов из экспорта WordPress / старого сайта.</p>
+        </div>
+    </div>
+    <div class="admin-mt-12">
+        <a href="/admin/news/import" class="btn btn--primary"><?= AdminUi::icon('database-import', 16) ?>Перейти к мастеру импорта новостей</a>
+    </div>
 </div>
 
 <!-- Демо-контент и Инициализация -->
