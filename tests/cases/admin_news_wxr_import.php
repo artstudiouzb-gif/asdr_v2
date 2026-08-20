@@ -7,6 +7,7 @@ test('admin WXR importer is routed through the front controller and protected', 
     $controller = (string) file_get_contents($root . '/app/Controllers/Admin/NewsImportController.php');
     $routes = (string) file_get_contents($root . '/public/index.php');
     $htaccess = (string) file_get_contents($root . '/public/.htaccess');
+    $rootHtaccess = (string) file_get_contents($root . '/.htaccess');
     $settings = (string) file_get_contents($root . '/app/Views/admin/settings/index.php');
     $view = (string) file_get_contents($root . '/app/Views/admin/news/import.php');
     $script = (string) file_get_contents($root . '/public/assets/js/admin-news-import.js');
