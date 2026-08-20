@@ -169,6 +169,18 @@ final class MigrationRunner
 
     private static function ensureMigrationsTable(PDO $pdo): void
     {
+        $driver = (string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') {
+            $pdo->exec(
+                'CREATE TABLE IF NOT EXISTS migrations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    filename VARCHAR(255) NOT NULL UNIQUE,
+                    applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )'
+            );
+            return;
+        }
+
         $pdo->exec(
             'CREATE TABLE IF NOT EXISTS migrations (
                 id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

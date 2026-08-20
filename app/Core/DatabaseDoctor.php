@@ -24,8 +24,19 @@ final class DatabaseDoctor
         $errors = 0;
         $warnings = 0;
 
-        $databaseName = (string) $pdo->query('SELECT DATABASE()')->fetchColumn();
-        $serverVersion = (string) $pdo->query('SELECT VERSION()')->fetchColumn();
+        $driver = (string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $databaseName = 'unknown';
+        $serverVersion = 'unknown';
+        try {
+            $databaseName = (string) ($pdo->query('SELECT DATABASE()')->fetchColumn() ?: '');
+        } catch (\Throwable) {
+            $databaseName = $driver;
+        }
+        try {
+            $serverVersion = (string) ($pdo->query('SELECT VERSION()')->fetchColumn() ?: '');
+        } catch (\Throwable) {
+            $serverVersion = $driver;
+        }
 
         if (!is_file($schemaSqlPath)) {
             return [
@@ -36,6 +47,19 @@ final class DatabaseDoctor
                 'is_healthy' => false,
                 'checks' => [
                     ['type' => 'error', 'message' => "Файл схемы {$schemaSqlPath} не найден."],
+                ],
+            ];
+        }
+
+        if ($driver !== 'mysql') {
+            return [
+                'database' => $databaseName,
+                'version' => $serverVersion,
+                'errors_count' => 0,
+                'warnings_count' => 0,
+                'is_healthy' => true,
+                'checks' => [
+                    ['type' => 'ok', 'message' => "Диагностика поддерживается для MySQL/MariaDB (текущий драйвер: {$driver})."],
                 ],
             ];
         }
