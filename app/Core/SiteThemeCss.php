@@ -120,6 +120,12 @@ final class SiteThemeCss
             $variables['--meta-letter-spacing'] = $metaLetterSpacing;
         }
 
+        foreach (DesignSettings::TYPO_SIZES as $key => $meta) {
+            $manual = DesignSettings::normalizeFsSize((string) \App\Models\Setting::get('design_' . $key, ''));
+            $val = $manual !== '' ? $manual : ($meta[2] . 'px');
+            $variables['--font-size-' . str_replace('_', '-', substr($key, 3))] = $val;
+        }
+
         foreach ([
             '--header-mid-bg' => (string) ($headerConfig['middlebar']['bg'] ?? ''),
             '--header-nav-bg' => (string) ($headerConfig['bottombar']['bg'] ?? ''),
