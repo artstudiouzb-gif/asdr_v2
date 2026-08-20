@@ -478,7 +478,7 @@ require __DIR__ . '/../layout/header.php';
         <div class="settings-card__icon"><?= AdminUi::icon('database-import', 20) ?></div>
         <div>
             <h3 class="settings-card__title">Импорт новостей (WXR / XML)</h3>
-            <p class="settings-card__subtitle">Пошаговый перенос новостей, категорий, изображений и связей переводов из экспорта WordPress / старого сайта.</p>
+            <p class="settings-card__subtitle">Пошаговый перенос новостей, категорий, изображений и связей переводов из WXR/XML-экспорта старого сайта.</p>
         </div>
     </div>
     <div class="admin-mt-12">
