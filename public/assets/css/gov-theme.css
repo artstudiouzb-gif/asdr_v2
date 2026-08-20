@@ -2262,52 +2262,54 @@ body.design-mark-underline .tx-mark {
    ========================================================================== */
 body.design-type-static .counter__value,
 body.design-type-static .counter__suffix { font-size: var(--step-8); }
-body.design-type-static h1 { font-size: var(--step-8); }
-body.design-type-static h2 { font-size: var(--step-6); }
-body.design-type-static h3 { font-size: var(--step-4); }
-body.design-type-static h4 { font-size: var(--step-2); }
-body.design-type-static .block-hero--media .block-hero__title { font-size: var(--step-10); }
-body.design-type-static .block-hero--media .block-hero__subtitle { font-size: var(--step-0); }
-body.design-type-static .block-hero__title { font-size: var(--step-10); }
-body.design-type-static .block-hero__subtitle { font-size: var(--step-0); }
-body.design-type-static .section-head__title { font-size: var(--step-6); }
-body.design-type-static .timeline-cta__title { font-size: var(--step-5); }
-body.design-type-static .profile__name { font-size: var(--step-8); }
-body.design-type-static .block-featband__title { font-size: var(--step-6); }
-body.design-type-static .block-banner--light .block-banner__title { font-size: var(--step-8); }
-body.design-type-static .block-banner__title { font-size: var(--step-8); }
+body.design-type-static h1, body.design-type-static .h1 { font-size: var(--font-size-h1, var(--step-8)); }
+body.design-type-static h2, body.design-type-static .h2 { font-size: var(--font-size-h2, var(--step-6)); }
+body.design-type-static h3, body.design-type-static .h3 { font-size: var(--font-size-h3, var(--step-4)); }
+body.design-type-static h4, body.design-type-static .h4 { font-size: var(--font-size-h4, var(--step-2)); }
+body.design-type-static h5, body.design-type-static .h5 { font-size: var(--font-size-h5, var(--step-1)); }
+body.design-type-static h6, body.design-type-static .h6 { font-size: var(--font-size-h6, var(--step-0)); }
+body.design-type-static .block-hero--media .block-hero__title { font-size: var(--font-size-h1, var(--step-10)); }
+body.design-type-static .block-hero--media .block-hero__subtitle { font-size: var(--font-size-lead, var(--step-0)); }
+body.design-type-static .block-hero__title { font-size: var(--font-size-h1, var(--step-10)); }
+body.design-type-static .block-hero__subtitle { font-size: var(--font-size-lead, var(--step-0)); }
+body.design-type-static .section-head__title { font-size: var(--font-size-h2, var(--step-6)); }
+body.design-type-static .timeline-cta__title { font-size: var(--font-size-h3, var(--step-5)); }
+body.design-type-static .profile__name { font-size: var(--font-size-h1, var(--step-8)); }
+body.design-type-static .block-featband__title { font-size: var(--font-size-h2, var(--step-6)); }
+body.design-type-static .block-banner--light .block-banner__title { font-size: var(--font-size-h2, var(--step-8)); }
+body.design-type-static .block-banner__title { font-size: var(--font-size-h2, var(--step-8)); }
 body.design-type-static .textimage__title,
-body.design-type-static .block-map__title { font-size: var(--step-5); }
+body.design-type-static .block-map__title { font-size: var(--font-size-h2, var(--step-5)); }
 body.design-type-static .listing__title,
-body.design-type-static .content-pagehead__title { font-size: var(--step-8); }
-body.design-type-static .newslist-lead__title { font-size: var(--step-5); }
-body.design-type-static .projdetail__title { font-size: var(--step-8); }
-body.design-type-static .catdetail__title { font-size: var(--step-8); }
-body.design-type-static .block-cta h2 { font-size: var(--step-9); }
-body.design-type-static .cms-columns__col .cms-block--cta .block-cta h2 { font-size: var(--step-4); }
+body.design-type-static .content-pagehead__title { font-size: var(--font-size-h1, var(--step-8)); }
+body.design-type-static .newslist-lead__title { font-size: var(--font-size-h3, var(--step-5)); }
+body.design-type-static .projdetail__title { font-size: var(--font-size-h1, var(--step-8)); }
+body.design-type-static .catdetail__title { font-size: var(--font-size-h1, var(--step-8)); }
+body.design-type-static .block-cta h2 { font-size: var(--font-size-h2, var(--step-9)); }
+body.design-type-static .cms-columns__col .cms-block--cta .block-cta h2 { font-size: var(--font-size-card-title, var(--step-4)); }
 body.design-type-static .site-content > section.cms-block--cta:first-of-type .block-cta h2,
-body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 { font-size: var(--step-10); }
+body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 { font-size: var(--font-size-h1, var(--step-10)); }
 body.design-type-static .site-content > section.cms-block--cta:first-of-type .block-cta p,
-body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta p { font-size: var(--step-2); }
-body.design-type-static .block-news__title { font-size: var(--step-6); }
-body.design-type-static .content-list__head h1 { font-size: var(--step-8); }
-body.design-type-static .news-index__title { font-size: var(--step-8); }
-body.design-type-static .news-single h1 { font-size: var(--step-8); }
-body.design-type-static .block-contact-cards__title { font-size: var(--step-6); }
-body.design-type-static .block-categories__title { font-size: var(--step-6); }
+body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta p { font-size: var(--font-size-lead, var(--step-2)); }
+body.design-type-static .block-news__title { font-size: var(--font-size-h2, var(--step-6)); }
+body.design-type-static .content-list__head h1 { font-size: var(--font-size-h1, var(--step-8)); }
+body.design-type-static .news-index__title { font-size: var(--font-size-h1, var(--step-8)); }
+body.design-type-static .news-single h1 { font-size: var(--font-size-h1, var(--step-8)); }
+body.design-type-static .block-contact-cards__title { font-size: var(--font-size-h2, var(--step-6)); }
+body.design-type-static .block-categories__title { font-size: var(--font-size-h2, var(--step-6)); }
 body.design-type-static .block-counters__title,
 body.design-type-static .block-team__title,
 body.design-type-static .block-projects__title,
-body.design-type-static .section-title { font-size: var(--step-6); }
+body.design-type-static .section-title { font-size: var(--font-size-h2, var(--step-6)); }
 
 /* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
    чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем). */
 @media (max-width: 640px) {
     body.design-type-static .counter__value,
     body.design-type-static .counter__suffix { font-size: var(--step-5); }
-    body.design-type-static h1 { font-size: var(--step-5); }
-    body.design-type-static h2 { font-size: var(--step-3); }
-    body.design-type-static h3 { font-size: var(--step-2); }
+    body.design-type-static h1, body.design-type-static .h1 { font-size: var(--step-5); }
+    body.design-type-static h2, body.design-type-static .h2 { font-size: var(--step-3); }
+    body.design-type-static h3, body.design-type-static .h3 { font-size: var(--step-2); }
     body.design-type-static .block-hero--media .block-hero__title { font-size: var(--step-6); }
     body.design-type-static .block-hero__title { font-size: var(--step-6); }
     body.design-type-static .section-head__title { font-size: var(--step-4); }
@@ -2508,7 +2510,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 }
 @media (max-width: 900px) { .block-banner--light { grid-template-columns: 1fr; } .block-banner--light .block-banner__photo { display: none; } }
 .block-banner--light .block-banner__inner { padding: clamp(20px, 4vw, 48px) 0; text-align: left; }
-.block-banner--light .block-banner__title { color: var(--gov-title); font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); line-height: 1.15; margin: 0 0 16px; }
+.block-banner--light .block-banner__title { color: var(--gov-title); font-size: var(--font-size-h2, var(--step-8)); line-height: 1.15; margin: 0 0 16px; }
 .block-banner--light .block-banner__text { color: var(--gov-muted); opacity: 1; font-size: var(--step-0); line-height: var(--base-line-height, 1.6); margin: 0 0 22px; }
 .block-banner--light .block-banner__button { 
     display: inline-block; padding: 13px 26px; background: var(--gov-navy); color: #fff; 
@@ -2730,7 +2732,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
     .textimage__button { transition: none; }
     .textimage__button:hover, .textimage__button:focus-visible { transform: none; }
 }
-.textimage__title { position: relative; font-size: clamp(var(--step-3), 2.4vw, var(--step-5)); margin: 0 0 18px; padding-left: 16px; }
+.textimage__title { position: relative; font-size: var(--font-size-h2, var(--step-5)); margin: 0 0 18px; padding-left: 16px; }
 .textimage__title::before { content: ''; position: absolute; left: 0; top: .18em; bottom: .18em; width: 4px; border-radius: 2px; background: var(--gov-teal); }
 .textimage__text { color: var(--gov-muted); line-height: var(--base-line-height, 1.6); margin-bottom: 24px; }
 .textimage__features { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 18px; }
@@ -2746,7 +2748,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 @media (max-width: 560px) { .docslist-grid { grid-template-columns: 1fr; } }
 
 /* Карта с меткой. */
-.block-map__title { font-size: clamp(var(--step-3), 2.4vw, var(--step-5)); margin: 0 0 20px; }
+.block-map__title { font-size: var(--font-size-h2, var(--step-5)); margin: 0 0 20px; }
 .block-map__canvas { position: relative; border-radius: var(--radius); overflow: hidden; min-height: 380px; background: color-mix(in srgb, var(--gov-navy) 6%, var(--gov-bg)); }
 .block-map__frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .block-map__image { position: absolute; inset: 0; background: var(--block-map-image) center/cover no-repeat; }
@@ -2829,7 +2831,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
     margin: 0 0 6px; color: var(--gov-teal-text);
     font-size: var(--step--2); font-weight: 700; letter-spacing: .04em;
 }
-.listing__title { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 10px; }
+.listing__title { font-size: var(--font-size-h1, var(--step-8)); margin: 0 0 10px; }
 .listing__lead { color: var(--gov-muted); font-size: var(--step-0); line-height: var(--base-line-height, 1.6); margin: 0; }
 
 /* Заголовок + лид простой страницы (без hero-шапки). */
@@ -2845,7 +2847,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
    в ch обрывала строку раньше абзаца под ней и выглядела случайной. */
 .block-text__title { max-width: none; }
 .content-pagehead__inner { max-width: var(--container-max); margin: 0 auto; }
-.content-pagehead__title { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 10px; color: var(--section-title-fg); }
+.content-pagehead__title { font-size: var(--font-size-h1, var(--step-8)); margin: 0 0 10px; color: var(--section-title-fg); }
 .content-pagehead__lead { color: var(--gov-muted); font-size: var(--step-0); line-height: var(--base-line-height, 1.6); margin: 0; }
 
 /* Крупная первая новость. */
@@ -2909,7 +2911,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
     padding: clamp(20px, 3vw, 36px);
 }
 .newslist__date { color: var(--gov-muted); font-size: var(--step--2); font-weight: 600; }
-.newslist-lead__title { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: clamp(var(--step-2), 2.2vw, var(--step-5)); color: var(--gov-title); line-height: 1.25; margin: 0; }
+.newslist-lead__title { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: var(--font-size-h3, var(--step-4)); color: var(--gov-title); line-height: 1.25; margin: 0; }
 .newslist-lead__excerpt { color: var(--gov-muted); line-height: var(--base-line-height, 1.6); font-size: var(--step-0); }
 .newslist-lead:hover .newslist-lead__title { color: var(--gov-teal); }
 
@@ -2989,7 +2991,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
 .projdetail-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: clamp(24px, 3.4vw, 48px); align-items: center; }
 @media (max-width: 900px) { .projdetail-head { grid-template-columns: 1fr; } }
 .projdetail-head--no-media { grid-template-columns: 1fr; }
-.projdetail__title { font-size: clamp(var(--step-5), 3.2vw, var(--step-8)); line-height: 1.15; margin: 14px 0 0; }
+.projdetail__title { font-size: var(--font-size-h1, var(--step-8)); line-height: 1.15; margin: 14px 0 0; }
 .projdetail__media { display: block; aspect-ratio: 16/9; border-radius: var(--radius); background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; }
 .projdetail__content { width: 100%; max-width: none; }
 /* Анонс проекта над блоками: тот же приём, что и лид страницы. */
@@ -3056,7 +3058,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
     transform: none !important;
 }
 .counter:last-child { border-right: 0; }
-.counter__value, .counter__suffix { color: var(--counters-text, var(--gov-title)) !important; font-family: var(--font-family, 'Noto Sans', sans-serif); font-weight: 700; font-size: clamp(var(--step-5), 3.2vw, var(--step-8)); line-height: 1; }
+.counter__value, .counter__suffix { color: var(--counters-text, var(--gov-title)) !important; font-family: var(--font-family, 'Noto Sans', sans-serif); font-weight: 700; font-size: var(--step-8); line-height: 1; }
 /* Плотный межстрочный: подпись из 2–3 слов не должна «рассыпаться». */
 .counter__label { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--2); line-height: 1.35; margin: 4px 0 0; transition: color 0.3s ease; }
 .counter:hover .counter__label { color: var(--counters-text, var(--gov-title)); }
@@ -3087,7 +3089,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
    в 180px и вылезает за карточку — переносить его нельзя (см. nowrap выше). */
 .block-counters--size-large .block-counters__grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
 .block-counters--size-large .counter__value,
-.block-counters--size-large .counter__suffix { font-size: clamp(var(--step-6), 4vw, var(--step-9)); }
+.block-counters--size-large .counter__suffix { font-size: var(--step-9); }
 
 /* Вариант «Карточки»: у каждого показателя своя поверхность вместо общей
    полосы с разделителями. Разделители при этом надо снять — иначе у карточки
@@ -3214,7 +3216,7 @@ body.design-type-static .section-title { font-size: var(--step-6); }
    закрасить почти полностью. Цветным остаётся штрих, сам текст идёт
    цветом остального текста hero. */
 .block-hero--media .block-hero__eyebrow { color: var(--hero-text, #fff); }
-.block-hero--media .block-hero__title { color: var(--hero-text, #fff); font-size: clamp(var(--step-8), 5.5vw, var(--step-11)); line-height: 1.1; margin: 0 0 20px; font-weight: 700; letter-spacing: -0.02em; }
+.block-hero--media .block-hero__title { color: var(--hero-text, #fff); font-size: var(--font-size-h1, var(--step-10)); line-height: 1.1; margin: 0 0 20px; font-weight: 700; letter-spacing: -0.02em; }
 .block-hero--media .block-hero__subtitle { color: var(--hero-text, rgba(255,255,255,.85)); font-size: var(--step-0); max-width: 520px; }
 .block-hero__actions { display: flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 16px !important; margin-top: 30px; }
 .block-hero__button { 
@@ -3452,7 +3454,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 /* Заголовок секции: серифный + ссылка «Все …». */
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 26px; flex-wrap: wrap; }
 .section-head__copy { flex: 1 1 520px; min-width: 0; }
-.section-head__title { font-size: clamp(var(--step-5), 3.5vw, var(--step-7)); margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+.section-head__title { font-size: var(--font-size-h2, var(--step-6)); margin: 0; font-weight: 700; letter-spacing: -0.02em; }
 .section-head__description,
 .block-advantages__description,
 .block-featband__description,
@@ -4143,7 +4145,7 @@ span.imgcard__media::after {
 /* История — таймлайн + CTA-карточка с фоном. */
 /* История — таймлайн + CTA-карточка с фоном. */
 .block-timeline__head { margin-bottom: 26px; }
-.block-timeline__title { margin: 0; color: var(--section-title-fg); font-size: var(--font-size-h2, clamp(var(--step-4), 2.6vw, var(--step-6))); font-weight: 700; line-height: 1.25; letter-spacing: -.02em; }
+.block-timeline__title { margin: 0; color: var(--section-title-fg); font-size: var(--font-size-h2, var(--step-6)); font-weight: 700; line-height: 1.25; letter-spacing: -.02em; }
 .block-timeline__layout { min-width: 0; }
 .block-timeline--with-cta .block-timeline__layout { display: grid; grid-template-columns: 1fr 1.1fr; gap: 28px; align-items: stretch; }
 @media (max-width: 900px) { .block-timeline--with-cta .block-timeline__layout { grid-template-columns: 1fr; } }
@@ -4229,7 +4231,7 @@ span.imgcard__media::after {
 .timeline-cta { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--timeline-cta-image, var(--gov-navy)) center/cover no-repeat; display: flex; align-items: flex-start; min-height: 320px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .timeline-cta__overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(15,33,60,.92) 25%, rgba(15,33,60,.55) 100%); }
 .timeline-cta__body { position: relative; padding: 36px; color: #fff; display: flex; flex-direction: column; gap: 14px; max-width: 480px; }
-.timeline-cta__title { font-size: clamp(var(--step-2), 2vw, var(--step-5)); margin: 0; color: #fff; }
+.timeline-cta__title { font-size: var(--font-size-h3, var(--step-4)); margin: 0; color: #fff; }
 .timeline-cta__text { margin: 0; color: rgba(255,255,255,.85); line-height: var(--base-line-height, 1.55); }
 .timeline-cta__button { display: inline-block; align-self: flex-start; margin-top: 8px; padding: 12px 22px; border: 1px solid rgba(255,255,255,.7); border-radius: var(--btn-radius, 8px); color: #fff; font-weight: 700; font-size: var(--step--2); text-decoration: none; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
 .timeline-cta__button:hover { background: var(--gov-teal); border-color: var(--gov-teal); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(23,153,155, 0.3); }
@@ -4325,7 +4327,7 @@ span.imgcard__media::after {
     mask: var(--gov-emblem) center / 52% no-repeat;
 }
 .profile__photo--empty > * { position: relative; z-index: 1; }
-.profile__name { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 12px; }
+.profile__name { font-size: var(--font-size-h1, var(--step-8)); margin: 0 0 12px; }
 .profile__position { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; color: var(--gov-teal-text, #0284c7); font-size: var(--step-1); line-height: 1.35; margin-bottom: 18px; }
 .profile__text { color: var(--gov-ink); line-height: var(--base-line-height, 1.65); margin: 0 0 22px; font-size: var(--step-0); }
 .profile__contacts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
@@ -4372,7 +4374,7 @@ span.imgcard__media::after {
 .featband__name { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: var(--step-0); color: #ffffff; }
 .featband__text { color: rgba(255,255,255,.92); font-size: var(--step--1); line-height: var(--base-line-height, 1.5); }
 .block-featband__head { margin-bottom: 26px; }
-.block-featband__title { margin: 0; font-size: var(--font-size-h2, clamp(var(--step-4), 2.6vw, var(--step-6))); }
+.block-featband__title { margin: 0; font-size: var(--font-size-h2, var(--step-6)); }
 
 /* Биография + образование (две колонки). */
 /* Список карьеры длиннее карточки образования, поэтому боковая колонка
