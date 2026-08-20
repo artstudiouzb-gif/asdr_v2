@@ -24,6 +24,7 @@ require __DIR__ . '/../layout/header.php';
     <a href="#settings-maintenance"><?= AdminUi::icon('tools', 16) ?>Обслуживание</a>
     <a href="#demo-section"><?= AdminUi::icon('database', 16) ?>Демо и RESET</a>
     <a href="#backup-section"><?= AdminUi::icon('save', 16) ?>Бэкап</a>
+    <a href="/admin/database"><?= AdminUi::icon('database', 16) ?>Обновление БД</a>
     <a href="/admin/telegram"><?= AdminUi::icon('telegram', 16) ?>Telegram</a>
 </nav>
 
@@ -545,6 +546,20 @@ require __DIR__ . '/../layout/header.php';
                 <button type="submit" class="btn btn--danger">RESET + DEMO (Сброс и замена)</button>
             </form>
         </div>
+    </div>
+</div>
+
+<!-- Управление базой данных и миграции -->
+<div class="settings-card admin-mt-24" id="database-section">
+    <div class="settings-card__header">
+        <div class="settings-card__icon"><?= AdminUi::icon('database', 20) ?></div>
+        <div>
+            <h3 class="settings-card__title">База данных и миграции</h3>
+            <p class="settings-card__subtitle">Проверка актуальности схемы, применение новых миграций в 1 клик, метрики таблиц и диагностика.</p>
+        </div>
+    </div>
+    <div class="admin-mt-12">
+        <a href="/admin/database" class="btn btn--primary"><?= AdminUi::icon('database', 16) ?>Перейти к управлению базой данных</a>
     </div>
 </div>
 

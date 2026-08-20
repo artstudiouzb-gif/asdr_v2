@@ -171,6 +171,7 @@ final class AdminUi
             'webhooks' => 'webhook',
             'redirects' => 'route',
             'performance' => 'gauge',
+            'database' => 'database',
             'audit' => 'history',
         ][$name] ?? $name;
 

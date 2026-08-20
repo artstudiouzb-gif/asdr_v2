@@ -33,6 +33,81 @@ final class MigrationRunner
         ));
     }
 
+    public static function pendingCount(PDO $pdo, string $migrationsDir): int
+    {
+        return count(self::pending($pdo, $migrationsDir));
+    }
+
+    /**
+     * @return array{
+     *     total: int,
+     *     applied_count: int,
+     *     pending_count: int,
+     *     pending: list<array{name: string, path: string, size: int}>,
+     *     applied: list<array{name: string, applied_at: string}>,
+     *     all: list<array{name: string, path: string, is_applied: bool, applied_at: ?string, size: int}>
+     * }
+     */
+    public static function status(PDO $pdo, string $migrationsDir): array
+    {
+        self::ensureMigrationsTable($pdo);
+
+        $appliedRows = [];
+        try {
+            $appliedRows = $pdo->query('SELECT filename, applied_at FROM migrations ORDER BY id DESC')->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (\Throwable) {
+            $appliedRows = [];
+        }
+
+        $appliedMap = [];
+        foreach ($appliedRows as $row) {
+            $appliedMap[(string) $row['filename']] = (string) ($row['applied_at'] ?? '');
+        }
+
+        $files = glob(rtrim($migrationsDir, '/') . '/*.sql') ?: [];
+        sort($files, SORT_STRING);
+
+        $all = [];
+        $pending = [];
+        foreach ($files as $file) {
+            $name = basename($file);
+            $isApplied = isset($appliedMap[$name]);
+            $size = (int) @filesize($file);
+            $item = [
+                'name' => $name,
+                'path' => $file,
+                'is_applied' => $isApplied,
+                'applied_at' => $appliedMap[$name] ?? null,
+                'size' => $size,
+            ];
+            $all[] = $item;
+            if (!$isApplied) {
+                $pending[] = [
+                    'name' => $name,
+                    'path' => $file,
+                    'size' => $size,
+                ];
+            }
+        }
+
+        $appliedList = [];
+        foreach ($appliedRows as $row) {
+            $appliedList[] = [
+                'name' => (string) $row['filename'],
+                'applied_at' => (string) ($row['applied_at'] ?? ''),
+            ];
+        }
+
+        return [
+            'total' => count($files),
+            'applied_count' => count($appliedMap),
+            'pending_count' => count($pending),
+            'pending' => $pending,
+            'applied' => $appliedList,
+            'all' => $all,
+        ];
+    }
+
     /**
      * @param null|callable(string,string):void $reporter (event, filename)
      * @return list<string> имена применённых миграций
