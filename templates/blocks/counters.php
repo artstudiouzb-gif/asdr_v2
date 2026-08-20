@@ -36,10 +36,16 @@ $blockClasses = ($iconBackground === 'off' ? ' block-counters--icons-no-bg' : ''
             $link = (string) ($item['link'] ?? '');
             $note = (string) ($item['note'] ?? '');
             $prefix = (string) ($item['prefix'] ?? '');
+            $iconImage = trim((string) ($item['icon_image'] ?? ''));
+            if ($iconImage !== '' && !\App\Core\UrlGuard::isSafeMedia($iconImage)) {
+                $iconImage = '';
+            }
             $tag = $link !== '' ? 'a' : 'div';
         ?>
             <<?= $tag ?> class="counter<?= $link !== '' ? ' counter--link' : '' ?>"<?= $link !== '' ? ' href="' . htmlspecialchars($link, ENT_QUOTES) . '"' : '' ?>>
-                <?php if (!empty($item['icon_svg'])): ?>
+                <?php if ($iconImage !== ''): ?>
+                    <span class="counter__icon" aria-hidden="true"><img class="counter__icon-img" src="<?= htmlspecialchars($iconImage, ENT_QUOTES) ?>" alt="" width="<?= $iconSize ?>" height="<?= $iconSize ?>"></span>
+                <?php elseif (!empty($item['icon_svg'])): ?>
                     <span class="counter__icon" aria-hidden="true"><?= \App\Core\Icon::render($item['icon_svg'], $iconSize) ?></span>
                 <?php endif; ?>
                 <div class="counter__body">

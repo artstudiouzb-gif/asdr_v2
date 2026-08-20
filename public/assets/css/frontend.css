@@ -2437,6 +2437,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .counter__value, .counter__suffix { color: var(--color-primary, #223d79); font-family: var(--font-heading, inherit); }
 .counter__label { color: var(--text-muted); margin-top: 4px; font-size: var(--step--1); }
 :root[data-theme="dark"] .counter__value, :root[data-theme="dark"] .counter__suffix { color: var(--text-main); }
+.counter__icon-img { width: var(--counter-icon-size, 28px); height: var(--counter-icon-size, 28px); object-fit: contain; }
 
 /* ==========================================================================
    БЛОКИ ГОС-СТРАНИЦ: hero (титул+фото), сетка категорий, медиаматериалы

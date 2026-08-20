@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Core\BlockData\CountersBlockNormalizer;
 
-test('Counters normalizer: сохраняет числа, подписи, цвета и ключ Tabler', function (): void {
+test('Counters normalizer: сохраняет числа, подписи, цвета, ключ Tabler и свою иконку', function (): void {
     $data = CountersBlockNormalizer::normalize([
         'title_field' => ' Наши результаты ',
         'card_bg' => '#AABBCC',
@@ -19,6 +19,7 @@ test('Counters normalizer: сохраняет числа, подписи, цве
                 'suffix' => ' + ',
                 'label' => ' реализованных проектов ',
                 'icon_svg' => 'chart-bar',
+                'icon_image' => '/uploads/custom-icon.svg',
             ],
             ['value' => '', 'label' => '', 'suffix' => '%', 'icon_svg' => 'percentage'],
             'unexpected',
@@ -40,6 +41,7 @@ test('Counters normalizer: сохраняет числа, подписи, цве
     assert_same('+', $data['items'][0]['suffix']);
     assert_same('реализованных проектов', $data['items'][0]['label']);
     assert_same('chart-bar', $data['items'][0]['icon_svg']);
+    assert_same('/uploads/custom-icon.svg', $data['items'][0]['icon_image']);
 });
 
 test('Counters normalizer: цвета по умолчанию и повреждённые поля не вызывают предупреждений', function (): void {
@@ -157,6 +159,12 @@ test('Шаблон показателей: отсчёт только у чист
     assert_contains('</a>', $linked);
     assert_not_contains('counter--link', $render([['value' => '5', 'label' => 'центров']]));
 
+    // Своя иконка (картинка) выводится вместо Tabler
+    $withImg = $render([['value' => '10', 'label' => 'наград', 'icon_svg' => 'trophy', 'icon_image' => '/uploads/trophy.png']]);
+    assert_contains('src="/uploads/trophy.png"', $withImg);
+    assert_contains('class="counter__icon-img"', $withImg);
+    assert_not_contains('<svg', $withImg);
+
     // Вид и размер приходят классами на блок, без инлайн-стилей.
     $cards = $render([['value' => '5', 'label' => 'центров']], ['variant' => 'cards', 'value_size' => 'large']);
     assert_contains('block-counters--cards', $cards);
@@ -167,6 +175,7 @@ test('Шаблон показателей: отсчёт только у чист
     assert_contains('.block-counters--size-large .counter__value', $theme);
     assert_contains('.counter__note', $theme);
     assert_contains('.counter__prefix', $theme);
+    assert_contains('.counter__icon-img', $theme);
 });
 
 test('Контроллер делегирует счётчики CountersBlockNormalizer', function (): void {
@@ -176,7 +185,7 @@ test('Контроллер делегирует счётчики CountersBlockNo
     assert_not_contains('// Число хранится как целое', $controller);
 });
 
-test('Форма счётчиков показывает настройки иконки и выравнивания', function (): void {
+test('Форма счётчиков показывает настройки иконки, выравнивания и поле своей иконки', function (): void {
     $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
 
     foreach (['name="icon_size"', 'name="icon_bg"', 'name="icon_position"', 'name="text_align"'] as $field) {
@@ -184,4 +193,6 @@ test('Форма счётчиков показывает настройки ик
     }
     assert_contains('Сверху по центру', $form);
     assert_contains('Без подложки', $form);
+    assert_contains('icon_image', $form);
+    assert_contains('Своя иконка (SVG / PNG / WebP)', $form);
 });
