@@ -313,6 +313,7 @@ $router->post('/admin/albums/{id}/images/add', [\App\Controllers\Admin\AlbumCont
 $router->post('/admin/albums/{id}/images/{imageId}/delete', [\App\Controllers\Admin\AlbumController::class, 'deleteImage']);
 $router->get('/admin/videos', [\App\Controllers\Admin\VideoController::class, 'index']);
 $router->post('/admin/videos/create', [\App\Controllers\Admin\VideoController::class, 'store']);
+$router->post('/admin/videos/bulk', [\App\Controllers\Admin\VideoController::class, 'bulk']);
 $router->post('/admin/videos/youtube/settings', [\App\Controllers\Admin\VideoController::class, 'importSettings']);
 $router->post('/admin/videos/youtube/sync', [\App\Controllers\Admin\VideoController::class, 'importRun']);
 $router->get('/admin/videos/{id}/edit', [\App\Controllers\Admin\VideoController::class, 'edit']);
