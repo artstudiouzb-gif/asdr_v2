@@ -126,6 +126,7 @@ final class Setting
             'telegram_gateway_token',
             'telegram_bot_token',
             'webpush_vapid_private',
+            'youtube_api_key',
         ], true) || preg_match('/^social_(telegram|facebook|linkedin|instagram)_token$/', $key) === 1;
     }
 }

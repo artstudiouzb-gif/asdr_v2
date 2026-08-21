@@ -84,9 +84,14 @@ shared-хостинге обычно `localhost`. Установщик подк�
 30 3 * * * php /path/to/app/Console/gdpr_cleanup.php     >> /path/to/storage/logs/gdpr_cleanup.log 2>&1
 0 9 * * 1  php /path/to/app/Console/digest_worker.php    >> /path/to/storage/logs/digest_worker.log 2>&1
 17 * * * * php /path/to/app/Console/integrity_check.php >> /path/to/storage/logs/integrity.log 2>&1
+0 * * * *  php /path/to/app/Console/youtube_worker.php   >> /path/to/storage/logs/youtube_worker.log 2>&1
 ```
 
 `/health` возвращает `degraded` и шлёт алерт, если воркер перестал запускаться.
+
+`youtube_worker.php` нужен только тем сайтам, где включена автозагрузка роликов
+с YouTube-канала («Видео» → «Автозагрузка с YouTube-канала»). Пока галочка снята,
+задание завершается сразу и ничего не делает.
 
 ### Автобэкапы и ротация
 
