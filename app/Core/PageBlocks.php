@@ -28,7 +28,14 @@ final class PageBlocks
             return BlockRenderer::renderPage(Block::forPageLocalized($pageId, $lang));
         };
 
-        if (Setting::get('perf_page_cache', '1') === '1') {
+        // Запрошена не первая страница блока с постраничным выводом. Кэш
+        // страницы общий и не знает про параметры адреса: сохранив под тем же
+        // ключом вторую страницу галереи, мы отдали бы её всем посетителям
+        // главной. Такие запросы редки (их делает читатель, листающий блок),
+        // поэтому просто собираем страницу заново, а не плодим ключи.
+        if (BlockPager::current() > 1) {
+            $rendered = $build();
+        } elseif (Setting::get('perf_page_cache', '1') === '1') {
             $ttl = max(0, (int) Setting::get('perf_cache_ttl', '0'));
             $cacheKey = 'page:' . $pageId . ':' . $lang;
             $rendered = Cache::remember($cacheKey, $build, $ttl);

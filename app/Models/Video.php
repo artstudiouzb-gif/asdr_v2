@@ -372,6 +372,40 @@ final class Video
         return self::localizeRows($rows, $lang);
     }
 
+    /**
+     * Срез опубликованных видео для постраничного вывода в блоке «Медиа».
+     *
+     * От forHome() отличается смыслом: там витрина главной (отмеченные
+     * «на главной», иначе последние), здесь — весь список подряд, потому что
+     * читатель листает его страницами и обязан дойти до последней записи.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function publishedSlice(int $limit, int $offset = 0, ?string $lang = null): array
+    {
+        $limit = max(1, min(48, $limit));
+        $offset = max(0, $offset);
+        $stmt = Database::pdo()->prepare(
+            'SELECT * FROM videos WHERE is_published = 1
+             ORDER BY sort_order ASC, COALESCE(published_at, created_at) DESC, id DESC
+             LIMIT ' . $limit . ' OFFSET ' . $offset
+        );
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+
+        if ($lang === null || $lang === Language::defaultCode()) {
+            return $rows;
+        }
+
+        return self::localizeRows($rows, $lang);
+    }
+
+    /** Сколько всего опубликованных видео (для полосы страниц). */
+    public static function publishedTotal(): int
+    {
+        return (int) Database::pdo()->query('SELECT COUNT(*) FROM videos WHERE is_published = 1')->fetchColumn();
+    }
+
     private static function bustPageCache(): void
     {
         \App\Core\Cache::forgetPrefix('page:');

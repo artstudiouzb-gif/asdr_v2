@@ -237,6 +237,37 @@ final class PhotoAlbum
         return self::localizeRows($rows, $lang);
     }
 
+    /**
+     * Срез опубликованных альбомов для постраничного вывода в блоке «Медиа».
+     * forHome() — витрина главной, здесь нужен весь список подряд.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function publishedSlice(int $limit, int $offset = 0, ?string $lang = null): array
+    {
+        $limit = max(1, min(48, $limit));
+        $offset = max(0, $offset);
+        $stmt = Database::pdo()->prepare(
+            'SELECT * FROM photo_albums WHERE is_published = 1
+             ORDER BY created_at DESC, id DESC
+             LIMIT ' . $limit . ' OFFSET ' . $offset
+        );
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+
+        if ($lang === null || $lang === Language::defaultCode()) {
+            return $rows;
+        }
+
+        return self::localizeRows($rows, $lang);
+    }
+
+    /** Сколько всего опубликованных альбомов (для полосы страниц). */
+    public static function publishedTotal(): int
+    {
+        return (int) Database::pdo()->query('SELECT COUNT(*) FROM photo_albums WHERE is_published = 1')->fetchColumn();
+    }
+
     public static function delete(int $id): void
     {
         Database::pdo()->prepare('DELETE FROM photo_albums WHERE id = :id')->execute([':id' => $id]);
