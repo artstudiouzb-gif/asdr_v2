@@ -51,6 +51,50 @@ final class VideoController
         exit;
     }
 
+    /**
+     * Массовые действия из списка: публикация, «показать на главной»,
+     * удаление. Импорт с канала приносит записи десятками и черновиками —
+     * без этого их пришлось бы открывать по одной.
+     */
+    public function bulk(): void
+    {
+        Auth::requireLogin();
+        Csrf::verifyRequest();
+
+        $ids = (array) ($_POST['ids'] ?? []);
+        $action = (string) ($_POST['bulk_action'] ?? '');
+        if ($ids === []) {
+            Flash::error('Не выбрано ни одного видео.');
+            header('Location: /admin/videos');
+            exit;
+        }
+
+        $done = match ($action) {
+            'publish' => Video::setPublishedMany($ids, true),
+            'unpublish' => Video::setPublishedMany($ids, false),
+            'feature' => Video::setFeaturedMany($ids, true),
+            'unfeature' => Video::setFeaturedMany($ids, false),
+            'delete' => Video::deleteMany($ids),
+            default => null,
+        };
+
+        if ($done === null) {
+            Flash::error('Неизвестное действие.');
+            header('Location: /admin/videos');
+            exit;
+        }
+
+        Flash::success(match ($action) {
+            'publish' => 'Опубликовано видео: ' . $done . '.',
+            'unpublish' => 'Снято с публикации: ' . $done . '.',
+            'feature' => 'Отмечено «на главной»: ' . $done . '.',
+            'unfeature' => 'Снято с главной: ' . $done . '.',
+            default => 'Удалено видео: ' . $done . '.',
+        });
+        header('Location: /admin/videos');
+        exit;
+    }
+
     /** Ручной запуск импорта («Загрузить сейчас»). */
     public function importRun(): void
     {

@@ -263,6 +263,70 @@ final class Video
         self::bustPageCache();
     }
 
+    /**
+     * Массовые действия из списка: публикация, «на главной», удаление.
+     * Одним запросом на всю выборку — импорт с канала приносит записи
+     * десятками, и построчный цикл здесь означал бы сотню запросов.
+     *
+     * @param array<int, int|string> $ids
+     */
+    public static function setPublishedMany(array $ids, bool $published): int
+    {
+        return self::updateFlagMany($ids, 'is_published', $published);
+    }
+
+    /** @param array<int, int|string> $ids */
+    public static function setFeaturedMany(array $ids, bool $featured): int
+    {
+        return self::updateFlagMany($ids, 'is_featured', $featured);
+    }
+
+    /** @param array<int, int|string> $ids */
+    public static function deleteMany(array $ids): int
+    {
+        $ids = self::normalizeIds($ids);
+        if ($ids === []) {
+            return 0;
+        }
+        $in = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = Database::pdo()->prepare("DELETE FROM videos WHERE id IN ($in)");
+        $stmt->execute($ids);
+        self::bustPageCache();
+
+        return $stmt->rowCount();
+    }
+
+    /** @param array<int, int|string> $ids */
+    private static function updateFlagMany(array $ids, string $column, bool $value): int
+    {
+        $ids = self::normalizeIds($ids);
+        if ($ids === []) {
+            return 0;
+        }
+        // Имя колонки не из пользовательского ввода — оно приходит из методов
+        // выше, значения по-прежнему уходят плейсхолдерами.
+        $in = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = Database::pdo()->prepare("UPDATE videos SET {$column} = ? WHERE id IN ($in)");
+        $stmt->execute(array_merge([$value ? 1 : 0], $ids));
+        self::bustPageCache();
+
+        // Не rowCount(): MySQL не считает строки, у которых значение и так было
+        // нужным, и «Опубликовано: 0» вместо «12» выглядело бы как сбой.
+        return count($ids);
+    }
+
+    /**
+     * @param array<int, int|string> $ids
+     * @return array<int, int>
+     */
+    private static function normalizeIds(array $ids): array
+    {
+        return array_values(array_unique(array_filter(
+            array_map('intval', $ids),
+            static fn (int $id): bool => $id > 0
+        )));
+    }
+
     public static function delete(int $id): void
     {
         Database::pdo()->prepare('DELETE FROM videos WHERE id = :id')->execute([':id' => $id]);

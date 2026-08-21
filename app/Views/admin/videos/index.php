@@ -135,13 +135,31 @@ $langMap = \App\Models\Video::availableLangsForIds(array_map(static fn ($i): int
 <?php if (empty($items)): ?>
     <p class="form-hint">Видео пока нет.</p>
 <?php else: ?>
+    <form id="videos-bulk" method="post" action="/admin/videos/bulk" class="bulk-bar" data-bulk-form>
+        <?= Csrf::field() ?>
+        <select name="bulk_action" required aria-label="Действие с выбранными">
+            <option value="">С выбранными…</option>
+            <option value="publish">Опубликовать</option>
+            <option value="unpublish">Снять с публикации</option>
+            <option value="feature">Показать на главной</option>
+            <option value="unfeature">Убрать с главной</option>
+            <option value="delete">Удалить</option>
+        </select>
+        <button type="submit" class="btn btn--small">Применить</button>
+        <span class="bulk-bar__count" data-bulk-count>0 выбрано</span>
+    </form>
+
     <table class="data-table">
         <thead>
-            <tr><th>Название</th><th>Языки</th><th>Длительность</th><th>Статус</th><th>Дата</th><th></th></tr>
+            <tr>
+                <th class="u-inline-5aec6ffae3"><input type="checkbox" data-select-all form="videos-bulk" aria-label="Выбрать все"></th>
+                <th>Название</th><th>Языки</th><th>Длительность</th><th>Статус</th><th>Дата</th><th></th>
+            </tr>
         </thead>
         <tbody>
             <?php foreach ($items as $item): ?>
                 <tr>
+                    <td class="u-inline-5aec6ffae3"><input type="checkbox" name="ids[]" value="<?= (int) $item['id'] ?>" form="videos-bulk" data-bulk-item aria-label="Выбрать видео"></td>
                     <td>
                         <?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?>
                         <?php if ((string) ($item['source'] ?? '') === 'youtube'): ?>
