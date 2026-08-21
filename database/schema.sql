@@ -766,13 +766,18 @@ CREATE TABLE IF NOT EXISTS videos (
     description  TEXT NULL,
     cover_url    VARCHAR(500) NOT NULL DEFAULT '',
     video_url    VARCHAR(500) NOT NULL DEFAULT '',
+    youtube_id   VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'id ролика YouTube — ключ повторного импорта',
+    source       VARCHAR(20) NOT NULL DEFAULT '' COMMENT 'происхождение: пусто — вручную, youtube — импорт',
+    published_at DATETIME NULL COMMENT 'дата публикации ролика на канале',
     duration     VARCHAR(20) NOT NULL DEFAULT '',
     is_published TINYINT(1) NOT NULL DEFAULT 1,
     is_featured  TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'показывать на главной (блок Медиа)',
     sort_order   INT NOT NULL DEFAULT 0,
     created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uniq_videos_slug (slug),
-    KEY idx_videos_listing (is_published, sort_order, created_at)
+    KEY idx_videos_listing (is_published, sort_order, created_at),
+    KEY idx_videos_youtube (youtube_id),
+    KEY idx_videos_dates (is_published, published_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Переводы видео (заголовок и описание на неосновных языках)
@@ -1195,7 +1200,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_14_heroes.sql'),
     ('2026_08_14_hero_watermark.sql'),
     ('2026_08_15_news_layout_card.sql'),
-    ('2026_08_15_news_card_fields.sql')
+    ('2026_08_15_news_card_fields.sql'),
+    ('2026_08_21_videos_youtube_import.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (
