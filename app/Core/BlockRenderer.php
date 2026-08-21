@@ -913,9 +913,34 @@ final class BlockRenderer
         if (in_array($mediaSource, ['albums', 'videos', 'media'], true)) {
             $lang = Locale::current();
             $limit = (int) ($data['limit'] ?? 8);
+            $paginate = !empty($data['paginate']);
+
+            // Постраничный вывод и витрина главной — разные задачи. Без полосы
+            // страниц блок показывает отмеченные «на главной» записи (forHome),
+            // с полосой — весь опубликованный список подряд: иначе читатель
+            // упирался бы в первые записи и не мог дойти до остальных.
+            $pager = null;
+            if ($paginate) {
+                $totals = [];
+                if ($mediaSource === 'videos' || $mediaSource === 'media') {
+                    $totals[] = \App\Models\Video::publishedTotal();
+                }
+                if ($mediaSource === 'albums' || $mediaSource === 'media') {
+                    $totals[] = \App\Models\PhotoAlbum::publishedTotal();
+                }
+                // Смешанный источник показывает видео и фото двумя вкладками,
+                // поэтому и листаются они вместе: на каждой странице своя
+                // порция и тех, и других. Страниц столько, сколько нужно
+                // самому длинному списку.
+                $pager = BlockPager::slice($totals === [] ? 0 : max($totals), $limit);
+            }
+
             $items = [];
             if ($mediaSource === 'videos' || $mediaSource === 'media') {
-                foreach (\App\Models\Video::forHome($limit, $lang) as $v) {
+                $videos = $pager === null
+                    ? \App\Models\Video::forHome($limit, $lang)
+                    : \App\Models\Video::publishedSlice($pager['per_page'], $pager['offset'], $lang);
+                foreach ($videos as $v) {
                     $items[] = [
                         'kind' => 'video',
                         'image' => (string) ($v['cover_url'] ?? ''),
@@ -926,7 +951,10 @@ final class BlockRenderer
                 }
             }
             if ($mediaSource === 'albums' || $mediaSource === 'media') {
-                foreach (\App\Models\PhotoAlbum::forHome($limit, $lang) as $a) {
+                $albums = $pager === null
+                    ? \App\Models\PhotoAlbum::forHome($limit, $lang)
+                    : \App\Models\PhotoAlbum::publishedSlice($pager['per_page'], $pager['offset'], $lang);
+                foreach ($albums as $a) {
                     $items[] = [
                         'kind' => 'photo',
                         'image' => \App\Models\PhotoAlbum::coverFor($a),
@@ -937,6 +965,9 @@ final class BlockRenderer
                 }
             }
             $data['items'] = $items;
+            if ($pager !== null) {
+                $data['_pager'] = $pager;
+            }
             if ($mediaSource === 'albums' && ($data['all_url'] ?? '') === '') {
                 $data['all_url'] = Locale::url('albums', $lang);
             }

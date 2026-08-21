@@ -1339,7 +1339,23 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </select>
                 <span class="form-hint">Автоматический источник использует записи с отметкой «Показать на главной».</span>
             </div>
-            <div class="form-field"><label for="limit">Сколько карточек показывать</label><input type="number" id="limit" name="limit" min="2" max="24" value="<?= (int) ($data['limit'] ?? ($type === 'cards_grid' ? 6 : 8)) ?>"></div>
+            <div class="form-field">
+                <label for="limit"><?= $type === 'media_gallery' ? 'Сколько карточек показывать (при постраничном выводе — на странице)' : 'Сколько карточек показывать' ?></label>
+                <input type="number" id="limit" name="limit" min="2" max="24" value="<?= (int) ($data['limit'] ?? ($type === 'cards_grid' ? 6 : 8)) ?>">
+            </div>
+            <?php if ($type === 'media_gallery'): ?>
+                <div class="form-field form-field--checkbox">
+                    <input type="checkbox" id="mg_paginate" name="paginate" value="1" <?= !empty($data['paginate']) ? 'checked' : '' ?>>
+                    <label for="mg_paginate">Постраничный вывод</label>
+                </div>
+                <p class="form-hint">
+                    С полосой страниц блок показывает <strong>весь опубликованный список</strong>,
+                    а не только отмеченные «Показать на главной», и делит его на страницы.
+                    Ссылка страницы ведёт на этот же блок, поэтому читатель остаётся на месте.
+                    Для видео это единственный способ дойти до старых роликов: отдельного
+                    раздела «Видео» на сайте нет.
+                </p>
+            <?php endif; ?>
             <?php if ($type === 'cards_grid'): ?>
                 <div class="form-field">
                     <label for="cards_variant">Вариант карточек</label>

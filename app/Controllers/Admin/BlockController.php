@@ -703,6 +703,10 @@ final class BlockController
                     // вводный текст и пропорция плитки.
                     $collected['description'] = TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale);
                     $collected['ratio'] = \App\Core\BlockData\BlockDataInput::enum($_POST, 'ratio', ['16-9', '4-3', '1-1'], '16-9');
+                    // Постраничный вывод: «сколько показывать» становится
+                    // размером страницы, а блок перестаёт быть витриной
+                    // отмеченных записей и показывает весь список.
+                    $collected['paginate'] = !empty($_POST['paginate']);
                 }
                 return $collected;
             case 'news_feature':
