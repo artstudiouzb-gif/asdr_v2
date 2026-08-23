@@ -93,7 +93,12 @@ final class ProfileController
         return $host !== '' && preg_match('/^[\x21-\x7E]{1,40}$/', $host) ? $host : 'ASDR';
     }
 
-    /** Подключение приложения-аутентификатора: включаем только по верному коду. */
+    /**
+     * Подключение приложения-аутентификатора: верный код плюс подтверждение
+     * паролем. Пароль обязателен по той же причине, что и при отключении:
+     * иначе угнанная сессия привязывала бы к аккаунту свой аутентификатор и
+     * получала постоянный второй фактор.
+     */
     public function enableTotp(): void
     {
         Auth::requireLogin();
@@ -110,7 +115,13 @@ final class ProfileController
             exit;
         }
 
-        if ($user === null || $secret === '' || !\App\Core\TOTP::verify($secret, $code)) {
+        if ($user === null || !password_verify((string) ($_POST['password'] ?? ''), $user['password_hash'])) {
+            Flash::error('Неверный пароль. Приложение-аутентификатор не подключён.');
+            header('Location: /admin/profile');
+            exit;
+        }
+
+        if ($secret === '' || !\App\Core\TOTP::verify($secret, $code)) {
             Flash::error('Неверный код. Проверьте, что время на устройстве синхронизировано, и попробуйте ещё раз.');
             header('Location: /admin/profile');
             exit;
@@ -245,7 +256,17 @@ final class ProfileController
         }
 
         User::updatePassword($userId, $new);
-        // Завершаем все прочие сессии; текущую оставляем активной.
+        // Текущую сессию оставляем активной, но с новым идентификатором:
+        // если старый успел утечь, он умирает вместе со сменой пароля.
+        // Реестр перерегистрирует её под новым sid, иначе Auth::check()
+        // не найдёт строку и выкинет того, кто пароль и менял.
+        session_regenerate_id(true);
+        SessionRegistry::register(
+            $userId,
+            session_id(),
+            $_SERVER['REMOTE_ADDR'] ?? null,
+            $_SERVER['HTTP_USER_AGENT'] ?? null
+        );
         SessionRegistry::revokeAllExcept($userId, session_id());
 
         \App\Core\Logger::security('Пароль администратора изменён', [

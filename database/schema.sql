@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash   VARCHAR(255) NOT NULL,
     totp_secret     TEXT         NULL,
     totp_enabled    TINYINT(1)   NOT NULL DEFAULT 0,
+    totp_last_step  BIGINT       NULL DEFAULT NULL COMMENT 'последний принятый шаг TOTP (защита от повтора кода)',
     role            ENUM('admin', 'editor') NOT NULL DEFAULT 'admin',
     admin_lang      VARCHAR(8) NULL COMMENT 'предпочитаемый язык интерфейса админки (ru, uz, en)',
     last_login_at   DATETIME NULL,
@@ -918,6 +919,7 @@ CREATE TABLE IF NOT EXISTS repo_users (
     password_hash   VARCHAR(255) NOT NULL,
     totp_secret     TEXT         NULL,
     totp_enabled    TINYINT(1)   NOT NULL DEFAULT 0,
+    totp_last_step  BIGINT       NULL DEFAULT NULL COMMENT 'последний принятый шаг TOTP (защита от повтора кода)',
     telegram_chat_id BIGINT      NULL COMMENT '2FA через Telegram-бота (NULL — не привязан)',
     is_active       TINYINT(1)   NOT NULL DEFAULT 1,
     last_login_at   DATETIME NULL,
@@ -1201,7 +1203,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_14_hero_watermark.sql'),
     ('2026_08_15_news_layout_card.sql'),
     ('2026_08_15_news_card_fields.sql'),
-    ('2026_08_21_videos_youtube_import.sql')
+    ('2026_08_21_videos_youtube_import.sql'),
+    ('2026_08_23_totp_replay_guard.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

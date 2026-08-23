@@ -102,8 +102,9 @@ require __DIR__ . '/layout/header.php';
                 <span class="badge badge--published u-inline-e48b05836a"><?= \App\Core\AdminUi::icon('check', 13) ?> <?= (int) ($systemHealth['queue_pending'] ?? 0) ?> <?= htmlspecialchars(t('в очереди'), ENT_QUOTES) ?></span>
             </div>
             <div class="u-inline-4588dc62ed">
-                <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('Passkeys / Биометрия'), ENT_QUOTES) ?></div>
-                <span class="badge badge--published u-inline-e48b05836a"><?= \App\Core\AdminUi::icon('fingerprint', 13) ?> <?= (int) ($systemHealth['passkeys_count'] ?? 0) ?> <?= htmlspecialchars(t('ключей'), ENT_QUOTES) ?></span>
+                <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('Ошибки очереди'), ENT_QUOTES) ?></div>
+                <?php $queueFailed = (int) ($systemHealth['queue_failed'] ?? 0); ?>
+                <span class="badge <?= $queueFailed > 0 ? 'badge--draft' : 'badge--published' ?> u-inline-e48b05836a"><?= \App\Core\AdminUi::icon($queueFailed > 0 ? 'alert-triangle' : 'check', 13) ?> <?= $queueFailed ?></span>
             </div>
             <div class="u-inline-4588dc62ed">
                 <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('Обслуживание'), ENT_QUOTES) ?></div>
