@@ -73,7 +73,7 @@ final class NotificationCenter
         ?int $createdBy = null
     ): int {
         return self::roles(
-            ['admin', 'super_admin'],
+            ['admin'],
             $title,
             $message,
             $category,

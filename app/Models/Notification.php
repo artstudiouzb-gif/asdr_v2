@@ -13,7 +13,7 @@ final class Notification
 {
     private const CATEGORIES = ['system', 'security', 'content', 'forms', 'users', 'integration'];
     private const SEVERITIES = ['info', 'success', 'warning', 'error', 'critical', 'security'];
-    private const ROLES = ['admin', 'super_admin', 'editor'];
+    private const ROLES = ['admin', 'editor'];
 
     /**
      * @param array{

@@ -312,6 +312,11 @@ final class PortalController
         exit;
     }
 
+    /**
+     * Подключение приложения-аутентификатора. Пароль спрашиваем так же, как
+     * при отключении: без него угнанная сессия привязала бы к аккаунту свой
+     * аутентификатор и получила постоянный второй фактор.
+     */
     public function enableTotp(): void
     {
         RepoAuth::requireLogin();
@@ -321,12 +326,19 @@ final class PortalController
         $secret = $_SESSION['repo_totp_setup_secret'] ?? null;
         $code = preg_replace('/\s+/', '', (string) ($_POST['code'] ?? ''));
 
-        if (!$secret || !TOTP::verify((string) $secret, (string) $code)) {
+        $reauthKey = (string) ($user['id'] ?? 0) . '|' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+        $passwordOk = $user
+            && RateLimiter::throttle('repo_security_reauth', $reauthKey, 5, 15, false)
+            && password_verify((string) ($_POST['password'] ?? ''), (string) $user['password_hash']);
+
+        if (!$passwordOk || !$secret || !TOTP::verify((string) $secret, (string) $code)) {
             View::render('repo/security', [
                 'repoUser' => $user,
                 'setupSecret' => $secret,
                 'otpauthUri' => $secret ? TOTP::provisioningUri((string) $secret, (string) $user['username'], self::totpIssuer()) : null,
-                'error' => 'Неверный код. Убедитесь, что время на устройстве синхронизировано.',
+                'error' => $passwordOk
+                    ? 'Неверный код. Убедитесь, что время на устройстве синхронизировано.'
+                    : 'Неверный пароль. Приложение-аутентификатор не подключено.',
             ] + self::telegramViewData($user));
             return;
         }

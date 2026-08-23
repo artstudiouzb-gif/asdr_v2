@@ -77,9 +77,25 @@ final class User
         $stmt->execute([':secret' => SecretBox::encrypt($secret, 'users.totp_secret'), ':id' => $id]);
     }
 
+    /**
+     * Одноразовое использование шага TOTP: принимает шаг только один раз и
+     * только вперёд. UPDATE атомарен, поэтому две параллельные попытки с
+     * одним кодом не пройдут обе. Возвращает true, если код можно засчитать.
+     */
+    public static function consumeTotpStep(int $id, int $step): bool
+    {
+        $stmt = Database::pdo()->prepare(
+            'UPDATE users SET totp_last_step = :step
+             WHERE id = :id AND (totp_last_step IS NULL OR totp_last_step < :step)'
+        );
+        $stmt->execute([':step' => $step, ':id' => $id]);
+
+        return $stmt->rowCount() === 1;
+    }
+
     public static function disableTotp(int $id): void
     {
-        $stmt = Database::pdo()->prepare('UPDATE users SET totp_secret = NULL, totp_enabled = 0 WHERE id = :id');
+        $stmt = Database::pdo()->prepare('UPDATE users SET totp_secret = NULL, totp_enabled = 0, totp_last_step = NULL WHERE id = :id');
         $stmt->execute([':id' => $id]);
     }
 

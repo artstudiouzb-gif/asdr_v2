@@ -147,7 +147,7 @@ final class FormController
         // Внутреннее уведомление не содержит поля заявки и персональные данные:
         // они доступны только после авторизации и проверки роли в админке.
         NotificationCenter::roles(
-            ['admin', 'super_admin', 'editor'],
+            ['admin', 'editor'],
             'Новая заявка',
             'Получена новая заявка через форму «' . (string) $form['name'] . '».',
             'forms',
