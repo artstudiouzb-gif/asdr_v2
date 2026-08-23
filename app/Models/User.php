@@ -86,9 +86,11 @@ final class User
     {
         $stmt = Database::pdo()->prepare(
             'UPDATE users SET totp_last_step = :step
-             WHERE id = :id AND (totp_last_step IS NULL OR totp_last_step < :step)'
+             WHERE id = :id AND (totp_last_step IS NULL OR totp_last_step < :guard)'
         );
-        $stmt->execute([':step' => $step, ':id' => $id]);
+        // Один и тот же именованный параметр дважды PDO не принимает
+        // при нативных prepared statements — отсюда отдельный :guard.
+        $stmt->execute([':step' => $step, ':id' => $id, ':guard' => $step]);
 
         return $stmt->rowCount() === 1;
     }
