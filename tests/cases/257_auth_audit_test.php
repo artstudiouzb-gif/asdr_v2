@@ -182,3 +182,39 @@ test('Код TOTP засчитывается один раз (БД)', function (
 
     $pdo->prepare('DELETE FROM users WHERE username = ?')->execute(['totp_replay']);
 });
+
+test('Без применённой миграции вход не падает, а теряет только защиту от повтора (БД)', function () {
+    if ((string) (getenv('TEST_DB_DATABASE') ?: '') === '') {
+        skip_test('TEST_DB_* не заданы');
+    }
+
+    // Сценарий: код выложили, `php database/migrate.php` не запустили.
+    // Второй фактор обязан продолжать работать — иначе владелец заперт
+    // снаружи админки, и чинить придётся через прямой доступ к базе.
+    $pdo = \App\Core\Database::pdo();
+    $pdo->prepare('DELETE FROM users WHERE username = ?')->execute(['totp_nomigration']);
+    $pdo->prepare('INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)')
+        ->execute(['totp_nomigration', 'nomig@example.com', password_hash('x', PASSWORD_DEFAULT), 'admin']);
+    $userId = (int) $pdo->lastInsertId();
+
+    $pdo->exec('ALTER TABLE users DROP COLUMN totp_last_step');
+    try {
+        $step = (int) floor(time() / 30);
+        // Не исключение и не отказ: код принимается, как до появления защиты.
+        assert_true(User::consumeTotpStep($userId, $step), 'без колонки код должен приниматься');
+        assert_true(User::consumeTotpStep($userId, $step), 'и повторно — защиты просто нет');
+    } finally {
+        $pdo->exec('ALTER TABLE users ADD COLUMN totp_last_step BIGINT NULL DEFAULT NULL AFTER totp_enabled');
+        $pdo->prepare('DELETE FROM users WHERE username = ?')->execute(['totp_nomigration']);
+    }
+
+    // Настоящая ошибка запроса по-прежнему обязана всплывать, а не глохнуть.
+    $failed = false;
+    try {
+        User::consumeTotpStep($userId, 1);
+        $pdo->query('SELECT nonexistent_column_zz FROM users LIMIT 1');
+    } catch (\PDOException $e) {
+        $failed = true;
+    }
+    assert_true($failed, 'посторонние ошибки БД не должны подавляться');
+});
