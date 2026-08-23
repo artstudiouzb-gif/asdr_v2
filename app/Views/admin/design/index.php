@@ -562,7 +562,7 @@ foreach ($options as $key => $opt) {
             </div>
 
             <details class="design-manual u-inline-8a359a76eb" open>
-                <summary><strong>Точные размеры</strong> <span class="form-hint">— переопределяют автоматическую шкалу при заполнении</span></summary>
+                <summary><strong>Точные размеры типографики (в пикселях)</strong> <span class="form-hint">— индивидуальная настройка каждого уровня в px (переопределяет общую шкалу)</span></summary>
                 <div class="design-manual__grid u-inline-9374e84210">
                     <?php foreach (\App\Core\DesignSettings::TYPO_SIZES as $fsKey => $fsMeta): ?>
                         <?php $fromScale = $scaleSizes[$fsKey] ?? ''; ?>

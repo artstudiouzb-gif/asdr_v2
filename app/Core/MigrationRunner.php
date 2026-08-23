@@ -33,6 +33,81 @@ final class MigrationRunner
         ));
     }
 
+    public static function pendingCount(PDO $pdo, string $migrationsDir): int
+    {
+        return count(self::pending($pdo, $migrationsDir));
+    }
+
+    /**
+     * @return array{
+     *     total: int,
+     *     applied_count: int,
+     *     pending_count: int,
+     *     pending: list<array{name: string, path: string, size: int}>,
+     *     applied: list<array{name: string, applied_at: string}>,
+     *     all: list<array{name: string, path: string, is_applied: bool, applied_at: ?string, size: int}>
+     * }
+     */
+    public static function status(PDO $pdo, string $migrationsDir): array
+    {
+        self::ensureMigrationsTable($pdo);
+
+        $appliedRows = [];
+        try {
+            $appliedRows = $pdo->query('SELECT filename, applied_at FROM migrations ORDER BY id DESC')->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (\Throwable) {
+            $appliedRows = [];
+        }
+
+        $appliedMap = [];
+        foreach ($appliedRows as $row) {
+            $appliedMap[(string) $row['filename']] = (string) ($row['applied_at'] ?? '');
+        }
+
+        $files = glob(rtrim($migrationsDir, '/') . '/*.sql') ?: [];
+        sort($files, SORT_STRING);
+
+        $all = [];
+        $pending = [];
+        foreach ($files as $file) {
+            $name = basename($file);
+            $isApplied = isset($appliedMap[$name]);
+            $size = (int) @filesize($file);
+            $item = [
+                'name' => $name,
+                'path' => $file,
+                'is_applied' => $isApplied,
+                'applied_at' => $appliedMap[$name] ?? null,
+                'size' => $size,
+            ];
+            $all[] = $item;
+            if (!$isApplied) {
+                $pending[] = [
+                    'name' => $name,
+                    'path' => $file,
+                    'size' => $size,
+                ];
+            }
+        }
+
+        $appliedList = [];
+        foreach ($appliedRows as $row) {
+            $appliedList[] = [
+                'name' => (string) $row['filename'],
+                'applied_at' => (string) ($row['applied_at'] ?? ''),
+            ];
+        }
+
+        return [
+            'total' => count($files),
+            'applied_count' => count($appliedMap),
+            'pending_count' => count($pending),
+            'pending' => $pending,
+            'applied' => $appliedList,
+            'all' => $all,
+        ];
+    }
+
     /**
      * @param null|callable(string,string):void $reporter (event, filename)
      * @return list<string> имена применённых миграций
@@ -41,11 +116,17 @@ final class MigrationRunner
     {
         self::ensureMigrationsTable($pdo);
 
-        $database = (string) $pdo->query('SELECT DATABASE()')->fetchColumn();
+        $dbStmt = $pdo->query('SELECT DATABASE()');
+        $database = (string) ($dbStmt ? $dbStmt->fetchColumn() : '');
+        $dbStmt?->closeCursor();
+
         $lockName = 'asdr_cms_migrations_' . substr(hash('sha256', $database), 0, 24);
         $lockStmt = $pdo->prepare('SELECT GET_LOCK(:name, 30)');
         $lockStmt->execute([':name' => $lockName]);
-        if ((int) $lockStmt->fetchColumn() !== 1) {
+        $lockAcquired = (int) $lockStmt->fetchColumn() === 1;
+        $lockStmt->closeCursor();
+
+        if (!$lockAcquired) {
             throw new RuntimeException('Не удалось получить блокировку миграций. Другой процесс ещё работает.');
         }
 
@@ -53,20 +134,15 @@ final class MigrationRunner
             // Pending вычисляем уже после получения блокировки: второй процесс
             // мог успеть применить миграции, пока мы ждали GET_LOCK().
             $pending = self::pending($pdo, $migrationsDir);
-            if ($pending === []) {
-                return [];
-            }
-
-            $record = $pdo->prepare(
-                'INSERT INTO migrations (filename, applied_at) VALUES (:filename, NOW())'
-            );
             $appliedNow = [];
+
+            $record = $pdo->prepare('INSERT INTO migrations (filename) VALUES (:filename)');
 
             foreach ($pending as $file) {
                 $name = basename($file);
-                $sql = file_get_contents($file);
-                if ($sql === false || trim($sql) === '') {
-                    throw new RuntimeException("Файл миграции {$name} пуст или недоступен.");
+                $sql = (string) file_get_contents($file);
+                if (trim($sql) === '') {
+                    continue;
                 }
 
                 if ($reporter !== null) {
@@ -78,6 +154,7 @@ final class MigrationRunner
                 // только после успешного выполнения всего файла.
                 $pdo->exec($sql);
                 $record->execute([':filename' => $name]);
+                $record->closeCursor();
                 $appliedNow[] = $name;
 
                 if ($reporter !== null) {
@@ -89,11 +166,24 @@ final class MigrationRunner
         } finally {
             $releaseStmt = $pdo->prepare('SELECT RELEASE_LOCK(:name)');
             $releaseStmt->execute([':name' => $lockName]);
+            $releaseStmt->closeCursor();
         }
     }
 
     private static function ensureMigrationsTable(PDO $pdo): void
     {
+        $driver = (string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') {
+            $pdo->exec(
+                'CREATE TABLE IF NOT EXISTS migrations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    filename VARCHAR(255) NOT NULL UNIQUE,
+                    applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )'
+            );
+            return;
+        }
+
         $pdo->exec(
             'CREATE TABLE IF NOT EXISTS migrations (
                 id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

@@ -182,3 +182,9 @@
     .block-mediagallery__head .media-tabs__tab,
     .media-tabs__indicator { transition: none; }
 }
+
+/* Полоса страниц блока: та же, что у ленты новостей, но здесь она стоит сразу
+   под плиткой, поэтому отступ задаём тут, а не в общей теме. */
+.mediagallery-grid + .listing-pager {
+    margin-top: var(--space-small, 24px);
+}

@@ -94,4 +94,17 @@ if ($showTabs) {
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
+    <?php if (!empty($data['_pager'])): ?>
+        <?php
+        // Полоса страниц у блока — та же, что у ленты новостей и каталогов:
+        // расходясь, две копии дали бы разное поведение на половинах сайта.
+        $mediaPager = (array) $data['_pager'];
+        $mediaBlockId = (int) $blockId;
+        ?>
+        <?= \App\Core\View::renderPartial('site/_pager', [
+            'page' => (int) $mediaPager['page'],
+            'pages' => (int) $mediaPager['pages'],
+            'pageUrl' => static fn (int $p): string => \App\Core\BlockPager::url($p, $mediaBlockId),
+        ]) ?>
+    <?php endif; ?>
 </div>

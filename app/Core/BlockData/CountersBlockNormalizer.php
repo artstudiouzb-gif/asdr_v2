@@ -54,6 +54,7 @@ final class CountersBlockNormalizer
                 'note' => mb_substr(BlockDataInput::plain($item, 'note', $locale), 0, 120),
                 'link' => BlockDataInput::safeLink($item['link'] ?? ''),
                 'icon_svg' => $iconSvg,
+                'icon_image' => BlockDataInput::safeMedia($item['icon_image'] ?? ''),
             ];
         }
 

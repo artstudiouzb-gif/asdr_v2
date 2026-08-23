@@ -277,6 +277,11 @@ $router->post('/admin/performance/reset-opcache', [\App\Controllers\Admin\Perfor
 $router->post('/admin/cloudflare/verify', [\App\Controllers\Admin\PerformanceController::class, 'cloudflareVerify']);
 $router->post('/admin/cloudflare/purge', [\App\Controllers\Admin\PerformanceController::class, 'cloudflarePurge']);
 
+// --- Admin: база данных и миграции ---
+$router->get('/admin/database', [\App\Controllers\Admin\DatabaseController::class, 'index']);
+$router->post('/admin/database/migrate', [\App\Controllers\Admin\DatabaseController::class, 'migrate']);
+$router->post('/admin/database/optimize', [\App\Controllers\Admin\DatabaseController::class, 'optimize']);
+
 // --- Admin: боковые виджеты ---
 $router->get('/admin/widgets', [AdminWidgetController::class, 'index']);
 $router->get('/admin/widgets/create', [AdminWidgetController::class, 'create']);
@@ -308,6 +313,9 @@ $router->post('/admin/albums/{id}/images/add', [\App\Controllers\Admin\AlbumCont
 $router->post('/admin/albums/{id}/images/{imageId}/delete', [\App\Controllers\Admin\AlbumController::class, 'deleteImage']);
 $router->get('/admin/videos', [\App\Controllers\Admin\VideoController::class, 'index']);
 $router->post('/admin/videos/create', [\App\Controllers\Admin\VideoController::class, 'store']);
+$router->post('/admin/videos/bulk', [\App\Controllers\Admin\VideoController::class, 'bulk']);
+$router->post('/admin/videos/youtube/settings', [\App\Controllers\Admin\VideoController::class, 'importSettings']);
+$router->post('/admin/videos/youtube/sync', [\App\Controllers\Admin\VideoController::class, 'importRun']);
 $router->get('/admin/videos/{id}/edit', [\App\Controllers\Admin\VideoController::class, 'edit']);
 $router->post('/admin/videos/{id}/update', [\App\Controllers\Admin\VideoController::class, 'update']);
 $router->post('/admin/videos/{id}/delete', [\App\Controllers\Admin\VideoController::class, 'destroy']);

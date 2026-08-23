@@ -12,11 +12,11 @@
       "/assets/css/public-layout-polish.css",
       "/assets/css/public-editorial-pages.css"
     ],
-    "sourceSha256": "052ca02b985e8a4d036f52bee2bdb50c8db8d7662c88de3cdc76c813db4ba74d",
-    "sha256": "e2a0f242a180607344cabe91ebdd9711e6a1a78a1b149906303a4abe4162e0d6",
-    "raw": 401746,
-    "gzip": 66737,
-    "brotli": 51867
+    "sourceSha256": "9dd14afa1e9100f1a57e7b112b5f319786eb5199cd35ea25c78b7cd08ad09c44",
+    "sha256": "27d4526aa0a3002bbf918a02470fafd9c5d3f95381781dda678e679ca102516e",
+    "raw": 402835,
+    "gzip": 66809,
+    "brotli": 51933
   },
   "js": {
     "path": "/assets/js/public.min.js",
@@ -34,11 +34,11 @@
   "blocks": {
     "/assets/css/blocks/news-detail.css": {
       "path": "/assets/css/blocks/news-detail.min.css",
-      "sourceSha256": "8710aaaf1196da3f5436ddf36d34222ce4a57505131d0c9bc9255dcbc2b505d8",
-      "sha256": "096fa4db943fc8a7497525ccfffa5efacd90d9cc30fd13f05479e0f61f95f105",
-      "raw": 37000,
-      "gzip": 6573,
-      "brotli": 5777
+      "sourceSha256": "3d92e6d54a28c8f09895f18aabcc419fd45676f07c4c8f759b69f17659a925ca",
+      "sha256": "dd391d4498aa9f94cdb7df0b24717df6e5a8026ba47a99b1f9c650b609888943",
+      "raw": 36990,
+      "gzip": 6565,
+      "brotli": 5771
     },
     "/assets/css/blocks/org-structure.css": {
       "path": "/assets/css/blocks/org-structure.min.css",
@@ -58,11 +58,11 @@
     },
     "/assets/css/blocks/media-gallery.css": {
       "path": "/assets/css/blocks/media-gallery.min.css",
-      "sourceSha256": "09a6cf2dec32c5dde53cb2d6613a2681bc8a1ffd44b48b941118c92ce288b2aa",
-      "sha256": "19b676a95d19e6f5dfd0aa5d9462148c54cd964bf0fdc82e5d4e05cf5e68ce05",
-      "raw": 3908,
-      "gzip": 1262,
-      "brotli": 1049
+      "sourceSha256": "c50685c763ec191246504cddf9a9694ae5a631202e340748ee099c989735ff3e",
+      "sha256": "c1b17171ba12091353021bdd473a6f2e268099dab3f2120de4b2bb3e72c4f403",
+      "raw": 3977,
+      "gzip": 1293,
+      "brotli": 1075
     },
     "/assets/css/blocks/tabs.css": {
       "path": "/assets/css/blocks/tabs.min.css",

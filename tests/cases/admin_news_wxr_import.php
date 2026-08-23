@@ -8,7 +8,7 @@ test('admin WXR importer is routed through the front controller and protected', 
     $routes = (string) file_get_contents($root . '/public/index.php');
     $htaccess = (string) file_get_contents($root . '/public/.htaccess');
     $rootHtaccess = (string) file_get_contents($root . '/.htaccess');
-    $newsIndex = (string) file_get_contents($root . '/app/Views/admin/news/index.php');
+    $settings = (string) file_get_contents($root . '/app/Views/admin/settings/index.php');
     $view = (string) file_get_contents($root . '/app/Views/admin/news/import.php');
     $script = (string) file_get_contents($root . '/public/assets/js/admin-news-import.js');
 
@@ -19,10 +19,10 @@ test('admin WXR importer is routed through the front controller and protected', 
     assert_contains("\$router->post('/admin/news/import/inspect', [\\App\\Controllers\\Admin\\NewsImportController::class, 'inspect'])", $routes);
     assert_contains("\$router->post('/admin/news/import/run', [\\App\\Controllers\\Admin\\NewsImportController::class, 'importBatch'])", $routes);
     assert_contains("\$router->post('/admin/news/import/discard', [\\App\\Controllers\\Admin\\NewsImportController::class, 'discard'])", $routes);
-    assert_contains('/admin/news/import', $newsIndex);
+    assert_contains('/admin/news/import', $settings);
     assert_contains('data-endpoint="/admin/news/import"', $view);
     assert_contains("endpoint + '/' + encodeURIComponent(action)", $script);
-    assert_not_contains('/admin/import-news.php', $newsIndex);
+    assert_not_contains('/admin/import-news.php', $settings);
     assert_not_contains('/admin/import-news.php', $view);
     assert_not_contains('/admin/import-news.php', $script);
     assert_not_contains('import-news.php', $htaccess);

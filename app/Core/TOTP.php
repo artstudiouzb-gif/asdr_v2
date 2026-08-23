@@ -54,20 +54,32 @@ final class TOTP
 
     public static function verify(string $secret, string $code, int $windowSteps = 1): bool
     {
+        return self::matchStep($secret, $code, $windowSteps) !== null;
+    }
+
+    /**
+     * Тот же разбор, что и verify(), но возвращает номер совпавшего шага
+     * времени (или null). Номер нужен защите от повтора: RFC 6238 §5.2
+     * требует принимать код одного шага ровно один раз, иначе подсмотренный
+     * код остаётся рабочим до полутора минут.
+     */
+    public static function matchStep(string $secret, string $code, int $windowSteps = 1): ?int
+    {
         $code = preg_replace('/\s+/', '', $code) ?? '';
         if (!preg_match('/^\d{6}$/', $code)) {
-            return false;
+            return null;
         }
 
         $currentTimeSlice = (int) floor(time() / self::PERIOD);
 
         for ($i = -$windowSteps; $i <= $windowSteps; $i++) {
-            if (hash_equals(self::calculateCode($secret, $currentTimeSlice + $i), $code)) {
-                return true;
+            $step = $currentTimeSlice + $i;
+            if (hash_equals(self::calculateCode($secret, $step), $code)) {
+                return $step;
             }
         }
 
-        return false;
+        return null;
     }
 
     private static function calculateCode(string $secret, int $timeSlice): string

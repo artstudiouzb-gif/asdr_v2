@@ -6357,11 +6357,11 @@ body, body.admin-body {
     padding: 10px 12px !important;
 }
 
-/* Полевые лейблы (исключая чекбоксы и радио) */
-.form-field > label:not(.colorfield__off):not(.checkbox-label),
-.filters-panel label:not(.colorfield__off):not(.checkbox-label),
-label.form-label,
-label:not(.colorfield__off):not(.form-field--checkbox):not(.checkbox-label):not([class*="checkbox"]):not([class*="toggle"]):not(:has(input[type="checkbox"])):not(:has(input[type="radio"])) {
+/* Полевые лейблы в светлой рабочей панели (исключая чекбоксы, радио, инсталлятор и экран авторизации) */
+.admin-layout .form-field > label:not(.colorfield__off):not(.checkbox-label),
+.admin-layout .filters-panel label:not(.colorfield__off):not(.checkbox-label),
+.admin-layout label.form-label,
+.admin-layout label:not(.colorfield__off):not(.form-field--checkbox):not(.checkbox-label):not([class*="checkbox"]):not([class*="toggle"]):not(:has(input[type="checkbox"])):not(:has(input[type="radio"])) {
     font-size: 13px !important;
     font-weight: 600 !important;
     color: #0f172a !important;
@@ -7326,55 +7326,19 @@ body.auth-page label,
     gap: 8px;
 }
 
-/* ========================================================================
-   WebAuthn / Passkeys Login Button & Divider
-   ======================================================================== */
-.auth-divider {
-    margin: 18px 0;
-    text-align: center;
-    position: relative;
+.auth-security-badge {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    margin-top: 24px !important;
+    color: #94a3b8 !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
 }
 
-.auth-divider::before {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--admin-border, #e2e8f0);
-}
-
-.auth-divider__label {
-    position: relative;
-    background: var(--admin-card-bg, #ffffff);
-    padding: 0 12px;
-    color: var(--admin-muted, #94a3b8);
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.auth-passkey-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 14px;
-    background: transparent;
-    border: 1px solid var(--admin-border, #cbd5e1);
-    border-radius: 8px;
-    color: var(--admin-text, #1e293b);
-    font-weight: 500;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 180ms ease;
-}
-
-.auth-passkey-btn:hover {
-    background: var(--admin-hover, #f8fafc);
-    border-color: var(--admin-accent, #0d9488);
-    color: var(--admin-accent, #0d9488);
+.auth-security-badge svg {
+    color: #34d399 !important;
 }
 
 /* ========================================================================
@@ -7497,13 +7461,177 @@ body.auth-page {
     font-weight: 600 !important;
 }
 
-.auth-site-link {
-    color: #94a3b8 !important;
-    font-size: 13px !important;
-}
-
 .auth-site-link:hover {
     color: #ffffff !important;
+}
+
+/* 1.1 Инсталлятор (/install/*) - Высокая контрастность, лейблы, шаги и инпуты */
+.install-card {
+    background: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.auth-page .install-card label,
+body.auth-page .install-card .form-field label,
+body.auth-page .install-card .form-field > label,
+body.auth-page .install-card label.u-inline-aa1820469b,
+body.auth-page .auth-card label,
+body.auth-page .auth-card .form-field label,
+body.auth-page .auth-card .auth-field label,
+.install-wrapper label,
+.install-card label,
+.install-card .form-field label,
+.install-card .form-field > label,
+.install-card label.u-inline-aa1820469b,
+.install-card label[class*="u-inline"] {
+    color: #f1f5f9 !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+    display: inline-block !important;
+}
+
+body.auth-page .install-card label span,
+body.auth-page .install-card .form-field label span,
+.install-card label span,
+.install-card .form-field label span,
+.install-card label .u-inline-9dd1207e58 {
+    color: #f87171 !important;
+    font-weight: 700 !important;
+}
+
+.install-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.install-header__title {
+    color: #ffffff !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+}
+
+.install-header__desc {
+    color: #cbd5e1 !important;
+    font-size: 13.5px !important;
+}
+
+.install-step-badge {
+    background: #0f172a !important;
+    border: 2px solid #334155 !important;
+    color: #94a3b8 !important;
+}
+
+.install-step-title {
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
+
+.install-step-item.is-done .install-step-badge {
+    background: #064e3b !important;
+    border-color: #059669 !important;
+    color: #34d399 !important;
+}
+
+.install-step-item.is-done .install-step-title {
+    color: #34d399 !important;
+}
+
+.install-step-item.is-active .install-step-badge {
+    background: #2563eb !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25) !important;
+}
+
+.install-step-item.is-active .install-step-title {
+    color: #60a5fa !important;
+    font-weight: 700 !important;
+}
+
+.install-callout {
+    background: rgba(37, 99, 235, 0.12) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    color: #bfdbfe !important;
+    border-radius: 6px !important;
+}
+
+.install-callout__icon,
+.install-callout svg {
+    color: #60a5fa !important;
+}
+
+.install-input-wrap input,
+.install-input-wrap select,
+.install-input-wrap textarea {
+    background: #0f172a !important;
+    border: 1px solid #334155 !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+    font-size: 13.5px !important;
+    padding: 11px 16px 11px 42px !important;
+}
+
+.install-input-wrap input:focus,
+.install-input-wrap select:focus,
+.install-input-wrap textarea:focus {
+    background: #0b1329 !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+}
+
+.install-input-wrap input::placeholder,
+.install-input-wrap textarea::placeholder {
+    color: #64748b !important;
+}
+
+.install-input-icon {
+    color: #94a3b8 !important;
+}
+
+.install-input-wrap:focus-within .install-input-icon {
+    color: #60a5fa !important;
+}
+
+.install-card .check-item {
+    background: #0f172a !important;
+    border: 1px solid #334155 !important;
+    border-radius: 6px !important;
+    color: #f8fafc !important;
+}
+
+.install-card .check-item:hover {
+    background: #131d35 !important;
+}
+
+.install-card .check-item__label {
+    color: #f8fafc !important;
+}
+
+.install-card .check-card-group__title {
+    color: #e2e8f0 !important;
+}
+
+.install-card .form-actions {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.install-card .form-actions .btn,
+.install-card .form-actions .btn--primary {
+    background: #2563eb !important;
+    border: 1px solid #2563eb !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    padding: 11px 22px !important;
+}
+
+.install-card .form-actions .btn--primary:hover {
+    background: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
 }
 
 /* 2. Конструктор шапки сайта (/admin/header) - Четкий контраст и карточная структура */

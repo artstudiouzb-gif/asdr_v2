@@ -68,3 +68,47 @@ test('absoluteUrl абсолютизирует относительные и pro
     assert_same('https://cdn/z.jpg', LegacyCmsImporter::absoluteUrl('//cdn/z.jpg', $base), 'protocol-relative');
     assert_same('https://o/w.jpg', LegacyCmsImporter::absoluteUrl('https://o/w.jpg', $base), 'уже абсолютная');
 });
+
+test('imageUrlCandidates возвращает полноразмерный оригинал и варианты разрешения', function () {
+    $thumb = 'https://asdr.gov.uz/wp-content/uploads/2026/07/photo-300x200.jpg';
+    $candidates = LegacyCmsImporter::imageUrlCandidates($thumb);
+    assert_same('https://asdr.gov.uz/wp-content/uploads/2026/07/photo.jpg', $candidates[0], 'первым идёт полноразмерный оригинал');
+    assert_same('https://asdr.gov.uz/wp-content/uploads/2026/07/photo-scaled.jpg', $candidates[1], 'вторым идёт scaled-вариант');
+    assert_same($thumb, $candidates[2], 'третьим идёт исходный thumbnail как fallback');
+
+    $pngThumb = 'https://asdr.gov.uz/wp-content/uploads/2026/07/screen-1024x768.png';
+    $pngCandidates = LegacyCmsImporter::imageUrlCandidates($pngThumb);
+    assert_same('https://asdr.gov.uz/wp-content/uploads/2026/07/screen.png', $pngCandidates[0], 'png полноразмерный');
+
+    $scaled = 'https://asdr.gov.uz/wp-content/uploads/2026/07/banner-scaled.jpg';
+    $scaledCandidates = LegacyCmsImporter::imageUrlCandidates($scaled);
+    assert_same('https://asdr.gov.uz/wp-content/uploads/2026/07/banner.jpg', $scaledCandidates[0], 'scaled разрешается к оригиналу');
+    assert_same($scaled, $scaledCandidates[1], 'scaled сохранён как fallback');
+});
+
+test('LegacyWxrImporter extractGalleryIds распознаёт шорткоды, Gutenberg блоки и html-атрибуты', function () {
+    $html = <<<HTML
+    <p>Введение</p>
+    [gallery ids="101, 102, 103"]
+    <!-- wp:gallery {"ids":[201,202],"linkTo":"media"} -->
+    <figure class="wp-block-gallery has-nested-images columns-default is-cropped">
+        <!-- wp:image {"id":201,"sizeSlug":"large"} -->
+        <figure class="wp-block-image size-large"><img src="https://old/img1-1024x768.jpg" alt="" class="wp-image-201"/></figure>
+        <!-- /wp:image -->
+        <!-- wp:image {"id":202,"sizeSlug":"large"} -->
+        <figure class="wp-block-image size-large"><img src="https://old/img2-1024x768.jpg" alt="" class="wp-image-202" data-id="202"/></figure>
+        <!-- /wp:image -->
+    </figure>
+    <!-- /wp:gallery -->
+    <p><img class="alignnone size-medium wp-image-301" src="https://old/single-300x200.jpg" alt="" width="300" height="200" data-id="302" /></p>
+HTML;
+
+    $ids = \App\Core\LegacyWxrImporter::extractGalleryIds($html);
+    assert_true(in_array(101, $ids, true), 'шорткод 101');
+    assert_true(in_array(102, $ids, true), 'шорткод 102');
+    assert_true(in_array(103, $ids, true), 'шорткод 103');
+    assert_true(in_array(201, $ids, true), 'Gutenberg gallery 201');
+    assert_true(in_array(202, $ids, true), 'Gutenberg gallery 202');
+    assert_true(in_array(301, $ids, true), 'wp-image класс 301');
+    assert_true(in_array(302, $ids, true), 'data-id 302');
+});

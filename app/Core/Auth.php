@@ -13,11 +13,19 @@ final class Auth
     private const CODE_TTL = 300;
 
     /**
-     * Вход по паролю с подтверждением одноразовым кодом через Telegram
-     * (официальный канал Verification Codes, Telegram Gateway API).
-     * Другие методы 2FA (TOTP, backup-коды) для админки отключены.
+     * Корзины перебора, которые снимает успешный вход. Корзины IP здесь нет
+     * намеренно: иначе известный пароль одного аккаунта сбрасывал бы защиту
+     * от перебора остальных с того же адреса.
+     */
+    private const CLEAR_ON_SUCCESS = ['pair', 'account'];
+
+    /**
+     * Вход по паролю со вторым фактором. Каналов два и достаточно любого:
+     * приложение-аутентификатор (TOTP, считается на устройстве, работает без
+     * сети) и одноразовый код в Telegram — бесплатным ботом или платным
+     * шлюзом Verification Codes (Telegram Gateway API).
      *
-     * Статусы: needs_code — код отправлен, ждём подтверждения;
+     * Статусы: needs_code — второй фактор ожидается;
      * setup_required — пароль верен, но второй фактор ещё не настроен;
      * send_failed — шлюз не принял сообщение; invalid/locked — как раньше.
      *
@@ -47,8 +55,10 @@ final class Auth
         // Успешный вход очищает корзины аккаунта и конкретной пары. Корзина
         // IP сохраняется до истечения окна, чтобы известный пароль одного
         // аккаунта не позволял сбрасывать защиту от password spraying.
-        RateLimiter::clearAttempts(array_key_first($identifiers));
-        RateLimiter::clearAttempts(array_key_last($identifiers));
+        // Ключи перечислены явно: порядок массива менять безопасно.
+        foreach (self::CLEAR_ON_SUCCESS as $bucket) {
+            RateLimiter::clearAttempts(self::loginIdentifier($bucket, $username, $ip));
+        }
 
         session_regenerate_id(true);
 
@@ -91,8 +101,9 @@ final class Auth
     }
 
     /**
-     * Доступен ли пользователю хоть один канал доставки кода: бесплатный
-     * бот (telegram_chat_id) или платный шлюз Verification Codes (телефон).
+     * Настроен ли хоть один второй фактор: приложение-аутентификатор,
+     * бесплатный бот (telegram_chat_id) или платный шлюз Verification Codes
+     * (телефон). Пока нет ни одного — сессия ограничена онбордингом.
      */
     private static function hasCodeChannel(array $user): bool
     {
@@ -119,18 +130,38 @@ final class Auth
     }
 
     /**
+     * Корзины перебора и их пределы. Пара «IP + аккаунт» держит основной
+     * лимит, отдельные корзины IP и аккаунта ловят перебор паролей одного
+     * аккаунта с разных адресов и password spraying с одного адреса.
+     *
      * @return array<string, int> identifier => max attempts
      */
     private static function loginIdentifiers(string $username, string $ip): array
     {
-        $account = mb_strtolower(trim($username));
         $base = max(1, (int) Config::get('security.login_max_attempts', 5));
-
-        return [
-            'admin_login|pair|' . $ip . '|' . $account => $base,
-            'admin_login|ip|' . $ip => max(25, $base * 5),
-            'admin_login|account|' . $account => max(10, $base * 2),
+        $limits = [
+            'pair' => $base,
+            'ip' => max(25, $base * 5),
+            'account' => max(10, $base * 2),
         ];
+
+        $identifiers = [];
+        foreach ($limits as $bucket => $limit) {
+            $identifiers[self::loginIdentifier($bucket, $username, $ip)] = $limit;
+        }
+
+        return $identifiers;
+    }
+
+    private static function loginIdentifier(string $bucket, string $username, string $ip): string
+    {
+        $account = mb_strtolower(trim($username));
+
+        return match ($bucket) {
+            'pair' => 'admin_login|pair|' . $ip . '|' . $account,
+            'ip' => 'admin_login|ip|' . $ip,
+            'account' => 'admin_login|account|' . $account,
+        };
     }
 
     /**
@@ -212,7 +243,10 @@ final class Auth
         $code = preg_replace('/\s+/', '', $code) ?? '';
         $valid = false;
         if (!empty($_SESSION['pending_totp']) && trim((string) ($user['totp_secret'] ?? '')) !== '') {
-            $valid = TOTP::verify((string) $user['totp_secret'], $code);
+            // Шаг времени засчитывается один раз (RFC 6238 §5.2): иначе
+            // подсмотренный код оставался бы рабочим до полутора минут.
+            $step = TOTP::matchStep((string) $user['totp_secret'], $code);
+            $valid = $step !== null && User::consumeTotpStep((int) $user['id'], $step);
         }
         // Отправленный код проверяем и без метки канала: сессии, начатые до
         // появления TOTP, метки не знают, а настоящий секрет здесь — сам хэш.
@@ -400,7 +434,7 @@ final class Auth
         return [
             'id' => (int) $_SESSION['user_id'],
             'username' => (string) ($_SESSION['username'] ?? ''),
-            'role' => (string) ($_SESSION['role'] ?? 'editor'),
+            'role' => (string) ($_SESSION['role'] ?? RbacGuard::ROLE_EDITOR),
         ];
     }
 
@@ -430,7 +464,20 @@ final class Auth
     public static function role(): string
     {
         Session::start();
-        return (string) ($_SESSION['role'] ?? 'editor');
+        return (string) ($_SESSION['role'] ?? RbacGuard::ROLE_EDITOR);
+    }
+
+    /**
+     * Идентификатор входа, ожидающего второго фактора. Через него, а не через
+     * $_SESSION напрямую, — иначе GET страницы ввода кода читает суперглобал
+     * до того, как кто-нибудь запустит сессию (Session::start ленивый).
+     */
+    public static function pendingUserId(): ?int
+    {
+        Session::start();
+        $id = $_SESSION['pending_user_id'] ?? null;
+
+        return $id ? (int) $id : null;
     }
 
     /**
@@ -474,13 +521,13 @@ final class Auth
     }
 
     /**
-     * Супер-администратор имеет полный доступ. Роль 'editor' ограничена
-     * только управлением контентом. Исторически роль называлась 'admin' —
-     * она эквивалентна super_admin.
+     * Ролей ровно две — те, что перечисляет ENUM `users.role`: 'admin'
+     * (супер-администратор, полный доступ) и 'editor' (только контент).
+     * Имена и права живут в RbacGuard, чтобы два списка не разъезжались.
      */
     public static function isSuperAdmin(): bool
     {
-        return in_array(self::role(), ['super_admin', 'admin'], true);
+        return self::role() === RbacGuard::ROLE_ADMIN;
     }
 
     public static function requireSuperAdmin(): void

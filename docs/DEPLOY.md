@@ -33,7 +33,9 @@ production. Эти инструменты используются только 
 4. Пройдите 4 шага: проверка окружения → БД → сайт → супер-администратор.
    Установщик подключится к базе (или создаст её, если есть права), импортирует
    `database/schema.sql`, запишет `config/config.php` и `storage/installed.lock`.
-5. Первый вход в `/admin` форсит настройку 2FA (TOTP) — обязательно.
+5. Первый вход в `/admin` форсит настройку 2FA — обязательно. Подойдёт
+   приложение-аутентификатор (TOTP) или привязанный Telegram; TOTP не
+   зависит от сети, поэтому его стоит подключить в любом случае.
 6. Для полноценного двуязычного демонстрационного сайта откройте
    «Настройки сайта → Демо-контент» и подтвердите загрузку кодом `DEMO`.
    CLI-команда `php database/seed_demo.php --reset` работает только после
@@ -84,9 +86,14 @@ shared-хостинге обычно `localhost`. Установщик подк�
 30 3 * * * php /path/to/app/Console/gdpr_cleanup.php     >> /path/to/storage/logs/gdpr_cleanup.log 2>&1
 0 9 * * 1  php /path/to/app/Console/digest_worker.php    >> /path/to/storage/logs/digest_worker.log 2>&1
 17 * * * * php /path/to/app/Console/integrity_check.php >> /path/to/storage/logs/integrity.log 2>&1
+0 * * * *  php /path/to/app/Console/youtube_worker.php   >> /path/to/storage/logs/youtube_worker.log 2>&1
 ```
 
 `/health` возвращает `degraded` и шлёт алерт, если воркер перестал запускаться.
+
+`youtube_worker.php` нужен только тем сайтам, где включена автозагрузка роликов
+с YouTube-канала («Видео» → «Автозагрузка с YouTube-канала»). Пока галочка снята,
+задание завершается сразу и ничего не делает.
 
 ### Автобэкапы и ротация
 

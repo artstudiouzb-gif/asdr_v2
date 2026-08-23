@@ -775,7 +775,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .testimonial__star.is-on { color: var(--color-accent, #e63946); }
 
 .block-counters__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 24px; text-align: center; }
-.counter__value, .counter__suffix { font-size: clamp(var(--step-6), 5vw, var(--step-10)); font-weight: 800; color: var(--color-accent, #e63946); line-height: 1; }
+.counter__value, .counter__suffix { font-size: var(--step-8); font-weight: 800; color: var(--color-accent, #e63946); line-height: 1; }
 .counter__suffix { margin-left: 2px; }
 .counter__label { margin-top: 8px; color: var(--text-muted); }
 
@@ -870,7 +870,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .block-advantages__icon--svg svg [fill]:not([fill="none"]) { fill: currentColor; }
 
 /* FAQ / аккордеон (группа 6) */
-.block-faq__title { text-align: left; margin: 0 0 24px; font-size: clamp(var(--step-4), 2.8vw, var(--step-7)); color: var(--section-title-fg); }
+.block-faq__title { text-align: left; margin: 0 0 24px; font-size: var(--font-size-h2, var(--step-6)); color: var(--section-title-fg); }
 .block-faq__list { width: 100%; max-width: 100%; display: flex; flex-direction: column; gap: 14px; }
 .faq-item {
     border: 1px solid var(--gov-border);
@@ -1125,7 +1125,7 @@ body.design-catalog-list .content-cards { display: flex; flex-direction: column;
 
 /* Hero (CTA-блок) — крупный современный вид */
 .block-cta { background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary,#1a1a1a) 6%, var(--surface)) , var(--surface)); border: 1px solid var(--border-color); padding: clamp(36px, 6vw, 72px); }
-.block-cta h2 { font-size: clamp(var(--step-5), 4vw, var(--step-9)); line-height: 1.15; letter-spacing: -.02em; margin-top: 0; }
+.block-cta h2 { font-size: var(--font-size-h2, var(--step-8)); line-height: 1.15; letter-spacing: -.02em; margin-top: 0; }
 .block-cta a { display: inline-block; padding: 13px 30px; background: var(--color-accent, #e63946); color: #fff; text-decoration: none; font-weight: 600; margin-top: 8px; box-shadow: var(--shadow-sm); transition: transform .15s, box-shadow .15s; }
 .block-cta a:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
@@ -1135,7 +1135,7 @@ body.design-catalog-list .content-cards { display: flex; flex-direction: column;
     display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
     transition: transform .15s, box-shadow .15s;
 }
-.cms-columns__col .cms-block--cta .block-cta h2 { font-size: clamp(var(--step-2), 2vw, var(--step-4)); margin: 0; }
+.cms-columns__col .cms-block--cta .block-cta h2 { font-size: var(--font-size-card-title, var(--step-2)); margin: 0; }
 .cms-columns__col .cms-block--cta .block-cta p { margin: 0; color: var(--text-muted); }
 .cms-columns__col .cms-block--cta .block-cta a { margin-top: auto; }
 .cms-columns__col .cms-block--cta .block-cta:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
@@ -1236,7 +1236,7 @@ h1, h2 { letter-spacing: -.015em; }
 }
 .block-banner--image { background-size: cover; background-position: center; color: #fff; transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
 .block-banner__inner { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; padding: clamp(40px, 7vw, 88px) clamp(20px, 4vw, 48px); text-align: center; }
-.block-banner__title { font-size: clamp(var(--step-4), 3.4vw, var(--step-8)); margin: 0 0 12px; line-height: 1.15; }
+.block-banner__title { font-size: var(--font-size-h2, var(--step-8)); margin: 0 0 12px; line-height: 1.15; }
 .block-banner--image .block-banner__title { color: #fff; }
 .block-banner__text { font-size: var(--step-1); margin: 0 0 24px; opacity: .95; }
 .block-banner__button { 
@@ -1630,12 +1630,12 @@ h1, h2, h3, h4, h5, h6,
     font-family: var(--font-heading, var(--font-family));
     letter-spacing: -.022em; line-height: 1.15; font-weight: 700;
 }
-h1 { font-size: clamp(var(--step-5), 4vw, var(--step-8)); line-height: 1.25; margin: 1.6rem 0 1rem; }
-h2 { font-size: clamp(var(--step-3), 3.2vw, var(--step-6)); line-height: 1.25; margin: 1.6rem 0 1rem; }
-h3 { font-size: clamp(var(--step-2), 2.5vw, var(--step-4)); line-height: 1.35; margin: 1.4rem 0 0.8rem; }
-h4 { font-size: clamp(var(--step-0), 2vw, var(--step-2)); line-height: 1.35; margin: 1.2rem 0 0.6rem; }
-h5 { font-size: var(--step-0); line-height: 1.35; margin: 1rem 0 0.5rem; }
-h6 { font-size: var(--step--1); line-height: 1.35; margin: 1rem 0 0.5rem; }
+h1 { font-size: var(--font-size-h1, var(--step-8)); line-height: var(--heading-line-height, 1.25); margin: 1.6rem 0 1rem; }
+h2 { font-size: var(--font-size-h2, var(--step-6)); line-height: var(--heading-line-height, 1.25); margin: 1.6rem 0 1rem; }
+h3 { font-size: var(--font-size-h3, var(--step-4)); line-height: var(--heading-line-height, 1.35); margin: 1.4rem 0 0.8rem; }
+h4 { font-size: var(--font-size-h4, var(--step-2)); line-height: var(--heading-line-height, 1.35); margin: 1.2rem 0 0.6rem; }
+h5 { font-size: var(--font-size-h5, var(--step-0)); line-height: var(--heading-line-height, 1.35); margin: 1rem 0 0.5rem; }
+h6 { font-size: var(--font-size-h6, var(--step--1)); line-height: var(--heading-line-height, 1.35); margin: 1rem 0 0.5rem; }
 
 /* Унификация размеров всех заголовков блоков на главной и внутренних страницах */
 .block-news__title,
@@ -1646,9 +1646,9 @@ h6 { font-size: var(--step--1); line-height: 1.35; margin: 1rem 0 0.5rem; }
 .block-team__title,
 .block-projects__title,
 .section-title {
-    font-size: clamp(var(--step-4), 2.8vw, var(--step-6)) !important;
-    line-height: 1.25 !important;
-    letter-spacing: -.02em !important;
+    font-size: var(--font-size-h2, var(--step-6));
+    line-height: var(--heading-line-height, 1.25);
+    letter-spacing: var(--heading-letter-spacing, -.02em);
 }
 h1, .news-index__title, .content-list__head h1 { font-weight: 800; }
 p { line-height: var(--base-line-height, 1.6); }
@@ -1692,11 +1692,11 @@ p { line-height: var(--base-line-height, 1.6); }
 }
 .site-content > section.cms-block--cta:first-of-type .block-cta h2,
 .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 {
-    color: #fff; font-size: clamp(var(--step-6), 4.6vw, var(--step-10)); margin: 0 0 14px; text-wrap: balance;
+    color: #fff; font-size: var(--font-size-h1, var(--step-10)); margin: 0 0 14px; text-wrap: balance;
 }
 .site-content > section.cms-block--cta:first-of-type .block-cta p,
 .page-blocks > section.cms-block--cta:first-of-type .block-cta p {
-    color: rgba(255, 255, 255, .82); font-size: clamp(var(--step-0), 1.6vw, var(--step-2));
+    color: rgba(255, 255, 255, .82); font-size: var(--font-size-lead, var(--step-1));
     max-width: 640px; margin: 0 auto;
 }
 .site-content > section.cms-block--cta:first-of-type .block-cta .block-cta__button,
@@ -1750,7 +1750,7 @@ p { line-height: var(--base-line-height, 1.6); }
     content: ''; position: absolute; left: 0; bottom: -1px; width: 64px; height: 3px; border-radius: 2px;
     background: linear-gradient(90deg, var(--color-primary, #1f4b8e), var(--color-accent, #5b52e5));
 }
-.block-news__title { font-size: clamp(var(--step-4), 2.6vw, var(--step-6)); margin: 0; }
+.block-news__title { font-size: var(--font-size-h2, var(--step-6)); margin: 0; }
 .block-news__all { font-weight: 600; }
 
 /* --- Карточки новостей: плейсхолдер обложки, дата-чип --- */
@@ -1814,7 +1814,7 @@ p { line-height: var(--base-line-height, 1.6); }
 
 /* --- Каталог/контент: карточки и хлебные крошки --- */
 .content-crumbs { font-size: var(--step--2); color: var(--text-muted); }
-.content-list__head h1 { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin-bottom: 6px; }
+.content-list__head h1 { font-size: var(--font-size-h1, var(--step-8)); margin-bottom: 6px; }
 .content-list__lead { color: var(--text-muted); max-width: 640px; }
 .content-card:hover { box-shadow: var(--shadow-primary); }
 
@@ -1875,7 +1875,7 @@ p { line-height: var(--base-line-height, 1.6); }
     content: ''; position: absolute; left: 0; bottom: -1px; width: 64px; height: 3px; border-radius: 2px;
     background: linear-gradient(90deg, var(--color-primary, #1f4b8e), var(--color-accent, #5b52e5));
 }
-.news-index__title { font-size: clamp(var(--step-5), 3.4vw, var(--step-8)); margin: 0 0 6px; }
+.news-index__title { font-size: var(--font-size-h1, var(--step-8)); margin: 0 0 6px; }
 .news-index__lead { color: var(--text-muted); max-width: 640px; margin: 0; }
 .news-index__empty { color: var(--text-muted); }
 .news-index__grid {
@@ -1904,7 +1904,7 @@ p { line-height: var(--base-line-height, 1.6); }
 
 /* --- Детальная новость: читаемая колонка, дата-чип, возврат --- */
 .news-single { max-width: 760px; }
-.news-single h1 { font-size: clamp(var(--step-5), 3.6vw, var(--step-8)); margin: 0 0 14px; text-wrap: balance; }
+.news-single h1 { font-size: var(--font-size-h1, var(--step-8)); margin: 0 0 14px; text-wrap: balance; }
 .news-single > time,
 .news-single--side > time {
     display: inline-block; margin-bottom: 20px; padding: 4px 12px; border-radius: 999px;
@@ -2370,7 +2370,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 /* ==========================================================================
    БЛОК «Контактные карточки» (модульный блок конструктора) + полоса статистики
    ========================================================================== */
-.block-contact-cards__title { font-size: clamp(var(--step-4), 2.6vw, var(--step-6)); margin: 0 0 22px; }
+.block-contact-cards__title { font-size: var(--font-size-h2, var(--step-6)); margin: 0 0 22px; }
 .block-contact-cards__empty { color: var(--text-muted); }
 .contact-cards {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--card-gap, 22px);
@@ -2437,6 +2437,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .counter__value, .counter__suffix { color: var(--color-primary, #223d79); font-family: var(--font-heading, inherit); }
 .counter__label { color: var(--text-muted); margin-top: 4px; font-size: var(--step--1); }
 :root[data-theme="dark"] .counter__value, :root[data-theme="dark"] .counter__suffix { color: var(--text-main); }
+.counter__icon-img { width: var(--counter-icon-size, 28px); height: var(--counter-icon-size, 28px); object-fit: contain; }
 
 /* ==========================================================================
    БЛОКИ ГОС-СТРАНИЦ: hero (титул+фото), сетка категорий, медиаматериалы
@@ -2452,8 +2453,8 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .block-hero__media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--bg-primary) 6%, color-mix(in srgb, var(--bg-primary) 55%, transparent) 42%, transparent 66%); }
 .block-hero__inner { position: relative; width: 100%; }
 .block-hero__text { max-width: var(--hero-text-width, 560px); }
-.block-hero__title { font-size: clamp(var(--step-6), 5vw, var(--step-10)); color: var(--color-primary, #223d79); margin: 0 0 16px; line-height: 1.15; text-wrap: balance; }
-.block-hero__subtitle { font-size: clamp(var(--step-0), 1.6vw, var(--step-2)); color: var(--text-muted); max-width: 480px; margin: 0; line-height: var(--base-line-height, 1.6); }
+.block-hero__title { font-size: var(--font-size-h1, var(--step-10)); color: var(--color-primary, #223d79); margin: 0 0 16px; line-height: 1.15; text-wrap: balance; }
+.block-hero__subtitle { font-size: var(--font-size-lead, var(--step-1)); color: var(--text-muted); max-width: 480px; margin: 0; line-height: var(--base-line-height, 1.6); }
 .block-hero__button {
     /* Без margin-top: кнопки всегда внутри .block-hero__actions (flex,
        align-items:center) — собственный отступ ломал вертикальную центровку
@@ -2503,7 +2504,7 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
 }
 
 /* Сетка категорий: плитки с иконкой; первая — активная (акцент). */
-.block-categories__title { font-size: clamp(var(--step-3), 2.6vw, var(--step-6)); margin: 0 0 20px; }
+.block-categories__title { font-size: var(--font-size-h2, var(--step-6)); margin: 0 0 20px; }
 .block-categories__empty { color: var(--text-muted); }
 .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
 .cat-tile {

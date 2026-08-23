@@ -252,18 +252,74 @@ final class LegacyCmsImporter
         ];
     }
 
+    /** Сброс кэша перенесённых картинок (для тестов и повторных запусков). */
+    public static function clearImageCache(): void
+    {
+        self::$imageCache = [];
+    }
+
     /**
-     * Все значения src из <img> в HTML.
+     * Все значения src из <img> и прямые ссылки на изображения из <a href="..."> в HTML.
      *
      * @return array<int,string>
      */
     public static function extractImageUrls(string $html): array
     {
-        if (!preg_match_all('/<img[^>]+src\s*=\s*["\']([^"\']+)["\']/i', $html, $m)) {
-            return [];
+        $urls = [];
+        if (preg_match_all('/<img[^>]+src\s*=\s*["\']([^"\']+)["\']/i', $html, $m)) {
+            foreach ($m[1] as $u) {
+                $trimmed = trim((string) $u);
+                if ($trimmed !== '') {
+                    $urls[] = $trimmed;
+                }
+            }
+        }
+        if (preg_match_all('/<a[^>]+href\s*=\s*["\']([^"\']+\.(?:jpe?g|png|gif|webp)(?:\?[^"\']*)?)["\']/i', $html, $m)) {
+            foreach ($m[1] as $u) {
+                $trimmed = trim((string) $u);
+                if ($trimmed !== '') {
+                    $urls[] = $trimmed;
+                }
+            }
         }
 
-        return array_values(array_unique($m[1]));
+        return array_values(array_unique($urls));
+    }
+
+    /**
+     * Возвращает список URL-кандидатов в порядке убывания разрешения:
+     * 1) оригинальный файл без суффикса размера (-300x200, -1024x768);
+     * 2) вариант -scaled (WP 5.3+ big image threshold);
+     * 3) исходный переданный URL (fallback).
+     *
+     * @return list<string>
+     */
+    public static function imageUrlCandidates(string $url): array
+    {
+        $normalized = self::normalizeImageUrl($url);
+        $path = (string) parse_url($normalized, PHP_URL_PATH);
+        $ext = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
+        if ($ext === '') {
+            return [$normalized];
+        }
+
+        $candidates = [];
+        if (preg_match('#^(.+)-\d+x\d+\.' . preg_quote($ext, '#') . '$#i', $normalized, $m)) {
+            $baseStem = $m[1];
+            $candidates[] = $baseStem . '.' . $ext;
+            $candidates[] = $baseStem . '-scaled.' . $ext;
+            $candidates[] = $normalized;
+        } elseif (preg_match('#^(.+)-scaled\.' . preg_quote($ext, '#') . '$#i', $normalized, $m)) {
+            $baseStem = $m[1];
+            $candidates[] = $baseStem . '.' . $ext;
+            $candidates[] = $normalized;
+        } else {
+            $candidates[] = $normalized;
+            $baseStem = substr($normalized, 0, -(strlen($ext) + 1));
+            $candidates[] = $baseStem . '-scaled.' . $ext;
+        }
+
+        return array_values(array_unique($candidates));
     }
 
     /**
@@ -337,52 +393,76 @@ final class LegacyCmsImporter
     /**
      * Переносит картинку в медиабиблиотеку: сначала из локальной папки
      * wp-content/uploads (если задана $uploadsDir), иначе скачивает по URL.
+     * Автоматически разрешает thumbnail-URL к полноразмерному оригиналу.
      * Возвращает публичный URL или null. Кэшируется по исходному URL.
      */
     public static function importImage(string $url, ?int $uploadedBy, ?string $uploadsDir = null): ?string
     {
+        $normalizedUrl = self::normalizeImageUrl($url);
+        if (isset(self::$imageCache[$normalizedUrl])) {
+            return self::$imageCache[$normalizedUrl];
+        }
         if (isset(self::$imageCache[$url])) {
             return self::$imageCache[$url];
         }
-        try {
-            $tmp = tempnam(sys_get_temp_dir(), 'wpimg_');
-            if ($tmp === false) {
-                return null;
-            }
-            $got = false;
-            if ($uploadsDir !== null) {
-                $local = self::resolveLocal($url, $uploadsDir);
-                if ($local !== null && is_file($local)) {
-                    $got = @copy($local, $tmp); // копия: оригинал в папке не трогаем
-                }
-            }
-            if (!$got && UrlGuard::isSafeRemote($url)) {
-                $got = self::download($url, $tmp);
-            }
-            if (!$got) {
-                @unlink($tmp);
-                return null;
-            }
-            $ext = strtolower((string) pathinfo((string) parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
-            if (!in_array($ext, self::IMG_EXT, true)) {
-                $ext = self::extFromMime((string) (new \finfo(FILEINFO_MIME_TYPE))->file($tmp));
-            }
-            if ($ext === null) {
-                @unlink($tmp);
-                return null;
-            }
-            $named = $tmp . '.' . $ext;
-            @rename($tmp, $named);
-            $file = Uploader::storeFromPath($named, 'wp-' . basename((string) parse_url($url, PHP_URL_PATH)) . '.' . $ext, (int) filesize($named), 'public', $uploadedBy, false);
-            @unlink($named);
 
-            $publicUrl = \App\Models\FileEntry::publicUrl($file);
-            self::$imageCache[$url] = $publicUrl;
-
-            return $publicUrl;
-        } catch (\Throwable) {
-            return null;
+        $candidates = self::imageUrlCandidates($normalizedUrl);
+        foreach ($candidates as $cand) {
+            if (isset(self::$imageCache[$cand])) {
+                $cached = self::$imageCache[$cand];
+                self::$imageCache[$normalizedUrl] = $cached;
+                self::$imageCache[$url] = $cached;
+                return $cached;
+            }
         }
+
+        foreach ($candidates as $cand) {
+            try {
+                $tmp = tempnam(sys_get_temp_dir(), 'wpimg_');
+                if ($tmp === false) {
+                    continue;
+                }
+                $got = false;
+                if ($uploadsDir !== null) {
+                    $local = self::resolveLocal($cand, $uploadsDir);
+                    if ($local !== null && is_file($local)) {
+                        $got = @copy($local, $tmp); // копия: оригинал в папке не трогаем
+                    }
+                }
+                if (!$got && UrlGuard::isSafeRemote($cand)) {
+                    $got = self::download($cand, $tmp);
+                }
+                if (!$got) {
+                    @unlink($tmp);
+                    continue;
+                }
+                $pathExt = strtolower((string) pathinfo((string) parse_url($cand, PHP_URL_PATH), PATHINFO_EXTENSION));
+                $ext = in_array($pathExt, self::IMG_EXT, true) ? $pathExt : self::extFromMime((string) (new \finfo(FILEINFO_MIME_TYPE))->file($tmp));
+                if ($ext === null) {
+                    @unlink($tmp);
+                    continue;
+                }
+                $named = $tmp . '.' . $ext;
+                @rename($tmp, $named);
+                $stem = pathinfo((string) parse_url($cand, PHP_URL_PATH), PATHINFO_FILENAME);
+                $origFileName = 'wp-' . ($stem !== '' ? $stem : 'image') . '.' . $ext;
+                $file = Uploader::storeFromPath($named, $origFileName, (int) filesize($named), 'public', $uploadedBy, false);
+                @unlink($named);
+
+                $publicUrl = \App\Models\FileEntry::publicUrl($file);
+                self::$imageCache[$url] = $publicUrl;
+                self::$imageCache[$normalizedUrl] = $publicUrl;
+                foreach ($candidates as $c) {
+                    self::$imageCache[$c] = $publicUrl;
+                }
+
+                return $publicUrl;
+            } catch (\Throwable) {
+                // пробуем следующий кандидат с меньшим приоритетом
+            }
+        }
+
+        return null;
     }
 
     /** Скачивание с закреплением проверенного публичного IP и лимитом 20 МБ. */

@@ -85,12 +85,12 @@ test('DesignSettings::bodyClasses включает глобальные комп
     assert_not_contains('design-footer-minimal', $min);
 });
 
-test('DesignSettings: масштаб заголовков — статичный режим даёт класс, плавающий нет', function () {
+test('DesignSettings: масштаб типографики — статичный режим даёт класс, плавающий нет', function () {
     assert_same('static', DesignSettings::sanitize('type_scale', 'static'));
-    assert_same('fluid', DesignSettings::sanitize('type_scale', 'bogus')); // default
+    assert_same('static', DesignSettings::sanitize('type_scale', 'bogus')); // default — статичный
 
     $base = DesignSettings::PRESETS['classic']['values'];
-    assert_not_contains('design-type-static', DesignSettings::bodyClasses($base)); // без ключа — плавающие
+    assert_contains('design-type-static', DesignSettings::bodyClasses($base)); // дефолт статичный
     assert_contains('design-type-static', DesignSettings::bodyClasses(['type_scale' => 'static'] + $base));
     assert_not_contains('design-type-static', DesignSettings::bodyClasses(['type_scale' => 'fluid'] + $base));
 });

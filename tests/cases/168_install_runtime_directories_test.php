@@ -7,6 +7,7 @@ test('installer preserves and can restore required runtime directories', functio
     $required = [
         '/storage/logs/.gitkeep',
         '/storage/cache/.gitkeep',
+        '/storage/sessions/.gitkeep',
         '/storage/backups/.gitkeep',
         '/storage/protected_uploads/.gitkeep',
         '/public/uploads/public/.gitkeep',
@@ -19,6 +20,7 @@ test('installer preserves and can restore required runtime directories', functio
     foreach ([
         '/storage/logs/README.md',
         '/storage/cache/README.md',
+        '/storage/sessions/README.md',
         '/storage/backups/README.md',
         '/storage/protected_uploads/README.md',
         '/public/uploads/public/index.html',

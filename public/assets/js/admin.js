@@ -925,9 +925,14 @@
                 adminAlert('Выберите действие.');
                 return;
             }
-            if (action && action.value === 'trash') {
+            // «В корзину» ещё можно откатить, «Удалить» — нет (у видео корзины
+            // не бывает), поэтому спрашиваем и там, и там, но разными словами.
+            if (action && (action.value === 'trash' || action.value === 'delete')) {
                 e.preventDefault();
-                adminConfirm('Переместить выбранные записи в корзину?').then(function (ok) {
+                var question = action.value === 'delete'
+                    ? 'Удалить выбранные записи? Это действие необратимо.'
+                    : 'Переместить выбранные записи в корзину?';
+                adminConfirm(question).then(function (ok) {
                     if (ok) {
                         form.dataset.confirmed = '1';
                         if (typeof form.requestSubmit === 'function') { form.requestSubmit(); }
@@ -3573,6 +3578,31 @@ document.addEventListener('change', function (event) {
         document.querySelectorAll('select[name="bg_mode"]').forEach(function (select) {
             apply(select);
             select.addEventListener('change', function () { apply(select); });
+        });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+
+/* --- Фоновая надпись секции: показывать подгруппу настроек только при введённом тексте --- */
+(function () {
+    var apply = function (input) {
+        var form = input.closest('form') || document;
+        var group = form.querySelector('[data-watermark-group]');
+        if (group) {
+            group.hidden = !input.value.trim();
+        }
+    };
+
+    var init = function () {
+        document.querySelectorAll('input[name="watermark"]').forEach(function (input) {
+            apply(input);
+            input.addEventListener('input', function () { apply(input); });
+            input.addEventListener('change', function () { apply(input); });
         });
     };
 

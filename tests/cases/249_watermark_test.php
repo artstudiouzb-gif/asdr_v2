@@ -158,3 +158,63 @@ test('Размер надписи не берётся из шрифтовой ш
     $hero = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
     assert_contains('font-size: var(--hero-watermark-size, 22vw)', $hero);
 });
+
+test('Фоновая надпись секции с контуром (stroke), толщиной, позицией и кастомным цветом', function () {
+    $normalized = BlockPresentationNormalizer::normalize([
+        'watermark' => 'SERVICES',
+        'watermark_style' => 'outline',
+        'watermark_stroke' => '4',
+        'watermark_x' => 'center',
+        'watermark_y' => 'middle',
+        'watermark_dx' => '10',
+        'watermark_dy' => '-20',
+        'watermark_size' => '25',
+        'watermark_opacity' => '18',
+        'watermark_font' => 'heading',
+        'watermark_color' => '#009bbe',
+    ]);
+
+    assert_same('SERVICES', $normalized['_watermark']);
+    assert_same('outline', $normalized['_watermark_style']);
+    assert_same(4, $normalized['_watermark_stroke']);
+    assert_same('center', $normalized['_watermark_x']);
+    assert_same('middle', $normalized['_watermark_y']);
+    assert_same(10, $normalized['_watermark_dx']);
+    assert_same(-20, $normalized['_watermark_dy']);
+    assert_same(25, $normalized['_watermark_size']);
+    assert_same(18, $normalized['_watermark_opacity']);
+    assert_same('heading', $normalized['_watermark_font']);
+    assert_same('#009bbe', $normalized['_watermark_color']);
+
+    $rendered = BlockRenderer::render([
+        'id' => 43,
+        'type' => 'cards_grid',
+        'data' => json_encode($normalized, JSON_UNESCAPED_UNICODE),
+    ]);
+    $html = (string) $rendered['html'];
+    $css = (string) $rendered['css'];
+
+    assert_contains('cms-block--has-watermark', $html);
+    assert_contains('cms-block__watermark--outline', $html);
+    assert_contains('cms-block__watermark--font-heading', $html);
+    assert_contains('cms-block__watermark--x-center', $html);
+    assert_contains('cms-block__watermark--y-middle', $html);
+    assert_contains('aria-hidden="true">SERVICES</span>', $html);
+
+    assert_contains('--block-watermark-opacity:0.18', $css);
+    assert_contains('--block-watermark-size:25vw', $css);
+    assert_contains('--block-watermark-dx:10%', $css);
+    assert_contains('--block-watermark-dy:-20%', $css);
+    assert_contains('--block-watermark-stroke:4px', $css);
+    assert_contains('--block-watermark-ink:#009bbe', $css);
+
+    // Настройки фоновой надписи и контура присутствуют в форме блока и скриптах админки
+    $formMarkup = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
+    assert_contains('name="watermark"', $formMarkup);
+    assert_contains('name="watermark_style"', $formMarkup);
+    assert_contains('name="watermark_stroke"', $formMarkup);
+    assert_contains('data-watermark-group', $formMarkup);
+
+    $adminJs = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin.js');
+    assert_contains('data-watermark-group', $adminJs);
+});

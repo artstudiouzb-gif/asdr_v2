@@ -17,6 +17,16 @@ final class Flash
         self::set('success', $message);
     }
 
+    public static function info(string $message): void
+    {
+        self::set('info', $message);
+    }
+
+    public static function warning(string $message): void
+    {
+        self::set('warning', $message);
+    }
+
     public static function error(string $message): void
     {
         self::set('error', $message);

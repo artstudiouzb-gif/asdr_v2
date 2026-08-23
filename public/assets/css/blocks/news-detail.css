@@ -113,8 +113,8 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero { pad
     display: block; width: 100%; height: 100%;
     object-fit: cover; border-radius: inherit;
 }
-body.design-type-static .newsdetail__title { font-size: var(--step-9); }
-body.design-type-static .newsdetail-phero__title { font-size: var(--step-9); }
+body.design-type-static .newsdetail__title { font-size: var(--font-size-h1, var(--step-9)); }
+body.design-type-static .newsdetail-phero__title { font-size: var(--font-size-h1, var(--step-9)); }
 
 /* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
    чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем). */
@@ -413,7 +413,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 .newsdetail-phero .content-crumbs a { color: rgba(255, 255, 255, .82); }
 .newsdetail-phero .content-crumbs a:hover { color: #fff; }
 .newsdetail-phero .content-crumbs span { color: rgba(255, 255, 255, .68); }
-.newsdetail-phero__title { font-size: clamp(var(--step-5), 3.6vw, var(--step-9)); line-height: 1.15; margin: 0; color: #fff; max-width: 22ch; letter-spacing: -.01em; }
+.newsdetail-phero__title { font-size: var(--font-size-h1, var(--step-9)); line-height: 1.15; margin: 0; color: #fff; max-width: 22ch; letter-spacing: -.01em; }
 .newsdetail-phero__lead { color: rgba(255,255,255,.85); font-size: var(--step-0); line-height: 1.6; margin: 0; max-width: 48ch; }
 .newsdetail-phero__lead a { color: #fff; text-decoration-color: rgba(255,255,255,.55); }
 /* Мета (дата·чтение·просмотры) и источник на фото-hero — светлые. Базовые серые
@@ -468,7 +468,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero .cont
 }
 
 .newsdetail-head__info { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; padding-top: 6px; }
-.newsdetail__title { font-size: clamp(var(--step-5), 3.4vw, var(--step-9)); line-height: 1.12; margin: 0; letter-spacing: -.01em; }
+.newsdetail__title { font-size: var(--font-size-h1, var(--step-9)); line-height: 1.12; margin: 0; letter-spacing: -.01em; }
 /* Лид набран той же шкалой, что и текст новости: раньше он был мельче,
    плотнее, серее и вдвое уже — абзац под ним читался как из другой статьи.
    Роль вводки держит вес, а не отдельный размер и цвет. Ширина — по
@@ -767,7 +767,7 @@ button.newsdetail-gallery__thumb:hover {
 .newsdetail:not(.newsdetail--premium) .newsdetail__title {
     width: 100%;
     max-width: none;
-    font-size: clamp(var(--step-7), 4.2vw, var(--step-11));
+    font-size: var(--font-size-h1, var(--step-11));
     line-height: 1.04;
     letter-spacing: -.035em;
     text-wrap: balance;
@@ -802,7 +802,7 @@ button.newsdetail-gallery__thumb:hover {
     max-width: none;
     margin: 2px 0 0;
     color: var(--gov-ink);
-    font-size: clamp(var(--step-0), 1.35vw, var(--step-1));
+    font-size: var(--font-size-lead, var(--step-1));
     line-height: 1.68;
 }
 .newsdetail:not(.newsdetail--premium) .newsdetail__source { margin-top: -4px; }

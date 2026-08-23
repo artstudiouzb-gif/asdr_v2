@@ -523,6 +523,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
                             <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
+                            <?= \App\Core\AdminUi::imageField("items[{$i}][icon_image]", (string) ($item['icon_image'] ?? ''), ['label' => 'Своя иконка (SVG / PNG / WebP)', 'hint' => 'Заполнено — используется вместо иконки Tabler.']) ?>
                             <div class="form-field"><label>Приставка (напр. более, до)</label><input type="text" name="items[<?= $i ?>][prefix]" maxlength="12" value="<?= htmlspecialchars($item['prefix'] ?? '', ENT_QUOTES) ?>"></div>
                             <div class="form-field"><label>Значение</label><input type="text" name="items[<?= $i ?>][value]" maxlength="24" value="<?= htmlspecialchars((string) ($item['value'] ?? ''), ENT_QUOTES) ?>" placeholder="34"><span class="form-hint">Можно «1 200», «24/7», «№1». Отсчёт при появлении работает только для чистого числа.</span></div>
                             <div class="form-field"><label>Суффикс (напр. + или %)</label><input type="text" name="items[<?= $i ?>][suffix]" value="<?= htmlspecialchars($item['suffix'] ?? '', ENT_QUOTES) ?>"></div>
@@ -535,6 +536,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </div>
                 <template data-repeater-template="items">
                     <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
+                    <?= \App\Core\AdminUi::imageField('items[__INDEX__][icon_image]', '', ['label' => 'Своя иконка (SVG / PNG / WebP)', 'hint' => 'Заполнено — используется вместо иконки Tabler.']) ?>
                     <div class="form-field"><label>Приставка (напр. более, до)</label><input type="text" name="items[__INDEX__][prefix]" maxlength="12"></div>
                     <div class="form-field"><label>Значение</label><input type="text" name="items[__INDEX__][value]" maxlength="24" placeholder="34"></div>
                     <div class="form-field"><label>Суффикс (напр. + или %)</label><input type="text" name="items[__INDEX__][suffix]"></div>
@@ -1337,7 +1339,23 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </select>
                 <span class="form-hint">Автоматический источник использует записи с отметкой «Показать на главной».</span>
             </div>
-            <div class="form-field"><label for="limit">Сколько карточек показывать</label><input type="number" id="limit" name="limit" min="2" max="24" value="<?= (int) ($data['limit'] ?? ($type === 'cards_grid' ? 6 : 8)) ?>"></div>
+            <div class="form-field">
+                <label for="limit"><?= $type === 'media_gallery' ? 'Сколько карточек показывать (при постраничном выводе — на странице)' : 'Сколько карточек показывать' ?></label>
+                <input type="number" id="limit" name="limit" min="2" max="24" value="<?= (int) ($data['limit'] ?? ($type === 'cards_grid' ? 6 : 8)) ?>">
+            </div>
+            <?php if ($type === 'media_gallery'): ?>
+                <div class="form-field form-field--checkbox">
+                    <input type="checkbox" id="mg_paginate" name="paginate" value="1" <?= !empty($data['paginate']) ? 'checked' : '' ?>>
+                    <label for="mg_paginate">Постраничный вывод</label>
+                </div>
+                <p class="form-hint">
+                    С полосой страниц блок показывает <strong>весь опубликованный список</strong>,
+                    а не только отмеченные «Показать на главной», и делит его на страницы.
+                    Ссылка страницы ведёт на этот же блок, поэтому читатель остаётся на месте.
+                    Для видео это единственный способ дойти до старых роликов: отдельного
+                    раздела «Видео» на сайте нет.
+                </p>
+            <?php endif; ?>
             <?php if ($type === 'cards_grid'): ?>
                 <div class="form-field">
                     <label for="cards_variant">Вариант карточек</label>
@@ -2308,18 +2326,32 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 когда карточки задуманы под цвет секции.
             </span>
         </div>
-        <div data-bg-group="color gradient image pattern">
         <div class="form-field">
             <label for="watermark">Фоновая надпись секции</label>
             <input type="text" id="watermark" name="watermark" maxlength="120"
                    value="<?= htmlspecialchars((string) ($data['_watermark'] ?? ''), ENT_QUOTES) ?>"
                    placeholder="Например: TOP 5">
             <span class="form-hint">
-                Крупное слово за содержимым секции — название раздела, цифра, аббревиатура.
+                Крупное слово за содержимым секции (за заголовками и карточками) — название раздела, цифра, аббревиатура.
                 Диктор его не читает, кликам не мешает. Пусто — надписи нет.
             </span>
         </div>
         <div data-watermark-group>
+        <div class="form-field">
+            <label for="watermark_style">Начертание надписи</label>
+            <select id="watermark_style" name="watermark_style">
+                <?php $wmS = (string) ($data['_watermark_style'] ?? 'fill'); ?>
+                <?php foreach (['fill' => 'Заливка', 'outline' => 'Только контур (Stroke)'] as $v => $l): ?>
+                    <option value="<?= $v ?>" <?= $wmS === $v ? 'selected' : '' ?>><?= $l ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="watermark_stroke">Толщина контура, px</label>
+            <input type="number" id="watermark_stroke" name="watermark_stroke" min="1" max="12" step="1"
+                   value="<?= (int) ($data['_watermark_stroke'] ?? 2) ?>">
+            <span class="form-hint">Действует при начертании «Только контур (Stroke)».</span>
+        </div>
         <div class="form-field">
             <label for="watermark_x">Привязка надписи по горизонтали</label>
             <select id="watermark_x" name="watermark_x">
@@ -2339,6 +2371,18 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </select>
         </div>
         <div class="form-field">
+            <label for="watermark_dx">Сдвиг надписи вправо, %</label>
+            <input type="number" id="watermark_dx" name="watermark_dx" min="-100" max="100" step="1"
+                   value="<?= (int) ($data['_watermark_dx'] ?? 0) ?>">
+            <span class="form-hint">Отрицательное — влево. Процент от самой надписи, а не от экрана.</span>
+        </div>
+        <div class="form-field">
+            <label for="watermark_dy">Сдвиг надписи вниз, %</label>
+            <input type="number" id="watermark_dy" name="watermark_dy" min="-100" max="100" step="1"
+                   value="<?= (int) ($data['_watermark_dy'] ?? 0) ?>">
+            <span class="form-hint">Отрицательное — вверх.</span>
+        </div>
+        <div class="form-field">
             <label for="watermark_size">Размер надписи, % ширины экрана</label>
             <input type="number" id="watermark_size" name="watermark_size" min="2" max="60" step="1"
                    value="<?= (int) ($data['_watermark_size'] ?? 22) ?>">
@@ -2351,15 +2395,6 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <span class="form-hint">12 % — фон. Выше 30 % надпись начинает спорить с заголовком секции, а выше 50 % текст поверх её штрихов теряет требуемый контраст 4.5:1 (замерено).</span>
         </div>
         <div class="form-field">
-            <label for="watermark_style">Начертание надписи</label>
-            <select id="watermark_style" name="watermark_style">
-                <?php $wmS = (string) ($data['_watermark_style'] ?? 'fill'); ?>
-                <?php foreach (['fill' => 'Заливка', 'outline' => 'Только контур'] as $v => $l): ?>
-                    <option value="<?= $v ?>" <?= $wmS === $v ? 'selected' : '' ?>><?= $l ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div class="form-field">
             <label for="watermark_font">Шрифт надписи</label>
             <select id="watermark_font" name="watermark_font">
                 <?php $wmF = (string) ($data['_watermark_font'] ?? 'heading'); ?>
@@ -2368,25 +2403,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <?php endforeach; ?>
             </select>
         </div>
-        <div class="form-field">
-            <label for="watermark_stroke">Толщина контура, px</label>
-            <input type="number" id="watermark_stroke" name="watermark_stroke" min="1" max="12" step="1"
-                   value="<?= (int) ($data['_watermark_stroke'] ?? 2) ?>">
-            <span class="form-hint">Действует только при начертании «Только контур».</span>
-        </div>
         <?= \App\Core\AdminUi::colorField('watermark_color', (string) ($data['_watermark_color'] ?? ''), 'Цвет надписи') ?>
-        <div class="form-field">
-            <label for="watermark_dx">Сдвиг надписи вправо, %</label>
-            <input type="number" id="watermark_dx" name="watermark_dx" min="-100" max="100" step="1"
-                   value="<?= (int) ($data['_watermark_dx'] ?? 0) ?>">
-            <span class="form-hint">Отрицательное — влево. Процент от самой надписи, а не от экрана.</span>
-        </div>
-        <div class="form-field">
-            <label for="watermark_dy">Сдвиг надписи вниз, %</label>
-            <input type="number" id="watermark_dy" name="watermark_dy" min="-100" max="100" step="1"
-                   value="<?= (int) ($data['_watermark_dy'] ?? 0) ?>">
-            <span class="form-hint">Отрицательное — вверх.</span>
-        </div>
         </div>
         <div class="form-field">
             <label for="min_height">Минимальная высота секции</label>
@@ -2397,7 +2414,6 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <?php endforeach; ?>
             </select>
             <span class="form-hint">Короткая секция обрезает фотографию-фон до полоски — здесь задаётся минимум.</span>
-        </div>
         </div>
         <div class="form-field">
             <label for="surface">Тип контейнера секции</label>
