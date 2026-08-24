@@ -12,21 +12,11 @@
     margin-bottom: clamp(22px, 2.4vw, 34px);
 }
 
+/* Акцент у заголовка секции один на весь сайт — вертикальная полоска слева
+   (public-layout-polish.css). Своё подчёркивание снизу давало здесь два
+   акцента сразу, и мозаика выбивалась из остальных блоков. */
 .block-newsfeat--mosaic .section-head__title {
-    position: relative;
-    padding-bottom: 12px;
     letter-spacing: -.025em;
-}
-
-.block-newsfeat--mosaic .section-head__title::after {
-    content: "";
-    position: absolute;
-    inset-inline-start: 0;
-    bottom: 0;
-    width: 34px;
-    height: 3px;
-    border-radius: var(--radius-pill);
-    background: var(--color-accent, var(--gov-teal));
 }
 
 .block-newsfeat--mosaic .section-head__all {
