@@ -11,8 +11,6 @@
 /* из public/assets/css/frontend.css */
 
 
-.orgstruct__deputy { position: relative; }
-.orgstruct__deputy-link { display: flex; flex-direction: column; color: inherit; text-decoration: none; }
 .orgstruct__toggle { display: none; }
 
 @media (max-width: 720px) {
