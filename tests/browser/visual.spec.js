@@ -77,10 +77,22 @@ function compare(actual, name, updating) {
         return;
     }
 
-    expect(JSON.parse(fs.readFileSync(file, 'utf8')), 'оформление изменилось — сверьте правку и обновите эталон').toEqual(actual);
+    // Порядок важен: actual первым, иначе в отчёте «Expected» и «Received»
+    // меняются местами и diff читается наоборот.
+    expect(actual, 'оформление изменилось — сверьте правку и обновите эталон')
+        .toEqual(JSON.parse(fs.readFileSync(file, 'utf8')));
 }
 
-const updating = process.argv.includes('--update-snapshots');
+/**
+ * Режим обновления эталона. Playwright сообщает его в конфиге ('all',
+ * 'changed', 'missing', 'none') — argv воркера этого флага не видит.
+ * UPDATE_VISUAL=1 остаётся запасным путём.
+ */
+function isUpdating(testInfo) {
+    const mode = testInfo.config.updateSnapshots;
+
+    return process.env.UPDATE_VISUAL === '1' || (mode !== undefined && mode !== 'none' && mode !== 'missing');
+}
 
 /**
  * Тема меняется с анимацией — снимок посреди перехода даёт промежуточные
@@ -97,7 +109,7 @@ test.describe('@visual витрина компонентов', () => {
         await page.goto(PAGE, { waitUntil: 'networkidle' });
         await freezeTransitions(page);
         await page.waitForTimeout(300);
-        compare(await collect(page), `${testInfo.project.name}-light`, updating);
+        compare(await collect(page), `${testInfo.project.name}-light`, isUpdating(testInfo));
     });
 
     test('тёмная тема', async ({ page }, testInfo) => {
@@ -110,6 +122,6 @@ test.describe('@visual витрина компонентов', () => {
         await page.goto(PAGE, { waitUntil: 'networkidle' });
         await freezeTransitions(page);
         await page.waitForTimeout(300);
-        compare(await collect(page), `${testInfo.project.name}-dark`, updating);
+        compare(await collect(page), `${testInfo.project.name}-dark`, isUpdating(testInfo));
     });
 });

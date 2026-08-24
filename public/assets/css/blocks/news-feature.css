@@ -272,7 +272,7 @@ body.design-type-static .newslist-lead .newslist-lead__title {
     border-bottom: 3px solid transparent;
     border-radius: var(--radius, 14px);
     background: var(--gov-surface);
-    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, .04);
+    box-shadow: var(--card-shadow, 0 4px 16px -2px rgba(15, 23, 42, .04));
     backface-visibility: hidden;
     transition:
         transform var(--feature-card-motion-duration) var(--feature-card-motion-ease),
