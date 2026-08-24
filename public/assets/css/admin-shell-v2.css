@@ -348,7 +348,7 @@ body.admin-body {
 .admin-sidebar__nav {
     flex: 1 1 auto;
     min-height: 0;
-    padding: 12px 10px 18px;
+    padding: 8px 8px 14px;
     overflow-x: hidden;
     overflow-y: auto;
 }
@@ -359,7 +359,7 @@ body.admin-body {
 }
 
 .admin-sidebar__label {
-    padding: 17px 12px 7px;
+    padding: 12px 10px 4px;
     font-size: 10px;
     letter-spacing: .12em;
 }
@@ -373,24 +373,30 @@ body.admin-body {
     background: rgba(255, 255, 255, .05);
 }
 
+.admin-nav-group__items {
+    gap: 0;
+}
+
 .admin-nav-item {
     position: relative;
-    min-height: 43px;
-    margin: 2px 0;
-    padding: 10px 13px;
+    gap: 9px;
+    min-height: 32px;
+    margin: 0;
+    padding: 5px 11px;
     color: var(--admin-sidebar-text);
     border: 0;
-    border-radius: 10px;
+    border-radius: 8px;
     font-size: 14px;
     font-weight: 550;
-    transition: color .16s ease, background-color .16s ease, transform .16s ease;
+    /* Без transform: сдвиг на ховере дёргал пункты (transition его не гасил). */
+    transition: color .16s ease, background-color .16s ease;
 }
 
 .admin-nav-item::before {
     content: '';
     position: absolute;
-    top: 9px;
-    bottom: 9px;
+    top: 4px;
+    bottom: 4px;
     left: 0;
     width: 3px;
     background: transparent;
@@ -400,7 +406,6 @@ body.admin-body {
 .admin-nav-item:hover {
     color: #ffffff;
     background: var(--admin-sidebar-hover);
-    transform: translateX(2px);
 }
 
 .admin-nav-item.is-active {
@@ -417,8 +422,8 @@ body.admin-body {
 }
 
 .admin-nav-item__icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     opacity: .9;
 }
 
@@ -498,12 +503,8 @@ html.admin-nav-collapsed .admin-sidebar__nav {
 
 html.admin-nav-collapsed .admin-nav-item {
     justify-content: center;
-    min-height: 46px;
-    padding: 10px;
-}
-
-html.admin-nav-collapsed .admin-nav-item:hover {
-    transform: none;
+    min-height: 38px;
+    padding: 8px;
 }
 
 html.admin-nav-collapsed .admin-sidebar__collapse {
@@ -605,7 +606,13 @@ html.admin-nav-collapsed .form-actions--sticky {
 
     html.admin-nav-collapsed .admin-nav-item {
         justify-content: flex-start;
-        padding: 10px 13px;
+        padding: 7px 12px;
+    }
+
+    /* На тач-экранах пункт остаётся крупнее: 32px пальцем не попасть. */
+    .admin-nav-item {
+        min-height: 40px;
+        padding: 7px 12px;
     }
 
     html.admin-nav-collapsed .admin-sidebar__collapse {
