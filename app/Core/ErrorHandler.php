@@ -106,6 +106,14 @@ final class ErrorHandler
             ob_end_clean();
         }
 
+        // AJAX-эндпоинты админки ждут JSON. Отдать им HTML-страницу 500 значит
+        // показать редактору «Сервер вернул некорректный ответ» вместо причины:
+        // именно так выглядел обрыв импорта новостей на «2006 gone away».
+        if (self::wantsJson()) {
+            self::renderJsonError($e);
+            return;
+        }
+
         if (self::$debug) {
             echo '<pre class="system-debug-error">';
             echo htmlspecialchars((string) $e, ENT_QUOTES);
@@ -119,5 +127,39 @@ final class ErrorHandler
         } else {
             echo 'Внутренняя ошибка сервера.';
         }
+    }
+
+    /** Запрос пришёл из fetch/XHR и ждёт JSON, а не страницу. */
+    private static function wantsJson(): bool
+    {
+        if (strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest') {
+            return true;
+        }
+
+        return str_contains(strtolower((string) ($_SERVER['HTTP_ACCEPT'] ?? '')), 'application/json');
+    }
+
+    private static function renderJsonError(Throwable $e): void
+    {
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=UTF-8');
+            header('Cache-Control: no-store');
+        }
+
+        $technical = get_class($e) . ': ' . $e->getMessage();
+        try {
+            // Тот же «перевод» ошибок, что и в журнале: внутренностей не
+            // раскрывает, но говорит, что случилось и что с этим делать.
+            $message = \App\Models\ErrorLog::explain($technical);
+        } catch (Throwable) {
+            $message = 'Внутренняя ошибка сервера.';
+        }
+        if (self::$debug) {
+            $message .= ' — ' . Logger::redact($technical);
+        } else {
+            $message .= ' Подробности — в разделе «Журнал ошибок».';
+        }
+
+        echo json_encode(['ok' => false, 'error' => $message], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 }
