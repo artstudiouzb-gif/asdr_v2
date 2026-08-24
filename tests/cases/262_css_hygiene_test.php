@@ -256,3 +256,27 @@ test('Вынесенная часть темы не переопределяет
     $clashes = array_values(array_unique($clashes));
     assert_same([], $clashes, "вынос меняет каскад:\n      " . implode("\n      ", $clashes));
 });
+
+test('Режимный класс на body не перебивает компонентные классы', function () {
+    // `body.design-type-static h2` весит (0,2,1) и выигрывает у любого
+    // одиночного класса компонента: заголовок карточки каталога рисовался
+    // размером H2 (32px вместо 20px), заголовок обложки — 42px вместо 56px,
+    // а заголовок панели настроек — 32px вместо 16px. Режим — это
+    // переключатель, а не повод добавлять вес: квалификатор оборачивается в
+    // `:where()`, и правило весит ровно столько, сколько сам селектор.
+    // Правило вида `body.design-type-static .block-cta h2` не в счёт: там тег
+    // уже сужен компонентным классом.
+    $bad = [];
+    foreach (public_css_files() as $path) {
+        foreach (css_rules((string) file_get_contents($path)) as $rule) {
+            foreach (explode(',', $rule['sel']) as $part) {
+                $part = trim($part);
+                if (preg_match('/^body\.design-[a-z0-9_-]+\s+[a-z]+[0-9]?(\s|$)/i', $part) === 1) {
+                    $bad[] = basename($path) . ':' . $rule['line'] . ' ' . $part;
+                }
+            }
+        }
+    }
+
+    assert_same([], $bad, "режим добавляет вес голому тегу:\n      " . implode("\n      ", $bad));
+});
