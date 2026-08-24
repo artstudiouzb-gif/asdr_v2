@@ -2249,12 +2249,12 @@ body.design-mark-underline .tx-mark {
     box-shadow: inset 0 -0.18em 0 color-mix(in srgb, var(--color-accent, #2f6fed) 32%, transparent);
     padding-inline: 0.05em;
 }
-body.design-type-static h1, body.design-type-static .h1 { font-size: var(--font-size-h1, var(--step-8)); }
-body.design-type-static h2, body.design-type-static .h2 { font-size: var(--font-size-h2, var(--step-6)); }
-body.design-type-static h3, body.design-type-static .h3 { font-size: var(--font-size-h3, var(--step-4)); }
-body.design-type-static h4, body.design-type-static .h4 { font-size: var(--font-size-h4, var(--step-2)); }
-body.design-type-static h5, body.design-type-static .h5 { font-size: var(--font-size-h5, var(--step-1)); }
-body.design-type-static h6, body.design-type-static .h6 { font-size: var(--font-size-h6, var(--step-0)); }
+:where(body.design-type-static) h1, :where(body.design-type-static) .h1 { font-size: var(--font-size-h1, var(--step-8)); }
+:where(body.design-type-static) h2, :where(body.design-type-static) .h2 { font-size: var(--font-size-h2, var(--step-6)); }
+:where(body.design-type-static) h3, :where(body.design-type-static) .h3 { font-size: var(--font-size-h3, var(--step-4)); }
+:where(body.design-type-static) h4, :where(body.design-type-static) .h4 { font-size: var(--font-size-h4, var(--step-2)); }
+:where(body.design-type-static) h5, :where(body.design-type-static) .h5 { font-size: var(--font-size-h5, var(--step-1)); }
+:where(body.design-type-static) h6, :where(body.design-type-static) .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 body.design-type-static .block-hero--media .block-hero__title { font-size: var(--font-size-h1, var(--step-10)); }
 body.design-type-static .block-hero--media .block-hero__subtitle { font-size: var(--font-size-lead, var(--step-0)); }
 body.design-type-static .block-hero__title { font-size: var(--font-size-h1, var(--step-10)); }
@@ -2286,14 +2286,15 @@ body.design-type-static .block-categories__title { font-size: var(--font-size-h2
 body.design-type-static .block-counters__title,
 body.design-type-static .block-team__title,
 body.design-type-static .block-projects__title,
+body.design-type-static .block-faq__title,
 body.design-type-static .section-title { font-size: var(--font-size-h2, var(--step-6)); }
 
 /* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
    чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем). */
 @media (max-width: 640px) {
-    body.design-type-static h1, body.design-type-static .h1 { font-size: var(--step-5); }
-    body.design-type-static h2, body.design-type-static .h2 { font-size: var(--step-3); }
-    body.design-type-static h3, body.design-type-static .h3 { font-size: var(--step-2); }
+    :where(body.design-type-static) h1, :where(body.design-type-static) .h1 { font-size: var(--step-5); }
+    :where(body.design-type-static) h2, :where(body.design-type-static) .h2 { font-size: var(--step-3); }
+    :where(body.design-type-static) h3, :where(body.design-type-static) .h3 { font-size: var(--step-2); }
     body.design-type-static .block-hero--media .block-hero__title { font-size: var(--step-6); }
     body.design-type-static .block-hero__title { font-size: var(--step-6); }
     body.design-type-static .section-head__title { font-size: var(--step-4); }
@@ -2320,6 +2321,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     body.design-type-static .block-counters__title,
     body.design-type-static .block-team__title,
     body.design-type-static .block-projects__title,
+    body.design-type-static .block-faq__title,
     body.design-type-static .section-title { font-size: var(--step-4); }
 }
 
@@ -6042,7 +6044,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 
 /* --- FAQ / Аккордеон вопросов --- */
 .block-faq { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 100%; }
-.block-faq__title { font-size: clamp(var(--step-4), 2.8vw, var(--step-7)); margin: 0 0 10px; color: var(--section-title-fg); text-align: left; }
+.block-faq__title { margin: 0 0 10px; color: var(--section-title-fg); text-align: left; }
 .faq-tools { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; width: 100%; }
 .faq-tools__search, .faq-tools__category select {
     display: flex; align-items: center; gap: 10px; padding: 10px 16px;
