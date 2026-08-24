@@ -97,7 +97,9 @@ test('Альбомы: заголовок карточки — h2, порядок
     assert_contains('<h2 class="album-card__title">', $view);
     assert_not_contains('<h3 class="album-card__title">', $view);
 
-    // Внешний вид держится классом, а не уровнем заголовка.
-    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/frontend.css');
+    // Внешний вид держится классом, а не уровнем заголовка. Само правило живёт
+    // в теме: копия в базовом файле была мёртвой (тема подключается позже и
+    // задавала те же свойства заново), поэтому проверяем действующее место.
+    $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/gov-theme.css');
     assert_contains('.album-card__title { font-size:', $css);
 });

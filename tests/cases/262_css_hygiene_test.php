@@ -134,6 +134,45 @@ test('Публичный CSS не хранит мёртвых повторов �
     assert_same([], $dead, "мёртвые повторы (правило ниже перекрывает целиком):\n      " . implode("\n      ", $dead));
 });
 
+test('Правило из базового файла не дублируется темой целиком', function () {
+    // Порядок подключения задаёт FrontendAssets::CSS_SOURCES: frontend.css идёт
+    // до gov-theme.css, поэтому при равной специфичности выигрывает тема. Копия
+    // в базе выглядит действующей, но не действует — правку в ней редактор
+    // вносит впустую. Так в базе жили целые куски FAQ и контактных карточек.
+    $sources = (string) file_get_contents(APP_ROOT . '/app/Core/FrontendAssets.php');
+    assert_true(
+        strpos($sources, "/assets/css/frontend.css") < strpos($sources, "/assets/css/gov-theme.css"),
+        'тема подключается после базы — на этом держится проверка'
+    );
+
+    $later = [];
+    foreach (css_rules((string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css')) as $rule) {
+        $key = $rule['ctx'] . '###' . $rule['sel'];
+        $later[$key] = array_merge($later[$key] ?? [], css_props($rule['body']));
+    }
+
+    $base = [];
+    foreach (css_rules((string) file_get_contents(APP_ROOT . '/public/assets/css/frontend.css')) as $rule) {
+        $key = $rule['ctx'] . '###' . $rule['sel'];
+        $base[$key]['props'] = array_merge($base[$key]['props'] ?? [], css_props($rule['body']));
+        $base[$key]['line'] = $base[$key]['line'] ?? $rule['line'];
+        $base[$key]['sel'] = $rule['sel'];
+    }
+
+    $dead = [];
+    foreach ($base as $key => $info) {
+        if (!isset($later[$key]) || ($info['props'] ?? []) === []) {
+            continue;
+        }
+        $missing = array_diff(array_keys($info['props']), array_keys($later[$key]));
+        if ($missing === []) {
+            $dead[] = 'frontend.css:' . $info['line'] . ' ' . $info['sel'];
+        }
+    }
+
+    assert_same([], $dead, "тема перекрывает целиком:\n      " . implode("\n      ", $dead));
+});
+
 test('Число !important в публичном CSS не растёт', function () {
     // Потолок — текущее состояние после уборки. Значение может только
     // уменьшаться: каждый !important это правка, не выигравшая по
