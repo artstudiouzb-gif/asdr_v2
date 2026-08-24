@@ -236,7 +236,7 @@ summary:focus-visible {
 /* Появление — прогрессивное улучшение: при отключённом JavaScript блок
    обязан остаться видимым, иначе часть страницы просто исчезает. */
 @media (scripting: none) {
-    [data-reveal] { opacity: 1 !important; transform: none !important; }
+    [data-reveal] { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
     [data-reveal] { opacity: 1 !important; transform: none !important; transition: none; }
@@ -454,11 +454,11 @@ summary:focus-visible {
 }
 .block-form__input-wrapper.has-icon input,
 .block-form__input-wrapper.has-icon select {
-    padding-left: 38px !important;
+    padding-left: 38px;
 }
 .block-form__input-wrapper.has-icon textarea {
-    padding-left: 38px !important;
-    padding-top: 10px !important;
+    padding-left: 38px;
+    padding-top: 10px;
 }
 .block-form__input-wrapper--textarea {
     align-items: flex-start;
@@ -1716,7 +1716,7 @@ p { line-height: var(--base-line-height, 1.6); }
     background: rgba(255, 255, 255, .1); font-weight: 700;
     transition: background .15s ease, transform .15s ease;
 }
-.site-footer__social-link:hover { background: var(--color-accent, #5b52e5); transform: translateY(-2px); text-decoration: none !important; }
+.site-footer__social-link:hover { background: var(--color-accent, #5b52e5); transform: translateY(-2px); text-decoration: none; }
 @media (max-width: 720px) {
     .site-footer--columns .site-footer__col--menu ul { columns: 1; }
 }
@@ -2798,9 +2798,9 @@ button.block-map__card-link { border: 0; padding: 0; background: none; font: inh
     border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 body.has-admin-bar {
-    --hdr-panel-height: 38px !important;
-    --hdr-top: 38px !important;
-    margin-top: 38px !important;
+    --hdr-panel-height: 38px;
+    --hdr-top: 38px;
+    margin-top: 38px;
 }
 body.has-admin-bar .site-header--sticky,
 body.has-admin-bar .site-header.is-scrolled,

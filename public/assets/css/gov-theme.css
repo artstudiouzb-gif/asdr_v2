@@ -52,8 +52,7 @@
        Зачем: в теме сейчас 61 разный размер шрифта в rem, и полсотни
        соседних пар отличаются меньше чем на 3.5 % (0.74/0.75/0.76/0.78,
        0.8/0.8125/0.82 …). Это не решения, а следы ручной подгонки
-       отдельных компонентов, и каждая новая правка требует ещё одного
-       !important, чтобы победить соседа. Шкала даёт общий словарь.
+       отдельных компонентов, и каждая новая правка требует ещё одного, чтобы победить соседа. Шкала даёт общий словарь.
 
        Единицы — rem, поэтому шкала сама подчиняется настройке «Размер
        базового шрифта» в админке: DesignSettings печатает
@@ -170,11 +169,11 @@ input, select, textarea,
 /* Смена темы: переход навешивается на всё документ на время анимации и
    снимается сразу после. Класс ставит window.asdrSetTheme (frontend.js). */
 :root.is-theme-switching, :root.is-theme-switching * {
-    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease !important;
+    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
 }
 @media (prefers-reduced-motion: reduce) {
     :root.is-theme-switching, :root.is-theme-switching * {
-        transition: none !important;
+        transition: none;
     }
 }
 
@@ -187,7 +186,7 @@ input, select, textarea,
 :root.is-theme-switching .newsdetail-gallery__thumb,
 :root.is-theme-switching .no-transition,
 :root.is-theme-switching .no-transition * {
-    transition: none !important;
+    transition: none;
 }
 
 /* Полноширинные блоки (width:100vw, hero и фоновые подложки) выступают на
@@ -273,9 +272,9 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     50% { opacity: 0.9; }
 }
 .block-form__submit.is-loading {
-    animation: submit-btn-pulse 1.4s infinite ease-in-out !important;
-    cursor: progress !important;
-    pointer-events: none !important;
+    animation: submit-btn-pulse 1.4s infinite ease-in-out;
+    cursor: progress;
+    pointer-events: none;
 }
 
 /* ============================================================================
@@ -363,8 +362,8 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
 }
 
 .site-submenu__link.is-active {
-    color: var(--gov-teal, #12807f) !important;
-    background: color-mix(in srgb, var(--gov-teal, #12807f) 10%, transparent) !important;
+    color: var(--gov-teal, #12807f);
+    background: color-mix(in srgb, var(--gov-teal, #12807f) 10%, transparent);
     font-weight: 700;
 }
 
@@ -675,7 +674,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 .site-submenu__link .site-menu__badge::after { display: none; }
 .site-lang-switcher__item { color: var(--gov-title); font-weight: 700; font-size: var(--step--3); transition: color 0.25s ease, opacity 0.25s ease; }
 .site-lang-switcher__item.is-active { color: var(--gov-teal); }
-.site-lang-switcher__item:not(.is-active):hover { color: var(--color-accent, var(--gov-teal)) !important; opacity: 0.85; }
+.site-lang-switcher__item:not(.is-active):hover { color: var(--color-accent, var(--gov-teal)); opacity: 0.85; }
 
 /* === Премиальный выпадающий переключатель языков (Dropdown) === */
 .site-lang-dropdown { position: relative; display: inline-block; user-select: none; }
@@ -1797,7 +1796,7 @@ body.reader-mode-active { overflow: hidden; }
 /* ==========================================================================
    Универсальный полноэкранный Lightbox просмотр фотографий
    ========================================================================== */
-.is-lightboxable { cursor: zoom-in !important; }
+.is-lightboxable { cursor: zoom-in; }
 .is-lightboxable[tabindex]:focus-visible {
     outline: 3px solid var(--gov-teal, #0d9488);
     outline-offset: 4px;
@@ -2021,7 +2020,7 @@ body.lightbox-active { overflow: hidden; }
         transform: translateY(-1px);
     }
     .newsfeat-text:hover {
-        transform: none !important;
+        transform: none;
     }
     .news-card:hover {
         transform: translateY(-2px);
@@ -3342,7 +3341,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 24px !important;
+    padding: 24px;
     background: var(--gov-surface);
     border: 1px solid var(--gov-border);
     border-radius: var(--radius, 14px);
@@ -3351,7 +3350,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
     transition: transform var(--feature-card-motion-duration) var(--feature-card-motion-ease),
         box-shadow var(--feature-card-motion-duration) var(--feature-card-motion-ease),
-        border-color .46s ease, background-color .46s ease !important;
+        border-color .46s ease, background-color .46s ease;
     backface-visibility: hidden;
 }
 .feature-card__top {
@@ -3782,7 +3781,7 @@ span.imgcard__media::after {
     .social-embed-card, .team-card, .testimonial, .timeline-card, .widget--style-card) { background-color: var(--gov-surface); }
 .cms-block--bg-navy .section-head__all { color: var(--section-link-fg); }
 
-.cms-block--fullwidth { background: transparent !important; }
+.cms-block--fullwidth { background: transparent; }
 .cms-block--fullwidth::before {
     content: ''; position: absolute; top: 0; bottom: 0; left: calc(50% - 50vw); width: 100vw; z-index: -1;
 }
@@ -3869,7 +3868,7 @@ span.imgcard__media::after {
     background-position: var(--block-bg-position, center center);
     background-repeat: var(--block-bg-repeat, no-repeat);
 }
-.cms-block--fullwidth.cms-block--bg-custom { background: transparent !important; }
+.cms-block--fullwidth.cms-block--bg-custom { background: transparent; }
 .cms-block--fullwidth.cms-block--bg-custom::before {
     background: var(--block-bg, transparent);
     background-size: var(--block-bg-size, cover);
@@ -4329,7 +4328,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     -webkit-mask: var(--gov-emblem) center / 44% no-repeat;
     mask: var(--gov-emblem) center / 44% no-repeat;
 }
-.newsfeat-lead:hover .newsfeat-lead__media { transform: scale(1.04) !important; }
+.newsfeat-lead:hover .newsfeat-lead__media { transform: scale(1.04); }
 /* Подложка под текстом — затемнение снизу, чтобы белый читался на любом фото. */
 .newsfeat-lead__over {
     position: absolute; inset-inline: 0; bottom: 0; display: flex; flex-direction: column;
@@ -4373,7 +4372,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .newsfeat-mini { display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: var(--gov-ink); }
 .newsfeat-mini__thumb { display: block; width: 100%; aspect-ratio: 16/10; min-height: 150px; border-radius: var(--radius-sm, 8px); overflow: hidden; background: var(--gov-navy); }
 .newsfeat-mini__media { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
-.newsfeat-mini:hover .newsfeat-mini__media { transform: scale(1.04) !important; }
+.newsfeat-mini:hover .newsfeat-mini__media { transform: scale(1.04); }
 .newsfeat-mini__media--empty { display: block; width: 100%; height: 100%; background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
 .newsfeat-mini__body { display: flex; flex-direction: column; gap: 6px; }
 .newsfeat-mini__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
@@ -4543,7 +4542,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .newsfeat-text__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
 .newsfeat-mini:hover .newsfeat-mini__title, .newsfeat-text:hover .newsfeat-text__title { color: var(--color-accent, var(--gov-teal)); }
 /* Заголовок лида белый на фото — при наведении оставляем чистым белый при зуме обложки */
-.newsfeat-lead:hover .newsfeat-lead__title { text-decoration: none !important; }
+.newsfeat-lead:hover .newsfeat-lead__title { text-decoration: none; }
 @media (max-width: 560px) { .newsfeat-lead__over { padding: 14px; } .newsfeat-lead__title { font-size: var(--step-1); } }
 
 /* --- Медиа-галерея: переключатели --- */
@@ -4734,19 +4733,19 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .feature-card {
     position: relative;
     counter-increment: cards-counter;
-    border-bottom: 3px solid transparent !important;
+    border-bottom: 3px solid transparent;
     transition: transform var(--feature-card-motion-duration) var(--feature-card-motion-ease),
                 box-shadow var(--feature-card-motion-duration) var(--feature-card-motion-ease),
                 border-color .46s ease,
                 border-bottom-color .46s ease,
-                background-color .46s ease !important;
+                background-color .46s ease;
 }
 .feature-card::before {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: radial-gradient(220px circle at var(--mouse-x, 0) var(--mouse-y, 0), color-mix(in srgb, var(--gov-teal) 7%, transparent), transparent 80%) !important;
+    background: radial-gradient(220px circle at var(--mouse-x, 0) var(--mouse-y, 0), color-mix(in srgb, var(--gov-teal) 7%, transparent), transparent 80%);
     opacity: 0;
     transition: opacity .5s ease;
     pointer-events: none;
@@ -4756,8 +4755,8 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     opacity: 1;
 }
 .feature-card::after {
-    content: "0" counter(cards-counter) !important;
-    display: none !important;
+    content: "0" counter(cards-counter);
+    display: none;
     font-size: var(--step-3);
     font-weight: 800;
 }
@@ -4766,7 +4765,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     box-shadow: 0 16px 36px rgba(37, 99, 235, 0.12);
     transform: translateY(-4px);
     border-color: var(--color-accent, var(--gov-teal));
-    border-bottom-color: var(--color-accent, var(--gov-teal)) !important;
+    border-bottom-color: var(--color-accent, var(--gov-teal));
 }
 .feature-card__title::after {
     content: "\00a0→";
@@ -4837,12 +4836,12 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     border: 1px solid color-mix(in srgb, var(--gov-border) 45%, transparent);
 }
 .block-cards--custom-bg .feature-card:hover {
-    background: color-mix(in srgb, var(--card-bg) 88%, transparent) !important;
+    background: color-mix(in srgb, var(--card-bg) 88%, transparent);
 }
 .block-cards--custom-text .feature-card__title { color: var(--cards-text); }
 .block-cards--custom-text .feature-card__text { color: var(--cards-text); opacity: .82; }
 .block-cards--custom-text .feature-card__icon { color: var(--cards-text); }
-.block-cards--custom-text .feature-card:hover .feature-card__title { color: var(--color-accent, var(--gov-teal)) !important; }
+.block-cards--custom-text .feature-card:hover .feature-card__title { color: var(--color-accent, var(--gov-teal)); }
 
 /* CTA-полоса */
 .block-ctaband[style*="--ctaband-bg"] { background: var(--ctaband-bg); }
@@ -4916,9 +4915,9 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 }
 .captcha-row input:focus,
 .captcha-row input:focus-visible {
-    border-color: var(--color-accent, var(--gov-teal)) !important;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent) !important;
-    outline: none !important;
+    border-color: var(--color-accent, var(--gov-teal));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent);
+    outline: none;
 }
 
 /* ===== Публичные формы (плавная анимация фокуса) ===== */
@@ -4931,9 +4930,9 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 }
 .block-form__field input:focus, .block-form__field textarea:focus, .block-form__field select:focus,
 .block-form__field input:focus-visible, .block-form__field textarea:focus-visible, .block-form__field select:focus-visible {
-    border-color: var(--color-accent, var(--gov-teal)) !important;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent) !important;
-    outline: none !important;
+    border-color: var(--color-accent, var(--gov-teal));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent);
+    outline: none;
 }
 
 /* --- Зона нажатия на сенсорных экранах ---
@@ -5703,15 +5702,15 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     }
     .site-submenu__link:hover,
     .site-submenu__link:focus-visible {
-        color: var(--submenu-hover, var(--menu-hover-color, var(--gov-teal))) !important;
-        background: transparent !important;
+        color: var(--submenu-hover, var(--menu-hover-color, var(--gov-teal)));
+        background: transparent;
         border-bottom-color: var(--submenu-hover, var(--menu-hover-color, var(--gov-teal)));
         transform: none;
     }
     .site-submenu__link.is-active,
     .site-submenu__link[aria-current="page"] {
-        color: var(--submenu-hover, var(--menu-active-color, var(--gov-teal))) !important;
-        background: transparent !important;
+        color: var(--submenu-hover, var(--menu-active-color, var(--gov-teal)));
+        background: transparent;
         border-bottom-color: var(--submenu-hover, var(--menu-active-color, var(--gov-teal)));
         box-shadow: none;
     }
@@ -6205,9 +6204,9 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     flex-direction: column;
     gap: 12px;
     min-height: 100%;
-    padding: 24px !important;
+    padding: 24px;
     border: 1px solid var(--gov-border);
-    border-bottom: 3px solid transparent !important;
+    border-bottom: 3px solid transparent;
     border-radius: var(--radius, 14px);
     background: var(--gov-surface);
     color: var(--gov-ink);
@@ -6215,7 +6214,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     transition: transform var(--feature-card-motion-duration) var(--feature-card-motion-ease),
         box-shadow var(--feature-card-motion-duration) var(--feature-card-motion-ease),
         border-color .46s ease, border-bottom-color .46s ease,
-        background-color .46s ease !important;
+        background-color .46s ease;
 }
 
 .feature-card.block-advantages__item:hover,
@@ -6223,7 +6222,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .feature-card.act-card:hover {
     transform: translateY(var(--feature-card-hover-lift, -4px));
     border-color: var(--color-accent, var(--gov-teal));
-    border-bottom-color: var(--color-accent, var(--gov-teal)) !important;
+    border-bottom-color: var(--color-accent, var(--gov-teal));
     background: var(--gov-surface);
     box-shadow: 0 16px 36px rgba(37, 99, 235, .12);
 }

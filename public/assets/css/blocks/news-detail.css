@@ -533,14 +533,14 @@ button.newsdetail-gallery__thumb img {
 }
 .newsdetail-gallery__thumb.is-active,
 button.newsdetail-gallery__thumb.is-active {
-    opacity: 1 !important;
-    border-color: var(--gov-teal, #0d9488) !important;
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gov-teal, #0d9488) 30%, transparent) !important;
+    opacity: 1;
+    border-color: var(--gov-teal, #0d9488);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gov-teal, #0d9488) 30%, transparent);
 }
 .newsdetail-gallery__thumb:hover,
 button.newsdetail-gallery__thumb:hover {
-    opacity: 1 !important;
-    transform: translateY(-2px) !important;
+    opacity: 1;
+    transform: translateY(-2px);
 }
 
 /* ==========================================================================
@@ -640,7 +640,7 @@ button.newsdetail-gallery__thumb:hover {
 .newsdetail-back-pill:hover,
 .newsdetail-back-pill:focus-visible {
     background: var(--gov-teal, #00a896);
-    color: #ffffff !important;
+    color: #ffffff;
     transform: translateY(-1px);
     box-shadow: 0 4px 14px rgba(0, 168, 150, 0.3);
 }
