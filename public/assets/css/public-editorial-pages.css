@@ -415,7 +415,9 @@
     min-height: 132px;
     padding: 14px;
     border: 1px solid var(--editorial-line);
-    border-radius: 7px;
+    /* Токен, а не фиксированные 7px: настройка радиуса в «Дизайне» обязана
+       действовать и на редакционных страницах. */
+    border-radius: var(--radius-sm, 8px);
     background: var(--gov-surface);
     box-shadow: none;
 }

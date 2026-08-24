@@ -29,7 +29,11 @@ test('visual refinement uses a component scope instead of blocking the homepage'
     assert_not_contains('body:not(.is-home)', $css);
     assert_not_contains("' is-home'", $header);
     assert_contains('data-visual-system', $header);
-    assert_contains('$visualSystemScope = !$isHome;', $page);
+    // Главная больше не исключение: пока система на ней не действовала, один и
+    // тот же блок выглядел на главной иначе, чем во внутреннем разделе — у
+    // заголовков секций пропадала акцентная полоска. Область по-прежнему
+    // задаётся атрибутом, а не классом body — ради этого тест и писался.
+    assert_contains('$visualSystemScope = true;', $page);
     assert_contains('[data-visual-system] .section-head', $css);
     assert_contains('[data-visual-system] :where(', $css);
 });
