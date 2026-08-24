@@ -20,7 +20,8 @@ test('Выделение в заголовке подмешивается к ц�
 });
 
 test('Примечание показателя не приглушается прозрачностью', function () {
-    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    // Счётчики вынесены из общей темы в blocks/counters.css — берём склейку.
+    $theme = theme_css();
     $rule = (string) preg_replace('/^.*?\.counter__note\s*\{(.*?)\}.*$/s', '$1', $theme);
 
     // --gov-muted подобран впритык к 4.5:1; множитель 0.8 сажал его до 3.51:1.

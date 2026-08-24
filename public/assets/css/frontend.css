@@ -757,9 +757,6 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .testimonial__star { display: inline-flex; color: color-mix(in srgb, var(--text-muted, #6b7280) 45%, transparent); }
 .testimonial__star.is-on { color: var(--color-accent, #e63946); }
 
-.block-counters__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 24px; text-align: center; }
-.counter__suffix { margin-left: 2px; }
-
 .block-team__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
 /* Проекты: колонки задаёт редактор, последний ряд дотягивает GridBalance. */
 .block-projects__grid { display: grid; grid-template-columns: repeat(var(--grid-track, 3), minmax(0, 1fr)); gap: 24px; }
@@ -1322,12 +1319,6 @@ body.design-detail-sidebar .content-detail__aside .content-detail__row dt { colo
 .site-footer__bottom-col--right {
     justify-content: flex-end;
 }
-.site-footer__counters {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-}
 .site-footer__bottom-col--middle a {
     color: inherit;
     text-decoration: none;
@@ -1434,13 +1425,6 @@ body.mobile-menu-open .site-burger span:nth-child(3) { transform: translateY(-7p
     width: 1px;
     height: 1px;
     overflow: hidden;
-}
-
-.block-form__char-counter {
-    margin-top: 4px;
-    color: var(--text-muted, #718096);
-    font-size: 12px;
-    text-align: right;
 }
 
 .block-form__radio-group,
@@ -2329,17 +2313,6 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 }
 :root[data-theme="dark"] .contact-card__title { color: var(--text-main); }
 
-/* Полоса статистики (блок «Счётчики» в гос-стиле): карточки с иконкой-подложкой. */
-.block-counters__grid { text-align: left; }
-.counter {
-    display: flex; flex-direction: column; gap: 4px;
-    padding: 22px 24px; background: var(--surface, #fff);
-    border: 1px solid var(--border-color); border-radius: var(--radius, 14px);
-}
-.counter__label { color: var(--text-muted); margin-top: 4px; font-size: var(--step--1); }
-:root[data-theme="dark"] .counter__value, :root[data-theme="dark"] .counter__suffix { color: var(--text-main); }
-.counter__icon-img { width: var(--counter-icon-size, 28px); height: var(--counter-icon-size, 28px); object-fit: contain; }
-
 /* ==========================================================================
    БЛОКИ ГОС-СТРАНИЦ: hero (титул+фото), сетка категорий, медиаматериалы
    ========================================================================== */
@@ -2650,11 +2623,6 @@ input[type="text"], input[type="email"], input[type="password"], input[type="sea
 .u-inline-14ed279e35{margin-top:0;color: var(--gov-teal-text, #005f5f);}
 .u-inline-d65cd622b8{background: var(--gov-bg-alt, #f8f9fa);padding: 20px;border-radius: 8px;margin: 20px 0;border-left: 4px solid var(--gov-teal, #008080);}
 .u-inline-f07251c396{padding-left: 20px;margin-bottom: 0;}
-/* generated:inline-utilities:end */
-
-.block-form__char-counter.is-near-limit {
-    color: #e63946;
-}
 
 .block-form__form {
     transition: opacity .4s ease;

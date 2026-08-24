@@ -578,7 +578,8 @@ test('Ширина: обложка «во всю ширину» выходит �
 
 test('Навигация не уходит под надвинутый соседний блок', function () {
     $hero = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
-    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    // Наезд объявлен в стилях счётчиков; они вынесены из темы отдельной частью.
+    $theme = theme_css();
 
     // Тема надвигает карточку «Счётчики» на низ обложки. Полоса навигации
     // оказывалась под ней, и стрелки со счётчиком пропадали с экрана.

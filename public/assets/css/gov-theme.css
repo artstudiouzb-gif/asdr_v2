@@ -278,10 +278,6 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     pointer-events: none !important;
 }
 
-/* Анимация фокуса для фильтров, поиска и полей ввода */
-.catlist-toolbar__search input, .catlist-toolbar__sort { transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease; }
-.catlist-toolbar__search input:focus, .catlist-toolbar__search input:focus-visible, .catlist-toolbar__sort:focus, .catlist-toolbar__sort:focus-visible { border-color: var(--color-accent, var(--gov-teal)) !important; box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent) !important; outline: none !important; }
-
 /* ============================================================================
    2. ШАПКА САЙТА И НАВИГАЦИЯ (Header, Navigation, Menus, Search)
    ============================================================================ */
@@ -1827,7 +1823,6 @@ body.lightbox-active { overflow: hidden; }
     padding: 16px 24px; background: rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-.rich-lightbox-counter { font-size: var(--step--2); font-weight: 700; color: rgba(255, 255, 255, 0.85); letter-spacing: 0.05em; }
 .rich-lightbox-actions { display: flex; align-items: center; gap: 12px; }
 .rich-lightbox-btn {
     display: flex; align-items: center; justify-content: center;
@@ -2255,16 +2250,6 @@ body.design-mark-underline .tx-mark {
     box-shadow: inset 0 -0.18em 0 color-mix(in srgb, var(--color-accent, #2f6fed) 32%, transparent);
     padding-inline: 0.05em;
 }
-
-/* ==========================================================================
-   Статичные размеры заголовков (Дизайн → Типографика → «Статичные»).
-   Плавающие clamp(min, Nvw, max) заменяются фиксированным размером (max)
-   на десктопе и min на узких экранах — «спокойная» типографика без
-   непрерывного масштабирования по ширине. Тело body получает класс
-   .design-type-static из DesignSettings::bodyClasses().
-   ========================================================================== */
-body.design-type-static .counter__value,
-body.design-type-static .counter__suffix { font-size: var(--step-8); }
 body.design-type-static h1, body.design-type-static .h1 { font-size: var(--font-size-h1, var(--step-8)); }
 body.design-type-static h2, body.design-type-static .h2 { font-size: var(--font-size-h2, var(--step-6)); }
 body.design-type-static h3, body.design-type-static .h3 { font-size: var(--font-size-h3, var(--step-4)); }
@@ -2287,7 +2272,6 @@ body.design-type-static .listing__title,
 body.design-type-static .content-pagehead__title { font-size: var(--font-size-h1, var(--step-8)); }
 body.design-type-static .newslist-lead__title { font-size: var(--font-size-h3, var(--step-5)); }
 body.design-type-static .projdetail__title { font-size: var(--font-size-h1, var(--step-8)); }
-body.design-type-static .catdetail__title { font-size: var(--font-size-h1, var(--step-8)); }
 body.design-type-static .block-cta h2 { font-size: var(--font-size-h2, var(--step-9)); }
 body.design-type-static .cms-columns__col .cms-block--cta .block-cta h2 { font-size: var(--font-size-card-title, var(--step-4)); }
 body.design-type-static .site-content > section.cms-block--cta:first-of-type .block-cta h2,
@@ -2308,8 +2292,6 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 /* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
    чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем). */
 @media (max-width: 640px) {
-    body.design-type-static .counter__value,
-    body.design-type-static .counter__suffix { font-size: var(--step-5); }
     body.design-type-static h1, body.design-type-static .h1 { font-size: var(--step-5); }
     body.design-type-static h2, body.design-type-static .h2 { font-size: var(--step-3); }
     body.design-type-static h3, body.design-type-static .h3 { font-size: var(--step-2); }
@@ -2327,7 +2309,6 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     body.design-type-static .content-pagehead__title { font-size: var(--step-5); }
     body.design-type-static .newslist-lead__title { font-size: var(--step-2); }
     body.design-type-static .projdetail__title { font-size: var(--step-5); }
-    body.design-type-static .catdetail__title { font-size: var(--step-5); }
     body.design-type-static .block-cta h2 { font-size: var(--step-5); }
     body.design-type-static .site-content > section.cms-block--cta:first-of-type .block-cta h2,
     body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 { font-size: var(--step-6); }
@@ -2342,6 +2323,8 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     body.design-type-static .block-projects__title,
     body.design-type-static .section-title { font-size: var(--step-4); }
 }
+
+
 
 
 /* ============================================================================
@@ -3022,72 +3005,6 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .listing--loading .listing__results { opacity: .45; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .listing__results { transition: none; } }
 
-/* ============================================================================
-   6. КОНТЕНТНЫЕ БЛОКИ, РАЗМЕТКА И HERO-БЛОКИ (Sections, Hero layout, Grid blocks)
-   ============================================================================ */
-
-/* --- Полоса статистики (counters): спокойная цельная карта без стекла --- */
-.block-counters__title { color: var(--counters-text, var(--gov-title)); }
-.block-counters__grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0; }
-.counter { 
-    border: 0; 
-    border-right: 1px solid var(--gov-border); 
-    border-radius: 0; 
-    padding: 6px 26px; 
-    box-shadow: none; 
-    background: transparent; 
-    flex-direction: row; 
-    align-items: flex-start; 
-    gap: 14px; 
-}
-.counter__value, .counter__suffix { color: var(--counters-text, var(--gov-title)) !important; font-family: var(--font-family, 'Noto Sans', sans-serif); font-weight: 700; font-size: var(--step-8); line-height: 1; }
-/* Плотный межстрочный: подпись из 2–3 слов не должна «рассыпаться». */
-.counter__label { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--2); line-height: 1.35; margin: 4px 0 0; transition: color 0.3s ease; }
-.block-counters[style*="--counters-text"] .counter__label { opacity: .78; }
-@media (max-width: 720px) { .counter { border-right: 0; border-bottom: 1px solid var(--gov-border); padding: 14px 0; } .counter:last-child { border-bottom: 0; } }
-
-/* --- Показатели: приставка, примечание, ссылка, крупный кегль, карточки --- */
-
-/* Приставка («более», «до», «≈») набирается мельче числа и стоит на общей
-   с ним базовой линии: выравнивание задано у .counter__num. */
-.counter__prefix { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--1); font-weight: 600; }
-
-
-/* Примечание — третья строка после подписи: сноска к показателю
-   («по данным на 2026 год»), а не вторая подпись. */
-/* Приглушать примечание прозрачностью нельзя: --gov-muted уже подобран впритык
-   к 4.5:1, и множитель 0.8 сажал контраст до 3.51:1 на светлой теме (замерено).
-   Разница с подписью держится кеглем, а не блёклостью. */
-.counter__note { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--3); line-height: 1.35; margin: 4px 0 0; text-wrap: pretty; }
-
-/* Показатель со ссылкой остаётся показателем: цвет наследуется, подчёркивания
-   нет — иначе в полосе появляется синяя строка поперёк остальных. */
-.counter--link { text-decoration: none; color: inherit; }
-.counter--link:hover .counter__label { color: var(--counters-text, var(--gov-title)); }
-.counter--link:focus-visible { outline: 3px solid var(--color-accent, #2f6fed); outline-offset: 3px; }
-
-/* Крупные числа требуют более широкой дорожки: «1 200» с приставкой не влезает
-   в 180px и вылезает за карточку — переносить его нельзя (см. nowrap выше). */
-.block-counters--size-large .block-counters__grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-.block-counters--size-large .counter__value,
-.block-counters--size-large .counter__suffix { font-size: var(--step-9); }
-
-/* Вариант «Карточки»: у каждого показателя своя поверхность вместо общей
-   полосы с разделителями. Разделители при этом надо снять — иначе у карточки
-   правая граница оказывается двойной. */
-.block-counters--cards .block-counters__grid { gap: var(--card-gap, 20px); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-.block-counters--cards .counter {
-    border: 1px solid var(--gov-border);
-    border-radius: var(--radius, 14px);
-    padding: clamp(16px, 2vw, 24px);
-    background: var(--counters-bg, var(--gov-surface));
-}
-.block-counters--cards .counter:last-child { border-right: 1px solid var(--gov-border); }
-@media (max-width: 720px) {
-    .block-counters--cards .counter { border-bottom: 1px solid var(--gov-border); }
-    .block-counters--cards .counter:last-child { border-bottom: 1px solid var(--gov-border); }
-}
-
 /* --- Секции: серифные заголовки с teal-акцентом --- */
 .block-news__head::after, .news-index__head::after { background: var(--gov-teal); }
 .block-news__all, .content-card__more, .news-card__more { color: var(--gov-teal-text); }
@@ -3379,54 +3296,12 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .block-hero--media .content-crumbs--on-hero a:hover { color: #fff; }
 /* На страницах с прозрачной шапкой крошки опускаем ниже неё. */
 body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: clamp(88px, 11vw, 130px); }
-
-/* Полоса статистики — белая карта, «наплывает» на нижний край фона hero.
-   Работает на любой странице, где блок счётчиков идёт сразу за hero. */
-.cms-block--hero:has(+ .cms-block--counters) { padding-bottom: 0; }
-/* Запас снизу внутри hero, чтобы карта наезжала на фон, а не на текст/кнопки. */
-/* +28px «воздуха»: карточка счётчиков наезжает ровно на clamp-высоту,
-   без добавки она прилипала вплотную к кнопкам hero. */
-.cms-block--hero + .cms-block--counters .block-counters { margin-top: clamp(-120px, -9vw, -80px); position: relative; z-index: 3; }
-.counter { flex-direction: row; align-items: flex-start; gap: 14px; }
-/* Иконка выровнена к строке числа (компенсирует разницу высот 54px vs текст). */
-.counter__icon { 
-    display: grid; 
-    place-items: center; 
-    width: var(--counter-icon-box-size, 50px);
-    height: var(--counter-icon-box-size, 50px);
-    margin-top: 2px; 
-    border-radius: 50%; 
-    flex-shrink: 0; 
-    background: color-mix(in srgb, var(--counters-text, var(--gov-title)) 8%, transparent); 
-    color: var(--counters-text, var(--gov-title)) !important; 
-    transition: background 0.35s ease, color 0.35s ease;
-}
-.counter__icon svg,
-.counter__icon img,
-.counter__icon-img {
-    width: var(--counter-icon-size, 28px) !important;
-    height: var(--counter-icon-size, 28px) !important;
-    object-fit: contain;
-}
-.counter__num { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
-.counter__body { display: flex; flex-direction: column; gap: 2px; }
-/* Мобильная иконка меньше и без сдвига — идёт после базовой, чтобы
-   перекрыть её на узком экране (число там мельче). */
 @media (max-width: 720px) {
-    .counter__icon {
-        width: var(--counter-icon-box-size, 50px);
-        height: var(--counter-icon-box-size, 50px);
-        margin-top: 0;
-    }
-}
-@media (max-width: 720px) {
-    .cms-block--hero:has(+ .cms-block--counters) .block-hero--media { padding-bottom: 0; }
-    .cms-block--hero + .cms-block--counters { padding-top: var(--space-premium); }
-    .cms-block--hero + .cms-block--counters .block-counters { margin-top: 0; }
     /* Своя ширина текста (--hero-text-width) на телефонах игнорируется,
        иначе 50vw и подобные значения сжимают текст в узкий столбик. */
     .block-hero .block-hero__text { max-width: none; }
 }
+
 
 /* Заголовок секции: серифный + ссылка «Все …». */
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 26px; flex-wrap: wrap; }
@@ -4721,225 +4596,11 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 }
 .mediacard__play--photo svg { width: 22px; height: 22px; }
 
-/* ===== Каталог (вакансии, тендеры, документы, мероприятия) ===== */
-.catlist-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-.catlist-toolbar__search { position: relative; flex: 1 1 260px; max-width: 460px; }
-.catlist-toolbar__search svg { position: absolute; left: 14px; top: 50%; translate: 0 -50%; color: var(--gov-muted); pointer-events: none; }
-.catlist-toolbar__search input { width: 100%; height: 46px; padding: 0 14px 0 42px; border: 1px solid var(--gov-border); border-radius: 10px; background: var(--gov-surface); color: var(--gov-title); font: inherit; outline: none; }
-.catlist-toolbar__sort { height: 46px; padding: 0 12px; border: 1px solid var(--gov-border); border-radius: 10px; background: var(--gov-surface); color: var(--gov-title); font: inherit; }
-.catlist-toolbar__btn { height: 46px; padding: 0 22px; border: 0; border-radius: 10px; background: var(--gov-navy); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
-.catlist-toolbar__btn:hover { background: var(--gov-teal); }
-.catlist-toolbar__reset { color: var(--gov-teal-text); font-weight: 600; text-decoration: none; }
-.catlist-count { color: var(--gov-muted); margin: 0; }
-.catlist-count b { color: var(--gov-title); }
-
-.catlist { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--card-gap, 20px); }
-@media (max-width: 900px) { .catlist { grid-template-columns: 1fr; } }
-
-/* --- Управление шаблоном списка разделов (Каталог) из настроек дизайна --- */
-body.design-catalog-cards_lg .catlist { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--card-gap, 24px); }
-body.design-catalog-cards_sm .catlist { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-body.design-catalog-cards_sm .catcard { padding: 16px; }
-body.design-catalog-cards_sm .catcard__title { font-size: var(--step-0); }
-body.design-catalog-list .catlist { display: flex; flex-direction: column; gap: 12px; }
-body.design-catalog-list .catcard { display: flex; flex-direction: row; align-items: flex-start; padding: 16px 20px; }
-@media (max-width: 900px) {
-    body.design-catalog-cards_lg .catlist { grid-template-columns: 1fr; }
-    body.design-catalog-cards_sm .catlist { grid-template-columns: 1fr; }
-    body.design-catalog-list .catcard { flex-direction: column; }
-}
-
 /* --- Управление сайдбаром и детальным шаблоном --- */
 body.design-sidebar-floating .entry-side,
 body.design-sidebar-floating .content-sidebar { position: sticky; top: 20px; }
 body.design-sidebar-fixed .entry-side,
 body.design-sidebar-fixed .content-sidebar { position: static; }
-.catcard {
-    display: flex;
-    gap: 18px;
-    padding: 24px;
-    border-radius: var(--radius);
-    background: color-mix(in srgb, var(--gov-surface) 75%, transparent);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid color-mix(in srgb, var(--gov-border) 60%, transparent);
-    box-shadow: var(--card-shadow, 0 4px 20px -6px rgba(15, 27, 45, 0.05));
-    transition: transform 0.35s cubic-bezier(0.165, 0.84, 0.44, 1),
-                box-shadow 0.35s cubic-bezier(0.165, 0.84, 0.44, 1),
-                border-color 0.3s ease,
-                background-color 0.3s ease;
-}
-.catcard:hover {
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 60%, var(--gov-border));
-    box-shadow: 0 12px 32px -8px rgba(15, 27, 45, 0.10);
-    background: color-mix(in srgb, var(--gov-surface) 92%, transparent);
-}
-.catcard--archived {
-    background: color-mix(in srgb, var(--gov-surface) 40%, transparent);
-    opacity: 0.85;
-}
-.catcard--archived .catcard__title a { color: var(--gov-muted); }
-
-.catcard__main {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    min-width: 0;
-    flex: 1;
-}
-.catcard__top {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 2px;
-}
-.catcard__doc-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm, 8px);
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 12%, transparent);
-    color: var(--gov-teal-text);
-    flex-shrink: 0;
-}
-.catcard__status {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 12px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 12%, transparent);
-    color: var(--gov-teal-text);
-    font-size: var(--step--4);
-    font-weight: 700;
-    letter-spacing: .02em;
-}
-.catcard__status--off {
-    background: color-mix(in srgb, var(--gov-title) 8%, transparent);
-    color: var(--gov-muted);
-}
-.catcard__created {
-    margin-left: auto;
-    color: var(--gov-muted);
-    font-size: var(--step--3);
-    font-weight: 500;
-}
-
-.catcard__title {
-    margin: 0;
-    font-size: var(--step-2);
-    font-weight: 700;
-    line-height: 1.35;
-    letter-spacing: var(--heading-letter-spacing, -0.015em);
-}
-.catcard__title a {
-    color: var(--gov-title);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-.catcard__title a:hover {
-    color: var(--gov-teal-text);
-}
-
-.catcard__meta {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 8px 12px;
-    margin: 4px 0;
-}
-.catcard__meta-item {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding: 8px 12px;
-    border-radius: var(--radius-sm, 8px);
-    background: color-mix(in srgb, var(--gov-bg) 65%, transparent);
-    border: 1px solid color-mix(in srgb, var(--gov-border) 50%, transparent);
-    transition: background-color 0.25s ease, border-color 0.25s ease;
-}
-.catcard:hover .catcard__meta-item {
-    background: color-mix(in srgb, var(--gov-bg) 88%, transparent);
-    border-color: color-mix(in srgb, var(--gov-border) 75%, transparent);
-}
-.catcard__meta-item i {
-    font-style: normal;
-    font-size: var(--step--4);
-    font-weight: 700;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    color: var(--gov-muted);
-}
-.catcard__meta-item span {
-    font-size: var(--step--2);
-    font-weight: 600;
-    color: var(--gov-title);
-    line-height: 1.3;
-}
-
-.catcard__excerpt {
-    margin: 0;
-    color: var(--gov-muted);
-    font-size: var(--step--2);
-    line-height: var(--base-line-height, 1.5);
-}
-
-.catcard__foot {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-top: auto;
-    padding-top: 10px;
-    border-top: 1px dashed color-mix(in srgb, var(--gov-border) 50%, transparent);
-}
-.catcard__file {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 5px 12px;
-    border-radius: var(--radius-sm, 6px);
-    background: color-mix(in srgb, var(--color-primary, var(--gov-navy)) 6%, transparent);
-    color: var(--gov-title);
-    font-size: var(--step--3);
-    font-weight: 600;
-}
-.catcard__more {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: auto;
-    color: var(--gov-teal-text);
-    font-weight: 700;
-    font-size: var(--step--2);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-.catcard__more .catcard__arrow {
-    display: inline-block;
-    transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-.catcard:hover .catcard__more .catcard__arrow {
-    transform: translateX(4px);
-}
-
-/* Мероприятия: плитка даты слева. */
-.catlist--events .catcard { align-items: flex-start; }
-.catlist--events .catcard--with-image { display: grid; grid-template-columns: 74px minmax(0, 1fr); align-items: start; }
-.catcard__event-media { display: block; grid-column: 1 / -1; width: 100%; height: 190px; overflow: hidden; border-radius: var(--radius, 12px); background: var(--gov-bg); }
-.catcard__event-media picture { display: block; width: 100%; height: 100%; }
-.catcard__event-image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--media-object-position, center); transition: transform .35s ease; }
-.catcard:hover .catcard__event-image { transform: scale(1.035); }
-.catcard--with-image .catcard__datebox { grid-column: 1; }
-.catcard--with-image .catcard__main { grid-column: 2; }
-.catcard__datebox { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 74px; min-height: 84px; padding: 10px 6px; border-radius: var(--radius, 12px); background: var(--gov-navy); color: #fff; text-align: center; }
-.catcard__datebox b { font-family: var(--font-heading, 'Noto Serif', serif); font-size: var(--step-5); line-height: 1; }
-.catcard__datebox i { font-style: normal; font-size: var(--step--4); font-weight: 700; letter-spacing: .08em; margin-top: 4px; }
-.catcard__datebox em { font-style: normal; font-size: var(--step--4); opacity: .75; }
-@media (max-width: 560px) {
-    .catcard__event-media { height: 180px; }
-}
 
 /* Анимация фокуса для фильтров, поиска и полей ввода */
 .catlist-toolbar__search input, .catlist-toolbar__sort, .site-search input {
@@ -5066,131 +4727,6 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     .block-hero__slider-nav { display: none; }
 }
 
-
-
-/* 2. Overlap layout for integrated counters (adjacent to Hero) */
-.cms-block--hero:has(+ .cms-block--counters) .block-hero--media {
-    padding-bottom: clamp(80px, 9vw, 130px);
-}
-.cms-block--hero + .cms-block--counters {
-    padding-top: 0;
-    position: relative;
-    z-index: 3;
-}
-.cms-block--hero + .cms-block--counters .block-counters {
-    margin-top: clamp(-100px, -7vw, -60px);
-}
-
-/* 3. Improved Premium Counter Card Style */
-.block-counters {
-    background: var(--counters-bg, var(--gov-surface));
-    border: 1px solid var(--gov-border);
-    border-radius: var(--radius, 20px);
-    padding: clamp(24px, 3.5vw, 38px);
-    box-shadow: 0 16px 40px rgba(19, 42, 92, 0.06), 0 2px 8px rgba(19, 42, 92, 0.02);
-    position: relative;
-    overflow: hidden;
-    z-index: 3;
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
-                box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
-                border-color 0.4s ease;
-}
-:root[data-theme="light"] .block-counters {
-    background: linear-gradient(135deg, #ffffff 60%, #f4f8fc 100%);
-}
-:root[data-theme="dark"] .block-counters {
-    background: linear-gradient(135deg, color-mix(in srgb, var(--gov-surface) 95%, #fff) 0%, color-mix(in srgb, var(--gov-surface) 90%, #000) 100%);
-    border-color: rgba(255, 255, 255, 0.08);
-}
-.block-counters:hover {
-    transform: translateY(-8px) !important;
-    box-shadow: 0 24px 50px rgba(23, 58, 99, 0.12) !important;
-    border-color: var(--color-accent, var(--gov-teal)) !important;
-}
-
-.counter {
-    border-right: 1px solid var(--gov-border);
-    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-.counter:hover {
-    transform: translateY(-2px) !important;
-}
-.counter:last-child {
-    border-right: 0;
-}
-
-.counter__value, .counter__suffix {
-    font-family: var(--font-heading, var(--font-family));
-    font-weight: var(--heading-font-weight, 800);
-    font-size: clamp(var(--step-6), 3.5vw, var(--step-8));
-    /* Сплошной цвет вместо градиента: градиент по тексту перекрывал «Цвет
-       текста» блока — что бы редактор ни выбрал, цифры оставались прежними. */
-    color: var(--counters-text, var(--gov-title));
-    -webkit-text-fill-color: currentColor;
-    display: inline-block;
-}
-
-.counter__label {
-    color: var(--counters-text, var(--gov-muted));
-    font-size: var(--step--1);
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-.counter:hover .counter__label {
-    color: var(--color-accent, var(--gov-teal)) !important;
-}
-
-.counter__icon {
-    background: color-mix(in srgb, var(--gov-teal) 8%, transparent);
-    color: var(--color-accent, var(--gov-teal));
-    transition: background 0.35s ease, color 0.35s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.counter:hover .counter__icon {
-    background: var(--color-accent, var(--gov-teal)) !important;
-    color: #fff !important;
-    transform: scale(1.1) !important;
-}
-.block-counters--icons-no-bg .counter__icon,
-.block-counters--icons-no-bg .counter:hover .counter__icon {
-    background: transparent !important;
-}
-.block-counters--icons-no-bg .counter:hover .counter__icon {
-    color: var(--color-accent, var(--gov-teal)) !important;
-}
-.block-counters .counter__body {
-    flex: 1;
-    min-width: 0;
-}
-.block-counters--icon-pos-left .counter {
-    flex-direction: row;
-}
-.block-counters--icon-pos-right .counter {
-    flex-direction: row-reverse;
-}
-.block-counters--icon-pos-top .counter,
-.block-counters--icon-pos-center .counter {
-    flex-direction: column;
-}
-.block-counters--icon-pos-center .counter {
-    align-items: center;
-}
-.block-counters--icon-pos-top .counter__body,
-.block-counters--icon-pos-center .counter__body {
-    width: 100%;
-}
-.block-counters--text-align-left .counter__body {
-    align-items: flex-start;
-    text-align: left;
-}
-.block-counters--text-align-center .counter__body {
-    align-items: center;
-    text-align: center;
-}
-.block-counters--text-align-right .counter__body {
-    align-items: flex-end;
-    text-align: right;
-}
-
 /* 4. Directions Cards (cards_grid) styling with Spotlight */
 .cards-grid {
     counter-reset: cards-counter;
@@ -5241,35 +4777,6 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .feature-card:hover .feature-card__title::after {
     transform: translateX(4px);
 }
-
-
-
-/* Деталка записи каталога. */
-.catdetail { display: flex; flex-direction: column; gap: clamp(24px, 3.4vw, 40px); padding-block: 10px clamp(40px, 5vw, 64px); }
-.catdetail__head { max-width: 900px; }
-.catdetail__eyebrow { display: inline-block; color: var(--gov-teal-text); font-size: var(--step--3); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-.catdetail__title { margin: 12px 0 10px; font-size: clamp(var(--step-5), 3vw, var(--step-8)); line-height: 1.15; color: var(--section-title-fg); }
-.catdetail__date { color: var(--gov-muted); font-size: var(--step--2); }
-.catdetail__event-banner { width: 100%; margin: 0; overflow: hidden; border-radius: clamp(14px, 2vw, 22px); aspect-ratio: 16 / 7; background: var(--gov-bg); box-shadow: var(--card-shadow); }
-.catdetail__event-banner picture { display: block; width: 100%; height: 100%; }
-.catdetail__event-image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--media-object-position, center); }
-.catdetail__grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: clamp(24px, 3.4vw, 48px); align-items: start; }
-@media (max-width: 900px) { .catdetail__grid { grid-template-columns: 1fr; } }
-.catdetail__body { display: flex; flex-direction: column; gap: 26px; }
-.catdetail__subtitle { margin: 0 0 10px; font-size: var(--step-2); color: var(--gov-title); }
-.catdetail__text { color: var(--gov-ink, #2b3b4e); line-height: var(--base-line-height, 1.6); }
-.catdetail__text img { max-width: 100%; border-radius: var(--radius, 12px); }
-.catdetail__empty { color: var(--gov-muted); }
-.catdetail__card { position: sticky; top: 90px; display: flex; flex-direction: column; gap: 16px; padding: 24px; }
-.catdetail__card-title { margin: 0; font-size: var(--step-0); color: var(--gov-title); }
-.catdetail__facts { display: flex; flex-direction: column; gap: 12px; margin: 0; }
-.catdetail__fact dt { font-size: var(--step--4); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--gov-muted); }
-.catdetail__fact dd { margin: 2px 0 0; color: var(--gov-title); font-weight: 600; }
-.catdetail__download { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: var(--radius-sm, 10px); background: var(--gov-navy); color: #fff; font-weight: 700; text-decoration: none; }
-button.catdetail__download { border: none; cursor: pointer; font-family: inherit; font-size: inherit; width: 100%; }
-.catdetail__download:hover { background: var(--gov-teal); }
-.catdetail__back { color: var(--gov-teal-text); font-weight: 600; font-size: var(--step--2); text-decoration: none; }
-.catdetail__back:hover { text-decoration: underline; }
 
 /* Календарь мероприятий. */
 .gcal-nav { display: flex; align-items: center; gap: 14px; }
@@ -6493,11 +6000,6 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .team-card__photo { margin-bottom: 12px; }
 .team-card__name,
 .team-card__position { margin-inline: 14px; }
-.catcard--with-image { padding: 0 24px 24px; }
-.catcard--with-image .catcard__event-media {
-    width: calc(100% + 48px);
-    margin-inline: -24px;
-}
 
 @media (max-width: 1000px) {
     .newsdetail:not(.newsdetail--premium) .newsdetail-article { order: 2; }
