@@ -1060,6 +1060,7 @@ final class BlockController
                     'all_url' => $this->safeUrlField('all_url'),
                     'columns' => max(1, min(5, (int) ($_POST['columns'] ?? 4))),
                     'search_enabled' => !empty($_POST['search_enabled']),
+                    'emblem' => !empty($_POST['emblem']),
                     'items' => $items,
                 ];
             case 'map_point':
