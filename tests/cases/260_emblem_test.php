@@ -95,3 +95,31 @@ test('Негодная эмблема не сохраняется молча (Б
         reset_design_state();
     }
 });
+
+test('Знак в шапке не гасится глобальным правилом', function () {
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+
+    assert_contains('.site-header__logo:not(:has(img))::before', $css, 'знак выводится вместо логотипа-картинки');
+
+    // Регрессия: правило «запрет псевдоэлементов логотипа» гасило ::before
+    // вместе с ::after, и эмблема не появлялась в шапке ни при каком файле —
+    // ни своя из «Дизайна», ни встроенная.
+    foreach (explode('}', $css) as $rule) {
+        $parts = explode('{', $rule, 2);
+        if (count($parts) !== 2) {
+            continue;
+        }
+        [$selector, $body] = $parts;
+        if (!str_contains($selector, '.site-header__logo::before')) {
+            continue;
+        }
+        if (!str_contains($body, 'display: none') && !str_contains($body, 'display:none')
+            && !str_contains($body, 'content: none') && !str_contains($body, 'content:none')) {
+            continue;
+        }
+        assert_true(
+            str_contains($selector, ':has(img)'),
+            'скрывать знак можно только при загруженном логотипе, селектор: ' . trim($selector)
+        );
+    }
+});
