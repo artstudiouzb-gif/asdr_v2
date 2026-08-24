@@ -248,11 +248,14 @@ final class DesignController
             exit;
         }
 
-        DesignSettings::save($_POST);
+        $warnings = DesignSettings::save($_POST);
         // Ручная правка снимает метку пресета (значения могли разойтись).
         Setting::set('design_preset', '');
         Cache::forgetPrefix('page:');
         Flash::success('Настройки дизайна сохранены.');
+        foreach ($warnings as $warning) {
+            Flash::error($warning);
+        }
         header('Location: /admin/design');
         exit;
     }

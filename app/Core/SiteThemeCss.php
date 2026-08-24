@@ -151,9 +151,11 @@ final class SiteThemeCss
         // Берём только свой адрес: знак с чужого домена — это и сторонний
         // запрос с каждой страницы, и лишняя дыра в CSP.
         $emblem = trim((string) Setting::get('design_emblem', ''));
-        if ($emblem !== '' && str_starts_with($emblem, '/') && UrlGuard::isSafeMedia($emblem)
-            && !preg_match('/["\'()\s]/', $emblem)) {
-            $variables['--gov-emblem'] = 'url("' . $emblem . '")';
+        if ($emblem !== '' && str_starts_with($emblem, '/') && UrlGuard::isSafeMedia($emblem)) {
+            // Кавычки, скобки и пробелы в адресе не отбрасываем вместе с
+            // эмблемой, а кодируем: из-за них знак молча пропадал у файла с
+            // «неудобным» именем.
+            $variables['--gov-emblem'] = 'url("' . Emblem::cssUrl($emblem) . '")';
         }
 
         if (!empty($headerConfig['shadow']['enabled']) && !$transparentHeader) {
