@@ -200,3 +200,56 @@ test('Число !important в публичном CSS не растёт', functi
         'стало ' . $total . ' при потолке ' . $limit . '; больше всего: ' . implode(', ', $top)
     );
 });
+
+test('Вынесенная часть темы не переопределяется поздними файлами бандла', function () {
+    // Части темы подключаются ПОСЛЕ общего бандла (AssetCollector::
+    // renderThemeStyles), поэтому вынос семейства правил поднимает его в
+    // каскаде выше public-layout-polish и editorial. Если те переопределяют
+    // те же селекторы, вынос молча меняет вид: так «Этапы» после выноса
+    // получили padding-top 24px вместо 28px, заданных polish.
+    $collector = (string) file_get_contents(APP_ROOT . '/app/Core/AssetCollector.php');
+    preg_match_all("#'([a-z_]+)' => '(/assets/css/blocks/[a-z-]+\.css)'#", $collector, $m, PREG_SET_ORDER);
+    assert_true($m !== [], 'карта частей темы разобрана');
+
+    $lateFiles = ['public-layout-polish.css', 'public-editorial-pages.css', 'public-content-modes.css'];
+    $late = '';
+    foreach ($lateFiles as $name) {
+        $late .= (string) file_get_contents(APP_ROOT . '/public/assets/css/' . $name) . "\n";
+    }
+    // Считаем конфликтом не сам повтор селектора, а повтор ВМЕСТЕ со свойством:
+    // polish вправе задать вынесенной карточке фильтр фотографии, лишь бы он не
+    // спорил с тем, что объявляет сама часть темы.
+    $lateSelectors = [];
+    foreach (css_rules($late) as $rule) {
+        foreach (explode(',', $rule['sel']) as $part) {
+            $part = trim($part);
+            $lateSelectors[$part] = array_merge($lateSelectors[$part] ?? [], array_keys(css_props($rule['body'])));
+        }
+    }
+
+    $clashes = [];
+    foreach ($m as [, $key, $href]) {
+        $path = APP_ROOT . '/public' . $href;
+        if (!is_file($path)) {
+            $clashes[] = $key . ': файла ' . $href . ' нет';
+            continue;
+        }
+        foreach (css_rules((string) file_get_contents($path)) as $rule) {
+            $mine = array_keys(css_props($rule['body']));
+            foreach (explode(',', $rule['sel']) as $part) {
+                $part = trim($part);
+                if ($part === '' || !isset($lateSelectors[$part])) {
+                    continue;
+                }
+                $shared = array_intersect($mine, $lateSelectors[$part]);
+                if ($shared !== []) {
+                    $clashes[] = basename($href) . ' ↔ поздний файл: ' . $part
+                        . ' (' . implode(', ', array_slice($shared, 0, 3)) . ')';
+                }
+            }
+        }
+    }
+
+    $clashes = array_values(array_unique($clashes));
+    assert_same([], $clashes, "вынос меняет каскад:\n      " . implode("\n      ", $clashes));
+});

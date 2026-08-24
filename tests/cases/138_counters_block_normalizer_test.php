@@ -170,7 +170,9 @@ test('Шаблон показателей: отсчёт только у чист
     assert_contains('block-counters--cards', $cards);
     assert_contains('block-counters--size-large', $cards);
 
-    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    // theme_css() склеивает тему с вынесенными частями: стили счётчиков живут
+    // в blocks/counters.css и подключаются только на страницах с блоком.
+    $theme = theme_css();
     assert_contains('.block-counters--cards .counter', $theme);
     assert_contains('.block-counters--size-large .counter__value', $theme);
     assert_contains('.counter__note', $theme);
