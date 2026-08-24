@@ -122,7 +122,9 @@ test('CSRF проверяется у всех небезопасных мето�
     $token = Csrf::token();
     assert_same(64, strlen($token));
     assert_true(Csrf::verify($token));
-    assert_false(Csrf::verify(substr($token, 0, -1) . '0'));
+    // Последний символ меняем на заведомо другой: приписанный '0' совпадал бы
+    // с исходным токеном каждый шестнадцатый прогон, и тест падал случайно.
+    assert_false(Csrf::verify(substr($token, 0, -1) . (substr($token, -1) === '0' ? '1' : '0')));
     assert_false(Csrf::verify(''));
 });
 
