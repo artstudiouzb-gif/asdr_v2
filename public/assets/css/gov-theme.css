@@ -977,8 +977,16 @@ body .site-header { transition: background-color 0.25s ease, box-shadow 0.25s ea
     scale: 1 !important;
     transition: none !important;
 }
-.site-header__logo::after,
-.site-header__logo::before {
+/* Гасим только ::after (декоративное подчёркивание). ::before — это фирменная
+   эмблема вместо логотипа (см. .site-header__logo:not(:has(img))::before), и
+   правило с !important убивало её вместе с подчёркиванием: загруженный в
+   «Дизайне» знак не появлялся в шапке ни при каком файле. */
+.site-header__logo::after {
+    display: none !important;
+    content: none !important;
+}
+/* Логотип-картинка загружен — знак не нужен. */
+.site-header__logo:has(img)::before {
     display: none !important;
     content: none !important;
 }
