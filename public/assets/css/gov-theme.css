@@ -5140,8 +5140,10 @@ body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__moon {
     justify-content: center;
     align-items: center;
     gap: 5px;
-    width: 40px;
-    height: 40px;
+    /* 44px — минимальная цель для касания: бургер открывают пальцем, и это
+       единственный вход в меню на телефоне. */
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius-sm, 8px);
     border: 1px solid var(--gov-border);
     background: var(--gov-surface);
@@ -6412,3 +6414,40 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .icon-text__value { margin: 0 0 6px; color: var(--gov-title); font-size: var(--step-1); font-weight: 700; line-height: 1.25; }
 .icon-text__value:last-child { margin-bottom: 0; }
 .block-icon-text__empty { color: var(--gov-muted); margin: 0; }
+/* ==========================================================================
+   ЦЕЛЬ ДЛЯ КАСАНИЯ
+   Иконочные кнопки нарисованы мелкими (25–38px) — так их задумал макет, и
+   увеличивать сам кружок незачем. Но пальцем в 28px попадают не все, поэтому
+   область нажатия расширяется прозрачным псевдоэлементом до 44×44: вид
+   прежний, промахов меньше. Приём безопасен для соседей — псевдоэлемент
+   центрирован и не перехватывает события за пределами своей кнопки.
+   ========================================================================== */
+/* .site-drawer__close сюда не входит: он уже позиционирован absolute, и
+   переключение на relative увело бы кнопку из своего угла. */
+.site-search-toggle,
+.site-search__submit,
+.site-search__close,
+.site-theme-toggle,
+.a11y-toggle,
+.hero__arrow,
+.hero__playpause,
+.carousel-nav__btn {
+    position: relative;
+}
+
+.site-search-toggle::after,
+.site-search__submit::after,
+.site-search__close::after,
+.site-theme-toggle::after,
+.a11y-toggle::after,
+.site-drawer__close::after,
+.hero__arrow::after,
+.hero__playpause::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+}

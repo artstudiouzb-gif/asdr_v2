@@ -2492,7 +2492,8 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
 .btn, .block-cta__button, .btn-cta, .block-hero__button, .timeline-card__button, .timeline-cta__button,
 .a11y-toggle, .site-theme-toggle, .site-search-toggle {
     position: relative;
-    overflow: hidden;
+    /* Без overflow: hidden — halo рисуется inset:0 и за кнопку не выходит, а
+       обрезка мешала расширить цель для касания до 44px псевдоэлементом. */
 }
 /* Линейные блоки используют собственные точки: их halo должен выходить за границы строки. */
 .stage, .timeline-item {
