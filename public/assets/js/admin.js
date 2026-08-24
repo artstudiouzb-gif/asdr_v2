@@ -3707,3 +3707,33 @@ document.addEventListener('change', function (event) {
     }
 })();
 
+
+/*
+ * Поля формы блока, которые действуют не при каждом варианте оформления.
+ * Разметка: обёртка поля получает data-field-when="<имя поля>" и
+ * data-field-value="<значения через запятую>". Без JS поле просто остаётся
+ * видимым — настройка от этого не ломается, лишь теряется подсказка.
+ */
+(function () {
+    var fields = document.querySelectorAll('[data-field-when]');
+    if (!fields.length) return;
+
+    function apply() {
+        fields.forEach(function (field) {
+            var source = document.querySelector('[name="' + field.getAttribute('data-field-when') + '"]');
+            if (!source) return;
+            var allowed = (field.getAttribute('data-field-value') || '').split(',');
+            field.hidden = allowed.indexOf(source.value) === -1;
+        });
+    }
+
+    var watched = {};
+    fields.forEach(function (field) {
+        var name = field.getAttribute('data-field-when');
+        if (watched[name]) return;
+        watched[name] = true;
+        var source = document.querySelector('[name="' + name + '"]');
+        if (source) source.addEventListener('change', apply);
+    });
+    apply();
+})();

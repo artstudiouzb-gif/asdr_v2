@@ -1994,10 +1994,16 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
             <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все документы"></div>
             <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="columns">Колонок</label><select id="columns" name="columns"><?php foreach ([1,2,3,4,5] as $n): ?><option value="<?= $n ?>" <?= (int)($data['columns'] ?? 4)===$n?'selected':'' ?>><?= $n ?></option><?php endforeach; ?></select></div>
+            <div class="form-field" data-field-when="variant" data-field-value="grid,acts,acts-editorial"><label for="columns">Колонок</label><select id="columns" name="columns"><?php foreach ([1,2,3,4,5] as $n): ?><option value="<?= $n ?>" <?= (int)($data['columns'] ?? 4)===$n?'selected':'' ?>><?= $n ?></option><?php endforeach; ?></select><span class="form-hint">Компактный список выводится строками, колонки к нему не применяются.</span></div>
             <div class="form-field form-field--checkbox">
                 <input type="checkbox" id="search_enabled" name="search_enabled" value="1" <?= (!array_key_exists('search_enabled', $data) || !empty($data['search_enabled'])) ? 'checked' : '' ?>>
                 <label for="search_enabled">Добавлять поиск и фильтр форматов</label>
+                <span class="form-hint">Появляется, когда документов четыре или больше.</span>
+            </div>
+            <div class="form-field form-field--checkbox" data-field-when="variant" data-field-value="acts,acts-editorial">
+                <input type="checkbox" id="emblem" name="emblem" value="1" <?= (!array_key_exists('emblem', $data) || !empty($data['emblem'])) ? 'checked' : '' ?>>
+                <label for="emblem">Фирменный знак на карточках</label>
+                <span class="form-hint">Эмблема водяным знаком в углу карточки правового акта. Отключите, если карточки идут на пёстром фоне.</span>
             </div>
             <div>
                 <label>Документы</label>
