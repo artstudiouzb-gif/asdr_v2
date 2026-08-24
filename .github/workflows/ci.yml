@@ -171,6 +171,9 @@ jobs:
           cp config/config.example.php config/config.php
           mkdir -p storage/logs storage/cache storage/protected_uploads
           touch storage/installed.lock
+          # Витрина компонентов для визуальных регрессов: фиксированный набор
+          # блоков, по которому сверяются вычисленные стили.
+          php tests/browser/seed_visual.php
 
       - name: Install browser test dependencies
         env:
@@ -201,6 +204,9 @@ jobs:
 
       - name: Run browser smoke tests
         run: npm run test:browser
+
+      - name: Run visual regression tests
+        run: npm run test:visual
 
       - name: Upload browser diagnostics
         if: failure()

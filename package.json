@@ -10,7 +10,8 @@
     "check:assets": "npm run check:vendor && npm run check:fonts && node scripts/build-assets.mjs --check",
     "check:security": "node scripts/security-scan.mjs",
     "check:styles": "node scripts/extract-static-inline-styles.mjs --check",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test --grep-invert @visual",
+    "test:visual": "playwright test --grep @visual"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

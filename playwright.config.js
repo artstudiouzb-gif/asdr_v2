@@ -9,6 +9,12 @@ module.exports = defineConfig({
     reporter: process.env.CI ? [['html', { open: 'never' }], ['list']] : 'list',
     use: {
         baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:8080',
+        // Готовый Chromium окружения: в средах, где браузеры Playwright уже
+        // установлены отдельно, скачивать их заново не нужно. В CI переменная
+        // не задана и работает штатный `npx playwright install chromium`.
+        launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH
+            ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
+            : {},
         trace: 'retain-on-failure',
         screenshot: 'only-on-failure'
     },
