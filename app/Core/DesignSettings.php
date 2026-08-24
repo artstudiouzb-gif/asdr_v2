@@ -760,8 +760,13 @@ final class DesignSettings
         return $spacings;
     }
 
-    public static function save(array $input): void
+    /**
+     * @return list<string> предупреждения для редактора (пустой список — всё принято)
+     */
+    public static function save(array $input): array
     {
+        $warnings = [];
+
         // Новая форма присылает один выбор вместо двух конкурирующих полей.
         // Прямые font_style/font_google_body по-прежнему принимаются от пресетов
         // и старых форм.
@@ -784,7 +789,21 @@ final class DesignSettings
             // Только свой файл: знак с чужого домена — сторонний запрос с
             // каждой страницы, и тема его всё равно не примет.
             $ok = $emblem !== '' && str_starts_with($emblem, '/') && UrlGuard::isSafeMedia($emblem);
-            Setting::set('design_emblem', $ok ? $emblem : '');
+            // Файл, который не годится трафаретом (не разобрался, без viewBox),
+            // молча сохранять нельзя: на сайте он просто не появится, и
+            // редактор будет считать, что эмблема установлена.
+            if ($ok) {
+                $verdict = Emblem::check($emblem);
+                if (!$verdict['ok']) {
+                    $ok = false;
+                    $warnings[] = $verdict['error'];
+                }
+            } elseif ($emblem !== '') {
+                $warnings[] = 'Эмблема принимается только файлом этого сайта: загрузите SVG в медиабиблиотеку.';
+            }
+            if ($ok || $emblem === '') {
+                Setting::set('design_emblem', $ok ? $emblem : '');
+            }
         }
         // Своя ширина контейнера — отдельное свободное поле (не из choices).
         if (array_key_exists('container_custom', $input)) {
@@ -969,6 +988,8 @@ final class DesignSettings
                 ? self::GOOGLE_FONTS[$headingSlug][1]
                 : $bodyFont
         );
+
+        return $warnings;
     }
 
     /** Применяет готовую конфигурацию (встроенную или пользовательскую «user:slug»). */

@@ -182,7 +182,9 @@ final class BlockBackground
     {
         $custom = trim((string) \App\Models\Setting::get('design_emblem', ''));
 
-        return $custom !== '' && UrlGuard::isSafeMedia($custom) ? $custom : '/assets/img/emblem.svg';
+        return Emblem::cssUrl(
+            $custom !== '' && UrlGuard::isSafeMedia($custom) ? $custom : '/assets/img/emblem.svg'
+        );
     }
 
     /** @param array<string, mixed> $data */

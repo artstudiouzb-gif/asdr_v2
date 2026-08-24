@@ -260,6 +260,15 @@ foreach ($options as $key => $opt) {
                         'accept' => 'image/svg+xml,image/*',
                         'hint' => 'Знак агентства: водяной знак на карточках актов, заглушки карточек без фото, значок перед названием в шапке, если логотип не загружен. Используется как трафарет — цвет берётся из темы, поэтому нужен одноцветный контурный SVG. Пусто — встроенная эмблема. Файл берётся из медиабиблиотеки этого сайта: ссылки на чужие домены не принимаются.',
                     ]) ?>
+                    <?php
+                    // Файл может лежать на диске и всё равно не рисоваться:
+                    // маске нужен viewBox. Говорим об этом прямо у поля, а не
+                    // оставляем редактора гадать, почему знак не появился.
+                    $emblemCheck = \App\Core\Emblem::check((string) \App\Models\Setting::get('design_emblem', ''));
+                    ?>
+                    <?php if (!$emblemCheck['ok']): ?>
+                        <div class="alert alert--error"><?= htmlspecialchars($emblemCheck['error'], ENT_QUOTES) ?></div>
+                    <?php endif; ?>
                     <div class="form-field">
                         <label for="design_default_theme">Тема по умолчанию для посетителей</label>
                         <select id="design_default_theme" name="default_theme" data-design-preview-field>
