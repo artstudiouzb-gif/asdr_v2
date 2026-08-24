@@ -9,8 +9,19 @@ use PDOException;
 
 final class Database
 {
+    /**
+     * Через сколько секунд простоя соединение проверяется перед запросом.
+     * Импорт новостей качает каждую картинку до минуты, и MySQL успевает
+     * закрыть простаивающее соединение по wait_timeout (на shared-хостинге он
+     * часто 30–60 с) — следующий запрос падал «2006 MySQL server has gone
+     * away». Запросы, идущие подряд, порога не достигают и лишнего обращения
+     * к серверу не платят.
+     */
+    private const PING_IDLE_SECONDS = 2.0;
+
     private static ?PDO $connection = null;
     private static ?array $lastConfig = null;
+    private static float $lastUsedAt = 0.0;
 
     public static function init(array $config): void
     {
@@ -40,6 +51,7 @@ final class Database
             // "published_at <= NOW()" прячутся до конца смещения (напр. на 3 часа).
             $offset = (new \DateTimeImmutable())->format('P'); // напр. +03:00
             self::$connection->exec("SET time_zone = '" . $offset . "'");
+            self::$lastUsedAt = microtime(true);
         } catch (PDOException $e) {
             self::$connection = null;
             // Бросаем исключение вместо exit — вызывающий код решает, что делать
@@ -63,7 +75,38 @@ final class Database
             }
         }
 
+        $now = microtime(true);
+        if (self::$lastUsedAt > 0.0
+            && ($now - self::$lastUsedAt) >= self::PING_IDLE_SECONDS
+            && !self::$connection->inTransaction()
+        ) {
+            self::reviveIfDead();
+        }
+        self::$lastUsedAt = $now;
+
         return self::$connection;
+    }
+
+    /**
+     * Проверяет соединение дешёвым SELECT 1 и переподключается, если сервер уже
+     * закрыл его. Внутри транзакции метод не вызывается: переподключение молча
+     * потеряло бы незакоммиченную работу, и там честнее упасть.
+     */
+    private static function reviveIfDead(): void
+    {
+        $config = self::$lastConfig;
+        try {
+            self::$connection?->query('SELECT 1');
+
+            return;
+        } catch (PDOException $e) {
+            if ($config === null) {
+                throw $e;
+            }
+        }
+
+        self::$connection = null;
+        self::init($config);
     }
 
     /**
