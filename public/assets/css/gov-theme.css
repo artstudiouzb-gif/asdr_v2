@@ -468,9 +468,6 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
 .site-menu--padding-spacious .site-menu__link { padding-inline: 18px; padding-block: 16px; }
 
 /* Style Type Modifiers */
-.site-menu--style-underline .site-menu__link::after {
-    background: var(--menu-active-color);
-}
 .site-menu--style-pill .site-menu__link {
     border-radius: 9999px;
     padding-inline: 14px;
@@ -1572,8 +1569,6 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline-offset: 2px; border-radius: 4px; }
 .cms-block--bg-navy a:focus-visible, .block-ctaband a:focus-visible, .featband a:focus-visible, .timeline-cta a:focus-visible { outline-color: #fff; }
 .section-head__all, .newsfeat__more, .person-card__more, .imgcard__more { color: var(--gov-teal-text); }
-.imgcard__more { color: rgba(255,255,255,.92); } /* на тёмном фото остаётся белым */
-.carousel-nav__btn { width: 44px; height: 44px; } /* touch-цель ≥44px */
 .media-tabs button, .media-tabs a { min-height: 32px; }
 @media (prefers-reduced-motion: reduce) {
     .imgcards-grid--carousel { scroll-behavior: auto; }
@@ -2751,9 +2746,6 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .textimage__media { display: block; aspect-ratio: 16/11; border-radius: var(--radius); background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; }
 
 /* Сетка документов. */
-.docslist-grid { display: grid; grid-template-columns: repeat(var(--grid-track, 4), minmax(0, 1fr)); gap: 16px; }
-@media (max-width: 1000px) { .docslist-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .docslist-grid { grid-template-columns: 1fr; } }
 
 /* Карта с меткой. */
 .block-map__title { font-size: var(--font-size-h2, var(--step-5)); margin: 0 0 20px; }
@@ -3035,20 +3027,6 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    ============================================================================ */
 
 /* --- Полоса статистики (counters): спокойная цельная карта без стекла --- */
-.block-counters { 
-    background: var(--counters-bg, var(--gov-surface));
-    border: 1px solid var(--gov-border);
-    border-radius: var(--radius); 
-    padding: clamp(20px, 3vw, 34px); 
-    box-shadow: 0 14px 34px rgba(19, 42, 92, 0.08);
-}
-.block-counters:hover {
-    transform: none !important;
-}
-:root[data-theme="dark"] .block-counters {
-    background: var(--counters-bg, var(--gov-surface));
-    border-color: var(--gov-border);
-}
 .block-counters__title { color: var(--counters-text, var(--gov-title)); }
 .block-counters__grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0; }
 .counter { 
@@ -3062,14 +3040,9 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     align-items: flex-start; 
     gap: 14px; 
 }
-.counter:hover {
-    transform: none !important;
-}
-.counter:last-child { border-right: 0; }
 .counter__value, .counter__suffix { color: var(--counters-text, var(--gov-title)) !important; font-family: var(--font-family, 'Noto Sans', sans-serif); font-weight: 700; font-size: var(--step-8); line-height: 1; }
 /* Плотный межстрочный: подпись из 2–3 слов не должна «рассыпаться». */
 .counter__label { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--2); line-height: 1.35; margin: 4px 0 0; transition: color 0.3s ease; }
-.counter:hover .counter__label { color: var(--counters-text, var(--gov-title)); }
 .block-counters[style*="--counters-text"] .counter__label { opacity: .78; }
 @media (max-width: 720px) { .counter { border-right: 0; border-bottom: 1px solid var(--gov-border); padding: 14px 0; } .counter:last-child { border-bottom: 0; } }
 
@@ -3413,8 +3386,6 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 /* Запас снизу внутри hero, чтобы карта наезжала на фон, а не на текст/кнопки. */
 /* +28px «воздуха»: карточка счётчиков наезжает ровно на clamp-высоту,
    без добавки она прилипала вплотную к кнопкам hero. */
-.cms-block--hero:has(+ .cms-block--counters) .block-hero--media { padding-bottom: calc(clamp(80px, 9vw, 130px) + 28px); }
-.cms-block--hero + .cms-block--counters { padding-top: 0; position: relative; z-index: 3; }
 .cms-block--hero + .cms-block--counters .block-counters { margin-top: clamp(-120px, -9vw, -80px); position: relative; z-index: 3; }
 .counter { flex-direction: row; align-items: flex-start; gap: 14px; }
 /* Иконка выровнена к строке числа (компенсирует разницу высот 54px vs текст). */
@@ -3429,11 +3400,6 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     background: color-mix(in srgb, var(--counters-text, var(--gov-title)) 8%, transparent); 
     color: var(--counters-text, var(--gov-title)) !important; 
     transition: background 0.35s ease, color 0.35s ease;
-}
-.counter:hover .counter__icon {
-    background: var(--color-accent, var(--gov-teal));
-    color: #fff;
-    transform: none !important;
 }
 .counter__icon svg,
 .counter__icon img,
@@ -3512,12 +3478,6 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
         box-shadow var(--feature-card-motion-duration) var(--feature-card-motion-ease),
         border-color .46s ease, background-color .46s ease !important;
     backface-visibility: hidden;
-}
-.feature-card:hover {
-    background: var(--gov-surface);
-    box-shadow: 0 16px 36px -12px rgba(15, 23, 42, 0.12);
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--gov-teal) 40%, var(--gov-border));
 }
 .feature-card__top {
     display: flex;
@@ -3772,7 +3732,9 @@ span.imgcard__media::after {
 .section-head--split-tools .section-head__all { margin-inline-start: auto; }
 .carousel-nav { display: inline-flex; gap: 8px; }
 .carousel-nav[hidden] { display: none; }
-.carousel-nav__btn { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gov-border); background: var(--gov-surface); color: var(--gov-title); font-size: var(--step-3); line-height: 1; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease; }
+/* 44px — минимальная цель для касания; прежде это требование лежало в
+   отдельном правиле выше по файлу, которое перекрывалось этим. */
+.carousel-nav__btn { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--gov-border); background: var(--gov-surface); color: var(--gov-title); font-size: var(--step-3); line-height: 1; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease; }
 .carousel-nav__btn:hover { background: var(--gov-navy); color: #fff; border-color: var(--gov-title); }
 .carousel-nav__btn[disabled] { opacity: .35; cursor: default; }
 .carousel-nav__btn[disabled]:hover { background: var(--gov-surface); color: var(--gov-title); border-color: var(--gov-border); }
@@ -4260,13 +4222,6 @@ span.imgcard__media::after {
 .newsdocs-item__title { font-weight: 700; color: var(--section-title-fg); line-height: 1.35; font-size: var(--step--1); }
 .newsdocs-item:hover .newsdocs-item__title { color: var(--gov-teal); }
 .newsdocs-docs { display: flex; flex-direction: column; gap: 14px; }
-.doc-card { 
-    display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; padding: 18px 20px; 
-    text-decoration: none; color: var(--gov-ink); 
-}
-.doc-card:hover { 
-    border-color: var(--gov-teal);
-}
 .doc-card__icon { 
     display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-sm, 10px); 
     background: color-mix(in srgb, var(--gov-teal) 12%, var(--gov-surface)); color: var(--gov-teal); 
@@ -4279,16 +4234,7 @@ span.imgcard__media::after {
 }
 .doc-card__body { display: flex; flex-direction: column; gap: 4px; }
 .doc-card__title { font-weight: 700; color: var(--gov-title); font-size: var(--step--1); line-height: 1.35; transition: color 0.3s ease; }
-.doc-card:hover .doc-card__title { color: var(--gov-teal-text); }
 .doc-card__meta { color: var(--gov-muted); font-size: var(--step--3); text-transform: uppercase; letter-spacing: .04em; }
-.doc-card__dl { 
-    color: var(--gov-title); 
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease; 
-}
-.doc-card:hover .doc-card__dl {
-    transform: translateY(3px);
-    color: var(--gov-teal);
-}
 
 /* CTA-полоса (navy) «Есть вопросы или предложения?». */
 .block-ctaband { 

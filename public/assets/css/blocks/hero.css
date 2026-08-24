@@ -588,11 +588,6 @@
     to { transform: scale(1.12); }
 }
 
-@keyframes hero-kenburns {
-    from { transform: scale(1); }
-    to { transform: scale(1.12); }
-}
-
 /*
  * Соседний блок, надвинутый на низ обложки.
  *
