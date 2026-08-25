@@ -797,6 +797,12 @@ final class HeroRenderer
      * @param array<string, mixed> $d
      * @param array<string, mixed> $s
      */
+    /**
+     * С какой плотности наложение считается решающим: ниже неё сквозь вуаль
+     * видно саму фотографию, и цвет по ней предсказать нельзя.
+     */
+    private const VEIL_DECIDES_FROM = 25;
+
     private static function contentScheme(array $d, array $s): string
     {
         $mode = $d['content_scheme'] !== '' ? (string) $d['content_scheme'] : (string) $s['content_scheme'];
@@ -804,18 +810,70 @@ final class HeroRenderer
             return $mode;
         }
 
-        $overlay = $d['overlay'] !== '' ? (string) $d['overlay'] : (string) $s['overlay'];
-        $opacity = $d['overlay_opacity'] >= 0 ? (int) $d['overlay_opacity'] : (int) $s['overlay_opacity'];
-        if (HeroSlideData::hasMedia($d) && $overlay !== 'none' && $opacity >= 25) {
-            return 'light';
+        // Свой цвет текста задан вручную — «авто» его не переспорит. Классы
+        // hero--content-light/dark объявляют --hero-fg на .hero__text, то есть
+        // глубже схемы, и затирали выбранный цвет: поле в форме было, а цвет
+        // всегда выходил белым или тёмно-синим. Отдельное значение снимает
+        // оба правила, и остаётся цвет из схемы.
+        if (self::hasOwnTextColor($d, $s)) {
+            return 'custom';
         }
+
         if (HeroSlideData::hasMedia($d)) {
-            // Фото без заметного затемнения: полагаться на его светлоту нельзя,
+            // Плотное наложение перекрывает фотографию и решает за неё. Раньше
+            // любое наложение считалось затемнением, и белая вуаль (осветление
+            // кадра) оставляла текст белым — на светлом фоне.
+            $veilIsLight = self::veilIsLight($d, $s);
+            if ($veilIsLight !== null) {
+                return $veilIsLight ? 'dark' : 'light';
+            }
+
+            // Фото без заметного наложения: полагаться на его светлоту нельзя,
             // поэтому берём цвет по схеме — он хотя бы предсказуем.
             return self::schemeIsDark($d, $s) ? 'light' : 'dark';
         }
 
         return self::schemeIsDark($d, $s) ? 'light' : 'dark';
+    }
+
+    /**
+     * Задан ли цвет текста вручную: схема «Custom» со своим цветом — у слайда
+     * или, если слайд её не переопределяет, у обложки.
+     *
+     * @param array<string, mixed> $d
+     * @param array<string, mixed> $s
+     */
+    private static function hasOwnTextColor(array $d, array $s): bool
+    {
+        $scheme = $d['scheme'] !== '' ? (string) $d['scheme'] : (string) $s['scheme'];
+        if ($scheme !== 'custom') {
+            return false;
+        }
+
+        $color = $d['scheme_text'] !== '' ? (string) $d['scheme_text'] : (string) $s['scheme_text'];
+
+        return $color !== '';
+    }
+
+    /**
+     * Светлое ли наложение поверх фона: `true` — осветляет кадр, `false` —
+     * затемняет, `null` — наложения нет или оно слишком слабое, чтобы решать
+     * за фотографию.
+     *
+     * @param array<string, mixed> $d
+     * @param array<string, mixed> $s
+     */
+    private static function veilIsLight(array $d, array $s): ?bool
+    {
+        $mode = $d['overlay'] !== '' ? (string) $d['overlay'] : (string) $s['overlay'];
+        $opacity = $d['overlay_opacity'] >= 0 ? (int) $d['overlay_opacity'] : (int) $s['overlay_opacity'];
+        if ($mode === 'none' || $opacity < self::VEIL_DECIDES_FROM) {
+            return null;
+        }
+
+        $color = $d['overlay_color'] !== '' ? (string) $d['overlay_color'] : (string) $s['overlay_color'];
+
+        return self::luminance($color) >= 0.5;
     }
 
     /**
@@ -834,6 +892,15 @@ final class HeroRenderer
     private static function headerScheme(array $d, array $s): string
     {
         if ((string) $d['media_type'] !== 'none') {
+            // Яркость самой фотографии не известна, но плотное наложение
+            // перекрывает её: белая вуаль осветляет кадр, и шапке нужно
+            // переключиться в тёмный набор — иначе повторяется та же потеря
+            // контраста, что и с текстом слайда.
+            $veilIsLight = self::veilIsLight($d, $s);
+            if ($veilIsLight !== null) {
+                return $veilIsLight ? 'light' : 'dark';
+            }
+
             return 'dark';
         }
 
