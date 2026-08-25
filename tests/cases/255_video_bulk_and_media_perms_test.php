@@ -28,7 +28,7 @@ test('Uploader: файл, собранный самим PHP, получает п
     assert_true($tmp !== false, 'временный файл создан');
     $image = imagecreatetruecolor(4, 4);
     imagejpeg($image, $tmp, 80);
-    imagedestroy($image);
+    unset($image);
     chmod($tmp, 0600); // ровно так его отдаёт tempnam()
     $named = $tmp . '.jpg';
     rename($tmp, $named);

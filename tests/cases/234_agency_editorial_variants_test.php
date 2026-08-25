@@ -44,7 +44,6 @@ test('Редактор bio_education сохраняет порядок видж�
 
     try {
         $method = new ReflectionMethod(BlockController::class, 'collectData');
-        $method->setAccessible(true);
         $data = $method->invoke(new BlockController(), 'bio_education', 'ru');
         assert_same([7, 8], $data['widgets_before']);
         assert_same([9], $data['widgets_after']);

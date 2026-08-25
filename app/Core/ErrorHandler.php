@@ -32,8 +32,36 @@ final class ErrorHandler
         if (!(error_reporting() & $severity)) {
             return false;
         }
-        // Превращаем ошибку в исключение, чтобы обработать единообразно.
+        // Уведомление об устаревшем API — не повод отдавать 500. Каждая новая
+        // версия PHP помечает deprecated то, что вчера работало молча (8.5 —
+        // curl_close(), imagedestroy(), $http_response_header, driver-константы
+        // PDO), а обработчик превращал любую ошибку в исключение: сайт целиком
+        // переставал открываться на новом сервере, хотя код продолжал работать.
+        // Поэтому deprecated пишем в журнал, а не бросаем.
+        if ($severity === E_DEPRECATED || $severity === E_USER_DEPRECATED) {
+            self::logDeprecation($message, $file, $line);
+            return true;
+        }
+        // Остальные ошибки превращаем в исключение, чтобы обработать единообразно.
         throw new \ErrorException($message, 0, $severity, $file, $line);
+    }
+
+    /**
+     * Устаревший вызов повторяется на каждой странице, поэтому одинаковые
+     * сообщения за запрос пишутся один раз — иначе журнал вырастает быстрее,
+     * чем его успевают прочитать.
+     */
+    private static function logDeprecation(string $message, string $file, int $line): void
+    {
+        static $seen = [];
+
+        $key = $message . '|' . $file . '|' . $line;
+        if (isset($seen[$key])) {
+            return;
+        }
+        $seen[$key] = true;
+
+        Logger::log('error', Logger::redact($message) . ' in ' . $file . ':' . $line, 'DEPRECATED');
     }
 
     public static function handleException(Throwable $e): void

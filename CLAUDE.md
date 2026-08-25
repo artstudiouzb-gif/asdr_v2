@@ -414,7 +414,7 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   `Asset::rewriteMedia()` переписывает `/uploads/public` в HTML на CDN.
   Pull-zone CDN (BunnyCDN и т.п.) — без переноса домена. `App\Core\Cloudflare` —
   purge через API (только если домен проксируется через CF).
-- **CI**: `.github/workflows/ci.yml` — 4 джобы: php -l + тесты на PHP 8.2/8.3/8.4
+- **CI**: `.github/workflows/ci.yml` — 4 джобы: php -l + тесты на PHP 8.2/8.3/8.4/8.5
   с MariaDB; PHPStan **блокирующий** (`composer analyse`) + `composer audit`;
   проверка синтаксиса JS (`node --check`); browser smoke на Chromium (Playwright).
 
@@ -602,6 +602,17 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   не умеет: порядок табуляции, осмысленность alt и формулировок для диктора.
 
 ## Грабли (уже наступали)
+- **Новая версия PHP выключала сайт целиком.** `ErrorHandler` превращает любую
+  ошибку в исключение, а PHP 8.5 пометил устаревшим то, что вчера работало
+  молча: `PDO::MYSQL_ATTR_*`, `curl_close()`, `imagedestroy()`,
+  `$http_response_header`. Драйверная константа читается при каждом соединении
+  с БД, поэтому 500 отдавала любая страница. Теперь `E_DEPRECATED` и
+  `E_USER_DEPRECATED` уходят в `storage/logs/error.log` (уровень `DEPRECATED`,
+  одинаковое сообщение за запрос пишется один раз), остальные ошибки
+  по-прежнему становятся исключением — молчаливое предупреждение это потерянные
+  данные. Драйверные атрибуты PDO берутся через `App\Core\PdoAttr::mysql()`
+  (на 8.4+ это `Pdo\Mysql::ATTR_*`, на 8.2–8.3 — прежняя константа), а список
+  устаревших вызовов стережёт тест 263.
 - **Произвольный код — только супер-админ, и только внешними файлами.** Поля
   страницы `custom_css`/`custom_js` (`CustomAssetHelper`) публикуют свой код
   файлами через `GeneratedCss`/`GeneratedJs`, инлайна в HTML нет. Адрес с

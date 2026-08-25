@@ -218,10 +218,28 @@ final class Http
             'ssl' => ['verify_peer' => true, 'verify_peer_name' => true],
         ]);
 
-        $result = @file_get_contents($url, false, $context);
+        // Код ответа раньше читался из $http_response_header — в PHP 8.5 эта
+        // переменная объявлена устаревшей. Те же заголовки отдаёт
+        // stream_get_meta_data() открытого потока, поэтому запрос идёт через
+        // fopen(), а не file_get_contents().
+        $stream = @fopen($url, 'rb', false, $context);
+        if ($stream === false) {
+            return ['status' => 0, 'body' => '', 'error' => 'stream request failed'];
+        }
+        $meta = stream_get_meta_data($stream);
+        $result = stream_get_contents($stream);
+        fclose($stream);
+
         $status = 0;
-        if (isset($http_response_header[0]) && preg_match('#\s(\d{3})\s#', $http_response_header[0], $m)) {
-            $status = (int) $m[1];
+        $wrapperData = $meta['wrapper_data'] ?? [];
+        if (is_array($wrapperData)) {
+            foreach ($wrapperData as $header) {
+                // При редиректе строк состояния несколько; берём последнюю —
+                // она относится к телу, которое в итоге вернулось.
+                if (is_string($header) && preg_match('#^HTTP/\S+\s+(\d{3})#', $header, $m) === 1) {
+                    $status = (int) $m[1];
+                }
+            }
         }
 
         return [

@@ -542,7 +542,7 @@ final class Backup
 
             $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
             if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') {
-                $pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+                $pdo->setAttribute(PdoAttr::mysql('USE_BUFFERED_QUERY'), false);
                 $bufferingChanged = true;
             }
 
@@ -603,7 +603,7 @@ final class Backup
             throw $e;
         } finally {
             if ($bufferingChanged) {
-                $pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+                $pdo->setAttribute(PdoAttr::mysql('USE_BUFFERED_QUERY'), true);
             }
             if ($migrationLockAcquired) {
                 try {

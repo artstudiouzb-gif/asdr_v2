@@ -11,7 +11,6 @@ use App\Core\ErrorHandler;
 
 test('Ошибка в AJAX-запросе возвращается JSON-ом с понятным объяснением', function () {
     $method = new ReflectionMethod(ErrorHandler::class, 'renderJsonError');
-    $method->setAccessible(true);
 
     ob_start();
     $method->invoke(null, new PDOException('SQLSTATE[HY000]: General error: 2006 MySQL server has gone away'));
@@ -26,7 +25,6 @@ test('Ошибка в AJAX-запросе возвращается JSON-ом с 
 
 test('JSON отдаётся только запросам, которые его ждут', function () {
     $method = new ReflectionMethod(ErrorHandler::class, 'wantsJson');
-    $method->setAccessible(true);
 
     $server = $_SERVER;
     try {
