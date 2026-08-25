@@ -306,6 +306,9 @@ final class HeroRenderer
         }
 
         $html = '<div class="' . implode(' ', $classes) . '" data-hero-slide data-hero-index="' . $index . '"'
+            // Светлый ли кадр — нужно прозрачной шапке: её белое лого и меню
+            // на светлом слайде пропадают.
+            . ' data-hero-scheme="' . self::headerScheme($d, $s) . '"'
             // Своя длительность показа. Атрибута нет — слайд держится столько
             // же, сколько остальные (интервал обложки).
             . ((int) $d['duration'] > 0 ? ' data-hero-slide-duration="' . ((int) $d['duration'] * 1000) . '"' : '')
@@ -808,6 +811,37 @@ final class HeroRenderer
         }
 
         return self::schemeIsDark($d, $s) ? 'light' : 'dark';
+    }
+
+    /**
+     * Схема кадра для прозрачной шапки: `light` разрешает ей переключиться на
+     * тёмный набор, `dark` оставляет светлый.
+     *
+     * Ответ `light` даётся только когда фон слайда — заливка. Под фотографией
+     * или видео яркость верхней полосы не известна никому: схема красит
+     * подложку, которой за картинкой не видно, и «светлая схема» на снимке
+     * ночного города переключила бы шапку в тёмное по тёмному. Для медиа
+     * работает затемняющая подложка шапки — она не зависит от кадра.
+     *
+     * @param array<string, mixed> $d
+     * @param array<string, mixed> $s
+     */
+    private static function headerScheme(array $d, array $s): string
+    {
+        if ((string) $d['media_type'] !== 'none') {
+            return 'dark';
+        }
+
+        // Заливку рисует контейнер обложки, а не слайд: у слайда собственная
+        // схема меняет только его текст и панель, фон под шапкой остаётся
+        // общим. Поэтому спрашиваем настройки обложки, иначе «светлый слайд»
+        // на navy-обложке переключил бы шапку в тёмное по тёмному.
+        $scheme = (string) $s['scheme'];
+        if ($scheme === 'custom') {
+            return self::luminance((string) $s['scheme_bg']) < 0.5 ? 'dark' : 'light';
+        }
+
+        return $scheme !== 'light' ? 'dark' : 'light';
     }
 
     /**

@@ -1948,7 +1948,7 @@ p { line-height: var(--base-line-height, 1.6); }
 .site-header--transparent:not(.is-scrolled) .site-menu__divider,
 .site-header--transparent:not(.is-scrolled) .site-menu--with-item-dividers > .site-menu__link:not(:last-child)::before,
 .site-header--transparent:not(.is-scrolled) .site-menu--with-item-dividers > .site-menu__item:not(:last-child)::before {
-    background: var(--menu-divider-color-transparent, rgba(255, 255, 255, 0.45)) !important;
+    background: var(--menu-divider-color-transparent, rgba(var(--hdr-veil, 255, 255, 255), 0.45)) !important;
 }
 
 /* Ручной разделитель уже рисует линию сам, поэтому следующему пункту дубликат не нужен. */
@@ -2428,7 +2428,9 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
 .site-header--transparent:not(.is-scrolled) .site-search-toggle,
 .site-header--transparent:not(.is-scrolled) .site-theme-toggle,
 .site-header--transparent:not(.is-scrolled) .a11y-toggle {
-    color: #fff !important;
+    /* Цвет идёт из --hdr-fg: на светлом кадре обложки шапка переключается на
+       тёмный набор целиком, и белые иконки на нём были бы не видны. */
+    color: var(--hdr-fg, #fff) !important;
 }
 
 /* Ховер для светлых кнопок (становится темным/акцентным с серым фоном) */
@@ -2442,8 +2444,8 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
 .site-header--transparent:not(.is-scrolled) .site-search-toggle:hover,
 .site-header--transparent:not(.is-scrolled) .site-theme-toggle:hover,
 .site-header--transparent:not(.is-scrolled) .a11y-toggle:hover {
-    background: rgba(255, 255, 255, 0.15) !important;
-    color: #fff !important;
+    background: rgba(var(--hdr-veil, 255, 255, 255), 0.15) !important;
+    color: var(--hdr-fg, #fff) !important;
     transform: scale(1.1) !important;
 }
 

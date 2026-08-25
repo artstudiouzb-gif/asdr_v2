@@ -190,6 +190,28 @@
 
     // --- Карусель ---------------------------------------------------------
 
+    /*
+     * Прозрачная шапка лежит поверх обложки, и её светлый набор — белое лого,
+     * белое меню — читается только на тёмном кадре. Гадать по картинке не
+     * нужно: сервер посчитал схему фона слайда и положил её в
+     * data-hero-scheme. Цвет текста слайда для этого не годится: редактор
+     * задаёт его вручную и обычно одинаковым на всех слайдах. Ниже по странице
+     * обложек может быть несколько, но под шапкой лежит только первая:
+     * остальные её не касаются.
+     */
+    function headerFollows(root) {
+        return !!document.querySelector('.site-header--transparent')
+            && document.querySelector('[data-hero]') === root;
+    }
+
+    function syncHeaderToSlide(root, slide) {
+        if (!headerFollows(root)) {
+            return;
+        }
+        var light = !!slide && slide.getAttribute('data-hero-scheme') === 'light';
+        document.body.classList.toggle('is-hero-light', light);
+    }
+
     function initHero(root) {
         var slides = Array.prototype.slice.call(root.querySelectorAll('[data-hero-slide]'));
         if (!slides.length) {
@@ -199,6 +221,7 @@
         // Один слайд — не карусель: медиа запускаем, всё остальное не нужно.
         if (slides.length === 1) {
             activateMedia(slides[0]);
+            syncHeaderToSlide(root, slides[0]);
 
             return;
         }
@@ -345,6 +368,7 @@
             slide.setAttribute('aria-hidden', 'false');
             slide.removeAttribute('inert');
             activateMedia(slide);
+            syncHeaderToSlide(root, slide);
 
             dots.forEach(function (dot) {
                 var active = parseInt(dot.getAttribute('data-hero-goto'), 10) === current;
@@ -478,6 +502,7 @@
             }
         });
         activateMedia(slides[current]);
+        syncHeaderToSlide(root, slides[current]);
         if (counter) {
             counter.textContent = pad(current + 1);
         }
