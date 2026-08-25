@@ -292,6 +292,10 @@
     display: flex;
     flex-direction: column;
     gap: 0;
+    /* Отступ всего блока сверху. Промежутки gap-* работают между частями и у
+       первой части сняты, поэтому опустить колонку целиком можно только
+       отдельной настройкой — раньше её дописывали в «Свой CSS» страницы. */
+    padding-top: var(--hero-text-offset, 0px);
     max-width: var(--hero-text-width);
     min-width: 0;
     color: var(--hero-fg);

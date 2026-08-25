@@ -125,6 +125,7 @@ final class HeroSlideData
             // Отступ сверху у части текста. Пусто — «как у обложки»;
             // 0 — значимое значение «прижать вплотную», поэтому пустая
             // строка и ноль здесь разное.
+            'text_offset_top' => '',
             'gap_title' => '',
             'gap_subtitle' => '',
             'gap_actions' => '',
@@ -269,6 +270,7 @@ final class HeroSlideData
             'subtitle_size' => BlockDataInput::enum($input, 'subtitle_size', ['s', 'm', 'l'], ''),
             'title_size_mobile' => BlockDataInput::enum($input, 'title_size_mobile', ['s', 'm', 'l', 'xl'], ''),
             'subtitle_size_mobile' => BlockDataInput::enum($input, 'subtitle_size_mobile', ['s', 'm', 'l'], ''),
+            'text_offset_top' => self::gap($input['text_offset_top'] ?? null),
             'gap_title' => self::gap($input['gap_title'] ?? null),
             'gap_subtitle' => self::gap($input['gap_subtitle'] ?? null),
             'gap_actions' => self::gap($input['gap_actions'] ?? null),
@@ -426,7 +428,7 @@ final class HeroSlideData
         $d['text_align_y_mobile'] = $enum($d['text_align_y_mobile'] ?? '', ['top', 'center', 'bottom'], '');
         $d['title_size'] = $enum($d['title_size'] ?? '', ['s', 'm', 'l', 'xl'], '');
         $d['subtitle_size'] = $enum($d['subtitle_size'] ?? '', ['s', 'm', 'l'], '');
-        foreach (['gap_title', 'gap_subtitle', 'gap_actions', 'gap_art'] as $gap) {
+        foreach (['text_offset_top', 'gap_title', 'gap_subtitle', 'gap_actions', 'gap_art'] as $gap) {
             $d[$gap] = self::gap($d[$gap] ?? null);
         }
         $d['title_size_mobile'] = $enum($d['title_size_mobile'] ?? '', ['s', 'm', 'l', 'xl'], '');
