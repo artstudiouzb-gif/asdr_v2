@@ -819,20 +819,16 @@ final class HeroRenderer
             return 'custom';
         }
 
-        if (HeroSlideData::hasMedia($d)) {
-            // Плотное наложение перекрывает фотографию и решает за неё. Раньше
-            // любое наложение считалось затемнением, и белая вуаль (осветление
-            // кадра) оставляла текст белым — на светлом фоне.
-            $veilIsLight = self::veilIsLight($d, $s);
-            if ($veilIsLight !== null) {
-                return $veilIsLight ? 'dark' : 'light';
-            }
-
-            // Фото без заметного наложения: полагаться на его светлоту нельзя,
-            // поэтому берём цвет по схеме — он хотя бы предсказуем.
-            return self::schemeIsDark($d, $s) ? 'light' : 'dark';
+        // Плотное наложение перекрывает то, что под ним, и решает за кадр —
+        // и за фотографию, и за заливку: светлая вуаль поверх navy-фона
+        // осветляет его ровно так же, как осветляет снимок.
+        $veilIsLight = self::veilIsLight($d, $s);
+        if ($veilIsLight !== null) {
+            return $veilIsLight ? 'dark' : 'light';
         }
 
+        // Наложения нет или оно слабое: под ним видно сам фон, и цвет берётся
+        // по схеме — на фотографию положиться нельзя, а схема предсказуема.
         return self::schemeIsDark($d, $s) ? 'light' : 'dark';
     }
 
@@ -857,17 +853,21 @@ final class HeroRenderer
 
     /**
      * Светлое ли наложение поверх фона: `true` — осветляет кадр, `false` —
-     * затемняет, `null` — наложения нет или оно слишком слабое, чтобы решать
-     * за фотографию.
+     * затемняет, `null` — наложения нет, оно слишком слабое, чтобы решать за
+     * кадром, или это градиент там, где нужен ответ про всю ширину
+     * (`$solidOnly`).
      *
      * @param array<string, mixed> $d
      * @param array<string, mixed> $s
      */
-    private static function veilIsLight(array $d, array $s): ?bool
+    private static function veilIsLight(array $d, array $s, bool $solidOnly = false): ?bool
     {
         $mode = $d['overlay'] !== '' ? (string) $d['overlay'] : (string) $s['overlay'];
         $opacity = $d['overlay_opacity'] >= 0 ? (int) $d['overlay_opacity'] : (int) $s['overlay_opacity'];
         if ($mode === 'none' || $opacity < self::VEIL_DECIDES_FROM) {
+            return null;
+        }
+        if ($solidOnly && $mode !== 'solid') {
             return null;
         }
 
@@ -891,16 +891,17 @@ final class HeroRenderer
      */
     private static function headerScheme(array $d, array $s): string
     {
-        if ((string) $d['media_type'] !== 'none') {
-            // Яркость самой фотографии не известна, но плотное наложение
-            // перекрывает её: белая вуаль осветляет кадр, и шапке нужно
-            // переключиться в тёмный набор — иначе повторяется та же потеря
-            // контраста, что и с текстом слайда.
-            $veilIsLight = self::veilIsLight($d, $s);
-            if ($veilIsLight !== null) {
-                return $veilIsLight ? 'light' : 'dark';
-            }
+        // Сплошное наложение кроет кадр целиком — по нему судить можно.
+        // Градиент гуще там, где стоит текст, и к другому краю сходит на нет,
+        // а шапка тянется во всю ширину: над прозрачным краем она получила бы
+        // тёмный набор поверх неосветлённого снимка. Поэтому для шапки
+        // градиент не в счёт — там работает её собственная подложка.
+        $veilIsLight = self::veilIsLight($d, $s, true);
+        if ($veilIsLight !== null) {
+            return $veilIsLight ? 'light' : 'dark';
+        }
 
+        if ((string) $d['media_type'] !== 'none') {
             return 'dark';
         }
 
