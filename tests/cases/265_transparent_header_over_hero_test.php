@@ -72,6 +72,23 @@ test('На светлом слайде шапка переключается н�
     );
 });
 
+test('Набор шапки меняется в середине перехода, а не по клику', function () {
+    $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/blocks/hero.js');
+    $theme = theme_css();
+
+    // Кадр проявляется за время перехода, а класс менялся сразу: замерено —
+    // через 30 мс новый кадр виден на 1 %, и тёмный логотип треть секунды
+    // лежал на ещё не ушедшем тёмном кадре.
+    assert_contains('headerTimer', $js, 'смена набора снова происходит сразу по клику');
+    assert_contains('duration || 0) / 2', $js, 'смена набора не приходится на середину перехода');
+    assert_contains('reduceMotion()', $js, 'при «меньше движения» задержки быть не должно');
+
+    // Подложка гаснет вместе с переходом: обычные переменные не
+    // анимируются, поэтому её плотность объявлена через @property.
+    assert_contains('@property --hdr-scrim', $theme, 'плотность подложки снова неанимируема');
+    assert_contains('transition-property: --hdr-scrim', $theme, 'подложка исчезает скачком');
+});
+
 test('Обложка сообщает шапке схему кадра, а не цвет своего текста', function () {
     $renderer = (string) file_get_contents(APP_ROOT . '/app/Core/Hero/HeroRenderer.php');
     $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/blocks/hero.js');
