@@ -596,6 +596,11 @@ final class HeroRenderer
                 $d['scheme_text'] !== '' ? (string) $d['scheme_text'] : (string) $s['scheme_text'],
                 $d['scheme_accent'] !== '' ? (string) $d['scheme_accent'] : (string) $s['scheme_accent']
             );
+            // Отдельная переменная для фона: --hero-bg применяется правилом на
+            // контейнере обложки, и объявление на слайде его не перекрашивает.
+            // Слайд красится своей, а без своей схемы остаётся прозрачным —
+            // тогда виден фон обложки, как было раньше.
+            $vars['--hero-slide-bg'] = $vars['--hero-bg'];
         }
 
         $overlayMode = $d['overlay'] !== '' ? (string) $d['overlay'] : (string) $s['overlay'];
@@ -832,16 +837,10 @@ final class HeroRenderer
             return 'dark';
         }
 
-        // Заливку рисует контейнер обложки, а не слайд: у слайда собственная
-        // схема меняет только его текст и панель, фон под шапкой остаётся
-        // общим. Поэтому спрашиваем настройки обложки, иначе «светлый слайд»
-        // на navy-обложке переключил бы шапку в тёмное по тёмному.
-        $scheme = (string) $s['scheme'];
-        if ($scheme === 'custom') {
-            return self::luminance((string) $s['scheme_bg']) < 0.5 ? 'dark' : 'light';
-        }
-
-        return $scheme !== 'light' ? 'dark' : 'light';
+        // Заливка слайда: своя схема, а если её нет — схема обложки. Так же
+        // считает и сам фон (см. --hero-slide-bg), поэтому шапка и кадр не
+        // разъезжаются.
+        return self::schemeIsDark($d, $s) ? 'dark' : 'light';
     }
 
     /**
