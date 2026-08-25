@@ -238,18 +238,23 @@ final class TeamMember
 
     public static function create(array $data): int
     {
+        // Всё, кроме имени и статуса, в схеме NULL-able, поэтому отсутствующий
+        // ключ — это NULL, а не ошибка. Раньше значения читались напрямую:
+        // вызов без телефона печатал «Undefined array key», а в рабочем режиме
+        // ErrorHandler превращает предупреждение в исключение — 500 на ровном
+        // месте у формы, где поле просто не заполнили.
         $stmt = Database::pdo()->prepare(
             'INSERT INTO team_members (name, position, department, unit, photo, email, phone, socials_json, status, sort_order, created_at)
              VALUES (:name, :position, :department, :unit, :photo, :email, :phone, :socials_json, :status, :sort_order, NOW())'
         );
         $stmt->execute([
             ':name' => $data['name'],
-            ':position' => $data['position'],
+            ':position' => $data['position'] ?? null,
             ':department' => $data['department'] ?? null,
             ':unit' => $data['unit'] ?? null,
-            ':photo' => $data['photo'],
-            ':email' => $data['email'],
-            ':phone' => $data['phone'],
+            ':photo' => $data['photo'] ?? null,
+            ':email' => $data['email'] ?? null,
+            ':phone' => $data['phone'] ?? null,
             ':socials_json' => json_encode($data['socials'] ?? [], JSON_UNESCAPED_UNICODE),
             ':status' => $data['status'],
             ':sort_order' => $data['sort_order'] ?? 0,
@@ -272,12 +277,12 @@ final class TeamMember
         );
         $stmt->execute([
             ':name' => $data['name'],
-            ':position' => $data['position'],
+            ':position' => $data['position'] ?? null,
             ':department' => $data['department'] ?? null,
             ':unit' => $data['unit'] ?? null,
-            ':photo' => $data['photo'],
-            ':email' => $data['email'],
-            ':phone' => $data['phone'],
+            ':photo' => $data['photo'] ?? null,
+            ':email' => $data['email'] ?? null,
+            ':phone' => $data['phone'] ?? null,
             ':socials_json' => json_encode($data['socials'] ?? [], JSON_UNESCAPED_UNICODE),
             ':status' => $data['status'],
             ':sort_order' => $data['sort_order'] ?? 0,
