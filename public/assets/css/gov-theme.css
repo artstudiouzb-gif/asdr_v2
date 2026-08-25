@@ -586,12 +586,12 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-dot .site-men
 .site-header--container-floating.site-header--transparent:not(.is-scrolled) {
     background: linear-gradient(
         var(--header-floating-angle, 135deg),
-        rgba(15, 23, 42, var(--header-floating-opacity, 0.25)) 0%,
-        rgba(30, 41, 59, calc(var(--header-floating-opacity, 0.25) * 0.8)) 100%
+        rgba(var(--hdr-glass-rgb, 15, 23, 42), var(--header-floating-opacity, 0.25)) 0%,
+        rgba(var(--hdr-glass-rgb-2, 30, 41, 59), calc(var(--header-floating-opacity, 0.25) * 0.8)) 100%
     ) !important;
     backdrop-filter: blur(var(--header-floating-blur, 14px)) saturate(160%) !important;
     -webkit-backdrop-filter: blur(var(--header-floating-blur, 14px)) saturate(160%) !important;
-    border: 1px solid rgba(255, 255, 255, calc(var(--header-floating-opacity, 0.25) + 0.05)) !important;
+    border: 1px solid rgba(var(--hdr-glass-edge, 255, 255, 255), calc(var(--header-floating-opacity, 0.25) + 0.05)) !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, calc(var(--header-floating-opacity, 0.25) * 0.8)) !important;
 }
 
@@ -834,7 +834,22 @@ body .site-header--sticky.is-scrolled { box-shadow: 0 8px 28px rgba(11,26,48,.14
 
 /* Прозрачная шапка: накладывается на первый экран; текст/иконки белые.
    При прокрутке (is-scrolled) возвращается сплошной фон и цвета темы. */
-body .site-header--transparent:not(.is-scrolled) { background: transparent; border-bottom-color: rgba(255,255,255,.18); box-shadow: none; }
+/* Прозрачная шапка лежит поверх произвольного кадра слайда, поэтому под ней
+   всегда есть затемняющая подложка: белое лого и белое меню иначе пропадают на
+   светлой картинке. Схема слайда эту дыру не закрывает — она описывает заливку,
+   а не яркость верхней полосы: у фотографии там бывает небо. Градиент гаснет к
+   низу шапки, кадр под ним остаётся виден. На светлом слайде подложка снимается
+   (--hdr-scrim: 0) — там шапка переключается на тёмный набор целиком. */
+body .site-header--transparent:not(.is-scrolled) {
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, var(--hdr-scrim, .48)) 0%,
+        rgba(0, 0, 0, calc(var(--hdr-scrim, .48) * .6)) 55%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    border-bottom-color: var(--hdr-border, rgba(255, 255, 255, .18));
+    box-shadow: none;
+}
 /* Прозрачная шапка накладывается на первый экран (absolute), а в связке
    с «липкой» после прокрутки переключается в fixed со сплошным фоном. */
 body .site-header.site-header--transparent { position: absolute; left: 0; right: 0; top: var(--hdr-top, 0px); z-index: 200; }
@@ -844,14 +859,22 @@ body .site-header.site-header--transparent { position: absolute; left: 0; right:
    чтобы hero был виден и под ней, а не только под средней/нижней шапкой. */
 body:has(.site-header--transparent) .site-topbar {
     position: absolute; left: 0; right: 0; top: var(--hdr-panel-height, 0px);
-    background: transparent; border-bottom: 0; color: #fff;
+    /* Продолжение подложки шапки вверх: на стыке плотность совпадает. */
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, calc(var(--hdr-scrim, .48) * 1.1)),
+        rgba(0, 0, 0, var(--hdr-scrim, .48))
+    );
+    border-bottom: 0; color: var(--hdr-fg, #fff);
 }
 body:has(.site-header--transparent) .site-topbar a,
 body:has(.site-header--transparent) .site-topbar .site-lang-switcher__item,
-body:has(.site-header--transparent) .site-topbar .hdr-contact { color: #fff; }
+body:has(.site-header--transparent) .site-topbar .hdr-contact { color: var(--hdr-fg, #fff); }
 body:has(.site-header--transparent) .site-topbar .site-search-toggle,
 body:has(.site-header--transparent) .site-topbar .site-theme-toggle,
-body:has(.site-header--transparent) .site-topbar .a11y-toggle { border-color: rgba(255,255,255,.4); color: #fff; }
+body:has(.site-header--transparent) .site-topbar .a11y-toggle {
+    border-color: var(--hdr-icon-border, rgba(255,255,255,.4)); color: var(--hdr-fg, #fff);
+}
 body .site-header.site-header--transparent.site-header--sticky.is-scrolled { position: fixed; top: var(--hdr-panel-height, 0px) !important; animation: hdr-slide-down .25s ease; }
 @keyframes hdr-slide-down { from { transform: translateY(-100%); } to { transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { body .site-header.site-header--transparent.site-header--sticky.is-scrolled { animation: none; } }
@@ -868,11 +891,15 @@ body .site-header--transparent:not(.is-scrolled) .site-theme-toggle,
 body .site-header--transparent:not(.is-scrolled) .site-search-toggle,
 body .site-header--transparent:not(.is-scrolled) .site-burger,
 body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle,
-body .site-header--transparent:not(.is-scrolled) .hdr-contact { color: #fff; }
+body .site-header--transparent:not(.is-scrolled) .hdr-contact { color: var(--hdr-fg, #fff); }
 body .site-header--transparent:not(.is-scrolled) .site-menu__link {
-    color: var(--menu-color-transparent, var(--menu-color, #fff));
+    /* Откат идёт на --hdr-fg, а не на --menu-color: цвет обычной шапки
+       подобран под светлую поверхность и почти всегда тёмный, поэтому на
+       кадре обложки ссылки пропадали ровно так же, как лого. Свой цвет для
+       прозрачного режима (настройка в конструкторе) по-прежнему главнее. */
+    color: var(--menu-color-transparent, var(--hdr-fg, #fff));
 }
-body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__trigger:hover { background: rgba(255, 255, 255, 0.16); }
+body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__trigger:hover { background: rgba(var(--hdr-veil, 255, 255, 255), 0.16); }
 /* Отдельный (светлый) логотип для прозрачного режима.
    Стандартный логотип прячем ТОЛЬКО когда реально задан светлый вариант —
    иначе (например, загружен один SVG-логотип) он остаётся видимым. */
@@ -889,7 +916,51 @@ body .site-header--transparent:not(.is-scrolled) .site-header__logo:has(.site-he
     :root[data-theme="auto"] .site-header__logo-light { display: block; }
     :root[data-theme="auto"] .site-header__logo:has(.site-header__logo-light) img.site-header__logo-std { display: none; }
 }
-.site-header--transparent:not(.is-scrolled) .site-header__logo:not(:has(img))::before { background: #fff; }
+
+/* Светлый кадр под шапкой. Слайд со светлым фоном объявляет себе тёмный текст
+   (класс hero--content-dark), и шапка обязана следовать за ним — иначе белое
+   лого и белое меню лежат на светлой картинке. Класс на body ставит
+   blocks/hero.js при смене слайда; без JS остаётся подложка выше, и контраст
+   держится на ней.
+   Цвета здесь заданы числами, а не переменными темы: кадр слайда одинаков в
+   светлой и тёмной теме, а --gov-title в тёмной переворачивается в белый и
+   вернул бы ровно ту проблему, которую правило закрывает. Оттенок наведения
+   затемняется от настраиваемого акцента через color-mix — акцент остаётся
+   тем, что выбран в «Дизайне». */
+body.is-hero-light .site-header--transparent:not(.is-scrolled),
+body.is-hero-light:has(.site-header--transparent) .site-topbar {
+    --hdr-scrim: 0;
+    --hdr-fg: #0f172a;
+    --hdr-border: rgba(15, 23, 42, .16);
+    --hdr-icon-border: rgba(15, 23, 42, .32);
+    --hdr-glass-rgb: 255, 255, 255;
+    --hdr-glass-rgb-2: 241, 245, 249;
+    --hdr-glass-edge: 15, 23, 42;
+    --hdr-veil: 15, 23, 42;
+    --hdr-ink-shadow: 0 1px 2px rgba(255, 255, 255, .55);
+    --menu-color-transparent: #0f172a;
+    --menu-hover-transparent: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 78%, #0b1220);
+    --menu-active-transparent: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 78%, #0b1220);
+}
+/* Контур для набора поверх кадра. Подложка держит основную массу, но на
+   светлом небе фотографии белым иконкам её не хватает: тонкая тень добавляет
+   границу, не меняя цвета. В тёмном наборе тень тёмная, в светлом — светлая. */
+body .site-header--transparent:not(.is-scrolled) .site-header__logo img,
+body .site-header--transparent:not(.is-scrolled) .site-search-toggle,
+body .site-header--transparent:not(.is-scrolled) .site-theme-toggle,
+body .site-header--transparent:not(.is-scrolled) .a11y-toggle,
+body .site-header--transparent:not(.is-scrolled) .site-burger,
+body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__trigger {
+    filter: drop-shadow(var(--hdr-ink-shadow, 0 1px 2px rgba(0, 0, 0, .45)));
+}
+body .site-header--transparent:not(.is-scrolled) .site-header__logo span,
+body .site-header--transparent:not(.is-scrolled) .hdr-contact {
+    text-shadow: var(--hdr-ink-shadow, 0 1px 2px rgba(0, 0, 0, .45));
+}
+
+body.is-hero-light .site-header--transparent:not(.is-scrolled) .site-header__logo-light { display: none; }
+body.is-hero-light .site-header--transparent:not(.is-scrolled) .site-header__logo:has(.site-header__logo-light) img.site-header__logo-std { display: block; }
+.site-header--transparent:not(.is-scrolled) .site-header__logo:not(:has(img))::before { background: var(--hdr-fg, #fff); }
 .site-header--transparent:not(.is-scrolled) .site-menu__link:hover,
 .site-header--transparent:not(.is-scrolled) .site-menu__link:focus-visible,
 .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle:hover,
@@ -949,11 +1020,11 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline .si
     box-shadow: none !important;
     filter: drop-shadow(0 0 6px var(--menu-active-transparent, var(--menu-active, var(--gov-teal)))) !important;
 }
-body .site-header--transparent:not(.is-scrolled) .site-nav { border-top-color: rgba(255,255,255,.16); background: transparent; }
-.site-header--transparent:not(.is-scrolled) .site-search { background: rgba(255,255,255,.15) !important; border-color: rgba(255,255,255,.3) !important; }
-.site-header--transparent:not(.is-scrolled) .site-search input { color: #fff !important; }
-.site-header--transparent:not(.is-scrolled) .site-search button { color: #fff !important; }
-.site-header--transparent:not(.is-scrolled) .site-search input::placeholder { color: rgba(255,255,255,.6); }
+body .site-header--transparent:not(.is-scrolled) .site-nav { border-top-color: rgba(var(--hdr-veil, 255, 255, 255), .16); background: transparent; }
+.site-header--transparent:not(.is-scrolled) .site-search { background: rgba(var(--hdr-veil, 255, 255, 255), .15) !important; border-color: rgba(var(--hdr-veil, 255, 255, 255), .3) !important; }
+.site-header--transparent:not(.is-scrolled) .site-search input { color: var(--hdr-fg, #fff) !important; }
+.site-header--transparent:not(.is-scrolled) .site-search button { color: var(--hdr-fg, #fff) !important; }
+.site-header--transparent:not(.is-scrolled) .site-search input::placeholder { color: rgba(var(--hdr-veil, 255, 255, 255), .6); }
 body .site-header { transition: background-color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
 
 /* ЛОГОТИП: Запрет любых трансформаций размера, подчеркиваний и псевдоэлементов */
@@ -1042,7 +1113,7 @@ body:has(.site-header--transparent) .site-topbar .site-theme-toggle {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    color: #ffffff !important;
+    color: var(--hdr-fg, #fff) !important;
 }
 
 body .site-header--transparent:not(.is-scrolled) .site-theme-toggle:hover,
@@ -1096,7 +1167,7 @@ body:has(.site-header--transparent) .site-topbar .site-theme-toggle:hover {
 body .site-header .a11y-toggle span { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 body .site-header .a11y-toggle { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--gov-border); padding: 0; }
 body .site-header--transparent:not(.is-scrolled) .a11y-toggle,
-body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: rgba(255,255,255,.4); }
+body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: var(--hdr-icon-border, rgba(255, 255, 255, .4)); color: var(--hdr-fg, #fff); }
 /* --- Безрамочный поиск с выезжающим полем ввода --- */
 /* Выезжающая форма поиска */
 .site-search-wrap {
@@ -1245,7 +1316,10 @@ body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search 
 }
 
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search input[type="search"] {
-    color: #ffffff !important;
+    /* Панель поиска рисует себе тёмное стекло, поэтому её текст остаётся
+       светлым и на светлом кадре: цвет идёт от --hdr-search-fg, а не от
+       --hdr-fg, который переключается вместе с шапкой. */
+    color: var(--hdr-search-fg, #ffffff) !important;
 }
 
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search input[type="search"]::placeholder {
@@ -1254,7 +1328,7 @@ body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search 
 
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search__submit,
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search__close {
-    color: #ffffff !important;
+    color: var(--hdr-search-fg, #ffffff) !important;
 }
 
 body.design-search-inline .site-header .site-search { display: inline-flex; }
@@ -1295,8 +1369,8 @@ body:has(.site-header--borders-none) .site-topbar--light { border-bottom: 0; }
 body .site-header--borders-container { border-bottom: 0; }
 body .site-header--borders-container .site-nav { border-top: 0; }
 body .site-header--borders-container .site-header__inner { border-bottom: 1px solid var(--gov-border); }
-body .site-header--borders-container.site-header--transparent:not(.is-scrolled) .site-header__inner { border-bottom-color: rgba(255,255,255,.16); }
-body .site-header--borders-container.site-header--transparent:not(.is-scrolled) .site-nav .site-nav__inner { border-top-color: rgba(255,255,255,.16); }
+body .site-header--borders-container.site-header--transparent:not(.is-scrolled) .site-header__inner { border-bottom-color: rgba(var(--hdr-veil, 255, 255, 255), .16); }
+body .site-header--borders-container.site-header--transparent:not(.is-scrolled) .site-nav .site-nav__inner { border-top-color: rgba(var(--hdr-veil, 255, 255, 255), .16); }
 
 /* --- Выпадающее подменю (гос-тема) --- */
 .site-submenu { background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 12px); box-shadow: 0 18px 44px rgba(11,26,48,.16); padding: 8px; min-width: 240px; margin-top: 6px; }
@@ -5063,7 +5137,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
    иначе тёплый #e67e22/#f1c40f выбивается на фоне hero. */
 body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__sun,
 body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__moon {
-    color: #ffffff !important;
+    color: var(--hdr-fg, #fff) !important;
 }
 
 /* Анимация лучей солнца при наведении */
@@ -5191,7 +5265,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle {
     border-radius: var(--radius-sm, 6px);
     background: transparent;
     box-shadow: none;
-    color: #fff;
+    color: var(--hdr-fg, #fff);
 }
 body .site-header--transparent:not(.is-scrolled) .site-burger:hover,
 body .site-header--transparent:not(.is-scrolled) .site-burger:focus-visible,
@@ -5610,7 +5684,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline > .
     outline-offset: 1px;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__toggle {
-    color: var(--menu-color-transparent, var(--menu-color, #fff)) !important;
+    color: var(--menu-color-transparent, var(--hdr-fg, #fff)) !important;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:hover > .site-menu__toggle,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:focus-within > .site-menu__toggle,
