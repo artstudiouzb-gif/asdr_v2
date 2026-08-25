@@ -313,6 +313,14 @@ $customDuration = (int) $data['duration'];
                 <?= $select('text_position', 'Выравнивание по горизонтали', $inherit + $posOptions, (string) $data['text_position'], '', 'col-6') ?>
                 <?= $select('text_align_y', 'Выравнивание по вертикали', $inherit + $yOptions, (string) $data['text_align_y'], '', 'col-6') ?>
 
+                <div class="form-field col-6">
+                    <label for="text_offset_top">Отступ текста сверху, px</label>
+                    <input type="number" id="text_offset_top" name="text_offset_top" min="0" max="200" step="1"
+                           value="<?= $data['text_offset_top'] === '' ? '' : (int) $data['text_offset_top'] ?>"
+                           placeholder="как у обложки">
+                    <span class="form-hint">Опускает весь текстовый блок этого слайда.</span>
+                </div>
+
                 <?= $select('title_size', 'Размер заголовка', $inherit + $sizeOptions, (string) $data['title_size'], '', 'col-6') ?>
                 <?= $select('subtitle_size', 'Размер описания', $inherit + $subtitleSizes, (string) $data['subtitle_size'], '', 'col-6') ?>
 

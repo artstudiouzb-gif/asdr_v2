@@ -212,12 +212,36 @@
         return first ? first === block : document.querySelector('[data-hero]') === root;
     }
 
-    function syncHeaderToSlide(root, slide) {
+    var headerTimer = null;
+
+    /*
+     * Набор шапки меняется скачком, а кадр — за время перехода. Если
+     * переключить его сразу по клику, тёмный логотип окажется поверх ещё не
+     * ушедшего тёмного кадра: замерено — через 30 мс новый кадр виден на 1 %,
+     * и рассинхрон держится треть секунды. Поэтому смена приходится на
+     * середину перехода, где кадры равны и подмена не читается. При
+     * «меньше движения» перехода нет — нет и задержки.
+     */
+    function syncHeaderToSlide(root, slide, duration) {
         if (!headerFollows(root)) {
             return;
         }
         var light = !!slide && slide.getAttribute('data-hero-scheme') === 'light';
-        document.body.classList.toggle('is-hero-light', light);
+        if (light === document.body.classList.contains('is-hero-light')) {
+            return;
+        }
+
+        window.clearTimeout(headerTimer);
+        var delay = reduceMotion() ? 0 : Math.round((duration || 0) / 2);
+        if (delay <= 0) {
+            document.body.classList.toggle('is-hero-light', light);
+
+            return;
+        }
+
+        headerTimer = window.setTimeout(function () {
+            document.body.classList.toggle('is-hero-light', light);
+        }, delay);
     }
 
     function initHero(root) {
@@ -376,7 +400,7 @@
             slide.setAttribute('aria-hidden', 'false');
             slide.removeAttribute('inert');
             activateMedia(slide);
-            syncHeaderToSlide(root, slide);
+            syncHeaderToSlide(root, slide, duration);
 
             dots.forEach(function (dot) {
                 var active = parseInt(dot.getAttribute('data-hero-goto'), 10) === current;

@@ -225,6 +225,7 @@ final class HeroRenderer
         $vars['--hero-duration'] = (int) $s['transition_duration'] . 'ms';
         $vars['--hero-title-size'] = 'var(--hero-title-' . $s['title_size'] . ')';
         $vars['--hero-subtitle-size'] = 'var(--hero-subtitle-' . $s['subtitle_size'] . ')';
+        $vars['--hero-text-offset'] = (int) $s['text_offset_top'] . 'px';
         foreach (self::GAP_VARS as $key => $var) {
             $vars[$var] = (int) $s[$key] . 'px';
         }
@@ -248,6 +249,9 @@ final class HeroRenderer
             $mobile['--hero-min-h'] = (string) $s['height_mobile_value'];
         } elseif ($s['height_mobile'] !== '' && isset(self::HEIGHTS_MOBILE[$s['height_mobile']])) {
             $mobile['--hero-min-h'] = self::HEIGHTS_MOBILE[$s['height_mobile']];
+        }
+        if ($s['text_offset_top_mobile'] !== '') {
+            $mobile['--hero-text-offset'] = (int) $s['text_offset_top_mobile'] . 'px';
         }
         if ($s['title_size_mobile'] !== '') {
             $mobile['--hero-title-size'] = 'var(--hero-title-' . $s['title_size_mobile'] . ')';
@@ -618,8 +622,12 @@ final class HeroRenderer
         if ($d['image_fit'] === 'contain') {
             $vars['--hero-fit'] = 'contain';
         }
-        // Отступы частей текста: пусто у слайда — берётся значение обложки,
-        // поэтому переменную объявляем только когда слайд от неё отходит.
+        // Отступ всего блока и промежутки между частями: пусто у слайда —
+        // берётся значение обложки, поэтому переменную объявляем только
+        // когда слайд от неё отходит.
+        if ($d['text_offset_top'] !== '') {
+            $vars['--hero-text-offset'] = (int) $d['text_offset_top'] . 'px';
+        }
         foreach (self::GAP_VARS as $key => $var) {
             if ($d[$key] !== '') {
                 $vars[$var] = (int) $d[$key] . 'px';

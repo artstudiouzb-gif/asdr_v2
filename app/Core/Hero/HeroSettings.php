@@ -59,6 +59,13 @@ final class HeroSettings
             // двойной), поэтому у обложек, сделанных до появления настройки,
             // ничего не сдвинется. Первый элемент отступ не получает — его
             // снимает CSS, иначе текст отъезжал бы от верхней границы.
+            // Отступ всего текстового блока сверху. Расстояния gap_* — это
+            // промежутки МЕЖДУ частями, и у первой части они не действуют:
+            // опустить колонку целиком ими нельзя, приходилось дописывать
+            // padding в «Свой CSS» страницы.
+            'text_offset_top' => 0,
+            'text_offset_top_mobile' => '',
+
             'gap_title' => 12,
             'gap_subtitle' => 12,
             'gap_actions' => 24,
@@ -150,6 +157,8 @@ final class HeroSettings
             'subtitle_size' => BlockDataInput::enum($input, 'subtitle_size', ['s', 'm', 'l'], 'm'),
             'title_size_mobile' => BlockDataInput::enum($input, 'title_size_mobile', ['s', 'm', 'l', 'xl'], ''),
             'subtitle_size_mobile' => BlockDataInput::enum($input, 'subtitle_size_mobile', ['s', 'm', 'l'], ''),
+            'text_offset_top' => self::gap($input['text_offset_top'] ?? null, 0),
+            'text_offset_top_mobile' => self::optionalGap($input['text_offset_top_mobile'] ?? null),
             'gap_title' => self::gap($input['gap_title'] ?? null, 12),
             'gap_subtitle' => self::gap($input['gap_subtitle'] ?? null, 12),
             'gap_actions' => self::gap($input['gap_actions'] ?? null, 24),
@@ -215,6 +224,8 @@ final class HeroSettings
         $s['text_align_y_mobile'] = $enum($s['text_align_y_mobile'] ?? '', ['top', 'center', 'bottom'], '');
         $s['title_size'] = $enum($s['title_size'] ?? '', ['s', 'm', 'l', 'xl'], 'l');
         $s['subtitle_size'] = $enum($s['subtitle_size'] ?? '', ['s', 'm', 'l'], 'm');
+        $s['text_offset_top'] = self::gap($s['text_offset_top'] ?? null, 0);
+        $s['text_offset_top_mobile'] = self::optionalGap($s['text_offset_top_mobile'] ?? null);
         $s['gap_title'] = self::gap($s['gap_title'] ?? null, 12);
         $s['gap_subtitle'] = self::gap($s['gap_subtitle'] ?? null, 12);
         $s['gap_actions'] = self::gap($s['gap_actions'] ?? null, 24);
@@ -284,6 +295,22 @@ final class HeroSettings
      * вплотную»), поэтому пустая строка и ноль различаются: пусто читается
      * как умолчание, а 0 сохраняется как есть.
      */
+    /**
+     * Отступ, который можно не задавать: пустое значение означает «как на
+     * десктопе» (у обложки) или «как у обложки» (у слайда).
+     */
+    private static function optionalGap(mixed $value): int|string
+    {
+        if ($value === null || (is_string($value) && trim($value) === '')) {
+            return '';
+        }
+        if (!is_numeric($value)) {
+            return '';
+        }
+
+        return max(0, min(200, (int) $value));
+    }
+
     private static function gap(mixed $value, int $default): int
     {
         if ($value === null || (is_string($value) && trim($value) === '')) {

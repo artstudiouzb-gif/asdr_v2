@@ -834,6 +834,17 @@ body .site-header--sticky.is-scrolled { box-shadow: 0 8px 28px rgba(11,26,48,.14
 
 /* Прозрачная шапка: накладывается на первый экран; текст/иконки белые.
    При прокрутке (is-scrolled) возвращается сплошной фон и цвета темы. */
+/* Плотность подложки объявлена типизированной переменной: обычные custom
+   properties не анимируются, и при смене кадра затемнение исчезало скачком.
+   С @property браузер умеет её интерполировать, и подложка уходит вместе с
+   переходом между слайдами. Где @property не поддержан — прежний скачок,
+   поведение не ломается. */
+@property --hdr-scrim {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0.48;
+}
+
 /* Прозрачная шапка лежит поверх произвольного кадра слайда, поэтому под ней
    всегда есть затемняющая подложка: белое лого и белое меню иначе пропадают на
    светлой картинке. Схема слайда эту дыру не закрывает — она описывает заливку,
@@ -849,6 +860,9 @@ body .site-header--transparent:not(.is-scrolled) {
     );
     border-bottom-color: var(--hdr-border, rgba(255, 255, 255, .18));
     box-shadow: none;
+    transition-property: --hdr-scrim, border-bottom-color;
+    transition-duration: .3s;
+    transition-timing-function: ease;
 }
 /* Прозрачная шапка накладывается на первый экран (absolute), а в связке
    с «липкой» после прокрутки переключается в fixed со сплошным фоном. */
@@ -866,6 +880,9 @@ body:has(.site-header--transparent) .site-topbar {
         rgba(0, 0, 0, var(--hdr-scrim, .48))
     );
     border-bottom: 0; color: var(--hdr-fg, #fff);
+    transition-property: --hdr-scrim, color;
+    transition-duration: .3s, .25s;
+    transition-timing-function: ease;
 }
 body:has(.site-header--transparent) .site-topbar a,
 body:has(.site-header--transparent) .site-topbar .site-lang-switcher__item,
@@ -956,6 +973,16 @@ body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__trigger {
 body .site-header--transparent:not(.is-scrolled) .site-header__logo span,
 body .site-header--transparent:not(.is-scrolled) .hdr-contact {
     text-shadow: var(--hdr-ink-shadow, 0 1px 2px rgba(0, 0, 0, .45));
+}
+/* Смена набора приходится на середину перехода между кадрами; короткий
+   переход цвета убирает остаточный щелчок у текста и знака. Иконки-кнопки
+   свой transition уже имеют. */
+body .site-header--transparent:not(.is-scrolled) .site-header__logo,
+body .site-header--transparent:not(.is-scrolled) .site-header__logo span,
+body .site-header--transparent:not(.is-scrolled) .hdr-contact,
+body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__current,
+body .site-header--transparent:not(.is-scrolled) .site-burger {
+    transition: color .25s ease, border-color .25s ease;
 }
 
 body.is-hero-light .site-header--transparent:not(.is-scrolled) .site-header__logo-light { display: none; }
