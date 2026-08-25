@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Core\ErrorHandler;
-use App\Core\PdoAttr;
 
 /*
  * Совместимость с PHP 8.5. Хостинг обновляет версию без спроса, а сайт до
@@ -60,7 +59,7 @@ test('В коде нет вызовов, устаревших в PHP 8.5', funct
         '/\bfinfo_close\s*\(/' => 'finfo_close(): объект finfo освобождается сам',
         '/\bxml_parser_free\s*\(/' => 'xml_parser_free(): XMLParser освобождается сам',
         '/\$http_response_header\b/' => '$http_response_header: код ответа берётся из stream_get_meta_data()',
-        '/\bPDO::(MYSQL|PGSQL|SQLITE|OCI|FB|SQLSRV)_[A-Z]/' => 'драйверная константа PDO — через App\Core\PdoAttr',
+        '/\bPDO::(MYSQL|PGSQL|SQLITE|OCI|FB|SQLSRV)_[A-Z]/' => 'драйверная константа PDO — подкласс драйвера (Pdo\Mysql::ATTR_*)',
         '/->setAccessible\s*\(/' => 'Reflection::setAccessible(): не нужен с PHP 8.1',
         '/\(\s*(integer|boolean|double|binary)\s*\)\s*[\$\(]/' => 'неканоническое имя приведения — (int)/(bool)/(float)/(string)',
         '/\bMHASH_[A-Z]/' => 'константы MHASH_* устарели — hash_hmac()',
@@ -75,11 +74,6 @@ test('В коде нет вызовов, устаревших в PHP 8.5', funct
     $offenders = [];
     foreach (php85_project_sources() as $path => $source) {
         foreach ($rules as $pattern => $why) {
-            // Единственное законное упоминание старой константы — в самом
-            // помощнике: он собирает её имя строкой для PHP 8.2–8.3.
-            if ($path === 'app/Core/PdoAttr.php' && str_contains($pattern, 'PDO::')) {
-                continue;
-            }
             if (preg_match($pattern, $source) === 1) {
                 $offenders[] = $path . ' — ' . $why;
             }
@@ -124,14 +118,16 @@ test('Уведомление об устаревшем API пишется в ж�
     assert_contains($marker, $written, 'в журнале должно быть само сообщение');
 });
 
-test('Драйверные атрибуты PDO берутся из имени, доступного текущей версии PHP', function (): void {
-    // На 8.4+ существует подкласс Pdo\Mysql, на 8.2–8.3 — только константы
-    // PDO::MYSQL_ATTR_*. Значения одинаковые, поэтому проверяем сам факт
-    // разрешения имени и то, что оно совпадает с константой этой версии.
-    $expected = defined('Pdo\\Mysql::ATTR_USE_BUFFERED_QUERY')
-        ? constant('Pdo\\Mysql::ATTR_USE_BUFFERED_QUERY')
-        : constant('PDO::MYSQL_ATTR_USE_BUFFERED_QUERY');
-
-    assert_same($expected, PdoAttr::mysql('USE_BUFFERED_QUERY'));
-    assert_true(PdoAttr::mysql('MULTI_STATEMENTS') > 0, 'MULTI_STATEMENTS должен разрешаться');
+test('Драйверные атрибуты PDO берутся из подкласса драйвера', function (): void {
+    // Минимум проекта — PHP 8.4, где у драйверов появились свои подклассы.
+    // Прежние константы `PDO::MYSQL_ATTR_*` в 8.5 объявлены устаревшими, и
+    // обращение к ним печатало бы уведомление при каждом соединении с базой.
+    assert_true(
+        defined('Pdo\\Mysql::ATTR_USE_BUFFERED_QUERY'),
+        'подкласс Pdo\\Mysql обязан быть доступен — минимум проекта PHP 8.4'
+    );
+    assert_true(
+        \Pdo\Mysql::ATTR_MULTI_STATEMENTS > 0,
+        'MULTI_STATEMENTS обязан разрешаться'
+    );
 });

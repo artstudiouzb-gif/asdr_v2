@@ -6,7 +6,7 @@
 ## Что это
 Госсайт «Агентство стратегического развития…». Тестовый адрес — **artstudio.uz**
 (прежний asr.artstudio.uz больше не существует).
-Собственная CMS: **чистый PHP 8.2+ без runtime-зависимостей Composer**,
+Собственная CMS: **чистый PHP 8.4+ без runtime-зависимостей Composer**,
 MySQL/MariaDB. Composer/PHPStan и npm/Playwright нужны только разработке и CI. Свой
 автозагрузчик (`app/Core/bootstrap.php`), свой роутер (`public/index.php`),
 свой тест-раннер. Деплой — shared-хостинг (cPanel), поэтому: никаких внешних
@@ -47,7 +47,7 @@ MySQL/MariaDB. Composer/PHPStan и npm/Playwright нужны только раз
 
 ## Как запустить локально
 
-Нужны PHP 8.2+ и MySQL/MariaDB. В Linux-контейнере БД при необходимости
+Нужны PHP 8.4+ и MySQL/MariaDB. В Linux-контейнере БД при необходимости
 поднимается отдельно; встроенный PHP-сервер запускается с router-файлом,
 поскольку он не читает `.htaccess`.
 ```bash
@@ -414,7 +414,7 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   `Asset::rewriteMedia()` переписывает `/uploads/public` в HTML на CDN.
   Pull-zone CDN (BunnyCDN и т.п.) — без переноса домена. `App\Core\Cloudflare` —
   purge через API (только если домен проксируется через CF).
-- **CI**: `.github/workflows/ci.yml` — 4 джобы: php -l + тесты на PHP 8.2/8.3/8.4/8.5
+- **CI**: `.github/workflows/ci.yml` — 4 джобы: php -l + тесты на PHP 8.4/8.5
   с MariaDB; PHPStan **блокирующий** (`composer analyse`) + `composer audit`;
   проверка синтаксиса JS (`node --check`); browser smoke на Chromium (Playwright).
 
@@ -610,9 +610,14 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   `E_USER_DEPRECATED` уходят в `storage/logs/error.log` (уровень `DEPRECATED`,
   одинаковое сообщение за запрос пишется один раз), остальные ошибки
   по-прежнему становятся исключением — молчаливое предупреждение это потерянные
-  данные. Драйверные атрибуты PDO берутся через `App\Core\PdoAttr::mysql()`
-  (на 8.4+ это `Pdo\Mysql::ATTR_*`, на 8.2–8.3 — прежняя константа), а список
-  устаревших вызовов стережёт тест 263.
+  данные. Драйверные атрибуты PDO берутся из подкласса драйвера
+  (`Pdo\Mysql::ATTR_*`), а список устаревших вызовов стережёт тест 263.
+- **Минимум — PHP 8.4, боевой сервер на 8.5.** Планка стоит там же в четырёх
+  местах: `EnvironmentCheck` (установщик), `scripts/release_check.php`,
+  `composer.json` и матрица CI. Поднимать её ради самого подъёма незачем —
+  версия сервера от этого не меняется; 8.4 выбран как первая версия с
+  подклассами драйверов PDO, из-за которых исчез класс-помощник, и оставляет
+  один шаг запаса вниз, если хостинг откатит версию.
 - **Произвольный код — только супер-админ, и только внешними файлами.** Поля
   страницы `custom_css`/`custom_js` (`CustomAssetHelper`) публикуют свой код
   файлами через `GeneratedCss`/`GeneratedJs`, инлайна в HTML нет. Адрес с

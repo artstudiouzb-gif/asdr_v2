@@ -1,6 +1,6 @@
 # ArtStudio CMS
 
-CMS на чистом PHP 8.2+ и MySQL/MariaDB — **без Composer, npm и внешних
+CMS на чистом PHP 8.4+ и MySQL/MariaDB — **без Composer, npm и внешних
 библиотек во время выполнения**. Composer/PHPStan и npm/Playwright используются
 только для разработки и CI. Всё, от TOTP и SMTP-клиента до Web Push (RFC 8291/8292) и
 QR-генератора, реализовано на стандартных расширениях PHP. Дизайн страниц
@@ -68,7 +68,7 @@ QR-генератора, реализовано на стандартных ра
 
 ## Требования
 
-- PHP 8.2+ с `pdo_mysql`, `mbstring`, `json`, `gd`, `curl`, `dom`, `openssl`, `zip`
+- PHP 8.4+ с `pdo_mysql`, `mbstring`, `json`, `gd`, `curl`, `dom`, `openssl`, `zip`
 - MySQL 5.7+ / MariaDB 10.3+
 - Apache (`mod_rewrite`, `mod_headers`) или nginx
   ([docs/nginx.conf.example](docs/nginx.conf.example))
@@ -201,7 +201,7 @@ php scripts/release_check.php
 ### CI
 
 `.github/workflows/ci.yml` на каждый push/PR запускает четыре задачи: `php -l`
-и полный прогон тестов на PHP 8.2–8.5 с MySQL 8; обязательный PHPStan и
+и полный прогон тестов на PHP 8.4 и 8.5 с MySQL 8; обязательный PHPStan и
 `composer audit`; проверку синтаксиса JavaScript и актуальности production-
 ассетов на Node.js 22; публичные browser-smoke сценарии в Chromium. При падении browser smoke отчёт,
 скриншоты и лог PHP-сервера сохраняются в artifact `browser-smoke-diagnostics`.
