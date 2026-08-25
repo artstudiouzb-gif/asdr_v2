@@ -29,7 +29,7 @@ $add = static function (string $name, string $status, string $message) use (&$ch
     $checks[] = ['name' => $name, 'status' => $status, 'message' => $message];
 };
 
-$add('php_version', version_compare(PHP_VERSION, '8.2.0', '>=') ? 'ok' : 'error', 'PHP ' . PHP_VERSION);
+$add('php_version', version_compare(PHP_VERSION, '8.4.0', '>=') ? 'ok' : 'error', 'PHP ' . PHP_VERSION);
 foreach (['pdo_mysql', 'mbstring', 'gd', 'curl', 'dom', 'fileinfo', 'openssl', 'zip'] as $extension) {
     $add('ext_' . $extension, extension_loaded($extension) ? 'ok' : 'error', $extension);
 }

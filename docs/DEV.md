@@ -7,7 +7,7 @@ Welcome to the **ArtStudio CMS** developer documentation. This guide details how
 ## 1. System Requirements & Local Setup
 
 ### Requirements
-- **PHP**: 8.2 or higher
+- **PHP**: 8.4 or higher
 - **Extensions**: `pdo_mysql`, `mbstring`, `gd`, `openssl`, `json`, `session`, `ctype`
 - **Database**: MariaDB 10.5+ or MySQL 8.0+
 

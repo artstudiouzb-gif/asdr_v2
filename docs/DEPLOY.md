@@ -1,12 +1,12 @@
 # Деплой и чек-лист первого релиза
 
-ArtStudio CMS — чистый PHP 8.2+ / MySQL(MariaDB), без Composer и npm на
+ArtStudio CMS — чистый PHP 8.4+ / MySQL(MariaDB), без Composer и npm на
 production. Эти инструменты используются только для проверок разработки и CI.
 Ниже — минимальные шаги для боевого запуска.
 
 ## 1. Требования окружения
 
-- **PHP 8.2+** с расширениями: `pdo_mysql`, `zip`, `gd`, `curl`, `mbstring`,
+- **PHP 8.4+** с расширениями: `pdo_mysql`, `zip`, `gd`, `curl`, `mbstring`,
   `dom`, `openssl`.
 - **MySQL 5.7+/MariaDB 10.3+**.
 - Веб-сервер Apache (с `mod_rewrite`, `mod_headers`) или nginx.
