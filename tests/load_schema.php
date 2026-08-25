@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../app/Core/MigrationRunner.php';
+require_once __DIR__ . '/../app/Core/PdoAttr.php';
 
 $dbName = $argv[1] ?? 'asdr_test';
 $host = getenv('TEST_DB_HOST') ?: (getenv('DB_HOST') ?: '127.0.0.1');
@@ -13,7 +14,7 @@ $pass = getenv('TEST_DB_PASSWORD') ?: (getenv('DB_PASSWORD') ?: '');
 $dsnRoot = sprintf('mysql:host=%s;port=%s;charset=utf8mb4', $host, $port);
 $pdo = new PDO($dsnRoot, $user, $pass, [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::MYSQL_ATTR_MULTI_STATEMENTS => true,
+    \App\Core\PdoAttr::mysql('MULTI_STATEMENTS') => true,
 ]);
 
 $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");

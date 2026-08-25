@@ -201,7 +201,7 @@ php scripts/release_check.php
 ### CI
 
 `.github/workflows/ci.yml` на каждый push/PR запускает четыре задачи: `php -l`
-и полный прогон тестов на PHP 8.2–8.4 с MySQL 8; обязательный PHPStan и
+и полный прогон тестов на PHP 8.2–8.5 с MySQL 8; обязательный PHPStan и
 `composer audit`; проверку синтаксиса JavaScript и актуальности production-
 ассетов на Node.js 22; публичные browser-smoke сценарии в Chromium. При падении browser smoke отчёт,
 скриншоты и лог PHP-сервера сохраняются в artifact `browser-smoke-diagnostics`.

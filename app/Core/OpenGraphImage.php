@@ -72,7 +72,7 @@ final class OpenGraphImage
             imagestring($img, 3, 100, 520, 'Официальный источник информации', $textMuted);
 
             imagepng($img, $cacheFile, 6);
-            imagedestroy($img);
+            unset($img);
 
             self::serveImage($cacheFile);
         } catch (Throwable $e) {

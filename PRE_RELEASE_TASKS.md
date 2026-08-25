@@ -18,7 +18,7 @@ production-сервера и реального контента. Полный �
   реализованы для фоновых очередей.
 - Вложенное меню, библиотека из 31 типа блоков, Columns, варианты reveal,
   SVG-иконки, ревизии блоков и предпросмотр черновиков реализованы.
-- CI выполняет четыре задачи: PHP 8.2–8.4 + MySQL 8 / MariaDB, PHPStan/Composer audit,
+- CI выполняет четыре задачи: PHP 8.2–8.5 + MySQL 8 / MariaDB, PHPStan/Composer audit,
   JavaScript syntax и browser smoke Chromium. Текущий объём — 607 сценариев без БД
   (плюс 140 требуют TEST_DB_*).
 
