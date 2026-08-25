@@ -2206,6 +2206,12 @@ final class DemoSeeder
         }
 
         $settings = \App\Core\Hero\HeroPresets::apply('navy', \App\Core\Hero\HeroSettings::defaults());
+        // Пресет Navy жёстко объявляет светлый текст — он и нужен на тёмном
+        // фоне. Но в демо есть светлый кадр, и жёсткая настройка оставила бы
+        // на нём белый текст: явный выбор всегда главнее автоподбора. На
+        // navy-фоне «авто» даёт тот же светлый текст, поэтому остальные слайды
+        // не меняются, а светлый получает тёмный.
+        $settings['content_scheme'] = 'auto';
         $settings['autoplay'] = true;
         $settings['autoplay_interval'] = 7;
         $settings['height'] = 'tall';
@@ -2285,6 +2291,34 @@ final class DemoSeeder
                     'media_type' => 'image',
                     'image' => '/uploads/public/demo-green-energy.jpg',
                     'cta_enabled' => '1', 'cta_url' => '/press-centr', 'cta_icon' => 'arrow-right',
+                ],
+            ],
+            [
+                // Светлый кадр. Демо показывало только тёмные обложки, и по
+                // нему нельзя было увидеть вторую половину поведения: белая
+                // вуаль осветляет фотографию, по ней же выбирается тёмный
+                // текст, а прозрачная шапка переходит в тёмный набор —
+                // логотип, меню и иконки перекрашиваются вместе с кадром.
+                // Заодно в заголовке показано выделение слова звёздочками.
+                'ru' => [
+                    'eyebrow' => 'Открытость',
+                    'title' => 'Аналитика и данные — в *открытом* доступе',
+                    'subtitle' => 'Показатели реформ, отчёты и наборы данных публикуются открыто: их можно скачать, перепроверить и использовать в собственных расчётах.',
+                    'cta_text' => 'Аналитика',
+                    'cta2_text' => '',
+                ],
+                'uz' => [
+                    'eyebrow' => 'Ochiqlik',
+                    'title' => 'Tahlil va ma’lumotlar — *ochiq* foydalanishda',
+                    'subtitle' => 'Islohotlar ko‘rsatkichlari, hisobotlar va ma’lumotlar to‘plamlari ochiq e’lon qilinadi: ularni yuklab olish, qayta tekshirish va o‘z hisob-kitoblaringizda ishlatish mumkin.',
+                    'cta_text' => 'Tahlil',
+                    'cta2_text' => '',
+                ],
+                'data' => [
+                    'media_type' => 'image',
+                    'image' => '/uploads/public/demo-strategy-meeting.jpg',
+                    'overlay' => 'solid', 'overlay_color' => '#ffffff', 'overlay_opacity' => '62',
+                    'cta_enabled' => '1', 'cta_url' => '/analitika', 'cta_icon' => 'arrow-right',
                 ],
             ],
         ];

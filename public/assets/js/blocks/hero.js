@@ -200,8 +200,16 @@
      * остальные её не касаются.
      */
     function headerFollows(root) {
-        return !!document.querySelector('.site-header--transparent')
-            && document.querySelector('[data-hero]') === root;
+        if (!document.querySelector('.site-header--transparent')) {
+            return false;
+        }
+        // Прозрачная шапка лежит поверх первого блока страницы. Обложка ниже
+        // по странице шапки не касается: под ней тогда другой блок, и
+        // подстраивать набор под чужой кадр — та же потеря контраста наоборот.
+        var block = root.closest('.cms-block') || root;
+        var first = document.querySelector('.cms-block');
+
+        return first ? first === block : document.querySelector('[data-hero]') === root;
     }
 
     function syncHeaderToSlide(root, slide) {

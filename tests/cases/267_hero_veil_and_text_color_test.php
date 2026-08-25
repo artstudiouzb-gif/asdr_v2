@@ -66,6 +66,39 @@ test('Прозрачная шапка идёт за наложением, а н�
     assert_contains('data-hero-scheme="dark"', $bare, 'без наложения шапка не должна доверять схеме');
 });
 
+test('Наложение решает и поверх заливки, а не только поверх фотографии', function () {
+    // Светлая вуаль осветляет navy-заливку ровно так же, как снимок. Пока
+    // проверка стояла только в ветке «есть медиа», такой кадр оставался с
+    // белым текстом на осветлённом фоне.
+    $onFill = hero_veil_render([
+        'title' => 'Проба', 'media_type' => 'none',
+        'overlay' => 'solid', 'overlay_color' => '#ffffff', 'overlay_opacity' => 70,
+    ], ['scheme' => 'navy', 'content_scheme' => 'auto']);
+    assert_contains('hero--content-dark', $onFill, 'светлая вуаль поверх заливки оставила светлый текст');
+    assert_contains('data-hero-scheme="light"', $onFill, 'шапка не заметила осветлённую заливку');
+
+    // Зеркальный случай: тёмная вуаль поверх светлой заливки.
+    $darkOnLight = hero_veil_render([
+        'title' => 'Проба', 'media_type' => 'none',
+        'overlay' => 'solid', 'overlay_color' => '#0b1a30', 'overlay_opacity' => 70,
+    ], ['scheme' => 'light', 'content_scheme' => 'auto']);
+    assert_contains('hero--content-light', $darkOnLight, 'тёмная вуаль поверх светлой заливки не затемнила кадр');
+    assert_contains('data-hero-scheme="dark"', $darkOnLight, 'шапка не заметила затемнённую заливку');
+});
+
+test('Градиентное наложение решает за текст, но не за шапку', function () {
+    // Градиент гуще там, где стоит текст, и к другому краю сходит на нет.
+    // Шапка тянется во всю ширину: над прозрачным краем тёмный набор лёг бы
+    // поверх неосветлённого снимка. Там работает её собственная подложка.
+    $gradient = hero_veil_render([
+        'title' => 'Проба', 'media_type' => 'image', 'image' => '/uploads/public/a.jpg',
+        'overlay' => 'gradient', 'overlay_color' => '#ffffff', 'overlay_opacity' => 70,
+    ], ['content_scheme' => 'auto']);
+
+    assert_contains('hero--content-dark', $gradient, 'под светлым градиентом текст обязан быть тёмным');
+    assert_contains('data-hero-scheme="dark"', $gradient, 'шапка доверилась градиенту, которого у её края нет');
+});
+
 test('Выбранный вручную цвет текста не затирается автоподбором', function () {
     // Классы hero--content-light/dark объявляют --hero-fg на .hero__text, то
     // есть глубже схемы. Пока они висят на слайде, свой цвет не виден.
