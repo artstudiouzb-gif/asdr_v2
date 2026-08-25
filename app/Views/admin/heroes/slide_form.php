@@ -293,7 +293,7 @@ $customDuration = (int) $data['duration'];
                 <span class="settings-card__icon"><?= AdminUi::icon('palette', 20) ?></span>
                 <div>
                     <h2 class="settings-card__title">Оформление и позиционирование текста</h2>
-                    <p class="settings-card__subtitle">Выравнивание, цветовая гамма, плотность затемнения и размеры шрифта. Схема красит фон кадра, если фон — заливка, а не фотография.</p>
+                    <p class="settings-card__subtitle">Выравнивание, цветовая гамма, плотность наложения и размеры шрифта. Схема красит фон кадра, если фон — заливка, а не фотография.</p>
                 </div>
             </div>
             <div class="form-grid-12">
@@ -316,14 +316,14 @@ $customDuration = (int) $data['duration'];
                 <?= $select('title_size', 'Размер заголовка', $inherit + $sizeOptions, (string) $data['title_size'], '', 'col-6') ?>
                 <?= $select('subtitle_size', 'Размер описания', $inherit + $subtitleSizes, (string) $data['subtitle_size'], '', 'col-6') ?>
 
-                <?= $select('overlay', 'Тип затемнения фона', $inherit + [
-                    'none' => 'Нет затемнения',
+                <?= $select('overlay', 'Наложение на фон', $inherit + [
+                    'none' => 'Без наложения',
                     'solid' => 'Сплошная заливка',
-                    'gradient' => 'Градиентное затемнение',
-                ], (string) $data['overlay'], '', 'col-4') ?>
+                    'gradient' => 'Градиент',
+                ], (string) $data['overlay'], 'Тёмный цвет затемняет кадр, светлый осветляет.', 'col-4') ?>
 
                 <div class="form-field col-4">
-                    <label for="overlay_opacity">Плотность затемнения (%)</label>
+                    <label for="overlay_opacity">Плотность наложения (%)</label>
                     <input type="number" id="overlay_opacity" name="overlay_opacity" min="0" max="100"
                            value="<?= (int) $data['overlay_opacity'] >= 0 ? (int) $data['overlay_opacity'] : '' ?>" placeholder="общая настройка">
                 </div>
@@ -336,11 +336,11 @@ $customDuration = (int) $data['duration'];
                     'to_top' => 'Снизу вверх',
                 ], (string) $data['overlay_direction'], '', 'col-4') ?>
 
-                <?php // Цвет затемнения и подложка у слайда работали и раньше,
+                <?php // Цвет наложения и подложка у слайда работали и раньше,
                       // но задать их можно было только у обложки — на кадре с
                       // другим настроением приходилось менять её целиком. ?>
                 <div class="col-4">
-                    <?= AdminUi::colorField('overlay_color', (string) $data['overlay_color'], 'Цвет затемнения', '#0b1a30', 'Использовать общую настройку обложки') ?>
+                    <?= AdminUi::colorField('overlay_color', (string) $data['overlay_color'], 'Цвет наложения', '#0b1a30', 'Использовать общую настройку обложки') ?>
                 </div>
                 <?= $select('panel', 'Подложка под текстом', $inherit + [
                     'on' => 'Включена',

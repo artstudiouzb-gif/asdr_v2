@@ -257,7 +257,7 @@ $overlayDirections = [
     $transitionLabels = [
         'fade' => 'Fade', 'slide' => 'Slide', 'fade_slide' => 'Fade + Slide', 'kenburns' => 'Ken Burns',
     ];
-    $overlayLabels = ['none' => 'без затемнения', 'solid' => 'сплошное', 'gradient' => 'градиент'];
+    $overlayLabels = ['none' => 'без наложения', 'solid' => 'сплошное', 'gradient' => 'градиент'];
     ?>
     <div class="form-card">
         <?= AdminUi::cardHeader('Оформление', 'palette') ?>
@@ -359,11 +359,11 @@ $overlayDirections = [
                 'custom' => 'Custom — свои цвета',
             ], (string) $settings['scheme']) ?>
             <?= $select('content_scheme', 'Цвет текста', [
-                'auto' => 'Auto — по фону и затемнению',
+                'auto' => 'Auto — по фону и наложению',
                 'light' => 'Light — светлый текст',
                 'dark' => 'Dark — тёмный текст',
             ], (string) $settings['content_scheme'],
-                'Считается отдельно от схемы обложки: на фотографии с затемнением текст светлый независимо от того, какой фон у секции.') ?>
+                'Считается отдельно от схемы обложки: на фотографии цвет текста выбирается по наложению — под тёмной вуалью светлый, под светлой тёмный.') ?>
             <div class="form-field">
                 <label for="scheme_bg">Свой фон (Custom)</label>
                 <input type="color" id="scheme_bg" name="scheme_bg" value="<?= htmlspecialchars((string) $settings['scheme_bg'], ENT_QUOTES) ?>">
@@ -380,17 +380,17 @@ $overlayDirections = [
         <?php
         ob_start(); ?>
             <div class="form-field form-field--wide">
-                <span class="form-hint">Затемнение лежит между фоном и текстом и отвечает за читаемость поверх любой фотографии.</span>
+                <span class="form-hint">Наложение лежит между фоном и текстом и отвечает за читаемость поверх любой фотографии. Цвет решает, что делать с кадром: тёмный затемняет, светлый осветляет. От плотности 25 % и выше по нему же выбирается цвет текста.</span>
             </div>
-            <?= $select('overlay', 'Затемнение', [
+            <?= $select('overlay', 'Наложение на фон', [
                 'none' => 'Нет', 'solid' => 'Сплошное', 'gradient' => 'Градиент',
             ], (string) $settings['overlay']) ?>
             <div class="form-field">
-                <label for="overlay_color">Цвет затемнения</label>
+                <label for="overlay_color">Цвет наложения</label>
                 <input type="color" id="overlay_color" name="overlay_color" value="<?= htmlspecialchars((string) $settings['overlay_color'], ENT_QUOTES) ?>">
             </div>
             <div class="form-field">
-                <label for="overlay_opacity">Плотность затемнения, %</label>
+                <label for="overlay_opacity">Плотность наложения, %</label>
                 <input type="number" id="overlay_opacity" name="overlay_opacity" min="0" max="100" value="<?= (int) $settings['overlay_opacity'] ?>">
             </div>
             <?= $select('overlay_direction', 'Направление градиента', $overlayDirections, (string) $settings['overlay_direction']) ?>
@@ -403,7 +403,7 @@ $overlayDirections = [
                 <label for="panel_opacity">Плотность подложки, %</label>
                 <input type="number" id="panel_opacity" name="panel_opacity" min="0" max="100" value="<?= (int) $settings['panel_opacity'] ?>">
             </div>
-        <?php echo $group('Затемнение и подложка', 'читаемость текста поверх фотографии',
+        <?php echo $group('Наложение и подложка', 'затемнить или осветлить кадр ради читаемости',
             ($overlayLabels[$settings['overlay']] ?? '') . ((string) $settings['overlay'] !== 'none' ? ' ' . (int) $settings['overlay_opacity'] . '%' : ''),
             (string) ob_get_clean()); ?>
 
