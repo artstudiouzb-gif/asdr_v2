@@ -293,7 +293,7 @@ $customDuration = (int) $data['duration'];
                 <span class="settings-card__icon"><?= AdminUi::icon('palette', 20) ?></span>
                 <div>
                     <h2 class="settings-card__title">Оформление и позиционирование текста</h2>
-                    <p class="settings-card__subtitle">Выравнивание, цветовая гамма, плотность затемнения и размеры шрифта.</p>
+                    <p class="settings-card__subtitle">Выравнивание, цветовая гамма, плотность затемнения и размеры шрифта. Схема красит фон кадра, если фон — заливка, а не фотография.</p>
                 </div>
             </div>
             <div class="form-grid-12">
@@ -335,6 +335,29 @@ $customDuration = (int) $data['duration'];
                     'to_bottom' => 'Сверху вниз',
                     'to_top' => 'Снизу вверх',
                 ], (string) $data['overlay_direction'], '', 'col-4') ?>
+
+                <?php // Цвет затемнения и подложка у слайда работали и раньше,
+                      // но задать их можно было только у обложки — на кадре с
+                      // другим настроением приходилось менять её целиком. ?>
+                <div class="col-4">
+                    <?= AdminUi::colorField('overlay_color', (string) $data['overlay_color'], 'Цвет затемнения', '#0b1a30', 'Использовать общую настройку обложки') ?>
+                </div>
+                <?= $select('panel', 'Подложка под текстом', $inherit + [
+                    'on' => 'Включена',
+                    'off' => 'Выключена',
+                ], (string) $data['panel'], 'Полупрозрачная плашка под текстом — выручает на пёстрой фотографии.', 'col-4') ?>
+
+                <?php // Цвета схемы «Custom»: без них выбор «Индивидуальная» у
+                      // слайда молча брал цвета обложки. ?>
+                <div class="col-4">
+                    <?= AdminUi::colorField('scheme_bg', (string) $data['scheme_bg'], 'Свой фон (Custom)', '#0b1a30', 'Использовать общую настройку обложки') ?>
+                </div>
+                <div class="col-4">
+                    <?= AdminUi::colorField('scheme_text', (string) $data['scheme_text'], 'Свой цвет текста (Custom)', '#ffffff', 'Использовать общую настройку обложки') ?>
+                </div>
+                <div class="col-4">
+                    <?= AdminUi::colorField('scheme_accent', (string) $data['scheme_accent'], 'Цвет основной кнопки', '#173a63', 'Использовать общую настройку обложки') ?>
+                </div>
             </div>
         </div>
 
