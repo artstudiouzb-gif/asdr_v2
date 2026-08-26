@@ -12,7 +12,11 @@
        на 110px внутрь от логотипа, подвала и строки «Обновлено», которые
        стоят по краю контейнера. Родитель уже даёт нужные поля. */
     --editorial-wide: 100%;
-    --editorial-reading: 840px;
+    /* Ширина колонки чтения. 840px давали 88 знаков в строке при основном
+       кегле — читаемо, но длиннее нормы (60–75). 760px дают около 80: глаз
+       возвращается к началу строки увереннее, а композиция страницы и ширина
+       сеток не меняются. */
+    --editorial-reading: 760px;
     --editorial-line: color-mix(in srgb, var(--gov-border) 92%, transparent);
     --editorial-muted: color-mix(in srgb, var(--gov-muted) 94%, transparent);
     /* Корень страницы — не секция: здесь цвет свой. Внутри блоков правила
@@ -591,7 +595,9 @@
 }
 
 .editorial-page__content > .cms-block--text .block-text--section .block-text__content {
-    max-width: 900px;
+    /* Ширина чтения общая: своя 900px давала 94 знака в строке — длиннее
+       остальных блоков той же страницы и заметно длиннее комфортных 60–75. */
+    max-width: var(--editorial-reading);
     margin-top: 12px;
     color: var(--section-muted-fg, var(--editorial-muted));
     font-size: var(--font-size-body, var(--step-0));
