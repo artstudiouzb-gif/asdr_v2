@@ -319,10 +319,6 @@ $overlayDirections = [
             </div>
             <?= $select('title_size', 'Размер заголовка', $sizeOptions, (string) $settings['title_size']) ?>
             <?= $select('subtitle_size', 'Размер описания', $subtitleSizes, (string) $settings['subtitle_size']) ?>
-            <?= $select('text_position_mobile', 'Текст по горизонтали (телефон)', ['' => 'Как на десктопе'] + $posOptions, (string) $settings['text_position_mobile']) ?>
-            <?= $select('text_align_y_mobile', 'Текст по вертикали (телефон)', ['' => 'Как на десктопе'] + $yOptions, (string) $settings['text_align_y_mobile']) ?>
-            <?= $select('title_size_mobile', 'Размер заголовка (телефон)', ['' => 'Как на десктопе'] + $sizeOptions, (string) $settings['title_size_mobile']) ?>
-            <?= $select('subtitle_size_mobile', 'Размер описания (телефон)', ['' => 'Как на десктопе'] + $subtitleSizes, (string) $settings['subtitle_size_mobile']) ?>
             <?php
             // Отступ всего блока сверху — отдельно от промежутков между
             // частями: те у первой части не действуют, и опустить колонку
@@ -332,13 +328,10 @@ $overlayDirections = [
                 <label for="text_offset_top">Отступ текста сверху, px</label>
                 <input type="number" id="text_offset_top" name="text_offset_top" min="0" max="200" step="1"
                        value="<?= (int) $settings['text_offset_top'] ?>">
-                <span class="form-hint">Опускает весь текстовый блок. 0 — как раньше.</span>
-            </div>
-            <div class="form-field">
-                <label for="text_offset_top_mobile">Отступ текста сверху на телефоне, px</label>
-                <input type="number" id="text_offset_top_mobile" name="text_offset_top_mobile" min="0" max="200" step="1"
-                       value="<?= $settings['text_offset_top_mobile'] === '' ? '' : (int) $settings['text_offset_top_mobile'] ?>"
-                       placeholder="как на десктопе">
+                <span class="form-hint">
+                    Опускает весь текстовый блок. 0 — как раньше. На телефоне
+                    отступ не занимает больше десятой части высоты экрана.
+                </span>
             </div>
             <?php
             // Расстояния между частями текста. Отступ задаётся сверху у каждой

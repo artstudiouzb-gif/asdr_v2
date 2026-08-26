@@ -233,23 +233,22 @@ final class HeroRenderer
 
         $css = $scope . ' .hero{' . self::declarations($vars) . '}';
 
-        // Телефон: своя высота и свои размеры текста. Десктопная композиция на
-        // узком экране разъезжается, и общей настройкой это лечится только
-        // ценой десктопа.
+        // Телефон: своя высота — она задаётся не размером текста, а форматом
+        // экрана. Размеры заголовка и подзаголовка мобильной настройки не
+        // требуют: шкала --hero-title-* построена на clamp() с vw и на узком
+        // экране сама садится на нижнюю ступень.
         $mobile = [];
         if ($s['height_mobile'] === 'custom' && $s['height_mobile_value'] !== '') {
             $mobile['--hero-min-h'] = (string) $s['height_mobile_value'];
         } elseif ($s['height_mobile'] !== '' && isset(self::HEIGHTS_MOBILE[$s['height_mobile']])) {
             $mobile['--hero-min-h'] = self::HEIGHTS_MOBILE[$s['height_mobile']];
         }
-        if ($s['text_offset_top_mobile'] !== '') {
-            $mobile['--hero-text-offset'] = (int) $s['text_offset_top_mobile'] . 'px';
-        }
-        if ($s['title_size_mobile'] !== '') {
-            $mobile['--hero-title-size'] = 'var(--hero-title-' . $s['title_size_mobile'] . ')';
-        }
-        if ($s['subtitle_size_mobile'] !== '') {
-            $mobile['--hero-subtitle-size'] = 'var(--hero-subtitle-' . $s['subtitle_size_mobile'] . ')';
+        // Отступ задан в пикселях по десктопу, и на телефоне крупное значение
+        // выдавило бы текст за экран. Поэтому на узком экране он ограничен
+        // десятой частью высоты окна: небольшие отступы не меняются вовсе,
+        // а крайние сами становятся уместными — второй настройки не нужно.
+        if ((int) $s['text_offset_top'] > 0) {
+            $mobile['--hero-text-offset'] = 'min(' . (int) $s['text_offset_top'] . 'px,10vh)';
         }
         if ($mobile !== []) {
             $css .= "\n@media (max-width:720px){" . $scope . ' .hero{' . self::declarations($mobile) . '}}';
@@ -292,12 +291,6 @@ final class HeroRenderer
         // CSS» страницы, и он должен выигрывать у классов раскладки.
         if ((string) $d['css_class'] !== '') {
             $classes[] = (string) $d['css_class'];
-        }
-        if ($s['text_position_mobile'] !== '') {
-            $classes[] = 'hero--pos-m-' . $s['text_position_mobile'];
-        }
-        if ($s['text_align_y_mobile'] !== '') {
-            $classes[] = 'hero--y-m-' . $s['text_align_y_mobile'];
         }
 
         $html = '<div class="' . implode(' ', $classes) . '" data-hero-slide data-hero-index="' . $index . '"'

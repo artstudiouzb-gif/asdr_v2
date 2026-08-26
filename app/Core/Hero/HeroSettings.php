@@ -47,24 +47,16 @@ final class HeroSettings
             'text_position' => 'left',
             'text_align_y' => 'center',
             'text_width' => '',
-            'text_position_mobile' => '',
-            'text_align_y_mobile' => '',
             'title_size' => 'l',
             'subtitle_size' => 'm',
-            'title_size_mobile' => '',
-            'subtitle_size_mobile' => '',
 
-            // Отступ сверху у каждой части текстового блока, в пикселях.
-            // Умолчания повторяют прежнюю вёрстку (шаг шкалы 12px, у кнопок
-            // двойной), поэтому у обложек, сделанных до появления настройки,
-            // ничего не сдвинется. Первый элемент отступ не получает — его
-            // снимает CSS, иначе текст отъезжал бы от верхней границы.
-            // Отступ всего текстового блока сверху. Расстояния gap_* — это
-            // промежутки МЕЖДУ частями, и у первой части они не действуют:
-            // опустить колонку целиком ими нельзя, приходилось дописывать
-            // padding в «Свой CSS» страницы.
+            // Отступ всего текстового блока сверху, в пикселях. Расстояния
+            // gap_* — это промежутки МЕЖДУ частями, и у первой части они не
+            // действуют: опустить колонку целиком ими нельзя, приходилось
+            // дописывать padding в «Свой CSS» страницы. На телефоне значение
+            // ограничивается высотой окна (см. HeroRenderer::rootCss), поэтому
+            // отдельной мобильной настройки нет.
             'text_offset_top' => 0,
-            'text_offset_top_mobile' => '',
 
             'gap_title' => 12,
             'gap_subtitle' => 12,
@@ -146,14 +138,9 @@ final class HeroSettings
             'text_position' => BlockDataInput::enum($input, 'text_position', ['left', 'center', 'right'], 'left'),
             'text_align_y' => BlockDataInput::enum($input, 'text_align_y', ['top', 'center', 'bottom'], 'center'),
             'text_width' => self::length($input, 'text_width_value', 'text_width_unit', ['px', '%', 'vw']),
-            'text_position_mobile' => BlockDataInput::enum($input, 'text_position_mobile', ['left', 'center', 'right'], ''),
-            'text_align_y_mobile' => BlockDataInput::enum($input, 'text_align_y_mobile', ['top', 'center', 'bottom'], ''),
             'title_size' => BlockDataInput::enum($input, 'title_size', ['s', 'm', 'l', 'xl'], 'l'),
             'subtitle_size' => BlockDataInput::enum($input, 'subtitle_size', ['s', 'm', 'l'], 'm'),
-            'title_size_mobile' => BlockDataInput::enum($input, 'title_size_mobile', ['s', 'm', 'l', 'xl'], ''),
-            'subtitle_size_mobile' => BlockDataInput::enum($input, 'subtitle_size_mobile', ['s', 'm', 'l'], ''),
             'text_offset_top' => self::gap($input['text_offset_top'] ?? null, 0),
-            'text_offset_top_mobile' => self::optionalGap($input['text_offset_top_mobile'] ?? null),
             'gap_title' => self::gap($input['gap_title'] ?? null, 12),
             'gap_subtitle' => self::gap($input['gap_subtitle'] ?? null, 12),
             'gap_actions' => self::gap($input['gap_actions'] ?? null, 24),
@@ -210,18 +197,13 @@ final class HeroSettings
         $s['text_position'] = $enum($s['text_position'] ?? '', ['left', 'center', 'right'], 'left');
         $s['text_align_y'] = $enum($s['text_align_y'] ?? '', ['top', 'center', 'bottom'], 'center');
         $s['text_width'] = self::cssLength($s['text_width'] ?? '', ['px', '%', 'vw']);
-        $s['text_position_mobile'] = $enum($s['text_position_mobile'] ?? '', ['left', 'center', 'right'], '');
-        $s['text_align_y_mobile'] = $enum($s['text_align_y_mobile'] ?? '', ['top', 'center', 'bottom'], '');
         $s['title_size'] = $enum($s['title_size'] ?? '', ['s', 'm', 'l', 'xl'], 'l');
         $s['subtitle_size'] = $enum($s['subtitle_size'] ?? '', ['s', 'm', 'l'], 'm');
         $s['text_offset_top'] = self::gap($s['text_offset_top'] ?? null, 0);
-        $s['text_offset_top_mobile'] = self::optionalGap($s['text_offset_top_mobile'] ?? null);
         $s['gap_title'] = self::gap($s['gap_title'] ?? null, 12);
         $s['gap_subtitle'] = self::gap($s['gap_subtitle'] ?? null, 12);
         $s['gap_actions'] = self::gap($s['gap_actions'] ?? null, 24);
         $s['gap_art'] = self::gap($s['gap_art'] ?? null, 12);
-        $s['title_size_mobile'] = $enum($s['title_size_mobile'] ?? '', ['s', 'm', 'l', 'xl'], '');
-        $s['subtitle_size_mobile'] = $enum($s['subtitle_size_mobile'] ?? '', ['s', 'm', 'l'], '');
 
         $s['scheme'] = $enum($s['scheme'] ?? '', self::SCHEMES, 'navy');
         $s['scheme_bg'] = self::hex($s['scheme_bg'] ?? '', '#0b1a30');
@@ -273,27 +255,6 @@ final class HeroSettings
         $limits = self::limitsFor($unit);
 
         return self::number(max($limits[0], min($limits[1], $value))) . $unit;
-    }
-
-    /**
-     * Отступ части текстового блока, px. Ноль — значимое значение («прижать
-     * вплотную»), поэтому пустая строка и ноль различаются: пусто читается
-     * как умолчание, а 0 сохраняется как есть.
-     */
-    /**
-     * Отступ, который можно не задавать: пустое значение означает «как на
-     * десктопе» (у обложки) или «как у обложки» (у слайда).
-     */
-    private static function optionalGap(mixed $value): int|string
-    {
-        if ($value === null || (is_string($value) && trim($value) === '')) {
-            return '';
-        }
-        if (!is_numeric($value)) {
-            return '';
-        }
-
-        return max(0, min(200, (int) $value));
     }
 
     private static function gap(mixed $value, int $default): int

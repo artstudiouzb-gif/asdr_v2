@@ -620,14 +620,6 @@
     .hero__nav { padding: var(--space-xs) var(--space-s); }
     .hero__thumbs { display: none; }
     .hero--no-arrows-mobile .hero__arrow { display: none; }
-    .hero--pos-m-left .hero__inner { justify-content: flex-start; text-align: start; }
-    .hero--pos-m-center .hero__inner { justify-content: center; text-align: center; }
-    .hero--pos-m-right .hero__inner { justify-content: flex-end; text-align: end; }
-    .hero--pos-m-center .hero__text { align-items: center; }
-    .hero--pos-m-right .hero__text { align-items: flex-end; }
-    .hero__slide.hero--y-m-top { align-items: start; }
-    .hero__slide.hero--y-m-center { align-items: center; }
-    .hero__slide.hero--y-m-bottom { align-items: end; }
     /* Кнопки на узком экране растягиваются на строку: обрезанная CTA хуже,
        чем высокая колонка. */
     .hero__actions { width: 100%; }
