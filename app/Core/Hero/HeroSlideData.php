@@ -100,10 +100,6 @@ final class HeroSlideData
             'link_new_tab' => false,
 
             // --- Цвет (пусто = как у обложки) ---
-            'scheme' => '',
-            'scheme_bg' => '',
-            'scheme_text' => '',
-            'scheme_accent' => '',
             'content_scheme' => '',
 
             // --- Затемнение и подложка (пусто = как у обложки) ---
@@ -111,25 +107,11 @@ final class HeroSlideData
             'overlay_color' => '',
             'overlay_opacity' => -1,
             'overlay_direction' => '',
-            'panel' => '',
 
             // --- Раскладка (пусто = как у обложки) ---
-            'text_position' => '',
-            'text_align_y' => '',
-            'text_position_mobile' => '',
-            'text_align_y_mobile' => '',
-            'title_size' => '',
-            'subtitle_size' => '',
-            'title_size_mobile' => '',
-            'subtitle_size_mobile' => '',
             // Отступ сверху у части текста. Пусто — «как у обложки»;
             // 0 — значимое значение «прижать вплотную», поэтому пустая
             // строка и ноль здесь разное.
-            'text_offset_top' => '',
-            'gap_title' => '',
-            'gap_subtitle' => '',
-            'gap_actions' => '',
-            'gap_art' => '',
 
             // --- Кнопки ---
             'cta_enabled' => false,
@@ -248,10 +230,6 @@ final class HeroSlideData
             'link_url' => BlockDataInput::safeLink($input['link_url'] ?? ''),
             'link_new_tab' => !empty($input['link_new_tab']),
 
-            'scheme' => BlockDataInput::enum($input, 'scheme', HeroSettings::SCHEMES, ''),
-            'scheme_bg' => BlockDataInput::optionalColor($input, 'scheme_bg'),
-            'scheme_text' => BlockDataInput::optionalColor($input, 'scheme_text'),
-            'scheme_accent' => BlockDataInput::optionalColor($input, 'scheme_accent'),
             'content_scheme' => BlockDataInput::enum($input, 'content_scheme', HeroSettings::CONTENT_SCHEMES, ''),
 
             'overlay' => BlockDataInput::enum($input, 'overlay', HeroSettings::OVERLAYS, ''),
@@ -260,21 +238,7 @@ final class HeroSlideData
             // (затемнение выключено ползунком), поэтому пустоту им не заменяем.
             'overlay_opacity' => self::optionalPercent($input['overlay_opacity'] ?? null),
             'overlay_direction' => BlockDataInput::enum($input, 'overlay_direction', HeroSettings::OVERLAY_DIRECTIONS, ''),
-            'panel' => BlockDataInput::enum($input, 'panel', ['on', 'off'], ''),
 
-            'text_position' => BlockDataInput::enum($input, 'text_position', ['left', 'center', 'right'], ''),
-            'text_align_y' => BlockDataInput::enum($input, 'text_align_y', ['top', 'center', 'bottom'], ''),
-            'text_position_mobile' => BlockDataInput::enum($input, 'text_position_mobile', ['left', 'center', 'right'], ''),
-            'text_align_y_mobile' => BlockDataInput::enum($input, 'text_align_y_mobile', ['top', 'center', 'bottom'], ''),
-            'title_size' => BlockDataInput::enum($input, 'title_size', ['s', 'm', 'l', 'xl'], ''),
-            'subtitle_size' => BlockDataInput::enum($input, 'subtitle_size', ['s', 'm', 'l'], ''),
-            'title_size_mobile' => BlockDataInput::enum($input, 'title_size_mobile', ['s', 'm', 'l', 'xl'], ''),
-            'subtitle_size_mobile' => BlockDataInput::enum($input, 'subtitle_size_mobile', ['s', 'm', 'l'], ''),
-            'text_offset_top' => self::gap($input['text_offset_top'] ?? null),
-            'gap_title' => self::gap($input['gap_title'] ?? null),
-            'gap_subtitle' => self::gap($input['gap_subtitle'] ?? null),
-            'gap_actions' => self::gap($input['gap_actions'] ?? null),
-            'gap_art' => self::gap($input['gap_art'] ?? null),
 
             'cta_enabled' => !empty($input['cta_enabled']),
             'cta_text' => BlockDataInput::plain($input, 'cta_text', $locale),
@@ -399,10 +363,6 @@ final class HeroSlideData
         $d['link_url'] = BlockDataInput::safeLink($d['link_url'] ?? '');
         $d['link_new_tab'] = !empty($d['link_new_tab']);
 
-        $d['scheme'] = $enum($d['scheme'] ?? '', HeroSettings::SCHEMES, '');
-        $d['scheme_bg'] = $hex($d['scheme_bg'] ?? '');
-        $d['scheme_text'] = $hex($d['scheme_text'] ?? '');
-        $d['scheme_accent'] = $hex($d['scheme_accent'] ?? '');
         $d['content_scheme'] = $enum($d['content_scheme'] ?? '', HeroSettings::CONTENT_SCHEMES, '');
 
         $d['overlay'] = $enum($d['overlay'] ?? '', HeroSettings::OVERLAYS, '');
@@ -420,19 +380,6 @@ final class HeroSlideData
 
         $d['overlay_opacity'] = self::optionalPercent($d['overlay_opacity'] ?? null);
         $d['overlay_direction'] = $enum($d['overlay_direction'] ?? '', HeroSettings::OVERLAY_DIRECTIONS, '');
-        $d['panel'] = $enum($d['panel'] ?? '', ['on', 'off'], '');
-
-        $d['text_position'] = $enum($d['text_position'] ?? '', ['left', 'center', 'right'], '');
-        $d['text_align_y'] = $enum($d['text_align_y'] ?? '', ['top', 'center', 'bottom'], '');
-        $d['text_position_mobile'] = $enum($d['text_position_mobile'] ?? '', ['left', 'center', 'right'], '');
-        $d['text_align_y_mobile'] = $enum($d['text_align_y_mobile'] ?? '', ['top', 'center', 'bottom'], '');
-        $d['title_size'] = $enum($d['title_size'] ?? '', ['s', 'm', 'l', 'xl'], '');
-        $d['subtitle_size'] = $enum($d['subtitle_size'] ?? '', ['s', 'm', 'l'], '');
-        foreach (['text_offset_top', 'gap_title', 'gap_subtitle', 'gap_actions', 'gap_art'] as $gap) {
-            $d[$gap] = self::gap($d[$gap] ?? null);
-        }
-        $d['title_size_mobile'] = $enum($d['title_size_mobile'] ?? '', ['s', 'm', 'l', 'xl'], '');
-        $d['subtitle_size_mobile'] = $enum($d['subtitle_size_mobile'] ?? '', ['s', 'm', 'l'], '');
 
         foreach (['cta', 'cta2'] as $cta) {
             $d[$cta . '_enabled'] = !empty($d[$cta . '_enabled']);

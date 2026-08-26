@@ -27,7 +27,7 @@ function hero_offset_css(array $slide, array $settings = []): string
     return (string) ($rendered['css'] ?? '');
 }
 
-test('Отступ текста сверху доезжает до стилей обложки, слайда и телефона', function () {
+test('Отступ текста сверху доезжает до стилей обложки и телефона', function () {
     $slide = ['title' => 'Заголовок', 'media_type' => 'none'];
 
     $hero = hero_offset_css($slide, ['text_offset_top' => 40]);
@@ -37,16 +37,12 @@ test('Отступ текста сверху доезжает до стилей 
     $mobile = hero_offset_css($slide, ['text_offset_top' => 40, 'text_offset_top_mobile' => 16]);
     assert_contains('--hero-text-offset:16px', $mobile, 'мобильный отступ не попал в стили');
 
-    // Слайд переопределяет обложку.
-    $own = hero_offset_css($slide + ['text_offset_top' => 90], ['text_offset_top' => 40]);
-    assert_contains('--hero-text-offset:90px', $own, 'слайд не может задать свой отступ');
-
-    // Пустое значение у слайда — «как у обложки»: своей переменной нет.
-    $inherited = hero_offset_css($slide, ['text_offset_top' => 40]);
+    // Отступ принадлежит обложке: у слайда своего больше нет, и переменная
+    // объявляется ровно один раз.
     assert_same(
         1,
-        substr_count($inherited, '--hero-text-offset'),
-        'слайд объявляет отступ, хотя должен наследовать значение обложки'
+        substr_count($hero, '--hero-text-offset'),
+        'отступ объявляется дважды — настройка снова живёт в двух местах'
     );
 });
 
@@ -62,16 +58,14 @@ test('Отступ задаётся из форм, а не только из б�
     assert_contains('name="text_offset_top"', $hero, 'в форме обложки нет поля отступа');
     assert_contains('name="text_offset_top_mobile"', $hero, 'в форме обложки нет отступа для телефона');
 
-    $slide = (string) file_get_contents(APP_ROOT . '/app/Views/admin/heroes/slide_form.php');
-    assert_contains('name="text_offset_top"', $slide, 'в форме слайда нет поля отступа');
-
     // Значения доезжают до данных: у обложки числом, у слайда — с пустым
     // значением как признаком наследования.
     $settings = HeroSettings::normalize(['text_offset_top' => '40', 'text_offset_top_mobile' => '']);
     assert_same(40, $settings['text_offset_top']);
     assert_same('', $settings['text_offset_top_mobile'], 'пустой мобильный отступ должен означать «как на десктопе»');
 
-    $data = HeroSlideData::normalize(['text_offset_top' => '90'], 'ru');
-    assert_same(90, $data['text_offset_top']);
-    assert_same('', HeroSlideData::normalize([], 'ru')['text_offset_top'], 'пусто у слайда — «как у обложки»');
+    assert_false(
+        array_key_exists('text_offset_top', HeroSlideData::defaults()),
+        'у слайда снова появился свой отступ'
+    );
 });

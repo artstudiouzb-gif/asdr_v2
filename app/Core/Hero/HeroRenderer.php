@@ -276,9 +276,12 @@ final class HeroRenderer
     private static function slide(array $d, int $index, int $count, array $s, string $scope, string $headingTag): array
     {
         $first = $index === 0;
-        $position = $d['text_position'] !== '' ? $d['text_position'] : $s['text_position'];
-        $alignY = $d['text_align_y'] !== '' ? $d['text_align_y'] : $s['text_align_y'];
-        $panel = $d['panel'] !== '' ? $d['panel'] === 'on' : (bool) $s['panel'];
+        // Раскладка у всех слайдов общая: она принадлежит обложке, а не
+        // отдельному кадру. Переопределения у слайда убраны — они удваивали
+        // поверхность ошибок и почти не использовались.
+        $position = (string) $s['text_position'];
+        $alignY = (string) $s['text_align_y'];
+        $panel = (bool) $s['panel'];
         $contentScheme = self::contentScheme($d, $s);
 
         $classes = [
@@ -298,14 +301,10 @@ final class HeroRenderer
         if ((string) $d['css_class'] !== '') {
             $classes[] = (string) $d['css_class'];
         }
-        if ($d['text_position_mobile'] !== '') {
-            $classes[] = 'hero--pos-m-' . $d['text_position_mobile'];
-        } elseif ($s['text_position_mobile'] !== '') {
+        if ($s['text_position_mobile'] !== '') {
             $classes[] = 'hero--pos-m-' . $s['text_position_mobile'];
         }
-        if ($d['text_align_y_mobile'] !== '') {
-            $classes[] = 'hero--y-m-' . $d['text_align_y_mobile'];
-        } elseif ($s['text_align_y_mobile'] !== '') {
+        if ($s['text_align_y_mobile'] !== '') {
             $classes[] = 'hero--y-m-' . $s['text_align_y_mobile'];
         }
 
@@ -592,20 +591,9 @@ final class HeroRenderer
      */
     private static function slideCss(array $d, array $s, string $scope, int $index, string $position): string
     {
+        // Цвет и фон принадлежат обложке: у слайда своей схемы больше нет.
+        // Кадр отличается фотографией и наложением, а не палитрой.
         $vars = [];
-        if ($d['scheme'] !== '') {
-            $vars = self::schemeVars(
-                (string) $d['scheme'],
-                $d['scheme_bg'] !== '' ? (string) $d['scheme_bg'] : (string) $s['scheme_bg'],
-                $d['scheme_text'] !== '' ? (string) $d['scheme_text'] : (string) $s['scheme_text'],
-                $d['scheme_accent'] !== '' ? (string) $d['scheme_accent'] : (string) $s['scheme_accent']
-            );
-            // Отдельная переменная для фона: --hero-bg применяется правилом на
-            // контейнере обложки, и объявление на слайде его не перекрашивает.
-            // Слайд красится своей, а без своей схемы остаётся прозрачным —
-            // тогда виден фон обложки, как было раньше.
-            $vars['--hero-slide-bg'] = $vars['--hero-bg'];
-        }
 
         $overlayMode = $d['overlay'] !== '' ? (string) $d['overlay'] : (string) $s['overlay'];
         if ($overlayMode !== 'none'
@@ -622,18 +610,6 @@ final class HeroRenderer
         if ($d['image_fit'] === 'contain') {
             $vars['--hero-fit'] = 'contain';
         }
-        // Отступ всего блока и промежутки между частями: пусто у слайда —
-        // берётся значение обложки, поэтому переменную объявляем только
-        // когда слайд от неё отходит.
-        if ($d['text_offset_top'] !== '') {
-            $vars['--hero-text-offset'] = (int) $d['text_offset_top'] . 'px';
-        }
-        foreach (self::GAP_VARS as $key => $var) {
-            if ($d[$key] !== '') {
-                $vars[$var] = (int) $d[$key] . 'px';
-            }
-        }
-
         // Прозрачность фоновой надписи — своя у слайда, поэтому переменной в
         // scoped CSS: инлайн-стили в блоках запрещены.
         if (trim((string) $d['watermark']) !== '') {
@@ -648,24 +624,12 @@ final class HeroRenderer
         }
 
         $desktop = [];
-        if ($d['title_size'] !== '') {
-            $desktop['--hero-title-size'] = 'var(--hero-title-' . $d['title_size'] . ')';
-        }
-        if ($d['subtitle_size'] !== '') {
-            $desktop['--hero-subtitle-size'] = 'var(--hero-subtitle-' . $d['subtitle_size'] . ')';
-        }
         $vars = array_merge($vars, $desktop);
 
         $selector = $scope . ' .hero__slide[data-hero-index="' . $index . '"]';
         $css = $vars === [] ? '' : $selector . '{' . self::declarations($vars) . '}';
 
         $mobile = [];
-        if ($d['title_size_mobile'] !== '') {
-            $mobile['--hero-title-size'] = 'var(--hero-title-' . $d['title_size_mobile'] . ')';
-        }
-        if ($d['subtitle_size_mobile'] !== '') {
-            $mobile['--hero-subtitle-size'] = 'var(--hero-subtitle-' . $d['subtitle_size_mobile'] . ')';
-        }
         if ($mobile !== []) {
             $css .= ($css !== '' ? "\n" : '')
                 . '@media (max-width:720px){' . $selector . '{' . self::declarations($mobile) . '}}';
@@ -823,7 +787,7 @@ final class HeroRenderer
         // глубже схемы, и затирали выбранный цвет: поле в форме было, а цвет
         // всегда выходил белым или тёмно-синим. Отдельное значение снимает
         // оба правила, и остаётся цвет из схемы.
-        if (self::hasOwnTextColor($d, $s)) {
+        if (self::hasOwnTextColor($s)) {
             return 'custom';
         }
 
@@ -837,24 +801,21 @@ final class HeroRenderer
 
         // Наложения нет или оно слабое: под ним видно сам фон, и цвет берётся
         // по схеме — на фотографию положиться нельзя, а схема предсказуема.
-        return self::schemeIsDark($d, $s) ? 'light' : 'dark';
+        return self::schemeIsDark($s) ? 'light' : 'dark';
     }
 
     /**
-     * Задан ли цвет текста вручную: схема «Custom» со своим цветом — у слайда
-     * или, если слайд её не переопределяет, у обложки.
+     * Задан ли цвет текста вручную: схема «Custom» обложки со своим цветом.
      *
-     * @param array<string, mixed> $d
      * @param array<string, mixed> $s
      */
-    private static function hasOwnTextColor(array $d, array $s): bool
+    private static function hasOwnTextColor(array $s): bool
     {
-        $scheme = $d['scheme'] !== '' ? (string) $d['scheme'] : (string) $s['scheme'];
-        if ($scheme !== 'custom') {
+        if ((string) $s['scheme'] !== 'custom') {
             return false;
         }
 
-        $color = $d['scheme_text'] !== '' ? (string) $d['scheme_text'] : (string) $s['scheme_text'];
+        $color = (string) $s['scheme_text'];
 
         return $color !== '';
     }
@@ -913,23 +874,21 @@ final class HeroRenderer
             return 'dark';
         }
 
-        // Заливка слайда: своя схема, а если её нет — схема обложки. Так же
-        // считает и сам фон (см. --hero-slide-bg), поэтому шапка и кадр не
-        // разъезжаются.
-        return self::schemeIsDark($d, $s) ? 'dark' : 'light';
+        // Под шапкой заливка обложки: своей схемы у слайда нет.
+        return self::schemeIsDark($s) ? 'dark' : 'light';
     }
 
     /**
-     * @param array<string, mixed> $d
+     * Тёмная ли заливка обложки. Схема принадлежит обложке целиком: у слайда
+     * своей нет, он отличается кадром и наложением.
+     *
      * @param array<string, mixed> $s
      */
-    private static function schemeIsDark(array $d, array $s): bool
+    private static function schemeIsDark(array $s): bool
     {
-        $scheme = $d['scheme'] !== '' ? (string) $d['scheme'] : (string) $s['scheme'];
+        $scheme = (string) $s['scheme'];
         if ($scheme === 'custom') {
-            $bg = $d['scheme_bg'] !== '' ? (string) $d['scheme_bg'] : (string) $s['scheme_bg'];
-
-            return self::luminance($bg) < 0.5;
+            return self::luminance((string) $s['scheme_bg']) < 0.5;
         }
 
         return $scheme !== 'light';

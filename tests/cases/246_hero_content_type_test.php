@@ -105,8 +105,7 @@ test('Слайд: пустое оформление означает «как у
 
     assert_same('', $slide['overlay'], 'затемнение наследуется от обложки');
     assert_same(-1, $slide['overlay_opacity'], 'плотность наследуется, а 0 остаётся значимым');
-    assert_same('', $slide['text_position']);
-    assert_same('', $slide['scheme']);
+    assert_same('', $slide['content_scheme'], 'цвет текста наследуется от обложки');
 
     // Явное «нет» отличается от «как у обложки».
     $off = HeroSlideData::normalize(['title' => 'Т', 'overlay' => 'none', 'overlay_opacity' => '0']);
@@ -725,11 +724,12 @@ test('Отступы частей текста: умолчания сохран�
     assert_same(200, HeroSettings::normalize(['gap_actions' => '9999'])['gap_actions'], 'отступ ограничен сверху');
     assert_same(0, HeroSettings::normalize(['gap_actions' => '-40'])['gap_actions'], 'отрицательного отступа не бывает');
 
-    // У слайда пустое поле — «как у обложки», и это НЕ то же самое, что ноль.
-    $slide = HeroSlideData::normalize(['title' => 'Т']);
-    assert_same('', $slide['gap_actions'], 'слайд по умолчанию наследует отступ обложки');
-    assert_same(0, HeroSlideData::normalize(['title' => 'Т', 'gap_actions' => '0'])['gap_actions']);
-    assert_same(40, HeroSlideData::normalize(['title' => 'Т', 'gap_actions' => '40'])['gap_actions']);
+    // Переопределения у слайда убраны: отступы принадлежат обложке, иначе
+    // одно и то же значение живёт в двух местах и расходится.
+    assert_false(
+        array_key_exists('gap_actions', HeroSlideData::defaults()),
+        'у слайда снова появился свой отступ'
+    );
 
     // Переменная обложки печатается всегда, переменная слайда — только когда
     // слайд действительно отходит от общей настройки.
@@ -745,14 +745,6 @@ test('Отступы частей текста: умолчания сохран�
         substr_count(str_replace(' ', '', $inherit['css']), '--hero-gap-actions:'),
         'слайд без своей настройки переменную не переобъявляет'
     );
-
-    $own = HeroRenderer::render(
-        ['id' => 1, 'name' => 'Тест'],
-        [hero_test_slide(['title' => 'Т', 'gap_actions' => 0], 1)],
-        HeroSettings::withDefaults(['gap_actions' => 48]),
-        42
-    );
-    assert_contains('--hero-gap-actions:0px', str_replace(' ', '', $own['css']), 'ноль у слайда доезжает до CSS');
 
     // Первая часть текста отступ сверху не получает: настройка про расстояние
     // МЕЖДУ частями, а не про отрыв от границы блока.
