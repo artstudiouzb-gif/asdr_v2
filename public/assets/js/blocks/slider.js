@@ -177,6 +177,8 @@
                 if (!html) {
                     return;
                 }
+                // Разметку собрал наш же /goals/random — это шаблон сервера,
+                // а не текст со страницы: адреса и подписи он уже экранировал.
                 track.innerHTML = html;
                 // Точек ровно столько, сколько кадров у новой цели: у прежней
                 // их могло быть больше или меньше.
@@ -192,19 +194,30 @@
             return;
         }
         if (count < 2) {
-            dots.innerHTML = '';
+            dots.textContent = '';
             return;
         }
 
+        // Точки собираются узлами, а не строкой HTML. Подпись берётся из
+        // разметки (она переводится), и склейка её в строку с innerHTML — это
+        // тот самый случай, когда кавычка в переводе выносит атрибут наружу.
+        // setAttribute экранирует значение сам, и разбирать нечего.
         var sample = dots.querySelector('.block-slider__dot');
         var label = sample ? (sample.getAttribute('aria-label') || '').replace(/\d+\s*$/, '') : '';
-        var html = '';
+
+        var fragment = document.createDocumentFragment();
         for (var i = 0; i < count; i++) {
-            html += '<button type="button" class="block-slider__dot' + (i === 0 ? ' is-active' : '') + '"'
-                + ' data-slide-index="' + i + '" aria-label="' + label + (i + 1) + '"'
-                + ' aria-current="' + (i === 0 ? 'true' : 'false') + '"></button>';
+            var dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = 'block-slider__dot' + (i === 0 ? ' is-active' : '');
+            dot.setAttribute('data-slide-index', String(i));
+            dot.setAttribute('aria-label', label + (i + 1));
+            dot.setAttribute('aria-current', i === 0 ? 'true' : 'false');
+            fragment.appendChild(dot);
         }
-        dots.innerHTML = html;
+
+        dots.textContent = '';
+        dots.appendChild(fragment);
     }
 
     document.querySelectorAll('.block-slider').forEach(function (slider) {
