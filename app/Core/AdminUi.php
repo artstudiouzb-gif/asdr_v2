@@ -162,6 +162,7 @@ final class AdminUi
             'subscribers' => 'mail',
             'repository' => 'archive',
             'design' => 'palette',
+            'goals' => 'target',
             'widgets' => 'layout-grid',
             'header' => 'layout-navbar',
             'footer' => 'layout-bottombar',

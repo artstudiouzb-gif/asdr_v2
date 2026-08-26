@@ -28,6 +28,10 @@ if (!isset(WidgetRenderer::SLIDER_RATIOS[$ratio])) {
 }
 $autoplay = max(0, min(30, (int) ($data['autoplay'] ?? 0)));
 $shuffle = !empty($data['shuffle']);
+// Источник «случайная цель»: сервер отрисовал одну цель, но она уедет в кэш
+// страницы и станет общей для всех. Признак говорит скрипту запросить свежую
+// цель — так у каждого посетителя своя. Без JS остаётся отрисованная.
+$fromGoals = (string) ($data['source'] ?? 'manual') === 'goals';
 
 // Разметка и стили общие с блоком «Слайдер» — поведение у них одно, и второй
 // набор правил разъехался бы с первым. Скрипт подключаем отсюда: виджет
@@ -37,10 +41,10 @@ if ($images !== []) {
 }
 ?>
 <?php if ($images === []): ?>
-    <p class="widget-empty">Фотографии не добавлены.</p>
+    <p class="widget-empty"><?= $fromGoals ? 'Нет ни одной цели со снимками.' : 'Фотографии не добавлены.' ?></p>
 <?php else: ?>
 <div class="block-slider block-slider--ratio-<?= htmlspecialchars($ratio, ENT_QUOTES) ?>"
-     <?= $autoplay > 0 ? 'data-autoplay="' . $autoplay . '" ' : '' ?><?= $shuffle ? 'data-slider-shuffle ' : '' ?>role="region"
+     <?= $autoplay > 0 ? 'data-autoplay="' . $autoplay . '" ' : '' ?><?= $shuffle ? 'data-slider-shuffle ' : '' ?><?= $fromGoals ? 'data-goal-slider ' : '' ?>role="region"
      aria-roledescription="<?= htmlspecialchars(t('Карусель'), ENT_QUOTES) ?>"
      aria-label="<?= htmlspecialchars(t('Слайдер изображений'), ENT_QUOTES) ?>" tabindex="0">
     <div class="block-slider__track">

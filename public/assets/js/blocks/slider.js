@@ -154,15 +154,78 @@
         });
     }
 
-    document.querySelectorAll('.block-slider').forEach(function (slider) {
-        if (slider.hasAttribute('data-slider-shuffle')) {
-            shuffleSlides(slider);
+    /**
+     * Карусель «случайная цель». Сервер отрисовал одну цель, но она уедет в
+     * кэш страницы и станет общей для всех посетителей. Свежую цель просим
+     * здесь: ответ не кэшируется, и у каждого получается своя.
+     *
+     * Не ответил сервер — остаётся отрисованная цель. Пустой карусели не
+     * бывает ни при каком отказе, и без JS виджет тоже работает.
+     */
+    function loadRandomGoal(root, done) {
+        var track = root.querySelector('.block-slider__track');
+        if (!track || !window.fetch) {
+            done();
+            return;
         }
-        initSlider(slider, {
-            slide: '.block-slider__slide',
-            prev: '.block-slider__prev',
-            next: '.block-slider__next'
-        });
+
+        window.fetch('/goals/random', { headers: { Accept: 'text/html' }, credentials: 'same-origin' })
+            .then(function (response) {
+                return response.ok && response.status !== 204 ? response.text() : '';
+            })
+            .then(function (html) {
+                if (!html) {
+                    return;
+                }
+                track.innerHTML = html;
+                // Точек ровно столько, сколько кадров у новой цели: у прежней
+                // их могло быть больше или меньше.
+                rebuildDots(root, track.querySelectorAll('.block-slider__slide').length);
+            })
+            .catch(function () {})
+            .then(done, done);
+    }
+
+    function rebuildDots(root, count) {
+        var dots = root.querySelector('.block-slider__dots');
+        if (!dots) {
+            return;
+        }
+        if (count < 2) {
+            dots.innerHTML = '';
+            return;
+        }
+
+        var sample = dots.querySelector('.block-slider__dot');
+        var label = sample ? (sample.getAttribute('aria-label') || '').replace(/\d+\s*$/, '') : '';
+        var html = '';
+        for (var i = 0; i < count; i++) {
+            html += '<button type="button" class="block-slider__dot' + (i === 0 ? ' is-active' : '') + '"'
+                + ' data-slide-index="' + i + '" aria-label="' + label + (i + 1) + '"'
+                + ' aria-current="' + (i === 0 ? 'true' : 'false') + '"></button>';
+        }
+        dots.innerHTML = html;
+    }
+
+    document.querySelectorAll('.block-slider').forEach(function (slider) {
+        var start = function () {
+            if (slider.hasAttribute('data-slider-shuffle')) {
+                shuffleSlides(slider);
+            }
+            initSlider(slider, {
+                slide: '.block-slider__slide',
+                prev: '.block-slider__prev',
+                next: '.block-slider__next'
+            });
+        };
+
+        // Кадры подменяются до запуска: initSlider запоминает список слайдов,
+        // и запущенная на старых кадрах карусель листала бы уже удалённые узлы.
+        if (slider.hasAttribute('data-goal-slider')) {
+            loadRandomGoal(slider, start);
+        } else {
+            start();
+        }
     });
 
     document.querySelectorAll('[data-hero-slider]').forEach(function (hero) {
