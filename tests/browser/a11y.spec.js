@@ -23,6 +23,7 @@ const PAGES = [
     ['проект', '/projects/cifrovaya-transformaciya'],
     ['каталог документов', '/catalog/documenty'],
     ['контакты с формой', '/kontakty'],
+    ['страница со слайдером', '/antikorrupciya'],
 ];
 
 for (const [name, url] of PAGES) {

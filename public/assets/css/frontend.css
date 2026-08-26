@@ -388,7 +388,9 @@ summary:focus-visible {
     z-index: 2;
     display: flex;
     justify-content: center;
-    gap: 8px;
+    /* Промежуток держит области нажатия соседних точек несмыкающимися:
+       точка 10px + 14px = 24px между центрами, ровно размер области ниже. */
+    gap: 14px;
     pointer-events: none;
 }
 .block-slider__dot {
@@ -396,6 +398,7 @@ summary:focus-visible {
     height: 10px;
     min-width: 10px;
     padding: 0;
+    position: relative;
     border: 1px solid rgba(255, 255, 255, .9);
     border-radius: 50%;
     background: rgba(15, 23, 42, .45);
@@ -403,6 +406,19 @@ summary:focus-visible {
     cursor: pointer;
     pointer-events: auto;
     transition: width .2s ease, border-radius .2s ease, background-color .2s ease;
+}
+/* Точка нарисована мелкой намеренно — попадать по ней нужно всё равно.
+   Область нажатия расширяется прозрачным ::after, как у иконочных кнопок
+   шапки и стрелок обложки. Здесь 24px, а не 44px: при 44px области соседних
+   точек перекрылись бы, и нажатие уходило бы не на тот слайд. */
+.block-slider__dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 24px);
+    height: max(100%, 24px);
+    transform: translate(-50%, -50%);
 }
 .block-slider__dot.is-active {
     width: 26px;
