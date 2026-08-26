@@ -10,26 +10,35 @@ use App\Models\HeroSlideTranslation;
 
 // Фоновая надпись — крупное слово за содержимым (у слайда обложки и у секции).
 // Это декорация из текста, поэтому у неё три обязательства: перевод, молчание
-// у диктора и прозрачность для мыши. Размер и место задаются числами: нужный
-// кегль зависит от длины слова, пресетом его не угадать.
+// у диктора и прозрачность для мыши. Размер задаётся числом: нужный кегль
+// зависит от длины слова, пресетом его не угадать.
+//
+// Настроек ровно пять и они одинаковы на обеих поверхностях: текст, размер,
+// привязка по горизонтали и вертикали, заметность. Точные смещения, контур с
+// толщиной, свой цвет и выбор семейства убраны — слово рисуется цветом текста
+// секции или обложки, поэтому остаётся видимым на любой схеме.
 
-test('Фоновая надпись слайда: размер и смещение числами, с границами', function () {
+test('Фоновая надпись слайда: размер числом, с границами', function () {
     $d = HeroSlideData::normalize([
         'watermark' => '  aerion  ',
         'watermark_size' => '30',
         'watermark_x' => 'right',
         'watermark_y' => 'top',
-        'watermark_dx' => '-40',
-        'watermark_dy' => '15',
         'watermark_opacity' => '18',
     ]);
     assert_same('aerion', $d['watermark']);
     assert_same(30, $d['watermark_size']);
     assert_same('right', $d['watermark_x']);
     assert_same('top', $d['watermark_y']);
-    assert_same(-40, $d['watermark_dx']);
-    assert_same(15, $d['watermark_dy']);
     assert_same(18, $d['watermark_opacity']);
+
+    // Убранные ручки не возвращаются молча: у слайда их нет ни в умолчаниях,
+    // ни после нормализации присланной формы.
+    foreach (['watermark_dx', 'watermark_dy', 'watermark_style',
+              'watermark_stroke', 'watermark_color', 'watermark_font'] as $gone) {
+        assert_false(array_key_exists($gone, HeroSlideData::defaults()), 'ручка надписи вернулась: ' . $gone);
+        assert_false(array_key_exists($gone, $d), 'ручка надписи сохранилась из формы: ' . $gone);
+    }
 
     // Пусто — умолчание, а не край диапазона и не ноль: иначе очистка поля
     // схлопывала бы надпись в точку.
@@ -38,9 +47,8 @@ test('Фоновая надпись слайда: размер и смещени
     assert_same(12, $empty['watermark_opacity']);
 
     // За границы не выпускаем: 300vw — это надпись шириной в три экрана.
-    $huge = HeroSlideData::normalize(['watermark' => 'x', 'watermark_size' => '300', 'watermark_dx' => '999']);
+    $huge = HeroSlideData::normalize(['watermark' => 'x', 'watermark_size' => '300']);
     assert_same(60, $huge['watermark_size']);
-    assert_same(100, $huge['watermark_dx']);
 
     // Чужие значения привязки откатываются к умолчанию, а не попадают в класс.
     $bad = HeroSlideData::normalize(['watermark' => 'x', 'watermark_x' => 'куда-нибудь']);
@@ -77,14 +85,12 @@ test('Фоновая надпись секции появляется тольк
         'watermark_size' => '20',
         'watermark_x' => 'right',
         'watermark_y' => 'top',
-        'watermark_dy' => '-15',
         'watermark_opacity' => '9',
     ]);
     assert_same('TOP 5', $on['_watermark']);
     assert_same(20, $on['_watermark_size']);
     assert_same('right', $on['_watermark_x']);
     assert_same('top', $on['_watermark_y']);
-    assert_same(-15, $on['_watermark_dy']);
     assert_same(9, $on['_watermark_opacity']);
 });
 
@@ -159,32 +165,44 @@ test('Размер надписи не берётся из шрифтовой ш
     assert_contains('font-size: var(--hero-watermark-size, 22vw)', $hero);
 });
 
-test('Фоновая надпись секции с контуром (stroke), толщиной, позицией и кастомным цветом', function () {
+test('Настройки надписи одинаковы у секции и у обложки, лишних не осталось', function () {
     $normalized = BlockPresentationNormalizer::normalize([
         'watermark' => 'SERVICES',
-        'watermark_style' => 'outline',
-        'watermark_stroke' => '4',
         'watermark_x' => 'center',
         'watermark_y' => 'middle',
-        'watermark_dx' => '10',
-        'watermark_dy' => '-20',
         'watermark_size' => '25',
         'watermark_opacity' => '18',
-        'watermark_font' => 'heading',
+        // Убранные ручки приходят из старой формы — они не должны сохраняться.
+        'watermark_style' => 'outline',
+        'watermark_stroke' => '4',
+        'watermark_dx' => '10',
+        'watermark_dy' => '-20',
+        'watermark_font' => 'body',
         'watermark_color' => '#009bbe',
     ]);
 
     assert_same('SERVICES', $normalized['_watermark']);
-    assert_same('outline', $normalized['_watermark_style']);
-    assert_same(4, $normalized['_watermark_stroke']);
     assert_same('center', $normalized['_watermark_x']);
     assert_same('middle', $normalized['_watermark_y']);
-    assert_same(10, $normalized['_watermark_dx']);
-    assert_same(-20, $normalized['_watermark_dy']);
     assert_same(25, $normalized['_watermark_size']);
     assert_same(18, $normalized['_watermark_opacity']);
-    assert_same('heading', $normalized['_watermark_font']);
-    assert_same('#009bbe', $normalized['_watermark_color']);
+    foreach (['_watermark_style', '_watermark_stroke', '_watermark_dx',
+              '_watermark_dy', '_watermark_font', '_watermark_color'] as $gone) {
+        assert_false(array_key_exists($gone, $normalized), 'ручка надписи вернулась к секции: ' . $gone);
+    }
+
+    // Обе поверхности описываются одним набором ключей — иначе одна из форм
+    // молча обрастает настройками, которых нет у другой.
+    $heroKeys = array_values(array_filter(
+        array_keys(HeroSlideData::defaults()),
+        static fn (string $k): bool => str_starts_with($k, 'watermark')
+    ));
+    sort($heroKeys);
+    assert_same(
+        ['watermark', 'watermark_opacity', 'watermark_size', 'watermark_x', 'watermark_y'],
+        $heroKeys,
+        'набор настроек надписи у обложки разошёлся с секцией'
+    );
 
     $rendered = BlockRenderer::render([
         'id' => 43,
@@ -195,25 +213,34 @@ test('Фоновая надпись секции с контуром (stroke), �
     $css = (string) $rendered['css'];
 
     assert_contains('cms-block--has-watermark', $html);
-    assert_contains('cms-block__watermark--outline', $html);
-    assert_contains('cms-block__watermark--font-heading', $html);
     assert_contains('cms-block__watermark--x-center', $html);
     assert_contains('cms-block__watermark--y-middle', $html);
     assert_contains('aria-hidden="true">SERVICES</span>', $html);
+    assert_true(strpos($html, 'watermark--outline') === false, 'класс контура остался в разметке');
 
     assert_contains('--block-watermark-opacity:0.18', $css);
     assert_contains('--block-watermark-size:25vw', $css);
-    assert_contains('--block-watermark-dx:10%', $css);
-    assert_contains('--block-watermark-dy:-20%', $css);
-    assert_contains('--block-watermark-stroke:4px', $css);
-    assert_contains('--block-watermark-ink:#009bbe', $css);
+    foreach (['--block-watermark-dx', '--block-watermark-dy',
+              '--block-watermark-stroke', '--block-watermark-ink'] as $gone) {
+        assert_true(strpos($css, $gone) === false, 'мёртвая переменная надписи: ' . $gone);
+    }
 
-    // Настройки фоновой надписи и контура присутствуют в форме блока и скриптах админки
-    $formMarkup = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
-    assert_contains('name="watermark"', $formMarkup);
-    assert_contains('name="watermark_style"', $formMarkup);
-    assert_contains('name="watermark_stroke"', $formMarkup);
-    assert_contains('data-watermark-group', $formMarkup);
+    // Поля есть в обеих формах: у секции — в блоке настроек, у слайда обложки
+    // — вместе с заголовком. У слайда они однажды пропали при перестройке
+    // формы, и настройка год лежала в базе без способа её задать.
+    $sectionForm = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
+    assert_contains('name="watermark"', $sectionForm);
+    assert_contains('data-watermark-group', $sectionForm);
+    assert_true(strpos($sectionForm, 'name="watermark_stroke"') === false, 'поле контура вернулось в форму секции');
+
+    // Имена полей у слайда частью печатает помощник $select, поэтому ищем и
+    // готовый атрибут, и вызов помощника.
+    $slideForm = (string) file_get_contents(APP_ROOT . '/app/Views/admin/heroes/slide_form.php');
+    foreach (['name="watermark"', 'name="watermark_size"', 'name="watermark_opacity"',
+              "\$select('watermark_x'", "\$select('watermark_y'"] as $field) {
+        assert_contains($field, $slideForm, 'в форме слайда нет настройки надписи: ' . $field);
+    }
+    assert_contains('[watermark]', $slideForm, 'надпись не переводится из формы слайда');
 
     $adminJs = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin.js');
     assert_contains('data-watermark-group', $adminJs);
