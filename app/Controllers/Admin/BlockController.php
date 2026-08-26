@@ -502,10 +502,7 @@ final class BlockController
                         'url' => ($slideUrl !== '' && \App\Core\UrlGuard::isSafeLink($slideUrl)) ? $slideUrl : '',
                     ];
                 }
-                $sliderRatio = (string) ($_POST['ratio'] ?? '16-9');
-                if (!in_array($sliderRatio, ['16-9', '4-3', '21-9', 'auto'], true)) {
-                    $sliderRatio = '16-9';
-                }
+                $sliderRatio = \App\Core\SliderRatio::normalize($_POST['ratio'] ?? null);
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
                     // 0 — автопрокрутка выключена; верхний предел бережёт от
