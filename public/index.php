@@ -216,6 +216,8 @@ $router->post('/admin/blocks/{id}/revisions/restore', [AdminBlockController::cla
 $router->post('/admin/pages/{id}/snippets/save', [\App\Controllers\Admin\SnippetController::class, 'save']);
 $router->post('/admin/pages/{id}/snippets/insert', [\App\Controllers\Admin\SnippetController::class, 'insert']);
 $router->post('/admin/pages/{id}/presets/apply', [\App\Controllers\Admin\SnippetController::class, 'applyPreset']);
+$router->get('/admin/snippets/export', [\App\Controllers\Admin\SnippetController::class, 'export']);
+$router->post('/admin/snippets/import', [\App\Controllers\Admin\SnippetController::class, 'import']);
 $router->post('/admin/snippets/{id}/delete', [\App\Controllers\Admin\SnippetController::class, 'destroy']);
 
 // --- Admin: проекты ---
