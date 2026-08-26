@@ -9,7 +9,7 @@ use App\Core\WidgetRenderer;
 
 final class Widget
 {
-    public const TYPES = ['latest_news', 'contacts', 'custom_html', 'projects_list', 'team_list', 'subscribe'];
+    public const TYPES = ['latest_news', 'contacts', 'custom_html', 'projects_list', 'team_list', 'subscribe', 'photo_slider'];
 
     public const TYPE_LABELS = [
         'latest_news' => 'Последние новости',
@@ -18,6 +18,7 @@ final class Widget
         'projects_list' => 'Список проектов',
         'team_list' => 'Список команды',
         'subscribe' => 'Форма подписки на новости',
+        'photo_slider' => 'Фотокарусель',
     ];
 
     public static function all(): array

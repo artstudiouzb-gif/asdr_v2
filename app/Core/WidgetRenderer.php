@@ -25,6 +25,18 @@ final class WidgetRenderer
         'projects_list' => ['count' => 5],
         'team_list' => ['count' => 5],
         'subscribe' => ['text' => 'Eng muhim yangiliklar va tahliliy materiallarni pochtangizga oling.'],
+        // Карусель фотографий без подписей и ссылок. Порядок по умолчанию
+        // случайный — виджет для того и заводился, чтобы показывать набор
+        // снимков вперемешку.
+        'photo_slider' => ['slides' => [], 'shuffle' => true, 'autoplay' => 0, 'ratio' => '16-9'],
+    ];
+
+    /** Соотношения сторон кадра: ключ настройки => подпись в админке. */
+    public const SLIDER_RATIOS = [
+        '16-9' => '16:9 — широкий',
+        '4-3' => '4:3',
+        '21-9' => '21:9 — панорама',
+        'auto' => 'По размеру фотографии',
     ];
 
     /** Панель оформления виджета (хранится в data._design). */

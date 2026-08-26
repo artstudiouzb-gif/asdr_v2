@@ -405,6 +405,12 @@ final class BlockRenderer
             if (str_contains($rendered['html'], 'data-hero-transition')) {
                 $assets['hero_slides'] = true;
             }
+            // Виджет-фотокарусель внутри блока. Сам шаблон виджета просит
+            // скрипт у AssetCollector, но при попадании в кэш он не
+            // выполняется — из HTML же ключ виден и на кэше тоже.
+            if (str_contains($rendered['html'], 'widget--photo_slider')) {
+                $assets['slider'] = true;
+            }
             if (!empty($rendered['preload_image']) && $preloadImages === []) {
                 // Одного LCP-кандидата достаточно: дополнительные high-priority
                 // preload конкурировали бы с CSS и шрифтами первого экрана.
