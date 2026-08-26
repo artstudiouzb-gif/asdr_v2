@@ -34,11 +34,7 @@ final class HeroSlideData
 
     public const WATERMARK_Y = ['top', 'middle', 'bottom'];
 
-    /** Заливка или контур: контур даёт фирменный «вырезанный» знак. */
-    public const WATERMARK_STYLES = ['fill', 'outline'];
 
-    /** Шрифт надписи: заголовочный или основной — третьего в теме нет. */
-    public const WATERMARK_FONTS = ['heading', 'body'];
 
     /**
      * Значения по умолчанию — они же список допустимых ключей.
@@ -63,20 +59,13 @@ final class HeroSlideData
             // «средняя/крупная»: нужный кегль зависит от длины слова, и
             // угадать его пресетом заранее нельзя.
             'watermark_size' => 22,
-            // Привязка к краю плюс смещение в процентах от размера надписи:
-            // край задаёт грубо, смещение доводит до места.
+            // Привязка к краю кадра. Точная доводка смещениями убрана вместе
+            // с контуром, толщиной, своим цветом и выбором семейства: слово
+            // рисуется цветом текста обложки, поэтому остаётся видимым на
+            // любой схеме, а не только на той, под которую его подобрали.
             'watermark_x' => 'center',
             'watermark_y' => 'middle',
-            'watermark_dx' => 0,
-            'watermark_dy' => 0,
             'watermark_opacity' => 12,
-            'watermark_style' => 'fill',
-            // Толщина контура в пикселях; при заливке не используется.
-            'watermark_stroke' => 2,
-            // Пусто — цвет текста обложки: надпись остаётся видимой на любой
-            // схеме, а не только на той, под которую её подобрали.
-            'watermark_color' => '',
-            'watermark_font' => 'heading',
 
             // --- Фон ---
             'media_type' => 'none',
@@ -196,13 +185,7 @@ final class HeroSlideData
             'watermark_size' => self::ranged($input['watermark_size'] ?? null, 2, 60, 22),
             'watermark_x' => BlockDataInput::enum($input, 'watermark_x', self::WATERMARK_X, 'center'),
             'watermark_y' => BlockDataInput::enum($input, 'watermark_y', self::WATERMARK_Y, 'middle'),
-            'watermark_dx' => self::ranged($input['watermark_dx'] ?? null, -100, 100, 0),
-            'watermark_dy' => self::ranged($input['watermark_dy'] ?? null, -100, 100, 0),
             'watermark_opacity' => self::percent($input['watermark_opacity'] ?? null, 12),
-            'watermark_style' => BlockDataInput::enum($input, 'watermark_style', self::WATERMARK_STYLES, 'fill'),
-            'watermark_stroke' => self::ranged($input['watermark_stroke'] ?? null, 1, 12, 2),
-            'watermark_color' => BlockDataInput::optionalColor($input, 'watermark_color'),
-            'watermark_font' => BlockDataInput::enum($input, 'watermark_font', self::WATERMARK_FONTS, 'heading'),
 
             'media_type' => $mediaType,
             'image' => $image,
@@ -357,12 +340,7 @@ final class HeroSlideData
         $d['watermark_size'] = self::ranged($d['watermark_size'] ?? null, 2, 60, 22);
         $d['watermark_x'] = $enum($d['watermark_x'] ?? '', self::WATERMARK_X, 'center');
         $d['watermark_y'] = $enum($d['watermark_y'] ?? '', self::WATERMARK_Y, 'middle');
-        $d['watermark_dx'] = self::ranged($d['watermark_dx'] ?? null, -100, 100, 0);
-        $d['watermark_dy'] = self::ranged($d['watermark_dy'] ?? null, -100, 100, 0);
         $d['watermark_opacity'] = self::percent($d['watermark_opacity'] ?? null, 12);
-        $d['watermark_style'] = $enum($d['watermark_style'] ?? '', self::WATERMARK_STYLES, 'fill');
-        $d['watermark_stroke'] = self::ranged($d['watermark_stroke'] ?? null, 1, 12, 2);
-        $d['watermark_font'] = $enum($d['watermark_font'] ?? '', self::WATERMARK_FONTS, 'heading');
         $d['css_class'] = self::cssClass($d['css_class'] ?? '');
 
         $d['overlay_opacity'] = self::optionalPercent($d['overlay_opacity'] ?? null);

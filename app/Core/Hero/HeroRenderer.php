@@ -473,9 +473,7 @@ final class HeroRenderer
         }
 
         return '<span class="hero__watermark hero__watermark--x-' . htmlspecialchars((string) $d['watermark_x'], ENT_QUOTES)
-            . ' hero__watermark--y-' . htmlspecialchars((string) $d['watermark_y'], ENT_QUOTES)
-            . ' hero__watermark--' . htmlspecialchars((string) $d['watermark_style'], ENT_QUOTES)
-            . ' hero__watermark--font-' . htmlspecialchars((string) $d['watermark_font'], ENT_QUOTES) . '"'
+            . ' hero__watermark--y-' . htmlspecialchars((string) $d['watermark_y'], ENT_QUOTES) . '"'
             . ' aria-hidden="true">' . htmlspecialchars($text, ENT_QUOTES) . '</span>';
     }
 
@@ -573,12 +571,6 @@ final class HeroRenderer
         if (trim((string) $d['watermark']) !== '') {
             $vars['--hero-watermark-opacity'] = (string) round(((int) $d['watermark_opacity']) / 100, 3);
             $vars['--hero-watermark-size'] = (int) $d['watermark_size'] . 'vw';
-            $vars['--hero-watermark-dx'] = (int) $d['watermark_dx'] . '%';
-            $vars['--hero-watermark-dy'] = (int) $d['watermark_dy'] . '%';
-            $vars['--hero-watermark-stroke'] = (int) $d['watermark_stroke'] . 'px';
-            if ((string) $d['watermark_color'] !== '') {
-                $vars['--hero-watermark-ink'] = (string) $d['watermark_color'];
-            }
         }
 
         $desktop = [];

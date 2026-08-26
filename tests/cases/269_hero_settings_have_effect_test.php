@@ -93,9 +93,7 @@ test('Каждое поле слайда влияет на вывод', function
     $probe = [
     'eyebrow' => 'Другое над', 'title' => 'Другой заголовок', 'subtitle' => 'Другое описание',
     'watermark' => 'ЗНАК', 'watermark_size' => 44, 'watermark_x' => 'left', 'watermark_y' => 'top',
-    'watermark_dx' => 12, 'watermark_dy' => 13, 'watermark_opacity' => 33,
-    'watermark_style' => 'outline', 'watermark_stroke' => 4, 'watermark_color' => '#ff0000',
-    'watermark_font' => 'body',
+    'watermark_opacity' => 33,
     'media_type' => 'video', 'image' => '/uploads/public/z.jpg', 'image_mobile' => '/uploads/public/m.jpg',
     'image_position' => 'left-top', 'image_position_mobile' => 'right-bottom', 'image_fit' => 'contain',
     'video_url' => '/uploads/public/v.mp4', 'video_mobile_url' => '/uploads/public/vm.mp4',
@@ -121,10 +119,7 @@ test('Каждое поле слайда влияет на вывод', function
 
     $context = [
     'watermark_size' => ['watermark' => 'ЗНАК'], 'watermark_x' => ['watermark' => 'ЗНАК'],
-    'watermark_y' => ['watermark' => 'ЗНАК'], 'watermark_dx' => ['watermark' => 'ЗНАК'],
-    'watermark_dy' => ['watermark' => 'ЗНАК'], 'watermark_opacity' => ['watermark' => 'ЗНАК'],
-    'watermark_style' => ['watermark' => 'ЗНАК'], 'watermark_stroke' => ['watermark' => 'ЗНАК', 'watermark_style' => 'outline'],
-    'watermark_color' => ['watermark' => 'ЗНАК'], 'watermark_font' => ['watermark' => 'ЗНАК'],
+    'watermark_y' => ['watermark' => 'ЗНАК'], 'watermark_opacity' => ['watermark' => 'ЗНАК'],
     'video_url' => ['media_type' => 'video'], 'video_mobile_url' => ['media_type' => 'video', 'video_url' => '/uploads/public/v.mp4', 'mobile_media' => 'mobile_video'],
     'youtube_url' => ['media_type' => 'youtube'], 'youtube_id' => ['media_type' => 'youtube'],
     'poster' => ['media_type' => 'video', 'video_url' => '/uploads/public/v.mp4'],

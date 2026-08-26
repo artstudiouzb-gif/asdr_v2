@@ -110,6 +110,37 @@ $customDuration = (int) $data['duration'];
                     <label for="subtitle">Описание / подзаголовок</label>
                     <textarea id="subtitle" name="subtitle" rows="3" placeholder="Краткое пояснение или вступительный текст..."><?= $esc($data['subtitle']) ?></textarea>
                 </div>
+                <?php
+                // Фоновая надпись — крупное слово за содержимым. Поля пропали
+                // при перестройке этой формы, а данные, перевод и стили
+                // остались: настройка была в базе, но задать её было нечем.
+                ?>
+                <div class="form-field col-12">
+                    <label for="watermark">Фоновая надпись</label>
+                    <input type="text" id="watermark" name="watermark" value="<?= $esc($data['watermark']) ?>" maxlength="120" placeholder="Например: aerion">
+                    <span class="form-hint">
+                        Крупное слово за содержимым, цветом текста обложки.
+                        Диктор его не читает, кликам оно не мешает. Переводится
+                        наравне с заголовком.
+                    </span>
+                </div>
+                <div data-watermark-group class="form-grid-12 col-12"<?= trim((string) $data['watermark']) === '' ? ' hidden' : '' ?>>
+                    <div class="form-field col-3">
+                        <label for="watermark_size">Размер, % ширины экрана</label>
+                        <input type="number" id="watermark_size" name="watermark_size" min="2" max="60" step="1" value="<?= (int) $data['watermark_size'] ?>">
+                        <span class="form-hint">Числом: нужный кегль зависит от длины слова.</span>
+                    </div>
+                    <div class="form-field col-3">
+                        <label for="watermark_opacity">Прозрачность, %</label>
+                        <input type="number" id="watermark_opacity" name="watermark_opacity" min="0" max="100" step="1" value="<?= (int) $data['watermark_opacity'] ?>">
+                    </div>
+                    <?= $select('watermark_x', 'По горизонтали', [
+                        'left' => 'К левому краю', 'center' => 'По центру', 'right' => 'К правому краю',
+                    ], (string) $data['watermark_x'], '', 'col-3') ?>
+                    <?= $select('watermark_y', 'По вертикали', [
+                        'top' => 'К верху', 'middle' => 'По центру', 'bottom' => 'К низу',
+                    ], (string) $data['watermark_y'], '', 'col-3') ?>
+                </div>
             </div>
         </div>
 
@@ -390,6 +421,10 @@ $customDuration = (int) $data['duration'];
                         <div class="form-field col-12">
                             <label for="<?= $id ?>subtitle">Описание (<?= strtoupper($code) ?>)</label>
                             <textarea id="<?= $id ?>subtitle" name="<?= $key ?>[subtitle]" rows="2"><?= $esc($tr['subtitle'] ?? '') ?></textarea>
+                        </div>
+                        <div class="form-field col-12">
+                            <label for="<?= $id ?>watermark">Фоновая надпись (<?= strtoupper($code) ?>)</label>
+                            <input type="text" id="<?= $id ?>watermark" name="<?= $key ?>[watermark]" value="<?= $esc($tr['watermark'] ?? '') ?>" maxlength="120">
                         </div>
                         <div class="form-field col-6">
                             <label for="<?= $id ?>cta">Текст основной кнопки (<?= strtoupper($code) ?>)</label>
