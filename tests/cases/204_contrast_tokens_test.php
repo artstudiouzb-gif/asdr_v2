@@ -34,9 +34,14 @@ test('Тема отдаёт --on-accent, а ссылки им пользуютс
     assert_contains('border-radius: var(--radius-sm, 10px)', $theme);
 
     // Ссылки в тексте — от --gov-teal-text (посчитан с поправкой), а не от
-    // сырого акцента: сырой давал 3.19:1 на белом.
+    // сырого акцента: сырой давал 3.19:1 на белом. Первым идёт цвет секции:
+    // на тёмной секции этот же компонент рисует текст, и без --section-*
+    // он оставался тёмным (на navy получалось около 1.5:1).
     $rich = (string) file_get_contents(APP_ROOT . '/public/assets/css/rich-content.css');
-    assert_contains('--rich-link: var(--gov-teal-text', $rich);
+    assert_contains('--rich-link: var(--section-link-fg, var(--gov-teal-text', $rich);
+    assert_contains('--rich-ink: var(--section-fg, var(--gov-ink', $rich);
+    assert_contains('--rich-title: var(--section-title-fg, var(--gov-title', $rich);
+    assert_contains('--rich-muted: var(--section-muted-fg, var(--gov-muted', $rich);
     assert_contains('color: var(--rich-link)', $rich);
 });
 
