@@ -23,6 +23,7 @@ $navContent = [
     'heroes' => ['/admin/heroes', t('Обложки')],
     'projects' => ['/admin/projects', t('Проекты')],
     'team' => ['/admin/team', t('Команда')],
+    'goals' => ['/admin/goals', t('Цели')],
 ];
 try {
     foreach (\App\Models\ContentType::all() as $navCt) {

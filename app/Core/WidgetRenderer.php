@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Models\Goal;
 use App\Models\News;
 use App\Models\Project;
 use App\Models\Setting;
@@ -28,7 +29,21 @@ final class WidgetRenderer
         // Карусель фотографий без подписей и ссылок. Порядок по умолчанию
         // случайный — виджет для того и заводился, чтобы показывать набор
         // снимков вперемешку.
-        'photo_slider' => ['slides' => [], 'shuffle' => true, 'autoplay' => 0, 'ratio' => '16-9'],
+        'photo_slider' => [
+            'source' => 'manual', 'slides' => [], 'shuffle' => true, 'autoplay' => 0, 'ratio' => '16-9',
+        ],
+    ];
+
+    /**
+     * Откуда карусель берёт кадры.
+     *
+     * `manual` — снимки лежат в самом виджете. `goals` — виджет показывает
+     * одну случайную «Цель»: целей сотни, в JSON виджета они не помещаются, и
+     * набор кадров у каждой свой.
+     */
+    public const SLIDER_SOURCES = [
+        'manual' => 'Свои фотографии',
+        'goals' => 'Случайная цель',
     ];
 
     /** Соотношения сторон кадра: ключ настройки => подпись в админке. */
@@ -173,6 +188,26 @@ final class WidgetRenderer
                 break;
             case 'team_list':
                 $data['items'] = array_slice(TeamMember::published($lang), 0, (int) ($data['count'] ?? 5));
+                break;
+            case 'photo_slider':
+                // Случайная цель выбирается на сервере только ради запасного
+                // варианта: этот кадр уедет в кэш страницы и застынет для всех.
+                // Свежую цель у каждого посетителя запрашивает скрипт (см.
+                // /goals/random) — иначе «случайная» была бы случайной ровно
+                // один раз, до сброса кэша.
+                if (($data['source'] ?? 'manual') === 'goals') {
+                    $random = Goal::random();
+                    $data['slides'] = $random === null ? [] : array_map(
+                        static fn (array $img): array => [
+                            'image' => (string) $img['image'],
+                            'alt' => (string) $img['alt'],
+                        ],
+                        $random['images']
+                    );
+                    // Порядок кадров внутри цели — авторский: случайной бывает
+                    // сама цель, а не история, которую рассказывают её слайды.
+                    $data['shuffle'] = false;
+                }
                 break;
             case 'contacts':
                 $data['phone'] = Setting::get('contact_phone');
