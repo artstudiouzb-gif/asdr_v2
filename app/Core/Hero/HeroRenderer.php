@@ -525,29 +525,17 @@ final class HeroRenderer
             return '';
         }
 
-        $image = trim((string) ($d[$key . '_image'] ?? ''));
+        // Значок кнопки — только иконка из набора Tabler. Своя картинка внутри
+        // кнопки стоила трёх полей на кнопку (файл, режим, ширина) ради
+        // случая, которого не встретилось: логотип в кнопке ломает высоту
+        // строки и не переживает смену темы.
         $icon = (string) $d[$key . '_icon'];
-        $imageMode = (string) ($d[$key . '_image_mode'] ?? 'icon');
-        $imageClass = '';
-
-        if ($image !== '' && UrlGuard::isSafeMedia($image)) {
-            $imageClass = ' hero__cta--image-' . $imageMode;
-            $sizeAttrs = match ($imageMode) {
-                'fill' => ' height="44"',
-                'custom' => ' width="' . (int) $d[$key . '_image_width'] . '"',
-                default => ' width="20" height="20"',
-            };
-            $iconHtml = '<span class="hero__cta-icon" aria-hidden="true">'
-                . '<img src="' . htmlspecialchars($image, ENT_QUOTES) . '" alt=""'
-                . $sizeAttrs . ' loading="lazy" decoding="async"></span>';
-        } elseif ($icon !== '') {
-            $iconHtml = '<span class="hero__cta-icon" aria-hidden="true">' . Icon::render($icon, 20) . '</span>';
-        } else {
-            $iconHtml = '';
-        }
+        $iconHtml = $icon !== ''
+            ? '<span class="hero__cta-icon" aria-hidden="true">' . Icon::render($icon, 20) . '</span>'
+            : '';
 
         return '<a class="hero__cta hero__cta--' . htmlspecialchars((string) $d[$key . '_style'], ENT_QUOTES)
-            . ($iconHtml !== '' ? ' hero__cta--with-icon' : '') . $imageClass . '"'
+            . ($iconHtml !== '' ? ' hero__cta--with-icon' : '') . '"'
             . ' href="' . htmlspecialchars($url, ENT_QUOTES) . '"'
             . (!empty($d[$key . '_new_tab']) ? ' target="_blank" rel="noopener"' : '')
             . '>' . $iconHtml . '<span>' . htmlspecialchars($text, ENT_QUOTES) . '</span></a>';

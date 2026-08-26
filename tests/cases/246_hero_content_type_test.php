@@ -603,11 +603,16 @@ test('Навигация не уходит под надвинутый сосе�
     }
 });
 
-test('Кнопка слайда: своя картинка побеждает иконку набора', function () {
-    // Иконка набора берёт currentColor и красится под тип кнопки; картинку
-    // ставят ради знака, которого в Tabler нет, поэтому подменять её иконкой
-    // нельзя — даже когда заполнены оба поля.
-    $both = HeroSlideData::normalize([
+test('Кнопка слайда: значок — только иконка набора', function () {
+    // Своя картинка внутри кнопки стоила трёх полей на кнопку (файл, режим,
+    // ширина) и своего семейства правил в CSS. Осталась иконка Tabler: она
+    // берёт currentColor и красится под тип кнопки.
+    foreach (['cta_image', 'cta_image_mode', 'cta_image_width',
+              'cta2_image', 'cta2_image_mode', 'cta2_image_width'] as $gone) {
+        assert_false(array_key_exists($gone, HeroSlideData::defaults()), 'картинка в кнопке вернулась: ' . $gone);
+    }
+
+    $data = HeroSlideData::normalize([
         'title' => 'Т',
         'cta_enabled' => '1',
         'cta_text' => 'Подробнее',
@@ -615,51 +620,26 @@ test('Кнопка слайда: своя картинка побеждает и
         'cta_icon' => 'arrow-right',
         'cta_image' => '/uploads/public/brand-mark.svg',
     ]);
-    assert_same('/uploads/public/brand-mark.svg', $both['cta_image']);
-    assert_same('arrow-right', $both['cta_icon'], 'иконка сохраняется: убрали картинку — она вернулась');
-
-    $rendered = HeroRenderer::render(
-        ['id' => 1, 'name' => 'Тест'],
-        [hero_test_slide($both, 1)],
-        HeroSettings::defaults(),
-        21
-    );
-    assert_contains('<img src="/uploads/public/brand-mark.svg"', $rendered['html']);
-    assert_contains('width="20" height="20"', $rendered['html'], 'без размеров SVG растягивается на всю кнопку');
-    assert_true(
-        strpos($rendered['html'], 'tabler-arrow-right') === false,
-        'при своей картинке иконка набора не выводится'
-    );
-    assert_contains('hero__cta--with-icon', $rendered['html']);
-});
-
-test('Кнопка слайда: опасный адрес картинки отбрасывается, остаётся иконка', function () {
-    // Абсолютный https здесь законен — медиа умеет жить на CDN, и остальные
-    // поля картинок ведут себя так же. Отсекается не чужой домен, а схема.
-    $data = HeroSlideData::normalize([
-        'title' => 'Т',
-        'cta_enabled' => '1',
-        'cta_text' => 'Подробнее',
-        'cta_url' => '/about',
-        'cta_icon' => 'arrow-right',
-        'cta_image' => 'javascript:alert(1)',
-    ]);
-    assert_same('', $data['cta_image'], 'адрес с исполняемой схемой не сохраняется');
+    assert_false(array_key_exists('cta_image', $data), 'присланное поле картинки не должно сохраняться');
 
     $rendered = HeroRenderer::render(
         ['id' => 1, 'name' => 'Тест'],
         [hero_test_slide($data, 1)],
         HeroSettings::defaults(),
-        22
+        21
     );
-    assert_true(strpos($rendered['html'], 'javascript:') === false);
-    assert_contains('tabler-arrow-right', $rendered['html'], 'иконка набора отработала как запасной вариант');
+    assert_contains('tabler-arrow-right', $rendered['html'], 'иконка кнопки пропала');
+    assert_contains('hero__cta--with-icon', $rendered['html']);
+    assert_true(
+        strpos($rendered['html'], 'brand-mark.svg') === false,
+        'картинка кнопки всё ещё доезжает до разметки'
+    );
 
-    $cdn = HeroSlideData::normalize([
-        'title' => 'Т',
-        'cta_image' => 'https://cdn.example.com/brand-mark.svg',
-    ]);
-    assert_same('https://cdn.example.com/brand-mark.svg', $cdn['cta_image'], 'картинка с CDN принимается');
+    // Семейство правил под режимы картинки ушло вместе с настройкой.
+    foreach (['hero.css', 'hero-art-layout.css'] as $file) {
+        $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/' . $file);
+        assert_true(strpos($css, 'hero__cta--image-') === false, 'мёртвые правила картинки в кнопке: ' . $file);
+    }
 });
 
 test('Выравнивание слайда: класс и селектор стоят на одном элементе', function () {

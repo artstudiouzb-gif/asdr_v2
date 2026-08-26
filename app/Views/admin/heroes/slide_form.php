@@ -64,11 +64,6 @@ $ctaStyles = [
     'ghost' => 'Контурная',
     'link' => 'Ссылка',
 ];
-$ctaImageModes = [
-    'icon' => 'Как иконка — 20 px',
-    'fill' => 'На всю высоту кнопки',
-    'custom' => 'Своя ширина',
-];
 $cropOptions = [
     'left-top' => 'Слева сверху',
     'center-top' => 'По центру сверху',
@@ -236,17 +231,6 @@ $customDuration = (int) $data['duration'];
                     <?= AdminUi::iconField('cta_icon', (string) $data['cta_icon'], ['label' => 'Иконка кнопки']) ?>
                 </div>
                 <?= $checkbox('cta_new_tab', 'Открывать в новой вкладке', (bool) $data['cta_new_tab'], '', 'col-4') ?>
-                <div class="col-6">
-                    <?= AdminUi::imageField('cta_image', (string) $data['cta_image'], [
-                        'label' => 'Своя картинка вместо иконки',
-                        'hint' => 'SVG или PNG. Если задана, используется вместо иконки Tabler.',
-                    ]) ?>
-                </div>
-                <?= $select('cta_image_mode', 'Размер своей картинки', $ctaImageModes, (string) $data['cta_image_mode'], '', 'col-3') ?>
-                <div class="form-field col-3">
-                    <label for="cta_image_width">Своя ширина картинки, px</label>
-                    <input type="number" id="cta_image_width" name="cta_image_width" min="20" max="400" step="1" value="<?= (int) $data['cta_image_width'] ?>">
-                </div>
 
                 <!-- Дополнительная кнопка -->
                 <div class="col-12"><hr class="form-divider"></div>
@@ -264,17 +248,6 @@ $customDuration = (int) $data['duration'];
                     <?= AdminUi::iconField('cta2_icon', (string) $data['cta2_icon'], ['label' => 'Иконка дополнительной кнопки']) ?>
                 </div>
                 <?= $checkbox('cta2_new_tab', 'Открывать в новой вкладке', (bool) $data['cta2_new_tab'], '', 'col-4') ?>
-                <div class="col-6">
-                    <?= AdminUi::imageField('cta2_image', (string) $data['cta2_image'], [
-                        'label' => 'Своя картинка вместо иконки',
-                        'hint' => 'SVG или PNG. Если задана, используется вместо иконки Tabler.',
-                    ]) ?>
-                </div>
-                <?= $select('cta2_image_mode', 'Размер своей картинки', $ctaImageModes, (string) $data['cta2_image_mode'], '', 'col-3') ?>
-                <div class="form-field col-3">
-                    <label for="cta2_image_width">Своя ширина картинки, px</label>
-                    <input type="number" id="cta2_image_width" name="cta2_image_width" min="20" max="400" step="1" value="<?= (int) $data['cta2_image_width'] ?>">
-                </div>
 
                 <!-- Ссылка со всего слайда -->
                 <div class="col-12"><hr class="form-divider"></div>
