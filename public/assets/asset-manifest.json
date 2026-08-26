@@ -82,11 +82,11 @@
     },
     "/assets/js/blocks/slider.js": {
       "path": "/assets/js/blocks/slider.min.js",
-      "sourceSha256": "bd765788826c91fa2e7fbbef6dd00d033d3a7925cfd509de82cb0b2ac6eeb5f9",
-      "sha256": "5e5f3d0e19c0fee16d73d4248d47daa9ee7e08dfb8820a6763b41e1b395d4a80",
-      "raw": 2453,
-      "gzip": 973,
-      "brotli": 843
+      "sourceSha256": "12fd43cc2f1764b3e7d3b968532d81ee31774d380cbc75042dff2d8926fab841",
+      "sha256": "9aa55f2f77adb1f77ca4d4cd903752161159fab585a9e8caef4b5390749233e7",
+      "raw": 2949,
+      "gzip": 1157,
+      "brotli": 992
     },
     "/assets/js/blocks/anchor_nav.js": {
       "path": "/assets/js/blocks/anchor_nav.min.js",

@@ -125,7 +125,39 @@
         }
     }
 
+    /**
+     * Случайный порядок кадров. Перемешивает браузер, а не сервер: страницы
+     * кэшируются общим ключом, и порядок, выбранный при сборке, застыл бы для
+     * всех посетителей до сброса кэша. Без JS карусель остаётся рабочей — она
+     * просто идёт в порядке редактора.
+     */
+    function shuffleSlides(root) {
+        var track = root.querySelector('.block-slider__track');
+        if (!track) { return; }
+        var slides = Array.prototype.slice.call(track.querySelectorAll('.block-slider__slide'));
+        if (slides.length < 2) { return; }
+
+        for (var i = slides.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = slides[i];
+            slides[i] = slides[j];
+            slides[j] = tmp;
+        }
+        slides.forEach(function (slide, index) {
+            // Активным становится первый после перемешивания, иначе на экране
+            // остался бы кадр, который редактор поставил первым.
+            slide.classList.toggle('is-active', index === 0);
+            slide.setAttribute('aria-hidden', index === 0 ? 'false' : 'true');
+            var img = slide.querySelector('img');
+            if (img && index === 0) { img.removeAttribute('loading'); }
+            track.appendChild(slide);
+        });
+    }
+
     document.querySelectorAll('.block-slider').forEach(function (slider) {
+        if (slider.hasAttribute('data-slider-shuffle')) {
+            shuffleSlides(slider);
+        }
         initSlider(slider, {
             slide: '.block-slider__slide',
             prev: '.block-slider__prev',

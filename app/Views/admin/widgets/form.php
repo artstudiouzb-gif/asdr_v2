@@ -121,6 +121,63 @@ $currentType = $widget['type'] ?? 'latest_news';
             </div>
         <?php endif; ?>
 
+        <!-- Настройки: photo_slider -->
+        <?php if ($showType('photo_slider')): ?>
+            <?php $sliderSlides = (array) ($data['slides'] ?? []); ?>
+            <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="photo_slider">
+                <label>Фотографии карусели</label>
+                <span class="form-hint">
+                    Подписей и ссылок у этого виджета нет — только снимки. Текст в поле
+                    «Описание для незрячих» на экране не показывается: его читает диктор,
+                    и без него карусель не проходит проверку доступности.
+                </span>
+                <div data-repeater="slides">
+                    <?php foreach ($sliderSlides as $i => $row): ?>
+                        <div class="repeater-row">
+                            <?= \App\Core\AdminUi::imageField('slides[' . $i . '][image]', (string) ($row['image'] ?? ''), ['label' => 'Фотография']) ?>
+                            <div class="form-field">
+                                <label>Описание для незрячих</label>
+                                <input type="text" name="slides[<?= $i ?>][alt]" maxlength="200" value="<?= htmlspecialchars((string) ($row['alt'] ?? ''), ENT_QUOTES) ?>">
+                            </div>
+                            <button type="button" class="btn btn--small btn--danger" data-repeater-remove>Удалить</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <template data-repeater-template="slides">
+                    <?= \App\Core\AdminUi::imageField('slides[__INDEX__][image]', '', ['label' => 'Фотография']) ?>
+                    <div class="form-field">
+                        <label>Описание для незрячих</label>
+                        <input type="text" name="slides[__INDEX__][alt]" maxlength="200">
+                    </div>
+                    <button type="button" class="btn btn--small btn--danger" data-repeater-remove>Удалить</button>
+                </template>
+                <button type="button" class="btn btn--small" data-repeater-add="slides">+ Добавить фотографию</button>
+            </div>
+            <div class="form-field form-field--checkbox<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="photo_slider">
+                <input type="checkbox" id="shuffle" name="shuffle" value="1" <?= !empty($data['shuffle']) ? 'checked' : '' ?>>
+                <label for="shuffle">Случайный порядок фотографий</label>
+                <span class="form-hint">
+                    Порядок выбирается заново у каждого посетителя, в браузере: страницы
+                    кэшируются, и порядок, выбранный на сервере, был бы одинаковым для всех
+                    до сброса кэша.
+                </span>
+            </div>
+            <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="photo_slider">
+                <label for="ratio">Соотношение сторон кадра</label>
+                <select id="ratio" name="ratio">
+                    <?php $currentRatio = (string) ($data['ratio'] ?? '16-9'); ?>
+                    <?php foreach (\App\Core\WidgetRenderer::SLIDER_RATIOS as $val => $label): ?>
+                        <option value="<?= htmlspecialchars((string) $val, ENT_QUOTES) ?>" <?= $currentRatio === (string) $val ? 'selected' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="photo_slider">
+                <label for="autoplay">Автопрокрутка, секунд</label>
+                <input type="number" id="autoplay" name="autoplay" min="0" max="30" value="<?= (int) ($data['autoplay'] ?? 0) ?>">
+                <span class="form-hint">0 — переключать только вручную. Показ встаёт на паузу при наведении и при включённой настройке «остановка анимаций».</span>
+            </div>
+        <?php endif; ?>
+
         <?php $design = \App\Core\WidgetRenderer::normalizeDesign($data); ?>
         <fieldset class="u-inline-c00ceb2874">
             <legend class="u-inline-1204c3c3eb">Оформление</legend>
