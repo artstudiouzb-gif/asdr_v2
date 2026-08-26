@@ -2,10 +2,7 @@
 /** @var array $data */
 /** @var int $blockId */
 $slides = is_array($data['slides'] ?? null) ? $data['slides'] : [];
-$ratio = (string) ($data['ratio'] ?? '16-9');
-if (!in_array($ratio, ['16-9', '4-3', '21-9', 'auto'], true)) {
-    $ratio = '16-9';
-}
+$ratio = \App\Core\SliderRatio::normalize($data['ratio'] ?? null);
 // Автопрокрутка: секунды между слайдами, 0 — выключено. Логику берёт на себя
 // общий скрипт слайдера (он же обслуживает обложку), ему нужен только атрибут.
 $autoplay = max(0, min(30, (int) ($data['autoplay'] ?? 0)));

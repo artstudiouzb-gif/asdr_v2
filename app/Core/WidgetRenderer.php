@@ -46,13 +46,6 @@ final class WidgetRenderer
         'goals' => 'Случайная цель',
     ];
 
-    /** Соотношения сторон кадра: ключ настройки => подпись в админке. */
-    public const SLIDER_RATIOS = [
-        '16-9' => '16:9 — широкий',
-        '4-3' => '4:3',
-        '21-9' => '21:9 — панорама',
-        'auto' => 'По размеру фотографии',
-    ];
 
     /** Панель оформления виджета (хранится в data._design). */
     public const DESIGN_STYLES = ['default', 'card', 'tinted', 'navy'];

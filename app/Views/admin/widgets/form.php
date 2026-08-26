@@ -180,8 +180,8 @@ $currentType = $widget['type'] ?? 'latest_news';
             <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="photo_slider">
                 <label for="ratio">Соотношение сторон кадра</label>
                 <select id="ratio" name="ratio">
-                    <?php $currentRatio = (string) ($data['ratio'] ?? '16-9'); ?>
-                    <?php foreach (\App\Core\WidgetRenderer::SLIDER_RATIOS as $val => $label): ?>
+                    <?php $currentRatio = \App\Core\SliderRatio::normalize($data['ratio'] ?? null); ?>
+                    <?php foreach (\App\Core\SliderRatio::ALL as $val => $label): ?>
                         <option value="<?= htmlspecialchars((string) $val, ENT_QUOTES) ?>" <?= $currentRatio === (string) $val ? 'selected' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES) ?></option>
                     <?php endforeach; ?>
                 </select>

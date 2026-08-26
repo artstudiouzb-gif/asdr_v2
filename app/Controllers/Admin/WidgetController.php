@@ -186,9 +186,7 @@ final class WidgetController
                 'slides' => $this->collectSlides(),
                 'shuffle' => !empty($_POST['shuffle']),
                 'autoplay' => max(0, min(30, (int) ($_POST['autoplay'] ?? 0))),
-                'ratio' => isset(\App\Core\WidgetRenderer::SLIDER_RATIOS[(string) ($_POST['ratio'] ?? '')])
-                    ? (string) $_POST['ratio']
-                    : '16-9',
+                'ratio' => \App\Core\SliderRatio::normalize($_POST['ratio'] ?? null),
             ],
             default => [],
         };

@@ -243,8 +243,9 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <div class="form-field">
                 <label for="slider_ratio">Пропорция кадра</label>
                 <select id="slider_ratio" name="ratio">
-                    <?php foreach (['16-9' => '16:9 — широкий кадр', '4-3' => '4:3 — классический', '21-9' => '21:9 — панорама', 'auto' => 'Как у изображения'] as $value => $label): ?>
-                        <option value="<?= $value ?>" <?= ($data['ratio'] ?? '16-9') === $value ? 'selected' : '' ?>><?= $label ?></option>
+                    <?php $sliderRatio = \App\Core\SliderRatio::normalize($data['ratio'] ?? null); ?>
+                    <?php foreach (\App\Core\SliderRatio::ALL as $value => $label): ?>
+                        <option value="<?= $value ?>" <?= $sliderRatio === $value ? 'selected' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES) ?></option>
                     <?php endforeach; ?>
                 </select>
                 <span class="form-hint">Общая пропорция удерживает высоту слайдера: при варианте «как у изображения» страница подпрыгивает на каждом переключении, если снимки разного размера.</span>

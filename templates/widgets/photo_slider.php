@@ -3,7 +3,7 @@
 use App\Core\AssetCollector;
 use App\Core\Media;
 use App\Core\UrlGuard;
-use App\Core\WidgetRenderer;
+use App\Core\SliderRatio;
 
 /** @var array $data */
 /** @var string $lang */
@@ -22,10 +22,7 @@ foreach ((array) ($data['slides'] ?? []) as $row) {
     ];
 }
 
-$ratio = (string) ($data['ratio'] ?? '16-9');
-if (!isset(WidgetRenderer::SLIDER_RATIOS[$ratio])) {
-    $ratio = '16-9';
-}
+$ratio = SliderRatio::normalize($data['ratio'] ?? null);
 $autoplay = max(0, min(30, (int) ($data['autoplay'] ?? 0)));
 $shuffle = !empty($data['shuffle']);
 // Источник «случайная цель»: сервер отрисовал одну цель, но она уедет в кэш

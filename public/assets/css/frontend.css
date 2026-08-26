@@ -357,9 +357,14 @@ summary:focus-visible {
 .block-slider__link { display: block; color: inherit; text-decoration: none; }
 /* Единая пропорция кадра: без неё слайды разной высоты дёргали страницу
    при каждом переключении. «auto» оставляет исходные размеры снимка. */
+.block-slider--ratio-21-9 { --slider-ratio: 21 / 9; }
 .block-slider--ratio-16-9 { --slider-ratio: 16 / 9; }
 .block-slider--ratio-4-3 { --slider-ratio: 4 / 3; }
-.block-slider--ratio-21-9 { --slider-ratio: 21 / 9; }
+/* Вертикальные форматы: карточки для соцсетей приходят в 4:5, 1:1 и 9:16, а
+   при широкой пропорции object-fit: cover срезает у них верх и низ. */
+.block-slider--ratio-1-1 { --slider-ratio: 1 / 1; }
+.block-slider--ratio-4-5 { --slider-ratio: 4 / 5; }
+.block-slider--ratio-9-16 { --slider-ratio: 9 / 16; }
 .block-slider__slide img { display: block; width: 100%; }
 .block-slider:not(.block-slider--ratio-auto) .block-slider__slide img {
     aspect-ratio: var(--slider-ratio, 16 / 9);
