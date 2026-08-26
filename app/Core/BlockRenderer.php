@@ -280,13 +280,7 @@ final class BlockRenderer
             $extraClass .= ' cms-block--has-watermark';
             $styleVars .= '--block-watermark-opacity:'
                 . round(((int) ($data['_watermark_opacity'] ?? 12)) / 100, 3) . ';'
-                . '--block-watermark-size:' . ((int) ($data['_watermark_size'] ?? 22)) . 'vw;'
-                . '--block-watermark-dx:' . ((int) ($data['_watermark_dx'] ?? 0)) . '%;'
-                . '--block-watermark-dy:' . ((int) ($data['_watermark_dy'] ?? 0)) . '%;'
-                . '--block-watermark-stroke:' . ((int) ($data['_watermark_stroke'] ?? 2)) . 'px;'
-                . ((string) ($data['_watermark_color'] ?? '') !== ''
-                    ? '--block-watermark-ink:' . (string) $data['_watermark_color'] . ';'
-                    : '');
+                . '--block-watermark-size:' . ((int) ($data['_watermark_size'] ?? 22)) . 'vw;';
         }
 
         if ($styleVars !== '') {
@@ -357,14 +351,9 @@ final class BlockRenderer
         $x = (string) ($data['_watermark_x'] ?? 'center');
         $y = (string) ($data['_watermark_y'] ?? 'middle');
 
-        $style = (string) ($data['_watermark_style'] ?? 'fill');
-        $font = (string) ($data['_watermark_font'] ?? 'heading');
-
         return '<span class="cms-block__watermark cms-block__watermark--x-'
             . htmlspecialchars($x, ENT_QUOTES) . ' cms-block__watermark--y-'
-            . htmlspecialchars($y, ENT_QUOTES) . ' cms-block__watermark--'
-            . htmlspecialchars($style, ENT_QUOTES) . ' cms-block__watermark--font-'
-            . htmlspecialchars($font, ENT_QUOTES) . '" aria-hidden="true">'
+            . htmlspecialchars($y, ENT_QUOTES) . '" aria-hidden="true">'
             . htmlspecialchars($text, ENT_QUOTES) . "</span>\n";
     }
 

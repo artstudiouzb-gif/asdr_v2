@@ -102,23 +102,19 @@ test('Градиентное наложение решает за текст, н
 test('Выбранный вручную цвет текста не затирается автоподбором', function () {
     // Классы hero--content-light/dark объявляют --hero-fg на .hero__text, то
     // есть глубже схемы. Пока они висят на слайде, свой цвет не виден.
-    $custom = hero_veil_render([
-        'title' => 'Проба',
-        'scheme' => 'custom',
-        'scheme_bg' => '#123a5e',
-        'scheme_text' => '#ffd166',
-    ]);
+    $custom = hero_veil_render(
+        ['title' => 'Проба'],
+        ['scheme' => 'custom', 'scheme_bg' => '#123a5e', 'scheme_text' => '#ffd166']
+    );
     assert_contains('hero--content-custom', $custom, 'свой цвет текста снова перебивается автоподбором');
     assert_not_contains('hero--content-light', $custom, 'на слайде остался класс автоподбора');
     assert_contains('#ffd166', $custom, 'выбранный цвет не доехал до стилей');
 
     // Явный выбор «светлый/тёмный» остаётся за редактором и главнее custom.
-    $explicit = hero_veil_render([
-        'title' => 'Проба',
-        'scheme' => 'custom',
-        'scheme_text' => '#ffd166',
-        'content_scheme' => 'light',
-    ]);
+    $explicit = hero_veil_render(
+        ['title' => 'Проба', 'content_scheme' => 'light'],
+        ['scheme' => 'custom', 'scheme_text' => '#ffd166']
+    );
     assert_contains('hero--content-light', $explicit, 'явный выбор цвета текста перестал действовать');
 
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
