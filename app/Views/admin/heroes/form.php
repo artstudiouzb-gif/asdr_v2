@@ -117,8 +117,6 @@ $overlayDirections = [
                 $preview = HeroSlideData::fallbackImage($data);
                 $active = (int) $slide['is_active'] === 1;
                 $mediaLabels = ['image' => 'Фото', 'video' => 'Видео', 'youtube' => 'YouTube', 'none' => 'Без фона'];
-                $schemeLabels = ['light' => 'Light', 'dark' => 'Dark', 'navy' => 'Navy', 'custom' => 'Custom'];
-                $scheme = $data['scheme'] !== '' ? (string) $data['scheme'] : (string) $settings['scheme'];
                 $editUrl = '/admin/heroes/' . $heroId . '/slides/' . $slideId . '/edit';
                 ?>
                 <li class="hero-slide-item<?= $active ? '' : ' is-off' ?>" draggable="true" data-hero-slide-id="<?= $slideId ?>">
@@ -136,8 +134,12 @@ $overlayDirections = [
                             <?= htmlspecialchars(trim((string) $slide['title']) !== '' ? (string) $slide['title'] : 'Без заголовка', ENT_QUOTES) ?>
                         </a>
                         <span class="hero-slide-item__meta">
-                            <?= htmlspecialchars($schemeLabels[$scheme] ?? $scheme, ENT_QUOTES) ?>
-                            · <?= htmlspecialchars($mediaLabels[(string) $data['media_type']] ?? '—', ENT_QUOTES) ?>
+                            <?php
+                            // Схему тут не показываем: она принадлежит обложке
+                            // и у всех слайдов одна — строка повторялась бы в
+                            // каждой и ничего не различала.
+                            ?>
+                            <?= htmlspecialchars($mediaLabels[(string) $data['media_type']] ?? '—', ENT_QUOTES) ?>
                             <?php if (!$active): ?> · выключен<?php endif; ?>
                             <?php if ($data['_visible_from'] !== '' || $data['_visible_to'] !== ''): ?> · по расписанию<?php endif; ?>
                         </span>

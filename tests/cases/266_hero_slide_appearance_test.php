@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Core\Hero\HeroSettings;
 use App\Core\Hero\HeroSlideData;
 
 /*
@@ -38,4 +39,42 @@ test('Цвет наложения у слайда задаётся из форм
     $out = HeroSlideData::normalize(['overlay' => 'solid', 'overlay_color' => '#001122'], 'ru');
     assert_same('#001122', $out['overlay_color']);
     assert_same('', HeroSlideData::normalize([], 'ru')['overlay_color'], 'пусто — «как у обложки»');
+});
+
+test('Вьюхи админки не читают настроек, которых больше нет', function () {
+    // Убранная настройка живёт в разметке дольше, чем в коде: PHP молчит про
+    // несуществующий ключ до самого запроса, а ErrorHandler превращает его в
+    // 500. Так список слайдов упал после того, как у слайда не стало своей
+    // схемы: `$data['scheme']` осталось в метке под заголовком.
+    $slideKeys = array_keys(HeroSlideData::defaults());
+    $heroKeys = array_keys(HeroSettings::defaults());
+
+    foreach ((array) glob(APP_ROOT . '/app/Views/admin/heroes/*.php') as $file) {
+        $src = (string) file_get_contents((string) $file);
+        $name = basename((string) $file);
+
+        // Читаем только обращения без запасного значения: `?? '...'` —
+        // осознанная страховка для старых записей, а не забытый ключ.
+        preg_match_all('/\$data\[\'([a-z0-9_]+)\'\](\s*\?\?)?/', $src, $m, PREG_SET_ORDER);
+        foreach ($m as $hit) {
+            if (($hit[2] ?? '') !== '') {
+                continue;
+            }
+            assert_true(
+                in_array($hit[1], $slideKeys, true),
+                $name . ': $data[\'' . $hit[1] . '\'] — у слайда такой настройки нет'
+            );
+        }
+
+        preg_match_all('/\$settings\[\'([a-z0-9_]+)\'\](\s*\?\?)?/', $src, $m, PREG_SET_ORDER);
+        foreach ($m as $hit) {
+            if (($hit[2] ?? '') !== '') {
+                continue;
+            }
+            assert_true(
+                in_array($hit[1], $heroKeys, true),
+                $name . ': $settings[\'' . $hit[1] . '\'] — у обложки такой настройки нет'
+            );
+        }
+    }
 });
