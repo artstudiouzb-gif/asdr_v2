@@ -24,7 +24,7 @@ test('У слайда осталось только то, что зависит 
     foreach ([
         'scheme', 'scheme_bg', 'scheme_text', 'scheme_accent', 'panel',
         'text_position', 'text_align_y', 'title_size', 'subtitle_size',
-        'text_offset_top', 'gap_title', 'gap_subtitle', 'gap_actions', 'gap_art',
+        'text_offset_top',
     ] as $gone) {
         assert_false(in_array($gone, $fields, true), 'переопределение вернулось к слайду: ' . $gone);
     }

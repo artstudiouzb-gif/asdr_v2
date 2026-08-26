@@ -333,23 +333,7 @@ $overlayDirections = [
                     отступ не занимает больше десятой части высоты экрана.
                 </span>
             </div>
-            <?php
-            // Расстояния между частями текста. Отступ задаётся сверху у каждой
-            // части: так «поднять кнопки» — это одно число, а не пересчёт всей
-            // колонки. У первой части отступ не действует.
-            foreach ([
-                'gap_art' => 'Отступ над картинкой, px',
-                'gap_title' => 'Отступ над заголовком, px',
-                'gap_subtitle' => 'Отступ над описанием, px',
-                'gap_actions' => 'Отступ над кнопками, px',
-            ] as $gapKey => $gapLabel): ?>
-                <div class="form-field">
-                    <label for="<?= $gapKey ?>"><?= htmlspecialchars($gapLabel, ENT_QUOTES) ?></label>
-                    <input type="number" id="<?= $gapKey ?>" name="<?= $gapKey ?>" min="0" max="200" step="1"
-                           value="<?= (int) $settings[$gapKey] ?>">
-                </div>
-            <?php endforeach; ?>
-        <?php echo $group('Контент и типографика', 'положение текста, размеры и отступы',
+        <?php echo $group('Контент и типографика', 'положение текста и размеры',
             ($posOptions[$settings['text_position']] ?? '') . ' · заголовок ' . mb_strtolower((string) ($sizeOptions[$settings['title_size']] ?? '')),
             (string) ob_get_clean()); ?>
 

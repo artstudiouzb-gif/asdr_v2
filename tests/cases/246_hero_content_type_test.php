@@ -709,46 +709,34 @@ test('Выравнивание слайда: класс и селектор ст
     );
 });
 
-test('Отступы частей текста: умолчания сохраняют прежнюю вёрстку, ноль значим', function () {
-    $defaults = HeroSettings::defaults();
-    // Прежде расстояния держал общий gap шкалы (12px, у кнопок двойной).
-    // Умолчания обязаны его повторять, иначе у всех существующих обложек
-    // текст поедет в первый же деплой.
-    assert_same(12, $defaults['gap_title']);
-    assert_same(12, $defaults['gap_subtitle']);
-    assert_same(24, $defaults['gap_actions']);
+test('Промежутки между частями текста задаёт тема, а не настройка', function () {
+    // Четыре числа в форме («над картинкой», «над заголовком», «над
+    // описанием», «над кнопками») меняли типографику, которой у обложки и
+    // так одна раскладка. Значения остались переменными темы.
+    foreach (['gap_title', 'gap_subtitle', 'gap_actions', 'gap_art'] as $gone) {
+        assert_false(array_key_exists($gone, HeroSettings::defaults()), 'настройка промежутка вернулась: ' . $gone);
+        assert_false(array_key_exists($gone, HeroSlideData::defaults()), 'настройка промежутка вернулась к слайду: ' . $gone);
+    }
 
-    // У обложки пустое поле — это «верни умолчание», значение всегда число.
-    assert_same(24, HeroSettings::normalize(['gap_actions' => ''])['gap_actions']);
-    assert_same(0, HeroSettings::normalize(['gap_actions' => '0'])['gap_actions'], 'ноль — осознанное «вплотную»');
-    assert_same(200, HeroSettings::normalize(['gap_actions' => '9999'])['gap_actions'], 'отступ ограничен сверху');
-    assert_same(0, HeroSettings::normalize(['gap_actions' => '-40'])['gap_actions'], 'отрицательного отступа не бывает');
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
+    foreach (['--hero-gap-art', '--hero-gap-title', '--hero-gap-subtitle', '--hero-gap-actions'] as $var) {
+        assert_contains($var . ':', $css, 'переменная промежутка пропала из темы: ' . $var);
+    }
 
-    // Переопределения у слайда убраны: отступы принадлежат обложке, иначе
-    // одно и то же значение живёт в двух местах и расходится.
-    assert_false(
-        array_key_exists('gap_actions', HeroSlideData::defaults()),
-        'у слайда снова появился свой отступ'
-    );
-
-    // Переменная обложки печатается всегда, переменная слайда — только когда
-    // слайд действительно отходит от общей настройки.
-    $inherit = HeroRenderer::render(
+    // Промежутки не печатаются в scoped CSS обложки: их некому переопределять.
+    $rendered = HeroRenderer::render(
         ['id' => 1, 'name' => 'Тест'],
         [hero_test_slide(['title' => 'Т'], 1)],
-        HeroSettings::withDefaults(['gap_actions' => 48]),
+        HeroSettings::withDefaults([]),
         41
     );
-    assert_contains('--hero-gap-actions:48px', str_replace(' ', '', $inherit['css']));
-    assert_same(
-        1,
-        substr_count(str_replace(' ', '', $inherit['css']), '--hero-gap-actions:'),
-        'слайд без своей настройки переменную не переобъявляет'
+    assert_false(
+        str_contains((string) $rendered['css'], '--hero-gap-'),
+        'промежутки снова печатаются в стилях обложки'
     );
 
-    // Первая часть текста отступ сверху не получает: настройка про расстояние
+    // Первая часть текста отступ сверху не получает: переменные про расстояние
     // МЕЖДУ частями, а не про отрыв от границы блока.
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
     assert_true(
         preg_match('/\.hero__text > :first-child\s*\{[^}]*margin-top:\s*0/', $css) === 1,
         'у первой части текста верхнего отступа быть не должно'

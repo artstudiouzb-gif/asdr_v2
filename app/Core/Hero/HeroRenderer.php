@@ -32,18 +32,6 @@ use App\Core\UrlGuard;
  */
 final class HeroRenderer
 {
-    /**
-     * Отступ сверху у частей текстового блока: ключ настройки => переменная.
-     * Список один на обложку и на слайд — иначе переопределение слайда
-     * молча разъедется с общей настройкой.
-     */
-    private const GAP_VARS = [
-        'gap_title' => '--hero-gap-title',
-        'gap_subtitle' => '--hero-gap-subtitle',
-        'gap_actions' => '--hero-gap-actions',
-        'gap_art' => '--hero-gap-art',
-    ];
-
     /** Готовые цветовые схемы: фон и цвет собственного текста обложки. */
     private const SCHEME_COLORS = [
         'light' => ['bg' => '#f2f5f9', 'fg' => '#101a2b'],
@@ -218,9 +206,6 @@ final class HeroRenderer
         $vars['--hero-title-size'] = 'var(--hero-title-' . $s['title_size'] . ')';
         $vars['--hero-subtitle-size'] = 'var(--hero-subtitle-' . $s['subtitle_size'] . ')';
         $vars['--hero-text-offset'] = (int) $s['text_offset_top'] . 'px';
-        foreach (self::GAP_VARS as $key => $var) {
-            $vars[$var] = (int) $s[$key] . 'px';
-        }
 
         if ($s['height'] === 'custom' && $s['height_value'] !== '') {
             $vars['--hero-min-h'] = (string) $s['height_value'];

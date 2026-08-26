@@ -50,18 +50,14 @@ final class HeroSettings
             'title_size' => 'l',
             'subtitle_size' => 'm',
 
-            // Отступ всего текстового блока сверху, в пикселях. Расстояния
-            // gap_* — это промежутки МЕЖДУ частями, и у первой части они не
-            // действуют: опустить колонку целиком ими нельзя, приходилось
-            // дописывать padding в «Свой CSS» страницы. На телефоне значение
-            // ограничивается высотой окна (см. HeroRenderer::rootCss), поэтому
-            // отдельной мобильной настройки нет.
+            // Отступ всего текстового блока сверху, в пикселях. Промежутки
+            // между заголовком, описанием и кнопками настройкой не являются —
+            // это типографика, она задана переменными --hero-gap-* в
+            // blocks/hero.css. На телефоне значение ограничивается высотой
+            // окна (см. HeroRenderer::rootCss), поэтому отдельной мобильной
+            // настройки нет.
             'text_offset_top' => 0,
 
-            'gap_title' => 12,
-            'gap_subtitle' => 12,
-            'gap_actions' => 24,
-            'gap_art' => 12,
 
             // --- Цвет ---
             // Схема обложки задаёт фон и цвет её собственного текста. Цвет
@@ -141,10 +137,6 @@ final class HeroSettings
             'title_size' => BlockDataInput::enum($input, 'title_size', ['s', 'm', 'l', 'xl'], 'l'),
             'subtitle_size' => BlockDataInput::enum($input, 'subtitle_size', ['s', 'm', 'l'], 'm'),
             'text_offset_top' => self::gap($input['text_offset_top'] ?? null, 0),
-            'gap_title' => self::gap($input['gap_title'] ?? null, 12),
-            'gap_subtitle' => self::gap($input['gap_subtitle'] ?? null, 12),
-            'gap_actions' => self::gap($input['gap_actions'] ?? null, 24),
-            'gap_art' => self::gap($input['gap_art'] ?? null, 12),
 
             'scheme' => BlockDataInput::enum($input, 'scheme', self::SCHEMES, 'navy'),
             'scheme_bg' => self::hex($input['scheme_bg'] ?? '', '#0b1a30'),
@@ -200,10 +192,6 @@ final class HeroSettings
         $s['title_size'] = $enum($s['title_size'] ?? '', ['s', 'm', 'l', 'xl'], 'l');
         $s['subtitle_size'] = $enum($s['subtitle_size'] ?? '', ['s', 'm', 'l'], 'm');
         $s['text_offset_top'] = self::gap($s['text_offset_top'] ?? null, 0);
-        $s['gap_title'] = self::gap($s['gap_title'] ?? null, 12);
-        $s['gap_subtitle'] = self::gap($s['gap_subtitle'] ?? null, 12);
-        $s['gap_actions'] = self::gap($s['gap_actions'] ?? null, 24);
-        $s['gap_art'] = self::gap($s['gap_art'] ?? null, 12);
 
         $s['scheme'] = $enum($s['scheme'] ?? '', self::SCHEMES, 'navy');
         $s['scheme_bg'] = self::hex($s['scheme_bg'] ?? '', '#0b1a30');
