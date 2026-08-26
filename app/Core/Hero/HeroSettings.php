@@ -99,11 +99,6 @@ final class HeroSettings
             // --- Автопрокрутка ---
             'autoplay' => false,
             'autoplay_interval' => 6,
-            'autoplay_pause_hover' => true,
-            'autoplay_pause_interaction' => true,
-            'autoplay_resume' => true,
-            'autoplay_resume_delay' => 10,
-            'autoplay_mobile' => false,
 
             // --- Переход ---
             'transition' => 'fade_slide',
@@ -185,11 +180,6 @@ final class HeroSettings
 
             'autoplay' => !empty($input['autoplay']),
             'autoplay_interval' => BlockDataInput::int($input, 'autoplay_interval', 3, 30, 6),
-            'autoplay_pause_hover' => !empty($input['autoplay_pause_hover']),
-            'autoplay_pause_interaction' => !empty($input['autoplay_pause_interaction']),
-            'autoplay_resume' => !empty($input['autoplay_resume']),
-            'autoplay_resume_delay' => BlockDataInput::int($input, 'autoplay_resume_delay', 3, 60, 10),
-            'autoplay_mobile' => !empty($input['autoplay_mobile']),
 
             'transition' => BlockDataInput::enum($input, 'transition', self::TRANSITIONS, 'fade_slide'),
             'transition_duration' => BlockDataInput::int($input, 'transition_duration', 150, 2000, 700),
@@ -254,11 +244,6 @@ final class HeroSettings
 
         $s['autoplay'] = !empty($s['autoplay']);
         $s['autoplay_interval'] = self::clamp($s['autoplay_interval'] ?? null, 3, 30, 6);
-        $s['autoplay_pause_hover'] = !empty($s['autoplay_pause_hover']);
-        $s['autoplay_pause_interaction'] = !empty($s['autoplay_pause_interaction']);
-        $s['autoplay_resume'] = !empty($s['autoplay_resume']);
-        $s['autoplay_resume_delay'] = self::clamp($s['autoplay_resume_delay'] ?? null, 3, 60, 10);
-        $s['autoplay_mobile'] = !empty($s['autoplay_mobile']);
 
         $s['transition'] = $enum($s['transition'] ?? '', self::TRANSITIONS, 'fade_slide');
         $s['transition_duration'] = self::clamp($s['transition_duration'] ?? null, 150, 2000, 700);

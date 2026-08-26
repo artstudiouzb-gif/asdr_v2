@@ -184,19 +184,11 @@ final class HeroRenderer
                 $attrs[] = 'data-hero-swipe';
             }
             if ($s['autoplay']) {
+                // Пауза при наведении и при действии, возобновление и
+                // отключение на телефоне больше не настраиваются: это не
+                // выбор редактора, а правильное поведение карусели. Оно
+                // зашито в blocks/hero.js.
                 $attrs[] = 'data-hero-autoplay="' . ((int) $s['autoplay_interval'] * 1000) . '"';
-                if ($s['autoplay_pause_hover']) {
-                    $attrs[] = 'data-hero-pause-hover';
-                }
-                if ($s['autoplay_pause_interaction']) {
-                    $attrs[] = 'data-hero-pause-interaction';
-                }
-                if ($s['autoplay_resume']) {
-                    $attrs[] = 'data-hero-resume="' . ((int) $s['autoplay_resume_delay'] * 1000) . '"';
-                }
-                if ($s['autoplay_mobile']) {
-                    $attrs[] = 'data-hero-autoplay-mobile';
-                }
             }
         }
 

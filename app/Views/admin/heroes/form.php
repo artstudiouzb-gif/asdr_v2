@@ -448,10 +448,11 @@ $overlayDirections = [
         ob_start(); ?>
             <div class="form-field form-field--wide">
                 <span class="form-hint">
-                    При включённой автопрокрутке в навигации появляется кнопка паузы — остановить
-                    показ должен уметь любой посетитель, а не только тот, кто наведёт курсор.
-                    Ручное переключение всегда пересчитывает таймер заново. Отдельному слайду
-                    можно задать свою длительность в его форме.
+                    Показ сам останавливается при наведении курсора и после любого действия
+                    посетителя, а через десять секунд бездействия продолжается; в навигации
+                    появляется кнопка паузы — остановить показ должен уметь любой посетитель.
+                    На телефоне автопрокрутки нет: там важнее свайп и заряд батареи.
+                    Отдельному слайду можно задать свою длительность в его форме.
                 </span>
             </div>
             <?= $checkbox('autoplay', 'Включить автопрокрутку', (bool) $settings['autoplay']) ?>
@@ -460,16 +461,7 @@ $overlayDirections = [
                 <input type="number" id="autoplay_interval" name="autoplay_interval" min="3" max="30" value="<?= (int) $settings['autoplay_interval'] ?>">
                 <span class="form-hint">Разумный диапазон — 5–7 секунд.</span>
             </div>
-            <?= $checkbox('autoplay_pause_hover', 'Пауза при наведении', (bool) $settings['autoplay_pause_hover']) ?>
-            <?= $checkbox('autoplay_pause_interaction', 'Пауза после действия посетителя', (bool) $settings['autoplay_pause_interaction']) ?>
-            <?= $checkbox('autoplay_resume', 'Продолжать показ после паузы', (bool) $settings['autoplay_resume']) ?>
-            <div class="form-field">
-                <label for="autoplay_resume_delay">Через сколько продолжить, секунд</label>
-                <input type="number" id="autoplay_resume_delay" name="autoplay_resume_delay" min="3" max="60" value="<?= (int) $settings['autoplay_resume_delay'] ?>">
-            </div>
-            <?= $checkbox('autoplay_mobile', 'Автопрокрутка на телефоне', (bool) $settings['autoplay_mobile'],
-                'По умолчанию выключена: на узком экране слайд уезжает раньше, чем его успевают дочитать.') ?>
-        <?php echo $group('Автопрокрутка', 'интервал и паузы',
+        <?php echo $group('Автопрокрутка', 'смена слайдов по таймеру',
             $settings['autoplay'] ? 'каждые ' . (int) $settings['autoplay_interval'] . ' с' : 'выключена',
             (string) ob_get_clean()); ?>
 

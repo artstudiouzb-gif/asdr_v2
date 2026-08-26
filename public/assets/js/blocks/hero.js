@@ -267,10 +267,13 @@
         var toggle = root.querySelector('[data-hero-toggle]');
 
         var interval = parseInt(root.getAttribute('data-hero-autoplay'), 10) || 0;
-        var resumeDelay = parseInt(root.getAttribute('data-hero-resume'), 10) || 0;
-        var pauseOnHover = root.hasAttribute('data-hero-pause-hover');
-        var pauseOnInteraction = root.hasAttribute('data-hero-pause-interaction');
-        var autoplayOnMobile = root.hasAttribute('data-hero-autoplay-mobile');
+        // Поведение автопрокрутки не настраивается: пауза при наведении и при
+        // действии нужна всегда, возобновление — через фиксированную паузу, а
+        // на телефоне автопрокрутки нет (свайп важнее, и это экономит батарею).
+        var resumeDelay = 10000;
+        var pauseOnHover = true;
+        var pauseOnInteraction = true;
+        var autoplayOnMobile = false;
 
         var timer = null;
         var resumeTimer = null;

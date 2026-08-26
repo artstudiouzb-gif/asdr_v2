@@ -61,9 +61,7 @@ test('Каждая настройка обложки влияет на выво�
     'overlay' => 'solid', 'overlay_color' => '#00ff00', 'overlay_opacity' => 77, 'overlay_direction' => 'to_top',
     'panel' => true, 'panel_color' => '#ff00ff', 'panel_opacity' => 66,
     'nav_arrows' => false, 'nav_arrows_mobile' => false, 'nav_indicator' => 'dots', 'nav_swipe' => false,
-    'autoplay' => true, 'autoplay_interval' => 13, 'autoplay_pause_hover' => false,
-    'autoplay_pause_interaction' => false, 'autoplay_resume' => false, 'autoplay_resume_delay' => 19,
-    'autoplay_mobile' => true,
+    'autoplay' => true, 'autoplay_interval' => 13,
     'transition' => 'kenburns', 'transition_duration' => 1234,
     ];
 
@@ -76,11 +74,6 @@ test('Каждая настройка обложки влияет на выво�
     'panel_color' => ['panel' => true],
     'panel_opacity' => ['panel' => true],
     'autoplay_interval' => ['autoplay' => true],
-    'autoplay_pause_hover' => ['autoplay' => true],
-    'autoplay_pause_interaction' => ['autoplay' => true],
-    'autoplay_resume' => ['autoplay' => true],
-    'autoplay_resume_delay' => ['autoplay' => true, 'autoplay_resume' => true],
-    'autoplay_mobile' => ['autoplay' => true],
     ];
 
     $mute = [];
