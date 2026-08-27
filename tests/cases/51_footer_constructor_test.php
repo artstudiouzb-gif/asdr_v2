@@ -58,3 +58,90 @@ test('Footer: нижняя строка использует общую шири
     assert_contains('padding: 0 20px;', $css);
     assert_not_contains('max-width: var(--content-width, 1200px);', $css);
 });
+
+test('FooterConfig: «Логотип и описание» хранит свой текст, прочие виджеты — нет', function () {
+    $cfg = FooterConfig::normalize([
+        'v' => FooterConfig::VERSION,
+        'columns' => [
+            ['heading' => 'A', 'widget' => 'about', 'text' => '<p>подпись</p><script>x</script>'],
+            ['heading' => 'S', 'widget' => 'social', 'text' => '<b>лишнее</b>'],
+        ],
+    ]);
+    assert_contains('<p>подпись</p>', $cfg['columns'][0]['text'], 'подпись под знаком сохранена');
+    assert_true(!str_contains($cfg['columns'][0]['text'], '<script'), 'скрипт вырезан');
+    assert_same('', $cfg['columns'][1]['text'], 'виджету без своего текста он не принадлежит');
+});
+
+test('FooterConfig: старому подвалу без «Контактов» колонка добавляется разово', function () {
+    // До v2 виджет «about» печатал адрес, телефон и почту сам. Убрав их
+    // оттуда, нельзя молча оставить сайт без контактов.
+    $legacy = ['columns' => [['heading' => '', 'widget' => 'about'], ['heading' => 'Разделы', 'widget' => 'menu']]];
+
+    $once = FooterConfig::normalize($legacy);
+    assert_same(['about', 'menu', 'contacts'], array_column($once['columns'], 'widget'), 'колонка контактов добавлена');
+    assert_same(FooterConfig::VERSION, $once['v'], 'результат помечен новой версией');
+
+    // Повторная прогонка уже перенесённого конфига ничего не добавляет —
+    // иначе удалённая редактором колонка возвращалась бы при каждом сохранении.
+    $again = FooterConfig::normalize(['v' => FooterConfig::VERSION, 'columns' => $once['columns']]);
+    $withoutContacts = array_values(array_filter($again['columns'], fn ($c) => $c['widget'] !== 'contacts'));
+    $deleted = FooterConfig::normalize(['v' => FooterConfig::VERSION, 'columns' => $withoutContacts]);
+    assert_same(['about', 'menu'], array_column($deleted['columns'], 'widget'), 'перенос не повторяется');
+});
+
+test('FooterConfig: подвал с обеими колонками не трогаем', function () {
+    $cfg = FooterConfig::normalize(['columns' => [
+        ['heading' => '', 'widget' => 'about'],
+        ['heading' => 'Связь', 'widget' => 'contacts'],
+    ]]);
+    assert_same(['about', 'contacts'], array_column($cfg['columns'], 'widget'), 'дубля колонки нет');
+});
+
+test('Подвал: контакты выводятся один раз и с иконками', function () {
+    $view = (string) file_get_contents(APP_ROOT . '/app/Views/site/_footer.php');
+    [, $aboutCase] = explode("case 'about':", $view, 2);
+    [$aboutCase] = explode("case 'menu':", $aboutCase, 2);
+    foreach (['$address', '$phone', '$email'] as $var) {
+        assert_true(!str_contains($aboutCase, $var), 'виджет «about» не печатает ' . $var . ' — это дело «Контактов»');
+    }
+
+    [, $contactsCase] = explode("case 'contacts':", $view, 2);
+    [$contactsCase] = explode("case 'social':", $contactsCase, 2);
+    foreach (['map-pin', 'phone', 'mail'] as $icon) {
+        assert_contains("'" . $icon . "'", $contactsCase, 'у строки контакта есть иконка ' . $icon);
+    }
+    assert_contains('footer-contacts', $contactsCase, 'разметка списка контактов');
+    assert_true(
+        !str_contains($contactsCase, 'Политика конфиденциальности'),
+        'ссылка на политику живёт в нижней строке подвала, дублировать её в контактах незачем'
+    );
+});
+
+test('Подвал: у новых виджетов есть оформление в обоих слоях CSS', function () {
+    $base = (string) file_get_contents(APP_ROOT . '/public/assets/css/frontend.css');
+    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+
+    foreach (['.footer-contacts__item', '.footer-contacts__icon', '.site-footer__about', '.site-footer__text'] as $sel) {
+        assert_contains($sel, $base, 'структура ' . $sel . ' описана в базе');
+    }
+    // Подвал тёмный: без правил темы текст виджетов выходил цветами страницы.
+    foreach (['.site-footer--columns .footer-contacts__icon', '.site-footer--columns .site-footer__text'] as $sel) {
+        assert_contains($sel, $theme, 'цвет ' . $sel . ' задан темой');
+    }
+    // Иконка контакта берёт акцент в варианте «на тёмном»: обычный акцент на navy тонет.
+    assert_contains('.site-footer--columns .footer-contacts__icon { color: var(--gov-teal-text)', $theme);
+});
+
+test('Подвал: меню в две дорожки только в широкой колонке', function () {
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/frontend.css');
+    // «Не больше двух, каждая от 220px»: в четырёх колонках подвала дорожка
+    // узкая и список идёт одной колонкой, в двух — двумя.
+    assert_contains('.site-footer--columns .site-footer__col--menu ul { columns: 2 220px;', $css);
+    assert_true(
+        !str_contains($css, '.site-footer--columns .site-footer__col--menu ul { columns: 2;'),
+        'жёсткого columns: 2 не осталось'
+    );
+    // На телефоне подвал в одну колонку, дорожка меню во всю ширину — тогда
+    // «от 220px» снова даёт две полуколонки, поэтому явно возвращаем одну.
+    assert_contains('@media (max-width: 720px) { .site-footer--columns .site-footer__col--menu ul { columns: 1; } }', $css);
+});

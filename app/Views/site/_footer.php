@@ -52,9 +52,12 @@ if ($footerLogo === '') { $footerLogo = trim((string) ($footerHcfg['logo_light']
 if ($footerLogo === '') { $footerLogo = $logo; }
 
 // Рендер одного виджета колонки подвала.
-$renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $address, $phone, $email, $footerMenu, $footerLang, $footerSocial, $privacyUrl): string {
+$renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $address, $phone, $email, $footerMenu, $footerLang, $footerSocial): string {
     switch ($col['widget']) {
         case 'about':
+            // Знак и подпись под ним. Контактов здесь нет намеренно: они —
+            // отдельный виджет, и на сайте с обеими колонками адрес, телефон
+            // и почта выводились дважды.
             $h = '';
             if ($footerLogo !== '') {
                 $footerLogoSize = \App\Core\Media::dimensions($footerLogo);
@@ -64,9 +67,8 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
             } else {
                 $h .= '<div class="site-footer__name">' . htmlspecialchars($siteName, ENT_QUOTES) . '</div>';
             }
-            if ($address !== '') { $h .= '<p class="site-footer__line">' . htmlspecialchars($address, ENT_QUOTES) . '</p>'; }
-            if ($phone !== '') { $h .= '<p class="site-footer__line"><a href="tel:' . htmlspecialchars(preg_replace('/[^0-9+]/', '', $phone) ?? '', ENT_QUOTES) . '">' . htmlspecialchars($phone, ENT_QUOTES) . '</a></p>'; }
-            if ($email !== '') { $h .= '<p class="site-footer__line"><a href="mailto:' . htmlspecialchars($email, ENT_QUOTES) . '">' . htmlspecialchars($email, ENT_QUOTES) . '</a></p>'; }
+            // Уже очищено санитайзером при сохранении.
+            if (trim($col['text']) !== '') { $h .= '<div class="site-footer__about">' . $col['text'] . '</div>'; }
             return $h;
         case 'menu':
             if (empty($footerMenu)) { return ''; }
@@ -77,17 +79,34 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
             }
             return $h . '</ul>';
         case 'contacts':
-            $h = '';
-            if ($address !== '') { $h .= '<p class="site-footer__line">' . htmlspecialchars($address, ENT_QUOTES) . '</p>'; }
-            if ($phone !== '') { $h .= '<p class="site-footer__line"><a href="tel:' . htmlspecialchars(preg_replace('/[^0-9+]/', '', $phone) ?? '', ENT_QUOTES) . '">' . htmlspecialchars($phone, ENT_QUOTES) . '</a></p>'; }
-            if ($email !== '') { $h .= '<p class="site-footer__line"><a href="mailto:' . htmlspecialchars($email, ENT_QUOTES) . '">' . htmlspecialchars($email, ENT_QUOTES) . '</a></p>'; }
-            if ($privacyUrl !== '') { $h .= '<p class="site-footer__line"><a href="' . htmlspecialchars($privacyUrl, ENT_QUOTES) . '">' . htmlspecialchars(t('Политика конфиденциальности'), ENT_QUOTES) . '</a></p>'; }
-            return $h;
+            // Иконка + значение: контакты в подвале ищут глазами, а не читают
+            // подряд, и знак у строки находится быстрее самой строки.
+            // Ссылки на политику здесь нет — она в нижней строке подвала.
+            $contactRows = [];
+            if ($address !== '') { $contactRows[] = ['map-pin', $address, '']; }
+            if ($phone !== '') { $contactRows[] = ['phone', $phone, 'tel:' . (preg_replace('/[^0-9+]/', '', $phone) ?? '')]; }
+            if ($email !== '') { $contactRows[] = ['mail', $email, 'mailto:' . $email]; }
+            if ($contactRows === []) { return ''; }
+            $h = '<ul class="footer-contacts">';
+            foreach ($contactRows as [$contactIcon, $contactText, $contactHref]) {
+                $value = htmlspecialchars($contactText, ENT_QUOTES);
+                $h .= '<li class="footer-contacts__item">'
+                    . '<span class="footer-contacts__icon">' . \App\Core\Icon::render($contactIcon, 18) . '</span>'
+                    . ($contactHref === ''
+                        ? '<span class="footer-contacts__value">' . $value . '</span>'
+                        : '<a class="footer-contacts__value" href="' . htmlspecialchars($contactHref, ENT_QUOTES) . '">' . $value . '</a>')
+                    . '</li>';
+            }
+            return $h . '</ul>';
         case 'social':
             if (empty($footerSocial)) { return ''; }
             $h = '<div class="site-footer__social">';
             foreach ($footerSocial as $btn) {
-                $h .= '<a class="site-footer__social-link" href="' . htmlspecialchars((string) $btn['url'], ENT_QUOTES) . '" target="_blank" rel="noopener" aria-label="' . htmlspecialchars((string) $btn['network'], ENT_QUOTES) . '">' . \App\Core\SocialIcons::glyph((string) $btn['network']) . '</a>';
+                // Диктору «telegram» само по себе ничего не говорит: подпись
+                // должна читаться как действие, а не как ключ настройки.
+                $network = (string) $btn['network'];
+                $label = t('Мы в соцсети') . ': ' . mb_convert_case($network, MB_CASE_TITLE);
+                $h .= '<a class="site-footer__social-link" href="' . htmlspecialchars((string) $btn['url'], ENT_QUOTES) . '" target="_blank" rel="noopener" aria-label="' . htmlspecialchars($label, ENT_QUOTES) . '">' . \App\Core\SocialIcons::glyph($network, 20) . '</a>';
             }
             return $h . '</div>';
         case 'subscribe':
@@ -107,7 +126,7 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
                 . \App\Core\Csrf::honeypotField()
                 . '<input type="hidden" name="source" value="footer">'
                 . '<input type="email" name="email" placeholder="' . htmlspecialchars(t('Ваш e-mail'), ENT_QUOTES) . '" aria-label="E-mail" autocomplete="email" required>'
-                . '<button type="submit" aria-label="' . htmlspecialchars(t('Подписаться'), ENT_QUOTES) . '">&rarr;</button>'
+                . '<button type="submit" aria-label="' . htmlspecialchars(t('Подписаться'), ENT_QUOTES) . '">' . \App\Core\Icon::render('arrow-right', 20) . '</button>'
                 . $footerConsent
                 . '</form>'
                 . '<div data-push-optin></div>'; // сюда push.js добавляет кнопку уведомлений
