@@ -33,6 +33,10 @@ final class FooterController
         }
 
         FooterConfig::save([
+            // Версия формата приходит из формы: разовый перенос колонок не
+            // должен повторяться при каждом сохранении (иначе удалённые
+            // «Контакты» возвращались бы сами).
+            'v' => (int) ($_POST['v'] ?? 1),
             'style' => $_POST['style'] ?? 'columns',
             'columns' => $columns,
             'bottom' => $_POST['bottom'] ?? '',

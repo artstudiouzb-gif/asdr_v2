@@ -4955,12 +4955,22 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .site-footer--columns .site-footer__heading::after { background: var(--gov-teal); }
 .site-footer__social-link:hover { background: var(--gov-teal); }
 .site-footer__logo { max-height: 80px; width: auto; object-fit: contain; margin-bottom: 14px; display: block; }
+/* Виджеты подвала на тёмном: те же приглушённые белые, что у строк колонок.
+   Знак у контакта берёт акцент в варианте «на тёмном» — обычный акцент на
+   navy проваливается. */
+.site-footer--columns .footer-contacts__item,
+.site-footer--columns .site-footer__about,
+.site-footer--columns .site-footer__text { color: rgba(255,255,255,.72); }
+.site-footer--columns .footer-contacts__icon { color: var(--gov-teal-text); opacity: 1; }
+.site-footer--columns .site-footer__text h2,
+.site-footer--columns .site-footer__text h3,
+.site-footer--columns .site-footer__text h4 { color: #fff; }
 
 /* --- Форма подписки в подвале --- */
 .footer-subscribe { display: flex; flex-wrap: wrap; margin-top: 12px; max-width: 320px; }
 .footer-subscribe input[type=email] { flex: 1; min-width: 0; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff; border-radius: 8px 0 0 8px; padding: 11px 14px; }
 .footer-subscribe input[type=email]::placeholder { color: rgba(255,255,255,.55); }
-.footer-subscribe button { border: 0; background: var(--gov-teal); color: #fff; padding: 0 18px; border-radius: 0 8px 8px 0; cursor: pointer; font-size: var(--step-1); }
+.footer-subscribe button { display: inline-grid; place-items: center; border: 0; background: var(--gov-teal); color: #fff; padding: 0 18px; border-radius: 0 8px 8px 0; cursor: pointer; }
 .footer-subscribe button:hover { background: color-mix(in srgb, var(--gov-teal) 85%, #000); }
 .footer-subscribe__consent { display: flex; flex: 1 0 100%; align-items: flex-start; gap: 8px; margin-top: 10px; color: rgba(255,255,255,.72); font-size: var(--step--4); line-height: var(--base-line-height, 1.45); cursor: pointer; }
 .footer-subscribe__consent input { flex: 0 0 auto; margin-top: 2px; accent-color: var(--gov-teal); }
