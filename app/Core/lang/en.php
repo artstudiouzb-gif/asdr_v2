@@ -182,6 +182,7 @@ return [
     'Подпишитесь на новости Агентства' => 'Subscribe to the Agency’s news',
     'Получайте самые важные новости и аналитические материалы на почту.' => 'Get the most important news and analytical materials by e-mail.',
     'Будьте в курсе наших новостей и аналитических материалов.' => 'Stay up to date with our news and analytical materials.',
+    'Мы в соцсети' => 'Find us on',
     'Политика конфиденциальности' => 'Privacy policy',
     'Источник:' => 'Source:',
     'Основное меню' => 'Main menu',

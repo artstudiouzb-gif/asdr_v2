@@ -182,6 +182,7 @@ return [
     'Подпишитесь на новости Агентства' => 'Agentlik yangiliklariga obuna bo‘ling',
     'Получайте самые важные новости и аналитические материалы на почту.' => 'Eng muhim yangiliklar va tahliliy materiallarni pochtangizga oling.',
     'Будьте в курсе наших новостей и аналитических материалов.' => 'Yangiliklarimiz va tahliliy materiallarimizdan xabardor bo‘ling.',
+    'Мы в соцсети' => 'Ijtimoiy tarmoqdamiz',
     'Политика конфиденциальности' => 'Maxfiylik siyosati',
     'Источник:' => 'Manba:',
     'Основное меню' => 'Asosiy menyu',

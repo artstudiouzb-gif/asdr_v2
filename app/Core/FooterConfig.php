@@ -16,7 +16,7 @@ final class FooterConfig
 {
     /** Доступные виджеты колонки подвала: value => подпись для админки. */
     public const WIDGETS = [
-        'about' => 'О сайте (логотип + контакты)',
+        'about' => 'Логотип и описание',
         'menu' => 'Меню сайта',
         'contacts' => 'Контакты (адрес, телефон, email)',
         'social' => 'Соцсети',
@@ -24,12 +24,28 @@ final class FooterConfig
         'text' => 'Текст / HTML (сниппет)',
     ];
 
+    /**
+     * Виджеты, которым принадлежит поле «Текст»: «Логотип и описание» выводит
+     * его подписью под знаком, «Текст / HTML» — самим содержимым колонки.
+     * Остальным виджетам текст не принадлежит и при сохранении обнуляется.
+     */
+    public const TEXT_WIDGETS = ['about', 'text'];
+
+    /**
+     * Версия формата конфигурации. Поднимается, когда меняется смысл уже
+     * сохранённых данных: v2 развёл «Логотип и описание» и «Контакты» —
+     * до неё первый виджет печатал адрес, телефон и почту сам, и на сайте с
+     * обеими колонками они выводились дважды.
+     */
+    public const VERSION = 2;
+
     public const STYLES = ['columns', 'minimal'];
 
     /** Максимум колонок в подвале. */
     public const MAX_COLUMNS = 4;
 
     public const DEFAULTS = [
+        'v' => self::VERSION,
         'style' => 'columns',                 // columns | minimal
         'columns' => [
             ['heading' => '', 'widget' => 'about', 'text' => ''],
@@ -119,9 +135,9 @@ final class FooterConfig
                     continue;
                 }
                 $text = (string) ($col['text'] ?? '');
-                // Текстовый виджет — безопасный HTML (тот же санитайзер, что для
-                // контента редактора); прочие виджеты текст не используют.
-                $text = ($widget === 'text' && trim($text) !== '')
+                // Текст — безопасный HTML (тот же санитайзер, что для контента
+                // редактора); виджеты без своего текста его не хранят.
+                $text = (in_array($widget, self::TEXT_WIDGETS, true) && trim($text) !== '')
                     ? HtmlSanitizer::sanitize($text)
                     : '';
                 $columns[] = [
@@ -133,7 +149,7 @@ final class FooterConfig
                     break;
                 }
             }
-            $result['columns'] = $columns;
+            $result['columns'] = self::upgradeColumns($columns, (int) ($config['v'] ?? 1));
         } else {
             $result['columns'] = self::DEFAULTS['columns'];
         }
@@ -142,7 +158,34 @@ final class FooterConfig
         if ($result['bottom'] === '') {
             $result['bottom'] = self::DEFAULTS['bottom'];
         }
+        $result['v'] = self::VERSION;
 
         return $result;
+    }
+
+    /**
+     * Разовый перенос при переходе на v2: «Логотип и описание» перестал
+     * печатать контакты, поэтому подвалу, где они держались только на нём,
+     * добавляется колонка «Контакты» — иначе адрес и телефон исчезли бы с
+     * сайта молча. Делается ровно один раз: результат помечен номером версии,
+     * и удалённую потом колонку сохранение обратно не вернёт.
+     *
+     * @param list<array{heading: string, widget: string, text: string}> $columns
+     * @return list<array{heading: string, widget: string, text: string}>
+     */
+    private static function upgradeColumns(array $columns, int $version): array
+    {
+        if ($version >= self::VERSION || count($columns) >= self::MAX_COLUMNS) {
+            return $columns;
+        }
+
+        $widgets = array_column($columns, 'widget');
+        if (!in_array('about', $widgets, true) || in_array('contacts', $widgets, true)) {
+            return $columns;
+        }
+
+        $columns[] = ['heading' => 'Контакты', 'widget' => 'contacts', 'text' => ''];
+
+        return $columns;
     }
 }
