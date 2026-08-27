@@ -4978,6 +4978,23 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .widget--accent .widget__title { padding-bottom: 10px; position: relative; }
 .widget--accent .widget__title::after { content: ''; position: absolute; left: 0; bottom: 0; width: 44px; height: 3px; border-radius: 2px; background: var(--gov-teal); }
 
+/* Карусель «случайная цель»: название и описание над кадрами. Название —
+   не заголовок разметки (виджет встаёт в любое место страницы, и уровень
+   заголовка тут не предсказать), поэтому размер задаётся здесь, а диктору
+   имя приходит подписью самой карусели. Цвет берётся у виджета: на его
+   тёмном оформлении собственный тёмный цвет пропал бы. */
+.goal-carousel__text { margin-bottom: 12px; }
+.goal-carousel__text:empty { margin-bottom: 0; }
+.goal-carousel__name {
+    margin: 0 0 4px; font-weight: 700; font-size: var(--step-0); line-height: 1.3;
+    color: inherit;
+}
+.goal-carousel__desc {
+    margin: 0; font-size: var(--step--2); line-height: var(--base-line-height, 1.5);
+    color: var(--gov-muted, #64748b);
+}
+.widget--style-navy .goal-carousel__desc { color: rgba(255, 255, 255, .72); }
+
 /* ===== Кнопка webpush-подписки (футер) ===== */
 .push-optin { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; min-height: 40px; padding: 0 16px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: var(--step--2); font-weight: 600; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
 .push-optin:hover { border-color: var(--gov-teal); background: rgba(23,153,155,.15); }

@@ -1117,13 +1117,15 @@ CREATE TABLE IF NOT EXISTS webpush_queue (
 -- «Цели» (Maqsadlar) — тип контента, у которого нет текста наружу: цель это
 -- набор снимков, и на сайте она показывается только каруселью в виджете.
 --
--- Имя цели служебное: оно нужно, чтобы отличать записи в списке из сотен
--- штук, поэтому не переводится и в разметку не попадает. Отдельной страницы
--- и slug'а у цели нет — публичного адреса, который надо было бы держать
--- стабильным, не существует.
+-- Название и описание видны на сайте и переводятся (механизм А, таблица
+-- goal_translations): набор снимков без единого слова не сообщает посетителю
+-- ни что за объект, ни зачем он. Отдельной страницы и slug'а у цели нет —
+-- публичного адреса, который надо было бы держать стабильным, не существует,
+-- поэтому языковая версия остаётся переводом строки, а не отдельной записью.
 CREATE TABLE IF NOT EXISTS goals (
-    id         INT AUTO_INCREMENT PRIMARY KEY,
-    name       VARCHAR(255) NOT NULL COMMENT 'служебное имя: только список админки, наружу не выходит',
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(255) NOT NULL COMMENT 'название цели: видно на сайте и переводится',
+    description TEXT NULL COMMENT 'описание под названием; необязательно',
     is_active  TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -1141,6 +1143,18 @@ CREATE TABLE IF NOT EXISTS goal_images (
     sort_order INT NOT NULL DEFAULT 0,
     INDEX idx_goal_images_goal (goal_id, sort_order),
     CONSTRAINT fk_goal_images_goal FOREIGN KEY (goal_id) REFERENCES goals (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Перевод названия и описания цели. Пустое поле откатывается к основному
+-- языку — как у альбомов и видео.
+CREATE TABLE IF NOT EXISTS goal_translations (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    goal_id     INT NOT NULL,
+    lang        VARCHAR(5) NOT NULL,
+    name        VARCHAR(255) NULL,
+    description TEXT NULL,
+    UNIQUE KEY uniq_goal_translation (goal_id, lang),
+    CONSTRAINT fk_goal_translations_goal FOREIGN KEY (goal_id) REFERENCES goals (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO migrations (filename) VALUES
@@ -1234,7 +1248,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_15_news_card_fields.sql'),
     ('2026_08_21_videos_youtube_import.sql'),
     ('2026_08_23_totp_replay_guard.sql'),
-    ('2026_08_26_goals.sql')
+    ('2026_08_26_goals.sql'),
+    ('2026_08_27_goal_texts.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

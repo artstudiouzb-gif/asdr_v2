@@ -31,6 +31,9 @@ final class WidgetRenderer
         // снимков вперемешку.
         'photo_slider' => [
             'source' => 'manual', 'slides' => [], 'shuffle' => true, 'autoplay' => 0, 'ratio' => '16-9',
+            // Заполняются только источником «случайная цель»: у своих снимков
+            // текста нет, виджет заводился как витрина кадров.
+            'goal_name' => '', 'goal_description' => '',
         ],
     ];
 
@@ -189,7 +192,7 @@ final class WidgetRenderer
                 // /goals/random) — иначе «случайная» была бы случайной ровно
                 // один раз, до сброса кэша.
                 if (($data['source'] ?? 'manual') === 'goals') {
-                    $random = Goal::random();
+                    $random = Goal::random($lang);
                     $data['slides'] = $random === null ? [] : array_map(
                         static fn (array $img): array => [
                             'image' => (string) $img['image'],
@@ -197,6 +200,10 @@ final class WidgetRenderer
                         ],
                         $random['images']
                     );
+                    // Название и описание цели идут над каруселью: набор снимков
+                    // без единого слова не сообщает, что за объект показан.
+                    $data['goal_name'] = $random === null ? '' : (string) ($random['goal']['name'] ?? '');
+                    $data['goal_description'] = $random === null ? '' : (string) ($random['goal']['description'] ?? '');
                     // Порядок кадров внутри цели — авторский: случайной бывает
                     // сама цель, а не история, которую рассказывают её слайды.
                     $data['shuffle'] = false;

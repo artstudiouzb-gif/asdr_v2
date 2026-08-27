@@ -2,6 +2,7 @@
 
 use App\Core\AdminUi;
 use App\Core\Csrf;
+use App\Models\Language;
 
 $pageTitle = 'Цели';
 $activeNav = 'goals';
@@ -21,17 +22,20 @@ $pageUrl = static fn (int $n): string => '/admin/goals?' . http_build_query(arra
     'per_page' => $perPage !== 20 ? $perPage : null,
     'page' => $n > 1 ? $n : null,
 ]));
+
+$siteLangs = array_map(static fn (array $l): string => (string) $l['code'], Language::active());
+$langMap = \App\Models\Goal::availableLangsForIds(array_map(static fn ($g): int => (int) $g['id'], $goals));
 ?>
 <div class="form-card">
     <p class="form-hint">
-        Цель — это набор снимков. Текста на сайте у неё нет: виджет «Фотокарусель»
-        показывает одну случайную цель, листая её кадры. Имя нужно только для этого
-        списка — посетитель его не видит.
+        Цель — это название, описание и набор снимков. Виджет «Фотокарусель» показывает
+        одну случайную цель: над каруселью её название и описание, ниже — кадры.
+        Название и описание видны посетителю, поэтому переводятся.
     </p>
 
     <form method="get" action="/admin/goals" class="admin-filters">
         <div class="form-field">
-            <label for="q">Поиск по имени</label>
+            <label for="q">Поиск по названию</label>
             <input type="search" id="q" name="q" value="<?= htmlspecialchars($search, ENT_QUOTES) ?>" placeholder="Например: Транспорт">
         </div>
         <div class="form-field">
@@ -53,12 +57,18 @@ $pageUrl = static fn (int $n): string => '/admin/goals?' . http_build_query(arra
     <?php else: ?>
         <table class="admin-table">
             <thead>
-                <tr><th>Имя</th><th>Снимков</th><th>Состояние</th><th></th></tr>
+                <tr><th>Название</th><th>Языки</th><th>Снимков</th><th>Состояние</th><th></th></tr>
             </thead>
             <tbody>
                 <?php foreach ($goals as $goal): ?>
                     <tr>
                         <td><a href="/admin/goals/<?= (int) $goal['id'] ?>/edit"><?= htmlspecialchars((string) $goal['name'], ENT_QUOTES) ?></a></td>
+                        <td class="u-inline-a9efa5449f"><?= \App\Core\View::renderPartial('admin/layout/lang_badges', [
+                            'siteLangs' => $siteLangs,
+                            'has' => $langMap[(int) $goal['id']] ?? [],
+                            'translationEditUrl' => '/admin/goals/' . (int) $goal['id'] . '/edit',
+                            'translationDefaultCode' => Language::defaultCode(),
+                        ]) ?></td>
                         <td><?= (int) $goal['image_count'] ?></td>
                         <td><?= $goal['is_active'] ? 'вкл' : 'выкл' ?></td>
                         <td>

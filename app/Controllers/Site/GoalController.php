@@ -15,15 +15,18 @@ use App\Models\Goal;
  * сброса кэша. Поэтому страница отдаёт запасную цель, а скрипт просит свежую
  * здесь — этот ответ не кэшируется никогда.
  *
- * Наружу уходят только кадры: имя цели служебное и в разметку не попадает.
+ * Ответ отдаётся JSON'ом из двух готовых кусков разметки — текста цели и её
+ * кадров. Одной строкой HTML их не склеить: скрипт кладёт их в разные места
+ * (текст над каруселью, кадры в дорожку), и разбирать склейку пришлось бы на
+ * стороне браузера.
  */
 final class GoalController
 {
     public function random(): void
     {
-        $random = Goal::random();
+        $random = Goal::random(\App\Core\Locale::current());
 
-        header('Content-Type: text/html; charset=utf-8');
+        header('Content-Type: application/json; charset=utf-8');
         // Ответ обязан быть свежим у каждого запроса — иначе браузер или
         // прокси вернут ту же цель, и вся затея теряет смысл.
         header('Cache-Control: no-store, max-age=0');
@@ -54,6 +57,33 @@ final class GoalController
                 . '</div>';
         }
 
-        echo $html;
+        echo json_encode([
+            'text' => $this->text($random['goal']),
+            'slides' => $html,
+            // Подпись карусели меняется вместе с целью: без неё диктор
+            // продолжал бы объявлять предыдущую.
+            'label' => (string) ($random['goal']['name'] ?? ''),
+        ], JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Название и описание цели — та же разметка, что и в шаблоне виджета.
+     *
+     * @param array<string, mixed> $goal
+     */
+    private function text(array $goal): string
+    {
+        $name = trim((string) ($goal['name'] ?? ''));
+        $description = trim((string) ($goal['description'] ?? ''));
+
+        $html = '';
+        if ($name !== '') {
+            $html .= '<p class="goal-carousel__name">' . htmlspecialchars($name, ENT_QUOTES) . '</p>';
+        }
+        if ($description !== '') {
+            $html .= '<p class="goal-carousel__desc">' . htmlspecialchars($description, ENT_QUOTES) . '</p>';
+        }
+
+        return $html;
     }
 }

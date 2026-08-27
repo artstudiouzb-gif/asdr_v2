@@ -8,10 +8,13 @@ use App\Core\Database;
 use App\Core\UrlGuard;
 
 /**
- * «Цель» (Maqsad) — набор снимков без текста наружу. Публичного адреса у цели
- * нет: на сайте она показывается только каруселью в виджете, поэтому ни slug,
- * ни SEO, ни таблицы переводов ей не нужны. Имя служебное — оно существует,
- * чтобы отличать записи в списке из сотен штук.
+ * «Цель» (Maqsad) — набор снимков с названием и описанием. Публичного адреса
+ * у цели нет: на сайте она показывается каруселью в виджете, поэтому ни slug,
+ * ни SEO ей не нужны.
+ *
+ * Название и описание видны посетителю, а значит переводятся (механизм А,
+ * `goal_translations`): набор снимков без единого слова не сообщает, что за
+ * объект показан и зачем.
  */
 final class Goal
 {
@@ -59,13 +62,106 @@ final class Goal
     }
 
     /** @return array<string, mixed>|null */
-    public static function find(int $id): ?array
+    public static function find(int $id, ?string $lang = null): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM goals WHERE id = ?');
         $stmt->execute([$id]);
         $row = $stmt->fetch();
+        if ($row === false) {
+            return null;
+        }
 
-        return $row === false ? null : $row;
+        return $lang === null ? $row : self::localize($row, $lang);
+    }
+
+    /**
+     * Накладывает перевод указанного языка на базовую строку. Пустое поле
+     * перевода откатывается к основному языку — недописанный перевод оставляет
+     * на месте текст, а не дыру.
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    public static function localize(array $row, string $lang): array
+    {
+        return self::applyTranslation($row, GoalTranslation::find((int) $row['id'], $lang));
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array<string, mixed>>
+     */
+    public static function localizeRows(array $rows, string $lang): array
+    {
+        $translations = GoalTranslation::forGoalIds(
+            array_map(static fn (array $row): int => (int) $row['id'], $rows),
+            $lang
+        );
+
+        return array_map(
+            static fn (array $row): array => self::applyTranslation($row, $translations[(int) $row['id']] ?? null),
+            $rows
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     * @param array<string, mixed>|null $translation
+     * @return array<string, mixed>
+     */
+    private static function applyTranslation(array $row, ?array $translation): array
+    {
+        if ($translation === null) {
+            return $row;
+        }
+        foreach (['name', 'description'] as $field) {
+            if (isset($translation[$field]) && trim((string) $translation[$field]) !== '') {
+                $row[$field] = $translation[$field];
+            }
+        }
+
+        return $row;
+    }
+
+    /**
+     * Языки, на которых у цели заполнен перевод — для колонки «Языки» в списке
+     * админки. Одним запросом на всю страницу, а не по запросу на строку.
+     *
+     * @param list<int> $ids
+     * @return array<int, list<string>>
+     */
+    public static function availableLangsForIds(array $ids): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        $map = [];
+        foreach ($ids as $id) {
+            $map[$id] = [];
+        }
+        if ($ids === []) {
+            return $map;
+        }
+
+        // Основной язык есть всегда: базовая строка и есть его версия.
+        $default = Language::defaultCode();
+        foreach ($ids as $id) {
+            $map[$id][] = $default;
+        }
+
+        $in = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = Database::pdo()->prepare(
+            "SELECT goal_id, lang FROM goal_translations
+              WHERE goal_id IN ($in) AND TRIM(COALESCE(name, '')) <> ''"
+        );
+        $stmt->execute($ids);
+        foreach ($stmt->fetchAll() as $row) {
+            $goalId = (int) $row['goal_id'];
+            $lang = (string) $row['lang'];
+            if ($lang !== $default && !in_array($lang, $map[$goalId], true)) {
+                $map[$goalId][] = $lang;
+            }
+        }
+
+        return $map;
     }
 
     /** @return array<int, array<string, mixed>> */
@@ -89,7 +185,7 @@ final class Goal
      *
      * @return array{goal: array<string, mixed>, images: array<int, array<string, mixed>>}|null
      */
-    public static function random(): ?array
+    public static function random(?string $lang = null): ?array
     {
         $ids = Database::pdo()
             ->query('SELECT DISTINCT g.id FROM goals g
@@ -101,7 +197,7 @@ final class Goal
         }
 
         $id = (int) $ids[random_int(0, count($ids) - 1)];
-        $goal = self::find($id);
+        $goal = self::find($id, $lang);
         if ($goal === null) {
             return null;
         }
@@ -109,18 +205,18 @@ final class Goal
         return ['goal' => $goal, 'images' => self::images($id)];
     }
 
-    public static function create(string $name, bool $isActive): int
+    public static function create(string $name, string $description, bool $isActive): int
     {
-        $stmt = Database::pdo()->prepare('INSERT INTO goals (name, is_active) VALUES (?, ?)');
-        $stmt->execute([$name, $isActive ? 1 : 0]);
+        $stmt = Database::pdo()->prepare('INSERT INTO goals (name, description, is_active) VALUES (?, ?, ?)');
+        $stmt->execute([$name, $description, $isActive ? 1 : 0]);
 
         return (int) Database::pdo()->lastInsertId();
     }
 
-    public static function update(int $id, string $name, bool $isActive): void
+    public static function update(int $id, string $name, string $description, bool $isActive): void
     {
-        $stmt = Database::pdo()->prepare('UPDATE goals SET name = ?, is_active = ? WHERE id = ?');
-        $stmt->execute([$name, $isActive ? 1 : 0, $id]);
+        $stmt = Database::pdo()->prepare('UPDATE goals SET name = ?, description = ?, is_active = ? WHERE id = ?');
+        $stmt->execute([$name, $description, $isActive ? 1 : 0, $id]);
     }
 
     public static function delete(int $id): void
