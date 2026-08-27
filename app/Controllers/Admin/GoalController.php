@@ -11,10 +11,12 @@ use App\Core\Csrf;
 use App\Core\Flash;
 use App\Core\View;
 use App\Models\Goal;
+use App\Models\GoalTranslation;
+use App\Models\Language;
 
 /**
- * Раздел «Цели». Записей сотни, а полей у записи три (имя, включена, снимки),
- * поэтому список сделан постраничным с поиском по имени, а форма — короткой.
+ * Раздел «Цели». Записей сотни, поэтому список сделан постраничным с поиском
+ * по названию, а форма — короткой: название, описание, снимки и переводы.
  */
 final class GoalController
 {
@@ -34,7 +36,12 @@ final class GoalController
     public function create(): void
     {
         Auth::requireLogin();
-        View::render('admin/goals/form', ['goal' => null, 'images' => [], 'error' => null]);
+        View::render('admin/goals/form', [
+            'goal' => null,
+            'images' => [],
+            'translations' => [],
+            'error' => null,
+        ]);
     }
 
     public function store(): void
@@ -47,13 +54,15 @@ final class GoalController
             View::render('admin/goals/form', [
                 'goal' => null,
                 'images' => $this->images(),
-                'error' => 'У цели должно быть имя — по нему она ищется в списке.',
+                'translations' => [],
+                'error' => 'У цели должно быть название — оно видно на сайте и по нему она ищется в списке.',
             ]);
             return;
         }
 
-        $id = Goal::create($name, !empty($_POST['is_active']));
+        $id = Goal::create($name, $this->description(), !empty($_POST['is_active']));
         Goal::replaceImages($id, $this->images());
+        $this->saveTranslations($id);
         Cache::flush();
         Flash::success('Цель добавлена.');
         header('Location: /admin/goals/' . $id . '/edit');
@@ -73,6 +82,7 @@ final class GoalController
         View::render('admin/goals/form', [
             'goal' => $goal,
             'images' => Goal::images((int) $id),
+            'translations' => GoalTranslation::forGoal((int) $id),
             'error' => null,
         ]);
     }
@@ -94,13 +104,15 @@ final class GoalController
             View::render('admin/goals/form', [
                 'goal' => array_merge($goal, ['name' => '']),
                 'images' => $this->images(),
-                'error' => 'У цели должно быть имя — по нему она ищется в списке.',
+                'translations' => GoalTranslation::forGoal((int) $id),
+                'error' => 'У цели должно быть название — оно видно на сайте и по нему она ищется в списке.',
             ]);
             return;
         }
 
-        Goal::update((int) $id, $name, !empty($_POST['is_active']));
+        Goal::update((int) $id, $name, $this->description(), !empty($_POST['is_active']));
         Goal::replaceImages((int) $id, $this->images());
+        $this->saveTranslations((int) $id);
         Cache::flush();
         Flash::success('Цель сохранена.');
         header('Location: /admin/goals/' . (int) $id . '/edit');
@@ -122,6 +134,34 @@ final class GoalController
     private function name(): string
     {
         return mb_substr(trim((string) ($_POST['name'] ?? '')), 0, 255);
+    }
+
+    /** Описание — простой текст: цель показывается в узкой колонке виджета. */
+    private function description(): string
+    {
+        return mb_substr(trim(strip_tags((string) ($_POST['description'] ?? ''))), 0, 2000);
+    }
+
+    /**
+     * Переводы названия и описания для всех НЕ-основных активных языков.
+     * Пустое поле сохраняется пустым и на сайте откатывается к основному
+     * языку — так недописанный перевод оставляет текст, а не дыру.
+     */
+    private function saveTranslations(int $goalId): void
+    {
+        $defaultCode = Language::defaultCode();
+        $input = (array) ($_POST['translations'] ?? []);
+        foreach (Language::active() as $lang) {
+            $code = (string) $lang['code'];
+            if ($code === $defaultCode) {
+                continue;
+            }
+            $row = (array) ($input[$code] ?? []);
+            GoalTranslation::upsert($goalId, $code, [
+                'name' => mb_substr(trim((string) ($row['name'] ?? '')), 0, 255),
+                'description' => mb_substr(trim(strip_tags((string) ($row['description'] ?? ''))), 0, 2000),
+            ]);
+        }
     }
 
     /**

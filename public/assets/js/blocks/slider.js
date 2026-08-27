@@ -162,27 +162,42 @@
      * Не ответил сервер — остаётся отрисованная цель. Пустой карусели не
      * бывает ни при каком отказе, и без JS виджет тоже работает.
      */
-    function loadRandomGoal(root, done) {
-        var track = root.querySelector('.block-slider__track');
+    function loadRandomGoal(host, slider, done) {
+        var track = slider.querySelector('.block-slider__track');
+        // Адрес приходит из разметки: он несёт язык страницы, а скрипт про
+        // текущий язык ничего не знает — жёсткий «/goals/random» приносил на
+        // узбекскую страницу русскую цель.
+        var url = host.getAttribute('data-goal-slider') || '/goals/random';
         if (!track || !window.fetch) {
             done();
             return;
         }
 
-        window.fetch('/goals/random', { headers: { Accept: 'text/html' }, credentials: 'same-origin' })
+        window.fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
             .then(function (response) {
-                return response.ok && response.status !== 204 ? response.text() : '';
+                return response.ok && response.status !== 204 ? response.json() : null;
             })
-            .then(function (html) {
-                if (!html) {
+            .then(function (data) {
+                if (!data || !data.slides) {
                     return;
                 }
                 // Разметку собрал наш же /goals/random — это шаблон сервера,
                 // а не текст со страницы: адреса и подписи он уже экранировал.
-                track.innerHTML = html;
+                track.innerHTML = data.slides;
+                // Название и описание принадлежат цели, а не виджету: подменив
+                // кадры без текста, мы подписали бы новые снимки прежним именем.
+                var text = host.querySelector('[data-goal-text]');
+                if (text) {
+                    text.innerHTML = data.text || '';
+                }
+                // Подпись карусели — это имя цели. setAttribute экранирует
+                // значение сам, склеивать его в строку HTML не нужно.
+                if (data.label) {
+                    slider.setAttribute('aria-label', data.label);
+                }
                 // Точек ровно столько, сколько кадров у новой цели: у прежней
                 // их могло быть больше или меньше.
-                rebuildDots(root, track.querySelectorAll('.block-slider__slide').length);
+                rebuildDots(slider, track.querySelectorAll('.block-slider__slide').length);
             })
             .catch(function () {})
             .then(done, done);
@@ -234,8 +249,11 @@
 
         // Кадры подменяются до запуска: initSlider запоминает список слайдов,
         // и запущенная на старых кадрах карусель листала бы уже удалённые узлы.
-        if (slider.hasAttribute('data-goal-slider')) {
-            loadRandomGoal(slider, start);
+        // Признак висит на обёртке, а не на самом слайдере: подменяются и
+        // текст цели, и её кадры, а лежат они рядом, а не один в другом.
+        var goalHost = slider.closest ? slider.closest('[data-goal-slider]') : null;
+        if (goalHost) {
+            loadRandomGoal(goalHost, slider, start);
         } else {
             start();
         }
