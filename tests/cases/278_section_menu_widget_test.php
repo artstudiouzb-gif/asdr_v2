@@ -19,6 +19,12 @@ use App\Models\Widget;
  * правило подсветки текущего пункта одно на оба места.
  */
 
+test('Подсветка ловит вложенный адрес, «вы здесь» — только точный', function () {
+    assert_true(SectionMenu::isUrlActive('/about', '/about/history'), 'раздел подсвечен на своей странице');
+    assert_false(SectionMenu::isCurrentPath('/about', '/about/history'), 'но текущей страницей не является');
+    assert_true(SectionMenu::isCurrentPath('/about/', '/about'), 'завершающий слэш ничего не меняет');
+});
+
 test('Текущим считается сам адрес и вложенный, но не корень сайта', function () {
     assert_true(SectionMenu::isUrlActive('/about', '/about'));
     assert_true(SectionMenu::isUrlActive('/about/', '/about'), 'завершающий слэш ничего не меняет');
@@ -83,13 +89,17 @@ test('Ветка меню находится по открытой страни�
     assert_same(1, count($branch['items']), 'выключенный пункт в меню раздела не попадает');
     assert_same('История', $branch['items'][0]['title']);
     assert_true($branch['items'][0]['active'], 'открытая страница отмечена');
-    assert_false($branch['active'], 'заголовок ветки — не текущая страница');
+    assert_true($branch['items'][0]['current'], 'она же — «вы здесь» для диктора');
+    assert_true($branch['active'], 'ветка подсвечена целиком');
+    assert_false($branch['current'], 'но текущей страницей заголовок ветки не является');
 
     // Раздел, открытый по собственному адресу: отмечен сам заголовок.
     $root = SectionMenu::branch('ru', '/press');
     assert_true($root !== null);
     assert_same('Пресс-служба', $root['title']);
     assert_true($root['active']);
+    assert_true($root['current'], 'на собственном адресе раздела «вы здесь» — заголовок');
+    assert_false($root['items'][0]['current'], 'вложенная страница текущей не становится');
 
     // Страница вне разделов ветки не имеет — виджет не выводится.
     assert_same(null, SectionMenu::branch('ru', '/contacts'));

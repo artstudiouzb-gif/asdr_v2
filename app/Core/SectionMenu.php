@@ -32,6 +32,10 @@ final class SectionMenu
      * Совпадает ли адрес пункта меню с текущей страницей. Совпадением считается
      * и вложенный адрес (`/about/history` внутри `/about`), кроме корня и
      * корней языков: они префикс для всего сайта и подсвечивали бы каждый пункт.
+     *
+     * Это подсветка, а не «вы здесь»: для `aria-current="page"` нужен точный
+     * адрес (`isCurrentPath`), иначе диктор объявит текущей ещё и страницу
+     * раздела, на которой посетитель не находится.
      */
     public static function isUrlActive(string $targetUrl, string $currentPath): bool
     {
@@ -49,6 +53,14 @@ final class SectionMenu
         return str_starts_with($currentPath, $targetPath . '/');
     }
 
+    /** Точное совпадение адреса с открытой страницей — «вы здесь». */
+    public static function isCurrentPath(string $targetUrl, string $currentPath): bool
+    {
+        $targetPath = parse_url($targetUrl, PHP_URL_PATH) ?: '/';
+
+        return (rtrim($targetPath, '/') ?: '/') === $currentPath;
+    }
+
     /**
      * Ветка меню, в которой находится текущая страница.
      *
@@ -56,7 +68,7 @@ final class SectionMenu
      * в один раздел или раздел состоит из одного пункта. Виджет в этом случае
      * не выводится вовсе — пустая рамка с заголовком хуже её отсутствия.
      *
-     * @return array{title:string, url:string, active:bool, items:list<array{title:string, url:string, active:bool}>}|null
+     * @return array{title:string, url:string, active:bool, current:bool, items:list<array{title:string, url:string, active:bool, current:bool}>}|null
      */
     public static function branch(string $lang, string $currentPath): ?array
     {
@@ -75,6 +87,7 @@ final class SectionMenu
                     'title' => (string) $child['title'],
                     'url' => $childUrl,
                     'active' => self::isUrlActive($childUrl, $currentPath),
+                    'current' => self::isCurrentPath($childUrl, $currentPath),
                 ];
             }
             if ($children === []) {
@@ -96,9 +109,11 @@ final class SectionMenu
             return [
                 'title' => (string) $item['title'],
                 'url' => $url,
-                // Активен сам раздел, а не одна из его страниц: заголовок
-                // ветки тогда и есть текущая страница.
-                'active' => self::isUrlActive($url, $currentPath),
+                'active' => $active,
+                // «Вы здесь» — только на собственном адресе раздела: на его
+                // внутренней странице заголовок ветки текущей страницей не
+                // является.
+                'current' => self::isCurrentPath($url, $currentPath),
                 'items' => $children,
             ];
         }
