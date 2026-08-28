@@ -3347,8 +3347,14 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
    как отдельная кнопка, а не как значение этого поля. */
 .colorfield .clr-field { display: block; width: 100%; }
 .colorfield .clr-field input[data-coloris] {
+    /* Высота и рамка — как у соседних полей формы: общий слой панели это поле
+       не трогает (см. исключение :not([data-coloris])), поэтому размеры
+       задаются здесь, а не достаются оттуда. */
+    min-height: 38px;
+    height: 38px;
     padding-right: 12px;
     padding-left: 44px;
+    border-color: var(--admin-border);
 }
 .colorfield .clr-field button {
     right: auto;
@@ -6713,8 +6719,11 @@ body, body.admin-body {
 
 /* 4. Поля форм, селекты, лейблы и подсказки */
 .filters-panel input, .filters-panel select,
+/* Поле выбора цвета исключено намеренно: у него слева образец, и общий
+   `padding: 0 12px !important` загонял HEX прямо под него. Исключение здесь
+   дешевле, чем ещё один !important в самом компоненте. */
 .admin-filters input, .admin-filters select,
-.admin-main input[type="text"], .admin-main input[type="search"],
+.admin-main input[type="text"]:not([data-coloris]), .admin-main input[type="search"],
 .admin-main input[type="email"], .admin-main input[type="password"],
 .admin-main input[type="number"], .admin-main input[type="url"],
 .admin-main select {
