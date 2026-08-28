@@ -254,6 +254,9 @@ final class FileController
             'url' => FileEntry::publicUrl($file),
             'name' => (string) $file['original_name'],
             'mime_type' => (string) ($file['mime_type'] ?? ''),
+            // Вес нужен подвалу окна выбора: по имени файла не видно, тянет
+            // ли страница эту картинку.
+            'size' => (int) ($file['size'] ?? 0),
             'alt_text' => (string) ($file['alt_text'] ?? ''),
             'caption' => (string) ($file['caption'] ?? ''),
             'description' => (string) ($file['description'] ?? ''),

@@ -112,9 +112,24 @@
             var color = group.querySelector('[data-coloris]');
             if (!off || !color) { return; }
 
+            // Выключенное поле не отправляется, поэтому на время «по умолчанию»
+            // прячем значение и пишем в подсказке, что цвет берётся из темы:
+            // прежде поле показывало посторонний HEX, который никуда не шёл.
             function syncDefaultState() {
                 color.disabled = off.checked;
                 group.classList.toggle('is-default', off.checked);
+
+                if (off.checked) {
+                    if (color.value) { color.dataset.colorfieldValue = color.value; }
+                    color.value = '';
+                    color.placeholder = 'цвет темы';
+                } else {
+                    if (!color.value && color.dataset.colorfieldValue) {
+                        color.value = color.dataset.colorfieldValue;
+                    }
+                    color.placeholder = '#17375E';
+                }
+                color.dispatchEvent(new Event('input', { bubbles: true }));
             }
 
             off.addEventListener('change', syncDefaultState);
@@ -1019,6 +1034,12 @@
         var selectBtn = modal.querySelector('[data-media-select-btn]');
         var toolbar = modal.querySelector('[data-media-toolbar]');
         var tabs = modal.querySelectorAll('[data-media-tab]');
+        var countEl = modal.querySelector('[data-media-count]');
+        var selectedBox = modal.querySelector('[data-media-selected]');
+        var selectedThumb = modal.querySelector('[data-media-selected-thumb]');
+        var dialog = modal.querySelector('.media-modal__dialog');
+        var lastTrigger = null;
+        var dropDepth = 0;
 
         var currentTarget = null;
         var currentCallback = null;
@@ -1042,6 +1063,23 @@
             all: { accept: '', label: 'файл' }
         };
 
+        // Вес и тип файла нужны подвалу окна: одна строка «Выбран: name»
+        // ничего не говорит о том, что именно уходит в поле.
+        function formatSize(bytes) {
+            var value = Number(bytes || 0);
+            if (!value) { return ''; }
+            if (value < 1024) { return value + ' Б'; }
+            if (value < 1024 * 1024) { return Math.round(value / 1024) + ' КБ'; }
+            return (value / (1024 * 1024)).toFixed(value < 10 * 1024 * 1024 ? 1 : 0) + ' МБ';
+        }
+
+        function itemByUrl(url) {
+            for (var i = 0; i < libraryItems.length; i++) {
+                if (libraryItems[i].url === url) { return libraryItems[i]; }
+            }
+            return null;
+        }
+
         function setUploadStatus(message, state) {
             if (!uploadStatus) { return; }
             uploadStatus.textContent = message || '';
@@ -1063,6 +1101,9 @@
 
         function updateSelectedUI() {
             var selectedCount = currentMultiple ? selectedUrls.length : (selectedUrl ? 1 : 0);
+            if (selectedThumb) { selectedThumb.textContent = ''; }
+            if (selectedBox) { selectedBox.classList.remove('has-file'); }
+
             if (!selectedCount) {
                 if (selectedInfo) selectedInfo.textContent = 'Файл не выбран';
                 if (selectBtn) selectBtn.disabled = true;
@@ -1070,7 +1111,27 @@
                 if (selectedInfo) {
                     selectedInfo.textContent = currentMultiple
                         ? 'Выбрано файлов: ' + selectedCount
-                        : 'Выбран: ' + (selectedName || selectedUrl);
+                        : (selectedName || selectedUrl);
+
+                    var meta = currentMultiple ? null : itemByUrl(selectedUrl);
+                    if (meta) {
+                        var parts = [];
+                        if (meta.mime_type) { parts.push(meta.mime_type); }
+                        if (formatSize(meta.size)) { parts.push(formatSize(meta.size)); }
+                        if (parts.length) {
+                            var metaNode = document.createElement('span');
+                            metaNode.className = 'media-modal__selected-meta';
+                            metaNode.textContent = parts.join(' · ');
+                            selectedInfo.appendChild(metaNode);
+                        }
+                    }
+                }
+                if (selectedThumb && !currentMultiple && /\.(jpe?g|png|gif|svg|webp|avif)$/i.test(selectedUrl || '')) {
+                    var thumb = document.createElement('img');
+                    thumb.src = encodeURI(selectedUrl);
+                    thumb.alt = '';
+                    selectedThumb.appendChild(thumb);
+                    if (selectedBox) { selectedBox.classList.add('has-file'); }
                 }
                 if (selectBtn) selectBtn.disabled = false;
             }
@@ -1079,6 +1140,7 @@
                 var itemUrl = fig.getAttribute('data-url');
                 var isThis = currentMultiple ? selectedUrls.indexOf(itemUrl) !== -1 : itemUrl === selectedUrl;
                 fig.classList.toggle('is-selected', isThis);
+                fig.setAttribute('aria-pressed', isThis ? 'true' : 'false');
             });
         }
 
@@ -1086,10 +1148,12 @@
             libraryItems = items || [];
             if (!libraryItems.length) {
                 grid.innerHTML = '<div class="media-modal__empty">В библиотеке нет подходящих файлов.</div>';
+                if (countEl) { countEl.textContent = ''; }
                 return;
             }
             grid.innerHTML = '';
             var term = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            var shown = 0;
 
             libraryItems.forEach(function (it) {
                 if (term && !it.name.toLowerCase().includes(term)) {
@@ -1105,17 +1169,14 @@
                     fig.classList.add('is-selected');
                 }
 
-                var isVideo = /\.(mp4|webm|ogg|mov|m4v)$/i.test(it.url);
-                var isImage = /\.(jpe?g|png|gif|svg|webp)$/i.test(it.url);
+                var isImage = /\.(jpe?g|png|gif|svg|webp|avif)$/i.test(it.url);
                 var ext = (it.name.split('.').pop() || 'file').toUpperCase();
 
-                if (isVideo) {
+                if (!isImage) {
+                    // Плашка с расширением одна на видео и документы: раньше
+                    // видео помечалось символом ▶, и в одном ряду два разных
+                    // обозначения читались как два разных вида карточки.
                     fig.classList.add('media-modal__item--file');
-                    fig.innerHTML = '<span class="media-modal__fileicon">▶</span><span class="media-modal__filename"></span>';
-                    fig.querySelector('.media-modal__filename').textContent = it.name;
-                } else if (!isImage) {
-                    fig.classList.add('media-modal__item--file');
-                    // Расширение берётся из имени файла — вставляем текстом.
                     fig.innerHTML = '<span class="media-modal__fileicon"></span><span class="media-modal__filename"></span>';
                     fig.querySelector('.media-modal__fileicon').textContent = ext;
                     fig.querySelector('.media-modal__filename').textContent = it.name;
@@ -1149,7 +1210,15 @@
                 });
 
                 grid.appendChild(fig);
+                shown++;
             });
+
+            if (!shown) {
+                grid.innerHTML = '<div class="media-modal__empty">Ничего не найдено. Измените запрос или загрузите файл.</div>';
+            }
+            if (countEl) {
+                countEl.textContent = term ? 'Найдено: ' + shown : 'Всего файлов: ' + shown;
+            }
         }
 
         function loadLibrary(type, force) {
@@ -1229,71 +1298,153 @@
             setUploadStatus('');
             switchTab('library');
             modal.hidden = false;
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.focus();
+            }
             loadLibrary(currentType, false);
         }
 
         function close() {
+            if (modal.hidden) { return; }
             modal.hidden = true;
+            modal.classList.remove('is-dropping');
+            dropDepth = 0;
             currentCallback = null;
             currentMultiple = false;
+            if (lastTrigger && lastTrigger.isConnected) { lastTrigger.focus(); }
+            lastTrigger = null;
         }
 
-        if (uploadInput && uploadBox) {
+        function uploadFile(file) {
+            if (!uploadBox || !file) { return; }
+            switchTab('upload');
+            if (!file.size || file.size > 200 * 1024 * 1024) {
+                setUploadStatus('Неверный размер файла (макс 200 МБ).', 'error');
+                return;
+            }
+
+            var chunkSize = 1024 * 1024;
+            var total = Math.ceil(file.size / chunkSize);
+            var uploadId = '';
+            for (var i = 0; i < 32; i++) { uploadId += Math.floor(Math.random() * 16).toString(16); }
+
+            if (uploadInput) { uploadInput.disabled = true; }
+            setUploadStatus('Загрузка… 0%');
+
+            function sendChunk(index) {
+                var fd = new FormData();
+                fd.append('csrf_token', uploadBox.getAttribute('data-csrf'));
+                fd.append('upload_id', uploadId);
+                fd.append('index', String(index));
+                fd.append('total', String(total));
+                fd.append('name', file.name);
+                fd.append('access_type', 'public');
+                fd.append('chunk', file.slice(index * chunkSize, Math.min((index + 1) * chunkSize, file.size)));
+
+                fetch('/admin/files/chunk', { method: 'POST', body: fd, credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (!res.ok) { throw new Error(res.error || 'Ошибка загрузки'); }
+                        if (res.done) {
+                            if (uploadInput) { uploadInput.disabled = false; }
+                            setUploadStatus('Файл загружен!', 'success');
+                            loaded = false;
+                            switchTab('library');
+                            loadLibrary(currentType, true).then(function () {
+                                if (res.url) {
+                                    selectUrl(res.url);
+                                }
+                            });
+                            return;
+                        }
+                        setUploadStatus('Загрузка… ' + Math.round(((index + 1) / total) * 100) + '%');
+                        sendChunk(index + 1);
+                    })
+                    .catch(function (err) {
+                        if (uploadInput) { uploadInput.disabled = false; }
+                        setUploadStatus('Ошибка: ' + err.message, 'error');
+                    });
+            }
+
+            sendChunk(0);
+        }
+
+        if (uploadInput) {
             uploadInput.addEventListener('change', function () {
-                if (!uploadInput.files || !uploadInput.files.length) return;
-                var file = uploadInput.files[0];
-                var options = typeOptions[currentType] || typeOptions.all;
-                if (!file.size || file.size > 200 * 1024 * 1024) {
-                    setUploadStatus('Неверный размер файла (макс 200 МБ).', 'error');
-                    return;
-                }
-
-                var chunkSize = 1024 * 1024;
-                var total = Math.ceil(file.size / chunkSize);
-                var uploadId = '';
-                for (var i = 0; i < 32; i++) { uploadId += Math.floor(Math.random() * 16).toString(16); }
-
-                uploadInput.disabled = true;
-                setUploadStatus('Загрузка… 0%');
-
-                function sendChunk(index) {
-                    var fd = new FormData();
-                    fd.append('csrf_token', uploadBox.getAttribute('data-csrf'));
-                    fd.append('upload_id', uploadId);
-                    fd.append('index', String(index));
-                    fd.append('total', String(total));
-                    fd.append('name', file.name);
-                    fd.append('access_type', 'public');
-                    fd.append('chunk', file.slice(index * chunkSize, Math.min((index + 1) * chunkSize, file.size)));
-
-                    fetch('/admin/files/chunk', { method: 'POST', body: fd, credentials: 'same-origin' })
-                        .then(function (r) { return r.json(); })
-                        .then(function (res) {
-                            if (!res.ok) { throw new Error(res.error || 'Ошибка загрузки'); }
-                            if (res.done) {
-                                uploadInput.disabled = false;
-                                setUploadStatus('Файл загружен!', 'success');
-                                loaded = false;
-                                switchTab('library');
-                                loadLibrary(currentType, true).then(function () {
-                                    if (res.url) {
-                                        selectUrl(res.url);
-                                    }
-                                });
-                                return;
-                            }
-                            setUploadStatus('Загрузка… ' + Math.round(((index + 1) / total) * 100) + '%');
-                            sendChunk(index + 1);
-                        })
-                        .catch(function (err) {
-                            uploadInput.disabled = false;
-                            setUploadStatus('Ошибка: ' + err.message, 'error');
-                        });
-                }
-
-                sendChunk(0);
+                if (!uploadInput.files || !uploadInput.files.length) { return; }
+                uploadFile(uploadInput.files[0]);
             });
         }
+
+        // Файл можно бросить прямо в окно выбора: раньше для этого нужно было
+        // сначала переключиться на вкладку загрузки и найти там область.
+        if (dialog) {
+            dialog.addEventListener('dragenter', function (event) {
+                if (!event.dataTransfer || modal.hidden) { return; }
+                event.preventDefault();
+                dropDepth++;
+                modal.classList.add('is-dropping');
+            });
+            dialog.addEventListener('dragover', function (event) {
+                if (modal.hidden) { return; }
+                event.preventDefault();
+                if (event.dataTransfer) { event.dataTransfer.dropEffect = 'copy'; }
+            });
+            dialog.addEventListener('dragleave', function () {
+                dropDepth = Math.max(0, dropDepth - 1);
+                if (!dropDepth) { modal.classList.remove('is-dropping'); }
+            });
+            dialog.addEventListener('drop', function (event) {
+                if (modal.hidden) { return; }
+                event.preventDefault();
+                dropDepth = 0;
+                modal.classList.remove('is-dropping');
+                if (event.dataTransfer && event.dataTransfer.files.length) {
+                    uploadFile(event.dataTransfer.files[0]);
+                }
+            });
+        }
+
+        // Стрелками ходим по карточкам, Enter выбирает файл сразу: без этого
+        // до нужного кадра в конце библиотеки приходилось долго жать Tab.
+        grid.addEventListener('keydown', function (event) {
+            var card = event.target.closest('.media-modal__item');
+            if (!card) { return; }
+            var cards = Array.prototype.filter.call(
+                grid.querySelectorAll('.media-modal__item'),
+                function (node) { return !node.hidden; }
+            );
+            var index = cards.indexOf(card);
+            if (index === -1) { return; }
+
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                var url = card.getAttribute('data-url');
+                if (currentMultiple) { card.click(); } else if (url) { selectUrl(url); }
+                return;
+            }
+
+            var perRow = 1;
+            if (cards.length > 1) {
+                var top = cards[0].getBoundingClientRect().top;
+                perRow = cards.filter(function (node) {
+                    return Math.abs(node.getBoundingClientRect().top - top) < 2;
+                }).length || 1;
+            }
+
+            var next = null;
+            if (event.key === 'ArrowRight') { next = cards[index + 1]; }
+            if (event.key === 'ArrowLeft') { next = cards[index - 1]; }
+            if (event.key === 'ArrowDown') { next = cards[index + perRow]; }
+            if (event.key === 'ArrowUp') { next = cards[index - perRow]; }
+            if (event.key === 'Home') { next = cards[0]; }
+            if (event.key === 'End') { next = cards[cards.length - 1]; }
+            if (!next) { return; }
+
+            event.preventDefault();
+            next.focus();
+        });
 
         // Публичный API для редактора: выбор изображения/SVG с колбэком.
         window.MediaPicker = {
@@ -1367,7 +1518,12 @@
 
         document.addEventListener('click', function (e) {
             var btn = e.target.closest('[data-media-pick]');
-            if (btn) { e.preventDefault(); open(btn.getAttribute('data-media-target'), null, btn.getAttribute('data-media-type'), false); return; }
+            if (btn) {
+                e.preventDefault();
+                lastTrigger = btn;
+                open(btn.getAttribute('data-media-target'), null, btn.getAttribute('data-media-type'), false);
+                return;
+            }
             if (e.target.closest('[data-media-close]') || e.target === modal) { close(); }
         });
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { close(); } });
@@ -1436,7 +1592,20 @@
 
     // --- Поле изображения с превью (медиабиблиотека / URL / загрузка файла) ---
     (function () {
+        // Имя выбранного файла рядом с кнопками: раньше о содержимом поля
+        // говорил только длинный путь в текстовом поле под ним.
+        function setName(field, src) {
+            var name = field.querySelector('[data-image-name]');
+            if (!name) { return; }
+            var value = String(src || '').split('?')[0];
+            var base = value ? (value.split('/').pop() || value) : '';
+            try { base = decodeURIComponent(base); } catch (error) {}
+            name.textContent = base || 'Файл не выбран';
+            name.classList.toggle('is-empty', !base);
+        }
+
         function setPreview(field, src) {
+            setName(field, /^data:/.test(String(src || '')) ? 'загруженный файл' : src);
             var box = field.querySelector('[data-image-preview]');
             if (!box) { return; }
             if (src) {
@@ -1446,7 +1615,7 @@
                 box.appendChild(img);
             } else {
                 box.innerHTML = '<span class="image-field__placeholder" aria-hidden="true">'
-                    + (window.asdrTablerIcon ? window.asdrTablerIcon('photo', 26) : '') + '</span>';
+                    + (window.asdrTablerIcon ? window.asdrTablerIcon('photo', 22) : '') + '</span>';
             }
         }
         // URL-инпут (в т.ч. установленный медиабиблиотекой — она шлёт change).

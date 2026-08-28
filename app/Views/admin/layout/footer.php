@@ -29,14 +29,20 @@
 <div class="media-modal" data-media-modal hidden role="dialog" aria-modal="true" aria-labelledby="media-modal-title">
     <div class="media-modal__dialog">
         <div class="media-modal__head">
+            <h2 class="media-modal__title" id="media-modal-title">Медиабиблиотека</h2>
             <div class="media-modal__tabs">
                 <button type="button" class="media-modal__tab is-active" data-media-tab="library">Библиотека файлов</button>
                 <button type="button" class="media-modal__tab" data-media-tab="upload">Загрузить файлы</button>
             </div>
+            <span class="media-modal__head-spacer"></span>
             <button type="button" class="media-modal__close" data-media-close aria-label="Закрыть"><?= \App\Core\Icon::render('x', 18) ?></button>
         </div>
         <div class="media-modal__toolbar" data-media-toolbar>
-            <input type="search" class="media-modal__search" data-media-search placeholder="Поиск в медиабиблиотеке…">
+            <div class="media-modal__search-box">
+                <?= \App\Core\Icon::render('search', 16, 'media-modal__search-icon') ?>
+                <input type="search" class="media-modal__search" data-media-search placeholder="Поиск по имени файла…" aria-label="Поиск в медиабиблиотеке">
+            </div>
+            <span class="media-modal__count" data-media-count aria-live="polite"></span>
         </div>
         <div class="media-modal__upload is-hidden" data-media-upload data-csrf="<?= htmlspecialchars(\App\Core\Csrf::token(), ENT_QUOTES) ?>">
             <div class="media-modal__dropzone">
@@ -54,12 +60,16 @@
             <div class="media-modal__empty">Загрузка…</div>
         </div>
         <div class="media-modal__footer">
-            <div class="media-modal__selected-info" data-media-selected-info>Файл не выбран</div>
+            <div class="media-modal__selected" data-media-selected>
+                <span class="media-modal__selected-thumb" data-media-selected-thumb></span>
+                <span class="media-modal__selected-info" data-media-selected-info>Файл не выбран</span>
+            </div>
             <div class="media-modal__footer-actions">
                 <button type="button" class="btn" data-media-close>Отмена</button>
                 <button type="button" class="btn btn--primary" data-media-select-btn disabled>Выбрать</button>
             </div>
         </div>
+        <div class="media-modal__dropveil" data-media-dropveil aria-hidden="true">Отпустите файл — он загрузится в библиотеку</div>
     </div>
 </div>
 

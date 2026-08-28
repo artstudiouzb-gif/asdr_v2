@@ -15,7 +15,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] {
 form[action*="/admin/heroes/"][action*="/slides/"] > .form-card {
     padding: 22px;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 10px;
+    border-radius: 3px;
     background: var(--hero-editor-surface);
     box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
 }
@@ -30,7 +30,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] > .form-card > .form-hint {
     margin: 0 0 18px;
     padding: 11px 13px;
     border: 1px solid color-mix(in srgb, var(--hero-editor-border) 78%, transparent);
-    border-radius: 8px;
+    border-radius: 3px;
     background: var(--hero-editor-soft);
     color: var(--hero-editor-muted);
     font-size: 12px;
@@ -41,7 +41,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] details.form-section {
     margin: 0 0 14px;
     overflow: clip;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 9px;
+    border-radius: 3px;
     background: var(--hero-editor-surface);
     box-shadow: 0 1px 2px rgba(15, 23, 42, .025);
 }
@@ -113,7 +113,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-section__state {
     overflow: hidden;
     padding: 4px 8px;
     border: 1px solid color-mix(in srgb, var(--hero-editor-border) 82%, transparent);
-    border-radius: 999px;
+    border-radius: 3px;
     background: var(--hero-editor-surface);
     color: var(--hero-editor-muted);
     font-size: 10.5px;
@@ -166,7 +166,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-field textarea {
     min-height: 40px;
     margin: 0;
     padding: 8px 10px;
-    border-radius: 6px;
+    border-radius: 3px;
     font-size: 13px;
     line-height: 1.4;
 }
@@ -189,7 +189,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-field--wide > .form-hin
     margin: 0;
     padding: 9px 11px;
     border-left: 3px solid color-mix(in srgb, var(--hero-editor-accent) 48%, var(--hero-editor-border));
-    border-radius: 5px;
+    border-radius: 3px;
     background: var(--hero-editor-soft);
 }
 
@@ -201,7 +201,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-field--checkbox {
     min-height: 42px;
     padding: 10px 11px;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 7px;
+    border-radius: 3px;
     background: var(--hero-editor-soft);
 }
 
@@ -240,7 +240,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] .image-field__preview {
     aspect-ratio: 16 / 10;
     overflow: hidden;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 7px;
+    border-radius: 3px;
     background: var(--hero-editor-soft);
 }
 
@@ -256,8 +256,8 @@ form[action*="/admin/heroes/"][action*="/slides/"] .image-field__controls {
 }
 
 form[action*="/admin/heroes/"][action*="/slides/"] .image-field__controls {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    display: flex !important;
+    flex-wrap: wrap;
     gap: 6px;
     align-items: center;
 }
@@ -281,7 +281,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] .tabler-icon-field__preview {
     display: grid;
     place-items: center;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 6px;
+    border-radius: 3px;
     background: var(--hero-editor-soft);
 }
 
@@ -304,7 +304,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-section__body--grid > f
     margin: 0;
     padding: 16px;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 8px;
+    border-radius: 3px;
     background: var(--hero-editor-soft);
 }
 
@@ -326,7 +326,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] > .form-actions {
     margin: 14px auto 0;
     padding: 10px 12px;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 8px 8px 0 0;
+    border-radius: 3px 3px 0 0;
     background: color-mix(in srgb, var(--hero-editor-surface) 94%, transparent);
     box-shadow: 0 -8px 24px rgba(15, 23, 42, .06);
     backdrop-filter: blur(12px);
@@ -390,6 +390,6 @@ form[action*="/admin/heroes/"][action*="/slides/"] > .form-actions {
 
     form[action*="/admin/heroes/"][action*="/slides/"] > .form-actions {
         flex-wrap: wrap;
-        border-radius: 8px 8px 0 0;
+        border-radius: 3px 3px 0 0;
     }
 }

@@ -111,7 +111,7 @@ body.admin-body {
     color: var(--admin-topbar-text);
     background: #f7f9fc;
     border: 1px solid #dce3ed;
-    border-radius: 11px;
+    border-radius: 3px;
 }
 
 .admin-search__input::placeholder {
@@ -151,7 +151,7 @@ body.admin-body {
     color: var(--admin-topbar-text);
     background: #ffffff;
     border: 1px solid #dce3ed;
-    border-radius: 9px;
+    border-radius: 3px;
 }
 
 .admin-tbtn:hover {
@@ -189,7 +189,7 @@ body.admin-body {
     min-height: 44px;
     padding: 4px 7px 4px 4px;
     color: var(--admin-topbar-text);
-    border-radius: 11px;
+    border-radius: 3px;
 }
 
 .admin-user__btn:hover {
@@ -201,7 +201,7 @@ body.admin-body {
     height: 36px;
     color: #ffffff;
     background: linear-gradient(135deg, var(--admin-accent), var(--admin-accent-hover));
-    border-radius: 10px;
+    border-radius: 3px;
     box-shadow: 0 4px 10px color-mix(in srgb, var(--admin-accent) 24%, transparent);
 }
 
@@ -304,7 +304,7 @@ body.admin-body {
     color: #ffffff;
     background: linear-gradient(145deg, color-mix(in srgb, var(--admin-accent) 80%, #ffffff), var(--admin-accent-hover));
     border: 1px solid rgba(255, 255, 255, .22);
-    border-radius: 15px;
+    border-radius: 3px;
     box-shadow: 0 12px 24px color-mix(in srgb, var(--admin-accent) 32%, transparent);
     font-size: 23px;
     font-weight: 850;
@@ -365,7 +365,7 @@ body.admin-body {
 }
 
 .admin-sidebar__label--toggle {
-    border-radius: 8px;
+    border-radius: 3px;
 }
 
 .admin-sidebar__label--toggle:hover {
@@ -385,7 +385,7 @@ body.admin-body {
     padding: 5px 11px;
     color: var(--admin-sidebar-text);
     border: 0;
-    border-radius: 8px;
+    border-radius: 3px;
     font-size: 14px;
     font-weight: 550;
     /* Без transform: сдвиг на ховере дёргал пункты (transition его не гасил). */
@@ -400,7 +400,7 @@ body.admin-body {
     left: 0;
     width: 3px;
     background: transparent;
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 3px 3px 0;
 }
 
 .admin-nav-item:hover {
@@ -488,7 +488,7 @@ html.admin-nav-collapsed .admin-sidebar__brand-mark {
 html.admin-nav-collapsed .admin-sidebar__logo {
     width: 46px;
     height: 46px;
-    border-radius: 13px;
+    border-radius: 3px;
     font-size: 20px;
 }
 
@@ -713,6 +713,6 @@ html.admin-nav-collapsed .form-actions--sticky {
 .admin-panel,
 .form-section {
     box-shadow: var(--admin-elevation-card);
-    border-radius: 12px;
+    border-radius: 3px;
 }
 
