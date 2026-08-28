@@ -31,7 +31,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <input type="text" id="title" name="title" value="<?= htmlspecialchars($block['title'] ?? '', ENT_QUOTES) ?>">
         </div>
 
-        <?php if (in_array($type, ['text', 'cta', 'counters', 'team_list', 'news_latest', 'hero', 'cards_grid', 'media_gallery', 'news_feature', 'timeline', 'text_image', 'map_point', 'org_structure'], true)): ?>
+        <?php if (in_array($type, ['text', 'team_list', 'news_latest', 'hero', 'news_feature', 'timeline', 'text_image', 'map_point', 'org_structure'], true)): ?>
             <div class="form-field">
                 <label for="title_field"><?= $type === 'timeline' ? 'Заголовок раздела' : 'Заголовок, показываемый на сайте' ?></label>
                 <input type="text" id="title_field" name="title_field" value="<?= htmlspecialchars($data['title'] ?? '', ENT_QUOTES) ?>">
@@ -141,35 +141,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'cta'): ?>
-            <div class="form-field">
-                <label for="cta_variant">Вариант блока</label>
-                <select id="cta_variant" name="variant">
-                    <?php foreach (['card' => 'Карточка призыва', 'band' => 'Компактная полоса', 'media-dark' => 'Фото с затемнением', 'media-light' => 'Светлый сплит с фото'] as $value => $label): ?>
-                        <option value="<?= $value ?>" <?= ($data['variant'] ?? 'card') === $value ? 'selected' : '' ?>><?= $label ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="form-hint">Выберите карточку, компактную полосу или один из двух макетов с фотографией.</span>
-            </div>
-            <div class="form-field">
-                <label for="text">Текст</label>
-                <textarea id="text" name="text"><?= htmlspecialchars($data['text'] ?? '', ENT_QUOTES) ?></textarea>
-            </div>
-            <?= \App\Core\AdminUi::iconField('icon_svg', $data['icon_svg'] ?? '', ['id' => 'icon_svg', 'label' => 'Иконка для варианта «Полоса»']) ?>
-            <?= \App\Core\AdminUi::imageField('image', $data['image'] ?? '', ['label' => 'Изображение для вариантов с фото']) ?>
-            <?= \App\Core\AdminUi::mediaPositionFields($data['image_position'] ?? 'center-center', $data['image_position_mobile'] ?? 'center-center') ?>
-            <div class="form-field">
-                <label for="button_text">Текст кнопки</label>
-                <input type="text" id="button_text" name="button_text" value="<?= htmlspecialchars($data['button_text'] ?? '', ENT_QUOTES) ?>">
-            </div>
-            <div class="form-field">
-                <label for="button_url">Ссылка кнопки</label>
-                <input type="text" id="button_url" name="button_url" value="<?= htmlspecialchars($data['button_url'] ?? '', ENT_QUOTES) ?>">
-            </div>
-            <div class="colorfield-row">
-                <?= \App\Core\AdminUi::colorField('bg_color', $data['bg_color'] ?? '', 'Цвет фона', '#eef2f7') ?>
-                <?= \App\Core\AdminUi::colorField('text_color', $data['text_color'] ?? '', 'Цвет текста', '#173a63') ?>
-                <?= \App\Core\AdminUi::colorField('button_color', $data['button_color'] ?? '', 'Цвет фона кнопки', '#17999b') ?>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('cta', $data) ?>
         <?php endif; ?>
 
         <?php if ($type === 'advantages'): ?>
@@ -364,61 +336,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'counters'): ?>
-            <div class="colorfield-row">
-                <?= \App\Core\AdminUi::colorField('card_bg', $data['card_bg'] ?? '', 'Цвет карточки (фон)', '#ffffff', 'По умолчанию (белая)') ?>
-                <?= \App\Core\AdminUi::colorField('text_color', $data['text_color'] ?? '', 'Цвет текста и цифр', '#173a63', 'По умолчанию (тёмно-синий)') ?>
-            </div>
-            <span class="form-hint u-inline-1e51bacc25">Оставьте «по умолчанию», чтобы карточка была белой с тёмным текстом. Для тёмной карточки выберите тёмный фон и светлый текст.</span>
-            <div class="colorfield-row">
-                <div class="form-field">
-                    <label for="counter_icon_size">Размер иконок, px</label>
-                    <input type="number" id="counter_icon_size" name="icon_size" min="16" max="64" step="1" value="<?= max(16, min(64, (int) ($data['icon_size'] ?? 28))) ?>">
-                </div>
-                <div class="form-field">
-                    <label for="counter_icon_bg">Фон иконок</label>
-                    <select id="counter_icon_bg" name="icon_bg">
-                        <option value="on" <?= (string) ($data['icon_bg'] ?? 'on') === 'on' ? 'selected' : '' ?>>С подложкой</option>
-                        <option value="off" <?= (string) ($data['icon_bg'] ?? 'on') === 'off' ? 'selected' : '' ?>>Без подложки</option>
-                    </select>
-                </div>
-            </div>
-            <div class="colorfield-row">
-                <div class="form-field">
-                    <label for="counter_icon_position">Положение иконки</label>
-                    <select id="counter_icon_position" name="icon_position">
-                        <?php foreach (['left' => 'Слева от текста', 'right' => 'Справа от текста', 'top' => 'Сверху', 'center' => 'Сверху по центру'] as $value => $label): ?>
-                            <option value="<?= $value ?>" <?= (string) ($data['icon_position'] ?? 'left') === $value ? 'selected' : '' ?>><?= $label ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="form-field">
-                    <label for="counter_text_align">Выравнивание содержимого</label>
-                    <select id="counter_text_align" name="text_align">
-                        <?php foreach (['left' => 'Слева', 'center' => 'По центру', 'right' => 'Справа'] as $value => $label): ?>
-                            <option value="<?= $value ?>" <?= (string) ($data['text_align'] ?? 'left') === $value ? 'selected' : '' ?>><?= $label ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
-            <span class="form-hint">Размер, фон и расположение применяются только к иконкам этого блока; выравнивание — к числу и подписи.</span>
-            <div class="form-grid form-grid--2">
-                <div class="form-field">
-                    <label for="counters_variant">Вид блока</label>
-                    <select id="counters_variant" name="variant">
-                        <?php foreach (['row' => 'Полоса с разделителями', 'cards' => 'Отдельные карточки'] as $value => $label): ?>
-                            <option value="<?= $value ?>" <?= (string) ($data['variant'] ?? 'row') === $value ? 'selected' : '' ?>><?= $label ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="form-field">
-                    <label for="counters_value_size">Размер чисел</label>
-                    <select id="counters_value_size" name="value_size">
-                        <?php foreach (['normal' => 'Обычный', 'large' => 'Крупный'] as $value => $label): ?>
-                            <option value="<?= $value ?>" <?= (string) ($data['value_size'] ?? 'normal') === $value ? 'selected' : '' ?>><?= $label ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('counters', $data) ?>
             <div>
                 <label>Счётчики</label>
                 <div data-repeater="items">
@@ -1090,86 +1008,15 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <div class="form-field"><label for="nf_all_url">Ссылка «Все …» — URL (пусто = /news)</label><input type="text" id="nf_all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
         <?php endif; ?>
 
+        <?php if ($type === 'cards_grid'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('cards_grid', $data) ?>
+        <?php endif; ?>
         <?php if ($type === 'media_gallery'): ?>
-            <div class="form-field">
-                <label for="mg_description">Описание раздела</label>
-                <textarea id="mg_description" name="description" rows="2"><?= htmlspecialchars($data['description'] ?? '', ENT_QUOTES) ?></textarea>
-            </div>
-            <div class="form-field">
-                <label for="mg_ratio">Пропорция плитки</label>
-                <select id="mg_ratio" name="ratio">
-                    <?php foreach (['16-9' => '16:9 — как у видео', '4-3' => '4:3 — классическая', '1-1' => '1:1 — квадрат'] as $value => $label): ?>
-                        <option value="<?= $value ?>" <?= ($data['ratio'] ?? '16-9') === $value ? 'selected' : '' ?>><?= $label ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="form-hint">Обложки видео и фотоальбомов приходят разного размера — общая пропорция выравнивает ряд.</span>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('media_gallery', $data) ?>
         <?php endif; ?>
 
+        <?php // Список карточек у обоих типов общий: поля строки почти те же. ?>
         <?php if (in_array($type, ['cards_grid', 'media_gallery'], true)): ?>
-            <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все направления"></div>
-            <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
-            <?php
-            $srcVal = $data['source'] ?? 'manual';
-            $srcOptions = $type === 'cards_grid'
-                ? ['projects' => 'Из раздела «Проекты»']
-                : ['media' => 'Видео + фотоальбомы', 'albums' => 'Из фотоальбомов', 'videos' => 'Из раздела «Видео»'];
-            ?>
-            <div class="form-field">
-                <label for="source">Источник данных</label>
-                <select id="source" name="source">
-                    <option value="manual" <?= !isset($srcOptions[$srcVal]) ? 'selected' : '' ?>>Ручной список (ниже)</option>
-                    <?php foreach ($srcOptions as $value => $label): ?><option value="<?= $value ?>" <?= $srcVal === $value ? 'selected' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES) ?></option><?php endforeach; ?>
-                </select>
-                <span class="form-hint">Автоматический источник использует записи с отметкой «Показать на главной».</span>
-            </div>
-            <div class="form-field">
-                <label for="limit"><?= $type === 'media_gallery' ? 'Сколько карточек показывать (при постраничном выводе — на странице)' : 'Сколько карточек показывать' ?></label>
-                <input type="number" id="limit" name="limit" min="2" max="24" value="<?= (int) ($data['limit'] ?? ($type === 'cards_grid' ? 6 : 8)) ?>">
-            </div>
-            <?php if ($type === 'media_gallery'): ?>
-                <div class="form-field form-field--checkbox">
-                    <input type="checkbox" id="mg_paginate" name="paginate" value="1" <?= !empty($data['paginate']) ? 'checked' : '' ?>>
-                    <label for="mg_paginate">Постраничный вывод</label>
-                </div>
-                <p class="form-hint">
-                    С полосой страниц блок показывает <strong>весь опубликованный список</strong>,
-                    а не только отмеченные «Показать на главной», и делит его на страницы.
-                    Ссылка страницы ведёт на этот же блок, поэтому читатель остаётся на месте.
-                    Для видео это единственный способ дойти до старых роликов: отдельного
-                    раздела «Видео» на сайте нет.
-                </p>
-            <?php endif; ?>
-            <?php if ($type === 'cards_grid'): ?>
-                <div class="form-field">
-                    <label for="cards_variant">Вариант карточек</label>
-                    <select id="cards_variant" name="variant">
-                        <option value="icon" <?= ($data['variant'] ?? 'icon') === 'icon' ? 'selected' : '' ?>>Иконка, заголовок и текст</option>
-                        <option value="compact" <?= ($data['variant'] ?? 'icon') === 'compact' ? 'selected' : '' ?>>Компактные категории</option>
-                        <option value="image" <?= ($data['variant'] ?? 'icon') === 'image' ? 'selected' : '' ?>>Карточки с фотографией</option>
-                        <option value="image_below" <?= ($data['variant'] ?? 'icon') === 'image_below' ? 'selected' : '' ?>>Фото сверху, заголовок и текст под ним</option>
-                    </select>
-                    <span class="form-hint">Один набор данных можно показать как карточки с иконками, категории или карточки с фотографиями.</span>
-                </div>
-                <div class="form-field"><label for="columns">Колонок</label>
-                    <select id="columns" name="columns">
-                        <?php foreach ([2,3,4,5] as $n): ?><option value="<?= $n ?>" <?= (int)($data['columns'] ?? 5)===$n?'selected':'' ?>><?= $n ?></option><?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="colorfield-row">
-                    <?= \App\Core\AdminUi::colorField('card_bg', $data['card_bg'] ?? '', 'Цвет карточек (фон)', '#ffffff') ?>
-                    <?= \App\Core\AdminUi::colorField('text_color', $data['text_color'] ?? '', 'Цвет текста и иконок', '#173a63') ?>
-                </div>
-                <?= \App\Core\AdminUi::mediaPositionFields($data['image_position'] ?? 'center-center', $data['image_position_mobile'] ?? 'center-center') ?>
-            <?php else: ?>
-                <div class="form-field">
-                    <label for="columns">Плиток в ряду</label>
-                    <select id="columns" name="columns">
-                        <?php foreach ([2, 3, 4, 5] as $n): ?><option value="<?= $n ?>" <?= (int) ($data['columns'] ?? 4) === $n ? 'selected' : '' ?>><?= $n ?></option><?php endforeach; ?>
-                    </select>
-                    <span class="form-hint">Действует на широких экранах; ниже 1000px число колонок подбирается автоматически.</span>
-                </div>
-            <?php endif; ?>
             <div>
                 <label>Элементы</label>
                 <div data-repeater="items">

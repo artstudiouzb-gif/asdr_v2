@@ -44,7 +44,7 @@ final class BlockTypeRegistry
             'image_position_mobile' => 'center-center',
         ],
         'html' => ['html' => ''],
-        'cta' => ['variant' => 'card', 'title' => '', 'text' => '', 'icon_svg' => '', 'image' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'button_text' => '', 'button_url' => '', 'bg_color' => '', 'text_color' => '', 'button_color' => ''],
+        'cta' => [], // схема: BlockFieldSchema
         'advantages' => [], // схема: BlockFieldSchema
         'slider' => [], // схема: BlockFieldSchema
         'form' => ['form_id' => null],
@@ -54,7 +54,7 @@ final class BlockTypeRegistry
         // блок хранит только подписи вкладок и оформление.
         'tabs' => [], // схема: BlockFieldSchema
         'testimonials' => [], // схема: BlockFieldSchema
-        'counters' => ['title' => '', 'card_bg' => '', 'text_color' => '', 'icon_size' => 28, 'icon_bg' => 'on', 'icon_position' => 'left', 'text_align' => 'left', 'variant' => 'row', 'value_size' => 'normal', 'items' => []],
+        'counters' => [], // схема: BlockFieldSchema
         'team_list' => ['title' => '', 'limit' => 0, 'department' => '', 'group_by_department' => false],
         'projects_list' => [], // схема: BlockFieldSchema
         'news_latest' => ['title' => 'Последние новости', 'all_text' => 'Все новости', 'all_url' => '', 'limit' => 3, 'category' => 0],
@@ -67,8 +67,8 @@ final class BlockTypeRegistry
         // а собственные поля блока не используются. Ноль — старая обложка,
         // собранная прямо в блоке; такие страницы продолжают работать.
         'hero' => ['hero_id' => 0, 'title' => '', 'eyebrow' => '', 'subtitle' => '', 'bg_type' => 'none', 'image' => '', 'image_mobile' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'video_url' => '', 'video_mobile' => 'poster', 'youtube_url' => '', 'bg_color' => '', 'width' => 'full', 'height' => 'regular', 'custom_height' => '720px', 'height_mobile' => '', 'custom_height_mobile' => '', 'overlay_enabled' => false, 'overlay_mode' => 'gradient', 'overlay_direction' => 'auto', 'overlay_color' => '#0b1a30', 'overlay_opacity' => 35, 'text_position' => 'left', 'text_align_y' => 'center', 'text_width' => '', 'text_color' => '', 'art_image' => '', 'art_alt' => '', 'art_position' => 'above', 'art_size' => 'medium', 'button_color' => '', 'panel_enabled' => false, 'panel_color' => '#0b1a30', 'panel_opacity' => 0, 'button_text' => '', 'button_url' => '', 'button_icon' => '', 'button_icon_image' => '', 'button2_text' => '', 'button2_url' => '', 'button2_icon' => '', 'button2_icon_image' => '', 'video_button_text' => '', 'video_button_url' => '', 'slides' => [], 'autoplay' => 0],
-        'cards_grid' => ['variant' => 'icon', 'title' => '', 'all_text' => '', 'all_url' => '', 'columns' => 5, 'card_bg' => '', 'text_color' => '', 'source' => 'manual', 'limit' => 6, 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'items' => []],
-        'media_gallery' => ['title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'source' => 'manual', 'limit' => 8, 'paginate' => false, 'columns' => 4, 'ratio' => '16-9', 'items' => []],
+        'cards_grid' => [], // схема: BlockFieldSchema
+        'media_gallery' => [], // схема: BlockFieldSchema
         'news_feature' => ['variant' => 'cards', 'title' => 'Новости и аналитика', 'all_text' => 'Все новости', 'all_url' => '', 'limit' => 5, 'category' => 0],
         'person_cards' => [], // схема: BlockFieldSchema
         'timeline' => ['title' => '', 'description' => '', 'items' => [], 'button_text' => '', 'button_url' => '', 'cta_title' => '', 'cta_text' => '', 'cta_button_text' => '', 'cta_button_url' => '', 'cta_image' => ''],

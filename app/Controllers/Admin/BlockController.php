@@ -10,7 +10,6 @@ use App\Core\BlockData\BlockFieldSchema;
 use App\Core\BlockData\BlockPresentationNormalizer;
 use App\Core\BlockData\ContactCardsBlockNormalizer;
 use App\Core\BlockData\CountersBlockNormalizer;
-use App\Core\BlockData\CtaBlockNormalizer;
 use App\Core\BlockData\FaqBlockNormalizer;
 use App\Core\BlockData\HeroBlockNormalizer;
 use App\Core\BlockData\SubscribeBlockNormalizer;
@@ -485,7 +484,7 @@ final class BlockController
                     'html' => \App\Core\HtmlSanitizer::sanitize($rawHtml),
                 ];
             case 'cta':
-                return CtaBlockNormalizer::normalize($_POST, $locale);
+                return BlockFieldSchema::normalize('cta', $_POST, $locale);
             case 'advantages':
                 return AdvantagesBlockNormalizer::normalize($_POST, $locale);
             case 'slider':
@@ -622,50 +621,20 @@ final class BlockController
                         'url' => $url,
                     ];
                 }
-                // Медиатека держит ритм четырёх колонок, карточки — пяти.
-                $cols = (int) ($_POST['columns'] ?? ($type === 'media_gallery' ? 4 : 5));
-                // Источник данных: «Проекты» (cards_grid с фото) или «Фотоальбомы»
-                // (media_gallery) собирают карточки из отмеченных «на главной»
-                // записей автоматически; иначе — ручной список items.
-                $source = 'manual';
-                if ($type === 'cards_grid' && ($_POST['source'] ?? '') === 'projects') {
-                    $source = 'projects';
-                } elseif ($type === 'media_gallery' && in_array($_POST['source'] ?? '', ['albums', 'videos', 'media'], true)) {
-                    $source = (string) $_POST['source'];
-                }
-                $variant = $type === 'cards_grid'
-                    && in_array($_POST['variant'] ?? 'icon', ['icon', 'compact', 'image', 'image_below'], true)
-                    ? (string) $_POST['variant']
-                    : 'icon';
-                // Проекты собираются с обложками, поэтому вариант без фото им не
-                // подходит; но выбор между текстом на фото и текстом под ним
-                // остаётся за редактором.
-                if ($source === 'projects' && !in_array($variant, ['image', 'image_below'], true)) {
-                    $variant = 'image';
-                }
-                $collected = [
-                    'variant' => $variant,
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => (trim((string) ($_POST['all_url'] ?? '')) !== '' && \App\Core\UrlGuard::isSafeLink(trim((string) ($_POST['all_url'] ?? '')))) ? trim((string) ($_POST['all_url'] ?? '')) : '',
-                    'columns' => max(2, min(5, $cols)),
-                    'card_bg' => self::color('card_bg'),
-                    'text_color' => self::color('text_color'),
-                    'source' => $source,
-                    'limit' => max(2, min(24, (int) ($_POST['limit'] ?? 6))),
-                    'image_position' => \App\Core\MediaPosition::normalize($_POST['image_position'] ?? null),
-                    'image_position_mobile' => \App\Core\MediaPosition::normalize($_POST['image_position_mobile'] ?? null),
-                    'items' => $items,
-                ];
-                if ($type === 'media_gallery') {
-                    // Медиагалерея делит поля с карточками, но у неё свои
-                    // вводный текст и пропорция плитки.
-                    $collected['description'] = TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale);
-                    $collected['ratio'] = \App\Core\BlockData\BlockDataInput::enum($_POST, 'ratio', ['16-9', '4-3', '1-1'], '16-9');
-                    // Постраничный вывод: «сколько показывать» становится
-                    // размером страницы, а блок перестаёт быть витриной
-                    // отмеченных записей и показывает весь список.
-                    $collected['paginate'] = !empty($_POST['paginate']);
+                $collected = array_merge(
+                    $type === 'cards_grid'
+                        ? BlockFieldSchema::normalize('cards_grid', $_POST, $locale)
+                        : BlockFieldSchema::normalize('media_gallery', $_POST, $locale),
+                    ['items' => $items]
+                );
+                // Проекты собираются с обложками, поэтому вариант без фото им
+                // не подходит; но выбор между текстом на фото и текстом под ним
+                // остаётся за редактором. Это зависимость одного поля от
+                // другого — схема такое не выражает.
+                if (($collected['source'] ?? '') === 'projects'
+                    && !in_array($collected['variant'] ?? '', ['image', 'image_below'], true)
+                ) {
+                    $collected['variant'] = 'image';
                 }
                 return $collected;
             case 'news_feature':

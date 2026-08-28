@@ -148,7 +148,9 @@ test('Кэш страницы не подменяется второй стра�
     $pdo->exec('DELETE FROM videos');
 
     $ids = [];
-    foreach (['Кэш A', 'Кэш B', 'Кэш C'] as $i => $title) {
+    // Четыре ролика и страница по два: «сколько показывать» — поле формы с
+    // минимумом в две карточки, и схема держит этот минимум и на выводе.
+    foreach (['Кэш A', 'Кэш B', 'Кэш C', 'Кэш D'] as $i => $title) {
         $id = (int) Video::create($title);
         Video::update($id, $title, '', '/uploads/public/v.jpg', 'https://youtu.be/cachedvide' . $i, '', true, false, $i);
         $ids[] = $id;
@@ -159,7 +161,7 @@ test('Кэш страницы не подменяется второй стра�
     $pageId = (int) $pdo->lastInsertId();
     Block::create($pageId, 'ru', 'media_gallery', 'Медиатека', [
         'source' => 'videos',
-        'limit' => 1,
+        'limit' => 2,
         'paginate' => true,
     ], '');
 
@@ -174,14 +176,14 @@ test('Кэш страницы не подменяется второй стра�
 
     $_GET[BlockPager::PARAM] = '2';
     $second = PageBlocks::compile($pageId, 'ru')['html'];
-    assert_contains('Кэш B', $second, 'вторая страница блока собирается заново');
+    assert_contains('Кэш C', $second, 'вторая страница блока собирается заново');
 
     // Главное: в общем кэше страницы осталась первая страница. Иначе один
     // читатель, пролиставший галерею, менял бы содержимое страницы всем.
     $cached = Cache::get('page:' . $pageId . ':ru');
     assert_true(is_array($cached), 'первая страница попала в кэш');
     assert_contains('Кэш A', (string) $cached['html']);
-    assert_true(!str_contains((string) $cached['html'], 'Кэш B'), 'вторая страница в общий кэш не попала');
+    assert_true(!str_contains((string) $cached['html'], 'Кэш C'), 'вторая страница в общий кэш не попала');
 
     $_GET = $saved;
     if ($savedUri === null) {

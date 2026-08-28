@@ -498,5 +498,5 @@ test('Карточки с фото: вариант «текст под фото�
     // Источник «Проекты» больше не навязывает подпись поверх фото: вариант
     // с текстом под снимком контроллер обязан сохранить.
     $controller = (string) file_get_contents(__DIR__ . '/../../app/Controllers/Admin/BlockController.php');
-    assert_contains("in_array(\$variant, ['image', 'image_below'], true)", $controller);
+    assert_contains("in_array(\$collected['variant'] ?? '', ['image', 'image_below'], true)", $controller);
 });

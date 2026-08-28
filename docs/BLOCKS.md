@@ -9,7 +9,8 @@
 **Настройки типа со схемой объявляются один раз.** У типов, переехавших на
 `App\Core\BlockData\BlockFieldSchema` (`columns`, `tabs`, `partners`,
 `advantages`, `testimonials`, `projects_list`, `faq`, `stages`, `docs_list`,
-`subscribe`, `slider`, `person_cards`, `contact_cards`, `icon_text`),
+`subscribe`, `slider`, `person_cards`, `contact_cards`, `icon_text`, `cta`,
+`counters`, `cards_grid`, `media_gallery`),
 описание поля — тип значения, границы, умолчание, подпись, подсказка — лежит
 только в схеме. Из него получаются умолчания реестра, поле формы, нормализация
 присланного и проверка данных на выводе (`BlockFieldSchema::apply()`), поэтому
