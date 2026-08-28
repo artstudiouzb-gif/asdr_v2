@@ -7,7 +7,8 @@
 `app/Controllers/Admin/BlockController.php::collectData()`.
 
 **Настройки типа со схемой объявляются один раз.** У типов, переехавших на
-`App\Core\BlockData\BlockFieldSchema` (`columns`, `tabs`, `partners`),
+`App\Core\BlockData\BlockFieldSchema` (`columns`, `tabs`, `partners`,
+`advantages`, `testimonials`, `projects_list`, `faq`, `stages`, `docs_list`),
 описание поля — тип значения, границы, умолчание, подпись, подсказка — лежит
 только в схеме. Из него получаются умолчания реестра, поле формы, нормализация
 присланного и проверка данных на выводе (`BlockFieldSchema::apply()`), поэтому

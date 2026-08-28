@@ -48,8 +48,15 @@ test('Поля схемы описаны полностью и осмыслен�
                     "умолчание вне списка значений: {$type}.{$key}"
                 );
             }
-            if ($field->kind === 'int') {
+            if ($field->kind === 'int' && $field->max !== null) {
                 assert_true($field->min < $field->max, "пустой диапазон: {$type}.{$key}");
+            }
+            if ($field->kind === 'int_choice') {
+                assert_true(count($field->options) > 1, "список из одного числа не настройка: {$type}.{$key}");
+                assert_true(
+                    isset($field->options[(int) $field->default]),
+                    "умолчание вне списка значений: {$type}.{$key}"
+                );
             }
         }
     }
@@ -58,7 +65,7 @@ test('Поля схемы описаны полностью и осмыслен�
 test('Присланное формой значение приводится к схеме', function () {
     $data = BlockFieldSchema::normalize('partners', [
         'variant' => 'marquee',
-        'columns' => '99',              // за границей — прижимается к максимуму
+        'columns' => '99',              // не из списка — умолчание
         'logo_size' => 'gigantic',      // чужое значение — умолчание
         'autoplay' => '7',
         'title_field' => '  Партнёры  ',
@@ -66,7 +73,7 @@ test('Присланное формой значение приводится к
     ], 'ru');
 
     assert_same('marquee', $data['variant']);
-    assert_same(8, $data['columns']);
+    assert_same(6, $data['columns'], 'число вне списка — это подделанная форма, берём умолчание');
     assert_same('medium', $data['logo_size']);
     assert_same(7, $data['autoplay']);
     assert_same('Партнёры', $data['title']);
@@ -85,7 +92,7 @@ test('Сохранённые данные тоже приводятся к сх�
         'mobile_order' => 'reverse',
     ]);
 
-    assert_same(4, $data['columns']);
+    assert_same(2, $data['columns'], 'значение вне списка заменяется умолчанием');
     assert_same('medium', $data['gap']);
     assert_same('stretch', $data['valign']);
     assert_same('reverse', $data['mobile_order']);
@@ -93,11 +100,16 @@ test('Сохранённые данные тоже приводятся к сх�
 
 test('Форма и сохранение типа со схемой обращаются к ней, а не к рукописным полям', function () {
     $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
-    $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/BlockController.php');
+    // Сохранение живёт либо веткой контроллера, либо отдельным нормализатором
+    // типа — важно, что скалярные поля в обоих случаях идут через схему.
+    $saving = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/BlockController.php');
+    foreach (glob(APP_ROOT . '/app/Core/BlockData/*Normalizer.php') ?: [] as $normalizer) {
+        $saving .= (string) file_get_contents($normalizer);
+    }
 
     foreach (array_keys(BlockFieldSchema::all()) as $type) {
         assert_contains("BlockFieldSchema::formHtml('{$type}'", $form, "форма {$type} рисуется по схеме");
-        assert_contains("BlockFieldSchema::normalize('{$type}'", $controller, "сохранение {$type} идёт по схеме");
+        assert_contains("BlockFieldSchema::normalize('{$type}'", $saving, "сохранение {$type} идёт по схеме");
 
         $html = BlockFieldSchema::formHtml($type, []);
         foreach (BlockFieldSchema::fields($type) as $key => $field) {
@@ -134,6 +146,27 @@ test('Шаблон типа со схемой не перепроверяет з
     // затевалось: она разъезжается с первой молча.
     $partners = (string) file_get_contents(APP_ROOT . '/templates/blocks/partners.php');
     assert_not_contains('in_array(', $partners, 'значения уже проверены схемой');
+
+    // Общее правило: значение поля со списком или границами шаблон читает
+    // прямо. Запасное `?? умолчание` рядом с ним — верный признак того, что
+    // проверка написана заново.
+    $fallbacks = [];
+    foreach (BlockFieldSchema::all() as $type => $fields) {
+        $path = APP_ROOT . '/templates/blocks/' . $type . '.php';
+        if (!is_file($path)) {
+            continue; // контейнеры рендерятся программно
+        }
+        $template = (string) file_get_contents($path);
+        foreach ($fields as $key => $field) {
+            if (!in_array($field->kind, ['enum', 'int', 'int_choice', 'bool'], true)) {
+                continue;
+            }
+            if (str_contains($template, "\$data['" . $key . "'] ?? ")) {
+                $fallbacks[] = $type . '.' . $key;
+            }
+        }
+    }
+    assert_same([], $fallbacks, 'шаблон повторяет проверку схемы: ' . implode(', ', $fallbacks));
 
     $renderer = (string) file_get_contents(APP_ROOT . '/app/Core/BlockRenderer.php');
     assert_contains('BlockFieldSchema::apply($type, $data)', $renderer, 'рендер приводит данные к схеме');

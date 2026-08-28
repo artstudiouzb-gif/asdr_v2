@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Core\BlockData;
 
+/**
+ * Нормализатор блока «Отзывы»: собирает только репитер, скалярные поля описаны
+ * схемой (`BlockFieldSchema`).
+ */
 final class TestimonialsBlockNormalizer
 {
     /**
@@ -35,13 +39,9 @@ final class TestimonialsBlockNormalizer
             ];
         }
 
-        return [
-            'variant' => BlockDataInput::enum($input, 'variant', ['carousel', 'grid'], 'carousel'),
-            'title' => BlockDataInput::plain($input, 'title_field', $locale),
-            'description' => BlockDataInput::plain($input, 'description', $locale),
-            'columns' => BlockDataInput::int($input, 'columns', 2, 4, 3),
-            'autoplay' => BlockDataInput::int($input, 'autoplay', 0, 30, 0),
-            'items' => $items,
-        ];
+        return array_merge(
+            BlockFieldSchema::normalize('testimonials', $input, $locale),
+            ['items' => $items]
+        );
     }
 }

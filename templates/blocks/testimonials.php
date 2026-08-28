@@ -5,11 +5,10 @@ use App\Core\Icon;
 /** @var array $data */
 /** @var int $blockId */
 $items = is_array($data['items'] ?? null) ? $data['items'] : [];
-$variant = in_array($data['variant'] ?? 'carousel', ['carousel', 'grid'], true)
-    ? (string) $data['variant']
-    : 'carousel';
-$columns = max(2, min(4, (int) ($data['columns'] ?? 3)));
-$autoplay = max(0, min(30, (int) ($data['autoplay'] ?? 0)));
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$variant = (string) $data['variant'];
+$columns = (int) $data['columns'];
+$autoplay = (int) $data['autoplay'];
 // Полосой отзывы едут только в варианте «карусель» и только когда их больше одного.
 $carousel = $variant === 'carousel' && count($items) > 1;
 

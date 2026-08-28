@@ -45,7 +45,7 @@ final class BlockTypeRegistry
         ],
         'html' => ['html' => ''],
         'cta' => ['variant' => 'card', 'title' => '', 'text' => '', 'icon_svg' => '', 'image' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'button_text' => '', 'button_url' => '', 'bg_color' => '', 'text_color' => '', 'button_color' => ''],
-        'advantages' => ['variant' => 'grid', 'title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 0, 'items' => []],
+        'advantages' => [], // схема: BlockFieldSchema
         'slider' => ['title' => '', 'autoplay' => 0, 'ratio' => '16-9', 'slides' => []],
         'form' => ['form_id' => null],
         'columns' => [], // схема: BlockFieldSchema
@@ -53,14 +53,14 @@ final class BlockTypeRegistry
         // вложенные блоки любого типа (column_index = номер вкладки), а сам
         // блок хранит только подписи вкладок и оформление.
         'tabs' => [], // схема: BlockFieldSchema
-        'testimonials' => ['variant' => 'carousel', 'title' => '', 'description' => '', 'columns' => 3, 'autoplay' => 0, 'items' => []],
+        'testimonials' => [], // схема: BlockFieldSchema
         'counters' => ['title' => '', 'card_bg' => '', 'text_color' => '', 'icon_size' => 28, 'icon_bg' => 'on', 'icon_position' => 'left', 'text_align' => 'left', 'variant' => 'row', 'value_size' => 'normal', 'items' => []],
         'team_list' => ['title' => '', 'limit' => 0, 'department' => '', 'group_by_department' => false],
-        'projects_list' => ['variant' => 'grid', 'title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 3, 'limit' => 3, 'autoplay' => 0],
+        'projects_list' => [], // схема: BlockFieldSchema
         'news_latest' => ['title' => 'Последние новости', 'all_text' => 'Все новости', 'all_url' => '', 'limit' => 3, 'category' => 0],
         'partners' => [], // схема: BlockFieldSchema
         'subscribe' => ['variant' => 'band', 'title' => 'Подписка на новости', 'text' => 'Получайте дайджест новостей на почту раз в неделю.', 'image' => '', 'placeholder' => '', 'note' => '', 'button_text' => 'Подписаться'],
-        'faq' => ['title' => '', 'search_enabled' => true, 'single_open' => false, 'items' => []],
+        'faq' => [], // схема: BlockFieldSchema
         'contact_cards' => ['variant' => 'cards', 'title' => '', 'line_icons' => true, 'icon_size' => 22, 'icon_bg' => 'on', 'items' => []],
         // hero_id — ссылка на обложку (тип контента «Обложки»). Когда он задан,
         // блок только размещает обложку: содержимое и настройки берутся из неё,
@@ -76,9 +76,9 @@ final class BlockTypeRegistry
         'person_profile' => ['photo' => '', 'photo_side' => 'left', 'name' => '', 'position' => '', 'text' => '', 'phone' => '', 'phone_label' => 'Приёмная:', 'email' => '', 'email_label' => 'E-mail:', 'button_text' => '', 'button_url' => '', 'button2_text' => '', 'button2_url' => '', 'telegram' => '', 'facebook' => '', 'linkedin' => '', 'x' => '', 'instagram' => ''],
         'bio_education' => ['bio_title' => 'Биография', 'bio_text' => '', 'career_title' => '', 'career' => [], 'edu_title' => 'Образование', 'edu_items' => [], 'extra_title' => '', 'extra_text' => '', 'widgets_before' => [], 'widgets_after' => [], 'quote_text' => '', 'quote_author' => ''],
         'anchor_nav' => ['items' => [], 'auto' => false, 'sticky' => false],
-        'stages' => ['variant' => 'default', 'title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 0, 'autoplay' => 0, 'items' => []],
+        'stages' => [], // схема: BlockFieldSchema
         'text_image' => ['title' => '', 'text' => '', 'image' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'image_side' => 'right', 'image_ratio' => 'auto', 'image_width' => 50, 'button_text' => '', 'button_url' => '', 'items' => []],
-        'docs_list' => ['variant' => 'grid', 'title' => '', 'all_text' => '', 'all_url' => '', 'columns' => 4, 'search_enabled' => true, 'emblem' => true, 'items' => []],
+        'docs_list' => [], // схема: BlockFieldSchema
         'map_point' => ['title' => '', 'image' => '', 'embed_url' => '', 'load_mode' => 'click', 'card_title' => '', 'address' => '', 'copy_enabled' => true, 'button_text' => '', 'button_url' => ''],
         'org_structure' => ['title' => '', 'layout' => 'tree', 'columns' => 4, 'council' => '', 'head_title' => 'Директор', 'head_name' => '', 'head_url' => '', 'side_items' => '', 'branches' => [], 'collapsible' => false, 'search' => false, 'notes' => '', 'footnote' => ''],
         'leader_card' => ['photo' => '', 'name' => '', 'name_tag' => 'p', 'position' => '', 'phone' => '', 'email' => '', 'hours' => '',
