@@ -31,18 +31,10 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <input type="text" id="title" name="title" value="<?= htmlspecialchars($block['title'] ?? '', ENT_QUOTES) ?>">
         </div>
 
-        <?php if (in_array($type, ['text', 'team_list', 'news_latest', 'hero', 'news_feature', 'timeline', 'text_image', 'map_point', 'org_structure'], true)): ?>
+        <?php if (in_array($type, ['text', 'team_list', 'hero', 'org_structure'], true)): ?>
             <div class="form-field">
-                <label for="title_field"><?= $type === 'timeline' ? 'Заголовок раздела' : 'Заголовок, показываемый на сайте' ?></label>
+                <label for="title_field">Заголовок, показываемый на сайте</label>
                 <input type="text" id="title_field" name="title_field" value="<?= htmlspecialchars($data['title'] ?? '', ENT_QUOTES) ?>">
-            </div>
-        <?php endif; ?>
-
-        <?php if ($type === 'timeline'): ?>
-            <div class="form-field">
-                <label for="section_description">Описание раздела</label>
-                <textarea id="section_description" name="description" rows="4" data-wysiwyg><?= htmlspecialchars($data['description'] ?? '', ENT_QUOTES) ?></textarea>
-                <span class="form-hint">Заголовок и описание выводятся над содержимым блока — отдельный текстовый блок не нужен.</span>
             </div>
         <?php endif; ?>
 
@@ -369,28 +361,16 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
         <?php endif; ?>
 
-        <?php if ($type === 'team_list' || $type === 'news_latest'): ?>
+        <?php if ($type === 'team_list'): ?>
             <div class="form-field">
-                <label for="limit">Сколько записей показывать<?= $type === 'news_latest' ? ' (0 — 3 по умолчанию)' : ' (0 — все)' ?></label>
+                <label for="limit">Сколько записей показывать (0 — все)</label>
                 <input type="number" id="limit" name="limit" min="0" value="<?= (int) ($data['limit'] ?? 0) ?>">
-                <span class="form-hint">
-                    <?php if ($type === 'news_latest'): ?>
-                        Блок выводит последние опубликованные новости (лента для главной страницы).
-                    <?php else: ?>
-                        Блок выводит опубликованные записи раздела «Команда» по порядку сортировки.
-                    <?php endif; ?>
-                </span>
+                <span class="form-hint">Блок выводит опубликованные записи раздела «Команда» по порядку сортировки.</span>
             </div>
         <?php endif; ?>
 
         <?php if ($type === 'news_latest'): ?>
-            <?php $allPlaceholder = 'Все новости'; ?>
-            <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="<?= $allPlaceholder ?>"></div>
-            <div class="form-field">
-                <label for="all_url">Ссылка «Все …» — URL</label>
-                <input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>">
-                <span class="form-hint">Пусто — блок сам подставит адрес раздела (с учётом выбранной рубрики). Ссылка показывается и без заголовка блока.</span>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('news_latest', $data) ?>
         <?php endif; ?>
 
         <?php if ($type === 'projects_list'): ?>
@@ -994,18 +974,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'news_feature'): ?>
-            <?php $nfVariant = ($data['variant'] ?? 'cards') === 'mosaic' ? 'mosaic' : 'cards'; ?>
-            <div class="form-field">
-                <label for="nf_variant">Макет блока</label>
-                <select id="nf_variant" name="variant">
-                    <option value="cards" <?= $nfVariant === 'cards' ? 'selected' : '' ?>>Карточки — крупная новость и ряд карточек</option>
-                    <option value="mosaic" <?= $nfVariant === 'mosaic' ? 'selected' : '' ?>>Мозаика — крупная с текстом на фото и колонка справа</option>
-                </select>
-                <span class="form-hint">«Карточки» повторяют вид страницы новостей. «Мозаика» плотнее: помещает больше материалов на ту же высоту.</span>
-            </div>
-            <div class="form-field"><label for="nf_limit">Сколько новостей показывать</label><input type="number" id="nf_limit" name="limit" min="2" max="12" value="<?= (int) ($data['limit'] ?? 5) ?>"><span class="form-hint">Всего, вместе с крупной. Для макета «Карточки» ряд заполняется без остатка при 5 или 9 (1 крупная + 4 или 8), для «Мозаики» — при 6.</span></div>
-            <div class="form-field"><label for="nf_all_text">Ссылка «Все …» — текст</label><input type="text" id="nf_all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все новости"></div>
-            <div class="form-field"><label for="nf_all_url">Ссылка «Все …» — URL (пусто = /news)</label><input type="text" id="nf_all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('news_feature', $data) ?>
         <?php endif; ?>
 
         <?php if ($type === 'cards_grid'): ?>
@@ -1094,7 +1063,10 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'timeline'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('timeline', $data) ?>
             <?php
+            // Статус события: у записей, заведённых до его появления, все
+            // события считаются пройденными, кроме последнего.
             $timelineItems = is_array($data['items'] ?? null) ? $data['items'] : [];
             $timelineHasStatuses = false;
             foreach ($timelineItems as $timelineItem) {
@@ -1134,25 +1106,10 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить событие</button></div>
             </div>
-            <div class="form-field"><label for="button_text">Кнопка под таймлайном — текст</label><input type="text" id="button_text" name="button_text" value="<?= htmlspecialchars($data['button_text'] ?? '', ENT_QUOTES) ?>" placeholder="Вся история"></div>
-            <div class="form-field"><label for="button_url">Кнопка под таймлайном — ссылка</label><input type="text" id="button_url" name="button_url" value="<?= htmlspecialchars($data['button_url'] ?? '', ENT_QUOTES) ?>"></div>
-            <hr>
-            <div class="form-field"><label for="cta_title">CTA-карточка справа — заголовок (пусто = без карточки)</label><input type="text" id="cta_title" name="cta_title" value="<?= htmlspecialchars($data['cta_title'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="cta_text">CTA — текст</label><textarea id="cta_text" name="cta_text" rows="2"><?= htmlspecialchars($data['cta_text'] ?? '', ENT_QUOTES) ?></textarea></div>
-            <div class="form-field"><label for="cta_button_text">CTA — текст кнопки</label><input type="text" id="cta_button_text" name="cta_button_text" value="<?= htmlspecialchars($data['cta_button_text'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="cta_button_url">CTA — ссылка кнопки</label><input type="text" id="cta_button_url" name="cta_button_url" value="<?= htmlspecialchars($data['cta_button_url'] ?? '', ENT_QUOTES) ?>"></div>
-            <?= \App\Core\AdminUi::imageField('cta_image', (string) ($data['cta_image'] ?? ''), ['label' => 'CTA — фоновое фото']) ?>
         <?php endif; ?>
 
         <?php if ($type === 'news_docs'): ?>
-            <div class="form-field"><label for="news_title">Колонка новостей — заголовок</label><input type="text" id="news_title" name="news_title" value="<?= htmlspecialchars($data['news_title'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="limit">Сколько новостей (1–6)</label><input type="number" id="limit" name="limit" min="1" max="6" value="<?= (int) ($data['limit'] ?? 3) ?>"><span class="form-hint">Берутся последние опубликованные новости.</span></div>
-            <div class="form-field"><label for="news_all_text">Новости: «Все …» — текст</label><input type="text" id="news_all_text" name="news_all_text" value="<?= htmlspecialchars($data['news_all_text'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="news_all_url">Новости: «Все …» — URL (пусто = /news)</label><input type="text" id="news_all_url" name="news_all_url" value="<?= htmlspecialchars($data['news_all_url'] ?? '', ENT_QUOTES) ?>"></div>
-            <hr>
-            <div class="form-field"><label for="docs_title">Колонка документов — заголовок</label><input type="text" id="docs_title" name="docs_title" value="<?= htmlspecialchars($data['docs_title'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="docs_all_text">Документы: «Все …» — текст</label><input type="text" id="docs_all_text" name="docs_all_text" value="<?= htmlspecialchars($data['docs_all_text'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="docs_all_url">Документы: «Все …» — URL</label><input type="text" id="docs_all_url" name="docs_all_url" value="<?= htmlspecialchars($data['docs_all_url'] ?? '', ENT_QUOTES) ?>"></div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('news_docs', $data) ?>
             <div>
                 <label>Документы</label>
                 <div data-repeater="docs">
@@ -1390,14 +1347,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'anchor_nav'): ?>
-            <div class="form-field form-field--check">
-                <label><input type="checkbox" name="auto" value="1" <?= !empty($data['auto']) ? 'checked' : '' ?>> Собирать разделы автоматически</label>
-                <span class="form-hint">В навигацию попадут все блоки страницы, у которых заполнен заголовок — в том порядке, в каком они идут. Пункты ниже добавляются перед ними.</span>
-            </div>
-            <div class="form-field form-field--check">
-                <label><input type="checkbox" name="sticky" value="1" <?= !empty($data['sticky']) ? 'checked' : '' ?>> Закреплять при прокрутке</label>
-                <span class="form-hint">Полоса остаётся под шапкой и подсвечивает раздел, который сейчас на экране. Полезно на длинных страницах.</span>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('anchor_nav', $data) ?>
             <div>
                 <label>Пункты навигации (якоря разделов или ссылки)</label>
                 <div data-repeater="items">
@@ -1455,26 +1405,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'text_image'): ?>
-            <div class="form-field"><label for="text">Текст</label><textarea id="text" name="text" rows="5" data-wysiwyg><?= htmlspecialchars($data['text'] ?? '', ENT_QUOTES) ?></textarea></div>
-            <?= \App\Core\AdminUi::imageField('image', $data['image'] ?? '', ['label' => 'Изображение']) ?>
-            <div class="form-field"><label for="image_side">Положение изображения</label><select id="image_side" name="image_side"><option value="right" <?= ($data['image_side'] ?? 'right') === 'right' ? 'selected' : '' ?>>Справа</option><option value="left" <?= ($data['image_side'] ?? 'right') === 'left' ? 'selected' : '' ?>>Слева</option></select></div>
-            <?= \App\Core\AdminUi::mediaPositionFields($data['image_position'] ?? 'center-center', $data['image_position_mobile'] ?? 'center-center') ?>
-            <div class="form-field">
-                <label for="ti_ratio">Пропорция кадра</label>
-                <select id="ti_ratio" name="image_ratio">
-                    <?php foreach (['auto' => 'Как у изображения', '16-9' => '16:9 — широкий кадр', '4-3' => '4:3 — классический', '1-1' => '1:1 — квадрат'] as $value => $label): ?>
-                        <option value="<?= $value ?>" <?= ($data['image_ratio'] ?? 'auto') === $value ? 'selected' : '' ?>><?= $label ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="form-hint">Общая пропорция выравнивает высоту кадра с текстовой колонкой.</span>
-            </div>
-            <div class="form-field">
-                <label for="ti_width">Ширина изображения, % ряда</label>
-                <input type="number" id="ti_width" name="image_width" min="30" max="60" step="5" value="<?= (int) ($data['image_width'] ?? 50) ?>">
-                <span class="form-hint">Оставшаяся часть ряда уходит под текст. На узких экранах колонки всё равно встают друг под друга.</span>
-            </div>
-            <div class="form-field"><label for="ti_btn_text">Кнопка — текст</label><input type="text" id="ti_btn_text" name="button_text" value="<?= htmlspecialchars($data['button_text'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="ti_btn_url">Кнопка — ссылка</label><input type="text" id="ti_btn_url" name="button_url" value="<?= htmlspecialchars($data['button_url'] ?? '', ENT_QUOTES) ?>"></div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('text_image', $data) ?>
             <div>
                 <label>Мини-фичи под текстом (иконка + подпись)</label>
                 <div data-repeater="items">
@@ -1541,22 +1472,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <input type="text" id="embed_url" name="embed_url" value="<?= htmlspecialchars($data['embed_url'] ?? '', ENT_QUOTES) ?>" placeholder="https://www.google.com/maps/embed?... или <iframe src=...>">
                 <small class="form-help">Поддерживаются Google Карты, Яндекс Карты и OSM. Можно вставить как ссылку встраивания, так и весь HTML-код &lt;iframe&gt;.</small>
             </div>
-            <?= \App\Core\AdminUi::imageField('image', $data['image'] ?? '', ['label' => 'Изображение-заставка карты', 'hint' => 'Показывается до загрузки интерактивной карты.']) ?>
-            <div class="form-field">
-                <label for="load_mode">Загрузка интерактивной карты</label>
-                <select id="load_mode" name="load_mode">
-                    <option value="click" <?= ($data['load_mode'] ?? 'click') === 'click' ? 'selected' : '' ?>>После нажатия — быстрее и приватнее</option>
-                    <option value="immediate" <?= ($data['load_mode'] ?? 'click') === 'immediate' ? 'selected' : '' ?>>Сразу при открытии страницы</option>
-                </select>
-            </div>
-            <div class="form-field"><label for="card_title">Карточка на карте — заголовок</label><input type="text" id="card_title" name="card_title" value="<?= htmlspecialchars($data['card_title'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="address">Карточка — адрес (можно в 2 строки)</label><textarea id="address" name="address" rows="2"><?= htmlspecialchars($data['address'] ?? '', ENT_QUOTES) ?></textarea></div>
-            <div class="form-field form-field--checkbox">
-                <input type="checkbox" id="copy_enabled" name="copy_enabled" value="1" <?= (!array_key_exists('copy_enabled', $data) || !empty($data['copy_enabled'])) ? 'checked' : '' ?>>
-                <label for="copy_enabled">Показывать кнопку «Скопировать адрес»</label>
-            </div>
-            <div class="form-field"><label for="button_text">Кнопка (напр. «Построить маршрут») — текст</label><input type="text" id="button_text" name="button_text" value="<?= htmlspecialchars($data['button_text'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="button_url">Кнопка — ссылка</label><input type="text" id="button_url" name="button_url" value="<?= htmlspecialchars($data['button_url'] ?? '', ENT_QUOTES) ?>" placeholder="https://maps.google.com/?daddr=..."></div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('map_point', $data) ?>
         <?php endif; ?>
 
         <?php if ($type === 'org_structure'): ?>

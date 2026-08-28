@@ -54,12 +54,22 @@ test('text_image адаптируется к ширине контейнера �
 });
 
 test('форма и обработчик text_image используют WYSIWYG и текстовый санитайзер', function (): void {
-    $root = dirname(__DIR__, 2);
-    $form = (string) file_get_contents($root . '/app/Views/admin/pages/block_form.php');
-    $controller = (string) file_get_contents($root . '/app/Controllers/Admin/BlockController.php');
+    // Поле текста рисует схема: у richtext-поля редактор включается атрибутом
+    // data-wysiwyg, а содержимое чистится санитайзером на входе.
+    assert_contains('name="text" rows="3" data-wysiwyg', block_editor_markup());
 
-    assert_contains('id="text" name="text" rows="5" data-wysiwyg', $form);
-    assert_contains("HtmlSanitizer::sanitizeText((string) (\$_POST['text'] ?? ''))", $controller);
+    $textField = \App\Core\BlockData\BlockFieldSchema::fields('text_image')['text'] ?? null;
+    assert_true($textField !== null && $textField->kind === 'richtext', 'текст блока — форматируемый');
+    assert_contains(
+        '<em>курсив</em>',
+        \App\Core\BlockData\BlockFieldSchema::normalize('text_image', ['text' => '<em>курсив</em><script>alert(1)</script>'], 'ru')['text'],
+        'безопасная разметка сохраняется'
+    );
+    assert_not_contains(
+        '<script',
+        \App\Core\BlockData\BlockFieldSchema::normalize('text_image', ['text' => '<em>курсив</em><script>alert(1)</script>'], 'ru')['text'],
+        'скрипт вырезается санитайзером'
+    );
 });
 
 test('rich content stylesheet covers editorial elements and responsive tables', function (): void {

@@ -57,7 +57,7 @@ final class BlockTypeRegistry
         'counters' => [], // схема: BlockFieldSchema
         'team_list' => ['title' => '', 'limit' => 0, 'department' => '', 'group_by_department' => false],
         'projects_list' => [], // схема: BlockFieldSchema
-        'news_latest' => ['title' => 'Последние новости', 'all_text' => 'Все новости', 'all_url' => '', 'limit' => 3, 'category' => 0],
+        'news_latest' => [], // схема: BlockFieldSchema
         'partners' => [], // схема: BlockFieldSchema
         'subscribe' => [], // схема: BlockFieldSchema
         'faq' => [], // схема: BlockFieldSchema
@@ -69,17 +69,17 @@ final class BlockTypeRegistry
         'hero' => ['hero_id' => 0, 'title' => '', 'eyebrow' => '', 'subtitle' => '', 'bg_type' => 'none', 'image' => '', 'image_mobile' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'video_url' => '', 'video_mobile' => 'poster', 'youtube_url' => '', 'bg_color' => '', 'width' => 'full', 'height' => 'regular', 'custom_height' => '720px', 'height_mobile' => '', 'custom_height_mobile' => '', 'overlay_enabled' => false, 'overlay_mode' => 'gradient', 'overlay_direction' => 'auto', 'overlay_color' => '#0b1a30', 'overlay_opacity' => 35, 'text_position' => 'left', 'text_align_y' => 'center', 'text_width' => '', 'text_color' => '', 'art_image' => '', 'art_alt' => '', 'art_position' => 'above', 'art_size' => 'medium', 'button_color' => '', 'panel_enabled' => false, 'panel_color' => '#0b1a30', 'panel_opacity' => 0, 'button_text' => '', 'button_url' => '', 'button_icon' => '', 'button_icon_image' => '', 'button2_text' => '', 'button2_url' => '', 'button2_icon' => '', 'button2_icon_image' => '', 'video_button_text' => '', 'video_button_url' => '', 'slides' => [], 'autoplay' => 0],
         'cards_grid' => [], // схема: BlockFieldSchema
         'media_gallery' => [], // схема: BlockFieldSchema
-        'news_feature' => ['variant' => 'cards', 'title' => 'Новости и аналитика', 'all_text' => 'Все новости', 'all_url' => '', 'limit' => 5, 'category' => 0],
+        'news_feature' => [], // схема: BlockFieldSchema
         'person_cards' => [], // схема: BlockFieldSchema
-        'timeline' => ['title' => '', 'description' => '', 'items' => [], 'button_text' => '', 'button_url' => '', 'cta_title' => '', 'cta_text' => '', 'cta_button_text' => '', 'cta_button_url' => '', 'cta_image' => ''],
-        'news_docs' => ['news_title' => 'Актуальные новости', 'news_all_text' => 'Все новости', 'news_all_url' => '', 'limit' => 3, 'category' => 0, 'docs_title' => 'Документы', 'docs_all_text' => 'Все документы', 'docs_all_url' => '', 'docs' => []],
+        'timeline' => [], // схема: BlockFieldSchema
+        'news_docs' => [], // схема: BlockFieldSchema
         'person_profile' => ['photo' => '', 'photo_side' => 'left', 'name' => '', 'position' => '', 'text' => '', 'phone' => '', 'phone_label' => 'Приёмная:', 'email' => '', 'email_label' => 'E-mail:', 'button_text' => '', 'button_url' => '', 'button2_text' => '', 'button2_url' => '', 'telegram' => '', 'facebook' => '', 'linkedin' => '', 'x' => '', 'instagram' => ''],
         'bio_education' => ['bio_title' => 'Биография', 'bio_text' => '', 'career_title' => '', 'career' => [], 'edu_title' => 'Образование', 'edu_items' => [], 'extra_title' => '', 'extra_text' => '', 'widgets_before' => [], 'widgets_after' => [], 'quote_text' => '', 'quote_author' => ''],
-        'anchor_nav' => ['items' => [], 'auto' => false, 'sticky' => false],
+        'anchor_nav' => [], // схема: BlockFieldSchema
         'stages' => [], // схема: BlockFieldSchema
-        'text_image' => ['title' => '', 'text' => '', 'image' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'image_side' => 'right', 'image_ratio' => 'auto', 'image_width' => 50, 'button_text' => '', 'button_url' => '', 'items' => []],
+        'text_image' => [], // схема: BlockFieldSchema
         'docs_list' => [], // схема: BlockFieldSchema
-        'map_point' => ['title' => '', 'image' => '', 'embed_url' => '', 'load_mode' => 'click', 'card_title' => '', 'address' => '', 'copy_enabled' => true, 'button_text' => '', 'button_url' => ''],
+        'map_point' => [], // схема: BlockFieldSchema
         'org_structure' => ['title' => '', 'layout' => 'tree', 'columns' => 4, 'council' => '', 'head_title' => 'Директор', 'head_name' => '', 'head_url' => '', 'side_items' => '', 'branches' => [], 'collapsible' => false, 'search' => false, 'notes' => '', 'footnote' => ''],
         'leader_card' => ['photo' => '', 'name' => '', 'name_tag' => 'p', 'position' => '', 'phone' => '', 'email' => '', 'hours' => '',
             'facebook' => '', 'x' => '', 'linkedin' => '', 'instagram' => '', 'telegram' => '',
