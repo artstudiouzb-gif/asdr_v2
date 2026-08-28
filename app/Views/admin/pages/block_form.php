@@ -31,7 +31,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <input type="text" id="title" name="title" value="<?= htmlspecialchars($block['title'] ?? '', ENT_QUOTES) ?>">
         </div>
 
-        <?php if (in_array($type, ['text', 'cta', 'slider', 'counters', 'team_list', 'news_latest', 'subscribe', 'contact_cards', 'hero', 'cards_grid', 'media_gallery', 'news_feature', 'person_cards', 'timeline', 'text_image', 'map_point', 'org_structure', 'icon_text'], true)): ?>
+        <?php if (in_array($type, ['text', 'cta', 'counters', 'team_list', 'news_latest', 'hero', 'cards_grid', 'media_gallery', 'news_feature', 'timeline', 'text_image', 'map_point', 'org_structure'], true)): ?>
             <div class="form-field">
                 <label for="title_field"><?= $type === 'timeline' ? 'Заголовок раздела' : 'Заголовок, показываемый на сайте' ?></label>
                 <input type="text" id="title_field" name="title_field" value="<?= htmlspecialchars($data['title'] ?? '', ENT_QUOTES) ?>">
@@ -219,21 +219,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'slider'): ?>
-            <div class="form-field">
-                <label for="slider_ratio">Пропорция кадра</label>
-                <select id="slider_ratio" name="ratio">
-                    <?php $sliderRatio = \App\Core\SliderRatio::normalize($data['ratio'] ?? null); ?>
-                    <?php foreach (\App\Core\SliderRatio::ALL as $value => $label): ?>
-                        <option value="<?= $value ?>" <?= $sliderRatio === $value ? 'selected' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES) ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="form-hint">Общая пропорция удерживает высоту слайдера: при варианте «как у изображения» страница подпрыгивает на каждом переключении, если снимки разного размера.</span>
-            </div>
-            <div class="form-field">
-                <label for="slider_autoplay">Автопрокрутка, секунд (0 — выключена)</label>
-                <input type="number" id="slider_autoplay" name="autoplay" min="0" max="30" value="<?= (int) ($data['autoplay'] ?? 0) ?>">
-                <span class="form-hint">Прокрутка останавливается при наведении, фокусе внутри слайдера и у посетителей, которые просили меньше движения в системе.</span>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('slider', $data) ?>
             <div>
                 <label>Слайды</label>
                 <div data-repeater="slides">
@@ -570,32 +556,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'subscribe'): ?>
-            <div class="form-field">
-                <label for="sub_variant">Вариант оформления</label>
-                <select id="sub_variant" name="variant">
-                    <?php foreach (['band' => 'Полоса во всю ширину', 'card' => 'Карточка по центру', 'image' => 'На фоне изображения'] as $value => $label): ?>
-                        <option value="<?= $value ?>" <?= ($data['variant'] ?? 'band') === $value ? 'selected' : '' ?>><?= $label ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="form-hint">Без загруженного изображения вариант «На фоне» показывается как обычная полоса.</span>
-            </div>
-            <?= \App\Core\AdminUi::imageField('image', (string) ($data['image'] ?? ''), ['label' => 'Фоновое изображение']) ?>
-            <div class="form-field">
-                <label for="sub_text">Текст под заголовком</label>
-                <input type="text" id="sub_text" name="text" value="<?= htmlspecialchars($data['text'] ?? '', ENT_QUOTES) ?>">
-            </div>
-            <div class="form-field">
-                <label for="sub_placeholder">Подсказка в поле e-mail</label>
-                <input type="text" id="sub_placeholder" name="placeholder" value="<?= htmlspecialchars($data['placeholder'] ?? '', ENT_QUOTES) ?>" placeholder="Ваш e-mail">
-            </div>
-            <div class="form-field">
-                <label for="sub_btn">Текст кнопки</label>
-                <input type="text" id="sub_btn" name="button_text" value="<?= htmlspecialchars($data['button_text'] ?? '', ENT_QUOTES) ?>" placeholder="Подписаться">
-            </div>
-            <div class="form-field">
-                <label for="sub_note">Примечание под формой</label>
-                <input type="text" id="sub_note" name="note" value="<?= htmlspecialchars($data['note'] ?? '', ENT_QUOTES) ?>" placeholder="Отписаться можно в один клик">
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('subscribe', $data) ?>
             <p class="form-hint">Адреса попадают в раздел «Подписчики»; рассылку раз в неделю отправляет digest_worker (cron).</p>
         <?php endif; ?>
 
@@ -624,31 +585,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'contact_cards'): ?>
-            <div class="form-field">
-                <label for="cc_variant">Вариант отображения</label>
-                <select id="cc_variant" name="variant">
-                    <option value="cards" <?= ($data['variant'] ?? 'cards') === 'cards' ? 'selected' : '' ?>>Иконка над заголовком</option>
-                    <option value="inline" <?= ($data['variant'] ?? 'cards') === 'inline' ? 'selected' : '' ?>>Иконка и заголовок в одну строку</option>
-                </select>
-                <span class="form-hint">Во втором варианте карточка ниже — в ряд их влезает больше.</span>
-            </div>
-            <div class="form-field">
-                <label for="cc_icon_size">Размер иконки, px</label>
-                <input type="number" id="cc_icon_size" name="icon_size" min="16" max="64" value="<?= (int) ($data['icon_size'] ?? 22) ?>">
-            </div>
-            <div class="form-field">
-                <label for="cc_icon_bg">Подложка под иконкой</label>
-                <select id="cc_icon_bg" name="icon_bg">
-                    <option value="on" <?= ($data['icon_bg'] ?? 'on') !== 'off' ? 'selected' : '' ?>>Есть — иконка в плитке</option>
-                    <option value="off" <?= ($data['icon_bg'] ?? 'on') === 'off' ? 'selected' : '' ?>>Нет — только иконка</option>
-                </select>
-                <span class="form-hint">Без подложки иконка стоит на фоне карточки. Размер плитки подстраивается под размер иконки.</span>
-            </div>
-            <div class="form-field form-field--checkbox">
-                <input type="checkbox" id="cc_line_icons" name="line_icons" value="1" <?= (!array_key_exists('line_icons', $data) || !empty($data['line_icons'])) ? 'checked' : '' ?>>
-                <label for="cc_line_icons">Мини-иконки у строк контактов</label>
-                <span class="form-hint">Подбираются по содержимому строки: трубка к номеру, конверт к почте, часы к режиму работы. Строка без узнаваемого содержимого остаётся без значка.</span>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('contact_cards', $data) ?>
             <div>
                 <label>Контактные карточки (адрес, телефон, e-mail, часы работы…)</label>
                 <div data-repeater="items">
@@ -1280,21 +1217,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'person_cards'): ?>
-            <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все руководство"></div>
-            <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field">
-                <label for="pc_description">Описание раздела</label>
-                <textarea id="pc_description" name="description" rows="2"><?= htmlspecialchars($data['description'] ?? '', ENT_QUOTES) ?></textarea>
-            </div>
-            <div class="form-field">
-                <label for="pc_columns">Колонок в сетке</label>
-                <select id="pc_columns" name="columns">
-                    <?php foreach ([2, 3, 4, 5] as $n): ?>
-                        <option value="<?= $n ?>" <?= (int) ($data['columns'] ?? 4) === $n ? 'selected' : '' ?>><?= $n ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="form-hint">Если в последнем ряду остаётся две-три карточки, они растягиваются на всю ширину; одинокую карточку блок не растягивает.</span>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('person_cards', $data) ?>
             <div>
                 <label>Персоны (без фото и имени — карточка «Вакантно»)</label>
                 <div data-repeater="items">
@@ -1418,16 +1341,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'icon_text'): ?>
-            <div class="form-field"><label for="it_description">Описание под заголовком</label><textarea id="it_description" name="description" rows="2"><?= htmlspecialchars($data['description'] ?? '', ENT_QUOTES) ?></textarea></div>
-            <div class="form-field">
-                <label for="it_variant">Вариант отображения</label>
-                <select id="it_variant" name="variant">
-                    <?php foreach (['cards' => 'Карточки с рамкой', 'plain' => 'Без рамок — иконка и текст', 'inline' => 'В строку — короткие реквизиты'] as $value => $label): ?>
-                        <option value="<?= $value ?>" <?= ($data['variant'] ?? 'cards') === $value ? 'selected' : '' ?>><?= $label ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="form-hint">«Без рамок» стоит выбрать, если рядом уже есть карточные секции — иначе блоки спорят друг с другом.</span>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('icon_text', $data) ?>
             <?php
             // Позиция иконки появилась позже выравнивания: у блоков, сохранённых
             // до неё, «по центру» означало иконку сверху — подставляем то же.
@@ -1445,84 +1359,6 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </select>
                 <span class="form-hint">Не зависит от выравнивания: можно поставить иконку над текстом, оставив сам текст по левому краю.</span>
             </div>
-            <div class="form-field">
-                <label for="it_rows_layout">Подпись и значение</label>
-                <select id="it_rows_layout" name="rows_layout">
-                    <option value="stacked" <?= ($data['rows_layout'] ?? 'stacked') === 'stacked' ? 'selected' : '' ?>>В столбик — подпись над значением</option>
-                    <option value="inline" <?= ($data['rows_layout'] ?? 'stacked') === 'inline' ? 'selected' : '' ?>>В одну строку — «Приёмная: +998 71 200-00-00»</option>
-                </select>
-                <span class="form-hint">В одну строку удобно для коротких реквизитов. Двоеточие после подписи ставится вручную в поле строк.</span>
-            </div>
-            <div class="form-field">
-                <label for="it_align">Выравнивание текста</label>
-                <select id="it_align" name="align">
-                    <option value="left" <?= ($data['align'] ?? 'left') === 'left' ? 'selected' : '' ?>>По левому краю</option>
-                    <option value="center" <?= ($data['align'] ?? 'left') === 'center' ? 'selected' : '' ?>>По центру</option>
-                </select>
-            </div>
-            <div class="form-field">
-                <label for="it_columns">Колонок</label>
-                <select id="it_columns" name="columns">
-                    <?php foreach ([1, 2, 3, 4] as $itCols): ?>
-                        <option value="<?= $itCols ?>" <?= (int) ($data['columns'] ?? 3) === $itCols ? 'selected' : '' ?>><?= $itCols ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div>
-                <label>Карточки</label>
-                <div data-repeater="items">
-                    <?php foreach (($data['items'] ?? []) as $i => $item): ?>
-                        <div class="repeater-row">
-                            <?= \App\Core\AdminUi::iconField("items[{$i}][icon_svg]", $item['icon_svg'] ?? '', ['label' => 'Иконка Tabler']) ?>
-                            <div class="form-field"><label>Цвет иконки</label><input type="text" name="items[<?= $i ?>][icon_color]" value="<?= htmlspecialchars($item['icon_color'] ?? '', ENT_QUOTES) ?>" placeholder="#3f9c5a — пусто = цвет сайта"></div>
-                            <div class="form-field">
-                                <label>Строки</label>
-                                <textarea name="items[<?= $i ?>][rows]" rows="3" placeholder="Телефон доверия | (71) 202-06-00"><?= htmlspecialchars($item['rows'] ?? '', ENT_QUOTES) ?></textarea>
-                                <span class="form-hint">По строке на пару: подпись, вертикальная черта, значение. Строка без черты выводится подписью.</span>
-                            </div>
-                            <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-                <template data-repeater-template="items">
-                    <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon_svg]', '', ['label' => 'Иконка Tabler']) ?>
-                    <div class="form-field"><label>Цвет иконки</label><input type="text" name="items[__INDEX__][icon_color]" placeholder="#3f9c5a — пусто = цвет сайта"></div>
-                    <div class="form-field"><label>Строки</label><textarea name="items[__INDEX__][rows]" rows="3" placeholder="Телефон доверия | (71) 202-06-00"></textarea></div>
-                    <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove><?= \App\Core\AdminUi::icon('trash') ?>Удалить</button>
-                </template>
-                <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить карточку</button></div>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($type === 'leader_card'): ?>
-            <?= \App\Core\AdminUi::imageField('photo', (string) ($data['photo'] ?? ''), ['label' => 'Фото руководителя']) ?>
-            <div class="form-field"><label for="lc_name">Имя</label><input type="text" id="lc_name" name="name" value="<?= htmlspecialchars($data['name'] ?? '', ENT_QUOTES) ?>" placeholder="Фамилия Имя Отчество"></div>
-            <?php $lcTag = in_array($data['name_tag'] ?? 'p', ['p', 'h2', 'h3'], true) ? $data['name_tag'] : 'p'; ?>
-            <div class="form-field">
-                <label for="lc_name_tag">Тег имени</label>
-                <select id="lc_name_tag" name="name_tag">
-                    <option value="p" <?= $lcTag === 'p' ? 'selected' : '' ?>>Обычный текст (не заголовок)</option>
-                    <option value="h2" <?= $lcTag === 'h2' ? 'selected' : '' ?>>Заголовок H2</option>
-                    <option value="h3" <?= $lcTag === 'h3' ? 'selected' : '' ?>>Заголовок H3</option>
-                </select>
-                <span class="form-hint">Заголовок ставится, когда карточка — самостоятельный раздел страницы. Уровни не должны перескакивать: под H1 страницы идёт H2, под ним H3. Заголовки вкладок подстроятся на уровень ниже сами.</span>
-            </div>
-            <div class="form-field"><label for="lc_position">Должность</label><textarea id="lc_position" name="position" rows="2" placeholder="Директор Агентства…"><?= htmlspecialchars($data['position'] ?? '', ENT_QUOTES) ?></textarea></div>
-            <div class="form-field"><label for="lc_phone">Телефон</label><input type="text" id="lc_phone" name="phone" value="<?= htmlspecialchars($data['phone'] ?? '', ENT_QUOTES) ?>" placeholder="+998 71 203 10 00"></div>
-            <div class="form-field"><label for="lc_email">E-mail</label><input type="text" id="lc_email" name="email" value="<?= htmlspecialchars($data['email'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="lc_hours">Приёмные часы</label><input type="text" id="lc_hours" name="hours" value="<?= htmlspecialchars($data['hours'] ?? '', ENT_QUOTES) ?>" placeholder="Пн–Пт 10:00 – 12:00"></div>
-
-            <p class="form-hint">Соцсети: пустое поле — значок не показывается.</p>
-            <?php foreach (['facebook' => 'Facebook', 'x' => 'X (Twitter)', 'linkedin' => 'LinkedIn', 'instagram' => 'Instagram', 'telegram' => 'Telegram'] as $lcNet => $lcNetLabel): ?>
-                <div class="form-field">
-                    <label for="lc_<?= $lcNet ?>"><?= htmlspecialchars($lcNetLabel, ENT_QUOTES) ?></label>
-                    <input type="text" id="lc_<?= $lcNet ?>" name="<?= $lcNet ?>" value="<?= htmlspecialchars($data[$lcNet] ?? '', ENT_QUOTES) ?>" placeholder="https://">
-                </div>
-            <?php endforeach; ?>
-
-            <hr>
-            <div class="form-field"><label for="lc_facts_title">Вкладка 1 — заголовок</label><input type="text" id="lc_facts_title" name="facts_title" value="<?= htmlspecialchars($data['facts_title'] ?? 'Основная информация', ENT_QUOTES) ?>"></div>
-            <?= \App\Core\AdminUi::iconField('facts_icon', $data['facts_icon'] ?? '', ['id' => 'lc_facts_icon', 'label' => 'Вкладка 1 — иконка']) ?>
             <div>
                 <label>Строки первой вкладки</label>
                 <div data-repeater="items">

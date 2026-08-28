@@ -2,10 +2,11 @@
 /** @var array $data */
 /** @var int $blockId */
 $slides = is_array($data['slides'] ?? null) ? $data['slides'] : [];
-$ratio = \App\Core\SliderRatio::normalize($data['ratio'] ?? null);
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$ratio = (string) $data['ratio'];
 // Автопрокрутка: секунды между слайдами, 0 — выключено. Логику берёт на себя
 // общий скрипт слайдера (он же обслуживает обложку), ему нужен только атрибут.
-$autoplay = max(0, min(30, (int) ($data['autoplay'] ?? 0)));
+$autoplay = (int) $data['autoplay'];
 $head = \App\Core\SectionHead::render(['title' => (string) ($data['title'] ?? '')]);
 ?>
 <div class="block-slider-wrap">

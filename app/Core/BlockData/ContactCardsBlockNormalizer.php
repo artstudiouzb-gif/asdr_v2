@@ -40,13 +40,9 @@ final class ContactCardsBlockNormalizer
             ];
         }
 
-        return [
-            'variant' => BlockDataInput::enum($input, 'variant', ['cards', 'inline'], 'cards'),
-            'title' => BlockDataInput::plain($input, 'title_field', $locale),
-            'line_icons' => !empty($input['line_icons']),
-            'icon_size' => BlockDataInput::int($input, 'icon_size', 16, 64, 22),
-            'icon_bg' => BlockDataInput::enum($input, 'icon_bg', ['on', 'off'], 'on'),
-            'items' => $items,
-        ];
+        return array_merge(
+            BlockFieldSchema::normalize('contact_cards', $input, $locale),
+            ['items' => $items]
+        );
     }
 }

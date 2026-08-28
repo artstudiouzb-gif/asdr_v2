@@ -503,15 +503,10 @@ final class BlockController
                         'url' => ($slideUrl !== '' && \App\Core\UrlGuard::isSafeLink($slideUrl)) ? $slideUrl : '',
                     ];
                 }
-                $sliderRatio = \App\Core\SliderRatio::normalize($_POST['ratio'] ?? null);
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    // 0 — автопрокрутка выключена; верхний предел бережёт от
-                    // «слайд раз в час», который читается как поломка.
-                    'autoplay' => max(0, min(30, (int) ($_POST['autoplay'] ?? 0))),
-                    'ratio' => $sliderRatio,
-                    'slides' => $slides,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('slider', $_POST, $locale),
+                    ['slides' => $slides]
+                );
             case 'form':
                 $formId = (int) ($_POST['form_id'] ?? 0);
                 $layout = in_array($_POST['layout'] ?? '1col', ['1col', '2col'], true) ? (string) $_POST['layout'] : '1col';
@@ -703,14 +698,10 @@ final class BlockController
                         'url' => $url,
                     ];
                 }
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => $this->safeUrlField('all_url'),
-                    'columns' => \App\Core\BlockData\BlockDataInput::int($_POST, 'columns', 2, 5, 4),
-                    'items' => $items,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('person_cards', $_POST, $locale),
+                    ['items' => $items]
+                );
             case 'timeline':
                 $items = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -788,16 +779,14 @@ final class BlockController
                     ];
                 }
 
-                return [
-                    'variant' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'variant', ['cards', 'plain', 'inline'], 'cards'),
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
-                    'icon_position' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'icon_position', ['left', 'top', 'right'], 'left'),
-                    'rows_layout' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'rows_layout', ['stacked', 'inline'], 'stacked'),
-                    'align' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'align', ['left', 'center'], 'left'),
-                    'columns' => max(1, min(4, (int) ($_POST['columns'] ?? 3))),
-                    'items' => $iconRows,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('icon_text', $_POST, $locale),
+                    [
+                        // Мимо схемы: значение зависит от выравнивания (см. EXTRA).
+                        'icon_position' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'icon_position', ['left', 'top', 'right'], 'left'),
+                        'items' => $iconRows,
+                    ]
+                );
             case 'leader_card':
                 $facts = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {

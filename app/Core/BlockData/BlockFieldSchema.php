@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Core\BlockData;
 
+use App\Core\AdminUi;
 use App\Core\HtmlSanitizer;
+use App\Core\Icon;
 use App\Core\TextProcessor;
 
 /**
@@ -36,6 +38,14 @@ final class BlockFieldSchema
         'faq' => ['items' => []],
         'docs_list' => ['items' => []],
         'stages' => ['items' => []],
+        'contact_cards' => ['items' => []],
+        // Положение иконки у «Иконка и текст» зависит от выравнивания: у
+        // блоков, сохранённых до появления поля, пустое значение означает
+        // «над текстом при выравнивании по центру, иначе слева». Схема такую
+        // связь не выражает, поэтому поле собирается отдельно.
+        'icon_text' => ['items' => [], 'icon_position' => ''],
+        'person_cards' => ['items' => []],
+        'slider' => ['slides' => []],
     ];
 
     /** @var array<string, array<string, Field>>|null */
@@ -238,6 +248,82 @@ final class BlockFieldSchema
                     '0 — без автопрокрутки. Работает только у варианта «полоса»; движение замирает под курсором и у посетителей, просивших меньше анимации.'
                 )->onlyWhen('variant', ['carousel']),
             ],
+            'subscribe' => [
+                'variant' => Field::enum('Вариант оформления', [
+                    'band' => 'Полоса во всю ширину',
+                    'card' => 'Карточка по центру',
+                    'image' => 'На фоне изображения',
+                ], 'band', 'Без загруженного изображения вариант «На фоне» показывается как обычная полоса.'),
+                'title' => Field::text('Заголовок, показываемый на сайте', 'Подписка на новости')->named('title_field'),
+                'image' => Field::media('Фоновое изображение'),
+                'text' => Field::text('Текст под заголовком', 'Получайте дайджест новостей на почту раз в неделю.'),
+                'placeholder' => Field::text('Подсказка в поле e-mail', '', '', 'Ваш e-mail'),
+                'button_text' => Field::text('Текст кнопки', 'Подписаться', '', 'Подписаться'),
+                'note' => Field::text('Примечание под формой', '', '', 'Отписаться можно в один клик'),
+            ],
+            'slider' => [
+                'title' => Field::text('Заголовок, показываемый на сайте')->named('title_field'),
+                'ratio' => Field::enum(
+                    'Пропорция кадра',
+                    \App\Core\SliderRatio::ALL,
+                    '16-9',
+                    'Общая пропорция удерживает высоту слайдера: при варианте «как у изображения» страница подпрыгивает на каждом переключении, если снимки разного размера.'
+                ),
+                'autoplay' => Field::int(
+                    'Автопрокрутка, секунд (0 — выключена)',
+                    0,
+                    30,
+                    0,
+                    'Прокрутка останавливается при наведении, фокусе внутри слайдера и у посетителей, которые просили меньше движения в системе.'
+                ),
+            ],
+            'person_cards' => [
+                'title' => Field::text('Заголовок, показываемый на сайте')->named('title_field'),
+                'description' => Field::textarea('Описание раздела'),
+                'all_text' => Field::text('Ссылка «Все …» — текст', '', '', 'Все руководство'),
+                'all_url' => Field::url('Ссылка «Все …» — URL'),
+                'columns' => Field::intChoice(
+                    'Колонок в сетке',
+                    [2, 3, 4, 5],
+                    4,
+                    'Если в последнем ряду остаётся две-три карточки, они растягиваются на всю ширину; одинокую карточку блок не растягивает.'
+                ),
+            ],
+            'contact_cards' => [
+                'variant' => Field::enum('Вариант отображения', [
+                    'cards' => 'Иконка над заголовком',
+                    'inline' => 'Иконка и заголовок в одну строку',
+                ], 'cards', 'Во втором варианте карточка ниже — в ряд их влезает больше.'),
+                'title' => Field::text('Заголовок, показываемый на сайте')->named('title_field'),
+                'icon_size' => Field::int('Размер иконки, px', 16, 64, 22),
+                'icon_bg' => Field::enum('Подложка под иконкой', [
+                    'on' => 'Есть — иконка в плитке',
+                    'off' => 'Нет — только иконка',
+                ], 'on', 'Без подложки иконка стоит на фоне карточки. Размер плитки подстраивается под размер иконки.'),
+                'line_icons' => Field::bool(
+                    'Мини-иконки у строк контактов',
+                    true,
+                    'Подбираются по содержимому строки: трубка к номеру, конверт к почте, часы к режиму работы. Строка без узнаваемого содержимого остаётся без значка.'
+                ),
+            ],
+            'icon_text' => [
+                'variant' => Field::enum('Вариант отображения', [
+                    'cards' => 'Карточки с рамкой',
+                    'plain' => 'Без рамок — иконка и текст',
+                    'inline' => 'В строку — короткие реквизиты',
+                ], 'cards', '«Без рамок» стоит выбрать, если рядом уже есть карточные секции — иначе блоки спорят друг с другом.'),
+                'title' => Field::text('Заголовок, показываемый на сайте')->named('title_field'),
+                'description' => Field::textarea('Описание под заголовком'),
+                'rows_layout' => Field::enum('Строки внутри карточки', [
+                    'stacked' => 'Одна под другой',
+                    'inline' => 'В строку, через разделитель',
+                ], 'stacked'),
+                'align' => Field::enum('Выравнивание текста', [
+                    'left' => 'По левому краю',
+                    'center' => 'По центру',
+                ], 'left'),
+                'columns' => Field::intChoice('Колонок', [1, 2, 3, 4], 3),
+            ],
         ];
     }
 
@@ -292,6 +378,9 @@ final class BlockFieldSchema
                     $locale
                 ),
                 'url' => BlockDataInput::safeLink($post[$name] ?? ''),
+                'media' => BlockDataInput::safeMedia($post[$name] ?? ''),
+                'icon' => Icon::cleanName($post[$name] ?? ''),
+                'color' => BlockDataInput::optionalColor($post, $name),
                 default => $field->default,
             };
         }
@@ -324,6 +413,11 @@ final class BlockFieldSchema
                     ? (int) $value
                     : (int) $field->default,
                 'bool' => (bool) $value,
+                'media' => BlockDataInput::safeMedia($value),
+                'icon' => Icon::cleanName($value),
+                'color' => preg_match('/^#[0-9a-f]{6}$/i', is_scalar($value) ? (string) $value : '') === 1
+                    ? strtolower((string) $value)
+                    : '',
                 default => is_scalar($value) ? (string) $value : '',
             };
         }
@@ -341,11 +435,22 @@ final class BlockFieldSchema
     public static function formHtml(string $type, array $data): string
     {
         $html = '';
+        $colorRun = '';
         foreach (self::fields($type) as $key => $field) {
+            // Соседние настройки цвета встают в один ряд — так они свёрстаны в
+            // остальной админке, и пара «фон / текст» читается как пара.
+            if ($field->kind === 'color') {
+                $colorRun .= self::fieldHtml($key, $field, $data);
+                continue;
+            }
+            if ($colorRun !== '') {
+                $html .= '<div class="colorfield-row">' . $colorRun . '</div>';
+                $colorRun = '';
+            }
             $html .= self::fieldHtml($key, $field, $data);
         }
 
-        return $html;
+        return $colorRun !== '' ? $html . '<div class="colorfield-row">' . $colorRun . '</div>' : $html;
     }
 
     /** @param array<string, mixed> $data */
@@ -359,6 +464,21 @@ final class BlockFieldSchema
             : ' data-field-when="' . $esc($field->when['field']) . '" data-field-value="' . $esc(implode(',', $field->when['values'])) . '"';
         $hint = $field->hint !== '' ? '<span class="form-hint">' . $esc($field->hint) . '</span>' : '';
         $label = '<label for="' . $id . '">' . $esc($field->label) . '</label>';
+
+        // Готовые виджеты админки приносят собственный `.form-field`, поэтому
+        // условие показа вешается обёрткой снаружи, а не атрибутом внутри.
+        if (in_array($field->kind, ['media', 'icon', 'color'], true)) {
+            $widget = match ($field->kind) {
+                'media' => AdminUi::imageField($name, is_scalar($value = $data[$key] ?? '') ? (string) $value : '', ['label' => $field->label, 'hint' => $field->hint]),
+                'icon' => AdminUi::iconField($name, $data[$key] ?? '', array_filter([
+                    'label' => $field->label,
+                    'hint' => $field->hint !== '' ? $field->hint : null,
+                ], static fn ($v) => $v !== null)),
+                default => AdminUi::colorField($name, (string) ($data[$key] ?? ''), $field->label, $field->swatch),
+            };
+
+            return $when === '' ? $widget : '<div' . $when . '>' . $widget . '</div>';
+        }
 
         if ($field->kind === 'bool') {
             // У флажка подпись идёт после самого флажка — так свёрстаны

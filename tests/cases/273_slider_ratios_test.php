@@ -41,14 +41,15 @@ test('Каждой пропорции отвечает правило в CSS', f
 });
 
 test('Список пропорций один на обе поверхности', function () {
-    // Свой список у каждой формы разъезжается молча — оба места обязаны
-    // спрашивать SliderRatio.
+    // Свой список у каждой поверхности разъезжается молча — все обязаны
+    // спрашивать SliderRatio. Блок «Слайдер» спрашивает его через схему полей,
+    // поэтому ветки в контроллере у него больше нет.
     $files = [
-        'templates/blocks/slider.php',
         'templates/widgets/photo_slider.php',
-        'app/Views/admin/pages/block_form.php',
+        // Поля блока «Слайдер» рисует схема — список пропорций объявлен там,
+        // а шаблон блока читает уже проверенное значение.
+        'app/Core/BlockData/BlockFieldSchema.php',
         'app/Views/admin/widgets/form.php',
-        'app/Controllers/Admin/BlockController.php',
         'app/Controllers/Admin/WidgetController.php',
     ];
     foreach ($files as $file) {
@@ -62,4 +63,9 @@ test('Список пропорций один на обе поверхност�
             'в ' . $file . ' остался свой перечень пропорций карусели'
         );
     }
+
+    // Шаблон блока своего списка тоже не заводит: пропорция приезжает готовой.
+    $template = (string) file_get_contents(APP_ROOT . '/templates/blocks/slider.php');
+    assert_true(!str_contains($template, "'21-9'"), 'в шаблоне слайдера остался свой перечень пропорций');
+    assert_contains('block-slider--ratio-', $template, 'ключ пропорции уходит в класс');
 });

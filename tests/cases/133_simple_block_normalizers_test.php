@@ -75,19 +75,23 @@ test('CTA normalizer: сохраняет медиа-вариант, изобра
 });
 
 test('Subscribe normalizer: сохраняет простой текстовый контракт', function () {
-    assert_same([
-        'variant' => 'band',
-        'title' => 'Подписка',
-        'text' => 'Получайте новости',
-        'image' => '',
-        'placeholder' => '',
-        'note' => '',
-        'button_text' => 'Подписаться',
-    ], SubscribeBlockNormalizer::normalize([
+    $data = SubscribeBlockNormalizer::normalize([
         'title_field' => '  Подписка  ',
         'text' => '  Получайте новости  ',
         'button_text' => ' Подписаться ',
-    ]));
+    ]);
+    // Порядок ключей задаёт схема полей (он же порядок полей в форме), поэтому
+    // сверяем состав, а не последовательность.
+    ksort($data);
+    assert_same([
+        'button_text' => 'Подписаться',
+        'image' => '',
+        'note' => '',
+        'placeholder' => '',
+        'text' => 'Получайте новости',
+        'title' => 'Подписка',
+        'variant' => 'band',
+    ], $data);
 });
 
 test('Контроллер делегирует простые блоки отдельным нормализаторам', function () {

@@ -6,9 +6,8 @@ use App\Models\Setting;
 
 /** @var array $data */
 /** @var int $blockId */
-$variant = in_array($data['variant'] ?? 'band', ['band', 'card', 'image'], true)
-    ? (string) $data['variant']
-    : 'band';
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$variant = (string) $data['variant'];
 $image = trim((string) ($data['image'] ?? ''));
 if ($variant === 'image' && $image === '') {
     // Без картинки вариант «на фоне» превращается в обычную полосу: белый
