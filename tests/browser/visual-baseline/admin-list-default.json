@@ -1,0 +1,34 @@
+{
+  ".data-table th": {
+    "backgroundColor": "rgb(250, 251, 252)",
+    "color": "rgb(30, 41, 59)",
+    "fontSize": "12px",
+    "fontWeight": "700",
+    "padding": "12px 16px",
+    "borderBottomColor": "rgb(220, 220, 222)"
+  },
+  ".data-table td": {
+    "color": "rgb(29, 35, 39)",
+    "fontSize": "16px",
+    "padding": "12px 16px",
+    "borderBottomColor": "rgb(29, 35, 39)"
+  },
+  ".badge": {
+    "backgroundColor": "rgb(220, 252, 231)",
+    "color": "rgb(21, 128, 61)",
+    "borderRadius": "3px",
+    "fontSize": "12px",
+    "padding": "3px 8px"
+  },
+  ".list-filter": {
+    "color": "rgb(29, 35, 39)",
+    "fontSize": "14px",
+    "borderRadius": "0px",
+    "padding": "0px"
+  },
+  ".btn--small": {
+    "fontSize": "12.5px",
+    "padding": "5px 10px",
+    "borderRadius": "3px"
+  }
+}
