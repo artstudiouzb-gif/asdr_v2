@@ -171,3 +171,59 @@ test('Шаблон типа со схемой не перепроверяет з
     $renderer = (string) file_get_contents(APP_ROOT . '/app/Core/BlockRenderer.php');
     assert_contains('BlockFieldSchema::apply($type, $data)', $renderer, 'рендер приводит данные к схеме');
 });
+
+test('У каждого типа блока в редакторе есть свои поля', function () {
+    // Сторож против правки формы вслепую. `block_form.php` — две тысячи строк
+    // из веток `if ($type === ...)`, и при переносе полей на схему легко
+    // срезать лишнее вместе с закрывающим `endif`: тогда ветка соседнего типа
+    // проглатывает следующую — один тип показывает чужие поля, а другой не
+    // показывает ничего и теряет содержимое при первом сохранении. Так уже
+    // случилось с «Иконка и текст» и «Карточкой руководителя».
+    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
+
+    $covered = [];
+    preg_match_all(
+        "/^        <\\?php if \\(\\\$type === '([a-z_]+)'\\): \\?>$/m",
+        $form,
+        $single,
+        PREG_OFFSET_CAPTURE | PREG_SET_ORDER
+    );
+    foreach ($single as $match) {
+        $type = $match[1][0];
+        $covered[] = $type;
+        $start = (int) $match[0][1];
+        $endPos = strpos($form, "\n        <?php endif; ?>", $start);
+        $section = $endPos === false ? '' : substr($form, $start, $endPos - $start);
+        assert_true(
+            str_contains($section, "formHtml('" . $type . "'") || str_contains($section, 'name="'),
+            "ветка {$type} осталась без полей — проверьте, не срезан ли закрывающий endif"
+        );
+    }
+    // Ветки на несколько типов сразу: `in_array($type, [...])`.
+    preg_match_all("/in_array\\(\\\$type, \\[([^\\]]+)\\], true\\)/", $form, $groups);
+    foreach ($groups[1] as $list) {
+        preg_match_all("/'([a-z_]+)'/", $list, $names);
+        $covered = array_merge($covered, $names[1]);
+    }
+
+    $missing = [];
+    foreach (array_keys(BlockTypeRegistry::defaults()) as $type) {
+        if (!in_array($type, $covered, true)) {
+            $missing[] = $type;
+        }
+    }
+    assert_same([], $missing, 'типы без полей в редакторе: ' . implode(', ', $missing));
+});
+
+test('Репитеры блоков различают свои наборы строк', function () {
+    // «Иконка и текст» и «Карточка руководителя» держат по репитеру `items`, но
+    // строки у них разные: у первого — цвет иконки и текст строк, у второго —
+    // подпись и значение. Когда ветки слиплись, репитер остался один, и блок
+    // молча терял содержимое. Поля-приметы обоих обязаны быть в редакторе.
+    $editor = block_editor_markup();
+
+    assert_contains('items[__INDEX__][icon_color]', $editor, '«Иконка и текст»: цвет иконки строки');
+    assert_contains('items[__INDEX__][rows]', $editor, '«Иконка и текст»: строки карточки');
+    assert_contains('items[__INDEX__][label]', $editor, '«Карточка руководителя»: подпись строки');
+    assert_contains('items[__INDEX__][value]', $editor, '«Карточка руководителя»: значение строки');
+});
