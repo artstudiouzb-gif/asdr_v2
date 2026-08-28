@@ -22,7 +22,7 @@ namespace App\Core\BlockData;
  */
 final class Field
 {
-    public const KINDS = ['enum', 'int', 'bool', 'text', 'textarea', 'richtext', 'url'];
+    public const KINDS = ['enum', 'int', 'int_choice', 'bool', 'text', 'textarea', 'richtext', 'url'];
 
     /**
      * @param array<string, string> $options варианты `enum`: значение => подпись
@@ -39,7 +39,6 @@ final class Field
         public readonly ?int $max = null,
         public readonly string $hint = '',
         public readonly string $input = '',
-        public readonly string $widget = '',
         public readonly string $placeholder = '',
         public readonly ?array $when = null,
     ) {
@@ -52,12 +51,30 @@ final class Field
     }
 
     /**
-     * Целое с границами. `widget: 'select'` — выпадающий список значений от
-     * min до max: колонок в ряду выбирают из списка, а не набирают числом.
+     * Целое числовым полем. Верхняя граница необязательна: у «сколько записей
+     * показывать» её нет и придумывать не нужно.
      */
-    public static function int(string $label, int $min, int $max, int $default, string $hint = '', string $widget = 'number'): self
+    public static function int(string $label, int $min, ?int $max, int $default, string $hint = ''): self
     {
-        return new self('int', $label, $default, min: $min, max: $max, hint: $hint, widget: $widget);
+        return new self('int', $label, $default, min: $min, max: $max, hint: $hint);
+    }
+
+    /**
+     * Целое из готового списка — выпадающим списком. Значения перечисляются, а
+     * не задаются диапазоном: набор колонок бывает с пропуском (0 — «сколько
+     * поместится», затем 2–5, но не 1), и диапазон такое не выражает.
+     *
+     * @param list<int> $values
+     * @param array<int, string> $labels подписи, отличные от самого числа
+     */
+    public static function intChoice(string $label, array $values, int $default, string $hint = '', array $labels = []): self
+    {
+        $options = [];
+        foreach ($values as $value) {
+            $options[$value] = $labels[$value] ?? (string) $value;
+        }
+
+        return new self('int_choice', $label, $default, options: $options, hint: $hint);
     }
 
     public static function bool(string $label, bool $default, string $hint = ''): self
@@ -126,7 +143,6 @@ final class Field
             $this->max,
             $this->hint,
             $input !== '' ? $input : $this->input,
-            $this->widget,
             $this->placeholder,
             $when ?? $this->when,
         );

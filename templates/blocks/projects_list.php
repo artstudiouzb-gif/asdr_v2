@@ -5,15 +5,10 @@ use App\Core\Icon;
 /** @var array $data */
 /** @var int $blockId */
 $projects = is_array($data['projects'] ?? null) ? $data['projects'] : [];
-$columns = (int) ($data['columns'] ?? 3);
-if ($columns < 2 || $columns > 4) {
-    $columns = 3;
-}
-$variant = (string) ($data['variant'] ?? 'grid');
-if (!in_array($variant, ['grid', 'list', 'carousel'], true)) {
-    $variant = 'grid';
-}
-$autoplay = max(0, min(30, (int) ($data['autoplay'] ?? 0)));
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$columns = (int) $data['columns'];
+$variant = (string) $data['variant'];
+$autoplay = (int) $data['autoplay'];
 // Полосой блок становится, только когда есть что листать.
 $carousel = $variant === 'carousel' && count($projects) > 1;
 

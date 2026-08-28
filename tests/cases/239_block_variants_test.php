@@ -72,8 +72,11 @@ test('Отзывы: нормализатор чистит вариант, кол
     ]);
 
     assert_same('carousel', $data['variant']);
-    assert_same(4, $data['columns']);
-    assert_same(30, $data['autoplay']);
+    // Колонки выбираются из списка, а не набираются числом: значение, которого
+    // в списке нет, приходит только из подделанной формы — берём умолчание, а
+    // не ближайшее допустимое.
+    assert_same(3, $data['columns']);
+    assert_same(30, $data['autoplay'], 'секунды остаются числом с границами');
     assert_same(5, $data['items'][0]['rating']);
 });
 

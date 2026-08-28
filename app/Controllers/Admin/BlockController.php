@@ -562,23 +562,7 @@ final class BlockController
                     'group_by_department' => !empty($_POST['group_by_department']),
                 ];
             case 'projects_list':
-                return [
-                    'variant' => \App\Core\BlockData\BlockDataInput::enum(
-                        $_POST,
-                        'variant',
-                        ['grid', 'list', 'carousel'],
-                        'grid'
-                    ),
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => $this->safeUrlField('all_url'),
-                    'columns' => max(2, min(4, (int) ($_POST['columns'] ?? 3))),
-                    'limit' => max(0, (int) ($_POST['limit'] ?? 0)),
-                    // 0 — без автопрокрутки; верхняя граница та же, что у
-                    // остальных каруселей.
-                    'autoplay' => \App\Core\BlockData\BlockDataInput::int($_POST, 'autoplay', 0, 30, 0),
-                ];
+                return BlockFieldSchema::normalize('projects_list', $_POST, $locale);
             case 'news_latest':
                 return [
                     'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
@@ -969,20 +953,10 @@ final class BlockController
                         'url' => \App\Core\BlockData\BlockDataInput::safeLink($item['url'] ?? ''),
                     ];
                 }
-                return [
-                    'variant' => ($_POST['variant'] ?? 'default') === 'history' ? 'history' : 'default',
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'description' => TextProcessor::process(
-                        \App\Core\HtmlSanitizer::sanitizeText((string) ($_POST['description'] ?? '')),
-                        $locale
-                    ),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => $this->safeUrlField('all_url'),
-                    // 0 — колонок ровно по числу этапов (прежнее поведение).
-                    'columns' => \App\Core\BlockData\BlockDataInput::int($_POST, 'columns', 0, 5, 0),
-                    'autoplay' => \App\Core\BlockData\BlockDataInput::int($_POST, 'autoplay', 0, 30, 0),
-                    'items' => $items,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('stages', $_POST, $locale),
+                    ['items' => $items]
+                );
             case 'text_image':
                 $items = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -1033,16 +1007,10 @@ final class BlockController
                         'date' => trim((string) ($item['date'] ?? '')),
                     ];
                 }
-                return [
-                    'variant' => in_array($_POST['variant'] ?? 'grid', ['grid', 'links', 'acts', 'acts-editorial'], true) ? (string) $_POST['variant'] : 'grid',
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => $this->safeUrlField('all_url'),
-                    'columns' => max(1, min(5, (int) ($_POST['columns'] ?? 4))),
-                    'search_enabled' => !empty($_POST['search_enabled']),
-                    'emblem' => !empty($_POST['emblem']),
-                    'items' => $items,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('docs_list', $_POST, $locale),
+                    ['items' => $items]
+                );
             case 'map_point':
                 $embed = \App\Core\MapEmbedUrl::normalize($_POST['embed_url'] ?? '');
                 $mapImage = trim((string) ($_POST['image'] ?? ''));
