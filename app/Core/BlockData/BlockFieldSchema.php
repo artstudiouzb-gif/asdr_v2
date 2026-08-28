@@ -251,7 +251,10 @@ final class BlockFieldSchema
     }
 
     /**
-     * @param array<string, string> $options
+     * Ключи списка — строки (значения enum) или числа (диапазон): PHP приводит
+     * числовую строку в ключе массива к int, и array-key здесь честнее.
+     *
+     * @param array<array-key, string> $options
      */
     private static function selectHtml(string $id, string $name, array $options, string $current): string
     {
@@ -266,12 +269,12 @@ final class BlockFieldSchema
         return $html . '</select>';
     }
 
-    /** @return array<string, string> */
+    /** @return array<int, string> */
     private static function range(int $min, int $max): array
     {
         $options = [];
         for ($n = $min; $n <= $max; $n++) {
-            $options[(string) $n] = (string) $n;
+            $options[$n] = (string) $n;
         }
 
         return $options;
