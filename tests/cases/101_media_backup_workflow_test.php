@@ -53,7 +53,7 @@ test('Admin media: единый picker, 5x3 и progressive «Показать е
     assert_not_contains('media-client-pager', $loadMore);
 
     // Единственный слой геометрии медиабиблиотеки.
-    assert_contains('aspect-ratio: 16 / 9', $unifiedCss);
+    assert_contains('aspect-ratio: 16 / 10', $unifiedCss);
     assert_contains('grid-template-columns: repeat(5, minmax(0, 1fr))', $unifiedCss);
     assert_contains('grid-auto-rows: max-content', $unifiedCss);
     assert_contains('.media-loadmore-bar', $unifiedCss);

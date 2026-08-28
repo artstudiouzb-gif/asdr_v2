@@ -1832,9 +1832,9 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
    Модальная медиабиблиотека
    ============================================================================ */
 /* ---------------------------------------------------------------------------
-   Выбор файла из медиабиблиотеки. Все цвета — токены темы админки: раньше они
-   были захардкожены светлыми, и на тёмной теме окно выпадало белым пятном,
-   в котором одно только поле поиска оставалось тёмным.
+   Окно выбора медиа: слева виды файлов со счётчиками, по центру сетка,
+   справа детали выбранного. Все цвета — токены темы админки: раньше они были
+   захардкожены светлыми, и на тёмной теме окно выпадало белым пятном.
    -------------------------------------------------------------------------- */
 .media-modal {
     position: fixed;
@@ -1851,61 +1851,117 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .media-modal[hidden] { display: none; }
 .media-modal__dialog {
     position: relative;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 216px minmax(0, 1fr) 0;
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas: 'rail body details' 'foot foot foot';
+    width: min(1240px, 100%);
+    height: min(88vh, 860px);
     overflow: hidden;
-    width: min(1080px, 100%);
-    max-height: min(88vh, 780px);
     color: var(--admin-text, #1e293b);
     background: var(--admin-surface, #fff);
     border: 1px solid var(--admin-border, #dcdcde);
     border-radius: 3px;
     box-shadow: 0 28px 70px rgba(2, 8, 23, .38);
 }
-.media-modal__head {
+.media-modal__dialog:has(.media-modal__details:not([hidden])) {
+    grid-template-columns: 216px minmax(0, 1fr) 300px;
+}
+
+/* Боковая колонка видов */
+.media-modal__rail {
+    grid-area: rail;
     display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--admin-border, #dcdcde);
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px 12px;
+    overflow-y: auto;
+    border-right: 1px solid var(--admin-border, #dcdcde);
     background: var(--admin-surface-soft, #fafbfc);
 }
-.media-modal__title {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: .01em;
-}
-/* Вкладки — сегментированный переключатель: раньше активная вкладка была
-   кнопкой, а вторая — просто серым текстом, и пара не читалась как пара. */
-.media-modal__tabs {
+.media-modal__title { margin: 0 0 2px 6px; font-size: 15px; font-weight: 700; }
+.media-modal__nav { display: flex; flex-direction: column; gap: 2px; }
+.media-modal__navitem {
     display: flex;
-    gap: 2px;
-    padding: 3px;
-    border: 1px solid var(--admin-border, #dcdcde);
-    border-radius: 3px;
-    background: var(--admin-bg, #f0f0f1);
-}
-.media-modal__tab {
-    padding: 6px 13px;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    padding: 7px 9px;
     border: 0;
     border-radius: 3px;
     background: transparent;
-    color: var(--admin-muted, #646970);
+    color: var(--admin-text, #1e293b);
     font-size: 13px;
     font-weight: 600;
+    text-align: left;
     cursor: pointer;
-    transition: background .16s ease, color .16s ease;
 }
-.media-modal__tab:hover { color: var(--admin-text, #1e293b); }
-.media-modal__tab.is-active {
-    background: var(--admin-surface, #fff);
+.media-modal__navitem:hover { background: color-mix(in srgb, var(--admin-text, #1e293b) 7%, transparent); }
+.media-modal__navitem.is-active {
+    background: color-mix(in srgb, var(--admin-accent, #2271b1) 14%, transparent);
     color: var(--admin-accent, #2271b1);
-    box-shadow: 0 1px 3px rgba(2, 8, 23, .12);
 }
-.media-modal__head-spacer { flex: 1 1 auto; }
+.media-modal__navicon { display: inline-flex; flex: 0 0 auto; color: var(--admin-muted, #646970); }
+.media-modal__navitem.is-active .media-modal__navicon { color: inherit; }
+.media-modal__navlabel { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.media-modal__navcount { flex: 0 0 auto; color: var(--admin-muted, #646970); font-size: 12px; font-weight: 600; }
+.media-modal__navitem.is-active .media-modal__navcount { color: inherit; }
+
+/* Центральная колонка */
+.media-modal__body {
+    grid-area: body;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+.media-modal__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--admin-border, #dcdcde);
+    background: var(--admin-surface, #fff);
+}
+.media-modal__search-box { position: relative; flex: 1 1 200px; min-width: 150px; }
+.media-modal__search-icon {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    color: var(--admin-muted, #646970);
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+.media-modal__search {
+    width: 100%;
+    height: 36px;
+    padding: 0 12px 0 33px;
+    border: 1px solid var(--admin-border, #dcdcde);
+    border-radius: 3px;
+    background: var(--admin-input-bg, #fff);
+    color: var(--admin-input-text, inherit);
+    font-size: 13px;
+}
+.media-modal__sort { display: flex; flex: 0 0 auto; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: var(--admin-muted, #646970); }
+.media-modal__sort select { height: 36px; font-size: 13px; }
+.media-modal__view { display: flex; flex: 0 0 auto; gap: 2px; padding: 2px; border: 1px solid var(--admin-border, #dcdcde); border-radius: 3px; }
+.media-modal__viewbtn {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--admin-muted, #646970);
+    cursor: pointer;
+}
+.media-modal__viewbtn.is-active { background: color-mix(in srgb, var(--admin-accent, #2271b1) 14%, transparent); color: var(--admin-accent, #2271b1); }
+.media-modal__upload-btn { flex: 0 0 auto; position: relative; overflow: hidden; cursor: pointer; }
+.media-modal__upload-btn input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .media-modal__close {
     display: grid;
+    flex: 0 0 auto;
     place-items: center;
     width: 32px;
     height: 32px;
@@ -1914,121 +1970,138 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     background: transparent;
     color: var(--admin-muted, #646970);
     cursor: pointer;
-    transition: background .16s ease, color .16s ease;
 }
-.media-modal__close:hover {
-    background: color-mix(in srgb, var(--admin-text, #1e293b) 8%, transparent);
-    color: var(--admin-text, #1e293b);
-}
-.media-modal__toolbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
+.media-modal__close:hover { background: color-mix(in srgb, var(--admin-text, #1e293b) 8%, transparent); color: var(--admin-text, #1e293b); }
+.media-modal__upload-status {
+    display: none;
+    padding: 8px 14px;
     border-bottom: 1px solid var(--admin-border, #dcdcde);
-    background: var(--admin-surface, #fff);
-}
-.media-modal__search-box {
-    position: relative;
-    flex: 1 1 auto;
-    min-width: 0;
-}
-.media-modal__search-icon {
-    position: absolute;
-    top: 50%;
-    left: 11px;
-    color: var(--admin-muted, #646970);
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-.media-modal__search {
-    width: 100%;
-    padding: 8px 12px 8px 34px;
-    border: 1px solid var(--admin-border, #dcdcde);
-    border-radius: 3px;
-    background: var(--admin-input-bg, #fff);
-    color: var(--admin-input-text, inherit);
-    font-size: 13px;
-}
-.media-modal__count {
-    flex: 0 0 auto;
-    color: var(--admin-muted, #646970);
     font-size: 12px;
     font-weight: 600;
-    white-space: nowrap;
 }
-.media-modal__upload {
-    padding: 20px 16px;
-    border-bottom: 1px solid var(--admin-border, #dcdcde);
-    background: var(--admin-surface, #fff);
-    text-align: center;
-}
-.media-modal__dropzone {
-    padding: 28px 20px;
-    border: 2px dashed color-mix(in srgb, var(--admin-accent, #2271b1) 45%, var(--admin-border, #dcdcde));
-    border-radius: 3px;
-    background: color-mix(in srgb, var(--admin-accent, #2271b1) 6%, transparent);
-    color: var(--admin-text, #1e293b);
-}
-.media-modal__upload-status { min-height: 18px; font-size: 12px; font-weight: 600; }
+.media-modal__upload-status.is-visible { display: block; }
 .media-modal__upload-status.is-error { color: var(--admin-danger, #b42318); }
 .media-modal__upload-status.is-success { color: var(--admin-success, #067647); }
+
+/* Сетка файлов */
 .media-modal__grid {
     flex: 1;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-content: start;
     gap: 14px;
     padding: 16px;
     overflow-y: auto;
     background: var(--admin-surface, #fff);
 }
-.media-modal__item {
-    position: relative;
-    padding: 0;
-    overflow: hidden;
-    border: 2px solid transparent;
-    border-radius: 3px;
-    background: color-mix(in srgb, var(--admin-text, #1e293b) 7%, var(--admin-surface, #fff));
-    aspect-ratio: 16 / 10;
-    cursor: pointer;
-    transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
-}
-.media-modal__item:focus-visible {
-    outline: none;
-    border-color: var(--admin-accent, #2271b1);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent, #2271b1) 28%, transparent);
-}
-.media-modal__item img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.media-modal__item--file {
+.media-modal__dropcard {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 3px;
     padding: 12px;
-    text-align: center;
+    border: 1px dashed color-mix(in srgb, var(--admin-accent, #2271b1) 45%, var(--admin-border, #dcdcde));
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--admin-accent, #2271b1) 5%, transparent);
     color: var(--admin-text, #1e293b);
+    text-align: center;
+    cursor: pointer;
+}
+.media-modal__dropcard:hover { background: color-mix(in srgb, var(--admin-accent, #2271b1) 11%, transparent); }
+.media-modal__dropcard-icon { color: var(--admin-accent, #2271b1); }
+.media-modal__dropcard-title { font-size: 12.5px; font-weight: 700; }
+.media-modal__dropcard-hint { color: var(--admin-muted, #646970); font-size: 11px; }
+/* Карточка: кадр сверху, имя и вес под ним. Подпись поверх кадра закрывала
+   нижнюю треть снимка — на пейзаже это ровно линия горизонта. */
+.media-modal__item {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.media-modal__thumb {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    border: 1px solid var(--admin-border, #dcdcde);
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--admin-text, #1e293b) 7%, var(--admin-surface, #fff));
+}
+.media-modal__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.media-modal__item--file .media-modal__thumb img { object-fit: contain; }
+.media-modal__item:hover .media-modal__thumb { border-color: color-mix(in srgb, var(--admin-accent, #2271b1) 55%, transparent); }
+.media-modal__item:focus-visible { outline: none; }
+.media-modal__item:focus-visible .media-modal__thumb {
+    border-color: var(--admin-accent, #2271b1);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent, #2271b1) 28%, transparent);
+}
+.media-modal__item.is-selected .media-modal__thumb {
+    border-color: var(--admin-accent, #2271b1);
+    box-shadow: 0 0 0 2px var(--admin-accent, #2271b1);
+}
+.media-modal__thumb::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--admin-border-strong, #8c8f94);
+    border-radius: 2px;
+    background: var(--admin-surface, #fff);
+}
+.media-modal__item.is-selected .media-modal__thumb::after {
+    border-color: var(--admin-accent, #2271b1);
+    background: var(--admin-accent, #2271b1) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5L20 7'/%3E%3C/svg%3E") center / 13px no-repeat;
+}
+.media-modal__play {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 3px;
+    background: rgba(2, 8, 23, .62);
+    color: #fff;
 }
 .media-modal__fileicon {
     display: grid;
     place-items: center;
-    min-width: 44px;
+    min-width: 46px;
     height: 26px;
     padding: 0 9px;
-    border-radius: 3px;
+    border-radius: 2px;
     background: var(--admin-surface, #fff);
     color: var(--admin-accent, #2271b1);
     font-size: 11px;
     font-weight: 800;
     letter-spacing: .04em;
-    box-shadow: 0 1px 4px rgba(2, 8, 23, .14);
 }
-.media-modal__filename {
-    font-size: 11px;
-    font-weight: 650;
-    line-height: 1.3;
-    word-break: break-word;
+.media-modal__caption { min-width: 0; }
+.media-modal__caption-name {
+    color: var(--admin-text, #1e293b);
+    font-size: 12.5px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
+.media-modal__caption-meta { color: var(--admin-muted, #646970); font-size: 11px; font-weight: 500; }
+/* Список — тот же набор карточек в одну колонку: отдельной разметки для
+   второго вида нет, поэтому виды не могут разойтись. */
+.media-modal__grid--list { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.media-modal__grid--list .media-modal__dropcard { flex-direction: row; gap: 10px; padding: 10px 12px; }
+.media-modal__grid--list .media-modal__item { flex-direction: row; align-items: center; gap: 12px; padding: 5px; }
+.media-modal__grid--list .media-modal__thumb { flex: 0 0 auto; width: 76px; aspect-ratio: 16 / 10; }
+.media-modal__grid--list .media-modal__caption { flex: 1 1 auto; }
 .media-modal__empty {
     grid-column: 1 / -1;
     padding: 48px 20px;
@@ -2036,7 +2109,60 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     font-size: 14px;
     text-align: center;
 }
+
+/* Детали выбранного файла */
+.media-modal__details {
+    grid-area: details;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    border-left: 1px solid var(--admin-border, #dcdcde);
+    background: var(--admin-surface-soft, #fafbfc);
+}
+.media-modal__details[hidden] { display: none; }
+.media-modal__details-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 10px 12px 16px;
+    border-bottom: 1px solid var(--admin-border, #dcdcde);
+}
+.media-modal__details-head h3 { margin: 0; font-size: 14px; font-weight: 700; }
+.media-modal__details-body { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 18px; overflow-y: auto; }
+.media-modal__details-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    overflow: hidden;
+    border: 1px solid var(--admin-border, #dcdcde);
+    border-radius: 3px;
+    background: var(--admin-surface, #fff);
+}
+.media-modal__details-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.media-modal__details-name { margin: 0; font-size: 13.5px; font-weight: 700; word-break: break-word; }
+.media-modal__details-meta { margin: 0; color: var(--admin-muted, #646970); font-size: 12px; }
+.media-modal__details-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.media-modal__details-field { display: grid; gap: 4px; }
+.media-modal__details-field > span { color: var(--admin-muted, #646970); font-size: 11.5px; font-weight: 600; }
+.media-modal__details-field input { width: 100%; }
+.media-modal__details-link { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 11.5px; }
+.media-modal__details-info {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 5px 10px;
+    margin: 4px 0 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--admin-border, #dcdcde);
+    font-size: 12px;
+}
+.media-modal__details-info dt { color: var(--admin-muted, #646970); }
+.media-modal__details-info dd { margin: 0; text-align: right; font-weight: 600; }
+
+/* Подвал */
 .media-modal__footer {
+    grid-area: foot;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2045,52 +2171,46 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     border-top: 1px solid var(--admin-border, #dcdcde);
     background: var(--admin-surface-soft, #fafbfc);
 }
-/* Слева в подвале — миниатюра выбранного файла с именем и весом: раньше там
-   была одна строка текста, и подтвердить выбор приходилось «на память». */
-.media-modal__selected {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-}
-.media-modal__selected-thumb {
-    display: none;
+.media-modal__selected { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.media-modal__selected-thumb:not(:empty) {
     flex: 0 0 auto;
-    width: 42px;
+    display: block;
+    width: 44px;
     height: 32px;
     overflow: hidden;
     border: 1px solid var(--admin-border, #dcdcde);
-    border-radius: 3px;
-    background: var(--admin-bg, #f0f0f1);
+    border-radius: 2px;
 }
 .media-modal__selected-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.media-modal__selected.has-file .media-modal__selected-thumb { display: block; }
 .media-modal__selected-info {
     min-width: 0;
+    color: var(--admin-text, #1e293b);
     font-size: 13px;
     font-weight: 600;
-    line-height: 1.3;
-    color: var(--admin-text, #1e293b);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.media-modal__selected-meta {
-    display: block;
-    color: var(--admin-muted, #646970);
-    font-size: 11px;
-    font-weight: 500;
+.media-modal__selected-meta { display: block; color: var(--admin-muted, #646970); font-size: 11px; font-weight: 500; }
+.media-modal__selected-drop {
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--admin-accent, #2271b1);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
 }
 .media-modal__footer-actions { display: flex; flex: 0 0 auto; gap: 8px; }
-/* Файл можно бросить прямо в окно: подсказка появляется только во время
-   перетаскивания, поэтому в покое сетка ничем не занята. */
+
+/* Перетаскивание файла в окно */
 .media-modal__dropveil {
     position: absolute;
     inset: 0;
     z-index: 20;
     display: none;
     place-items: center;
-    border-radius: 3px;
     background: color-mix(in srgb, var(--admin-surface, #fff) 88%, transparent);
     color: var(--admin-accent, #2271b1);
     font-size: 15px;
@@ -2098,14 +2218,28 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     pointer-events: none;
 }
 .media-modal.is-dropping .media-modal__dropveil { display: grid; }
-.media-modal.is-dropping .media-modal__dialog {
-    border-color: var(--admin-accent, #2271b1);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent, #2271b1) 30%, transparent), 0 28px 70px rgba(2, 8, 23, .38);
+.media-modal.is-dropping .media-modal__dialog { border-color: var(--admin-accent, #2271b1); }
+
+@media (max-width: 1100px) {
+    .media-modal__dialog,
+    .media-modal__dialog:has(.media-modal__details:not([hidden])) {
+        grid-template-columns: 180px minmax(0, 1fr);
+        grid-template-areas: 'rail body' 'foot foot';
+    }
+    .media-modal__details { display: none; }
+    .media-modal__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
-@media (max-width: 640px) {
+@media (max-width: 720px) {
     .media-modal { padding: 8px; }
-    .media-modal__dialog { max-height: 94vh; }
-    .media-modal__head { flex-wrap: wrap; gap: 8px; }
+    .media-modal__dialog,
+    .media-modal__dialog:has(.media-modal__details:not([hidden])) {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: 'body' 'foot';
+        height: 94vh;
+    }
+    .media-modal__rail { display: none; }
+    .media-modal__toolbar { flex-wrap: wrap; }
+    .media-modal__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* ============================================================================

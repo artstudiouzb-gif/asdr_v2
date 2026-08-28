@@ -167,6 +167,9 @@
         return Promise.resolve(fallbackCopy(text, showSuccess));
     }
 
+    // Копирование нужно и деталям файла в медиабиблиотеке — отдаём наружу.
+    window.asdrCopyToClipboard = copyToClipboard;
+
     function fallbackCopy(text, onSuccess) {
         try {
             var textarea = document.createElement('textarea');
@@ -1025,36 +1028,44 @@
     (function () {
         var modal = document.querySelector('[data-media-modal]');
         if (!modal) { return; }
+        var dialog = modal.querySelector('.media-modal__dialog');
         var grid = modal.querySelector('[data-media-grid]');
+        var nav = modal.querySelector('[data-media-nav]');
         var uploadBox = modal.querySelector('[data-media-upload]');
         var uploadInput = modal.querySelector('[data-media-upload-input]');
         var uploadStatus = modal.querySelector('[data-media-upload-status]');
         var searchInput = modal.querySelector('[data-media-search]');
+        var sortSelect = modal.querySelector('[data-media-sort]');
         var selectedInfo = modal.querySelector('[data-media-selected-info]');
-        var selectBtn = modal.querySelector('[data-media-select-btn]');
-        var toolbar = modal.querySelector('[data-media-toolbar]');
-        var tabs = modal.querySelectorAll('[data-media-tab]');
-        var countEl = modal.querySelector('[data-media-count]');
-        var selectedBox = modal.querySelector('[data-media-selected]');
         var selectedThumb = modal.querySelector('[data-media-selected-thumb]');
-        var dialog = modal.querySelector('.media-modal__dialog');
-        var lastTrigger = null;
-        var dropDepth = 0;
+        var selectedDrop = modal.querySelector('[data-media-selected-drop]');
+        var selectBtn = modal.querySelector('[data-media-select-btn]');
+        var details = modal.querySelector('[data-media-details]');
+        var detailsBody = modal.querySelector('[data-media-details-body]');
+        var viewButtons = modal.querySelectorAll('[data-media-view]');
 
         var currentTarget = null;
         var currentCallback = null;
         var loaded = false;
-        var loadedType = null;
+        var loadedKey = null;
+        var baseType = 'image';
         var currentType = 'image';
+        var currentSort = 'date_desc';
         var currentMultiple = false;
         var selectedUrl = null;
         var selectedName = null;
         var selectedUrls = [];
         var selectedNames = {};
         var libraryItems = [];
+        var counts = {};
+        var detailsUrl = null;
+        var lastTrigger = null;
+        var dropDepth = 0;
+        var searchTimer = null;
 
         var typeOptions = {
             image: { accept: '.jpg,.jpeg,.png,.gif,.webp,.svg', label: 'изображение' },
+            raster: { accept: '.jpg,.jpeg,.png,.gif,.webp', label: 'изображение' },
             svg: { accept: '.svg,image/svg+xml', label: 'SVG-файл' },
             video: { accept: '.mp4,video/mp4', label: 'видео MP4' },
             audio: { accept: '.mp3,.aac,.ogg,.wav,.m4a,audio/*', label: 'аудиофайл' },
@@ -1063,14 +1074,72 @@
             all: { accept: '', label: 'файл' }
         };
 
-        // Вес и тип файла нужны подвалу окна: одна строка «Выбран: name»
-        // ничего не говорит о том, что именно уходит в поле.
+        var typeLabels = {
+            all_files: 'Все файлы',
+            all: 'Все медиа',
+            image: 'Изображения',
+            raster: 'Фотографии',
+            svg: 'Векторные',
+            video: 'Видео',
+            audio: 'Аудио',
+            document: 'Документы'
+        };
+
+        var typeIcons = {
+            all_files: 'folder',
+            all: 'folder',
+            image: 'photo',
+            raster: 'photo',
+            svg: 'vector',
+            video: 'movie',
+            audio: 'music',
+            document: 'file-text'
+        };
+
+        // Колонка видов показывает только то, что поле готово принять: у поля
+        // изображения выбор из документов ничего не даёт, кроме битой картинки.
+        var typeBranches = {
+            image: ['image', 'raster', 'svg'],
+            raster: ['raster'],
+            svg: ['svg'],
+            video: ['video'],
+            audio: ['audio'],
+            document: ['document'],
+            all: ['all', 'image', 'raster', 'svg', 'video', 'audio'],
+            all_files: ['all_files', 'image', 'raster', 'svg', 'video', 'audio', 'document']
+        };
+
+        function icon(name, size) {
+            return window.asdrTablerIcon ? window.asdrTablerIcon(name, size || 16) : '';
+        }
+
         function formatSize(bytes) {
             var value = Number(bytes || 0);
             if (!value) { return ''; }
             if (value < 1024) { return value + ' Б'; }
             if (value < 1024 * 1024) { return Math.round(value / 1024) + ' КБ'; }
             return (value / (1024 * 1024)).toFixed(value < 10 * 1024 * 1024 ? 1 : 0) + ' МБ';
+        }
+
+        function formatDate(value) {
+            var raw = String(value || '').replace(' ', 'T');
+            var date = raw ? new Date(raw) : null;
+            if (!date || isNaN(date.getTime())) { return ''; }
+            return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+                + ' в ' + date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function extOf(name) {
+            var parts = String(name || '').split('.');
+            return parts.length > 1 ? parts.pop().toUpperCase() : 'ФАЙЛ';
+        }
+
+        function isImageUrl(url) {
+            return /\.(jpe?g|png|gif|svg|webp|avif)$/i.test(String(url || ''));
+        }
+
+        function isVideoUrl(url) {
+            return /\.(mp4|webm|ogg|mov|m4v)$/i.test(String(url || ''));
         }
 
         function itemByUrl(url) {
@@ -1083,6 +1152,7 @@
         function setUploadStatus(message, state) {
             if (!uploadStatus) { return; }
             uploadStatus.textContent = message || '';
+            uploadStatus.classList.toggle('is-visible', Boolean(message));
             uploadStatus.classList.toggle('is-error', state === 'error');
             uploadStatus.classList.toggle('is-success', state === 'success');
         }
@@ -1099,14 +1169,43 @@
             close();
         }
 
+        function renderNav() {
+            if (!nav) { return; }
+            var branch = typeBranches[baseType] || typeBranches.image;
+            nav.textContent = '';
+
+            branch.forEach(function (key) {
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'media-modal__navitem' + (key === currentType ? ' is-active' : '');
+                button.setAttribute('data-media-type-filter', key);
+                button.setAttribute('aria-pressed', key === currentType ? 'true' : 'false');
+                button.innerHTML = '<span class="media-modal__navicon">' + icon(typeIcons[key] || 'folder', 17) + '</span>'
+                    + '<span class="media-modal__navlabel"></span>'
+                    + '<span class="media-modal__navcount"></span>';
+                button.querySelector('.media-modal__navlabel').textContent = typeLabels[key] || key;
+                button.querySelector('.media-modal__navcount').textContent = counts[key] === undefined ? '' : String(counts[key]);
+                button.addEventListener('click', function () {
+                    if (currentType === key) { return; }
+                    currentType = key;
+                    renderNav();
+                    loadLibrary(true);
+                });
+                nav.appendChild(button);
+            });
+        }
+
         function updateSelectedUI() {
             var selectedCount = currentMultiple ? selectedUrls.length : (selectedUrl ? 1 : 0);
             if (selectedThumb) { selectedThumb.textContent = ''; }
-            if (selectedBox) { selectedBox.classList.remove('has-file'); }
+            if (selectedDrop) { selectedDrop.hidden = !selectedCount; }
 
             if (!selectedCount) {
-                if (selectedInfo) selectedInfo.textContent = 'Файл не выбран';
-                if (selectBtn) selectBtn.disabled = true;
+                if (selectedInfo) { selectedInfo.textContent = 'Файл не выбран'; }
+                if (selectBtn) {
+                    selectBtn.disabled = true;
+                    selectBtn.textContent = currentMultiple ? 'Выбрать файлы' : 'Выбрать файл';
+                }
             } else {
                 if (selectedInfo) {
                     selectedInfo.textContent = currentMultiple
@@ -1115,25 +1214,26 @@
 
                     var meta = currentMultiple ? null : itemByUrl(selectedUrl);
                     if (meta) {
-                        var parts = [];
-                        if (meta.mime_type) { parts.push(meta.mime_type); }
+                        var parts = [extOf(meta.name)];
                         if (formatSize(meta.size)) { parts.push(formatSize(meta.size)); }
-                        if (parts.length) {
-                            var metaNode = document.createElement('span');
-                            metaNode.className = 'media-modal__selected-meta';
-                            metaNode.textContent = parts.join(' · ');
-                            selectedInfo.appendChild(metaNode);
-                        }
+                        var metaNode = document.createElement('span');
+                        metaNode.className = 'media-modal__selected-meta';
+                        metaNode.textContent = parts.join(' · ');
+                        selectedInfo.appendChild(metaNode);
                     }
                 }
-                if (selectedThumb && !currentMultiple && /\.(jpe?g|png|gif|svg|webp|avif)$/i.test(selectedUrl || '')) {
+                if (selectedThumb && !currentMultiple && isImageUrl(selectedUrl)) {
                     var thumb = document.createElement('img');
                     thumb.src = encodeURI(selectedUrl);
                     thumb.alt = '';
                     selectedThumb.appendChild(thumb);
-                    if (selectedBox) { selectedBox.classList.add('has-file'); }
                 }
-                if (selectBtn) selectBtn.disabled = false;
+                if (selectBtn) {
+                    selectBtn.disabled = false;
+                    selectBtn.textContent = currentMultiple
+                        ? 'Выбрать файлы (' + selectedCount + ')'
+                        : 'Выбрать файл';
+                }
             }
 
             grid.querySelectorAll('.media-modal__item').forEach(function (fig) {
@@ -1144,21 +1244,177 @@
             });
         }
 
-        function renderLibraryItems(items) {
-            libraryItems = items || [];
-            if (!libraryItems.length) {
-                grid.innerHTML = '<div class="media-modal__empty">В библиотеке нет подходящих файлов.</div>';
-                if (countEl) { countEl.textContent = ''; }
+        // Правая колонка живёт данными выдачи: отдельного запроса за деталями
+        // нет, поэтому она не может разойтись с карточкой в сетке.
+        function renderDetails(item) {
+            if (!details || !detailsBody) { return; }
+            if (!item) {
+                details.hidden = true;
+                detailsUrl = null;
                 return;
             }
-            grid.innerHTML = '';
-            var term = searchInput ? searchInput.value.toLowerCase().trim() : '';
-            var shown = 0;
+
+            detailsUrl = item.url;
+            details.hidden = false;
+            detailsBody.textContent = '';
+
+            var preview = document.createElement('div');
+            preview.className = 'media-modal__details-preview';
+            if (isImageUrl(item.url)) {
+                var img = document.createElement('img');
+                img.src = encodeURI(item.url);
+                img.alt = '';
+                img.addEventListener('load', function () {
+                    var box = detailsBody.querySelector('[data-media-details-size]');
+                    if (box && img.naturalWidth) {
+                        box.textContent = img.naturalWidth + ' × ' + img.naturalHeight;
+                    }
+                });
+                preview.appendChild(img);
+            } else {
+                var badge = document.createElement('span');
+                badge.className = 'media-modal__fileicon';
+                badge.textContent = extOf(item.name);
+                preview.appendChild(badge);
+            }
+            detailsBody.appendChild(preview);
+
+            var name = document.createElement('p');
+            name.className = 'media-modal__details-name';
+            name.textContent = item.name;
+            detailsBody.appendChild(name);
+
+            var meta = document.createElement('p');
+            meta.className = 'media-modal__details-meta';
+            meta.textContent = [extOf(item.name), formatSize(item.size)].filter(Boolean).join(' · ');
+            detailsBody.appendChild(meta);
+
+            if (formatDate(item.created_at)) {
+                var uploaded = document.createElement('p');
+                uploaded.className = 'media-modal__details-meta';
+                uploaded.textContent = 'Загружен ' + formatDate(item.created_at);
+                detailsBody.appendChild(uploaded);
+            }
+
+            var actions = document.createElement('div');
+            actions.className = 'media-modal__details-actions';
+
+            var openLink = document.createElement('a');
+            openLink.className = 'btn btn--small';
+            openLink.href = item.url;
+            openLink.target = '_blank';
+            openLink.rel = 'noopener';
+            openLink.innerHTML = icon('external-link', 15) + '<span>Открыть</span>';
+            actions.appendChild(openLink);
+
+            var copyBtn = document.createElement('button');
+            copyBtn.type = 'button';
+            copyBtn.className = 'btn btn--small';
+            copyBtn.innerHTML = icon('copy', 15) + '<span>Копировать ссылку</span>';
+            copyBtn.addEventListener('click', function () {
+                if (window.asdrCopyToClipboard) { window.asdrCopyToClipboard(item.url, copyBtn); }
+            });
+            actions.appendChild(copyBtn);
+            detailsBody.appendChild(actions);
+
+            var link = document.createElement('input');
+            link.type = 'text';
+            link.readOnly = true;
+            link.className = 'media-modal__details-link';
+            link.value = item.url;
+            link.setAttribute('aria-label', 'Ссылка на файл');
+            detailsBody.appendChild(fieldRow('Ссылка на файл', link));
+
+            var alt = document.createElement('input');
+            alt.type = 'text';
+            alt.value = item.alt_text || '';
+            alt.setAttribute('data-media-alt', '');
+            alt.setAttribute('aria-label', 'Альтернативный текст');
+            detailsBody.appendChild(fieldRow('Альтернативный текст', alt));
+
+            var caption = document.createElement('input');
+            caption.type = 'text';
+            caption.value = item.caption || '';
+            caption.setAttribute('data-media-caption', '');
+            caption.setAttribute('aria-label', 'Подпись');
+            detailsBody.appendChild(fieldRow('Подпись', caption));
+
+            var save = document.createElement('button');
+            save.type = 'button';
+            save.className = 'btn btn--small';
+            save.textContent = 'Сохранить описание';
+            save.addEventListener('click', function () { saveMetadata(item, alt.value, caption.value, save); });
+            detailsBody.appendChild(save);
+
+            var info = document.createElement('dl');
+            info.className = 'media-modal__details-info';
+            info.innerHTML = '<dt>Тип файла</dt><dd data-media-details-mime></dd>'
+                + '<dt>Размер</dt><dd data-media-details-weight></dd>'
+                + '<dt>Разрешение</dt><dd data-media-details-size>—</dd>';
+            info.querySelector('[data-media-details-mime]').textContent = item.mime_type || extOf(item.name);
+            info.querySelector('[data-media-details-weight]').textContent = formatSize(item.size) || '—';
+            detailsBody.appendChild(info);
+        }
+
+        function fieldRow(labelText, control) {
+            var row = document.createElement('div');
+            row.className = 'media-modal__details-field';
+            var label = document.createElement('span');
+            label.textContent = labelText;
+            row.appendChild(label);
+            row.appendChild(control);
+            return row;
+        }
+
+        function saveMetadata(item, altText, captionText, button) {
+            var token = uploadBox ? uploadBox.getAttribute('data-csrf') : '';
+            if (!token || !item.id) { return; }
+            var fd = new FormData();
+            fd.append('csrf_token', token);
+            fd.append('metadata_id', String(item.id));
+            fd.append('alt_text', altText || '');
+            fd.append('caption', captionText || '');
+            button.disabled = true;
+
+            fetch('/admin/files/upload', { method: 'POST', body: fd, credentials: 'same-origin' })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    button.disabled = false;
+                    if (!res.ok) { throw new Error(res.error || 'Ошибка'); }
+                    item.alt_text = res.item ? res.item.alt_text : altText;
+                    item.caption = res.item ? res.item.caption : captionText;
+                    setUploadStatus('Описание сохранено.', 'success');
+                })
+                .catch(function (err) {
+                    button.disabled = false;
+                    setUploadStatus('Не удалось сохранить описание: ' + err.message, 'error');
+                });
+        }
+
+        function renderLibraryItems(items) {
+            libraryItems = items || [];
+            grid.textContent = '';
+
+            var zone = document.createElement('button');
+            zone.type = 'button';
+            zone.className = 'media-modal__dropcard';
+            zone.innerHTML = '<span class="media-modal__dropcard-icon">' + icon('cloud-upload', 26) + '</span>'
+                + '<span class="media-modal__dropcard-title">Загрузить файлы</span>'
+                + '<span class="media-modal__dropcard-hint">или перетащите их сюда</span>';
+            zone.addEventListener('click', function () { if (uploadInput) { uploadInput.click(); } });
+            grid.appendChild(zone);
+
+            if (!libraryItems.length) {
+                var empty = document.createElement('div');
+                empty.className = 'media-modal__empty';
+                empty.textContent = searchInput && searchInput.value.trim()
+                    ? 'Ничего не найдено. Измените запрос или загрузите файл.'
+                    : 'В библиотеке нет подходящих файлов.';
+                grid.appendChild(empty);
+                return;
+            }
 
             libraryItems.forEach(function (it) {
-                if (term && !it.name.toLowerCase().includes(term)) {
-                    return;
-                }
                 var fig = document.createElement('button');
                 fig.type = 'button';
                 fig.className = 'media-modal__item';
@@ -1169,24 +1425,42 @@
                     fig.classList.add('is-selected');
                 }
 
-                var isImage = /\.(jpe?g|png|gif|svg|webp|avif)$/i.test(it.url);
-                var ext = (it.name.split('.').pop() || 'file').toUpperCase();
-
-                if (!isImage) {
-                    // Плашка с расширением одна на видео и документы: раньше
-                    // видео помечалось символом ▶, и в одном ряду два разных
-                    // обозначения читались как два разных вида карточки.
-                    fig.classList.add('media-modal__item--file');
-                    fig.innerHTML = '<span class="media-modal__fileicon"></span><span class="media-modal__filename"></span>';
-                    fig.querySelector('.media-modal__fileicon').textContent = ext;
-                    fig.querySelector('.media-modal__filename').textContent = it.name;
-                } else {
+                var thumb = document.createElement('span');
+                thumb.className = 'media-modal__thumb';
+                if (isImageUrl(it.url)) {
                     var img = document.createElement('img');
                     img.src = encodeURI(it.url);
-                    img.alt = it.name;
+                    img.alt = '';
                     img.loading = 'lazy';
-                    fig.appendChild(img);
+                    thumb.appendChild(img);
+                } else {
+                    fig.classList.add('media-modal__item--file');
+                    var badge = document.createElement('span');
+                    badge.className = 'media-modal__fileicon';
+                    badge.textContent = extOf(it.name);
+                    thumb.appendChild(badge);
                 }
+                // Знак «видео» ставим только поверх кадра: рядом с плашкой
+                // расширения он был вторым обозначением того же самого.
+                if (isVideoUrl(it.url) && isImageUrl(it.url)) {
+                    var play = document.createElement('span');
+                    play.className = 'media-modal__play';
+                    play.innerHTML = icon('player-play', 18);
+                    thumb.appendChild(play);
+                }
+                fig.appendChild(thumb);
+
+                var caption = document.createElement('span');
+                caption.className = 'media-modal__caption';
+                var title = document.createElement('span');
+                title.className = 'media-modal__caption-name';
+                title.textContent = it.name;
+                var sub = document.createElement('span');
+                sub.className = 'media-modal__caption-meta';
+                sub.textContent = [extOf(it.name), formatSize(it.size)].filter(Boolean).join(' · ');
+                caption.appendChild(title);
+                caption.appendChild(sub);
+                fig.appendChild(caption);
 
                 fig.addEventListener('click', function () {
                     if (currentMultiple) {
@@ -1202,6 +1476,7 @@
                         selectedUrl = it.url;
                         selectedName = it.name;
                     }
+                    renderDetails(it);
                     updateSelectedUI();
                 });
 
@@ -1210,28 +1485,35 @@
                 });
 
                 grid.appendChild(fig);
-                shown++;
             });
 
-            if (!shown) {
-                grid.innerHTML = '<div class="media-modal__empty">Ничего не найдено. Измените запрос или загрузите файл.</div>';
-            }
-            if (countEl) {
-                countEl.textContent = term ? 'Найдено: ' + shown : 'Всего файлов: ' + shown;
+            if (detailsUrl) {
+                var stillHere = itemByUrl(detailsUrl);
+                renderDetails(stillHere);
             }
         }
 
-        function loadLibrary(type, force) {
-            if (!force && loaded && loadedType === type) { return Promise.resolve(); }
-            loaded = false; loadedType = type;
+        function loadLibrary(force) {
+            var query = searchInput ? searchInput.value.trim() : '';
+            var key = currentType + '|' + currentSort + '|' + query;
+            if (!force && loaded && loadedKey === key) { return Promise.resolve(); }
+            loaded = false; loadedKey = key;
             grid.setAttribute('aria-busy', 'true');
             grid.innerHTML = '<div class="media-modal__empty">Загрузка…</div>';
-            return fetch('/admin/media/list?type=' + encodeURIComponent(type), { credentials: 'same-origin' })
+
+            var url = '/admin/media/list?type=' + encodeURIComponent(currentType)
+                + '&sort=' + encodeURIComponent(currentSort)
+                + (query ? '&q=' + encodeURIComponent(query) : '');
+
+            return fetch(url, { credentials: 'same-origin' })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     loaded = true;
                     grid.setAttribute('aria-busy', 'false');
+                    counts = data.counts || {};
+                    renderNav();
                     renderLibraryItems(data.items || []);
+                    updateSelectedUI();
                 })
                 .catch(function () {
                     grid.setAttribute('aria-busy', 'false');
@@ -1239,31 +1521,45 @@
                 });
         }
 
-        function switchTab(tabName) {
-            tabs.forEach(function (t) {
-                t.classList.toggle('is-active', t.getAttribute('data-media-tab') === tabName);
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(function () { loadLibrary(true); }, 250);
             });
-            if (tabName === 'upload') {
-                if (uploadBox) uploadBox.classList.remove('is-hidden');
-                if (toolbar) toolbar.classList.add('is-hidden');
-                if (grid) grid.classList.add('is-hidden');
-            } else {
-                if (uploadBox) uploadBox.classList.add('is-hidden');
-                if (toolbar) toolbar.classList.remove('is-hidden');
-                if (grid) grid.classList.remove('is-hidden');
-            }
         }
 
-        tabs.forEach(function (t) {
-            t.addEventListener('click', function () {
-                switchTab(t.getAttribute('data-media-tab'));
+        if (sortSelect) {
+            sortSelect.addEventListener('change', function () {
+                currentSort = sortSelect.value;
+                loadLibrary(true);
+            });
+        }
+
+        viewButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                var view = button.getAttribute('data-media-view');
+                viewButtons.forEach(function (other) {
+                    other.classList.toggle('is-active', other === button);
+                });
+                grid.classList.toggle('media-modal__grid--list', view === 'list');
             });
         });
 
-        if (searchInput) {
-            searchInput.addEventListener('input', function () {
-                renderLibraryItems(libraryItems);
+        if (selectedDrop) {
+            selectedDrop.addEventListener('click', function () {
+                selectedUrl = null;
+                selectedName = null;
+                selectedUrls = [];
+                selectedNames = {};
+                updateSelectedUI();
             });
+        }
+
+        if (details) {
+            var detailsClose = modal.querySelector('[data-media-details-close]');
+            if (detailsClose) {
+                detailsClose.addEventListener('click', function () { renderDetails(null); });
+            }
         }
 
         if (selectBtn) {
@@ -1282,12 +1578,16 @@
         function open(targetSelector, callback, type, multiple) {
             currentTarget = targetSelector ? document.querySelector(targetSelector) : null;
             currentCallback = callback || null;
-            currentType = type || 'image';
+            baseType = typeOptions[type] ? type : 'image';
+            currentType = baseType;
             currentMultiple = Boolean(multiple);
             selectedUrl = null;
             selectedName = null;
             selectedUrls = [];
             selectedNames = {};
+            counts = {};
+            renderDetails(null);
+            renderNav();
             updateSelectedUI();
 
             var options = typeOptions[currentType] || typeOptions.all;
@@ -1296,13 +1596,12 @@
                 uploadInput.accept = options.accept;
             }
             setUploadStatus('');
-            switchTab('library');
             modal.hidden = false;
             if (searchInput) {
                 searchInput.value = '';
                 searchInput.focus();
             }
-            loadLibrary(currentType, false);
+            loadLibrary(true);
         }
 
         function close() {
@@ -1312,13 +1611,13 @@
             dropDepth = 0;
             currentCallback = null;
             currentMultiple = false;
+            renderDetails(null);
             if (lastTrigger && lastTrigger.isConnected) { lastTrigger.focus(); }
             lastTrigger = null;
         }
 
         function uploadFile(file) {
             if (!uploadBox || !file) { return; }
-            switchTab('upload');
             if (!file.size || file.size > 200 * 1024 * 1024) {
                 setUploadStatus('Неверный размер файла (макс 200 МБ).', 'error');
                 return;
@@ -1347,14 +1646,23 @@
                     .then(function (res) {
                         if (!res.ok) { throw new Error(res.error || 'Ошибка загрузки'); }
                         if (res.done) {
-                            if (uploadInput) { uploadInput.disabled = false; }
-                            setUploadStatus('Файл загружен!', 'success');
-                            loaded = false;
-                            switchTab('library');
-                            loadLibrary(currentType, true).then(function () {
-                                if (res.url) {
+                            if (uploadInput) { uploadInput.disabled = false; uploadInput.value = ''; }
+                            setUploadStatus('Файл загружен.', 'success');
+                            loadLibrary(true).then(function () {
+                                if (!res.url) { return; }
+                                // Файл загружали, чтобы его поставить: в поле
+                                // он уходит сразу, в галерее — просто
+                                // отмечается в выборе.
+                                if (!currentMultiple) {
                                     selectUrl(res.url);
+                                    return;
                                 }
+                                if (selectedUrls.indexOf(res.url) === -1) {
+                                    selectedUrls.push(res.url);
+                                    selectedNames[res.url] = file.name;
+                                }
+                                renderDetails(itemByUrl(res.url));
+                                updateSelectedUI();
                             });
                             return;
                         }
@@ -1377,11 +1685,11 @@
             });
         }
 
-        // Файл можно бросить прямо в окно выбора: раньше для этого нужно было
+        // Файл можно бросить в любое место окна: раньше для этого нужно было
         // сначала переключиться на вкладку загрузки и найти там область.
         if (dialog) {
             dialog.addEventListener('dragenter', function (event) {
-                if (!event.dataTransfer || modal.hidden) { return; }
+                if (modal.hidden || !event.dataTransfer) { return; }
                 event.preventDefault();
                 dropDepth++;
                 modal.classList.add('is-dropping');
@@ -1406,8 +1714,8 @@
             });
         }
 
-        // Стрелками ходим по карточкам, Enter выбирает файл сразу: без этого
-        // до нужного кадра в конце библиотеки приходилось долго жать Tab.
+        // Стрелками ходим по карточкам, Enter выбирает файл: без этого до
+        // нужного кадра в конце библиотеки приходилось долго жать Tab.
         grid.addEventListener('keydown', function (event) {
             var card = event.target.closest('.media-modal__item');
             if (!card) { return; }
@@ -1445,7 +1753,6 @@
             event.preventDefault();
             next.focus();
         });
-
         // Публичный API для редактора: выбор изображения/SVG с колбэком.
         window.MediaPicker = {
             pick: function (cb) { open(null, cb, 'image', false); },

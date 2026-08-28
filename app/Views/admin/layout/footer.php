@@ -27,49 +27,77 @@
 </div>
 
 <div class="media-modal" data-media-modal hidden role="dialog" aria-modal="true" aria-labelledby="media-modal-title">
-    <div class="media-modal__dialog">
-        <div class="media-modal__head">
-            <h2 class="media-modal__title" id="media-modal-title">Медиабиблиотека</h2>
-            <div class="media-modal__tabs">
-                <button type="button" class="media-modal__tab is-active" data-media-tab="library">Библиотека файлов</button>
-                <button type="button" class="media-modal__tab" data-media-tab="upload">Загрузить файлы</button>
-            </div>
-            <span class="media-modal__head-spacer"></span>
-            <button type="button" class="media-modal__close" data-media-close aria-label="Закрыть"><?= \App\Core\Icon::render('x', 18) ?></button>
-        </div>
-        <div class="media-modal__toolbar" data-media-toolbar>
-            <div class="media-modal__search-box">
-                <?= \App\Core\Icon::render('search', 16, 'media-modal__search-icon') ?>
-                <input type="search" class="media-modal__search" data-media-search placeholder="Поиск по имени файла…" aria-label="Поиск в медиабиблиотеке">
-            </div>
-            <span class="media-modal__count" data-media-count aria-live="polite"></span>
-        </div>
-        <div class="media-modal__upload is-hidden" data-media-upload data-csrf="<?= htmlspecialchars(\App\Core\Csrf::token(), ENT_QUOTES) ?>">
-            <div class="media-modal__dropzone">
-                <div class="u-inline-30220647a6">Перетащите файлы сюда</div>
-                <div class="u-inline-a43690dc6d">или нажмите кнопку для выбора на диске (до 200 МБ)</div>
-                <label class="btn btn--primary u-inline-42278569ee" data-media-upload-button>
-                    <?= \App\Core\AdminUi::icon('plus', 16, 'btn__icon', 2.5) ?>
-                    Выберите файл
+    <div class="media-modal__dialog" data-media-upload data-csrf="<?= htmlspecialchars(\App\Core\Csrf::token(), ENT_QUOTES) ?>">
+        <aside class="media-modal__rail">
+            <h2 class="media-modal__title" id="media-modal-title">Выберите медиа</h2>
+            <nav class="media-modal__nav" data-media-nav aria-label="Виды файлов"></nav>
+        </aside>
+
+        <div class="media-modal__body">
+            <div class="media-modal__toolbar" data-media-toolbar>
+                <div class="media-modal__search-box">
+                    <?= \App\Core\Icon::render('search', 16, 'media-modal__search-icon') ?>
+                    <input type="search" class="media-modal__search" data-media-search placeholder="Поиск по медиа…" aria-label="Поиск в медиабиблиотеке">
+                </div>
+                <label class="media-modal__sort">
+                    <span>Сортировка</span>
+                    <select data-media-sort aria-label="Порядок файлов">
+                        <option value="date_desc">Новые</option>
+                        <option value="date_asc">Старые</option>
+                        <option value="name_asc">По имени</option>
+                        <option value="size_desc">Крупные</option>
+                    </select>
+                </label>
+                <div class="media-modal__view" role="group" aria-label="Вид списка">
+                    <button type="button" class="media-modal__viewbtn is-active" data-media-view="grid" aria-label="Плитка"><?= \App\Core\Icon::render('layout-grid', 16) ?></button>
+                    <button type="button" class="media-modal__viewbtn" data-media-view="list" aria-label="Список"><?= \App\Core\Icon::render('list', 16) ?></button>
+                </div>
+                <label class="btn btn--primary media-modal__upload-btn" data-media-upload-button>
+                    <?= \App\Core\AdminUi::icon('upload', 15, 'btn__icon', 2) ?>Загрузить файлы
                     <input class="u-inline-c8be1ccba6" type="file" data-media-upload-input>
                 </label>
-                <div class="media-modal__upload-status u-inline-d8a81eac84" data-media-upload-status aria-live="polite"></div>
+                <button type="button" class="media-modal__close" data-media-close aria-label="Закрыть"><?= \App\Core\Icon::render('x', 18) ?></button>
+            </div>
+
+            <div class="media-modal__upload-status u-inline-d8a81eac84" data-media-upload-status aria-live="polite"></div>
+
+            <div class="media-modal__grid" data-media-grid aria-busy="true">
+                <div class="media-modal__empty">Загрузка…</div>
             </div>
         </div>
-        <div class="media-modal__grid" data-media-grid aria-busy="true">
-            <div class="media-modal__empty">Загрузка…</div>
-        </div>
+
+        <aside class="media-modal__details" data-media-details hidden>
+            <div class="media-modal__details-head">
+                <h3>Детали файла</h3>
+                <button type="button" class="media-modal__close" data-media-details-close aria-label="Скрыть детали"><?= \App\Core\Icon::render('x', 16) ?></button>
+            </div>
+            <div class="media-modal__details-body" data-media-details-body></div>
+        </aside>
+
         <div class="media-modal__footer">
             <div class="media-modal__selected" data-media-selected>
                 <span class="media-modal__selected-thumb" data-media-selected-thumb></span>
                 <span class="media-modal__selected-info" data-media-selected-info>Файл не выбран</span>
+                <button type="button" class="media-modal__selected-drop" data-media-selected-drop hidden>Снять выбор</button>
             </div>
             <div class="media-modal__footer-actions">
                 <button type="button" class="btn" data-media-close>Отмена</button>
-                <button type="button" class="btn btn--primary" data-media-select-btn disabled>Выбрать</button>
+                <button type="button" class="btn btn--primary" data-media-select-btn disabled>Выбрать файл</button>
             </div>
         </div>
+
         <div class="media-modal__dropveil" data-media-dropveil aria-hidden="true">Отпустите файл — он загрузится в библиотеку</div>
+        <?php
+        /* Значки, которые рисует уже скрипт: символы спрайта ищутся по готовому
+           HTML, поэтому имена обязаны встретиться на странице. Список
+           RUNTIME_ICONS для этого не годится — он сверяется с frontend.js. */
+        ?>
+        <span class="u-inline-c8be1ccba6" aria-hidden="true" data-media-icons><?php
+            foreach (['folder', 'photo', 'vector', 'movie', 'music', 'file-text',
+                      'cloud-upload', 'player-play', 'external-link', 'copy'] as $mediaIcon) {
+                echo \App\Core\Icon::render($mediaIcon, 16);
+            }
+        ?></span>
     </div>
 </div>
 

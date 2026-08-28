@@ -1,165 +1,97 @@
-/* Unified admin media visuals.
- * The standalone media library and every MediaPicker modal share one
- * thumbnail contract: 16:9 preview, filename overlay and the same selected
- * state. Context may change the number of columns, never the card itself.
+/* Единый вид карточки файла: страница /admin/files и окно выбора медиа.
+ * Контекст меняет число колонок, но не саму карточку — кадр 16:10, подпись
+ * под ним и одинаковая отметка выбранного.
  */
 
 :root {
     --admin-media-thumb-radius: 3px;
-    --admin-media-thumb-border: 2px solid transparent;
-    --admin-media-thumb-bg: color-mix(in srgb, var(--admin-text, #1e293b) 8%, var(--admin-surface, #fff));
-    --admin-media-thumb-shadow: 0 1px 3px rgba(2, 8, 23, .10);
-    --admin-media-thumb-shadow-hover: 0 8px 20px rgba(2, 8, 23, .18);
-    --admin-media-thumb-caption-bg: linear-gradient(180deg, transparent, rgba(2, 8, 23, .78));
-    --admin-media-thumb-caption: #fff;
+    --admin-media-thumb-bg: color-mix(in srgb, var(--admin-text, #1e293b) 7%, var(--admin-surface, #fff));
+    --admin-media-thumb-border: 1px solid var(--admin-border, #dcdcde);
+    --admin-media-thumb-ring: 0 0 0 2px var(--admin-accent, #2271b1);
 }
 
 /* -------------------------------------------------------------------------
- * Shared thumbnail card: /admin/files + modal MediaPicker.
+ * Кадр карточки.
  * ---------------------------------------------------------------------- */
 .media-grid .media-card,
-.media-modal__grid .media-modal__item {
+.media-modal__thumb {
     position: relative;
-    width: 100%;
     min-width: 0;
-    min-height: 0 !important;
-    height: auto !important;
-    aspect-ratio: 16 / 9 !important;
     overflow: hidden;
+    aspect-ratio: 16 / 10 !important;
     border: var(--admin-media-thumb-border) !important;
     border-radius: var(--admin-media-thumb-radius) !important;
     background: var(--admin-media-thumb-bg) !important;
-    box-shadow: var(--admin-media-thumb-shadow) !important;
-    transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
-}
-
-.media-grid .media-card:hover,
-.media-modal__grid .media-modal__item:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--admin-media-thumb-shadow-hover) !important;
+    transition: border-color .16s ease, box-shadow .16s ease;
 }
 
 .media-grid .media-card__thumb,
-.media-modal__grid .media-modal__item img {
+.media-modal__thumb img {
     width: 100% !important;
     height: 100% !important;
     display: block;
     object-fit: cover !important;
 }
 
-/* The standalone library already has a caption node. The modal picker keeps
- * its lightweight DOM and renders the same footer from the button title. */
+/* Подпись лежит под кадром в обоих контекстах: наложенная поверх снимка, она
+ * закрывала нижнюю треть кадра. У окна выбора в подписи две строки — имя и
+ * вес, — поэтому многоточие живёт на самой строке, а не на контейнере. */
+.media-modal__caption { display: grid; gap: 1px; }
 .media-grid .media-card__caption,
-.media-modal__grid .media-modal__item:not(.media-modal__item--file)::before {
-    position: absolute;
-    z-index: 3;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    min-height: 26px;
-    padding: 14px 8px 5px;
-    overflow: hidden;
-    color: var(--admin-media-thumb-caption) !important;
-    background: var(--admin-media-thumb-caption-bg) !important;
-    font-size: 10.5px;
+.media-modal__caption {
+    padding: 6px 2px 0;
+    color: var(--admin-text, #1e293b) !important;
+    background: none !important;
+    font-size: 12.5px;
     font-weight: 600;
-    line-height: 1.2;
+    line-height: 1.25;
     text-align: left;
-    white-space: nowrap;
+}
+
+.media-grid .media-card__caption,
+.media-modal__caption-name,
+.media-modal__caption-meta {
+    overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.media-modal__grid .media-modal__item:not(.media-modal__item--file)::before {
-    content: attr(title);
-    pointer-events: none;
-}
-
-/* One selected state in both contexts. */
+/* Одна отметка выбранного в обоих контекстах. */
 .media-grid .media-card.is-selected,
-.media-modal__grid .media-modal__item.is-selected {
-    border-color: var(--admin-accent, #2563eb) !important;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent, #2563eb) 24%, transparent) !important;
+.media-modal__item.is-selected .media-modal__thumb {
+    border-color: var(--admin-accent, #2271b1) !important;
+    box-shadow: var(--admin-media-thumb-ring) !important;
 }
 
-/* /admin/files uses a real Tabler icon node. Keep it visually identical to
- * the modal pseudo-check instead of maintaining two different designs. */
 .media-grid .media-card__check {
-    top: 7px !important;
-    right: 7px !important;
-    width: 23px !important;
-    height: 23px !important;
-    border: 2px solid #fff !important;
-    border-radius: 3px !important;
+    top: 6px !important;
+    right: auto !important;
+    left: 6px !important;
+    width: 18px !important;
+    height: 18px !important;
+    border: 1.5px solid #fff !important;
+    border-radius: 2px !important;
     color: #fff !important;
-    background: var(--admin-accent, #2563eb) !important;
-    box-shadow: 0 2px 7px rgba(15, 23, 42, .30) !important;
+    background: var(--admin-accent, #2271b1) !important;
 }
 
-/* MediaPicker did not have a check node at all. The selected class is already
- * maintained by admin.js for both single and multiple selection, so the same
- * visual marker can be derived without introducing another picker system. */
-.media-modal__grid .media-modal__item::after {
-    content: '✓';
-    position: absolute;
-    z-index: 5;
-    top: 7px;
-    right: 7px;
-    width: 23px;
-    height: 23px;
-    display: grid;
-    place-items: center;
-    border: 2px solid #fff;
-    border-radius: 3px;
-    color: #fff;
-    background: var(--admin-accent, #2563eb);
-    box-shadow: 0 2px 7px rgba(15, 23, 42, .30);
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    font-weight: 800;
-    line-height: 1;
-    opacity: 0;
-    transform: scale(.78);
-    pointer-events: none;
-    transition: opacity .14s ease, transform .14s ease;
-}
-
-.media-modal__grid .media-modal__item.is-selected::after {
-    opacity: 1;
-    transform: scale(1);
-}
-
-/* Non-image files keep their central icon/filename treatment, but inherit the
- * exact same card shell and selected marker. */
-.media-modal__grid .media-modal__item--file {
-    padding: 12px !important;
-}
-
-.media-modal__item[hidden] {
-    display: none !important;
-}
+.media-modal__item[hidden] { display: none !important; }
 
 /* -------------------------------------------------------------------------
- * Modal grid geometry. 15 initial items = five columns × three rows.
+ * Геометрия сетки окна: 15 карточек первой порции = пять колонок × три ряда.
  * ---------------------------------------------------------------------- */
 .media-modal__grid {
-    flex: 1 1 auto;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
     min-height: 0 !important;
     max-height: none !important;
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
     grid-auto-flow: row;
     grid-auto-rows: max-content;
-    align-content: start;
-    gap: 12px !important;
-    padding: 16px !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
     scrollbar-gutter: stable;
     overscroll-behavior: contain;
 }
 
-/* Progressive control lives outside the grid. Adding 15 more cards therefore
-   adds ordinary rows to the same scroll area and cannot overlap thumbnails. */
+/* Кнопка «Показать ещё» стоит вне сетки, поэтому новые карточки добавляют
+   обычные ряды и не могут наехать на кадры. */
 .media-loadmore-bar {
     flex: 0 0 auto;
     display: flex;
@@ -172,9 +104,7 @@
     background: var(--admin-surface, #fff);
 }
 
-.media-loadmore-bar[hidden] {
-    display: none !important;
-}
+.media-loadmore-bar[hidden] { display: none !important; }
 
 .media-loadmore-bar__status {
     color: var(--admin-muted, #64748b);
@@ -182,30 +112,34 @@
     font-weight: 600;
 }
 
-.media-loadmore-bar__button {
-    flex: 0 0 auto;
+.media-loadmore-bar__button { flex: 0 0 auto; }
+
+/* Открытые детали забирают треть ширины — в тот же ряд помещается четыре
+   карточки, а не пять. */
+.media-modal__dialog:has(.media-modal__details:not([hidden])) .media-modal__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
 
-@media (max-width: 900px) {
-    .media-modal__grid {
+@media (max-width: 1100px) {
+    .media-modal__grid,
+    .media-modal__dialog:has(.media-modal__details:not([hidden])) .media-modal__grid {
         grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     }
 }
 
-@media (max-width: 680px) {
-    .media-modal__grid {
+@media (max-width: 720px) {
+    .media-modal__grid,
+    .media-modal__dialog:has(.media-modal__details:not([hidden])) .media-modal__grid {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 8px !important;
-        padding: 10px !important;
     }
+}
 
+@media (max-width: 680px) {
     .media-loadmore-bar {
         align-items: stretch;
         flex-direction: column;
         padding: 10px;
     }
 
-    .media-loadmore-bar__button {
-        width: 100%;
-    }
+    .media-loadmore-bar__button { width: 100%; }
 }
