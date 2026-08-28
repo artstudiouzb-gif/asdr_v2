@@ -215,37 +215,42 @@ final class AdminUi
 
         $esc = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES);
         $hasImg = trim($urlValue) !== '';
+        $fileTitle = $hasImg ? (string) preg_replace('~^.*/~', '', $urlValue) : '';
 
         $html = '<div class="form-field image-field" data-image-field>';
         $html .= '<label for="' . $esc($id) . '">' . $esc($label) . '</label>';
         $html .= '<div class="image-field__row">';
 
-        // Превью.
+        // Превью вписывает картинку целиком (contain): логотип с широкой
+        // надписью при обрезке по краям превращался в бессмысленный фрагмент.
         $html .= '<div class="image-field__preview" data-image-preview>';
         if ($hasImg) {
             $html .= '<img src="' . $esc($urlValue) . '" alt="">';
         } else {
             $html .= '<span class="image-field__placeholder" aria-hidden="true">'
-                . Icon::render('photo', 26, 'image-field__placeholder-icon', 1.6) . '</span>';
+                . Icon::render('photo', 22, 'image-field__placeholder-icon', 1.6) . '</span>';
         }
         $html .= '</div>';
 
-        // Управление.
+        // Управление. Кнопки в одной строке, адрес файла — под ними: раньше
+        // поле занимало три ряда, из которых один был нативным «Выберите файл».
         $html .= '<div class="image-field__main">';
+        $html .= '<div class="image-field__name" data-image-name>'
+            . ($hasImg ? $esc($fileTitle) : 'Файл не выбран') . '</div>';
         $html .= '<div class="image-field__controls">';
-        $html .= '<input type="text" id="' . $esc($id) . '" name="' . $esc($urlName) . '" value="' . $esc($urlValue) . '"'
-            . ' data-image-input placeholder="URL или выбор из медиабиблиотеки">';
-        $html .= '<button type="button" class="btn btn--small" data-media-pick data-media-target="#' . $esc($id) . '">Медиабиблиотека</button>';
-        $html .= '<button type="button" class="btn btn--small" data-image-clear title="Очистить" aria-label="Очистить">'
-            . Icon::render('x', 16) . '</button>';
-        $html .= '</div>';
-
+        $html .= '<button type="button" class="btn btn--small" data-media-pick data-media-target="#' . $esc($id) . '">'
+            . Icon::render('photo', 15, 'btn__icon') . '<span>Выбрать из библиотеки</span></button>';
         if ($fileName !== null) {
-            $html .= '<div class="image-field__upload">';
-            $html .= '<input type="file" name="' . $esc($fileName) . '" accept="' . $esc($accept) . '" data-image-file>';
-            $html .= '<span class="form-hint">…или загрузите файл с компьютера.</span>';
-            $html .= '</div>';
+            $html .= '<label class="btn btn--small image-field__upload">'
+                . Icon::render('upload', 15, 'btn__icon') . '<span>Загрузить</span>'
+                . '<input type="file" name="' . $esc($fileName) . '" accept="' . $esc($accept) . '" data-image-file></label>';
         }
+        $html .= '<button type="button" class="btn btn--small image-field__clear" data-image-clear title="Очистить" aria-label="Очистить">'
+            . Icon::render('x', 15) . '</button>';
+        $html .= '</div>';
+        $html .= '<input type="text" class="image-field__url" id="' . $esc($id) . '" name="' . $esc($urlName) . '" value="' . $esc($urlValue) . '"'
+            . ' data-image-input placeholder="URL или выбор из медиабиблиотеки">';
+
         if ($hint !== '') {
             $html .= '<span class="form-hint">' . $esc($hint) . '</span>';
         }
@@ -300,11 +305,16 @@ final class AdminUi
         $val = ($value !== null && $value !== '') ? $value : $defaultHex;
         $off = ($value === null || $value === '');
 
-        $html = '<div class="form-field colorfield">';
+        // Состояние «по умолчанию» — часть поля, а не галочка сбоку: раньше
+        // при включённой галочке образец продолжал показывать посторонний цвет,
+        // и было не понять, что именно уйдёт на сайт.
+        $html = '<div class="form-field colorfield' . ($off ? ' is-default' : '') . '" data-colorfield>';
         $html .= '<label for="' . $esc($name) . '">' . $esc($label) . '</label>';
+        $html .= '<div class="colorfield__control">';
         $html .= '<input type="color" id="' . $esc($name) . '" name="' . $esc($name) . '" value="' . $esc($val) . '">';
+        $html .= '</div>';
         $html .= '<label class="colorfield__off"><input type="checkbox" name="' . $esc($name) . '_off" value="1"'
-            . ($off ? ' checked' : '') . '> ' . $esc($offLabel) . '</label>';
+            . ($off ? ' checked' : '') . '><span>' . $esc($offLabel) . '</span></label>';
         $html .= '</div>';
 
         return $html;
