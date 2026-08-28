@@ -46,7 +46,7 @@ final class BlockTypeRegistry
         'html' => ['html' => ''],
         'cta' => ['variant' => 'card', 'title' => '', 'text' => '', 'icon_svg' => '', 'image' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'button_text' => '', 'button_url' => '', 'bg_color' => '', 'text_color' => '', 'button_color' => ''],
         'advantages' => [], // схема: BlockFieldSchema
-        'slider' => ['title' => '', 'autoplay' => 0, 'ratio' => '16-9', 'slides' => []],
+        'slider' => [], // схема: BlockFieldSchema
         'form' => ['form_id' => null],
         'columns' => [], // схема: BlockFieldSchema
         // Вкладки — такой же контейнер, как columns: содержимое вкладки это
@@ -59,9 +59,9 @@ final class BlockTypeRegistry
         'projects_list' => [], // схема: BlockFieldSchema
         'news_latest' => ['title' => 'Последние новости', 'all_text' => 'Все новости', 'all_url' => '', 'limit' => 3, 'category' => 0],
         'partners' => [], // схема: BlockFieldSchema
-        'subscribe' => ['variant' => 'band', 'title' => 'Подписка на новости', 'text' => 'Получайте дайджест новостей на почту раз в неделю.', 'image' => '', 'placeholder' => '', 'note' => '', 'button_text' => 'Подписаться'],
+        'subscribe' => [], // схема: BlockFieldSchema
         'faq' => [], // схема: BlockFieldSchema
-        'contact_cards' => ['variant' => 'cards', 'title' => '', 'line_icons' => true, 'icon_size' => 22, 'icon_bg' => 'on', 'items' => []],
+        'contact_cards' => [], // схема: BlockFieldSchema
         // hero_id — ссылка на обложку (тип контента «Обложки»). Когда он задан,
         // блок только размещает обложку: содержимое и настройки берутся из неё,
         // а собственные поля блока не используются. Ноль — старая обложка,
@@ -70,7 +70,7 @@ final class BlockTypeRegistry
         'cards_grid' => ['variant' => 'icon', 'title' => '', 'all_text' => '', 'all_url' => '', 'columns' => 5, 'card_bg' => '', 'text_color' => '', 'source' => 'manual', 'limit' => 6, 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'items' => []],
         'media_gallery' => ['title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'source' => 'manual', 'limit' => 8, 'paginate' => false, 'columns' => 4, 'ratio' => '16-9', 'items' => []],
         'news_feature' => ['variant' => 'cards', 'title' => 'Новости и аналитика', 'all_text' => 'Все новости', 'all_url' => '', 'limit' => 5, 'category' => 0],
-        'person_cards' => ['title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 4, 'items' => []],
+        'person_cards' => [], // схема: BlockFieldSchema
         'timeline' => ['title' => '', 'description' => '', 'items' => [], 'button_text' => '', 'button_url' => '', 'cta_title' => '', 'cta_text' => '', 'cta_button_text' => '', 'cta_button_url' => '', 'cta_image' => ''],
         'news_docs' => ['news_title' => 'Актуальные новости', 'news_all_text' => 'Все новости', 'news_all_url' => '', 'limit' => 3, 'category' => 0, 'docs_title' => 'Документы', 'docs_all_text' => 'Все документы', 'docs_all_url' => '', 'docs' => []],
         'person_profile' => ['photo' => '', 'photo_side' => 'left', 'name' => '', 'position' => '', 'text' => '', 'phone' => '', 'phone_label' => 'Приёмная:', 'email' => '', 'email_label' => 'E-mail:', 'button_text' => '', 'button_url' => '', 'button2_text' => '', 'button2_url' => '', 'telegram' => '', 'facebook' => '', 'linkedin' => '', 'x' => '', 'instagram' => ''],
@@ -87,10 +87,7 @@ final class BlockTypeRegistry
             'bio_title' => 'Биография', 'bio_icon' => '', 'bio' => '',
             'duties_title' => 'Функции', 'duties_icon' => '', 'duties' => '',
             'mobile_icons_only' => false],
-        // icon_position по умолчанию пуст намеренно: у блоков, сохранённых до
-        // появления поля, позицию иконки задавало выравнивание, и подстановка
-        // «слева» дефолтом сдвинула бы иконку на всех таких страницах.
-        'icon_text' => ['variant' => 'cards', 'title' => '', 'description' => '', 'icon_position' => '', 'align' => 'left', 'rows_layout' => 'stacked', 'columns' => 3, 'items' => []],
+        'icon_text' => [], // схема: BlockFieldSchema
     ];
 
     /** Короткие русские названия для сообщений редактору. */

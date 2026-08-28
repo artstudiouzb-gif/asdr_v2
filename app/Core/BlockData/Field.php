@@ -22,7 +22,7 @@ namespace App\Core\BlockData;
  */
 final class Field
 {
-    public const KINDS = ['enum', 'int', 'int_choice', 'bool', 'text', 'textarea', 'richtext', 'url'];
+    public const KINDS = ['enum', 'int', 'int_choice', 'bool', 'text', 'textarea', 'richtext', 'url', 'media', 'icon', 'color'];
 
     /**
      * @param array<string, string> $options варианты `enum`: значение => подпись
@@ -41,6 +41,7 @@ final class Field
         public readonly string $input = '',
         public readonly string $placeholder = '',
         public readonly ?array $when = null,
+        public readonly string $swatch = '',
     ) {
     }
 
@@ -103,6 +104,28 @@ final class Field
         return new self('url', $label, '', hint: $hint, placeholder: $placeholder);
     }
 
+    /** Картинка: адрес из медиабиблиотеки, поле с превью и очисткой. */
+    public static function media(string $label, string $hint = ''): self
+    {
+        return new self('media', $label, '', hint: $hint);
+    }
+
+    /** Иконка Tabler: имя значка, поле с пикером. */
+    public static function icon(string $label = 'Иконка', string $hint = ''): self
+    {
+        return new self('icon', $label, '', hint: $hint);
+    }
+
+    /**
+     * Необязательный цвет. Пустое значение — «как в теме», поэтому у поля есть
+     * отдельный флажок «по умолчанию»; `$swatch` — цвет, который показывает
+     * пипетка, пока своего значения нет.
+     */
+    public static function color(string $label, string $swatch, string $hint = ''): self
+    {
+        return new self('color', $label, '', hint: $hint, swatch: $swatch);
+    }
+
     /**
      * Имя поля в форме отличается от ключа данных. Так исторически сделан
      * заголовок секции: `name="title_field"`, потому что `title` — колонка
@@ -145,6 +168,7 @@ final class Field
             $input !== '' ? $input : $this->input,
             $this->placeholder,
             $when ?? $this->when,
+            $this->swatch,
         );
     }
 }
