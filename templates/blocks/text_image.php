@@ -13,9 +13,9 @@ if ($textIsPlain) {
 }
 $image = trim((string) ($data['image'] ?? ''));
 $items = $data['items'] ?? [];
-$imageSide = ($data['image_side'] ?? 'right') === 'left' ? 'left' : 'right';
-$rawRatio = (string) ($data['image_ratio'] ?? 'auto');
-$ratio = in_array($rawRatio, ['auto', '16-9', '4-3', '1-1'], true) ? $rawRatio : 'auto';
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$imageSide = (string) $data['image_side'];
+$ratio = (string) $data['image_ratio'];
 $mediaClasses = \App\Core\MediaPosition::classes($data['image_position'] ?? null, $data['image_position_mobile'] ?? null);
 $buttonText = trim((string) ($data['button_text'] ?? ''));
 $buttonUrl = trim((string) ($data['button_url'] ?? ''));
@@ -26,7 +26,7 @@ if ($buttonUrl !== '' && !\App\Core\UrlGuard::isSafeLink($buttonUrl)) {
 // Доля ширины под кадр — долями fr в scoped CSS блока: инлайн-стили в блоках
 // запрещены тестами.
 $templateCss = '';
-$visualWidth = max(30, min(60, (int) ($data['image_width'] ?? 50)));
+$visualWidth = (int) $data['image_width'];
 if ($image !== '' && $visualWidth !== 50) {
     $templateCss = '@media (min-width:901px){#block-' . (int) $blockId
         . ' .block-textimage{--textimage-info:' . (100 - $visualWidth) . 'fr;--textimage-visual:' . $visualWidth . 'fr}}';
