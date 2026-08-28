@@ -33,9 +33,9 @@ test('News rendering: legacy formatter, balanced pagination and thumbnail fallba
 
     assert_contains('LegacyContentFormatter::paragraphize($html)', $social, 'existing imported rows are formatted on render');
 
-    assert_contains('$gridPageSize = 12;', $controller, 'regular grid pages use a multiple of three');
-    assert_contains('$firstPageSize = $gridPageSize + 1;', $controller, 'first page keeps one lead plus twelve cards');
-    assert_contains('$firstPageSize + (($page - 2) * $gridPageSize)', $controller, 'later pages continue after the first thirteen items without overlap');
+    assert_contains('$gridPageSize = \\App\\Core\\NewsFeedRhythm::PAGE_SIZE;', $controller, 'grid page size comes from the feed rhythm');
+    assert_contains('$firstPageSize = $gridPageSize + 1;', $controller, 'first page keeps one lead plus a full grid');
+    assert_contains('$firstPageSize + (($page - 2) * $gridPageSize)', $controller, 'later pages continue after the first page without overlap');
     assert_contains("requireCss('news-index-pagination'", $controller, 'news list loads pagination spacing');
 
     assert_contains("'news_gallery_thumbnails' => '/assets/js/news-gallery-thumbnails.js'", $collector, 'thumbnail helper is registered');

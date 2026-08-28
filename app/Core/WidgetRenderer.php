@@ -35,6 +35,9 @@ final class WidgetRenderer
             // текста нет, виджет заводился как витрина кадров.
             'goal_name' => '', 'goal_description' => '',
         ],
+        // Настроек нет: раздел определяется по открытой странице, а показывать
+        // или нет — решает размещение виджета в колонке.
+        'section_menu' => [],
     ];
 
     /**
@@ -150,6 +153,12 @@ final class WidgetRenderer
         }
 
         $inner = self::renderTemplate($templateFile, $view, $lang);
+        // Виджет, которому нечего показать, не выводится вовсе: рамка с одним
+        // заголовком читается как поломка. Так ведёт себя «Меню раздела» на
+        // странице вне разделов.
+        if (trim($inner) === '') {
+            return '';
+        }
         $title = self::resolveTitle($widget, $lang);
 
         $design = self::normalizeDesign($data);
@@ -208,6 +217,11 @@ final class WidgetRenderer
                     // сама цель, а не история, которую рассказывают её слайды.
                     $data['shuffle'] = false;
                 }
+                break;
+            case 'section_menu':
+                // Ветка считается по адресу текущей страницы. Кэш блоков этому
+                // не мешает: его ключ и так включает страницу.
+                $data['branch'] = SectionMenu::branch($lang, SectionMenu::currentPath());
                 break;
             case 'contacts':
                 $data['phone'] = Setting::get('contact_phone');

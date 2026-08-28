@@ -39,13 +39,13 @@ function agency_blocks(): array
 test('Контент Агентства: типы блоков зарегистрированы, ключи совпадают с реестром', function () {
     foreach (agency_blocks() as [$slug, $lang, $type, $data]) {
         $where = "{$slug} [{$lang}] → {$type}";
-        assert_true(isset(BlockTypeRegistry::DEFAULTS[$type]), 'неизвестный тип блока: ' . $where);
+        assert_true(isset(BlockTypeRegistry::defaults()[$type]), 'неизвестный тип блока: ' . $where);
         // Ключ вне DEFAULTS не переживёт первого сохранения блока в админке:
         // collectData собирает данные по белому списку и лишнее отбрасывает.
         // Служебные ключи с подчёркиванием (_reveal, _spacing, _visible_*)
         // хранятся отдельно от полей блока и проверке не подлежат.
         $keys = array_filter(array_keys($data), static fn (string $key): bool => !str_starts_with($key, '_'));
-        $unknown = array_diff($keys, array_keys(BlockTypeRegistry::DEFAULTS[$type]));
+        $unknown = array_diff($keys, array_keys(BlockTypeRegistry::defaults()[$type]));
         assert_same([], array_values($unknown), 'лишние ключи в ' . $where);
     }
 });

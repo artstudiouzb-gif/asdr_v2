@@ -1,0 +1,279 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Core\BlockData;
+
+use App\Core\HtmlSanitizer;
+use App\Core\TextProcessor;
+
+/**
+ * Схемы настроек блоков: одно описание поля вместо четырёх его копий.
+ *
+ * Тип, попавший сюда, получает умолчания, поле формы и нормализацию из одного
+ * места (см. `Field`). Шаблон такого блока обязан читать `$data` как есть:
+ * значение уже проверено, повторный `in_array()` в шаблоне — это вторая копия
+ * списка, которая рано или поздно разойдётся с первой.
+ *
+ * Переезд типов постепенный: пока схемы нет, тип живёт по-старому
+ * (`BlockTypeRegistry::BASE_DEFAULTS` + рукописное поле формы + ветка
+ * `BlockController::collectData()`).
+ *
+ * Схема описывает **скалярные** настройки. Мимо неё идут:
+ * репитеры (`items` — у строки свой набор полей) и значения, зависящие от
+ * другого поля (ширина колонок зависит от их числа). Их умолчания перечислены
+ * в EXTRA, а сборка остаётся явной.
+ */
+final class BlockFieldSchema
+{
+    /** @var array<string, array<string, mixed>> ключи типа, собираемые мимо схемы */
+    private const EXTRA = [
+        'columns' => ['ratio' => ''],
+        'tabs' => ['items' => []],
+        'partners' => ['items' => []],
+    ];
+
+    /** @var array<string, array<string, Field>>|null */
+    private static ?array $cache = null;
+
+    /** @return array<string, array<string, Field>> */
+    public static function all(): array
+    {
+        return self::$cache ??= [
+            'columns' => [
+                'columns' => Field::int('Количество колонок', 2, 4, 2, widget: 'select'),
+                'gap' => Field::enum('Промежуток между колонками', [
+                    'small' => 'Малый',
+                    'medium' => 'Средний',
+                    'large' => 'Большой',
+                ], 'medium', 'Наполнение колонок настраивается на странице: кнопка «+ блок» в каждой колонке.'),
+                'valign' => Field::enum('Выравнивание содержимого по высоте', [
+                    'stretch' => 'Растянуть — колонки одной высоты',
+                    'top' => 'По верху',
+                    'center' => 'По центру',
+                    'bottom' => 'По низу',
+                ], 'stretch', 'Заметно, когда в колонках разное количество содержимого: «по центру» ставит короткую колонку вровень с серединой длинной.'),
+                'mobile_order' => Field::enum('Порядок колонок на телефоне', [
+                    'normal' => 'Как в редакторе',
+                    'reverse' => 'В обратном порядке',
+                ], 'normal', 'Обратный порядок нужен паре «текст + фото»: на широком экране фото слева, а на телефоне первым читается текст.'),
+            ],
+            'tabs' => [
+                'variant' => Field::enum('Вариант отображения', [
+                    'segmented' => 'Переключатель — вкладки в общей дорожке',
+                    'underline' => 'Подчёркивание — активная вкладка с чертой',
+                    'vertical' => 'Список слева, содержимое справа',
+                ], 'segmented', 'На телефоне вертикальный вариант тоже показывает вкладки сверху — сбоку для них нет места.'),
+                'align' => Field::enum('Положение полосы вкладок', [
+                    'left' => 'Слева',
+                    'center' => 'По центру',
+                    'stretch' => 'На всю ширину',
+                ], 'left'),
+                'title' => Field::text('Заголовок, показываемый на сайте')->named('title_field'),
+                'description' => Field::richtext('Описание раздела'),
+                'autoplay' => Field::int(
+                    'Автоматическое переключение, секунд (0 — выключено)',
+                    0,
+                    30,
+                    0,
+                    'Активная вкладка показывает отсчёт до следующей. Переключение прекращается насовсем, как только посетитель выбрал вкладку сам, — и не начинается у тех, кто просил меньше движения.'
+                ),
+            ],
+            'partners' => [
+                'variant' => Field::enum('Вариант отображения', [
+                    'row' => 'Ряд — логотипы стоят сеткой',
+                    'marquee' => 'Бегущая строка — логотипы едут непрерывно',
+                ], 'row', 'Бегущая строка идёт сама и останавливается под курсором, при фокусе внутри и у посетителей, которые просили меньше движения. Ей нужно хотя бы три логотипа.'),
+                'title' => Field::text('Заголовок, показываемый на сайте', 'Партнёры')->named('title_field'),
+                'description' => Field::textarea('Описание раздела'),
+                'all_text' => Field::text('Ссылка «Все …» — текст', '', '', 'Все партнёры'),
+                'all_url' => Field::url('Ссылка «Все …» — URL'),
+                'columns' => Field::int(
+                    'Логотипов в ряду',
+                    3,
+                    8,
+                    6,
+                    'Если логотипов больше, ряд превращается в прокручиваемую полосу. На узких экранах число подбирается автоматически.',
+                    'select'
+                )->onlyWhen('variant', ['row']),
+                'logo_size' => Field::enum('Высота логотипа', [
+                    'small' => 'Мелкие',
+                    'medium' => 'Средние',
+                    'large' => 'Крупные',
+                ], 'medium', 'Общая высота выравнивает ряд: логотипы у партнёров разных пропорций.'),
+                'grayscale' => Field::bool('Обесцвечивать логотипы, возвращать цвет при наведении', true),
+                'autoplay' => Field::int('Автопрокрутка, секунд (0 — выключена)', 0, 30, 0)
+                    ->onlyWhen('variant', ['row']),
+            ],
+        ];
+    }
+
+    public static function has(string $type): bool
+    {
+        return isset(self::all()[$type]);
+    }
+
+    /** @return array<string, Field> */
+    public static function fields(string $type): array
+    {
+        return self::all()[$type] ?? [];
+    }
+
+    /**
+     * Умолчания типа: поля схемы плюс то, что собирается мимо неё.
+     *
+     * @return array<string, mixed>
+     */
+    public static function defaults(string $type): array
+    {
+        $defaults = [];
+        foreach (self::fields($type) as $key => $field) {
+            $defaults[$key] = $field->default;
+        }
+
+        return array_merge($defaults, self::EXTRA[$type] ?? []);
+    }
+
+    /**
+     * Присланное формой значение каждого поля схемы. Ключи мимо схемы
+     * (репитеры, зависимые значения) добавляет вызывающий код.
+     *
+     * @param array<string, mixed> $post
+     * @return array<string, mixed>
+     */
+    public static function normalize(string $type, array $post, string $locale): array
+    {
+        $data = [];
+        foreach (self::fields($type) as $key => $field) {
+            $name = $field->inputName($key);
+            $data[$key] = match ($field->kind) {
+                'enum' => BlockDataInput::enum($post, $name, array_keys($field->options), (string) $field->default),
+                'int' => BlockDataInput::int($post, $name, (int) $field->min, (int) $field->max, (int) $field->default),
+                'bool' => !empty($post[$name]),
+                'text', 'textarea' => BlockDataInput::plain($post, $name, $locale),
+                'richtext' => TextProcessor::process(
+                    HtmlSanitizer::sanitizeText(is_scalar($post[$name] ?? null) ? (string) $post[$name] : ''),
+                    $locale
+                ),
+                'url' => BlockDataInput::safeLink($post[$name] ?? ''),
+                default => $field->default,
+            };
+        }
+
+        return $data;
+    }
+
+    /**
+     * Сохранённые данные, приведённые к схеме: значение вне списка или вне
+     * границ заменяется умолчанием.
+     *
+     * Вызывается на выводе, а не только при сохранении: `data` блока приезжает
+     * и из старых записей, и из загруженного файла шаблона страницы, где
+     * проверены только ключи. Благодаря этому шаблон блока читает значение как
+     * есть — вторая копия списка допустимых значений ему не нужна.
+     *
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    public static function apply(string $type, array $data): array
+    {
+        foreach (self::fields($type) as $key => $field) {
+            $value = $data[$key] ?? $field->default;
+            $data[$key] = match ($field->kind) {
+                'enum' => isset($field->options[is_scalar($value) ? (string) $value : ''])
+                    ? (string) $value
+                    : (string) $field->default,
+                'int' => max((int) $field->min, min((int) $field->max, is_numeric($value) ? (int) $value : (int) $field->default)),
+                'bool' => (bool) $value,
+                default => is_scalar($value) ? (string) $value : '',
+            };
+        }
+
+        return $data;
+    }
+
+    /**
+     * Поля формы блока. Разметка та же, что у рукописных полей: класс
+     * `form-field`, подпись, подсказка и `data-field-when` для полей,
+     * применимых не ко всем вариантам.
+     *
+     * @param array<string, mixed> $data сохранённые значения блока
+     */
+    public static function formHtml(string $type, array $data): string
+    {
+        $html = '';
+        foreach (self::fields($type) as $key => $field) {
+            $html .= self::fieldHtml($key, $field, $data);
+        }
+
+        return $html;
+    }
+
+    /** @param array<string, mixed> $data */
+    private static function fieldHtml(string $key, Field $field, array $data): string
+    {
+        $esc = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES);
+        $name = $field->inputName($key);
+        $id = 'bf_' . (string) preg_replace('/[^a-z0-9_]/', '', strtolower($key));
+        $when = $field->when === null
+            ? ''
+            : ' data-field-when="' . $esc($field->when['field']) . '" data-field-value="' . $esc(implode(',', $field->when['values'])) . '"';
+        $hint = $field->hint !== '' ? '<span class="form-hint">' . $esc($field->hint) . '</span>' : '';
+        $label = '<label for="' . $id . '">' . $esc($field->label) . '</label>';
+
+        if ($field->kind === 'bool') {
+            // У флажка подпись идёт после самого флажка — так свёрстаны
+            // остальные флажки формы блока.
+            $checked = array_key_exists($key, $data) ? !empty($data[$key]) : (bool) $field->default;
+
+            return '<div class="form-field form-field--checkbox"' . $when . '>'
+                . '<input type="checkbox" id="' . $id . '" name="' . $esc($name) . '" value="1"' . ($checked ? ' checked' : '') . '>'
+                . '<label for="' . $id . '">' . $esc($field->label) . '</label>' . $hint . '</div>';
+        }
+
+        $value = $data[$key] ?? $field->default;
+        $control = match ($field->kind) {
+            'enum' => self::selectHtml($id, $name, $field->options, is_scalar($value) ? (string) $value : ''),
+            'int' => $field->widget === 'select'
+                ? self::selectHtml($id, $name, self::range((int) $field->min, (int) $field->max), (string) (int) $value)
+                : '<input type="number" id="' . $id . '" name="' . $esc($name) . '" min="' . (int) $field->min
+                    . '" max="' . (int) $field->max . '" value="' . (int) $value . '">',
+            'textarea' => '<textarea id="' . $id . '" name="' . $esc($name) . '" rows="2">'
+                . $esc(is_scalar($value) ? (string) $value : '') . '</textarea>',
+            'richtext' => '<textarea id="' . $id . '" name="' . $esc($name) . '" rows="3" data-wysiwyg>'
+                . $esc(is_scalar($value) ? (string) $value : '') . '</textarea>',
+            default => '<input type="text" id="' . $id . '" name="' . $esc($name) . '" value="'
+                . $esc(is_scalar($value) ? (string) $value : '') . '"'
+                . ($field->placeholder !== '' ? ' placeholder="' . $esc($field->placeholder) . '"' : '') . '>',
+        };
+
+        return '<div class="form-field"' . $when . '>' . $label . $control . $hint . '</div>';
+    }
+
+    /**
+     * @param array<string, string> $options
+     */
+    private static function selectHtml(string $id, string $name, array $options, string $current): string
+    {
+        $esc = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES);
+        $html = '<select id="' . $id . '" name="' . $esc($name) . '">';
+        foreach ($options as $value => $label) {
+            $value = (string) $value;
+            $html .= '<option value="' . $esc($value) . '"' . ($current === $value ? ' selected' : '') . '>'
+                . $esc($label) . '</option>';
+        }
+
+        return $html . '</select>';
+    }
+
+    /** @return array<string, string> */
+    private static function range(int $min, int $max): array
+    {
+        $options = [];
+        for ($n = $min; $n <= $max; $n++) {
+            $options[(string) $n] = (string) $n;
+        }
+
+        return $options;
+    }
+}

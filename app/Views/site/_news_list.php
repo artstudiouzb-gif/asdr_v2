@@ -64,22 +64,33 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
     <?php endif; ?>
 
     <div class="newslist-grid">
-        <?php foreach ($grid as $item): ?>
-            <?php $c = News::getCoverImage($item); ?>
-            <a class="relnews-card" href="<?= htmlspecialchars(Locale::url('news/' . $item['slug']), ENT_QUOTES) ?>">
+        <?php foreach (array_values($grid) as $index => $item): ?>
+            <?php
+            $c = News::getCoverImage($item);
+            // Ритм ленты: каждая пятая карточка широкая — с анонсом и фотографией
+            // сбоку. Двенадцать одинаковых карточек подряд читаются как таблица.
+            $wide = \App\Core\NewsFeedRhythm::isWide($index);
+            $excerpt = $wide ? trim((string) ($item['excerpt'] ?? '')) : '';
+            ?>
+            <a class="relnews-card<?= $wide ? ' relnews-card--wide' : '' ?>" href="<?= htmlspecialchars(Locale::url('news/' . $item['slug']), ENT_QUOTES) ?>">
                 <span class="news-cover">
                     <?php if ($c !== null): ?>
-                        <?= \App\Core\Media::picture($c, (string) $item['title'], null, null, 'relnews-card__img', true, '(max-width: 700px) 100vw, 25vw', false, 'relnews-card__media') ?>
+                        <?= \App\Core\Media::picture($c, (string) $item['title'], null, null, 'relnews-card__img', true, $wide ? '(max-width: 560px) 100vw, 40vw' : '(max-width: 700px) 100vw, 25vw', false, 'relnews-card__media') ?>
                     <?php else: ?>
                         <span class="relnews-card__media relnews-card__media--empty" aria-hidden="true"></span>
                     <?php endif; ?>
                     <?= \App\Core\NewsBadge::renderOverlay($item['badge'] ?? '', $item['badge_color'] ?? null) ?>
                 </span>
-                <span class="news-meta">
-                    <?php if (!empty($item['published_at'])): ?><time class="relnews-card__date"><?= htmlspecialchars($fmt((string) $item['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
-                    <?php if ($categoryOf($item) !== ''): ?><span class="news-category"><?= htmlspecialchars($categoryOf($item), ENT_QUOTES) ?></span><?php endif; ?>
+                <span class="relnews-card__body">
+                    <span class="news-meta">
+                        <?php if (!empty($item['published_at'])): ?><time class="relnews-card__date"><?= htmlspecialchars($fmt((string) $item['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                        <?php if ($categoryOf($item) !== ''): ?><span class="news-category"><?= htmlspecialchars($categoryOf($item), ENT_QUOTES) ?></span><?php endif; ?>
+                    </span>
+                    <h3 class="relnews-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
+                    <?php if ($excerpt !== ''): ?>
+                        <span class="relnews-card__excerpt"><?= htmlspecialchars($excerpt, ENT_QUOTES) ?></span>
+                    <?php endif; ?>
                 </span>
-                <h3 class="relnews-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
             </a>
         <?php endforeach; ?>
     </div>

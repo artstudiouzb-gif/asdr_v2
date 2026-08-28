@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 
 use App\Core\Auth;
 use App\Core\BlockData\AdvantagesBlockNormalizer;
+use App\Core\BlockData\BlockFieldSchema;
 use App\Core\BlockData\BlockPresentationNormalizer;
 use App\Core\BlockData\ContactCardsBlockNormalizer;
 use App\Core\BlockData\CountersBlockNormalizer;
@@ -519,14 +520,15 @@ final class BlockController
                     'layout' => $layout,
                 ];
             case 'columns':
-                $cols = (int) ($_POST['columns'] ?? 2);
-                if ($cols < 2 || $cols > 4) {
-                    $cols = 2;
-                }
-                $gap = in_array($_POST['gap'] ?? 'medium', ['small', 'medium', 'large'], true)
-                    ? (string) $_POST['gap'] : 'medium';
-                $ratio = \App\Core\ColumnRatio::normalize((string) ($_POST['ratio'] ?? ''), $cols);
-                return ['columns' => $cols, 'gap' => $gap, 'ratio' => $ratio];
+                $columnsData = BlockFieldSchema::normalize('columns', $_POST, $locale);
+                // Ширина колонок идёт мимо схемы: список допустимых пропорций
+                // свой у каждого числа колонок, то есть значение зависит от
+                // соседнего поля.
+                $columnsData['ratio'] = \App\Core\ColumnRatio::normalize(
+                    (string) ($_POST['ratio'] ?? ''),
+                    (int) $columnsData['columns']
+                );
+                return $columnsData;
             case 'tabs':
                 // Содержимое вкладок — вложенные блоки, здесь только подписи.
                 $tabItems = [];
@@ -538,28 +540,16 @@ final class BlockController
                     if ($tabTitle === '') {
                         continue;
                     }
-                    $tabItems[] = ['title' => $tabTitle, 'icon' => \App\Core\Icon::cleanName($item['icon'] ?? '')];
+                    $tabItems[] = [
+                        'title' => $tabTitle,
+                        'icon' => \App\Core\Icon::cleanName($item['icon'] ?? ''),
+                        'text' => \App\Core\BlockData\BlockDataInput::plain($item, 'text', $locale),
+                    ];
                 }
-                return [
-                    'variant' => \App\Core\BlockData\BlockDataInput::enum(
-                        $_POST,
-                        'variant',
-                        ['segmented', 'underline', 'vertical'],
-                        'segmented'
-                    ),
-                    'align' => \App\Core\BlockData\BlockDataInput::enum(
-                        $_POST,
-                        'align',
-                        ['left', 'center', 'stretch'],
-                        'left'
-                    ),
-                    'title' => \App\Core\BlockData\BlockDataInput::plain($_POST, 'title_field', $locale),
-                    'description' => TextProcessor::process(
-                        \App\Core\HtmlSanitizer::sanitizeText((string) ($_POST['description'] ?? '')),
-                        $locale,
-                    ),
-                    'items' => array_slice($tabItems, 0, 10),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('tabs', $_POST, $locale),
+                    ['items' => array_slice($tabItems, 0, 10)]
+                );
             case 'testimonials':
                 return TestimonialsBlockNormalizer::normalize($_POST, $locale);
             case 'counters':
@@ -614,17 +604,10 @@ final class BlockController
                         'url' => $url,
                     ];
                 }
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => $this->safeUrlField('all_url'),
-                    'columns' => \App\Core\BlockData\BlockDataInput::int($_POST, 'columns', 3, 8, 6),
-                    'logo_size' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'logo_size', ['small', 'medium', 'large'], 'medium'),
-                    'grayscale' => !empty($_POST['grayscale']),
-                    'autoplay' => \App\Core\BlockData\BlockDataInput::int($_POST, 'autoplay', 0, 30, 0),
-                    'items' => $items,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('partners', $_POST, $locale),
+                    ['items' => $items]
+                );
             case 'subscribe':
                 return SubscribeBlockNormalizer::normalize($_POST, $locale);
             case 'faq':

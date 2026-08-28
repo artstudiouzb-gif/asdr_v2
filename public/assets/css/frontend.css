@@ -185,6 +185,44 @@ summary:focus-visible {
 .widget-contacts__social { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .widget-social-link { font-size: var(--step--3); text-decoration: none; color: var(--color-accent, #e63946); font-weight: 600; }
 .widget-empty { color: var(--text-muted); font-size: var(--step--2); }
+
+/* --- Виджет «Меню раздела» ---
+   Текущая страница отмечена и цветом, и жирностью, и полосой слева: одного
+   цвета мало — в чёрно-белом режиме отличия не осталось бы. */
+.widget-secmenu__parent {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--gov-title, var(--ink));
+    font-size: var(--step-0);
+    font-weight: 700;
+    text-decoration: none;
+}
+.widget-secmenu__list { list-style: none; margin: 0; padding: 0; }
+.widget-secmenu__list li + li { margin-top: 2px; }
+.widget-secmenu__link {
+    display: block;
+    padding: 9px 12px;
+    border-left: 2px solid var(--gov-border, var(--line));
+    color: var(--text-muted);
+    font-size: var(--step--1);
+    line-height: 1.4;
+    text-decoration: none;
+    transition: color .2s ease, border-color .2s ease, background-color .2s ease;
+}
+.widget-secmenu__link:hover,
+.widget-secmenu__parent:hover { color: var(--gov-teal-text, var(--color-accent)); }
+.widget-secmenu__link.is-active,
+.widget-secmenu__parent.is-active {
+    color: var(--gov-title, var(--ink));
+    font-weight: 700;
+}
+.widget-secmenu__link.is-active {
+    border-left-color: var(--color-accent, var(--gov-teal));
+    background: color-mix(in srgb, var(--color-accent, #e63946) 8%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+    .widget-secmenu__link { transition: none; }
+}
 .site-header__logo {
     display: inline-flex;
     align-items: center;
@@ -698,9 +736,24 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .cms-columns--gap-small { gap: 12px; }
 .cms-columns--gap-medium { gap: 28px; }
 .cms-columns--gap-large { gap: 48px; }
+/* Выравнивание содержимого по высоте. Умолчание — растяжение (колонки одной
+   высоты), поэтому у него класса нет: он и есть поведение сетки. */
+.cms-columns--valign-top { align-items: start; }
+.cms-columns--valign-center { align-items: center; }
+.cms-columns--valign-bottom { align-items: end; }
 /* Вложенные блоки не добавляют собственный вертикальный «воздух». */
 .cms-columns__col > .cms-block { padding-top: 0; padding-bottom: 0; }
 @media (max-width: 720px) { .cms-columns--2, .cms-columns--3, .cms-columns--4 { grid-template-columns: 1fr; } }
+/* Обратный порядок на телефоне: пара «фото слева, текст справа» на узком
+   экране обязана начинаться с текста. Меняется только показ — порядок чтения
+   с клавиатуры и диктором остаётся авторским, поэтому приём годится для
+   содержимого, а не для последовательности действий. */
+@media (max-width: 720px) {
+    .cms-columns--mobile-reverse .cms-columns__col:nth-child(1) { order: 4; }
+    .cms-columns--mobile-reverse .cms-columns__col:nth-child(2) { order: 3; }
+    .cms-columns--mobile-reverse .cms-columns__col:nth-child(3) { order: 2; }
+    .cms-columns--mobile-reverse .cms-columns__col:nth-child(4) { order: 1; }
+}
 
 /* Новые блоки (группа 4): отзывы, счётчики, команда, проекты */
 .block-testimonials__title, .block-counters__title, .block-team__title, .block-projects__title {
@@ -1109,6 +1162,31 @@ h1, h2 { letter-spacing: -.015em; }
 }
 @media (max-width: 900px) {
     .block-partners__grid { grid-template-columns: repeat(auto-fit, minmax(140px, 200px)); }
+}
+/* --- Вариант «бегущая строка» ---
+   Набор логотипов выведен дважды, дорожка едет ровно на половину своей ширины
+   — в этот момент копия оказывается там, где был оригинал, и шва не видно.
+   Половина считается точно только с отступом после последнего логотипа: без
+   него в шве не хватало бы одного промежутка. Ширина промежутка та же, что у
+   ряда: лента и сетка не должны выглядеть по-разному свёрстанными. */
+.block-partners__marquee { overflow-x: auto; scrollbar-width: none; }
+.block-partners__marquee::-webkit-scrollbar { display: none; }
+.block-partners__marquee-track {
+    display: flex;
+    align-items: center;
+    gap: var(--card-gap, 24px);
+    padding-inline-end: var(--card-gap, 24px);
+    width: max-content;
+    animation: block-partners-marquee var(--partners-marquee-time, 40s) linear infinite;
+}
+/* Под курсором и при фокусе внутри лента стоит: иначе логотип не поймать
+   мышью, а с клавиатуры не прочитать название. */
+.block-partners__marquee:hover .block-partners__marquee-track,
+.block-partners__marquee:focus-within .block-partners__marquee-track { animation-play-state: paused; }
+.block-partners--marquee .block-partners__item { flex: none; width: 200px; justify-content: center; }
+@keyframes block-partners-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
 }
 .block-testimonials > .section-head,
 .block-partners > .section-head { margin-bottom: 28px; }

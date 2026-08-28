@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Core\BlockData\BlockFieldSchema;
+
 /**
  * Единый реестр типов блоков.
  *
@@ -13,8 +15,18 @@ namespace App\Core;
  */
 final class BlockTypeRegistry
 {
-    /** @var array<string, array<string, mixed>> */
-    public const DEFAULTS = [
+    /**
+     * Умолчания типов, у которых поля описаны по-старому — списком здесь,
+     * полем в `block_form.php` и веткой в `BlockController::collectData()`.
+     *
+     * Пустой массив означает, что тип переехал на схему полей
+     * (`App\Core\BlockData\BlockFieldSchema`) и умолчания берутся оттуда;
+     * ключ остаётся, чтобы не менялся порядок типов в редакторе. Полный
+     * список даёт `defaults()`, обращаться нужно к нему.
+     *
+     * @var array<string, array<string, mixed>>
+     */
+    public const BASE_DEFAULTS = [
         'text' => [
             'variant' => 'default',
             'title' => '',
@@ -36,17 +48,17 @@ final class BlockTypeRegistry
         'advantages' => ['variant' => 'grid', 'title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 0, 'items' => []],
         'slider' => ['title' => '', 'autoplay' => 0, 'ratio' => '16-9', 'slides' => []],
         'form' => ['form_id' => null],
-        'columns' => ['columns' => 2, 'gap' => 'medium', 'ratio' => ''],
+        'columns' => [], // схема: BlockFieldSchema
         // Вкладки — такой же контейнер, как columns: содержимое вкладки это
         // вложенные блоки любого типа (column_index = номер вкладки), а сам
         // блок хранит только подписи вкладок и оформление.
-        'tabs' => ['variant' => 'segmented', 'title' => '', 'description' => '', 'align' => 'left', 'items' => []],
+        'tabs' => [], // схема: BlockFieldSchema
         'testimonials' => ['variant' => 'carousel', 'title' => '', 'description' => '', 'columns' => 3, 'autoplay' => 0, 'items' => []],
         'counters' => ['title' => '', 'card_bg' => '', 'text_color' => '', 'icon_size' => 28, 'icon_bg' => 'on', 'icon_position' => 'left', 'text_align' => 'left', 'variant' => 'row', 'value_size' => 'normal', 'items' => []],
         'team_list' => ['title' => '', 'limit' => 0, 'department' => '', 'group_by_department' => false],
         'projects_list' => ['variant' => 'grid', 'title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 3, 'limit' => 3, 'autoplay' => 0],
         'news_latest' => ['title' => 'Последние новости', 'all_text' => 'Все новости', 'all_url' => '', 'limit' => 3, 'category' => 0],
-        'partners' => ['title' => 'Партнёры', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 6, 'logo_size' => 'medium', 'grayscale' => true, 'autoplay' => 0, 'items' => []],
+        'partners' => [], // схема: BlockFieldSchema
         'subscribe' => ['variant' => 'band', 'title' => 'Подписка на новости', 'text' => 'Получайте дайджест новостей на почту раз в неделю.', 'image' => '', 'placeholder' => '', 'note' => '', 'button_text' => 'Подписаться'],
         'faq' => ['title' => '', 'search_enabled' => true, 'single_open' => false, 'items' => []],
         'contact_cards' => ['variant' => 'cards', 'title' => '', 'line_icons' => true, 'icon_size' => 22, 'icon_bg' => 'on', 'items' => []],
@@ -132,21 +144,44 @@ final class BlockTypeRegistry
         'icon_text' => 'Иконка и текст (контакты, телефоны)',
     ];
 
+    /** @var array<string, array<string, mixed>>|null */
+    private static ?array $defaults = null;
+
+    /**
+     * Умолчания всех типов: у переехавших на схему — из неё, у остальных — из
+     * BASE_DEFAULTS. Порядок типов сохраняется, он же порядок в редакторе.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function defaults(): array
+    {
+        if (self::$defaults !== null) {
+            return self::$defaults;
+        }
+
+        $all = [];
+        foreach (self::BASE_DEFAULTS as $type => $fields) {
+            $all[$type] = BlockFieldSchema::has($type) ? BlockFieldSchema::defaults($type) : $fields;
+        }
+
+        return self::$defaults = $all;
+    }
+
     /** @return list<string> */
     public static function types(): array
     {
-        return array_keys(self::DEFAULTS);
+        return array_keys(self::BASE_DEFAULTS);
     }
 
     public static function has(string $type): bool
     {
-        return array_key_exists($type, self::DEFAULTS);
+        return array_key_exists($type, self::BASE_DEFAULTS);
     }
 
     /** @return array<string, mixed> */
     public static function defaultsFor(string $type): array
     {
-        return self::DEFAULTS[$type] ?? [];
+        return self::defaults()[$type] ?? [];
     }
 
     /** @return array<string, string> */

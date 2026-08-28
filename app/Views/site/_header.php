@@ -111,22 +111,9 @@ $renderMenuIcon = static function (mixed $iconName): string {
 $currentReqUri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $currentReqPath = rtrim($currentReqUri, '/') ?: '/';
 
-$isNavUrlActive = static function (string $targetUrl) use ($currentReqPath): bool {
-    $targetPath = parse_url($targetUrl, PHP_URL_PATH) ?: '/';
-    $targetPath = rtrim($targetPath, '/') ?: '/';
-
-    if ($currentReqPath === $targetPath) {
-        return true;
-    }
-
-    if ($targetPath !== '/' && !in_array($targetPath, ['/ru', '/uz', '/en', '/kk', '/tr', '/de'], true)) {
-        if (str_starts_with($currentReqPath, $targetPath . '/')) {
-            return true;
-        }
-    }
-
-    return false;
-};
+// Правило подсветки одно на шапку и на боковое меню раздела: разъехавшись,
+// они показывали бы разные «текущие» пункты на одной странице.
+$isNavUrlActive = static fn (string $targetUrl): bool => \App\Core\SectionMenu::isUrlActive($targetUrl, $currentReqPath);
 
 $menuHtml = '';
 $et = static fn (string $text): string => htmlspecialchars(t($text), ENT_QUOTES);

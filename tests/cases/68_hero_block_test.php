@@ -182,10 +182,10 @@ test('Hero: форма и сохранение содержат два явны�
     assert_contains("'overlay_mode' => \$overlayMode", $normalizer);
     assert_contains("'overlay_direction' => \$overlayDirection", $normalizer);
 
-    assert_same(false, BlockRenderer::DEFAULTS['hero']['overlay_enabled']);
-    assert_same(35, BlockRenderer::DEFAULTS['hero']['overlay_opacity']);
-    assert_same('gradient', BlockRenderer::DEFAULTS['hero']['overlay_mode']);
-    assert_same('auto', BlockRenderer::DEFAULTS['hero']['overlay_direction']);
+    assert_same(false, BlockRenderer::defaults()['hero']['overlay_enabled']);
+    assert_same(35, BlockRenderer::defaults()['hero']['overlay_opacity']);
+    assert_same('gradient', BlockRenderer::defaults()['hero']['overlay_mode']);
+    assert_same('auto', BlockRenderer::defaults()['hero']['overlay_direction']);
 });
 
 test('Hero: мобильное фото сохраняет исходную непрозрачность', function () {

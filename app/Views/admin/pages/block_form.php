@@ -31,7 +31,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <input type="text" id="title" name="title" value="<?= htmlspecialchars($block['title'] ?? '', ENT_QUOTES) ?>">
         </div>
 
-        <?php if (in_array($type, ['text', 'cta', 'advantages', 'slider', 'testimonials', 'counters', 'team_list', 'projects_list', 'news_latest', 'partners', 'faq', 'subscribe', 'contact_cards', 'hero', 'cards_grid', 'media_gallery', 'news_feature', 'person_cards', 'timeline', 'stages', 'text_image', 'docs_list', 'map_point', 'org_structure', 'icon_text', 'tabs'], true)): ?>
+        <?php if (in_array($type, ['text', 'cta', 'advantages', 'slider', 'testimonials', 'counters', 'team_list', 'projects_list', 'news_latest', 'faq', 'subscribe', 'contact_cards', 'hero', 'cards_grid', 'media_gallery', 'news_feature', 'person_cards', 'timeline', 'stages', 'text_image', 'docs_list', 'map_point', 'org_structure', 'icon_text'], true)): ?>
             <div class="form-field">
                 <label for="title_field"><?= in_array($type, ['advantages', 'timeline', 'stages'], true) ? 'Заголовок раздела' : 'Заголовок, показываемый на сайте' ?></label>
                 <input type="text" id="title_field" name="title_field" value="<?= htmlspecialchars($data['title'] ?? '', ENT_QUOTES) ?>">
@@ -325,14 +325,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'columns'): ?>
-            <div class="form-field">
-                <label for="columns">Количество колонок</label>
-                <select id="columns" name="columns">
-                    <?php foreach ([2, 3, 4] as $n): ?>
-                        <option value="<?= $n ?>" <?= (int) ($data['columns'] ?? 2) === $n ? 'selected' : '' ?>><?= $n ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('columns', $data) ?>
             <div class="form-field">
                 <?php $colRatio = (string) ($data['ratio'] ?? ''); ?>
                 <label for="ratio">Ширина колонок</label>
@@ -348,50 +341,17 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </select>
                 <span class="form-hint">Доли ширины: «2 : 1» — первая колонка вдвое шире второй. Число долей должно совпадать с числом колонок, иначе колонки останутся равными. На телефоне колонки в любом случае идут одна под другой.</span>
             </div>
-            <div class="form-field">
-                <label for="gap">Промежуток между колонками</label>
-                <select id="gap" name="gap">
-                    <?php foreach (['small' => 'Малый', 'medium' => 'Средний', 'large' => 'Большой'] as $gv => $gl): ?>
-                        <option value="<?= $gv ?>" <?= (string) ($data['gap'] ?? 'medium') === $gv ? 'selected' : '' ?>><?= $gl ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="form-hint">Наполнение колонок настраивается на странице: кнопка «+ блок» в каждой колонке.</span>
-            </div>
         <?php endif; ?>
 
         <?php if ($type === 'tabs'): ?>
-            <?php $tabsVariant = (string) ($data['variant'] ?? 'segmented'); ?>
-            <div class="form-field">
-                <label for="tabs_variant">Вариант отображения</label>
-                <select id="tabs_variant" name="variant">
-                    <?php foreach ([
-                        'segmented' => 'Переключатель — вкладки в общей дорожке',
-                        'underline' => 'Подчёркивание — активная вкладка с чертой',
-                        'vertical' => 'Список слева, содержимое справа',
-                    ] as $tv => $tl): ?>
-                        <option value="<?= $tv ?>" <?= $tabsVariant === $tv ? 'selected' : '' ?>><?= $tl ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="form-hint">На телефоне вертикальный вариант тоже показывает вкладки сверху — сбоку для них нет места.</span>
-            </div>
-            <div class="form-field">
-                <label for="tabs_align">Положение полосы вкладок</label>
-                <select id="tabs_align" name="align">
-                    <?php foreach (['left' => 'Слева', 'center' => 'По центру', 'stretch' => 'На всю ширину'] as $av => $al): ?>
-                        <option value="<?= $av ?>" <?= (string) ($data['align'] ?? 'left') === $av ? 'selected' : '' ?>><?= $al ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="form-field">
-                <label for="tabs_description">Описание раздела</label>
-                <textarea id="tabs_description" name="description" rows="3" data-wysiwyg><?= htmlspecialchars($data['description'] ?? '', ENT_QUOTES) ?></textarea>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('tabs', $data) ?>
             <div>
                 <label>Вкладки</label>
                 <div data-repeater="items">
                     <?php foreach (($data['items'] ?? []) as $i => $item): ?>
                         <div class="repeater-row">
                             <div class="form-field"><label>Название вкладки</label><input type="text" name="items[<?= $i ?>][title]" value="<?= htmlspecialchars($item['title'] ?? '', ENT_QUOTES) ?>"></div>
+                            <div class="form-field"><label>Пояснение под названием (необязательно)</label><input type="text" name="items[<?= $i ?>][text]" value="<?= htmlspecialchars($item['text'] ?? '', ENT_QUOTES) ?>"><span class="form-hint">Одна строка: чему посвящена вкладка. Показывается над её содержимым.</span></div>
                             <?= \App\Core\AdminUi::iconField("items[{$i}][icon]", $item['icon'] ?? '', ['label' => 'Иконка (необязательно)']) ?>
                             <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить вкладку</button>
                         </div>
@@ -399,6 +359,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </div>
                 <template data-repeater-template="items">
                     <div class="form-field"><label>Название вкладки</label><input type="text" name="items[__INDEX__][title]"></div>
+                    <div class="form-field"><label>Пояснение под названием (необязательно)</label><input type="text" name="items[__INDEX__][text]"></div>
                     <?= \App\Core\AdminUi::iconField('items[__INDEX__][icon]', '', ['label' => 'Иконка (необязательно)']) ?>
                     <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить вкладку</button>
                 </template>
@@ -662,38 +623,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'partners'): ?>
-            <div class="form-field">
-                <label for="p_description">Описание раздела</label>
-                <textarea id="p_description" name="description" rows="2"><?= htmlspecialchars($data['description'] ?? '', ENT_QUOTES) ?></textarea>
-            </div>
-            <div class="form-field"><label for="all_text">Ссылка «Все …» — текст</label><input type="text" id="all_text" name="all_text" value="<?= htmlspecialchars($data['all_text'] ?? '', ENT_QUOTES) ?>" placeholder="Все партнёры"></div>
-            <div class="form-field"><label for="all_url">Ссылка «Все …» — URL</label><input type="text" id="all_url" name="all_url" value="<?= htmlspecialchars($data['all_url'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field">
-                <label for="p_columns">Логотипов в ряду</label>
-                <select id="p_columns" name="columns">
-                    <?php foreach ([3, 4, 5, 6, 7, 8] as $n): ?>
-                        <option value="<?= $n ?>" <?= (int) ($data['columns'] ?? 6) === $n ? 'selected' : '' ?>><?= $n ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="form-hint">Если логотипов больше, ряд превращается в прокручиваемую полосу. На узких экранах число подбирается автоматически.</span>
-            </div>
-            <div class="form-field">
-                <label for="p_logo_size">Высота логотипа</label>
-                <select id="p_logo_size" name="logo_size">
-                    <?php foreach (['small' => 'Мелкие', 'medium' => 'Средние', 'large' => 'Крупные'] as $value => $label): ?>
-                        <option value="<?= $value ?>" <?= ($data['logo_size'] ?? 'medium') === $value ? 'selected' : '' ?>><?= $label ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="form-hint">Общая высота выравнивает ряд: логотипы у партнёров разных пропорций.</span>
-            </div>
-            <div class="form-field form-field--checkbox">
-                <input type="checkbox" id="p_grayscale" name="grayscale" value="1" <?= (!array_key_exists('grayscale', $data) || !empty($data['grayscale'])) ? 'checked' : '' ?>>
-                <label for="p_grayscale">Обесцвечивать логотипы, возвращать цвет при наведении</label>
-            </div>
-            <div class="form-field">
-                <label for="p_autoplay">Автопрокрутка, секунд (0 — выключена)</label>
-                <input type="number" id="p_autoplay" name="autoplay" min="0" max="30" value="<?= (int) ($data['autoplay'] ?? 0) ?>">
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('partners', $data) ?>
             <div>
                 <label>Логотипы партнёров</label>
                 <div data-repeater="items">
