@@ -18,6 +18,20 @@
     "padding": "5px 11px",
     "borderRadius": "3px"
   },
+  ".admin-welcome": {
+    "backgroundColor": "rgb(255, 255, 255)",
+    "borderColor": "rgb(220, 220, 222) rgb(220, 220, 222) rgb(220, 220, 222) rgb(37, 99, 235)",
+    "padding": "22px 26px"
+  },
+  ".admin-welcome h2": {
+    "color": "rgb(29, 35, 39)",
+    "fontSize": "16.5px",
+    "fontWeight": "700"
+  },
+  ".admin-welcome p": {
+    "color": "rgb(100, 105, 112)",
+    "fontSize": "14px"
+  },
   ".form-card": {
     "backgroundColor": "rgb(255, 255, 255)",
     "borderColor": "rgb(220, 220, 222)",
@@ -27,14 +41,19 @@
   },
   ".stat-card": {
     "backgroundColor": "rgb(255, 255, 255)",
-    "borderColor": "rgb(226, 232, 240)",
+    "borderColor": "rgb(220, 220, 222)",
     "borderRadius": "3px",
     "padding": "18px 20px"
   },
   ".stat-card__value": {
-    "color": "rgb(15, 23, 42)",
+    "color": "rgb(29, 35, 39)",
     "fontSize": "26px",
     "fontWeight": "800"
+  },
+  ".stat-card__label": {
+    "color": "rgb(100, 105, 112)",
+    "fontSize": "13px",
+    "fontWeight": "600"
   },
   ".btn": {
     "backgroundColor": "rgb(37, 99, 235)",
