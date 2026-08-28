@@ -95,5 +95,43 @@ foreach ($rows as [$title, $slug, $status, $publishedAt]) {
     ]);
 }
 
+// Два файла в медиатеке: без них и страница медиабиблиотеки, и сетка в окне
+// выбора показывают пустое состояние — карточку файла нечем снимать, а она
+// как раз общая для обоих мест.
+$uploadsDir = (string) Config::get('paths.public_uploads', '');
+$media = [
+    ['visual-regression-photo.jpg', 'visual-regression-photo.jpg', 'image/jpeg'],
+    ['постановление-2026.pdf', 'visual-regression-doc.pdf', 'application/pdf'],
+];
+foreach ($media as [$original, $stored, $mime]) {
+    $path = $uploadsDir . '/' . $stored;
+    if (!is_file($path)) {
+        if (str_starts_with($mime, 'image/') && function_exists('imagejpeg')) {
+            $image = imagecreatetruecolor(480, 300);
+            for ($y = 0; $y < 300; $y++) {
+                $shade = (int) (30 + ($y / 300) * 120);
+                imageline($image, 0, $y, 480, $y, imagecolorallocate($image, $shade, $shade + 20, $shade + 45));
+            }
+            imagejpeg($image, $path, 82);
+            unset($image);
+        } else {
+            file_put_contents($path, "%PDF-1.4\n% фикстура визуальных тестов\n");
+        }
+        @chmod($path, 0644);
+    }
+
+    $exists = $pdo->prepare('SELECT id FROM files WHERE stored_name = ?');
+    $exists->execute([$stored]);
+    if ((int) ($exists->fetchColumn() ?: 0) !== 0) {
+        continue;
+    }
+
+    $pdo->prepare(
+        "INSERT INTO files (original_name, stored_name, mime_type, size, access_type, created_at)
+         VALUES (?, ?, ?, ?, 'public', ?)"
+    )->execute([$original, $stored, $mime, (int) (@filesize($path) ?: 1024), '2026-01-10 12:00:00']);
+}
+
 echo 'Фикстура админки готова: пользователь ' . VISUAL_ADMIN_USERNAME
-    . ', новостей: ' . count($rows) . PHP_EOL;
+    . ', новостей: ' . count($rows)
+    . ', файлов: ' . count($media) . PHP_EOL;

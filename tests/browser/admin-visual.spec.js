@@ -134,6 +134,69 @@ const SCREENS = [
         ],
     },
     {
+        // Страница медиабиблиотеки: карточка файла здесь и в окне выбора —
+        // один компонент, и снимать надо оба конца этого контракта.
+        name: 'media-library',
+        url: '/admin/files',
+        probes: [
+            ['.media-grid', ['gridTemplateColumns', 'gap']],
+            ['.media-card', ['backgroundColor', 'borderColor', 'borderRadius', 'aspectRatio']],
+            ['.media-card__thumb', ['objectFit', 'width', 'height']],
+            ['.media-card__caption', ['backgroundColor', 'color', 'fontSize', 'padding']],
+            ['.media-card__ext', ['color', 'fontSize', 'fontWeight']],
+            ['.media-card__icon-wrap', ['backgroundColor', 'color']],
+            ['.media-toolbar', ['backgroundColor', 'borderColor', 'padding']],
+        ],
+    },
+    {
+        // Конструктор шапки: зоны, перетаскиваемые элементы и вкладки макетов —
+        // своё семейство правил, которого не касается ни один другой экран.
+        name: 'header-builder',
+        url: '/admin/header',
+        probes: [
+            ['.hdr-tab-btn', ['backgroundColor', 'color', 'borderColor', 'padding']],
+            ['.hb-zone', ['backgroundColor', 'borderColor', 'borderRadius', 'padding']],
+            ['.hb-zone__label', ['color', 'fontSize', 'fontWeight']],
+            ['.hb-el', ['backgroundColor', 'borderColor', 'borderRadius', 'color']],
+            ['.hb-el__label', ['color', 'fontSize']],
+            ['.hdr-chip', ['backgroundColor', 'color', 'borderRadius', 'fontSize']],
+        ],
+    },
+    {
+        name: 'footer-builder',
+        url: '/admin/footer',
+        probes: [
+            ['.header-builder__group', ['backgroundColor', 'borderColor', 'padding']],
+            ['.fb-card', ['backgroundColor', 'borderColor', 'borderRadius']],
+            ['.fb-card__head', ['backgroundColor', 'color', 'padding']],
+            ['.fb-card__badge', ['backgroundColor', 'color', 'fontSize']],
+            ['.repeater-row', ['backgroundColor', 'borderColor', 'padding']],
+        ],
+    },
+    {
+        // Конструктор блоков — самое большое семейство правил панели.
+        // Адрес зависит от id страницы, поэтому доходим до него так же, как
+        // редактор: из списка страниц по названию витрины.
+        name: 'block-editor',
+        navigate: async (page, expectVisible) => {
+            await page.goto('/admin/pages', { waitUntil: 'networkidle' });
+            const link = page.getByRole('link', { name: /Витрина компонентов/ }).first();
+            await expectVisible(link);
+            await link.click();
+            await page.waitForURL(/\/admin\/pages\/\d+\/edit$/, { timeout: 15000 });
+            await page.waitForLoadState('networkidle');
+        },
+        probes: [
+            ['.block-list-item', ['backgroundColor', 'borderColor', 'borderRadius', 'padding']],
+            ['.block-list-item__type', ['color', 'fontSize', 'fontWeight']],
+            ['.block-list-item__num', ['backgroundColor', 'color', 'fontSize']],
+            ['.block-list-item__sub', ['color', 'fontSize']],
+            ['.preset-card', ['backgroundColor', 'borderColor', 'borderRadius']],
+            ['.preset-card__title', ['color', 'fontSize', 'fontWeight']],
+            ['.btn--danger', ['backgroundColor', 'color', 'borderColor']],
+        ],
+    },
+    {
         name: 'design',
         url: '/admin/design',
         probes: [
@@ -159,6 +222,10 @@ const MEDIA_MODAL = {
         ['.media-modal__search', ['backgroundColor', 'color', 'borderColor', 'borderRadius', 'height']],
         ['.media-modal__grid', ['backgroundColor', 'gridTemplateColumns', 'gap', 'padding']],
         ['.media-modal__dropcard', ['backgroundColor', 'borderColor', 'borderRadius']],
+        ['.media-modal__item', ['display', 'gap']],
+        ['.media-modal__thumb', ['backgroundColor', 'borderColor', 'borderRadius', 'aspectRatio']],
+        ['.media-modal__caption-name', ['color', 'fontSize', 'fontWeight']],
+        ['.media-modal__caption-meta', ['color', 'fontSize']],
         ['.media-modal__footer', ['backgroundColor', 'borderTopColor', 'padding']],
     ],
 };
@@ -334,7 +401,11 @@ test.describe('@visual админка', () => {
 
     for (const screen of SCREENS) {
         test(screen.name, async ({}, testInfo) => {
-            await page.goto(screen.url, { waitUntil: 'networkidle' });
+            if (screen.navigate) {
+                await screen.navigate(page, (locator) => expect(locator).toBeVisible());
+            } else {
+                await page.goto(screen.url, { waitUntil: 'networkidle' });
+            }
             await freezeTransitions(page);
             if (screen.prepare) { await screen.prepare(page); }
 
