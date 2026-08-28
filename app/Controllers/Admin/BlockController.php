@@ -549,12 +549,11 @@ final class BlockController
             case 'counters':
                 return CountersBlockNormalizer::normalize($_POST, $locale);
             case 'team_list':
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'limit' => max(0, (int) ($_POST['limit'] ?? 0)),
-                    'department' => trim((string) ($_POST['department'] ?? '')),
-                    'group_by_department' => !empty($_POST['group_by_department']),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('team_list', $_POST, $locale),
+                    // Сектор — ссылка на запись в БД, поэтому мимо схемы.
+                    ['department' => trim((string) ($_POST['department'] ?? ''))]
+                );
             case 'projects_list':
                 return BlockFieldSchema::normalize('projects_list', $_POST, $locale);
             case 'news_latest':
@@ -749,55 +748,12 @@ final class BlockController
                     ];
                 }
 
-                return [
-                    'photo' => trim((string) ($_POST['photo'] ?? '')),
-                    'name' => TextProcessor::typographPlain(trim((string) ($_POST['name'] ?? '')), $locale),
-                    // Уровень заголовка выбирает редактор: карточка стоит на
-                    // разных страницах, и что для одной h2, для другой h3.
-                    'name_tag' => in_array($_POST['name_tag'] ?? 'p', ['p', 'h2', 'h3'], true) ? (string) $_POST['name_tag'] : 'p',
-                    'position' => TextProcessor::typographPlain(trim((string) ($_POST['position'] ?? '')), $locale),
-                    'phone' => trim((string) ($_POST['phone'] ?? '')),
-                    'email' => trim((string) ($_POST['email'] ?? '')),
-                    'hours' => TextProcessor::typographPlain(trim((string) ($_POST['hours'] ?? '')), $locale),
-                    // Соцсети — только безопасные ссылки: адрес приходит из формы
-                    // и попадает в href, javascript: там быть не должно.
-                    'facebook' => $this->safeUrlField('facebook'),
-                    'x' => $this->safeUrlField('x'),
-                    'linkedin' => $this->safeUrlField('linkedin'),
-                    'instagram' => $this->safeUrlField('instagram'),
-                    'telegram' => $this->safeUrlField('telegram'),
-                    'facts_title' => TextProcessor::typographPlain(trim((string) ($_POST['facts_title'] ?? '')), $locale),
-                    'facts_icon' => \App\Core\Icon::cleanName($_POST['facts_icon'] ?? ''),
-                    'items' => $facts,
-                    'bio_title' => TextProcessor::typographPlain(trim((string) ($_POST['bio_title'] ?? '')), $locale),
-                    'bio_icon' => \App\Core\Icon::cleanName($_POST['bio_icon'] ?? ''),
-                    'bio' => TextProcessor::process((string) ($_POST['bio'] ?? ''), $locale),
-                    'duties_title' => TextProcessor::typographPlain(trim((string) ($_POST['duties_title'] ?? '')), $locale),
-                    'duties_icon' => \App\Core\Icon::cleanName($_POST['duties_icon'] ?? ''),
-                    'duties' => TextProcessor::process((string) ($_POST['duties'] ?? ''), $locale),
-                    'mobile_icons_only' => !empty($_POST['mobile_icons_only']),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('leader_card', $_POST, $locale),
+                    ['items' => $facts]
+                );
             case 'person_profile':
-                return [
-                    'photo' => trim((string) ($_POST['photo'] ?? '')),
-                    'photo_side' => ($_POST['photo_side'] ?? 'left') === 'right' ? 'right' : 'left',
-                    'name' => TextProcessor::typographPlain(trim((string) ($_POST['name'] ?? '')), $locale),
-                    'position' => TextProcessor::typographPlain(trim((string) ($_POST['position'] ?? '')), $locale),
-                    'text' => TextProcessor::typographPlain(trim((string) ($_POST['text'] ?? '')), $locale),
-                    'phone' => trim((string) ($_POST['phone'] ?? '')),
-                    'phone_label' => trim((string) ($_POST['phone_label'] ?? 'Приёмная:')),
-                    'email' => trim((string) ($_POST['email'] ?? '')),
-                    'email_label' => trim((string) ($_POST['email_label'] ?? 'E-mail:')),
-                    'button_text' => trim((string) ($_POST['button_text'] ?? '')),
-                    'button_url' => $this->safeUrlField('button_url'),
-                    'button2_text' => trim((string) ($_POST['button2_text'] ?? '')),
-                    'button2_url' => $this->safeUrlField('button2_url'),
-                    'telegram' => $this->safeUrlField('telegram'),
-                    'facebook' => $this->safeUrlField('facebook'),
-                    'linkedin' => $this->safeUrlField('linkedin'),
-                    'x' => $this->safeUrlField('x'),
-                    'instagram' => $this->safeUrlField('instagram'),
-                ];
+                return BlockFieldSchema::normalize('person_profile', $_POST, $locale);
             case 'bio_education':
                 $collect = static function (string $key, array $fields) use ($locale): array {
                     $rows = [];
@@ -838,20 +794,15 @@ final class BlockController
                     $collectWidgetIds('widgets_after'),
                     $widgetsBefore
                 ));
-                return [
-                    'bio_title' => TextProcessor::typographPlain(trim((string) ($_POST['bio_title'] ?? 'Биография')), $locale),
-                    'bio_text' => TextProcessor::typographPlain(trim((string) ($_POST['bio_text'] ?? '')), $locale),
-                    'career_title' => TextProcessor::typographPlain(trim((string) ($_POST['career_title'] ?? '')), $locale),
-                    'career' => $collect('career', ['years', 'text']),
-                    'edu_title' => TextProcessor::typographPlain(trim((string) ($_POST['edu_title'] ?? 'Образование')), $locale),
-                    'edu_items' => $collect('edu_items', ['years', 'title', 'org']),
-                    'extra_title' => TextProcessor::typographPlain(trim((string) ($_POST['extra_title'] ?? '')), $locale),
-                    'extra_text' => TextProcessor::typographPlain(trim((string) ($_POST['extra_text'] ?? '')), $locale),
-                    'widgets_before' => $widgetsBefore,
-                    'widgets_after' => $widgetsAfter,
-                    'quote_text' => TextProcessor::typographPlain(trim((string) ($_POST['quote_text'] ?? '')), $locale),
-                    'quote_author' => TextProcessor::typographPlain(trim((string) ($_POST['quote_author'] ?? '')), $locale),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('bio_education', $_POST, $locale),
+                    [
+                        'career' => $collect('career', ['years', 'text']),
+                        'edu_items' => $collect('edu_items', ['years', 'title', 'org']),
+                        'widgets_before' => $widgetsBefore,
+                        'widgets_after' => $widgetsAfter,
+                    ]
+                );
             case 'anchor_nav':
                 $items = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -957,25 +908,12 @@ final class BlockController
                         'units' => $bUnits,
                     ];
                 }
-                $orgColumns = (int) ($_POST['columns'] ?? 4);
-
                 // Построчные поля сохраняются как есть: типографика съела бы
                 // служебные маркеры разметки («- группа», «* проектный офис»).
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'layout' => ($_POST['layout'] ?? 'tree') === 'spine' ? 'spine' : 'tree',
-                    'columns' => max(2, min(4, $orgColumns)),
-                    'council' => trim((string) ($_POST['council'] ?? '')),
-                    'head_title' => TextProcessor::typographPlain(trim((string) ($_POST['head_title'] ?? '')), $locale),
-                    'head_name' => trim((string) ($_POST['head_name'] ?? '')),
-                    'head_url' => $this->safeUrlField('head_url'),
-                    'side_items' => trim((string) ($_POST['side_items'] ?? '')),
-                    'branches' => $branches,
-                    'collapsible' => !empty($_POST['collapsible']),
-                    'search' => !empty($_POST['org_search']),
-                    'notes' => trim((string) ($_POST['notes'] ?? '')),
-                    'footnote' => TextProcessor::typographPlain(trim((string) ($_POST['footnote'] ?? '')), $locale),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('org_structure', $_POST, $locale),
+                    ['branches' => $branches]
+                );
             default:
                 return [];
         }

@@ -11,7 +11,8 @@
 `advantages`, `testimonials`, `projects_list`, `faq`, `stages`, `docs_list`,
 `subscribe`, `slider`, `person_cards`, `contact_cards`, `icon_text`, `cta`,
 `counters`, `cards_grid`, `media_gallery`, `news_latest`, `news_feature`,
-`news_docs`, `map_point`, `text_image`, `anchor_nav`, `timeline`),
+`news_docs`, `map_point`, `text_image`, `anchor_nav`, `timeline`, `team_list`,
+`person_profile`, `leader_card`, `org_structure`, `bio_education`),
 описание поля — тип значения, границы, умолчание, подпись, подсказка — лежит
 только в схеме. Из него получаются умолчания реестра, поле формы, нормализация
 присланного и проверка данных на выводе (`BlockFieldSchema::apply()`), поэтому

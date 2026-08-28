@@ -227,3 +227,40 @@ test('Репитеры блоков различают свои наборы с�
     assert_contains('items[__INDEX__][label]', $editor, '«Карточка руководителя»: подпись строки');
     assert_contains('items[__INDEX__][value]', $editor, '«Карточка руководителя»: значение строки');
 });
+
+test('Форма, разбитая на несколько вызовов схемы, не теряет полей', function () {
+    // У типов, где список строк стоит посреди настроек, форма зовёт схему
+    // несколько раз с перечислением ключей. Забытый в этих списках ключ —
+    // это поле, пропавшее из редактора: сохранение вернёт ему умолчание, а
+    // редактор даже не увидит, что настройка была.
+    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
+
+    $listed = [];
+    $whole = [];
+    preg_match_all(
+        "/BlockFieldSchema::formHtml\\('([a-z_]+)', \\\$data(?:, \\[([^\\]]*)\\])?\\)/",
+        $form,
+        $calls,
+        PREG_SET_ORDER
+    );
+    foreach ($calls as $call) {
+        $type = $call[1];
+        if (!isset($call[2]) || trim($call[2]) === '') {
+            $whole[$type] = true;
+            continue;
+        }
+        preg_match_all("/'([a-z_0-9]+)'/", $call[2], $keys);
+        $listed[$type] = array_merge($listed[$type] ?? [], $keys[1]);
+    }
+
+    foreach ($listed as $type => $keys) {
+        if (isset($whole[$type])) {
+            continue; // тип рисуется и целиком — перечисление лишь дополняет
+        }
+        $expected = array_keys(BlockFieldSchema::fields($type));
+        sort($expected);
+        $keys = array_values(array_unique($keys));
+        sort($keys);
+        assert_same($expected, $keys, "форма {$type} потеряла поля схемы");
+    }
+});

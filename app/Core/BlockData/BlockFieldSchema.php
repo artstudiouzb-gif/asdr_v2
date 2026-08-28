@@ -62,6 +62,14 @@ final class BlockFieldSchema
         'text_image' => ['items' => []],
         'anchor_nav' => ['items' => []],
         'timeline' => ['items' => []],
+        // Сектор — ссылка на запись в БД (список секторов собирается по
+        // команде), поэтому собирается отдельно.
+        'team_list' => ['department' => ''],
+        'org_structure' => ['branches' => []],
+        'leader_card' => ['items' => []],
+        'bio_education' => [
+            'career' => [], 'edu_items' => [], 'widgets_before' => [], 'widgets_after' => [],
+        ],
     ];
 
     /** @var array<string, array<string, Field>>|null */
@@ -544,6 +552,116 @@ final class BlockFieldSchema
                 'cta_button_url' => Field::url('CTA — ссылка кнопки'),
                 'cta_image' => Field::media('CTA — фоновое фото'),
             ],
+            'team_list' => [
+                'title' => Field::text('Заголовок, показываемый на сайте')->named('title_field'),
+                'limit' => Field::int(
+                    'Сколько записей показывать (0 — все)',
+                    0,
+                    null,
+                    0,
+                    'Блок выводит опубликованные записи раздела «Команда» по порядку сортировки.'
+                ),
+                'group_by_department' => Field::bool('Группировать по секторам, а внутри — по отделам и группам', false),
+            ],
+            'person_profile' => [
+                'photo' => Field::media('Фото'),
+                'name' => Field::text('Имя'),
+                'position' => Field::text('Должность'),
+                'text' => Field::textarea('Описание'),
+                'phone_label' => Field::text('Подпись телефона', 'Приёмная:'),
+                'phone' => Field::text('Телефон', '', '', '+998 71 203 10 00'),
+                'email_label' => Field::text('Подпись e-mail', 'E-mail:'),
+                'email' => Field::text('E-mail'),
+                'button_text' => Field::text('Кнопка — текст', '', '', 'Обратиться к руководителю'),
+                'button_url' => Field::url('Кнопка — ссылка'),
+                'button2_text' => Field::text('Вторая кнопка — текст', '', '', 'Биография'),
+                'button2_url' => Field::url(
+                    'Вторая кнопка — ссылка',
+                    'Вторая кнопка оформляется контуром — как второстепенное действие.'
+                ),
+                'photo_side' => Field::enum('Сторона фото', [
+                    'left' => 'Слева',
+                    'right' => 'Справа',
+                ], 'left', 'На узких экранах фото в любом случае встаёт над текстом.'),
+                'telegram' => Field::url('Telegram', '', 'https://...'),
+                'facebook' => Field::url('Facebook', '', 'https://...'),
+                'linkedin' => Field::url('LinkedIn', '', 'https://...'),
+                'x' => Field::url('X', '', 'https://...'),
+                'instagram' => Field::url('Instagram', '', 'https://...'),
+            ],
+            'leader_card' => [
+                'photo' => Field::media('Фото руководителя'),
+                'name' => Field::text('Имя'),
+                'name_tag' => Field::enum('Уровень заголовка имени', [
+                    'p' => 'Обычный текст (по умолчанию)',
+                    'h2' => 'Заголовок второго уровня',
+                    'h3' => 'Заголовок третьего уровня',
+                ], 'p', 'Заголовком имя стоит делать только там, где карточка открывает раздел страницы.'),
+                'position' => Field::text('Должность'),
+                'phone' => Field::text('Телефон'),
+                'email' => Field::text('E-mail'),
+                'hours' => Field::text('Часы приёма'),
+                'facebook' => Field::url('Facebook', '', 'https://...'),
+                'x' => Field::url('X', '', 'https://...'),
+                'linkedin' => Field::url('LinkedIn', '', 'https://...'),
+                'instagram' => Field::url('Instagram', '', 'https://...'),
+                'telegram' => Field::url('Telegram', '', 'https://...'),
+                'mobile_icons_only' => Field::bool('На телефоне показывать только значки соцсетей', false),
+                'facts_title' => Field::text('Вкладка «Основная информация» — заголовок', 'Основная информация'),
+                'facts_icon' => Field::icon('Вкладка «Основная информация» — значок'),
+                'bio_title' => Field::text('Вкладка «Биография» — заголовок', 'Биография'),
+                'bio_icon' => Field::icon('Вкладка «Биография» — значок'),
+                'bio' => Field::richtext('Биография'),
+                'duties_title' => Field::text('Вкладка «Функции» — заголовок', 'Функции'),
+                'duties_icon' => Field::icon('Вкладка «Функции» — значок'),
+                'duties' => Field::richtext('Функции'),
+            ],
+            'org_structure' => [
+                'title' => Field::text('Заголовок, показываемый на сайте')->named('title_field'),
+                'layout' => Field::enum('Макет схемы', [
+                    'tree' => 'Дерево — ветки рядами под руководителем',
+                    'spine' => 'Стержень — ветки по обе стороны от оси',
+                ], 'tree'),
+                'columns' => Field::intChoice(
+                    'Колонок в ряду (для макета «Дерево»)',
+                    [2, 3, 4],
+                    4,
+                    'Лишние ветки переносятся на следующий ряд со своим соединителем.'
+                ),
+                'council' => Field::textarea(
+                    'Коллегиальный орган над руководителем (по одному на строку)',
+                    '',
+                    'Координационный совет'
+                ),
+                'head_title' => Field::text('Руководитель — должность', 'Директор'),
+                'head_name' => Field::text('Руководитель — Ф.И.О. (необязательно)'),
+                'head_url' => Field::url('Руководитель — ссылка (напр. на страницу директора)', '', '/direktor'),
+                'side_items' => Field::textarea('Органы сбоку от руководителя (по одному на строку)', '', 'Советник'),
+                'collapsible' => Field::bool('Сворачивать подразделения на всех экранах (на телефоне схема сворачивается всегда)', false),
+                'search' => Field::bool('Поиск по схеме (поле над схемой; полезно, когда узлов больше трёх десятков)', false)
+                    ->named('org_search'),
+                'notes' => Field::textarea(
+                    'Примечания карточками под схемой (по одному на строку)',
+                    '',
+                    'Отделы четвёртой колонки подчиняются директору напрямую'
+                ),
+                'footnote' => Field::text(
+                    'Примечание под схемой (необязательно)',
+                    '',
+                    '',
+                    'Структура утверждена постановлением…'
+                ),
+            ],
+            'bio_education' => [
+                'bio_title' => Field::text('Левая колонка — заголовок', 'Биография'),
+                'bio_text' => Field::textarea('Вступительный текст'),
+                'career_title' => Field::text('Заголовок хронологии', '', '', 'Профессиональный путь'),
+                'edu_title' => Field::text('Правая колонка — заголовок', 'Образование'),
+                'extra_title' => Field::text('Доп. образование — заголовок', '', '', 'Дополнительное образование'),
+                'extra_text' => Field::textarea('Доп. образование — пункты (по одному на строку)'),
+                'quote_text' => Field::textarea('Цитата'),
+                'quote_author' => Field::text('Автор цитаты'),
+            ],
         ];
     }
 
@@ -648,6 +766,10 @@ final class BlockFieldSchema
                     ? strtolower((string) $value)
                     : '',
                 'media_position' => MediaPosition::normalize($value),
+                // Форматируемый текст чистится и на выводе: в data блока он
+                // мог попасть из старой записи или из файла шаблона страницы,
+                // а шаблоны печатают его как разметку.
+                'richtext' => HtmlSanitizer::sanitizeText(is_scalar($value) ? (string) $value : ''),
                 default => is_scalar($value) ? (string) $value : '',
             };
             $companion = $field->companionKey($key);
@@ -664,13 +786,22 @@ final class BlockFieldSchema
      * `form-field`, подпись, подсказка и `data-field-when` для полей,
      * применимых не ко всем вариантам.
      *
+     * У типов, где список повторяющихся строк стоит посреди настроек
+     * («Карточка руководителя», «Биография и образование»), форма зовёт метод
+     * несколько раз, перечисляя ключи: `$only`. Полноту такого разбиения
+     * сторожит тест — иначе поле молча исчезло бы из редактора.
+     *
      * @param array<string, mixed> $data сохранённые значения блока
+     * @param list<string> $only только эти поля; пусто — все
      */
-    public static function formHtml(string $type, array $data): string
+    public static function formHtml(string $type, array $data, array $only = []): string
     {
         $html = '';
         $colorRun = '';
         foreach (self::fields($type) as $key => $field) {
+            if ($only !== [] && !in_array($key, $only, true)) {
+                continue;
+            }
             // Соседние настройки цвета встают в один ряд — так они свёрстаны в
             // остальной админке, и пара «фон / текст» читается как пара.
             if ($field->kind === 'color') {
@@ -734,7 +865,8 @@ final class BlockFieldSchema
             'int' => '<input type="number" id="' . $id . '" name="' . $esc($name) . '" min="' . (int) $field->min
                 . ($field->max !== null ? '" max="' . $field->max : '') . '" value="' . (int) $value . '">',
             'int_choice' => self::selectHtml($id, $name, $field->options, (string) (int) $value),
-            'textarea' => '<textarea id="' . $id . '" name="' . $esc($name) . '" rows="2">'
+            'textarea' => '<textarea id="' . $id . '" name="' . $esc($name) . '" rows="2"'
+                . ($field->placeholder !== '' ? ' placeholder="' . $esc($field->placeholder) . '"' : '') . '>'
                 . $esc(is_scalar($value) ? (string) $value : '') . '</textarea>',
             'richtext' => '<textarea id="' . $id . '" name="' . $esc($name) . '" rows="3" data-wysiwyg>'
                 . $esc(is_scalar($value) ? (string) $value : '') . '</textarea>',
