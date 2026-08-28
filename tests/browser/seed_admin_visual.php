@@ -34,7 +34,10 @@ const VISUAL_ADMIN_PASSWORD = 'Visual-regression-1';
 // сам тест (tests/browser/admin-visual.spec.js), поэтому вход идёт обычным
 // путём, со вторым фактором, а не в обход него.
 const VISUAL_ADMIN_TOTP = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP';
+// Двух записей достаточно, чтобы в списке была и чётная строка: полоска
+// строится подложкой, и без второй строки её просто нечем снимать.
 const VISUAL_NEWS_TITLE = 'Заседание коллегии Агентства';
+const VISUAL_NEWS_TITLE_SECOND = 'Итоги квартала: показатели реформ';
 
 $env = (string) Config::get('app.env', 'production');
 if (!in_array($env, ['testing', 'development'], true)) {
@@ -64,24 +67,33 @@ if ($userId === 0) {
 }
 User::enableTotp($userId, VISUAL_ADMIN_TOTP);
 
-// Одна опубликованная новость: без записей список показывает пустое
-// состояние, и снимок таблицы не о чем было бы сверять.
-$news = $pdo->prepare('SELECT id FROM news WHERE title = ?');
-$news->execute([VISUAL_NEWS_TITLE]);
-if ((int) ($news->fetchColumn() ?: 0) === 0) {
+// Записи списка: без них таблица показывает пустое состояние, и снимок не о
+// чем было бы сверять. Одна опубликована, вторая черновик — в колонке статуса
+// видно обе метки.
+$rows = [
+    [VISUAL_NEWS_TITLE, 'visual-regression-news', 'published', '2026-01-15 10:00:00'],
+    [VISUAL_NEWS_TITLE_SECOND, 'visual-regression-news-2', 'draft', '2026-01-12 09:30:00'],
+];
+foreach ($rows as [$title, $slug, $status, $publishedAt]) {
+    $news = $pdo->prepare('SELECT id FROM news WHERE title = ?');
+    $news->execute([$title]);
+    if ((int) ($news->fetchColumn() ?: 0) !== 0) {
+        continue;
+    }
+
     $pdo->prepare(
         'INSERT INTO news (title, slug, lang, excerpt, content, status, published_at, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())'
     )->execute([
-        VISUAL_NEWS_TITLE,
-        'visual-regression-news',
+        $title,
+        $slug,
         Language::defaultCode(),
         'Фиксированная запись для визуальных тестов админки.',
         '<p>Содержимое не меняется, поэтому расхождение снимка означает правку оформления.</p>',
-        'published',
-        '2026-01-15 10:00:00',
+        $status,
+        $publishedAt,
     ]);
 }
 
 echo 'Фикстура админки готова: пользователь ' . VISUAL_ADMIN_USERNAME
-    . ', новость «' . VISUAL_NEWS_TITLE . '»' . PHP_EOL;
+    . ', новостей: ' . count($rows) . PHP_EOL;

@@ -49,9 +49,13 @@ const SCREENS = [
             ['.admin-topbar', ['backgroundColor', 'color', 'height', 'borderBottomColor']],
             ['.admin-sidebar', ['backgroundColor', 'color', 'width', 'borderRightColor']],
             ['.admin-nav-item', ['color', 'fontSize', 'fontWeight', 'padding', 'borderRadius']],
+            ['.admin-welcome', ['backgroundColor', 'borderColor', 'padding']],
+            ['.admin-welcome h2', ['color', 'fontSize', 'fontWeight']],
+            ['.admin-welcome p', ['color', 'fontSize']],
             ['.form-card', ['backgroundColor', 'borderColor', 'borderRadius', 'boxShadow', 'padding']],
             ['.stat-card', ['backgroundColor', 'borderColor', 'borderRadius', 'padding']],
             ['.stat-card__value', ['color', 'fontSize', 'fontWeight']],
+            ['.stat-card__label', ['color', 'fontSize', 'fontWeight']],
             ['.btn', ['backgroundColor', 'color', 'borderColor', 'borderRadius', 'fontSize', 'padding']],
             ['.btn--primary', ['backgroundColor', 'color', 'borderColor', 'borderRadius']],
         ],
@@ -60,9 +64,19 @@ const SCREENS = [
         name: 'list',
         url: '/admin/news',
         probes: [
+            ['.data-table', ['backgroundColor', 'borderColor']],
             ['.data-table th', ['backgroundColor', 'color', 'fontSize', 'fontWeight', 'padding', 'borderBottomColor']],
             ['.data-table td', ['color', 'fontSize', 'padding', 'borderBottomColor']],
+            // Полоска чётной строки — тоже подложка под текстом: пока её не
+            // снимали, белые строки на тёмной теме никто не замечал.
+            ['.data-table tbody tr:nth-child(even)', ['backgroundColor']],
             ['.badge', ['backgroundColor', 'color', 'borderRadius', 'fontSize', 'padding']],
+            ['.list-filters--panel', ['backgroundColor', 'borderColor', 'padding']],
+            ['.list-filter label', ['color', 'fontSize', 'fontWeight']],
+            ['.list-filter input', ['backgroundColor', 'color', 'borderColor', 'height']],
+            ['.bulk-bar', ['backgroundColor', 'borderColor', 'padding']],
+            ['.bulk-bar__count', ['color', 'fontSize']],
+            ['.lang-filter-count', ['backgroundColor', 'color']],
             ['.list-filter', ['color', 'fontSize', 'borderRadius', 'padding']],
             ['.btn--small', ['fontSize', 'padding', 'borderRadius']],
         ],
@@ -223,9 +237,24 @@ async function applyTheme(page, theme) {
     }, theme);
 }
 
+/**
+ * Гасим переходы перед снимком. Одного тега стилей мало: слой переопределений
+ * панели объявляет свои transition через !important и побеждает его по
+ * специфичности, поэтому снимок ловил цвет посреди перехода темы — рамка поля
+ * фильтра приходила промежуточной, и тест краснел через раз. Инлайн-стиль с
+ * !important сильнее любого правила таблицы стилей, поэтому проходим по узлам.
+ */
 async function freezeTransitions(page) {
     await page.addStyleTag({
         content: '*, *::before, *::after { transition: none !important; animation: none !important; }',
+    });
+    await page.evaluate(() => {
+        document.querySelectorAll('*').forEach((el) => {
+            // У части узлов внутри встроенного SVG инлайн-стиля нет вовсе.
+            if (!el.style || typeof el.style.setProperty !== 'function') { return; }
+            el.style.setProperty('transition', 'none', 'important');
+            el.style.setProperty('animation', 'none', 'important');
+        });
     });
 }
 
@@ -331,6 +360,8 @@ test.describe('@visual админка', () => {
         await expect(page.locator('[data-media-modal]')).toBeVisible();
         // Ждём ответа библиотеки: до него сетка занята сообщением «Загрузка…».
         await expect(page.locator('[data-media-grid]')).toHaveAttribute('aria-busy', 'false');
+        // Окно и карточки библиотеки появились уже после первой заморозки.
+        await freezeTransitions(page);
 
         for (const theme of THEMES) {
             await applyTheme(page, theme);
