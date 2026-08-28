@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Core\BlockData\BlockFieldSchema;
 use App\Models\FormDef;
 
 final class BlockRenderer
@@ -11,9 +12,12 @@ final class BlockRenderer
     /**
      * Совместимый фасад: источник истины находится в BlockTypeRegistry.
      *
-     * @var array<string, array<string, mixed>>
+     * @return array<string, array<string, mixed>>
      */
-    public const DEFAULTS = BlockTypeRegistry::DEFAULTS;
+    public static function defaults(): array
+    {
+        return BlockTypeRegistry::defaults();
+    }
 
     /**
      * Ближайшая граница расписания среди отрисованных блоков — заполняется в
@@ -153,6 +157,12 @@ final class BlockRenderer
 
         // Смердживание с дефолтами поддерживает частично заполненные формы.
         $data = array_merge(self::defaultsFor($type), $data);
+        // Типы со схемой полей получают проверенные значения и на выводе:
+        // data блока приезжает и из старых записей, и из загруженного файла
+        // шаблона страницы, где сверены только ключи.
+        if (BlockFieldSchema::has($type)) {
+            $data = BlockFieldSchema::apply($type, $data);
+        }
 
         // Условия показа (расписание). Границу запоминаем до проверки: блок,
         // который ещё не начался, тоже обязан разморозить кэш к своему старту.
@@ -438,14 +448,12 @@ final class BlockRenderer
      */
     private static function renderColumns(array $block, array $data): array
     {
-        $count = (int) ($data['columns'] ?? 2);
-        if ($count < 2 || $count > 4) {
-            $count = 2;
-        }
-        $gap = (string) ($data['gap'] ?? 'medium');
-        if (!in_array($gap, ['small', 'medium', 'large'], true)) {
-            $gap = 'medium';
-        }
+        // Значения уже проверены схемой полей (BlockFieldSchema), поэтому
+        // читаются как есть.
+        $count = (int) $data['columns'];
+        $gap = (string) $data['gap'];
+        $valign = (string) $data['valign'];
+        $mobileOrder = (string) $data['mobile_order'];
 
         $byColumn = self::containerChildren($block, $count);
 
@@ -459,10 +467,16 @@ final class BlockRenderer
                 . "\n    </div>\n";
         }
 
+        // Выравнивание по высоте и порядок на телефоне — классы: инлайн-стили
+        // в блоках запрещены тестами.
+        $modifiers = $valign !== 'stretch' ? ' cms-columns--valign-' . $valign : '';
+        $modifiers .= $mobileOrder === 'reverse' ? ' cms-columns--mobile-reverse' : '';
+
         $html = sprintf(
-            "<div class=\"cms-columns cms-columns--%d cms-columns--gap-%s\">\n%s</div>",
+            "<div class=\"cms-columns cms-columns--%d cms-columns--gap-%s%s\">\n%s</div>",
             $count,
             htmlspecialchars($gap, ENT_QUOTES),
+            $modifiers,
             $colsHtml
         );
 
@@ -559,14 +573,10 @@ final class BlockRenderer
     {
         $blockId = (int) ($block['id'] ?? 0);
 
-        $variant = (string) ($data['variant'] ?? 'segmented');
-        if (!in_array($variant, ['segmented', 'underline', 'vertical'], true)) {
-            $variant = 'segmented';
-        }
-        $align = (string) ($data['align'] ?? 'left');
-        if (!in_array($align, ['left', 'center', 'stretch'], true)) {
-            $align = 'left';
-        }
+        // Значения проверены схемой полей (BlockFieldSchema).
+        $variant = (string) $data['variant'];
+        $align = (string) $data['align'];
+        $autoplay = (int) $data['autoplay'];
 
         $items = [];
         foreach ((array) ($data['items'] ?? []) as $item) {
@@ -577,7 +587,11 @@ final class BlockRenderer
             if ($title === '') {
                 continue;
             }
-            $items[] = ['title' => $title, 'icon' => Icon::cleanName($item['icon'] ?? '')];
+            $items[] = [
+                'title' => $title,
+                'icon' => Icon::cleanName($item['icon'] ?? ''),
+                'text' => trim((string) ($item['text'] ?? '')),
+            ];
         }
         // Вкладок больше десятка не бывает осмысленно, а полоса из них
         // разъезжается на любой ширине.
@@ -598,18 +612,33 @@ final class BlockRenderer
                 ? '<span class="cms-tabs__tab-icon" aria-hidden="true">' . Icon::render($item['icon'], 18) . '</span>'
                 : '';
 
+            // Полоса отсчёта до следующей вкладки. Рисуется только при
+            // включённом автопереключении и заполняется скриптом: без него
+            // отсчитывать нечего.
+            $progress = $autoplay > 0
+                ? '<span class="cms-tabs__tab-progress" data-tabs-progress aria-hidden="true"></span>'
+                : '';
+
             $listHtml .= '        <a class="cms-tabs__tab' . ($index === 0 ? ' is-active' : '')
                 . '" href="#' . $panelId . '" data-tabs-tab="' . $index . '">'
-                . $icon . '<span class="cms-tabs__tab-text">' . $title . '</span></a>' . "\n";
+                . $icon . '<span class="cms-tabs__tab-text">' . $title . '</span>' . $progress . '</a>' . "\n";
 
             [$inner, $innerCss] = self::renderContainerCell($byTab[$index]);
             $cssParts = array_merge($cssParts, $innerCss);
+
+            // Пояснение к вкладке — одна строка о том, чему она посвящена.
+            // Стоит над содержимым, а не в самой вкладке: вторая строка в
+            // полосе вкладок ломает ряд.
+            $note = $item['text'] !== ''
+                ? '            <p class="cms-tabs__panel-note">' . htmlspecialchars($item['text'], ENT_QUOTES) . '</p>' . "\n"
+                : '';
 
             $panelsHtml .= '        <div class="cms-tabs__panel" id="' . $panelId
                 . '" data-tabs-panel="' . $index . '">' . "\n"
                 // Заголовок панели нужен версии без JavaScript: там панели идут
                 // подряд, и без него не видно, где кончается одна вкладка.
                 . '            <h3 class="cms-tabs__panel-title">' . $title . '</h3>' . "\n"
+                . $note
                 . trim($inner) . "\n"
                 . '        </div>' . "\n";
         }
@@ -620,8 +649,14 @@ final class BlockRenderer
             'description_html' => true,
         ]);
 
+        // Автопереключение — атрибутом: без JavaScript панели и так видны все
+        // подряд, переключать нечего.
+        $autoplayAttr = $autoplay > 0 && count($items) > 1
+            ? ' data-tabs-autoplay="' . $autoplay . '"'
+            : '';
+
         $html = '<div class="cms-tabs cms-tabs--' . $variant . ' cms-tabs--align-' . $align
-            . '" data-tabs data-tab-count="' . count($items) . '">' . "\n"
+            . '" data-tabs data-tab-count="' . count($items) . '"' . $autoplayAttr . '>' . "\n"
             . ($head !== '' ? '    ' . $head . "\n" : '')
             // Список и панели лежат в общей обёртке: у варианта «список слева»
             // они становятся сеткой, а шапка секции обязана остаться над ними.

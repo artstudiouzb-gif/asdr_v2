@@ -3012,6 +3012,40 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 @media (max-width: 1000px) { .newslist-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .newslist-grid { grid-template-columns: 1fr; } }
 
+/* Тело карточки: обёртка нужна широкой карточке, где текст стоит рядом с
+   фотографией, а не под ней. У обычной карточки промежуток остаётся прежним. */
+.relnews-card__body { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+/* Каждая пятая карточка ленты — широкая: занимает две ячейки сетки и
+   показывает анонс. Ровно две, а не всю строку: группа «4 компактные + 1
+   широкая» даёт шесть ячеек, а шесть делится и на 4, и на 3, и на 2 колонки —
+   ряды остаются полными на любой ширине (см. App\Core\NewsFeedRhythm). */
+.relnews-card--wide { grid-column: span 2; flex-direction: row; align-items: stretch; }
+.relnews-card--wide .news-cover { flex: 0 0 42%; }
+.relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: 4 / 3; }
+.relnews-card--wide .relnews-card__body { flex: 1 1 auto; justify-content: center; }
+.relnews-card--wide .relnews-card__title { font-size: var(--step-2); }
+/* Анонс — три строки: карточка стоит в ряду с компактными, и её высота задаёт
+   высоту всего ряда. Правило адресовано только широкой карточке: у той же
+   `.relnews-card__excerpt` есть свои размеры в части темы для детальной
+   новости, и общий селектор здесь спорил бы с ними. */
+.relnews-card--wide .relnews-card__excerpt {
+    color: var(--gov-muted);
+    font-size: var(--step--1);
+    line-height: var(--base-line-height, 1.6);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+/* В одну колонку широкой карточке растягиваться некуда: `span 2` создал бы
+   вторую колонку и горизонтальную прокрутку. */
+@media (max-width: 560px) {
+    .relnews-card--wide { grid-column: auto; flex-direction: column; }
+    .relnews-card--wide .news-cover { flex: none; }
+    .relnews-card--wide .relnews-card__media { height: auto; aspect-ratio: 16 / 10; }
+}
+
 /* «Читать подробнее» — завершение карточки. Отделено чертой сверху и всегда
    прижато к низу, поэтому у карточек разной высоты ссылки стоят в одну линию. */
 .card-more {

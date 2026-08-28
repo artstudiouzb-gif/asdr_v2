@@ -238,6 +238,7 @@ return [
     'Отзывы — прокрутка вбок' => 'Testimonials — scroll sideways',
     'Карточки — прокрутка вбок' => 'Cards — scroll sideways',
     'Этапы — прокрутка вбок' => 'Stages — scroll sideways',
+    'Партнёры' => 'Partners',
     'Партнёры — прокрутка вбок' => 'Partners — scroll sideways',
     'Перевод пока недоступен' => 'Translation is not available yet',
     'Доступен на другом языке' => 'Available in another language',

@@ -1,0 +1,134 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Core\BlockData;
+
+/**
+ * Описание одной настройки блока: тип значения, границы, умолчание и подписи
+ * для формы.
+ *
+ * Заводится ради того, чтобы настройка была объявлена **один раз**. Прежде она
+ * жила в четырёх местах: умолчание в реестре типов, поле в `block_form.php`,
+ * ветка в `BlockController::collectData()` и повторная проверка в шаблоне
+ * (`in_array(...)` встречался в шаблонах блоков около сорока раз). Список
+ * допустимых значений расходился молча: форма отдавала значение, нормализатор
+ * его принимал, а шаблон о нём не знал и откатывался к умолчанию.
+ *
+ * Из одного описания получаются все четыре вещи: умолчание
+ * (`BlockFieldSchema::defaults()`), поле формы (`BlockFieldSchema::formHtml()`),
+ * нормализация присланного (`BlockFieldSchema::normalize()`) и гарантия для
+ * шаблона: в `$data` уже лежит проверенное значение, перепроверять нечего.
+ */
+final class Field
+{
+    public const KINDS = ['enum', 'int', 'bool', 'text', 'textarea', 'richtext', 'url'];
+
+    /**
+     * @param array<string, string> $options варианты `enum`: значение => подпись
+     * @param string $input имя поля в форме, если отличается от ключа данных
+     * @param array{field:string, values:list<string>}|null $when
+     *        условие применимости: поле показывается только при этом варианте
+     */
+    private function __construct(
+        public readonly string $kind,
+        public readonly string $label,
+        public readonly mixed $default,
+        public readonly array $options = [],
+        public readonly ?int $min = null,
+        public readonly ?int $max = null,
+        public readonly string $hint = '',
+        public readonly string $input = '',
+        public readonly string $widget = '',
+        public readonly string $placeholder = '',
+        public readonly ?array $when = null,
+    ) {
+    }
+
+    /** @param array<string, string> $options */
+    public static function enum(string $label, array $options, string $default, string $hint = ''): self
+    {
+        return new self('enum', $label, $default, options: $options, hint: $hint);
+    }
+
+    /**
+     * Целое с границами. `widget: 'select'` — выпадающий список значений от
+     * min до max: колонок в ряду выбирают из списка, а не набирают числом.
+     */
+    public static function int(string $label, int $min, int $max, int $default, string $hint = '', string $widget = 'number'): self
+    {
+        return new self('int', $label, $default, min: $min, max: $max, hint: $hint, widget: $widget);
+    }
+
+    public static function bool(string $label, bool $default, string $hint = ''): self
+    {
+        return new self('bool', $label, $default, hint: $hint);
+    }
+
+    public static function text(string $label, string $default = '', string $hint = '', string $placeholder = ''): self
+    {
+        return new self('text', $label, $default, hint: $hint, placeholder: $placeholder);
+    }
+
+    public static function textarea(string $label, string $hint = ''): self
+    {
+        return new self('textarea', $label, '', hint: $hint);
+    }
+
+    /** Форматируемый текст: в форме — редактор, на входе — санитайзер. */
+    public static function richtext(string $label, string $hint = ''): self
+    {
+        return new self('richtext', $label, '', hint: $hint);
+    }
+
+    public static function url(string $label, string $hint = '', string $placeholder = ''): self
+    {
+        return new self('url', $label, '', hint: $hint, placeholder: $placeholder);
+    }
+
+    /**
+     * Имя поля в форме отличается от ключа данных. Так исторически сделан
+     * заголовок секции: `name="title_field"`, потому что `title` — колонка
+     * самого блока, и одноимённое поле формы затирало бы её.
+     */
+    public function named(string $inputName): self
+    {
+        return $this->with(input: $inputName);
+    }
+
+    /**
+     * Поле применимо только к части вариантов блока. Разметка та же, что у
+     * рукописных полей: скрытие — подсказка редактору, а не условие
+     * сохранения (без JS поле остаётся видимым).
+     *
+     * @param list<string> $values
+     */
+    public function onlyWhen(string $field, array $values): self
+    {
+        return $this->with(when: ['field' => $field, 'values' => $values]);
+    }
+
+    /** Имя поля формы: либо переопределённое, либо сам ключ данных. */
+    public function inputName(string $key): string
+    {
+        return $this->input !== '' ? $this->input : $key;
+    }
+
+    /** @param array{field:string, values:list<string>}|null $when */
+    private function with(string $input = '', ?array $when = null): self
+    {
+        return new self(
+            $this->kind,
+            $this->label,
+            $this->default,
+            $this->options,
+            $this->min,
+            $this->max,
+            $this->hint,
+            $input !== '' ? $input : $this->input,
+            $this->widget,
+            $this->placeholder,
+            $when ?? $this->when,
+        );
+    }
+}

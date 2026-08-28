@@ -238,6 +238,7 @@ return [
     'Отзывы — прокрутка вбок' => 'Sharhlar — yon tomonga aylantirish',
     'Карточки — прокрутка вбок' => 'Kartochkalar — yon tomonga aylantirish',
     'Этапы — прокрутка вбок' => 'Bosqichlar — yon tomonga aylantirish',
+    'Партнёры' => 'Hamkorlar',
     'Партнёры — прокрутка вбок' => 'Hamkorlar — yon tomonga aylantirish',
     'Перевод пока недоступен' => 'Tarjima hozircha mavjud emas',
     'Доступен на другом языке' => 'Boshqa tilda mavjud',

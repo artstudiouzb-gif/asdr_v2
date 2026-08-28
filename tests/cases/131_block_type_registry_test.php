@@ -39,7 +39,7 @@ test('Реестр блоков: все источники используют 
 });
 
 test('Реестр блоков: совместимые фасады рендера не изменились', function () {
-    assert_same(BlockTypeRegistry::DEFAULTS, BlockRenderer::DEFAULTS);
+    assert_same(BlockTypeRegistry::defaults(), BlockRenderer::defaults());
     assert_same(BlockTypeRegistry::TYPE_LABELS, BlockRenderer::TYPE_LABELS);
     assert_same(
         BlockTypeRegistry::defaultsFor('hero'),

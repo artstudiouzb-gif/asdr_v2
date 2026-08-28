@@ -97,6 +97,13 @@ $currentType = $widget['type'] ?? 'latest_news';
             </div>
         <?php endif; ?>
 
+        <!-- Настройки: section_menu -->
+        <?php if ($showType('section_menu')): ?>
+            <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="section_menu">
+                <span class="form-hint">Настроек нет: виджет сам находит раздел основного меню, внутри которого лежит открытая страница, и показывает его страницы. На странице вне разделов виджет не выводится. Заголовок можно не задавать — им служит название раздела.</span>
+            </div>
+        <?php endif; ?>
+
         <!-- Настройки: contacts -->
         <?php if ($showType('contacts')): ?>
             <div class="form-field form-field--checkbox<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="contacts">

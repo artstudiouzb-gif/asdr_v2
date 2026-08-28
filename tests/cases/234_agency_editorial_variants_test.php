@@ -7,7 +7,7 @@ use App\Core\DesignSettings;
 use App\Controllers\Admin\BlockController;
 
 test('Редакционные варианты страницы Агентства являются настройками системных блоков', function (): void {
-    $defaults = BlockTypeRegistry::DEFAULTS;
+    $defaults = BlockTypeRegistry::defaults();
     assert_true(array_key_exists('variant', $defaults['text']));
     assert_true(array_key_exists('aside_title', $defaults['text']));
     assert_true(array_key_exists('items', $defaults['text']));

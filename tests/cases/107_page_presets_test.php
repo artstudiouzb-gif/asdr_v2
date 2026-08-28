@@ -12,7 +12,7 @@ test('Сборки страниц: описаны корректно и испо
     $presets = PagePresets::all();
     assert_true(count($presets) >= 5, 'сборок должно быть несколько');
 
-    $known = array_keys(BlockRenderer::DEFAULTS);
+    $known = array_keys(BlockRenderer::defaults());
     foreach ($presets as $id => $preset) {
         assert_true($preset['name'] !== '', "{$id}: нет названия");
         assert_true($preset['description'] !== '', "{$id}: нет описания");

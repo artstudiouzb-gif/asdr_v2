@@ -12,7 +12,7 @@ test('Каждое поле блока читается на выводе', func
     $renderer = (string) file_get_contents(APP_ROOT . '/app/Core/BlockRenderer.php');
     $orphans = [];
 
-    foreach (BlockTypeRegistry::DEFAULTS as $type => $defaults) {
+    foreach (BlockTypeRegistry::defaults() as $type => $defaults) {
         $tplPath = APP_ROOT . '/templates/blocks/' . $type . '.php';
         $tpl = is_file($tplPath) ? (string) file_get_contents($tplPath) : '';
         // Партиалы карточек лежат рядом: шаблон их подключает, поля читают они.
@@ -33,7 +33,7 @@ test('Каждое поле блока читается на выводе', func
 });
 
 test('Фирменный знак карточек актов включается настройкой блока', function () {
-    $defaults = BlockTypeRegistry::DEFAULTS['docs_list'];
+    $defaults = BlockTypeRegistry::defaultsFor('docs_list');
     assert_true(array_key_exists('emblem', $defaults), 'настройка объявлена в DEFAULTS');
     assert_true((bool) $defaults['emblem'], 'по умолчанию знак показывается');
 
