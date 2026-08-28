@@ -45,6 +45,25 @@
     "borderColor": "color(srgb 0.138235 0.466667 0.41098)",
     "borderRadius": "3px"
   },
+  ".media-modal__item": {
+    "display": "flex",
+    "gap": "7px"
+  },
+  ".media-modal__thumb": {
+    "backgroundColor": "color(srgb 0.17749 0.218157 0.284353)",
+    "borderColor": "rgb(51, 65, 85)",
+    "borderRadius": "3px",
+    "aspectRatio": "16 / 10"
+  },
+  ".media-modal__caption-name": {
+    "color": "rgb(248, 250, 252)",
+    "fontSize": "12.5px",
+    "fontWeight": "600"
+  },
+  ".media-modal__caption-meta": {
+    "color": "rgb(148, 163, 184)",
+    "fontSize": "11px"
+  },
   ".media-modal__footer": {
     "backgroundColor": "rgb(30, 41, 59)",
     "borderTopColor": "rgb(51, 65, 85)",

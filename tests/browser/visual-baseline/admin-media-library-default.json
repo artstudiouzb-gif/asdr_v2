@@ -1,0 +1,37 @@
+{
+  ".media-grid": {
+    "gridTemplateColumns": "172.391px 172.406px 172.391px 172.391px 172.391px",
+    "gap": "14px"
+  },
+  ".media-card": {
+    "backgroundColor": "color(srgb 0.937961 0.939608 0.940706)",
+    "borderColor": "rgb(220, 220, 222)",
+    "borderRadius": "3px",
+    "aspectRatio": "16 / 10"
+  },
+  ".media-card__thumb": {
+    "objectFit": "cover",
+    "width": "170.391px",
+    "height": "105.734px"
+  },
+  ".media-card__caption": {
+    "backgroundColor": "rgba(0, 0, 0, 0)",
+    "color": "rgb(29, 35, 39)",
+    "fontSize": "12.5px",
+    "padding": "6px 2px 0px"
+  },
+  ".media-card__ext": {
+    "color": "rgb(100, 105, 112)",
+    "fontSize": "11px",
+    "fontWeight": "700"
+  },
+  ".media-card__icon-wrap": {
+    "backgroundColor": "color(srgb 0.911373 0.913725 0.915294)",
+    "color": "rgb(100, 105, 112)"
+  },
+  ".media-toolbar": {
+    "backgroundColor": "rgb(255, 255, 255)",
+    "borderColor": "rgb(220, 220, 222)",
+    "padding": "14px 18px"
+  }
+}

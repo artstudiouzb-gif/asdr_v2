@@ -42,6 +42,16 @@
     --admin-shadow: 0 1px 1px rgba(0, 0, 0, .04);
     --admin-shadow-md: 0 2px 8px rgba(0, 0, 0, .07);
     --admin-shadow-lg: 0 16px 40px rgba(0, 0, 0, .18);
+    /* Эти имена уже стоят в правилах, но нигде не объявлялись: каждый такой
+       var() молча откатывался к литералу, и 39 мест переставали слушать тему.
+       Объявляем их через настоящие токены — дешевле, чем править места. */
+    --admin-text-muted: var(--admin-muted);
+    --admin-radius-md: var(--admin-radius);
+    --admin-bg-soft: var(--admin-surface-soft);
+    --admin-bg-alt: var(--admin-surface-soft);
+    --admin-bg-subtle: var(--admin-surface-soft);
+    --admin-hover-bg: var(--admin-surface-hover);
+    --admin-hover: var(--admin-surface-hover);
     --admin-topbar-h: 46px;
     --admin-sidebar-w: 240px;
 }
@@ -70,6 +80,7 @@ body[data-admin-theme="default"] {
 /* 2. Классический тёмный (CMS Style) */
 html[data-admin-theme="wp_classic"],
 body[data-admin-theme="wp_classic"] {
+    --admin-accent-soft: color-mix(in srgb, var(--admin-accent) 12%, var(--admin-surface));
     --admin-primary: #2563eb;
     --admin-primary-dark: #1d4ed8;
     --admin-accent: #2563eb;
@@ -88,6 +99,7 @@ body[data-admin-theme="wp_classic"] {
 /* 3. Глубокий океан (Navy & Teal) */
 html[data-admin-theme="navy_teal"],
 body[data-admin-theme="navy_teal"] {
+    --admin-accent-soft: color-mix(in srgb, var(--admin-accent) 12%, var(--admin-surface));
     --admin-primary: #0d9488;
     --admin-primary-dark: #0f766e;
     --admin-accent: #0d9488;
@@ -106,6 +118,7 @@ body[data-admin-theme="navy_teal"] {
 /* 4. Премиум Пурпур (Royal Purple) */
 html[data-admin-theme="royal_purple"],
 body[data-admin-theme="royal_purple"] {
+    --admin-accent-soft: color-mix(in srgb, var(--admin-accent) 12%, var(--admin-surface));
     --admin-primary: #7c3aed;
     --admin-primary-dark: #6d28d9;
     --admin-accent: #7c3aed;
@@ -151,6 +164,7 @@ body[data-admin-theme="dark_emerald"] {
        версии тёмная тема получала светло-голубую подложку у активной вкладки
        и у всех прочих потребителей этого токена. */
     --admin-accent-soft: color-mix(in srgb, var(--admin-accent) 20%, var(--admin-surface));
+    --admin-surface-hover: color-mix(in srgb, var(--admin-text) 8%, var(--admin-surface));
     color-scheme: dark;
 }
 
@@ -2258,7 +2272,7 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 /* ============================================================================
    Репитеры, список блоков, дерево меню, колонки, вкладки, шапка, виджеты
    ============================================================================ */
-.repeater-row { border: 1px solid var(--admin-border); border-radius: 3px; padding: 16px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 12px; position: relative; background: #fff; }
+.repeater-row { border: 1px solid var(--admin-border); border-radius: 3px; padding: 16px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 12px; position: relative; background: var(--admin-surface); }
 .repeater-row__remove { align-self: flex-end; }
 .repeater-actions { margin-bottom: 20px; }
 
@@ -3199,7 +3213,7 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 @media (max-width: 720px) { .hdr-builder__zones { grid-template-columns: 1fr; } }
 .hdr-chip {
     display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 4px 8px 4px 6px;
-    background: #fff; border: 1px solid var(--admin-border); border-radius: 3px;
+    background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 3px;
     font-size: 13px; font-weight: 500; cursor: grab; user-select: none;
     max-width: 100%; min-width: 0;
     box-shadow: 0 1px 2px rgba(16,24,40,.06);
@@ -3226,12 +3240,12 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .hb-palette .hb-el__remove { display: none; }
 .hb-palette .hb-el { cursor: grab; }
 
-.hb-section { border: 1px solid var(--admin-border, #e1e3e8); border-radius: 3px; margin-bottom: 14px; overflow: hidden; background: #fff; }
-.hb-section__head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; background: #f7f9fc; border-bottom: 1px solid var(--admin-border, #e1e3e8); }
+.hb-section { border: 1px solid var(--admin-border, #e1e3e8); border-radius: 3px; margin-bottom: 14px; overflow: hidden; background: var(--admin-surface); }
+.hb-section__head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; background: var(--admin-surface-soft); border-bottom: 1px solid var(--admin-border, #e1e3e8); }
 .hb-section__badge { padding: 3px 10px; border-radius: 3px; background: #173a63; color: #fff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
 .hb-section__badge--middle { background: #17999b; }
 .hb-section__badge--bottom { background: #4a5a74; }
-.hb-section__title { font-weight: 700; color: #1f2b3d; }
+.hb-section__title { font-weight: 700; color: var(--admin-text); }
 .hb-section__controls { margin-left: auto; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .hb-section__controls > label,
 .hb-color-control { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: #4b5563; }
@@ -3271,7 +3285,7 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 }
 .hb-zone__drop:focus-visible { outline: 3px solid rgba(23, 153, 155, .35); outline-offset: 2px; }
 
-.hb-el { display: inline-flex; align-items: center; gap: 8px; padding: 8px 10px; background: #fff; border: 1px solid #dde3ec; border-radius: 3px; box-shadow: 0 1px 2px rgba(19,42,92,.07); font-size: 13px; font-weight: 600; color: #1f2b3d; cursor: grab; transition: box-shadow .15s ease, border-color .15s ease, transform .12s ease; max-width: 100%; min-width: 0; }
+.hb-el { display: inline-flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 3px; box-shadow: 0 1px 2px rgba(19,42,92,.07); font-size: 13px; font-weight: 600; color: var(--admin-text); cursor: grab; transition: box-shadow .15s ease, border-color .15s ease, transform .12s ease; max-width: 100%; min-width: 0; }
 .hb-el__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 /* В узких зонах (Слева/Центр/Справа) чипы стоят в столбик во всю ширину; подпись — в одну строку. */
 .hb-zone__drop .hdr-chip { width: 100%; }
@@ -3320,11 +3334,11 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 
 /* Конструктор футера Pro Max: колонки-карточки с перестановкой. */
 .fb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-.fb-grid > .repeater-row, .fb-card { border: 1px solid var(--admin-border, #e1e3e8); border-radius: 3px; background: #fff; padding: 14px 16px; box-shadow: 0 1px 3px rgba(19,42,92,.06); }
+.fb-grid > .repeater-row, .fb-card { border: 1px solid var(--admin-border, #e1e3e8); border-radius: 3px; background: var(--admin-surface); padding: 14px 16px; box-shadow: 0 1px 3px rgba(19,42,92,.06); }
 .fb-card__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .fb-card__badge { padding: 3px 10px; border-radius: 3px; background: #4a5a74; color: #fff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
 .fb-card__tools { display: inline-flex; gap: 4px; }
-.fb-move { width: 30px; height: 30px; border: 1px solid var(--admin-border, #e1e3e8); border-radius: 3px; background: #f7f9fc; color: #173a63; cursor: pointer; font-size: 14px; line-height: 1; }
+.fb-move { width: 30px; height: 30px; border: 1px solid var(--admin-border, #e1e3e8); border-radius: 3px; background: var(--admin-surface-soft); color: var(--admin-text); cursor: pointer; font-size: 14px; line-height: 1; }
 .fb-move:hover { background: #173a63; color: #fff; border-color: #173a63; }
 
 /* --- Панель явного сохранения порядка (перетаскивание блоков/меню) --- */
@@ -3778,7 +3792,7 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     padding: 16px;
     border: 1px solid var(--admin-border);
     border-radius: var(--admin-radius);
-    background: #fff;
+    background: var(--admin-surface);
     transition: border-color .15s ease, box-shadow .15s ease;
 }
 .preset-card:hover { border-color: var(--admin-accent); box-shadow: 0 2px 10px rgba(16,24,40,.06); }
@@ -4619,7 +4633,7 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     justify-content: space-between;
     gap: 12px;
     padding: 14px 18px;
-    background: #ffffff;
+    background: var(--admin-surface);
     border: 1px solid var(--admin-border, #e6e8ec);
     border-radius: 3px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -4770,7 +4784,7 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     padding: 12px;
     color: var(--admin-muted, #64748b);
     text-align: center;
-    background: #e2e8f0;
+    background: color-mix(in srgb, var(--admin-text) 10%, var(--admin-surface));
 }
 
 .media-card__ext {
@@ -5078,33 +5092,6 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     margin-bottom: 24px;
     flex-wrap: wrap;
 }
-.hdr-tab-btn {
-    flex: 1;
-    min-width: 170px;
-    padding: 10px 14px;
-    border: none;
-    background: transparent;
-    border-radius: 3px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--admin-text-muted, #64748b);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-}
-.hdr-tab-btn:hover {
-    color: var(--admin-text, #0f172a);
-    background: rgba(255,255,255,0.6);
-}
-.hdr-tab-btn.is-active {
-    background: #ffffff;
-    color: var(--admin-accent, #2563eb);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
 /* Визуальные карточки селекторов */
 .hdr-card-grid {
     display: grid;
@@ -8085,31 +8072,34 @@ body.auth-page .install-card .form-field label span,
     border: 1px solid var(--admin-border, #cbd5e1) !important;
 }
 
+/* Вкладки макетов шапки. Второго семейства правил у них больше нет, поэтому
+   !important здесь ни с чем не спорит и снят; цвета берутся из темы —
+   активная вкладка красилась литеральным синим при любом акценте. */
 .hdr-tab-btn {
-    flex: 1 1 auto !important;
-    min-width: 140px !important;
-    padding: 8px 16px !important;
-    border: 1px solid transparent !important;
-    background: transparent !important;
-    border-radius: 3px!important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    color: var(--admin-muted, #475569) !important;
-    cursor: pointer !important;
-    text-align: center !important;
-    transition: all 0.15s ease !important;
+    flex: 1 1 auto;
+    min-width: 140px;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--admin-muted);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
 }
 
 .hdr-tab-btn:hover {
-    color: var(--admin-text, #0f172a) !important;
-    background: rgba(255, 255, 255, 0.8) !important;
+    color: var(--admin-text);
+    background: color-mix(in srgb, var(--admin-text) 6%, var(--admin-surface));
 }
 
 .hdr-tab-btn.is-active {
-    background: var(--admin-surface, #ffffff) !important;
-    color: #2563eb !important;
-    border-color: #cbd5e1 !important;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+    background: var(--admin-surface);
+    color: var(--admin-accent);
+    border-color: var(--admin-border);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
 }
 
 /* Карточки архитектуры шапки (1. Ширина и форма контейнера) */
