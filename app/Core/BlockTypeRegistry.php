@@ -55,7 +55,7 @@ final class BlockTypeRegistry
         'tabs' => [], // схема: BlockFieldSchema
         'testimonials' => [], // схема: BlockFieldSchema
         'counters' => [], // схема: BlockFieldSchema
-        'team_list' => ['title' => '', 'limit' => 0, 'department' => '', 'group_by_department' => false],
+        'team_list' => [], // схема: BlockFieldSchema
         'projects_list' => [], // схема: BlockFieldSchema
         'news_latest' => [], // схема: BlockFieldSchema
         'partners' => [], // схема: BlockFieldSchema
@@ -73,20 +73,15 @@ final class BlockTypeRegistry
         'person_cards' => [], // схема: BlockFieldSchema
         'timeline' => [], // схема: BlockFieldSchema
         'news_docs' => [], // схема: BlockFieldSchema
-        'person_profile' => ['photo' => '', 'photo_side' => 'left', 'name' => '', 'position' => '', 'text' => '', 'phone' => '', 'phone_label' => 'Приёмная:', 'email' => '', 'email_label' => 'E-mail:', 'button_text' => '', 'button_url' => '', 'button2_text' => '', 'button2_url' => '', 'telegram' => '', 'facebook' => '', 'linkedin' => '', 'x' => '', 'instagram' => ''],
-        'bio_education' => ['bio_title' => 'Биография', 'bio_text' => '', 'career_title' => '', 'career' => [], 'edu_title' => 'Образование', 'edu_items' => [], 'extra_title' => '', 'extra_text' => '', 'widgets_before' => [], 'widgets_after' => [], 'quote_text' => '', 'quote_author' => ''],
+        'person_profile' => [], // схема: BlockFieldSchema
+        'bio_education' => [], // схема: BlockFieldSchema
         'anchor_nav' => [], // схема: BlockFieldSchema
         'stages' => [], // схема: BlockFieldSchema
         'text_image' => [], // схема: BlockFieldSchema
         'docs_list' => [], // схема: BlockFieldSchema
         'map_point' => [], // схема: BlockFieldSchema
-        'org_structure' => ['title' => '', 'layout' => 'tree', 'columns' => 4, 'council' => '', 'head_title' => 'Директор', 'head_name' => '', 'head_url' => '', 'side_items' => '', 'branches' => [], 'collapsible' => false, 'search' => false, 'notes' => '', 'footnote' => ''],
-        'leader_card' => ['photo' => '', 'name' => '', 'name_tag' => 'p', 'position' => '', 'phone' => '', 'email' => '', 'hours' => '',
-            'facebook' => '', 'x' => '', 'linkedin' => '', 'instagram' => '', 'telegram' => '',
-            'facts_title' => 'Основная информация', 'facts_icon' => '', 'items' => [],
-            'bio_title' => 'Биография', 'bio_icon' => '', 'bio' => '',
-            'duties_title' => 'Функции', 'duties_icon' => '', 'duties' => '',
-            'mobile_icons_only' => false],
+        'org_structure' => [], // схема: BlockFieldSchema
+        'leader_card' => [], // схема: BlockFieldSchema
         'icon_text' => [], // схема: BlockFieldSchema
     ];
 

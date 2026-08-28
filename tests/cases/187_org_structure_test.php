@@ -114,9 +114,20 @@ test('Оргструктура: небезопасные ссылки отбра
 });
 
 test('Оргструктура: сохранение формы принимает новые поля', function () {
-    $src = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Controllers/Admin/BlockController.php');
-
+    // Поля описаны схемой: она же собирает присланное и отдаёт умолчания.
+    $fields = \App\Core\BlockData\BlockFieldSchema::fields('org_structure');
     foreach (['council', 'collapsible', 'notes', 'layout'] as $field) {
-        assert_contains("'{$field}' =>", $src, "поле {$field} не сохраняется");
+        assert_true(isset($fields[$field]), "поле {$field} не описано схемой");
     }
+
+    $saved = \App\Core\BlockData\BlockFieldSchema::normalize('org_structure', [
+        'council' => ' Координационный совет ',
+        'collapsible' => '1',
+        'notes' => 'Примечание',
+        'layout' => 'spine',
+    ], 'ru');
+    assert_same('Координационный совет', $saved['council']);
+    assert_same(true, $saved['collapsible']);
+    assert_same('Примечание', $saved['notes']);
+    assert_same('spine', $saved['layout']);
 });

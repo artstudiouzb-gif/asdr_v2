@@ -88,9 +88,9 @@ final class Field
         return new self('text', $label, $default, hint: $hint, placeholder: $placeholder);
     }
 
-    public static function textarea(string $label, string $hint = ''): self
+    public static function textarea(string $label, string $hint = '', string $placeholder = ''): self
     {
-        return new self('textarea', $label, '', hint: $hint);
+        return new self('textarea', $label, '', hint: $hint, placeholder: $placeholder);
     }
 
     /** Форматируемый текст: в форме — редактор, на входе — санитайзер. */

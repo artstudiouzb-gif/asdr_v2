@@ -31,7 +31,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             <input type="text" id="title" name="title" value="<?= htmlspecialchars($block['title'] ?? '', ENT_QUOTES) ?>">
         </div>
 
-        <?php if (in_array($type, ['text', 'team_list', 'hero', 'org_structure'], true)): ?>
+        <?php if (in_array($type, ['text', 'hero'], true)): ?>
             <div class="form-field">
                 <label for="title_field">Заголовок, показываемый на сайте</label>
                 <input type="text" id="title_field" name="title_field" value="<?= htmlspecialchars($data['title'] ?? '', ENT_QUOTES) ?>">
@@ -361,14 +361,6 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
         <?php endif; ?>
 
-        <?php if ($type === 'team_list'): ?>
-            <div class="form-field">
-                <label for="limit">Сколько записей показывать (0 — все)</label>
-                <input type="number" id="limit" name="limit" min="0" value="<?= (int) ($data['limit'] ?? 0) ?>">
-                <span class="form-hint">Блок выводит опубликованные записи раздела «Команда» по порядку сортировки.</span>
-            </div>
-        <?php endif; ?>
-
         <?php if ($type === 'news_latest'): ?>
             <?= \App\Core\BlockData\BlockFieldSchema::formHtml('news_latest', $data) ?>
         <?php endif; ?>
@@ -402,6 +394,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'team_list'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('team_list', $data) ?>
             <?php $teamDepartments = $departments ?? []; ?>
             <div class="form-field">
                 <label for="department">Показывать только сотрудников сектора</label>
@@ -414,10 +407,6 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php endforeach; ?>
                 </select>
                 <span class="form-hint">Сектор задаётся в карточке сотрудника (раздел «Команда»).</span>
-            </div>
-            <div class="form-field form-field--checkbox">
-                <input type="checkbox" id="group_by_department" name="group_by_department" value="1" <?= !empty($data['group_by_department']) ? 'checked' : '' ?>>
-                <label for="group_by_department">Группировать по секторам, а внутри — по отделам и группам</label>
             </div>
             <?php if ($teamDepartments !== []): ?>
                 <p class="form-hint">
@@ -1190,34 +1179,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
         <?php endif; ?>
 
         <?php if ($type === 'leader_card'): ?>
-            <?= \App\Core\AdminUi::imageField('photo', (string) ($data['photo'] ?? ''), ['label' => 'Фото руководителя']) ?>
-            <div class="form-field"><label for="lc_name">Имя</label><input type="text" id="lc_name" name="name" value="<?= htmlspecialchars($data['name'] ?? '', ENT_QUOTES) ?>" placeholder="Фамилия Имя Отчество"></div>
-            <?php $lcTag = in_array($data['name_tag'] ?? 'p', ['p', 'h2', 'h3'], true) ? $data['name_tag'] : 'p'; ?>
-            <div class="form-field">
-                <label for="lc_name_tag">Тег имени</label>
-                <select id="lc_name_tag" name="name_tag">
-                    <option value="p" <?= $lcTag === 'p' ? 'selected' : '' ?>>Обычный текст (не заголовок)</option>
-                    <option value="h2" <?= $lcTag === 'h2' ? 'selected' : '' ?>>Заголовок H2</option>
-                    <option value="h3" <?= $lcTag === 'h3' ? 'selected' : '' ?>>Заголовок H3</option>
-                </select>
-                <span class="form-hint">Заголовок ставится, когда карточка — самостоятельный раздел страницы. Уровни не должны перескакивать: под H1 страницы идёт H2, под ним H3. Заголовки вкладок подстроятся на уровень ниже сами.</span>
-            </div>
-            <div class="form-field"><label for="lc_position">Должность</label><textarea id="lc_position" name="position" rows="2" placeholder="Директор Агентства…"><?= htmlspecialchars($data['position'] ?? '', ENT_QUOTES) ?></textarea></div>
-            <div class="form-field"><label for="lc_phone">Телефон</label><input type="text" id="lc_phone" name="phone" value="<?= htmlspecialchars($data['phone'] ?? '', ENT_QUOTES) ?>" placeholder="+998 71 203 10 00"></div>
-            <div class="form-field"><label for="lc_email">E-mail</label><input type="text" id="lc_email" name="email" value="<?= htmlspecialchars($data['email'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="lc_hours">Приёмные часы</label><input type="text" id="lc_hours" name="hours" value="<?= htmlspecialchars($data['hours'] ?? '', ENT_QUOTES) ?>" placeholder="Пн–Пт 10:00 – 12:00"></div>
-
-            <p class="form-hint">Соцсети: пустое поле — значок не показывается.</p>
-            <?php foreach (['facebook' => 'Facebook', 'x' => 'X (Twitter)', 'linkedin' => 'LinkedIn', 'instagram' => 'Instagram', 'telegram' => 'Telegram'] as $lcNet => $lcNetLabel): ?>
-                <div class="form-field">
-                    <label for="lc_<?= $lcNet ?>"><?= htmlspecialchars($lcNetLabel, ENT_QUOTES) ?></label>
-                    <input type="text" id="lc_<?= $lcNet ?>" name="<?= $lcNet ?>" value="<?= htmlspecialchars($data[$lcNet] ?? '', ENT_QUOTES) ?>" placeholder="https://">
-                </div>
-            <?php endforeach; ?>
-
-            <hr>
-            <div class="form-field"><label for="lc_facts_title">Вкладка 1 — заголовок</label><input type="text" id="lc_facts_title" name="facts_title" value="<?= htmlspecialchars($data['facts_title'] ?? 'Основная информация', ENT_QUOTES) ?>"></div>
-            <?= \App\Core\AdminUi::iconField('facts_icon', $data['facts_icon'] ?? '', ['id' => 'lc_facts_icon', 'label' => 'Вкладка 1 — иконка']) ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('leader_card', $data, ['photo', 'name', 'name_tag', 'position', 'phone', 'email', 'hours', 'facebook', 'x', 'linkedin', 'instagram', 'telegram', 'facts_title', 'facts_icon']) ?>
             <div>
                 <label>Строки первой вкладки</label>
                 <div data-repeater="items">
@@ -1240,54 +1202,18 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
 
             <hr>
-            <div class="form-field"><label for="lc_bio_title">Вкладка 2 — заголовок</label><input type="text" id="lc_bio_title" name="bio_title" value="<?= htmlspecialchars($data['bio_title'] ?? 'Биография', ENT_QUOTES) ?>"></div>
-            <?= \App\Core\AdminUi::iconField('bio_icon', $data['bio_icon'] ?? '', ['id' => 'lc_bio_icon', 'label' => 'Вкладка 2 — иконка']) ?>
-            <div class="form-field"><label for="lc_bio">Вкладка 2 — текст</label><textarea id="lc_bio" name="bio" rows="6" data-wysiwyg><?= htmlspecialchars($data['bio'] ?? '', ENT_QUOTES) ?></textarea></div>
-
-            <hr>
-            <div class="form-field"><label for="lc_duties_title">Вкладка 3 — заголовок</label><input type="text" id="lc_duties_title" name="duties_title" value="<?= htmlspecialchars($data['duties_title'] ?? 'Функции', ENT_QUOTES) ?>"></div>
-            <?= \App\Core\AdminUi::iconField('duties_icon', $data['duties_icon'] ?? '', ['id' => 'lc_duties_icon', 'label' => 'Вкладка 3 — иконка']) ?>
-            <div class="form-field"><label for="lc_duties">Вкладка 3 — текст</label><textarea id="lc_duties" name="duties" rows="6" data-wysiwyg><?= htmlspecialchars($data['duties'] ?? '', ENT_QUOTES) ?></textarea></div>
-            <hr>
-            <div class="form-field form-field--checkbox">
-                <input type="checkbox" id="lc_mobile_icons_only" name="mobile_icons_only" value="1" <?= !empty($data['mobile_icons_only']) ? 'checked' : '' ?>>
-                <label for="lc_mobile_icons_only">На узком экране оставить во вкладках только иконки</label>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('leader_card', $data, ['bio_title', 'bio_icon', 'bio', 'duties_title', 'duties_icon', 'duties', 'mobile_icons_only']) ?>
             <p class="form-hint">Экономит место, когда заголовки длинные. Работает, только если иконка задана у каждой показанной вкладки — иначе получилась бы пустая вкладка, и настройка молча не применится. Подписи остаются доступны скринридеру.</p>
             <p class="form-hint">Вкладка без заголовка и без содержимого не показывается. Цвет активной вкладки берётся из акцента сайта («Дизайн сайта»), отдельной настройки у блока нет.</p>
         <?php endif; ?>
 
 
         <?php if ($type === 'person_profile'): ?>
-            <?= \App\Core\AdminUi::imageField('photo', (string) ($data['photo'] ?? ''), ['label' => 'Фото']) ?>
-            <div class="form-field"><label for="name">Имя</label><input type="text" id="name" name="name" value="<?= htmlspecialchars($data['name'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="position">Должность</label><input type="text" id="position" name="position" value="<?= htmlspecialchars($data['position'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="text">Описание</label><textarea id="text" name="text" rows="4"><?= htmlspecialchars($data['text'] ?? '', ENT_QUOTES) ?></textarea></div>
-            <div class="form-field"><label for="phone_label">Подпись телефона</label><input type="text" id="phone_label" name="phone_label" value="<?= htmlspecialchars($data['phone_label'] ?? 'Приёмная:', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="phone">Телефон</label><input type="text" id="phone" name="phone" value="<?= htmlspecialchars($data['phone'] ?? '', ENT_QUOTES) ?>" placeholder="+998 71 203 10 00"></div>
-            <div class="form-field"><label for="email_label">Подпись e-mail</label><input type="text" id="email_label" name="email_label" value="<?= htmlspecialchars($data['email_label'] ?? 'E-mail:', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="email">E-mail</label><input type="text" id="email" name="email" value="<?= htmlspecialchars($data['email'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="button_text">Кнопка — текст</label><input type="text" id="button_text" name="button_text" value="<?= htmlspecialchars($data['button_text'] ?? '', ENT_QUOTES) ?>" placeholder="Обратиться к руководителю"></div>
-            <div class="form-field"><label for="button_url">Кнопка — ссылка</label><input type="text" id="button_url" name="button_url" value="<?= htmlspecialchars($data['button_url'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="button2_text">Вторая кнопка — текст</label><input type="text" id="button2_text" name="button2_text" value="<?= htmlspecialchars($data['button2_text'] ?? '', ENT_QUOTES) ?>" placeholder="Биография"></div>
-            <div class="form-field"><label for="button2_url">Вторая кнопка — ссылка</label><input type="text" id="button2_url" name="button2_url" value="<?= htmlspecialchars($data['button2_url'] ?? '', ENT_QUOTES) ?>"><span class="form-hint">Вторая кнопка оформляется контуром — как второстепенное действие.</span></div>
-            <div class="form-field">
-                <label for="pp_photo_side">Сторона фото</label>
-                <select id="pp_photo_side" name="photo_side">
-                    <option value="left" <?= ($data['photo_side'] ?? 'left') === 'left' ? 'selected' : '' ?>>Слева</option>
-                    <option value="right" <?= ($data['photo_side'] ?? 'left') === 'right' ? 'selected' : '' ?>>Справа</option>
-                </select>
-                <span class="form-hint">На узких экранах фото в любом случае встаёт над текстом.</span>
-            </div>
-            <?php foreach (['telegram' => 'Telegram', 'facebook' => 'Facebook', 'linkedin' => 'LinkedIn', 'x' => 'X', 'instagram' => 'Instagram'] as $ppSocial => $ppLabel): ?>
-                <div class="form-field"><label for="pp_<?= $ppSocial ?>"><?= $ppLabel ?></label><input type="text" id="pp_<?= $ppSocial ?>" name="<?= $ppSocial ?>" value="<?= htmlspecialchars($data[$ppSocial] ?? '', ENT_QUOTES) ?>" placeholder="https://..."></div>
-            <?php endforeach; ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('person_profile', $data) ?>
         <?php endif; ?>
 
         <?php if ($type === 'bio_education'): ?>
-            <div class="form-field"><label for="bio_title">Левая колонка — заголовок</label><input type="text" id="bio_title" name="bio_title" value="<?= htmlspecialchars($data['bio_title'] ?? 'Биография', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="bio_text">Вступительный текст</label><textarea id="bio_text" name="bio_text" rows="4"><?= htmlspecialchars($data['bio_text'] ?? '', ENT_QUOTES) ?></textarea></div>
-            <div class="form-field"><label for="career_title">Заголовок хронологии</label><input type="text" id="career_title" name="career_title" value="<?= htmlspecialchars($data['career_title'] ?? '', ENT_QUOTES) ?>" placeholder="Профессиональный путь"></div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('bio_education', $data, ['bio_title', 'bio_text', 'career_title']) ?>
             <div>
                 <label>Карьера (годы + позиция)</label>
                 <div data-repeater="career">
@@ -1307,7 +1233,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="career"><?= \App\Core\AdminUi::icon('plus') ?>Добавить период</button></div>
             </div>
             <hr>
-            <div class="form-field"><label for="edu_title">Правая колонка — заголовок</label><input type="text" id="edu_title" name="edu_title" value="<?= htmlspecialchars($data['edu_title'] ?? 'Образование', ENT_QUOTES) ?>"></div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('bio_education', $data, ['edu_title']) ?>
             <div>
                 <label>Образование (годы + степень + вуз)</label>
                 <div data-repeater="edu_items">
@@ -1328,8 +1254,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="edu_items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить</button></div>
             </div>
-            <div class="form-field"><label for="extra_title">Доп. образование — заголовок</label><input type="text" id="extra_title" name="extra_title" value="<?= htmlspecialchars($data['extra_title'] ?? '', ENT_QUOTES) ?>" placeholder="Дополнительное образование"></div>
-            <div class="form-field"><label for="extra_text">Доп. образование — пункты (по одному на строку)</label><textarea id="extra_text" name="extra_text" rows="3"><?= htmlspecialchars($data['extra_text'] ?? '', ENT_QUOTES) ?></textarea></div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('bio_education', $data, ['extra_title', 'extra_text']) ?>
             <?php
             $widgetSlots = [
                 ['key' => 'widgets_before', 'title' => 'Виджеты над образованием', 'selected' => (array) ($data['widgets_before'] ?? [])],
@@ -1398,8 +1323,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     </section>
                 <?php endforeach; ?>
             </div>
-            <div class="form-field"><label for="quote_text">Цитата</label><textarea id="quote_text" name="quote_text" rows="2"><?= htmlspecialchars($data['quote_text'] ?? '', ENT_QUOTES) ?></textarea></div>
-            <div class="form-field"><label for="quote_author">Автор цитаты</label><input type="text" id="quote_author" name="quote_author" value="<?= htmlspecialchars($data['quote_author'] ?? '', ENT_QUOTES) ?>"></div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('bio_education', $data, ['quote_text', 'quote_author']) ?>
         <?php endif; ?>
 
         <?php if ($type === 'anchor_nav'): ?>
@@ -1548,31 +1472,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                     <?php endforeach; ?>
                 </p>
             <?php endif; ?>
-            <div class="form-field">
-                <label for="layout">Макет схемы</label>
-                <select id="layout" name="layout">
-                    <option value="tree" <?= $orgLayout === 'tree' ? 'selected' : '' ?>>Дерево (колонки с соединителями)</option>
-                    <option value="spine" <?= $orgLayout === 'spine' ? 'selected' : '' ?>>Компактный список (для больших структур)</option>
-                </select>
-            </div>
-            <div class="form-field">
-                <label for="columns">Колонок в ряду (для макета «Дерево»)</label>
-                <select id="columns" name="columns">
-                    <?php foreach ([2, 3, 4] as $c): ?><option value="<?= $c ?>" <?= $orgColumns === $c ? 'selected' : '' ?>><?= $c ?></option><?php endforeach; ?>
-                </select>
-                <span class="form-hint">Лишние ветки переносятся на следующий ряд со своим соединителем.</span>
-            </div>
-            <div class="form-field">
-                <label for="council">Коллегиальный орган над руководителем (по одному на строку)</label>
-                <textarea id="council" name="council" rows="2" placeholder="Координационный совет"><?= htmlspecialchars($data['council'] ?? '', ENT_QUOTES) ?></textarea>
-            </div>
-            <div class="form-field"><label for="head_title">Руководитель — должность</label><input type="text" id="head_title" name="head_title" value="<?= htmlspecialchars($data['head_title'] ?? 'Директор', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="head_name">Руководитель — Ф.И.О. (необязательно)</label><input type="text" id="head_name" name="head_name" value="<?= htmlspecialchars($data['head_name'] ?? '', ENT_QUOTES) ?>"></div>
-            <div class="form-field"><label for="head_url">Руководитель — ссылка (напр. на страницу директора)</label><input type="text" id="head_url" name="head_url" value="<?= htmlspecialchars($data['head_url'] ?? '', ENT_QUOTES) ?>" placeholder="/direktor"></div>
-            <div class="form-field">
-                <label for="side_items">Органы сбоку от руководителя (по одному на строку)</label>
-                <textarea id="side_items" name="side_items" rows="3" placeholder="Советник"><?= htmlspecialchars($data['side_items'] ?? '', ENT_QUOTES) ?></textarea>
-            </div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('org_structure', $data, ['title', 'layout', 'columns', 'council', 'head_title', 'head_name', 'head_url', 'side_items']) ?>
             <?php
             // Готовые ссылки на состав сектора: адрес собирается по данным
             // команды, а не переписывается руками (переименование сектора
@@ -1619,19 +1519,7 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="branches"><?= \App\Core\AdminUi::icon('plus') ?>Добавить ветку</button></div>
             </div>
-            <div class="form-field form-field--checkbox">
-                <input type="checkbox" id="collapsible" name="collapsible" value="1" <?= !empty($data['collapsible']) ? 'checked' : '' ?>>
-                <label for="collapsible">Сворачивать подразделения на всех экранах (на телефоне схема сворачивается всегда)</label>
-            </div>
-            <div class="form-field form-field--checkbox">
-                <input type="checkbox" id="org_search" name="org_search" value="1" <?= !empty($data['search']) ? 'checked' : '' ?>>
-                <label for="org_search">Поиск по схеме (поле над схемой; полезно, когда узлов больше трёх десятков)</label>
-            </div>
-            <div class="form-field">
-                <label for="notes">Примечания карточками под схемой (по одному на строку)</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="Отделы четвёртой колонки подчиняются директору напрямую"><?= htmlspecialchars($data['notes'] ?? '', ENT_QUOTES) ?></textarea>
-            </div>
-            <div class="form-field"><label for="footnote">Примечание под схемой (необязательно)</label><input type="text" id="footnote" name="footnote" value="<?= htmlspecialchars($data['footnote'] ?? '', ENT_QUOTES) ?>" placeholder="Структура утверждена постановлением…"></div>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('org_structure', $data, ['collapsible', 'search', 'notes', 'footnote']) ?>
         <?php endif; ?>
 
         <?php // Общие поля оформления свёрнуты: контент-поля — основная задача,

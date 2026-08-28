@@ -63,7 +63,8 @@ $iconsOnly = !empty($data['mobile_icons_only'])
 
 // Тег имени и уровень заголовков вкладок связаны: если имя — заголовок, то
 // разделы карточки должны идти ровно на уровень ниже.
-$nameTag = in_array($data['name_tag'] ?? 'p', ['p', 'h2', 'h3'], true) ? (string) $data['name_tag'] : 'p';
+// Значение проверено схемой полей (BlockFieldSchema) — читаем как есть.
+$nameTag = (string) $data['name_tag'];
 $panelTag = $nameTag === 'h3' ? 'h4' : 'h3';
 
 $panelId = static fn (string $key): string => 'leader-' . (int) $blockId . '-' . $key;
