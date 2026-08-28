@@ -42,6 +42,15 @@ if (!in_array($env, ['testing', 'development'], true)) {
     exit(1);
 }
 
+// Секрет TOTP хранится зашифрованным. Без ключа SecretBox бросает исключение,
+// а обработчик ошибок в CLI печатает трассу и выходит с нулём — шаг CI считался
+// успешным, фикстура ложилась наполовину, и падал уже вход в панель, где
+// причину было не видно. Поэтому проверяем ключ здесь и падаем громко.
+if ((string) Config::get('crypto.encryption_key', '') === '') {
+    fwrite(STDERR, "Нужен APP_ENCRYPTION_KEY: секрет TOTP тестовой учётки хранится зашифрованным.\n");
+    exit(1);
+}
+
 $pdo = Database::pdo();
 
 $existing = $pdo->prepare('SELECT id FROM users WHERE username = ?');

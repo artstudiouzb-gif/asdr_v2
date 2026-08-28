@@ -162,6 +162,10 @@ jobs:
           DB_DATABASE: asdr_browser
           DB_USERNAME: root
           DB_PASSWORD: ''
+          # Секрет TOTP тестовой учётки шифруется этим ключом, а сервер тем же
+          # ключом расшифровывает его при входе — значения обязаны совпадать.
+          # Ключ одноразовый, для базы, которая живёт минуты.
+          APP_ENCRYPTION_KEY: 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff
         run: |
           php tests/load_schema.php asdr_browser
           php -r "
@@ -209,6 +213,9 @@ jobs:
           DB_DATABASE: asdr_browser
           DB_USERNAME: root
           DB_PASSWORD: ''
+          # Тот же ключ, что у фикстуры: иначе секрет TOTP не расшифруется и
+          # вход в панель остановится на настройке второго фактора.
+          APP_ENCRYPTION_KEY: 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff
         run: |
           php -S 127.0.0.1:8080 -t public public/router.php > /tmp/asdr-server.log 2>&1 &
           echo $! > /tmp/asdr-server.pid
