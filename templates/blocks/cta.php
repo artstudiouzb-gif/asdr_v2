@@ -11,9 +11,8 @@ $buttonText = trim((string) ($data['button_text'] ?? ''));
 $buttonUrl = trim((string) ($data['button_url'] ?? ''));
 $icon = trim((string) ($data['icon_svg'] ?? ''));
 $image = trim((string) ($data['image'] ?? ''));
-$variant = in_array($data['variant'] ?? 'card', ['card', 'band', 'media-dark', 'media-light'], true)
-    ? (string) $data['variant']
-    : 'card';
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$variant = (string) $data['variant'];
 $mediaClasses = MediaPosition::classes($data['image_position'] ?? null, $data['image_position_mobile'] ?? null);
 
 if ($buttonUrl !== '' && !UrlGuard::isSafeLink($buttonUrl)) {

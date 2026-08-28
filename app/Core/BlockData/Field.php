@@ -22,7 +22,7 @@ namespace App\Core\BlockData;
  */
 final class Field
 {
-    public const KINDS = ['enum', 'int', 'int_choice', 'bool', 'text', 'textarea', 'richtext', 'url', 'media', 'icon', 'color'];
+    public const KINDS = ['enum', 'int', 'int_choice', 'bool', 'text', 'textarea', 'richtext', 'url', 'media', 'icon', 'color', 'media_position'];
 
     /**
      * @param array<string, string> $options варианты `enum`: значение => подпись
@@ -114,6 +114,26 @@ final class Field
     public static function icon(string $label = 'Иконка', string $hint = ''): self
     {
         return new self('icon', $label, '', hint: $hint);
+    }
+
+    /**
+     * Кадрирование фонового изображения: пресеты для широкого экрана и для
+     * телефона.
+     *
+     * Единственное поле, которое владеет **двумя** ключами данных: своим и
+     * тем же именем с суффиксом `_mobile`. Виджет админки рисует оба списка
+     * сразу, и разносить их по двум описаниям значило бы разложить один
+     * элемент управления на две половины.
+     */
+    public static function mediaPosition(string $label = 'Кадрирование изображения'): self
+    {
+        return new self('media_position', $label, 'center-center');
+    }
+
+    /** Ключ-спутник поля `media_position`; у остальных видов его нет. */
+    public function companionKey(string $key): ?string
+    {
+        return $this->kind === 'media_position' ? $key . '_mobile' : null;
     }
 
     /**

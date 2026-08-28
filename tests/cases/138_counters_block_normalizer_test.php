@@ -188,7 +188,8 @@ test('Контроллер делегирует счётчики CountersBlockNo
 });
 
 test('Форма счётчиков показывает настройки иконки, выравнивания и поле своей иконки', function (): void {
-    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
+    // Поля счётчиков рисует схема, поэтому смотрим на редактор целиком.
+    $form = block_editor_markup();
 
     foreach (['name="icon_size"', 'name="icon_bg"', 'name="icon_position"', 'name="text_align"'] as $field) {
         assert_contains($field, $form);

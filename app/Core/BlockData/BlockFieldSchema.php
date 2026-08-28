@@ -7,6 +7,7 @@ namespace App\Core\BlockData;
 use App\Core\AdminUi;
 use App\Core\HtmlSanitizer;
 use App\Core\Icon;
+use App\Core\MediaPosition;
 use App\Core\TextProcessor;
 
 /**
@@ -46,6 +47,9 @@ final class BlockFieldSchema
         'icon_text' => ['items' => [], 'icon_position' => ''],
         'person_cards' => ['items' => []],
         'slider' => ['slides' => []],
+        'counters' => ['items' => []],
+        'cards_grid' => ['items' => []],
+        'media_gallery' => ['items' => []],
     ];
 
     /** @var array<string, array<string, Field>>|null */
@@ -324,6 +328,106 @@ final class BlockFieldSchema
                 ], 'left'),
                 'columns' => Field::intChoice('Колонок', [1, 2, 3, 4], 3),
             ],
+            'cta' => [
+                'variant' => Field::enum('Вариант блока', [
+                    'card' => 'Карточка призыва',
+                    'band' => 'Компактная полоса',
+                    'media-dark' => 'Фото с затемнением',
+                    'media-light' => 'Светлый сплит с фото',
+                ], 'card', 'Выберите карточку, компактную полосу или один из двух макетов с фотографией.'),
+                'title' => Field::text('Заголовок, показываемый на сайте')->named('title_field'),
+                'text' => Field::textarea('Текст'),
+                'icon_svg' => Field::icon('Иконка для варианта «Полоса»'),
+                'image' => Field::media('Изображение для вариантов с фото'),
+                'image_position' => Field::mediaPosition(),
+                'button_text' => Field::text('Текст кнопки'),
+                'button_url' => Field::url('Ссылка кнопки'),
+                'bg_color' => Field::color('Цвет фона', '#eef2f7'),
+                'text_color' => Field::color('Цвет текста', '#173a63'),
+                'button_color' => Field::color('Цвет фона кнопки', '#17999b'),
+            ],
+            'counters' => [
+                'title' => Field::text('Заголовок, показываемый на сайте')->named('title_field'),
+                'card_bg' => Field::color('Цвет карточки (фон)', '#ffffff'),
+                'text_color' => Field::color(
+                    'Цвет текста и цифр',
+                    '#173a63',
+                    'Оставьте «по умолчанию», чтобы карточка была белой с тёмным текстом. Для тёмной карточки выберите тёмный фон и светлый текст.'
+                ),
+                'icon_size' => Field::int('Размер иконок, px', 16, 64, 28),
+                'icon_bg' => Field::enum('Фон иконок', [
+                    'on' => 'С подложкой',
+                    'off' => 'Без подложки',
+                ], 'on'),
+                'icon_position' => Field::enum('Положение иконки', [
+                    'left' => 'Слева от текста',
+                    'right' => 'Справа от текста',
+                    'top' => 'Сверху',
+                    'center' => 'Сверху по центру',
+                ], 'left'),
+                'text_align' => Field::enum('Выравнивание содержимого', [
+                    'left' => 'Слева',
+                    'center' => 'По центру',
+                    'right' => 'Справа',
+                ], 'left', 'Размер, фон и расположение применяются только к иконкам этого блока; выравнивание — к числу и подписи.'),
+                'variant' => Field::enum('Вид блока', [
+                    'row' => 'Полоса с разделителями',
+                    'cards' => 'Отдельные карточки',
+                ], 'row'),
+                'value_size' => Field::enum('Размер чисел', [
+                    'normal' => 'Обычный',
+                    'large' => 'Крупный',
+                ], 'normal'),
+            ],
+            'cards_grid' => [
+                'title' => Field::text('Заголовок, показываемый на сайте')->named('title_field'),
+                'all_text' => Field::text('Ссылка «Все …» — текст', '', '', 'Все направления'),
+                'all_url' => Field::url('Ссылка «Все …» — URL'),
+                'source' => Field::enum('Источник данных', [
+                    'manual' => 'Ручной список (ниже)',
+                    'projects' => 'Из раздела «Проекты»',
+                ], 'manual', 'Автоматический источник использует записи с отметкой «Показать на главной».'),
+                'limit' => Field::int('Сколько карточек показывать', 2, 24, 6),
+                'variant' => Field::enum('Вариант карточек', [
+                    'icon' => 'Иконка, заголовок и текст',
+                    'compact' => 'Компактные категории',
+                    'image' => 'Карточки с фотографией',
+                    'image_below' => 'Фото сверху, заголовок и текст под ним',
+                ], 'icon', 'Один набор данных можно показать как карточки с иконками, категории или карточки с фотографиями.'),
+                'columns' => Field::intChoice('Колонок', [2, 3, 4, 5], 5),
+                'card_bg' => Field::color('Цвет карточек (фон)', '#ffffff'),
+                'text_color' => Field::color('Цвет текста и иконок', '#173a63'),
+                'image_position' => Field::mediaPosition(),
+            ],
+            'media_gallery' => [
+                'title' => Field::text('Заголовок, показываемый на сайте')->named('title_field'),
+                'description' => Field::textarea('Описание раздела'),
+                'ratio' => Field::enum('Пропорция плитки', [
+                    '16-9' => '16:9 — как у видео',
+                    '4-3' => '4:3 — классическая',
+                    '1-1' => '1:1 — квадрат',
+                ], '16-9', 'Обложки видео и фотоальбомов приходят разного размера — общая пропорция выравнивает ряд.'),
+                'all_text' => Field::text('Ссылка «Все …» — текст', '', '', 'Все направления'),
+                'all_url' => Field::url('Ссылка «Все …» — URL'),
+                'source' => Field::enum('Источник данных', [
+                    'manual' => 'Ручной список (ниже)',
+                    'media' => 'Видео + фотоальбомы',
+                    'albums' => 'Из фотоальбомов',
+                    'videos' => 'Из раздела «Видео»',
+                ], 'manual', 'Автоматический источник использует записи с отметкой «Показать на главной».'),
+                'limit' => Field::int('Сколько карточек показывать (при постраничном выводе — на странице)', 2, 24, 8),
+                'paginate' => Field::bool(
+                    'Постраничный вывод',
+                    false,
+                    'С полосой страниц блок показывает весь опубликованный список, а не только отмеченные «Показать на главной», и делит его на страницы. Ссылка страницы ведёт на этот же блок. Для видео это единственный способ дойти до старых роликов: отдельного раздела «Видео» на сайте нет.'
+                ),
+                'columns' => Field::intChoice(
+                    'Плиток в ряду',
+                    [2, 3, 4, 5],
+                    4,
+                    'Действует на широких экранах; ниже 1000px число колонок подбирается автоматически.'
+                ),
+            ],
         ];
     }
 
@@ -348,6 +452,10 @@ final class BlockFieldSchema
         $defaults = [];
         foreach (self::fields($type) as $key => $field) {
             $defaults[$key] = $field->default;
+            $companion = $field->companionKey($key);
+            if ($companion !== null) {
+                $defaults[$companion] = $field->default;
+            }
         }
 
         return array_merge($defaults, self::EXTRA[$type] ?? []);
@@ -381,8 +489,13 @@ final class BlockFieldSchema
                 'media' => BlockDataInput::safeMedia($post[$name] ?? ''),
                 'icon' => Icon::cleanName($post[$name] ?? ''),
                 'color' => BlockDataInput::optionalColor($post, $name),
+                'media_position' => MediaPosition::normalize($post[$name] ?? null),
                 default => $field->default,
             };
+            $companion = $field->companionKey($key);
+            if ($companion !== null) {
+                $data[$companion] = MediaPosition::normalize($post[$companion] ?? null);
+            }
         }
 
         return $data;
@@ -418,8 +531,13 @@ final class BlockFieldSchema
                 'color' => preg_match('/^#[0-9a-f]{6}$/i', is_scalar($value) ? (string) $value : '') === 1
                     ? strtolower((string) $value)
                     : '',
+                'media_position' => MediaPosition::normalize($value),
                 default => is_scalar($value) ? (string) $value : '',
             };
+            $companion = $field->companionKey($key);
+            if ($companion !== null) {
+                $data[$companion] = MediaPosition::normalize($data[$companion] ?? null);
+            }
         }
 
         return $data;
@@ -467,13 +585,17 @@ final class BlockFieldSchema
 
         // Готовые виджеты админки приносят собственный `.form-field`, поэтому
         // условие показа вешается обёрткой снаружи, а не атрибутом внутри.
-        if (in_array($field->kind, ['media', 'icon', 'color'], true)) {
+        if (in_array($field->kind, ['media', 'icon', 'color', 'media_position'], true)) {
             $widget = match ($field->kind) {
                 'media' => AdminUi::imageField($name, is_scalar($value = $data[$key] ?? '') ? (string) $value : '', ['label' => $field->label, 'hint' => $field->hint]),
                 'icon' => AdminUi::iconField($name, $data[$key] ?? '', array_filter([
                     'label' => $field->label,
                     'hint' => $field->hint !== '' ? $field->hint : null,
                 ], static fn ($v) => $v !== null)),
+                'media_position' => AdminUi::mediaPositionFields(
+                    MediaPosition::normalize($data[$key] ?? null),
+                    MediaPosition::normalize($data[$key . '_mobile'] ?? null)
+                ),
                 default => AdminUi::colorField($name, (string) ($data[$key] ?? ''), $field->label, $field->swatch),
             };
 
