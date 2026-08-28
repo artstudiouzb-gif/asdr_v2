@@ -179,17 +179,37 @@ function totp(secret, timeSlice = Math.floor(Date.now() / 1000 / 30)) {
 }
 
 async function login(page) {
-    await page.goto('/admin/login', { waitUntil: 'domcontentloaded' });
-    await page.fill('#username', ADMIN_USER);
-    await page.fill('#password', ADMIN_PASSWORD);
-    await page.click('form button[type="submit"], form input[type="submit"]');
+    // Шаг TOTP одноразовый и принимается только вперёд (users.totp_last_step),
+    // а сервер держит окно ±1 шаг. Поэтому при отказе сразу предъявляем код
+    // следующего окна: он и в допуске сервера, и заведомо больше уже
+    // потраченного шага. Третья попытка — после смены окна, на случай, когда
+    // израсходован и он.
+    const step = () => Math.floor(Date.now() / 1000 / 30);
 
-    await page.waitForURL(/\/admin(\/login\/2fa)?$/, { timeout: 15000 });
-    if (page.url().includes('/admin/login/2fa')) {
-        await page.fill('#code', totp(ADMIN_TOTP_SECRET));
+    for (let attempt = 0; attempt < 3; attempt++) {
+        if (attempt === 2) { await page.waitForTimeout(31000); }
+
+        await page.goto('/admin/login', { waitUntil: 'domcontentloaded' });
+        await page.fill('#username', ADMIN_USER);
+        await page.fill('#password', ADMIN_PASSWORD);
         await page.click('form button[type="submit"], form input[type="submit"]');
-        await page.waitForURL(/\/admin\/?$/, { timeout: 15000 });
+        await page.waitForLoadState();
+
+        if (/\/admin\/?$/.test(page.url())) { return; }
+        if (!page.url().includes('/admin/login/2fa')) {
+            // Не пароль и не второй фактор — фикстура не доехала. Молчать об
+            // этом нельзя: дальше посыпались бы снимки, а не вход.
+            throw new Error('Вход остановился на ' + page.url() + ' — проверьте tests/browser/seed_admin_visual.php');
+        }
+
+        await page.fill('#code', totp(ADMIN_TOTP_SECRET, step() + (attempt === 1 ? 1 : 0)));
+        await page.click('form button[type="submit"], form input[type="submit"]');
+        await page.waitForLoadState();
+
+        if (/\/admin\/?$/.test(page.url())) { return; }
     }
+
+    throw new Error('Второй фактор не принят за три попытки: шаг TOTP занят другим входом?');
 }
 
 /**
@@ -263,7 +283,13 @@ test.describe('@visual админка', () => {
     let page = null;
 
     test.beforeAll(async ({ browser }, testInfo) => {
-        if (testInfo.project.use.isMobile) { return; }
+        // Хуки выполняются раньше, чем срабатывает test.skip ниже, поэтому
+        // мобильный проект отсекается здесь же: иначе он тоже заходил бы в
+        // панель и забирал тот самый одноразовый шаг TOTP, из-за чего вход
+        // десктопного проекта падал в параллельном воркере.
+        if (testInfo.project.name !== 'desktop-chromium') { return; }
+        // Вход умеет ждать следующего окна кода — хуку нужен запас времени.
+        testInfo.setTimeout(120000);
         context = await browser.newContext({ viewport: testInfo.project.use.viewport || { width: 1440, height: 900 } });
         page = await context.newPage();
         await login(page);
