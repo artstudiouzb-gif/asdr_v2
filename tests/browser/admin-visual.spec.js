@@ -237,9 +237,24 @@ async function applyTheme(page, theme) {
     }, theme);
 }
 
+/**
+ * Гасим переходы перед снимком. Одного тега стилей мало: слой переопределений
+ * панели объявляет свои transition через !important и побеждает его по
+ * специфичности, поэтому снимок ловил цвет посреди перехода темы — рамка поля
+ * фильтра приходила промежуточной, и тест краснел через раз. Инлайн-стиль с
+ * !important сильнее любого правила таблицы стилей, поэтому проходим по узлам.
+ */
 async function freezeTransitions(page) {
     await page.addStyleTag({
         content: '*, *::before, *::after { transition: none !important; animation: none !important; }',
+    });
+    await page.evaluate(() => {
+        document.querySelectorAll('*').forEach((el) => {
+            // У части узлов внутри встроенного SVG инлайн-стиля нет вовсе.
+            if (!el.style || typeof el.style.setProperty !== 'function') { return; }
+            el.style.setProperty('transition', 'none', 'important');
+            el.style.setProperty('animation', 'none', 'important');
+        });
     });
 }
 
@@ -345,6 +360,8 @@ test.describe('@visual админка', () => {
         await expect(page.locator('[data-media-modal]')).toBeVisible();
         // Ждём ответа библиотеки: до него сетка занята сообщением «Загрузка…».
         await expect(page.locator('[data-media-grid]')).toHaveAttribute('aria-busy', 'false');
+        // Окно и карточки библиотеки появились уже после первой заморозки.
+        await freezeTransitions(page);
 
         for (const theme of THEMES) {
             await applyTheme(page, theme);
