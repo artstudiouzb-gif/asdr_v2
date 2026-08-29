@@ -22,9 +22,8 @@ $category = $category ?? '';
 $lang = Locale::current();
 // Дата — единым числовым форматом на всех языках: 19.07.2026.
 $fmt = static fn (string $d): string => DateFormatter::short($d);
-// Крупная первая новость — только на первой странице общего списка.
-$featured = ($page === 1 && $category === '' && !empty($items)) ? $items[0] : null;
-$grid = $featured !== null ? array_slice($items, 1) : $items;
+// Отдельной крупной новости над лентой нет: первая новость открывает ленту
+// крупной карточкой группы (App\Core\NewsFeedRhythm), дальше ритм повторяется.
 $pageUrl = static fn (int $p): string => Locale::url('news')
     . (($p > 1 || $category !== '') ? '?' . http_build_query(array_filter(['category' => $category, 'page' => $p > 1 ? $p : null])) : '');
 
@@ -42,33 +41,13 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
 <?php if (empty($items)): ?>
     <p class="listing__empty"><?= htmlspecialchars(t('Пока нет опубликованных новостей.'), ENT_QUOTES) ?></p>
 <?php else: ?>
-    <?php if ($featured !== null): ?>
-        <?php $fc = News::getCoverImage($featured); ?>
-        <a class="newslist-lead" href="<?= htmlspecialchars(Locale::url('news/' . $featured['slug']), ENT_QUOTES) ?>">
-            <span class="news-cover">
-                <?php if ($fc !== null): ?>
-                    <?= \App\Core\Media::picture($fc, (string) $featured['title'], null, null, 'newslist-lead__img', false, '(max-width: 900px) 100vw, 55vw', false, 'newslist-lead__media') ?>
-                <?php else: ?>
-                    <span class="newslist-lead__media newslist-lead__media--empty" aria-hidden="true"></span>
-                <?php endif; ?>
-                <?= \App\Core\NewsBadge::renderOverlay($featured['badge'] ?? '', $featured['badge_color'] ?? null) ?>
-            </span>
-            <span class="newslist-lead__body">
-                <span class="news-meta">
-                    <?php if (!empty($featured['published_at'])): ?><time class="newslist__date"><?= htmlspecialchars($fmt((string) $featured['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
-                    <?php if ($categoryOf($featured) !== ''): ?><span class="news-category"><?= htmlspecialchars($categoryOf($featured), ENT_QUOTES) ?></span><?php endif; ?>
-                </span>
-                <h2 class="newslist-lead__title"><?= htmlspecialchars((string) $featured['title'], ENT_QUOTES) ?></h2>
-            </span>
-        </a>
-    <?php endif; ?>
-
     <div class="newslist-grid">
-        <?php foreach (array_values($grid) as $index => $item): ?>
+        <?php foreach (array_values($items) as $index => $item): ?>
             <?php
             $c = News::getCoverImage($item);
-            // Ритм ленты: каждая пятая карточка широкая — с анонсом и фотографией
-            // сбоку. Двенадцать одинаковых карточек подряд читаются как таблица.
+            // Ритм ленты: группа «крупная плюс две компактные». Крупная идёт
+            // первой — с анонсом и фотографией сбоку; ряд из одинаковых
+            // карточек читался бы как таблица.
             $wide = \App\Core\NewsFeedRhythm::isWide($index);
             $excerpt = $wide ? trim((string) ($item['excerpt'] ?? '')) : '';
             ?>

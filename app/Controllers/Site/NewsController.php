@@ -39,28 +39,15 @@ final class NewsController
 
         $total = News::publishedCount($categoryId > 0 ? $categoryId : null, $lang);
 
-        // В общем списке первая страница имеет отдельную композицию: 1 крупная
-        // новость плюс сетка. На следующих страницах крупной карточки нет, в
-        // рубриках — тоже. Размер сетки задаёт ритм ленты: каждая пятая
-        // карточка широкая (две ячейки), поэтому страница из десяти карточек
-        // укладывается в 12 ячеек и ряды остаются полными и при четырёх
-        // колонках, и при трёх, и при двух.
+        // Композиция страницы одна и та же везде — и на первой, и в рубрике:
+        // лента идёт группами «крупная плюс две компактные». Отдельной крупной
+        // новости над сеткой больше нет, поэтому и особого размера первой
+        // страницы тоже: размер задаёт ритм (App\Core\NewsFeedRhythm).
         $gridPageSize = \App\Core\NewsFeedRhythm::PAGE_SIZE;
-        $hasLead = $categorySlug === '';
-        if ($hasLead) {
-            $firstPageSize = $gridPageSize + 1;
-            $pages = $total <= $firstPageSize
-                ? 1
-                : 1 + (int) ceil(($total - $firstPageSize) / $gridPageSize);
-            $page = min($page, $pages);
-            $perPage = $page === 1 ? $firstPageSize : $gridPageSize;
-            $offset = $page === 1 ? 0 : $firstPageSize + (($page - 2) * $gridPageSize);
-        } else {
-            $pages = max(1, (int) ceil($total / $gridPageSize));
-            $page = min($page, $pages);
-            $perPage = $gridPageSize;
-            $offset = ($page - 1) * $gridPageSize;
-        }
+        $pages = max(1, (int) ceil($total / $gridPageSize));
+        $page = min($page, $pages);
+        $perPage = $gridPageSize;
+        $offset = ($page - 1) * $gridPageSize;
 
         $vars = [
             'items' => News::published($perPage, $offset, $lang, $categoryId > 0 ? $categoryId : null),
