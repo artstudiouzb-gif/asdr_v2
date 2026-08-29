@@ -65,6 +65,16 @@
   ".btn--small": {
     "fontSize": "12.5px",
     "padding": "5px 10px",
-    "borderRadius": "3px"
+    "borderRadius": "3px",
+    "height": "32px",
+    "minHeight": "28px"
+  },
+  ".bulk-bar select": {
+    "width": "220px",
+    "height": "38px"
+  },
+  ".bulk-bar .btn": {
+    "height": "38px",
+    "minHeight": "38px"
   }
 }

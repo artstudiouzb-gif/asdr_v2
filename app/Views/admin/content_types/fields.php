@@ -23,6 +23,10 @@ $ftypes = ['text' => 'Текст', 'textarea' => 'Многострочный', '
             <label for="description">Описание раздела (для страницы списка на сайте)</label>
             <input type="text" id="description" name="description" value="<?= htmlspecialchars((string) ($type['description'] ?? ''), ENT_QUOTES) ?>">
         </div>
+        <?= \App\Core\AdminUi::iconField('icon', (string) ($type['icon'] ?? ''), [
+            'label' => 'Иконка раздела',
+            'hint' => 'Значок пункта в боковом меню. Пусто — общий значок списка.',
+        ]) ?>
         <div class="form-field form-field--checkbox">
             <input type="checkbox" id="has_translations" name="has_translations" value="1" <?= (int) $type['has_translations'] === 1 ? 'checked' : '' ?>>
             <label for="has_translations">Мультиязычный</label>

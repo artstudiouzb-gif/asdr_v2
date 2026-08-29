@@ -814,6 +814,7 @@ CREATE TABLE IF NOT EXISTS content_types (
     slug             VARCHAR(60)  NOT NULL,
     name             VARCHAR(190) NOT NULL,
     description      VARCHAR(255) NOT NULL DEFAULT '',
+    icon             VARCHAR(60)  NOT NULL DEFAULT '' COMMENT 'имя иконки Tabler для пункта меню',
     has_translations TINYINT(1)   NOT NULL DEFAULT 0,
     is_public        TINYINT(1)   NOT NULL DEFAULT 1,
     created_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -863,10 +864,10 @@ CREATE TABLE IF NOT EXISTS content_entry_translations (
 -- ---------------------------------------------------------------------------
 -- Стартовые публичные типы контента государственного сайта (редактируемы)
 -- ---------------------------------------------------------------------------
-INSERT IGNORE INTO content_types (slug, name, description, has_translations, is_public, created_at) VALUES
-    ('documenty', 'Документы', 'Официальные документы, приказы и постановления', 1, 1, NOW()),
-    ('vakansii',  'Вакансии',  'Открытые вакансии организации', 1, 1, NOW()),
-    ('tendery',   'Тендеры',   'Актуальные тендеры и закупки', 1, 1, NOW());
+INSERT IGNORE INTO content_types (slug, name, description, icon, has_translations, is_public, created_at) VALUES
+    ('documenty', 'Документы', 'Официальные документы, приказы и постановления', 'file-text', 1, 1, NOW()),
+    ('vakansii',  'Вакансии',  'Открытые вакансии организации', 'briefcase', 1, 1, NOW()),
+    ('tendery',   'Тендеры',   'Актуальные тендеры и закупки', 'gavel', 1, 1, NOW());
 
 INSERT INTO content_type_fields (type_id, name, label, field_type, required, sort_order, created_at)
 SELECT t.id, f.name, f.label, f.field_type, f.required, f.sort_order, NOW()
@@ -1249,7 +1250,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_21_videos_youtube_import.sql'),
     ('2026_08_23_totp_replay_guard.sql'),
     ('2026_08_26_goals.sql'),
-    ('2026_08_27_goal_texts.sql')
+    ('2026_08_27_goal_texts.sql'),
+    ('2026_08_29_content_type_icon.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

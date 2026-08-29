@@ -36,6 +36,14 @@
     --admin-neutral: #64748b;
     --admin-surface-hover: #f6f7f7;  /* фон ховера кнопок/строк */
     --admin-surface-soft: #fafbfc;   /* подложки групп/тулбаров */
+    /* Высоты кнопок: компактная (в строках таблиц и репитерах), обычная,
+       «в строку с полем ввода» (поля 38px) и главная в форме. Высот было
+       восемь — 26, 27, 28, 30, 32, 34, 38, 40, — и соседние кнопки одного
+       смысла отличались на пиксель-два. */
+    --admin-btn-h-sm: 28px;
+    --admin-btn-h: 34px;
+    --admin-btn-h-row: 38px;
+    --admin-btn-h-lg: 40px;
     --admin-radius-sm: 2px;
     --admin-radius: 3px;
     --admin-radius-lg: 3px;
@@ -221,14 +229,9 @@ body {
 
 /* --- Базовая типографика (замена того, что давал Pico) --- */
 h1, h2, h3, h4 { margin: 0 0 .5em; font-weight: 700; line-height: 1.25; color: var(--admin-text); }
-h1 { font-size: 24px; }
-h2 { font-size: 19px; }
-h3 { font-size: 16px; }
-h4 { font-size: 14px; }
 p { margin: 0 0 1em; }
 a { color: var(--admin-accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
-small { font-size: 12px; }
 code, kbd, pre { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; }
 code { background: #f1f2f4; padding: 1px 5px; border-radius: 3px; font-size: .92em; }
 hr { border: 0; border-top: 1px solid var(--admin-border); margin: 20px 0; }
@@ -476,15 +479,7 @@ body.auth-page {
     backdrop-filter: blur(20px);
     animation: authCardEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.auth-card::before {
-    display: none;
-}
 .auth-card--wide { max-width: 520px; }
-.install-card,
-.auth-card--wide.install-card {
-    max-width: 100% !important;
-    width: 100% !important;
-}
 @keyframes authCardEnter {
     from { opacity: 0; transform: translateY(16px) scale(0.98); }
     to { opacity: 1; transform: translateY(0) scale(1); }
@@ -730,9 +725,6 @@ body.auth-page {
     font-weight: 600;
     color: #64748b;
     text-align: center;
-}
-.auth-security-badge svg {
-    color: #2dd4bf;
 }
 
 .totp-secret { background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 3px; padding: 12px; margin-bottom: 10px; text-align: center; word-break: break-all; color: #e2e8f0; }
@@ -995,7 +987,7 @@ body.theme-dark .alert--success,
    ============================================================================ */
 .btn {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 14px; border-radius: var(--admin-radius-sm); border: 1px solid var(--admin-border-strong);
+    padding: 8px 14px; min-height: var(--admin-btn-h); border-radius: var(--admin-radius-sm); border: 1px solid var(--admin-border-strong);
     /* Поверхность, а не белый литерал: на тёмной теме кнопка выходила белой
        с почти белым текстом — читать было нечего. */
     background: var(--admin-surface); color: var(--admin-text); text-decoration: none;
@@ -1012,7 +1004,6 @@ body.theme-dark .alert--success,
 .btn--warning:hover { background: color-mix(in srgb, var(--admin-warning-soft) 70%, var(--admin-warning-border)); border-color: var(--admin-warning); color: var(--admin-warning); }
 .btn--danger { background: var(--admin-surface); border-color: var(--admin-danger-border); color: var(--admin-danger); }
 .btn--danger:hover { background: var(--admin-danger-soft); }
-.btn--small, .btn--sm { padding: 5px 9px; font-size: 13px; border-radius: var(--admin-radius-sm); }
 .btn__icon { flex-shrink: 0; opacity: .85; }
 .btn--primary .btn__icon, .btn--danger .btn__icon { opacity: 1; }
 .btn:disabled, .btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; transform: none; }
@@ -1254,15 +1245,12 @@ body.theme-dark .alert--success,
 .form-grid input:not([type]),
 .form-grid select,
 .form-grid textarea:not([data-wysiwyg]) { max-width: 640px; }
-.admin-builder-workspace { width: 100%; }
 .admin-builder-workspace > .form-grid { gap: 0; }
 .form-grid { display: flex; flex-direction: column; gap: 18px; }
 .form-field { display: flex; flex-direction: column; gap: 6px; }
 .form-field label { font-size: 13px; font-weight: 600; }
 .form-field input, .form-field select, .form-field textarea { width: 100%; }
-.form-field--checkbox { flex-direction: row; align-items: center; gap: 10px; }
 .form-field--checkbox input { width: auto; }
-.form-hint { font-size: 12px; color: var(--admin-muted); }
 /* Переключатель языка стека блоков: у каждого языка свой набор блоков. */
 .block-lang-switch {
     display: flex;
@@ -1342,26 +1330,6 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     transform: translateY(-1px);
     box-shadow: 0 6px 18px rgba(2, 132, 199, 0.45);
     background: var(--admin-primary-dark, #0369a1);
-}
-
-/* Кнопка «Отмена» на плавающей панели */
-.form-actions--sticky a.btn,
-.form-actions--sticky .btn--outline,
-.form-actions--sticky .btn--secondary,
-.form-actions--sticky .btn--cancel {
-    background: var(--admin-surface-soft, #f8fafc);
-    border: 1.5px solid var(--admin-border, #cbd5e1);
-    color: var(--admin-text-muted, #475569);
-    font-weight: 500;
-}
-
-.form-actions--sticky a.btn:hover,
-.form-actions--sticky .btn--outline:hover,
-.form-actions--sticky .btn--secondary:hover,
-.form-actions--sticky .btn--cancel:hover {
-    background: #fef2f2;
-    border-color: #fca5a5;
-    color: #dc2626;
 }
 
 /* Сворачиваемая секция формы (details): второстепенные поля не шумят,
@@ -1769,7 +1737,11 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     padding: 10px 16px; background: var(--admin-surface-soft); border: 1px solid var(--admin-border);
     border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);
 }
-.bulk-bar select { height: 36px; padding: 4px 10px; border-radius: 3px; font-weight: 500; }
+/* Селект действия не растягивается на всю полосу: базовое правило форм даёт
+   ему width:100%, из-за чего кнопка «Применить» уезжала на вторую строку и
+   полоса читалась как две. Кнопка держит ту же высоту, что и селект рядом. */
+.bulk-bar select { width: auto; min-width: 220px; max-width: 340px; height: 36px; padding: 4px 10px; border-radius: 3px; font-weight: 500; }
+.bulk-bar .btn { min-height: var(--admin-btn-h-row); }
 .bulk-bar__count { color: var(--admin-muted); font-size: 13px; margin-left: auto; font-weight: 600; }
 
 /* Компактный квадрат применяется только к кнопкам-иконкам. Текстовые действия
@@ -1802,15 +1774,6 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .admin-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 20px; flex-wrap: wrap; }
 .admin-pagination__summary { margin-right: 12px; color: #64748b; font-size: 13px; font-weight: 500; }
 .admin-pagination__gap { padding: 0 4px; color: #64748b; }
-
-/* Двухколоночный макет редактирования UI/UX Pro Max с фиксированным боковым блоком */
-.entry-grid {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 28px;
-    align-items: start;
-}
-.entry-main { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
 .entry-side { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 68px; z-index: 10; }
 
 /* Чек-лист качества контента */
@@ -1819,7 +1782,6 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     border-radius: 3px; padding: 14px 20px; margin-bottom: 24px;
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
 }
-.content-checklist__head { display: flex; align-items: center; gap: 10px; color: #1d4ed8; font-weight: 700; font-size: 14px; }
 .content-checklist__toggle { background: none; border: 0; color: #2563eb; font-size: 13px; font-weight: 600; cursor: pointer; margin-left: auto; text-decoration: underline; }
 .content-checklist__list { margin: 12px 0 0; padding-left: 20px; list-style: disc; }
 .content-checklist__item { margin-bottom: 6px; font-size: 13px; color: #1e3a8a; }
@@ -1833,7 +1795,6 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     transition: all 0.15s ease;
 }
 .sidebar-cover-preview:hover { border-color: #2563eb; background: #eff6ff; }
-.sidebar-cover-image { width: 100%; height: 100%; object-fit: cover; display: block; }
 .sidebar-cover-placeholder { display: flex; flex-direction: column; align-items: center; gap: 6px; color: #64748b; font-size: 12px; font-weight: 600; text-align: center; padding: 12px; }
 
 @media (max-width: 1100px) {
@@ -2553,7 +2514,6 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .menu-node--child .menu-node__row { min-height: 51px; }
 .menu-node--child .menu-node__type-icon { width: 29px; height: 29px; background: #f1f5f9; color: #64748b; }
 .menu-node--divider > .menu-node__row { background: repeating-linear-gradient(135deg, #fff, #fff 8px, #f8fafc 8px, #f8fafc 16px); }
-.menu-node--divider .menu-node__title { color: #64748b; font-style: italic; }
 .menu-node--language-error { border-color: var(--admin-danger); }
 .menu-preview {
     margin-top: 14px;
@@ -2688,7 +2648,6 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 .lang-tab-btn.is-active { color: var(--admin-accent); border-bottom-color: var(--admin-accent); }
 .lang-tab-btn__badge { font-size: 11px; color: #aaa; font-weight: 400; }
 .lang-tab-panel { display: none; }
-.lang-tab-panel.is-active { display: block; }
 
 /* Header mini-app конструктор */
 .header-builder__group { border: 1px solid var(--admin-border); border-radius: 3px; padding: 18px; margin-bottom: 16px; background: var(--admin-surface); }
@@ -3180,9 +3139,7 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 
 .hb-divider-field { max-width: 360px; margin-top: 20px; }
 .hb-behavior { display: flex; flex-direction: column; gap: 16px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--admin-border); }
-.hb-behavior__options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .hb-behavior-card { display: block; min-width: 0; padding: 15px 16px; border: 1px solid var(--admin-border); border-radius: 3px; background: #f8f9fa; cursor: pointer; }
-.hb-behavior-card:hover { border-color: color-mix(in srgb, var(--admin-accent) 45%, var(--admin-border)); background: #fff; }
 .hb-behavior-card .hb-switch { width: 100%; font-weight: 700; }
 .hb-behavior-card__title { min-width: 0; }
 .hb-behavior-card__hint { display: block; margin: 9px 0 0 42px; color: var(--admin-muted); font-size: 12px; font-weight: 400; line-height: 1.5; }
@@ -3400,16 +3357,6 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     font-style: italic;
     text-transform: none;
     letter-spacing: 0;
-}
-.colorfield__off {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--admin-muted);
-    cursor: pointer;
 }
 .colorfield.is-default .colorfield__off { color: var(--admin-accent); }
 .colorfield__off input { width: auto; }
@@ -4077,37 +4024,11 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
 .live-deck__p { font-size: var(--live-font-size, 16px); font-family: var(--live-font-body, inherit); line-height: var(--live-line-height, 1.6); color: var(--live-text-muted, #666666); margin: 0 0 12px 0; }
 .live-deck__btn-primary { background: var(--live-color-primary, #173a63); color: #ffffff; border: none; border-radius: var(--live-btn-radius, 3px); padding: 8px 16px; font-weight: 600; cursor: pointer; font-size: var(--live-fs-btn, 15px); }
 .live-deck__btn-accent { background: var(--live-color-accent, #17999b); color: #ffffff; border: none; border-radius: var(--live-btn-radius, 3px); padding: 8px 16px; font-weight: 600; cursor: pointer; font-size: var(--live-fs-btn, 15px); }
-
-/* Header Live Preview Bar */
-.hdr-live-preview {
-    background: #0f172a;
-    border-radius: 3px;
-    padding: 16px;
-    margin-bottom: 24px;
-    border: 1px solid #1e293b;
-}
-.hdr-live-preview__head {
-    font-size: 13px;
-    font-weight: 700;
-    color: #38bdf8;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 12px;
-}
 .hdr-live-preview__box {
     background: #ffffff;
     border-radius: 3px;
     overflow: hidden;
     border: 1px solid #cbd5e1;
-}
-.hdr-live-preview__top {
-    background: var(--prev-topbar-bg, #173a63);
-    color: var(--prev-topbar-text, #ffffff);
-    padding: 6px 16px;
-    font-size: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 .hdr-live-preview__main {
     padding: 12px 16px;
@@ -4116,24 +4037,6 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     justify-content: space-between;
     background: var(--prev-middle-bg, #ffffff);
     border-bottom: 1px solid #e2e8f0;
-}
-.hdr-live-preview__logo {
-    font-weight: 800;
-    font-size: 18px;
-    color: #1e293b;
-}
-.hdr-live-preview__nav {
-    display: flex;
-    gap: 16px;
-    font-size: 14px;
-    font-weight: 600;
-}
-.hdr-live-preview__nav-item {
-    color: var(--prev-nav-color, #1e293b);
-    text-decoration: none;
-}
-.hdr-live-preview__nav-item.is-active {
-    color: var(--prev-nav-active, #0284c7);
 }
 
 /* --- Отключение кнопки Upgrade и брендинга в визуальном редакторе TinyMCE --- */
@@ -4974,34 +4877,6 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     background: #f8fafc;
 }
 
-/* Премиальный дизайн рабочего пространства Конструктора Шапки Pro Max */
-.hdr-workspace-header {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: #ffffff;
-    border-radius: 3px;
-    padding: 20px 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-.hdr-workspace-header__title {
-    font-size: 1.35rem;
-    font-weight: 800;
-    margin: 0 0 4px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.hdr-workspace-header__desc {
-    font-size: 0.9rem;
-    color: #94a3b8;
-    margin: 0;
-}
-
 /* Предпросмотр шапки */
 .hdr-live-preview {
     background: var(--admin-surface, #ffffff);
@@ -5082,43 +4957,9 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     border-radius: 3px;
     box-shadow: 0 14px 34px rgba(15, 23, 42, .14);
 }
-/* Модульная панель навигации по вкладкам */
-.hdr-tabs-nav {
-    display: flex;
-    gap: 8px;
-    background: var(--admin-bg, #f1f5f9);
-    padding: 6px;
-    border-radius: 3px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-}
-/* Визуальные карточки селекторов */
-.hdr-card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 16px;
-    margin-top: 12px;
-}
-.hdr-select-card {
-    background: var(--admin-surface, #ffffff);
-    border: 2px solid var(--admin-border, #e2e8f0);
-    border-radius: 3px;
-    padding: 16px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    transition: all 0.2s ease;
-    position: relative;
-}
 .hdr-select-card:hover {
     border-color: var(--admin-accent-soft, #93c5fd);
     transform: translateY(-2px);
-}
-.hdr-select-card.is-selected {
-    border-color: var(--admin-accent, #2563eb);
-    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
-    box-shadow: 0 4px 14px rgba(37,99,235,0.08);
 }
 .hdr-select-card__title {
     font-weight: 700;
@@ -5127,16 +4968,6 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     display: flex;
     align-items: center;
     gap: 6px;
-}
-.hdr-select-card__desc {
-    font-size: 0.82rem;
-    color: var(--admin-text-muted, #64748b);
-    line-height: 1.4;
-}
-.hdr-select-card input[type="radio"] {
-    position: absolute;
-    top: 14px;
-    right: 14px;
 }
 
 .hb-inline-grid {
@@ -5449,29 +5280,11 @@ body.auth-page {
     margin-bottom: 10px;
     transition: all 0.25s ease;
 }
-.install-step-item.is-done .install-step-badge {
-    background: #ecfdf5;
-    color: var(--inst-success);
-    border-color: var(--inst-success);
-}
-.install-step-item.is-active .install-step-badge {
-    background: var(--inst-primary);
-    color: #ffffff;
-    border-color: var(--inst-primary);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
-}
 .install-step-title {
     font-size: 0.88rem;
     font-weight: 600;
     color: var(--inst-muted);
     line-height: 1.25;
-}
-.install-step-item.is-active .install-step-title {
-    color: var(--inst-primary);
-    font-weight: 700;
-}
-.install-step-item.is-done .install-step-title {
-    color: var(--inst-text);
 }
 
 .install-header {
@@ -5531,13 +5344,6 @@ body.auth-page {
 .install-input-wrap textarea {
     padding-top: 12px !important;
 }
-.install-input-wrap input:focus,
-.install-input-wrap select:focus,
-.install-input-wrap textarea:focus {
-    background: #ffffff;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
-}
 .install-input-icon {
     position: absolute;
     left: 14px;
@@ -5547,9 +5353,6 @@ body.auth-page {
     color: #94a3b8;
     pointer-events: none;
     transition: color 0.2s ease;
-}
-.install-input-wrap:focus-within .install-input-icon {
-    color: #2563eb;
 }
 
 /* System Check Cards */
@@ -5578,7 +5381,6 @@ body.auth-page {
     margin-bottom: 10px;
     transition: background 0.15s ease;
 }
-.check-item:hover { background: #f1f5f9; }
 .check-item__info {
     display: flex;
     align-items: center;
@@ -5595,10 +5397,6 @@ body.auth-page {
     font-size: 0.85rem;
     flex-shrink: 0;
 }
-.check-item__icon.ok { background: #dcfce7; color: #15803d; }
-.check-item__icon.fail { background: #fee2e2; color: #b91c1c; }
-.check-item__label { font-weight: 600; font-size: 0.94rem; }
-.check-item__hint { font-size: 0.78rem; color: #ef4444; margin-top: 2px; }
 
 .install-card .form-actions {
     display: flex;
@@ -6883,6 +6681,9 @@ small, .form-hint, .help-block {
     font-weight: 600 !important;
     padding: 5px 10px !important;
     border-radius: 3px!important;
+    /* Компактная кнопка ниже базовой, но одна для всех трёх написаний класса:
+       раньше .btn--small и .btn--sm расходились на пиксель. */
+    min-height: var(--admin-btn-h-sm) !important;
 }
 
 /* 7. Полноразмерная свободная ширина без искусственных ограничений */
@@ -7427,30 +7228,9 @@ body.auth-page label,
     letter-spacing: -0.01em !important;
 }
 
-.install-header__title {
-    color: #f8fafc !important;
-}
-
-.install-header__desc {
-    color: var(--admin-muted, #94a3b8) !important;
-}
-
 .check-card-group__title {
     color: #cbd5e1 !important;
     font-weight: 700 !important;
-}
-
-.install-step-title {
-    color: var(--admin-muted, #94a3b8) !important;
-}
-
-.install-step-item.is-active .install-step-title {
-    color: #60a5fa !important;
-    font-weight: 700 !important;
-}
-
-.install-step-item.is-done .install-step-title {
-    color: #cbd5e1 !important;
 }
 
 .install-header {
@@ -7513,49 +7293,9 @@ body.auth-page label,
     font-weight: 700 !important;
 }
 
-.install-input-wrap input,
-.install-input-wrap select,
-.install-input-wrap textarea {
-    color: #f8fafc !important;
-    background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    border-radius: 3px!important;
-}
-
 .install-input-wrap select option {
     background: #0f172a !important;
     color: #f8fafc !important;
-}
-
-.install-input-wrap input::placeholder,
-.install-input-wrap textarea::placeholder {
-    color: var(--admin-muted, #94a3b8) !important;
-}
-
-.install-input-wrap input:focus,
-.install-input-wrap select:focus,
-.install-input-wrap textarea:focus {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25) !important;
-}
-
-.install-input-icon {
-    color: var(--admin-muted, #94a3b8) !important;
-}
-
-.install-input-wrap:focus-within .install-input-icon {
-    color: #60a5fa !important;
-}
-
-.install-callout {
-    background: rgba(37, 99, 235, 0.12) !important;
-    border: 1px solid rgba(37, 99, 235, 0.25) !important;
-    color: #93c5fd !important;
-}
-
-.install-callout svg {
-    color: #60a5fa !important;
 }
 
 .install-callout strong {

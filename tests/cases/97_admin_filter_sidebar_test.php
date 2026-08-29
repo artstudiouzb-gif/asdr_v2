@@ -29,7 +29,10 @@ test('header settings group behavior controls into spacious responsive cards', f
             "в конструкторе шапки нет элемента с классом {$class}"
         );
     }
-    assert_contains('.hb-behavior__options { display: grid;', $css);
+    // Проверяем действующее правило, а не первое попавшееся: у этого селектора
+    // было два семейства, и нижнее перекрывало верхнее целиком — тест держался
+    // за мёртвую копию и прошёл бы даже с испорченной сеткой.
+    assert_contains(".hb-behavior__options {\n    display: grid !important;", $css);
     assert_contains('@media (max-width: 720px)', $css);
 });
 
@@ -80,7 +83,10 @@ test('header and footer builders use the shared wide workspace', function (): vo
     assert_true(is_string($css));
     assert_contains('class="admin-builder-workspace"', $header);
     assert_contains('class="admin-builder-workspace"', $footer);
-    assert_contains('.admin-builder-workspace { width: 100%; }', $css);
+    // Ширину рабочей области задаёт общий блок «во всю ширину» ниже по файлу;
+    // отдельное правило было его мёртвой копией.
+    assert_contains('.admin-builder-workspace,', $css);
+    assert_contains('width: 100% !important;', $css);
     assert_contains('grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));', $css);
 });
 

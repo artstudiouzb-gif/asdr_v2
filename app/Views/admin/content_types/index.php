@@ -25,6 +25,10 @@ require __DIR__ . '/../layout/header.php';
             <label for="description">Описание раздела (необязательно)</label>
             <input type="text" id="description" name="description" placeholder="Короткое описание для страницы списка">
         </div>
+        <?= \App\Core\AdminUi::iconField('icon', '', [
+            'label' => 'Иконка раздела',
+            'hint' => 'Значок пункта в боковом меню. Пусто — общий значок списка.',
+        ]) ?>
         <div class="form-field form-field--checkbox">
             <input type="checkbox" id="has_translations" name="has_translations" value="1">
             <label for="has_translations">Мультиязычный (переводы записей)</label>
@@ -43,7 +47,12 @@ require __DIR__ . '/../layout/header.php';
         <?php if (empty($items)): ?><tr><td colspan="5" class="data-table__empty">Типов пока нет.</td></tr><?php endif; ?>
         <?php foreach ($items as $t): ?>
             <tr>
-                <td><?= htmlspecialchars((string) $t['name'], ENT_QUOTES) ?></td>
+                <td>
+                    <span class="content-type-name">
+                        <?= \App\Core\AdminUi::icon((string) ($t['icon'] ?? '') ?: 'list-details', 18) ?>
+                        <?= htmlspecialchars((string) $t['name'], ENT_QUOTES) ?>
+                    </span>
+                </td>
                 <td><code><?= htmlspecialchars((string) $t['slug'], ENT_QUOTES) ?></code></td>
                 <td><?= (int) $t['has_translations'] === 1 ? 'да' : 'нет' ?></td>
                 <td>
