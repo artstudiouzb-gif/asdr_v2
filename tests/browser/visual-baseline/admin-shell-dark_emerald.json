@@ -30,7 +30,7 @@
   },
   ".admin-welcome h2": {
     "color": "rgb(248, 250, 252)",
-    "fontSize": "16px",
+    "fontSize": "20px",
     "fontWeight": "600"
   },
   ".admin-welcome p": {
