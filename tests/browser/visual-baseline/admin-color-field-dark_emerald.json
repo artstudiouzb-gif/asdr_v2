@@ -20,7 +20,7 @@
     "fontFamily": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
   },
   ".colorfield__off": {
-    "color": "rgb(148, 163, 184)",
+    "color": "rgb(16, 185, 129)",
     "fontSize": "12px",
     "gap": "6px",
     "marginTop": "6px"
