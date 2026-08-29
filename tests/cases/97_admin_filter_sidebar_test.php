@@ -9,7 +9,9 @@ test('admin filters wrap inside their panel and sidebar uses a light accessible 
     assert_contains('--admin-sidebar-bg: #f6f7f7', $css);
     assert_contains('--admin-sidebar-text: #2c3338', $css);
     assert_contains('--admin-sidebar-active: #dcecf7', $css);
-    assert_contains('.list-filters--panel { display: flex; flex-wrap: wrap;', $css);
+    // Панель фильтров — сетка одинаковых дорожек: при переносе flex-строкой
+    // вторая строка вставала своими ширинами и не совпадала с первой.
+    assert_contains('.list-filters--panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));', $css);
     assert_contains('.list-filters__actions { display: flex; flex: 0 0 auto;', $css);
     assert_contains('.list-filters__actions { width: 100%; margin-left: 0; }', $css);
 });
