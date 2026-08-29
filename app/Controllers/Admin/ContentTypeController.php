@@ -38,7 +38,7 @@ final class ContentTypeController
         } elseif (ContentType::slugExists($slug)) {
             Flash::error('Тип с таким адресом уже существует.');
         } else {
-            $id = ContentType::create($slug, $name, $hasTr, $description, $isPublic);
+            $id = ContentType::create($slug, $name, $hasTr, $description, $isPublic, (string) ($_POST['icon'] ?? ''));
             Flash::success('Тип контента создан. Добавьте поля.');
             header('Location: /admin/content-types/' . $id . '/fields');
             exit;
@@ -80,7 +80,8 @@ final class ContentTypeController
             trim((string) ($_POST['name'] ?? $type['name'])),
             !empty($_POST['has_translations']),
             trim((string) ($_POST['description'] ?? ($type['description'] ?? ''))),
-            !empty($_POST['is_public'])
+            !empty($_POST['is_public']),
+            (string) ($_POST['icon'] ?? ($type['icon'] ?? ''))
         );
 
         $fields = [];

@@ -61,12 +61,15 @@
     "borderColor": "rgb(16, 185, 129)",
     "borderRadius": "3px",
     "fontSize": "13.5px",
-    "padding": "8px 16px"
+    "padding": "8px 16px",
+    "height": "34.1875px",
+    "minHeight": "34px"
   },
   ".btn--primary": {
     "backgroundColor": "rgb(16, 185, 129)",
     "color": "rgb(255, 255, 255)",
     "borderColor": "rgb(16, 185, 129)",
-    "borderRadius": "3px"
+    "borderRadius": "3px",
+    "height": "34.1875px"
   }
 }

@@ -150,14 +150,19 @@ final class AdminUi
         // без иконки, и таких было девятнадцать из тридцати. Соответствие
         // задаётся здесь явно; новый раздел без строки в этой карте иконки не
         // получит (стережёт тест).
+        // Разделы, делившие один значок, разведены: медиафайлы отличаются от
+        // фотоальбомов, пользователи — от команды. Одинаковые значки в колонке
+        // читались как один и тот же раздел.
         $name = [
             'team' => 'users',
+            'users' => 'user-shield',
             'security' => 'shield',
             'news_categories' => 'category',
             'pages' => 'file-text',
             'heroes' => 'slideshow',
             'projects' => 'briefcase',
             'albums' => 'photo',
+            'files' => 'folder',
             'videos' => 'movie',
             'subscribers' => 'mail',
             'repository' => 'archive',

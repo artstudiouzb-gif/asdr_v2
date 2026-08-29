@@ -56,8 +56,11 @@ const SCREENS = [
             ['.stat-card', ['backgroundColor', 'borderColor', 'borderRadius', 'padding']],
             ['.stat-card__value', ['color', 'fontSize', 'fontWeight']],
             ['.stat-card__label', ['color', 'fontSize', 'fontWeight']],
-            ['.btn', ['backgroundColor', 'color', 'borderColor', 'borderRadius', 'fontSize', 'padding']],
-            ['.btn--primary', ['backgroundColor', 'color', 'borderColor', 'borderRadius']],
+            // Высота кнопок — часть шкалы (28/34/38/40). Без этого зонда
+            // разнобой в один-два пикселя между .btn--small и .btn--sm никто
+            // не замечал.
+            ['.btn', ['backgroundColor', 'color', 'borderColor', 'borderRadius', 'fontSize', 'padding', 'height', 'minHeight']],
+            ['.btn--primary', ['backgroundColor', 'color', 'borderColor', 'borderRadius', 'height']],
         ],
     },
     {
@@ -78,7 +81,9 @@ const SCREENS = [
             ['.bulk-bar__count', ['color', 'fontSize']],
             ['.lang-filter-count', ['backgroundColor', 'color']],
             ['.list-filter', ['color', 'fontSize', 'borderRadius', 'padding']],
-            ['.btn--small', ['fontSize', 'padding', 'borderRadius']],
+            ['.btn--small', ['fontSize', 'padding', 'borderRadius', 'height', 'minHeight']],
+            ['.bulk-bar select', ['width', 'height']],
+            ['.bulk-bar .btn', ['height', 'minHeight']],
         ],
     },
     {
