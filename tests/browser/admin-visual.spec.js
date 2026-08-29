@@ -142,6 +142,30 @@ const SCREENS = [
         ],
     },
     {
+        // Таблицы разделов — не тот компонент, что списки материалов: списки
+        // рисует .data-table (экран list выше), а разделы вроде «Базы данных» —
+        // .admin-table / table.table со своим набором правил. Пока их никто не
+        // снимал, разбор трёх наслаивавшихся блоков правил не краснел бы ни в
+        // одном тесте.
+        name: 'section-table',
+        url: '/admin/database',
+        prepare: async (page) => {
+            // Таблицы лежат внутри <details>: у закрытого содержимое не
+            // отрисовано, и срез отдал бы «auto» вместо размеров.
+            await page.evaluate(() => {
+                document.querySelectorAll('.admin-main details').forEach((node) => { node.open = true; });
+            });
+            await expect(page.locator('table.table').first()).toBeVisible();
+        },
+        probes: [
+            ['table.table th', ['backgroundColor', 'color', 'fontSize', 'fontWeight', 'letterSpacing', 'textTransform', 'padding', 'borderBottomColor']],
+            ['table.table td', ['color', 'fontSize', 'lineHeight', 'padding', 'borderBottomColor']],
+            // Полосатость и плотность — отдельные классы, и оба не работали:
+            // у общего правила вес (0,1,2), у них был (0,1,1).
+            ['.table--striped tbody tr:nth-child(even)', ['backgroundColor']],
+        ],
+    },
+    {
         // Страница медиабиблиотеки: карточка файла здесь и в окне выбора —
         // один компонент, и снимать надо оба конца этого контракта.
         name: 'media-library',

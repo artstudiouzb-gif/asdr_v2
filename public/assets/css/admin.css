@@ -3559,14 +3559,8 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
         background: var(--admin-sidebar-hover) !important;
     }
     /* Lists, tables, cards */
-    .admin-table th {
-        background-color: #1e293b !important;
-        border-bottom-color: var(--admin-border) !important;
-        color: var(--admin-text) !important;
-    }
-    .admin-table td {
-        border-bottom-color: var(--admin-border) !important;
-    }
+    /* Заголовок и ячейка красятся токенами в общем правиле таблиц: набор для
+       системной тёмной схемы стоял тут мёртвым — он раньше по файлу. */
     .admin-table tr:hover td {
         background-color: var(--admin-sidebar-hover) !important;
     }
@@ -6580,30 +6574,42 @@ body, body.admin-body {
     color: var(--admin-text, #334155) !important;
 }
 
-/* 3. Таблицы: контрастные заголовки колонок, читаемые ячейки */
+/* 3. Таблицы разделов (.admin-table / .table; списки материалов — свой
+   компонент .data-table выше).
+
+   Правил было три: это, второй блок «Контраст для таблиц» в конце файла и
+   набор под prefers-color-scheme. Все три с !important, и каждое перебивало
+   соседнее наполовину: заголовку кегль и капитель доставались отсюда, а фон,
+   цвет и отступы — из конца файла, где стоит `padding: 10px 14px` вместо
+   здешних `12px 16px`. Правило для системной тёмной схемы не действовало
+   вовсе: оно раньше по файлу, а веса равны. Теперь набор один, поверхности
+   берутся из токенов — поэтому отдельные значения для тёмной темы не нужны, —
+   и !important не нужен: с `.data-table` селекторы не пересекаются. */
 .admin-table th, table.table th, .table th {
-    font-size: var(--admin-fs-sm) !important;
-    font-weight: var(--admin-fw-semibold) !important;
-    letter-spacing: 0.03em !important;
-    text-transform: uppercase !important;
-    padding: 12px 16px !important;
-    color: var(--admin-muted, #475569) !important;
-    background-color: #f8fafc !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 10px 14px;
+    background: var(--admin-surface-soft);
+    color: var(--admin-text);
+    font-size: var(--admin-fs-sm);
+    font-weight: var(--admin-fw-semibold);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--admin-border);
 }
 
 .admin-table td, table.table td, .table td {
-    font-size: var(--admin-fs-base) !important;
-    padding: 12px 16px !important;
-    line-height: 1.5 !important;
-    color: var(--admin-text, #1e293b) !important;
-    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 10px 14px;
+    color: var(--admin-text);
+    font-size: var(--admin-fs-base);
+    line-height: 1.5;
+    /* Разделитель строк мягче границы: прежний литерал #f1f5f9 давал почти
+       белую линию, но в тёмной теме светился поперёк таблицы. */
+    border-bottom: 1px solid color-mix(in srgb, var(--admin-border) 55%, transparent);
 }
 
 .admin-table td a, table.table td a, .table td a {
-    font-size: var(--admin-fs-base) !important;
-    font-weight: var(--admin-fw-medium) !important;
-    color: #2563eb !important;
+    font-size: var(--admin-fs-base);
+    font-weight: var(--admin-fw-medium);
+    color: var(--admin-accent);
 }
 
 /* 4. Поля форм, селекты, лейблы и подсказки */
@@ -8103,22 +8109,7 @@ label.hb-behavior-card:has(input:checked) {
     font-size: var(--admin-fs-sm) !important;
 }
 
-/* Контраст для таблиц */
-.admin-table th,
-table.table th {
-    background: var(--admin-surface-soft, #f8fafc) !important;
-    color: var(--admin-text, #334155) !important;
-    font-weight: var(--admin-fw-semibold) !important;
-    border-bottom: 1px solid #cbd5e1 !important;
-    padding: 10px 14px !important;
-}
 
-.admin-table td,
-table.table td {
-    color: var(--admin-text, #0f172a) !important;
-    border-bottom: 1px solid #f1f5f9 !important;
-    padding: 10px 14px !important;
-}
 
 
 
@@ -8171,6 +8162,8 @@ table.table td {
 .hb-social-row__url { flex: 1 1 240px; min-width: 200px; }
 
 .table--striped tbody tr:nth-child(even) { background: var(--admin-surface-soft); }
-/* Плотная таблица спорит с бланкетом `.admin-table td/th … !important` в конце
-   файла — отсюда и !important: без него класс не менял ничего. */
-.table--compact th, .table--compact td { padding: 6px 10px !important; }
+/* Плотной таблице нужен вес не ниже общего правила: у того `table.table td`
+   это (0,1,2), и одноклассовый `.table--compact td` проигрывал ему даже с
+   !important в паре с бланкетом — класс не менял ничего. */
+table.table--compact th, table.table--compact td,
+.admin-table.table--compact th, .admin-table.table--compact td { padding: 6px 10px; }
