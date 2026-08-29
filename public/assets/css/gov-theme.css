@@ -2562,18 +2562,74 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .album-card__body { display: flex; flex-direction: column; gap: 6px; padding: 2px 2px 4px; flex: 1; }
 .album-card__title { font-size: var(--step-0); font-weight: 700; color: var(--gov-title); margin: 0; line-height: 1.35; transition: color 0.2s ease; }
 .album-card:hover .album-card__title { color: var(--gov-teal); }
-.adjnews { display: flex; align-items: center; gap: 18px; padding: 18px 20px; background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 14px); text-decoration: none; color: var(--gov-ink); transition: box-shadow .2s ease, border-color .2s ease; }
-.adjnews:hover { box-shadow: 0 12px 30px rgba(19,42,92,.1); border-color: color-mix(in srgb, var(--gov-navy) 22%, var(--gov-border)); }
-.adjnews--next { text-align: right; justify-content: flex-end; }
+/* Соседние новости. Карточки зеркальны: у «предыдущей» порядок стрелка → кадр →
+   текст, у «следующей» — текст → кадр → стрелка. Раньше кадр в обеих стоял
+   слева, а вправо уезжал только текст, и пара читалась как две разные
+   карточки. Разметка идёт в том же порядке, что и колонки, поэтому переставлять
+   элементы `order`-ом не нужно — кроме узкого экрана, где зеркало теряет смысл. */
+.adjnews {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    background: var(--gov-surface);
+    border: 1px solid var(--gov-border);
+    border-radius: var(--radius, 14px);
+    text-decoration: none;
+    color: var(--gov-ink);
+    transition: box-shadow .2s ease, border-color .2s ease, transform .2s ease;
+}
+.adjnews--next { grid-template-columns: minmax(0, 1fr) auto auto; text-align: right; }
+.adjnews:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(19,42,92,.1);
+    border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
+}
 .adjnews--empty { border: 0; background: transparent; }
-.adjnews__arrow { font-size: var(--step-2); color: var(--gov-teal-text); flex: 0 0 auto; }
-.adjnews__media { width: 92px; aspect-ratio: 4/3; border-radius: var(--radius-sm, 10px); background: var(--gov-navy) center/cover no-repeat; flex: 0 0 auto; object-fit: cover; }
+/* Стрелка — кружок, а не голый знак: у неё та же роль, что у стрелок каруселей,
+   и на пустом поле карточки одинокий символ читался как опечатка. */
+.adjnews__arrow {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; flex: 0 0 auto;
+    border: 1px solid var(--gov-border); border-radius: 50%;
+    color: var(--gov-teal-text); font-size: var(--step-0); line-height: 1;
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+.adjnews:hover .adjnews__arrow { background: var(--gov-teal); border-color: var(--gov-teal); color: #fff; }
+.adjnews__media { width: 112px; aspect-ratio: 4/3; border-radius: var(--radius-sm, 10px); background: var(--gov-navy) center/cover no-repeat; flex: 0 0 auto; object-fit: cover; }
 .adjnews__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
-.adjnews__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.adjnews__body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+/* Подпись и дата — одной строкой: тремя этажами (подпись, дата, заголовок)
+   карточка выглядела рыхлой, а дата разрывала связку подписи с заголовком. */
+.adjnews__meta { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.adjnews--next .adjnews__meta { justify-content: flex-end; }
 .adjnews__label { text-transform: uppercase; font-size: var(--step--4); letter-spacing: .08em; font-weight: 700; color: var(--gov-muted); }
 .adjnews__date { color: var(--gov-muted); font-size: var(--step--3); }
-.adjnews__title { font-weight: 700; color: var(--section-title-fg); line-height: 1.35; font-size: var(--step--1); }
+/* Заголовок в две строки: соседние новости — навигация, а не анонс, и длинное
+   название не должно растягивать карточку вдвое против парной. */
+.adjnews__title {
+    font-weight: 700; color: var(--section-title-fg); line-height: 1.35; font-size: var(--step--1);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
 .adjnews:hover .adjnews__title { color: var(--gov-teal); }
+/* Одна колонка — зеркалить нечего: обе карточки читаются слева направо. */
+@media (max-width: 720px) {
+    .adjnews--next { grid-template-columns: auto auto minmax(0, 1fr); text-align: left; }
+    .adjnews--next .adjnews__arrow { order: -2; }
+    .adjnews--next .adjnews__media { order: -1; }
+    .adjnews--next .adjnews__meta { justify-content: flex-start; }
+}
+/* На телефоне кадр уступает место тексту. Стрелка, отступы и превью съедали
+   180px из 380: на заголовок оставалась колонка в полтора слова, и подпись
+   «предыдущая новость» ломалась пополам. Кадр здесь украшение, заголовок — суть. */
+@media (max-width: 560px) {
+    .adjnews,
+    .adjnews--next { grid-template-columns: auto minmax(0, 1fr); }
+    .adjnews__media { display: none; }
+    .adjnews__meta { flex-direction: column; align-items: flex-start; gap: 2px; }
+    .adjnews--next .adjnews__meta { align-items: flex-start; }
+}
 @media (prefers-reduced-motion: reduce) {
     .newsdetail-photos__item, .adjnews, .relnews-card { transition: none; }
 }

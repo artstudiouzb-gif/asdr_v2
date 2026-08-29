@@ -99,3 +99,27 @@ test('Фотография широкой карточки занимает вс
     // фотографией разъезжалась до 60% вместо заданных 42%.
     assert_contains('.relnews-card--wide .news-cover { flex: 0 0 42%; min-width: 0; }', $css);
 });
+
+test('Соседние новости — зеркальная пара', function () {
+    $view = (string) file_get_contents(APP_ROOT . '/app/Views/site/news_show.php');
+    $css = theme_css();
+
+    // Порядок разметки и порядок колонок должны совпадать: у «предыдущей»
+    // стрелка → кадр → текст, у «следующей» — текст → кадр → стрелка. Прежде
+    // кадр в обеих карточках стоял слева, вправо уезжал только текст, и пара
+    // читалась как две разные карточки.
+    $next = substr($view, (int) strpos($view, 'adjnews adjnews--next'));
+    $body = strpos($next, 'adjnews__body');
+    $media = strpos($next, 'adjnews__media');
+    $arrow = strpos($next, 'adjnews__arrow');
+    assert_true($body !== false && $media !== false && $arrow !== false, 'карточка «следующая» собрана из трёх частей');
+    assert_true($body < $media, 'у «следующей» текст идёт перед кадром');
+    assert_true($media < $arrow, 'стрелка замыкает карточку «следующей»');
+
+    assert_contains('.adjnews--next { grid-template-columns: minmax(0, 1fr) auto auto;', $css, 'колонки зеркальны разметке');
+    // На узком экране зеркало теряет смысл: обе карточки читаются слева направо.
+    assert_contains('.adjnews--next .adjnews__arrow { order: -2; }', $css);
+    // Кадр на телефоне уступает место заголовку — иначе на текст остаётся
+    // колонка в полтора слова.
+    assert_contains('.adjnews__media { display: none; }', $css);
+});

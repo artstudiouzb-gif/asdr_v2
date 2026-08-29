@@ -743,30 +743,36 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <a class="adjnews adjnews--prev" href="<?= htmlspecialchars(Locale::url('news/' . $prevNews['slug'], $lang), ENT_QUOTES) ?>">
                     <span class="adjnews__arrow">←</span>
                     <?php if ($pc !== null): ?>
-                        <?= \App\Core\Media::picture($pc, (string) $prevNews['title'], null, null, 'adjnews__media', true, '92px') ?>
+                        <?= \App\Core\Media::picture($pc, (string) $prevNews['title'], null, null, 'adjnews__media', true, '112px') ?>
                     <?php else: ?>
                         <span class="adjnews__media adjnews__media--empty" aria-hidden="true"></span>
                     <?php endif; ?>
                     <span class="adjnews__body">
-                        <span class="adjnews__label"><?= htmlspecialchars(t('Предыдущая новость'), ENT_QUOTES) ?></span>
-                        <?php if (!empty($prevNews['published_at'])): ?><time class="adjnews__date"><?= htmlspecialchars(DateFormatter::short((string) $prevNews['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                        <span class="adjnews__meta">
+                            <span class="adjnews__label"><?= htmlspecialchars(t('Предыдущая новость'), ENT_QUOTES) ?></span>
+                            <?php if (!empty($prevNews['published_at'])): ?><time class="adjnews__date"><?= htmlspecialchars(DateFormatter::short((string) $prevNews['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                        </span>
                         <h3 class="adjnews__title"><?= htmlspecialchars((string) $prevNews['title'], ENT_QUOTES) ?></h3>
                     </span>
                 </a>
             <?php else: ?><span class="adjnews adjnews--empty"></span><?php endif; ?>
             <?php if ($nextNews !== null): ?>
                 <?php $nc = News::getCoverImage($nextNews); ?>
+                <?php // Порядок зеркальный: текст, кадр, стрелка — карточка «дальше»
+                      // читается справа налево и повторяет соседнюю как отражение. ?>
                 <a class="adjnews adjnews--next" href="<?= htmlspecialchars(Locale::url('news/' . $nextNews['slug'], $lang), ENT_QUOTES) ?>">
+                    <span class="adjnews__body">
+                        <span class="adjnews__meta">
+                            <span class="adjnews__label"><?= htmlspecialchars(t('Следующая новость'), ENT_QUOTES) ?></span>
+                            <?php if (!empty($nextNews['published_at'])): ?><time class="adjnews__date"><?= htmlspecialchars(DateFormatter::short((string) $nextNews['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                        </span>
+                        <h3 class="adjnews__title"><?= htmlspecialchars((string) $nextNews['title'], ENT_QUOTES) ?></h3>
+                    </span>
                     <?php if ($nc !== null): ?>
-                        <?= \App\Core\Media::picture($nc, (string) $nextNews['title'], null, null, 'adjnews__media', true, '92px') ?>
+                        <?= \App\Core\Media::picture($nc, (string) $nextNews['title'], null, null, 'adjnews__media', true, '112px') ?>
                     <?php else: ?>
                         <span class="adjnews__media adjnews__media--empty" aria-hidden="true"></span>
                     <?php endif; ?>
-                    <span class="adjnews__body">
-                        <span class="adjnews__label"><?= htmlspecialchars(t('Следующая новость'), ENT_QUOTES) ?></span>
-                        <?php if (!empty($nextNews['published_at'])): ?><time class="adjnews__date"><?= htmlspecialchars(DateFormatter::short((string) $nextNews['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
-                        <h3 class="adjnews__title"><?= htmlspecialchars((string) $nextNews['title'], ENT_QUOTES) ?></h3>
-                    </span>
                     <span class="adjnews__arrow">→</span>
                 </a>
             <?php else: ?><span class="adjnews adjnews--empty"></span><?php endif; ?>
