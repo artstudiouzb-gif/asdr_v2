@@ -30,7 +30,9 @@ test('Партиал списка новостей: карточки, пагин
         ['slug' => 'second', 'title' => 'Вторая новость', 'excerpt' => '', 'published_at' => '2026-07-02 10:00', 'badge' => '', 'image' => ''],
     ];
 
-    // Внутри рубрики крупной новости нет — только сетка карточек.
+    // Композиция одна и та же везде: сетка групп «крупная плюс две компактные».
+    // Отдельной крупной новости над лентой нет ни в рубрике, ни на первой
+    // странице — первая новость открывает ленту крупной карточкой группы.
     $html = View::renderPartial('site/_news_list', [
         'items' => $items,
         'page' => 1,
@@ -39,16 +41,18 @@ test('Партиал списка новостей: карточки, пагин
     ]);
     assert_contains('Первая новость', $html);
     assert_contains('Вторая новость', $html);
-    assert_not_contains('newslist-lead', $html, 'в рубрике крупной новости быть не должно');
+    assert_not_contains('newslist-lead', $html, 'отдельной крупной новости над лентой нет');
+    assert_contains('relnews-card--wide', $html, 'первая карточка ленты — крупная');
     assert_contains('listing-pager', $html, 'при двух страницах нужна пагинация');
     assert_contains('category=', $html, 'пагинация сохраняет выбранную рубрику');
     // Фрагмент — только результаты, без обвязки страницы.
     assert_not_contains('<html', $html);
     assert_not_contains('listing-filter', $html);
 
-    // Первая страница общего списка — первая новость крупной.
+    // Первая страница общего списка устроена так же, без исключений.
     $home = View::renderPartial('site/_news_list', ['items' => $items, 'page' => 1, 'pages' => 1, 'category' => '']);
-    assert_contains('newslist-lead', $home);
+    assert_not_contains('newslist-lead', $home, 'исключения для первой страницы нет');
+    assert_contains('relnews-card--wide', $home, 'лента открывается крупной карточкой');
     assert_not_contains('listing-pager', $home, 'одна страница — пагинация не нужна');
 
     $empty = View::renderPartial('site/_news_list', ['items' => [], 'page' => 1, 'pages' => 1, 'category' => '']);
