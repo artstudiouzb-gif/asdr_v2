@@ -3013,17 +3013,29 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 @media (max-width: 560px) { .newslist-grid { grid-template-columns: 1fr; } }
 
 /* Тело карточки: обёртка нужна широкой карточке, где текст стоит рядом с
-   фотографией, а не под ней. У обычной карточки промежуток остаётся прежним. */
-.relnews-card__body { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+   фотографией, а не под ней. У обычной карточки промежуток остаётся прежним.
+
+   Боковой отступ — здесь, а не у карточки: фотография у неё «в край», это её
+   роль обложки, а текст без отступа упирался в границу — дата стояла вплотную
+   к рамке. Сверху ещё несколько пикселей: между низом фотографии и датой было
+   9px, и число читалось приклеенным к снимку. */
+.relnews-card__body { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 4px 14px 0; }
 
 /* Каждая пятая карточка ленты — широкая: занимает две ячейки сетки и
    показывает анонс. Ровно две, а не всю строку: группа «4 компактные + 1
    широкая» даёт шесть ячеек, а шесть делится и на 4, и на 3, и на 2 колонки —
    ряды остаются полными на любой ширине (см. App\Core\NewsFeedRhythm). */
-.relnews-card--wide { grid-column: span 2; flex-direction: row; align-items: stretch; }
-.relnews-card--wide .news-cover { flex: 0 0 42%; }
-.relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: 4 / 3; }
-.relnews-card--wide .relnews-card__body { flex: 1 1 auto; justify-content: center; }
+.relnews-card.relnews-card--wide { grid-column: span 2; flex-direction: row; align-items: stretch; padding: 0; }
+/* `min-width: 0` — не косметика: у флекс-элемента автоматический минимум равен
+   содержимому, а содержимое здесь — картинка с заданной пропорцией. Из-за него
+   колонка с фотографией разъезжалась до 60% вместо заданных 42%, а текст
+   ужимался вдвое. */
+.relnews-card--wide .news-cover { flex: 0 0 42%; min-width: 0; }
+/* Без пропорции: она спорила с `height: 100%` — браузер укорачивал кадр, чтобы
+   сойтись с 4:3, и под фотографией оставалась белая полоса в 17px. Высоту
+   задаёт сама карточка, кадрирование — `object-fit: cover` у изображения. */
+.relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: auto; }
+.relnews-card--wide .relnews-card__body { flex: 1 1 auto; justify-content: center; padding: 18px 20px; }
 .relnews-card--wide .relnews-card__title { font-size: var(--step-2); }
 /* Анонс — три строки: карточка стоит в ряду с компактными, и её высота задаёт
    высоту всего ряда. Правило адресовано только широкой карточке: у той же
@@ -3041,9 +3053,10 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 /* В одну колонку широкой карточке растягиваться некуда: `span 2` создал бы
    вторую колонку и горизонтальную прокрутку. */
 @media (max-width: 560px) {
-    .relnews-card--wide { grid-column: auto; flex-direction: column; }
+    .relnews-card.relnews-card--wide { grid-column: auto; flex-direction: column; padding: 0 0 14px; }
     .relnews-card--wide .news-cover { flex: none; }
     .relnews-card--wide .relnews-card__media { height: auto; aspect-ratio: 16 / 10; }
+    .relnews-card--wide .relnews-card__body { padding: 4px 14px 0; }
 }
 
 /* «Читать подробнее» — завершение карточки. Отделено чертой сверху и всегда
