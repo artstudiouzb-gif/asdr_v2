@@ -694,8 +694,8 @@ foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
     // Порядок важен: «Noto Serif» содержит «Noto S», поэтому имена
     // проверяются целиком и совпадение прерывает перебор.
     foreach ([
-        'Noto Serif' => '/assets/fonts/noto-serif/noto-serif-400-cyrillic.woff2',
-        'Noto Sans' => '/assets/fonts/noto-sans/noto-sans-400-cyrillic.woff2',
+        'Noto Serif' => '/assets/fonts/noto-serif/noto-serif-var-cyrillic.woff2',
+        'Noto Sans' => '/assets/fonts/noto-sans/noto-sans-var-cyrillic.woff2',
     ] as $family => $fontFile) {
         // Совпадать должно начало стека: семейство, которым реально набран
         // текст. Иначе запасное начертание («Inter Fallback») или дальний

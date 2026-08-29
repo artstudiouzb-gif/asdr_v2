@@ -36,10 +36,16 @@ function extKeepText() {
  * лежат: их скачивает на сервер App\Core\LocalGoogleFonts при сохранении
  * дизайна. Добавлять сюда новое семейство «на всякий случай» не нужно —
  * каждое стоит ~90 КБ в поставке и ничего не даёт, пока не выбрано.
+ *
+ * Запрашивается диапазон `wght@400..700`, а не перечисление весов: файлы Noto
+ * переменные (в них есть таблицы fvar/gvar), и одна и та же woff2 покрывает всю
+ * ось. Прежний запрос `400;600;700` возвращал три @font-face на один и тот же
+ * файл — лишние объявления, и любой невыписанный вес (например 500) браузер
+ * подделывал синтетическим жирным, хотя настоящий лежал в том же файле.
  */
 const fonts = [
-    { slug: 'noto-sans', family: 'Noto Sans', query: 'Noto+Sans:wght@400;600;700', weights: [400, 600, 700] },
-    { slug: 'noto-serif', family: 'Noto Serif', query: 'Noto+Serif:wght@400;600;700', weights: [400, 600, 700] },
+    { slug: 'noto-sans', family: 'Noto Sans', query: 'Noto+Sans:wght@400..700', weights: [400, 500, 600, 700] },
+    { slug: 'noto-serif', family: 'Noto Serif', query: 'Noto+Serif:wght@400..700', weights: [400, 500, 600, 700] },
 ];
 const subsets = ['cyrillic-ext', 'cyrillic', 'latin'];
 const checkOnly = process.argv.includes('--check');
@@ -66,13 +72,23 @@ function parseFaces(css) {
     return faces;
 }
 
+/** Лицо переменного шрифта объявляет диапазон («400 700»), а не одно число. */
+function weightCovered(declared, weight) {
+    const parts = declared.trim().split(/\s+/).map(Number);
+    if (parts.some(Number.isNaN)) {
+        return false;
+    }
+    const [min, max] = parts.length === 1 ? [parts[0], parts[0]] : [parts[0], parts[1]];
+    return weight >= min && weight <= max;
+}
+
 function validate(font, faces, source) {
     for (const subset of subsets) {
         for (const weight of font.weights) {
             if (!faces.some((face) => face.subset === subset
                 && face.family === font.family
                 && face.style === 'normal'
-                && face.weight === String(weight)
+                && weightCovered(face.weight, weight)
                 && face.url !== ''
                 && face.unicodeRange !== '')) {
                 throw new Error(`${font.family} ${weight} has no ${subset} face in ${source}.`);
@@ -126,7 +142,9 @@ async function sync(font) {
     const sourceToFile = new Map();
     for (const face of faces) {
         if (!sourceToFile.has(face.url)) {
-            sourceToFile.set(face.url, `${font.slug}-${face.weight}-${face.subset}.woff2`);
+            // Один файл на всю ось — «400» в имени врал бы про его содержимое.
+            const label = face.weight.includes(' ') ? 'var' : face.weight;
+            sourceToFile.set(face.url, `${font.slug}-${label}-${face.subset}.woff2`);
         }
     }
     const extUrls = new Set(faces.filter((face) => face.subset === 'cyrillic-ext').map((face) => face.url));

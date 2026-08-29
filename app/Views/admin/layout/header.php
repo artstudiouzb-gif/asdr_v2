@@ -122,6 +122,7 @@ $navBrandSubtitle = $navBrandHost !== '' ? $navBrandHost : t('Панель уп�
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($pageTitle, ENT_QUOTES) ?> — <?= htmlspecialchars(\App\Core\AdminBrand::name(), ENT_QUOTES) ?></title>
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/vendor/coloris/coloris.min.css'), ENT_QUOTES) ?>">
+<?= \App\Core\AdminUi::fontLinks() ?>
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/css/admin.css'), ENT_QUOTES) ?>">
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/css/admin-shell-v2.css'), ENT_QUOTES) ?>">
 <?= \App\Core\Icon::browserConfigHtml() ?>

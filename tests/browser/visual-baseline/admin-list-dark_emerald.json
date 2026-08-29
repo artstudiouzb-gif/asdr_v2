@@ -58,7 +58,7 @@
   },
   ".list-filter": {
     "color": "rgb(248, 250, 252)",
-    "fontSize": "14px",
+    "fontSize": "13px",
     "borderRadius": "0px",
     "padding": "0px"
   },

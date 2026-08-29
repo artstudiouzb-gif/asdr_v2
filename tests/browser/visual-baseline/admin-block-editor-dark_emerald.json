@@ -17,7 +17,7 @@
   },
   ".block-list-item__sub": {
     "color": "rgb(248, 250, 252)",
-    "fontSize": "14px"
+    "fontSize": "13px"
   },
   ".preset-card": {
     "backgroundColor": "rgb(30, 41, 59)",

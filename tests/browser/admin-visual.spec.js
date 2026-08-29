@@ -46,6 +46,9 @@ const SCREENS = [
         name: 'shell',
         url: '/admin',
         probes: [
+            // Семейство и базовый кегль: панель набрана своим Noto Sans из
+            // поставки, и откат на системный стек надо замечать сразу.
+            ['body', ['fontFamily', 'fontSize', 'fontWeight']],
             ['.admin-topbar', ['backgroundColor', 'color', 'height', 'borderBottomColor']],
             ['.admin-sidebar', ['backgroundColor', 'color', 'width', 'borderRightColor']],
             ['.admin-nav-item', ['color', 'fontSize', 'fontWeight', 'padding', 'borderRadius']],
