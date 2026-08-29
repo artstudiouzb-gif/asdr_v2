@@ -51,6 +51,14 @@ const SCREENS = [
     ['users', '/admin/users'],
     ['telegram', '/admin/telegram'],
     ['database', '/admin/database'],
+    // Обложки: слайды рисует собственная секция слоя переопределений.
+    ['heroes', '/admin/heroes'],
+];
+
+// Экран входа рисуется мимо общей оболочки и своей секцией правил, но снять
+// его можно только до авторизации — поэтому он отдельным списком.
+const ANON_SCREENS = [
+    ['login', '/admin/login'],
 ];
 const PROPS = [
     'display', 'position', 'boxSizing', 'width', 'height', 'minHeight', 'maxWidth',
@@ -103,41 +111,52 @@ async function login(page) {
     throw new Error('Второй фактор не принят за три попытки: шаг TOTP занят другим входом?');
 }
 
+/** Снимает один экран в одной теме; возвращает число снятых узлов. */
+async function captureScreen(page, screen, url, theme, out) {
+    await page.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
+    await page.evaluate((value) => document.documentElement.setAttribute('data-admin-theme', value), theme);
+    // Переходы гасим: срез ловил цвет посреди смены темы.
+    await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important}' });
+    await page.waitForTimeout(150);
+    const data = await page.evaluate((props) => {
+        const result = {};
+        const walk = (el, keyPath) => {
+            const computed = getComputedStyle(el);
+            const record = {};
+            for (const prop of props) { record[prop] = computed[prop]; }
+            const cls = typeof el.className === 'string'
+                ? el.className.trim().split(/\s+/).slice(0, 3).join('.') : '';
+            result[keyPath + '|' + el.tagName.toLowerCase() + (cls ? '.' + cls : '')] = record;
+            [...el.children].forEach((child, i) => walk(child, keyPath + '>' + i));
+        };
+        walk(document.body, '0');
+        return result;
+    }, PROPS);
+    fs.writeFileSync(path.join(out, `${screen}-${theme}.json`), JSON.stringify(data));
+    return Object.keys(data).length;
+}
+
 async function capture(name) {
     const out = path.join(STORE, name);
     fs.mkdirSync(out, { recursive: true });
     const browser = await chromium.launch();
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, baseURL: BASE });
     const page = await context.newPage();
-    await login(page);
 
     let total = 0;
-    for (const [screen, url] of SCREENS) {
+    for (const [screen, url] of ANON_SCREENS) {
         for (const theme of THEMES) {
-            await page.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
-            await page.evaluate((value) => document.documentElement.setAttribute('data-admin-theme', value), theme);
-            // Переходы гасим: срез ловил цвет посреди смены темы.
-            await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important}' });
-            await page.waitForTimeout(150);
-            const data = await page.evaluate((props) => {
-                const result = {};
-                const walk = (el, keyPath) => {
-                    const computed = getComputedStyle(el);
-                    const record = {};
-                    for (const prop of props) { record[prop] = computed[prop]; }
-                    const cls = typeof el.className === 'string'
-                        ? el.className.trim().split(/\s+/).slice(0, 3).join('.') : '';
-                    result[keyPath + '|' + el.tagName.toLowerCase() + (cls ? '.' + cls : '')] = record;
-                    [...el.children].forEach((child, i) => walk(child, keyPath + '>' + i));
-                };
-                walk(document.body, '0');
-                return result;
-            }, PROPS);
-            total += Object.keys(data).length;
-            fs.writeFileSync(path.join(out, `${screen}-${theme}.json`), JSON.stringify(data));
+            total += await captureScreen(page, screen, url, theme, out);
         }
     }
-    console.log(`Срез «${name}»: узлов ${total}, файлов ${SCREENS.length * THEMES.length}.`);
+
+    await login(page);
+    for (const [screen, url] of SCREENS) {
+        for (const theme of THEMES) {
+            total += await captureScreen(page, screen, url, theme, out);
+        }
+    }
+    console.log(`Срез «${name}»: узлов ${total}, файлов ${(SCREENS.length + ANON_SCREENS.length) * THEMES.length}.`);
     await browser.close();
 }
 

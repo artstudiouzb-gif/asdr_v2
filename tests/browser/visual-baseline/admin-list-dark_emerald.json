@@ -64,7 +64,7 @@
   },
   ".btn--small": {
     "fontSize": "12px",
-    "padding": "5px 10px",
+    "padding": "0px",
     "borderRadius": "3px",
     "height": "32px",
     "minHeight": "28px"
