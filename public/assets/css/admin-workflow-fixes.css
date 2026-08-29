@@ -27,8 +27,8 @@
 }
 .news-gallery-editor__title {
     margin: 0 !important;
-    font-size: 15px !important;
-    font-weight: 750 !important;
+    font-size: var(--admin-fs-lg) !important;
+    font-weight: var(--admin-fw-semibold) !important;
 }
 .news-gallery-editor__count {
     display: inline-flex;
@@ -40,8 +40,8 @@
     border-radius: 3px;
     color: var(--admin-accent, #2563eb);
     background: color-mix(in srgb, var(--admin-accent, #2563eb) 12%, transparent);
-    font-size: 12px;
-    font-weight: 800;
+    font-size: var(--admin-fs-sm);
+    font-weight: var(--admin-fw-semibold);
 }
 .news-gallery-editor__add {
     flex: 0 0 auto;
@@ -62,12 +62,12 @@
     display: block;
     margin-bottom: 4px;
     color: var(--admin-text, #172033);
-    font-size: 14px;
+    font-size: var(--admin-fs-md);
 }
 .news-gallery-editor__empty span {
     display: block;
     max-width: 560px;
-    font-size: 12px;
+    font-size: var(--admin-fs-sm);
 }
 .news-gallery-editor .news-gallery-admin {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
@@ -126,7 +126,7 @@
 .news-gallery-editor__helper {
     margin: 0;
     color: var(--admin-muted, #64748b);
-    font-size: 12px;
+    font-size: var(--admin-fs-sm);
 }
 
 /* Backup restore is intentionally visually separated from simple download. */
@@ -150,7 +150,7 @@
 .backup-restore-panel__head p {
     margin: 0;
     color: var(--admin-muted, #64748b);
-    font-size: 12px;
+    font-size: var(--admin-fs-sm);
 }
 .backup-restore-panel__grid {
     display: grid;
@@ -167,7 +167,7 @@
     min-height: 20px;
     margin-top: 6px;
     color: var(--admin-muted, #64748b);
-    font-size: 12px;
+    font-size: var(--admin-fs-sm);
 }
 .backup-restore-panel__confirm {
     margin-top: 14px;
@@ -188,7 +188,7 @@
 }
 .backup-restore-panel__safety {
     color: var(--admin-muted, #64748b);
-    font-size: 12px;
+    font-size: var(--admin-fs-sm);
 }
 
 @media (max-width: 760px) {

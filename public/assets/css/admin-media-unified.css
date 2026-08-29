@@ -69,8 +69,8 @@
     padding: 6px 2px 0;
     color: var(--admin-text, #1e293b) !important;
     background: none !important;
-    font-size: 12.5px;
-    font-weight: 600;
+    font-size: var(--admin-fs-sm);
+    font-weight: var(--admin-fw-medium);
     line-height: 1.25;
     text-align: left;
 }
@@ -137,8 +137,8 @@
 
 .media-loadmore-bar__status {
     color: var(--admin-muted, #64748b);
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--admin-fs-sm);
+    font-weight: var(--admin-fw-medium);
 }
 
 .media-loadmore-bar__button { flex: 0 0 auto; }

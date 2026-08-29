@@ -2,7 +2,7 @@
   ".form-field > label": {
     "color": "rgb(29, 35, 39)",
     "fontSize": "13px",
-    "fontWeight": "600",
+    "fontWeight": "500",
     "marginBottom": "6px"
   },
   "input[type=\"text\"]": {
@@ -11,14 +11,14 @@
     "borderColor": "rgb(220, 220, 222)",
     "borderRadius": "3px",
     "height": "38px",
-    "fontSize": "13.5px"
+    "fontSize": "13px"
   },
   "textarea": {
     "backgroundColor": "rgb(255, 255, 255)",
     "color": "rgb(15, 23, 42)",
     "borderColor": "rgb(220, 220, 222)",
     "borderRadius": "3px",
-    "fontSize": "13.5px"
+    "fontSize": "13px"
   },
   "select": {
     "backgroundColor": "rgb(255, 255, 255)",
@@ -29,7 +29,7 @@
   },
   ".form-hint": {
     "color": "rgb(100, 105, 112)",
-    "fontSize": "12.5px"
+    "fontSize": "12px"
   },
   ".form-card": {
     "backgroundColor": "rgb(255, 255, 255)",

@@ -20,13 +20,13 @@
   ".media-card__caption": {
     "backgroundColor": "rgba(0, 0, 0, 0)",
     "color": "rgb(248, 250, 252)",
-    "fontSize": "12.5px",
+    "fontSize": "12px",
     "padding": "6px 2px 0px"
   },
   ".media-card__ext": {
     "color": "rgb(148, 163, 184)",
     "fontSize": "11px",
-    "fontWeight": "700"
+    "fontWeight": "600"
   },
   ".media-card__icon-wrap": {
     "backgroundColor": "color(srgb 0.17749 0.218157 0.284353)",

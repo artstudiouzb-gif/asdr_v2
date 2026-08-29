@@ -17,7 +17,7 @@
   ".media-modal__navitem": {
     "color": "rgb(37, 99, 235)",
     "fontSize": "13px",
-    "fontWeight": "600",
+    "fontWeight": "500",
     "padding": "7px 9px",
     "borderRadius": "3px"
   },
@@ -57,8 +57,8 @@
   },
   ".media-modal__caption-name": {
     "color": "rgb(29, 35, 39)",
-    "fontSize": "12.5px",
-    "fontWeight": "600"
+    "fontSize": "12px",
+    "fontWeight": "500"
   },
   ".media-modal__caption-meta": {
     "color": "rgb(100, 105, 112)",

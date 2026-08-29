@@ -34,8 +34,8 @@
     background: transparent !important;
     box-shadow: none !important;
     color: var(--slider-settings-muted) !important;
-    font-size: 13px !important;
-    font-weight: 650 !important;
+    font-size: var(--admin-fs-base) !important;
+    font-weight: var(--admin-fw-semibold) !important;
     line-height: 1.2 !important;
     white-space: nowrap;
 }
@@ -94,8 +94,8 @@
 .slider-settings-layout__section-title {
     margin: 0 0 3px !important;
     color: var(--slider-settings-text);
-    font-size: 14px !important;
-    font-weight: 750 !important;
+    font-size: var(--admin-fs-md) !important;
+    font-weight: var(--admin-fw-semibold) !important;
     line-height: 1.25;
 }
 
@@ -103,7 +103,7 @@
     max-width: 430px;
     margin: 0;
     color: var(--slider-settings-muted);
-    font-size: 11.5px;
+    font-size: var(--admin-fs-xs);
     line-height: 1.4;
 }
 
@@ -143,8 +143,8 @@
     min-width: 0;
     margin: 0 !important;
     color: var(--slider-settings-text) !important;
-    font-size: 12.5px !important;
-    font-weight: 650 !important;
+    font-size: var(--admin-fs-sm) !important;
+    font-weight: var(--admin-fw-semibold) !important;
     line-height: 1.25 !important;
     cursor: pointer;
 }
@@ -204,8 +204,8 @@
     display: block;
     margin: 0 0 6px !important;
     color: var(--slider-settings-text) !important;
-    font-size: 11.5px !important;
-    font-weight: 650 !important;
+    font-size: var(--admin-fs-xs) !important;
+    font-weight: var(--admin-fw-semibold) !important;
     line-height: 1.25;
 }
 
@@ -215,7 +215,7 @@
     min-height: 38px !important;
     margin: 0 !important;
     border-radius: 3px!important;
-    font-size: 13px !important;
+    font-size: var(--admin-fs-base) !important;
 }
 
 .slider-settings-layout__control[type="number"] {
