@@ -13,7 +13,21 @@
 /* -------------------------------------------------------------------------
  * Кадр карточки.
  * ---------------------------------------------------------------------- */
-.media-grid .media-card,
+/* Пропорция принадлежит кадру, а не карточке: на странице /admin/files
+   подпись лежит внутри .media-card, и пока рамку 16:10 держала сама карточка,
+   подпись оставалась абсолютной поверх снимка — с прозрачным фоном тёмное имя
+   файла ложилось прямо на фотографию. */
+.media-grid .media-card {
+    position: relative;
+    min-width: 0;
+    display: block;
+    aspect-ratio: auto !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+}
+
 .media-modal__thumb {
     position: relative;
     min-width: 0;
@@ -26,12 +40,24 @@
 }
 
 .media-grid .media-card__thumb,
+.media-grid .media-card__icon-wrap {
+    aspect-ratio: 16 / 10 !important;
+    height: auto !important;
+    overflow: hidden;
+    border: var(--admin-media-thumb-border) !important;
+    border-radius: var(--admin-media-thumb-radius) !important;
+    background: var(--admin-media-thumb-bg) !important;
+    transition: border-color .16s ease, box-shadow .16s ease;
+}
+
+.media-grid .media-card__thumb,
 .media-modal__thumb img {
     width: 100% !important;
-    height: 100% !important;
     display: block;
     object-fit: cover !important;
 }
+
+.media-modal__thumb img { height: 100% !important; }
 
 /* Подпись лежит под кадром в обоих контекстах: наложенная поверх снимка, она
  * закрывала нижнюю треть кадра. У окна выбора в подписи две строки — имя и
@@ -39,6 +65,7 @@
 .media-modal__caption { display: grid; gap: 1px; }
 .media-grid .media-card__caption,
 .media-modal__caption {
+    position: static !important;
     padding: 6px 2px 0;
     color: var(--admin-text, #1e293b) !important;
     background: none !important;
@@ -57,7 +84,9 @@
 }
 
 /* Одна отметка выбранного в обоих контекстах. */
-.media-grid .media-card.is-selected,
+/* Отметка выбранного тоже переехала на кадр — рамку рисует он. */
+.media-grid .media-card.is-selected .media-card__thumb,
+.media-grid .media-card.is-selected .media-card__icon-wrap,
 .media-modal__item.is-selected .media-modal__thumb {
     border-color: var(--admin-accent, #2271b1) !important;
     box-shadow: var(--admin-media-thumb-ring) !important;

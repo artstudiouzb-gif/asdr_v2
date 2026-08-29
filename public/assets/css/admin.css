@@ -1004,8 +1004,15 @@ body.theme-dark .alert--success,
 .btn--warning:hover { background: color-mix(in srgb, var(--admin-warning-soft) 70%, var(--admin-warning-border)); border-color: var(--admin-warning); color: var(--admin-warning); }
 .btn--danger { background: var(--admin-surface); border-color: var(--admin-danger-border); color: var(--admin-danger); }
 .btn--danger:hover { background: var(--admin-danger-soft); }
+/* Обе стояли в разметке (21 место на .btn--outline, «Загрузить файл на сервер»
+   на .btn--success) и рисовались обычной кнопкой: главное действие формы ничем
+   не отличалось от «Отмены». */
+.btn--success { background: var(--admin-success); border-color: var(--admin-success); color: #fff; }
+.btn--success:hover { background: color-mix(in srgb, var(--admin-success) 85%, #000); border-color: color-mix(in srgb, var(--admin-success) 85%, #000); color: #fff; }
+.btn--outline { background: transparent; border-color: var(--admin-accent); color: var(--admin-accent); }
+.btn--outline:hover { background: var(--admin-accent-soft); border-color: var(--admin-accent); color: var(--admin-accent-hover); }
 .btn__icon { flex-shrink: 0; opacity: .85; }
-.btn--primary .btn__icon, .btn--danger .btn__icon { opacity: 1; }
+.btn--primary .btn__icon, .btn--danger .btn__icon, .btn--success .btn__icon { opacity: 1; }
 .btn:disabled, .btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; transform: none; }
 .btn--social {
     display: inline-flex; align-items: center; justify-content: center; gap: 7px;
@@ -1081,7 +1088,10 @@ body.theme-dark .alert--success,
     border-color: color-mix(in srgb, var(--admin-danger) 45%, var(--admin-surface));
     background: color-mix(in srgb, var(--admin-danger) 12%, var(--admin-surface));
 }
-.stat-card__value { font-size: 26px; font-weight: 800; color: var(--admin-text); line-height: 1.1; letter-spacing: -0.02em; }
+.stat-card__value { font-size: 26px; font-weight: 800; color: var(--admin-text); line-height: 1.1; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+/* Не число, а строка: версия СУБД и имя базы набирались тем же кеглем, что
+   счётчики, и «10.11.14-MariaDB-0ubuntu0.24.04.1» разваливался на три строки. */
+.stat-card__value--text { font-size: 16px; font-weight: 700; line-height: 1.35; letter-spacing: 0; }
 .stat-card__label { font-size: 13px; font-weight: 600; color: var(--admin-muted); }
 
 /* ============================================================================
@@ -1180,6 +1190,17 @@ body.theme-dark .alert--success,
 .badge--draft { background: #f1f5f9; color: #475569; }
 .badge--danger { background: #fee2e2; color: #991b1b; }
 .badge--accent { background: #eff6ff; color: #1d4ed8; }
+/* «Ожидает» и «Отключён» стояли в разметке обычным серым бейджем: предупреждение
+   и выключенная запись читались как нейтральная подпись. Палитра — та же, что у
+   .status-badge ниже: два семейства бейджей в одной панели не должны красить
+   один и тот же статус по-разному. */
+.badge--warning { background: #fef3c7; color: #92400e; }
+.badge--muted { background: #f1f5f9; color: #64748b; }
+/* Размер и форма: мелкая пометка у подписи поля и круглый счётчик в меню.
+   Оба исключены из бланкета слоя «Enterprise Scale» ниже — иначе его
+   !important не давал модификатору ничего изменить. */
+.badge--small { padding: 2px 7px; font-size: 11px; }
+.badge--pill { border-radius: 999px; padding: 2px 8px; min-width: 20px; justify-content: center; }
 .badge--home { margin-left: 8px; vertical-align: middle; }
 .badge svg { flex-shrink: 0; }
 .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; margin-right: 8px; vertical-align: middle; }
@@ -1632,15 +1653,22 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     text-decoration: none;
 }
 .submission-count-link > span:not(.badge) { color: var(--admin-muted); font-size: 13px; }
+/* Полоса фильтров была сеткой из четырёх заданных колонок, хотя на разных
+   экранах полей разное число: на «Подписчиках» третьей колонкой оказывался
+   выбор языка и растягивался на 1.5fr — вдвое шире поиска по адресу. Ряд
+   гибкий: поиск забирает остаток, остальные поля стоят по содержимому. */
 .admin-filter-bar {
-    display: grid;
-    grid-template-columns: minmax(160px, .7fr) minmax(150px, .6fr) minmax(240px, 1.5fr) auto;
+    display: flex;
+    flex-wrap: wrap;
     align-items: end;
     gap: 14px;
     margin-bottom: 18px;
 }
-.admin-filter-bar .form-field { margin: 0; }
+.admin-filter-bar .form-field { margin: 0; flex: 0 1 200px; min-width: 150px; }
+/* Кнопки стоят в одном ряду с полями, поэтому берут «строчную» высоту шкалы:
+   базовые 34px рядом с 38-пиксельным полем читаются как сбитая линия. */
 .admin-filter-bar .form-actions { margin: 0; align-self: end; }
+.admin-filter-bar .form-actions .btn { min-height: var(--admin-btn-h-row); }
 .submission-row--unread td {
     background: color-mix(in srgb, var(--admin-accent) 5%, var(--admin-surface));
 }
@@ -1690,8 +1718,9 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
         overflow: auto;
     }
     .submission-summary,
-    .admin-filter-bar,
     .submission-detail-layout { grid-template-columns: 1fr; }
+    .admin-filter-bar .form-field,
+    .admin-filter-bar__search { flex-basis: 100%; }
     .forms-list-heading { flex-direction: column; align-items: stretch; }
     .submission-fields > div,
     .submission-meta dl > div { grid-template-columns: 1fr; gap: 5px; }
@@ -1701,13 +1730,21 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
    Фильтры, вкладки и массовые действия (UI/UX Pro Max)
    ============================================================================ */
 .list-filters { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-.list-filters--panel { display: flex; flex-wrap: wrap; align-items: flex-end; width: 100%; max-width: 100%; padding: 18px 22px; background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 3px; box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02); gap: 14px; margin-bottom: 20px; }
-.list-filter { display: flex; flex: 1 1 160px; min-width: min(140px, 100%); flex-direction: column; gap: 6px; }
+/* Сетка, а не перенос по строке: при `flex-wrap` вторая строка фильтров вставала
+   своими ширинами, и «Дата до» оказывалась вдвое шире «Даты от» над ней. Дорожки
+   одинаковые, поэтому строки выстраиваются в колонки. 180px — ширина, при
+   которой не обрезается самый длинный список («Основной: Русский»). */
+.list-filters--panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); align-items: end; width: 100%; max-width: 100%; padding: 18px 22px; background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 3px; box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02); gap: 14px; margin-bottom: 20px; }
+.list-filter { display: flex; flex: 1 1 160px; min-width: 0; flex-direction: column; gap: 6px; }
 .list-filter label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--admin-muted); margin: 0; }
 .list-filter input, .list-filter select { height: 38px; padding: 7px 12px; border-radius: 3px; border: 1px solid var(--admin-border); background: var(--admin-input-bg, #f8fafc); color: var(--admin-input-text, inherit); font-size: 13px; transition: all 0.15s ease; }
 .list-filter input:focus, .list-filter select:focus { border-color: var(--admin-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent) 18%, transparent); }
-.list-filter--search { flex: 2 1 280px; min-width: min(220px, 100%); }
-.list-filter--compact { flex: 0 1 130px; min-width: 100px; max-width: 130px; }
+.list-filters--panel .list-filter--search { grid-column: span 2; }
+/* Кнопки — в последние две дорожки: так они держатся правого края панели,
+   куда бы ни попал последний фильтр. */
+.list-filters--panel .list-filters__actions { grid-column: -3 / -1; margin-left: 0; }
+.list-filter--search { flex: 2 1 280px; min-width: 0; }
+.list-filter--compact { flex: 0 1 130px; min-width: 0; }
 .list-filters__actions { display: flex; flex: 0 0 auto; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; margin-left: auto; }
 @media (max-width: 768px) {
     .list-filters__actions { width: 100%; margin-left: 0; }
@@ -2718,7 +2755,9 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     .admin-main__header { align-items: flex-start; }
     .admin-main__actions { width: 100%; }
     .admin-main__actions .btn { flex: 1; justify-content: center; }
-    .list-filters--panel { align-items: stretch; flex-direction: column; }
+    .list-filters--panel { align-items: stretch; grid-template-columns: 1fr; }
+    .list-filters--panel .list-filter--search,
+    .list-filters--panel .list-filters__actions { grid-column: span 1; }
     .list-filter--search, .list-filter--compact { min-width: 0; max-width: none; }
     .list-filters__actions { width: 100%; margin-left: 0; }
     .list-filters__actions .btn { flex: 1; justify-content: center; }
@@ -3633,11 +3672,24 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     padding: 3px 10px; border-radius: 3px; font-size: 12px; font-weight: 600;
     line-height: 1.2; width: max-content;
 }
-.status-badge--success { background: rgba(16, 185, 129, 0.12); color: #10b981; }
-.status-badge--warning { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
-.status-badge--danger { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
-.status-badge--info { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
-.status-badge--neutral { background: rgba(148, 163, 184, 0.12); color: #94a3b8; }
+/* Палитра была подобрана для тёмного фона (светлый текст на 12 % заливке), но
+   применялась всегда: в светлой теме «Активен» давал 2.5:1, «Ожидает» — 2.1:1,
+   то есть надпись почти пропадала. Светлые значения — те же, что у .badge--*,
+   тёмные лежат в блоке prefers-color-scheme выше. */
+.status-badge--success, .status-badge--published { background: #dcfce7; color: #15803d; }
+.status-badge--warning { background: #fef3c7; color: #92400e; }
+.status-badge--danger { background: #fee2e2; color: #991b1b; }
+.status-badge--info { background: #eff6ff; color: #1d4ed8; }
+.status-badge--neutral, .status-badge--draft { background: #f1f5f9; color: #475569; }
+/* Тёмный набор объявлен здесь, а не в общем блоке prefers-color-scheme выше:
+   тот идёт раньше по файлу, и светлые значения перебивали бы его. */
+@media (prefers-color-scheme: dark) {
+    .status-badge--success, .status-badge--published { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+    .status-badge--warning { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+    .status-badge--danger { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+    .status-badge--info { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+    .status-badge--neutral, .status-badge--draft { background: rgba(148, 163, 184, 0.12); color: #94a3b8; }
+}
 
 /* Drag and Drop Uploader */
 .dropzone {
@@ -4556,6 +4608,10 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     margin-left: auto;
 }
 
+/* Ширина по содержимому, а не во всю строку: без неё каждый список занимал
+   всю полосу и тулбар разъезжался в четыре этажа. */
+.media-toolbar select { width: auto; min-width: 170px; }
+.media-toolbar input[type="search"] { width: auto; min-width: 220px; }
 .media-toolbar select,
 .media-toolbar input[type="search"] {
     padding: 8px 12px;
@@ -6377,7 +6433,7 @@ input[type="number"],
 input[type="url"],
 textarea,
 select,
-.badge,
+.badge:not(.badge--pill),
 .tag,
 .chip,
 .fb-card__badge {
@@ -6644,7 +6700,7 @@ small, .form-hint, .help-block {
     border-radius: 3px!important;
 }
 
-.badge, .status-badge, .tag, .chip {
+.badge:not(.badge--small):not(.badge--pill), .status-badge, .tag, .chip {
     font-size: 12px !important;
     font-weight: 600 !important;
     padding: 3px 8px !important;
@@ -6684,6 +6740,12 @@ small, .form-hint, .help-block {
     /* Компактная кнопка ниже базовой, но одна для всех трёх написаний класса:
        раньше .btn--small и .btn--sm расходились на пиксель. */
     min-height: var(--admin-btn-h-sm) !important;
+}
+
+.btn--large, .btn--lg {
+    font-size: 14.5px !important;
+    padding: 10px 20px !important;
+    min-height: var(--admin-btn-h-lg) !important;
 }
 
 /* 7. Полноразмерная свободная ширина без искусственных ограничений */
@@ -8015,3 +8077,55 @@ table.table td {
 
 
 
+
+/* --- Классы, которые разметка ставила, а CSS не описывал ------------------
+   Найдены сверкой class-атрибутов админки с правилами (тест 278). Каждый такой
+   класс молча ничего не делал: отступ не появлялся, строка не выстраивалась в
+   ряд, подпись оставалась размером с абзац, а «Обновить БД» в предупреждении о
+   миграциях уезжала под текст вместо правого края. */
+.admin-mt-8 { margin-top: 8px; }
+.admin-mt-12 { margin-top: 12px; }
+.admin-mt-16 { margin-top: 16px; }
+.admin-mb-16 { margin-bottom: 16px; }
+.admin-ml-8 { margin-left: 8px; }
+.admin-ml-12 { margin-left: 12px; }
+.admin-ml-auto { margin-left: auto; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+.text-center { text-align: center; }
+.u-flex-between { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+.admin-page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.admin-actions-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.admin-subtitle { margin: 0 0 16px; max-width: 90ch; color: var(--admin-muted); font-size: 13.5px; line-height: 1.55; }
+.admin-pager { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+/* `.admin-grid` в разметке был, а правила не было: карточки состояния БД
+   стояли не сеткой, а простыми блоками друг под другом. */
+.admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.admin-grid--4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.admin-list-group { display: flex; flex-direction: column; border: 1px solid var(--admin-border); border-radius: var(--admin-radius-sm); overflow: hidden; }
+.admin-list-group__item { padding: 9px 14px; border-bottom: 1px solid var(--admin-border); background: var(--admin-surface); font-size: 13px; }
+.admin-list-group__item:last-child { border-bottom: 0; }
+.admin-filter-bar__search { flex: 1 1 260px; min-width: 220px; }
+.alert__content { flex: 1; min-width: 0; }
+
+.form-help { display: block; margin-top: 6px; color: var(--admin-muted); font-size: 12.5px; line-height: 1.45; }
+.form-subtitle { margin: 0 0 8px; font-size: 14px; font-weight: 700; color: var(--admin-text); }
+.form-divider { margin: 20px 0; border: 0; border-top: 1px solid var(--admin-border); }
+.form-card__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.form-grid--inline { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+
+/* Название типа контента с иконкой: без выравнивания svg вставал по базовой
+   линии текста и висел выше строки. */
+.content-type-name { display: inline-flex; align-items: center; gap: 8px; }
+
+.hb-palette__title { margin-bottom: 8px; font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--admin-muted); }
+.hb-section__height { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--admin-muted); }
+.hb-section__height select { width: auto; min-width: 120px; }
+.hb-social-row__url { flex: 1 1 240px; min-width: 200px; }
+
+.table--striped tbody tr:nth-child(even) { background: var(--admin-surface-soft); }
+/* Плотная таблица спорит с бланкетом `.admin-table td/th … !important` в конце
+   файла — отсюда и !important: без него класс не менял ничего. */
+.table--compact th, .table--compact td { padding: 6px 10px !important; }

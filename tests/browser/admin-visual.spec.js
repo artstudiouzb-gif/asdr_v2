@@ -146,11 +146,17 @@ const SCREENS = [
         probes: [
             ['.media-grid', ['gridTemplateColumns', 'gap']],
             ['.media-card', ['backgroundColor', 'borderColor', 'borderRadius', 'aspectRatio']],
-            ['.media-card__thumb', ['objectFit', 'width', 'height']],
+            // Рамку и пропорцию держит кадр, а не карточка: подпись лежит под
+            // ним, и на самой карточке 16:10 выталкивало её поверх снимка.
+            ['.media-card__thumb', ['objectFit', 'width', 'height', 'aspectRatio', 'borderColor', 'borderRadius']],
             ['.media-card__caption', ['backgroundColor', 'color', 'fontSize', 'padding']],
             ['.media-card__ext', ['color', 'fontSize', 'fontWeight']],
-            ['.media-card__icon-wrap', ['backgroundColor', 'color']],
+            ['.media-card__icon-wrap', ['backgroundColor', 'color', 'aspectRatio', 'borderColor']],
             ['.media-toolbar', ['backgroundColor', 'borderColor', 'padding']],
+            // Списки тулбара по содержимому: при ширине во всю строку каждый
+            // вставал на свой этаж и полоса управления разъезжалась.
+            ['.media-toolbar select', ['width', 'minWidth']],
+            ['.media-toolbar input[type=\"search\"]', ['width', 'minWidth']],
         ],
     },
     {
