@@ -19,6 +19,8 @@
 !/storage/cache/.gitkeep
 !/storage/cache/README.md
 /storage/integrity/
+# Срезы вычисленных стилей админки (scripts/admin-style-snapshot.mjs).
+/storage/tmp/
 /public/uploads/public/*
 !/public/uploads/public/.gitkeep
 !/public/uploads/public/index.html

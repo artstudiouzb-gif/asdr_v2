@@ -6609,36 +6609,46 @@ body, body.admin-body {
 /* 4. Поля форм, селекты, лейблы и подсказки */
 .filters-panel input, .filters-panel select,
 /* Поле выбора цвета исключено намеренно: у него слева образец, и общий
-   `padding: 0 12px !important` загонял HEX прямо под него. Исключение здесь
-   дешевле, чем ещё один !important в самом компоненте. */
+   `padding: 0 12px` загонял HEX прямо под него. Исключение здесь
+   дешевле, чем ещё один в самом компоненте. */
 .admin-filters input, .admin-filters select,
 .admin-main input[type="text"]:not([data-coloris]), .admin-main input[type="search"],
 .admin-main input[type="email"], .admin-main input[type="password"],
 .admin-main input[type="number"], .admin-main input[type="url"],
 .admin-main select {
-    font-size: var(--admin-fs-base) !important;
-    height: 38px !important;
-    border: 1px solid var(--admin-border, #cbd5e1) !important;
-    border-radius: 3px!important;
-    background-color: var(--admin-input-bg, #ffffff) !important;
-    color: var(--admin-input-text, #0f172a) !important;
-    padding: 0 12px !important;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+    font-size: var(--admin-fs-base);
+    height: 38px;
+    border: 1px solid var(--admin-border, #cbd5e1);
+    border-radius: 3px;
+    background-color: var(--admin-input-bg, #ffffff);
+    color: var(--admin-input-text, #0f172a);
+    padding: 0 12px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.admin-main input:focus, .admin-main select:focus, .admin-main textarea:focus {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-    outline: none !important;
+/* Список селекторов повторяет правило поля выше не от лени: у того
+   `.admin-main input[type="text"]:not([data-coloris])` вес (0,3,1), и короткое
+   `.admin-main input:focus` (0,2,1) проигрывало ему рамку — при фокусе
+   оставалось только свечение, а граница держалась серой. Цвет берётся из темы:
+   прежний литерал #2563eb светил синим и в изумрудной панели. */
+.filters-panel input:focus, .filters-panel select:focus,
+.admin-filters input:focus, .admin-filters select:focus,
+.admin-main input[type="text"]:not([data-coloris]):focus, .admin-main input[type="search"]:focus,
+.admin-main input[type="email"]:focus, .admin-main input[type="password"]:focus,
+.admin-main input[type="number"]:focus, .admin-main input[type="url"]:focus,
+.admin-main select:focus, .admin-main textarea:focus {
+    border-color: var(--admin-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-accent) 15%, transparent);
+    outline: none;
 }
 
 .admin-main textarea {
-    font-size: var(--admin-fs-base) !important;
-    border: 1px solid var(--admin-border, #cbd5e1) !important;
-    border-radius: 3px!important;
-    background-color: var(--admin-input-bg, #ffffff) !important;
-    color: var(--admin-input-text, #0f172a) !important;
-    padding: 10px 12px !important;
+    font-size: var(--admin-fs-base);
+    border: 1px solid var(--admin-border, #cbd5e1);
+    border-radius: 3px;
+    background-color: var(--admin-input-bg, #ffffff);
+    color: var(--admin-input-text, #0f172a);
+    padding: 10px 12px;
 }
 
 /* Полевые лейблы в светлой рабочей панели (исключая чекбоксы, радио, инсталлятор и экран авторизации) */
@@ -6646,11 +6656,11 @@ body, body.admin-body {
 .admin-layout .filters-panel label:not(.colorfield__off):not(.checkbox-label),
 .admin-layout label.form-label,
 .admin-layout label:not(.colorfield__off):not(.form-field--checkbox):not(.checkbox-label):not([class*="checkbox"]):not([class*="toggle"]):not(:has(input[type="checkbox"])):not(:has(input[type="radio"])) {
-    font-size: var(--admin-fs-base) !important;
-    font-weight: var(--admin-fw-medium) !important;
-    color: var(--admin-text, #0f172a) !important;
-    margin-bottom: 6px !important;
-    display: inline-block !important;
+    font-size: var(--admin-fs-base);
+    font-weight: var(--admin-fw-medium);
+    color: var(--admin-text, #0f172a);
+    margin-bottom: 6px;
+    display: inline-block;
 }
 
 /* Строгое горизонтальное выравнивание простых строчных чекбоксов */
@@ -6661,34 +6671,34 @@ body, body.admin-body {
 label.colorfield__off,
 label.checkbox-inline,
 label.radio-inline {
-    display: inline-flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 8px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    cursor: pointer !important;
-    user-select: none !important;
-    font-size: var(--admin-fs-base) !important;
-    font-weight: var(--admin-fw-medium) !important;
-    color: var(--admin-text, #1e293b) !important;
-    line-height: 1.4 !important;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    user-select: none;
+    font-size: var(--admin-fs-base);
+    font-weight: var(--admin-fw-medium);
+    color: var(--admin-text, #1e293b);
+    line-height: 1.4;
 }
 
 .form-field--checkbox > label,
 .checkbox-field > label,
 .form-check > label,
 .colorfield__off > label {
-    display: inline !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    font-size: var(--admin-fs-base) !important;
-    font-weight: var(--admin-fw-medium) !important;
-    color: var(--admin-text, #1e293b) !important;
-    line-height: 1.4 !important;
-    cursor: pointer !important;
-    user-select: none !important;
+    display: inline;
+    margin: 0;
+    padding: 0;
+    font-size: var(--admin-fs-base);
+    font-weight: var(--admin-fw-medium);
+    color: var(--admin-text, #1e293b);
+    line-height: 1.4;
+    cursor: pointer;
+    user-select: none;
 }
 
 .form-field--checkbox input[type="checkbox"],
@@ -6698,33 +6708,33 @@ label.radio-inline {
 label.colorfield__off input[type="checkbox"],
 label input[type="checkbox"],
 label input[type="radio"] {
-    width: 16px !important;
-    height: 16px !important;
-    min-width: 16px !important;
-    min-height: 16px !important;
-    max-width: 16px !important;
-    max-height: 16px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    flex-shrink: 0 !important;
-    accent-color: #2563eb !important;
-    cursor: pointer !important;
-    vertical-align: middle !important;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    max-width: 16px;
+    max-height: 16px;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+    accent-color: #2563eb;
+    cursor: pointer;
+    vertical-align: middle;
 }
 
 .colorfield__off,
 label.colorfield__off {
-    gap: 6px !important;
-    margin-top: 6px !important;
-    font-size: var(--admin-fs-sm) !important;
-    color: var(--admin-muted, #475569) !important;
-    white-space: nowrap !important;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: var(--admin-fs-sm);
+    color: var(--admin-muted, #475569);
+    white-space: nowrap;
 }
 
 small, .form-hint, .help-block {
-    font-size: var(--admin-fs-sm) !important;
-    line-height: 1.45 !important;
-    color: var(--admin-muted, #64748b) !important;
+    font-size: var(--admin-fs-sm);
+    line-height: 1.45;
+    color: var(--admin-muted, #64748b);
 }
 
 /* 5. Бейджи языков (RU/UZ), статусов и теги */
