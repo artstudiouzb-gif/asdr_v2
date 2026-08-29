@@ -60,6 +60,12 @@
     "fontSize": "13px",
     "fontWeight": "500"
   },
+  ".badge--small": {
+    "padding": "2px 7px",
+    "fontSize": "11px",
+    "fontWeight": "500",
+    "borderRadius": "3px"
+  },
   ".btn": {
     "backgroundColor": "rgb(16, 185, 129)",
     "color": "rgb(255, 255, 255)",

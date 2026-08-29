@@ -59,6 +59,10 @@ const SCREENS = [
             ['.stat-card', ['backgroundColor', 'borderColor', 'borderRadius', 'padding']],
             ['.stat-card__value', ['color', 'fontSize', 'fontWeight']],
             ['.stat-card__label', ['color', 'fontSize', 'fontWeight']],
+            // Уменьшенный бейдж: на дашборде он стоял ad-hoc классом с
+            // хешем, а размер ему всё равно перебивал слой переопределений.
+            // Обычный `.badge` снимается на экране list.
+            ['.badge--small', ['padding', 'fontSize', 'fontWeight', 'borderRadius']],
             // Высота кнопок — часть шкалы (28/34/38/40). Без этого зонда
             // разнобой в один-два пикселя между .btn--small и .btn--sm никто
             // не замечал.
