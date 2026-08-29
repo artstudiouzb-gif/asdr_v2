@@ -27,7 +27,9 @@ test('в поставке ровно два семейства, оба со вс
             foreach ([400, 600, 700] as $weight) {
                 $pattern = '/\/\*\s*' . preg_quote($subset, '/') . '\s*\*\/\s*'
                     . '@font-face\s*\{(?=[^}]*font-family:\s*\'' . preg_quote($family, '/') . '\';)'
-                    . '(?=[^}]*font-weight:\s*' . $weight . ';)[^}]*'
+                    // Файл переменный: лицо объявляет диапазон «400 700», а не
+                    // одно число, и одна woff2 покрывает все нужные веса.
+                    . '(?=[^}]*font-weight:\s*(?:' . $weight . '|\d+\s+\d+);)[^}]*'
                     . "url\\('\\.\\.\\/fonts\\/" . preg_quote($slug, '/') . "\\/([^']+\\.woff2)'\\)[^}]*}/s";
                 assert_true((bool) preg_match($pattern, $css, $match), "нет {$family} {$weight} {$subset}");
                 $file = $root . '/public/assets/fonts/' . $slug . '/' . $match[1];

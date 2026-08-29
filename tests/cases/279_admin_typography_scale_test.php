@@ -116,3 +116,41 @@ test('Семейство шрифта в админке одно', function () {
     sort($strays);
     assert_true($strays === [], 'семейство мимо токена: ' . implode(', ', $strays));
 });
+
+test('Панель подключает свой шрифт на каждом экране', function () {
+    // Файл переменный: одна woff2 покрывает ось 400–700, поэтому три начертания
+    // шкалы не стоят ни одного лишнего байта. Лицо обязано объявлять диапазон —
+    // при трёх фиксированных весах любой невыписанный (например 500) браузер
+    // подделывал бы синтетическим жирным, хотя настоящий лежит в том же файле.
+    $fontCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/noto-sans.css');
+    assert_contains('font-weight: 400 700;', $fontCss, 'лицо объявляет диапазон весов');
+    assert_true(
+        substr_count($fontCss, '@font-face') === 3,
+        'три лица — по одному на подмножество, а не по одному на вес'
+    );
+
+    $admin = (string) file_get_contents(APP_ROOT . '/public/assets/css/admin.css');
+    assert_contains("--admin-font: 'Noto Sans',", $admin, 'панель набрана Noto Sans, системный стек — запасной');
+
+    // Экран входа и второго фактора рисуются мимо общей шапки: без подключения
+    // шрифта они выглядели бы другой гарнитурой, чем остальная панель.
+    $heads = [
+        'app/Views/admin/layout/header.php',
+        'app/Views/admin/auth/login.php',
+        'app/Views/admin/auth/2fa.php',
+        'app/Views/admin/auth/forgot.php',
+        'app/Views/admin/auth/reset.php',
+    ];
+    foreach ($heads as $head) {
+        $html = (string) file_get_contents(APP_ROOT . '/' . $head);
+        assert_contains('AdminUi::fontLinks()', $html, basename($head) . ' подключает шрифт панели');
+    }
+
+    $links = \App\Core\AdminUi::fontLinks();
+    assert_contains('rel="preload"', $links, 'подмножества предзагружаются');
+    assert_contains('noto-sans-var-cyrillic.woff2', $links, 'кириллица предзагружается');
+    assert_contains('noto-sans-var-latin.woff2', $links, 'латиница — тоже: цифры и даты живут в ней');
+    // Адрес preload обязан совпадать с адресом в @font-face — иначе браузер
+    // считает это разными ресурсами и качает файл дважды.
+    assert_not_contains('woff2?v=', $links, 'адрес шрифта без версии');
+});
