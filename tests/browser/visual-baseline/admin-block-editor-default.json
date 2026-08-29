@@ -26,7 +26,7 @@
   },
   ".preset-card__title": {
     "color": "rgb(29, 35, 39)",
-    "fontSize": "13px",
+    "fontSize": "16px",
     "fontWeight": "500"
   },
   ".btn--danger": {
