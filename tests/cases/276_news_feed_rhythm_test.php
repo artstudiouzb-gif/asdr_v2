@@ -53,9 +53,43 @@ test('Лента выводит широкую карточку с анонсо�
 test('Широкая карточка занимает две ячейки и складывается в одну колонку', function () {
     $css = theme_css();
 
-    assert_contains('.relnews-card--wide { grid-column: span 2;', $css, 'две ячейки, а не вся строка');
+    // Класс продублирован в селекторе не для красоты: часть темы
+    // blocks/news-detail.css подключается после общего бандла и задаёт
+    // `.relnews-card { padding: 0 0 14px }`. Модификатору нужен вес выше, иначе
+    // нижний отступ карточки оставлял под фотографией белую полосу.
+    assert_contains('.relnews-card.relnews-card--wide { grid-column: span 2;', $css, 'две ячейки, а не вся строка');
     // В одноколоночной сетке `span 2` создал бы вторую колонку и
     // горизонтальную прокрутку — на узком экране растяжение снимается.
-    assert_contains('.relnews-card--wide { grid-column: auto; flex-direction: column; }', $css);
+    assert_contains('.relnews-card.relnews-card--wide { grid-column: auto; flex-direction: column;', $css);
     assert_contains('.relnews-card--wide .relnews-card__excerpt', $css, 'анонс оформлен только у широкой карточки');
+});
+
+test('Дата в карточке новости отбита от края наравне с заголовком', function () {
+    // Отступ текста задаёт часть темы blocks/news-detail.css: фотография в
+    // карточке идёт «в край», поэтому вставку держит текст. Разметок две — в
+    // блоке похожих новостей текст лежит прямо в карточке, в ленте /news
+    // завёрнут в `.relnews-card__body`. Пока дата отбивалась селектором с `>`,
+    // а заголовок — без него, в ленте число стояло вплотную к рамке, а
+    // заголовок рядом был отбит на 14px.
+    $part = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/news-detail.css');
+    assert_contains('.relnews-card > .news-meta', $part, 'дата отбита у плоской разметки');
+    assert_contains('.relnews-card > .relnews-card__title,', $part, 'заголовок — тем же селектором, что и дата');
+    assert_not_contains("\n.relnews-card__title,\n.relnews-card__excerpt { margin-inline", $part, 'вставка не задаётся мимо прямых потомков');
+
+    assert_contains('.relnews-card__body { display: flex;', theme_css(), 'тело карточки описано в теме');
+    assert_true(
+        (bool) preg_match('/\.relnews-card__body \{[^}]*padding: 4px 14px 0;/', theme_css()),
+        'у тела карточки есть боковой отступ — иначе дата упирается в границу'
+    );
+});
+
+test('Фотография широкой карточки занимает всю высоту', function () {
+    $css = theme_css();
+
+    // Пропорция спорила с `height: 100%`: браузер укорачивал кадр, чтобы сойтись
+    // с 4:3, и под фотографией оставалась белая полоса.
+    assert_contains('.relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: auto; }', $css);
+    // `min-width: 0` снимает автоминимум флекс-элемента: без него колонка с
+    // фотографией разъезжалась до 60% вместо заданных 42%.
+    assert_contains('.relnews-card--wide .news-cover { flex: 0 0 42%; min-width: 0; }', $css);
 });
