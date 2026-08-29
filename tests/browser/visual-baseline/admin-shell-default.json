@@ -19,7 +19,7 @@
   ".admin-nav-item": {
     "color": "rgb(255, 255, 255)",
     "fontSize": "13px",
-    "fontWeight": "500",
+    "fontWeight": "600",
     "padding": "5px 11px",
     "borderRadius": "3px"
   },

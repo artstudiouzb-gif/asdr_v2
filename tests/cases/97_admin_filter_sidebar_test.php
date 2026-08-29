@@ -34,7 +34,9 @@ test('header settings group behavior controls into spacious responsive cards', f
     // Проверяем действующее правило, а не первое попавшееся: у этого селектора
     // было два семейства, и нижнее перекрывало верхнее целиком — тест держался
     // за мёртвую копию и прошёл бы даже с испорченной сеткой.
-    assert_contains(".hb-behavior__options {\n    display: grid !important;", $css);
+    // Без !important: слой переопределений разобран, правило действует весом
+    // селектора. Пиноваться к !important в тесте значит закреплять его насовсем.
+    assert_contains(".hb-behavior__options {\n    display: grid;", $css);
     assert_contains('@media (max-width: 720px)', $css);
 });
 
