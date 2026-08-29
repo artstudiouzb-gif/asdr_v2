@@ -5,7 +5,7 @@
   ".colorfield > label": {
     "color": "rgb(29, 35, 39)",
     "fontSize": "13px",
-    "fontWeight": "600"
+    "fontWeight": "500"
   },
   ".colorfield .clr-field": {
     "display": "block",
@@ -17,11 +17,11 @@
     "borderColor": "rgb(220, 220, 222)",
     "borderRadius": "3px",
     "paddingLeft": "44px",
-    "fontFamily": "ui-monospace, SFMono-Regular, Consolas, monospace"
+    "fontFamily": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
   },
   ".colorfield__off": {
     "color": "rgb(100, 105, 112)",
-    "fontSize": "12.5px",
+    "fontSize": "12px",
     "gap": "6px",
     "marginTop": "6px"
   }

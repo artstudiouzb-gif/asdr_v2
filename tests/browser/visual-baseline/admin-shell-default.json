@@ -13,7 +13,7 @@
   },
   ".admin-nav-item": {
     "color": "rgb(255, 255, 255)",
-    "fontSize": "13.5px",
+    "fontSize": "13px",
     "fontWeight": "500",
     "padding": "5px 11px",
     "borderRadius": "3px"
@@ -25,8 +25,8 @@
   },
   ".admin-welcome h2": {
     "color": "rgb(29, 35, 39)",
-    "fontSize": "16.5px",
-    "fontWeight": "700"
+    "fontSize": "16px",
+    "fontWeight": "600"
   },
   ".admin-welcome p": {
     "color": "rgb(100, 105, 112)",
@@ -47,22 +47,22 @@
   },
   ".stat-card__value": {
     "color": "rgb(29, 35, 39)",
-    "fontSize": "26px",
-    "fontWeight": "800"
+    "fontSize": "24px",
+    "fontWeight": "600"
   },
   ".stat-card__label": {
     "color": "rgb(100, 105, 112)",
     "fontSize": "13px",
-    "fontWeight": "600"
+    "fontWeight": "500"
   },
   ".btn": {
     "backgroundColor": "rgb(37, 99, 235)",
     "color": "rgb(255, 255, 255)",
     "borderColor": "rgb(37, 99, 235)",
     "borderRadius": "3px",
-    "fontSize": "13.5px",
+    "fontSize": "13px",
     "padding": "8px 16px",
-    "height": "34.1875px",
+    "height": "34px",
     "minHeight": "34px"
   },
   ".btn--primary": {
@@ -70,6 +70,6 @@
     "color": "rgb(255, 255, 255)",
     "borderColor": "rgb(37, 99, 235)",
     "borderRadius": "3px",
-    "height": "34.1875px"
+    "height": "34px"
   }
 }

@@ -16,7 +16,7 @@
   ".design-card__label": {
     "color": "rgb(29, 35, 39)",
     "fontSize": "13px",
-    "fontWeight": "600"
+    "fontWeight": "500"
   },
   ".design-opt__label": {
     "color": "rgb(29, 35, 39)",
