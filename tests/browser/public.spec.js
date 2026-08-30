@@ -199,3 +199,51 @@ test('explicit block paddings override page rhythm and keep print/a11y modes int
     await page.emulateMedia({ media: 'print' });
     expect(await paddings('#block-bio')).toEqual(['12px', '12px']);
 });
+
+test('анимация появления работает и в первом экране, и без сетки', async ({ page }) => {
+    // Переход не запускается, если начальное состояние ни разу не нарисовано.
+    // Скрипт с defer выполняется до первой отрисовки, поэтому блок первого
+    // экрана получал `is-visible` в том же кадре, где впервые получил стили,
+    // и появлялся мгновенно: настройка «анимация появления» на верхних блоках
+    // не работала вовсе. Ловим промежуточную прозрачность — она и означает,
+    // что переход идёт.
+    await page.addInitScript(() => {
+        window.__revealSamples = [];
+        const tick = () => {
+            const el = document.querySelector('[data-reveal-type="slide-up"]');
+            if (el) { window.__revealSamples.push(Number(getComputedStyle(el).opacity)); }
+            if (performance.now() < 2500) { requestAnimationFrame(tick); }
+        };
+        requestAnimationFrame(tick);
+    });
+    const response = await page.goto('/reveal-check');
+    expect(response.status()).toBe(200);
+    await page.waitForTimeout(2600);
+
+    const samples = await page.evaluate(() => window.__revealSamples);
+    const partial = samples.filter((o) => o > 0.02 && o < 0.98);
+    expect(partial.length).toBeGreaterThan(3);
+    expect(samples[samples.length - 1]).toBe(1);
+
+    // Карточки сетки проявляются по очереди: у каждой своя задержка.
+    const delays = await page.evaluate(() => Array.from(
+        document.querySelectorAll('.block-advantages__grid .anim-card'),
+        (c) => c.style.getPropertyValue('--card-reveal-delay')
+    ));
+    expect(delays.length).toBeGreaterThan(1);
+    expect(new Set(delays).size).toBe(delays.length);
+
+    // «Карточки по очереди» у блока без сетки очередь строить не из чего —
+    // раньше выбор не давал ровно ничего. Секция обязана появиться целиком.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(1500);
+    const gridless = await page.evaluate(() => {
+        const section = Array.from(document.querySelectorAll('[data-reveal-items]'))
+            .find((s) => !s.classList.contains('is-motion-ready'));
+        if (!section) { return null; }
+        return { reveal: section.hasAttribute('data-reveal'), opacity: getComputedStyle(section).opacity };
+    });
+    expect(gridless).not.toBeNull();
+    expect(gridless.reveal).toBe(true);
+    expect(Number(gridless.opacity)).toBe(1);
+});

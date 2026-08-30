@@ -21,7 +21,12 @@ test('Карусель проектов не отключает анимации
 
     assert_true(!str_contains($govCss, '[data-carousel-track] *'), 'Вложенные переходы карусели должны оставаться активными');
     assert_contains('transition: transform .7s cubic-bezier(.22, 1, .36, 1)', $govCss);
-    assert_contains('transform: translateY(18px) scale(.99)', $frontendCss);
+    // Сдвиг и масштаб появления живут в переменных: сам показ описан
+    // ключевыми кадрами (переход карточки объявлен темой и заменял базовый).
+    assert_contains('@keyframes card-reveal', $frontendCss);
+    assert_contains('--card-reveal-shift: 18px', $frontendCss);
+    assert_contains('--card-reveal-scale: .99;', $frontendCss);
+    assert_contains('translateY(var(--card-reveal-shift)) scale(var(--card-reveal-scale))', $frontendCss);
 });
 
 test('Счётчики без стекла и поворота, новости появляются мягко', function (): void {
@@ -51,7 +56,8 @@ test('Счётчики без стекла и поворота, новости �
     assert_true(!str_contains($iconCss, 'rotate('), 'Иконки счётчиков не должны поворачиваться');
 
     assert_contains('.newsfeat-grid > .anim-card', $frontendCss);
-    assert_contains('transform: translateY(8px) scale(.995)', $frontendCss);
+    assert_contains('--card-reveal-shift: 8px', $frontendCss);
+    assert_contains('--card-reveal-scale: .995', $frontendCss);
     assert_contains(':where(.newsfeat-lead, .newsfeat-mini, .newsfeat-text):hover', $govCss);
     assert_contains('transform: translateY(-1px)', $govCss);
 });
