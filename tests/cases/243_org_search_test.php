@@ -106,9 +106,10 @@ test('Раздел «Дизайн» не предлагает настроек, 
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css')
         . file_get_contents(APP_ROOT . '/public/assets/css/frontend.css');
     $body = \App\Core\DesignSettings::bodyClasses(['catalog_layout' => 'list', 'sidebar_position' => 'fixed',
-        'card_style' => 'flat', 'detail_layout' => 'sidebar', 'type_scale' => 'static', 'scroll_top' => 'on']);
+        'card_style' => 'flat', 'detail_layout' => 'sidebar', 'type_scale' => 'static', 'scroll_top' => 'on',
+        'title_reveal' => 'wipe']);
     foreach (['design-catalog-list', 'design-sidebar-fixed', 'design-cards-flat', 'design-detail-sidebar',
-              'design-type-static', 'design-scrolltop'] as $class) {
+              'design-type-static', 'design-scrolltop', 'design-title-wipe'] as $class) {
         assert_contains($class, $body);
         assert_contains($class, $css, 'класс ' . $class . ' выводится, но не оформлен');
     }
