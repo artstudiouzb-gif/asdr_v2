@@ -207,9 +207,9 @@ body.design-type-static .counter__suffix { font-size: var(--step-8); }
     border-color: rgba(255, 255, 255, 0.08);
 }
 .block-counters:hover {
-    transform: translateY(-8px) !important;
-    box-shadow: 0 24px 50px rgba(23, 58, 99, 0.12) !important;
-    border-color: var(--color-accent, var(--gov-teal)) !important;
+    transform: translateY(-8px);
+    box-shadow: 0 24px 50px rgba(23, 58, 99, 0.12);
+    border-color: var(--color-accent, var(--gov-teal));
 }
 
 .counter {
@@ -245,7 +245,7 @@ body.design-type-static .counter__suffix { font-size: var(--step-8); }
 }
 
 .counter__icon {
-    background: color-mix(in srgb, var(--gov-teal) 8%, transparent);
+    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 8%, transparent);
     color: var(--color-accent, var(--gov-teal));
     transition: background 0.35s ease, color 0.35s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -294,3 +294,37 @@ body.design-type-static .counter__suffix { font-size: var(--step-8); }
     align-items: flex-end;
     text-align: right;
 }
+/* Выравнивание двигает пару «иконка + текст» целиком. Пока подпись тянулась
+   на всю оставшуюся ширину (flex: 1), «по центру» центрировало её внутри
+   ячейки, а иконка оставалась прижатой к краю: у одиночного показателя это
+   читалось как «настройка не работает». */
+.block-counters--text-align-center .counter { justify-content: center; }
+.block-counters--text-align-right .counter { justify-content: flex-end; }
+/* Иконка справа переворачивает ряд (row-reverse), и главная ось начинается у
+   правого края: «выравнивание справа» с flex-end уводило бы группу влево. */
+.block-counters--text-align-right.block-counters--icon-pos-right .counter { justify-content: flex-start; }
+.block-counters--text-align-center .counter__body,
+.block-counters--text-align-right .counter__body { flex: 0 1 auto; }
+
+/* Подложка блока — настройка, а не данность: «без подложки» снимает фон,
+   рамку, тень, внутренний отступ и подъём при наведении, и показатель встаёт
+   прямо на фон секции. Заливку снимаем и в схемах темы — она объявлена
+   отдельными правилами для светлой и тёмной. */
+.block-counters--panel-none,
+:root[data-theme="light"] .block-counters--panel-none,
+:root[data-theme="dark"] .block-counters--panel-none {
+    background: none;
+    border-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+}
+.block-counters--panel-none:hover {
+    transform: none;
+    border-color: transparent;
+    box-shadow: none;
+}
+/* Боковой отступ полосы держала подложка. Без неё крайние показатели обязаны
+   встать вровень с остальными блоками страницы. */
+.block-counters--panel-none.block-counters--row .counter:first-child { padding-left: 0; }
+.block-counters--panel-none.block-counters--row .counter:last-child { padding-right: 0; }
