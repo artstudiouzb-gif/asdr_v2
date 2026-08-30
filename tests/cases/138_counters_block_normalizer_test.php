@@ -199,3 +199,33 @@ test('Форма счётчиков показывает настройки ик
     assert_contains('icon_image', $form);
     assert_contains('Своя иконка (SVG / PNG / WebP)', $form);
 });
+
+test('Counters: подложка блока — настройка, а положения иконки имеют правила', function (): void {
+    $data = CountersBlockNormalizer::normalize([
+        'panel' => 'none',
+        'items' => [['value' => '128', 'label' => 'проектов']],
+    ]);
+    assert_same('none', $data['panel']);
+    // Значение вне набора — подделанная форма, а не «ближайшее допустимое».
+    assert_same('card', CountersBlockNormalizer::normalize(['panel' => 'glass'])['panel']);
+
+    // Класс обязан доехать до разметки: без него настройка ничего не меняет.
+    $html = \App\Core\BlockRenderer::render([
+        'id' => 91,
+        'type' => 'counters',
+        'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
+        'custom_css' => '',
+    ])['html'];
+    assert_contains('block-counters--panel-none', $html);
+
+    // …и обязан иметь правило. Тот же договор — у каждого положения иконки и
+    // каждого выравнивания: пункт списка без правила выглядит сломанным.
+    $css = theme_css();
+    assert_contains('.block-counters--panel-none', $css);
+    foreach (['left', 'right', 'top', 'center'] as $pos) {
+        assert_contains('.block-counters--icon-pos-' . $pos . ' ', $css);
+    }
+    foreach (['left', 'center', 'right'] as $align) {
+        assert_contains('.block-counters--text-align-' . $align . ' ', $css);
+    }
+});

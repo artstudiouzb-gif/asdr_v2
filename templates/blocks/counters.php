@@ -9,6 +9,7 @@ $iconSize = (int) $data['icon_size'];
 $iconBoxSize = max(42, $iconSize + 22);
 $iconBackground = (string) $data['icon_bg'];
 $iconPosition = (string) $data['icon_position'];
+$panel = (string) $data['panel'];
 $textAlign = (string) $data['text_align'];
 $variant = (string) $data['variant'];
 $valueSize = (string) $data['value_size'];
@@ -17,6 +18,7 @@ $cstyle = '--counter-icon-size:' . $iconSize . 'px;--counter-icon-box-size:' . $
     . ($textColor !== '' ? '--counters-text:' . $textColor . ';' : '');
 $templateCss = '#block-' . $blockId . ' .block-counters{' . $cstyle . '}';
 $blockClasses = ($iconBackground === 'off' ? ' block-counters--icons-no-bg' : '')
+    . ' block-counters--panel-' . $panel
     . ' block-counters--icon-pos-' . $iconPosition
     . ' block-counters--text-align-' . $textAlign
     . ' block-counters--' . $variant
