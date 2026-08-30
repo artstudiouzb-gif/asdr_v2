@@ -115,3 +115,51 @@ test('Рукописный шрифт — отдельный каталог с �
     assert_contains("Setting::get('design_font_script'", $local);
     assert_true(class_exists(LocalGoogleFonts::class));
 });
+
+test('Проявление заголовков: класс на body, правила в теме и только через JS', function (): void {
+    $base = ['catalog_layout' => 'list', 'sidebar_position' => 'fixed', 'card_style' => 'flat',
+        'detail_layout' => 'sidebar', 'type_scale' => 'static', 'scroll_top' => 'on', 'title_mark' => 'accent'];
+
+    // Умолчание — без анимации: включать её всем без спроса нельзя.
+    assert_not_contains('design-title-', DesignSettings::bodyClasses($base));
+    assert_contains('design-title-fade', DesignSettings::bodyClasses(['title_reveal' => 'fade'] + $base));
+    assert_contains('design-title-wipe', DesignSettings::bodyClasses(['title_reveal' => 'wipe'] + $base));
+    // Значение вне набора — подделанная форма, а не «ближайшее допустимое».
+    assert_not_contains('design-title-', DesignSettings::bodyClasses(['title_reveal' => 'evil"'] + $base));
+
+    $theme = theme_css();
+    foreach (['fade', 'wipe'] as $choice) {
+        assert_contains('body.design-title-' . $choice . ' .is-title-reveal', $theme);
+    }
+    // Заливка текста снимается только там, где текст можно закрасить фоном:
+    // иначе заголовок стал бы невидимым вместо бледного.
+    assert_contains('@supports ((-webkit-background-clip: text) or (background-clip: text))', $theme);
+
+    $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js');
+    // Бледное состояние вешает только скрипт — иначе без JS заголовок
+    // оставался бы бледным навсегда.
+    assert_contains("classList.add('is-title-reveal')", $js);
+    assert_contains("classList.remove('is-title-reveal')", $js);
+    // …и не вешает при «меньше движения» и в режимах контраста.
+    assert_contains('asdrReduceMotion', $js);
+    assert_contains("getAttribute('data-a11y-contrast')", $js);
+});
+
+test('Скелетон-заглушка видима на обеих темах и без мёртвых близнецов', function (): void {
+    $frontend = (string) file_get_contents(APP_ROOT . '/public/assets/css/frontend.css');
+
+    // Белый перелив поверх светлой поверхности не виден вовсе — подмешиваем
+    // цвет текста, тогда приём работает и на светлой теме, и на тёмной.
+    assert_contains('.skeleton::before', $frontend);
+    assert_not_contains('rgba(255,255,255,.18)', $frontend);
+    assert_contains('color-mix(in srgb, var(--text-main, #0f172a) 12%, transparent)', $frontend);
+
+    // Второй набор правил под ту же задачу никем не использовался: класс без
+    // потребителя читается как рабочий приём и живёт годами.
+    foreach (glob(APP_ROOT . '/public/assets/css/*.css') ?: [] as $file) {
+        if (str_contains($file, '.min.')) {
+            continue;
+        }
+        assert_not_contains('media-skeleton', (string) file_get_contents($file), basename($file));
+    }
+});

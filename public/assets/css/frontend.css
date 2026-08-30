@@ -660,9 +660,13 @@ summary:focus-visible {
 
 /* Скелетон-заглушки (до загрузки медиа) */
 .skeleton { position: relative; background: var(--bg-surface); }
+/* Перелив подмешивается к цвету текста, а не берётся белым: белый на 18%
+   поверх светлой поверхности (#f4f5f7) даёт #f8f9fa — заглушку не было видно
+   вовсе, и приём считался несуществующим. Подмешивание само тянет перелив в
+   нужную сторону: тёмный на светлой теме, светлый на тёмной. */
 .skeleton::before {
     content: ''; position: absolute; inset: 0; z-index: 1;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text-main, #0f172a) 12%, transparent), transparent);
     background-size: 200% 100%; animation: skeleton-shimmer 1.3s ease-in-out infinite;
 }
 .skeleton > * { position: relative; z-index: 0; }

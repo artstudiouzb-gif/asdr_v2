@@ -832,6 +832,47 @@
         window.asdrRevealObserve(Array.prototype.slice.call(reveals));
     })();
 
+    // Проявление заголовков (Дизайн → Типографика). Заголовок секции ждёт
+    // прокрутки бледным и набирает свой цвет. Бледное состояние вешает сам
+    // скрипт: без него, при «меньше движения» и в режимах контраста заголовок
+    // остаётся обычным — это украшение, а не содержимое. Заголовки секций —
+    // это h2 (у карточек h3/h4), поэтому список ровно такой.
+    (function () {
+        var body = document.body;
+        if (!body || !/\bdesign-title-(fade|wipe)\b/.test(body.className)) { return; }
+        if (!('IntersectionObserver' in window)) { return; }
+        if (typeof window.asdrReduceMotion === 'function' && window.asdrReduceMotion()) { return; }
+        var contrast = document.documentElement.getAttribute('data-a11y-contrast');
+        if (contrast && contrast !== 'normal') { return; }
+
+        var titles = Array.prototype.filter.call(
+            document.querySelectorAll('.cms-block h2'),
+            function (el) { return (el.textContent || '').trim() !== ''; }
+        );
+        if (!titles.length) { return; }
+
+        // Класс снимается сразу после показа: пока он висит, заливка текста
+        // прозрачная, и выделение мышью, печать и цвет выбранного слова живут
+        // по правилам анимации, а не по своим.
+        var settle = function (el) { el.classList.remove('is-title-reveal'); };
+        var io = new IntersectionObserver(function (entries, obs) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) { return; }
+                var el = entry.target;
+                obs.unobserve(el);
+                el.addEventListener('animationend', function () { settle(el); }, { once: true });
+                // Анимация могла не начаться (вкладка в фоне, тема без правил):
+                // заголовок обязан вернуться к своим стилям в любом случае.
+                setTimeout(function () { settle(el); }, 2500);
+            });
+        }, { threshold: 0.25, rootMargin: '0px 0px -5% 0px' });
+
+        titles.forEach(function (el) { el.classList.add('is-title-reveal'); });
+        afterFirstPaint(function () {
+            titles.forEach(function (el) { io.observe(el); });
+        });
+    })();
+
     // Медиа-галерея: переключатели «Видео / Фото».
     document.querySelectorAll('[data-media-gallery]').forEach(function (gallery) {
         var tabs = gallery.querySelectorAll('[data-media-tab]');

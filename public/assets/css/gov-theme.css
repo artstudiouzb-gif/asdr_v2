@@ -2350,6 +2350,59 @@ body.design-mark-underline .tx-mark {
     box-shadow: inset 0 -0.18em 0 color-mix(in srgb, var(--color-accent, #2f6fed) 32%, transparent);
     padding-inline: 0.05em;
 }
+
+/* ==========================================================================
+   Проявление заголовков (Дизайн → Типографика → «Проявление заголовков»).
+   Заголовок секции ждёт прокрутки бледным и набирает свой цвет: «fade» —
+   весь сразу, «wipe» — слева направо.
+
+   Бледное состояние вешает JS (`is-title-reveal`), а не CSS: без скриптов,
+   при «меньше движения» и в режимах контраста заголовок обязан остаться
+   обычным — это украшение, а не содержимое. После показа класс снимается,
+   поэтому выделение мышью, печать и выбранное слово (.tx-mark) работают со
+   своими стилями, а не с остатками анимации.
+   ========================================================================== */
+body.design-title-fade .is-title-reveal {
+    animation: title-reveal-fade .9s ease forwards;
+}
+@keyframes title-reveal-fade {
+    from { opacity: .22; }
+}
+
+/* Заливка текста снимается только там, где текст можно закрасить фоном:
+   без background-clip прозрачная заливка сделала бы заголовок невидимым.
+   `color` не трогаем — currentColor в градиенте это и есть цвет заголовка,
+   а обнуление цвета оставило бы градиент прозрачным. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    body.design-title-wipe .is-title-reveal {
+        background-image: linear-gradient(90deg,
+            currentColor 0%, currentColor 33%,
+            color-mix(in srgb, currentColor 20%, transparent) 62%,
+            color-mix(in srgb, currentColor 20%, transparent) 100%);
+        background-repeat: no-repeat;
+        background-size: 300% 100%;
+        background-position: 100% 0;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: title-reveal-wipe 1.1s cubic-bezier(.22, 1, .36, 1) forwards;
+    }
+    @keyframes title-reveal-wipe {
+        to { background-position: 0 0; }
+    }
+}
+
+/* Страховка на случай, если настройку «меньше движения» включили уже после
+   того, как JS навесил класс: заголовок остаётся читаемым и без анимации. */
+@media (prefers-reduced-motion: reduce) {
+    body.design-title-fade .is-title-reveal,
+    body.design-title-wipe .is-title-reveal {
+        animation: none;
+        background-image: none;
+        opacity: 1;
+        -webkit-text-fill-color: currentColor;
+    }
+}
 :where(body.design-type-static) h1, :where(body.design-type-static) .h1 { font-size: var(--font-size-h1, var(--step-8)); }
 :where(body.design-type-static) h2, :where(body.design-type-static) .h2 { font-size: var(--font-size-h2, var(--step-6)); }
 :where(body.design-type-static) h3, :where(body.design-type-static) .h3 { font-size: var(--font-size-h3, var(--step-4)); }
