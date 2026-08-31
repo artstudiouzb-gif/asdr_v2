@@ -1058,9 +1058,16 @@ button.newsdetail-gallery__thumb:hover {
 }
 .relnews-card__media { border-radius: 0; }
 .relnews-card:hover .relnews-card__media { transform: none; box-shadow: none; }
+/* Текст отступает от края: фотография идёт «в край», вставку держит текст.
+   Разметок две — в блоке похожих новостей текст лежит прямо в карточке, а в
+   ленте /news завёрнут в `.relnews-card__body`. Поэтому здесь только прямые
+   потомки, а вставку для ленты даёт padding у тела (gov-theme). Прежде дата
+   отбивалась через `>`, а заголовок — без него: в ленте селектор с `>` не
+   совпадал, и число стояло вплотную к рамке, пока заголовок рядом был отбит
+   на 14px. */
 .relnews-card > .news-meta { margin: 5px 14px 0; }
-.relnews-card__title,
-.relnews-card__excerpt { margin-inline: 14px; }
+.relnews-card > .relnews-card__title,
+.relnews-card > .relnews-card__excerpt { margin-inline: 14px; }
 /* Заголовку не нужен внешний отступ уровня h3: расстояние между строками
    карточки задаёт её собственный `gap`, а с наследованным `margin-top` дата
    отходила от заголовка на 31px против 14px у остальных строк. */

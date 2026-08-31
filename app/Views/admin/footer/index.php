@@ -23,6 +23,7 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
 <div class="admin-builder-workspace">
     <form method="post" action="/admin/footer" class="form-grid">
         <?= Csrf::field() ?>
+        <input type="hidden" name="v" value="<?= (int) ($config['v'] ?? FooterConfig::VERSION) ?>">
 
         <div class="header-builder__group">
             <h3>Стиль подвала</h3>
@@ -40,8 +41,10 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
             <h3>Колонки подвала</h3>
             <p class="form-hint u-inline-291b7bbb01">
                 До <?= FooterConfig::MAX_COLUMNS ?> колонок. Каждая колонка — заголовок и виджет.
-                Для виджета «Текст / HTML» можно вставить произвольную разметку или сниппет
-                (скрипты и небезопасные теги вырезаются).
+                Поле «Текст» работает у двух виджетов: «Логотип и описание» печатает его
+                подписью под знаком, «Текст / HTML» — содержимым всей колонки
+                (скрипты и небезопасные теги вырезаются). Адрес, телефон и почту виджет
+                «Контакты» берёт из «Настроек сайта».
             </p>
             <div data-repeater="footcol" data-repeater-max="<?= FooterConfig::MAX_COLUMNS ?>" class="fb-grid">
                 <?php foreach ($config['columns'] as $i => $col): ?>
@@ -62,7 +65,7 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
                             <?= $widgetSelect('columns[' . $i . '][widget]', $col['widget']) ?>
                         </div>
                         <div class="form-field footer-col__text">
-                            <label>Текст / HTML (для виджета «Текст»)</label>
+                            <label>Текст / HTML (для виджетов «Логотип и описание» и «Текст»)</label>
                             <textarea name="columns[<?= $i ?>][text]" rows="3" placeholder="<p>Произвольный текст…</p>"><?= htmlspecialchars($col['text'], ENT_QUOTES) ?></textarea>
                         </div>
                         <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить колонку</button>
@@ -86,7 +89,7 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
                     <?= $widgetSelect('columns[__INDEX__][widget]', 'menu') ?>
                 </div>
                 <div class="form-field footer-col__text">
-                    <label>Текст / HTML (для виджета «Текст»)</label>
+                    <label>Текст / HTML (для виджетов «Логотип и описание» и «Текст»)</label>
                     <textarea name="columns[__INDEX__][text]" rows="3" placeholder="<p>Произвольный текст…</p>"></textarea>
                 </div>
                 <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить колонку</button>

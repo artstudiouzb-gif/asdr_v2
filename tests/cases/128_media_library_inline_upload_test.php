@@ -10,12 +10,15 @@ test('В медиабиблиотеке можно загрузить новый
     assert_contains('data-media-upload-input', $footer);
     assert_contains('data-media-upload-button', $footer);
     assert_contains('data-csrf=', $footer);
-    assert_contains('class="media-modal__upload is-hidden"', $footer, 'скрывается только начальное состояние, а не весь upload-tab навсегда');
-    assert_not_contains('class="media-modal__upload u-inline-c8be1ccba6"', $footer);
+    // Загрузка — обычная кнопка панели с нативным полем внутри, а не отдельная
+    // вкладка: прежде, чтобы загрузить файл, приходилось уходить из библиотеки.
+    assert_contains('data-media-upload-button', $footer);
+    assert_not_contains('data-media-tab', $footer, 'вкладки «Библиотека/Загрузка» заменены одной кнопкой');
+    assert_contains('data-media-dropveil', $footer, 'файл можно бросить в любое место окна');
     assert_contains("fetch('/admin/files/chunk'", $js);
     assert_contains("fd.append('access_type', 'public')", $js);
     assert_contains('200 * 1024 * 1024', $js);
-    assert_contains('loadLibrary(currentType, true)', $js);
+    assert_contains('loadLibrary(true)', $js);
     assert_contains('selectUrl(res.url)', $js);
     assert_contains("audio: { accept: '.mp3,.aac,.ogg,.wav,.m4a,audio/*'", $js, 'медиабиблиотека знает аудиоформаты');
     assert_contains('pickMany: function (cb)', $js, 'галерея умеет выбирать несколько существующих файлов');

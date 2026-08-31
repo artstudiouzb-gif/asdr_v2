@@ -72,8 +72,11 @@ test('Отзывы: нормализатор чистит вариант, кол
     ]);
 
     assert_same('carousel', $data['variant']);
-    assert_same(4, $data['columns']);
-    assert_same(30, $data['autoplay']);
+    // Колонки выбираются из списка, а не набираются числом: значение, которого
+    // в списке нет, приходит только из подделанной формы — берём умолчание, а
+    // не ближайшее допустимое.
+    assert_same(3, $data['columns']);
+    assert_same(30, $data['autoplay'], 'секунды остаются числом с границами');
     assert_same(5, $data['items'][0]['rating']);
 });
 
@@ -495,5 +498,5 @@ test('Карточки с фото: вариант «текст под фото�
     // Источник «Проекты» больше не навязывает подпись поверх фото: вариант
     // с текстом под снимком контроллер обязан сохранить.
     $controller = (string) file_get_contents(__DIR__ . '/../../app/Controllers/Admin/BlockController.php');
-    assert_contains("in_array(\$variant, ['image', 'image_below'], true)", $controller);
+    assert_contains("in_array(\$collected['variant'] ?? '', ['image', 'image_below'], true)", $controller);
 });

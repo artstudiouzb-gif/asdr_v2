@@ -61,7 +61,7 @@ $langs = Language::active();
         <option value="duplicate">Дублировать</option>
         <option value="trash">В корзину</option>
     </select>
-    <button type="submit" class="btn btn--small">Применить</button>
+    <button type="submit" class="btn">Применить</button>
     <span class="bulk-bar__count" data-bulk-count>0 выбрано</span>
 </form>
 

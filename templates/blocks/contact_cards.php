@@ -2,9 +2,8 @@
 /** @var array $data */
 $title = $data['title'] ?? '';
 $items = $data['items'] ?? [];
-$variant = in_array($data['variant'] ?? 'cards', ['cards', 'inline'], true)
-    ? (string) $data['variant']
-    : 'cards';
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$variant = (string) $data['variant'];
 // Мини-иконки у строк подбираются по содержимому: трубка к номеру, конверт к
 // почте, часы к режиму работы.
 $lineIcons = !empty($data['line_icons']);
@@ -31,8 +30,8 @@ $getFallbackIcon = static function (string $cardTitle): ?string {
 // в блоках стережёт тест, а размер значка тема форсит через
 // --feature-card-icon-size (у неё правило со !important), плитка же прибита
 // к 44×44 — перебить это можно только селектором с id блока.
-$iconSize = max(16, min(64, (int) ($data['icon_size'] ?? 22)));
-$iconBg = ($data['icon_bg'] ?? 'on') === 'off' ? 'off' : 'on';
+$iconSize = (int) $data['icon_size'];
+$iconBg = (string) $data['icon_bg'];
 $scope = '#block-' . (int) $blockId . ' .contact-card';
 $templateCss = $scope . '{--feature-card-icon-size:' . $iconSize . 'px}';
 if ($iconBg === 'off') {

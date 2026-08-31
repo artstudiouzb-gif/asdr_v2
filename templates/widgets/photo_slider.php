@@ -3,13 +3,14 @@
 use App\Core\AssetCollector;
 use App\Core\Media;
 use App\Core\UrlGuard;
-use App\Core\WidgetRenderer;
+use App\Core\SliderRatio;
 
 /** @var array $data */
 /** @var string $lang */
 
-// Только фотографии: подписей, ссылок и текста у этого виджета нет — он
-// заводился как витрина снимков, а не как список с картинками.
+// У своих снимков подписей и ссылок нет — виджет заводился как витрина кадров.
+// Текст появляется только у источника «случайная цель»: название и описание
+// принадлежат самой цели, а не виджету.
 $images = [];
 foreach ((array) ($data['slides'] ?? []) as $row) {
     $src = trim((string) (is_array($row) ? ($row['image'] ?? '') : $row));
@@ -22,12 +23,15 @@ foreach ((array) ($data['slides'] ?? []) as $row) {
     ];
 }
 
-$ratio = (string) ($data['ratio'] ?? '16-9');
-if (!isset(WidgetRenderer::SLIDER_RATIOS[$ratio])) {
-    $ratio = '16-9';
-}
+$ratio = SliderRatio::normalize($data['ratio'] ?? null);
 $autoplay = max(0, min(30, (int) ($data['autoplay'] ?? 0)));
 $shuffle = !empty($data['shuffle']);
+// Источник «случайная цель»: сервер отрисовал одну цель, но она уедет в кэш
+// страницы и станет общей для всех. Признак говорит скрипту запросить свежую
+// цель — так у каждого посетителя своя. Без JS остаётся отрисованная.
+$fromGoals = (string) ($data['source'] ?? 'manual') === 'goals';
+$goalName = $fromGoals ? trim((string) ($data['goal_name'] ?? '')) : '';
+$goalDescription = $fromGoals ? trim((string) ($data['goal_description'] ?? '')) : '';
 
 // Разметка и стили общие с блоком «Слайдер» — поведение у них одно, и второй
 // набор правил разъехался бы с первым. Скрипт подключаем отсюда: виджет
@@ -37,12 +41,28 @@ if ($images !== []) {
 }
 ?>
 <?php if ($images === []): ?>
-    <p class="widget-empty">Фотографии не добавлены.</p>
+    <p class="widget-empty"><?= $fromGoals ? 'Нет ни одной цели со снимками.' : 'Фотографии не добавлены.' ?></p>
 <?php else: ?>
+<?php // Признак «карусель целей» держит обёртка, а не сам слайдер: скрипт
+      // подменяет и текст, и кадры, и обоим нужен общий корень. В значении —
+      // адрес на языке страницы: скрипт не знает, какой язык открыт, и жёсткий
+      // «/goals/random» приносил на узбекскую страницу русскую цель. ?>
+<div class="goal-carousel"<?= $fromGoals
+    ? ' data-goal-slider="' . htmlspecialchars(\App\Core\Locale::url('goals/random', $lang), ENT_QUOTES) . '"'
+    : '' ?>>
+<?php if ($fromGoals): ?>
+    <?php // Название — не заголовок разметки: виджет встаёт в любое место
+          // страницы, и уровень заголовка тут не предсказать. Диктор получает
+          // его через aria-label карусели. ?>
+    <div class="goal-carousel__text" data-goal-text>
+        <?php if ($goalName !== ''): ?><p class="goal-carousel__name"><?= htmlspecialchars($goalName, ENT_QUOTES) ?></p><?php endif; ?>
+        <?php if ($goalDescription !== ''): ?><p class="goal-carousel__desc"><?= htmlspecialchars($goalDescription, ENT_QUOTES) ?></p><?php endif; ?>
+    </div>
+<?php endif; ?>
 <div class="block-slider block-slider--ratio-<?= htmlspecialchars($ratio, ENT_QUOTES) ?>"
      <?= $autoplay > 0 ? 'data-autoplay="' . $autoplay . '" ' : '' ?><?= $shuffle ? 'data-slider-shuffle ' : '' ?>role="region"
      aria-roledescription="<?= htmlspecialchars(t('Карусель'), ENT_QUOTES) ?>"
-     aria-label="<?= htmlspecialchars(t('Слайдер изображений'), ENT_QUOTES) ?>" tabindex="0">
+     aria-label="<?= htmlspecialchars($goalName !== '' ? $goalName : t('Слайдер изображений'), ENT_QUOTES) ?>" tabindex="0">
     <div class="block-slider__track">
         <?php foreach ($images as $index => $image): ?>
             <div class="block-slider__slide<?= $index === 0 ? ' is-active' : '' ?>" role="group"
@@ -65,5 +85,6 @@ if ($images !== []) {
         </div>
         <span class="visually-hidden" data-slider-status aria-live="polite"></span>
     <?php endif; ?>
+</div>
 </div>
 <?php endif; ?>

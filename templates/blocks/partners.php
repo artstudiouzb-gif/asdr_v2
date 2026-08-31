@@ -4,21 +4,32 @@ use App\Core\Icon;
 
 /** @var array $data */
 /** @var int $blockId */
+// Значения проверены схемой полей (BlockFieldSchema) — здесь они читаются
+// как есть, второй копии списков в шаблоне нет.
 $items = is_array($data['items'] ?? null) ? $data['items'] : [];
-$columns = max(3, min(8, (int) ($data['columns'] ?? 6)));
-$logoSize = in_array($data['logo_size'] ?? 'medium', ['small', 'medium', 'large'], true)
-    ? (string) $data['logo_size']
-    : 'medium';
+$variant = (string) $data['variant'];
+$columns = (int) $data['columns'];
+$logoSize = (string) $data['logo_size'];
 $grayscale = !empty($data['grayscale']);
-$autoplay = max(0, min(30, (int) ($data['autoplay'] ?? 0)));
-$carousel = count($items) > 1;
+$autoplay = (int) $data['autoplay'];
+// Бегущей строке нужен хотя бы один повтор набора, иначе в шве видна пустота;
+// с двумя логотипами лента выглядит как мигание, поэтому от трёх.
+$marquee = $variant === 'marquee' && count($items) >= 3;
+$carousel = !$marquee && count($items) > 1;
 // В полосу сетка превращается, когда логотипов больше, чем помещается в ряд.
-$desktopCarousel = count($items) > $columns;
+$desktopCarousel = !$marquee && count($items) > $columns;
 
-// Число колонок и высота логотипа — в scoped CSS: инлайн-стили в блоках
+// Число колонок и скорость ленты — в scoped CSS: инлайн-стили в блоках
 // запрещены тестами.
-$templateCss = '@media (min-width:721px){#block-' . (int) $blockId
-    . ' .block-partners__grid{--partners-cols:' . $columns . '}}';
+if ($marquee) {
+    // Скорость ленты — от числа логотипов: с одним и тем же временем полного
+    // круга длинный набор летел бы, а короткий полз.
+    $templateCss = '#block-' . (int) $blockId . ' .block-partners__marquee-track{'
+        . '--partners-marquee-time:' . (count($items) * 6) . 's}';
+} else {
+    $templateCss = '@media (min-width:721px){#block-' . (int) $blockId
+        . ' .block-partners__grid{--partners-cols:' . $columns . '}}';
+}
 
 $navHtml = '';
 if ($carousel) {
@@ -40,11 +51,21 @@ $head = \App\Core\SectionHead::render([
     'title_class' => 'block-partners__title',
 ]);
 ?>
-<div class="block-partners block-partners--logo-<?= htmlspecialchars($logoSize, ENT_QUOTES) ?><?= $grayscale ? ' block-partners--grayscale' : '' ?>"<?= $carousel ? ' data-carousel' : '' ?><?= $carousel && $autoplay > 0 ? ' data-carousel-autoplay="' . $autoplay . '"' : '' ?>>
+<div class="block-partners block-partners--logo-<?= htmlspecialchars($logoSize, ENT_QUOTES) ?><?= $grayscale ? ' block-partners--grayscale' : '' ?><?= $marquee ? ' block-partners--marquee' : '' ?>"<?= $carousel ? ' data-carousel' : '' ?><?= $carousel && $autoplay > 0 ? ' data-carousel-autoplay="' . $autoplay . '"' : '' ?>>
     <?= $head ?>
     <?php if (!empty($items)): ?>
+        <?php // Лента едет непрерывно, поэтому набор логотипов выводится дважды:
+              // копия догоняет оригинал в момент, когда он ушёл влево на свою
+              // ширину, и шов не виден. Копия — для глаз, поэтому она скрыта от
+              // диктора, а сама дорожка объявлена списком партнёров.
+              // Прокрутить ленту можно и рукой: под курсором она стоит. ?>
+        <?php if ($marquee): ?>
+        <div class="block-partners__marquee" tabindex="0" role="group" aria-label="<?= htmlspecialchars(t('Партнёры'), ENT_QUOTES) ?>">
+            <div class="block-partners__marquee-track">
+        <?php else: ?>
         <div class="block-partners__grid<?= $desktopCarousel ? ' block-partners__grid--carousel' : '' ?>"<?= $carousel ? ' data-carousel-track tabindex="0" role="group" aria-label="' . htmlspecialchars(t('Партнёры — прокрутка вбок'), ENT_QUOTES) . '"' : '' ?>>
-            <?php foreach ($items as $p): ?>
+        <?php endif; ?>
+            <?php foreach ($marquee ? array_merge($items, $items) : $items as $index => $p): ?>
                 <?php
                 $logo = trim((string) ($p['logo'] ?? ''));
                 $nameRaw = (string) ($p['name'] ?? '');
@@ -60,12 +81,16 @@ $head = \App\Core\SectionHead::render([
                     ? \App\Core\Media::picture($logo, $nameRaw, null, null, 'block-partners__logo', true, '180px')
                     : '<span class="block-partners__name">' . ($name !== '' ? $name : htmlspecialchars(t('Партнёр'), ENT_QUOTES)) . '</span>';
                 ?>
-                <?php if ($url !== ''): ?>
+                <?php $copy = $marquee && $index >= count($items); ?>
+                <?php if ($url !== '' && !$copy): ?>
                     <a class="block-partners__item"<?= $carousel ? ' data-carousel-item' : '' ?> href="<?= htmlspecialchars($url, ENT_QUOTES) ?>" target="_blank" rel="noopener" title="<?= $name ?>"><?= $img ?></a>
                 <?php else: ?>
-                    <span class="block-partners__item"<?= $carousel ? ' data-carousel-item' : '' ?> title="<?= $name ?>"><?= $img ?></span>
+                    <span class="block-partners__item"<?= $carousel ? ' data-carousel-item' : '' ?><?= $copy ? ' aria-hidden="true"' : '' ?> title="<?= $name ?>"><?= $img ?></span>
                 <?php endif; ?>
             <?php endforeach; ?>
+        <?php if ($marquee): ?>
+            </div>
+        <?php endif; ?>
         </div>
     <?php endif; ?>
 </div>

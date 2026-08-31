@@ -52,8 +52,9 @@ $orgRenderItems = static function (array $items, int $level, string $id = '', st
 };
 
 $title = trim((string) ($data['title'] ?? ''));
-$layout = ($data['layout'] ?? 'tree') === 'spine' ? 'spine' : 'tree';
-$columns = (int) ($data['columns'] ?? 4);
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$layout = (string) $data['layout'];
+$columns = (int) $data['columns'];
 $columns = max(2, min(4, $columns));
 $council = $orgParseLines((string) ($data['council'] ?? ''));
 $headTitle = trim((string) ($data['head_title'] ?? ''));

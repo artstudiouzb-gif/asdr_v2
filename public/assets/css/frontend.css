@@ -185,6 +185,44 @@ summary:focus-visible {
 .widget-contacts__social { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .widget-social-link { font-size: var(--step--3); text-decoration: none; color: var(--color-accent, #e63946); font-weight: 600; }
 .widget-empty { color: var(--text-muted); font-size: var(--step--2); }
+
+/* --- Виджет «Меню раздела» ---
+   Текущая страница отмечена и цветом, и жирностью, и полосой слева: одного
+   цвета мало — в чёрно-белом режиме отличия не осталось бы. */
+.widget-secmenu__parent {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--gov-title, var(--ink));
+    font-size: var(--step-0);
+    font-weight: 700;
+    text-decoration: none;
+}
+.widget-secmenu__list { list-style: none; margin: 0; padding: 0; }
+.widget-secmenu__list li + li { margin-top: 2px; }
+.widget-secmenu__link {
+    display: block;
+    padding: 9px 12px;
+    border-left: 2px solid var(--gov-border, var(--line));
+    color: var(--text-muted);
+    font-size: var(--step--1);
+    line-height: 1.4;
+    text-decoration: none;
+    transition: color .2s ease, border-color .2s ease, background-color .2s ease;
+}
+.widget-secmenu__link:hover,
+.widget-secmenu__parent:hover { color: var(--gov-teal-text, var(--color-accent)); }
+.widget-secmenu__link.is-active,
+.widget-secmenu__parent.is-active {
+    color: var(--gov-title, var(--ink));
+    font-weight: 700;
+}
+.widget-secmenu__link.is-active {
+    border-left-color: var(--color-accent, var(--gov-teal));
+    background: color-mix(in srgb, var(--color-accent, #e63946) 8%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+    .widget-secmenu__link { transition: none; }
+}
 .site-header__logo {
     display: inline-flex;
     align-items: center;
@@ -244,8 +282,26 @@ summary:focus-visible {
 
 /* Мягкий каскад появления карточек в сетках. Класс .anim-card навешивает
    САМ JS — без JS (или при reduced-motion) карточки просто видны. */
-.anim-card { opacity: 0; transform: translateY(18px) scale(.99); transition: opacity .65s ease var(--card-reveal-delay, 0ms), transform .7s cubic-bezier(.22, 1, .36, 1) var(--card-reveal-delay, 0ms); }
-.anim-card.is-inview { opacity: 1; transform: none; }
+/* Появление карточки описано ключевыми кадрами, а не переходом. Переход тут
+   не работает: у карточек темы (.feature-card, .news-card, …) объявлен свой
+   `transition`, а тема грузится после базы и заменяет список целиком — opacity
+   в нём нет, и каскад просто не проявлялся. Заливка `backwards` держит
+   начальное состояние во время задержки и отпускает трансформацию после
+   показа, поэтому собственный ховер карточки остаётся своим. */
+.anim-card {
+    opacity: 0;
+    --card-reveal-shift: 18px;
+    --card-reveal-scale: .99;
+    --card-reveal-duration: .7s;
+}
+.anim-card.is-inview {
+    opacity: 1;
+    animation: card-reveal var(--card-reveal-duration) cubic-bezier(.22, 1, .36, 1) var(--card-reveal-delay, 0ms) backwards;
+}
+@keyframes card-reveal {
+    from { opacity: 0; transform: translateY(var(--card-reveal-shift)) scale(var(--card-reveal-scale)); }
+    to { opacity: 1; transform: none; }
+}
 [data-reveal-items]:not(.is-motion-ready) .anim-card {
     opacity: 1;
     transform: none;
@@ -253,12 +309,12 @@ summary:focus-visible {
 /* У новостного блока крупные колонки проявляются почти на месте: так движение
    читается как мягкое появление, а не как резкий прыжок всего макета. */
 .newsfeat-grid > .anim-card {
-    transform: translateY(8px) scale(.995);
-    transition: opacity .75s ease, transform .85s cubic-bezier(.22, 1, .36, 1);
+    --card-reveal-shift: 8px;
+    --card-reveal-scale: .995;
+    --card-reveal-duration: .85s;
 }
-.newsfeat-grid > .anim-card.is-inview { transform: none; }
 @media (prefers-reduced-motion: reduce) {
-    .anim-card { opacity: 1 !important; transform: none !important; transition: none; }
+    .anim-card { opacity: 1 !important; animation: none !important; }
 }
 
 .block-text__title { font-size: var(--step-5); margin-bottom: 12px; }
@@ -357,9 +413,14 @@ summary:focus-visible {
 .block-slider__link { display: block; color: inherit; text-decoration: none; }
 /* Единая пропорция кадра: без неё слайды разной высоты дёргали страницу
    при каждом переключении. «auto» оставляет исходные размеры снимка. */
+.block-slider--ratio-21-9 { --slider-ratio: 21 / 9; }
 .block-slider--ratio-16-9 { --slider-ratio: 16 / 9; }
 .block-slider--ratio-4-3 { --slider-ratio: 4 / 3; }
-.block-slider--ratio-21-9 { --slider-ratio: 21 / 9; }
+/* Вертикальные форматы: карточки для соцсетей приходят в 4:5, 1:1 и 9:16, а
+   при широкой пропорции object-fit: cover срезает у них верх и низ. */
+.block-slider--ratio-1-1 { --slider-ratio: 1 / 1; }
+.block-slider--ratio-4-5 { --slider-ratio: 4 / 5; }
+.block-slider--ratio-9-16 { --slider-ratio: 9 / 16; }
 .block-slider__slide img { display: block; width: 100%; }
 .block-slider:not(.block-slider--ratio-auto) .block-slider__slide img {
     aspect-ratio: var(--slider-ratio, 16 / 9);
@@ -383,7 +444,9 @@ summary:focus-visible {
     z-index: 2;
     display: flex;
     justify-content: center;
-    gap: 8px;
+    /* Промежуток держит области нажатия соседних точек несмыкающимися:
+       точка 10px + 14px = 24px между центрами, ровно размер области ниже. */
+    gap: 14px;
     pointer-events: none;
 }
 .block-slider__dot {
@@ -391,6 +454,7 @@ summary:focus-visible {
     height: 10px;
     min-width: 10px;
     padding: 0;
+    position: relative;
     border: 1px solid rgba(255, 255, 255, .9);
     border-radius: 50%;
     background: rgba(15, 23, 42, .45);
@@ -398,6 +462,19 @@ summary:focus-visible {
     cursor: pointer;
     pointer-events: auto;
     transition: width .2s ease, border-radius .2s ease, background-color .2s ease;
+}
+/* Точка нарисована мелкой намеренно — попадать по ней нужно всё равно.
+   Область нажатия расширяется прозрачным ::after, как у иконочных кнопок
+   шапки и стрелок обложки. Здесь 24px, а не 44px: при 44px области соседних
+   точек перекрылись бы, и нажатие уходило бы не на тот слайд. */
+.block-slider__dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 24px);
+    height: max(100%, 24px);
+    transform: translate(-50%, -50%);
 }
 .block-slider__dot.is-active {
     width: 26px;
@@ -583,9 +660,13 @@ summary:focus-visible {
 
 /* Скелетон-заглушки (до загрузки медиа) */
 .skeleton { position: relative; background: var(--bg-surface); }
+/* Перелив подмешивается к цвету текста, а не берётся белым: белый на 18%
+   поверх светлой поверхности (#f4f5f7) даёт #f8f9fa — заглушку не было видно
+   вовсе, и приём считался несуществующим. Подмешивание само тянет перелив в
+   нужную сторону: тёмный на светлой теме, светлый на тёмной. */
 .skeleton::before {
     content: ''; position: absolute; inset: 0; z-index: 1;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text-main, #0f172a) 12%, transparent), transparent);
     background-size: 200% 100%; animation: skeleton-shimmer 1.3s ease-in-out infinite;
 }
 .skeleton > * { position: relative; z-index: 0; }
@@ -677,9 +758,24 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .cms-columns--gap-small { gap: 12px; }
 .cms-columns--gap-medium { gap: 28px; }
 .cms-columns--gap-large { gap: 48px; }
+/* Выравнивание содержимого по высоте. Умолчание — растяжение (колонки одной
+   высоты), поэтому у него класса нет: он и есть поведение сетки. */
+.cms-columns--valign-top { align-items: start; }
+.cms-columns--valign-center { align-items: center; }
+.cms-columns--valign-bottom { align-items: end; }
 /* Вложенные блоки не добавляют собственный вертикальный «воздух». */
 .cms-columns__col > .cms-block { padding-top: 0; padding-bottom: 0; }
 @media (max-width: 720px) { .cms-columns--2, .cms-columns--3, .cms-columns--4 { grid-template-columns: 1fr; } }
+/* Обратный порядок на телефоне: пара «фото слева, текст справа» на узком
+   экране обязана начинаться с текста. Меняется только показ — порядок чтения
+   с клавиатуры и диктором остаётся авторским, поэтому приём годится для
+   содержимого, а не для последовательности действий. */
+@media (max-width: 720px) {
+    .cms-columns--mobile-reverse .cms-columns__col:nth-child(1) { order: 4; }
+    .cms-columns--mobile-reverse .cms-columns__col:nth-child(2) { order: 3; }
+    .cms-columns--mobile-reverse .cms-columns__col:nth-child(3) { order: 2; }
+    .cms-columns--mobile-reverse .cms-columns__col:nth-child(4) { order: 1; }
+}
 
 /* Новые блоки (группа 4): отзывы, счётчики, команда, проекты */
 .block-testimonials__title, .block-counters__title, .block-team__title, .block-projects__title {
@@ -1089,6 +1185,31 @@ h1, h2 { letter-spacing: -.015em; }
 @media (max-width: 900px) {
     .block-partners__grid { grid-template-columns: repeat(auto-fit, minmax(140px, 200px)); }
 }
+/* --- Вариант «бегущая строка» ---
+   Набор логотипов выведен дважды, дорожка едет ровно на половину своей ширины
+   — в этот момент копия оказывается там, где был оригинал, и шва не видно.
+   Половина считается точно только с отступом после последнего логотипа: без
+   него в шве не хватало бы одного промежутка. Ширина промежутка та же, что у
+   ряда: лента и сетка не должны выглядеть по-разному свёрстанными. */
+.block-partners__marquee { overflow-x: auto; scrollbar-width: none; }
+.block-partners__marquee::-webkit-scrollbar { display: none; }
+.block-partners__marquee-track {
+    display: flex;
+    align-items: center;
+    gap: var(--card-gap, 24px);
+    padding-inline-end: var(--card-gap, 24px);
+    width: max-content;
+    animation: block-partners-marquee var(--partners-marquee-time, 40s) linear infinite;
+}
+/* Под курсором и при фокусе внутри лента стоит: иначе логотип не поймать
+   мышью, а с клавиатуры не прочитать название. */
+.block-partners__marquee:hover .block-partners__marquee-track,
+.block-partners__marquee:focus-within .block-partners__marquee-track { animation-play-state: paused; }
+.block-partners--marquee .block-partners__item { flex: none; width: 200px; justify-content: center; }
+@keyframes block-partners-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
 .block-testimonials > .section-head,
 .block-partners > .section-head { margin-bottom: 28px; }
 .block-testimonials__title,
@@ -1290,8 +1411,23 @@ body.design-detail-sidebar .content-detail__aside .content-detail__row dt { colo
 .site-footer__col--menu li { margin: 8px 0; }
 .site-footer__col--menu a { text-decoration: none; color: var(--text-main); }
 .site-footer__col--menu a:hover { color: var(--color-accent, #e63946); }
-.site-footer__social { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.site-footer__social { display: flex; gap: 8px; flex-wrap: wrap; margin: 0; }
 .site-footer__social-link { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary, #1a1a1a); color: #fff; text-decoration: none; font-weight: 700; }
+/* Контакты подвала: иконка + значение. Список, а не абзацы — это перечень
+   однотипных строк, и диктор объявляет их числом. */
+.footer-contacts { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.footer-contacts__item { display: grid; grid-template-columns: 22px 1fr; align-items: start; gap: 10px; color: var(--text-muted); }
+.footer-contacts__icon { display: inline-flex; align-items: center; justify-content: center; height: 22px; opacity: .7; }
+.footer-contacts__value { color: inherit; text-decoration: none; }
+a.footer-contacts__value:hover { color: var(--color-accent, #e63946); text-decoration: underline; text-underline-offset: 3px; }
+/* Подпись под знаком («Логотип и описание») и произвольный HTML колонки:
+   без своих правил они выходили с цветами страницы, а подвал тёмный. */
+.site-footer__about, .site-footer__text { color: var(--text-muted); }
+.site-footer__about > :first-child, .site-footer__text > :first-child { margin-top: 0; }
+.site-footer__about > :last-child, .site-footer__text > :last-child { margin-bottom: 0; }
+.site-footer__about p, .site-footer__text p, .site-footer__text ul, .site-footer__text ol { margin: 0 0 10px; }
+.site-footer__text ul, .site-footer__text ol { padding-left: 18px; }
+.site-footer__text h2, .site-footer__text h3, .site-footer__text h4 { font-size: var(--step-0); margin: 0 0 8px; color: inherit; }
 .site-footer__bottom { border-top: 1px solid var(--border-color); padding: 18px 0; color: var(--text-muted); font-size: var(--step--2); }
 .site-footer__bottom-inner {
     display: flex;
@@ -1342,6 +1478,10 @@ body.design-detail-sidebar .content-detail__aside .content-detail__row dt { colo
         width: 100%;
     }
 }
+/* Четвёртая колонка на планшете вставала одна во второй ряд рядом с тремя
+   пустыми дорожками: auto-fit укладывает столько, сколько влезло, а не поровну.
+   Ниже 1000px раскладываем сеткой 2×2. */
+@media (max-width: 1000px) { .site-footer__inner { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 720px) { .site-footer__inner { grid-template-columns: 1fr; gap: 28px; } }
 
 /* --- Мобильная версия (настройки дизайна): бургер-меню и мобильная шапка --- */
@@ -1705,8 +1845,18 @@ p { line-height: var(--base-line-height, 1.6); }
     background: var(--color-accent, #5b52e5);
 }
 .site-footer--columns .site-footer__line { margin: 0 0 8px; color: rgba(255, 255, 255, .72); }
-.site-footer--columns .site-footer__col--menu ul { columns: 2; column-gap: 28px; margin: 0; padding: 0; list-style: none; }
+/* Меню в две дорожки — только если колонка достаточно широка: жёсткое
+   `columns: 2` рвало пять пунктов на 140-пиксельные полуколонки и в четырёх
+   колонках подвала читалось как ещё одна колонка. Пара «не больше двух,
+   каждая от 220px» решает это без брейкпоинта: ширина дорожки зависит от
+   числа колонок подвала, а не от ширины экрана. */
+.site-footer--columns .site-footer__col--menu ul { columns: 2 220px; column-gap: 28px; margin: 0; padding: 0; list-style: none; }
 .site-footer--columns .site-footer__col--menu li { margin-bottom: 10px; break-inside: avoid; }
+/* Ниже 720px подвал в одну колонку, и дорожка меню становится во всю ширину
+   экрана — «не больше двух, каждая от 220px» тут снова даёт две полуколонки
+   с разъехавшимися строками. На телефоне список идёт одной. */
+@media (max-width: 720px) { .site-footer--columns .site-footer__col--menu ul { columns: 1; } }
+
 .site-footer--columns .site-footer__bottom {
     border-top: 1px solid rgba(255, 255, 255, .12); color: rgba(255, 255, 255, .55);
     padding: 18px 0;
@@ -1717,9 +1867,6 @@ p { line-height: var(--base-line-height, 1.6); }
     transition: background .15s ease, transform .15s ease;
 }
 .site-footer__social-link:hover { background: var(--color-accent, #5b52e5); transform: translateY(-2px); text-decoration: none; }
-@media (max-width: 720px) {
-    .site-footer--columns .site-footer__col--menu ul { columns: 1; }
-}
 
 /* --- Каталог/контент: карточки и хлебные крошки --- */
 .content-crumbs { font-size: var(--step--2); color: var(--text-muted); }

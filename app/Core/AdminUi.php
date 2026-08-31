@@ -13,6 +13,38 @@ use App\Models\Language;
 final class AdminUi
 {
 
+    /**
+     * Подключение шрифта панели: объявления @font-face и предзагрузка двух
+     * подмножеств.
+     *
+     * Панель набрана Noto Sans — тем же семейством, что и сайт по умолчанию.
+     * Прежде она полагалась на системный стек, то есть выглядела по-разному на
+     * каждой машине, а начертания 500 и 600 браузер подделывал синтетическим
+     * жирным. Файл переменный (одна woff2 на всю ось 400–700), поэтому три
+     * начертания шкалы не стоят ни одного лишнего байта.
+     *
+     * Предзагружаются кириллица и латиница: интерфейс русский, но цифры, даты и
+     * латинские слова живут в латинском подмножестве и встречаются на каждом
+     * экране. Расширенная кириллица (узбекские Ғ Қ Ҳ) объявлена и приезжает
+     * только там, где такие буквы есть.
+     *
+     * Адрес шрифта — без `?v=`: в @font-face файл указан относительным путём без
+     * версии, и preload с другим адресом браузер за тот же ресурс не считает.
+     * Версионировать не нужно — имя файла меняется вместе с содержимым
+     * (npm run sync:fonts).
+     */
+    public static function fontLinks(): string
+    {
+        $html = '';
+        foreach (['cyrillic', 'latin'] as $subset) {
+            $html .= '<link rel="preload" href="/assets/fonts/noto-sans/noto-sans-var-' . $subset
+                . '.woff2" as="font" type="font/woff2" crossorigin>' . "\n";
+        }
+
+        return $html . '<link rel="stylesheet" href="'
+            . htmlspecialchars(Asset::url('/assets/css/noto-sans.css'), ENT_QUOTES) . '">' . "\n";
+    }
+
     /** Возвращает иконку из локального спрайта Tabler для типа блока. */
     public static function blockIcon(string $type, int $size = 18): string
     {
@@ -150,18 +182,24 @@ final class AdminUi
         // без иконки, и таких было девятнадцать из тридцати. Соответствие
         // задаётся здесь явно; новый раздел без строки в этой карте иконки не
         // получит (стережёт тест).
+        // Разделы, делившие один значок, разведены: медиафайлы отличаются от
+        // фотоальбомов, пользователи — от команды. Одинаковые значки в колонке
+        // читались как один и тот же раздел.
         $name = [
             'team' => 'users',
+            'users' => 'user-shield',
             'security' => 'shield',
             'news_categories' => 'category',
             'pages' => 'file-text',
             'heroes' => 'slideshow',
             'projects' => 'briefcase',
             'albums' => 'photo',
+            'files' => 'folder',
             'videos' => 'movie',
             'subscribers' => 'mail',
             'repository' => 'archive',
             'design' => 'palette',
+            'goals' => 'target',
             'widgets' => 'layout-grid',
             'header' => 'layout-navbar',
             'footer' => 'layout-bottombar',
@@ -214,37 +252,42 @@ final class AdminUi
 
         $esc = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES);
         $hasImg = trim($urlValue) !== '';
+        $fileTitle = $hasImg ? (string) preg_replace('~^.*/~', '', $urlValue) : '';
 
         $html = '<div class="form-field image-field" data-image-field>';
         $html .= '<label for="' . $esc($id) . '">' . $esc($label) . '</label>';
         $html .= '<div class="image-field__row">';
 
-        // Превью.
+        // Превью вписывает картинку целиком (contain): логотип с широкой
+        // надписью при обрезке по краям превращался в бессмысленный фрагмент.
         $html .= '<div class="image-field__preview" data-image-preview>';
         if ($hasImg) {
             $html .= '<img src="' . $esc($urlValue) . '" alt="">';
         } else {
             $html .= '<span class="image-field__placeholder" aria-hidden="true">'
-                . Icon::render('photo', 26, 'image-field__placeholder-icon', 1.6) . '</span>';
+                . Icon::render('photo', 22, 'image-field__placeholder-icon', 1.6) . '</span>';
         }
         $html .= '</div>';
 
-        // Управление.
+        // Управление. Кнопки в одной строке, адрес файла — под ними: раньше
+        // поле занимало три ряда, из которых один был нативным «Выберите файл».
         $html .= '<div class="image-field__main">';
+        $html .= '<div class="image-field__name" data-image-name>'
+            . ($hasImg ? $esc($fileTitle) : 'Файл не выбран') . '</div>';
         $html .= '<div class="image-field__controls">';
-        $html .= '<input type="text" id="' . $esc($id) . '" name="' . $esc($urlName) . '" value="' . $esc($urlValue) . '"'
-            . ' data-image-input placeholder="URL или выбор из медиабиблиотеки">';
-        $html .= '<button type="button" class="btn btn--small" data-media-pick data-media-target="#' . $esc($id) . '">Медиабиблиотека</button>';
-        $html .= '<button type="button" class="btn btn--small" data-image-clear title="Очистить" aria-label="Очистить">'
-            . Icon::render('x', 16) . '</button>';
-        $html .= '</div>';
-
+        $html .= '<button type="button" class="btn btn--small" data-media-pick data-media-target="#' . $esc($id) . '">'
+            . Icon::render('photo', 15, 'btn__icon') . '<span>Выбрать из библиотеки</span></button>';
         if ($fileName !== null) {
-            $html .= '<div class="image-field__upload">';
-            $html .= '<input type="file" name="' . $esc($fileName) . '" accept="' . $esc($accept) . '" data-image-file>';
-            $html .= '<span class="form-hint">…или загрузите файл с компьютера.</span>';
-            $html .= '</div>';
+            $html .= '<label class="btn btn--small image-field__upload">'
+                . Icon::render('upload', 15, 'btn__icon') . '<span>Загрузить</span>'
+                . '<input type="file" name="' . $esc($fileName) . '" accept="' . $esc($accept) . '" data-image-file></label>';
         }
+        $html .= '<button type="button" class="btn btn--small image-field__clear" data-image-clear title="Очистить" aria-label="Очистить">'
+            . Icon::render('x', 15) . '</button>';
+        $html .= '</div>';
+        $html .= '<input type="text" class="image-field__url" id="' . $esc($id) . '" name="' . $esc($urlName) . '" value="' . $esc($urlValue) . '"'
+            . ' data-image-input placeholder="URL или выбор из медиабиблиотеки">';
+
         if ($hint !== '') {
             $html .= '<span class="form-hint">' . $esc($hint) . '</span>';
         }
@@ -299,11 +342,16 @@ final class AdminUi
         $val = ($value !== null && $value !== '') ? $value : $defaultHex;
         $off = ($value === null || $value === '');
 
-        $html = '<div class="form-field colorfield">';
+        // Состояние «по умолчанию» — часть поля, а не галочка сбоку: раньше
+        // при включённой галочке образец продолжал показывать посторонний цвет,
+        // и было не понять, что именно уйдёт на сайт.
+        $html = '<div class="form-field colorfield' . ($off ? ' is-default' : '') . '" data-colorfield>';
         $html .= '<label for="' . $esc($name) . '">' . $esc($label) . '</label>';
+        $html .= '<div class="colorfield__control">';
         $html .= '<input type="color" id="' . $esc($name) . '" name="' . $esc($name) . '" value="' . $esc($val) . '">';
+        $html .= '</div>';
         $html .= '<label class="colorfield__off"><input type="checkbox" name="' . $esc($name) . '_off" value="1"'
-            . ($off ? ' checked' : '') . '> ' . $esc($offLabel) . '</label>';
+            . ($off ? ' checked' : '') . '><span>' . $esc($offLabel) . '</span></label>';
         $html .= '</div>';
 
         return $html;

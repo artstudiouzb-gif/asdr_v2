@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Core\BlockData\BlockFieldSchema;
+
 /**
  * Единый реестр типов блоков.
  *
@@ -13,8 +15,18 @@ namespace App\Core;
  */
 final class BlockTypeRegistry
 {
-    /** @var array<string, array<string, mixed>> */
-    public const DEFAULTS = [
+    /**
+     * Умолчания типов, у которых поля описаны по-старому — списком здесь,
+     * полем в `block_form.php` и веткой в `BlockController::collectData()`.
+     *
+     * Пустой массив означает, что тип переехал на схему полей
+     * (`App\Core\BlockData\BlockFieldSchema`) и умолчания берутся оттуда;
+     * ключ остаётся, чтобы не менялся порядок типов в редакторе. Полный
+     * список даёт `defaults()`, обращаться нужно к нему.
+     *
+     * @var array<string, array<string, mixed>>
+     */
+    public const BASE_DEFAULTS = [
         'text' => [
             'variant' => 'default',
             'title' => '',
@@ -32,53 +44,45 @@ final class BlockTypeRegistry
             'image_position_mobile' => 'center-center',
         ],
         'html' => ['html' => ''],
-        'cta' => ['variant' => 'card', 'title' => '', 'text' => '', 'icon_svg' => '', 'image' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'button_text' => '', 'button_url' => '', 'bg_color' => '', 'text_color' => '', 'button_color' => ''],
-        'advantages' => ['variant' => 'grid', 'title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 0, 'items' => []],
-        'slider' => ['title' => '', 'autoplay' => 0, 'ratio' => '16-9', 'slides' => []],
+        'cta' => [], // схема: BlockFieldSchema
+        'advantages' => [], // схема: BlockFieldSchema
+        'slider' => [], // схема: BlockFieldSchema
         'form' => ['form_id' => null],
-        'columns' => ['columns' => 2, 'gap' => 'medium', 'ratio' => ''],
+        'columns' => [], // схема: BlockFieldSchema
         // Вкладки — такой же контейнер, как columns: содержимое вкладки это
         // вложенные блоки любого типа (column_index = номер вкладки), а сам
         // блок хранит только подписи вкладок и оформление.
-        'tabs' => ['variant' => 'segmented', 'title' => '', 'description' => '', 'align' => 'left', 'items' => []],
-        'testimonials' => ['variant' => 'carousel', 'title' => '', 'description' => '', 'columns' => 3, 'autoplay' => 0, 'items' => []],
-        'counters' => ['title' => '', 'card_bg' => '', 'text_color' => '', 'icon_size' => 28, 'icon_bg' => 'on', 'icon_position' => 'left', 'text_align' => 'left', 'variant' => 'row', 'value_size' => 'normal', 'items' => []],
-        'team_list' => ['title' => '', 'limit' => 0, 'department' => '', 'group_by_department' => false],
-        'projects_list' => ['variant' => 'grid', 'title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 3, 'limit' => 3, 'autoplay' => 0],
-        'news_latest' => ['title' => 'Последние новости', 'all_text' => 'Все новости', 'all_url' => '', 'limit' => 3, 'category' => 0],
-        'partners' => ['title' => 'Партнёры', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 6, 'logo_size' => 'medium', 'grayscale' => true, 'autoplay' => 0, 'items' => []],
-        'subscribe' => ['variant' => 'band', 'title' => 'Подписка на новости', 'text' => 'Получайте дайджест новостей на почту раз в неделю.', 'image' => '', 'placeholder' => '', 'note' => '', 'button_text' => 'Подписаться'],
-        'faq' => ['title' => '', 'search_enabled' => true, 'single_open' => false, 'items' => []],
-        'contact_cards' => ['variant' => 'cards', 'title' => '', 'line_icons' => true, 'icon_size' => 22, 'icon_bg' => 'on', 'items' => []],
+        'tabs' => [], // схема: BlockFieldSchema
+        'testimonials' => [], // схема: BlockFieldSchema
+        'counters' => [], // схема: BlockFieldSchema
+        'team_list' => [], // схема: BlockFieldSchema
+        'projects_list' => [], // схема: BlockFieldSchema
+        'news_latest' => [], // схема: BlockFieldSchema
+        'partners' => [], // схема: BlockFieldSchema
+        'subscribe' => [], // схема: BlockFieldSchema
+        'faq' => [], // схема: BlockFieldSchema
+        'contact_cards' => [], // схема: BlockFieldSchema
         // hero_id — ссылка на обложку (тип контента «Обложки»). Когда он задан,
         // блок только размещает обложку: содержимое и настройки берутся из неё,
         // а собственные поля блока не используются. Ноль — старая обложка,
         // собранная прямо в блоке; такие страницы продолжают работать.
         'hero' => ['hero_id' => 0, 'title' => '', 'eyebrow' => '', 'subtitle' => '', 'bg_type' => 'none', 'image' => '', 'image_mobile' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'video_url' => '', 'video_mobile' => 'poster', 'youtube_url' => '', 'bg_color' => '', 'width' => 'full', 'height' => 'regular', 'custom_height' => '720px', 'height_mobile' => '', 'custom_height_mobile' => '', 'overlay_enabled' => false, 'overlay_mode' => 'gradient', 'overlay_direction' => 'auto', 'overlay_color' => '#0b1a30', 'overlay_opacity' => 35, 'text_position' => 'left', 'text_align_y' => 'center', 'text_width' => '', 'text_color' => '', 'art_image' => '', 'art_alt' => '', 'art_position' => 'above', 'art_size' => 'medium', 'button_color' => '', 'panel_enabled' => false, 'panel_color' => '#0b1a30', 'panel_opacity' => 0, 'button_text' => '', 'button_url' => '', 'button_icon' => '', 'button_icon_image' => '', 'button2_text' => '', 'button2_url' => '', 'button2_icon' => '', 'button2_icon_image' => '', 'video_button_text' => '', 'video_button_url' => '', 'slides' => [], 'autoplay' => 0],
-        'cards_grid' => ['variant' => 'icon', 'title' => '', 'all_text' => '', 'all_url' => '', 'columns' => 5, 'card_bg' => '', 'text_color' => '', 'source' => 'manual', 'limit' => 6, 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'items' => []],
-        'media_gallery' => ['title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'source' => 'manual', 'limit' => 8, 'paginate' => false, 'columns' => 4, 'ratio' => '16-9', 'items' => []],
-        'news_feature' => ['variant' => 'cards', 'title' => 'Новости и аналитика', 'all_text' => 'Все новости', 'all_url' => '', 'limit' => 5, 'category' => 0],
-        'person_cards' => ['title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 4, 'items' => []],
-        'timeline' => ['title' => '', 'description' => '', 'items' => [], 'button_text' => '', 'button_url' => '', 'cta_title' => '', 'cta_text' => '', 'cta_button_text' => '', 'cta_button_url' => '', 'cta_image' => ''],
-        'news_docs' => ['news_title' => 'Актуальные новости', 'news_all_text' => 'Все новости', 'news_all_url' => '', 'limit' => 3, 'category' => 0, 'docs_title' => 'Документы', 'docs_all_text' => 'Все документы', 'docs_all_url' => '', 'docs' => []],
-        'person_profile' => ['photo' => '', 'photo_side' => 'left', 'name' => '', 'position' => '', 'text' => '', 'phone' => '', 'phone_label' => 'Приёмная:', 'email' => '', 'email_label' => 'E-mail:', 'button_text' => '', 'button_url' => '', 'button2_text' => '', 'button2_url' => '', 'telegram' => '', 'facebook' => '', 'linkedin' => '', 'x' => '', 'instagram' => ''],
-        'bio_education' => ['bio_title' => 'Биография', 'bio_text' => '', 'career_title' => '', 'career' => [], 'edu_title' => 'Образование', 'edu_items' => [], 'extra_title' => '', 'extra_text' => '', 'widgets_before' => [], 'widgets_after' => [], 'quote_text' => '', 'quote_author' => ''],
-        'anchor_nav' => ['items' => [], 'auto' => false, 'sticky' => false],
-        'stages' => ['variant' => 'default', 'title' => '', 'description' => '', 'all_text' => '', 'all_url' => '', 'columns' => 0, 'autoplay' => 0, 'items' => []],
-        'text_image' => ['title' => '', 'text' => '', 'image' => '', 'image_position' => 'center-center', 'image_position_mobile' => 'center-center', 'image_side' => 'right', 'image_ratio' => 'auto', 'image_width' => 50, 'button_text' => '', 'button_url' => '', 'items' => []],
-        'docs_list' => ['variant' => 'grid', 'title' => '', 'all_text' => '', 'all_url' => '', 'columns' => 4, 'search_enabled' => true, 'emblem' => true, 'items' => []],
-        'map_point' => ['title' => '', 'image' => '', 'embed_url' => '', 'load_mode' => 'click', 'card_title' => '', 'address' => '', 'copy_enabled' => true, 'button_text' => '', 'button_url' => ''],
-        'org_structure' => ['title' => '', 'layout' => 'tree', 'columns' => 4, 'council' => '', 'head_title' => 'Директор', 'head_name' => '', 'head_url' => '', 'side_items' => '', 'branches' => [], 'collapsible' => false, 'search' => false, 'notes' => '', 'footnote' => ''],
-        'leader_card' => ['photo' => '', 'name' => '', 'name_tag' => 'p', 'position' => '', 'phone' => '', 'email' => '', 'hours' => '',
-            'facebook' => '', 'x' => '', 'linkedin' => '', 'instagram' => '', 'telegram' => '',
-            'facts_title' => 'Основная информация', 'facts_icon' => '', 'items' => [],
-            'bio_title' => 'Биография', 'bio_icon' => '', 'bio' => '',
-            'duties_title' => 'Функции', 'duties_icon' => '', 'duties' => '',
-            'mobile_icons_only' => false],
-        // icon_position по умолчанию пуст намеренно: у блоков, сохранённых до
-        // появления поля, позицию иконки задавало выравнивание, и подстановка
-        // «слева» дефолтом сдвинула бы иконку на всех таких страницах.
-        'icon_text' => ['variant' => 'cards', 'title' => '', 'description' => '', 'icon_position' => '', 'align' => 'left', 'rows_layout' => 'stacked', 'columns' => 3, 'items' => []],
+        'cards_grid' => [], // схема: BlockFieldSchema
+        'media_gallery' => [], // схема: BlockFieldSchema
+        'news_feature' => [], // схема: BlockFieldSchema
+        'person_cards' => [], // схема: BlockFieldSchema
+        'timeline' => [], // схема: BlockFieldSchema
+        'news_docs' => [], // схема: BlockFieldSchema
+        'person_profile' => [], // схема: BlockFieldSchema
+        'bio_education' => [], // схема: BlockFieldSchema
+        'anchor_nav' => [], // схема: BlockFieldSchema
+        'stages' => [], // схема: BlockFieldSchema
+        'text_image' => [], // схема: BlockFieldSchema
+        'docs_list' => [], // схема: BlockFieldSchema
+        'map_point' => [], // схема: BlockFieldSchema
+        'org_structure' => [], // схема: BlockFieldSchema
+        'leader_card' => [], // схема: BlockFieldSchema
+        'icon_text' => [], // схема: BlockFieldSchema
     ];
 
     /** Короткие русские названия для сообщений редактору. */
@@ -132,21 +136,44 @@ final class BlockTypeRegistry
         'icon_text' => 'Иконка и текст (контакты, телефоны)',
     ];
 
+    /** @var array<string, array<string, mixed>>|null */
+    private static ?array $defaults = null;
+
+    /**
+     * Умолчания всех типов: у переехавших на схему — из неё, у остальных — из
+     * BASE_DEFAULTS. Порядок типов сохраняется, он же порядок в редакторе.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function defaults(): array
+    {
+        if (self::$defaults !== null) {
+            return self::$defaults;
+        }
+
+        $all = [];
+        foreach (self::BASE_DEFAULTS as $type => $fields) {
+            $all[$type] = BlockFieldSchema::has($type) ? BlockFieldSchema::defaults($type) : $fields;
+        }
+
+        return self::$defaults = $all;
+    }
+
     /** @return list<string> */
     public static function types(): array
     {
-        return array_keys(self::DEFAULTS);
+        return array_keys(self::BASE_DEFAULTS);
     }
 
     public static function has(string $type): bool
     {
-        return array_key_exists($type, self::DEFAULTS);
+        return array_key_exists($type, self::BASE_DEFAULTS);
     }
 
     /** @return array<string, mixed> */
     public static function defaultsFor(string $type): array
     {
-        return self::DEFAULTS[$type] ?? [];
+        return self::defaults()[$type] ?? [];
     }
 
     /** @return array<string, string> */

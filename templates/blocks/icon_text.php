@@ -14,20 +14,19 @@ use App\Core\Icon;
  */
 $title = trim((string) ($data['title'] ?? ''));
 $description = trim((string) ($data['description'] ?? ''));
-$variant = in_array($data['variant'] ?? 'cards', ['cards', 'plain', 'inline'], true)
-    ? (string) $data['variant']
-    : 'cards';
-$align = ($data['align'] ?? 'left') === 'center' ? 'center' : 'left';
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$variant = (string) $data['variant'];
+$align = (string) $data['align'];
 // Подпись и значение: в столбик или одной строкой рядом с иконкой
 // («Приёмная: +998 71 200-00-00»).
-$rowsLayout = ($data['rows_layout'] ?? 'stacked') === 'inline' ? 'inline' : 'stacked';
+$rowsLayout = (string) $data['rows_layout'];
 // Позиция иконки — отдельная настройка. У блоков, сохранённых до её появления,
 // её задавало выравнивание: «по центру» означало иконку сверху.
 $iconPosition = (string) ($data['icon_position'] ?? '');
 if (!in_array($iconPosition, ['left', 'top', 'right'], true)) {
     $iconPosition = $align === 'center' ? 'top' : 'left';
 }
-$columns = max(1, min(4, (int) ($data['columns'] ?? 3)));
+$columns = (int) $data['columns'];
 $items = array_values(array_filter(
     (array) ($data['items'] ?? []),
     static fn (array $item): bool => trim((string) ($item['rows'] ?? '')) !== ''

@@ -52,7 +52,8 @@ test('Настройка фона кнопок имеет приоритет н�
     assert_contains('.block-hero__button--ghost { background: transparent !important;', $css);
     assert_contains('background: var(--cta-btn) !important;', $css);
 
-    $form = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Views/admin/pages/block_form.php');
+    // Поля CTA рисует схема, поэтому смотрим на редактор целиком.
+    $form = block_editor_markup();
     assert_contains('Цвет фона основной кнопки', $form);
     assert_contains('Цвет фона кнопки', $form);
 });

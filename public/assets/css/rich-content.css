@@ -1,13 +1,21 @@
 /* Shared editorial typography for the public site and TinyMCE. */
 :where(.rich-content) {
-    --rich-ink: var(--gov-ink, #1f2b3d);
-    --rich-title: var(--gov-title, var(--color-primary, #173a63));
+    /* Цвет секции идёт первым, обычный цвет темы — запасным.
+       Текст на цветной секции рисуется этим же компонентом, и без
+       --section-* он оставался тёмным: на navy-секции получалось #1a1a1a
+       по тёмно-синему, около 1.5:1 при норме 4.5:1. Переменная секции вне
+       тёмных секций не задана (:root объявляет её через несуществующую
+       --text-primary), поэтому на светлой странице ничего не меняется, а
+       белая карточка внутри тёмной секции объявляет её себе заново и
+       остаётся с тёмным текстом. */
+    --rich-ink: var(--section-fg, var(--gov-ink, #1f2b3d));
+    --rich-title: var(--section-title-fg, var(--gov-title, var(--color-primary, #173a63)));
     --rich-accent: var(--gov-teal, var(--color-accent, #17999b));
     /* Ссылки в тексте — отдельным токеном: заливки могут быть яркими, а
        текст обязан держать 4.5:1. --gov-teal-text считается на сервере с
        поправкой на контраст, сырой акцент давал 3.19:1. */
-    --rich-link: var(--gov-teal-text, var(--rich-accent));
-    --rich-muted: var(--gov-muted, #667182);
+    --rich-link: var(--section-link-fg, var(--gov-teal-text, var(--rich-accent)));
+    --rich-muted: var(--section-muted-fg, var(--gov-muted, #667182));
     --rich-border: var(--gov-border, #e5e9f0);
     --rich-surface: var(--gov-surface, #ffffff);
     --rich-tint: color-mix(in srgb, var(--rich-title) 5%, var(--rich-surface));

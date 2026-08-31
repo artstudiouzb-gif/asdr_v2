@@ -728,14 +728,3 @@ body {
     outline-offset: 3px;
 }
 
-/* Media skeleton loading placeholder */
-.media-skeleton {
-    background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%);
-    background-size: 200% 100%;
-    animation: media-skeleton-shimmer 1.6s infinite ease-in-out;
-}
-
-@keyframes media-skeleton-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}

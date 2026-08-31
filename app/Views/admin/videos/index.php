@@ -145,7 +145,7 @@ $langMap = \App\Models\Video::availableLangsForIds(array_map(static fn ($i): int
             <option value="unfeature">Убрать с главной</option>
             <option value="delete">Удалить</option>
         </select>
-        <button type="submit" class="btn btn--small">Применить</button>
+        <button type="submit" class="btn">Применить</button>
         <span class="bulk-bar__count" data-bulk-count>0 выбрано</span>
     </form>
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Models\Goal;
 use App\Models\News;
 use App\Models\Project;
 use App\Models\Setting;
@@ -28,16 +29,29 @@ final class WidgetRenderer
         // Карусель фотографий без подписей и ссылок. Порядок по умолчанию
         // случайный — виджет для того и заводился, чтобы показывать набор
         // снимков вперемешку.
-        'photo_slider' => ['slides' => [], 'shuffle' => true, 'autoplay' => 0, 'ratio' => '16-9'],
+        'photo_slider' => [
+            'source' => 'manual', 'slides' => [], 'shuffle' => true, 'autoplay' => 0, 'ratio' => '16-9',
+            // Заполняются только источником «случайная цель»: у своих снимков
+            // текста нет, виджет заводился как витрина кадров.
+            'goal_name' => '', 'goal_description' => '',
+        ],
+        // Настроек нет: раздел определяется по открытой странице, а показывать
+        // или нет — решает размещение виджета в колонке.
+        'section_menu' => [],
     ];
 
-    /** Соотношения сторон кадра: ключ настройки => подпись в админке. */
-    public const SLIDER_RATIOS = [
-        '16-9' => '16:9 — широкий',
-        '4-3' => '4:3',
-        '21-9' => '21:9 — панорама',
-        'auto' => 'По размеру фотографии',
+    /**
+     * Откуда карусель берёт кадры.
+     *
+     * `manual` — снимки лежат в самом виджете. `goals` — виджет показывает
+     * одну случайную «Цель»: целей сотни, в JSON виджета они не помещаются, и
+     * набор кадров у каждой свой.
+     */
+    public const SLIDER_SOURCES = [
+        'manual' => 'Свои фотографии',
+        'goals' => 'Случайная цель',
     ];
+
 
     /** Панель оформления виджета (хранится в data._design). */
     public const DESIGN_STYLES = ['default', 'card', 'tinted', 'navy'];
@@ -139,6 +153,12 @@ final class WidgetRenderer
         }
 
         $inner = self::renderTemplate($templateFile, $view, $lang);
+        // Виджет, которому нечего показать, не выводится вовсе: рамка с одним
+        // заголовком читается как поломка. Так ведёт себя «Меню раздела» на
+        // странице вне разделов.
+        if (trim($inner) === '') {
+            return '';
+        }
         $title = self::resolveTitle($widget, $lang);
 
         $design = self::normalizeDesign($data);
@@ -173,6 +193,35 @@ final class WidgetRenderer
                 break;
             case 'team_list':
                 $data['items'] = array_slice(TeamMember::published($lang), 0, (int) ($data['count'] ?? 5));
+                break;
+            case 'photo_slider':
+                // Случайная цель выбирается на сервере только ради запасного
+                // варианта: этот кадр уедет в кэш страницы и застынет для всех.
+                // Свежую цель у каждого посетителя запрашивает скрипт (см.
+                // /goals/random) — иначе «случайная» была бы случайной ровно
+                // один раз, до сброса кэша.
+                if (($data['source'] ?? 'manual') === 'goals') {
+                    $random = Goal::random($lang);
+                    $data['slides'] = $random === null ? [] : array_map(
+                        static fn (array $img): array => [
+                            'image' => (string) $img['image'],
+                            'alt' => (string) $img['alt'],
+                        ],
+                        $random['images']
+                    );
+                    // Название и описание цели идут над каруселью: набор снимков
+                    // без единого слова не сообщает, что за объект показан.
+                    $data['goal_name'] = $random === null ? '' : (string) ($random['goal']['name'] ?? '');
+                    $data['goal_description'] = $random === null ? '' : (string) ($random['goal']['description'] ?? '');
+                    // Порядок кадров внутри цели — авторский: случайной бывает
+                    // сама цель, а не история, которую рассказывают её слайды.
+                    $data['shuffle'] = false;
+                }
+                break;
+            case 'section_menu':
+                // Ветка считается по адресу текущей страницы. Кэш блоков этому
+                // не мешает: его ключ и так включает страницу.
+                $data['branch'] = SectionMenu::branch($lang, SectionMenu::currentPath());
                 break;
             case 'contacts':
                 $data['phone'] = Setting::get('contact_phone');

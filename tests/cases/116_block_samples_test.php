@@ -15,7 +15,7 @@ use App\Core\BlockTypeRegistry;
 const SAMPLE_EXEMPT = ['columns', 'slider', 'form'];
 
 test('Образцы: есть у каждого содержательного типа блока', function () {
-    foreach (array_keys(BlockRenderer::DEFAULTS) as $type) {
+    foreach (array_keys(BlockRenderer::defaults()) as $type) {
         if (in_array($type, SAMPLE_EXEMPT, true)) {
             continue;
         }
@@ -28,7 +28,7 @@ test('Образцы: есть у каждого содержательного 
 
 test('Образцы: блок с образцом виден на странице', function () {
     ensure_test_db();
-    foreach (array_keys(BlockRenderer::DEFAULTS) as $i => $type) {
+    foreach (array_keys(BlockRenderer::defaults()) as $i => $type) {
         if (in_array($type, SAMPLE_EXEMPT, true)) {
             continue;
         }
@@ -55,7 +55,7 @@ test('Образцы: «Команда» с группировкой — ина�
 
 test('Образцы: без разметки в экранируемых полях и без нерабочих полей', function () {
     ensure_test_db();
-    foreach (array_keys(BlockRenderer::DEFAULTS) as $i => $type) {
+    foreach (array_keys(BlockRenderer::defaults()) as $i => $type) {
         if (in_array($type, SAMPLE_EXEMPT, true)) {
             continue;
         }

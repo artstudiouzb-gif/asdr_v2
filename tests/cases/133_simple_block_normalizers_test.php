@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Core\BlockData\CtaBlockNormalizer;
+use App\Core\BlockData\BlockFieldSchema;
 use App\Core\BlockData\SubscribeBlockNormalizer;
 
 test('CTA normalizer: сохраняет контракт, цвета и безопасную ссылку', function () {
-    $data = CtaBlockNormalizer::normalize([
+    $data = BlockFieldSchema::normalize('cta', [
         'title_field' => '  Заголовок  ',
         'text' => '  Описание  ',
         'button_text' => ' Подробнее ',
@@ -15,7 +15,7 @@ test('CTA normalizer: сохраняет контракт, цвета и без�
         'text_color' => '#112233',
         'text_color_off' => '1',
         'button_color' => 'bad',
-    ]);
+    ], 'ru');
 
     assert_same([
         'variant' => 'card',
@@ -32,11 +32,11 @@ test('CTA normalizer: сохраняет контракт, цвета и без�
         'button_color' => '',
     ], $data);
 
-    assert_same('/about', CtaBlockNormalizer::normalize(['button_url' => ' /about '])['button_url']);
+    assert_same('/about', BlockFieldSchema::normalize('cta', ['button_url' => ' /about '], 'ru')['button_url']);
 });
 
 test('CTA normalizer: сохраняет медиа-вариант, изображение и безопасную ссылку', function () {
-    $data = CtaBlockNormalizer::normalize([
+    $data = BlockFieldSchema::normalize('cta', [
         'variant' => 'media-light',
         'title_field' => '  Баннер  ',
         'text' => '  Текст  ',
@@ -49,7 +49,7 @@ test('CTA normalizer: сохраняет медиа-вариант, изобра
         'text_color' => '#A0B0C0',
         'button_color' => '#FFFFFF',
         'button_color_off' => '1',
-    ]);
+    ], 'ru');
 
     assert_same([
         'variant' => 'media-light',
@@ -66,34 +66,43 @@ test('CTA normalizer: сохраняет медиа-вариант, изобра
         'button_color' => '',
     ], $data);
 
-    $invalid = CtaBlockNormalizer::normalize([
+    $invalid = BlockFieldSchema::normalize('cta', [
         'variant' => 'unknown',
         'button_url' => "https://example.com/\njavascript:alert(1)",
-    ]);
+    ], 'ru');
     assert_same('card', $invalid['variant']);
     assert_same('', $invalid['button_url']);
 });
 
 test('Subscribe normalizer: сохраняет простой текстовый контракт', function () {
-    assert_same([
-        'variant' => 'band',
-        'title' => 'Подписка',
-        'text' => 'Получайте новости',
-        'image' => '',
-        'placeholder' => '',
-        'note' => '',
-        'button_text' => 'Подписаться',
-    ], SubscribeBlockNormalizer::normalize([
+    $data = SubscribeBlockNormalizer::normalize([
         'title_field' => '  Подписка  ',
         'text' => '  Получайте новости  ',
         'button_text' => ' Подписаться ',
-    ]));
+    ]);
+    // Порядок ключей задаёт схема полей (он же порядок полей в форме), поэтому
+    // сверяем состав, а не последовательность.
+    ksort($data);
+    assert_same([
+        'button_text' => 'Подписаться',
+        'image' => '',
+        'note' => '',
+        'placeholder' => '',
+        'text' => 'Получайте новости',
+        'title' => 'Подписка',
+        'variant' => 'band',
+    ], $data);
 });
 
 test('Контроллер делегирует простые блоки отдельным нормализаторам', function () {
     $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/BlockController.php');
 
-    assert_contains('CtaBlockNormalizer::normalize($_POST, $locale)', $controller);
+    // У CTA собственного нормализатора больше нет: все его поля описаны
+    // схемой, и класс-переходник только прятал бы этот факт.
+    assert_contains("BlockFieldSchema::normalize('cta', \$_POST, \$locale)", $controller);
+    assert_not_contains('CtaBlockNormalizer', $controller);
+    // У подписки нормализатор остался: там есть зависимость одного поля от
+    // другого — вариант «на фоне» без картинки равен полосе.
     assert_contains('SubscribeBlockNormalizer::normalize($_POST, $locale)', $controller);
     assert_not_contains('BannerBlockNormalizer', $controller);
 });

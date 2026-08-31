@@ -59,7 +59,10 @@ test('Полный лид хранится, а карточки использу
     assert_contains("excerpt((string) \$featured['excerpt'], 260)", $feature);
 
     assert_not_contains('newslist-lead__excerpt', $listing, 'лента /news не дублирует лид описанием');
-    assert_not_contains('relnews-card__excerpt', $listing, 'обычные карточки /news не выводят описание');
+    // Анонс появился у широкой карточки ритма ленты (каждая пятая) — обычные
+    // карточки по-прежнему обходятся заголовком.
+    assert_contains("\$excerpt = \$wide ? trim((string) (\$item['excerpt'] ?? '')) : '';", $listing, 'анонс есть только у широкой карточки');
+    assert_contains('relnews-card--wide', $listing, 'широкая карточка помечена своим классом');
     assert_not_contains('card-more', $listing, 'вся карточка уже является ссылкой — отдельный CTA не нужен');
 });
 

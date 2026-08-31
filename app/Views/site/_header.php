@@ -111,22 +111,9 @@ $renderMenuIcon = static function (mixed $iconName): string {
 $currentReqUri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $currentReqPath = rtrim($currentReqUri, '/') ?: '/';
 
-$isNavUrlActive = static function (string $targetUrl) use ($currentReqPath): bool {
-    $targetPath = parse_url($targetUrl, PHP_URL_PATH) ?: '/';
-    $targetPath = rtrim($targetPath, '/') ?: '/';
-
-    if ($currentReqPath === $targetPath) {
-        return true;
-    }
-
-    if ($targetPath !== '/' && !in_array($targetPath, ['/ru', '/uz', '/en', '/kk', '/tr', '/de'], true)) {
-        if (str_starts_with($currentReqPath, $targetPath . '/')) {
-            return true;
-        }
-    }
-
-    return false;
-};
+// Правило подсветки одно на шапку и на боковое меню раздела: разъехавшись,
+// они показывали бы разные «текущие» пункты на одной странице.
+$isNavUrlActive = static fn (string $targetUrl): bool => \App\Core\SectionMenu::isUrlActive($targetUrl, $currentReqPath);
 
 $menuHtml = '';
 $et = static fn (string $text): string => htmlspecialchars(t($text), ENT_QUOTES);
@@ -707,8 +694,8 @@ foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
     // Порядок важен: «Noto Serif» содержит «Noto S», поэтому имена
     // проверяются целиком и совпадение прерывает перебор.
     foreach ([
-        'Noto Serif' => '/assets/fonts/noto-serif/noto-serif-400-cyrillic.woff2',
-        'Noto Sans' => '/assets/fonts/noto-sans/noto-sans-400-cyrillic.woff2',
+        'Noto Serif' => '/assets/fonts/noto-serif/noto-serif-var-cyrillic.woff2',
+        'Noto Sans' => '/assets/fonts/noto-sans/noto-sans-var-cyrillic.woff2',
     ] as $family => $fontFile) {
         // Совпадать должно начало стека: семейство, которым реально набран
         // текст. Иначе запасное начертание («Inter Fallback») или дальний

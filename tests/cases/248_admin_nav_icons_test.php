@@ -50,3 +50,39 @@ test('Разделы «Обложки» и «Категории новостей
         );
     }
 });
+
+test('Разные разделы не делят одну иконку', function () {
+    // Одинаковый значок у соседних пунктов читается как один и тот же раздел:
+    // «Медиафайлы» и «Фотоальбомы» были с одной картинкой, «Команда» и
+    // «Пользователи» — тоже.
+    $byIcon = [];
+    foreach (admin_nav_keys() as $key) {
+        preg_match('/#tabler-([a-z0-9-]+)/', AdminUi::navigationIcon($key), $m);
+        $byIcon[$m[1] ?? '(пусто)'][] = $key;
+    }
+
+    $shared = [];
+    foreach ($byIcon as $icon => $keys) {
+        if (count($keys) > 1) {
+            $shared[] = $icon . ' ← ' . implode(', ', $keys);
+        }
+    }
+
+    assert_same([], $shared, 'значок делят несколько разделов: ' . implode('; ', $shared));
+});
+
+test('Тип контента приносит в меню свою иконку', function () {
+    $header = (string) file_get_contents(APP_ROOT . '/app/Views/admin/layout/header.php');
+    $create = (string) file_get_contents(APP_ROOT . '/app/Views/admin/content_types/index.php');
+    $edit = (string) file_get_contents(APP_ROOT . '/app/Views/admin/content_types/fields.php');
+    $schema = (string) file_get_contents(APP_ROOT . '/database/schema.sql');
+
+    // Разделы «Вакансии», «Документы», «Тендеры» — это типы контента, и все
+    // они получали один общий значок списка: ключ карте иконок неизвестен.
+    // Держать соответствие в PHP нельзя — типы заводит редактор.
+    assert_contains("(string) (\$navCt['icon'] ?? '')", $header, 'меню берёт иконку из записи типа');
+    assert_contains("\$navIc = \$navItem[2] ?? ''", $header);
+    assert_contains("AdminUi::iconField('icon'", $create, 'иконка выбирается при создании типа');
+    assert_contains("AdminUi::iconField('icon'", $edit, 'иконка правится у существующего типа');
+    assert_contains('icon             VARCHAR(60)', $schema, 'колонка есть в schema.sql');
+});

@@ -18,6 +18,8 @@ use App\Controllers\Admin\ProjectController as AdminProjectController;
 use App\Controllers\Admin\ContentRevisionController as AdminContentRevisionController;
 use App\Controllers\Admin\SettingsController;
 use App\Controllers\Admin\TeamController as AdminTeamController;
+use App\Controllers\Admin\GoalController as AdminGoalController;
+use App\Controllers\Site\GoalController as SiteGoalController;
 use App\Controllers\Admin\WidgetController as AdminWidgetController;
 use App\Controllers\InstallController;
 use App\Controllers\Site\FormController as SiteFormController;
@@ -214,6 +216,8 @@ $router->post('/admin/blocks/{id}/revisions/restore', [AdminBlockController::cla
 $router->post('/admin/pages/{id}/snippets/save', [\App\Controllers\Admin\SnippetController::class, 'save']);
 $router->post('/admin/pages/{id}/snippets/insert', [\App\Controllers\Admin\SnippetController::class, 'insert']);
 $router->post('/admin/pages/{id}/presets/apply', [\App\Controllers\Admin\SnippetController::class, 'applyPreset']);
+$router->get('/admin/snippets/export', [\App\Controllers\Admin\SnippetController::class, 'export']);
+$router->post('/admin/snippets/import', [\App\Controllers\Admin\SnippetController::class, 'import']);
 $router->post('/admin/snippets/{id}/delete', [\App\Controllers\Admin\SnippetController::class, 'destroy']);
 
 // --- Admin: проекты ---
@@ -283,6 +287,13 @@ $router->post('/admin/database/migrate', [\App\Controllers\Admin\DatabaseControl
 $router->post('/admin/database/optimize', [\App\Controllers\Admin\DatabaseController::class, 'optimize']);
 
 // --- Admin: боковые виджеты ---
+$router->get('/admin/goals', [AdminGoalController::class, 'index']);
+$router->get('/admin/goals/create', [AdminGoalController::class, 'create']);
+$router->post('/admin/goals/create', [AdminGoalController::class, 'store']);
+$router->get('/admin/goals/{id}/edit', [AdminGoalController::class, 'edit']);
+$router->post('/admin/goals/{id}/edit', [AdminGoalController::class, 'update']);
+$router->post('/admin/goals/{id}/delete', [AdminGoalController::class, 'destroy']);
+
 $router->get('/admin/widgets', [AdminWidgetController::class, 'index']);
 $router->get('/admin/widgets/create', [AdminWidgetController::class, 'create']);
 $router->post('/admin/widgets/create', [AdminWidgetController::class, 'store']);
@@ -451,6 +462,7 @@ $router->get('/rss/{lang}', [\App\Controllers\Site\SitemapController::class, 'rs
 $router->get('/robots.txt', [\App\Controllers\Site\SitemapController::class, 'robots']);
 
 // --- Письменность узбекского текста (латиница ↔ кириллица) ---
+$router->get('/goals/random', [SiteGoalController::class, 'random']);
 $router->get('/script/{code}', [\App\Controllers\Site\ScriptController::class, 'switch']);
 
 // --- Публичный сайт ---

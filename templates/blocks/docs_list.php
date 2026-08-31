@@ -4,13 +4,14 @@ $title = trim((string) ($data['title'] ?? ''));
 $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
 $items = $data['items'] ?? [];
-$cols = max(1, min(5, (int) ($data['columns'] ?? 4)));
-$variant = in_array($data['variant'] ?? 'grid', ['grid', 'links', 'acts', 'acts-editorial'], true) ? (string) $data['variant'] : 'grid';
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$cols = (int) $data['columns'];
+$variant = (string) $data['variant'];
 $actsVariant = in_array($variant, ['acts', 'acts-editorial'], true);
-$searchEnabled = !array_key_exists('search_enabled', $data) || !empty($data['search_enabled']);
-// Фирменный знак на карточке акта: включён, пока редактор не снял галочку.
-// У блоков, сохранённых до появления настройки, ключа нет — знак остаётся.
-$showEmblem = !array_key_exists('emblem', $data) || !empty($data['emblem']);
+$searchEnabled = !empty($data['search_enabled']);
+// Фирменный знак на карточке акта. У блоков, сохранённых до появления
+// настройки, ключа нет — умолчание схемы подставляет включённое состояние.
+$showEmblem = !empty($data['emblem']);
 $prepared = array_map([\App\Core\DocumentPresenter::class, 'prepare'], is_array($items) ? $items : []);
 $kinds = array_values(array_unique(array_filter(array_column($prepared, 'extension'), static fn (string $kind): bool => $kind !== 'other')));
 // Хвост последнего ряда растягивается на всю ширину: пять актов в три

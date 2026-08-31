@@ -112,9 +112,24 @@
             var color = group.querySelector('[data-coloris]');
             if (!off || !color) { return; }
 
+            // Выключенное поле не отправляется, поэтому на время «по умолчанию»
+            // прячем значение и пишем в подсказке, что цвет берётся из темы:
+            // прежде поле показывало посторонний HEX, который никуда не шёл.
             function syncDefaultState() {
                 color.disabled = off.checked;
                 group.classList.toggle('is-default', off.checked);
+
+                if (off.checked) {
+                    if (color.value) { color.dataset.colorfieldValue = color.value; }
+                    color.value = '';
+                    color.placeholder = 'цвет темы';
+                } else {
+                    if (!color.value && color.dataset.colorfieldValue) {
+                        color.value = color.dataset.colorfieldValue;
+                    }
+                    color.placeholder = '#17375E';
+                }
+                color.dispatchEvent(new Event('input', { bubbles: true }));
             }
 
             off.addEventListener('change', syncDefaultState);
@@ -151,6 +166,9 @@
         }
         return Promise.resolve(fallbackCopy(text, showSuccess));
     }
+
+    // Копирование нужно и деталям файла в медиабиблиотеке — отдаём наружу.
+    window.asdrCopyToClipboard = copyToClipboard;
 
     function fallbackCopy(text, onSuccess) {
         try {
@@ -1010,30 +1028,44 @@
     (function () {
         var modal = document.querySelector('[data-media-modal]');
         if (!modal) { return; }
+        var dialog = modal.querySelector('.media-modal__dialog');
         var grid = modal.querySelector('[data-media-grid]');
+        var nav = modal.querySelector('[data-media-nav]');
         var uploadBox = modal.querySelector('[data-media-upload]');
         var uploadInput = modal.querySelector('[data-media-upload-input]');
         var uploadStatus = modal.querySelector('[data-media-upload-status]');
         var searchInput = modal.querySelector('[data-media-search]');
+        var sortSelect = modal.querySelector('[data-media-sort]');
         var selectedInfo = modal.querySelector('[data-media-selected-info]');
+        var selectedThumb = modal.querySelector('[data-media-selected-thumb]');
+        var selectedDrop = modal.querySelector('[data-media-selected-drop]');
         var selectBtn = modal.querySelector('[data-media-select-btn]');
-        var toolbar = modal.querySelector('[data-media-toolbar]');
-        var tabs = modal.querySelectorAll('[data-media-tab]');
+        var details = modal.querySelector('[data-media-details]');
+        var detailsBody = modal.querySelector('[data-media-details-body]');
+        var viewButtons = modal.querySelectorAll('[data-media-view]');
 
         var currentTarget = null;
         var currentCallback = null;
         var loaded = false;
-        var loadedType = null;
+        var loadedKey = null;
+        var baseType = 'image';
         var currentType = 'image';
+        var currentSort = 'date_desc';
         var currentMultiple = false;
         var selectedUrl = null;
         var selectedName = null;
         var selectedUrls = [];
         var selectedNames = {};
         var libraryItems = [];
+        var counts = {};
+        var detailsUrl = null;
+        var lastTrigger = null;
+        var dropDepth = 0;
+        var searchTimer = null;
 
         var typeOptions = {
             image: { accept: '.jpg,.jpeg,.png,.gif,.webp,.svg', label: 'изображение' },
+            raster: { accept: '.jpg,.jpeg,.png,.gif,.webp', label: 'изображение' },
             svg: { accept: '.svg,image/svg+xml', label: 'SVG-файл' },
             video: { accept: '.mp4,video/mp4', label: 'видео MP4' },
             audio: { accept: '.mp3,.aac,.ogg,.wav,.m4a,audio/*', label: 'аудиофайл' },
@@ -1042,9 +1074,85 @@
             all: { accept: '', label: 'файл' }
         };
 
+        var typeLabels = {
+            all_files: 'Все файлы',
+            all: 'Все медиа',
+            image: 'Изображения',
+            raster: 'Фотографии',
+            svg: 'Векторные',
+            video: 'Видео',
+            audio: 'Аудио',
+            document: 'Документы'
+        };
+
+        var typeIcons = {
+            all_files: 'folder',
+            all: 'folder',
+            image: 'photo',
+            raster: 'photo',
+            svg: 'vector',
+            video: 'movie',
+            audio: 'music',
+            document: 'file-text'
+        };
+
+        // Колонка видов показывает только то, что поле готово принять: у поля
+        // изображения выбор из документов ничего не даёт, кроме битой картинки.
+        var typeBranches = {
+            image: ['image', 'raster', 'svg'],
+            raster: ['raster'],
+            svg: ['svg'],
+            video: ['video'],
+            audio: ['audio'],
+            document: ['document'],
+            all: ['all', 'image', 'raster', 'svg', 'video', 'audio'],
+            all_files: ['all_files', 'image', 'raster', 'svg', 'video', 'audio', 'document']
+        };
+
+        function icon(name, size) {
+            return window.asdrTablerIcon ? window.asdrTablerIcon(name, size || 16) : '';
+        }
+
+        function formatSize(bytes) {
+            var value = Number(bytes || 0);
+            if (!value) { return ''; }
+            if (value < 1024) { return value + ' Б'; }
+            if (value < 1024 * 1024) { return Math.round(value / 1024) + ' КБ'; }
+            return (value / (1024 * 1024)).toFixed(value < 10 * 1024 * 1024 ? 1 : 0) + ' МБ';
+        }
+
+        function formatDate(value) {
+            var raw = String(value || '').replace(' ', 'T');
+            var date = raw ? new Date(raw) : null;
+            if (!date || isNaN(date.getTime())) { return ''; }
+            return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+                + ' в ' + date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function extOf(name) {
+            var parts = String(name || '').split('.');
+            return parts.length > 1 ? parts.pop().toUpperCase() : 'ФАЙЛ';
+        }
+
+        function isImageUrl(url) {
+            return /\.(jpe?g|png|gif|svg|webp|avif)$/i.test(String(url || ''));
+        }
+
+        function isVideoUrl(url) {
+            return /\.(mp4|webm|ogg|mov|m4v)$/i.test(String(url || ''));
+        }
+
+        function itemByUrl(url) {
+            for (var i = 0; i < libraryItems.length; i++) {
+                if (libraryItems[i].url === url) { return libraryItems[i]; }
+            }
+            return null;
+        }
+
         function setUploadStatus(message, state) {
             if (!uploadStatus) { return; }
             uploadStatus.textContent = message || '';
+            uploadStatus.classList.toggle('is-visible', Boolean(message));
             uploadStatus.classList.toggle('is-error', state === 'error');
             uploadStatus.classList.toggle('is-success', state === 'success');
         }
@@ -1061,40 +1169,252 @@
             close();
         }
 
+        function renderNav() {
+            if (!nav) { return; }
+            var branch = typeBranches[baseType] || typeBranches.image;
+            nav.textContent = '';
+
+            branch.forEach(function (key) {
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'media-modal__navitem' + (key === currentType ? ' is-active' : '');
+                button.setAttribute('data-media-type-filter', key);
+                button.setAttribute('aria-pressed', key === currentType ? 'true' : 'false');
+                button.innerHTML = '<span class="media-modal__navicon">' + icon(typeIcons[key] || 'folder', 17) + '</span>'
+                    + '<span class="media-modal__navlabel"></span>'
+                    + '<span class="media-modal__navcount"></span>';
+                button.querySelector('.media-modal__navlabel').textContent = typeLabels[key] || key;
+                button.querySelector('.media-modal__navcount').textContent = counts[key] === undefined ? '' : String(counts[key]);
+                button.addEventListener('click', function () {
+                    if (currentType === key) { return; }
+                    currentType = key;
+                    renderNav();
+                    loadLibrary(true);
+                });
+                nav.appendChild(button);
+            });
+        }
+
         function updateSelectedUI() {
             var selectedCount = currentMultiple ? selectedUrls.length : (selectedUrl ? 1 : 0);
+            if (selectedThumb) { selectedThumb.textContent = ''; }
+            if (selectedDrop) { selectedDrop.hidden = !selectedCount; }
+
             if (!selectedCount) {
-                if (selectedInfo) selectedInfo.textContent = 'Файл не выбран';
-                if (selectBtn) selectBtn.disabled = true;
+                if (selectedInfo) { selectedInfo.textContent = 'Файл не выбран'; }
+                if (selectBtn) {
+                    selectBtn.disabled = true;
+                    selectBtn.textContent = currentMultiple ? 'Выбрать файлы' : 'Выбрать файл';
+                }
             } else {
                 if (selectedInfo) {
                     selectedInfo.textContent = currentMultiple
                         ? 'Выбрано файлов: ' + selectedCount
-                        : 'Выбран: ' + (selectedName || selectedUrl);
+                        : (selectedName || selectedUrl);
+
+                    var meta = currentMultiple ? null : itemByUrl(selectedUrl);
+                    if (meta) {
+                        var parts = [extOf(meta.name)];
+                        if (formatSize(meta.size)) { parts.push(formatSize(meta.size)); }
+                        var metaNode = document.createElement('span');
+                        metaNode.className = 'media-modal__selected-meta';
+                        metaNode.textContent = parts.join(' · ');
+                        selectedInfo.appendChild(metaNode);
+                    }
                 }
-                if (selectBtn) selectBtn.disabled = false;
+                if (selectedThumb && !currentMultiple && isImageUrl(selectedUrl)) {
+                    var thumb = document.createElement('img');
+                    thumb.src = encodeURI(selectedUrl);
+                    thumb.alt = '';
+                    selectedThumb.appendChild(thumb);
+                }
+                if (selectBtn) {
+                    selectBtn.disabled = false;
+                    selectBtn.textContent = currentMultiple
+                        ? 'Выбрать файлы (' + selectedCount + ')'
+                        : 'Выбрать файл';
+                }
             }
 
             grid.querySelectorAll('.media-modal__item').forEach(function (fig) {
                 var itemUrl = fig.getAttribute('data-url');
                 var isThis = currentMultiple ? selectedUrls.indexOf(itemUrl) !== -1 : itemUrl === selectedUrl;
                 fig.classList.toggle('is-selected', isThis);
+                fig.setAttribute('aria-pressed', isThis ? 'true' : 'false');
             });
+        }
+
+        // Правая колонка живёт данными выдачи: отдельного запроса за деталями
+        // нет, поэтому она не может разойтись с карточкой в сетке.
+        function renderDetails(item) {
+            if (!details || !detailsBody) { return; }
+            if (!item) {
+                details.hidden = true;
+                detailsUrl = null;
+                return;
+            }
+
+            detailsUrl = item.url;
+            details.hidden = false;
+            detailsBody.textContent = '';
+
+            var preview = document.createElement('div');
+            preview.className = 'media-modal__details-preview';
+            if (isImageUrl(item.url)) {
+                var img = document.createElement('img');
+                img.src = encodeURI(item.url);
+                img.alt = '';
+                img.addEventListener('load', function () {
+                    var box = detailsBody.querySelector('[data-media-details-size]');
+                    if (box && img.naturalWidth) {
+                        box.textContent = img.naturalWidth + ' × ' + img.naturalHeight;
+                    }
+                });
+                preview.appendChild(img);
+            } else {
+                var badge = document.createElement('span');
+                badge.className = 'media-modal__fileicon';
+                badge.textContent = extOf(item.name);
+                preview.appendChild(badge);
+            }
+            detailsBody.appendChild(preview);
+
+            var name = document.createElement('p');
+            name.className = 'media-modal__details-name';
+            name.textContent = item.name;
+            detailsBody.appendChild(name);
+
+            var meta = document.createElement('p');
+            meta.className = 'media-modal__details-meta';
+            meta.textContent = [extOf(item.name), formatSize(item.size)].filter(Boolean).join(' · ');
+            detailsBody.appendChild(meta);
+
+            if (formatDate(item.created_at)) {
+                var uploaded = document.createElement('p');
+                uploaded.className = 'media-modal__details-meta';
+                uploaded.textContent = 'Загружен ' + formatDate(item.created_at);
+                detailsBody.appendChild(uploaded);
+            }
+
+            var actions = document.createElement('div');
+            actions.className = 'media-modal__details-actions';
+
+            var openLink = document.createElement('a');
+            openLink.className = 'btn btn--small';
+            openLink.href = item.url;
+            openLink.target = '_blank';
+            openLink.rel = 'noopener';
+            openLink.innerHTML = icon('external-link', 15) + '<span>Открыть</span>';
+            actions.appendChild(openLink);
+
+            var copyBtn = document.createElement('button');
+            copyBtn.type = 'button';
+            copyBtn.className = 'btn btn--small';
+            copyBtn.innerHTML = icon('copy', 15) + '<span>Копировать ссылку</span>';
+            copyBtn.addEventListener('click', function () {
+                if (window.asdrCopyToClipboard) { window.asdrCopyToClipboard(item.url, copyBtn); }
+            });
+            actions.appendChild(copyBtn);
+            detailsBody.appendChild(actions);
+
+            var link = document.createElement('input');
+            link.type = 'text';
+            link.readOnly = true;
+            link.className = 'media-modal__details-link';
+            link.value = item.url;
+            link.setAttribute('aria-label', 'Ссылка на файл');
+            detailsBody.appendChild(fieldRow('Ссылка на файл', link));
+
+            var alt = document.createElement('input');
+            alt.type = 'text';
+            alt.value = item.alt_text || '';
+            alt.setAttribute('data-media-alt', '');
+            alt.setAttribute('aria-label', 'Альтернативный текст');
+            detailsBody.appendChild(fieldRow('Альтернативный текст', alt));
+
+            var caption = document.createElement('input');
+            caption.type = 'text';
+            caption.value = item.caption || '';
+            caption.setAttribute('data-media-caption', '');
+            caption.setAttribute('aria-label', 'Подпись');
+            detailsBody.appendChild(fieldRow('Подпись', caption));
+
+            var save = document.createElement('button');
+            save.type = 'button';
+            save.className = 'btn btn--small';
+            save.textContent = 'Сохранить описание';
+            save.addEventListener('click', function () { saveMetadata(item, alt.value, caption.value, save); });
+            detailsBody.appendChild(save);
+
+            var info = document.createElement('dl');
+            info.className = 'media-modal__details-info';
+            info.innerHTML = '<dt>Тип файла</dt><dd data-media-details-mime></dd>'
+                + '<dt>Размер</dt><dd data-media-details-weight></dd>'
+                + '<dt>Разрешение</dt><dd data-media-details-size>—</dd>';
+            info.querySelector('[data-media-details-mime]').textContent = item.mime_type || extOf(item.name);
+            info.querySelector('[data-media-details-weight]').textContent = formatSize(item.size) || '—';
+            detailsBody.appendChild(info);
+        }
+
+        function fieldRow(labelText, control) {
+            var row = document.createElement('div');
+            row.className = 'media-modal__details-field';
+            var label = document.createElement('span');
+            label.textContent = labelText;
+            row.appendChild(label);
+            row.appendChild(control);
+            return row;
+        }
+
+        function saveMetadata(item, altText, captionText, button) {
+            var token = uploadBox ? uploadBox.getAttribute('data-csrf') : '';
+            if (!token || !item.id) { return; }
+            var fd = new FormData();
+            fd.append('csrf_token', token);
+            fd.append('metadata_id', String(item.id));
+            fd.append('alt_text', altText || '');
+            fd.append('caption', captionText || '');
+            button.disabled = true;
+
+            fetch('/admin/files/upload', { method: 'POST', body: fd, credentials: 'same-origin' })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    button.disabled = false;
+                    if (!res.ok) { throw new Error(res.error || 'Ошибка'); }
+                    item.alt_text = res.item ? res.item.alt_text : altText;
+                    item.caption = res.item ? res.item.caption : captionText;
+                    setUploadStatus('Описание сохранено.', 'success');
+                })
+                .catch(function (err) {
+                    button.disabled = false;
+                    setUploadStatus('Не удалось сохранить описание: ' + err.message, 'error');
+                });
         }
 
         function renderLibraryItems(items) {
             libraryItems = items || [];
+            grid.textContent = '';
+
+            var zone = document.createElement('button');
+            zone.type = 'button';
+            zone.className = 'media-modal__dropcard';
+            zone.innerHTML = '<span class="media-modal__dropcard-icon">' + icon('cloud-upload', 26) + '</span>'
+                + '<span class="media-modal__dropcard-title">Загрузить файлы</span>'
+                + '<span class="media-modal__dropcard-hint">или перетащите их сюда</span>';
+            zone.addEventListener('click', function () { if (uploadInput) { uploadInput.click(); } });
+            grid.appendChild(zone);
+
             if (!libraryItems.length) {
-                grid.innerHTML = '<div class="media-modal__empty">В библиотеке нет подходящих файлов.</div>';
+                var empty = document.createElement('div');
+                empty.className = 'media-modal__empty';
+                empty.textContent = searchInput && searchInput.value.trim()
+                    ? 'Ничего не найдено. Измените запрос или загрузите файл.'
+                    : 'В библиотеке нет подходящих файлов.';
+                grid.appendChild(empty);
                 return;
             }
-            grid.innerHTML = '';
-            var term = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
             libraryItems.forEach(function (it) {
-                if (term && !it.name.toLowerCase().includes(term)) {
-                    return;
-                }
                 var fig = document.createElement('button');
                 fig.type = 'button';
                 fig.className = 'media-modal__item';
@@ -1105,27 +1425,42 @@
                     fig.classList.add('is-selected');
                 }
 
-                var isVideo = /\.(mp4|webm|ogg|mov|m4v)$/i.test(it.url);
-                var isImage = /\.(jpe?g|png|gif|svg|webp)$/i.test(it.url);
-                var ext = (it.name.split('.').pop() || 'file').toUpperCase();
-
-                if (isVideo) {
-                    fig.classList.add('media-modal__item--file');
-                    fig.innerHTML = '<span class="media-modal__fileicon">▶</span><span class="media-modal__filename"></span>';
-                    fig.querySelector('.media-modal__filename').textContent = it.name;
-                } else if (!isImage) {
-                    fig.classList.add('media-modal__item--file');
-                    // Расширение берётся из имени файла — вставляем текстом.
-                    fig.innerHTML = '<span class="media-modal__fileicon"></span><span class="media-modal__filename"></span>';
-                    fig.querySelector('.media-modal__fileicon').textContent = ext;
-                    fig.querySelector('.media-modal__filename').textContent = it.name;
-                } else {
+                var thumb = document.createElement('span');
+                thumb.className = 'media-modal__thumb';
+                if (isImageUrl(it.url)) {
                     var img = document.createElement('img');
                     img.src = encodeURI(it.url);
-                    img.alt = it.name;
+                    img.alt = '';
                     img.loading = 'lazy';
-                    fig.appendChild(img);
+                    thumb.appendChild(img);
+                } else {
+                    fig.classList.add('media-modal__item--file');
+                    var badge = document.createElement('span');
+                    badge.className = 'media-modal__fileicon';
+                    badge.textContent = extOf(it.name);
+                    thumb.appendChild(badge);
                 }
+                // Знак «видео» ставим только поверх кадра: рядом с плашкой
+                // расширения он был вторым обозначением того же самого.
+                if (isVideoUrl(it.url) && isImageUrl(it.url)) {
+                    var play = document.createElement('span');
+                    play.className = 'media-modal__play';
+                    play.innerHTML = icon('player-play', 18);
+                    thumb.appendChild(play);
+                }
+                fig.appendChild(thumb);
+
+                var caption = document.createElement('span');
+                caption.className = 'media-modal__caption';
+                var title = document.createElement('span');
+                title.className = 'media-modal__caption-name';
+                title.textContent = it.name;
+                var sub = document.createElement('span');
+                sub.className = 'media-modal__caption-meta';
+                sub.textContent = [extOf(it.name), formatSize(it.size)].filter(Boolean).join(' · ');
+                caption.appendChild(title);
+                caption.appendChild(sub);
+                fig.appendChild(caption);
 
                 fig.addEventListener('click', function () {
                     if (currentMultiple) {
@@ -1141,6 +1476,7 @@
                         selectedUrl = it.url;
                         selectedName = it.name;
                     }
+                    renderDetails(it);
                     updateSelectedUI();
                 });
 
@@ -1150,19 +1486,34 @@
 
                 grid.appendChild(fig);
             });
+
+            if (detailsUrl) {
+                var stillHere = itemByUrl(detailsUrl);
+                renderDetails(stillHere);
+            }
         }
 
-        function loadLibrary(type, force) {
-            if (!force && loaded && loadedType === type) { return Promise.resolve(); }
-            loaded = false; loadedType = type;
+        function loadLibrary(force) {
+            var query = searchInput ? searchInput.value.trim() : '';
+            var key = currentType + '|' + currentSort + '|' + query;
+            if (!force && loaded && loadedKey === key) { return Promise.resolve(); }
+            loaded = false; loadedKey = key;
             grid.setAttribute('aria-busy', 'true');
             grid.innerHTML = '<div class="media-modal__empty">Загрузка…</div>';
-            return fetch('/admin/media/list?type=' + encodeURIComponent(type), { credentials: 'same-origin' })
+
+            var url = '/admin/media/list?type=' + encodeURIComponent(currentType)
+                + '&sort=' + encodeURIComponent(currentSort)
+                + (query ? '&q=' + encodeURIComponent(query) : '');
+
+            return fetch(url, { credentials: 'same-origin' })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     loaded = true;
                     grid.setAttribute('aria-busy', 'false');
+                    counts = data.counts || {};
+                    renderNav();
                     renderLibraryItems(data.items || []);
+                    updateSelectedUI();
                 })
                 .catch(function () {
                     grid.setAttribute('aria-busy', 'false');
@@ -1170,31 +1521,45 @@
                 });
         }
 
-        function switchTab(tabName) {
-            tabs.forEach(function (t) {
-                t.classList.toggle('is-active', t.getAttribute('data-media-tab') === tabName);
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(function () { loadLibrary(true); }, 250);
             });
-            if (tabName === 'upload') {
-                if (uploadBox) uploadBox.classList.remove('is-hidden');
-                if (toolbar) toolbar.classList.add('is-hidden');
-                if (grid) grid.classList.add('is-hidden');
-            } else {
-                if (uploadBox) uploadBox.classList.add('is-hidden');
-                if (toolbar) toolbar.classList.remove('is-hidden');
-                if (grid) grid.classList.remove('is-hidden');
-            }
         }
 
-        tabs.forEach(function (t) {
-            t.addEventListener('click', function () {
-                switchTab(t.getAttribute('data-media-tab'));
+        if (sortSelect) {
+            sortSelect.addEventListener('change', function () {
+                currentSort = sortSelect.value;
+                loadLibrary(true);
+            });
+        }
+
+        viewButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                var view = button.getAttribute('data-media-view');
+                viewButtons.forEach(function (other) {
+                    other.classList.toggle('is-active', other === button);
+                });
+                grid.classList.toggle('media-modal__grid--list', view === 'list');
             });
         });
 
-        if (searchInput) {
-            searchInput.addEventListener('input', function () {
-                renderLibraryItems(libraryItems);
+        if (selectedDrop) {
+            selectedDrop.addEventListener('click', function () {
+                selectedUrl = null;
+                selectedName = null;
+                selectedUrls = [];
+                selectedNames = {};
+                updateSelectedUI();
             });
+        }
+
+        if (details) {
+            var detailsClose = modal.querySelector('[data-media-details-close]');
+            if (detailsClose) {
+                detailsClose.addEventListener('click', function () { renderDetails(null); });
+            }
         }
 
         if (selectBtn) {
@@ -1213,12 +1578,16 @@
         function open(targetSelector, callback, type, multiple) {
             currentTarget = targetSelector ? document.querySelector(targetSelector) : null;
             currentCallback = callback || null;
-            currentType = type || 'image';
+            baseType = typeOptions[type] ? type : 'image';
+            currentType = baseType;
             currentMultiple = Boolean(multiple);
             selectedUrl = null;
             selectedName = null;
             selectedUrls = [];
             selectedNames = {};
+            counts = {};
+            renderDetails(null);
+            renderNav();
             updateSelectedUI();
 
             var options = typeOptions[currentType] || typeOptions.all;
@@ -1227,74 +1596,163 @@
                 uploadInput.accept = options.accept;
             }
             setUploadStatus('');
-            switchTab('library');
             modal.hidden = false;
-            loadLibrary(currentType, false);
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.focus();
+            }
+            loadLibrary(true);
         }
 
         function close() {
+            if (modal.hidden) { return; }
             modal.hidden = true;
+            modal.classList.remove('is-dropping');
+            dropDepth = 0;
             currentCallback = null;
             currentMultiple = false;
+            renderDetails(null);
+            if (lastTrigger && lastTrigger.isConnected) { lastTrigger.focus(); }
+            lastTrigger = null;
         }
 
-        if (uploadInput && uploadBox) {
+        function uploadFile(file) {
+            if (!uploadBox || !file) { return; }
+            if (!file.size || file.size > 200 * 1024 * 1024) {
+                setUploadStatus('Неверный размер файла (макс 200 МБ).', 'error');
+                return;
+            }
+
+            var chunkSize = 1024 * 1024;
+            var total = Math.ceil(file.size / chunkSize);
+            var uploadId = '';
+            for (var i = 0; i < 32; i++) { uploadId += Math.floor(Math.random() * 16).toString(16); }
+
+            if (uploadInput) { uploadInput.disabled = true; }
+            setUploadStatus('Загрузка… 0%');
+
+            function sendChunk(index) {
+                var fd = new FormData();
+                fd.append('csrf_token', uploadBox.getAttribute('data-csrf'));
+                fd.append('upload_id', uploadId);
+                fd.append('index', String(index));
+                fd.append('total', String(total));
+                fd.append('name', file.name);
+                fd.append('access_type', 'public');
+                fd.append('chunk', file.slice(index * chunkSize, Math.min((index + 1) * chunkSize, file.size)));
+
+                fetch('/admin/files/chunk', { method: 'POST', body: fd, credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (!res.ok) { throw new Error(res.error || 'Ошибка загрузки'); }
+                        if (res.done) {
+                            if (uploadInput) { uploadInput.disabled = false; uploadInput.value = ''; }
+                            setUploadStatus('Файл загружен.', 'success');
+                            loadLibrary(true).then(function () {
+                                if (!res.url) { return; }
+                                // Файл загружали, чтобы его поставить: в поле
+                                // он уходит сразу, в галерее — просто
+                                // отмечается в выборе.
+                                if (!currentMultiple) {
+                                    selectUrl(res.url);
+                                    return;
+                                }
+                                if (selectedUrls.indexOf(res.url) === -1) {
+                                    selectedUrls.push(res.url);
+                                    selectedNames[res.url] = file.name;
+                                }
+                                renderDetails(itemByUrl(res.url));
+                                updateSelectedUI();
+                            });
+                            return;
+                        }
+                        setUploadStatus('Загрузка… ' + Math.round(((index + 1) / total) * 100) + '%');
+                        sendChunk(index + 1);
+                    })
+                    .catch(function (err) {
+                        if (uploadInput) { uploadInput.disabled = false; }
+                        setUploadStatus('Ошибка: ' + err.message, 'error');
+                    });
+            }
+
+            sendChunk(0);
+        }
+
+        if (uploadInput) {
             uploadInput.addEventListener('change', function () {
-                if (!uploadInput.files || !uploadInput.files.length) return;
-                var file = uploadInput.files[0];
-                var options = typeOptions[currentType] || typeOptions.all;
-                if (!file.size || file.size > 200 * 1024 * 1024) {
-                    setUploadStatus('Неверный размер файла (макс 200 МБ).', 'error');
-                    return;
-                }
-
-                var chunkSize = 1024 * 1024;
-                var total = Math.ceil(file.size / chunkSize);
-                var uploadId = '';
-                for (var i = 0; i < 32; i++) { uploadId += Math.floor(Math.random() * 16).toString(16); }
-
-                uploadInput.disabled = true;
-                setUploadStatus('Загрузка… 0%');
-
-                function sendChunk(index) {
-                    var fd = new FormData();
-                    fd.append('csrf_token', uploadBox.getAttribute('data-csrf'));
-                    fd.append('upload_id', uploadId);
-                    fd.append('index', String(index));
-                    fd.append('total', String(total));
-                    fd.append('name', file.name);
-                    fd.append('access_type', 'public');
-                    fd.append('chunk', file.slice(index * chunkSize, Math.min((index + 1) * chunkSize, file.size)));
-
-                    fetch('/admin/files/chunk', { method: 'POST', body: fd, credentials: 'same-origin' })
-                        .then(function (r) { return r.json(); })
-                        .then(function (res) {
-                            if (!res.ok) { throw new Error(res.error || 'Ошибка загрузки'); }
-                            if (res.done) {
-                                uploadInput.disabled = false;
-                                setUploadStatus('Файл загружен!', 'success');
-                                loaded = false;
-                                switchTab('library');
-                                loadLibrary(currentType, true).then(function () {
-                                    if (res.url) {
-                                        selectUrl(res.url);
-                                    }
-                                });
-                                return;
-                            }
-                            setUploadStatus('Загрузка… ' + Math.round(((index + 1) / total) * 100) + '%');
-                            sendChunk(index + 1);
-                        })
-                        .catch(function (err) {
-                            uploadInput.disabled = false;
-                            setUploadStatus('Ошибка: ' + err.message, 'error');
-                        });
-                }
-
-                sendChunk(0);
+                if (!uploadInput.files || !uploadInput.files.length) { return; }
+                uploadFile(uploadInput.files[0]);
             });
         }
 
+        // Файл можно бросить в любое место окна: раньше для этого нужно было
+        // сначала переключиться на вкладку загрузки и найти там область.
+        if (dialog) {
+            dialog.addEventListener('dragenter', function (event) {
+                if (modal.hidden || !event.dataTransfer) { return; }
+                event.preventDefault();
+                dropDepth++;
+                modal.classList.add('is-dropping');
+            });
+            dialog.addEventListener('dragover', function (event) {
+                if (modal.hidden) { return; }
+                event.preventDefault();
+                if (event.dataTransfer) { event.dataTransfer.dropEffect = 'copy'; }
+            });
+            dialog.addEventListener('dragleave', function () {
+                dropDepth = Math.max(0, dropDepth - 1);
+                if (!dropDepth) { modal.classList.remove('is-dropping'); }
+            });
+            dialog.addEventListener('drop', function (event) {
+                if (modal.hidden) { return; }
+                event.preventDefault();
+                dropDepth = 0;
+                modal.classList.remove('is-dropping');
+                if (event.dataTransfer && event.dataTransfer.files.length) {
+                    uploadFile(event.dataTransfer.files[0]);
+                }
+            });
+        }
+
+        // Стрелками ходим по карточкам, Enter выбирает файл: без этого до
+        // нужного кадра в конце библиотеки приходилось долго жать Tab.
+        grid.addEventListener('keydown', function (event) {
+            var card = event.target.closest('.media-modal__item');
+            if (!card) { return; }
+            var cards = Array.prototype.filter.call(
+                grid.querySelectorAll('.media-modal__item'),
+                function (node) { return !node.hidden; }
+            );
+            var index = cards.indexOf(card);
+            if (index === -1) { return; }
+
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                var url = card.getAttribute('data-url');
+                if (currentMultiple) { card.click(); } else if (url) { selectUrl(url); }
+                return;
+            }
+
+            var perRow = 1;
+            if (cards.length > 1) {
+                var top = cards[0].getBoundingClientRect().top;
+                perRow = cards.filter(function (node) {
+                    return Math.abs(node.getBoundingClientRect().top - top) < 2;
+                }).length || 1;
+            }
+
+            var next = null;
+            if (event.key === 'ArrowRight') { next = cards[index + 1]; }
+            if (event.key === 'ArrowLeft') { next = cards[index - 1]; }
+            if (event.key === 'ArrowDown') { next = cards[index + perRow]; }
+            if (event.key === 'ArrowUp') { next = cards[index - perRow]; }
+            if (event.key === 'Home') { next = cards[0]; }
+            if (event.key === 'End') { next = cards[cards.length - 1]; }
+            if (!next) { return; }
+
+            event.preventDefault();
+            next.focus();
+        });
         // Публичный API для редактора: выбор изображения/SVG с колбэком.
         window.MediaPicker = {
             pick: function (cb) { open(null, cb, 'image', false); },
@@ -1367,7 +1825,12 @@
 
         document.addEventListener('click', function (e) {
             var btn = e.target.closest('[data-media-pick]');
-            if (btn) { e.preventDefault(); open(btn.getAttribute('data-media-target'), null, btn.getAttribute('data-media-type'), false); return; }
+            if (btn) {
+                e.preventDefault();
+                lastTrigger = btn;
+                open(btn.getAttribute('data-media-target'), null, btn.getAttribute('data-media-type'), false);
+                return;
+            }
             if (e.target.closest('[data-media-close]') || e.target === modal) { close(); }
         });
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { close(); } });
@@ -1436,7 +1899,20 @@
 
     // --- Поле изображения с превью (медиабиблиотека / URL / загрузка файла) ---
     (function () {
+        // Имя выбранного файла рядом с кнопками: раньше о содержимом поля
+        // говорил только длинный путь в текстовом поле под ним.
+        function setName(field, src) {
+            var name = field.querySelector('[data-image-name]');
+            if (!name) { return; }
+            var value = String(src || '').split('?')[0];
+            var base = value ? (value.split('/').pop() || value) : '';
+            try { base = decodeURIComponent(base); } catch (error) {}
+            name.textContent = base || 'Файл не выбран';
+            name.classList.toggle('is-empty', !base);
+        }
+
         function setPreview(field, src) {
+            setName(field, /^data:/.test(String(src || '')) ? 'загруженный файл' : src);
             var box = field.querySelector('[data-image-preview]');
             if (!box) { return; }
             if (src) {
@@ -1446,7 +1922,7 @@
                 box.appendChild(img);
             } else {
                 box.innerHTML = '<span class="image-field__placeholder" aria-hidden="true">'
-                    + (window.asdrTablerIcon ? window.asdrTablerIcon('photo', 26) : '') + '</span>';
+                    + (window.asdrTablerIcon ? window.asdrTablerIcon('photo', 22) : '') + '</span>';
             }
         }
         // URL-инпут (в т.ч. установленный медиабиблиотекой — она шлёт change).

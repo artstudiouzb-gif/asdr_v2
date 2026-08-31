@@ -6,10 +6,10 @@ namespace App\Controllers\Admin;
 
 use App\Core\Auth;
 use App\Core\BlockData\AdvantagesBlockNormalizer;
+use App\Core\BlockData\BlockFieldSchema;
 use App\Core\BlockData\BlockPresentationNormalizer;
 use App\Core\BlockData\ContactCardsBlockNormalizer;
 use App\Core\BlockData\CountersBlockNormalizer;
-use App\Core\BlockData\CtaBlockNormalizer;
 use App\Core\BlockData\FaqBlockNormalizer;
 use App\Core\BlockData\HeroBlockNormalizer;
 use App\Core\BlockData\SubscribeBlockNormalizer;
@@ -484,7 +484,7 @@ final class BlockController
                     'html' => \App\Core\HtmlSanitizer::sanitize($rawHtml),
                 ];
             case 'cta':
-                return CtaBlockNormalizer::normalize($_POST, $locale);
+                return BlockFieldSchema::normalize('cta', $_POST, $locale);
             case 'advantages':
                 return AdvantagesBlockNormalizer::normalize($_POST, $locale);
             case 'slider':
@@ -502,18 +502,10 @@ final class BlockController
                         'url' => ($slideUrl !== '' && \App\Core\UrlGuard::isSafeLink($slideUrl)) ? $slideUrl : '',
                     ];
                 }
-                $sliderRatio = (string) ($_POST['ratio'] ?? '16-9');
-                if (!in_array($sliderRatio, ['16-9', '4-3', '21-9', 'auto'], true)) {
-                    $sliderRatio = '16-9';
-                }
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    // 0 — автопрокрутка выключена; верхний предел бережёт от
-                    // «слайд раз в час», который читается как поломка.
-                    'autoplay' => max(0, min(30, (int) ($_POST['autoplay'] ?? 0))),
-                    'ratio' => $sliderRatio,
-                    'slides' => $slides,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('slider', $_POST, $locale),
+                    ['slides' => $slides]
+                );
             case 'form':
                 $formId = (int) ($_POST['form_id'] ?? 0);
                 $layout = in_array($_POST['layout'] ?? '1col', ['1col', '2col'], true) ? (string) $_POST['layout'] : '1col';
@@ -522,14 +514,15 @@ final class BlockController
                     'layout' => $layout,
                 ];
             case 'columns':
-                $cols = (int) ($_POST['columns'] ?? 2);
-                if ($cols < 2 || $cols > 4) {
-                    $cols = 2;
-                }
-                $gap = in_array($_POST['gap'] ?? 'medium', ['small', 'medium', 'large'], true)
-                    ? (string) $_POST['gap'] : 'medium';
-                $ratio = \App\Core\ColumnRatio::normalize((string) ($_POST['ratio'] ?? ''), $cols);
-                return ['columns' => $cols, 'gap' => $gap, 'ratio' => $ratio];
+                $columnsData = BlockFieldSchema::normalize('columns', $_POST, $locale);
+                // Ширина колонок идёт мимо схемы: список допустимых пропорций
+                // свой у каждого числа колонок, то есть значение зависит от
+                // соседнего поля.
+                $columnsData['ratio'] = \App\Core\ColumnRatio::normalize(
+                    (string) ($_POST['ratio'] ?? ''),
+                    (int) $columnsData['columns']
+                );
+                return $columnsData;
             case 'tabs':
                 // Содержимое вкладок — вложенные блоки, здесь только подписи.
                 $tabItems = [];
@@ -541,65 +534,33 @@ final class BlockController
                     if ($tabTitle === '') {
                         continue;
                     }
-                    $tabItems[] = ['title' => $tabTitle, 'icon' => \App\Core\Icon::cleanName($item['icon'] ?? '')];
+                    $tabItems[] = [
+                        'title' => $tabTitle,
+                        'icon' => \App\Core\Icon::cleanName($item['icon'] ?? ''),
+                        'text' => \App\Core\BlockData\BlockDataInput::plain($item, 'text', $locale),
+                    ];
                 }
-                return [
-                    'variant' => \App\Core\BlockData\BlockDataInput::enum(
-                        $_POST,
-                        'variant',
-                        ['segmented', 'underline', 'vertical'],
-                        'segmented'
-                    ),
-                    'align' => \App\Core\BlockData\BlockDataInput::enum(
-                        $_POST,
-                        'align',
-                        ['left', 'center', 'stretch'],
-                        'left'
-                    ),
-                    'title' => \App\Core\BlockData\BlockDataInput::plain($_POST, 'title_field', $locale),
-                    'description' => TextProcessor::process(
-                        \App\Core\HtmlSanitizer::sanitizeText((string) ($_POST['description'] ?? '')),
-                        $locale,
-                    ),
-                    'items' => array_slice($tabItems, 0, 10),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('tabs', $_POST, $locale),
+                    ['items' => array_slice($tabItems, 0, 10)]
+                );
             case 'testimonials':
                 return TestimonialsBlockNormalizer::normalize($_POST, $locale);
             case 'counters':
                 return CountersBlockNormalizer::normalize($_POST, $locale);
             case 'team_list':
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'limit' => max(0, (int) ($_POST['limit'] ?? 0)),
-                    'department' => trim((string) ($_POST['department'] ?? '')),
-                    'group_by_department' => !empty($_POST['group_by_department']),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('team_list', $_POST, $locale),
+                    // Сектор — ссылка на запись в БД, поэтому мимо схемы.
+                    ['department' => trim((string) ($_POST['department'] ?? ''))]
+                );
             case 'projects_list':
-                return [
-                    'variant' => \App\Core\BlockData\BlockDataInput::enum(
-                        $_POST,
-                        'variant',
-                        ['grid', 'list', 'carousel'],
-                        'grid'
-                    ),
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => $this->safeUrlField('all_url'),
-                    'columns' => max(2, min(4, (int) ($_POST['columns'] ?? 3))),
-                    'limit' => max(0, (int) ($_POST['limit'] ?? 0)),
-                    // 0 — без автопрокрутки; верхняя граница та же, что у
-                    // остальных каруселей.
-                    'autoplay' => \App\Core\BlockData\BlockDataInput::int($_POST, 'autoplay', 0, 30, 0),
-                ];
+                return BlockFieldSchema::normalize('projects_list', $_POST, $locale);
             case 'news_latest':
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => $this->safeUrlField('all_url'),
-                    'limit' => max(0, (int) ($_POST['limit'] ?? 0)),
-                    'category' => max(0, (int) ($_POST['category'] ?? 0)),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('news_latest', $_POST, $locale),
+                    ['category' => max(0, (int) ($_POST['category'] ?? 0))]
+                );
             case 'partners':
                 $items = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -617,17 +578,10 @@ final class BlockController
                         'url' => $url,
                     ];
                 }
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => $this->safeUrlField('all_url'),
-                    'columns' => \App\Core\BlockData\BlockDataInput::int($_POST, 'columns', 3, 8, 6),
-                    'logo_size' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'logo_size', ['small', 'medium', 'large'], 'medium'),
-                    'grayscale' => !empty($_POST['grayscale']),
-                    'autoplay' => \App\Core\BlockData\BlockDataInput::int($_POST, 'autoplay', 0, 30, 0),
-                    'items' => $items,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('partners', $_POST, $locale),
+                    ['items' => $items]
+                );
             case 'subscribe':
                 return SubscribeBlockNormalizer::normalize($_POST, $locale);
             case 'faq':
@@ -663,61 +617,27 @@ final class BlockController
                         'url' => $url,
                     ];
                 }
-                // Медиатека держит ритм четырёх колонок, карточки — пяти.
-                $cols = (int) ($_POST['columns'] ?? ($type === 'media_gallery' ? 4 : 5));
-                // Источник данных: «Проекты» (cards_grid с фото) или «Фотоальбомы»
-                // (media_gallery) собирают карточки из отмеченных «на главной»
-                // записей автоматически; иначе — ручной список items.
-                $source = 'manual';
-                if ($type === 'cards_grid' && ($_POST['source'] ?? '') === 'projects') {
-                    $source = 'projects';
-                } elseif ($type === 'media_gallery' && in_array($_POST['source'] ?? '', ['albums', 'videos', 'media'], true)) {
-                    $source = (string) $_POST['source'];
-                }
-                $variant = $type === 'cards_grid'
-                    && in_array($_POST['variant'] ?? 'icon', ['icon', 'compact', 'image', 'image_below'], true)
-                    ? (string) $_POST['variant']
-                    : 'icon';
-                // Проекты собираются с обложками, поэтому вариант без фото им не
-                // подходит; но выбор между текстом на фото и текстом под ним
-                // остаётся за редактором.
-                if ($source === 'projects' && !in_array($variant, ['image', 'image_below'], true)) {
-                    $variant = 'image';
-                }
-                $collected = [
-                    'variant' => $variant,
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => (trim((string) ($_POST['all_url'] ?? '')) !== '' && \App\Core\UrlGuard::isSafeLink(trim((string) ($_POST['all_url'] ?? '')))) ? trim((string) ($_POST['all_url'] ?? '')) : '',
-                    'columns' => max(2, min(5, $cols)),
-                    'card_bg' => self::color('card_bg'),
-                    'text_color' => self::color('text_color'),
-                    'source' => $source,
-                    'limit' => max(2, min(24, (int) ($_POST['limit'] ?? 6))),
-                    'image_position' => \App\Core\MediaPosition::normalize($_POST['image_position'] ?? null),
-                    'image_position_mobile' => \App\Core\MediaPosition::normalize($_POST['image_position_mobile'] ?? null),
-                    'items' => $items,
-                ];
-                if ($type === 'media_gallery') {
-                    // Медиагалерея делит поля с карточками, но у неё свои
-                    // вводный текст и пропорция плитки.
-                    $collected['description'] = TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale);
-                    $collected['ratio'] = \App\Core\BlockData\BlockDataInput::enum($_POST, 'ratio', ['16-9', '4-3', '1-1'], '16-9');
-                    // Постраничный вывод: «сколько показывать» становится
-                    // размером страницы, а блок перестаёт быть витриной
-                    // отмеченных записей и показывает весь список.
-                    $collected['paginate'] = !empty($_POST['paginate']);
+                $collected = array_merge(
+                    $type === 'cards_grid'
+                        ? BlockFieldSchema::normalize('cards_grid', $_POST, $locale)
+                        : BlockFieldSchema::normalize('media_gallery', $_POST, $locale),
+                    ['items' => $items]
+                );
+                // Проекты собираются с обложками, поэтому вариант без фото им
+                // не подходит; но выбор между текстом на фото и текстом под ним
+                // остаётся за редактором. Это зависимость одного поля от
+                // другого — схема такое не выражает.
+                if (($collected['source'] ?? '') === 'projects'
+                    && !in_array($collected['variant'] ?? '', ['image', 'image_below'], true)
+                ) {
+                    $collected['variant'] = 'image';
                 }
                 return $collected;
             case 'news_feature':
-                return [
-                    'variant' => ($_POST['variant'] ?? 'cards') === 'mosaic' ? 'mosaic' : 'cards',
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => (trim((string) ($_POST['all_url'] ?? '')) !== '' && \App\Core\UrlGuard::isSafeLink(trim((string) ($_POST['all_url'] ?? '')))) ? trim((string) ($_POST['all_url'] ?? '')) : '',
-                    'limit' => max(2, min(12, (int) ($_POST['limit'] ?? 6))),
-                    'category' => max(0, (int) ($_POST['category'] ?? 0)),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('news_feature', $_POST, $locale),
+                    ['category' => max(0, (int) ($_POST['category'] ?? 0))]
+                );
             case 'person_cards':
                 $items = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -739,14 +659,10 @@ final class BlockController
                         'url' => $url,
                     ];
                 }
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => $this->safeUrlField('all_url'),
-                    'columns' => \App\Core\BlockData\BlockDataInput::int($_POST, 'columns', 2, 5, 4),
-                    'items' => $items,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('person_cards', $_POST, $locale),
+                    ['items' => $items]
+                );
             case 'timeline':
                 $items = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -763,21 +679,10 @@ final class BlockController
                             : 'planned',
                     ];
                 }
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'description' => TextProcessor::process(
-                        \App\Core\HtmlSanitizer::sanitizeText((string) ($_POST['description'] ?? '')),
-                        $locale
-                    ),
-                    'items' => $items,
-                    'button_text' => trim((string) ($_POST['button_text'] ?? '')),
-                    'button_url' => $this->safeUrlField('button_url'),
-                    'cta_title' => TextProcessor::typographPlain(trim((string) ($_POST['cta_title'] ?? '')), $locale),
-                    'cta_text' => TextProcessor::typographPlain(trim((string) ($_POST['cta_text'] ?? '')), $locale),
-                    'cta_button_text' => trim((string) ($_POST['cta_button_text'] ?? '')),
-                    'cta_button_url' => $this->safeUrlField('cta_button_url'),
-                    'cta_image' => trim((string) ($_POST['cta_image'] ?? '')),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('timeline', $_POST, $locale),
+                    ['items' => $items]
+                );
             case 'news_docs':
                 $docs = [];
                 foreach ((array) ($_POST['docs'] ?? []) as $doc) {
@@ -795,17 +700,13 @@ final class BlockController
                         'url' => $url,
                     ];
                 }
-                return [
-                    'news_title' => TextProcessor::typographPlain(trim((string) ($_POST['news_title'] ?? '')), $locale),
-                    'news_all_text' => trim((string) ($_POST['news_all_text'] ?? '')),
-                    'news_all_url' => $this->safeUrlField('news_all_url'),
-                    'limit' => max(1, min(6, (int) ($_POST['limit'] ?? 3))),
-                    'category' => max(0, (int) ($_POST['category'] ?? 0)),
-                    'docs_title' => TextProcessor::typographPlain(trim((string) ($_POST['docs_title'] ?? '')), $locale),
-                    'docs_all_text' => trim((string) ($_POST['docs_all_text'] ?? '')),
-                    'docs_all_url' => $this->safeUrlField('docs_all_url'),
-                    'docs' => $docs,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('news_docs', $_POST, $locale),
+                    [
+                        'category' => max(0, (int) ($_POST['category'] ?? 0)),
+                        'docs' => $docs,
+                    ]
+                );
             case 'icon_text':
                 $iconRows = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -824,16 +725,14 @@ final class BlockController
                     ];
                 }
 
-                return [
-                    'variant' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'variant', ['cards', 'plain', 'inline'], 'cards'),
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'description' => TextProcessor::typographPlain(trim((string) ($_POST['description'] ?? '')), $locale),
-                    'icon_position' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'icon_position', ['left', 'top', 'right'], 'left'),
-                    'rows_layout' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'rows_layout', ['stacked', 'inline'], 'stacked'),
-                    'align' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'align', ['left', 'center'], 'left'),
-                    'columns' => max(1, min(4, (int) ($_POST['columns'] ?? 3))),
-                    'items' => $iconRows,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('icon_text', $_POST, $locale),
+                    [
+                        // Мимо схемы: значение зависит от выравнивания (см. EXTRA).
+                        'icon_position' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'icon_position', ['left', 'top', 'right'], 'left'),
+                        'items' => $iconRows,
+                    ]
+                );
             case 'leader_card':
                 $facts = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -849,55 +748,12 @@ final class BlockController
                     ];
                 }
 
-                return [
-                    'photo' => trim((string) ($_POST['photo'] ?? '')),
-                    'name' => TextProcessor::typographPlain(trim((string) ($_POST['name'] ?? '')), $locale),
-                    // Уровень заголовка выбирает редактор: карточка стоит на
-                    // разных страницах, и что для одной h2, для другой h3.
-                    'name_tag' => in_array($_POST['name_tag'] ?? 'p', ['p', 'h2', 'h3'], true) ? (string) $_POST['name_tag'] : 'p',
-                    'position' => TextProcessor::typographPlain(trim((string) ($_POST['position'] ?? '')), $locale),
-                    'phone' => trim((string) ($_POST['phone'] ?? '')),
-                    'email' => trim((string) ($_POST['email'] ?? '')),
-                    'hours' => TextProcessor::typographPlain(trim((string) ($_POST['hours'] ?? '')), $locale),
-                    // Соцсети — только безопасные ссылки: адрес приходит из формы
-                    // и попадает в href, javascript: там быть не должно.
-                    'facebook' => $this->safeUrlField('facebook'),
-                    'x' => $this->safeUrlField('x'),
-                    'linkedin' => $this->safeUrlField('linkedin'),
-                    'instagram' => $this->safeUrlField('instagram'),
-                    'telegram' => $this->safeUrlField('telegram'),
-                    'facts_title' => TextProcessor::typographPlain(trim((string) ($_POST['facts_title'] ?? '')), $locale),
-                    'facts_icon' => \App\Core\Icon::cleanName($_POST['facts_icon'] ?? ''),
-                    'items' => $facts,
-                    'bio_title' => TextProcessor::typographPlain(trim((string) ($_POST['bio_title'] ?? '')), $locale),
-                    'bio_icon' => \App\Core\Icon::cleanName($_POST['bio_icon'] ?? ''),
-                    'bio' => TextProcessor::process((string) ($_POST['bio'] ?? ''), $locale),
-                    'duties_title' => TextProcessor::typographPlain(trim((string) ($_POST['duties_title'] ?? '')), $locale),
-                    'duties_icon' => \App\Core\Icon::cleanName($_POST['duties_icon'] ?? ''),
-                    'duties' => TextProcessor::process((string) ($_POST['duties'] ?? ''), $locale),
-                    'mobile_icons_only' => !empty($_POST['mobile_icons_only']),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('leader_card', $_POST, $locale),
+                    ['items' => $facts]
+                );
             case 'person_profile':
-                return [
-                    'photo' => trim((string) ($_POST['photo'] ?? '')),
-                    'photo_side' => ($_POST['photo_side'] ?? 'left') === 'right' ? 'right' : 'left',
-                    'name' => TextProcessor::typographPlain(trim((string) ($_POST['name'] ?? '')), $locale),
-                    'position' => TextProcessor::typographPlain(trim((string) ($_POST['position'] ?? '')), $locale),
-                    'text' => TextProcessor::typographPlain(trim((string) ($_POST['text'] ?? '')), $locale),
-                    'phone' => trim((string) ($_POST['phone'] ?? '')),
-                    'phone_label' => trim((string) ($_POST['phone_label'] ?? 'Приёмная:')),
-                    'email' => trim((string) ($_POST['email'] ?? '')),
-                    'email_label' => trim((string) ($_POST['email_label'] ?? 'E-mail:')),
-                    'button_text' => trim((string) ($_POST['button_text'] ?? '')),
-                    'button_url' => $this->safeUrlField('button_url'),
-                    'button2_text' => trim((string) ($_POST['button2_text'] ?? '')),
-                    'button2_url' => $this->safeUrlField('button2_url'),
-                    'telegram' => $this->safeUrlField('telegram'),
-                    'facebook' => $this->safeUrlField('facebook'),
-                    'linkedin' => $this->safeUrlField('linkedin'),
-                    'x' => $this->safeUrlField('x'),
-                    'instagram' => $this->safeUrlField('instagram'),
-                ];
+                return BlockFieldSchema::normalize('person_profile', $_POST, $locale);
             case 'bio_education':
                 $collect = static function (string $key, array $fields) use ($locale): array {
                     $rows = [];
@@ -938,20 +794,15 @@ final class BlockController
                     $collectWidgetIds('widgets_after'),
                     $widgetsBefore
                 ));
-                return [
-                    'bio_title' => TextProcessor::typographPlain(trim((string) ($_POST['bio_title'] ?? 'Биография')), $locale),
-                    'bio_text' => TextProcessor::typographPlain(trim((string) ($_POST['bio_text'] ?? '')), $locale),
-                    'career_title' => TextProcessor::typographPlain(trim((string) ($_POST['career_title'] ?? '')), $locale),
-                    'career' => $collect('career', ['years', 'text']),
-                    'edu_title' => TextProcessor::typographPlain(trim((string) ($_POST['edu_title'] ?? 'Образование')), $locale),
-                    'edu_items' => $collect('edu_items', ['years', 'title', 'org']),
-                    'extra_title' => TextProcessor::typographPlain(trim((string) ($_POST['extra_title'] ?? '')), $locale),
-                    'extra_text' => TextProcessor::typographPlain(trim((string) ($_POST['extra_text'] ?? '')), $locale),
-                    'widgets_before' => $widgetsBefore,
-                    'widgets_after' => $widgetsAfter,
-                    'quote_text' => TextProcessor::typographPlain(trim((string) ($_POST['quote_text'] ?? '')), $locale),
-                    'quote_author' => TextProcessor::typographPlain(trim((string) ($_POST['quote_author'] ?? '')), $locale),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('bio_education', $_POST, $locale),
+                    [
+                        'career' => $collect('career', ['years', 'text']),
+                        'edu_items' => $collect('edu_items', ['years', 'title', 'org']),
+                        'widgets_before' => $widgetsBefore,
+                        'widgets_after' => $widgetsAfter,
+                    ]
+                );
             case 'anchor_nav':
                 $items = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -966,11 +817,10 @@ final class BlockController
                     }
                     $items[] = ['label' => TextProcessor::typographPlain($label, $locale), 'url' => $url !== '' ? $url : '#'];
                 }
-                return [
-                    'items' => $items,
-                    'auto' => !empty($_POST['auto']),
-                    'sticky' => !empty($_POST['sticky']),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('anchor_nav', $_POST, $locale),
+                    ['items' => $items]
+                );
             case 'stages':
                 $items = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -989,20 +839,10 @@ final class BlockController
                         'url' => \App\Core\BlockData\BlockDataInput::safeLink($item['url'] ?? ''),
                     ];
                 }
-                return [
-                    'variant' => ($_POST['variant'] ?? 'default') === 'history' ? 'history' : 'default',
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'description' => TextProcessor::process(
-                        \App\Core\HtmlSanitizer::sanitizeText((string) ($_POST['description'] ?? '')),
-                        $locale
-                    ),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => $this->safeUrlField('all_url'),
-                    // 0 — колонок ровно по числу этапов (прежнее поведение).
-                    'columns' => \App\Core\BlockData\BlockDataInput::int($_POST, 'columns', 0, 5, 0),
-                    'autoplay' => \App\Core\BlockData\BlockDataInput::int($_POST, 'autoplay', 0, 30, 0),
-                    'items' => $items,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('stages', $_POST, $locale),
+                    ['items' => $items]
+                );
             case 'text_image':
                 $items = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -1013,25 +853,10 @@ final class BlockController
                     $iconSvg = \App\Core\Icon::cleanName($item['icon_svg'] ?? '');
                     $items[] = ['icon_svg' => $iconSvg, 'label' => TextProcessor::typographPlain($label, $locale)];
                 }
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'text' => TextProcessor::process(
-                        \App\Core\HtmlSanitizer::sanitizeText((string) ($_POST['text'] ?? '')),
-                        $locale
-                    ),
-                    'image' => \App\Core\UrlGuard::isSafeMedia(trim((string) ($_POST['image'] ?? '')))
-                        ? trim((string) ($_POST['image'] ?? ''))
-                        : '',
-                    'image_position' => \App\Core\MediaPosition::normalize($_POST['image_position'] ?? null),
-                    'image_position_mobile' => \App\Core\MediaPosition::normalize($_POST['image_position_mobile'] ?? null),
-                    'image_side' => ($_POST['image_side'] ?? 'right') === 'left' ? 'left' : 'right',
-                    'image_ratio' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'image_ratio', ['auto', '16-9', '4-3', '1-1'], 'auto'),
-                    // Доля ширины под кадр: остальное занимает текстовая колонка.
-                    'image_width' => \App\Core\BlockData\BlockDataInput::int($_POST, 'image_width', 30, 60, 50),
-                    'button_text' => trim((string) ($_POST['button_text'] ?? '')),
-                    'button_url' => $this->safeUrlField('button_url'),
-                    'items' => $items,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('text_image', $_POST, $locale),
+                    ['items' => $items]
+                );
             case 'docs_list':
                 $items = [];
                 foreach ((array) ($_POST['items'] ?? []) as $item) {
@@ -1053,34 +878,16 @@ final class BlockController
                         'date' => trim((string) ($item['date'] ?? '')),
                     ];
                 }
-                return [
-                    'variant' => in_array($_POST['variant'] ?? 'grid', ['grid', 'links', 'acts', 'acts-editorial'], true) ? (string) $_POST['variant'] : 'grid',
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'all_text' => trim((string) ($_POST['all_text'] ?? '')),
-                    'all_url' => $this->safeUrlField('all_url'),
-                    'columns' => max(1, min(5, (int) ($_POST['columns'] ?? 4))),
-                    'search_enabled' => !empty($_POST['search_enabled']),
-                    'emblem' => !empty($_POST['emblem']),
-                    'items' => $items,
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('docs_list', $_POST, $locale),
+                    ['items' => $items]
+                );
             case 'map_point':
-                $embed = \App\Core\MapEmbedUrl::normalize($_POST['embed_url'] ?? '');
-                $mapImage = trim((string) ($_POST['image'] ?? ''));
-                if ($mapImage !== '' && !\App\Core\UrlGuard::isSafeMedia($mapImage)) {
-                    $mapImage = '';
-                }
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'image' => $mapImage,
-                    'embed_url' => $embed,
-                    'load_mode' => ($_POST['load_mode'] ?? 'click') === 'immediate' ? 'immediate' : 'click',
-                    'card_title' => TextProcessor::typographPlain(trim((string) ($_POST['card_title'] ?? '')), $locale),
-                    'address' => trim((string) ($_POST['address'] ?? '')),
-                    'copy_enabled' => !empty($_POST['copy_enabled']),
-                    'button_text' => trim((string) ($_POST['button_text'] ?? '')),
-                    'button_url' => $this->safeUrlField('button_url'),
-                ];
-
+                return array_merge(
+                    BlockFieldSchema::normalize('map_point', $_POST, $locale),
+                    // Адрес карты принимается и ссылкой, и целым тегом <iframe>.
+                    ['embed_url' => \App\Core\MapEmbedUrl::normalize($_POST['embed_url'] ?? '')]
+                );
             case 'org_structure':
                 $branches = [];
                 foreach ((array) ($_POST['branches'] ?? []) as $branch) {
@@ -1101,25 +908,12 @@ final class BlockController
                         'units' => $bUnits,
                     ];
                 }
-                $orgColumns = (int) ($_POST['columns'] ?? 4);
-
                 // Построчные поля сохраняются как есть: типографика съела бы
                 // служебные маркеры разметки («- группа», «* проектный офис»).
-                return [
-                    'title' => TextProcessor::typographPlain(trim((string) ($_POST['title_field'] ?? '')), $locale),
-                    'layout' => ($_POST['layout'] ?? 'tree') === 'spine' ? 'spine' : 'tree',
-                    'columns' => max(2, min(4, $orgColumns)),
-                    'council' => trim((string) ($_POST['council'] ?? '')),
-                    'head_title' => TextProcessor::typographPlain(trim((string) ($_POST['head_title'] ?? '')), $locale),
-                    'head_name' => trim((string) ($_POST['head_name'] ?? '')),
-                    'head_url' => $this->safeUrlField('head_url'),
-                    'side_items' => trim((string) ($_POST['side_items'] ?? '')),
-                    'branches' => $branches,
-                    'collapsible' => !empty($_POST['collapsible']),
-                    'search' => !empty($_POST['org_search']),
-                    'notes' => trim((string) ($_POST['notes'] ?? '')),
-                    'footnote' => TextProcessor::typographPlain(trim((string) ($_POST['footnote'] ?? '')), $locale),
-                ];
+                return array_merge(
+                    BlockFieldSchema::normalize('org_structure', $_POST, $locale),
+                    ['branches' => $branches]
+                );
             default:
                 return [];
         }

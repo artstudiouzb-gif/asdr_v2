@@ -43,19 +43,26 @@ final class FileController
             $this->json(['items' => [], 'error' => 'Не удалось подготовить метаданные медиабиблиотеки.'], 500);
         }
 
-        // Фильтр по типу: image (по умолчанию), svg, video, audio, document, all_files, all.
+        // Фильтр по виду файлов: image (по умолчанию), raster, svg, video,
+        // audio, document, all_files, all. Список видов — у модели, чтобы
+        // выдача и счётчики боковой колонки не разошлись.
         $type = (string) ($_GET['type'] ?? 'image');
-        $type = in_array($type, ['image', 'svg', 'video', 'audio', 'document', 'all_files', 'all'], true) ? $type : 'image';
+        $type = in_array($type, FileEntry::libraryTypes(), true) ? $type : 'image';
+        $sort = (string) ($_GET['sort'] ?? 'date_desc');
+        $sort = in_array($sort, FileEntry::librarySorts(), true) ? $sort : 'date_desc';
         $limit = max(1, min(500, (int) ($_GET['limit'] ?? 300)));
         $offset = max(0, (int) ($_GET['offset'] ?? 0));
         $query = trim((string) ($_GET['q'] ?? ''));
 
         $items = [];
-        foreach (FileEntry::libraryFiltered($type, $limit, $offset, $query) as $file) {
+        foreach (FileEntry::libraryFiltered($type, $limit, $offset, $query, $sort) as $file) {
             $items[] = self::libraryItem($file);
         }
 
-        echo json_encode(['items' => $items], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        echo json_encode([
+            'items' => $items,
+            'counts' => FileEntry::libraryCounts($query),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
     public function upload(): void
@@ -254,6 +261,10 @@ final class FileController
             'url' => FileEntry::publicUrl($file),
             'name' => (string) $file['original_name'],
             'mime_type' => (string) ($file['mime_type'] ?? ''),
+            // Вес нужен подвалу окна выбора: по имени файла не видно, тянет
+            // ли страница эту картинку.
+            'size' => (int) ($file['size'] ?? 0),
+            'created_at' => (string) ($file['created_at'] ?? ''),
             'alt_text' => (string) ($file['alt_text'] ?? ''),
             'caption' => (string) ($file['caption'] ?? ''),
             'description' => (string) ($file['description'] ?? ''),

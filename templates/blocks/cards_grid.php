@@ -9,15 +9,16 @@ $title = trim((string) ($data['title'] ?? ''));
 $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
 $items = is_array($data['items'] ?? null) ? $data['items'] : [];
-$variant = in_array($data['variant'] ?? 'icon', ['icon', 'compact', 'image', 'image_below'], true) ? (string) $data['variant'] : 'icon';
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$variant = (string) $data['variant'];
 // «Текст под фото» — та же карточка, только подпись выносится из-под градиента
 // на подложку: длинный анонс на снимке читается плохо, что бы ни делали с
 // затемнением.
 $imageBelow = $variant === 'image_below';
-$columns = max(2, min(5, (int) ($data['columns'] ?? 5)));
+$columns = (int) $data['columns'];
 $mediaClasses = MediaPosition::classes($data['image_position'] ?? null, $data['image_position_mobile'] ?? null);
-$cardBg = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['card_bg'] ?? '')) ? (string) $data['card_bg'] : '';
-$textColor = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['text_color'] ?? '')) ? (string) $data['text_color'] : '';
+$cardBg = (string) $data['card_bg'];
+$textColor = (string) $data['text_color'];
 $visualStyleRaw = (string) ($data['_cards_style'] ?? 'old');
 $visualStyle = in_array($visualStyleRaw, ['old', 'new'], true) ? $visualStyleRaw : 'old';
 $iconSize = max(16, min(64, (int) ($data['_cards_icon_size'] ?? 22)));

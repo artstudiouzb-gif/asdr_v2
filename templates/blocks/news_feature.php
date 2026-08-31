@@ -10,7 +10,8 @@ $allUrl = trim((string) ($data['all_url'] ?? ''));
 $news = $data['news'] ?? [];
 // Два макета блока: «карточки» — крупная новость и ряд карточек, как в ленте;
 // «мозаика» — крупная с текстом на обложке и колонка справа.
-$variant = ($data['variant'] ?? 'cards') === 'mosaic' ? 'mosaic' : 'cards';
+// Значение проверено схемой полей (BlockFieldSchema) — читаем как есть.
+$variant = (string) $data['variant'];
 
 $featured = $news[0] ?? null;
 $rest = array_slice($news, 1);

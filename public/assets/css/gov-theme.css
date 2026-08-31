@@ -2350,6 +2350,59 @@ body.design-mark-underline .tx-mark {
     box-shadow: inset 0 -0.18em 0 color-mix(in srgb, var(--color-accent, #2f6fed) 32%, transparent);
     padding-inline: 0.05em;
 }
+
+/* ==========================================================================
+   Проявление заголовков (Дизайн → Типографика → «Проявление заголовков»).
+   Заголовок секции ждёт прокрутки бледным и набирает свой цвет: «fade» —
+   весь сразу, «wipe» — слева направо.
+
+   Бледное состояние вешает JS (`is-title-reveal`), а не CSS: без скриптов,
+   при «меньше движения» и в режимах контраста заголовок обязан остаться
+   обычным — это украшение, а не содержимое. После показа класс снимается,
+   поэтому выделение мышью, печать и выбранное слово (.tx-mark) работают со
+   своими стилями, а не с остатками анимации.
+   ========================================================================== */
+body.design-title-fade .is-title-reveal {
+    animation: title-reveal-fade .9s ease forwards;
+}
+@keyframes title-reveal-fade {
+    from { opacity: .22; }
+}
+
+/* Заливка текста снимается только там, где текст можно закрасить фоном:
+   без background-clip прозрачная заливка сделала бы заголовок невидимым.
+   `color` не трогаем — currentColor в градиенте это и есть цвет заголовка,
+   а обнуление цвета оставило бы градиент прозрачным. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    body.design-title-wipe .is-title-reveal {
+        background-image: linear-gradient(90deg,
+            currentColor 0%, currentColor 33%,
+            color-mix(in srgb, currentColor 20%, transparent) 62%,
+            color-mix(in srgb, currentColor 20%, transparent) 100%);
+        background-repeat: no-repeat;
+        background-size: 300% 100%;
+        background-position: 100% 0;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: title-reveal-wipe 1.1s cubic-bezier(.22, 1, .36, 1) forwards;
+    }
+    @keyframes title-reveal-wipe {
+        to { background-position: 0 0; }
+    }
+}
+
+/* Страховка на случай, если настройку «меньше движения» включили уже после
+   того, как JS навесил класс: заголовок остаётся читаемым и без анимации. */
+@media (prefers-reduced-motion: reduce) {
+    body.design-title-fade .is-title-reveal,
+    body.design-title-wipe .is-title-reveal {
+        animation: none;
+        background-image: none;
+        opacity: 1;
+        -webkit-text-fill-color: currentColor;
+    }
+}
 :where(body.design-type-static) h1, :where(body.design-type-static) .h1 { font-size: var(--font-size-h1, var(--step-8)); }
 :where(body.design-type-static) h2, :where(body.design-type-static) .h2 { font-size: var(--font-size-h2, var(--step-6)); }
 :where(body.design-type-static) h3, :where(body.design-type-static) .h3 { font-size: var(--font-size-h3, var(--step-4)); }
@@ -2562,18 +2615,74 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .album-card__body { display: flex; flex-direction: column; gap: 6px; padding: 2px 2px 4px; flex: 1; }
 .album-card__title { font-size: var(--step-0); font-weight: 700; color: var(--gov-title); margin: 0; line-height: 1.35; transition: color 0.2s ease; }
 .album-card:hover .album-card__title { color: var(--gov-teal); }
-.adjnews { display: flex; align-items: center; gap: 18px; padding: 18px 20px; background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 14px); text-decoration: none; color: var(--gov-ink); transition: box-shadow .2s ease, border-color .2s ease; }
-.adjnews:hover { box-shadow: 0 12px 30px rgba(19,42,92,.1); border-color: color-mix(in srgb, var(--gov-navy) 22%, var(--gov-border)); }
-.adjnews--next { text-align: right; justify-content: flex-end; }
+/* Соседние новости. Карточки зеркальны: у «предыдущей» порядок стрелка → кадр →
+   текст, у «следующей» — текст → кадр → стрелка. Раньше кадр в обеих стоял
+   слева, а вправо уезжал только текст, и пара читалась как две разные
+   карточки. Разметка идёт в том же порядке, что и колонки, поэтому переставлять
+   элементы `order`-ом не нужно — кроме узкого экрана, где зеркало теряет смысл. */
+.adjnews {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    background: var(--gov-surface);
+    border: 1px solid var(--gov-border);
+    border-radius: var(--radius, 14px);
+    text-decoration: none;
+    color: var(--gov-ink);
+    transition: box-shadow .2s ease, border-color .2s ease, transform .2s ease;
+}
+.adjnews--next { grid-template-columns: minmax(0, 1fr) auto auto; text-align: right; }
+.adjnews:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(19,42,92,.1);
+    border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
+}
 .adjnews--empty { border: 0; background: transparent; }
-.adjnews__arrow { font-size: var(--step-2); color: var(--gov-teal-text); flex: 0 0 auto; }
-.adjnews__media { width: 92px; aspect-ratio: 4/3; border-radius: var(--radius-sm, 10px); background: var(--gov-navy) center/cover no-repeat; flex: 0 0 auto; object-fit: cover; }
+/* Стрелка — кружок, а не голый знак: у неё та же роль, что у стрелок каруселей,
+   и на пустом поле карточки одинокий символ читался как опечатка. */
+.adjnews__arrow {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; flex: 0 0 auto;
+    border: 1px solid var(--gov-border); border-radius: 50%;
+    color: var(--gov-teal-text); font-size: var(--step-0); line-height: 1;
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+.adjnews:hover .adjnews__arrow { background: var(--gov-teal); border-color: var(--gov-teal); color: #fff; }
+.adjnews__media { width: 112px; aspect-ratio: 4/3; border-radius: var(--radius-sm, 10px); background: var(--gov-navy) center/cover no-repeat; flex: 0 0 auto; object-fit: cover; }
 .adjnews__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
-.adjnews__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.adjnews__body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+/* Подпись и дата — одной строкой: тремя этажами (подпись, дата, заголовок)
+   карточка выглядела рыхлой, а дата разрывала связку подписи с заголовком. */
+.adjnews__meta { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.adjnews--next .adjnews__meta { justify-content: flex-end; }
 .adjnews__label { text-transform: uppercase; font-size: var(--step--4); letter-spacing: .08em; font-weight: 700; color: var(--gov-muted); }
 .adjnews__date { color: var(--gov-muted); font-size: var(--step--3); }
-.adjnews__title { font-weight: 700; color: var(--section-title-fg); line-height: 1.35; font-size: var(--step--1); }
+/* Заголовок в две строки: соседние новости — навигация, а не анонс, и длинное
+   название не должно растягивать карточку вдвое против парной. */
+.adjnews__title {
+    font-weight: 700; color: var(--section-title-fg); line-height: 1.35; font-size: var(--step--1);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
 .adjnews:hover .adjnews__title { color: var(--gov-teal); }
+/* Одна колонка — зеркалить нечего: обе карточки читаются слева направо. */
+@media (max-width: 720px) {
+    .adjnews--next { grid-template-columns: auto auto minmax(0, 1fr); text-align: left; }
+    .adjnews--next .adjnews__arrow { order: -2; }
+    .adjnews--next .adjnews__media { order: -1; }
+    .adjnews--next .adjnews__meta { justify-content: flex-start; }
+}
+/* На телефоне кадр уступает место тексту. Стрелка, отступы и превью съедали
+   180px из 380: на заголовок оставалась колонка в полтора слова, и подпись
+   «предыдущая новость» ломалась пополам. Кадр здесь украшение, заголовок — суть. */
+@media (max-width: 560px) {
+    .adjnews,
+    .adjnews--next { grid-template-columns: auto minmax(0, 1fr); }
+    .adjnews__media { display: none; }
+    .adjnews__meta { flex-direction: column; align-items: flex-start; gap: 2px; }
+    .adjnews--next .adjnews__meta { align-items: flex-start; }
+}
 @media (prefers-reduced-motion: reduce) {
     .newsdetail-photos__item, .adjnews, .relnews-card { transition: none; }
 }
@@ -3011,6 +3120,67 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 @media (max-width: 1100px) { .newslist-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 1000px) { .newslist-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .newslist-grid { grid-template-columns: 1fr; } }
+
+
+/* Тело карточки: обёртка нужна широкой карточке, где текст стоит рядом с
+   фотографией, а не под ней. У обычной карточки промежуток остаётся прежним.
+
+   Боковой отступ — здесь, а не у карточки: фотография у неё «в край», это её
+   роль обложки, а текст без отступа упирался в границу — дата стояла вплотную
+   к рамке. Сверху ещё несколько пикселей: между низом фотографии и датой было
+   9px, и число читалось приклеенным к снимку. */
+.relnews-card__body { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 4px 14px 0; }
+
+/* Каждая пятая карточка ленты — широкая: занимает две ячейки сетки и
+   показывает анонс. Ровно две, а не всю строку: группа «4 компактные + 1
+   широкая» даёт шесть ячеек, а шесть делится и на 4, и на 3, и на 2 колонки —
+   ряды остаются полными на любой ширине (см. App\Core\NewsFeedRhythm). */
+.relnews-card.relnews-card--wide { grid-column: span 2; flex-direction: row; align-items: stretch; padding: 0; }
+/* `min-width: 0` — не косметика: у флекс-элемента автоматический минимум равен
+   содержимому, а содержимое здесь — картинка с заданной пропорцией. Из-за него
+   колонка с фотографией разъезжалась до 60% вместо заданных 42%, а текст
+   ужимался вдвое. */
+.relnews-card--wide .news-cover { flex: 0 0 42%; min-width: 0; }
+/* Без пропорции: она спорила с `height: 100%` — браузер укорачивал кадр, чтобы
+   сойтись с 4:3, и под фотографией оставалась белая полоса в 17px. Высоту
+   задаёт сама карточка, кадрирование — `object-fit: cover` у изображения. */
+.relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: auto; }
+.relnews-card--wide .relnews-card__body { flex: 1 1 auto; justify-content: center; padding: 18px 20px; }
+.relnews-card--wide .relnews-card__title { font-size: var(--step-2); }
+/* Анонс — три строки: карточка стоит в ряду с компактными, и её высота задаёт
+   высоту всего ряда. Правило адресовано только широкой карточке: у той же
+   `.relnews-card__excerpt` есть свои размеры в части темы для детальной
+   новости, и общий селектор здесь спорил бы с ними. */
+.relnews-card--wide .relnews-card__excerpt {
+    color: var(--gov-muted);
+    font-size: var(--step--1);
+    line-height: var(--base-line-height, 1.6);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+/* В одну колонку широкой карточке растягиваться некуда: `span 2` создал бы
+   вторую колонку и горизонтальную прокрутку. */
+@media (max-width: 560px) {
+    .relnews-card.relnews-card--wide { grid-column: auto; flex-direction: column; padding: 0 0 14px; }
+    .relnews-card--wide .news-cover { flex: none; }
+    .relnews-card--wide .relnews-card__media { height: auto; aspect-ratio: 16 / 10; }
+    .relnews-card--wide .relnews-card__body { padding: 4px 14px 0; }
+}
+/* На трёх колонках ритм выключается. Группа «крупная плюс две компактные» —
+   это четыре ячейки, а четыре на три не делятся: крупная карточка рано или
+   поздно упирается в последнюю колонку, места на две ячейки там нет, сетка
+   переносит её на следующий ряд и оставляет дыру. Ровный ряд компактных
+   карточек лучше дырявой ленты. */
+@media (max-width: 1100px) and (min-width: 1001px) {
+    .relnews-card.relnews-card--wide { grid-column: auto; flex-direction: column; padding: 0 0 14px; }
+    .relnews-card--wide .news-cover { flex: none; }
+    .relnews-card--wide .relnews-card__media { height: auto; aspect-ratio: 16 / 10; }
+    .relnews-card--wide .relnews-card__body { padding: 4px 14px 0; }
+    .relnews-card--wide .relnews-card__title { font-size: var(--step-0); }
+    .relnews-card--wide .relnews-card__excerpt { display: none; }
+}
 
 /* «Читать подробнее» — завершение карточки. Отделено чертой сверху и всегда
    прижато к низу, поэтому у карточек разной высоты ссылки стоят в одну линию. */
@@ -4955,12 +5125,22 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .site-footer--columns .site-footer__heading::after { background: var(--gov-teal); }
 .site-footer__social-link:hover { background: var(--gov-teal); }
 .site-footer__logo { max-height: 80px; width: auto; object-fit: contain; margin-bottom: 14px; display: block; }
+/* Виджеты подвала на тёмном: те же приглушённые белые, что у строк колонок.
+   Знак у контакта берёт акцент в варианте «на тёмном» — обычный акцент на
+   navy проваливается. */
+.site-footer--columns .footer-contacts__item,
+.site-footer--columns .site-footer__about,
+.site-footer--columns .site-footer__text { color: rgba(255,255,255,.72); }
+.site-footer--columns .footer-contacts__icon { color: var(--gov-teal-text); opacity: 1; }
+.site-footer--columns .site-footer__text h2,
+.site-footer--columns .site-footer__text h3,
+.site-footer--columns .site-footer__text h4 { color: #fff; }
 
 /* --- Форма подписки в подвале --- */
 .footer-subscribe { display: flex; flex-wrap: wrap; margin-top: 12px; max-width: 320px; }
 .footer-subscribe input[type=email] { flex: 1; min-width: 0; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff; border-radius: 8px 0 0 8px; padding: 11px 14px; }
 .footer-subscribe input[type=email]::placeholder { color: rgba(255,255,255,.55); }
-.footer-subscribe button { border: 0; background: var(--gov-teal); color: #fff; padding: 0 18px; border-radius: 0 8px 8px 0; cursor: pointer; font-size: var(--step-1); }
+.footer-subscribe button { display: inline-grid; place-items: center; border: 0; background: var(--gov-teal); color: #fff; padding: 0 18px; border-radius: 0 8px 8px 0; cursor: pointer; }
 .footer-subscribe button:hover { background: color-mix(in srgb, var(--gov-teal) 85%, #000); }
 .footer-subscribe__consent { display: flex; flex: 1 0 100%; align-items: flex-start; gap: 8px; margin-top: 10px; color: rgba(255,255,255,.72); font-size: var(--step--4); line-height: var(--base-line-height, 1.45); cursor: pointer; }
 .footer-subscribe__consent input { flex: 0 0 auto; margin-top: 2px; accent-color: var(--gov-teal); }
@@ -4977,6 +5157,23 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .widget--pad-spacious.widget--style-card, .widget--pad-spacious.widget--style-tinted, .widget--pad-spacious.widget--style-navy { padding: 32px; }
 .widget--accent .widget__title { padding-bottom: 10px; position: relative; }
 .widget--accent .widget__title::after { content: ''; position: absolute; left: 0; bottom: 0; width: 44px; height: 3px; border-radius: 2px; background: var(--gov-teal); }
+
+/* Карусель «случайная цель»: название и описание над кадрами. Название —
+   не заголовок разметки (виджет встаёт в любое место страницы, и уровень
+   заголовка тут не предсказать), поэтому размер задаётся здесь, а диктору
+   имя приходит подписью самой карусели. Цвет берётся у виджета: на его
+   тёмном оформлении собственный тёмный цвет пропал бы. */
+.goal-carousel__text { margin-bottom: 12px; }
+.goal-carousel__text:empty { margin-bottom: 0; }
+.goal-carousel__name {
+    margin: 0 0 4px; font-weight: 700; font-size: var(--step-0); line-height: 1.3;
+    color: inherit;
+}
+.goal-carousel__desc {
+    margin: 0; font-size: var(--step--2); line-height: var(--base-line-height, 1.5);
+    color: var(--gov-muted, #64748b);
+}
+.widget--style-navy .goal-carousel__desc { color: rgba(255, 255, 255, .72); }
 
 /* ===== Кнопка webpush-подписки (футер) ===== */
 .push-optin { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; min-height: 40px; padding: 0 16px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: var(--step--2); font-weight: 600; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
