@@ -154,6 +154,24 @@ final class BlockSamples
                     ['icon_svg' => 'bell', 'icon_color' => '', 'rows' => "Канцелярия (для юридических лиц) | (71) 239-59-22"],
                 ],
             ],
+            // Коллаж: композиция «два кадра внахлёст + плитка с числом» —
+            // ровно то, ради чего блок и заводился.
+            'collage' => [
+                'title' => '',
+                'columns' => 6,
+                'rows' => 4,
+                'ratio' => '4-3',
+                'gap' => 'medium',
+                'items' => [
+                    ['type' => 'photo', 'col' => 1, 'col_span' => 4, 'row' => 1, 'row_span' => 2,
+                     'shape' => 'rounded', 'image' => '', 'alt' => 'Работа на объекте', 'focus' => 'center', 'link' => ''],
+                    ['type' => 'stat', 'col' => 1, 'col_span' => 2, 'row' => 3, 'row_span' => 2,
+                     'shape' => 'rounded', 'icon_svg' => 'users', 'value' => '25K+',
+                     'label' => 'обращений рассмотрено', 'bg' => '', 'fg' => '', 'link' => ''],
+                    ['type' => 'photo', 'col' => 3, 'col_span' => 4, 'row' => 2, 'row_span' => 3,
+                     'shape' => 'rounded', 'image' => '', 'alt' => 'Специалист агентства', 'focus' => 'center', 'link' => ''],
+                ],
+            ],
             'leader_card' => [
                 'photo' => '', 'name' => 'Фамилия Имя Отчество',
                 'position' => 'Должность руководителя',
