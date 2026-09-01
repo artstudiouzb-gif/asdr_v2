@@ -45,6 +45,13 @@ final class BlockHints
             $hints[] = $label . ': подпись задана, но не указана ссылка — на сайте она не появится.';
         }
 
+        // Врезка опознаёт источник по ссылке: незнакомый адрес не выводится
+        // вовсе, и без подсказки редактор видел бы пустое место без причины.
+        if ($type === 'embed' && $filled('url') && \App\Core\EmbedSource::parse((string) $data['url']) === null) {
+            $hints[] = 'Ссылка не распознана — на сайте врезки не будет.'
+                . ' Поддерживаются ролик YouTube, пост Telegram (t.me/канал/номер) и форма Google.';
+        }
+
         // Автоматический источник подменяет ручной список целиком.
         if (in_array($type, ['cards_grid', 'media_gallery'], true)) {
             $source = (string) ($data['source'] ?? 'manual');
