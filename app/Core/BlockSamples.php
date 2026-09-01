@@ -172,6 +172,18 @@ final class BlockSamples
                      'shape' => 'rounded', 'image' => '', 'alt' => 'Специалист агентства', 'focus' => 'center', 'link' => ''],
                 ],
             ],
+            'divider' => [
+                'variant' => 'short',
+                'size' => 'medium',
+            ],
+            'buttons' => [
+                'align' => 'left',
+                'size' => 'normal',
+                'items' => [
+                    ['text' => 'Скачать бланк', 'url' => '/docs', 'style' => 'primary', 'icon_svg' => 'download', 'new_tab' => false],
+                    ['text' => 'Подать заявление', 'url' => '/services', 'style' => 'outline', 'icon_svg' => '', 'new_tab' => false],
+                ],
+            ],
             'chart' => [
                 'title' => 'Структура расходов',
                 'variant' => 'stacked',

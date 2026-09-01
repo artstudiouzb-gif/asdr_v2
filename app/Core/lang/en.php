@@ -414,4 +414,5 @@ return [
     'Таблица' => 'Table',
     'Таблица не заполнена.' => 'The table is empty.',
     'Изображение не выбрано.' => 'No image selected.',
+    'Откроется в новой вкладке' => 'Opens in a new tab',
 ];

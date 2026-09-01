@@ -88,6 +88,8 @@ final class BlockTypeRegistry
         'image' => [], // схема: BlockFieldSchema
         'embed' => [], // схема: BlockFieldSchema
         'chart' => [], // схема: BlockFieldSchema
+        'divider' => [], // схема: BlockFieldSchema
+        'buttons' => [], // схема: BlockFieldSchema
     ];
 
     /** Короткие русские названия для сообщений редактору. */
@@ -108,7 +110,7 @@ final class BlockTypeRegistry
         'leader_card' => 'Карточка руководителя',
         'icon_text' => 'Иконка и текст', 'collage' => 'Коллаж', 'table' => 'Таблица',
         'image' => 'Изображение', 'embed' => 'Внешняя врезка',
-        'chart' => 'Диаграмма',
+        'chart' => 'Диаграмма', 'divider' => 'Разделитель', 'buttons' => 'Кнопки',
     ];
 
     /**
@@ -122,7 +124,6 @@ final class BlockTypeRegistry
         'projects_list' => 'Список проектов',
         'partners' => 'Партнёры (логотипы)',
         'subscribe' => 'Подписка на дайджест',
-        'faq' => 'FAQ / аккордеон',
         'contact_cards' => 'Контактные карточки',
         'hero' => 'Герой (титул + фото/видео)',
         'cards_grid' => 'Карточки (иконки / фото / категории)',
@@ -146,6 +147,13 @@ final class BlockTypeRegistry
         'image' => 'Изображение (одно фото с подписью)',
         'embed' => 'Внешняя врезка (YouTube, Telegram, Google Формы)',
         'chart' => 'Диаграмма (столбцы, доли, показатель к цели)',
+        'divider' => 'Разделитель (линия, знак или пустое место)',
+        'buttons' => 'Кнопки (до трёх в ряд)',
+        // Аккордеон и цитата — это FAQ и «Отзывы»: разметка, скрипт и стили у
+        // них те же, и отдельные блоки-близнецы разъехались бы с ними при
+        // первой правке. Названы так, чтобы редактор их нашёл по своему слову.
+        'faq' => 'FAQ / аккордеон (свёрнутые разделы)',
+        'testimonials' => 'Отзывы и цитаты (автор, должность, фото)',
     ];
 
     /** @var array<string, array<string, mixed>>|null */

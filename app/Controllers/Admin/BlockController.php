@@ -556,6 +556,10 @@ final class BlockController
                 return BlockFieldSchema::normalize('embed', $_POST, $locale);
             case 'chart':
                 return BlockFieldSchema::normalize('chart', $_POST, $locale);
+            case 'divider':
+                return BlockFieldSchema::normalize('divider', $_POST, $locale);
+            case 'buttons':
+                return \App\Core\BlockData\ButtonsBlockNormalizer::normalize($_POST, $locale);
             case 'counters':
                 return CountersBlockNormalizer::normalize($_POST, $locale);
             case 'team_list':

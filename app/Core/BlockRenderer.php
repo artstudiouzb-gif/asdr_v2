@@ -126,8 +126,11 @@ final class BlockRenderer
 
         // Самодостаточные визуальные и интерактивные элементы могут не иметь
         // текста, но всё равно являются содержимым блока.
+        // `hr` в этом списке не для красоты: разделитель — это блок, у которого
+        // нет и не должно быть ни текста, ни картинки, а на страницу он попасть
+        // обязан.
         if (preg_match(
-            '#<(img|picture|video|audio|iframe|svg|canvas|form|input|textarea|select|button)\b#i',
+            '#<(img|picture|video|audio|iframe|svg|canvas|form|input|textarea|select|button|hr)\b#i',
             $withoutCode
         ) === 1) {
             return false;
