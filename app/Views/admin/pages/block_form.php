@@ -327,6 +327,10 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
         <?php endif; ?>
 
+        <?php if ($type === 'chart'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('chart', $data) ?>
+        <?php endif; ?>
+
         <?php if ($type === 'embed'): ?>
             <?= \App\Core\BlockData\BlockFieldSchema::formHtml('embed', $data) ?>
         <?php endif; ?>

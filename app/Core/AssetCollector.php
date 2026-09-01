@@ -68,6 +68,7 @@ final class AssetCollector
         'table' => '/assets/css/blocks/table.css',
         'image' => '/assets/css/blocks/image.css',
         'embed' => '/assets/css/blocks/embed.css',
+        'chart' => '/assets/css/blocks/chart.css',
         'news_feature' => '/assets/css/blocks/news-feature.css',
         'hero_slides' => '/assets/css/blocks/hero-art-layout.css',
     ];
