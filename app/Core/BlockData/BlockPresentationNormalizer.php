@@ -177,6 +177,30 @@ final class BlockPresentationNormalizer
      * @param array<string, mixed> $input
      * @return array<string, mixed>
      */
+    /**
+     * Оформление, с которым создаётся новый блок.
+     *
+     * Появление при прокрутке включено сразу — оно показывает, что страница
+     * продолжается, и без него длинная страница читается как один снимок.
+     * Двух исключений хватает:
+     *   — первый блок страницы это первый экран; пряча его до появления, мы
+     *     задерживаем то, ради чего страницу открыли (и то, что Google меряет
+     *     как LCP), ради эффекта, которого посетитель не увидит;
+     *   — вложенный блок появляется вместе со своим контейнером, иначе
+     *     анимация играет дважды.
+     * Это умолчание, а не правило вывода: редактор меняет его в «Оформлении».
+     *
+     * @return array<string, mixed>
+     */
+    public static function newBlockPresentation(bool $isFirstOnPage, bool $nested): array
+    {
+        if ($isFirstOnPage || $nested) {
+            return [];
+        }
+
+        return ['_reveal' => ['enabled' => true, 'type' => 'fade']];
+    }
+
     public static function normalize(array $input): array
     {
         $spacing = self::scalarString($input['spacing'] ?? null, 'premium');

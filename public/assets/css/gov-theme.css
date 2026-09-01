@@ -6095,8 +6095,10 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 }
 .block-anchornav--sticky { border-bottom: 0; }
 .block-anchornav__link:focus-visible { outline: 3px solid var(--color-accent, var(--gov-teal)); outline-offset: -3px; }
-/* Якорь не должен уезжать под закреплённую полосу. */
-.cms-block[id] { scroll-margin-top: calc(var(--anchornav-top, 0px) + 64px); }
+/* Якорь не должен уезжать под закреплённую полосу оглавления. Высоту шапки
+   здесь не учитываем: её держит scroll-padding-top у html — один отступ на все
+   якоря сайта, а не константа у каждого вида цели. */
+.cms-block[id] { scroll-margin-top: var(--anchornav-top, 0px); }
 
 /* ==========================================================================
    Карточка правового акта

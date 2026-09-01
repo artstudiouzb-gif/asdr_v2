@@ -99,12 +99,19 @@ final class BlockController
                 $sample['form_id'] = (int) $firstForm['id'];
             }
         }
+        // Оформление по умолчанию: появление при прокрутке у всех блоков, кроме
+        // первого на странице и вложенных (см. newBlockPresentation).
+        $presentation = \App\Core\BlockData\BlockPresentationNormalizer::newBlockPresentation(
+            $parentBlockId === null && Block::forPage($pageId, $lang) === [],
+            $parentBlockId !== null
+        );
+
         $blockId = Block::create(
             $pageId,
             $lang,
             $type,
             $title !== '' ? $title : null,
-            array_merge(BlockTypeRegistry::defaultsFor($type), $sample),
+            array_merge(BlockTypeRegistry::defaultsFor($type), $sample, $presentation),
             '',
             $parentBlockId,
             $columnIndex

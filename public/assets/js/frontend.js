@@ -1282,14 +1282,24 @@
                 if (topbar) { topbar.style.setProperty('--hdr-panel-height', panelHeight + 'px'); }
             }
         };
+        // Высота шапки уходит в --scroll-offset: на неё опирается
+        // scroll-padding-top, иначе якорная ссылка прячет заголовок раздела
+        // под шапкой. Меряем, а не подбираем константу: макетов шапки четыре.
+        var syncScrollOffset = function () {
+            var stuck = getComputedStyle(hdr).position === 'sticky';
+            var height = stuck ? Math.round(hdr.getBoundingClientRect().height) : 0;
+            document.documentElement.style.setProperty('--scroll-offset', height + 'px');
+        };
         var apply = function () {
             hdr.classList.toggle('is-scrolled', window.scrollY > 12);
         };
         window.addEventListener('scroll', apply, { passive: true });
         window.addEventListener('resize', offset);
+        window.addEventListener('resize', syncScrollOffset, { passive: true });
         window.addEventListener('a11y:panelchange', offset);
         offset();
         apply();
+        syncScrollOffset();
     })();
 
     // Плавающая кнопка «Наверх»: активна только при включённом тумблере
@@ -1568,7 +1578,12 @@
                 if (r.top < window.innerHeight - 20 && r.bottom > 0) { c.classList.add('is-inview'); }
             });
         };
-        var onScroll = function () { window.requestAnimationFrame(failsafe); };
+        var pending = false;
+        var onScroll = function () {
+            if (pending) { return; }
+            pending = true;
+            window.requestAnimationFrame(function () { pending = false; failsafe(); });
+        };
         window.addEventListener('scroll', onScroll, { passive: true });
         window.addEventListener('resize', onScroll, { passive: true });
         setTimeout(failsafe, 2500);
@@ -1844,14 +1859,32 @@
     (function () {
         var bar = document.getElementById('site-scroll-progress-bar');
         if (!bar) { return; }
-        var update = function () {
-            var winScroll = document.documentElement.scrollTop || document.body.scrollTop;
-            var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        // scrollHeight читается не на каждом событии прокрутки, а раз в кадр:
+        // это чтение заставляет браузер пересчитать раскладку, и на инерционной
+        // прокрутке (несколько событий в кадр) оно и делало ход рваным.
+        var height = 0;
+        var ticking = false;
+        var measure = function () {
+            height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        };
+        var paint = function () {
+            ticking = false;
+            var winScroll = window.scrollY || document.documentElement.scrollTop || 0;
             var scrolled = height > 0 ? (winScroll / height) * 100 : 0;
             bar.style.setProperty('--scroll-progress', Math.min(Math.max(scrolled, 0), 100) + '%');
         };
+        var update = function () {
+            if (ticking) { return; }
+            ticking = true;
+            window.requestAnimationFrame(paint);
+        };
         window.addEventListener('scroll', update, { passive: true });
-        update();
+        // Высота документа меняется от ресайза и от догруженных картинок,
+        // а не от самой прокрутки.
+        window.addEventListener('resize', function () { measure(); update(); }, { passive: true });
+        window.addEventListener('load', function () { measure(); update(); });
+        measure();
+        paint();
     })();
 
     // Движок Toast-уведомлений
