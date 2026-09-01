@@ -572,17 +572,35 @@ final class DemoSeeder
             $pdo->prepare('UPDATE pages SET transparent_header = 1, layout_type = ? WHERE id = ?')
                 ->execute(['no_sidebar', $localizedHomeId]);
 
+            // Появление секций — по тем же правилам ритма, что и у остальных
+            // демо-страниц: без него главная показывалась одним снимком, и
+            // редактор не видел настройки, которая по умолчанию включена.
+            // Берём из ритма только появление: фоны и отступы у главной свои.
+            $homeTypes = [];
+            foreach ($blocks as $b) {
+                if (isset($b['type'])) {
+                    $homeTypes[] = (string) $b['type'];
+                }
+            }
+            $homeLooks = \App\Core\PagePresets::rhythmFor($homeTypes);
+
             $order = 1;
+            $lookIndex = 0;
             foreach ($blocks as $b) {
                 if (!isset($b['type'])) {
                     continue;
                 }
+                $blockData = is_array($b['data'] ?? null) ? $b['data'] : [];
+                if (!array_key_exists('_reveal', $blockData) && isset($homeLooks[$lookIndex]['_reveal'])) {
+                    $blockData['_reveal'] = $homeLooks[$lookIndex]['_reveal'];
+                }
+                $lookIndex++;
                 $ins->execute([
                     ':pid' => $localizedHomeId,
                     ':lang' => $lang,
                     ':ty' => (string) $b['type'],
                     ':ti' => (string) ($b['title'] ?? ''),
-                    ':d' => json_encode($b['data'] ?? [], JSON_UNESCAPED_UNICODE),
+                    ':d' => json_encode($blockData, JSON_UNESCAPED_UNICODE),
                     ':so' => $order++,
                 ]);
                 $c['home']++;
@@ -1404,6 +1422,15 @@ final class DemoSeeder
 
         $sort = (int) $pdo->query('SELECT COALESCE(MAX(sort_order), 0) + 1 FROM blocks WHERE page_id = ' . $pageId)
             ->fetchColumn();
+        // Появление секции — по тем же правилам ритма, что у демо-страниц.
+        // Первым у проекта идёт текстовый блок описания (sort_order 0), он и
+        // есть первый экран, поэтому здесь всегда не первый блок.
+        if (!array_key_exists('_reveal', $data)) {
+            $look = \App\Core\PagePresets::rhythmFor(['text', $type])[1] ?? [];
+            if (isset($look['_reveal'])) {
+                $data['_reveal'] = $look['_reveal'];
+            }
+        }
         $pdo->prepare(
             "INSERT INTO blocks (page_id, lang, type, title, data, custom_css, sort_order, is_active, created_at)
              VALUES (:id, :lang, :type, :title, :data, '', :sort, 1, NOW())"
