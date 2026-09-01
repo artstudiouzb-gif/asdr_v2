@@ -8155,3 +8155,11 @@ label.hb-behavior-card:has(input:checked) {
    в паре с бланкетом — класс не менял ничего. */
 table.table--compact th, table.table--compact td,
 .admin-table.table--compact th, .admin-table.table--compact td { padding: 6px 10px; }
+
+/* Размещение элемента коллажа: четыре коротких списка стоят рядом, а не
+   столбцом — это одна настройка «где и сколько ячеек», а не четыре разных. */
+.collage-place {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--admin-gap-sm, 8px) var(--admin-gap, 12px);
+}

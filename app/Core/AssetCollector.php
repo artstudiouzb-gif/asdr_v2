@@ -64,6 +64,7 @@ final class AssetCollector
      * композицию, не раздувая общий публичный CSS-бандл.
      */
     private const BLOCK_CSS_MAP = [
+        'collage' => '/assets/css/blocks/collage.css',
         'news_feature' => '/assets/css/blocks/news-feature.css',
         'hero_slides' => '/assets/css/blocks/hero-art-layout.css',
     ];

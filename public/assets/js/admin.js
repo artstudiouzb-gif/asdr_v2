@@ -4213,3 +4213,49 @@ document.addEventListener('change', function (event) {
     });
     apply();
 })();
+
+/*
+ * Форма блока «Коллаж»: набор полей элемента зависит от его типа.
+ *
+ * Показывать все поля разом нельзя — редактор видел бы «Надпись по кругу» у
+ * фотографии и «Кадрирование» у узора и не понимал бы, какие из них
+ * действуют. Скрытые поля остаются в форме и уходят на сервер, но
+ * нормализатор берёт только те, что относятся к выбранному типу.
+ */
+(function () {
+    'use strict';
+
+    var FIELDS = {
+        photo: ['shape', 'photo', 'link'],
+        stat: ['shape', 'stat', 'colors', 'link'],
+        // Печать всегда круглая: выбор формы у неё ничего не менял бы.
+        badge: ['badge', 'colors', 'link'],
+        pattern: ['shape', 'pattern', 'colors']
+    };
+
+    function applyRow(row) {
+        var select = row.querySelector('[data-collage-type]');
+        if (!select) { return; }
+        var allowed = FIELDS[select.value] || FIELDS.photo;
+        row.querySelectorAll('[data-collage-fields]').forEach(function (group) {
+            group.hidden = allowed.indexOf(group.getAttribute('data-collage-fields')) === -1;
+        });
+    }
+
+    function applyAll(root) {
+        (root || document).querySelectorAll('[data-collage-repeater] .repeater-row').forEach(applyRow);
+    }
+
+    var repeater = document.querySelector('[data-collage-repeater]');
+    if (!repeater) { return; }
+
+    applyAll();
+    document.addEventListener('change', function (event) {
+        var select = event.target.closest ? event.target.closest('[data-collage-type]') : null;
+        if (!select) { return; }
+        var row = select.closest('.repeater-row');
+        if (row) { applyRow(row); }
+    });
+    // Новая строка приходит из шаблона репитера со всеми полями сразу.
+    new MutationObserver(function () { applyAll(repeater); }).observe(repeater, { childList: true });
+})();
