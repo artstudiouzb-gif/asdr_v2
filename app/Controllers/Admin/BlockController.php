@@ -552,6 +552,8 @@ final class BlockController
                 return BlockFieldSchema::normalize('table', $_POST, $locale);
             case 'image':
                 return BlockFieldSchema::normalize('image', $_POST, $locale);
+            case 'embed':
+                return BlockFieldSchema::normalize('embed', $_POST, $locale);
             case 'counters':
                 return CountersBlockNormalizer::normalize($_POST, $locale);
             case 'team_list':

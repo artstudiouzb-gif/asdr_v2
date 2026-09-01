@@ -23,7 +23,7 @@ const EXPECTED_BLOCK_TYPES = [
     'person_cards', 'timeline', 'news_docs', 'person_profile',
     'bio_education', 'anchor_nav', 'stages', 'text_image',
     'docs_list', 'map_point', 'org_structure', 'leader_card', 'icon_text',
-    'collage', 'table', 'image',
+    'collage', 'table', 'image', 'embed',
 ];
 
 test('Реестр блоков: все источники используют одинаковый набор типов', function () {

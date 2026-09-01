@@ -172,6 +172,13 @@ final class BlockSamples
                      'shape' => 'rounded', 'image' => '', 'alt' => 'Специалист агентства', 'focus' => 'center', 'link' => ''],
                 ],
             ],
+            'embed' => [
+                'title' => 'Запись заседания',
+                'url' => 'https://youtu.be/aqz-KE-bpKQ',
+                'ratio' => '16-9',
+                'height' => 600,
+                'caption' => 'Трансляция коллегии Агентства',
+            ],
             'image' => [
                 'title' => '',
                 'image' => '',
