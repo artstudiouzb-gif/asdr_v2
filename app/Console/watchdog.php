@@ -11,8 +11,12 @@ declare(strict_types=1);
  *
  * Проверяет молчащие воркеры (cron перестал их вызывать), застрявшие очереди
  * публикаций и писем, свободное место на диске. О каждой проблеме сообщает в
- * Telegram один раз и отдельно — когда она ушла. Сам heartbeat не отмечает:
- * сторож, следящий за собой, бесполезен.
+ * Telegram один раз и отдельно — когда она ушла.
+ *
+ * За себя сторож не отвечает: если сервер или cron умерли, некому и сообщить.
+ * Поэтому чистый проход отмечается сигналом наружу (`App\Core\HeartbeatPing`,
+ * адрес в MONITORING_HEARTBEAT_URL) — тревогу поднимет приёмник, когда сигнал
+ * перестанет приходить.
  */
 
 require __DIR__ . '/../Core/Cli.php';
@@ -20,6 +24,7 @@ require __DIR__ . '/../Core/Cli.php';
 
 require __DIR__ . '/../Core/bootstrap.php';
 
+use App\Core\HeartbeatPing;
 use App\Core\Logger;
 use App\Core\ProcessLock;
 use App\Core\Watchdog;
@@ -50,6 +55,17 @@ try {
         count($result['resolved']),
         PHP_EOL
     ));
+
+    // Сигнал наружу — только по чистому проходу: приёмник считает тишину
+    // аварией, и пинг при известных проблемах прятал бы их от него.
+    if (HeartbeatPing::isConfigured()) {
+        if ($result['problems'] === []) {
+            $sent = HeartbeatPing::send();
+            fwrite(STDOUT, ($sent ? 'Сигнал наружу отправлен.' : 'Сигнал наружу не ушёл — см. журнал.') . PHP_EOL);
+        } else {
+            fwrite(STDOUT, 'Сигнал наружу пропущен: есть незакрытые проблемы.' . PHP_EOL);
+        }
+    }
 } finally {
     ProcessLock::release($lock);
 }

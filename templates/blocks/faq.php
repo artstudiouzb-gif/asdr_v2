@@ -51,3 +51,18 @@ $categories = array_values(array_unique(array_filter(array_map(
     </div>
     <p class="block-faq__empty" data-faq-empty hidden><?= htmlspecialchars(t('Ничего не найдено.'), ENT_QUOTES) ?></p>
 </div>
+
+<?php
+// Расширенный сниппет с раскрывающимися вопросами прямо в выдаче. Разметка
+// собирается из тех же строк, что видит посетитель, и выводится только у
+// первого блока вопросов на странице: два FAQPage поисковик отбрасывает оба.
+if (\App\Core\SchemaOrg::claimFaqPage()) {
+    echo \App\Core\SchemaOrg::render(\App\Core\SchemaOrg::faqPage(array_map(
+        static fn (array $item): array => [
+            'question' => (string) ($item['question'] ?? ''),
+            'answer' => (string) ($item['answer'] ?? ''),
+        ],
+        array_values(array_filter(is_array($items) ? $items : [], 'is_array'))
+    )));
+}
+?>
