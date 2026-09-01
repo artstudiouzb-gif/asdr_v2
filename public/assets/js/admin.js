@@ -4377,7 +4377,12 @@ document.addEventListener('change', function (event) {
         if (!link || link.hasAttribute('download') || (link.getAttribute('target') || '') !== '') { return; }
 
         var href = link.getAttribute('href') || '';
-        if (href === '' || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) { return; }
+        if (href === '' || href.charAt(0) === '#') { return; }
+        // Схему спрашиваем у разобранной ссылки, а не сверяем строку начала
+        // href: строковая проверка не видит ни регистра, ни пробелов перед
+        // схемой, ни данных, закодированных сущностями. Всё, что не http(s),
+        // переходом страницы не является.
+        if (link.protocol !== 'http:' && link.protocol !== 'https:') { return; }
         if (link.origin !== window.location.origin) { return; }
         // Ссылка на текущую страницу с якорем переходом не является.
         if (link.pathname === window.location.pathname && link.hash !== '') { return; }
