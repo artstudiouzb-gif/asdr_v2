@@ -119,6 +119,26 @@ final class Router
 
         $activeCodes = Language::activeCodes();
         $defaultCode = Language::defaultCode();
+
+        // Языковой префикс не создаёт второго адреса служебным областям.
+        // `managesPath()` выше смотрит на путь запроса, и `/uz/admin/...` под
+        // её исключения не подпадает: префикс срезался, и запрос доезжал до
+        // настоящего обработчика `/admin/...`. Все проверки доступа, которые
+        // стоят ДО роутера (скрытый вход `AdminEntryGate`, онбординг второго
+        // фактора в public/index.php), сверяют путь запроса — и такой адрес
+        // проходил мимо них. Проверять срезанный путь надо здесь, в
+        // единственном месте, где префикс снимается: список проверок до
+        // роутера ещё вырастет, и каждая из них повторяла бы эту ошибку.
+        // Локализованной версии у служебной области нет, поэтому отдаём путь
+        // как есть — ни один маршрут с ним не совпадёт, и ответом будет 404.
+        $strippedPath = $this->withoutLanguagePrefix($path, $activeCodes);
+        if ($strippedPath !== $path && !LocalePreference::managesPath($strippedPath)) {
+            Locale::set($defaultCode);
+            Locale::setPath($path);
+
+            return $path;
+        }
+
         $requestedCode = LocalePreference::requestedCode($uri, $activeCodes);
         if ($requestedCode !== null) {
             LocalePreference::remember($requestedCode);
