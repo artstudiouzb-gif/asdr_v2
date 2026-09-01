@@ -4259,3 +4259,144 @@ document.addEventListener('change', function (event) {
     // Новая строка приходит из шаблона репитера со всеми полями сразу.
     new MutationObserver(function () { applyAll(repeater); }).observe(repeater, { childList: true });
 })();
+
+
+/*
+ * Ход перехода и место правки.
+ *
+ * Админка отвечает полной перезагрузкой на каждое сохранение и каждый переход:
+ * формы уходят обычным POST, ответ приходит редиректом. Само по себе это
+ * нормально (CSRF, загрузка файлов, flash-сообщения устроены под это), но
+ * между нажатием и новой страницей не происходило ничего — ожидание читалось
+ * как «кнопка не сработала», а на длинной форме сохранение ещё и выбрасывало
+ * редактора в начало страницы.
+ *
+ * Здесь два приёма, оба — прогрессивное улучшение: без JS админка работает
+ * ровно как раньше.
+ */
+(function () {
+    'use strict';
+
+    /* --- Полоса хода ------------------------------------------------------ */
+
+    var bar = null;
+    var creep = null;
+    var giveUp = null;
+
+    function width() {
+        return parseFloat(bar && bar.style.width) || 0;
+    }
+
+    function startProgress() {
+        if (bar) { return; }
+        bar = document.createElement('div');
+        bar.className = 'admin-route-progress';
+        // Полоса ничего не сообщает диктору: он и так узнает о новой странице.
+        bar.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(bar);
+
+        // Ширина ставится следующим кадром, иначе переход от нуля не сыграет.
+        requestAnimationFrame(function () {
+            if (!bar) { return; }
+            bar.style.width = '35%';
+            // Точного прогресса у серверного перехода нет: подбираемся к 90 %
+            // всё меньшими шагами и обрываемся вместе с документом.
+            creep = window.setInterval(function () {
+                if (!bar) { return; }
+                var current = width();
+                if (current >= 90) { return; }
+                bar.style.width = (current + (90 - current) * 0.22) + '%';
+            }, 450);
+        });
+
+        // Страница может и не уйти: скачивание файла, отменённая отправка,
+        // ошибка сети. Бесконечная полоса врёт хуже, чем её отсутствие.
+        giveUp = window.setTimeout(finishProgress, 20000);
+    }
+
+    function finishProgress() {
+        if (!bar) { return; }
+        var node = bar;
+        bar = null;
+        window.clearInterval(creep);
+        window.clearTimeout(giveUp);
+        node.style.width = '100%';
+        node.classList.add('is-done');
+        window.setTimeout(function () { node.remove(); }, 400);
+    }
+
+    /* --- Возврат к месту правки ------------------------------------------- */
+
+    var SCROLL_KEY = 'artstudio:admin:scroll:';
+
+    function rememberScroll() {
+        try {
+            window.sessionStorage.setItem(
+                SCROLL_KEY + window.location.pathname,
+                String(window.scrollY || window.pageYOffset || 0)
+            );
+        } catch (e) {}
+    }
+
+    function restoreScroll() {
+        // Якорь в адресе — это осознанная цель редиректа (#smtp-section),
+        // спорить с ней нельзя.
+        if (window.location.hash) { return; }
+        var key = SCROLL_KEY + window.location.pathname;
+        var saved = null;
+        try {
+            saved = window.sessionStorage.getItem(key);
+            window.sessionStorage.removeItem(key);
+        } catch (e) { return; }
+        var top = parseInt(saved || '', 10);
+        if (!top || top < 80) { return; }
+        window.scrollTo(0, top);
+    }
+
+    /* --- Точки включения --------------------------------------------------- */
+
+    document.addEventListener('submit', function (event) {
+        var form = event.target;
+        if (!form || form.tagName !== 'FORM' || form.hasAttribute('data-no-progress')) { return; }
+        if ((form.getAttribute('target') || '') !== '') { return; }
+
+        // Подтверждение и проверка полей отменяют отправку уже после этого
+        // обработчика, поэтому решение откладываем на следующий тик.
+        window.setTimeout(function () {
+            if (event.defaultPrevented) { return; }
+            rememberScroll();
+            startProgress();
+        }, 0);
+    });
+
+    document.addEventListener('click', function (event) {
+        if (event.defaultPrevented || event.button !== 0) { return; }
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return; }
+
+        var link = event.target.closest ? event.target.closest('a[href]') : null;
+        if (!link || link.hasAttribute('download') || (link.getAttribute('target') || '') !== '') { return; }
+
+        var href = link.getAttribute('href') || '';
+        if (href === '' || href.charAt(0) === '#') { return; }
+        // Схему спрашиваем у разобранной ссылки, а не сверяем строку начала
+        // href: строковая проверка не видит ни регистра, ни пробелов перед
+        // схемой, ни данных, закодированных сущностями. Всё, что не http(s),
+        // переходом страницы не является.
+        if (link.protocol !== 'http:' && link.protocol !== 'https:') { return; }
+        if (link.origin !== window.location.origin) { return; }
+        // Ссылка на текущую страницу с якорем переходом не является.
+        if (link.pathname === window.location.pathname && link.hash !== '') { return; }
+
+        startProgress();
+    });
+
+    // Возврат «назад» отдаёт страницу из кэша браузера — полоса на ней осталась
+    // бы навсегда: до выгрузки она не успевает исчезнуть.
+    window.addEventListener('pageshow', finishProgress);
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', restoreScroll);
+    } else {
+        restoreScroll();
+    }
+})();
