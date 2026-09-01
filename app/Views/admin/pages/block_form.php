@@ -327,6 +327,48 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
         <?php endif; ?>
 
+        <?php if ($type === 'divider'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('divider', $data) ?>
+        <?php endif; ?>
+
+        <?php if ($type === 'buttons'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('buttons', $data) ?>
+            <?php
+            $buttonStyles = ['primary' => 'Основная', 'outline' => 'Контурная', 'link' => 'Ссылкой'];
+            $buttonRow = static function (string $idx, array $item) use ($buttonStyles): string {
+                $v = static fn (string $k): string => htmlspecialchars((string) ($item[$k] ?? ''), ENT_QUOTES);
+                $p = static fn (string $k): string => 'items[' . $idx . '][' . $k . ']';
+                $opts = '';
+                foreach ($buttonStyles as $key => $label) {
+                    $opts .= '<option value="' . $key . '"' . (($item['style'] ?? 'primary') === $key ? ' selected' : '')
+                        . '>' . htmlspecialchars($label, ENT_QUOTES) . '</option>';
+                }
+
+                return '<div class="form-field"><label>Текст кнопки</label><input type="text" maxlength="60" name="'
+                        . $p('text') . '" value="' . $v('text') . '"></div>'
+                    . '<div class="form-field"><label>Ссылка</label><input type="text" name="' . $p('url')
+                        . '" value="' . $v('url') . '" placeholder="/page"></div>'
+                    . '<div class="form-field"><label>Вид</label><select name="' . $p('style') . '">' . $opts . '</select></div>'
+                    . \App\Core\AdminUi::iconField($p('icon_svg'), (string) ($item['icon_svg'] ?? ''), ['label' => 'Иконка'])
+                    . '<label class="form-check"><input type="checkbox" name="' . $p('new_tab') . '" value="1"'
+                        . (!empty($item['new_tab']) ? ' checked' : '') . '> Открывать в новой вкладке</label>'
+                    . '<button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>'
+                    . \App\Core\AdminUi::icon('trash') . 'Удалить</button>';
+            };
+            ?>
+            <div>
+                <label>Кнопки</label>
+                <span class="form-hint">Не больше трёх: четвёртая — это уже меню, и главное действие теряется среди равных. Кнопка без текста или без ссылки на сайте не появится.</span>
+                <div data-repeater="items" data-repeater-max="<?= \App\Core\BlockData\ButtonsBlockNormalizer::MAX_BUTTONS ?>">
+                    <?php foreach (($data['items'] ?? []) as $i => $item): ?>
+                        <div class="repeater-row"><?= $buttonRow((string) $i, is_array($item) ? $item : []) ?></div>
+                    <?php endforeach; ?>
+                </div>
+                <template data-repeater-template="items"><?= $buttonRow('__INDEX__', []) ?></template>
+                <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить кнопку</button></div>
+            </div>
+        <?php endif; ?>
+
         <?php if ($type === 'chart'): ?>
             <?= \App\Core\BlockData\BlockFieldSchema::formHtml('chart', $data) ?>
         <?php endif; ?>
