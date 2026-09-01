@@ -417,6 +417,7 @@ $customDuration = (int) $data['duration'];
                         <div class="form-field col-6">
                             <label for="<?= $id ?>title">Заголовок (<?= strtoupper($code) ?>)</label>
                             <input type="text" id="<?= $id ?>title" name="<?= $key ?>[title]" value="<?= $esc($tr['title'] ?? '') ?>">
+                            <span class="form-hint"><?= htmlspecialchars(\App\Core\BlockData\Field::TITLE_MARKUP_HINT, ENT_QUOTES) ?></span>
                         </div>
                         <div class="form-field col-12">
                             <label for="<?= $id ?>subtitle">Описание (<?= strtoupper($code) ?>)</label>

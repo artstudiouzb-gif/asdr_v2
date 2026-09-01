@@ -67,8 +67,12 @@ final class SectionHead
         if ($title !== '' || $description !== '') {
             $html .= '<div class="section-head__copy">';
             if ($title !== '') {
+                // Разметка строки (*слово* и | ) разбирается здесь же: общая
+                // шапка секции — это заголовок полутора десятков блоков, и
+                // экранирование в обход TitleMarkup оставляло их без обоих
+                // приёмов, хотя у блоков со своим заголовком они работали.
                 $html .= '<' . $level . ' class="' . htmlspecialchars($titleClass, ENT_QUOTES) . '">'
-                    . htmlspecialchars($title, ENT_QUOTES) . '</' . $level . '>';
+                    . TitleMarkup::html($title) . '</' . $level . '>';
             }
             if ($description !== '') {
                 // HTML пропускаем только по явному флагу: вызывающий обязан

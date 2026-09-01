@@ -11,7 +11,7 @@ $fmt = static fn (string $d): string => DateFormatter::short($d);
 <div class="block-newsdocs">
     <div class="newsdocs-col">
         <div class="section-head">
-            <?php if (!empty($data['news_title'])): ?><h2 class="section-head__title"><?= htmlspecialchars((string) $data['news_title'], ENT_QUOTES) ?></h2><?php endif; ?>
+            <?php if (!empty($data['news_title'])): ?><h2 class="section-head__title"><?= \App\Core\TitleMarkup::html((string) $data['news_title']) ?></h2><?php endif; ?>
             <?php if (!empty($data['news_all_text']) && !empty($data['news_all_url'])): ?><a class="section-head__all" href="<?= htmlspecialchars((string) $data['news_all_url'], ENT_QUOTES) ?>"><?= htmlspecialchars((string) $data['news_all_text'], ENT_QUOTES) ?> →</a><?php endif; ?>
         </div>
         <?php if (empty($news)): ?>
@@ -36,7 +36,7 @@ $fmt = static fn (string $d): string => DateFormatter::short($d);
     </div>
     <div class="newsdocs-col">
         <div class="section-head">
-            <?php if (!empty($data['docs_title'])): ?><h2 class="section-head__title"><?= htmlspecialchars((string) $data['docs_title'], ENT_QUOTES) ?></h2><?php endif; ?>
+            <?php if (!empty($data['docs_title'])): ?><h2 class="section-head__title"><?= \App\Core\TitleMarkup::html((string) $data['docs_title']) ?></h2><?php endif; ?>
             <?php if (!empty($data['docs_all_text']) && !empty($data['docs_all_url'])): ?><a class="section-head__all" href="<?= htmlspecialchars((string) $data['docs_all_url'], ENT_QUOTES) ?>"><?= htmlspecialchars((string) $data['docs_all_text'], ENT_QUOTES) ?> →</a><?php endif; ?>
         </div>
         <?php if (empty($docs)): ?>
