@@ -208,6 +208,7 @@ final class AdminUi
             'telegram' => 'brand-telegram',
             'webhooks' => 'webhook',
             'redirects' => 'route',
+            'seo' => 'world-search',
             'performance' => 'gauge',
             'database' => 'database',
             'audit' => 'history',

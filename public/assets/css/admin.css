@@ -8163,3 +8163,21 @@ table.table--compact th, table.table--compact td,
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: var(--admin-gap-sm, 8px) var(--admin-gap, 12px);
 }
+
+/* Примеры адресов в находке проверки индексации: список коротких моноширинных
+   строк, а не абзац — по ним ищут глазами, а не читают. */
+.seo-samples {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    font-family: var(--admin-font-mono);
+    font-size: var(--admin-fs-xs);
+    color: var(--admin-text-muted);
+}
+
+/* Действие раздела рядом с его заголовком: сам заголовок печатает макет по
+   $pageTitle, поэтому кнопка живёт отдельной строкой и прижимается вправо. */
+.admin-page-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--admin-gap, 12px);
+}
