@@ -550,6 +550,8 @@ final class BlockController
                 return \App\Core\BlockData\CollageBlockNormalizer::normalize($_POST, $locale);
             case 'table':
                 return BlockFieldSchema::normalize('table', $_POST, $locale);
+            case 'image':
+                return BlockFieldSchema::normalize('image', $_POST, $locale);
             case 'counters':
                 return CountersBlockNormalizer::normalize($_POST, $locale);
             case 'team_list':

@@ -25,11 +25,11 @@
       "/assets/js/frontend.js",
       "/assets/js/forms.js"
     ],
-    "sourceSha256": "f206ca466a8c692f8ef44d5a744941d6b207edd617fe6c122e16fd6136bc2ae4",
-    "sha256": "bc3d671d76449bbb14c9c2cd99af44f4d27df9b04b1bd760ddfbe369bc3ecfb4",
-    "raw": 61284,
-    "gzip": 16180,
-    "brotli": 14200
+    "sourceSha256": "e1850b05f7b07fed46b92277ed57d4f740c5e636984db377239d80dce79deab7",
+    "sha256": "bda9efe9943e2b82179325b2003308b81edd84b92eac80e9d383cd7d101b468e",
+    "raw": 61308,
+    "gzip": 16192,
+    "brotli": 14213
   },
   "blocks": {
     "/assets/css/blocks/news-detail.css": {
