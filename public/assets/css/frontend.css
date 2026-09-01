@@ -932,7 +932,6 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 
 /* Команда по подразделениям: сектор — заголовок с якорем, отделы и группы
    внутри сектора — подзаголовок со своей сеткой карточек. */
-.block-team__group { scroll-margin-top: 90px; }
 .block-team__group + .block-team__group { margin-top: 40px; }
 .block-team__group-title { margin: 0 0 18px; font-size: var(--step-2); }
 .block-team__group:target .block-team__group-title { color: var(--color-accent, #e63946); }
@@ -1671,6 +1670,11 @@ body.mobile-menu-open .site-burger span:nth-child(3) { transform: translateY(-7p
 }
 /* Плавная прокрутка только при отсутствии prefers-reduced-motion (WCAG). */
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+/* Якорь не должен уезжать под закреплённую шапку: браузер останавливает
+   прокрутку на этом отступе выше цели, иначе заголовок раздела оказывается
+   прямо за шапкой и выглядит как промах. Высоту меряет frontend.js (макетов
+   шапки четыре, константой их не покрыть), 5rem — запас, когда JS отключён. */
+html:has(.site-header--sticky) { scroll-padding-top: calc(var(--scroll-offset, 5rem) + 24px); }
 ::selection { background: color-mix(in srgb, var(--color-primary, #1f4b8e) 82%, #000); color: #fff; }
 /* Заголовочная гарнитура (Montserrat) — крупный корпоративный характер. */
 h1, h2, h3, h4, h5, h6,
