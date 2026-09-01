@@ -327,6 +327,10 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
         <?php endif; ?>
 
+        <?php if ($type === 'table'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('table', $data) ?>
+        <?php endif; ?>
+
         <?php if ($type === 'collage'): ?>
             <?= \App\Core\BlockData\BlockFieldSchema::formHtml('collage', $data) ?>
             <?php

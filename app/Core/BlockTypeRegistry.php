@@ -84,6 +84,7 @@ final class BlockTypeRegistry
         'leader_card' => [], // схема: BlockFieldSchema
         'icon_text' => [], // схема: BlockFieldSchema
         'collage' => [], // схема: BlockFieldSchema
+        'table' => [], // схема: BlockFieldSchema
     ];
 
     /** Короткие русские названия для сообщений редактору. */
@@ -102,7 +103,7 @@ final class BlockTypeRegistry
         'anchor_nav' => 'Якорная навигация', 'stages' => 'Этапы', 'text_image' => 'Текст с фото',
         'docs_list' => 'Список документов', 'map_point' => 'Карта', 'org_structure' => 'Оргструктура',
         'leader_card' => 'Карточка руководителя',
-        'icon_text' => 'Иконка и текст', 'collage' => 'Коллаж',
+        'icon_text' => 'Иконка и текст', 'collage' => 'Коллаж', 'table' => 'Таблица',
     ];
 
     /**
@@ -136,6 +137,7 @@ final class BlockTypeRegistry
         'leader_card' => 'Карточка руководителя (с вкладками)',
         'icon_text' => 'Иконка и текст (контакты, телефоны)',
         'collage' => 'Коллаж (фото внахлёст, плитки, печать)',
+        'table' => 'Таблица (строки текстом, ячейки через |)',
     ];
 
     /** @var array<string, array<string, mixed>>|null */

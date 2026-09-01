@@ -412,4 +412,6 @@ return [
     'Найдено: %d' => 'Topildi: %d',
     'Предыдущая страница' => 'Oldingi sahifa',
     'Следующая страница' => 'Keyingi sahifa',
+    'Таблица' => 'Jadval',
+    'Таблица не заполнена.' => 'Jadval to‘ldirilmagan.',
 ];

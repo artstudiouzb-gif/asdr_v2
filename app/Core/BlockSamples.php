@@ -172,6 +172,17 @@ final class BlockSamples
                      'shape' => 'rounded', 'image' => '', 'alt' => 'Специалист агентства', 'focus' => 'center', 'link' => ''],
                 ],
             ],
+            'table' => [
+                'title' => 'Ключевые показатели',
+                'rows' => "Показатель | 2024 | 2025\n"
+                    . "Валовой продукт | 5,6 % | 6,1 %\n"
+                    . "Экспорт услуг | 12,4 млрд | 14,1 млрд\n"
+                    . "Доля МСБ | 54 % | 57 %",
+                'header_row' => true,
+                'header_col' => true,
+                'variant' => 'lines',
+                'density' => 'normal',
+            ],
             'leader_card' => [
                 'photo' => '', 'name' => 'Фамилия Имя Отчество',
                 'position' => 'Должность руководителя',
