@@ -172,6 +172,14 @@ final class BlockSamples
                      'shape' => 'rounded', 'image' => '', 'alt' => 'Специалист агентства', 'focus' => 'center', 'link' => ''],
                 ],
             ],
+            'chart' => [
+                'title' => 'Структура расходов',
+                'variant' => 'stacked',
+                'rows' => "Транспорт | 24\nОбразование | 18\nЗдравоохранение | 15\nЦифровизация | 12",
+                'total' => 0,
+                'unit' => '%',
+                'caption' => 'По данным на 2026 год',
+            ],
             'embed' => [
                 'title' => 'Запись заседания',
                 'url' => 'https://youtu.be/aqz-KE-bpKQ',
