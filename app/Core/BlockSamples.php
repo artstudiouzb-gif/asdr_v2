@@ -172,6 +172,17 @@ final class BlockSamples
                      'shape' => 'rounded', 'image' => '', 'alt' => 'Специалист агентства', 'focus' => 'center', 'link' => ''],
                 ],
             ],
+            'image' => [
+                'title' => '',
+                'image' => '',
+                'alt' => 'Совещание в Агентстве',
+                'caption' => 'Заседание коллегии по итогам квартала',
+                'credit' => 'Пресс-служба Агентства',
+                'link' => '',
+                'zoom' => true,
+                'width' => 'container',
+                'ratio' => 'auto',
+            ],
             'table' => [
                 'title' => 'Ключевые показатели',
                 'rows' => "Показатель | 2024 | 2025\n"

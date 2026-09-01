@@ -414,4 +414,5 @@ return [
     'Следующая страница' => 'Keyingi sahifa',
     'Таблица' => 'Jadval',
     'Таблица не заполнена.' => 'Jadval to‘ldirilmagan.',
+    'Изображение не выбрано.' => 'Rasm tanlanmagan.',
 ];

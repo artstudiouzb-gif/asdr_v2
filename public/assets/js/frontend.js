@@ -1343,7 +1343,9 @@
     // и видео YouTube (карточки на главной/страницах, «Смотреть видео» в новостях).
     (function () {
         var IMG_RE = /\.(jpe?g|png|gif|webp|avif)(\?.*)?$/i;
-        var PHOTO_SCOPES = '.album-photos, .newsdetail-photos__grid, .mediagallery-grid';
+        // Блок «Изображение» попадает сюда только с включённым увеличением:
+        // класс ставит шаблон, поэтому обычный снимок остаётся обычным.
+        var PHOTO_SCOPES = '.album-photos, .newsdetail-photos__grid, .mediagallery-grid, .block-image--zoomable';
 
         function ytId(url) {
             var patterns = [
