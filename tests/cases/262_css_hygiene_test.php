@@ -298,6 +298,13 @@ test('Переход между страницами: шапка перенос�
     assert_contains('::view-transition-group(site-header)', $css);
     assert_contains('::view-transition-group(site-header),::view-transition-group(site-topbar){animation:none}', $min);
 
+    // И не переливается со старой. Вид шапки зависит от страницы: на обложке
+    // она прозрачная со светлым набором, на остальных — сплошная. Перелив двух
+    // таких снимков держал белую полосу поверх уже тёмной обложки — это и
+    // читалось как мигание белой шапки при переходе на главную.
+    assert_contains('::view-transition-old(site-header),::view-transition-old(site-topbar){animation:none;opacity:0}', $min);
+    assert_contains('::view-transition-new(site-header),::view-transition-new(site-topbar){animation:none;opacity:1}', $min);
+
     // Подвалу имя не даём: внизу страницы он то виден, то нет, и снимок ехал бы
     // за экран на глазах у читателя.
     assert_false(str_contains($css, 'view-transition-name: site-footer'), 'подвал не должен участвовать в переходе');

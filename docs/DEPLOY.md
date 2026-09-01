@@ -87,7 +87,21 @@ shared-хостинге обычно `localhost`. Установщик подк�
 0 9 * * 1  php /path/to/app/Console/digest_worker.php    >> /path/to/storage/logs/digest_worker.log 2>&1
 17 * * * * php /path/to/app/Console/integrity_check.php >> /path/to/storage/logs/integrity.log 2>&1
 0 * * * *  php /path/to/app/Console/youtube_worker.php   >> /path/to/storage/logs/youtube_worker.log 2>&1
+*/15 * * * * php /path/to/app/Console/watchdog.php       >> /path/to/storage/logs/watchdog.log 2>&1
+25 4 * * * php /path/to/app/Console/seo_worker.php       >> /path/to/storage/logs/seo_worker.log 2>&1
+40 3 * * 0 php /path/to/app/Console/restore_drill.php    >> /path/to/storage/logs/restore_drill.log 2>&1
 ```
+
+`watchdog.php` — сторож тишины: замечает молчащие воркеры, застрявшие очереди
+и кончающийся диск, сообщает в Telegram один раз о каждой проблеме. Если в
+окружении задан `MONITORING_HEARTBEAT_URL` (адрес приёмника healthchecks.io,
+Better Uptime или любого cron-монитора), чистый проход дополнительно пингует
+его: тревогу поднимает **отсутствие** сигнала — так о простое узнают, даже
+когда упал сам сервер и сообщить некому.
+
+`seo_worker.php` — ежедневный снимок «Поиска и индексации»: причины, по
+которым страница может не попасть в поиск, видны в `/admin/seo` без ключей
+Google/Яндекса.
 
 `/health` возвращает `degraded` и шлёт алерт, если воркер перестал запускаться.
 
@@ -106,17 +120,22 @@ shared-хостинге обычно `localhost`. Установщик подк�
 приходит в Telegram: и алерт из логов (`TELEGRAM_*` в config), и сообщение от
 бота на chat_id из настройки «Уведомления о заявках форм».
 
-### Репетиция восстановления — раз в квартал
+### Репетиция восстановления
 
-Копия, которую ни разу не разворачивали, бэкапом не является. `restore.php`
-восстанавливает архив в **отдельную** базу и каталог, боевые данные не трогает:
+Копия, которую ни разу не разворачивали, бэкапом не является. Еженедельная
+строка `restore_drill.php` в cron выше делает репетицию сама: берёт свежий
+архив, сверяет контрольную сумму, разворачивает в отдельную базу и каталог,
+проверяет содержимое и убирает за собой. Боевую базу не трогает никогда —
+это проверяется до работы. Провал уходит в Telegram.
+
+Ручной вариант с конкретным архивом остаётся:
 
 ```bash
 php database/restore.php storage/backups/backup_2026-08-01_030000.zip \
     artstudio_restore_check /tmp/artstudio_restore_files
 ```
 
-После успеха скрипт ставит отметку `storage/backups/.last_restore_check`, а
+После успеха ставится отметка `storage/backups/.last_restore_check`, а
 `scripts/release_check.php` предупреждает, если последней репетиции больше 90
 дней (или её не было вовсе). Первый прогон обязателен **до** открытия сайта.
 
@@ -174,6 +193,11 @@ HTML/CSS/JS/JSON ужимаются в 3–5 раз. Для nginx строки `
 - **`BACKUP_EXTERNAL_DIR`** — копия бэкапа вне сервера (иначе локальная копия
   бесполезна при полном отказе). Один раз прогоните восстановление:
   `php database/restore.php <архив> <тестовая_БД> <каталог>`.
+- **`HEALTH_CHECK_TOKEN`** — токен для подробностей `/health?token=…` (без
+  него эндпоинт отдаёт только ok/degraded без деталей).
+- **`MONITORING_HEARTBEAT_URL`** — адрес внешнего приёмника (healthchecks.io
+  и т.п.): сторож пингует его по чистому проходу, тишина = тревога. Без
+  переменной функция выключена, `release_check` предупреждает.
 - Настройки: аналитика (по ID), cookie-consent, favicon/PWA, срок хранения ПДн.
 
 ## 9. Обновление существующей установки
