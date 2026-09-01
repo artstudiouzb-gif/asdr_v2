@@ -54,10 +54,10 @@ final class SeoFinding
             (string) ($row['title'] ?? ''),
             (string) ($row['detail'] ?? ''),
             (int) ($row['count'] ?? 0),
-            array_values(array_filter(
-                (array) ($row['samples'] ?? []),
-                static fn (mixed $v): bool => is_string($v)
-            )),
+            // Именно 'is_string', а не своя замыкание-обёртка: анализатор
+            // сужает тип по встроенной проверке и видит list<string>, а по
+            // замыканию — нет.
+            array_values(array_filter((array) ($row['samples'] ?? []), 'is_string')),
             (string) ($row['fix_url'] ?? ''),
         );
     }

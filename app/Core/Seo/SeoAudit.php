@@ -32,7 +32,7 @@ final class SeoAudit
     /** Столько же новостей помещается в карту сайта — предел SitemapController. */
     public const SITEMAP_NEWS_LIMIT = 1000;
 
-    /** @var list<string> адреса примеров показываем не все: список должен читаться */
+    /** Адреса примеров показываем не все: список должен читаться, а не пугать. */
     private const MAX_SAMPLES = 5;
 
     /** @return list<SeoFinding> */
