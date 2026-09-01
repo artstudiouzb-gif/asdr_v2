@@ -1700,6 +1700,18 @@ html:has(.site-header--sticky) { scroll-padding-top: calc(var(--scroll-offset, 5
    в нём переливаются одна в другую — активный пункт меню меняется без рывка. */
 ::view-transition-group(site-header),
 ::view-transition-group(site-topbar) { animation: none; }
+/* И не переливается. Вид шапки зависит от страницы: на обложке она прозрачная
+   со светлым набором, на остальных — сплошная. Перелив двух таких снимков
+   держал **белую полосу поверх уже тёмной обложки** — ровно то, что читается
+   как мигание при переходе на главную. Шапка не контент, который должен
+   превращаться одно в другое: это постоянная часть страницы, поэтому новая
+   встаёт сразу, а старая не показывается вовсе. Белый набор при этом читается
+   и на светлом: под прозрачной шапкой всегда есть затемняющая подложка
+   (--hdr-scrim), она едет вместе со снимком. */
+::view-transition-old(site-header),
+::view-transition-old(site-topbar) { animation: none; opacity: 0; }
+::view-transition-new(site-header),
+::view-transition-new(site-topbar) { animation: none; opacity: 1; }
 
 ::selection { background: color-mix(in srgb, var(--color-primary, #1f4b8e) 82%, #000); color: #fff; }
 /* Заголовочная гарнитура (Montserrat) — крупный корпоративный характер. */

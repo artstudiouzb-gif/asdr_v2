@@ -53,7 +53,10 @@ test('Шапка строит hreflang и переключатель по пут
     $header = (string) file_get_contents(APP_ROOT . '/app/Views/site/_header.php');
 
     assert_contains('Locale::url(Locale::alternatePath((string) $hrefLang[\'code\'])', $header);
-    assert_contains('Locale::url(Locale::alternatePath($code), $code)', $header);
+    // Путь языковой версии берётся из alternatePath — но только когда версия
+    // на этом языке есть (см. тест ниже), поэтому через промежуточный $langPath.
+    assert_contains('Locale::alternatePath($code)', $header);
+    assert_contains('Locale::url($langPath, $code)', $header);
     // Прежний способ — путь текущего запроса под чужим префиксом — не должен
     // вернуться: он и давал редирект.
     assert_not_contains('Locale::url(Locale::path(), (string) $hrefLang[\'code\'])', $header);
@@ -74,4 +77,23 @@ test('Главная объявляет корневые адреса, а не s
     assert_same('/uz', Locale::url(Locale::alternatePath('uz'), 'uz'));
     assert_same('/', Locale::url(Locale::alternatePath('ru'), 'ru'));
     Locale::setAlternatePaths([]);
+});
+
+test('Переключатель языков не ведёт на несуществующую языковую версию', function () {
+    // Новости и проекты переводятся отдельной записью: «тот же путь под другим
+    // префиксом» у них не существует, и откат alternatePath на текущий путь
+    // давал в переключателе ссылку на 404. Материал, которого нет на выбранном
+    // языке, ведёт на главную этого языка — контроллеры объявляют реальный
+    // список языков через Locale::setContentLangs.
+    $header = (string) file_get_contents(APP_ROOT . '/app/Views/site/_header.php');
+
+    assert_contains('$codeHasContent = $contentLangs === null || in_array($code, $contentLangs, true)', $header);
+    assert_contains("\$langPath = \$codeHasContent ? Locale::alternatePath(\$code) : ''", $header);
+    // Кириллический пункт «Ўзбекча» строится из того же пути, что и латиница:
+    // отдельная сборка снова повела бы на несуществующий адрес.
+    assert_contains("Locale::url(\$langPath, 'uz')", $header);
+    assert_false(
+        str_contains($header, "Locale::url(Locale::alternatePath('uz'), 'uz')"),
+        'кириллический пункт собирает путь мимо проверки существования'
+    );
 });

@@ -288,7 +288,13 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
         $code = (string) $l['code'];
         // У связанной записи-перевода свой адрес: ведём сразу на него, иначе
         // переключение языка отвечало редиректом.
-        $href = Locale::url(Locale::alternatePath($code), $code)
+        // Материал, которого нет на выбранном языке, — отдельный случай:
+        // новости и проекты переводятся отдельной записью, и «тот же путь под
+        // другим префиксом» там не существует — переключатель вёл на 404.
+        // Посетителя, попросившего другой язык, ведём на главную этого языка.
+        $codeHasContent = $contentLangs === null || in_array($code, $contentLangs, true);
+        $langPath = $codeHasContent ? Locale::alternatePath($code) : '';
+        $href = Locale::url($langPath, $code)
             . '?' . \App\Core\LocalePreference::QUERY . '=' . rawurlencode($code);
         if ($code === 'uz') {
             // На узбекский всегда возвращаемся в латинице, даже из кириллицы.
@@ -306,7 +312,7 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
         if ($code !== 'uz') {
             continue;
         }
-        $uzHref = Locale::url(Locale::alternatePath('uz'), 'uz') . '?' . \App\Core\LocalePreference::QUERY . '=uz';
+        $uzHref = Locale::url($langPath, 'uz') . '?' . \App\Core\LocalePreference::QUERY . '=uz';
         $langOptions[] = [
             'name' => 'Ўзбекча',
             'short' => 'Ўзб',
