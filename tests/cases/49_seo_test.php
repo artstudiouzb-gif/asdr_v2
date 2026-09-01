@@ -44,3 +44,69 @@ test('SchemaOrg::render: валидный JSON и защита от </script>', 
     $json = substr($html, strlen('<script type="application/ld+json">'), -strlen('</script>'));
     assert_true(is_array(json_decode($json, true)), 'внутри — валидный JSON');
 });
+
+test('FAQPage: разметка собирается из видимых строк, HTML в неё не проходит', function (): void {
+    $data = SchemaOrg::faqPage([
+        ['question' => 'Как направить обращение?', 'answer' => '<p>Через <b>форму</b><br>или почтой.</p>'],
+        ['question' => '', 'answer' => 'Ответ без вопроса'],
+        ['question' => 'Вопрос без ответа', 'answer' => '   '],
+    ]);
+
+    assert_same('FAQPage', $data['@type']);
+    // Пара без вопроса или без ответа сниппета не даёт: поисковик считает
+    // такую разметку неполной и отбрасывает её целиком.
+    assert_same(1, count($data['mainEntity']));
+    assert_same('Question', $data['mainEntity'][0]['@type']);
+    // HTML в JSON-LD не допускается, а тег между словами обязан стать пробелом:
+    // иначе «форму<br>или» склеивается в одно слово.
+    assert_same('Через форму или почтой.', $data['mainEntity'][0]['acceptedAnswer']['text']);
+
+    // Размечать нечего — разметки нет вовсе, а не пустой FAQPage.
+    assert_same([], SchemaOrg::faqPage([]));
+    assert_same('', SchemaOrg::render([]));
+});
+
+test('FAQPage: на страницу выводится одна разметка, а не по одной на блок', function (): void {
+    // Два FAQPage на странице поисковик отбрасывает оба, поэтому право на
+    // разметку забирает первый блок вопросов.
+    SchemaOrg::resetPageState();
+    assert_true(SchemaOrg::claimFaqPage());
+    assert_false(SchemaOrg::claimFaqPage());
+
+    // Флаг постраничный: следующая страница снова получает своё право.
+    SchemaOrg::resetPageState();
+    assert_true(SchemaOrg::claimFaqPage());
+
+    // Сбрасывает его тот же метод, что и счётчик h1 — иначе вторая страница в
+    // одном процессе (обход, генератор карты) осталась бы без разметки.
+    $renderer = (string) file_get_contents(APP_ROOT . '/app/Core/BlockRenderer.php');
+    assert_contains('SchemaOrg::resetPageState()', $renderer);
+});
+
+test('FAQPage: блок вопросов выводит разметку теми же ключами, что пишет форма', function (): void {
+    SchemaOrg::resetPageState();
+
+    $html = \App\Core\BlockRenderer::render([
+        'id' => 95,
+        'type' => 'faq',
+        'data' => json_encode(['title' => 'Вопросы', 'items' => [
+            ['question' => 'Как?', 'answer' => 'Вот так.'],
+        ]], JSON_UNESCAPED_UNICODE),
+        'custom_css' => '',
+    ])['html'];
+
+    assert_contains('"@type":"FAQPage"', $html);
+    assert_contains('Как?', $html);
+
+    // Прежние ключи «q»/«a» шаблон не читает: витрина с ними рисовала пустые
+    // вопросы, и разметка обязана вести себя так же честно — без содержимого
+    // её нет.
+    SchemaOrg::resetPageState();
+    $legacy = \App\Core\BlockRenderer::render([
+        'id' => 96,
+        'type' => 'faq',
+        'data' => json_encode(['items' => [['q' => 'Как?', 'a' => 'Так.']]], JSON_UNESCAPED_UNICODE),
+        'custom_css' => '',
+    ])['html'];
+    assert_not_contains('FAQPage', $legacy);
+});
