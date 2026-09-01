@@ -65,6 +65,7 @@ final class AssetCollector
      */
     private const BLOCK_CSS_MAP = [
         'collage' => '/assets/css/blocks/collage.css',
+        'table' => '/assets/css/blocks/table.css',
         'news_feature' => '/assets/css/blocks/news-feature.css',
         'hero_slides' => '/assets/css/blocks/hero-art-layout.css',
     ];
