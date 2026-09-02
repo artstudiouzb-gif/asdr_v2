@@ -422,7 +422,9 @@ final class Uploader
                 if ($width <= $targetWidth) {
                     continue;
                 }
-                $targetHeight = (int) round($height * ($targetWidth / $width));
+                // Не меньше пикселя: у очень узкой картинки (например,
+                // 2000×1) пересчёт давал ноль, и создание холста падало.
+                $targetHeight = max(1, (int) round($height * ($targetWidth / $width)));
                 $resized = imagecreatetruecolor($targetWidth, $targetHeight);
                 if ($type === IMAGETYPE_PNG) {
                     imagealphablending($resized, false);
@@ -438,7 +440,7 @@ final class Uploader
             // этом работает и там, где картинка задаётся через CSS background.
             $maxW = self::originalMaxWidth();
             if ($downscaleOriginal && $width > $maxW) {
-                $newH = (int) round($height * ($maxW / $width));
+                $newH = max(1, (int) round($height * ($maxW / $width)));
                 $down = imagecreatetruecolor($maxW, $newH);
                 if ($type === IMAGETYPE_PNG) {
                     imagealphablending($down, false);

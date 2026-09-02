@@ -219,11 +219,13 @@ final class FormController
     {
         parse_str(mb_substr((string) $raw, 0, 1000), $input);
         $params = [];
-        $q = mb_substr(trim((string) ($input['q'] ?? '')), 0, 120);
+        $rawQ = $input['q'] ?? '';
+        $q = mb_substr(trim(is_string($rawQ) ? $rawQ : ''), 0, 120);
         if ($q !== '') {
             $params['q'] = $q;
         }
-        $status = (string) ($input['status'] ?? '');
+        $rawStatus = $input['status'] ?? '';
+        $status = is_string($rawStatus) ? $rawStatus : '';
         if (in_array($status, ['unread', 'read'], true)) {
             $params['status'] = $status;
         }

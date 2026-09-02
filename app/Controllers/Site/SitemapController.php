@@ -49,7 +49,7 @@ final class SitemapController
             $xml .= '  <url>' . "\n";
             $xml .= '    <loc>' . self::xmlEscape($loc) . '</loc>' . "\n";
             if (!empty($p['updated_at'])) {
-                $xml .= '    <lastmod>' . date('c', strtotime((string) $p['updated_at'])) . '</lastmod>' . "\n";
+                $xml .= '    <lastmod>' . \App\Core\DateFormatter::format((string) $p['updated_at'], 'c') . '</lastmod>' . "\n";
             }
             $xml .= '    <changefreq>weekly</changefreq>' . "\n";
             $xml .= '    <priority>' . (!empty($p['is_home']) ? '1.0' : '0.8') . '</priority>' . "\n";
@@ -65,7 +65,7 @@ final class SitemapController
             $xml .= '  <url>' . "\n";
             $xml .= '    <loc>' . self::xmlEscape($loc) . '</loc>' . "\n";
             $pubDate = !empty($n['published_at']) ? (string) $n['published_at'] : (string) $n['created_at'];
-            $xml .= '    <lastmod>' . date('c', strtotime($pubDate)) . '</lastmod>' . "\n";
+            $xml .= '    <lastmod>' . \App\Core\DateFormatter::format($pubDate, 'c') . '</lastmod>' . "\n";
             $xml .= '    <changefreq>daily</changefreq>' . "\n";
             $xml .= '    <priority>0.7</priority>' . "\n";
 
@@ -80,7 +80,7 @@ final class SitemapController
             $xml .= '  <url>' . "\n";
             $xml .= '    <loc>' . self::xmlEscape($loc) . '</loc>' . "\n";
             if (!empty($pr['updated_at'])) {
-                $xml .= '    <lastmod>' . date('c', strtotime((string) $pr['updated_at'])) . '</lastmod>' . "\n";
+                $xml .= '    <lastmod>' . \App\Core\DateFormatter::format((string) $pr['updated_at'], 'c') . '</lastmod>' . "\n";
             }
             $xml .= '    <changefreq>monthly</changefreq>' . "\n";
             $xml .= '    <priority>0.6</priority>' . "\n";
@@ -186,7 +186,7 @@ final class SitemapController
 
         foreach ($items as $n) {
             $link = self::canonicalUrl($baseUrl, 'news', $n);
-            $pubDate = date('r', strtotime((string) $n['published_at']));
+            $pubDate = \App\Core\DateFormatter::format((string) $n['published_at'], 'r');
             $title = (string) $n['title'];
             $excerpt = (string) ($n['excerpt'] ?: $n['title']);
             $image = (string) ($n['image'] ?? '');
