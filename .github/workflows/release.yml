@@ -15,12 +15,26 @@ name: Release package
 # интерфейс создаёт и тег, и оба триггера сработали бы на одно действие,
 # запустив сборку дважды.
 on:
+# Второй путь — запуск вручную из вкладки Actions. Он нужен затем, что
+# публикация релиза кнопкой доступна только через интерфейс: выпустить релиз
+# из командной строки или по API стало нечем, когда убрали тег-триггер.
+# `publish: true` вместе с именем создаёт релиз и кладёт в него архив.
+#
+# Рекурсии здесь нет: события, созданные встроенным GITHUB_TOKEN, новых
+# запусков workflow не порождают — то есть `gh release create` ниже не
+# запустит эту же сборку повторно через `release: published`.
+on:
   workflow_dispatch:
     inputs:
       release_name:
-        description: 'Имя сборки (например, 2.0.0-rc1); пустое = short SHA'
+        description: 'Имя сборки и тега (например, 2.8); пустое = short SHA'
         required: false
         type: string
+      publish:
+        description: 'Опубликовать релиз с этим именем (иначе только собрать архив)'
+        required: false
+        default: false
+        type: boolean
   release:
     types: [published]
 
@@ -150,3 +164,25 @@ jobs:
             "dist/${ARCHIVE}" \
             "dist/${ARCHIVE}.sha256" \
             --clobber
+
+      # Выпуск релиза ручным запуском: здесь релиза ещё нет, поэтому его
+      # создают, а не дополняют. Имя обязательно — публиковать релиз под
+      # именем вида `a1b2c3d4e5f6` (короткий SHA, которым названа безымянная
+      # сборка) значит выпустить то, что никто потом не опознает.
+      - name: Publish release from a manual run
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARCHIVE: ${{ steps.package.outputs.archive }}
+          RELEASE_NAME: ${{ inputs.release_name }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${RELEASE_NAME}" ]]; then
+            echo "Публикация запрошена без имени релиза: заполните release_name." >&2
+            exit 1
+          fi
+          gh release create "${RELEASE_NAME}" \
+            "dist/${ARCHIVE}" \
+            "dist/${ARCHIVE}.sha256" \
+            --generate-notes \
+            --title "${RELEASE_NAME}"

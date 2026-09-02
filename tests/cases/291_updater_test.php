@@ -140,17 +140,24 @@ test('Релиз выходит с установочным архивом, а �
         'сборка снова зависит от имени тега'
     );
 
-    // Ассеты кладутся в уже опубликованный релиз. `gh release create` на это
-    // событие падает: релиз к тому моменту существует — им и запущена сборка.
-    assert_contains('gh release upload', $workflow, 'архив не прикладывается к релизу');
-    // Ищем выполняемую строку, а не упоминание: `gh release create` назван в
-    // объяснении выше, и подстрочная проверка спотыкалась бы о комментарий.
-    assert_false(
-        (bool) preg_match('/^\s+gh release create/m', $workflow),
-        'сборка пытается создать релиз заново'
-    );
+    // Путей два, и они не взаимозаменяемы. На событие `release` релиз уже
+    // существует — им и запущена сборка, поэтому ассеты в него кладут;
+    // `gh release create` там падал бы с «release already exists». А ручной
+    // запуск из Actions релиза ещё не имеет — там как раз создают.
+    // Проверяем шаг целиком, а не файл: обе команды в файле есть законно.
+    $releaseStep = substr($workflow, (int) strpos($workflow, "if: github.event_name == 'release'"));
+    $nextStep = strpos($releaseStep, "\n      - name:");
+    $releaseStep = $nextStep !== false ? substr($releaseStep, 0, $nextStep) : $releaseStep;
+
+    assert_contains('gh release upload', $releaseStep, 'архив не прикладывается к опубликованному релизу');
+    assert_false(str_contains($releaseStep, 'gh release create'), 'на публикацию релиза он создаётся заново');
     // Повторный запуск после починки не должен падать на существующем файле.
-    assert_contains('--clobber', $workflow, 'перезапуск сборки упрётся в уже загруженный архив');
+    assert_contains('--clobber', $releaseStep, 'перезапуск сборки упрётся в уже загруженный архив');
+
+    // Ручной выпуск: без него релиз нечем выпустить иначе как кнопкой в
+    // интерфейсе — тег-триггера больше нет.
+    assert_contains("if: github.event_name == 'workflow_dispatch' && inputs.publish", $workflow, 'релиз нельзя выпустить запуском из Actions');
+    assert_contains('gh release create', $workflow, 'ручной выпуск не создаёт релиз');
 
     // Имена файлов должны совпадать с тем, что ищет Updater::pickAsset():
     // архив по маске asdr-cms-*.zip и сумма рядом с тем же именем.
