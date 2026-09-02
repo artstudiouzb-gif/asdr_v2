@@ -2,6 +2,13 @@ parameters:
     bootstrapFiles:
         - phpstan-bootstrap.php
     level: 5
+    # Диапазон версий PHP закреплён явно: иначе результат зависит от того,
+    # установлен ли vendor (CI берёт версию из composer.json, локальный прогон
+    # без vendor — из запущенного интерпретатора), и локальная проверка
+    # расходится с CI. Границы те же, что в матрице CI: 8.4 и 8.5.
+    phpVersion:
+        min: 80400
+        max: 80599
     paths:
         - app
         - public/index.php
