@@ -22,8 +22,6 @@ $category = $category ?? '';
 $lang = Locale::current();
 // Дата — единым числовым форматом на всех языках: 19.07.2026.
 $fmt = static fn (string $d): string => DateFormatter::short($d);
-// Отдельной крупной новости над лентой нет: первая новость открывает ленту
-// крупной карточкой цикла (App\Core\NewsFeedRhythm), дальше ритм повторяется.
 $pageUrl = static fn (int $p): string => Locale::url('news')
     . (($p > 1 || $category !== '') ? '?' . http_build_query(array_filter(['category' => $category, 'page' => $p > 1 ? $p : null])) : '');
 
