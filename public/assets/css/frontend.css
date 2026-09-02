@@ -2460,16 +2460,6 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .contact-cards {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--card-gap, 22px);
 }
-.contact-card {
-    background: var(--surface, #fff); border: 1px solid var(--border-color); border-radius: var(--radius, 14px);
-    padding: 24px; 
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s ease;
-}
-.contact-card:hover { 
-    box-shadow: 0 16px 36px rgba(19, 42, 92, 0.06); 
-    transform: translateY(-4px); 
-    border-color: var(--color-accent, var(--gov-teal));
-}
 .contact-card__icon {
     display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 12px; margin-bottom: 14px;
     background: color-mix(in srgb, var(--color-primary, #223d79) 10%, transparent);
@@ -2586,7 +2576,6 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
     transition: border-color .4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow .4s cubic-bezier(0.165, 0.84, 0.44, 1), transform .4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 .cat-tile:hover { border-color: var(--color-accent, var(--gov-teal)); box-shadow: 0 12px 28px rgba(19, 42, 92, 0.05); transform: translateY(-3px); }
-.cat-tile.is-active { background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 8%, var(--surface)); border-color: var(--color-accent, var(--gov-teal)); }
 .cat-tile__icon { 
     display: grid; place-items: center; width: 50px; height: 50px; border-radius: 14px; 
     background: color-mix(in srgb, var(--color-primary, #223d79) 9%, transparent); 
