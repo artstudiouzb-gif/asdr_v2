@@ -134,4 +134,25 @@
             });
         });
     });
+    // --- Учёт просмотра новости ---
+    // Просмотр засчитывает браузер, а не показ страницы: HTML уезжает и без
+    // читателя — из общего кэша и предзагрузкой (Speculation Rules). При
+    // prerender страница выполняется заранее, поэтому маячок ждёт активации:
+    // document.prerendering === true означает, что вкладку ещё не открыли.
+    (function () {
+        var host = document.querySelector('[data-news-view]');
+        if (!host || !navigator.sendBeacon) { return; }
+        var id = parseInt(host.getAttribute('data-news-view'), 10);
+        if (!id || id < 1) { return; }
+
+        function report() {
+            try { navigator.sendBeacon('/news/view', String(id)); } catch (e) { /* счётчик не стоит ошибки */ }
+        }
+
+        if (document.prerendering) {
+            document.addEventListener('prerenderingchange', report, { once: true });
+        } else {
+            report();
+        }
+    })();
 })();
