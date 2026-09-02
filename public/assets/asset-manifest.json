@@ -12,11 +12,11 @@
       "/assets/css/public-layout-polish.css",
       "/assets/css/public-editorial-pages.css"
     ],
-    "sourceSha256": "b6a6ff5836c46e1953e1e1213246bfb50b14ae25e28a1555636ab875baea2ac3",
-    "sha256": "8e56d9c79b69e73710048631adb3b451ce87b618111390ffe87654b753336aa2",
-    "raw": 399832,
-    "gzip": 66534,
-    "brotli": 51829
+    "sourceSha256": "95490953967b254e12103b70a8931273ba38fab77b2f64f07fe8b5ef8434e74a",
+    "sha256": "95428381841abca7708ecb425ca7d5aa2922f3d5d313c19252e4d371b7b4396b",
+    "raw": 399649,
+    "gzip": 66494,
+    "brotli": 51853
   },
   "js": {
     "path": "/assets/js/public.min.js",
@@ -34,19 +34,19 @@
   "blocks": {
     "/assets/css/blocks/news-detail.css": {
       "path": "/assets/css/blocks/news-detail.min.css",
-      "sourceSha256": "0c71efb81a6957a8914e7d25da0a8d7cfa2cf6ee56c9a73750f0709b5d3fe9b0",
-      "sha256": "a62f1b0cea86af1d6431567277765b0aead743313533e30b3b5e0de128fe6282",
-      "raw": 36958,
-      "gzip": 6553,
-      "brotli": 5759
+      "sourceSha256": "4f9c24acf6b347c38715835ecab63accfe197def4dda31083a617e65a8679ccc",
+      "sha256": "947ec5243352589b45b8b4ae200923569474043adb69d8312d7a09b94e1111f1",
+      "raw": 36940,
+      "gzip": 6543,
+      "brotli": 5750
     },
     "/assets/css/blocks/org-structure.css": {
       "path": "/assets/css/blocks/org-structure.min.css",
-      "sourceSha256": "610994bc75e002faee0e6d170ffa2aff6575139779e46416013c387479243f0f",
-      "sha256": "809a766e66d1f176bf13bba305b12a66635f6a178070e6c69460cb8e47d789cc",
-      "raw": 13860,
-      "gzip": 2778,
-      "brotli": 2380
+      "sourceSha256": "f4c680a958aeb59364f36e2e368d977d41fb3e109d0f1388fc55654d7bd25de5",
+      "sha256": "7bbb1d087f3618a9b6a1df8a9e107ea533b2c91f93aa19552bf9843eca0cc16e",
+      "raw": 13842,
+      "gzip": 2767,
+      "brotli": 2369
     },
     "/assets/css/blocks/leader-card.css": {
       "path": "/assets/css/blocks/leader-card.min.css",
@@ -74,11 +74,11 @@
     },
     "/assets/css/blocks/hero.css": {
       "path": "/assets/css/blocks/hero.min.css",
-      "sourceSha256": "a5d59ba337c9d865f22d4e07235026207a3dfdeb5ee27ebd1ac670a65973b919",
-      "sha256": "d4685523a71dad682324b9bf6d73ec8969899f9e37cec64a9c259f728f69e395",
-      "raw": 11011,
-      "gzip": 2831,
-      "brotli": 2492
+      "sourceSha256": "265a8dbd14948383228551d082d65dc2ba57082b9dca2596ed5781494b881b10",
+      "sha256": "68daccd96002be426b3b5170ba330a411f5210ebb515e3b6809b4d86bff6f421",
+      "raw": 10993,
+      "gzip": 2824,
+      "brotli": 2487
     },
     "/assets/js/blocks/slider.js": {
       "path": "/assets/js/blocks/slider.min.js",

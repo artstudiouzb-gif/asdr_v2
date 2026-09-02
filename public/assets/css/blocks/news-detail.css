@@ -770,7 +770,6 @@ button.newsdetail-gallery__thumb:hover {
     font-size: var(--font-size-h1, var(--step-11));
     line-height: 1.04;
     letter-spacing: -.035em;
-    text-wrap: balance;
 }
 .newsdetail:not(.newsdetail--premium) .newsdetail__meta {
     display: flex;
