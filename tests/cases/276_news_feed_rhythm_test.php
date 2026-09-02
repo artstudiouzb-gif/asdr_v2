@@ -38,20 +38,28 @@ test('Цикл ритма укладывается в ряды', function () {
     assert_same(0, NewsFeedRhythm::PAGE_SIZE % NewsFeedRhythm::CYCLE, 'страница не должна обрывать цикл');
 });
 
-test('Крупные карточки стоят по краям цикла', function () {
-    $wide = [];
+test('Крупные карточки стоят по краям цикла и различаются ролью', function () {
+    $slots = [];
     for ($i = 0; $i < NewsFeedRhythm::PAGE_SIZE; $i++) {
-        if (NewsFeedRhythm::isWide($i)) {
-            $wide[] = $i;
+        $slot = NewsFeedRhythm::slot($i);
+        if ($slot !== NewsFeedRhythm::SLOT_COMPACT) {
+            $slots[$i] = $slot;
         }
     }
 
-    // 0 — начало первого ряда (крупная слева), 9 — конец третьего (крупная
-    // справа, после двух компактных). Между ними ряд из четырёх компактных.
-    assert_same([0, 9, 10, 19], $wide, 'по одной крупной в начале и в конце цикла');
-    assert_true(NewsFeedRhythm::isWide(0), 'лента открывается крупной карточкой, а не отдельной новостью над сеткой');
+    // 0 — начало первого ряда, 9 — конец третьего (после двух компактных).
+    // Между ними ряд из четырёх компактных карточек.
+    assert_same(
+        [0 => 'hero', 9 => 'wide', 10 => 'hero', 19 => 'wide'],
+        $slots,
+        'цикл открывает обложка, замыкает широкая'
+    );
+    // Виды крупных карточек не взаимозаменяемы: обложка — фотография во всю
+    // карточку с текстом поверх (главная новость страницы), широкая — кадр
+    // сбоку и текст рядом. Растяжение на две ячейки у них общее.
+    assert_true(NewsFeedRhythm::isWide(0) && NewsFeedRhythm::isWide(9), 'обе крупные занимают две ячейки');
     foreach ([1, 2, 3, 4, 5, 6, 7, 8] as $compact) {
-        assert_true(!NewsFeedRhythm::isWide($compact), "карточка {$compact} остаётся компактной");
+        assert_same(NewsFeedRhythm::SLOT_COMPACT, NewsFeedRhythm::slot($compact), "карточка {$compact} остаётся компактной");
     }
 });
 
@@ -59,8 +67,8 @@ test('Лента выводит широкую карточку с анонсо�
     $listing = (string) file_get_contents(APP_ROOT . '/app/Views/site/_news_list.php');
     $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Site/NewsController.php');
 
-    assert_contains('NewsFeedRhythm::isWide($index)', $listing, 'ритм считает отдельный класс, а не шаблон');
-    assert_contains('relnews-card--wide', $listing);
+    assert_contains('NewsFeedRhythm::slot($index)', $listing, 'ритм считает отдельный класс, а не шаблон');
+    assert_contains('relnews-card relnews-card--<?= $slot ?>', $listing, 'класс карточки — её слот');
     assert_contains('relnews-card__excerpt', $listing, 'широкая карточка показывает анонс');
     assert_contains('NewsFeedRhythm::PAGE_SIZE', $controller, 'размер страницы задаёт ритм');
 });
@@ -72,7 +80,10 @@ test('Широкая карточка занимает две ячейки и с
     // blocks/news-detail.css подключается после общего бандла и задаёт
     // `.relnews-card { padding: 0 0 14px }`. Модификатору нужен вес выше, иначе
     // нижний отступ карточки оставлял под фотографией белую полосу.
-    assert_contains('.relnews-card.relnews-card--wide { grid-column: span 2;', $css, 'две ячейки, а не вся строка');
+    assert_true(
+        (bool) preg_match('/\.relnews-card\.relnews-card--wide \{\s*grid-column: span 2;/', $css),
+        'две ячейки, а не вся строка'
+    );
     // В одноколоночной сетке `span 2` создал бы вторую колонку и
     // горизонтальную прокрутку — на узком экране растяжение снимается.
     assert_contains('.relnews-card.relnews-card--wide { grid-column: auto; grid-template-columns: minmax(0, 1fr);', $css);
@@ -101,22 +112,29 @@ test('Дата в карточке новости отбита от края н�
     );
 });
 
-test('Кадр широкой карточки — 16:9 и шире текста', function () {
+test('Кадры крупных карточек занимают свою площадь целиком', function () {
     $css = theme_css();
 
-    // Пропорция объявлена у обёртки: она блок известной ширины, из неё браузер
-    // и считает высоту. У самой картинки пропорции нет — иначе она спорила бы
-    // с `height: 100%` и под фотографией оставалась бы белая полоса.
-    assert_contains('.relnews-card--wide .news-cover { min-width: 0; aspect-ratio: 16 / 9; }', $css);
+    // Обложка: фотография и есть карточка — кадр лежит подложкой, поверх него
+    // затемнение, иначе белый текст читался бы только на удачном снимке.
+    assert_contains('.relnews-card--hero .news-cover { position: absolute; inset: 0; }', $css);
+    assert_contains('.relnews-card--hero .news-cover::after', $css, 'затемнение под текстом');
+    assert_contains('.relnews-card--hero .relnews-card__body', $css, 'текст лежит поверх кадра');
+
+    // Широкая: кадр тянется на всю высоту своей половины. Фиксированная
+    // пропорция здесь оставляла пустые поля сверху и снизу — высоту ряда
+    // задаёт соседняя компактная карточка, а не эта фотография.
+    assert_contains('.relnews-card--wide .news-cover { min-width: 0; }', $css);
     assert_contains('.relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: auto; }', $css);
-    // Выравнивание `center` — условие работы пропорции: при растяжении высоту
-    // колонки задавала бы карточка, и 16:9 ни на что не влияли бы.
+    // Кадр занимает ровно одну колонку сетки: карточка растянута на две
+    // ячейки, и при произвольной доле её внутренняя граница попадала между
+    // колонками — текст начинался не там, где начинается карточка ряда выше.
+    assert_contains('grid-template-columns: minmax(0, calc(50% - var(--newsgrid-gap, 24px) / 2)) minmax(0, 1fr);', $css);
+    assert_contains('column-gap: var(--newsgrid-gap, 24px);', $css, 'промежуток внутри карточки равен промежутку сетки');
+    assert_contains('--newsgrid-gap: 24px;', $css, 'промежуток объявлен один раз — у самой сетки');
     assert_true(
-        (bool) preg_match(
-            '/\.relnews-card\.relnews-card--wide \{[^}]*grid-template-columns: minmax\(0, 56%\)[^}]*align-items: center;/',
-            $css
-        ),
-        'кадр занимает большую долю карточки, а колонки выровнены по центру'
+        (bool) preg_match('/\.relnews-card\.relnews-card--wide \{[^}]*align-items: stretch;/', $css),
+        'кадр занимает всю высоту карточки'
     );
 });
 
