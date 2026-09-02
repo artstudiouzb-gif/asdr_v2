@@ -33,9 +33,7 @@ test('News rendering: legacy formatter, balanced pagination and thumbnail fallba
 
     assert_contains('LegacyContentFormatter::paragraphize($html)', $social, 'existing imported rows are formatted on render');
 
-    assert_contains('$gridPageSize = 12;', $controller, 'regular grid pages use a multiple of three');
-    assert_contains('$firstPageSize = $gridPageSize + 1;', $controller, 'first page keeps one lead plus twelve cards');
-    assert_contains('$firstPageSize + (($page - 2) * $gridPageSize)', $controller, 'later pages continue after the first thirteen items without overlap');
+    assert_contains('$perPage = 14;', $controller, 'news index uses balanced 4-row grid with 14 items');
     assert_contains("requireCss('news-index-pagination'", $controller, 'news list loads pagination spacing');
 
     assert_contains("'news_gallery_thumbnails' => '/assets/js/news-gallery-thumbnails.js'", $collector, 'thumbnail helper is registered');

@@ -868,12 +868,14 @@ final class DesignSettings
                 (string) $input['color_primary'],
                 self::customAppearance()['color_primary']
             ));
+            Setting::set('design_palette', 'custom');
         }
         if (array_key_exists('color_accent', $input)) {
             Setting::set('design_custom_color_accent', SettingsValidator::hexColor(
                 (string) $input['color_accent'],
                 self::customAppearance()['color_accent']
             ));
+            Setting::set('design_palette', 'custom');
         }
         $semantic = self::semanticColors();
         foreach ($semantic as $key => $current) {

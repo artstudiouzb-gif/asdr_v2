@@ -39,27 +39,15 @@ final class NewsController
 
         $total = News::publishedCount($categoryId > 0 ? $categoryId : null, $lang);
 
-        // В общем списке первая страница имеет отдельную композицию:
-        // 1 крупная новость + 12 карточек. На следующих страницах крупной
-        // карточки уже нет, поэтому отдаём ровно 12 элементов — четыре полных
-        // ряда по 3, без прежней одинокой 13-й карточки. В рубриках крупной
-        // новости тоже нет, поэтому там всегда по 12.
-        $gridPageSize = 12;
-        $hasLead = $categorySlug === '';
-        if ($hasLead) {
-            $firstPageSize = $gridPageSize + 1;
-            $pages = $total <= $firstPageSize
-                ? 1
-                : 1 + (int) ceil(($total - $firstPageSize) / $gridPageSize);
-            $page = min($page, $pages);
-            $perPage = $page === 1 ? $firstPageSize : $gridPageSize;
-            $offset = $page === 1 ? 0 : $firstPageSize + (($page - 2) * $gridPageSize);
-        } else {
-            $pages = max(1, (int) ceil($total / $gridPageSize));
-            $page = min($page, $pages);
-            $perPage = $gridPageSize;
-            $offset = ($page - 1) * $gridPageSize;
-        }
+        // Лента новостей формирует сбалансированную 4-строчную сетку (14 новостей на страницу):
+        // Строка 1: 1 крупный лид (2 колонки) + 2 карточки (3 новости)
+        // Строка 2: 4 карточки (4 новости)
+        // Строка 3: 2 карточки + 1 крупный лид (2 колонки) (3 новости)
+        // Строка 4: 4 карточки (4 новости)
+        $perPage = 14;
+        $pages = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $pages);
+        $offset = ($page - 1) * $perPage;
 
         $vars = [
             'items' => News::published($perPage, $offset, $lang, $categoryId > 0 ? $categoryId : null),

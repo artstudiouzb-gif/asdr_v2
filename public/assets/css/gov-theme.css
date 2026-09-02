@@ -2230,7 +2230,7 @@ body.lightbox-active { overflow: hidden; }
    тёмном фоне и к тёмному на светлом. Тот же приём, что у надписи обложки
    (`--hero-watermark-ink` по умолчанию равен `--hero-fg`). */
 body.design-mark-accent .tx-mark {
-    color: color-mix(in srgb, var(--gov-teal-text, var(--color-accent, #2f6fed)) 70%, currentColor);
+    color: color-mix(in srgb, var(--gov-teal-text, var(--color-accent, var(--gov-teal))) 70%, currentColor);
 }
 
 /* Рукописное семейство — своя роль в «Дизайне» (--font-script). Оно оптически
@@ -2249,7 +2249,7 @@ body.design-mark-script .tx-mark {
 /* Мазок — тень внутрь, а не фон и не подчёркивание: не меняет размеры строки,
    не разрывается на переносе слова и не трогает цвет самого текста. */
 body.design-mark-underline .tx-mark {
-    box-shadow: inset 0 -0.18em 0 color-mix(in srgb, var(--color-accent, #2f6fed) 32%, transparent);
+    box-shadow: inset 0 -0.18em 0 color-mix(in srgb, var(--color-accent, var(--gov-teal)) 32%, transparent);
     padding-inline: 0.05em;
 }
 
@@ -2853,8 +2853,8 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 /* Крупная первая новость. */
 .newslist-lead {
     display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    gap: clamp(20px, 3vw, 40px);
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 0;
     align-items: stretch;
     text-decoration: none;
     color: var(--gov-ink);
@@ -2862,22 +2862,31 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     border: 1px solid var(--gov-border);
     border-radius: var(--radius);
     overflow: hidden;
-    margin-bottom: clamp(24px, 3.2vw, 36px);
+    margin-bottom: 0;
     transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+.newslist-grid .newslist-lead {
+    grid-column: span 2;
+    margin-bottom: 0;
+    height: 100%;
 }
 .newslist-lead:hover {
     border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
     box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
     transform: translateY(-2px);
 }
-@media (max-width: 900px) { .newslist-lead { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+    .newslist-grid .newslist-lead,
+    .newslist-lead {
+        grid-template-columns: 1fr;
+    }
+}
 .newslist-lead__media {
     display: block;
     position: relative;
     width: 100%;
     height: 100%;
-    min-height: 240px;
-    aspect-ratio: 16 / 10;
+    min-height: 200px;
     overflow: hidden;
     background-color: var(--gov-navy);
     background-position: center;
@@ -2906,14 +2915,15 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: center;
-    gap: 12px;
-    padding: clamp(20px, 3vw, 36px);
+    justify-content: space-between;
+    gap: 10px;
+    padding: clamp(16px, 2vw, 24px);
+    background: var(--gov-surface);
 }
-.newslist__date { color: var(--gov-muted); font-size: var(--step--2); font-weight: 600; }
-.newslist-lead__title { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: var(--font-size-h3, var(--step-4)); color: var(--gov-title); line-height: 1.25; margin: 0; }
-.newslist-lead__excerpt { color: var(--gov-muted); line-height: var(--base-line-height, 1.6); font-size: var(--step-0); }
-.newslist-lead:hover .newslist-lead__title { color: var(--gov-teal); }
+.newslist__date { color: var(--gov-muted); font-size: var(--step--3); font-weight: 600; }
+.newslist-lead__title { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: var(--font-size-h3, var(--step-2)); color: var(--gov-title); line-height: 1.3; margin: 0; }
+.newslist-lead__excerpt { color: var(--gov-muted); line-height: 1.5; font-size: var(--step--2); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.newslist-lead:hover .newslist-lead__title { color: var(--color-accent, var(--gov-teal)); }
 
 /* Обёртка обложки: система координат для метки-плашки. Отдельный элемент
    нужен потому, что саму <picture> собирает Media::picture(), и вложить в неё
@@ -2924,8 +2934,14 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 /* Сетка новостей: 4 колонки на широком экране, дальше по общей шкале точек. */
 .newslist-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
 @media (max-width: 1100px) { .newslist-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 1000px) { .newslist-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { .newslist-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) {
+    .newslist-grid { grid-template-columns: repeat(2, 1fr); }
+    .newslist-grid .newslist-lead { grid-column: span 2; }
+}
+@media (max-width: 560px) {
+    .newslist-grid { grid-template-columns: 1fr; }
+    .newslist-grid .newslist-lead { grid-column: span 1; }
+}
 
 /* «Читать подробнее» — завершение карточки. Отделено чертой сверху и всегда
    прижато к низу, поэтому у карточек разной высоты ссылки стоят в одну линию. */
@@ -3083,7 +3099,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    нет — иначе в полосе появляется синяя строка поперёк остальных. */
 .counter--link { text-decoration: none; color: inherit; }
 .counter--link:hover .counter__label { color: var(--counters-text, var(--gov-title)); }
-.counter--link:focus-visible { outline: 3px solid var(--color-accent, #2f6fed); outline-offset: 3px; }
+.counter--link:focus-visible { outline: 3px solid var(--color-accent, var(--gov-teal)); outline-offset: 3px; }
 
 /* Крупные числа требуют более широкой дорожки: «1 200» с приставкой не влезает
    в 180px и вылезает за карточку — переносить его нельзя (см. nowrap выше). */

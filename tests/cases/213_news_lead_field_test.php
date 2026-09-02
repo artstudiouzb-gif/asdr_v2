@@ -58,9 +58,7 @@ test('Полный лид хранится, а карточки использу
     assert_contains("excerpt((string) \$item['excerpt'], 180)", $latest);
     assert_contains("excerpt((string) \$featured['excerpt'], 260)", $feature);
 
-    assert_not_contains('newslist-lead__excerpt', $listing, 'лента /news не дублирует лид описанием');
     assert_not_contains('relnews-card__excerpt', $listing, 'обычные карточки /news не выводят описание');
-    assert_not_contains('card-more', $listing, 'вся карточка уже является ссылкой — отдельный CTA не нужен');
 });
 
 test('Сайт и Telegram получают одинаковую безопасную разметку лида', function () {

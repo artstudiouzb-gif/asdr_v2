@@ -106,13 +106,13 @@ summary:focus-visible {
     align-items: center;
 }
 .site-menu__link { position: relative; text-decoration: none; color: var(--color-primary, #1a1a1a); font-weight: 600; padding: 10px 4px; background: transparent; background-color: transparent; transition: color 0.2s ease; }
-.site-menu__link:hover { color: var(--gov-teal-text, var(--color-accent, #2f6fed)); background: transparent !important; background-color: transparent !important; }
+.site-menu__link:hover { color: var(--gov-teal-text, var(--color-accent, var(--gov-teal))); background: transparent !important; background-color: transparent !important; }
 /* Контрастный вариант акцента, а не сам акцент: сырой #009bbe на белой
    шапке даёт 3.26:1 при норме 4.5:1 (ловил axe). */
-.site-menu__link.is-active { color: var(--gov-teal-text, var(--color-accent, #2f6fed)) !important; font-weight: 700; background: transparent !important; background-color: transparent !important; }
+.site-menu__link.is-active { color: var(--gov-teal-text, var(--color-accent, var(--gov-teal))) !important; font-weight: 700; background: transparent !important; background-color: transparent !important; }
 .site-menu__link::after {
     content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-    background: var(--color-accent, #2f6fed); border-radius: 3px 3px 0 0;
+    background: var(--color-accent, var(--gov-teal)); border-radius: 3px 3px 0 0;
     transform: scaleX(0); transition: transform 0.2s ease;
 }
 .site-menu__link:hover::after, .site-menu__link.is-active::after {
@@ -336,14 +336,14 @@ summary:focus-visible {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: color-mix(in srgb, var(--color-accent, #2f6fed) 8%, transparent);
-    color: var(--color-accent, #2f6fed);
+    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 8%, transparent);
+    color: var(--color-accent, var(--gov-teal));
     margin-bottom: 16px;
     font-size: 28px;
     transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease;
 }
 .block-advantages__item:hover .block-advantages__icon {
-    background: var(--color-accent, #2f6fed);
+    background: var(--color-accent, var(--gov-teal));
     color: #fff;
 }
 @keyframes advantages-icon-float {
@@ -2383,7 +2383,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .contact-card:hover { 
     box-shadow: 0 16px 36px rgba(19, 42, 92, 0.06); 
     transform: translateY(-4px); 
-    border-color: var(--color-accent, #2f6fed);
+    border-color: var(--color-accent, var(--gov-teal));
 }
 .contact-card__icon {
     display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 12px; margin-bottom: 14px;
@@ -2394,7 +2394,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .contact-card__icon svg { width: 22px; height: 22px; }
 .contact-card:hover .contact-card__icon {
     transform: scale(1.1);
-    background-color: var(--color-accent, #2f6fed);
+    background-color: var(--color-accent, var(--gov-teal));
     color: #fff;
 }
 .contact-card__title { 
@@ -2403,26 +2403,26 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
     transition: color 0.3s ease;
 }
 .contact-card:hover .contact-card__title {
-    color: var(--color-accent, #2f6fed);
+    color: var(--color-accent, var(--gov-teal));
 }
 .contact-card__line { margin: 2px 0; color: var(--text-muted); }
 /* Мини-иконка у строки контакта: подбирается по содержимому строки. Иконка
    не переносится вместе с текстом — она в своей колонке. */
 .contact-card__line--icon { display: flex; align-items: flex-start; gap: 8px; }
-.contact-card__line-icon { flex: none; display: inline-flex; margin-top: 2px; color: var(--color-accent, #e63946); }
+.contact-card__line-icon { flex: none; display: inline-flex; margin-top: 2px; color: var(--color-accent, var(--gov-teal)); }
 .contact-card__line-text { min-width: 0; }
 /* Своя картинка вместо иконки Tabler: размер тот же, что у значка темы. */
 .contact-card__icon-img { width: var(--feature-card-icon-size, 22px); height: var(--feature-card-icon-size, 22px); object-fit: contain; }
 /* Кликабельные номер и почта внутри строки контакта: подчёркивание появляется
    при наведении, чтобы строка не выглядела сплошной ссылкой. */
 .contact-link { color: inherit; text-decoration: none; border-bottom: 1px dotted currentColor; }
-.contact-link:hover, .contact-link:focus-visible { color: var(--color-accent, #e63946); border-bottom-style: solid; }
+.contact-link:hover, .contact-link:focus-visible { color: var(--color-accent, var(--gov-teal)); border-bottom-style: solid; }
 .contact-card__link { 
-    display: inline-block; margin-top: 12px; font-weight: 600; color: var(--color-accent, #2f6fed); text-decoration: none; 
+    display: inline-block; margin-top: 12px; font-weight: 600; color: var(--color-accent, var(--gov-teal)); text-decoration: none; 
     transition: transform 0.3s ease, color 0.3s ease;
 }
 .contact-card:hover .contact-card__link { 
-    color: var(--color-accent, #2f6fed);
+    color: var(--color-accent, var(--gov-teal));
     transform: translateX(4px); 
 }
 :root[data-theme="dark"] .contact-card__title { color: var(--text-main); }
@@ -2513,8 +2513,8 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
     background: var(--surface, #fff); color: var(--text-main); text-decoration: none;
     transition: border-color .4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow .4s cubic-bezier(0.165, 0.84, 0.44, 1), transform .4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
-.cat-tile:hover { border-color: var(--color-accent, #2f6fed); box-shadow: 0 12px 28px rgba(19, 42, 92, 0.05); transform: translateY(-3px); }
-.cat-tile.is-active { background: color-mix(in srgb, var(--color-accent, #2f6fed) 8%, var(--surface)); border-color: var(--color-accent, #2f6fed); }
+.cat-tile:hover { border-color: var(--color-accent, var(--gov-teal)); box-shadow: 0 12px 28px rgba(19, 42, 92, 0.05); transform: translateY(-3px); }
+.cat-tile.is-active { background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 8%, var(--surface)); border-color: var(--color-accent, var(--gov-teal)); }
 .cat-tile__icon { 
     display: grid; place-items: center; width: 50px; height: 50px; border-radius: 14px; 
     background: color-mix(in srgb, var(--color-primary, #223d79) 9%, transparent); 
@@ -2524,10 +2524,10 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
 .cat-tile__icon svg { width: 24px; height: 24px; }
 .cat-tile:hover .cat-tile__icon {
     transform: scale(1.08);
-    background-color: var(--color-accent, #2f6fed);
+    background-color: var(--color-accent, var(--gov-teal));
     color: #fff;
 }
-.cat-tile.is-active .cat-tile__icon { background-color: var(--color-accent, #2f6fed); color: #fff; }
+.cat-tile.is-active .cat-tile__icon { background-color: var(--color-accent, var(--gov-teal)); color: #fff; }
 .cat-tile__label { font-weight: 600; font-size: var(--step--1); }
 
 .media-list { display: flex; flex-direction: column; }
@@ -2633,7 +2633,7 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: radial-gradient(220px circle at var(--mouse-x, 0) var(--mouse-y, 0), color-mix(in srgb, var(--color-accent, #2f6fed) 7%, transparent), transparent 80%);
+    background: radial-gradient(220px circle at var(--mouse-x, 0) var(--mouse-y, 0), color-mix(in srgb, var(--color-accent, var(--gov-teal)) 7%, transparent), transparent 80%);
     opacity: 0;
     transition: opacity 0.4s ease;
     pointer-events: none;
