@@ -8,7 +8,7 @@
  * @var array{status:string, release:string, requested_by:string, requested_at:int,
  *     started_at:int, finished_at:int, heartbeat:int, step:string, error:string,
  *     log:list<array{at:int,level:string,text:string}>, maintenance_owned:bool,
- *     maintenance_before:string} $state
+ *     maintenance_before:string, files_touched:bool} $state
  * @var bool $stale
  * @var array<string,mixed> $check
  * @var string $repo

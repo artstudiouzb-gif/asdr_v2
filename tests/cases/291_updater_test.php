@@ -257,6 +257,32 @@ test('Оборвавшееся обновление не оставляет са
     assert_contains('UpdateState::maintenanceStuck()', $entry, 'заглушка осталась бы висеть навсегда');
 });
 
+test('Форма состояния объявлена одинаково везде, где объявлена', function () {
+    // Форма состояния расписана в трёх докблоках — read(), normalize() и
+    // @var во вьюхе. Новое поле легко добавить в класс и забыть во вьюхе:
+    // PHPStan тогда ругается на несуществующий ключ, а тесты молчат, потому
+    // что на выводе всё работает. Здесь и сверяем.
+    $keys = array_keys(UpdateState::read());
+    assert_true(in_array('files_touched', $keys, true), 'состояние потеряло отметку о замене файлов');
+
+    $sources = [
+        'app/Core/UpdateState.php' => 2,      // read() и normalize()
+        'app/Views/admin/update/index.php' => 1, // @var $state
+    ];
+    foreach ($sources as $file => $expected) {
+        $text = (string) file_get_contents(APP_ROOT . '/' . $file);
+        // Докблок формы узнаём по последнему полю: оно замыкает объявление.
+        $found = substr_count($text, 'maintenance_before:string');
+        assert_same($expected, $found, 'объявлений формы в ' . $file . ' стало другое число');
+        foreach ($keys as $key) {
+            assert_true(
+                substr_count($text, $key . ':') >= $expected,
+                'поле ' . $key . ' не объявлено во всех формах состояния в ' . $file
+            );
+        }
+    }
+});
+
 test('Новый заказ не наследует чужой режим обслуживания', function () {
     // Обновление запоминает, каким застало режим обслуживания, и возвращает
     // именно это. Если прошлая попытка оборвалась и оставила сайт закрытым,
