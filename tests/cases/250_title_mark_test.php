@@ -163,3 +163,54 @@ test('Скелетон-заглушка видима на обеих темах 
         assert_not_contains('media-skeleton', (string) file_get_contents($file), basename($file));
     }
 });
+
+test('Заголовок: черта даёт принудительный перенос строки, а не текст', function (): void {
+    $markup = \App\Core\TitleMarkup::class;
+
+    assert_same(
+        'Агентство стратегического<br>развития и реформ',
+        $markup::html('Агентство стратегического | развития и реформ')
+    );
+    // Пробелы вокруг черты не обязательны, а две черты подряд — это один
+    // перенос: редактор ставит черту там, где ему удобно её видеть.
+    assert_same('а<br>б', $markup::html('а|б'));
+    assert_same('а<br>б', $markup::html('а || б'));
+    // Черта с краю переносить нечего — пустая строка сверху читалась бы как
+    // лишний отступ.
+    assert_same('край', $markup::html('| край'));
+    assert_same('край', $markup::html('край |'));
+    // Разметка выделения и перенос уживаются в одной строке.
+    assert_same(
+        'Стратегия <span class="tx-mark">развития</span><br>региона',
+        $markup::html('Стратегия *развития* | региона')
+    );
+
+    // Тег в заголовке по-прежнему остаётся текстом: правило «поля-заголовки
+    // не принимают HTML» важнее удобства записи, потому перенос и сделан
+    // чертой, а не <br>.
+    assert_contains('&lt;br&gt;', $markup::html('а <br> б'));
+
+    // Где разметка недопустима (title=, meta, поиск), перенос становится
+    // пробелом: склейка «АгентствоРазвития» — уже другое слово.
+    assert_same('Агентство развития', $markup::plain('Агентство | развития'));
+    assert_same('а б', $markup::plain('а|б'));
+    assert_true($markup::hasBreak('а | б'));
+    assert_false($markup::hasBreak('а б'));
+
+    // Косая черта разметкой не является: «24/7» — обычный текст.
+    assert_same('24/7 работа', $markup::html('24/7 работа'));
+});
+
+test('Заголовок: разметку строки объясняет подсказка у каждого поля заголовка', function (): void {
+    $field = \App\Core\BlockData\Field::text('Заголовок, показываемый на сайте')->named('title_field');
+    assert_same(\App\Core\BlockData\Field::TITLE_MARKUP_HINT, $field->hint);
+    assert_contains('|', $field->hint);
+
+    // Своя подсказка поля важнее общей: там объясняют что-то более частное.
+    $own = \App\Core\BlockData\Field::text('Заголовок', '', 'Своя подсказка')->named('title_field');
+    assert_same('Своя подсказка', $own->hint);
+
+    // Обложка — не блок, её форма своя, и подсказку туда надо ставить руками.
+    $heroForm = (string) file_get_contents(APP_ROOT . '/app/Views/admin/heroes/slide_form.php');
+    assert_contains('TITLE_MARKUP_HINT', $heroForm);
+});

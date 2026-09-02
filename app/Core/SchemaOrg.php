@@ -121,9 +121,76 @@ final class SchemaOrg
         ];
     }
 
+    /**
+     * Раскрывающиеся вопросы страницы.
+     *
+     * Разметка обязана совпадать с тем, что видит посетитель, поэтому ответ
+     * берётся текстом с самой страницы: HTML в JSON-LD не допускается, а
+     * пересказ своими словами поисковик считает подлогом.
+     *
+     * @param list<array{question: string, answer: string}> $items
+     * @return array<string, mixed> пустой массив, если размечать нечего
+     */
+    public static function faqPage(array $items): array
+    {
+        $list = [];
+        foreach ($items as $item) {
+            $question = trim($item['question'] ?? '');
+            // Тег → пробел, иначе «первый<br>второй» склеивается в одно слово.
+            $answer = trim((string) preg_replace('/\s+/u', ' ', strip_tags(str_replace('<', ' <', $item['answer'] ?? ''))));
+            if ($question === '' || $answer === '') {
+                continue;
+            }
+            $list[] = [
+                '@type' => 'Question',
+                'name' => $question,
+                'acceptedAnswer' => ['@type' => 'Answer', 'text' => $answer],
+            ];
+        }
+
+        if ($list === []) {
+            return [];
+        }
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => $list,
+        ];
+    }
+
+    /**
+     * Разметка вопросов уже выведена на этой странице.
+     *
+     * FAQPage на страницу допускается ровно один: два блока «Вопросы и ответы»
+     * дали бы две разметки, и поисковик отбросил бы обе. Флаг сбрасывает
+     * BlockRenderer::renderPage, как и счётчик h1.
+     */
+    private static bool $faqRendered = false;
+
+    public static function resetPageState(): void
+    {
+        self::$faqRendered = false;
+    }
+
+    /** Первый на странице блок вопросов получает разметку, следующие — нет. */
+    public static function claimFaqPage(): bool
+    {
+        if (self::$faqRendered) {
+            return false;
+        }
+        self::$faqRendered = true;
+
+        return true;
+    }
+
     /** Печатает готовый JSON-LD блок. @param array<string, mixed> $data */
     public static function render(array $data): string
     {
+        if ($data === []) {
+            return '';
+        }
+
         return '<script type="application/ld+json">'
             . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG)
             . '</script>';

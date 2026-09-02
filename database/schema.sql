@@ -707,6 +707,17 @@ CREATE TABLE IF NOT EXISTS error_log (
 -- ---------------------------------------------------------------------------
 -- Менеджер 301/302-редиректов: переезд со старого сайта без потери ссылок
 -- ---------------------------------------------------------------------------
+-- История проверок индексации: без неё нельзя ответить на вопрос «стало хуже
+-- или так было всегда», а именно он возникает первым.
+CREATE TABLE IF NOT EXISTS seo_audits (
+    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    errors      SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    warnings    SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    findings    LONGTEXT NOT NULL,
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_seo_audits_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS redirects (
     id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     from_path   VARCHAR(255) NOT NULL,
@@ -1251,7 +1262,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_23_totp_replay_guard.sql'),
     ('2026_08_26_goals.sql'),
     ('2026_08_27_goal_texts.sql'),
-    ('2026_08_29_content_type_icon.sql')
+    ('2026_08_29_content_type_icon.sql'),
+    ('2026_09_01_seo_audits.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

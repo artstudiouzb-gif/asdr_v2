@@ -327,6 +327,154 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
         <?php endif; ?>
 
+        <?php if ($type === 'divider'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('divider', $data) ?>
+        <?php endif; ?>
+
+        <?php if ($type === 'buttons'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('buttons', $data) ?>
+            <?php
+            $buttonStyles = ['primary' => 'Основная', 'outline' => 'Контурная', 'link' => 'Ссылкой'];
+            $buttonRow = static function (string $idx, array $item) use ($buttonStyles): string {
+                $v = static fn (string $k): string => htmlspecialchars((string) ($item[$k] ?? ''), ENT_QUOTES);
+                $p = static fn (string $k): string => 'items[' . $idx . '][' . $k . ']';
+                $opts = '';
+                foreach ($buttonStyles as $key => $label) {
+                    $opts .= '<option value="' . $key . '"' . (($item['style'] ?? 'primary') === $key ? ' selected' : '')
+                        . '>' . htmlspecialchars($label, ENT_QUOTES) . '</option>';
+                }
+
+                return '<div class="form-field"><label>Текст кнопки</label><input type="text" maxlength="60" name="'
+                        . $p('text') . '" value="' . $v('text') . '"></div>'
+                    . '<div class="form-field"><label>Ссылка</label><input type="text" name="' . $p('url')
+                        . '" value="' . $v('url') . '" placeholder="/page"></div>'
+                    . '<div class="form-field"><label>Вид</label><select name="' . $p('style') . '">' . $opts . '</select></div>'
+                    . \App\Core\AdminUi::iconField($p('icon_svg'), (string) ($item['icon_svg'] ?? ''), ['label' => 'Иконка'])
+                    . '<label class="form-check"><input type="checkbox" name="' . $p('new_tab') . '" value="1"'
+                        . (!empty($item['new_tab']) ? ' checked' : '') . '> Открывать в новой вкладке</label>'
+                    . '<button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>'
+                    . \App\Core\AdminUi::icon('trash') . 'Удалить</button>';
+            };
+            ?>
+            <div>
+                <label>Кнопки</label>
+                <span class="form-hint">Не больше трёх: четвёртая — это уже меню, и главное действие теряется среди равных. Кнопка без текста или без ссылки на сайте не появится.</span>
+                <div data-repeater="items" data-repeater-max="<?= \App\Core\BlockData\ButtonsBlockNormalizer::MAX_BUTTONS ?>">
+                    <?php foreach (($data['items'] ?? []) as $i => $item): ?>
+                        <div class="repeater-row"><?= $buttonRow((string) $i, is_array($item) ? $item : []) ?></div>
+                    <?php endforeach; ?>
+                </div>
+                <template data-repeater-template="items"><?= $buttonRow('__INDEX__', []) ?></template>
+                <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить кнопку</button></div>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($type === 'chart'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('chart', $data) ?>
+        <?php endif; ?>
+
+        <?php if ($type === 'embed'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('embed', $data) ?>
+        <?php endif; ?>
+
+        <?php if ($type === 'image'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('image', $data) ?>
+        <?php endif; ?>
+
+        <?php if ($type === 'table'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('table', $data) ?>
+        <?php endif; ?>
+
+        <?php if ($type === 'collage'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('collage', $data) ?>
+            <?php
+            // Списки размещения строятся по выбранному полотну: предлагать
+            // восьмую колонку в шестиколоночной сетке значило бы показывать
+            // редактору значение, которое нормализатор тут же обрежет.
+            $collageCols = (int) ($data['columns'] ?? 6);
+            $collageRows = (int) ($data['rows'] ?? 4);
+            $collageTypes = [
+                'photo' => 'Фотография',
+                'stat' => 'Плитка с числом',
+                'badge' => 'Круглая печать',
+                'pattern' => 'Узор',
+            ];
+            $collageShapes = ['rounded' => 'Скруглённый', 'circle' => 'Круг', 'square' => 'Без скругления'];
+            $collageFocus = ['auto' => 'Как в медиатеке', 'center' => 'По центру', 'top' => 'Верх',
+                'bottom' => 'Низ', 'left' => 'Слева', 'right' => 'Справа'];
+            $collagePatterns = ['dots' => 'Точки', 'grid' => 'Сетка', 'diagonal' => 'Диагональ', 'emblem' => 'Эмблема (гирих)'];
+            $collageNumbers = static function (string $name, int $max, int $value): string {
+                $out = '<select name="' . htmlspecialchars($name, ENT_QUOTES) . '">';
+                for ($n = 1; $n <= $max; $n++) {
+                    $out .= '<option value="' . $n . '"' . ($value === $n ? ' selected' : '') . '>' . $n . '</option>';
+                }
+
+                return $out . '</select>';
+            };
+            $collageRow = static function (string $idx, array $item) use (
+                $collageTypes, $collageShapes, $collageFocus, $collagePatterns,
+                $collageCols, $collageRows, $collageNumbers
+            ): string {
+                $sel = static fn (array $opts, string $name, string $cur): string => implode('', array_map(
+                    static fn (string $v, string $l): string => '<option value="' . htmlspecialchars($v, ENT_QUOTES) . '"'
+                        . ($cur === $v ? ' selected' : '') . '>' . htmlspecialchars($l, ENT_QUOTES) . '</option>',
+                    array_keys($opts),
+                    array_values($opts)
+                ));
+                $v = static fn (string $k, string $def = ''): string => htmlspecialchars((string) ($item[$k] ?? $def), ENT_QUOTES);
+                $n = static fn (string $k, int $def): int => (int) ($item[$k] ?? $def);
+                $p = static fn (string $k): string => 'items[' . $idx . '][' . $k . ']';
+
+                return '<div class="form-field"><label>Тип элемента</label><select name="' . $p('type') . '" data-collage-type>'
+                        . $sel($collageTypes, 'type', (string) ($item['type'] ?? 'photo')) . '</select></div>'
+                    . '<div class="collage-place">'
+                        . '<div class="form-field"><label>Колонка</label>' . $collageNumbers($p('col'), $collageCols, $n('col', 1)) . '</div>'
+                        . '<div class="form-field"><label>Ширина, колонок</label>' . $collageNumbers($p('col_span'), $collageCols, $n('col_span', 1)) . '</div>'
+                        . '<div class="form-field"><label>Строка</label>' . $collageNumbers($p('row'), $collageRows, $n('row', 1)) . '</div>'
+                        . '<div class="form-field"><label>Высота, строк</label>' . $collageNumbers($p('row_span'), $collageRows, $n('row_span', 1)) . '</div>'
+                    . '</div>'
+                    . '<div class="form-field" data-collage-fields="shape"><label>Форма</label><select name="' . $p('shape') . '">'
+                        . $sel($collageShapes, 'shape', (string) ($item['shape'] ?? 'rounded')) . '</select></div>'
+                    . '<div data-collage-fields="photo">'
+                        . \App\Core\AdminUi::imageField($p('image'), (string) ($item['image'] ?? ''), ['label' => 'Фотография'])
+                        . '<div class="form-field"><label>Описание для диктора</label><input type="text" name="' . $p('alt') . '" value="' . $v('alt') . '"></div>'
+                        . '<div class="form-field"><label>Кадрирование</label><select name="' . $p('focus') . '">'
+                            . $sel($collageFocus, 'focus', (string) ($item['focus'] ?? 'auto')) . '</select></div>'
+                    . '</div>'
+                    . '<div data-collage-fields="stat">'
+                        . \App\Core\AdminUi::iconField($p('icon_svg'), (string) ($item['icon_svg'] ?? ''), ['label' => 'Иконка'])
+                        . '<div class="form-field"><label>Значение</label><input type="text" name="' . $p('value') . '" maxlength="24" value="' . $v('value') . '" placeholder="25K+"></div>'
+                        . '<div class="form-field"><label>Подпись</label><input type="text" name="' . $p('label') . '" value="' . $v('label') . '"></div>'
+                    . '</div>'
+                    . '<div data-collage-fields="badge">'
+                        . '<div class="form-field"><label>Надпись по кругу</label><input type="text" name="' . $p('text') . '" maxlength="40" value="' . $v('text') . '" placeholder="Свяжитесь с нами"></div>'
+                    . '</div>'
+                    . '<div data-collage-fields="pattern">'
+                        . '<div class="form-field"><label>Узор</label><select name="' . $p('pattern') . '">'
+                            . $sel($collagePatterns, 'pattern', (string) ($item['pattern'] ?? 'dots')) . '</select></div>'
+                    . '</div>'
+                    . '<div class="colorfield-row" data-collage-fields="colors">'
+                        . \App\Core\AdminUi::colorField($p('bg'), (string) ($item['bg'] ?? ''), ['label' => 'Цвет подложки'])
+                        . \App\Core\AdminUi::colorField($p('fg'), (string) ($item['fg'] ?? ''), ['label' => 'Цвет содержимого'])
+                    . '</div>'
+                    . '<div class="form-field" data-collage-fields="link"><label>Ссылка</label><input type="text" name="' . $p('link') . '" value="' . $v('link') . '" placeholder="/page"></div>'
+                    . '<button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>'
+                    . \App\Core\AdminUi::icon('trash') . 'Удалить</button>';
+            };
+            ?>
+            <div>
+                <label>Элементы коллажа</label>
+                <span class="form-hint">Элементы могут занимать одни и те же ячейки — так и получается наложение. Кто ниже в списке, тот лежит поверх. На телефоне коллаж раскладывается в столбец в порядке списка.</span>
+                <div data-repeater="items" data-collage-repeater>
+                    <?php foreach (($data['items'] ?? []) as $i => $item): ?>
+                        <div class="repeater-row"><?= $collageRow((string) $i, is_array($item) ? $item : []) ?></div>
+                    <?php endforeach; ?>
+                </div>
+                <template data-repeater-template="items"><?= $collageRow('__INDEX__', []) ?></template>
+                <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить элемент</button></div>
+            </div>
+        <?php endif; ?>
+
         <?php if ($type === 'counters'): ?>
             <?= \App\Core\BlockData\BlockFieldSchema::formHtml('counters', $data) ?>
             <div>

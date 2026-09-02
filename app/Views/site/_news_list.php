@@ -22,8 +22,6 @@ $category = $category ?? '';
 $lang = Locale::current();
 // Дата — единым числовым форматом на всех языках: 19.07.2026.
 $fmt = static fn (string $d): string => DateFormatter::short($d);
-// Отдельной крупной новости над лентой нет: первая новость открывает ленту
-// крупной карточкой группы (App\Core\NewsFeedRhythm), дальше ритм повторяется.
 $pageUrl = static fn (int $p): string => Locale::url('news')
     . (($p > 1 || $category !== '') ? '?' . http_build_query(array_filter(['category' => $category, 'page' => $p > 1 ? $p : null])) : '');
 
@@ -45,16 +43,25 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
         <?php foreach (array_values($items) as $index => $item): ?>
             <?php
             $c = News::getCoverImage($item);
-            // Ритм ленты: группа «крупная плюс две компактные». Крупная идёт
-            // первой — с анонсом и фотографией сбоку; ряд из одинаковых
-            // карточек читался бы как таблица.
-            $wide = \App\Core\NewsFeedRhythm::isWide($index);
-            $excerpt = $wide ? trim((string) ($item['excerpt'] ?? '')) : '';
+            // Ритм ленты: цикл «обложка плюс две компактные» → ряд из четырёх
+            // компактных → «две компактные плюс широкая». Ряд одинаковых
+            // карточек читался бы как таблица (App\Core\NewsFeedRhythm).
+            $slot = \App\Core\NewsFeedRhythm::slot($index);
+            $isHero = $slot === \App\Core\NewsFeedRhythm::SLOT_HERO;
+            $isWide = $slot === \App\Core\NewsFeedRhythm::SLOT_WIDE;
+            // Анонс — только у крупных: в компактной карточке ему нет места,
+            // а обрезанный до строки он не сообщает ничего.
+            $excerpt = $isHero || $isWide ? trim((string) ($item['excerpt'] ?? '')) : '';
+            // Кадр обложки лежит подложкой всей карточки, поэтому и просят его
+            // во всю ширину колонки, а не под размер ячейки.
+            $sizes = $isHero
+                ? '(max-width: 560px) 100vw, 50vw'
+                : ($isWide ? '(max-width: 560px) 100vw, 30vw' : '(max-width: 700px) 100vw, 25vw');
             ?>
-            <a class="relnews-card<?= $wide ? ' relnews-card--wide' : '' ?>" href="<?= htmlspecialchars(Locale::url('news/' . $item['slug']), ENT_QUOTES) ?>">
+            <a class="relnews-card relnews-card--<?= $slot ?>" href="<?= htmlspecialchars(Locale::url('news/' . $item['slug']), ENT_QUOTES) ?>">
                 <span class="news-cover">
                     <?php if ($c !== null): ?>
-                        <?= \App\Core\Media::picture($c, (string) $item['title'], null, null, 'relnews-card__img', true, $wide ? '(max-width: 560px) 100vw, 40vw' : '(max-width: 700px) 100vw, 25vw', false, 'relnews-card__media') ?>
+                        <?= \App\Core\Media::picture($c, (string) $item['title'], null, null, 'relnews-card__img', !$isHero, $sizes, $isHero, 'relnews-card__media') ?>
                     <?php else: ?>
                         <span class="relnews-card__media relnews-card__media--empty" aria-hidden="true"></span>
                     <?php endif; ?>
@@ -62,13 +69,21 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
                 </span>
                 <span class="relnews-card__body">
                     <span class="news-meta">
-                        <?php if (!empty($item['published_at'])): ?><time class="relnews-card__date"><?= htmlspecialchars($fmt((string) $item['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                        <?php if (!empty($item['published_at'])): ?>
+                            <time class="relnews-card__date"><?= \App\Core\Icon::render('calendar', 15, 'ui-icon', 1.7) ?><?= htmlspecialchars($fmt((string) $item['published_at']), ENT_QUOTES) ?></time>
+                        <?php endif; ?>
                         <?php if ($categoryOf($item) !== ''): ?><span class="news-category"><?= htmlspecialchars($categoryOf($item), ENT_QUOTES) ?></span><?php endif; ?>
                     </span>
                     <h3 class="relnews-card__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
                     <?php if ($excerpt !== ''): ?>
                         <span class="relnews-card__excerpt"><?= htmlspecialchars($excerpt, ENT_QUOTES) ?></span>
                     <?php endif; ?>
+                    <?php // Завершение карточки: у обложки это кнопка, у остальных — ссылка
+                          // со стрелкой; компонент один, чтобы они не разъехались.
+                          // Целиком скрыт от диктора: карточка сама является
+                          // ссылкой, и без этого её имя читалось бы как
+                          // «Заголовок… Читать подробнее» у каждой новости. ?>
+                    <span class="card-more" aria-hidden="true"><?= htmlspecialchars(t('Читать подробнее'), ENT_QUOTES) ?><span class="card-more__arrow">→</span></span>
                 </span>
             </a>
         <?php endforeach; ?>

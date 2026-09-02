@@ -17,6 +17,9 @@ namespace App\Core;
  */
 final class BlockBackground
 {
+    /** Встроенные узоры — один список на фон секции и на элемент коллажа. */
+    public const PATTERNS = ['dots', 'grid', 'diagonal', 'emblem'];
+
     /**
      * Классы секции и её scoped CSS.
      *
@@ -158,10 +161,23 @@ final class BlockBackground
     /** @param array<string, mixed> $data */
     private static function patternLayer(array $data): string
     {
+        return self::patternCss(self::patternKey($data));
+    }
+
+    /**
+     * Объявления встроенного узора. Публичны, потому что узор нужен не только
+     * фону секции: «Коллаж» рисует им отдельный элемент композиции, и второй
+     * список тех же градиентов разъехался бы с этим при первой правке.
+     *
+     * Размер и цвет — переменные (`--block-pattern-size`, `--block-pattern-ink`):
+     * вызывающий задаёт их у себя, а сам набор узоров один на всех.
+     */
+    public static function patternCss(string $key): string
+    {
         $size = 'var(--block-pattern-size,28px)';
         $ink = 'var(--block-pattern-ink)';
 
-        return match (self::patternKey($data)) {
+        return match (in_array($key, self::PATTERNS, true) ? $key : 'dots') {
             'grid' => 'background-image:linear-gradient(to right,' . $ink . ' 1px,transparent 1px),'
                 . 'linear-gradient(to bottom,' . $ink . ' 1px,transparent 1px);background-size:' . $size . ' ' . $size . ';',
             'diagonal' => 'background-image:repeating-linear-gradient(45deg,' . $ink . ' 0,' . $ink . ' 1px,'
@@ -177,8 +193,15 @@ final class BlockBackground
         };
     }
 
-    /** Файл эмблемы: настройка «Дизайна» либо штатный файл темы. */
-    private static function emblemUrl(): string
+    /**
+     * Файл эмблемы: настройка «Дизайна» либо штатный файл темы.
+     *
+     * Публичный, потому что знак нужен не только фону секции: им же рисуется
+     * разделитель. Брать `var(--gov-emblem)` в статическом файле нельзя —
+     * переменная объявлена относительным url и разрешается от того файла, где
+     * объявлена, а не от того, где используется.
+     */
+    public static function emblemUrl(): string
     {
         $custom = trim((string) \App\Models\Setting::get('design_emblem', ''));
 
@@ -192,6 +215,6 @@ final class BlockBackground
     {
         $pattern = (string) ($data['_bg_pattern'] ?? 'dots');
 
-        return in_array($pattern, ['dots', 'grid', 'diagonal', 'emblem'], true) ? $pattern : 'dots';
+        return in_array($pattern, self::PATTERNS, true) ? $pattern : 'dots';
     }
 }

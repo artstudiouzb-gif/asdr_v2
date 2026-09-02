@@ -411,4 +411,8 @@ return [
     'Найдено: %d' => 'Found: %d',
     'Предыдущая страница' => 'Previous page',
     'Следующая страница' => 'Next page',
+    'Таблица' => 'Table',
+    'Таблица не заполнена.' => 'The table is empty.',
+    'Изображение не выбрано.' => 'No image selected.',
+    'Откроется в новой вкладке' => 'Opens in a new tab',
 ];

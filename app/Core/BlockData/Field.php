@@ -147,13 +147,29 @@ final class Field
     }
 
     /**
+     * Подсказка о разметке заголовка. Приёмов два, и оба живут внутри самой
+     * строки, поэтому объяснить их надо там же, где её набирают — у каждого
+     * заголовка секции, а не в одном месте документации.
+     */
+    public const TITLE_MARKUP_HINT = 'Разметка внутри строки: *слово* — выделение,'
+        . ' | — принудительный перенос строки. Теги в заголовок не принимаются.';
+
+    /**
      * Имя поля в форме отличается от ключа данных. Так исторически сделан
      * заголовок секции: `name="title_field"`, потому что `title` — колонка
      * самого блока, и одноимённое поле формы затирало бы её.
+     *
+     * Заодно заголовок получает подсказку о разметке строки: своего текста у
+     * этих полей почти нигде нет, а объяснять приём в тридцати описаниях по
+     * отдельности значило бы разъехаться с ними при первой правке.
      */
     public function named(string $inputName): self
     {
-        return $this->with(input: $inputName);
+        $field = $this->with(input: $inputName);
+
+        return $inputName === 'title_field' && $field->hint === ''
+            ? $field->with(hint: self::TITLE_MARKUP_HINT)
+            : $field;
     }
 
     /**
@@ -175,7 +191,7 @@ final class Field
     }
 
     /** @param array{field:string, values:list<string>}|null $when */
-    private function with(string $input = '', ?array $when = null): self
+    private function with(string $input = '', ?array $when = null, ?string $hint = null): self
     {
         return new self(
             $this->kind,
@@ -184,7 +200,7 @@ final class Field
             $this->options,
             $this->min,
             $this->max,
-            $this->hint,
+            $hint ?? $this->hint,
             $input !== '' ? $input : $this->input,
             $this->placeholder,
             $when ?? $this->when,

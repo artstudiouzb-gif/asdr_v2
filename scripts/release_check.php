@@ -111,6 +111,17 @@ if (!is_file($restoreMarker)) {
     $add('restore_drill', $drillDays <= 90 ? 'ok' : 'warning', 'Последняя проверка восстановления: ' . $drillDays . ' дн. назад');
 }
 
+// Сигнал наружу. Свой сторож живёт на том же сервере: упал сервер — упал и он,
+// и о простое никто не узнает. Внешний приёмник считает тишину аварией.
+require_once $root . '/app/Core/HeartbeatPing.php';
+$add(
+    'heartbeat',
+    \App\Core\HeartbeatPing::isConfigured() ? 'ok' : 'warning',
+    \App\Core\HeartbeatPing::isConfigured()
+        ? 'Сигнал наружу настроен (watchdog пингует приёмник)'
+        : 'Сигнал наружу не настроен (MONITORING_HEARTBEAT_URL) — простой сервера некому заметить'
+);
+
 // Эталон целостности файлов (app/Console/integrity_check.php).
 require_once $root . '/app/Core/Integrity.php';
 $baselineAge = \App\Core\Integrity::baselineAge();

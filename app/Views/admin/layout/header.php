@@ -67,6 +67,7 @@ if ($navIsSuper) {
         'social' => ['/admin/social', t('Соцсети')],
         'webhooks' => ['/admin/webhooks', t('Вебхуки')],
         'redirects' => ['/admin/redirects', t('Редиректы')],
+        'seo' => ['/admin/seo', t('Поиск и индексация')],
         'performance' => ['/admin/performance', t('Производительность')],
         'database' => ['/admin/database', t('База данных')],
         'security' => ['/admin/security', t('Безопасность')],

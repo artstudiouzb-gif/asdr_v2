@@ -5,50 +5,70 @@ declare(strict_types=1);
 use App\Core\NewsFeedRhythm;
 
 /*
- * Ритм ленты новостей: группа «крупная плюс две компактные».
+ * Ритм ленты новостей: цикл «крупная плюс две компактные» → ряд из четырёх
+ * компактных → «две компактные плюс крупная».
  *
  * Одинаковые карточки читаются как таблица. Крупная разбивает сетку и
  * показывает анонс, который в компактную не помещается. Отдельной крупной
- * новости над лентой нет: первая карточка группы и есть главная новость.
+ * новости над лентой нет: первая карточка цикла и есть главная новость.
  *
  * Главное здесь — арифметика, а не украшение: крупная карточка занимает две
- * ячейки, поэтому группа — четыре ячейки, то есть один полный ряд при четырёх
- * колонках и два ряда при двух. На три колонки четыре ячейки не делятся, и там
- * ритм выключается в CSS: иначе крупная карточка упирается в последнюю колонку
- * и сетка оставляет дыру.
+ * ячейки, поэтому цикл из десяти карточек — двенадцать ячеек, то есть три
+ * полных ряда при четырёх колонках и шесть при двух. На три колонки цикл не
+ * раскладывается, и там ритм выключается в CSS: иначе крупная карточка
+ * упирается в последнюю колонку и сетка оставляет дыру.
  */
 
-test('Группа ритма укладывается в ряды', function () {
-    assert_same(4, NewsFeedRhythm::CELLS_PER_GROUP, 'крупная на две ячейки плюс две компактные');
+test('Цикл ритма укладывается в ряды', function () {
+    // Две крупные по две ячейки плюс восемь компактных.
+    assert_same(12, NewsFeedRhythm::CELLS_PER_CYCLE, 'цикл — двенадцать ячеек');
+    assert_same(
+        NewsFeedRhythm::CELLS_PER_CYCLE,
+        NewsFeedRhythm::CYCLE + count(NewsFeedRhythm::WIDE_POSITIONS),
+        'каждая крупная карточка добавляет к циклу лишнюю ячейку'
+    );
 
-    $cells = (NewsFeedRhythm::PAGE_SIZE / NewsFeedRhythm::GROUP) * NewsFeedRhythm::CELLS_PER_GROUP;
-    assert_same(16, $cells, 'страница — четыре полные группы');
-    // Три колонки в список не входят намеренно: четыре ячейки на три не делятся,
-    // поэтому там ритм выключён в CSS (см. .relnews-card--wide в gov-theme).
+    $cells = (NewsFeedRhythm::PAGE_SIZE / NewsFeedRhythm::CYCLE) * NewsFeedRhythm::CELLS_PER_CYCLE;
+    assert_same(24, $cells, 'страница — два полных цикла');
+    // Три колонки в список не входят намеренно: цикл на три колонки не
+    // раскладывается, поэтому там ритм выключён в CSS (см. .relnews-card--wide).
     foreach ([4, 2, 1] as $columns) {
         assert_same(0, $cells % $columns, "при {$columns} колонках последний ряд остаётся полным");
     }
-    assert_same(0, NewsFeedRhythm::PAGE_SIZE % NewsFeedRhythm::GROUP, 'страница не должна обрывать группу');
+    assert_same(0, NewsFeedRhythm::PAGE_SIZE % NewsFeedRhythm::CYCLE, 'страница не должна обрывать цикл');
 });
 
-test('Крупной становится первая карточка каждой группы', function () {
-    $wide = [];
+test('Крупные карточки стоят по краям цикла и различаются ролью', function () {
+    $slots = [];
     for ($i = 0; $i < NewsFeedRhythm::PAGE_SIZE; $i++) {
-        if (NewsFeedRhythm::isWide($i)) {
-            $wide[] = $i;
+        $slot = NewsFeedRhythm::slot($i);
+        if ($slot !== NewsFeedRhythm::SLOT_COMPACT) {
+            $slots[$i] = $slot;
         }
     }
 
-    assert_same([0, 3, 6, 9], $wide, 'каждая третья, начиная с первой');
-    assert_true(NewsFeedRhythm::isWide(0), 'лента открывается крупной карточкой, а не отдельной новостью над сеткой');
+    // 0 — начало первого ряда, 9 — конец третьего (после двух компактных).
+    // Между ними ряд из четырёх компактных карточек.
+    assert_same(
+        [0 => 'hero', 9 => 'wide', 10 => 'hero', 19 => 'wide'],
+        $slots,
+        'цикл открывает обложка, замыкает широкая'
+    );
+    // Виды крупных карточек не взаимозаменяемы: обложка — фотография во всю
+    // карточку с текстом поверх (главная новость страницы), широкая — кадр
+    // сбоку и текст рядом. Растяжение на две ячейки у них общее.
+    assert_true(NewsFeedRhythm::isWide(0) && NewsFeedRhythm::isWide(9), 'обе крупные занимают две ячейки');
+    foreach ([1, 2, 3, 4, 5, 6, 7, 8] as $compact) {
+        assert_same(NewsFeedRhythm::SLOT_COMPACT, NewsFeedRhythm::slot($compact), "карточка {$compact} остаётся компактной");
+    }
 });
 
 test('Лента выводит широкую карточку с анонсом, а размер страницы берёт из ритма', function () {
     $listing = (string) file_get_contents(APP_ROOT . '/app/Views/site/_news_list.php');
     $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Site/NewsController.php');
 
-    assert_contains('NewsFeedRhythm::isWide($index)', $listing, 'ритм считает отдельный класс, а не шаблон');
-    assert_contains('relnews-card--wide', $listing);
+    assert_contains('NewsFeedRhythm::slot($index)', $listing, 'ритм считает отдельный класс, а не шаблон');
+    assert_contains('relnews-card relnews-card--<?= $slot ?>', $listing, 'класс карточки — её слот');
     assert_contains('relnews-card__excerpt', $listing, 'широкая карточка показывает анонс');
     assert_contains('NewsFeedRhythm::PAGE_SIZE', $controller, 'размер страницы задаёт ритм');
 });
@@ -60,12 +80,15 @@ test('Широкая карточка занимает две ячейки и с
     // blocks/news-detail.css подключается после общего бандла и задаёт
     // `.relnews-card { padding: 0 0 14px }`. Модификатору нужен вес выше, иначе
     // нижний отступ карточки оставлял под фотографией белую полосу.
-    assert_contains('.relnews-card.relnews-card--wide { grid-column: span 2;', $css, 'две ячейки, а не вся строка');
+    assert_true(
+        (bool) preg_match('/\.relnews-card\.relnews-card--wide \{\s*grid-column: span 2;/', $css),
+        'две ячейки, а не вся строка'
+    );
     // В одноколоночной сетке `span 2` создал бы вторую колонку и
     // горизонтальную прокрутку — на узком экране растяжение снимается.
-    assert_contains('.relnews-card.relnews-card--wide { grid-column: auto; flex-direction: column;', $css);
+    assert_contains('.relnews-card.relnews-card--wide { grid-column: auto; grid-template-columns: minmax(0, 1fr);', $css);
     assert_contains('.relnews-card--wide .relnews-card__excerpt', $css, 'анонс оформлен только у широкой карточки');
-    // Три колонки: четыре ячейки группы на три не делятся, поэтому ритм там
+    // Три колонки: цикл на три колонки не раскладывается, поэтому ритм там
     // выключается — иначе крупная карточка упирается в последнюю колонку.
     assert_contains('@media (max-width: 1100px) and (min-width: 1001px)', $css, 'на трёх колонках ритм выключен');
 });
@@ -89,15 +112,30 @@ test('Дата в карточке новости отбита от края н�
     );
 });
 
-test('Фотография широкой карточки занимает всю высоту', function () {
+test('Кадры крупных карточек занимают свою площадь целиком', function () {
     $css = theme_css();
 
-    // Пропорция спорила с `height: 100%`: браузер укорачивал кадр, чтобы сойтись
-    // с 4:3, и под фотографией оставалась белая полоса.
+    // Обложка: фотография и есть карточка — кадр лежит подложкой, поверх него
+    // затемнение, иначе белый текст читался бы только на удачном снимке.
+    assert_contains('.relnews-card--hero .news-cover { position: absolute; inset: 0; }', $css);
+    assert_contains('.relnews-card--hero .news-cover::after', $css, 'затемнение под текстом');
+    assert_contains('.relnews-card--hero .relnews-card__body', $css, 'текст лежит поверх кадра');
+
+    // Широкая: кадр тянется на всю высоту своей половины. Фиксированная
+    // пропорция здесь оставляла пустые поля сверху и снизу — высоту ряда
+    // задаёт соседняя компактная карточка, а не эта фотография.
+    assert_contains('.relnews-card--wide .news-cover { min-width: 0; }', $css);
     assert_contains('.relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: auto; }', $css);
-    // `min-width: 0` снимает автоминимум флекс-элемента: без него колонка с
-    // фотографией разъезжалась до 60% вместо заданных 42%.
-    assert_contains('.relnews-card--wide .news-cover { flex: 0 0 42%; min-width: 0; }', $css);
+    // Кадр занимает ровно одну колонку сетки: карточка растянута на две
+    // ячейки, и при произвольной доле её внутренняя граница попадала между
+    // колонками — текст начинался не там, где начинается карточка ряда выше.
+    assert_contains('grid-template-columns: minmax(0, calc(50% - var(--newsgrid-gap, 24px) / 2)) minmax(0, 1fr);', $css);
+    assert_contains('column-gap: var(--newsgrid-gap, 24px);', $css, 'промежуток внутри карточки равен промежутку сетки');
+    assert_contains('--newsgrid-gap: 24px;', $css, 'промежуток объявлен один раз — у самой сетки');
+    assert_true(
+        (bool) preg_match('/\.relnews-card\.relnews-card--wide \{[^}]*align-items: stretch;/', $css),
+        'кадр занимает всю высоту карточки'
+    );
 });
 
 test('Соседние новости — зеркальная пара', function () {

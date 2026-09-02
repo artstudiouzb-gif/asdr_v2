@@ -44,7 +44,13 @@ test('Галерея использует единый lightbox из общег�
     $frontend = (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js');
 
     assert_not_contains('/assets/js/blocks/gallery.js', $collector);
-    assert_contains("var PHOTO_SCOPES = '.album-photos, .newsdetail-photos__grid, .mediagallery-grid'", $frontend);
+    // Список контейнеров явный: фотографию открывает лайтбокс только там, где
+    // это задумано, а не у любой ссылки на файл. Блок «Изображение» попадает в
+    // список отдельным классом — его ставит шаблон при включённом увеличении.
+    assert_contains(
+        "var PHOTO_SCOPES = '.album-photos, .newsdetail-photos__grid, .mediagallery-grid, .block-image--zoomable'",
+        $frontend
+    );
     assert_true(str_ends_with(trim($frontend), '})();'), 'общий IIFE должен закрываться в конце bundle');
     assert_same(1, substr_count($frontend, "\n})();"), 'frontend helpers не должны выпадать из общего scope');
 });

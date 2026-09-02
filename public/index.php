@@ -274,6 +274,8 @@ $router->get('/admin/footer', [\App\Controllers\Admin\FooterController::class, '
 $router->post('/admin/footer', [\App\Controllers\Admin\FooterController::class, 'update']);
 
 // --- Admin: производительность ---
+$router->get('/admin/seo', [\App\Controllers\Admin\SeoController::class, 'index']);
+$router->post('/admin/seo/run', [\App\Controllers\Admin\SeoController::class, 'run']);
 $router->get('/admin/performance', [\App\Controllers\Admin\PerformanceController::class, 'index']);
 $router->post('/admin/performance', [\App\Controllers\Admin\PerformanceController::class, 'update']);
 $router->post('/admin/performance/clear-cache', [\App\Controllers\Admin\PerformanceController::class, 'clearCache']);

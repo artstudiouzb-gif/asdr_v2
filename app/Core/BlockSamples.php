@@ -154,6 +154,73 @@ final class BlockSamples
                     ['icon_svg' => 'bell', 'icon_color' => '', 'rows' => "Канцелярия (для юридических лиц) | (71) 239-59-22"],
                 ],
             ],
+            // Коллаж: композиция «два кадра внахлёст + плитка с числом» —
+            // ровно то, ради чего блок и заводился.
+            'collage' => [
+                'title' => '',
+                'columns' => 6,
+                'rows' => 4,
+                'ratio' => '4-3',
+                'gap' => 'medium',
+                'items' => [
+                    ['type' => 'photo', 'col' => 1, 'col_span' => 4, 'row' => 1, 'row_span' => 2,
+                     'shape' => 'rounded', 'image' => '', 'alt' => 'Работа на объекте', 'focus' => 'center', 'link' => ''],
+                    ['type' => 'stat', 'col' => 1, 'col_span' => 2, 'row' => 3, 'row_span' => 2,
+                     'shape' => 'rounded', 'icon_svg' => 'users', 'value' => '25K+',
+                     'label' => 'обращений рассмотрено', 'bg' => '', 'fg' => '', 'link' => ''],
+                    ['type' => 'photo', 'col' => 3, 'col_span' => 4, 'row' => 2, 'row_span' => 3,
+                     'shape' => 'rounded', 'image' => '', 'alt' => 'Специалист агентства', 'focus' => 'center', 'link' => ''],
+                ],
+            ],
+            'divider' => [
+                'variant' => 'short',
+                'size' => 'medium',
+            ],
+            'buttons' => [
+                'align' => 'left',
+                'size' => 'normal',
+                'items' => [
+                    ['text' => 'Скачать бланк', 'url' => '/docs', 'style' => 'primary', 'icon_svg' => 'download', 'new_tab' => false],
+                    ['text' => 'Подать заявление', 'url' => '/services', 'style' => 'outline', 'icon_svg' => '', 'new_tab' => false],
+                ],
+            ],
+            'chart' => [
+                'title' => 'Структура расходов',
+                'variant' => 'stacked',
+                'rows' => "Транспорт | 24\nОбразование | 18\nЗдравоохранение | 15\nЦифровизация | 12",
+                'total' => 0,
+                'unit' => '%',
+                'caption' => 'По данным на 2026 год',
+            ],
+            'embed' => [
+                'title' => 'Запись заседания',
+                'url' => 'https://youtu.be/aqz-KE-bpKQ',
+                'ratio' => '16-9',
+                'height' => 600,
+                'caption' => 'Трансляция коллегии Агентства',
+            ],
+            'image' => [
+                'title' => '',
+                'image' => '',
+                'alt' => 'Совещание в Агентстве',
+                'caption' => 'Заседание коллегии по итогам квартала',
+                'credit' => 'Пресс-служба Агентства',
+                'link' => '',
+                'zoom' => true,
+                'width' => 'container',
+                'ratio' => 'auto',
+            ],
+            'table' => [
+                'title' => 'Ключевые показатели',
+                'rows' => "Показатель | 2024 | 2025\n"
+                    . "Валовой продукт | 5,6 % | 6,1 %\n"
+                    . "Экспорт услуг | 12,4 млрд | 14,1 млрд\n"
+                    . "Доля МСБ | 54 % | 57 %",
+                'header_row' => true,
+                'header_col' => true,
+                'variant' => 'lines',
+                'density' => 'normal',
+            ],
             'leader_card' => [
                 'photo' => '', 'name' => 'Фамилия Имя Отчество',
                 'position' => 'Должность руководителя',

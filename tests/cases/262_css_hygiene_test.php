@@ -280,3 +280,45 @@ test('Режимный класс на body не перебивает компо
 
     assert_same([], $bad, "режим добавляет вес голому тегу:\n      " . implode("\n      ", $bad));
 });
+
+test('Переход между страницами: шапка переносится, а не перерисовывается', function (): void {
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/frontend.css');
+    $min = (string) file_get_contents(APP_ROOT . '/public/assets/css/public.min.css');
+
+    // Опт-ин обязан пережить минификатор: сокращения и незнакомые at-rule он
+    // уже выбрасывал (см. transition с переменной), и заметить это можно только
+    // в собранном файле.
+    assert_contains('@view-transition', $css);
+    assert_contains('@view-transition{navigation:auto}', $min, 'минификатор выбросил опт-ин перехода');
+    assert_contains('view-transition-name:site-header', $min);
+
+    // Шапка не липкая, и по умолчанию браузер вёз бы её снимок от старого
+    // положения к новому: уходя с прокрутки, старое положение выше экрана —
+    // шапка влетала бы сверху, оставляя верх страницы пустым.
+    assert_contains('::view-transition-group(site-header)', $css);
+    assert_contains('::view-transition-group(site-header),::view-transition-group(site-topbar){animation:none}', $min);
+
+    // И не переливается со старой. Вид шапки зависит от страницы: на обложке
+    // она прозрачная со светлым набором, на остальных — сплошная. Перелив двух
+    // таких снимков держал белую полосу поверх уже тёмной обложки — это и
+    // читалось как мигание белой шапки при переходе на главную.
+    assert_contains('::view-transition-old(site-header),::view-transition-old(site-topbar){animation:none;opacity:0}', $min);
+    assert_contains('::view-transition-new(site-header),::view-transition-new(site-topbar){animation:none;opacity:1}', $min);
+
+    // Подвалу имя не даём: внизу страницы он то виден, то нет, и снимок ехал бы
+    // за экран на глазах у читателя.
+    assert_false(str_contains($css, 'view-transition-name: site-footer'), 'подвал не должен участвовать в переходе');
+});
+
+test('Переход между страницами уважает «меньше движения»', function (): void {
+    // Псевдоэлементы перехода живут отдельным деревом у корня, и общее правило
+    // a11y `html[data-a11y-motion="off"] *` их не достаёт — нужен свой селектор.
+    $a11y = (string) file_get_contents(APP_ROOT . '/public/assets/css/a11y.css');
+
+    assert_contains('@media (prefers-reduced-motion: reduce)', $a11y);
+    assert_contains('html::view-transition-group(*)', $a11y);
+    assert_contains('html[data-a11y-motion="off"]::view-transition-group(*)', $a11y);
+
+    $min = (string) file_get_contents(APP_ROOT . '/public/assets/css/public.min.css');
+    assert_contains('html[data-a11y-motion=off]::view-transition-group(*)', $min);
+});

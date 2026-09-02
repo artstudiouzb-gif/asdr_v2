@@ -1296,6 +1296,29 @@ body.theme-dark .alert--success,
 .admin-poll-results__title { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; font-size: var(--admin-fs-md); color: var(--admin-text); }
 .admin-progress { height: 8px; background: color-mix(in srgb, var(--admin-border) 60%, transparent); border-radius: 3px; overflow: hidden; }
 .admin-progress__bar { height: 100%; background: var(--admin-accent); border-radius: 3px; }
+
+/* Ход перехода. Админка отвечает полной перезагрузкой на каждое сохранение и
+   каждый переход, и между нажатием и новой страницей не происходило ничего:
+   ожидание читалось как «кнопка не сработала». Точного прогресса у серверного
+   перехода нет — полоса едет к 90 % и обрывается вместе с документом. */
+.admin-route-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+    height: 3px;
+    width: 0;
+    background: var(--admin-accent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--admin-accent) 55%, transparent);
+    pointer-events: none;
+    transition-property: width, opacity;
+    transition-duration: .25s, .3s;
+    transition-timing-function: ease-out, linear;
+}
+.admin-route-progress.is-done { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+    .admin-route-progress { transition-duration: 0s, 0s; }
+}
 /* Карточка формы больше не режется до 760 (тянется до ширины контента, 1400),
    но одиночные поля ввода держим читаемой ширины — иначе на широкой карточке
    поле под «Название сайта» растянулось бы на весь экран. Редактор (wysiwyg)
@@ -8155,3 +8178,29 @@ label.hb-behavior-card:has(input:checked) {
    в паре с бланкетом — класс не менял ничего. */
 table.table--compact th, table.table--compact td,
 .admin-table.table--compact th, .admin-table.table--compact td { padding: 6px 10px; }
+
+/* Размещение элемента коллажа: четыре коротких списка стоят рядом, а не
+   столбцом — это одна настройка «где и сколько ячеек», а не четыре разных. */
+.collage-place {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--admin-gap-sm, 8px) var(--admin-gap, 12px);
+}
+
+/* Примеры адресов в находке проверки индексации: список коротких моноширинных
+   строк, а не абзац — по ним ищут глазами, а не читают. */
+.seo-samples {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    font-family: var(--admin-font-mono);
+    font-size: var(--admin-fs-xs);
+    color: var(--admin-text-muted);
+}
+
+/* Действие раздела рядом с его заголовком: сам заголовок печатает макет по
+   $pageTitle, поэтому кнопка живёт отдельной строкой и прижимается вправо. */
+.admin-page-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--admin-gap, 12px);
+}

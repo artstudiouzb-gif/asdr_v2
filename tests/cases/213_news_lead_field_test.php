@@ -59,11 +59,17 @@ test('Полный лид хранится, а карточки использу
     assert_contains("excerpt((string) \$featured['excerpt'], 260)", $feature);
 
     assert_not_contains('newslist-lead__excerpt', $listing, 'лента /news не дублирует лид описанием');
-    // Анонс появился у широкой карточки ритма ленты (каждая пятая) — обычные
-    // карточки по-прежнему обходятся заголовком.
-    assert_contains("\$excerpt = \$wide ? trim((string) (\$item['excerpt'] ?? '')) : '';", $listing, 'анонс есть только у широкой карточки');
-    assert_contains('relnews-card--wide', $listing, 'широкая карточка помечена своим классом');
-    assert_not_contains('card-more', $listing, 'вся карточка уже является ссылкой — отдельный CTA не нужен');
+    // Анонс есть у обоих крупных видов ритма — в компактную карточку он не
+    // помещается, а обрезанный до строки ничего не сообщает.
+    assert_contains("\$excerpt = \$isHero || \$isWide ? trim((string) (\$item['excerpt'] ?? '')) : '';", $listing, 'анонс — только у крупных карточек');
+    // Класс карточки — это её слот из ритма: один источник правды вместо
+    // трёх условий в шаблоне (App\Core\NewsFeedRhythm::slot()).
+    assert_contains('relnews-card relnews-card--<?= $slot ?>', $listing, 'вид карточки задаёт ритм');
+    assert_contains('NewsFeedRhythm::SLOT_WIDE', $listing, 'широкая карточка отличается от обложки');
+    // CTA в карточке есть, но он декоративный: карточка сама является ссылкой,
+    // поэтому «Читать подробнее» скрыто от диктора — иначе имя каждой ссылки
+    // читалось бы как «Заголовок… Читать подробнее».
+    assert_contains('<span class="card-more" aria-hidden="true">', $listing, 'CTA не участвует в имени ссылки');
 });
 
 test('Сайт и Telegram получают одинаковую безопасную разметку лида', function () {

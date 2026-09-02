@@ -98,13 +98,13 @@ summary:focus-visible {
 .site-header--logo-center .site-header__zone--right { margin-left: 0; }
 
 .site-menu__link { position: relative; text-decoration: none; color: var(--color-primary, #1a1a1a); font-weight: 600; padding: 10px 4px; background: transparent; background-color: transparent; transition: color 0.2s ease; }
-.site-menu__link:hover { color: var(--gov-teal-text, var(--color-accent, #2f6fed)); background: transparent !important; background-color: transparent !important; }
+.site-menu__link:hover { color: var(--gov-teal-text, var(--color-accent, var(--gov-teal))); background: transparent !important; background-color: transparent !important; }
 /* Контрастный вариант акцента, а не сам акцент: сырой #009bbe на белой
    шапке даёт 3.26:1 при норме 4.5:1 (ловил axe). */
-.site-menu__link.is-active { color: var(--gov-teal-text, var(--color-accent, #2f6fed)) !important; font-weight: 700; background: transparent !important; background-color: transparent !important; }
+.site-menu__link.is-active { color: var(--gov-teal-text, var(--color-accent, var(--gov-teal))) !important; font-weight: 700; background: transparent !important; background-color: transparent !important; }
 .site-menu__link::after {
     content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-    background: var(--color-accent, #2f6fed); border-radius: 3px 3px 0 0;
+    background: var(--color-accent, var(--gov-teal)); border-radius: 3px 3px 0 0;
     transform: scaleX(0); transition: transform 0.2s ease;
 }
 .site-menu__link:hover::after, .site-menu__link.is-active::after {
@@ -376,14 +376,14 @@ summary:focus-visible {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: color-mix(in srgb, var(--color-accent, #2f6fed) 8%, transparent);
-    color: var(--color-accent, #2f6fed);
+    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 8%, transparent);
+    color: var(--color-accent, var(--gov-teal));
     margin-bottom: 16px;
     font-size: 28px;
     transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease;
 }
 .block-advantages__item:hover .block-advantages__icon {
-    background: var(--color-accent, #2f6fed);
+    background: var(--color-accent, var(--gov-teal));
     color: #fff;
 }
 @keyframes advantages-icon-float {
@@ -932,7 +932,6 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 
 /* Команда по подразделениям: сектор — заголовок с якорем, отделы и группы
    внутри сектора — подзаголовок со своей сеткой карточек. */
-.block-team__group { scroll-margin-top: 90px; }
 .block-team__group + .block-team__group { margin-top: 40px; }
 .block-team__group-title { margin: 0 0 18px; font-size: var(--step-2); }
 .block-team__group:target .block-team__group-title { color: var(--color-accent, #e63946); }
@@ -1671,6 +1670,49 @@ body.mobile-menu-open .site-burger span:nth-child(3) { transform: translateY(-7p
 }
 /* Плавная прокрутка только при отсутствии prefers-reduced-motion (WCAG). */
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+/* Якорь не должен уезжать под закреплённую шапку: браузер останавливает
+   прокрутку на этом отступе выше цели, иначе заголовок раздела оказывается
+   прямо за шапкой и выглядит как промах. Высоту меряет frontend.js (макетов
+   шапки четыре, константой их не покрыть), 5rem — запас, когда JS отключён. */
+html:has(.site-header--sticky) { scroll-padding-top: calc(var(--scroll-offset, 5rem) + 24px); }
+
+/* Бесшовный переход между страницами (View Transitions).
+   Сайт серверный: каждая ссылка — новый документ, и шапка перерисовывалась
+   вместе со всем остальным, хотя она на всех страницах одна и та же. Браузер
+   умеет сопоставлять именованные снимки между двумя документами и переносить
+   их, а не рисовать заново: шапка, верхняя полоса и подвал стоят на месте,
+   меняется только содержимое между ними.
+   SPA для этого не нужен: приём чисто декларативный, работает на обычной
+   навигации, а браузер без поддержки просто переходит по ссылке как раньше. */
+@view-transition { navigation: auto; }
+/* Имя обязано быть уникальным на странице: два элемента с одним именем
+   отменяют переход целиком, поэтому берём то, что заведомо в одном экземпляре.
+   Подвал имени намеренно не получает: он стоит внизу и на короткой странице
+   виден, а на длинной — нет. Снимок поехал бы от видимого положения к
+   заэкранному, и переход выглядел бы как уезжающий вниз подвал. Верх страницы
+   такой разницы не знает — шапка на месте всегда. */
+.site-topbar { view-transition-name: site-topbar; }
+.site-header { view-transition-name: site-header; }
+/* Шапка не переезжает. По умолчанию браузер везёт снимок от старого положения
+   к новому, а шапка у нас не липкая: уходя с прокрутки, её старое положение —
+   выше экрана, и она **влетала бы сверху**, оставляя верх страницы пустым.
+   Снимаем перенос: снимок сразу стоит на новом месте, а старая и новая шапки
+   в нём переливаются одна в другую — активный пункт меню меняется без рывка. */
+::view-transition-group(site-header),
+::view-transition-group(site-topbar) { animation: none; }
+/* И не переливается. Вид шапки зависит от страницы: на обложке она прозрачная
+   со светлым набором, на остальных — сплошная. Перелив двух таких снимков
+   держал **белую полосу поверх уже тёмной обложки** — ровно то, что читается
+   как мигание при переходе на главную. Шапка не контент, который должен
+   превращаться одно в другое: это постоянная часть страницы, поэтому новая
+   встаёт сразу, а старая не показывается вовсе. Белый набор при этом читается
+   и на светлом: под прозрачной шапкой всегда есть затемняющая подложка
+   (--hdr-scrim), она едет вместе со снимком. */
+::view-transition-old(site-header),
+::view-transition-old(site-topbar) { animation: none; opacity: 0; }
+::view-transition-new(site-header),
+::view-transition-new(site-topbar) { animation: none; opacity: 1; }
+
 ::selection { background: color-mix(in srgb, var(--color-primary, #1f4b8e) 82%, #000); color: #fff; }
 /* Заголовочная гарнитура (Montserrat) — крупный корпоративный характер. */
 h1, h2, h3, h4, h5, h6,
@@ -2427,7 +2469,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .contact-card__icon svg { width: 22px; height: 22px; }
 .contact-card:hover .contact-card__icon {
     transform: scale(1.1);
-    background-color: var(--color-accent, #2f6fed);
+    background-color: var(--color-accent, var(--gov-teal));
     color: #fff;
 }
 .contact-card__title { 
@@ -2436,26 +2478,26 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
     transition: color 0.3s ease;
 }
 .contact-card:hover .contact-card__title {
-    color: var(--color-accent, #2f6fed);
+    color: var(--color-accent, var(--gov-teal));
 }
 .contact-card__line { margin: 2px 0; color: var(--text-muted); }
 /* Мини-иконка у строки контакта: подбирается по содержимому строки. Иконка
    не переносится вместе с текстом — она в своей колонке. */
 .contact-card__line--icon { display: flex; align-items: flex-start; gap: 8px; }
-.contact-card__line-icon { flex: none; display: inline-flex; margin-top: 2px; color: var(--color-accent, #e63946); }
+.contact-card__line-icon { flex: none; display: inline-flex; margin-top: 2px; color: var(--color-accent, var(--gov-teal)); }
 .contact-card__line-text { min-width: 0; }
 /* Своя картинка вместо иконки Tabler: размер тот же, что у значка темы. */
 .contact-card__icon-img { width: var(--feature-card-icon-size, 22px); height: var(--feature-card-icon-size, 22px); object-fit: contain; }
 /* Кликабельные номер и почта внутри строки контакта: подчёркивание появляется
    при наведении, чтобы строка не выглядела сплошной ссылкой. */
 .contact-link { color: inherit; text-decoration: none; border-bottom: 1px dotted currentColor; }
-.contact-link:hover, .contact-link:focus-visible { color: var(--color-accent, #e63946); border-bottom-style: solid; }
+.contact-link:hover, .contact-link:focus-visible { color: var(--color-accent, var(--gov-teal)); border-bottom-style: solid; }
 .contact-card__link { 
-    display: inline-block; margin-top: 12px; font-weight: 600; color: var(--color-accent, #2f6fed); text-decoration: none; 
+    display: inline-block; margin-top: 12px; font-weight: 600; color: var(--color-accent, var(--gov-teal)); text-decoration: none; 
     transition: transform 0.3s ease, color 0.3s ease;
 }
 .contact-card:hover .contact-card__link { 
-    color: var(--color-accent, #2f6fed);
+    color: var(--color-accent, var(--gov-teal));
     transform: translateX(4px); 
 }
 :root[data-theme="dark"] .contact-card__title { color: var(--text-main); }
@@ -2533,7 +2575,7 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
     background: var(--surface, #fff); color: var(--text-main); text-decoration: none;
     transition: border-color .4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow .4s cubic-bezier(0.165, 0.84, 0.44, 1), transform .4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
-.cat-tile:hover { border-color: var(--color-accent, #2f6fed); box-shadow: 0 12px 28px rgba(19, 42, 92, 0.05); transform: translateY(-3px); }
+.cat-tile:hover { border-color: var(--color-accent, var(--gov-teal)); box-shadow: 0 12px 28px rgba(19, 42, 92, 0.05); transform: translateY(-3px); }
 .cat-tile__icon { 
     display: grid; place-items: center; width: 50px; height: 50px; border-radius: 14px; 
     background: color-mix(in srgb, var(--color-primary, #223d79) 9%, transparent); 
@@ -2543,10 +2585,10 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
 .cat-tile__icon svg { width: 24px; height: 24px; }
 .cat-tile:hover .cat-tile__icon {
     transform: scale(1.08);
-    background-color: var(--color-accent, #2f6fed);
+    background-color: var(--color-accent, var(--gov-teal));
     color: #fff;
 }
-.cat-tile.is-active .cat-tile__icon { background-color: var(--color-accent, #2f6fed); color: #fff; }
+.cat-tile.is-active .cat-tile__icon { background-color: var(--color-accent, var(--gov-teal)); color: #fff; }
 .cat-tile__label { font-weight: 600; font-size: var(--step--1); }
 
 .media-list { display: flex; flex-direction: column; }
@@ -2655,7 +2697,7 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: radial-gradient(220px circle at var(--mouse-x, 0) var(--mouse-y, 0), color-mix(in srgb, var(--color-accent, #2f6fed) 7%, transparent), transparent 80%);
+    background: radial-gradient(220px circle at var(--mouse-x, 0) var(--mouse-y, 0), color-mix(in srgb, var(--color-accent, var(--gov-teal)) 7%, transparent), transparent 80%);
     opacity: 0;
     transition: opacity 0.4s ease;
     pointer-events: none;
