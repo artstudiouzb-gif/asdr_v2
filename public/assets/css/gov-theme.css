@@ -3131,21 +3131,108 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    9px, и число читалось приклеенным к снимку. */
 .relnews-card__body { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 4px 14px 0; }
 
+/* Обложка ленты — первая карточка цикла: фотография во всю карточку, текст
+   поверх неё. Это главная новость страницы, и роль у неё другая, чем у
+   широкой карточки в конце цикла (там фотография сбоку, текст рядом).
+
+   Растяжение на две ячейки общее у обоих крупных видов, поэтому объявлено
+   ниже одним правилом: различается только внутреннее устройство. */
+.relnews-card.relnews-card--hero {
+    grid-column: span 2;
+    position: relative;
+    min-height: clamp(280px, 24vw, 400px);
+    padding: 0;
+    overflow: hidden;
+    isolation: isolate;
+}
+/* Кадр — подложка: обёртка растянута на карточку, а не стоит в потоке. */
+.relnews-card--hero .news-cover { position: absolute; inset: 0; }
+.relnews-card--hero .relnews-card__media {
+    height: 100%;
+    width: 100%;
+    aspect-ratio: auto;
+    border-radius: 0;
+}
+/* Затемнение снизу вверх: белый текст обязан читаться на любой фотографии, а
+   не только на удачной. Верх кадра остаётся чистым — там нет текста. */
+.relnews-card--hero .news-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(6, 14, 28, 0) 28%, rgba(6, 14, 28, .55) 62%, rgba(6, 14, 28, .9) 100%);
+}
+.relnews-card--hero .relnews-card__body {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: clamp(20px, 2.4vw, 34px);
+    /* Сверху зарезервировано место под метку: она лежит на кадре отдельным
+       слоем, и на узком экране, где текста больше, чем высоты, первая строка
+       заезжала прямо под неё. */
+    padding-top: clamp(58px, 13vw, 76px);
+}
+/* Цвет объявлен на самой карточке: внутри есть и заголовок, и дата, и анонс,
+   у каждого свой токен, и перечислять их по отдельности значило бы забыть
+   следующий добавленный элемент. */
+.relnews-card--hero,
+.relnews-card--hero .relnews-card__title,
+.relnews-card--hero .relnews-card__date,
+.relnews-card--hero .news-category { color: #fff; }
+.relnews-card--hero .relnews-card__title { font-size: var(--step-4); }
+.relnews-card--hero .relnews-card__excerpt {
+    color: rgba(255, 255, 255, .86);
+    font-size: var(--step--1);
+    line-height: var(--base-line-height, 1.6);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.relnews-card--hero .news-category { border-color: rgba(255, 255, 255, .5); }
+/* Завершение обложки — кнопка, а не ссылка с чертой: черта поверх фотографии
+   читается как случайная линия. Заливка та же, что у кнопки обложки страницы
+   (`--color-primary`), поэтому цвет один на весь сайт и настраивается в
+   «Дизайне». */
+.relnews-card--hero .card-more {
+    align-self: flex-start;
+    margin-top: 4px;
+    padding: 12px 24px;
+    border: 0;
+    border-radius: var(--btn-radius, 10px);
+    background: var(--color-primary, var(--gov-navy));
+    color: #fff;
+}
+.relnews-card--hero:hover .relnews-card__title { color: #fff; }
+/* Кадр обложки не уезжает при наведении: он размером с карточку, и увеличение
+   съедало бы края фотографии вместе с затемнением. */
+.relnews-card--hero:hover .relnews-card__media img { transform: scale(1.03); }
+
+/* Завершение карточки в ленте — без черты сверху: она рисует по горизонтали
+   лишний ряд линий на каждой карточке. В блоках подборок черта остаётся: там
+   карточек три-четыре, и она отделяет ссылку от текста. */
+.newslist-grid .card-more { border-top: 0; padding-top: 2px; }
+
+/* Дата с иконкой: значок и число — одна строка, а не два соседних элемента. */
+.relnews-card__date { display: inline-flex; align-items: center; gap: 6px; }
+.relnews-card__date .ui-icon { flex: none; opacity: .75; }
+
 /* Крупная карточка ленты занимает две ячейки сетки и показывает анонс. Ровно
    две, а не всю строку: цикл ленты — «крупная + две компактные», ряд из
    четырёх компактных, «две компактные + крупная», то есть двенадцать ячеек
    (см. App\Core\NewsFeedRhythm). Двенадцать делится и на 4, и на 2, и на 1
    колонку — ряды остаются полными, а крупная карточка идёт зигзагом: слева,
    потом справа. */
-.relnews-card.relnews-card--wide { grid-column: span 2; display: grid; grid-template-columns: minmax(0, 56%) minmax(0, 1fr); align-items: center; padding: 0; }
-/* Пропорция кадра объявлена у обёртки, а не у самой картинки: обёртка — блок
-   известной ширины (доля карточки), из неё браузер и считает высоту 16:9.
-   Выравнивание `center` у сетки нужно ровно за этим: при растяжении (`stretch`)
-   высоту колонки задавала бы карточка, и пропорция ни на что не влияла бы —
-   именно поэтому прежний вариант с `height: 100%` давал почти квадратный кадр.
+.relnews-card.relnews-card--wide { grid-column: span 2; display: grid; grid-template-columns: minmax(0, 56%) minmax(0, 1fr); align-items: stretch; padding: 0; }
+/* Кадр занимает свою половину целиком: карточка стоит в ряду с компактными,
+   её высоту задают они, и при фиксированной пропорции над кадром и под ним
+   оставались бы пустые поля в полсотни пикселей — на белой карточке это
+   читается как незагрузившаяся картинка. Роль «крупного кадра с честной
+   пропорцией» забрала обложка в начале цикла: там фотография и есть карточка.
    `min-width: 0` снимает автоминимум по содержимому: без него колонка с
    фотографией разъезжается шире заданной доли, а текст ужимается вдвое. */
-.relnews-card--wide .news-cover { min-width: 0; aspect-ratio: 16 / 9; }
+.relnews-card--wide .news-cover { min-width: 0; }
 /* Своей пропорции у кадра нет — он заполняет обёртку целиком, кадрирует
    `object-fit: cover` у изображения. */
 .relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: auto; }
@@ -3168,6 +3255,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    вторую колонку и горизонтальную прокрутку. Кадр остаётся 16:9 — обёртка
    считает высоту от ширины карточки. */
 @media (max-width: 560px) {
+    .relnews-card.relnews-card--hero { grid-column: auto; min-height: clamp(300px, 78vw, 380px); }
     .relnews-card.relnews-card--wide { grid-column: auto; grid-template-columns: minmax(0, 1fr); padding: 0 0 14px; }
     .relnews-card--wide .relnews-card__body { padding: 4px 14px 0; }
 }
@@ -3177,6 +3265,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    её на следующий ряд и оставляет дыру. Ровный ряд компактных карточек лучше
    дырявой ленты. */
 @media (max-width: 1100px) and (min-width: 1001px) {
+    .relnews-card.relnews-card--hero { grid-column: auto; min-height: 320px; }
     .relnews-card.relnews-card--wide { grid-column: auto; grid-template-columns: minmax(0, 1fr); padding: 0 0 14px; }
     .relnews-card--wide .relnews-card__body { padding: 4px 14px 0; }
     .relnews-card--wide .relnews-card__title { font-size: var(--step-0); }
