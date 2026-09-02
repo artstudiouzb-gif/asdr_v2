@@ -18,34 +18,6 @@
 [hidden] { display: none !important; }
 
 :root {
-    /* Движение — один язык на весь фронт.
-
-       Кривых было восемь, и две из них с перелётом (0.34,1.56 и
-       0.175,0.885,0.32,1.275): элемент проскакивал конечную точку и возвращался,
-       отчего наведение читалось как щелчок, а не как мягкое движение. Соседние
-       компоненты при этом двигались по разным кривым и с разной длительностью,
-       и общего характера у сайта не получалось.
-
-       `--ease-soft` — выход без перелёта (easeOutQuint): быстро стартует,
-       долго доводит и останавливается сам. `--ease-inout-soft` нужен там, где
-       движение и начинается, и заканчивается на экране (шторка, аккордеон).
-       Длительности: --dur-quick для мелкого (иконка, подсветка), --dur-base для
-       обычного (карточка, кнопка), --dur-slow для крупного (панель, переход
-       страницы), --dur-reveal для появления секции при прокрутке.
-
-       Объявлены они в теме, а не в базовом frontend.css: тему грузит и
-       публичная страница (в общем бандле), и портал файлов /repo, у которого
-       базового файла нет. Переменная без значения делает недействительным всё
-       объявление, поэтому половина переходов портала осталась бы без анимации
-       — молча, без единой ошибки. У страницы входа в портал нет и темы,
-       поэтому там значения продублированы запасным вариантом. */
-    --ease-soft: cubic-bezier(.22, 1, .36, 1);
-    --ease-inout-soft: cubic-bezier(.65, 0, .35, 1);
-    --dur-quick: .18s;
-    --dur-base: .3s;
-    --dur-slow: .5s;
-    --dur-reveal: .75s;
-
     color-scheme: light;
     --gov-bg: #f8fafc;
     --gov-surface: #ffffff;
@@ -356,7 +328,7 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     border-radius: 99px;
     transform: scaleX(0);
     transform-origin: center;
-    transition: transform 0.28s var(--ease-soft), opacity 0.2s ease;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
     box-shadow: none;
     filter: drop-shadow(0 0 6px color-mix(in srgb, var(--menu-active-color, var(--gov-teal, #12807f)) 80%, transparent));
     opacity: 0;
@@ -524,7 +496,7 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     border-radius: 50%;
     background: var(--menu-active-color, var(--gov-teal, #12807f));
     box-shadow: 0 0 10px var(--menu-active-color, var(--gov-teal, #12807f));
-    transition: transform 0.25s var(--ease-soft), opacity 0.2s ease;
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
     opacity: 0;
 }
 .site-menu--style-dot .site-menu__link:hover::after,
@@ -740,7 +712,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
     border: 1px solid var(--gov-border, rgba(0, 0, 0, 0.12)); border-radius: var(--radius-sm, 8px);
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(15, 23, 42, 0.04);
     z-index: 1050; display: flex; flex-direction: column; gap: 2px;
-    animation: langDropdownFade 0.18s var(--ease-soft);
+    animation: langDropdownFade 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @keyframes langDropdownFade {
     from { opacity: 0; transform: translateY(-4px) scale(0.98); }
@@ -1046,7 +1018,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__link[aria-current="
     box-shadow: 0 0 10px color-mix(in srgb, var(--menu-active, var(--gov-teal, #17999b)) 75%, transparent);
     transform: scaleX(0);
     transform-origin: center;
-    transition: transform 0.25s var(--ease-soft);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .site-menu--style-underline .site-menu__link:hover::after,
@@ -1139,7 +1111,7 @@ body .site-header .site-theme-toggle,
     color: currentColor !important;
     cursor: pointer;
     overflow: visible;
-    transition: transform 0.35s var(--ease-soft), color 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
 }
 
 body .site-header .site-theme-toggle:hover,
@@ -1188,7 +1160,7 @@ body:has(.site-header--transparent) .site-topbar .site-theme-toggle:hover {
     inset: 0;
     width: 100%;
     height: 100%;
-    transition: transform 0.5s var(--ease-soft), opacity 0.35s ease;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
 }
 
 .site-theme-toggle__icon--sun {
@@ -1253,7 +1225,7 @@ body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: va
     visibility: hidden;
     pointer-events: none;
     z-index: 100;
-    transition: transform 0.3s var(--ease-soft),
+    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
                 opacity 0.25s ease,
                 visibility 0.25s ease;
 }
@@ -1715,7 +1687,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     border: 1px solid color-mix(in srgb, var(--gov-border) 45%, transparent);
     border-radius: var(--radius);
     box-shadow: var(--card-shadow, 0 4px 16px -2px rgba(15, 23, 42, .04));
-    transition: transform 0.4s var(--ease-soft), box-shadow 0.4s var(--ease-soft), border-color 0.4s ease, background-color 0.35s ease;
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s ease, background-color 0.35s ease;
 }
 .news-card:hover, .content-card:hover, .contact-card:hover, .cat-tile:hover, .team-card:hover, .project-card:hover, .person-card:hover, .block-advantages__item:hover, .album-card:hover,
 .doc-card:hover, .catcard:hover, .catdetail__card:hover, .widget--style-card:hover {
@@ -1742,7 +1714,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 /* Новостям нужна более спокойная реакция: короткий быстрый подъём выглядел
    дёргано рядом с крупной обложкой и плотной правой колонкой. */
 :where(.news-card, .news-card__link, .newsfeat-lead, .newsfeat-mini, .newsfeat-text) {
-    transition: transform .38s var(--ease-soft),
+    transition: transform .38s cubic-bezier(.22, 1, .36, 1),
         box-shadow .38s ease, border-color .38s ease, color .28s ease;
 }
 
@@ -2002,7 +1974,7 @@ body.lightbox-active { overflow: hidden; }
     width: 48px; height: 48px; border-radius: 50%; border: 0;
     background: var(--gov-teal, #0d9488); color: #ffffff;
     box-shadow: 0 8px 24px rgba(13, 148, 136, 0.4);
-    cursor: pointer; transition: all 0.25s var(--ease-soft);
+    cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .push-floating-bell:hover {
     transform: scale(1.1); box-shadow: 0 12px 32px rgba(13, 148, 136, 0.5);
@@ -2025,7 +1997,7 @@ body.lightbox-active { overflow: hidden; }
     background: var(--gov-surface, #ffffff);
     border: 1px solid var(--gov-border, rgba(0, 0, 0, 0.12));
     box-shadow: 0 12px 40px rgba(15, 23, 42, 0.15);
-    color: var(--gov-title, #1e293b); animation: pushPromptSlideUp 0.3s var(--ease-soft);
+    color: var(--gov-title, #1e293b); animation: pushPromptSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @keyframes pushPromptSlideUp {
     from { opacity: 0; transform: translateY(16px); }
@@ -2050,7 +2022,7 @@ body.lightbox-active { overflow: hidden; }
     position: absolute; z-index: 1000; transform: translateX(-50%);
     display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: var(--radius, 12px);
     background: #1e293b; color: #ffffff; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3);
-    animation: quotePopoverPop 0.2s var(--ease-soft);
+    animation: quotePopoverPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .quote-share-popover[hidden] { display: none; }
 @keyframes quotePopoverPop {
@@ -2102,7 +2074,7 @@ body.lightbox-active { overflow: hidden; }
 .news-poll-res-row { margin-bottom: 14px; }
 .news-poll-res-info { display: flex; justify-content: space-between; font-size: var(--step--2); font-weight: 600; margin-bottom: 6px; color: var(--gov-title); }
 .news-poll-bar-track { height: 10px; border-radius: var(--radius-sm, 5px); background: color-mix(in srgb, var(--gov-border) 40%, transparent); overflow: hidden; }
-.news-poll-bar-fill { width: var(--poll-percent, 0%); height: 100%; border-radius: var(--radius-sm, 5px); background: var(--gov-teal, #0d9488); transition: width 0.6s var(--ease-soft); }
+.news-poll-bar-fill { width: var(--poll-percent, 0%); height: 100%; border-radius: var(--radius-sm, 5px); background: var(--gov-teal, #0d9488); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
 .news-poll-card__meta { margin-top: 14px; font-size: var(--step--3); color: var(--gov-subtext); }
 .news-poll-card__actions { margin-top: 14px; }
 .news-poll-card__actions .btn { width: 100%; justify-content: center; }
@@ -2413,7 +2385,7 @@ body.design-title-fade .is-title-reveal {
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: title-reveal-wipe 1.1s var(--ease-soft) forwards;
+        animation: title-reveal-wipe 1.1s cubic-bezier(.22, 1, .36, 1) forwards;
     }
     @keyframes title-reveal-wipe {
         to { background-position: 0 0; }
@@ -2579,7 +2551,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     text-decoration: none;
     color: var(--gov-ink);
     box-shadow: var(--card-shadow, 0 2px 8px rgba(15, 23, 42, 0.03));
-    transition: transform 0.25s var(--ease-soft), box-shadow 0.25s var(--ease-soft), border-color 0.25s ease;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
 }
 .relnews-card:hover,
 .album-card:hover,
@@ -2625,7 +2597,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.35s var(--ease-soft);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .relnews-card:hover .relnews-card__media img,
 .relnews-card:hover .relnews-card__img,
@@ -2727,7 +2699,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); 
     align-items: center; gap: 24px; background: transparent; border-radius: var(--radius); 
     overflow: hidden; min-height: 360px; 
-    transition: transform 0.4s var(--ease-soft), box-shadow 0.4s var(--ease-soft);
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 .block-banner--light:hover {
     transform: translateY(-2px);
@@ -2740,7 +2712,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .block-banner--light .block-banner__button { 
     display: inline-block; padding: 13px 26px; background: var(--gov-navy); color: #fff; 
     border-radius: var(--btn-radius, 8px); font-weight: 700; text-decoration: none; 
-    transition: transform 0.3s var(--ease-soft), box-shadow 0.3s ease, background-color 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease, background-color 0.3s ease;
 }
 .block-banner--light .block-banner__button:hover {
     transform: translateY(-2px) scale(1.02);
@@ -2752,7 +2724,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     position: relative; height: 100%; min-height: 320px; background: center/cover no-repeat; 
     -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%); 
     mask-image: linear-gradient(90deg, transparent 0, #000 22%); 
-    transition: transform 0.5s var(--ease-soft);
+    transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 .block-banner--light:hover .block-banner__photo {
     transform: scale(1.04);
@@ -2846,7 +2818,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 }
 .stage { 
     position: relative; display: flex; flex-direction: column; gap: 7px; padding-top: 24px; 
-    transition: transform 0.3s var(--ease-soft);
+    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 .stage:hover {
     transform: translateY(-2px);
@@ -2861,7 +2833,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     position: absolute; z-index: 2; top: 0; left: 0; width: 12px; height: 12px; border-radius: 50%;
     background: var(--gov-surface); border: 2px solid var(--gov-border);
     box-shadow: 0 0 0 3px var(--gov-bg);
-    transition: transform 0.3s var(--ease-soft), border-color 0.3s, background-color 0.3s, box-shadow 0.3s;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s, background-color 0.3s, box-shadow 0.3s;
 }
 .stage:hover .stage__dot {
     transform: scale(1.35);
@@ -3361,7 +3333,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
     background-size: cover; background-position: center;
     background-color: var(--gov-navy);
-    animation: hero-media-zoom 2.2s var(--ease-soft) forwards;
+    animation: hero-media-zoom 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @media (prefers-reduced-motion: reduce) {
     .block-hero__video, .block-hero--media .block-hero__media {
@@ -3438,7 +3410,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     font-weight: 700; 
     border-radius: var(--btn-radius, 9999px); 
     text-decoration: none; 
-    transition: background 0.3s var(--ease-soft), transform 0.3s var(--ease-soft), box-shadow 0.3s ease;
+    transition: background 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
     gap: 10px;
@@ -3639,7 +3611,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 
 .feature-card {
     --feature-card-motion-duration: .62s;
-    --feature-card-motion-ease: var(--ease-soft);
+    --feature-card-motion-ease: cubic-bezier(.16, 1, .3, 1);
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -3825,7 +3797,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 @media (max-width: 1000px) { .imgcards-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .imgcards-grid { grid-template-columns: 1fr; } }
 .imgcard { position: relative; display: block; min-height: 240px; border-radius: var(--radius); overflow: hidden; text-decoration: none; color: #fff; isolation: isolate; }
-.imgcard__media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: var(--gov-navy) center/cover no-repeat; transform: scale(1.001); transition: transform .7s var(--ease-soft); will-change: transform; }
+.imgcard__media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: var(--gov-navy) center/cover no-repeat; transform: scale(1.001); transition: transform .7s cubic-bezier(.22, 1, .36, 1); will-change: transform; }
 .imgcard:hover .imgcard__media { transform: scale(1.04); }
 /* Карточка без изображения: фирменная подложка с эмблемой вместо пустой
    тёмной плашки. Материалы без картинки встречаются всегда, и выглядеть они
@@ -3845,9 +3817,9 @@ span.imgcard__media::after {
 /* Подложка под подписью. Прежний градиент рассчитывался на тёмные снимки: на
    светлом фото (небо, снег, стекло) белый заголовок терял контраст. */
 .imgcard__overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,26,48,0) 22%, rgba(11,26,48,.55) 58%, rgba(11,26,48,.92) 100%); transition: opacity .5s ease; }
-.imgcard__body { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px; display: flex; flex-direction: column; gap: 10px; transform: translateY(2px); transition: transform .55s var(--ease-soft); }
+.imgcard__body { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px; display: flex; flex-direction: column; gap: 10px; transform: translateY(2px); transition: transform .55s cubic-bezier(.22, 1, .36, 1); }
 .imgcard__title { margin: 0; font-family: var(--font-heading, var(--font-family)); font-weight: 700; font-size: var(--step-1); line-height: 1.25; color: #fff; }
-.imgcard__more { display: inline-flex; align-items: center; font-size: var(--step--2); font-weight: 700; color: rgba(255,255,255,.9); transition: color .3s ease, transform .45s var(--ease-soft); }
+.imgcard__more { display: inline-flex; align-items: center; font-size: var(--step--2); font-weight: 700; color: rgba(255,255,255,.9); transition: color .3s ease, transform .45s cubic-bezier(.22, 1, .36, 1); }
 /* Вариант «фото сверху, текст под ним»: снимок занимает верх карточки, подпись
    уходит на подложку. Тот же список карточек, поэтому классы общие — меняется
    только раскладка и цвета текста. */
@@ -4004,7 +3976,7 @@ span.imgcard__media::after {
 }
 .mediacard__img { 
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; 
-    transition: transform 0.5s var(--ease-soft);
+    transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 .mediacard:hover .mediacard__img {
     transform: scale(1.05);
@@ -4018,7 +3990,7 @@ span.imgcard__media::after {
     border-radius: 50%; 
     background: rgba(255,255,255,.9); 
     color: var(--gov-navy); 
-    transition: transform 0.3s var(--ease-soft), background 0.3s, color 0.3s, box-shadow 0.3s;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s, color 0.3s, box-shadow 0.3s;
 }
 .mediacard__play svg { width: 22px; height: 22px; margin-left: 2px; }
 .mediacard:hover .mediacard__play { 
@@ -4233,7 +4205,7 @@ span.imgcard__media::after {
     .persons-grid > .person-card { grid-column: auto; }
 }
 .person-card { display: flex; flex-direction: column; background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius); overflow: hidden; }
-.person-card__photo { display: block; aspect-ratio: 4/4.4; background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; transition: transform 0.5s var(--ease-soft); }
+.person-card__photo { display: block; aspect-ratio: 4/4.4; background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
 /* Потолок высоты портрета: когда персон в ряду две, карточка занимает
    половину экрана, и пропорция 4:4.4 растила её до шестисот пикселей. */
 .person-card__photo, .person-card__placeholder { max-height: 360px; }
@@ -4252,11 +4224,11 @@ span.imgcard__media::after {
     content: ""; position: absolute; inset: 0; background: var(--gov-navy); opacity: .16;
     -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2012.4a4.7%204.7%200%201%200%200-9.4%204.7%204.7%200%200%200%200%209.4Z'%2F%3E%3Cpath%20d%3D'M12%2014.3c-4.9%200-7.6%202.6-7.6%205.4V21h15.2v-1.3c0-2.8-2.7-5.4-7.6-5.4Z'%2F%3E%3C%2Fsvg%3E") center / 38% no-repeat;
     mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%3E%3Cpath%20d%3D'M12%2012.4a4.7%204.7%200%201%200%200-9.4%204.7%204.7%200%200%200%200%209.4Z'%2F%3E%3Cpath%20d%3D'M12%2014.3c-4.9%200-7.6%202.6-7.6%205.4V21h15.2v-1.3c0-2.8-2.7-5.4-7.6-5.4Z'%2F%3E%3C%2Fsvg%3E") center / 38% no-repeat;
-    transition: opacity .4s ease, transform .6s var(--ease-soft);
+    transition: opacity .4s ease, transform .6s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 .person-card:hover .person-card__placeholder::after { opacity: .2; transform: scale(1.06); }
 .person-card__placeholder svg, .person-card__vacant { position: relative; z-index: 1; }
-.person-card__placeholder svg { opacity: .55; transition: transform 0.4s var(--ease-soft), color 0.3s ease; }
+.person-card__placeholder svg { opacity: .55; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease; }
 .person-card:hover .person-card__placeholder svg { transform: scale(1.15); color: var(--gov-teal); }
 .person-card__vacant {
     text-transform: uppercase; font-size: var(--step--4); letter-spacing: .08em; font-weight: 700;
@@ -4388,7 +4360,7 @@ span.imgcard__media::after {
 .doc-card__icon { 
     display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-sm, 10px); 
     background: color-mix(in srgb, var(--gov-teal) 12%, var(--gov-surface)); color: var(--gov-teal); 
-    transition: transform 0.3s var(--ease-soft), background 0.3s, color 0.3s;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s, color 0.3s;
 }
 .doc-card:hover .doc-card__icon {
     transform: scale(1.08) rotate(4deg);
@@ -4409,7 +4381,7 @@ span.imgcard__media::after {
 .ctaband__icon { 
     display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; 
     border: 1px solid rgba(255,255,255,.35); color: #fff; flex: 0 0 auto; 
-    transition: transform 0.4s var(--ease-soft), border-color 0.3s ease, background 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease, background 0.3s ease;
 }
 .ctaband__icon svg { width: 30px; height: 30px; }
 .block-ctaband:hover .ctaband__icon {
@@ -4423,7 +4395,7 @@ span.imgcard__media::after {
 .ctaband__button { 
     display: inline-block; padding: 13px 26px; background: #fff; color: var(--gov-navy); 
     border-radius: var(--btn-radius, 8px); font-weight: 700; font-size: var(--step--1); text-decoration: none; 
-    transition: transform 0.3s var(--ease-soft), box-shadow 0.3s ease, background-color 0.3s ease; 
+    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease, background-color 0.3s ease; 
 }
 .ctaband__button:hover { 
     transform: translateY(-2px) scale(1.02);
@@ -4590,7 +4562,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
    Разорванной связи «картинка отдельно, текст отдельно» больше нет. */
 .newsfeat-lead { display: block; min-width: 0; text-decoration: none; color: var(--gov-ink); }
 .newsfeat-lead__frame { position: relative; display: block; height: 100%; border-radius: var(--radius); overflow: hidden; }
-.newsfeat-lead__media { display: block; width: 100%; height: 100%; min-height: 260px; background: var(--gov-navy) center/cover no-repeat; object-fit: cover; transition: transform 0.5s var(--ease-soft); }
+.newsfeat-lead__media { display: block; width: 100%; height: 100%; min-height: 260px; background: var(--gov-navy) center/cover no-repeat; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
 
 /* Материал без изображения. Раньше место картинки заливалось сплошным цветом
    и читалось как ошибка загрузки; теперь это фирменная подложка с эмблемой. */
@@ -4660,7 +4632,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .newsfeat__more { color: var(--gov-teal-text); font-size: var(--step--2); font-weight: 700; }
 .newsfeat-mini { display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: var(--gov-ink); }
 .newsfeat-mini__thumb { display: block; width: 100%; aspect-ratio: 16/10; min-height: 150px; border-radius: var(--radius-sm, 8px); overflow: hidden; background: var(--gov-navy); }
-.newsfeat-mini__media { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s var(--ease-soft); }
+.newsfeat-mini__media { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
 .newsfeat-mini:hover .newsfeat-mini__media { transform: scale(1.04); }
 .newsfeat-mini__media--empty { display: block; width: 100%; height: 100%; background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
 .newsfeat-mini__body { display: flex; flex-direction: column; gap: 6px; }
@@ -4860,7 +4832,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     font-weight: 700;
     color: var(--gov-muted);
     border-radius: calc(var(--radius-sm, 10px) - 3px);
-    transition: all 0.22s var(--ease-inout-soft);
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: var(--font-family, 'Noto Sans', sans-serif); 
 }
 .media-tabs__tab::after {
@@ -5323,7 +5295,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.35s var(--ease-soft), box-shadow 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
 }
 .site-theme-toggle:hover {
     transform: scale(1.12);
@@ -5348,7 +5320,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     inset: 0;
     width: 100%;
     height: 100%;
-    transition: transform 0.5s var(--ease-soft), opacity 0.4s ease;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
 }
 
 /* Светлая тема: Солнце активно */
@@ -5414,7 +5386,7 @@ body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__moon {
 
 /* --- Кнопки поиска (Search Toggle / Submit) --- */
 .site-search-toggle, .site-search button {
-    transition: transform 0.3s var(--ease-soft), color 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease;
 }
 .site-search-toggle:hover, .site-search button:hover {
     transform: scale(1.15) rotate(-8deg);
@@ -5429,7 +5401,7 @@ body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__moon {
 
 /* --- Кнопка «Версия для слабовидящих» --- */
 .a11y-toggle {
-    transition: transform 0.3s var(--ease-soft), background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 .a11y-toggle:hover {
     transform: translateY(-2px) scale(1.03);
@@ -5476,7 +5448,7 @@ body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__moon {
     height: 2px;
     background: currentColor;
     border-radius: 2px;
-    transition: transform 0.35s var(--ease-soft), opacity 0.25s ease, width 0.25s ease;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, width 0.25s ease;
 }
 .site-burger:hover span:nth-child(2) {
     width: 14px;
@@ -5520,7 +5492,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow.is-open .s
 
 /* --- Иконки социальных сетей --- */
 .site-social__link, .widget-social-link {
-    transition: transform 0.3s var(--ease-soft), color 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease, box-shadow 0.25s ease;
 }
 .site-social__link:hover, .widget-social-link:hover {
     transform: translateY(-3px) scale(1.15);
@@ -5594,7 +5566,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow.is-open .s
     font-size: var(--step--2);
     font-weight: 600;
     pointer-events: auto;
-    animation: toast-slide-in 0.35s var(--ease-soft) forwards;
+    animation: toast-slide-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 .site-toast--info svg { color: var(--gov-teal); }
 .site-toast--error svg { color: #e74c3c; }
@@ -5651,7 +5623,7 @@ body.quick-search-active { overflow: hidden; }
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     transform: translateY(-12px) scale(0.97);
-    transition: transform 0.25s var(--ease-soft);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .site-quick-search.is-open .site-quick-search__container {
     transform: translateY(0) scale(1);
@@ -6397,7 +6369,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230284c7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
-    transition: transform 0.3s var(--ease-soft), background-color 0.2s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
     flex-shrink: 0;
     margin-left: 16px;
 }
