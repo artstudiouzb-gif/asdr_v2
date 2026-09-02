@@ -53,7 +53,7 @@ $toggle = static function (string $key, string $activeVal, string $label, string
         <section class="a11y-group">
             <div class="a11y-group__head">
                 <span class="a11y-group__title">
-                    <span class="a11y-group__icon" aria-hidden="true"><?= Icon::render('typography', 18) ?></span>
+                    <span class="a11y-group__icon" aria-hidden="true"><?= Icon::render('typography', 20) ?></span>
                     <?= htmlspecialchars(t('Размер текста'), ENT_QUOTES) ?>
                 </span>
                 <output class="a11y-group__value" data-a11y-size-value><?= (int) $settings['size'] ?>%</output>
@@ -72,40 +72,58 @@ $toggle = static function (string $key, string $activeVal, string $label, string
             </div>
         </section>
 
-        <!-- 2. КОНТРАСТ И ЦВЕТОВАЯ СХЕМА -->
+        <!-- 2. КОНТРАСТ И ЦВЕТОВАЯ СХЕМА (ТОЛЬКО КРУПНЫЕ ПЛИТКИ-ОБРАЗЦЫ) -->
         <section class="a11y-group">
             <div class="a11y-group__head">
                 <span class="a11y-group__title">
-                    <span class="a11y-group__icon" aria-hidden="true"><?= Icon::render('palette', 18) ?></span>
-                    <?= htmlspecialchars(t('Контраст и фон'), ENT_QUOTES) ?>
+                    <span class="a11y-group__icon" aria-hidden="true"><?= Icon::render('palette', 20) ?></span>
+                    <?= htmlspecialchars(t('Цвет и контраст'), ENT_QUOTES) ?>
                 </span>
             </div>
             <div class="a11y-group__grid a11y-group__grid--schemes">
-                <?= $choice('contrast', 'normal', t('Обычный'), '<span class="a11y-scheme-badge a11y-scheme-badge--normal">A</span>', 'a11y-choice--card a11y-choice--normal') ?>
-                <?= $choice('contrast', 'mono', t('Чёрно-белый'), '<span class="a11y-scheme-badge a11y-scheme-badge--mono">A</span>', 'a11y-choice--card a11y-choice--mono') ?>
-                <?= $choice('contrast', 'warm', t('Тёплый'), '<span class="a11y-scheme-badge a11y-scheme-badge--warm">A</span>', 'a11y-choice--card a11y-choice--warm') ?>
-                <button type="button" class="a11y-choice a11y-choice--card a11y-choice--dark" data-a11y-theme aria-pressed="false">
-                    <span class="a11y-choice__visual" aria-hidden="true">
-                        <span class="a11y-scheme-badge a11y-scheme-badge--dark"><?= Icon::render('moon', 15) ?></span>
-                    </span>
-                    <span class="a11y-choice__label"><?= htmlspecialchars(t('Тёмный'), ENT_QUOTES) ?></span>
+                <button type="button" class="a11y-choice a11y-choice--badge-only a11y-choice--normal"
+                        data-a11y-set="contrast:normal"
+                        aria-pressed="<?= ((string) $settings['contrast'] === 'normal') ? 'true' : 'false' ?>"
+                        aria-label="<?= htmlspecialchars(t('Стандартная схема'), ENT_QUOTES) ?>"
+                        title="<?= htmlspecialchars(t('Стандартная'), ENT_QUOTES) ?>">
+                    <span class="a11y-scheme-badge a11y-scheme-badge--normal" aria-hidden="true">A</span>
+                </button>
+                <button type="button" class="a11y-choice a11y-choice--badge-only a11y-choice--mono"
+                        data-a11y-set="contrast:mono"
+                        aria-pressed="<?= ((string) $settings['contrast'] === 'mono') ? 'true' : 'false' ?>"
+                        aria-label="<?= htmlspecialchars(t('Чёрно-белая схема'), ENT_QUOTES) ?>"
+                        title="<?= htmlspecialchars(t('Чёрно-белая'), ENT_QUOTES) ?>">
+                    <span class="a11y-scheme-badge a11y-scheme-badge--mono" aria-hidden="true">A</span>
+                </button>
+                <button type="button" class="a11y-choice a11y-choice--badge-only a11y-choice--warm"
+                        data-a11y-set="contrast:warm"
+                        aria-pressed="<?= ((string) $settings['contrast'] === 'warm') ? 'true' : 'false' ?>"
+                        aria-label="<?= htmlspecialchars(t('Тёплая схема (бежевый фон)'), ENT_QUOTES) ?>"
+                        title="<?= htmlspecialchars(t('Тёплая (бежевая)'), ENT_QUOTES) ?>">
+                    <span class="a11y-scheme-badge a11y-scheme-badge--warm" aria-hidden="true">A</span>
+                </button>
+                <button type="button" class="a11y-choice a11y-choice--badge-only a11y-choice--dark"
+                        data-a11y-theme
+                        aria-pressed="false"
+                        aria-label="<?= htmlspecialchars(t('Тёмная тема'), ENT_QUOTES) ?>"
+                        title="<?= htmlspecialchars(t('Тёмная тема'), ENT_QUOTES) ?>">
+                    <span class="a11y-scheme-badge a11y-scheme-badge--dark" aria-hidden="true"><?= Icon::render('moon', 18) ?></span>
                 </button>
             </div>
-            <p class="a11y-group__hint"><?= htmlspecialchars(t('Тёплый фон снижает резь в глазах при долгом чтении.'), ENT_QUOTES) ?></p>
         </section>
 
         <!-- 3. ШРИФТ -->
         <section class="a11y-group">
             <div class="a11y-group__head">
                 <span class="a11y-group__title">
-                    <span class="a11y-group__icon" aria-hidden="true"><?= Icon::render('typography', 18) ?></span>
+                    <span class="a11y-group__icon" aria-hidden="true"><?= Icon::render('typography', 20) ?></span>
                     <?= htmlspecialchars(t('Шрифт'), ENT_QUOTES) ?>
                 </span>
             </div>
             <div class="a11y-group__grid a11y-group__grid--fonts">
-                <?= $choice('font', 'default', t('Обычный'), '<span class="a11y-font-badge a11y-font-badge--sans">Aa</span>', 'a11y-choice--card a11y-choice--font-col') ?>
-                <?= $choice('font', 'readable', t('Читаемый'), '<span class="a11y-font-badge a11y-font-badge--readable">Aa</span>', 'a11y-choice--card a11y-choice--font-col a11y-choice--font-readable') ?>
-                <?= $choice('font', 'serif', t('С засечками'), '<span class="a11y-font-badge a11y-font-badge--serif">Aa</span>', 'a11y-choice--card a11y-choice--font-col a11y-choice--font-serif') ?>
+                <?= $choice('font', 'default', t('Стандарт'), '<span class="a11y-font-badge a11y-font-badge--sans">Aa</span>', 'a11y-choice--card') ?>
+                <?= $choice('font', 'readable', t('Без засечек'), '<span class="a11y-font-badge a11y-font-badge--readable">Aa</span>', 'a11y-choice--card a11y-choice--font-readable') ?>
+                <?= $choice('font', 'serif', t('С засечками'), '<span class="a11y-font-badge a11y-font-badge--serif">Aa</span>', 'a11y-choice--card a11y-choice--font-serif') ?>
             </div>
         </section>
 
@@ -113,14 +131,14 @@ $toggle = static function (string $key, string $activeVal, string $label, string
         <section class="a11y-group">
             <div class="a11y-group__head">
                 <span class="a11y-group__title">
-                    <span class="a11y-group__icon" aria-hidden="true"><?= Icon::render('arrows-vertical', 18) ?></span>
+                    <span class="a11y-group__icon" aria-hidden="true"><?= Icon::render('arrows-vertical', 20) ?></span>
                     <?= htmlspecialchars(t('Интервалы'), ENT_QUOTES) ?>
                 </span>
             </div>
             <div class="a11y-group__grid a11y-group__grid--spacing">
-                <?= $choice('spacing', 'normal', t('Обычные'), '<span class="a11y-spacing-icon a11y-spacing-icon--normal"><i></i><i></i><i></i></span>', 'a11y-choice--card a11y-choice--spacing-col') ?>
-                <?= $choice('spacing', 'wide', t('Увеличенные'), '<span class="a11y-spacing-icon a11y-spacing-icon--wide"><i></i><i></i><i></i></span>', 'a11y-choice--card a11y-choice--spacing-col') ?>
-                <?= $choice('spacing', 'wider', t('Максимальные'), '<span class="a11y-spacing-icon a11y-spacing-icon--wider"><i></i><i></i><i></i></span>', 'a11y-choice--card a11y-choice--spacing-col') ?>
+                <?= $choice('spacing', 'normal', t('Обычный'), '<span class="a11y-spacing-icon a11y-spacing-icon--normal"><i></i><i></i><i></i></span>', 'a11y-choice--card') ?>
+                <?= $choice('spacing', 'wide', t('Средний'), '<span class="a11y-spacing-icon a11y-spacing-icon--wide"><i></i><i></i><i></i></span>', 'a11y-choice--card') ?>
+                <?= $choice('spacing', 'wider', t('Большой'), '<span class="a11y-spacing-icon a11y-spacing-icon--wider"><i></i><i></i><i></i></span>', 'a11y-choice--card') ?>
             </div>
         </section>
 
@@ -128,7 +146,7 @@ $toggle = static function (string $key, string $activeVal, string $label, string
         <section class="a11y-group">
             <div class="a11y-group__head">
                 <span class="a11y-group__title">
-                    <span class="a11y-group__icon" aria-hidden="true"><?= Icon::render('adjustments-horizontal', 18) ?></span>
+                    <span class="a11y-group__icon" aria-hidden="true"><?= Icon::render('adjustments-horizontal', 20) ?></span>
                     <?= htmlspecialchars(t('Чтение без помех'), ENT_QUOTES) ?>
                 </span>
             </div>
@@ -138,15 +156,13 @@ $toggle = static function (string $key, string $activeVal, string $label, string
                 <?= $toggle('motion', 'off', t('Остановить анимации'), 'player-pause') ?>
                 <?= $toggle('links', 'underline', t('Подчёркивать ссылки'), 'underline') ?>
             </div>
-            <p class="a11y-group__hint"><?= htmlspecialchars(t('Режим чтения убирает баннеры и колонки: остаётся только текст страницы.'), ENT_QUOTES) ?></p>
         </section>
     </div>
 
     <div class="a11y-drawer__foot">
         <button type="button" class="a11y-reset" data-a11y-reset>
-            <span class="a11y-reset__icon" aria-hidden="true"><?= Icon::render('refresh', 16) ?></span>
-            <?= htmlspecialchars(t('Сбросить настройки'), ENT_QUOTES) ?>
+            <span class="a11y-reset__icon" aria-hidden="true"><?= Icon::render('refresh', 18) ?></span>
+            <?= htmlspecialchars(t('Сбросить все настройки'), ENT_QUOTES) ?>
         </button>
-        <p class="a11y-drawer__note"><?= htmlspecialchars(t('Настройки сохраняются в этом браузере и действуют на всех страницах сайта.'), ENT_QUOTES) ?></p>
     </div>
 </aside>
