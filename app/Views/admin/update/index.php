@@ -57,7 +57,7 @@ $ago = static function (?int $seconds): string {
     <table class="data-table">
         <tbody>
             <tr>
-                <th style="width: 220px;">Установлено</th>
+                <th class="u-inline-7006b2a9a3">Установлено</th>
                 <td><strong><?= htmlspecialchars((string) ($check['installed'] ?? '—'), ENT_QUOTES) ?></strong></td>
             </tr>
             <?php if ($check['ok'] ?? false): ?>
@@ -162,7 +162,7 @@ $ago = static function (?int $seconds): string {
 
         <?php if ($state['log'] !== []): ?>
             <table class="data-table">
-                <thead><tr><th style="width: 160px;">Время</th><th>Шаг</th></tr></thead>
+                <thead><tr><th class="u-inline-611bf920db">Время</th><th>Шаг</th></tr></thead>
                 <tbody>
                     <?php foreach (array_reverse($state['log']) as $line): ?>
                         <tr>
