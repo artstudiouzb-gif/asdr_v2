@@ -3167,11 +3167,12 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     flex: 1;
     justify-content: flex-end;
     gap: 10px;
-    padding: clamp(20px, 2.4vw, 34px);
-    /* Сверху зарезервировано место под метку: она лежит на кадре отдельным
-       слоем, и на узком экране, где текста больше, чем высоты, первая строка
-       заезжала прямо под неё. */
-    padding-top: clamp(58px, 13vw, 76px);
+    /* Боковой отступ — тот же, что у компактной карточки (14px): карточки
+       стоят в одной сетке, и текст обязан начинаться на одной вертикали.
+       Свой у обложки только вертикальный: снизу просторнее, потому что под
+       текстом кнопка, сверху зарезервировано место под метку — она лежит на
+       кадре отдельным слоем, и на узком экране первая строка заезжала под неё. */
+    padding: clamp(58px, 13vw, 76px) 14px clamp(18px, 2vw, 26px);
 }
 /* Цвет объявлен на самой карточке: внутри есть и заголовок, и дата, и анонс,
    у каждого свой токен, и перечислять их по отдельности значило бы забыть
@@ -3236,7 +3237,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 /* Своей пропорции у кадра нет — он заполняет обёртку целиком, кадрирует
    `object-fit: cover` у изображения. */
 .relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: auto; }
-.relnews-card--wide .relnews-card__body { min-width: 0; justify-content: center; padding: 18px 20px; }
+.relnews-card--wide .relnews-card__body { min-width: 0; justify-content: center; padding: 18px 14px; }
 .relnews-card--wide .relnews-card__title { font-size: var(--step-2); }
 /* Анонс — три строки: карточка стоит в ряду с компактными, и её высота задаёт
    высоту всего ряда. Правило адресовано только широкой карточке: у той же
