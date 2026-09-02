@@ -453,15 +453,9 @@ $router->post('/repo/security/telegram/disable', [\App\Controllers\Repo\PortalCo
 $router->get('/health', [\App\Controllers\Site\HealthController::class, 'index']);
 // Приём Core Web Vitals: sendBeacon шлёт их при закрытии вкладки.
 $router->post('/_vitals', [\App\Controllers\Site\VitalsController::class, 'store']);
-// Маячок просмотра новости: показ страницы её больше не считает (см.
-// NewsController::countView и App\Core\Speculation).
-$router->post('/news/view', [\App\Controllers\Site\NewsController::class, 'countView']);
 
 // --- PWA-манифест ---
 $router->get('/manifest.webmanifest', [\App\Controllers\Site\ManifestController::class, 'webmanifest']);
-// Правила предзагрузки следующей страницы: их запрашивает сам браузер по
-// заголовку Speculation-Rules (App\Core\Speculation).
-$router->get('/speculation-rules.json', [\App\Controllers\Site\SpeculationController::class, 'rules']);
 
 // --- SEO & RSS ---
 $router->get('/sitemap.xml', [\App\Controllers\Site\SitemapController::class, 'sitemap']);
