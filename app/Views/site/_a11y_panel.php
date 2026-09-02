@@ -138,15 +138,13 @@ $toggle = static function (string $key, string $activeVal, string $label, string
                 <?= $toggle('motion', 'off', t('Остановить анимации'), 'player-pause') ?>
                 <?= $toggle('links', 'underline', t('Подчёркивать ссылки'), 'underline') ?>
             </div>
-            <p class="a11y-group__hint"><?= htmlspecialchars(t('Режим чтения убирает баннеры и колонки: остаётся только текст страницы.'), ENT_QUOTES) ?></p>
         </section>
     </div>
 
     <div class="a11y-drawer__foot">
         <button type="button" class="a11y-reset" data-a11y-reset>
-            <span class="a11y-reset__icon" aria-hidden="true"><?= Icon::render('refresh', 16) ?></span>
+            <span class="a11y-reset__icon" aria-hidden="true"><?= Icon::render('refresh', 18) ?></span>
             <?= htmlspecialchars(t('Сбросить настройки'), ENT_QUOTES) ?>
         </button>
-        <p class="a11y-drawer__note"><?= htmlspecialchars(t('Настройки сохраняются в этом браузере и действуют на всех страницах сайта.'), ENT_QUOTES) ?></p>
     </div>
 </aside>
