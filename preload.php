@@ -30,77 +30,87 @@ spl_autoload_register(static function (string $class): void {
     }
 });
 
-// 2. Load helpers
+// 2. Load global helpers
 if (is_file(APP_ROOT . '/app/Core/helpers.php')) {
     require_once APP_ROOT . '/app/Core/helpers.php';
 }
 
-/**
- * Helper to recursively scan and preload PHP files in a directory.
- *
- * @param string $dir
- * @param list<string> $excludes
- * @return list<string> list of successfully compiled/loaded file paths
- */
-function preload_directory(string $dir, array $excludes = []): array
-{
-    $preloaded = [];
-    if (!is_dir($dir)) {
-        return $preloaded;
-    }
-
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
-        RecursiveIteratorIterator::LEAVES_ONLY
-    );
-
-    $hasOpcacheCompile = function_exists('opcache_compile_file')
-        && filter_var(ini_get('opcache.enable'), FILTER_VALIDATE_BOOLEAN);
-
-    foreach ($iterator as $file) {
-        /** @var SplFileInfo $file */
-        if (!$file->isFile() || $file->getExtension() !== 'php') {
-            continue;
+if (!function_exists('preload_directory')) {
+    /**
+     * Helper to recursively scan and preload PHP files in a directory.
+     *
+     * @param string $dir
+     * @param list<string> $excludes
+     * @return list<string> list of successfully compiled/loaded file paths
+     */
+    function preload_directory(string $dir, array $excludes = []): array
+    {
+        $preloaded = [];
+        if (!is_dir($dir)) {
+            return $preloaded;
         }
 
-        $path = str_replace('\\', '/', $file->getPathname());
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::LEAVES_ONLY
+        );
 
-        $skip = false;
-        foreach ($excludes as $exclude) {
-            if (str_contains($path, $exclude)) {
-                $skip = true;
-                break;
+        $hasOpcache = function_exists('opcache_compile_file')
+            && (filter_var(ini_get('opcache.enable'), FILTER_VALIDATE_BOOLEAN)
+                || filter_var(ini_get('opcache.enable_cli'), FILTER_VALIDATE_BOOLEAN));
+
+        foreach ($iterator as $file) {
+            /** @var SplFileInfo $file */
+            if (!$file->isFile() || $file->getExtension() !== 'php') {
+                continue;
             }
-        }
-        if ($skip) {
-            continue;
-        }
 
-        try {
-            if ($hasOpcacheCompile) {
-                // Compile into OPcache shared memory
-                if (@opcache_compile_file($path)) {
-                    $preloaded[] = $path;
+            $path = str_replace('\\', '/', $file->getPathname());
+
+            $skip = false;
+            foreach ($excludes as $exclude) {
+                if (str_contains($path, $exclude)) {
+                    $skip = true;
+                    break;
                 }
-            } else {
-                // Fallback for environments / CLI inspection
+            }
+            if ($skip) {
+                continue;
+            }
+
+            try {
+                if ($hasOpcache) {
+                    if (@opcache_compile_file($path)) {
+                        $preloaded[] = $path;
+                        continue;
+                    }
+                }
+
+                // Derive class name from path: /app/Core/Router.php -> App\Core\Router
+                $appPos = strpos($path, '/app/');
+                if ($appPos !== false) {
+                    $subPath = substr($path, $appPos + 5, -4); // strip '/app/' and '.php'
+                    $class = 'App\\' . str_replace('/', '\\', $subPath);
+                    if (class_exists($class, true) || interface_exists($class, false) || trait_exists($class, false) || enum_exists($class, false)) {
+                        $preloaded[] = $path;
+                        continue;
+                    }
+                }
+
                 require_once $path;
                 $preloaded[] = $path;
-            }
-        } catch (\Throwable $e) {
-            // Ignore non-critical runtime issues during preload
-            if (defined('STDERR') && is_resource(STDERR)) {
-                fwrite(STDERR, "[Preload Warning] Could not compile {$path}: " . $e->getMessage() . PHP_EOL);
+            } catch (\Throwable) {
+                // Skip unresolvable files without failing the master process
             }
         }
-    }
 
-    return $preloaded;
+        return $preloaded;
+    }
 }
 
 // 3. Preload Core classes, Models, and Controllers
 $excludes = [
-    '/app/Core/bootstrap.php', // Runtime request-specific initialization
+    '/app/Core/bootstrap.php',
     '/app/Core/data/',
     '/app/Core/lang/',
     '/app/Views/',
