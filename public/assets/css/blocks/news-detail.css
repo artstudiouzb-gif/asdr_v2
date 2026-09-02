@@ -564,7 +564,7 @@ button.newsdetail-gallery__thumb:hover {
     text-decoration: none;
     line-height: 1;
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s var(--ease-inout-soft);
 }
 .newsdetail-dl-btn__icon {
     display: inline-flex;

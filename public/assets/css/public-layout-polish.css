@@ -600,7 +600,7 @@
 :root {
     --editorial-headline-tracking: -0.025em;
     --editorial-eyebrow-tracking: 0.06em;
-    --editorial-smooth-transition: 240ms cubic-bezier(0.16, 1, 0.3, 1);
+    --editorial-smooth-transition: 240ms var(--ease-soft);
     
     /* Layered atmospheric elevation tokens (Apple / Pentagram optical standard) */
     --elevation-flat: 0 0 0 1px color-mix(in srgb, var(--gov-navy, #0f172a) 8%, transparent);

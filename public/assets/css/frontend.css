@@ -62,7 +62,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    transition: background-color .3s cubic-bezier(0.16, 1, 0.3, 1), color .3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background-color .3s var(--ease-soft), color .3s var(--ease-soft);
 }
 
 img { max-width: 100%; display: block; height: auto; }
@@ -122,7 +122,7 @@ summary:focus-visible {
     border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     opacity: 0; visibility: hidden;
     transform: translateY(10px);
-    transition: opacity 0.25s cubic-bezier(0.23, 1, 0.32, 1), transform 0.25s cubic-bezier(0.23, 1, 0.32, 1), visibility 0.25s;
+    transition: opacity 0.25s var(--ease-soft), transform 0.25s var(--ease-soft), visibility 0.25s;
 }
 .site-submenu__link { padding: 6px 10px; border-radius: 6px; white-space: nowrap; }
 .site-submenu__link:hover { background: var(--bg-muted, #f2f2f2); }
@@ -264,11 +264,14 @@ summary:focus-visible {
 @media (min-width: 769px) { .cms-block--only-mobile { display: none; } }
 
 /* Микро-анимации появления при скролле (Intersection Observer, группа 4.2). */
-[data-reveal] { opacity: 0; transition: opacity .75s cubic-bezier(0.215, 0.61, 0.355, 1), transform .75s cubic-bezier(0.215, 0.61, 0.355, 1); }
-[data-reveal-type="slide-up"] { transform: translateY(28px); }
-[data-reveal-type="slide-left"] { transform: translateX(-32px); }
-[data-reveal-type="slide-right"] { transform: translateX(32px); }
-[data-reveal-type="zoom-in"] { transform: scale(.94); }
+[data-reveal] { opacity: 0; transition: opacity var(--dur-reveal) var(--ease-soft), transform var(--dur-reveal) var(--ease-soft); }
+/* Сдвиг небольшой намеренно: чем длиннее путь, тем заметнее сама анимация, а
+   заметной должна быть страница. Двадцать восемь пикселей читались как прыжок
+   макета, особенно когда рядом появлялась сетка карточек со своим сдвигом. */
+[data-reveal-type="slide-up"] { transform: translateY(20px); }
+[data-reveal-type="slide-left"] { transform: translateX(-24px); }
+[data-reveal-type="slide-right"] { transform: translateX(24px); }
+[data-reveal-type="zoom-in"] { transform: scale(.96); }
 /* fade — только прозрачность (transform не нужен). */
 [data-reveal].is-visible { opacity: 1; transform: none; }
 /* Появление — прогрессивное улучшение: при отключённом JavaScript блок
@@ -296,7 +299,7 @@ summary:focus-visible {
 }
 .anim-card.is-inview {
     opacity: 1;
-    animation: card-reveal var(--card-reveal-duration) cubic-bezier(.22, 1, .36, 1) var(--card-reveal-delay, 0ms) backwards;
+    animation: card-reveal var(--card-reveal-duration) var(--ease-soft) var(--card-reveal-delay, 0ms) backwards;
 }
 @keyframes card-reveal {
     from { opacity: 0; transform: translateY(var(--card-reveal-shift)) scale(var(--card-reveal-scale)); }
@@ -355,7 +358,7 @@ summary:focus-visible {
     border: 1px solid var(--gov-border);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s ease;
+    transition: transform 0.4s var(--ease-soft), box-shadow 0.4s var(--ease-soft), border-color 0.4s ease;
 }
 .block-advantages__item h3,
 .block-advantages__item p {
@@ -799,7 +802,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     scroll-snap-align: start; flex: 0 0 min(360px, 85%); margin: 0;
     background: var(--gov-surface, #fff); border: 1px solid var(--gov-border); border-radius: var(--radius, 16px); padding: 32px 28px; text-align: center;
     box-shadow: 0 4px 12px rgba(19,42,92,.02);
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s ease;
+    transition: transform 0.4s var(--ease-soft), box-shadow 0.4s var(--ease-soft), border-color 0.4s ease;
 }
 .testimonial:hover {
     transform: translateY(-4px) scale(1.01);
@@ -809,7 +812,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .testimonial__photo { 
     width: 76px; height: 76px; border-radius: 50%; object-fit: cover; margin: 0 auto 16px; 
     border: 3px solid var(--gov-border);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease; 
+    transition: transform 0.3s var(--ease-soft), border-color 0.3s ease; 
 }
 .testimonial:hover .testimonial__photo {
     transform: scale(1.08);
@@ -865,13 +868,13 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     .block-projects__grid { grid-template-columns: minmax(0, 1fr); }
 }
 .team-card { text-align: center; }
-.team-card__photo { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: var(--radius-sm, 12px); margin-bottom: 12px; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
+.team-card__photo { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: var(--radius-sm, 12px); margin-bottom: 12px; transition: transform 0.5s var(--ease-soft); }
 .team-card:hover .team-card__photo { transform: scale(1.04); }
 .team-card__name { font-weight: 700; transition: color 0.3s ease; }
 .team-card:hover .team-card__name { color: var(--color-accent, #e63946); }
 .team-card__position { color: var(--text-muted); font-size: var(--step--2); }
 .project-card { display: block; text-decoration: none; color: inherit; background: var(--bg-surface); border-radius: var(--radius, 12px); overflow: hidden; }
-.project-card__cover { width: 100%; aspect-ratio: 16/10; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
+.project-card__cover { width: 100%; aspect-ratio: 16/10; object-fit: cover; transition: transform 0.5s var(--ease-soft); }
 .project-card:hover .project-card__cover { transform: scale(1.05); }
 .project-card__title { font-weight: 700; padding: 12px 14px 0; transition: color 0.3s ease; }
 .project-card:hover .project-card__title { color: var(--color-accent, #e63946); }
@@ -957,7 +960,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     color: var(--gov-muted, #666);
     font-size: var(--step--1);
     line-height: var(--base-line-height, 1.6);
-    animation: faq-fade-in 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: faq-fade-in 0.35s var(--ease-inout-soft);
 }
 @keyframes faq-fade-in {
     from { opacity: 0; transform: translateY(-6px); }
@@ -1086,7 +1089,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .news-card { border: 1px solid var(--gov-border); border-radius: 10px; overflow: hidden; background: var(--surface, #fff); transition: box-shadow .15s ease, transform .15s ease; }
 .news-card__link { display: flex; flex-direction: column; height: 100%; text-decoration: none; color: inherit; }
 .news-card__cover { display: block; aspect-ratio: 16 / 9; overflow: hidden; background: #f0f2f5; }
-.news-card__cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
+.news-card__cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s var(--ease-soft); }
 .news-card:hover .news-card__cover img { transform: scale(1.05); }
 .news-card__body { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px; }
 .news-card__title { font-weight: 600; font-size: var(--step-1); color: var(--color-primary, #1a1a1a); line-height: 1.35; }
@@ -1246,7 +1249,7 @@ h1, h2 { letter-spacing: -.015em; }
     border: 1px solid var(--border-color); 
     border-radius: var(--radius, 14px); 
     min-height: 90px; 
-    transition: box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s ease; 
+    transition: box-shadow 0.4s var(--ease-soft), transform 0.4s var(--ease-soft), border-color 0.4s ease; 
 }
 .block-partners__item:hover { 
     box-shadow: 0 12px 28px rgba(19, 42, 92, 0.06); 
@@ -1261,7 +1264,7 @@ h1, h2 { letter-spacing: -.015em; }
     object-fit: contain; 
     filter: grayscale(1); 
     opacity: .65; 
-    transition: filter 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.3s ease; 
+    transition: filter 0.3s var(--ease-soft), opacity 0.3s var(--ease-soft), transform 0.3s ease; 
 }
 .block-partners__item:hover .block-partners__logo { 
     filter: grayscale(0); 
@@ -1274,13 +1277,13 @@ h1, h2 { letter-spacing: -.015em; }
 /* --- Блок «Баннер» --- */
 .block-banner { 
     border-radius: var(--radius, 14px); overflow: hidden; background: var(--bg-surface); 
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); 
+    transition: transform 0.4s var(--ease-soft), box-shadow 0.4s var(--ease-soft); 
 }
 .block-banner:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 28px rgba(19, 42, 92, 0.05);
 }
-.block-banner--image { background-size: cover; background-position: center; color: #fff; transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+.block-banner--image { background-size: cover; background-position: center; color: #fff; transition: transform 0.4s var(--ease-soft), box-shadow 0.4s var(--ease-soft); }
 .block-banner__inner { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; padding: clamp(40px, 7vw, 88px) clamp(20px, 4vw, 48px); text-align: center; }
 .block-banner__title { font-size: var(--font-size-h2, var(--step-8)); margin: 0 0 12px; line-height: 1.15; }
 .block-banner--image .block-banner__title { color: #fff; }
@@ -1289,7 +1292,7 @@ h1, h2 { letter-spacing: -.015em; }
     display: inline-block; padding: 13px 32px; background: var(--color-accent, #e63946); 
     color: #fff; text-decoration: none; font-weight: 600; border-radius: var(--btn-radius, 10px); 
     box-shadow: var(--shadow-sm); 
-    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease, background 0.3s ease; 
+    transition: transform 0.3s var(--ease-soft), box-shadow 0.3s ease, background 0.3s ease; 
 }
 .block-banner__button:hover { 
     transform: translateY(-2px) scale(1.02); 
@@ -1330,7 +1333,7 @@ body.design-search-overlay .site-search-toggle { display: inline-flex; }
     width: min(620px, calc(100vw - 32px)); margin: 0; padding: 16px;
     background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 16px;
     box-shadow: 0 20px 48px rgba(15, 23, 42, 0.18); transform: translateY(-10px) scale(.99);
-    transform-origin: top right; transition: transform .2s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: top right; transition: transform .2s var(--ease-soft);
 }
 .site-search-overlay.is-open .site-search-overlay__form { transform: translateY(0); }
 .site-search-overlay__form input {
@@ -1637,7 +1640,7 @@ body.mobile-menu-open .site-burger span:nth-child(3) { transform: translateY(-7p
     box-shadow: 0 0 10px rgba(230, 57, 70, 0.25);
 }
 .subscribe-block__form button[type=submit] {
-    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease, background-color 0.3s;
+    transition: transform 0.3s var(--ease-soft), box-shadow 0.3s ease, background-color 0.3s;
 }
 .subscribe-block__form button[type=submit]:hover {
     transform: translateY(-1px) scale(1.02);
@@ -1712,6 +1715,34 @@ html:has(.site-header--sticky) { scroll-padding-top: calc(var(--scroll-offset, 5
 ::view-transition-old(site-topbar) { animation: none; opacity: 0; }
 ::view-transition-new(site-header),
 ::view-transition-new(site-topbar) { animation: none; opacity: 1; }
+
+/* Содержимое страницы: мягкое проявление вместо стандартного перелива.
+   Умолчание браузера — короткий кросс-фейд линейной кривой; на нём переход
+   читается как подмена картинки. Новая страница входит дольше старой и с
+   небольшим подъёмом: движение направлено (страница «приходит»), а старая не
+   тянет на себя внимание, поэтому уходит быстрее и без сдвига.
+
+   Подъём маленький (10px): большой сдвиг всей страницы читается как рывок
+   макета и мешает читать первый экран, ради которого страницу и открыли. */
+@keyframes vt-content-out { to { opacity: 0; } }
+@keyframes vt-content-in { from { opacity: 0; transform: translateY(10px); } }
+::view-transition-old(root) { animation: vt-content-out var(--dur-base) var(--ease-soft) both; }
+::view-transition-new(root) { animation: vt-content-in var(--dur-slow) var(--ease-soft) both; }
+
+/* Обложка новости переезжает из карточки в статью: браузер сопоставляет два
+   снимка с одним именем и ведёт один кадр в другой, вместо того чтобы гасить
+   карточку и рисовать баннер заново. Имя на карточке ставит frontend.js в
+   момент клика — их на странице десятки, а два элемента с одним именем
+   отменяют переход целиком. На стороне статьи элемент единственный, и его
+   называет разметка (`data-news-cover` у обложки, галереи или видео). */
+[data-news-cover] { view-transition-name: news-cover; }
+/* Кадр едет по той же кривой и столько же, сколько проявляется страница: у
+   снимка своя анимация с умолчанием браузера (250 мс), и без этой строки
+   обложка приезжала бы раньше, чем появится текст вокруг неё. */
+::view-transition-group(news-cover) {
+    animation-duration: var(--dur-slow);
+    animation-timing-function: var(--ease-soft);
+}
 
 ::selection { background: color-mix(in srgb, var(--color-primary, #1f4b8e) 82%, #000); color: #fff; }
 /* Заголовочная гарнитура (Montserrat) — крупный корпоративный характер. */
@@ -2172,7 +2203,7 @@ body.mobile-menu-open .site-drawer { visibility: visible; opacity: 1; }
     border-left: 1px solid var(--border-color);
     box-shadow: -10px 0 40px rgba(15, 23, 42, 0.12);
     padding: 64px 20px 24px; overflow-y: auto;
-    transform: translateX(100%); transition: transform .3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateX(100%); transition: transform .3s var(--ease-soft);
 }
 body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .site-drawer__close {
@@ -2464,7 +2495,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
     display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 12px; margin-bottom: 14px;
     background: color-mix(in srgb, var(--color-primary, #223d79) 10%, transparent);
     color: var(--color-primary, #223d79);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s, color 0.3s;
+    transition: transform 0.3s var(--ease-soft), background-color 0.3s, color 0.3s;
 }
 .contact-card__icon svg { width: 22px; height: 22px; }
 .contact-card:hover .contact-card__icon {
@@ -2573,14 +2604,14 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
     display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
     padding: 24px 14px; border: 1px solid var(--border-color); border-radius: var(--radius, 14px);
     background: var(--surface, #fff); color: var(--text-main); text-decoration: none;
-    transition: border-color .4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow .4s cubic-bezier(0.165, 0.84, 0.44, 1), transform .4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    transition: border-color .4s var(--ease-soft), box-shadow .4s var(--ease-soft), transform .4s var(--ease-soft);
 }
 .cat-tile:hover { border-color: var(--color-accent, #2f6fed); box-shadow: 0 12px 28px rgba(19, 42, 92, 0.05); transform: translateY(-3px); }
 .cat-tile__icon { 
     display: grid; place-items: center; width: 50px; height: 50px; border-radius: 14px; 
     background: color-mix(in srgb, var(--color-primary, #223d79) 9%, transparent); 
     color: var(--color-primary, #223d79); 
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s ease, color 0.3s ease;
+    transition: transform 0.3s var(--ease-soft), background-color 0.3s ease, color 0.3s ease;
 }
 .cat-tile__icon svg { width: 24px; height: 24px; }
 .cat-tile:hover .cat-tile__icon {
