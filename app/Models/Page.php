@@ -13,6 +13,16 @@ final class Page
     /** Кэш slug главной страницы на время запроса (см. homeSlug()). */
     private static ?string $homeSlugCache = null;
 
+    /**
+     * Память ответов в пределах запроса: адрес пункта → цель (null тоже
+     * запоминается). Шапка спрашивает одно и то же дважды — сперва разрешая
+     * пункты дерева, потом собирая ссылку каждого из них, — и на меню из
+     * 46 пунктов это давало 36 одинаковых запросов на каждой странице.
+     *
+     * @var array<string, array<string,mixed>|null>
+     */
+    private static array $menuTargetMemo = [];
+
     public static function all(): array
     {
         $stmt = Database::pdo()->query(
@@ -279,6 +289,23 @@ final class Page
      */
     public static function findPublishedMenuTarget(string $slug, string $lang): ?array
     {
+        $memoKey = $lang . '|' . ltrim(trim($slug), '/');
+        if (array_key_exists($memoKey, self::$menuTargetMemo)) {
+            return self::$menuTargetMemo[$memoKey];
+        }
+
+        return self::$menuTargetMemo[$memoKey] = self::resolveMenuTarget($slug, $lang);
+    }
+
+    /** Сбрасывает память целей меню: адреса страниц изменились. */
+    public static function forgetMenuTargets(): void
+    {
+        self::$menuTargetMemo = [];
+    }
+
+    /** @return array<string,mixed>|null */
+    private static function resolveMenuTarget(string $slug, string $lang): ?array
+    {
         $slug = ltrim(trim($slug), '/');
         $entityType = 'page';
         if (str_starts_with($slug, 'projects/')) {
@@ -337,6 +364,78 @@ final class Page
         $target = $stmtTarget->fetch();
 
         return $target ?: null;
+    }
+
+    /**
+     * Цели пунктов меню сразу для набора адресов: значение пункта → запись.
+     *
+     * Шапка разрешала каждый пункт отдельным запросом, и меню из 46 пунктов
+     * давало 36 обращений к базе на **каждой** странице сайта. Здесь обычный
+     * случай — точное совпадание языка — берётся одним запросом на тип
+     * записи. Редкий остаток (страница есть только на другом языке) дорешает
+     * поштучный findPublishedMenuTarget: своя копия его логики про группы
+     * переводов разъехалась бы с ним при первой правке.
+     *
+     * @param array<array-key, mixed> $urlValues
+     * @return array<string, array<string,mixed>> адрес пункта → строка страницы
+     */
+    public static function publishedMenuTargets(array $urlValues, string $lang): array
+    {
+        if (!Language::isActive($lang)) {
+            return [];
+        }
+
+        $wanted = [];   // тип записи → slug → список исходных значений
+        foreach ($urlValues as $value) {
+            $value = (string) $value;
+            $slug = ltrim(trim($value), '/');
+            $entityType = 'page';
+            if (str_starts_with($slug, 'projects/')) {
+                $entityType = 'project';
+                $slug = substr($slug, strlen('projects/'));
+            }
+            if ($slug !== '') {
+                $wanted[$entityType][$slug][] = $value;
+            }
+        }
+        if ($wanted === []) {
+            return [];
+        }
+
+        $found = [];
+        $pdo = Database::pdo();
+        foreach ($wanted as $entityType => $bySlug) {
+            foreach (array_chunk(array_keys($bySlug), 500) as $chunk) {
+                $marks = implode(', ', array_fill(0, count($chunk), '?'));
+                $stmt = $pdo->prepare(
+                    "SELECT * FROM pages
+                     WHERE slug IN ({$marks}) AND lang = ? AND entity_type = ?
+                       AND status = 'published' AND deleted_at IS NULL"
+                );
+                $stmt->execute(array_merge($chunk, [$lang, $entityType]));
+                foreach ($stmt->fetchAll() as $row) {
+                    foreach ($bySlug[(string) $row['slug']] ?? [] as $value) {
+                        $found[$value] = $row;
+                    }
+                }
+            }
+        }
+
+        foreach ($urlValues as $value) {
+            $value = (string) $value;
+            if (!array_key_exists($value, $found)) {
+                $target = self::findPublishedMenuTarget($value, $lang);
+                if ($target !== null) {
+                    $found[$value] = $target;
+                }
+                continue;
+            }
+            // Найденное кладём в общую память: ту же цель спросит resolveUrl,
+            // когда будет собирать ссылку этого пункта.
+            self::$menuTargetMemo[$lang . '|' . ltrim(trim($value), '/')] = $found[$value];
+        }
+
+        return $found;
     }
 
     /** Значение пункта меню для найденной цели: у проекта адрес с префиксом. */
@@ -962,6 +1061,8 @@ final class Page
 
     public static function create(array $data): int
     {
+        // Адреса страниц изменились — память целей меню в этом запросе устарела.
+        self::forgetMenuTargets();
         $parentId = !empty($data['parent_id']) ? (int) $data['parent_id'] : null;
         if (!empty($data['is_home'])) {
             $parentId = null;
@@ -1025,6 +1126,8 @@ final class Page
 
     public static function update(int $id, array $data, ?int $expectedLockVersion = null): void
     {
+        // Адреса страниц изменились — память целей меню в этом запросе устарела.
+        self::forgetMenuTargets();
         $current = self::findById($id);
         $parentId = array_key_exists('parent_id', $data)
             ? (!empty($data['parent_id']) ? (int) $data['parent_id'] : null)
@@ -1102,6 +1205,8 @@ final class Page
 
     public static function delete(int $id): void
     {
+        // Адреса страниц изменились — память целей меню в этом запросе устарела.
+        self::forgetMenuTargets();
         // Мягкое удаление: страница отправляется в корзину (блоки сохраняются).
         $stmt = Database::pdo()->prepare('UPDATE pages SET deleted_at = NOW(), is_home = 0 WHERE id = :id');
         $stmt->execute([':id' => $id]);

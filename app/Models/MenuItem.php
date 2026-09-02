@@ -38,10 +38,22 @@ final class MenuItem
              ORDER BY sort_order ASC, id ASC"
         );
         $stmt->execute([':lang' => $lang]);
-        $rows = [];
-        foreach ($stmt->fetchAll() as $row) {
+        $items = $stmt->fetchAll();
+
+        // Цели пунктов разрешаются пакетом: поштучно это давало по запросу на
+        // пункт, то есть 36 обращений к базе на каждой странице сайта.
+        $pageValues = [];
+        foreach ($items as $row) {
             if ((string) $row['url_type'] === 'page') {
-                $page = Page::findPublishedMenuTarget((string) $row['url_value'], $lang);
+                $pageValues[] = (string) $row['url_value'];
+            }
+        }
+        $targets = $pageValues === [] ? [] : Page::publishedMenuTargets($pageValues, $lang);
+
+        $rows = [];
+        foreach ($items as $row) {
+            if ((string) $row['url_type'] === 'page') {
+                $page = $targets[(string) $row['url_value']] ?? null;
                 if ($page === null) {
                     continue;
                 }

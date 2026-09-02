@@ -40,6 +40,15 @@ final class SitemapController
         $news = Database::pdo()->query("SELECT n.* FROM news n WHERE n.status = 'published' AND n.published_at <= NOW() AND n.deleted_at IS NULL ORDER BY n.published_at DESC LIMIT 1000")->fetchAll();
         $projects = Database::pdo()->query("SELECT pr.* FROM pages pr WHERE pr.entity_type = 'project' AND pr.status = 'published' AND pr.deleted_at IS NULL ORDER BY pr.updated_at DESC")->fetchAll();
 
+        // Переводы читаются пакетом на каждый тип. Поштучный запрос давал по
+        // два обращения к базе на запись: на 450 записях — 900 запросов и
+        // половину времени ответа страницы.
+        $groups = [
+            'pages' => TranslationGroupHelper::getTranslationsBatch('pages', array_column($pages, 'id')),
+            'news' => TranslationGroupHelper::getTranslationsBatch('news', array_column($news, 'id')),
+            'projects' => TranslationGroupHelper::getTranslationsBatch('projects', array_column($projects, 'id')),
+        ];
+
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' . "\n";
 
@@ -54,7 +63,7 @@ final class SitemapController
             $xml .= '    <changefreq>weekly</changefreq>' . "\n";
             $xml .= '    <priority>' . (!empty($p['is_home']) ? '1.0' : '0.8') . '</priority>' . "\n";
 
-            $xml .= self::alternateLinks($baseUrl, 'pages', (int) $p['id']);
+            $xml .= self::alternateLinks($baseUrl, 'pages', $groups['pages'][(int) $p['id']] ?? []);
 
             $xml .= '  </url>' . "\n";
         }
@@ -69,7 +78,7 @@ final class SitemapController
             $xml .= '    <changefreq>daily</changefreq>' . "\n";
             $xml .= '    <priority>0.7</priority>' . "\n";
 
-            $xml .= self::alternateLinks($baseUrl, 'news', (int) $n['id']);
+            $xml .= self::alternateLinks($baseUrl, 'news', $groups['news'][(int) $n['id']] ?? []);
 
             $xml .= '  </url>' . "\n";
         }
@@ -84,7 +93,7 @@ final class SitemapController
             }
             $xml .= '    <changefreq>monthly</changefreq>' . "\n";
             $xml .= '    <priority>0.6</priority>' . "\n";
-            $xml .= self::alternateLinks($baseUrl, 'projects', (int) $pr['id']);
+            $xml .= self::alternateLinks($baseUrl, 'projects', $groups['projects'][(int) $pr['id']] ?? []);
             $xml .= '  </url>' . "\n";
         }
 
@@ -106,10 +115,11 @@ final class SitemapController
         return $baseUrl . Locale::url($path, $lang);
     }
 
-    private static function alternateLinks(string $baseUrl, string $type, int $recordId): string
+    /** @param array<string, array<string,mixed>> $translations язык → строка */
+    private static function alternateLinks(string $baseUrl, string $type, array $translations): string
     {
         $links = [];
-        foreach (TranslationGroupHelper::getTranslations($type, $recordId) as $langCode => $row) {
+        foreach ($translations as $langCode => $row) {
             if (!self::isPublished($type, $row)) {
                 continue;
             }

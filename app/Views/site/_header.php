@@ -491,6 +491,29 @@ $emailHtml = $emailVal !== ''
         . htmlspecialchars($emailVal, ENT_QUOTES) . '</a>'
     : '';
 $snippetHtml = (string) ($hcfg['snippet'] ?? ''); // очищен санитайзером при сохранении
+
+// Плашка курсов читает файл кэша, поэтому собирается только там, где её
+// действительно вывели: элемент необязательный и по умолчанию не размещён ни в
+// одной зоне, а работу делал на каждой странице каждого сайта.
+$currencyHtml = '';
+foreach (['elements', 'elements_mobile'] as $set) {
+    foreach ((array) ($hcfg[$set] ?? []) as $zoneItems) {
+        if (in_array('currency', (array) $zoneItems, true)) {
+            $currencyHtml = \App\Core\CurrencyInformer::renderWidgetHtml();
+            break 2;
+        }
+    }
+}
+if ($currencyHtml === '') {
+    foreach (['topbar', 'bottombar'] as $bar) {
+        foreach ((array) ($hcfg[$bar]['zones'] ?? []) as $zoneItems) {
+            if (in_array('currency', (array) $zoneItems, true)) {
+                $currencyHtml = \App\Core\CurrencyInformer::renderWidgetHtml();
+                break 2;
+            }
+        }
+    }
+}
 $fragments = [
     'logo' => $logoHtml,
     'menu' => $priorityMenuHtml,
@@ -502,7 +525,7 @@ $fragments = [
     'a11y' => $a11yToggle,
     'phone' => $phoneHtml,
     'email' => $emailHtml,
-    'currency' => \App\Core\CurrencyInformer::renderWidgetHtml(),
+    'currency' => $currencyHtml,
     'snippet' => $snippetHtml !== '' ? '<span class="hdr-snippet">' . $snippetHtml . '</span>' : '',
     'divider' => '<span class="site-header__divider" aria-hidden="true"></span>',
     'spacer' => '<span class="site-header__spacer" aria-hidden="true"></span>',

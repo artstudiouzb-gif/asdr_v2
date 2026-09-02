@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 
 use App\Core\Auth;
 use App\Core\Csrf;
+use App\Core\CurrencyInformer;
 use App\Core\Flash;
 use App\Core\HeaderConfig;
 use App\Core\ImageField;
@@ -190,8 +191,38 @@ final class HeaderController
             ],
         ]);
 
+        // Курсы валют публичная страница не загружает — она читает кэш, а
+        // наполняет его cron. Без этой строки редактор, только что поставивший
+        // плашку, увидел бы пустоту до ближайшего запуска воркера и решил, что
+        // элемент не работает. В админке ожидание ответа допустимо.
+        if (self::usesCurrency(HeaderConfig::get())) {
+            CurrencyInformer::refresh();
+        }
+
         Flash::success('Настройки шапки сохранены.');
         header('Location: /admin/header');
         exit;
+    }
+
+    /**
+     * Стоит ли плашка курсов хотя бы в одной зоне шапки.
+     *
+     * @param array<string, mixed> $cfg
+     */
+    private static function usesCurrency(array $cfg): bool
+    {
+        $sets = [$cfg['elements'] ?? [], $cfg['elements_mobile'] ?? []];
+        foreach (['topbar', 'bottombar'] as $bar) {
+            $sets[] = $cfg[$bar]['zones'] ?? [];
+        }
+        foreach ($sets as $zones) {
+            foreach ((array) $zones as $items) {
+                if (in_array('currency', (array) $items, true)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
