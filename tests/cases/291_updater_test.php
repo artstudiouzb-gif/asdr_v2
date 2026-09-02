@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Core\Updater;
+use App\Core\UpdateState;
 
 /*
  * Обновление из релиза на GitHub (`scripts/update.php`, `App\Core\Updater`).
@@ -172,15 +173,133 @@ test('Репозиторий обновления берётся из окруж
     putenv('UPDATE_REPO');
 });
 
-test('Обновление не вынесено кнопкой в админку', function () {
+test('Замену файлов не выполняет веб-запрос', function () {
     // Веб-запрос обрывается по таймауту, и обрыв посреди замены оставит сайт
-    // с половиной старых и половиной новых файлов. Панель может только
-    // сообщать о новой версии.
+    // с половиной старых и половиной новых файлов. Кнопка в панели поэтому
+    // только ставит задачу, а работу делает CLI-воркер.
     foreach (glob(APP_ROOT . '/app/Controllers/Admin/*.php') ?: [] as $controller) {
         $source = (string) file_get_contents($controller);
         assert_false(
-            str_contains($source, 'Updater::apply') || str_contains($source, 'Updater::download'),
-            'замена файлов доступна из админки: ' . basename($controller)
+            str_contains($source, 'Updater::apply')
+                || str_contains($source, 'Updater::download')
+                || str_contains($source, 'UpdateRunner::run'),
+            'замена файлов доступна из веб-запроса: ' . basename($controller)
         );
     }
+
+    // Контроллер только пишет намерение — этим и ограничена его роль.
+    $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/UpdateController.php');
+    assert_contains('UpdateState::queue(', $controller, 'кнопка обязана ставить задачу');
+
+    // Выполняет её отдельный CLI-воркер, а не общая очередь: у JobQueue
+    // аренда строки 60 секунд, а обновление длиннее — вторая копия воркера
+    // подхватила бы задачу посреди замены файлов.
+    $worker = (string) file_get_contents(APP_ROOT . '/app/Console/update_worker.php');
+    assert_contains('Cli::assertCli()', $worker, 'воркер запускается только из командной строки');
+    assert_contains("ProcessLock::acquire('update_worker')", $worker, 'два запуска не должны совпасть');
+    assert_contains('UpdateRunner::run(', $worker, 'замену делает воркер');
+});
+
+test('Без живого воркера обновление из панели не заказывается', function () {
+    // Намерение записано, а выполнять его некому — нажатие выглядит как
+    // «ничего не произошло». Это худший вид отказа, поэтому кнопка
+    // спрашивает heartbeat воркера.
+    $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/UpdateController.php');
+    assert_contains("Heartbeat::lastRun('update')", $controller, 'свежесть воркера не проверяется');
+    assert_contains("\$worker['alive']", $controller, 'заказ не зависит от живости воркера');
+
+    // Версию выбирает не редактор: через выбор ассета в панель приехал бы
+    // произвольный архив.
+    assert_false(str_contains($controller, "\$_POST['release']"), 'версия приходит из формы');
+    // Адрес репозитория контроллер не выбирает: он спрашивает Updater, а тот
+    // читает окружение (стережёт тест выше).
+    assert_contains('Updater::repo()', $controller, 'репозиторий берётся мимо Updater');
+    assert_false(str_contains($controller, 'getenv('), 'контроллер читает окружение сам');
+});
+
+test('Режим обслуживания возвращается в то состояние, в каком его застали', function () {
+    // Слепое «выключить в конце» открыло бы сайт, закрытый владельцем на
+    // профилактику, — обновление не вправе решать это за него.
+    $state = (string) file_get_contents(APP_ROOT . '/app/Core/UpdateState.php');
+    assert_contains('maintenance_before', $state, 'прежнее значение не запоминается');
+    assert_contains("Setting::set('maintenance_mode', \$state['maintenance_before'] === '1' ? '1' : '0')", $state);
+
+    // Снимается он в finally — то есть и после отказа с откатом тоже.
+    $runner = (string) file_get_contents(APP_ROOT . '/app/Core/UpdateRunner.php');
+    assert_true(
+        (bool) preg_match('/\} finally \{[^}]*UpdateState::releaseMaintenance\(\);/s', $runner),
+        'после отказа сайт остался бы закрытым'
+    );
+});
+
+test('Оборвавшееся обновление не оставляет сайт закрытым', function () {
+    // Процесс могли убить (таймаут хостинга, OOM, перезагрузка) — снимать
+    // флаг тогда некому. Спасают две вещи: воркер прибирает за прошлым
+    // запуском, а публичная точка входа не показывает заглушку, если её
+    // включило переставшее отчитываться обновление.
+    $now = time();
+    $fresh = ['status' => 'running', 'heartbeat' => $now, 'maintenance_owned' => true, 'maintenance_before' => '0'];
+    $dead = ['status' => 'running', 'heartbeat' => $now - UpdateState::STALE_AFTER - 1, 'maintenance_owned' => true, 'maintenance_before' => '0'];
+
+    assert_false(UpdateState::isStale($fresh), 'идущее обновление принято за сорвавшееся');
+    assert_true(UpdateState::isStale($dead), 'молчание дольше предела не замечено');
+    // Завершённое обновление сорвавшимся не бывает, сколько бы ни прошло.
+    assert_false(UpdateState::isStale(['status' => 'done', 'heartbeat' => 0]), 'завершённое считается сорвавшимся');
+
+    $worker = (string) file_get_contents(APP_ROOT . '/app/Console/update_worker.php');
+    assert_contains('UpdateState::recoverStale()', $worker, 'воркер не прибирает за прошлым запуском');
+    // Режимом обслуживания распоряжается бегунок. Снятие «на всякий случай»
+    // в воркере отменяло бы решение recoverStale() оставить закрытым сайт,
+    // собранный наполовину.
+    assert_false(str_contains($worker, 'UpdateState::releaseMaintenance()'), 'воркер снимает режим обслуживания мимо бегунка');
+
+    $entry = (string) file_get_contents(APP_ROOT . '/public/index.php');
+    assert_contains('UpdateState::maintenanceStuck()', $entry, 'заглушка осталась бы висеть навсегда');
+});
+
+test('Новый заказ не наследует чужой режим обслуживания', function () {
+    // Обновление запоминает, каким застало режим обслуживания, и возвращает
+    // именно это. Если прошлая попытка оборвалась и оставила сайт закрытым,
+    // новое обновление сочло бы закрытый сайт нормой и вернуло бы его
+    // закрытым после успешной установки — навсегда.
+    $state = (string) file_get_contents(APP_ROOT . '/app/Core/UpdateState.php');
+    assert_true(
+        (bool) preg_match('/function queue\([^)]*\): void\s*\{.*?self::releaseMaintenance\(\);.*?self::write\(/s', $state),
+        'заказ не отдаёт режим обслуживания прошлой попытки'
+    );
+});
+
+test('Сайт открывается сам только тогда, когда файлы целы', function () {
+    // Обрыв до замены оставляет сайт рабочим — открываем. Обрыв во время
+    // замены оставляет половину старых файлов и половину новых: открытый,
+    // такой сайт отдаёт 500 всем подряд, а закрытый — честные 503.
+    $runner = (string) file_get_contents(APP_ROOT . '/app/Core/UpdateRunner.php');
+    assert_true(
+        (bool) preg_match('/UpdateState::markFilesTouched\(\);\s*\n\s*\$applied = Updater::apply\(/', $runner),
+        'отметка ставится не вплотную к замене файлов'
+    );
+
+    $state = (string) file_get_contents(APP_ROOT . '/app/Core/UpdateState.php');
+    // Именно отрицание: сайт открывается сам, только если файлы не трогали.
+    assert_true(
+        (bool) preg_match('/maintenanceStuck\(\): bool.*?!\$state\[.files_touched.\]/s', $state),
+        'сайт открылся бы после обрыва посреди замены файлов'
+    );
+});
+
+test('Опасная последовательность одна на панель и на консоль', function () {
+    // Две копии разъедутся при первой правке: проверка суммы появится в
+    // одной, снимок для отката — в другой.
+    $script = (string) file_get_contents(APP_ROOT . '/scripts/update.php');
+    assert_contains('UpdateRunner::run(', $script, 'скрипт несёт свою копию замены');
+    assert_contains('UpdateRunner::preview(', $script, 'пробный прогон считает план сам');
+    assert_false(str_contains($script, 'Updater::apply('), 'замена продублирована в скрипте');
+
+    // Миграции — в том же процессе: запуск дочернего процесса на
+    // shared-хостинге часто запрещён, и обновление обрывалось бы сразу
+    // после замены файлов — в самом неудачном месте.
+    $runner = (string) file_get_contents(APP_ROOT . '/app/Core/UpdateRunner.php');
+    assert_contains('MigrationRunner::applyPending(', $runner);
+    assert_false(str_contains($runner, 'passthru('), 'бегунок зовёт внешний процесс');
+    assert_false(str_contains($runner, "exec('rm -rf"), 'бегунок зовёт внешнюю команду');
 });
