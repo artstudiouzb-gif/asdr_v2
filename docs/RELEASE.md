@@ -24,6 +24,20 @@
 - [ ] После установки выполнить `php scripts/release_check.php`; ошибок
       (`FAIL`) быть не должно.
 
+### Как выпускается сам релиз
+
+Установочный архив собирает workflow «Release package». Запускает его
+**публикация релиза** на GitHub (кнопка «Publish release»), а не пуш тега:
+имя тега значения не имеет. Workflow прогоняет тесты, собирает
+`asdr-cms-<тег>.zip`, проверяет состав архива (обязательные файлы на месте,
+`config.php`, тестов и `composer.json` внутри нет), считает `.sha256` и
+прикладывает оба файла к тому же релизу.
+
+- [ ] После публикации релиза проверить, что у него появились
+      `asdr-cms-*.zip` и `asdr-cms-*.zip.sha256`. Без них релиз установить
+      нечем: `Source code` не годится (в нём тесты и `composer.json`), а архив
+      без суммы не принимается — сверять целостность загрузки будет нечем.
+
 ## 2. Окружение (переменные / config.php)
 
 - [ ] `APP_URL` — боевой домен с https (важно: используется в sitemap,
@@ -60,9 +74,13 @@
 */15 * * * * php /path/app/Console/watchdog.php       >> /path/storage/logs/watchdog.log 2>&1
 25 4 * * * php /path/app/Console/seo_worker.php       >> /path/storage/logs/seo_worker.log 2>&1
 40 3 * * 0 php /path/app/Console/restore_drill.php    >> /path/storage/logs/restore_drill.log 2>&1
+* * * * *  php /path/app/Console/update_worker.php    >> /path/storage/logs/update_worker.log 2>&1
 ```
 
 - [ ] Cron установлен; `/health` возвращает `ok` (а не `degraded`).
+- [ ] Раздел «Обновление системы» в панели показывает, что воркер отвечает.
+      Без строки `update_worker.php` кнопка обновления недоступна: заказ
+      записать некому будет выполнить.
 
 ## 4. Telegram-бот (вход в панель + уведомления)
 
