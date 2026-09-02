@@ -34,11 +34,11 @@
   "blocks": {
     "/assets/css/blocks/news-detail.css": {
       "path": "/assets/css/blocks/news-detail.min.css",
-      "sourceSha256": "9e92dbbbfcb357669a4b4d9d777b10e7284b7fe703db41402f1a5b48bdda1820",
-      "sha256": "26a7b7d4799fb0dbc7782e65bf0ec0a9990c7cecd3fe10733aeedbb332ece6b3",
+      "sourceSha256": "0c71efb81a6957a8914e7d25da0a8d7cfa2cf6ee56c9a73750f0709b5d3fe9b0",
+      "sha256": "a62f1b0cea86af1d6431567277765b0aead743313533e30b3b5e0de128fe6282",
       "raw": 36958,
-      "gzip": 6555,
-      "brotli": 5760
+      "gzip": 6553,
+      "brotli": 5759
     },
     "/assets/css/blocks/org-structure.css": {
       "path": "/assets/css/blocks/org-structure.min.css",
