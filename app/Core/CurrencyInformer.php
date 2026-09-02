@@ -8,14 +8,34 @@ final class CurrencyInformer
 {
     private const CBU_API = "https://cbu.uz/ru/arkhiv-kursov-valyut/json/";
 
+    /** Курс ЦБ меняется раз в сутки; час — запас на задержку публикации. */
+    public const TTL = 3600;
+
     /**
-     * Получает актуальные курсы основных валют (USD, EUR, RUB).
+     * Обновляет кэш курсов. Зовётся воркером по cron и при сохранении шапки,
+     * где плашка включена, — но никогда при рендере публичной страницы:
+     * ожидание ответа cbu.uz становилось временем ответа сайта.
+     */
+    public static function refresh(): bool
+    {
+        return ExternalJsonService::refresh(self::CBU_API, self::TTL);
+    }
+
+    /** Возраст кэша курсов в секундах; null — курсы ни разу не загружались. */
+    public static function cacheAge(): ?int
+    {
+        return ExternalJsonService::age(self::CBU_API);
+    }
+
+    /**
+     * Курсы основных валют (USD, EUR, RUB) из кэша. В сеть не ходит:
+     * пустой результат — это пустая плашка, а не ожидание стороннего сервиса.
      *
      * @return array<string, array{code:string, name:string, rate:string, diff:string}>
      */
     public static function rates(): array
     {
-        $data = ExternalJsonService::fetch(self::CBU_API, 3600);
+        $data = ExternalJsonService::cached(self::CBU_API);
         if (!is_array($data)) {
             return [];
         }
