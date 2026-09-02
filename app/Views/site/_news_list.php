@@ -23,7 +23,7 @@ $lang = Locale::current();
 // Дата — единым числовым форматом на всех языках: 19.07.2026.
 $fmt = static fn (string $d): string => DateFormatter::short($d);
 // Отдельной крупной новости над лентой нет: первая новость открывает ленту
-// крупной карточкой группы (App\Core\NewsFeedRhythm), дальше ритм повторяется.
+// крупной карточкой цикла (App\Core\NewsFeedRhythm), дальше ритм повторяется.
 $pageUrl = static fn (int $p): string => Locale::url('news')
     . (($p > 1 || $category !== '') ? '?' . http_build_query(array_filter(['category' => $category, 'page' => $p > 1 ? $p : null])) : '');
 
@@ -45,16 +45,17 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
         <?php foreach (array_values($items) as $index => $item): ?>
             <?php
             $c = News::getCoverImage($item);
-            // Ритм ленты: группа «крупная плюс две компактные». Крупная идёт
-            // первой — с анонсом и фотографией сбоку; ряд из одинаковых
-            // карточек читался бы как таблица.
+            // Ритм ленты: цикл «крупная плюс две компактные» → ряд из четырёх
+            // компактных → «две компактные плюс крупная». Крупная идёт с
+            // анонсом и фотографией сбоку; ряд из одинаковых карточек читался
+            // бы как таблица.
             $wide = \App\Core\NewsFeedRhythm::isWide($index);
             $excerpt = $wide ? trim((string) ($item['excerpt'] ?? '')) : '';
             ?>
             <a class="relnews-card<?= $wide ? ' relnews-card--wide' : '' ?>" href="<?= htmlspecialchars(Locale::url('news/' . $item['slug']), ENT_QUOTES) ?>">
                 <span class="news-cover">
                     <?php if ($c !== null): ?>
-                        <?= \App\Core\Media::picture($c, (string) $item['title'], null, null, 'relnews-card__img', true, $wide ? '(max-width: 560px) 100vw, 40vw' : '(max-width: 700px) 100vw, 25vw', false, 'relnews-card__media') ?>
+                        <?= \App\Core\Media::picture($c, (string) $item['title'], null, null, 'relnews-card__img', true, $wide ? '(max-width: 560px) 100vw, 30vw' : '(max-width: 700px) 100vw, 25vw', false, 'relnews-card__media') ?>
                     <?php else: ?>
                         <span class="relnews-card__media relnews-card__media--empty" aria-hidden="true"></span>
                     <?php endif; ?>
