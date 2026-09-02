@@ -18,6 +18,8 @@
 /storage/cache/*
 !/storage/cache/.gitkeep
 !/storage/cache/README.md
+# Загруженные архивы обновлений и снимки отката (scripts/update.php).
+/storage/updates/
 /storage/integrity/
 # Срезы вычисленных стилей админки (scripts/admin-style-snapshot.mjs).
 /storage/tmp/
