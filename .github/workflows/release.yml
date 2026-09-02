@@ -90,17 +90,40 @@ jobs:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
+          # Идентификаторов два, и это не дубль. `release_id` — то, чем релиз
+          # называется на GitHub: обновление сравнивает установленную версию
+          # именно с тегом (`Updater::check()`), поэтому расхождение хоть на
+          # префикс `v` означало бы «доступно обновление» навсегда.
+          # `release_name` — имя файла архива, из него `v` историчеcки снят.
           if [[ -n "${RELEASE_TAG}" ]]; then
+            release_id="${RELEASE_TAG}"
             release_name="${RELEASE_TAG#v}"
           elif [[ -n "${MANUAL_NAME}" ]]; then
+            release_id="${MANUAL_NAME}"
             release_name="${MANUAL_NAME}"
           else
-            release_name="$(git rev-parse --short=12 HEAD)"
+            release_id="$(git rev-parse --short=12 HEAD)"
+            release_name="${release_id}"
           fi
           safe_name="$(printf '%s' "${release_name}" | tr -c 'A-Za-z0-9._-' '-')"
           archive="asdr-cms-${safe_name}.zip"
-          mkdir -p dist verify-package
+          mkdir -p dist verify-package inject/asdr-cms/storage
           git archive --format=zip --prefix=asdr-cms/ --output="dist/${archive}" HEAD
+
+          # Пакет обязан знать собственную версию. `storage/` не в git, поэтому
+          # `git archive` этот файл не принесёт, а без него свежая установка
+          # отвечает `unknown` — и панель обновления вечно предлагает поставить
+          # версию, которая уже стоит (`available = tag !== installed`).
+          # Ключи те же, что пишет UpdateRunner после обновления: читатель один
+          # (`App\Core\Release::id`), и вторая форма файла ему не нужна.
+          # `deployed_at` здесь — время сборки; при первом же обновлении его
+          # перезапишет реальное время выкладки.
+          printf '{\n    "release": "%s",\n    "deployed_at": "%s"\n}\n' \
+            "${release_id}" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            > inject/asdr-cms/storage/release.json
+          archive_path="$(pwd)/dist/${archive}"
+          (cd inject && zip -q "${archive_path}" asdr-cms/storage/release.json)
+
           unzip -q "dist/${archive}" -d verify-package
 
           for required in \
@@ -116,9 +139,14 @@ jobs:
             storage/logs/.gitkeep \
             storage/backups/.gitkeep \
             storage/protected_uploads/.gitkeep \
+            storage/release.json \
             docs/DEPLOY.md; do
             test -f "verify-package/asdr-cms/${required}"
           done
+
+          # Мало положить файл — в нём должна стоять та версия, которая
+          # выпускается. Иначе установка отрапортует о чужой.
+          grep -q "\"release\": \"${release_id}\"" "verify-package/asdr-cms/storage/release.json"
 
           for forbidden in \
             config/config.php \
