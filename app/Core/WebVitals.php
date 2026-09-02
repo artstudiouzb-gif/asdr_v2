@@ -91,7 +91,7 @@ final class WebVitals
             if (!in_array($name, self::METRICS, true)) {
                 continue;
             }
-            $value = is_array($metric) ? $metric['value'] ?? null : null;
+            $value = $metric['value'] ?? null;
             if (!is_numeric($value)) {
                 continue;
             }

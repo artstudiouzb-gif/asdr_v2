@@ -416,19 +416,6 @@ final class BlockController
         return $section . $pageId . '/edit?block_lang=' . urlencode($lang);
     }
 
-    /** Валидный #RRGGBB в нижнем регистре или пустая строка (значение по умолчанию). */
-    private static function hexOrEmpty(mixed $v): string
-    {
-        $v = trim((string) $v);
-        return preg_match('/^#[0-9a-fA-F]{6}$/', $v) ? strtolower($v) : '';
-    }
-
-    /** Цвет из поля $field: '' если включена галочка «$field_off» (по умолчанию). */
-    private static function color(string $field): string
-    {
-        return empty($_POST[$field . '_off']) ? self::hexOrEmpty($_POST[$field] ?? '') : '';
-    }
-
     private function collectData(string $type, string $locale = 'ru'): array
     {
         switch ($type) {
@@ -951,13 +938,5 @@ final class BlockController
         return in_array($type, ['team_list', 'org_structure'], true)
             ? \App\Models\TeamMember::departments()
             : [];
-    }
-
-    /** Читает URL-поле из POST и отбрасывает небезопасные схемы (javascript: и т.п.). */
-    private function safeUrlField(string $field): string
-    {
-        $url = trim((string) ($_POST[$field] ?? ''));
-
-        return ($url !== '' && \App\Core\UrlGuard::isSafeLink($url)) ? $url : '';
     }
 }

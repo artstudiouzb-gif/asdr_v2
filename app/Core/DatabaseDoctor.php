@@ -96,7 +96,7 @@ final class DatabaseDoctor
                 }
             }
             preg_match_all('/(?:UNIQUE\s+)?KEY\s+`?([a-z0-9_]+)`?\s*\(/i', $body, $indexMatches);
-            $expectedIndexes[$table] = $indexMatches[1] ?? [];
+            $expectedIndexes[$table] = $indexMatches[1];
 
             preg_match_all(
                 '/CONSTRAINT\s+`?([a-z0-9_]+)`?\s+FOREIGN KEY\s*\(\s*`?([a-z0-9_]+)`?\s*\)\s+REFERENCES\s+`?([a-z0-9_]+)`?\s*\(\s*`?([a-z0-9_]+)`?\s*\)(?:\s+ON DELETE\s+(CASCADE|SET NULL|RESTRICT|NO ACTION))?/i',
@@ -307,7 +307,7 @@ final class DatabaseDoctor
         if (
             isset($actualTableMeta['languages'])
             && in_array('is_default', $actualColumns['languages'] ?? [], true)
-            && in_array('is_active', $actualColumns['languages'] ?? [], true)
+            && in_array('is_active', $actualColumns['languages'], true)
         ) {
             $defaultLanguages = $count($pdo, 'SELECT COUNT(*) FROM languages WHERE is_default = 1');
             $activeDefaultLanguages = $count($pdo, 'SELECT COUNT(*) FROM languages WHERE is_default = 1 AND is_active = 1');

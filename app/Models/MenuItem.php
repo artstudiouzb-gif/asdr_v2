@@ -65,7 +65,7 @@ final class MenuItem
     public static function create(array $data): int
     {
         $lang = self::normalizeLang($data['lang'] ?? '');
-        $parentId = isset($data['parent_id']) && $data['parent_id'] !== null ? (int) $data['parent_id'] : null;
+        $parentId = isset($data['parent_id']) ? (int) $data['parent_id'] : null;
 
         // Порядок считаем в пределах одного родителя и языка.
         $stmt = Database::pdo()->prepare(
@@ -104,7 +104,7 @@ final class MenuItem
     public static function update(int $id, array $data): void
     {
         $lang = self::normalizeLang($data['lang'] ?? '');
-        $parentId = isset($data['parent_id']) && $data['parent_id'] !== null ? (int) $data['parent_id'] : null;
+        $parentId = isset($data['parent_id']) ? (int) $data['parent_id'] : null;
         $current = self::findById($id);
         $sortOrder = (int) ($current['sort_order'] ?? 0);
         $parentChanged = $current !== null
@@ -300,7 +300,7 @@ final class MenuItem
                 throw new \DomainException('Получен повторяющийся пункт меню. Обновите страницу.');
             }
             $seen[$id] = true;
-            $futureParent[$id] = isset($row['parent_id']) && $row['parent_id'] !== null ? (int) $row['parent_id'] : null;
+            $futureParent[$id] = isset($row['parent_id']) ? (int) $row['parent_id'] : null;
         }
 
         // Проверяем всю будущую структуру до первого UPDATE: либо применятся

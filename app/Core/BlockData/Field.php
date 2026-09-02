@@ -25,7 +25,9 @@ final class Field
     public const KINDS = ['enum', 'int', 'int_choice', 'bool', 'text', 'textarea', 'richtext', 'url', 'media', 'icon', 'color', 'media_position'];
 
     /**
-     * @param array<string, string> $options варианты `enum`: значение => подпись
+     * @param array<array-key, string> $options варианты `enum`: значение => подпись.
+     *     Ключ — не обязательно строка: у `intChoice` значения числовые, а PHP
+     *     числовые ключи массива хранит как int, что бы ни объявили.
      * @param string $input имя поля в форме, если отличается от ключа данных
      * @param array{field:string, values:list<string>}|null $when
      *        условие применимости: поле показывается только при этом варианте

@@ -762,7 +762,7 @@ final class DemoSeeder
                     $pdo,
                     (string) $n['slug'],
                     $categoryIds[$n['category']],
-                    [(string) $n['category'], (string) ($n['uz_category'] ?? '')]
+                    [(string) $n['category'], (string) $n['uz_category']]
                 );
             }
 
@@ -1217,7 +1217,7 @@ final class DemoSeeder
                     $entryId = $entryStmt->fetchColumn();
                     $translation = $translations[$slug][$r[1]] ?? null;
                     if ($entryId !== false && is_array($translation)) {
-                        $translatedData = array_replace($r[2], $translation[1] ?? []);
+                        $translatedData = array_replace($r[2], $translation[1]);
                         $transIns = $pdo->prepare(
                             "INSERT INTO content_entry_translations (entry_id, lang, title, data)
                              SELECT :entry_id, 'uz', :title, :data
@@ -1272,7 +1272,7 @@ final class DemoSeeder
                 ':t' => $project[1],
                 ':s' => $project[0],
                 ':d' => self::projectLead($project[3]),
-                ':i' => $projectImages[$project[0]] ?? $project[2],
+                ':i' => $projectImages[$project[0]],
                 ':o' => $i,
                 ':s2' => $project[0],
             ]);
@@ -1294,7 +1294,7 @@ final class DemoSeeder
             // Фотографии и характеристики проекта — блоки его же страницы:
             // отдельных разделов формы под них больше нет.
             $gallery = array_values(array_unique([
-                $projectImages[$project[0]] ?? $project[2],
+                $projectImages[$project[0]],
                 '/uploads/public/demo-strategy-meeting.jpg',
                 '/uploads/public/demo-urban-development.jpg',
             ]));
@@ -2551,19 +2551,5 @@ final class DemoSeeder
         $id = $stmt->fetchColumn();
 
         return $id !== false ? (int) $id : null;
-    }
-
-    private static function defaultLang(PDO $pdo): string
-    {
-        try {
-            $code = $pdo->query('SELECT code FROM languages WHERE is_default = 1 LIMIT 1')->fetchColumn();
-            if ($code !== false && $code !== '') {
-                return (string) $code;
-            }
-        } catch (\Throwable $e) {
-            // таблица языков может отсутствовать в минимальной установке
-        }
-
-        return 'ru';
     }
 }

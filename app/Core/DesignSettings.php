@@ -583,7 +583,7 @@ final class DesignSettings
     {
         $classes = [];
         foreach (['fs_lead', 'fs_card_title', 'fs_card_text', 'fs_meta', 'fs_menu', 'fs_topbar'] as $group) {
-            foreach (explode(',', self::TYPO_SIZES[$group][1] ?? '') as $selector) {
+            foreach (explode(',', self::TYPO_SIZES[$group][1]) as $selector) {
                 $selector = trim($selector);
                 if (preg_match('/^\.[A-Za-z0-9_-]+$/', $selector) === 1) {
                     $classes[$selector] = true;

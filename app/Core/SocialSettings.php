@@ -108,6 +108,13 @@ final class SocialSettings
         if (in_array($field, ['page_id', 'user_id'], true)) {
             return $value === '' || preg_match('/^\d{3,30}$/', $value) === 1 ? $value : null;
         }
+        // Ветка и запасной вариант ниже сохранены намеренно, хотя анализатор
+        // видит, что сейчас все поля из FIELDS разобраны выше и сюда доходит
+        // только 'author'. Убрать проверку — и новое поле получило бы разбор
+        // ссылки LinkedIn; убрать запасной вариант — и оно не получило бы
+        // вообще ничего. Оба нужны, чтобы добавленное поле попадало под
+        // осторожное ограничение длины, а не под чужое правило.
+        // @phpstan-ignore identical.alwaysTrue
         if ($field === 'author') {
             return $value === ''
                 || preg_match('/^urn:li:(?:organization:\d{1,30}|person:[A-Za-z0-9_-]{3,100})$/', $value) === 1
@@ -115,6 +122,7 @@ final class SocialSettings
                     : null;
         }
 
+        // @phpstan-ignore deadCode.unreachable
         return mb_strlen($value) <= 500 ? $value : null;
     }
 
@@ -199,13 +207,13 @@ final class SocialSettings
         }
 
         preg_match_all('/<[^>]*>/u', $signature, $matches);
-        $remainder = str_replace($matches[0] ?? [], '', $signature);
+        $remainder = str_replace($matches[0], '', $signature);
         if (str_contains($remainder, '<') || str_contains($remainder, '>')) {
             return 'В подписи найден незавершённый HTML-тег.';
         }
 
         $stack = [];
-        foreach ($matches[0] ?? [] as $tag) {
+        foreach ($matches[0] as $tag) {
             if (preg_match('/^<\\/(b|i|code|blockquote|tg-spoiler)>$/i', $tag, $m) === 1) {
                 $name = strtolower($m[1]);
                 if (array_pop($stack) !== $name) {

@@ -117,7 +117,10 @@ final class NewsImportController
         }
         fclose($out);
 
-        if ($written !== $fileSize || $written < 16 || $written > self::MAX_BYTES) {
+        // Верхнюю границу держит проверка $fileSize на входе метода, а
+        // сравнение с ним ниже переносит её на $written: третья проверка не
+        // срабатывала никогда.
+        if ($written !== $fileSize || $written < 16) {
             @unlink($final . '.tmp');
             self::forgetToken($token);
             $this->json(['ok' => false, 'error' => 'Размер собранного XML не совпадает с исходным файлом.'], 422);

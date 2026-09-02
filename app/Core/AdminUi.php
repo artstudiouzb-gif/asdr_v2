@@ -430,7 +430,7 @@ final class AdminUi
         $allParams = $params;
         $allParams['lang'] = 'all';
         unset($allParams['page']);
-        $allUrl = $baseUrl . ($allParams !== [] ? '?' . http_build_query($allParams) : '');
+        $allUrl = $baseUrl . '?' . http_build_query($allParams);
         $allCount = isset($counts['all']) ? (int) $counts['all'] : (int) array_sum(array_map('intval', $counts));
         $isAllActive = ($currentLang === '' || $currentLang === 'all');
 

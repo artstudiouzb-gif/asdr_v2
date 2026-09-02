@@ -106,7 +106,7 @@ final class Backup
 
         // Контрольная сумма архива рядом с ним (формат, совместимый с sha256sum -c).
         $hash = hash_file('sha256', $zipPath);
-        if (!is_string($hash) || $hash === '') {
+        if (!is_string($hash)) {
             throw new \RuntimeException('Не удалось вычислить контрольную сумму бэкапа.');
         }
         $checksum = $hash . '  ' . basename($zipPath) . "\n";

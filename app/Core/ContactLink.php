@@ -56,7 +56,7 @@ final class ContactLink
         $result = preg_replace_callback(
             $pattern,
             static function (array $m): string {
-                if (($m['email'] ?? '') !== '') {
+                if ($m['email'] !== '') {
                     // Символы адреса ограничены [\w.+-]@ — кодировать нечего,
                     // и строка уже экранирована для HTML.
                     return '<a class="contact-link contact-link--mail" href="mailto:'

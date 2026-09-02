@@ -30,7 +30,7 @@ final class Mailer
             if ($host !== '') {
                 $this->config = [
                     'host' => $host,
-                    'port' => (int) ($sysConfig['port'] ?: \App\Models\Setting::get('smtp_port', 587)),
+                    'port' => (int) ($sysConfig['port'] ?: \App\Models\Setting::get('smtp_port', '587')),
                     'encryption' => (string) ($sysConfig['encryption'] ?: \App\Models\Setting::get('smtp_encryption', 'tls')),
                     'username' => (string) ($sysConfig['username'] ?: \App\Models\Setting::get('smtp_username', '')),
                     'password' => (string) ($sysConfig['password'] ?: \App\Models\Setting::get('smtp_password', '')),
