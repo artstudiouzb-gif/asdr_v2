@@ -111,22 +111,9 @@ $renderMenuIcon = static function (mixed $iconName): string {
 $currentReqUri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $currentReqPath = rtrim($currentReqUri, '/') ?: '/';
 
-$isNavUrlActive = static function (string $targetUrl) use ($currentReqPath): bool {
-    $targetPath = parse_url($targetUrl, PHP_URL_PATH) ?: '/';
-    $targetPath = rtrim($targetPath, '/') ?: '/';
-
-    if ($currentReqPath === $targetPath) {
-        return true;
-    }
-
-    if ($targetPath !== '/' && !in_array($targetPath, ['/ru', '/uz', '/en', '/kk', '/tr', '/de'], true)) {
-        if (str_starts_with($currentReqPath, $targetPath . '/')) {
-            return true;
-        }
-    }
-
-    return false;
-};
+// Правило подсветки одно на шапку и на боковое меню раздела: разъехавшись,
+// они показывали бы разные «текущие» пункты на одной странице.
+$isNavUrlActive = static fn (string $targetUrl): bool => \App\Core\SectionMenu::isUrlActive($targetUrl, $currentReqPath);
 
 $menuHtml = '';
 $et = static fn (string $text): string => htmlspecialchars(t($text), ENT_QUOTES);
@@ -301,7 +288,13 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
         $code = (string) $l['code'];
         // У связанной записи-перевода свой адрес: ведём сразу на него, иначе
         // переключение языка отвечало редиректом.
-        $href = Locale::url(Locale::alternatePath($code), $code)
+        // Материал, которого нет на выбранном языке, — отдельный случай:
+        // новости и проекты переводятся отдельной записью, и «тот же путь под
+        // другим префиксом» там не существует — переключатель вёл на 404.
+        // Посетителя, попросившего другой язык, ведём на главную этого языка.
+        $codeHasContent = $contentLangs === null || in_array($code, $contentLangs, true);
+        $langPath = $codeHasContent ? Locale::alternatePath($code) : '';
+        $href = Locale::url($langPath, $code)
             . '?' . \App\Core\LocalePreference::QUERY . '=' . rawurlencode($code);
         if ($code === 'uz') {
             // На узбекский всегда возвращаемся в латинице, даже из кириллицы.
@@ -319,7 +312,7 @@ if (!empty($hcfg['language_switcher']['enabled']) && (count($activeLangs) >= 1 |
         if ($code !== 'uz') {
             continue;
         }
-        $uzHref = Locale::url(Locale::alternatePath('uz'), 'uz') . '?' . \App\Core\LocalePreference::QUERY . '=uz';
+        $uzHref = Locale::url($langPath, 'uz') . '?' . \App\Core\LocalePreference::QUERY . '=uz';
         $langOptions[] = [
             'name' => 'Ўзбекча',
             'short' => 'Ўзб',
@@ -707,8 +700,8 @@ foreach ([(string) $font, (string) $fontHeading] as $selectedFont) {
     // Порядок важен: «Noto Serif» содержит «Noto S», поэтому имена
     // проверяются целиком и совпадение прерывает перебор.
     foreach ([
-        'Noto Serif' => '/assets/fonts/noto-serif/noto-serif-400-cyrillic.woff2',
-        'Noto Sans' => '/assets/fonts/noto-sans/noto-sans-400-cyrillic.woff2',
+        'Noto Serif' => '/assets/fonts/noto-serif/noto-serif-var-cyrillic.woff2',
+        'Noto Sans' => '/assets/fonts/noto-sans/noto-sans-var-cyrillic.woff2',
     ] as $family => $fontFile) {
         // Совпадать должно начало стека: семейство, которым реально набран
         // текст. Иначе запасное начертание («Inter Fallback») или дальний

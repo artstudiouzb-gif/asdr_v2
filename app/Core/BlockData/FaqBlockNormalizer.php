@@ -7,6 +7,10 @@ namespace App\Core\BlockData;
 use App\Core\HtmlSanitizer;
 use App\Core\TextProcessor;
 
+/**
+ * Нормализатор блока «Вопросы и ответы»: собирает только репитер, скалярные
+ * поля описаны схемой (`BlockFieldSchema`).
+ */
 final class FaqBlockNormalizer
 {
     /**
@@ -34,11 +38,9 @@ final class FaqBlockNormalizer
             ];
         }
 
-        return [
-            'title' => BlockDataInput::plain($input, 'title_field', $locale),
-            'search_enabled' => !empty($input['search_enabled']),
-            'single_open' => !empty($input['single_open']),
-            'items' => $items,
-        ];
+        return array_merge(
+            BlockFieldSchema::normalize('faq', $input, $locale),
+            ['items' => $items]
+        );
     }
 }

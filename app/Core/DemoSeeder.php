@@ -572,17 +572,35 @@ final class DemoSeeder
             $pdo->prepare('UPDATE pages SET transparent_header = 1, layout_type = ? WHERE id = ?')
                 ->execute(['no_sidebar', $localizedHomeId]);
 
+            // Появление секций — по тем же правилам ритма, что и у остальных
+            // демо-страниц: без него главная показывалась одним снимком, и
+            // редактор не видел настройки, которая по умолчанию включена.
+            // Берём из ритма только появление: фоны и отступы у главной свои.
+            $homeTypes = [];
+            foreach ($blocks as $b) {
+                if (isset($b['type'])) {
+                    $homeTypes[] = (string) $b['type'];
+                }
+            }
+            $homeLooks = \App\Core\PagePresets::rhythmFor($homeTypes);
+
             $order = 1;
+            $lookIndex = 0;
             foreach ($blocks as $b) {
                 if (!isset($b['type'])) {
                     continue;
                 }
+                $blockData = is_array($b['data'] ?? null) ? $b['data'] : [];
+                if (!array_key_exists('_reveal', $blockData) && isset($homeLooks[$lookIndex]['_reveal'])) {
+                    $blockData['_reveal'] = $homeLooks[$lookIndex]['_reveal'];
+                }
+                $lookIndex++;
                 $ins->execute([
                     ':pid' => $localizedHomeId,
                     ':lang' => $lang,
                     ':ty' => (string) $b['type'],
                     ':ti' => (string) ($b['title'] ?? ''),
-                    ':d' => json_encode($b['data'] ?? [], JSON_UNESCAPED_UNICODE),
+                    ':d' => json_encode($blockData, JSON_UNESCAPED_UNICODE),
                     ':so' => $order++,
                 ]);
                 $c['home']++;
@@ -1404,6 +1422,15 @@ final class DemoSeeder
 
         $sort = (int) $pdo->query('SELECT COALESCE(MAX(sort_order), 0) + 1 FROM blocks WHERE page_id = ' . $pageId)
             ->fetchColumn();
+        // Появление секции — по тем же правилам ритма, что у демо-страниц.
+        // Первым у проекта идёт текстовый блок описания (sort_order 0), он и
+        // есть первый экран, поэтому здесь всегда не первый блок.
+        if (!array_key_exists('_reveal', $data)) {
+            $look = \App\Core\PagePresets::rhythmFor(['text', $type])[1] ?? [];
+            if (isset($look['_reveal'])) {
+                $data['_reveal'] = $look['_reveal'];
+            }
+        }
         $pdo->prepare(
             "INSERT INTO blocks (page_id, lang, type, title, data, custom_css, sort_order, is_active, created_at)
              VALUES (:id, :lang, :type, :title, :data, '', :sort, 1, NOW())"
@@ -2206,6 +2233,12 @@ final class DemoSeeder
         }
 
         $settings = \App\Core\Hero\HeroPresets::apply('navy', \App\Core\Hero\HeroSettings::defaults());
+        // Пресет Navy жёстко объявляет светлый текст — он и нужен на тёмном
+        // фоне. Но в демо есть светлый кадр, и жёсткая настройка оставила бы
+        // на нём белый текст: явный выбор всегда главнее автоподбора. На
+        // navy-фоне «авто» даёт тот же светлый текст, поэтому остальные слайды
+        // не меняются, а светлый получает тёмный.
+        $settings['content_scheme'] = 'auto';
         $settings['autoplay'] = true;
         $settings['autoplay_interval'] = 7;
         $settings['height'] = 'tall';
@@ -2285,6 +2318,34 @@ final class DemoSeeder
                     'media_type' => 'image',
                     'image' => '/uploads/public/demo-green-energy.jpg',
                     'cta_enabled' => '1', 'cta_url' => '/press-centr', 'cta_icon' => 'arrow-right',
+                ],
+            ],
+            [
+                // Светлый кадр. Демо показывало только тёмные обложки, и по
+                // нему нельзя было увидеть вторую половину поведения: белая
+                // вуаль осветляет фотографию, по ней же выбирается тёмный
+                // текст, а прозрачная шапка переходит в тёмный набор —
+                // логотип, меню и иконки перекрашиваются вместе с кадром.
+                // Заодно в заголовке показано выделение слова звёздочками.
+                'ru' => [
+                    'eyebrow' => 'Открытость',
+                    'title' => 'Аналитика и данные — в *открытом* доступе',
+                    'subtitle' => 'Показатели реформ, отчёты и наборы данных публикуются открыто: их можно скачать, перепроверить и использовать в собственных расчётах.',
+                    'cta_text' => 'Аналитика',
+                    'cta2_text' => '',
+                ],
+                'uz' => [
+                    'eyebrow' => 'Ochiqlik',
+                    'title' => 'Tahlil va ma’lumotlar — *ochiq* foydalanishda',
+                    'subtitle' => 'Islohotlar ko‘rsatkichlari, hisobotlar va ma’lumotlar to‘plamlari ochiq e’lon qilinadi: ularni yuklab olish, qayta tekshirish va o‘z hisob-kitoblaringizda ishlatish mumkin.',
+                    'cta_text' => 'Tahlil',
+                    'cta2_text' => '',
+                ],
+                'data' => [
+                    'media_type' => 'image',
+                    'image' => '/uploads/public/demo-strategy-meeting.jpg',
+                    'overlay' => 'solid', 'overlay_color' => '#ffffff', 'overlay_opacity' => '62',
+                    'cta_enabled' => '1', 'cta_url' => '/analitika', 'cta_icon' => 'arrow-right',
                 ],
             ],
         ];

@@ -27,6 +27,8 @@
     font-weight: 600;
     line-height: 1.2;
     text-decoration: none;
+    /* Система координат для полосы отсчёта автопереключения. */
+    position: relative;
     transition: color .24s ease, background-color .24s ease, border-color .24s ease;
 }
 
@@ -147,4 +149,32 @@
     }
 
     .cms-tabs--segmented .cms-tabs__tab { flex: none; }
+}
+
+/* Пояснение к вкладке: одна строка о том, чему она посвящена. Остаётся видимым
+   и со скриптом — в отличие от заголовка панели, который дублирует название
+   вкладки. */
+.cms-tabs__panel-note {
+    margin: 0 0 16px;
+    max-width: var(--editorial-reading, 760px);
+    color: var(--gov-muted, var(--text-muted));
+    font-size: var(--step--1);
+    line-height: var(--base-line-height, 1.6);
+}
+
+/* Отсчёт до следующей вкладки. Долю считает скрипт (--cms-tabs-progress), а не
+   CSS-анимация: длительность приходит настройкой, и анимацию пришлось бы
+   перезапускать на каждой смене вкладки. У неактивных вкладок доля нулевая,
+   поэтому полоса не видна. */
+.cms-tabs__tab-progress {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 5px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: .5;
+    transform: scaleX(var(--cms-tabs-progress, 0));
+    transform-origin: left center;
 }

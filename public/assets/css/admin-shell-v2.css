@@ -90,8 +90,8 @@ body.admin-body {
     padding-left: 0;
     color: var(--admin-topbar-muted);
     border-left: 0;
-    font-size: 13px;
-    font-weight: 650;
+    font-size: var(--admin-fs-base);
+    font-weight: var(--admin-fw-semibold);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -111,7 +111,7 @@ body.admin-body {
     color: var(--admin-topbar-text);
     background: #f7f9fc;
     border: 1px solid #dce3ed;
-    border-radius: 11px;
+    border-radius: 3px;
 }
 
 .admin-search__input::placeholder {
@@ -151,7 +151,7 @@ body.admin-body {
     color: var(--admin-topbar-text);
     background: #ffffff;
     border: 1px solid #dce3ed;
-    border-radius: 9px;
+    border-radius: 3px;
 }
 
 .admin-tbtn:hover {
@@ -189,7 +189,7 @@ body.admin-body {
     min-height: 44px;
     padding: 4px 7px 4px 4px;
     color: var(--admin-topbar-text);
-    border-radius: 11px;
+    border-radius: 3px;
 }
 
 .admin-user__btn:hover {
@@ -201,7 +201,7 @@ body.admin-body {
     height: 36px;
     color: #ffffff;
     background: linear-gradient(135deg, var(--admin-accent), var(--admin-accent-hover));
-    border-radius: 10px;
+    border-radius: 3px;
     box-shadow: 0 4px 10px color-mix(in srgb, var(--admin-accent) 24%, transparent);
 }
 
@@ -215,7 +215,7 @@ body.admin-body {
     max-width: 128px;
     overflow: hidden;
     color: var(--admin-topbar-text);
-    font-size: 13px;
+    font-size: var(--admin-fs-base);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -225,8 +225,8 @@ body.admin-body {
     display: block;
     margin-top: 3px;
     color: var(--admin-topbar-muted);
-    font-size: 11px;
-    font-weight: 500;
+    font-size: var(--admin-fs-xs);
+    font-weight: var(--admin-fw-medium);
 }
 
 .admin-user__chevron {
@@ -304,10 +304,10 @@ body.admin-body {
     color: #ffffff;
     background: linear-gradient(145deg, color-mix(in srgb, var(--admin-accent) 80%, #ffffff), var(--admin-accent-hover));
     border: 1px solid rgba(255, 255, 255, .22);
-    border-radius: 15px;
+    border-radius: 3px;
     box-shadow: 0 12px 24px color-mix(in srgb, var(--admin-accent) 32%, transparent);
-    font-size: 23px;
-    font-weight: 850;
+    font-size: var(--admin-fs-2xl);
+    font-weight: var(--admin-fw-semibold);
 }
 
 .admin-sidebar__logoimg {
@@ -328,8 +328,8 @@ body.admin-body {
 .admin-sidebar__brand-copy strong {
     overflow: hidden;
     color: #ffffff;
-    font-size: 18px;
-    font-weight: 800;
+    font-size: var(--admin-fs-lg);
+    font-weight: var(--admin-fw-semibold);
     letter-spacing: -.02em;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -338,8 +338,8 @@ body.admin-body {
 .admin-sidebar__brand-copy small {
     overflow: hidden;
     color: var(--admin-sidebar-muted);
-    font-size: 11px;
-    font-weight: 550;
+    font-size: var(--admin-fs-xs);
+    font-weight: var(--admin-fw-medium);
     letter-spacing: .025em;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -348,7 +348,7 @@ body.admin-body {
 .admin-sidebar__nav {
     flex: 1 1 auto;
     min-height: 0;
-    padding: 12px 10px 18px;
+    padding: 8px 8px 14px;
     overflow-x: hidden;
     overflow-y: auto;
 }
@@ -359,13 +359,13 @@ body.admin-body {
 }
 
 .admin-sidebar__label {
-    padding: 17px 12px 7px;
-    font-size: 10px;
+    padding: 12px 10px 4px;
+    font-size: var(--admin-fs-xs);
     letter-spacing: .12em;
 }
 
 .admin-sidebar__label--toggle {
-    border-radius: 8px;
+    border-radius: 3px;
 }
 
 .admin-sidebar__label--toggle:hover {
@@ -373,34 +373,39 @@ body.admin-body {
     background: rgba(255, 255, 255, .05);
 }
 
+.admin-nav-group__items {
+    gap: 0;
+}
+
 .admin-nav-item {
     position: relative;
-    min-height: 43px;
-    margin: 2px 0;
-    padding: 10px 13px;
+    gap: 9px;
+    min-height: 32px;
+    margin: 0;
+    padding: 5px 11px;
     color: var(--admin-sidebar-text);
     border: 0;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 550;
-    transition: color .16s ease, background-color .16s ease, transform .16s ease;
+    border-radius: 3px;
+    font-size: var(--admin-fs-md);
+    font-weight: var(--admin-fw-medium);
+    /* Без transform: сдвиг на ховере дёргал пункты (transition его не гасил). */
+    transition: color .16s ease, background-color .16s ease;
 }
 
 .admin-nav-item::before {
     content: '';
     position: absolute;
-    top: 9px;
-    bottom: 9px;
+    top: 4px;
+    bottom: 4px;
     left: 0;
     width: 3px;
     background: transparent;
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 3px 3px 0;
 }
 
 .admin-nav-item:hover {
     color: #ffffff;
     background: var(--admin-sidebar-hover);
-    transform: translateX(2px);
 }
 
 .admin-nav-item.is-active {
@@ -408,7 +413,7 @@ body.admin-body {
     background: var(--admin-sidebar-active-bg);
     border-left: 0;
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--admin-sidebar-active-border) 28%, transparent);
-    font-weight: 700;
+    font-weight: var(--admin-fw-semibold);
 }
 
 .admin-nav-item.is-active::before {
@@ -417,8 +422,8 @@ body.admin-body {
 }
 
 .admin-nav-item__icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     opacity: .9;
 }
 
@@ -451,8 +456,8 @@ body.admin-body {
 
 .admin-main__header h1 {
     color: var(--admin-text);
-    font-size: 25px;
-    font-weight: 750;
+    font-size: var(--admin-fs-2xl);
+    font-weight: var(--admin-fw-semibold);
     letter-spacing: -.025em;
 }
 
@@ -483,8 +488,8 @@ html.admin-nav-collapsed .admin-sidebar__brand-mark {
 html.admin-nav-collapsed .admin-sidebar__logo {
     width: 46px;
     height: 46px;
-    border-radius: 13px;
-    font-size: 20px;
+    border-radius: 3px;
+    font-size: var(--admin-fs-xl);
 }
 
 html.admin-nav-collapsed .admin-sidebar__logoimg {
@@ -498,12 +503,8 @@ html.admin-nav-collapsed .admin-sidebar__nav {
 
 html.admin-nav-collapsed .admin-nav-item {
     justify-content: center;
-    min-height: 46px;
-    padding: 10px;
-}
-
-html.admin-nav-collapsed .admin-nav-item:hover {
-    transform: none;
+    min-height: 38px;
+    padding: 8px;
 }
 
 html.admin-nav-collapsed .admin-sidebar__collapse {
@@ -605,7 +606,13 @@ html.admin-nav-collapsed .form-actions--sticky {
 
     html.admin-nav-collapsed .admin-nav-item {
         justify-content: flex-start;
-        padding: 10px 13px;
+        padding: 7px 12px;
+    }
+
+    /* На тач-экранах пункт остаётся крупнее: 32px пальцем не попасть. */
+    .admin-nav-item {
+        min-height: 40px;
+        padding: 7px 12px;
     }
 
     html.admin-nav-collapsed .admin-sidebar__collapse {
@@ -669,7 +676,7 @@ html.admin-nav-collapsed .form-actions--sticky {
     }
 
     .admin-main__header h1 {
-        font-size: 22px;
+        font-size: var(--admin-fs-2xl);
     }
 }
 
@@ -706,6 +713,6 @@ html.admin-nav-collapsed .form-actions--sticky {
 .admin-panel,
 .form-section {
     box-shadow: var(--admin-elevation-card);
-    border-radius: 12px;
+    border-radius: 3px;
 }
 

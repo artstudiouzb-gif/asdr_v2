@@ -12,9 +12,15 @@
        на 110px внутрь от логотипа, подвала и строки «Обновлено», которые
        стоят по краю контейнера. Родитель уже даёт нужные поля. */
     --editorial-wide: 100%;
-    --editorial-reading: 840px;
+    /* Ширина колонки чтения. 840px давали 88 знаков в строке при основном
+       кегле — читаемо, но длиннее нормы (60–75). 760px дают около 80: глаз
+       возвращается к началу строки увереннее, а композиция страницы и ширина
+       сеток не меняются. */
+    --editorial-reading: 760px;
     --editorial-line: color-mix(in srgb, var(--gov-border) 92%, transparent);
     --editorial-muted: color-mix(in srgb, var(--gov-muted) 94%, transparent);
+    /* Корень страницы — не секция: здесь цвет свой. Внутри блоков правила
+       ниже спрашивают --section-*, чтобы текст слушал цвет своей секции. */
     color: var(--gov-ink);
 }
 
@@ -70,6 +76,8 @@
 .content-pagehead--editorial .content-pagehead__lead {
     max-width: 680px;
     margin: 12px 0 0;
+    /* Шапка страницы — не секция: цвет свой, --section-* сюда не адресован
+       (в :root он разрешается в цвет темы и снял бы полупрозрачность). */
     color: var(--editorial-muted);
     font-size: var(--font-size-lead, var(--step-0));
     line-height: 1.55;
@@ -154,7 +162,7 @@
 
 .editorial-page__content > .cms-block:first-child.cms-block--text .block-text__content {
     max-width: 790px;
-    color: var(--gov-ink);
+    color: var(--section-fg, var(--gov-ink));
     font-size: var(--font-size-body, var(--step-0));
     line-height: 1.72;
 }
@@ -162,7 +170,7 @@
 .editorial-page__content > .cms-block:first-child.cms-block--text .block-text__content > p:first-child {
     margin-top: 0;
     max-width: 760px;
-    color: var(--gov-title);
+    color: var(--section-title-fg, var(--gov-title));
     font-size: var(--font-size-lead, var(--step-1));
     line-height: 1.62;
 }
@@ -224,7 +232,7 @@
 .editorial-page__content > .cms-block--text:has(.block-text__title) .block-text__content {
     max-width: var(--editorial-reading);
     margin-top: 12px;
-    color: var(--gov-ink);
+    color: var(--section-fg, var(--gov-ink));
     font-size: var(--font-size-body, var(--step-0));
     line-height: 1.7;
 }
@@ -268,7 +276,7 @@
 .editorial-page__content > .cms-block--timeline .block-timeline__description {
     max-width: var(--editorial-reading);
     margin-top: 12px;
-    color: var(--editorial-muted);
+    color: var(--section-muted-fg, var(--editorial-muted));
     font-size: var(--font-size-body, var(--step-0));
     line-height: 1.65;
 }
@@ -336,7 +344,7 @@
 .editorial-page__content .block-advantages__item:not(.feature-card) .block-advantages__desc,
 .editorial-page__content .block-advantages__item:not(.feature-card) p {
     margin: 0;
-    color: var(--editorial-muted);
+    color: var(--section-muted-fg, var(--editorial-muted));
     font-size: var(--font-size-card-text, var(--step--4));
     line-height: 1.48;
 }
@@ -381,7 +389,7 @@
 
 .editorial-page__content .stage__text {
     margin-top: 7px;
-    color: var(--editorial-muted);
+    color: var(--section-muted-fg, var(--editorial-muted));
     font-size: var(--font-size-card-text, var(--step--2));
     line-height: 1.48;
 }
@@ -415,7 +423,9 @@
     min-height: 132px;
     padding: 14px;
     border: 1px solid var(--editorial-line);
-    border-radius: 7px;
+    /* Токен, а не фиксированные 7px: настройка радиуса в «Дизайне» обязана
+       действовать и на редакционных страницах. */
+    border-radius: var(--radius-sm, 8px);
     background: var(--gov-surface);
     box-shadow: none;
 }
@@ -551,7 +561,7 @@
     align-items: center;
     gap: 10px;
     min-width: 0;
-    color: var(--gov-title);
+    color: var(--section-title-fg, var(--gov-title));
     font-size: var(--font-size-card-title, var(--step--1));
     font-weight: 700;
 }
@@ -585,9 +595,11 @@
 }
 
 .editorial-page__content > .cms-block--text .block-text--section .block-text__content {
-    max-width: 900px;
+    /* Ширина чтения общая: своя 900px давала 94 знака в строке — длиннее
+       остальных блоков той же страницы и заметно длиннее комфортных 60–75. */
+    max-width: var(--editorial-reading);
     margin-top: 12px;
-    color: var(--editorial-muted);
+    color: var(--section-muted-fg, var(--editorial-muted));
     font-size: var(--font-size-body, var(--step-0));
     line-height: 1.65;
 }
@@ -636,7 +648,7 @@
 
 .editorial-page__content .block-text__system-title {
     margin: 0 0 24px;
-    color: var(--gov-title);
+    color: var(--section-title-fg, var(--gov-title));
     font-size: var(--font-size-h3, clamp(var(--step-1), 1.5vw, var(--step-3)));
     line-height: 1.35;
 }
@@ -655,7 +667,7 @@
     align-items: center;
     gap: 13px;
     min-width: 0;
-    color: var(--gov-title);
+    color: var(--section-title-fg, var(--gov-title));
     font-size: var(--font-size-card-title, var(--step--1));
     font-weight: 600;
     line-height: 1.42;
@@ -803,7 +815,7 @@
 }
 
 .editorial-page__content .block-stages--history .stage__year {
-    color: var(--gov-title);
+    color: var(--section-title-fg, var(--gov-title));
     font-size: var(--font-size-h3, var(--step-3));
     line-height: 1;
 }
@@ -840,8 +852,13 @@
     gap: 20px;
 }
 
+/* Фирменный водяной знак остаётся и в редакционном варианте: в углу с номером
+   он мешал, поэтому уходит вниз карточки, где пусто. Раньше его тут просто
+   выключали, и фирменный слой пропадал со всех страниц с актами. */
 .editorial-page__content .block-docslist--acts-editorial .act-card__emblem {
-    display: none;
+    inset-block-start: auto;
+    inset-block-end: -12px;
+    inset-inline-end: -12px;
 }
 
 .editorial-page__content .act-card__editorial-head {
@@ -1032,14 +1049,14 @@
 }
 
 .editorial-page__content .person-card__name {
-    color: var(--gov-title);
+    color: var(--section-title-fg, var(--gov-title));
     font-size: var(--font-size-card-title, var(--step--2));
     line-height: 1.3;
 }
 
 .editorial-page__content .person-card__role {
     margin-top: 7px;
-    color: var(--editorial-muted);
+    color: var(--section-muted-fg, var(--editorial-muted));
     font-size: var(--font-size-card-text, var(--step--4));
     line-height: 1.42;
 }
@@ -1132,7 +1149,7 @@
 
 .editorial-page__content .profile__name {
     margin: 0;
-    color: var(--gov-title);
+    color: var(--section-title-fg, var(--gov-title));
     font-family: var(--font-heading, var(--font-family));
     font-size: var(--font-size-h1, clamp(var(--step-7), 4vw, var(--step-10)));
     line-height: 1.04;
@@ -1152,7 +1169,7 @@
     margin-top: 26px;
     padding-top: 22px;
     border-top: 1px solid var(--editorial-line);
-    color: var(--gov-ink);
+    color: var(--section-fg, var(--gov-ink));
     font-size: var(--font-size-lead, var(--step-0));
     line-height: 1.72;
 }
@@ -1195,7 +1212,7 @@
 }
 
 .editorial-page__content .bio__text {
-    color: var(--gov-ink);
+    color: var(--section-fg, var(--gov-ink));
     font-size: var(--font-size-body, var(--step-0));
     line-height: 1.76;
 }
@@ -1244,14 +1261,14 @@
 }
 
 .editorial-page__content .bio-career__years {
-    color: var(--gov-title);
+    color: var(--section-title-fg, var(--gov-title));
     font-size: var(--font-size-meta, var(--step--2));
     font-weight: 800;
     line-height: 1.5;
 }
 
 .editorial-page__content .bio-career__text {
-    color: var(--gov-ink);
+    color: var(--section-fg, var(--gov-ink));
     font-size: var(--font-size-card-text, var(--step--1));
     line-height: 1.58;
 }
@@ -1270,7 +1287,7 @@
 
 .editorial-page__content .bio-career__item:last-child .bio-career__years,
 .editorial-page__content .bio-career__item:last-child .bio-career__text {
-    color: var(--gov-title);
+    color: var(--section-title-fg, var(--gov-title));
     font-weight: 700;
 }
 

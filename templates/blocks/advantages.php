@@ -3,7 +3,8 @@
 $title = $data['title'] ?? '';
 $description = trim(\App\Core\HtmlSanitizer::sanitizeText((string) ($data['description'] ?? '')));
 $items = $data['items'] ?? [];
-$variant = in_array($data['variant'] ?? 'grid', ['grid', 'indexed', 'inline', 'band'], true) ? (string) $data['variant'] : 'grid';
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$variant = (string) $data['variant'];
 
 // Шапка секции — общая: заголовок, вводный текст и ссылка «Все …».
 $head = \App\Core\SectionHead::render([
@@ -25,7 +26,7 @@ if ($variant !== 'band') {
     // Карточки хвоста растягиваются на всю ширину — иначе справа зияет пустая
     // ячейка.
     $count = count($items);
-    $columns = max(0, min(5, (int) ($data['columns'] ?? 0)));
+    $columns = (int) $data['columns'];
     if ($columns === 0) {
         $columns = $count <= 5 ? $count : \App\Core\GridBalance::columnsFor($count);
     }

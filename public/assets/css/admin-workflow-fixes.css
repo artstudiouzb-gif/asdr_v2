@@ -7,7 +7,7 @@
     display: block;
     padding: 18px;
     border: 1px solid color-mix(in srgb, var(--admin-accent, #2563eb) 24%, var(--admin-border, #dce3ed));
-    border-radius: 12px;
+    border-radius: 3px;
     background: linear-gradient(180deg,
         color-mix(in srgb, var(--admin-accent, #2563eb) 5%, var(--admin-surface, #fff)),
         var(--admin-surface, #fff) 42%);
@@ -27,8 +27,8 @@
 }
 .news-gallery-editor__title {
     margin: 0 !important;
-    font-size: 15px !important;
-    font-weight: 750 !important;
+    font-size: var(--admin-fs-lg) !important;
+    font-weight: var(--admin-fw-semibold) !important;
 }
 .news-gallery-editor__count {
     display: inline-flex;
@@ -37,11 +37,11 @@
     min-width: 28px;
     height: 24px;
     padding: 0 8px;
-    border-radius: 999px;
+    border-radius: 3px;
     color: var(--admin-accent, #2563eb);
     background: color-mix(in srgb, var(--admin-accent, #2563eb) 12%, transparent);
-    font-size: 12px;
-    font-weight: 800;
+    font-size: var(--admin-fs-sm);
+    font-weight: var(--admin-fw-semibold);
 }
 .news-gallery-editor__add {
     flex: 0 0 auto;
@@ -53,7 +53,7 @@
     margin: 0 0 14px;
     padding: 20px;
     border: 1px dashed color-mix(in srgb, var(--admin-accent, #2563eb) 36%, var(--admin-border, #dce3ed));
-    border-radius: 10px;
+    border-radius: 3px;
     background: var(--admin-surface-soft, #f8fafc);
     color: var(--admin-muted, #64748b);
     text-align: center;
@@ -62,12 +62,12 @@
     display: block;
     margin-bottom: 4px;
     color: var(--admin-text, #172033);
-    font-size: 14px;
+    font-size: var(--admin-fs-md);
 }
 .news-gallery-editor__empty span {
     display: block;
     max-width: 560px;
-    font-size: 12px;
+    font-size: var(--admin-fs-sm);
 }
 .news-gallery-editor .news-gallery-admin {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
@@ -76,7 +76,7 @@
 }
 .news-gallery-editor .news-gallery-admin > div {
     padding: 10px !important;
-    border-radius: 10px !important;
+    border-radius: 3px!important;
     background: var(--admin-surface, #fff) !important;
     box-shadow: 0 1px 4px rgba(15, 23, 42, .06) !important;
 }
@@ -85,7 +85,7 @@
     aspect-ratio: 16 / 9;
     margin-bottom: 9px;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 3px;
     background: #e8eef5;
 }
 .news-gallery-admin__thumb img {
@@ -107,7 +107,7 @@
     height: 90px !important;
     margin-bottom: 6px;
     object-fit: cover;
-    border-radius: 7px;
+    border-radius: 3px;
 }
 .news-gallery-editor [data-file-preview] {
     margin-top: 10px;
@@ -126,7 +126,7 @@
 .news-gallery-editor__helper {
     margin: 0;
     color: var(--admin-muted, #64748b);
-    font-size: 12px;
+    font-size: var(--admin-fs-sm);
 }
 
 /* Backup restore is intentionally visually separated from simple download. */
@@ -134,7 +134,7 @@
     margin-top: 18px;
     padding: 18px;
     border: 1px solid color-mix(in srgb, var(--admin-warning, #9a6700) 38%, var(--admin-border, #dce3ed));
-    border-radius: 12px;
+    border-radius: 3px;
     background: color-mix(in srgb, var(--admin-warning-soft, #fff8c5) 36%, var(--admin-surface, #fff));
 }
 .backup-restore-panel__head {
@@ -150,7 +150,7 @@
 .backup-restore-panel__head p {
     margin: 0;
     color: var(--admin-muted, #64748b);
-    font-size: 12px;
+    font-size: var(--admin-fs-sm);
 }
 .backup-restore-panel__grid {
     display: grid;
@@ -160,14 +160,14 @@
 .backup-restore-panel__file {
     padding: 14px;
     border: 1px dashed var(--admin-border-strong, #8c8f94);
-    border-radius: 9px;
+    border-radius: 3px;
     background: var(--admin-surface, #fff);
 }
 .backup-restore-panel__status {
     min-height: 20px;
     margin-top: 6px;
     color: var(--admin-muted, #64748b);
-    font-size: 12px;
+    font-size: var(--admin-fs-sm);
 }
 .backup-restore-panel__confirm {
     margin-top: 14px;
@@ -188,7 +188,7 @@
 }
 .backup-restore-panel__safety {
     color: var(--admin-muted, #64748b);
-    font-size: 12px;
+    font-size: var(--admin-fs-sm);
 }
 
 @media (max-width: 760px) {

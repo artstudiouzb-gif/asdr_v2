@@ -78,7 +78,6 @@ function fetch(string $url, string $cookieJar, ?array $post = null): array
     $body = (string) curl_exec($ch);
     $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
     $final = (string) curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
-    curl_close($ch);
 
     return ['status' => $status, 'body' => $body, 'final' => $final];
 }

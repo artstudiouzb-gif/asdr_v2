@@ -131,9 +131,17 @@ test('Оглавление: закреплённая полоса не пере�
 
     // Липкой должна быть секция: sticky внутри низкого блока уезжает вместе с ним.
     assert_contains('.cms-block:has(> .block-anchornav--sticky)', $css);
-    assert_contains('scroll-margin-top: calc(var(--anchornav-top', $css);
-    // Высота шапки меряется, а не подбирается константой.
+    assert_contains('scroll-margin-top: var(--anchornav-top', $css);
+    // Высота шапки здесь не учитывается: её держит scroll-padding-top у html —
+    // один отступ на все якоря сайта. Две константы разъезжались бы молча, и
+    // якорь блока уезжал бы вдвое ниже, чем якорь вопроса или сектора команды.
+    $frontend = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/frontend.css');
+    assert_contains('scroll-padding-top: calc(var(--scroll-offset', $frontend);
+    assert_false(str_contains($css, 'var(--anchornav-top, 0px) + 64px'), 'отступ шапки задан дважды');
+    // Обе высоты меряются, а не подбираются константой.
     assert_contains("setProperty('--anchornav-top'", $js);
+    $frontendJs = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/js/frontend.js');
+    assert_contains("setProperty('--scroll-offset'", $frontendJs);
     assert_contains('IntersectionObserver', $js);
 });
 

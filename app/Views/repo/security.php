@@ -46,11 +46,16 @@ require __DIR__ . '/layout/top.php';
             <div>
                 <p>1. <?= $qrSvg !== '' ? 'Отсканируйте QR-код приложением (Google Authenticator, Aegis, 1Password и т.п.).' : 'Добавьте ключ в приложение-аутентификатор (Google Authenticator, Aegis, 1Password и т.п.).' ?></p>
                 <p>2. <?= $qrSvg !== '' ? 'Или введите ключ вручную:' : 'Ключ для ручного ввода:' ?> <span class="repo-secret"><?= htmlspecialchars((string) $setupSecret, ENT_QUOTES) ?></span></p>
-                <p>3. Введите текущий 6-значный код для подтверждения:</p>
+                <p>3. Введите текущий 6-значный код и подтвердите паролем:</p>
                 <form class="repo-form-narrow" method="post" action="/repo/security/2fa/enable">
                     <?= Csrf::field() ?>
                     <div class="repo-field mb-2">
-                        <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]*" maxlength="7" placeholder="000000" required>
+                        <label for="enable_totp_code">Код из приложения</label>
+                        <input type="text" id="enable_totp_code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]*" maxlength="7" placeholder="000000" required>
+                    </div>
+                    <div class="repo-field mb-2">
+                        <label for="enable_totp_password">Текущий пароль</label>
+                        <input type="password" id="enable_totp_password" name="password" autocomplete="current-password" required>
                     </div>
                     <button type="submit" class="repo-btn">Включить 2FA</button>
                 </form>

@@ -12,7 +12,7 @@ test('Сборки страниц: описаны корректно и испо
     $presets = PagePresets::all();
     assert_true(count($presets) >= 5, 'сборок должно быть несколько');
 
-    $known = array_keys(BlockRenderer::DEFAULTS);
+    $known = array_keys(BlockRenderer::defaults());
     foreach ($presets as $id => $preset) {
         assert_true($preset['name'] !== '', "{$id}: нет названия");
         assert_true($preset['description'] !== '', "{$id}: нет описания");
@@ -132,6 +132,30 @@ test('Демо-контент: оформление берётся из общи
     assert_contains('PagePresets::rhythmFor', $seeder, 'демо-страницы получают ритм секций');
     // Своё оформление в демо-данных приоритетнее автоматического (+= не перетирает).
     assert_contains('$blockData += $looks', $seeder);
+});
+
+test('Ритм не анимирует первый блок и анимирует остальные', function () {
+    // Первый блок — первый экран: пряча его до появления, мы задерживаем то,
+    // ради чего страницу открыли. То же правило у нового блока в редакторе
+    // (BlockPresentationNormalizer::newBlockPresentation), и разъезжаться им
+    // нельзя: демо-страницы показывали бы не то, что получает редактор.
+    $looks = PagePresets::rhythmFor(['hero', 'counters', 'cards_grid', 'text']);
+    assert_false((bool) $looks[0]['_reveal']['enabled'], 'первый блок анимируется');
+    for ($i = 1, $n = count($looks); $i < $n; $i++) {
+        assert_true((bool) $looks[$i]['_reveal']['enabled'], 'блок ' . $i . ' без появления');
+    }
+});
+
+test('Демо-главная и демо-проекты тоже получают появление секций', function () {
+    // Эти две ветки посева шли мимо ритма, и главная — самая заметная страница
+    // демо — показывалась одним снимком: редактор не видел настройки, которая
+    // по умолчанию включена.
+    $seeder = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Core/DemoSeeder.php');
+    assert_contains('$homeLooks = \\App\\Core\\PagePresets::rhythmFor($homeTypes)', $seeder);
+    assert_contains("rhythmFor(['text', \$type])[1]", $seeder);
+    // Берём только появление: фоны и отступы у главной и проектов свои.
+    assert_contains("\$blockData['_reveal'] = \$homeLooks[\$lookIndex]['_reveal']", $seeder);
+    assert_same(2, substr_count($seeder, "array_key_exists('_reveal'"), 'своё появление в данных должно оставаться главнее');
 });
 
 test('Сборки страниц: разметка не протекает в поля, которые экранируются', function () {

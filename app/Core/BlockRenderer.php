@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Core\BlockData\BlockFieldSchema;
 use App\Models\FormDef;
 
 final class BlockRenderer
@@ -11,9 +12,12 @@ final class BlockRenderer
     /**
      * Совместимый фасад: источник истины находится в BlockTypeRegistry.
      *
-     * @var array<string, array<string, mixed>>
+     * @return array<string, array<string, mixed>>
      */
-    public const DEFAULTS = BlockTypeRegistry::DEFAULTS;
+    public static function defaults(): array
+    {
+        return BlockTypeRegistry::defaults();
+    }
 
     /**
      * Ближайшая граница расписания среди отрисованных блоков — заполняется в
@@ -122,8 +126,11 @@ final class BlockRenderer
 
         // Самодостаточные визуальные и интерактивные элементы могут не иметь
         // текста, но всё равно являются содержимым блока.
+        // `hr` в этом списке не для красоты: разделитель — это блок, у которого
+        // нет и не должно быть ни текста, ни картинки, а на страницу он попасть
+        // обязан.
         if (preg_match(
-            '#<(img|picture|video|audio|iframe|svg|canvas|form|input|textarea|select|button)\b#i',
+            '#<(img|picture|video|audio|iframe|svg|canvas|form|input|textarea|select|button|hr)\b#i',
             $withoutCode
         ) === 1) {
             return false;
@@ -153,6 +160,12 @@ final class BlockRenderer
 
         // Смердживание с дефолтами поддерживает частично заполненные формы.
         $data = array_merge(self::defaultsFor($type), $data);
+        // Типы со схемой полей получают проверенные значения и на выводе:
+        // data блока приезжает и из старых записей, и из загруженного файла
+        // шаблона страницы, где сверены только ключи.
+        if (BlockFieldSchema::has($type)) {
+            $data = BlockFieldSchema::apply($type, $data);
+        }
 
         // Условия показа (расписание). Границу запоминаем до проверки: блок,
         // который ещё не начался, тоже обязан разморозить кэш к своему старту.
@@ -280,13 +293,7 @@ final class BlockRenderer
             $extraClass .= ' cms-block--has-watermark';
             $styleVars .= '--block-watermark-opacity:'
                 . round(((int) ($data['_watermark_opacity'] ?? 12)) / 100, 3) . ';'
-                . '--block-watermark-size:' . ((int) ($data['_watermark_size'] ?? 22)) . 'vw;'
-                . '--block-watermark-dx:' . ((int) ($data['_watermark_dx'] ?? 0)) . '%;'
-                . '--block-watermark-dy:' . ((int) ($data['_watermark_dy'] ?? 0)) . '%;'
-                . '--block-watermark-stroke:' . ((int) ($data['_watermark_stroke'] ?? 2)) . 'px;'
-                . ((string) ($data['_watermark_color'] ?? '') !== ''
-                    ? '--block-watermark-ink:' . (string) $data['_watermark_color'] . ';'
-                    : '');
+                . '--block-watermark-size:' . ((int) ($data['_watermark_size'] ?? 22)) . 'vw;';
         }
 
         if ($styleVars !== '') {
@@ -357,14 +364,9 @@ final class BlockRenderer
         $x = (string) ($data['_watermark_x'] ?? 'center');
         $y = (string) ($data['_watermark_y'] ?? 'middle');
 
-        $style = (string) ($data['_watermark_style'] ?? 'fill');
-        $font = (string) ($data['_watermark_font'] ?? 'heading');
-
         return '<span class="cms-block__watermark cms-block__watermark--x-'
             . htmlspecialchars($x, ENT_QUOTES) . ' cms-block__watermark--y-'
-            . htmlspecialchars($y, ENT_QUOTES) . ' cms-block__watermark--'
-            . htmlspecialchars($style, ENT_QUOTES) . ' cms-block__watermark--font-'
-            . htmlspecialchars($font, ENT_QUOTES) . '" aria-hidden="true">'
+            . htmlspecialchars($y, ENT_QUOTES) . '" aria-hidden="true">'
             . htmlspecialchars($text, ENT_QUOTES) . "</span>\n";
     }
 
@@ -380,6 +382,9 @@ final class BlockRenderer
         $preloadImages = [];
         self::$nextBoundary = null;
         self::$h1Used = false;
+        // FAQPage на страницу допускается ровно один — флаг живёт там же, где
+        // счётчик h1, и сбрасывается вместе с ним.
+        \App\Core\SchemaOrg::resetPageState();
         self::$pageSections = self::collectSections($blocks);
 
         foreach ($blocks as $block) {
@@ -416,6 +421,12 @@ final class BlockRenderer
             if (str_contains($rendered['html'], 'data-hero-transition')) {
                 $assets['hero_slides'] = true;
             }
+            // Виджет-фотокарусель внутри блока. Сам шаблон виджета просит
+            // скрипт у AssetCollector, но при попадании в кэш он не
+            // выполняется — из HTML же ключ виден и на кэше тоже.
+            if (str_contains($rendered['html'], 'widget--photo_slider')) {
+                $assets['slider'] = true;
+            }
             if (!empty($rendered['preload_image']) && $preloadImages === []) {
                 // Одного LCP-кандидата достаточно: дополнительные high-priority
                 // preload конкурировали бы с CSS и шрифтами первого экрана.
@@ -443,14 +454,12 @@ final class BlockRenderer
      */
     private static function renderColumns(array $block, array $data): array
     {
-        $count = (int) ($data['columns'] ?? 2);
-        if ($count < 2 || $count > 4) {
-            $count = 2;
-        }
-        $gap = (string) ($data['gap'] ?? 'medium');
-        if (!in_array($gap, ['small', 'medium', 'large'], true)) {
-            $gap = 'medium';
-        }
+        // Значения уже проверены схемой полей (BlockFieldSchema), поэтому
+        // читаются как есть.
+        $count = (int) $data['columns'];
+        $gap = (string) $data['gap'];
+        $valign = (string) $data['valign'];
+        $mobileOrder = (string) $data['mobile_order'];
 
         $byColumn = self::containerChildren($block, $count);
 
@@ -464,10 +473,16 @@ final class BlockRenderer
                 . "\n    </div>\n";
         }
 
+        // Выравнивание по высоте и порядок на телефоне — классы: инлайн-стили
+        // в блоках запрещены тестами.
+        $modifiers = $valign !== 'stretch' ? ' cms-columns--valign-' . $valign : '';
+        $modifiers .= $mobileOrder === 'reverse' ? ' cms-columns--mobile-reverse' : '';
+
         $html = sprintf(
-            "<div class=\"cms-columns cms-columns--%d cms-columns--gap-%s\">\n%s</div>",
+            "<div class=\"cms-columns cms-columns--%d cms-columns--gap-%s%s\">\n%s</div>",
             $count,
             htmlspecialchars($gap, ENT_QUOTES),
+            $modifiers,
             $colsHtml
         );
 
@@ -564,14 +579,10 @@ final class BlockRenderer
     {
         $blockId = (int) ($block['id'] ?? 0);
 
-        $variant = (string) ($data['variant'] ?? 'segmented');
-        if (!in_array($variant, ['segmented', 'underline', 'vertical'], true)) {
-            $variant = 'segmented';
-        }
-        $align = (string) ($data['align'] ?? 'left');
-        if (!in_array($align, ['left', 'center', 'stretch'], true)) {
-            $align = 'left';
-        }
+        // Значения проверены схемой полей (BlockFieldSchema).
+        $variant = (string) $data['variant'];
+        $align = (string) $data['align'];
+        $autoplay = (int) $data['autoplay'];
 
         $items = [];
         foreach ((array) ($data['items'] ?? []) as $item) {
@@ -582,7 +593,11 @@ final class BlockRenderer
             if ($title === '') {
                 continue;
             }
-            $items[] = ['title' => $title, 'icon' => Icon::cleanName($item['icon'] ?? '')];
+            $items[] = [
+                'title' => $title,
+                'icon' => Icon::cleanName($item['icon'] ?? ''),
+                'text' => trim((string) ($item['text'] ?? '')),
+            ];
         }
         // Вкладок больше десятка не бывает осмысленно, а полоса из них
         // разъезжается на любой ширине.
@@ -603,18 +618,33 @@ final class BlockRenderer
                 ? '<span class="cms-tabs__tab-icon" aria-hidden="true">' . Icon::render($item['icon'], 18) . '</span>'
                 : '';
 
+            // Полоса отсчёта до следующей вкладки. Рисуется только при
+            // включённом автопереключении и заполняется скриптом: без него
+            // отсчитывать нечего.
+            $progress = $autoplay > 0
+                ? '<span class="cms-tabs__tab-progress" data-tabs-progress aria-hidden="true"></span>'
+                : '';
+
             $listHtml .= '        <a class="cms-tabs__tab' . ($index === 0 ? ' is-active' : '')
                 . '" href="#' . $panelId . '" data-tabs-tab="' . $index . '">'
-                . $icon . '<span class="cms-tabs__tab-text">' . $title . '</span></a>' . "\n";
+                . $icon . '<span class="cms-tabs__tab-text">' . $title . '</span>' . $progress . '</a>' . "\n";
 
             [$inner, $innerCss] = self::renderContainerCell($byTab[$index]);
             $cssParts = array_merge($cssParts, $innerCss);
+
+            // Пояснение к вкладке — одна строка о том, чему она посвящена.
+            // Стоит над содержимым, а не в самой вкладке: вторая строка в
+            // полосе вкладок ломает ряд.
+            $note = $item['text'] !== ''
+                ? '            <p class="cms-tabs__panel-note">' . htmlspecialchars($item['text'], ENT_QUOTES) . '</p>' . "\n"
+                : '';
 
             $panelsHtml .= '        <div class="cms-tabs__panel" id="' . $panelId
                 . '" data-tabs-panel="' . $index . '">' . "\n"
                 // Заголовок панели нужен версии без JavaScript: там панели идут
                 // подряд, и без него не видно, где кончается одна вкладка.
                 . '            <h3 class="cms-tabs__panel-title">' . $title . '</h3>' . "\n"
+                . $note
                 . trim($inner) . "\n"
                 . '        </div>' . "\n";
         }
@@ -625,8 +655,14 @@ final class BlockRenderer
             'description_html' => true,
         ]);
 
+        // Автопереключение — атрибутом: без JavaScript панели и так видны все
+        // подряд, переключать нечего.
+        $autoplayAttr = $autoplay > 0 && count($items) > 1
+            ? ' data-tabs-autoplay="' . $autoplay . '"'
+            : '';
+
         $html = '<div class="cms-tabs cms-tabs--' . $variant . ' cms-tabs--align-' . $align
-            . '" data-tabs data-tab-count="' . count($items) . '">' . "\n"
+            . '" data-tabs data-tab-count="' . count($items) . '"' . $autoplayAttr . '>' . "\n"
             . ($head !== '' ? '    ' . $head . "\n" : '')
             // Список и панели лежат в общей обёртке: у варианта «список слева»
             // они становятся сеткой, а шапка секции обязана остаться над ними.
@@ -913,9 +949,34 @@ final class BlockRenderer
         if (in_array($mediaSource, ['albums', 'videos', 'media'], true)) {
             $lang = Locale::current();
             $limit = (int) ($data['limit'] ?? 8);
+            $paginate = !empty($data['paginate']);
+
+            // Постраничный вывод и витрина главной — разные задачи. Без полосы
+            // страниц блок показывает отмеченные «на главной» записи (forHome),
+            // с полосой — весь опубликованный список подряд: иначе читатель
+            // упирался бы в первые записи и не мог дойти до остальных.
+            $pager = null;
+            if ($paginate) {
+                $totals = [];
+                if ($mediaSource === 'videos' || $mediaSource === 'media') {
+                    $totals[] = \App\Models\Video::publishedTotal();
+                }
+                if ($mediaSource === 'albums' || $mediaSource === 'media') {
+                    $totals[] = \App\Models\PhotoAlbum::publishedTotal();
+                }
+                // Смешанный источник показывает видео и фото двумя вкладками,
+                // поэтому и листаются они вместе: на каждой странице своя
+                // порция и тех, и других. Страниц столько, сколько нужно
+                // самому длинному списку.
+                $pager = BlockPager::slice($totals === [] ? 0 : max($totals), $limit);
+            }
+
             $items = [];
             if ($mediaSource === 'videos' || $mediaSource === 'media') {
-                foreach (\App\Models\Video::forHome($limit, $lang) as $v) {
+                $videos = $pager === null
+                    ? \App\Models\Video::forHome($limit, $lang)
+                    : \App\Models\Video::publishedSlice($pager['per_page'], $pager['offset'], $lang);
+                foreach ($videos as $v) {
                     $items[] = [
                         'kind' => 'video',
                         'image' => (string) ($v['cover_url'] ?? ''),
@@ -926,7 +987,10 @@ final class BlockRenderer
                 }
             }
             if ($mediaSource === 'albums' || $mediaSource === 'media') {
-                foreach (\App\Models\PhotoAlbum::forHome($limit, $lang) as $a) {
+                $albums = $pager === null
+                    ? \App\Models\PhotoAlbum::forHome($limit, $lang)
+                    : \App\Models\PhotoAlbum::publishedSlice($pager['per_page'], $pager['offset'], $lang);
+                foreach ($albums as $a) {
                     $items[] = [
                         'kind' => 'photo',
                         'image' => \App\Models\PhotoAlbum::coverFor($a),
@@ -937,6 +1001,9 @@ final class BlockRenderer
                 }
             }
             $data['items'] = $items;
+            if ($pager !== null) {
+                $data['_pager'] = $pager;
+            }
             if ($mediaSource === 'albums' && ($data['all_url'] ?? '') === '') {
                 $data['all_url'] = Locale::url('albums', $lang);
             }

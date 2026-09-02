@@ -7,7 +7,7 @@ use App\Core\DesignSettings;
 use App\Controllers\Admin\BlockController;
 
 test('Редакционные варианты страницы Агентства являются настройками системных блоков', function (): void {
-    $defaults = BlockTypeRegistry::DEFAULTS;
+    $defaults = BlockTypeRegistry::defaults();
     assert_true(array_key_exists('variant', $defaults['text']));
     assert_true(array_key_exists('aside_title', $defaults['text']));
     assert_true(array_key_exists('items', $defaults['text']));
@@ -24,10 +24,13 @@ test('Редакционные варианты страницы Агентст�
     assert_true(array_key_exists('widgets_before', $defaults['bio_education']));
     assert_true(array_key_exists('widgets_after', $defaults['bio_education']));
 
-    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
+    // Редактор — это форма плюс поля, которые рисует схема: у типов со схемой
+    // варианты объявлены там, а не в разметке формы.
+    $editor = block_editor_markup();
     foreach (['intro', 'system', 'spotlight', 'indexed', 'history', 'acts-editorial', 'media_image', 'media_video', 'media_youtube'] as $variant) {
-        assert_contains($variant, $form, "вариант {$variant} недоступен в редакторе");
+        assert_contains($variant, $editor, "вариант {$variant} недоступен в редакторе");
     }
+    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
     assert_contains("['key' => 'widgets_before'", $form);
     assert_contains("['key' => 'widgets_after'", $form);
     assert_contains('name="<?= htmlspecialchars($slotKey, ENT_QUOTES) ?>[', $form);
@@ -44,7 +47,6 @@ test('Редактор bio_education сохраняет порядок видж�
 
     try {
         $method = new ReflectionMethod(BlockController::class, 'collectData');
-        $method->setAccessible(true);
         $data = $method->invoke(new BlockController(), 'bio_education', 'ru');
         assert_same([7, 8], $data['widgets_before']);
         assert_same([9], $data['widgets_after']);
@@ -86,10 +88,15 @@ test('Последний абзац заголовочного блока не �
 });
 
 test('Преимущества, этапы и таймлайн имеют собственное описание раздела', function (): void {
-    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
-    assert_contains("['advantages', 'timeline', 'stages']", $form);
-    assert_contains('name="description"', $form);
-    assert_contains('отдельный текстовый блок не нужен', $form);
+    $editor = block_editor_markup();
+    assert_contains('name="description"', $editor);
+    // Пояснение одно и то же у всех трёх — у двух оно приходит из схемы, у
+    // таймлайна пока из рукописной ветки формы.
+    assert_contains('отдельный текстовый блок не нужен', $editor);
+    foreach (['advantages', 'stages'] as $type) {
+        $fields = \App\Core\BlockData\BlockFieldSchema::fields($type);
+        assert_true(isset($fields['description']), "{$type}: описание не описано схемой");
+    }
 
     foreach (['advantages', 'stages', 'timeline'] as $type) {
         $template = (string) file_get_contents(APP_ROOT . '/templates/blocks/' . $type . '.php');

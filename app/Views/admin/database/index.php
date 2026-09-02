@@ -119,11 +119,11 @@ $totalMigrations = (int) ($status['total'] ?? 0);
     <div class="admin-grid admin-grid--4 admin-mt-16">
         <div class="stat-card">
             <div class="stat-card__label">СУБД / Версия</div>
-            <div class="stat-card__value"><?= htmlspecialchars($dbVersion, ENT_QUOTES) ?></div>
+            <div class="stat-card__value stat-card__value--text"><?= htmlspecialchars($dbVersion, ENT_QUOTES) ?></div>
         </div>
         <div class="stat-card">
             <div class="stat-card__label">Имя базы данных</div>
-            <div class="stat-card__value"><?= htmlspecialchars($dbName, ENT_QUOTES) ?></div>
+            <div class="stat-card__value stat-card__value--text"><?= htmlspecialchars($dbName, ENT_QUOTES) ?></div>
         </div>
         <div class="stat-card">
             <div class="stat-card__label">Количество таблиц</div>

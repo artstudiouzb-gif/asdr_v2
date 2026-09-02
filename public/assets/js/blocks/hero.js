@@ -190,6 +190,60 @@
 
     // --- Карусель ---------------------------------------------------------
 
+    /*
+     * Прозрачная шапка лежит поверх обложки, и её светлый набор — белое лого,
+     * белое меню — читается только на тёмном кадре. Гадать по картинке не
+     * нужно: сервер посчитал схему фона слайда и положил её в
+     * data-hero-scheme. Цвет текста слайда для этого не годится: редактор
+     * задаёт его вручную и обычно одинаковым на всех слайдах. Ниже по странице
+     * обложек может быть несколько, но под шапкой лежит только первая:
+     * остальные её не касаются.
+     */
+    function headerFollows(root) {
+        if (!document.querySelector('.site-header--transparent')) {
+            return false;
+        }
+        // Прозрачная шапка лежит поверх первого блока страницы. Обложка ниже
+        // по странице шапки не касается: под ней тогда другой блок, и
+        // подстраивать набор под чужой кадр — та же потеря контраста наоборот.
+        var block = root.closest('.cms-block') || root;
+        var first = document.querySelector('.cms-block');
+
+        return first ? first === block : document.querySelector('[data-hero]') === root;
+    }
+
+    var headerTimer = null;
+
+    /*
+     * Набор шапки меняется скачком, а кадр — за время перехода. Если
+     * переключить его сразу по клику, тёмный логотип окажется поверх ещё не
+     * ушедшего тёмного кадра: замерено — через 30 мс новый кадр виден на 1 %,
+     * и рассинхрон держится треть секунды. Поэтому смена приходится на
+     * середину перехода, где кадры равны и подмена не читается. При
+     * «меньше движения» перехода нет — нет и задержки.
+     */
+    function syncHeaderToSlide(root, slide, duration) {
+        if (!headerFollows(root)) {
+            return;
+        }
+        var light = !!slide && slide.getAttribute('data-hero-scheme') === 'light';
+        if (light === document.body.classList.contains('is-hero-light')) {
+            return;
+        }
+
+        window.clearTimeout(headerTimer);
+        var delay = reduceMotion() ? 0 : Math.round((duration || 0) / 2);
+        if (delay <= 0) {
+            document.body.classList.toggle('is-hero-light', light);
+
+            return;
+        }
+
+        headerTimer = window.setTimeout(function () {
+            document.body.classList.toggle('is-hero-light', light);
+        }, delay);
+    }
+
     function initHero(root) {
         var slides = Array.prototype.slice.call(root.querySelectorAll('[data-hero-slide]'));
         if (!slides.length) {
@@ -199,6 +253,7 @@
         // Один слайд — не карусель: медиа запускаем, всё остальное не нужно.
         if (slides.length === 1) {
             activateMedia(slides[0]);
+            syncHeaderToSlide(root, slides[0]);
 
             return;
         }
@@ -212,10 +267,13 @@
         var toggle = root.querySelector('[data-hero-toggle]');
 
         var interval = parseInt(root.getAttribute('data-hero-autoplay'), 10) || 0;
-        var resumeDelay = parseInt(root.getAttribute('data-hero-resume'), 10) || 0;
-        var pauseOnHover = root.hasAttribute('data-hero-pause-hover');
-        var pauseOnInteraction = root.hasAttribute('data-hero-pause-interaction');
-        var autoplayOnMobile = root.hasAttribute('data-hero-autoplay-mobile');
+        // Поведение автопрокрутки не настраивается: пауза при наведении и при
+        // действии нужна всегда, возобновление — через фиксированную паузу, а
+        // на телефоне автопрокрутки нет (свайп важнее, и это экономит батарею).
+        var resumeDelay = 10000;
+        var pauseOnHover = true;
+        var pauseOnInteraction = true;
+        var autoplayOnMobile = false;
 
         var timer = null;
         var resumeTimer = null;
@@ -345,6 +403,7 @@
             slide.setAttribute('aria-hidden', 'false');
             slide.removeAttribute('inert');
             activateMedia(slide);
+            syncHeaderToSlide(root, slide, duration);
 
             dots.forEach(function (dot) {
                 var active = parseInt(dot.getAttribute('data-hero-goto'), 10) === current;
@@ -478,6 +537,7 @@
             }
         });
         activateMedia(slides[current]);
+        syncHeaderToSlide(root, slides[current]);
         if (counter) {
             counter.textContent = pad(current + 1);
         }

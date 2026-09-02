@@ -212,6 +212,11 @@ $themeList = [
                 <label for="totp_code">Код из приложения</label>
                 <input type="text" id="totp_code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,9}" maxlength="9" required>
             </div>
+            <div class="form-field">
+                <label for="totp_enable_password">Подтвердите паролем</label>
+                <input type="password" id="totp_enable_password" name="password" autocomplete="current-password" required>
+                <p class="form-hint">Пароль нужен, чтобы чужая сессия не могла привязать к аккаунту свой аутентификатор.</p>
+            </div>
             <div class="form-actions"><button type="submit" class="btn btn--primary">Подключить приложение</button></div>
         </form>
     <?php endif; ?>

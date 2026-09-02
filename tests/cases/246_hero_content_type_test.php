@@ -105,8 +105,7 @@ test('Слайд: пустое оформление означает «как у
 
     assert_same('', $slide['overlay'], 'затемнение наследуется от обложки');
     assert_same(-1, $slide['overlay_opacity'], 'плотность наследуется, а 0 остаётся значимым');
-    assert_same('', $slide['text_position']);
-    assert_same('', $slide['scheme']);
+    assert_same('', $slide['content_scheme'], 'цвет текста наследуется от обложки');
 
     // Явное «нет» отличается от «как у обложки».
     $off = HeroSlideData::normalize(['title' => 'Т', 'overlay' => 'none', 'overlay_opacity' => '0']);
@@ -578,7 +577,8 @@ test('Ширина: обложка «во всю ширину» выходит �
 
 test('Навигация не уходит под надвинутый соседний блок', function () {
     $hero = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
-    $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
+    // Наезд объявлен в стилях счётчиков; они вынесены из темы отдельной частью.
+    $theme = theme_css();
 
     // Тема надвигает карточку «Счётчики» на низ обложки. Полоса навигации
     // оказывалась под ней, и стрелки со счётчиком пропадали с экрана.
@@ -603,11 +603,16 @@ test('Навигация не уходит под надвинутый сосе�
     }
 });
 
-test('Кнопка слайда: своя картинка побеждает иконку набора', function () {
-    // Иконка набора берёт currentColor и красится под тип кнопки; картинку
-    // ставят ради знака, которого в Tabler нет, поэтому подменять её иконкой
-    // нельзя — даже когда заполнены оба поля.
-    $both = HeroSlideData::normalize([
+test('Кнопка слайда: значок — только иконка набора', function () {
+    // Своя картинка внутри кнопки стоила трёх полей на кнопку (файл, режим,
+    // ширина) и своего семейства правил в CSS. Осталась иконка Tabler: она
+    // берёт currentColor и красится под тип кнопки.
+    foreach (['cta_image', 'cta_image_mode', 'cta_image_width',
+              'cta2_image', 'cta2_image_mode', 'cta2_image_width'] as $gone) {
+        assert_false(array_key_exists($gone, HeroSlideData::defaults()), 'картинка в кнопке вернулась: ' . $gone);
+    }
+
+    $data = HeroSlideData::normalize([
         'title' => 'Т',
         'cta_enabled' => '1',
         'cta_text' => 'Подробнее',
@@ -615,51 +620,26 @@ test('Кнопка слайда: своя картинка побеждает и
         'cta_icon' => 'arrow-right',
         'cta_image' => '/uploads/public/brand-mark.svg',
     ]);
-    assert_same('/uploads/public/brand-mark.svg', $both['cta_image']);
-    assert_same('arrow-right', $both['cta_icon'], 'иконка сохраняется: убрали картинку — она вернулась');
-
-    $rendered = HeroRenderer::render(
-        ['id' => 1, 'name' => 'Тест'],
-        [hero_test_slide($both, 1)],
-        HeroSettings::defaults(),
-        21
-    );
-    assert_contains('<img src="/uploads/public/brand-mark.svg"', $rendered['html']);
-    assert_contains('width="20" height="20"', $rendered['html'], 'без размеров SVG растягивается на всю кнопку');
-    assert_true(
-        strpos($rendered['html'], 'tabler-arrow-right') === false,
-        'при своей картинке иконка набора не выводится'
-    );
-    assert_contains('hero__cta--with-icon', $rendered['html']);
-});
-
-test('Кнопка слайда: опасный адрес картинки отбрасывается, остаётся иконка', function () {
-    // Абсолютный https здесь законен — медиа умеет жить на CDN, и остальные
-    // поля картинок ведут себя так же. Отсекается не чужой домен, а схема.
-    $data = HeroSlideData::normalize([
-        'title' => 'Т',
-        'cta_enabled' => '1',
-        'cta_text' => 'Подробнее',
-        'cta_url' => '/about',
-        'cta_icon' => 'arrow-right',
-        'cta_image' => 'javascript:alert(1)',
-    ]);
-    assert_same('', $data['cta_image'], 'адрес с исполняемой схемой не сохраняется');
+    assert_false(array_key_exists('cta_image', $data), 'присланное поле картинки не должно сохраняться');
 
     $rendered = HeroRenderer::render(
         ['id' => 1, 'name' => 'Тест'],
         [hero_test_slide($data, 1)],
         HeroSettings::defaults(),
-        22
+        21
     );
-    assert_true(strpos($rendered['html'], 'javascript:') === false);
-    assert_contains('tabler-arrow-right', $rendered['html'], 'иконка набора отработала как запасной вариант');
+    assert_contains('tabler-arrow-right', $rendered['html'], 'иконка кнопки пропала');
+    assert_contains('hero__cta--with-icon', $rendered['html']);
+    assert_true(
+        strpos($rendered['html'], 'brand-mark.svg') === false,
+        'картинка кнопки всё ещё доезжает до разметки'
+    );
 
-    $cdn = HeroSlideData::normalize([
-        'title' => 'Т',
-        'cta_image' => 'https://cdn.example.com/brand-mark.svg',
-    ]);
-    assert_same('https://cdn.example.com/brand-mark.svg', $cdn['cta_image'], 'картинка с CDN принимается');
+    // Семейство правил под режимы картинки ушло вместе с настройкой.
+    foreach (['hero.css', 'hero-art-layout.css'] as $file) {
+        $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/' . $file);
+        assert_true(strpos($css, 'hero__cta--image-') === false, 'мёртвые правила картинки в кнопке: ' . $file);
+    }
 });
 
 test('Выравнивание слайда: класс и селектор стоят на одном элементе', function () {
@@ -709,53 +689,34 @@ test('Выравнивание слайда: класс и селектор ст
     );
 });
 
-test('Отступы частей текста: умолчания сохраняют прежнюю вёрстку, ноль значим', function () {
-    $defaults = HeroSettings::defaults();
-    // Прежде расстояния держал общий gap шкалы (12px, у кнопок двойной).
-    // Умолчания обязаны его повторять, иначе у всех существующих обложек
-    // текст поедет в первый же деплой.
-    assert_same(12, $defaults['gap_title']);
-    assert_same(12, $defaults['gap_subtitle']);
-    assert_same(24, $defaults['gap_actions']);
+test('Промежутки между частями текста задаёт тема, а не настройка', function () {
+    // Четыре числа в форме («над картинкой», «над заголовком», «над
+    // описанием», «над кнопками») меняли типографику, которой у обложки и
+    // так одна раскладка. Значения остались переменными темы.
+    foreach (['gap_title', 'gap_subtitle', 'gap_actions', 'gap_art'] as $gone) {
+        assert_false(array_key_exists($gone, HeroSettings::defaults()), 'настройка промежутка вернулась: ' . $gone);
+        assert_false(array_key_exists($gone, HeroSlideData::defaults()), 'настройка промежутка вернулась к слайду: ' . $gone);
+    }
 
-    // У обложки пустое поле — это «верни умолчание», значение всегда число.
-    assert_same(24, HeroSettings::normalize(['gap_actions' => ''])['gap_actions']);
-    assert_same(0, HeroSettings::normalize(['gap_actions' => '0'])['gap_actions'], 'ноль — осознанное «вплотную»');
-    assert_same(200, HeroSettings::normalize(['gap_actions' => '9999'])['gap_actions'], 'отступ ограничен сверху');
-    assert_same(0, HeroSettings::normalize(['gap_actions' => '-40'])['gap_actions'], 'отрицательного отступа не бывает');
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
+    foreach (['--hero-gap-art', '--hero-gap-title', '--hero-gap-subtitle', '--hero-gap-actions'] as $var) {
+        assert_contains($var . ':', $css, 'переменная промежутка пропала из темы: ' . $var);
+    }
 
-    // У слайда пустое поле — «как у обложки», и это НЕ то же самое, что ноль.
-    $slide = HeroSlideData::normalize(['title' => 'Т']);
-    assert_same('', $slide['gap_actions'], 'слайд по умолчанию наследует отступ обложки');
-    assert_same(0, HeroSlideData::normalize(['title' => 'Т', 'gap_actions' => '0'])['gap_actions']);
-    assert_same(40, HeroSlideData::normalize(['title' => 'Т', 'gap_actions' => '40'])['gap_actions']);
-
-    // Переменная обложки печатается всегда, переменная слайда — только когда
-    // слайд действительно отходит от общей настройки.
-    $inherit = HeroRenderer::render(
+    // Промежутки не печатаются в scoped CSS обложки: их некому переопределять.
+    $rendered = HeroRenderer::render(
         ['id' => 1, 'name' => 'Тест'],
         [hero_test_slide(['title' => 'Т'], 1)],
-        HeroSettings::withDefaults(['gap_actions' => 48]),
+        HeroSettings::withDefaults([]),
         41
     );
-    assert_contains('--hero-gap-actions:48px', str_replace(' ', '', $inherit['css']));
-    assert_same(
-        1,
-        substr_count(str_replace(' ', '', $inherit['css']), '--hero-gap-actions:'),
-        'слайд без своей настройки переменную не переобъявляет'
+    assert_false(
+        str_contains((string) $rendered['css'], '--hero-gap-'),
+        'промежутки снова печатаются в стилях обложки'
     );
 
-    $own = HeroRenderer::render(
-        ['id' => 1, 'name' => 'Тест'],
-        [hero_test_slide(['title' => 'Т', 'gap_actions' => 0], 1)],
-        HeroSettings::withDefaults(['gap_actions' => 48]),
-        42
-    );
-    assert_contains('--hero-gap-actions:0px', str_replace(' ', '', $own['css']), 'ноль у слайда доезжает до CSS');
-
-    // Первая часть текста отступ сверху не получает: настройка про расстояние
+    // Первая часть текста отступ сверху не получает: переменные про расстояние
     // МЕЖДУ частями, а не про отрыв от границы блока.
-    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/hero.css');
     assert_true(
         preg_match('/\.hero__text > :first-child\s*\{[^}]*margin-top:\s*0/', $css) === 1,
         'у первой части текста верхнего отступа быть не должно'

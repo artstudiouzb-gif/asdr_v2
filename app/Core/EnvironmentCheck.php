@@ -16,11 +16,11 @@ final class EnvironmentCheck
     {
         $checks = [];
 
-        $phpOk = PHP_VERSION_ID >= 80200;
+        $phpOk = PHP_VERSION_ID >= 80400;
         $checks[] = [
-            'label' => 'PHP 8.2 или новее (текущая: ' . PHP_VERSION . ')',
+            'label' => 'PHP 8.4 или новее (текущая: ' . PHP_VERSION . ')',
             'ok' => $phpOk,
-            'hint' => $phpOk ? '' : 'Обновите PHP до версии 8.2+.',
+            'hint' => $phpOk ? '' : 'Обновите PHP до версии 8.4+.',
         ];
 
         foreach ([

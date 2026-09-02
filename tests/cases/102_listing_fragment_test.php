@@ -25,12 +25,27 @@ test('Fragment: режим включается только параметро�
 
 test('Партиал списка новостей: карточки, пагинация и пустое состояние (БД)', function () {
     ensure_test_db(); // Locale::url() спрашивает у БД язык по умолчанию
+    // Полный цикл ритма: обложка открывает ленту, широкая замыкает цикл
+    // (App\Core\NewsFeedRhythm), между ними компактные карточки.
     $items = [
         ['slug' => 'first', 'title' => 'Первая новость', 'excerpt' => 'Аннотация', 'published_at' => '2026-07-01 10:00', 'badge' => 'Важно', 'image' => ''],
         ['slug' => 'second', 'title' => 'Вторая новость', 'excerpt' => '', 'published_at' => '2026-07-02 10:00', 'badge' => '', 'image' => ''],
     ];
+    for ($i = 3; $i <= \App\Core\NewsFeedRhythm::CYCLE; $i++) {
+        $items[] = [
+            'slug' => 'news-' . $i,
+            'title' => 'Новость ' . $i,
+            'excerpt' => 'Аннотация ' . $i,
+            'published_at' => '2026-07-0' . ($i % 9 + 1) . ' 10:00',
+            'badge' => '',
+            'image' => '',
+        ];
+    }
 
-    // Внутри рубрики крупной новости нет — только сетка карточек.
+    // Композиция одна и та же везде: цикл «обложка плюс две компактные» → ряд
+    // из четырёх компактных → «две компактные плюс широкая». Отдельной крупной
+    // новости над лентой нет ни в рубрике, ни на первой странице — первая
+    // новость и есть обложка цикла.
     $html = View::renderPartial('site/_news_list', [
         'items' => $items,
         'page' => 1,
@@ -39,16 +54,19 @@ test('Партиал списка новостей: карточки, пагин
     ]);
     assert_contains('Первая новость', $html);
     assert_contains('Вторая новость', $html);
-    assert_not_contains('newslist-lead', $html, 'в рубрике крупной новости быть не должно');
+    assert_not_contains('newslist-lead', $html, 'отдельной крупной новости над лентой нет');
+    assert_contains('relnews-card--hero', $html, 'лента открывается обложкой');
+    assert_contains('relnews-card--wide', $html, 'цикл замыкает широкая карточка');
     assert_contains('listing-pager', $html, 'при двух страницах нужна пагинация');
     assert_contains('category=', $html, 'пагинация сохраняет выбранную рубрику');
     // Фрагмент — только результаты, без обвязки страницы.
     assert_not_contains('<html', $html);
     assert_not_contains('listing-filter', $html);
 
-    // Первая страница общего списка — первая новость крупной.
+    // Первая страница общего списка устроена так же, без исключений.
     $home = View::renderPartial('site/_news_list', ['items' => $items, 'page' => 1, 'pages' => 1, 'category' => '']);
-    assert_contains('newslist-lead', $home);
+    assert_not_contains('newslist-lead', $home, 'исключения для первой страницы нет');
+    assert_contains('relnews-card--hero', $home, 'лента открывается обложкой');
     assert_not_contains('listing-pager', $home, 'одна страница — пагинация не нужна');
 
     $empty = View::renderPartial('site/_news_list', ['items' => [], 'page' => 1, 'pages' => 1, 'category' => '']);

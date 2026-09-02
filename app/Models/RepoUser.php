@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use App\Core\Logger;
 use App\Core\SecretBox;
 
 /**
@@ -96,9 +97,53 @@ final class RepoUser
         $stmt->execute([':s' => SecretBox::encrypt($secret, 'repo_users.totp_secret'), ':id' => $id]);
     }
 
+    /**
+     * Одноразовое использование шага TOTP: принимает шаг только один раз и
+     * только вперёд. UPDATE атомарен, поэтому две параллельные попытки с
+     * одним кодом не пройдут обе. Возвращает true, если код можно засчитать.
+     *
+     * Колонки может не быть: код выложили, а `php database/migrate.php` не
+     * запустили. Ронять на этом второй фактор нельзя — владелец останется
+     * заперт снаружи админки, и чинить придётся через доступ к БД. Поэтому
+     * недостающая колонка возвращает поведение до защиты (код принимается),
+     * громко пишет в security-лог, и только.
+     */
+    public static function consumeTotpStep(int $id, int $step): bool
+    {
+        try {
+            $stmt = Database::pdo()->prepare(
+                'UPDATE repo_users SET totp_last_step = :step
+                 WHERE id = :id AND (totp_last_step IS NULL OR totp_last_step < :guard)'
+            );
+            // Один и тот же именованный параметр дважды PDO не принимает
+            // при нативных prepared statements — отсюда отдельный :guard.
+            $stmt->execute([':step' => $step, ':id' => $id, ':guard' => $step]);
+
+            return $stmt->rowCount() === 1;
+        } catch (\PDOException $e) {
+            if (!self::missingReplayColumn($e)) {
+                throw $e;
+            }
+
+            Logger::security(
+                'Нет колонки repo_users.totp_last_step — защита от повтора кода TOTP отключена. '
+                . 'Примените миграции: php database/migrate.php',
+                ['user_id' => $id]
+            );
+
+            return true;
+        }
+    }
+
+    /** Отсутствующая колонка (42S22/1054), а не любая ошибка запроса. */
+    private static function missingReplayColumn(\PDOException $e): bool
+    {
+        return $e->getCode() === '42S22' && str_contains($e->getMessage(), 'totp_last_step');
+    }
+
     public static function disableTotp(int $id): void
     {
-        $stmt = Database::pdo()->prepare('UPDATE repo_users SET totp_secret = NULL, totp_enabled = 0 WHERE id = :id');
+        $stmt = Database::pdo()->prepare('UPDATE repo_users SET totp_secret = NULL, totp_enabled = 0, totp_last_step = NULL WHERE id = :id');
         $stmt->execute([':id' => $id]);
     }
 

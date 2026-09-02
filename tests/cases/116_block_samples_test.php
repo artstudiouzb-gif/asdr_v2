@@ -15,7 +15,7 @@ use App\Core\BlockTypeRegistry;
 const SAMPLE_EXEMPT = ['columns', 'slider', 'form'];
 
 test('Образцы: есть у каждого содержательного типа блока', function () {
-    foreach (array_keys(BlockRenderer::DEFAULTS) as $type) {
+    foreach (array_keys(BlockRenderer::defaults()) as $type) {
         if (in_array($type, SAMPLE_EXEMPT, true)) {
             continue;
         }
@@ -28,7 +28,7 @@ test('Образцы: есть у каждого содержательного 
 
 test('Образцы: блок с образцом виден на странице', function () {
     ensure_test_db();
-    foreach (array_keys(BlockRenderer::DEFAULTS) as $i => $type) {
+    foreach (array_keys(BlockRenderer::defaults()) as $i => $type) {
         if (in_array($type, SAMPLE_EXEMPT, true)) {
             continue;
         }
@@ -44,9 +44,18 @@ test('Образцы: блок с образцом виден на страни�
     }
 });
 
+test('Образцы: «Команда» с группировкой — иначе образец предупреждает сам на себя', function () {
+    // Проверка подсказок ниже зависит от содержимого базы: как только у
+    // сотрудников появляются секторы (а на боевом сайте они есть), образец без
+    // группировки начинает вызывать предупреждение. Раньше это всплывало
+    // случайно — на повторном прогоне тестов по той же базе.
+    $sample = BlockSamples::for('team_list');
+    assert_true(!empty($sample['group_by_department']), 'у образца «Команда» включена группировка по секторам');
+});
+
 test('Образцы: без разметки в экранируемых полях и без нерабочих полей', function () {
     ensure_test_db();
-    foreach (array_keys(BlockRenderer::DEFAULTS) as $i => $type) {
+    foreach (array_keys(BlockRenderer::defaults()) as $i => $type) {
         if (in_array($type, SAMPLE_EXEMPT, true)) {
             continue;
         }
@@ -69,7 +78,7 @@ test('Новый блок создаётся с образцом', function () {
     $src = (string) file_get_contents(dirname(__DIR__, 2) . '/app/Controllers/Admin/BlockController.php');
     // Язык блока передаётся, чтобы ссылки образца вели в раздел того же языка.
     assert_contains('BlockSamples::for($type, $lang)', $src);
-    assert_contains('array_merge(BlockTypeRegistry::defaultsFor($type), $sample)', $src);
+    assert_contains('array_merge(BlockTypeRegistry::defaultsFor($type), $sample, $presentation)', $src);
     // Блок формы получает первую существующую форму, иначе он бесполезен.
     assert_contains('FormDef::all()[0] ?? null', $src);
 });

@@ -23,10 +23,17 @@ $navContent = [
     'heroes' => ['/admin/heroes', t('Обложки')],
     'projects' => ['/admin/projects', t('Проекты')],
     'team' => ['/admin/team', t('Команда')],
+    'goals' => ['/admin/goals', t('Цели')],
 ];
 try {
     foreach (\App\Models\ContentType::all() as $navCt) {
-        $navContent['content:' . $navCt['slug']] = ['/admin/content/' . $navCt['slug'], $navCt['name']];
+        // Иконка едет вместе с пунктом: у каждого типа она своя, и общий
+        // значок списка остаётся только запасным вариантом.
+        $navContent['content:' . $navCt['slug']] = [
+            '/admin/content/' . $navCt['slug'],
+            $navCt['name'],
+            (string) ($navCt['icon'] ?? ''),
+        ];
     }
 } catch (\Throwable $e) {
     // миграция типов контента не накатана — пропускаем
@@ -60,6 +67,7 @@ if ($navIsSuper) {
         'social' => ['/admin/social', t('Соцсети')],
         'webhooks' => ['/admin/webhooks', t('Вебхуки')],
         'redirects' => ['/admin/redirects', t('Редиректы')],
+        'seo' => ['/admin/seo', t('Поиск и индексация')],
         'performance' => ['/admin/performance', t('Производительность')],
         'database' => ['/admin/database', t('База данных')],
         'security' => ['/admin/security', t('Безопасность')],
@@ -115,6 +123,7 @@ $navBrandSubtitle = $navBrandHost !== '' ? $navBrandHost : t('Панель уп�
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($pageTitle, ENT_QUOTES) ?> — <?= htmlspecialchars(\App\Core\AdminBrand::name(), ENT_QUOTES) ?></title>
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/vendor/coloris/coloris.min.css'), ENT_QUOTES) ?>">
+<?= \App\Core\AdminUi::fontLinks() ?>
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/css/admin.css'), ENT_QUOTES) ?>">
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/css/admin-shell-v2.css'), ENT_QUOTES) ?>">
 <?= \App\Core\Icon::browserConfigHtml() ?>
@@ -254,8 +263,14 @@ try {
                         <?= \App\Core\AdminUi::icon('chevron-down', 12, 'admin-sidebar__chevron', 2.5) ?>
                     </button>
                     <div class="admin-nav-group__items">
-                        <?php foreach ($navGroupItems as $navKey => [$navUrl, $navText]): ?>
-                            <?php $navIc = str_starts_with($navKey, 'content:') ? 'content_types' : $navKey; ?>
+                        <?php foreach ($navGroupItems as $navKey => $navItem): ?>
+                            <?php
+                            [$navUrl, $navText] = $navItem;
+                            $navIc = $navItem[2] ?? '';
+                            if ($navIc === '') {
+                                $navIc = str_starts_with($navKey, 'content:') ? 'content_types' : $navKey;
+                            }
+                            ?>
                             <a href="<?= $navUrl ?>" class="admin-nav-item <?= $activeNav === $navKey ? 'is-active' : '' ?>" title="<?= htmlspecialchars($navText, ENT_QUOTES) ?>"<?= $activeNav === $navKey ? ' aria-current="page"' : '' ?>>
                                 <?= \App\Core\AdminUi::navigationIcon($navIc) ?><span><?= htmlspecialchars($navText, ENT_QUOTES) ?></span>
                                 <?php if ($navKey === 'database' && $navPendingMigrationsCount > 0): ?>

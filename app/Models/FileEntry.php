@@ -18,9 +18,47 @@ final class FileEntry
     }
 
     /**
+     * Условия выборки по видам файлов. Один список на выдачу и на счётчики
+     * боковой колонки: раздельные разъезжались бы молча — в списке одно число,
+     * на экране другое.
+     *
+     * @var array<string, string>
+     */
+    private const LIBRARY_TYPES = [
+        'all_files' => '1=1',
+        'all' => "(mime_type LIKE 'image/%' OR mime_type LIKE 'video/%' OR mime_type LIKE 'audio/%')",
+        'image' => "mime_type LIKE 'image/%'",
+        'raster' => "mime_type LIKE 'image/%' AND mime_type <> 'image/svg+xml'",
+        'svg' => "mime_type = 'image/svg+xml'",
+        'video' => "mime_type LIKE 'video/%'",
+        'audio' => "mime_type LIKE 'audio/%'",
+        'document' => "mime_type NOT LIKE 'image/%' AND mime_type NOT LIKE 'video/%' AND mime_type NOT LIKE 'audio/%'",
+    ];
+
+    /** @var array<string, string> */
+    private const LIBRARY_SORTS = [
+        'date_desc' => 'created_at DESC',
+        'date_asc' => 'created_at ASC',
+        'name_asc' => 'original_name ASC',
+        'size_desc' => 'size DESC',
+    ];
+
+    /** @return list<string> */
+    public static function libraryTypes(): array
+    {
+        return array_keys(self::LIBRARY_TYPES);
+    }
+
+    /** @return list<string> */
+    public static function librarySorts(): array
+    {
+        return array_keys(self::LIBRARY_SORTS);
+    }
+
+    /**
      * Постраничная выборка файлов для модальной медиабиблиотеки с фильтром по типу и поиску.
      */
-    public static function libraryFiltered(string $type = 'image', int $limit = 300, int $offset = 0, string $query = ''): array
+    public static function libraryFiltered(string $type = 'image', int $limit = 300, int $offset = 0, string $query = '', string $sort = 'date_desc'): array
     {
         $sql = "SELECT * FROM files WHERE access_type = 'public'";
         $bind = [];
@@ -30,24 +68,10 @@ final class FileEntry
             $bind[':q'] = '%' . $query . '%';
         }
 
-        if ($type === 'svg') {
-            $sql .= " AND mime_type = 'image/svg+xml'";
-        } elseif ($type === 'video') {
-            $sql .= " AND mime_type LIKE 'video/%'";
-        } elseif ($type === 'audio') {
-            $sql .= " AND mime_type LIKE 'audio/%'";
-        } elseif ($type === 'document') {
-            $sql .= " AND mime_type NOT LIKE 'image/%' AND mime_type NOT LIKE 'video/%' AND mime_type NOT LIKE 'audio/%'";
-        } elseif ($type === 'all_files') {
-            // все публичные
-        } elseif ($type === 'all') {
-            $sql .= " AND (mime_type LIKE 'image/%' OR mime_type LIKE 'video/%' OR mime_type LIKE 'audio/%')";
-        } else {
-            // по умолчанию image
-            $sql .= " AND mime_type LIKE 'image/%'";
-        }
+        $sql .= ' AND (' . (self::LIBRARY_TYPES[$type] ?? self::LIBRARY_TYPES['image']) . ')';
+        $sql .= ' ORDER BY ' . (self::LIBRARY_SORTS[$sort] ?? self::LIBRARY_SORTS['date_desc']);
+        $sql .= ' LIMIT :limit OFFSET :offset';
 
-        $sql .= ' ORDER BY created_at DESC LIMIT :limit OFFSET :offset';
         $stmt = Database::pdo()->prepare($sql);
         foreach ($bind as $k => $v) {
             $stmt->bindValue($k, $v);
@@ -57,6 +81,59 @@ final class FileEntry
         $stmt->execute();
 
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Число файлов в каждом виде — для боковой колонки окна выбора. Считается
+     * одним запросом с группировкой по mime, а не восемью отдельными.
+     *
+     * @return array<string, int>
+     */
+    public static function libraryCounts(string $query = ''): array
+    {
+        $sql = "SELECT mime_type, COUNT(*) AS c FROM files WHERE access_type = 'public'";
+        $bind = [];
+        if ($query !== '') {
+            $sql .= ' AND original_name LIKE :q';
+            $bind[':q'] = '%' . $query . '%';
+        }
+        $sql .= ' GROUP BY mime_type';
+
+        $stmt = Database::pdo()->prepare($sql);
+        foreach ($bind as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
+        $stmt->execute();
+
+        $counts = array_fill_keys(array_keys(self::LIBRARY_TYPES), 0);
+        foreach ($stmt->fetchAll() as $row) {
+            $mime = (string) ($row['mime_type'] ?? '');
+            $n = (int) ($row['c'] ?? 0);
+            $isImage = str_starts_with($mime, 'image/');
+            $isVideo = str_starts_with($mime, 'video/');
+            $isAudio = str_starts_with($mime, 'audio/');
+
+            $counts['all_files'] += $n;
+            if ($isImage || $isVideo || $isAudio) {
+                $counts['all'] += $n;
+            }
+            if ($isImage) {
+                $counts['image'] += $n;
+                if ($mime === 'image/svg+xml') {
+                    $counts['svg'] += $n;
+                } else {
+                    $counts['raster'] += $n;
+                }
+            } elseif ($isVideo) {
+                $counts['video'] += $n;
+            } elseif ($isAudio) {
+                $counts['audio'] += $n;
+            } else {
+                $counts['document'] += $n;
+            }
+        }
+
+        return $counts;
     }
 
     public static function filtered(array $params, bool $includeProtected = true): array

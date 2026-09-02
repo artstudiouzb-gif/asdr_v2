@@ -27,6 +27,9 @@ final class ContentController
             return;
         }
 
+        // Стили каталога вынесены из общей темы: подключаем их только здесь.
+        \App\Core\AssetCollector::requireThemePart('catalog');
+
         $lang = Locale::current();
         $fields = ContentType::fields((int) $type['id']);
 
@@ -96,6 +99,8 @@ final class ContentController
             View::render('errors/404');
             return;
         }
+
+        \App\Core\AssetCollector::requireThemePart('catalog');
 
         $lang = Locale::current();
         if ((int) ($type['has_translations'] ?? 0) === 1) {

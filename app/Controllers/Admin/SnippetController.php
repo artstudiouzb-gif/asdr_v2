@@ -8,6 +8,7 @@ use App\Core\Auth;
 use App\Core\Cache;
 use App\Core\Csrf;
 use App\Core\Flash;
+use App\Core\PageTemplateFile;
 use App\Core\View;
 use App\Models\BlockSnippet;
 use App\Models\Language;
@@ -145,6 +146,96 @@ final class SnippetController
             Flash::success('Прежние блоки сохранены как шаблон «' . $backup . '» — применить его с режимом «Заменить», чтобы вернуть как было.');
         }
         $this->back($pageId, $lang);
+    }
+
+    /**
+     * Выгрузка шаблона файлом. Внутри системы шаблон уже был, но жил только в
+     * базе: перенести сборку на другой сайт или отдать её кому-то было нечем.
+     */
+    public function export(): void
+    {
+        Auth::requireLogin();
+
+        $snippet = BlockSnippet::findById((int) ($_GET['id'] ?? 0));
+        if ($snippet === null) {
+            http_response_code(404);
+            View::render('errors/404');
+            return;
+        }
+
+        $blocks = json_decode((string) ($snippet['blocks_json'] ?? ''), true);
+        $name = (string) $snippet['name'];
+        $file = PageTemplateFile::fileName($name);
+        $body = PageTemplateFile::export($name, is_array($blocks) ? $blocks : []);
+
+        header('Content-Type: application/json; charset=utf-8');
+        // Транслитерированное имя — для клиентов, которые не понимают
+        // filename*; полное идёт следом и выигрывает там, где понимают.
+        header(
+            'Content-Disposition: attachment; filename="' . $file . '"; '
+            . "filename*=UTF-8''" . rawurlencode(PageTemplateFile::fileName($name))
+        );
+        header('Content-Length: ' . strlen($body));
+        header('X-Content-Type-Options: nosniff');
+        echo $body;
+    }
+
+    /**
+     * Загрузка шаблона из файла. Присланный файл — не свои данные: тип блока
+     * сверяется с реестром, поля — с умолчаниями типа, оформление проходит
+     * через тот же нормализатор, что и форма блока. Что не прошло — попадает
+     * в предупреждения, а не пропадает молча.
+     */
+    public function import(): void
+    {
+        Auth::requireLogin();
+        Csrf::verifyRequest();
+
+        $file = $_FILES['template'] ?? null;
+        if (!is_array($file) || (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            Flash::error('Файл не выбран или не загрузился.');
+            $this->backToImport();
+        }
+        if ((int) ($file['size'] ?? 0) > PageTemplateFile::MAX_BYTES) {
+            Flash::error('Файл больше 2 МБ — это не шаблон страницы.');
+            $this->backToImport();
+        }
+
+        $json = (string) file_get_contents((string) $file['tmp_name']);
+        try {
+            $parsed = PageTemplateFile::parse($json, Auth::isSuperAdmin());
+        } catch (\InvalidArgumentException $e) {
+            Flash::error('Импорт не выполнен. ' . $e->getMessage());
+            $this->backToImport();
+        }
+
+        // Имя из файла может совпасть с уже сохранённым — это нормально, но
+        // пустое имя оставило бы в списке безымянную строку.
+        $name = $parsed['name'] !== '' ? $parsed['name'] : 'Импорт от ' . date('d.m.Y H:i');
+        $posted = trim((string) ($_POST['snippet_name'] ?? ''));
+        if ($posted !== '') {
+            $name = mb_substr($posted, 0, 190);
+        }
+
+        BlockSnippet::create($name, $parsed['blocks']);
+        Cache::flush();
+
+        $message = 'Шаблон «' . $name . '» загружен: ' . count($parsed['blocks']) . ' блоков.';
+        if ($parsed['warnings'] !== []) {
+            // Предупреждения показываем целиком, а не «и ещё 12»: по ним
+            // редактор понимает, что именно приехало не так.
+            Flash::error($message . ' Замечания: ' . implode('; ', $parsed['warnings']) . '.');
+        } else {
+            Flash::success($message);
+        }
+        $this->backToImport();
+    }
+
+    private function backToImport(): never
+    {
+        $referer = (string) ($_SERVER['HTTP_REFERER'] ?? '/admin/pages');
+        header('Location: ' . (str_starts_with($referer, '/') ? $referer : '/admin/pages'));
+        exit;
     }
 
     public function destroy(array $params): void

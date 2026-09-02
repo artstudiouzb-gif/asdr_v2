@@ -15,7 +15,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] {
 form[action*="/admin/heroes/"][action*="/slides/"] > .form-card {
     padding: 22px;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 10px;
+    border-radius: 3px;
     background: var(--hero-editor-surface);
     box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
 }
@@ -30,10 +30,10 @@ form[action*="/admin/heroes/"][action*="/slides/"] > .form-card > .form-hint {
     margin: 0 0 18px;
     padding: 11px 13px;
     border: 1px solid color-mix(in srgb, var(--hero-editor-border) 78%, transparent);
-    border-radius: 8px;
+    border-radius: 3px;
     background: var(--hero-editor-soft);
     color: var(--hero-editor-muted);
-    font-size: 12px;
+    font-size: var(--admin-fs-sm);
     line-height: 1.5;
 }
 
@@ -41,7 +41,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] details.form-section {
     margin: 0 0 14px;
     overflow: clip;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 9px;
+    border-radius: 3px;
     background: var(--hero-editor-surface);
     box-shadow: 0 1px 2px rgba(15, 23, 42, .025);
 }
@@ -64,8 +64,8 @@ form[action*="/admin/heroes/"][action*="/slides/"] details.form-section > summar
     color: var(--hero-editor-text);
     background: var(--hero-editor-surface);
     border-bottom: 1px solid transparent;
-    font-size: 13px;
-    font-weight: 720;
+    font-size: var(--admin-fs-base);
+    font-weight: var(--admin-fw-semibold);
     line-height: 1.3;
     transition: background-color .16s ease, border-color .16s ease;
 }
@@ -100,8 +100,8 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-section__hint {
     min-width: 0;
     overflow: hidden;
     color: var(--hero-editor-muted);
-    font-size: 11.5px;
-    font-weight: 500;
+    font-size: var(--admin-fs-xs);
+    font-weight: var(--admin-fw-medium);
     line-height: 1.35;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -113,11 +113,11 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-section__state {
     overflow: hidden;
     padding: 4px 8px;
     border: 1px solid color-mix(in srgb, var(--hero-editor-border) 82%, transparent);
-    border-radius: 999px;
+    border-radius: 3px;
     background: var(--hero-editor-surface);
     color: var(--hero-editor-muted);
-    font-size: 10.5px;
-    font-weight: 650;
+    font-size: var(--admin-fs-xs);
+    font-weight: var(--admin-fw-semibold);
     line-height: 1.2;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -153,8 +153,8 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-field > .field-label {
     display: block;
     margin: 0 0 7px !important;
     color: var(--hero-editor-text);
-    font-size: 12.5px !important;
-    font-weight: 650 !important;
+    font-size: var(--admin-fs-sm) !important;
+    font-weight: var(--admin-fw-semibold) !important;
     line-height: 1.35;
 }
 
@@ -166,8 +166,8 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-field textarea {
     min-height: 40px;
     margin: 0;
     padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 13px;
+    border-radius: 3px;
+    font-size: var(--admin-fs-base);
     line-height: 1.4;
 }
 
@@ -180,8 +180,8 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-hint {
     display: block;
     margin-top: 6px;
     color: var(--hero-editor-muted);
-    font-size: 11.5px;
-    font-weight: 450;
+    font-size: var(--admin-fs-xs);
+    font-weight: var(--admin-fw-medium);
     line-height: 1.45;
 }
 
@@ -189,7 +189,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-field--wide > .form-hin
     margin: 0;
     padding: 9px 11px;
     border-left: 3px solid color-mix(in srgb, var(--hero-editor-accent) 48%, var(--hero-editor-border));
-    border-radius: 5px;
+    border-radius: 3px;
     background: var(--hero-editor-soft);
 }
 
@@ -201,7 +201,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-field--checkbox {
     min-height: 42px;
     padding: 10px 11px;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 7px;
+    border-radius: 3px;
     background: var(--hero-editor-soft);
 }
 
@@ -240,7 +240,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] .image-field__preview {
     aspect-ratio: 16 / 10;
     overflow: hidden;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 7px;
+    border-radius: 3px;
     background: var(--hero-editor-soft);
 }
 
@@ -256,8 +256,8 @@ form[action*="/admin/heroes/"][action*="/slides/"] .image-field__controls {
 }
 
 form[action*="/admin/heroes/"][action*="/slides/"] .image-field__controls {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    display: flex !important;
+    flex-wrap: wrap;
     gap: 6px;
     align-items: center;
 }
@@ -281,7 +281,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] .tabler-icon-field__preview {
     display: grid;
     place-items: center;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 6px;
+    border-radius: 3px;
     background: var(--hero-editor-soft);
 }
 
@@ -304,15 +304,15 @@ form[action*="/admin/heroes/"][action*="/slides/"] .form-section__body--grid > f
     margin: 0;
     padding: 16px;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 8px;
+    border-radius: 3px;
     background: var(--hero-editor-soft);
 }
 
 form[action*="/admin/heroes/"][action*="/slides/"] .form-section__body--grid > fieldset.form-grid > legend {
     padding: 0 7px;
     color: var(--hero-editor-text);
-    font-size: 12.5px;
-    font-weight: 700;
+    font-size: var(--admin-fs-sm);
+    font-weight: var(--admin-fw-semibold);
 }
 
 form[action*="/admin/heroes/"][action*="/slides/"] > .form-actions {
@@ -326,7 +326,7 @@ form[action*="/admin/heroes/"][action*="/slides/"] > .form-actions {
     margin: 14px auto 0;
     padding: 10px 12px;
     border: 1px solid var(--hero-editor-border);
-    border-radius: 8px 8px 0 0;
+    border-radius: 3px 3px 0 0;
     background: color-mix(in srgb, var(--hero-editor-surface) 94%, transparent);
     box-shadow: 0 -8px 24px rgba(15, 23, 42, .06);
     backdrop-filter: blur(12px);
@@ -390,6 +390,6 @@ form[action*="/admin/heroes/"][action*="/slides/"] > .form-actions {
 
     form[action*="/admin/heroes/"][action*="/slides/"] > .form-actions {
         flex-wrap: wrap;
-        border-radius: 8px 8px 0 0;
+        border-radius: 3px 3px 0 0;
     }
 }

@@ -12,7 +12,7 @@ declare(strict_types=1);
  *
  * Формат: slug => ['group' => …, '<lang>' => ['title','lead','meta_*','blocks']].
  * Блок — ['type', 'title' (внутреннее имя для админки), 'data'].
- * Ключи внутри data обязаны совпадать с BlockTypeRegistry::DEFAULTS, иначе
+ * Ключи внутри data обязаны совпадать с BlockTypeRegistry::defaults(), иначе
  * первое же сохранение блока в админке их потеряет (стережёт тест 227).
  */
 

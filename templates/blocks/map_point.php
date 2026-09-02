@@ -7,7 +7,8 @@ $cardTitle = trim((string) ($data['card_title'] ?? ''));
 $address = trim((string) ($data['address'] ?? ''));
 $btnText = trim((string) ($data['button_text'] ?? ''));
 $btnUrl = trim((string) ($data['button_url'] ?? ''));
-$loadMode = ($data['load_mode'] ?? 'click') === 'immediate' ? 'immediate' : 'click';
+// Значение проверено схемой полей (BlockFieldSchema) — читаем как есть.
+$loadMode = (string) $data['load_mode'];
 $copyEnabled = !array_key_exists('copy_enabled', $data) || !empty($data['copy_enabled']);
 
 if ($image !== '' && !\App\Core\UrlGuard::isSafeMedia($image)) {

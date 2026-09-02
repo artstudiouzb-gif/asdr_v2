@@ -8,7 +8,8 @@ $btnUrl = trim((string) ($data['button_url'] ?? ''));
 $btn2Text = trim((string) ($data['button2_text'] ?? ''));
 $btn2Url = trim((string) ($data['button2_url'] ?? ''));
 $hasContacts = $phone !== '' || $email !== '';
-$photoSide = ($data['photo_side'] ?? 'left') === 'right' ? 'right' : 'left';
+// Значение проверено схемой полей (BlockFieldSchema) — читаем как есть.
+$photoSide = (string) $data['photo_side'];
 
 // Соцсети: показываем только заполненные и только с безопасным адресом.
 $socialIcons = [

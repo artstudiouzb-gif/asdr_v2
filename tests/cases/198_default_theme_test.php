@@ -48,10 +48,10 @@ test('По умолчанию: цвета и шрифты фирменные', f
 
     // Расширенная кириллица обязательна: узбекские Ғ Қ Ҳ лежат в cyrillic-ext.
     foreach ([
-        'noto-sans/noto-sans-400-cyrillic.woff2',
-        'noto-sans/noto-sans-400-cyrillic-ext.woff2',
-        'noto-serif/noto-serif-400-cyrillic.woff2',
-        'noto-serif/noto-serif-400-cyrillic-ext.woff2',
+        'noto-sans/noto-sans-var-cyrillic.woff2',
+        'noto-sans/noto-sans-var-cyrillic-ext.woff2',
+        'noto-serif/noto-serif-var-cyrillic.woff2',
+        'noto-serif/noto-serif-var-cyrillic-ext.woff2',
     ] as $file) {
         assert_true(
             is_file(dirname(__DIR__, 2) . '/public/assets/fonts/' . $file),

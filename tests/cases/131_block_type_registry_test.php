@@ -23,6 +23,7 @@ const EXPECTED_BLOCK_TYPES = [
     'person_cards', 'timeline', 'news_docs', 'person_profile',
     'bio_education', 'anchor_nav', 'stages', 'text_image',
     'docs_list', 'map_point', 'org_structure', 'leader_card', 'icon_text',
+    'collage', 'table', 'image', 'embed', 'chart', 'divider', 'buttons',
 ];
 
 test('Реестр блоков: все источники используют одинаковый набор типов', function () {
@@ -39,7 +40,7 @@ test('Реестр блоков: все источники используют 
 });
 
 test('Реестр блоков: совместимые фасады рендера не изменились', function () {
-    assert_same(BlockTypeRegistry::DEFAULTS, BlockRenderer::DEFAULTS);
+    assert_same(BlockTypeRegistry::defaults(), BlockRenderer::defaults());
     assert_same(BlockTypeRegistry::TYPE_LABELS, BlockRenderer::TYPE_LABELS);
     assert_same(
         BlockTypeRegistry::defaultsFor('hero'),

@@ -13,7 +13,7 @@ $pass = getenv('TEST_DB_PASSWORD') ?: (getenv('DB_PASSWORD') ?: '');
 $dsnRoot = sprintf('mysql:host=%s;port=%s;charset=utf8mb4', $host, $port);
 $pdo = new PDO($dsnRoot, $user, $pass, [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::MYSQL_ATTR_MULTI_STATEMENTS => true,
+    \Pdo\Mysql::ATTR_MULTI_STATEMENTS => true,
 ]);
 
 $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");

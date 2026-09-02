@@ -2,7 +2,8 @@
 /** @var array $data */
 /** @var int $blockId */
 $items = is_array($data['items'] ?? null) ? $data['items'] : [];
-$columns = max(2, min(5, (int) ($data['columns'] ?? 4)));
+// Значение проверено схемой полей (BlockFieldSchema) — читаем как есть.
+$columns = (int) $data['columns'];
 $head = \App\Core\SectionHead::render([
     'title' => (string) ($data['title'] ?? ''),
     'description' => (string) ($data['description'] ?? ''),

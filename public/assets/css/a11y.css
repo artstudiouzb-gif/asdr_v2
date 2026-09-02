@@ -219,6 +219,24 @@ html[data-a11y-motion="off"] *::after {
     scroll-behavior: auto !important;
 }
 
+/* Переход между страницами (View Transitions) правило выше не гасит: его
+   псевдоэлементы живут в отдельном дереве у корня и под `*` не попадают.
+   Снимаем анимацию — переход отрабатывает мгновенно, страница просто
+   сменяется. Отключать сам `@view-transition` нечем: это правило страницы,
+   а не элемента, и на атрибут его не повесить. */
+@media (prefers-reduced-motion: reduce) {
+    html::view-transition-group(*),
+    html::view-transition-old(*),
+    html::view-transition-new(*) {
+        animation: none;
+    }
+}
+html[data-a11y-motion="off"]::view-transition-group(*),
+html[data-a11y-motion="off"]::view-transition-old(*),
+html[data-a11y-motion="off"]::view-transition-new(*) {
+    animation: none;
+}
+
 /* ===== Режим чтения ===== */
 /* Остаётся текст: одна колонка, узкая мера, без баннеров и декора. */
 html[data-a11y-reading="on"] .block-hero video,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use App\Core\Icon;
 
 /**
  * Пользовательский тип контента (задача 131): slug, название, признак
@@ -56,16 +57,17 @@ final class ContentType
         return (int) $stmt->fetchColumn() > 0;
     }
 
-    public static function create(string $slug, string $name, bool $hasTranslations, string $description = '', bool $isPublic = true): int
+    public static function create(string $slug, string $name, bool $hasTranslations, string $description = '', bool $isPublic = true, string $icon = ''): int
     {
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO content_types (slug, name, description, has_translations, is_public, created_at)
-             VALUES (:s, :n, :d, :t, :p, NOW())'
+            'INSERT INTO content_types (slug, name, description, icon, has_translations, is_public, created_at)
+             VALUES (:s, :n, :d, :i, :t, :p, NOW())'
         );
         $stmt->execute([
             ':s' => $slug,
             ':n' => $name,
             ':d' => $description,
+            ':i' => Icon::cleanName($icon),
             ':t' => $hasTranslations ? 1 : 0,
             ':p' => $isPublic ? 1 : 0,
         ]);
@@ -73,14 +75,15 @@ final class ContentType
         return (int) Database::pdo()->lastInsertId();
     }
 
-    public static function update(int $id, string $name, bool $hasTranslations, string $description = '', bool $isPublic = true): void
+    public static function update(int $id, string $name, bool $hasTranslations, string $description = '', bool $isPublic = true, string $icon = ''): void
     {
         $stmt = Database::pdo()->prepare(
-            'UPDATE content_types SET name = :n, description = :d, has_translations = :t, is_public = :p WHERE id = :id'
+            'UPDATE content_types SET name = :n, description = :d, icon = :i, has_translations = :t, is_public = :p WHERE id = :id'
         );
         $stmt->execute([
             ':n' => $name,
             ':d' => $description,
+            ':i' => Icon::cleanName($icon),
             ':t' => $hasTranslations ? 1 : 0,
             ':p' => $isPublic ? 1 : 0,
             ':id' => $id,

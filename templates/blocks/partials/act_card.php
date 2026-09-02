@@ -15,6 +15,7 @@ $tag = $presented['url'] !== '' ? 'a' : 'div';
 $number = trim((string) ($doc['number'] ?? ''));
 $date = trim((string) ($doc['date'] ?? ''));
 $editorialAct = !empty($editorialAct);
+$showEmblem = !isset($showEmblem) || (bool) $showEmblem;
 $docIndex = isset($docIndex) ? (int) $docIndex : 0;
 ?>
 <<?= $tag ?>
@@ -25,7 +26,7 @@ $docIndex = isset($docIndex) ? (int) $docIndex : 0;
     <?= $presented['url'] !== '' ? 'href="' . htmlspecialchars($presented['url'], ENT_QUOTES) . '"' : '' ?>
     <?= $presented['url'] !== '' && $presented['direct_file'] ? 'download' : '' ?>
 >
-    <span class="act-card__emblem" aria-hidden="true"></span>
+    <?php if ($showEmblem): ?><span class="act-card__emblem" aria-hidden="true"></span><?php endif; ?>
     <span class="feature-card__top act-card__editorial-head" aria-hidden="true">
         <span class="feature-card__icon act-card__editorial-icon"><?= Icon::render('file-description', 22) ?></span>
         <span class="feature-card__num act-card__index" aria-hidden="true"><?= str_pad((string) ($docIndex + 1), 2, '0', STR_PAD_LEFT) ?></span>

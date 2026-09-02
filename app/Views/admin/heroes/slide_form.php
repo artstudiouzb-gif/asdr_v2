@@ -64,11 +64,6 @@ $ctaStyles = [
     'ghost' => 'Контурная',
     'link' => 'Ссылка',
 ];
-$ctaImageModes = [
-    'icon' => 'Как иконка — 20 px',
-    'fill' => 'На всю высоту кнопки',
-    'custom' => 'Своя ширина',
-];
 $cropOptions = [
     'left-top' => 'Слева сверху',
     'center-top' => 'По центру сверху',
@@ -114,6 +109,37 @@ $customDuration = (int) $data['duration'];
                 <div class="form-field col-12">
                     <label for="subtitle">Описание / подзаголовок</label>
                     <textarea id="subtitle" name="subtitle" rows="3" placeholder="Краткое пояснение или вступительный текст..."><?= $esc($data['subtitle']) ?></textarea>
+                </div>
+                <?php
+                // Фоновая надпись — крупное слово за содержимым. Поля пропали
+                // при перестройке этой формы, а данные, перевод и стили
+                // остались: настройка была в базе, но задать её было нечем.
+                ?>
+                <div class="form-field col-12">
+                    <label for="watermark">Фоновая надпись</label>
+                    <input type="text" id="watermark" name="watermark" value="<?= $esc($data['watermark']) ?>" maxlength="120" placeholder="Например: aerion">
+                    <span class="form-hint">
+                        Крупное слово за содержимым, цветом текста обложки.
+                        Диктор его не читает, кликам оно не мешает. Переводится
+                        наравне с заголовком.
+                    </span>
+                </div>
+                <div data-watermark-group class="form-grid-12 col-12"<?= trim((string) $data['watermark']) === '' ? ' hidden' : '' ?>>
+                    <div class="form-field col-3">
+                        <label for="watermark_size">Размер, % ширины экрана</label>
+                        <input type="number" id="watermark_size" name="watermark_size" min="2" max="60" step="1" value="<?= (int) $data['watermark_size'] ?>">
+                        <span class="form-hint">Числом: нужный кегль зависит от длины слова.</span>
+                    </div>
+                    <div class="form-field col-3">
+                        <label for="watermark_opacity">Прозрачность, %</label>
+                        <input type="number" id="watermark_opacity" name="watermark_opacity" min="0" max="100" step="1" value="<?= (int) $data['watermark_opacity'] ?>">
+                    </div>
+                    <?= $select('watermark_x', 'По горизонтали', [
+                        'left' => 'К левому краю', 'center' => 'По центру', 'right' => 'К правому краю',
+                    ], (string) $data['watermark_x'], '', 'col-3') ?>
+                    <?= $select('watermark_y', 'По вертикали', [
+                        'top' => 'К верху', 'middle' => 'По центру', 'bottom' => 'К низу',
+                    ], (string) $data['watermark_y'], '', 'col-3') ?>
                 </div>
             </div>
         </div>
@@ -236,17 +262,6 @@ $customDuration = (int) $data['duration'];
                     <?= AdminUi::iconField('cta_icon', (string) $data['cta_icon'], ['label' => 'Иконка кнопки']) ?>
                 </div>
                 <?= $checkbox('cta_new_tab', 'Открывать в новой вкладке', (bool) $data['cta_new_tab'], '', 'col-4') ?>
-                <div class="col-6">
-                    <?= AdminUi::imageField('cta_image', (string) $data['cta_image'], [
-                        'label' => 'Своя картинка вместо иконки',
-                        'hint' => 'SVG или PNG. Если задана, используется вместо иконки Tabler.',
-                    ]) ?>
-                </div>
-                <?= $select('cta_image_mode', 'Размер своей картинки', $ctaImageModes, (string) $data['cta_image_mode'], '', 'col-3') ?>
-                <div class="form-field col-3">
-                    <label for="cta_image_width">Своя ширина картинки, px</label>
-                    <input type="number" id="cta_image_width" name="cta_image_width" min="20" max="400" step="1" value="<?= (int) $data['cta_image_width'] ?>">
-                </div>
 
                 <!-- Дополнительная кнопка -->
                 <div class="col-12"><hr class="form-divider"></div>
@@ -264,17 +279,6 @@ $customDuration = (int) $data['duration'];
                     <?= AdminUi::iconField('cta2_icon', (string) $data['cta2_icon'], ['label' => 'Иконка дополнительной кнопки']) ?>
                 </div>
                 <?= $checkbox('cta2_new_tab', 'Открывать в новой вкладке', (bool) $data['cta2_new_tab'], '', 'col-4') ?>
-                <div class="col-6">
-                    <?= AdminUi::imageField('cta2_image', (string) $data['cta2_image'], [
-                        'label' => 'Своя картинка вместо иконки',
-                        'hint' => 'SVG или PNG. Если задана, используется вместо иконки Tabler.',
-                    ]) ?>
-                </div>
-                <?= $select('cta2_image_mode', 'Размер своей картинки', $ctaImageModes, (string) $data['cta2_image_mode'], '', 'col-3') ?>
-                <div class="form-field col-3">
-                    <label for="cta2_image_width">Своя ширина картинки, px</label>
-                    <input type="number" id="cta2_image_width" name="cta2_image_width" min="20" max="400" step="1" value="<?= (int) $data['cta2_image_width'] ?>">
-                </div>
 
                 <!-- Ссылка со всего слайда -->
                 <div class="col-12"><hr class="form-divider"></div>
@@ -287,43 +291,30 @@ $customDuration = (int) $data['duration'];
             </div>
         </div>
 
-        <!-- 5. Оформление, читаемость и цвета -->
+        <!-- 5. Наложение и цвет текста -->
         <div class="settings-card">
             <div class="settings-card__header">
                 <span class="settings-card__icon"><?= AdminUi::icon('palette', 20) ?></span>
                 <div>
-                    <h2 class="settings-card__title">Оформление и позиционирование текста</h2>
-                    <p class="settings-card__subtitle">Выравнивание, цветовая гамма, плотность затемнения и размеры шрифта.</p>
+                    <h2 class="settings-card__title">Наложение и цвет текста</h2>
+                    <p class="settings-card__subtitle">Всё, что зависит от самого кадра: вуаль поверх фотографии и цвет текста на ней. Раскладка, размеры и палитра общие для обложки — они в её настройках.</p>
                 </div>
             </div>
             <div class="form-grid-12">
-                <?= $select('scheme', 'Цветовая схема', $inherit + [
-                    'light' => 'Light (Светлая)',
-                    'dark' => 'Dark (Тёмная)',
-                    'navy' => 'Navy (Тёмно-синяя)',
-                    'custom' => 'Custom (Индивидуальная)',
-                ], (string) $data['scheme'], '', 'col-6') ?>
-
                 <?= $select('content_scheme', 'Цвет текста', $inherit + [
                     'auto' => 'Auto — автоматически',
                     'light' => 'Light — светлый',
                     'dark' => 'Dark — тёмный',
                 ], (string) $data['content_scheme'], '', 'col-6') ?>
 
-                <?= $select('text_position', 'Выравнивание по горизонтали', $inherit + $posOptions, (string) $data['text_position'], '', 'col-6') ?>
-                <?= $select('text_align_y', 'Выравнивание по вертикали', $inherit + $yOptions, (string) $data['text_align_y'], '', 'col-6') ?>
-
-                <?= $select('title_size', 'Размер заголовка', $inherit + $sizeOptions, (string) $data['title_size'], '', 'col-6') ?>
-                <?= $select('subtitle_size', 'Размер описания', $inherit + $subtitleSizes, (string) $data['subtitle_size'], '', 'col-6') ?>
-
-                <?= $select('overlay', 'Тип затемнения фона', $inherit + [
-                    'none' => 'Нет затемнения',
+                <?= $select('overlay', 'Наложение на фон', $inherit + [
+                    'none' => 'Без наложения',
                     'solid' => 'Сплошная заливка',
-                    'gradient' => 'Градиентное затемнение',
-                ], (string) $data['overlay'], '', 'col-4') ?>
+                    'gradient' => 'Градиент',
+                ], (string) $data['overlay'], 'Тёмный цвет затемняет кадр, светлый осветляет.', 'col-4') ?>
 
                 <div class="form-field col-4">
-                    <label for="overlay_opacity">Плотность затемнения (%)</label>
+                    <label for="overlay_opacity">Плотность наложения (%)</label>
                     <input type="number" id="overlay_opacity" name="overlay_opacity" min="0" max="100"
                            value="<?= (int) $data['overlay_opacity'] >= 0 ? (int) $data['overlay_opacity'] : '' ?>" placeholder="общая настройка">
                 </div>
@@ -335,6 +326,13 @@ $customDuration = (int) $data['duration'];
                     'to_bottom' => 'Сверху вниз',
                     'to_top' => 'Снизу вверх',
                 ], (string) $data['overlay_direction'], '', 'col-4') ?>
+
+                <?php // Цвет наложения и подложка у слайда работали и раньше,
+                      // но задать их можно было только у обложки — на кадре с
+                      // другим настроением приходилось менять её целиком. ?>
+                <div class="col-4">
+                    <?= AdminUi::colorField('overlay_color', (string) $data['overlay_color'], 'Цвет наложения', '#0b1a30', 'Использовать общую настройку обложки') ?>
+                </div>
             </div>
         </div>
 
@@ -419,10 +417,15 @@ $customDuration = (int) $data['duration'];
                         <div class="form-field col-6">
                             <label for="<?= $id ?>title">Заголовок (<?= strtoupper($code) ?>)</label>
                             <input type="text" id="<?= $id ?>title" name="<?= $key ?>[title]" value="<?= $esc($tr['title'] ?? '') ?>">
+                            <span class="form-hint"><?= htmlspecialchars(\App\Core\BlockData\Field::TITLE_MARKUP_HINT, ENT_QUOTES) ?></span>
                         </div>
                         <div class="form-field col-12">
                             <label for="<?= $id ?>subtitle">Описание (<?= strtoupper($code) ?>)</label>
                             <textarea id="<?= $id ?>subtitle" name="<?= $key ?>[subtitle]" rows="2"><?= $esc($tr['subtitle'] ?? '') ?></textarea>
+                        </div>
+                        <div class="form-field col-12">
+                            <label for="<?= $id ?>watermark">Фоновая надпись (<?= strtoupper($code) ?>)</label>
+                            <input type="text" id="<?= $id ?>watermark" name="<?= $key ?>[watermark]" value="<?= $esc($tr['watermark'] ?? '') ?>" maxlength="120">
                         </div>
                         <div class="form-field col-6">
                             <label for="<?= $id ?>cta">Текст основной кнопки (<?= strtoupper($code) ?>)</label>

@@ -38,8 +38,23 @@
     function showError(message) {
         if (!errorToast) return;
         errorToast.textContent = message || 'Неизвестная ошибка.';
+        // Ошибку по таймеру не гасим: в ней написано, что делать дальше.
         errorToast.hidden = false;
-        window.setTimeout(function () { errorToast.hidden = true; }, 9000);
+    }
+
+    function clearError() {
+        if (errorToast) errorToast.hidden = true;
+    }
+
+    function describeBadResponse(response, raw) {
+        var text = String(raw || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        var code = 'HTTP ' + response.status + (response.statusText ? ' ' + response.statusText : '');
+        if (text === '') {
+            return 'Сервер оборвал ответ (' + code + '). Обычно это лимит времени PHP или сбой соединения с базой '
+                + 'на длинной пачке. Импорт можно продолжить — уже загруженные новости не потеряются.';
+        }
+        if (text.length > 300) text = text.slice(0, 300) + '…';
+        return 'Сервер ответил не JSON (' + code + '): ' + text;
     }
 
     async function jsonPost(action, data) {
@@ -49,11 +64,16 @@
             credentials: 'same-origin',
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
-        var payload;
+        var raw = await response.text();
+        var payload = null;
         try {
-            payload = await response.json();
+            payload = JSON.parse(raw);
         } catch (e) {
-            throw new Error('Сервер вернул некорректный ответ.');
+            // Ответ не JSON — значит запрос умер до кода контроллера (лимит
+            // времени, обрыв соединения с БД, 502 от хостинга). Показываем код
+            // и первые строки ответа: без них редактор видел только «некорректный
+            // ответ» и не понимал, что случилось.
+            throw new Error(describeBadResponse(response, raw));
         }
         if (!response.ok || !payload.ok) throw new Error(payload.error || 'Операция не выполнена.');
         return payload;
@@ -70,6 +90,7 @@
             showError('Размер XML должен быть не больше ' + maxMb + ' МБ.');
             return;
         }
+        clearError();
         selectedFile = file;
         token = '';
         report = null;
@@ -187,6 +208,7 @@
         form.addEventListener('submit', async function (event) {
             event.preventDefault();
             if (busy || !selectedFile) return;
+            clearError();
             busy = true;
             try {
                 token = await uploadFile(selectedFile);
@@ -266,6 +288,7 @@
             var status = root.querySelector('[data-import-status]').value;
             var backup = root.querySelector('[data-import-backup]').checked;
             if (status === 'published' && !window.confirm('Новые записи будут опубликованы сразу. Продолжить?')) return;
+            clearError();
             busy = true;
             startButton.disabled = true;
             reportStage.hidden = true;

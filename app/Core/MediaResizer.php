@@ -144,8 +144,7 @@ final class MediaResizer
         }
 
         imagewebp($targetImg, $dest, max(10, min(100, $quality)));
-        imagedestroy($targetImg);
-        imagedestroy($sourceImg);
+        unset($targetImg, $sourceImg);
     }
 
     private static function serveFile(string $file): void

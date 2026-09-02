@@ -52,8 +52,7 @@
        Зачем: в теме сейчас 61 разный размер шрифта в rem, и полсотни
        соседних пар отличаются меньше чем на 3.5 % (0.74/0.75/0.76/0.78,
        0.8/0.8125/0.82 …). Это не решения, а следы ручной подгонки
-       отдельных компонентов, и каждая новая правка требует ещё одного
-       !important, чтобы победить соседа. Шкала даёт общий словарь.
+       отдельных компонентов, и каждая новая правка требует ещё одного, чтобы победить соседа. Шкала даёт общий словарь.
 
        Единицы — rem, поэтому шкала сама подчиняется настройке «Размер
        базового шрифта» в админке: DesignSettings печатает
@@ -170,11 +169,11 @@ input, select, textarea,
 /* Смена темы: переход навешивается на всё документ на время анимации и
    снимается сразу после. Класс ставит window.asdrSetTheme (frontend.js). */
 :root.is-theme-switching, :root.is-theme-switching * {
-    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease !important;
+    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
 }
 @media (prefers-reduced-motion: reduce) {
     :root.is-theme-switching, :root.is-theme-switching * {
-        transition: none !important;
+        transition: none;
     }
 }
 
@@ -187,7 +186,7 @@ input, select, textarea,
 :root.is-theme-switching .newsdetail-gallery__thumb,
 :root.is-theme-switching .no-transition,
 :root.is-theme-switching .no-transition * {
-    transition: none !important;
+    transition: none;
 }
 
 /* Полноширинные блоки (width:100vw, hero и фоновые подложки) выступают на
@@ -273,14 +272,10 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     50% { opacity: 0.9; }
 }
 .block-form__submit.is-loading {
-    animation: submit-btn-pulse 1.4s infinite ease-in-out !important;
-    cursor: progress !important;
-    pointer-events: none !important;
+    animation: submit-btn-pulse 1.4s infinite ease-in-out;
+    cursor: progress;
+    pointer-events: none;
 }
-
-/* Анимация фокуса для фильтров, поиска и полей ввода */
-.catlist-toolbar__search input, .catlist-toolbar__sort { transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease; }
-.catlist-toolbar__search input:focus, .catlist-toolbar__search input:focus-visible, .catlist-toolbar__sort:focus, .catlist-toolbar__sort:focus-visible { border-color: var(--color-accent, var(--gov-teal)) !important; box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent) !important; outline: none !important; }
 
 /* ============================================================================
    2. ШАПКА САЙТА И НАВИГАЦИЯ (Header, Navigation, Menus, Search)
@@ -367,8 +362,8 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
 }
 
 .site-submenu__link.is-active {
-    color: var(--gov-teal, #12807f) !important;
-    background: color-mix(in srgb, var(--gov-teal, #12807f) 10%, transparent) !important;
+    color: var(--gov-teal, #12807f);
+    background: color-mix(in srgb, var(--gov-teal, #12807f) 10%, transparent);
     font-weight: 700;
 }
 
@@ -468,9 +463,6 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
 .site-menu--padding-spacious .site-menu__link { padding-inline: 18px; padding-block: 16px; }
 
 /* Style Type Modifiers */
-.site-menu--style-underline .site-menu__link::after {
-    background: var(--menu-active-color);
-}
 .site-menu--style-pill .site-menu__link {
     border-radius: 9999px;
     padding-inline: 14px;
@@ -594,12 +586,12 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-dot .site-men
 .site-header--container-floating.site-header--transparent:not(.is-scrolled) {
     background: linear-gradient(
         var(--header-floating-angle, 135deg),
-        rgba(15, 23, 42, var(--header-floating-opacity, 0.25)) 0%,
-        rgba(30, 41, 59, calc(var(--header-floating-opacity, 0.25) * 0.8)) 100%
+        rgba(var(--hdr-glass-rgb, 15, 23, 42), var(--header-floating-opacity, 0.25)) 0%,
+        rgba(var(--hdr-glass-rgb-2, 30, 41, 59), calc(var(--header-floating-opacity, 0.25) * 0.8)) 100%
     ) !important;
     backdrop-filter: blur(var(--header-floating-blur, 14px)) saturate(160%) !important;
     -webkit-backdrop-filter: blur(var(--header-floating-blur, 14px)) saturate(160%) !important;
-    border: 1px solid rgba(255, 255, 255, calc(var(--header-floating-opacity, 0.25) + 0.05)) !important;
+    border: 1px solid rgba(var(--hdr-glass-edge, 255, 255, 255), calc(var(--header-floating-opacity, 0.25) + 0.05)) !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, calc(var(--header-floating-opacity, 0.25) * 0.8)) !important;
 }
 
@@ -682,7 +674,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 .site-submenu__link .site-menu__badge::after { display: none; }
 .site-lang-switcher__item { color: var(--gov-title); font-weight: 700; font-size: var(--step--3); transition: color 0.25s ease, opacity 0.25s ease; }
 .site-lang-switcher__item.is-active { color: var(--gov-teal); }
-.site-lang-switcher__item:not(.is-active):hover { color: var(--color-accent, var(--gov-teal)) !important; opacity: 0.85; }
+.site-lang-switcher__item:not(.is-active):hover { color: var(--color-accent, var(--gov-teal)); opacity: 0.85; }
 
 /* === Премиальный выпадающий переключатель языков (Dropdown) === */
 .site-lang-dropdown { position: relative; display: inline-block; user-select: none; }
@@ -842,7 +834,36 @@ body .site-header--sticky.is-scrolled { box-shadow: 0 8px 28px rgba(11,26,48,.14
 
 /* Прозрачная шапка: накладывается на первый экран; текст/иконки белые.
    При прокрутке (is-scrolled) возвращается сплошной фон и цвета темы. */
-body .site-header--transparent:not(.is-scrolled) { background: transparent; border-bottom-color: rgba(255,255,255,.18); box-shadow: none; }
+/* Плотность подложки объявлена типизированной переменной: обычные custom
+   properties не анимируются, и при смене кадра затемнение исчезало скачком.
+   С @property браузер умеет её интерполировать, и подложка уходит вместе с
+   переходом между слайдами. Где @property не поддержан — прежний скачок,
+   поведение не ломается. */
+@property --hdr-scrim {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0.48;
+}
+
+/* Прозрачная шапка лежит поверх произвольного кадра слайда, поэтому под ней
+   всегда есть затемняющая подложка: белое лого и белое меню иначе пропадают на
+   светлой картинке. Схема слайда эту дыру не закрывает — она описывает заливку,
+   а не яркость верхней полосы: у фотографии там бывает небо. Градиент гаснет к
+   низу шапки, кадр под ним остаётся виден. На светлом слайде подложка снимается
+   (--hdr-scrim: 0) — там шапка переключается на тёмный набор целиком. */
+body .site-header--transparent:not(.is-scrolled) {
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, var(--hdr-scrim, .48)) 0%,
+        rgba(0, 0, 0, calc(var(--hdr-scrim, .48) * .6)) 55%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    border-bottom-color: var(--hdr-border, rgba(255, 255, 255, .18));
+    box-shadow: none;
+    transition-property: --hdr-scrim, border-bottom-color;
+    transition-duration: .3s;
+    transition-timing-function: ease;
+}
 /* Прозрачная шапка накладывается на первый экран (absolute), а в связке
    с «липкой» после прокрутки переключается в fixed со сплошным фоном. */
 body .site-header.site-header--transparent { position: absolute; left: 0; right: 0; top: var(--hdr-top, 0px); z-index: 200; }
@@ -852,14 +873,25 @@ body .site-header.site-header--transparent { position: absolute; left: 0; right:
    чтобы hero был виден и под ней, а не только под средней/нижней шапкой. */
 body:has(.site-header--transparent) .site-topbar {
     position: absolute; left: 0; right: 0; top: var(--hdr-panel-height, 0px);
-    background: transparent; border-bottom: 0; color: #fff;
+    /* Продолжение подложки шапки вверх: на стыке плотность совпадает. */
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, calc(var(--hdr-scrim, .48) * 1.1)),
+        rgba(0, 0, 0, var(--hdr-scrim, .48))
+    );
+    border-bottom: 0; color: var(--hdr-fg, #fff);
+    transition-property: --hdr-scrim, color;
+    transition-duration: .3s, .25s;
+    transition-timing-function: ease;
 }
 body:has(.site-header--transparent) .site-topbar a,
 body:has(.site-header--transparent) .site-topbar .site-lang-switcher__item,
-body:has(.site-header--transparent) .site-topbar .hdr-contact { color: #fff; }
+body:has(.site-header--transparent) .site-topbar .hdr-contact { color: var(--hdr-fg, #fff); }
 body:has(.site-header--transparent) .site-topbar .site-search-toggle,
 body:has(.site-header--transparent) .site-topbar .site-theme-toggle,
-body:has(.site-header--transparent) .site-topbar .a11y-toggle { border-color: rgba(255,255,255,.4); color: #fff; }
+body:has(.site-header--transparent) .site-topbar .a11y-toggle {
+    border-color: var(--hdr-icon-border, rgba(255,255,255,.4)); color: var(--hdr-fg, #fff);
+}
 body .site-header.site-header--transparent.site-header--sticky.is-scrolled { position: fixed; top: var(--hdr-panel-height, 0px) !important; animation: hdr-slide-down .25s ease; }
 @keyframes hdr-slide-down { from { transform: translateY(-100%); } to { transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { body .site-header.site-header--transparent.site-header--sticky.is-scrolled { animation: none; } }
@@ -876,11 +908,15 @@ body .site-header--transparent:not(.is-scrolled) .site-theme-toggle,
 body .site-header--transparent:not(.is-scrolled) .site-search-toggle,
 body .site-header--transparent:not(.is-scrolled) .site-burger,
 body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle,
-body .site-header--transparent:not(.is-scrolled) .hdr-contact { color: #fff; }
+body .site-header--transparent:not(.is-scrolled) .hdr-contact { color: var(--hdr-fg, #fff); }
 body .site-header--transparent:not(.is-scrolled) .site-menu__link {
-    color: var(--menu-color-transparent, var(--menu-color, #fff));
+    /* Откат идёт на --hdr-fg, а не на --menu-color: цвет обычной шапки
+       подобран под светлую поверхность и почти всегда тёмный, поэтому на
+       кадре обложки ссылки пропадали ровно так же, как лого. Свой цвет для
+       прозрачного режима (настройка в конструкторе) по-прежнему главнее. */
+    color: var(--menu-color-transparent, var(--hdr-fg, #fff));
 }
-body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__trigger:hover { background: rgba(255, 255, 255, 0.16); }
+body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__trigger:hover { background: rgba(var(--hdr-veil, 255, 255, 255), 0.16); }
 /* Отдельный (светлый) логотип для прозрачного режима.
    Стандартный логотип прячем ТОЛЬКО когда реально задан светлый вариант —
    иначе (например, загружен один SVG-логотип) он остаётся видимым. */
@@ -897,7 +933,61 @@ body .site-header--transparent:not(.is-scrolled) .site-header__logo:has(.site-he
     :root[data-theme="auto"] .site-header__logo-light { display: block; }
     :root[data-theme="auto"] .site-header__logo:has(.site-header__logo-light) img.site-header__logo-std { display: none; }
 }
-.site-header--transparent:not(.is-scrolled) .site-header__logo:not(:has(img))::before { background: #fff; }
+
+/* Светлый кадр под шапкой. Слайд со светлым фоном объявляет себе тёмный текст
+   (класс hero--content-dark), и шапка обязана следовать за ним — иначе белое
+   лого и белое меню лежат на светлой картинке. Класс на body ставит
+   blocks/hero.js при смене слайда; без JS остаётся подложка выше, и контраст
+   держится на ней.
+   Цвета здесь заданы числами, а не переменными темы: кадр слайда одинаков в
+   светлой и тёмной теме, а --gov-title в тёмной переворачивается в белый и
+   вернул бы ровно ту проблему, которую правило закрывает. Оттенок наведения
+   затемняется от настраиваемого акцента через color-mix — акцент остаётся
+   тем, что выбран в «Дизайне». */
+body.is-hero-light .site-header--transparent:not(.is-scrolled),
+body.is-hero-light:has(.site-header--transparent) .site-topbar {
+    --hdr-scrim: 0;
+    --hdr-fg: #0f172a;
+    --hdr-border: rgba(15, 23, 42, .16);
+    --hdr-icon-border: rgba(15, 23, 42, .32);
+    --hdr-glass-rgb: 255, 255, 255;
+    --hdr-glass-rgb-2: 241, 245, 249;
+    --hdr-glass-edge: 15, 23, 42;
+    --hdr-veil: 15, 23, 42;
+    --hdr-ink-shadow: 0 1px 2px rgba(255, 255, 255, .55);
+    --menu-color-transparent: #0f172a;
+    --menu-hover-transparent: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 78%, #0b1220);
+    --menu-active-transparent: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 78%, #0b1220);
+}
+/* Контур для набора поверх кадра. Подложка держит основную массу, но на
+   светлом небе фотографии белым иконкам её не хватает: тонкая тень добавляет
+   границу, не меняя цвета. В тёмном наборе тень тёмная, в светлом — светлая. */
+body .site-header--transparent:not(.is-scrolled) .site-header__logo img,
+body .site-header--transparent:not(.is-scrolled) .site-search-toggle,
+body .site-header--transparent:not(.is-scrolled) .site-theme-toggle,
+body .site-header--transparent:not(.is-scrolled) .a11y-toggle,
+body .site-header--transparent:not(.is-scrolled) .site-burger,
+body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__trigger {
+    filter: drop-shadow(var(--hdr-ink-shadow, 0 1px 2px rgba(0, 0, 0, .45)));
+}
+body .site-header--transparent:not(.is-scrolled) .site-header__logo span,
+body .site-header--transparent:not(.is-scrolled) .hdr-contact {
+    text-shadow: var(--hdr-ink-shadow, 0 1px 2px rgba(0, 0, 0, .45));
+}
+/* Смена набора приходится на середину перехода между кадрами; короткий
+   переход цвета убирает остаточный щелчок у текста и знака. Иконки-кнопки
+   свой transition уже имеют. */
+body .site-header--transparent:not(.is-scrolled) .site-header__logo,
+body .site-header--transparent:not(.is-scrolled) .site-header__logo span,
+body .site-header--transparent:not(.is-scrolled) .hdr-contact,
+body .site-header--transparent:not(.is-scrolled) .site-lang-dropdown__current,
+body .site-header--transparent:not(.is-scrolled) .site-burger {
+    transition: color .25s ease, border-color .25s ease;
+}
+
+body.is-hero-light .site-header--transparent:not(.is-scrolled) .site-header__logo-light { display: none; }
+body.is-hero-light .site-header--transparent:not(.is-scrolled) .site-header__logo:has(.site-header__logo-light) img.site-header__logo-std { display: block; }
+.site-header--transparent:not(.is-scrolled) .site-header__logo:not(:has(img))::before { background: var(--hdr-fg, #fff); }
 .site-header--transparent:not(.is-scrolled) .site-menu__link:hover,
 .site-header--transparent:not(.is-scrolled) .site-menu__link:focus-visible,
 .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle:hover,
@@ -957,11 +1047,11 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline .si
     box-shadow: none !important;
     filter: drop-shadow(0 0 6px var(--menu-active-transparent, var(--menu-active, var(--gov-teal)))) !important;
 }
-body .site-header--transparent:not(.is-scrolled) .site-nav { border-top-color: rgba(255,255,255,.16); background: transparent; }
-.site-header--transparent:not(.is-scrolled) .site-search { background: rgba(255,255,255,.15) !important; border-color: rgba(255,255,255,.3) !important; }
-.site-header--transparent:not(.is-scrolled) .site-search input { color: #fff !important; }
-.site-header--transparent:not(.is-scrolled) .site-search button { color: #fff !important; }
-.site-header--transparent:not(.is-scrolled) .site-search input::placeholder { color: rgba(255,255,255,.6); }
+body .site-header--transparent:not(.is-scrolled) .site-nav { border-top-color: rgba(var(--hdr-veil, 255, 255, 255), .16); background: transparent; }
+.site-header--transparent:not(.is-scrolled) .site-search { background: rgba(var(--hdr-veil, 255, 255, 255), .15) !important; border-color: rgba(var(--hdr-veil, 255, 255, 255), .3) !important; }
+.site-header--transparent:not(.is-scrolled) .site-search input { color: var(--hdr-fg, #fff) !important; }
+.site-header--transparent:not(.is-scrolled) .site-search button { color: var(--hdr-fg, #fff) !important; }
+.site-header--transparent:not(.is-scrolled) .site-search input::placeholder { color: rgba(var(--hdr-veil, 255, 255, 255), .6); }
 body .site-header { transition: background-color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
 
 /* ЛОГОТИП: Запрет любых трансформаций размера, подчеркиваний и псевдоэлементов */
@@ -977,8 +1067,16 @@ body .site-header { transition: background-color 0.25s ease, box-shadow 0.25s ea
     scale: 1 !important;
     transition: none !important;
 }
-.site-header__logo::after,
-.site-header__logo::before {
+/* Гасим только ::after (декоративное подчёркивание). ::before — это фирменная
+   эмблема вместо логотипа (см. .site-header__logo:not(:has(img))::before), и
+   правило с !important убивало её вместе с подчёркиванием: загруженный в
+   «Дизайне» знак не появлялся в шапке ни при каком файле. */
+.site-header__logo::after {
+    display: none !important;
+    content: none !important;
+}
+/* Логотип-картинка загружен — знак не нужен. */
+.site-header__logo:has(img)::before {
     display: none !important;
     content: none !important;
 }
@@ -1042,7 +1140,7 @@ body:has(.site-header--transparent) .site-topbar .site-theme-toggle {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    color: #ffffff !important;
+    color: var(--hdr-fg, #fff) !important;
 }
 
 body .site-header--transparent:not(.is-scrolled) .site-theme-toggle:hover,
@@ -1096,7 +1194,7 @@ body:has(.site-header--transparent) .site-topbar .site-theme-toggle:hover {
 body .site-header .a11y-toggle span { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 body .site-header .a11y-toggle { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--gov-border); padding: 0; }
 body .site-header--transparent:not(.is-scrolled) .a11y-toggle,
-body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: rgba(255,255,255,.4); }
+body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: var(--hdr-icon-border, rgba(255, 255, 255, .4)); color: var(--hdr-fg, #fff); }
 /* --- Безрамочный поиск с выезжающим полем ввода --- */
 /* Выезжающая форма поиска */
 .site-search-wrap {
@@ -1245,7 +1343,10 @@ body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search 
 }
 
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search input[type="search"] {
-    color: #ffffff !important;
+    /* Панель поиска рисует себе тёмное стекло, поэтому её текст остаётся
+       светлым и на светлом кадре: цвет идёт от --hdr-search-fg, а не от
+       --hdr-fg, который переключается вместе с шапкой. */
+    color: var(--hdr-search-fg, #ffffff) !important;
 }
 
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search input[type="search"]::placeholder {
@@ -1254,7 +1355,7 @@ body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search 
 
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search__submit,
 body .site-header--transparent:not(.is-scrolled) .site-search-wrap .site-search__close {
-    color: #ffffff !important;
+    color: var(--hdr-search-fg, #ffffff) !important;
 }
 
 body.design-search-inline .site-header .site-search { display: inline-flex; }
@@ -1295,8 +1396,8 @@ body:has(.site-header--borders-none) .site-topbar--light { border-bottom: 0; }
 body .site-header--borders-container { border-bottom: 0; }
 body .site-header--borders-container .site-nav { border-top: 0; }
 body .site-header--borders-container .site-header__inner { border-bottom: 1px solid var(--gov-border); }
-body .site-header--borders-container.site-header--transparent:not(.is-scrolled) .site-header__inner { border-bottom-color: rgba(255,255,255,.16); }
-body .site-header--borders-container.site-header--transparent:not(.is-scrolled) .site-nav .site-nav__inner { border-top-color: rgba(255,255,255,.16); }
+body .site-header--borders-container.site-header--transparent:not(.is-scrolled) .site-header__inner { border-bottom-color: rgba(var(--hdr-veil, 255, 255, 255), .16); }
+body .site-header--borders-container.site-header--transparent:not(.is-scrolled) .site-nav .site-nav__inner { border-top-color: rgba(var(--hdr-veil, 255, 255, 255), .16); }
 
 /* --- Выпадающее подменю (гос-тема) --- */
 .site-submenu { background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 12px); box-shadow: 0 18px 44px rgba(11,26,48,.16); padding: 8px; min-width: 240px; margin-top: 6px; }
@@ -1564,8 +1665,6 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline-offset: 2px; border-radius: 4px; }
 .cms-block--bg-navy a:focus-visible, .block-ctaband a:focus-visible, .featband a:focus-visible, .timeline-cta a:focus-visible { outline-color: #fff; }
 .section-head__all, .newsfeat__more, .person-card__more, .imgcard__more { color: var(--gov-teal-text); }
-.imgcard__more { color: rgba(255,255,255,.92); } /* на тёмном фото остаётся белым */
-.carousel-nav__btn { width: 44px; height: 44px; } /* touch-цель ≥44px */
 .media-tabs button, .media-tabs a { min-height: 32px; }
 @media (prefers-reduced-motion: reduce) {
     .imgcards-grid--carousel { scroll-behavior: auto; }
@@ -1587,7 +1686,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     border: 1px solid color-mix(in srgb, var(--gov-border) 45%, transparent);
     border-radius: var(--radius);
-    box-shadow: 0 1px 3px rgba(15, 27, 45, 0.01), 0 8px 24px -16px rgba(15, 27, 45, 0.06);
+    box-shadow: var(--card-shadow, 0 4px 16px -2px rgba(15, 23, 42, .04));
     transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s ease, background-color 0.35s ease;
 }
 .news-card:hover, .content-card:hover, .contact-card:hover, .cat-tile:hover, .team-card:hover, .project-card:hover, .person-card:hover, .block-advantages__item:hover, .album-card:hover,
@@ -1798,7 +1897,7 @@ body.reader-mode-active { overflow: hidden; }
 /* ==========================================================================
    Универсальный полноэкранный Lightbox просмотр фотографий
    ========================================================================== */
-.is-lightboxable { cursor: zoom-in !important; }
+.is-lightboxable { cursor: zoom-in; }
 .is-lightboxable[tabindex]:focus-visible {
     outline: 3px solid var(--gov-teal, #0d9488);
     outline-offset: 4px;
@@ -1824,7 +1923,6 @@ body.lightbox-active { overflow: hidden; }
     padding: 16px 24px; background: rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-.rich-lightbox-counter { font-size: var(--step--2); font-weight: 700; color: rgba(255, 255, 255, 0.85); letter-spacing: 0.05em; }
 .rich-lightbox-actions { display: flex; align-items: center; gap: 12px; }
 .rich-lightbox-btn {
     display: flex; align-items: center; justify-content: center;
@@ -2023,7 +2121,7 @@ body.lightbox-active { overflow: hidden; }
         transform: translateY(-1px);
     }
     .newsfeat-text:hover {
-        transform: none !important;
+        transform: none;
     }
     .news-card:hover {
         transform: translateY(-2px);
@@ -2227,8 +2325,8 @@ body.lightbox-active { overflow: hidden; }
    (обложка, hero новости, navy-секция) давал 2.66:1 при норме 3:1 — замерено
    по пикселям. `currentColor` в свойстве `color` — это унаследованный цвет,
    поэтому подмешивание само тянет акцент в сторону читаемого: к белому на
-   тёмном фоне и к тёмному на светлом. Тот же приём, что у надписи обложки
-   (`--hero-watermark-ink` по умолчанию равен `--hero-fg`). */
+   тёмном фоне и к тёмному на светлом. Тот же приём, что у надписи обложки:
+   она рисуется цветом текста обложки (`--hero-fg`). */
 body.design-mark-accent .tx-mark {
     color: color-mix(in srgb, var(--gov-teal-text, var(--color-accent, var(--gov-teal))) 70%, currentColor);
 }
@@ -2254,20 +2352,63 @@ body.design-mark-underline .tx-mark {
 }
 
 /* ==========================================================================
-   Статичные размеры заголовков (Дизайн → Типографика → «Статичные»).
-   Плавающие clamp(min, Nvw, max) заменяются фиксированным размером (max)
-   на десктопе и min на узких экранах — «спокойная» типографика без
-   непрерывного масштабирования по ширине. Тело body получает класс
-   .design-type-static из DesignSettings::bodyClasses().
+   Проявление заголовков (Дизайн → Типографика → «Проявление заголовков»).
+   Заголовок секции ждёт прокрутки бледным и набирает свой цвет: «fade» —
+   весь сразу, «wipe» — слева направо.
+
+   Бледное состояние вешает JS (`is-title-reveal`), а не CSS: без скриптов,
+   при «меньше движения» и в режимах контраста заголовок обязан остаться
+   обычным — это украшение, а не содержимое. После показа класс снимается,
+   поэтому выделение мышью, печать и выбранное слово (.tx-mark) работают со
+   своими стилями, а не с остатками анимации.
    ========================================================================== */
-body.design-type-static .counter__value,
-body.design-type-static .counter__suffix { font-size: var(--step-8); }
-body.design-type-static h1, body.design-type-static .h1 { font-size: var(--font-size-h1, var(--step-8)); }
-body.design-type-static h2, body.design-type-static .h2 { font-size: var(--font-size-h2, var(--step-6)); }
-body.design-type-static h3, body.design-type-static .h3 { font-size: var(--font-size-h3, var(--step-4)); }
-body.design-type-static h4, body.design-type-static .h4 { font-size: var(--font-size-h4, var(--step-2)); }
-body.design-type-static h5, body.design-type-static .h5 { font-size: var(--font-size-h5, var(--step-1)); }
-body.design-type-static h6, body.design-type-static .h6 { font-size: var(--font-size-h6, var(--step-0)); }
+body.design-title-fade .is-title-reveal {
+    animation: title-reveal-fade .9s ease forwards;
+}
+@keyframes title-reveal-fade {
+    from { opacity: .22; }
+}
+
+/* Заливка текста снимается только там, где текст можно закрасить фоном:
+   без background-clip прозрачная заливка сделала бы заголовок невидимым.
+   `color` не трогаем — currentColor в градиенте это и есть цвет заголовка,
+   а обнуление цвета оставило бы градиент прозрачным. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    body.design-title-wipe .is-title-reveal {
+        background-image: linear-gradient(90deg,
+            currentColor 0%, currentColor 33%,
+            color-mix(in srgb, currentColor 20%, transparent) 62%,
+            color-mix(in srgb, currentColor 20%, transparent) 100%);
+        background-repeat: no-repeat;
+        background-size: 300% 100%;
+        background-position: 100% 0;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: title-reveal-wipe 1.1s cubic-bezier(.22, 1, .36, 1) forwards;
+    }
+    @keyframes title-reveal-wipe {
+        to { background-position: 0 0; }
+    }
+}
+
+/* Страховка на случай, если настройку «меньше движения» включили уже после
+   того, как JS навесил класс: заголовок остаётся читаемым и без анимации. */
+@media (prefers-reduced-motion: reduce) {
+    body.design-title-fade .is-title-reveal,
+    body.design-title-wipe .is-title-reveal {
+        animation: none;
+        background-image: none;
+        opacity: 1;
+        -webkit-text-fill-color: currentColor;
+    }
+}
+:where(body.design-type-static) h1, :where(body.design-type-static) .h1 { font-size: var(--font-size-h1, var(--step-8)); }
+:where(body.design-type-static) h2, :where(body.design-type-static) .h2 { font-size: var(--font-size-h2, var(--step-6)); }
+:where(body.design-type-static) h3, :where(body.design-type-static) .h3 { font-size: var(--font-size-h3, var(--step-4)); }
+:where(body.design-type-static) h4, :where(body.design-type-static) .h4 { font-size: var(--font-size-h4, var(--step-2)); }
+:where(body.design-type-static) h5, :where(body.design-type-static) .h5 { font-size: var(--font-size-h5, var(--step-1)); }
+:where(body.design-type-static) h6, :where(body.design-type-static) .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 body.design-type-static .block-hero--media .block-hero__title { font-size: var(--font-size-h1, var(--step-10)); }
 body.design-type-static .block-hero--media .block-hero__subtitle { font-size: var(--font-size-lead, var(--step-0)); }
 body.design-type-static .block-hero__title { font-size: var(--font-size-h1, var(--step-10)); }
@@ -2284,7 +2425,6 @@ body.design-type-static .listing__title,
 body.design-type-static .content-pagehead__title { font-size: var(--font-size-h1, var(--step-8)); }
 body.design-type-static .newslist-lead__title { font-size: var(--font-size-h3, var(--step-5)); }
 body.design-type-static .projdetail__title { font-size: var(--font-size-h1, var(--step-8)); }
-body.design-type-static .catdetail__title { font-size: var(--font-size-h1, var(--step-8)); }
 body.design-type-static .block-cta h2 { font-size: var(--font-size-h2, var(--step-9)); }
 body.design-type-static .cms-columns__col .cms-block--cta .block-cta h2 { font-size: var(--font-size-card-title, var(--step-4)); }
 body.design-type-static .site-content > section.cms-block--cta:first-of-type .block-cta h2,
@@ -2300,16 +2440,15 @@ body.design-type-static .block-categories__title { font-size: var(--font-size-h2
 body.design-type-static .block-counters__title,
 body.design-type-static .block-team__title,
 body.design-type-static .block-projects__title,
+body.design-type-static .block-faq__title,
 body.design-type-static .section-title { font-size: var(--font-size-h2, var(--step-6)); }
 
 /* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
    чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем). */
 @media (max-width: 640px) {
-    body.design-type-static .counter__value,
-    body.design-type-static .counter__suffix { font-size: var(--step-5); }
-    body.design-type-static h1, body.design-type-static .h1 { font-size: var(--step-5); }
-    body.design-type-static h2, body.design-type-static .h2 { font-size: var(--step-3); }
-    body.design-type-static h3, body.design-type-static .h3 { font-size: var(--step-2); }
+    :where(body.design-type-static) h1, :where(body.design-type-static) .h1 { font-size: var(--step-5); }
+    :where(body.design-type-static) h2, :where(body.design-type-static) .h2 { font-size: var(--step-3); }
+    :where(body.design-type-static) h3, :where(body.design-type-static) .h3 { font-size: var(--step-2); }
     body.design-type-static .block-hero--media .block-hero__title { font-size: var(--step-6); }
     body.design-type-static .block-hero__title { font-size: var(--step-6); }
     body.design-type-static .section-head__title { font-size: var(--step-4); }
@@ -2324,7 +2463,6 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     body.design-type-static .content-pagehead__title { font-size: var(--step-5); }
     body.design-type-static .newslist-lead__title { font-size: var(--step-2); }
     body.design-type-static .projdetail__title { font-size: var(--step-5); }
-    body.design-type-static .catdetail__title { font-size: var(--step-5); }
     body.design-type-static .block-cta h2 { font-size: var(--step-5); }
     body.design-type-static .site-content > section.cms-block--cta:first-of-type .block-cta h2,
     body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 { font-size: var(--step-6); }
@@ -2337,8 +2475,11 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     body.design-type-static .block-counters__title,
     body.design-type-static .block-team__title,
     body.design-type-static .block-projects__title,
+    body.design-type-static .block-faq__title,
     body.design-type-static .section-title { font-size: var(--step-4); }
 }
+
+
 
 
 /* ============================================================================
@@ -2474,18 +2615,74 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .album-card__body { display: flex; flex-direction: column; gap: 6px; padding: 2px 2px 4px; flex: 1; }
 .album-card__title { font-size: var(--step-0); font-weight: 700; color: var(--gov-title); margin: 0; line-height: 1.35; transition: color 0.2s ease; }
 .album-card:hover .album-card__title { color: var(--gov-teal); }
-.adjnews { display: flex; align-items: center; gap: 18px; padding: 18px 20px; background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 14px); text-decoration: none; color: var(--gov-ink); transition: box-shadow .2s ease, border-color .2s ease; }
-.adjnews:hover { box-shadow: 0 12px 30px rgba(19,42,92,.1); border-color: color-mix(in srgb, var(--gov-navy) 22%, var(--gov-border)); }
-.adjnews--next { text-align: right; justify-content: flex-end; }
+/* Соседние новости. Карточки зеркальны: у «предыдущей» порядок стрелка → кадр →
+   текст, у «следующей» — текст → кадр → стрелка. Раньше кадр в обеих стоял
+   слева, а вправо уезжал только текст, и пара читалась как две разные
+   карточки. Разметка идёт в том же порядке, что и колонки, поэтому переставлять
+   элементы `order`-ом не нужно — кроме узкого экрана, где зеркало теряет смысл. */
+.adjnews {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    background: var(--gov-surface);
+    border: 1px solid var(--gov-border);
+    border-radius: var(--radius, 14px);
+    text-decoration: none;
+    color: var(--gov-ink);
+    transition: box-shadow .2s ease, border-color .2s ease, transform .2s ease;
+}
+.adjnews--next { grid-template-columns: minmax(0, 1fr) auto auto; text-align: right; }
+.adjnews:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(19,42,92,.1);
+    border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
+}
 .adjnews--empty { border: 0; background: transparent; }
-.adjnews__arrow { font-size: var(--step-2); color: var(--gov-teal-text); flex: 0 0 auto; }
-.adjnews__media { width: 92px; aspect-ratio: 4/3; border-radius: var(--radius-sm, 10px); background: var(--gov-navy) center/cover no-repeat; flex: 0 0 auto; object-fit: cover; }
+/* Стрелка — кружок, а не голый знак: у неё та же роль, что у стрелок каруселей,
+   и на пустом поле карточки одинокий символ читался как опечатка. */
+.adjnews__arrow {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; flex: 0 0 auto;
+    border: 1px solid var(--gov-border); border-radius: 50%;
+    color: var(--gov-teal-text); font-size: var(--step-0); line-height: 1;
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+.adjnews:hover .adjnews__arrow { background: var(--gov-teal); border-color: var(--gov-teal); color: #fff; }
+.adjnews__media { width: 112px; aspect-ratio: 4/3; border-radius: var(--radius-sm, 10px); background: var(--gov-navy) center/cover no-repeat; flex: 0 0 auto; object-fit: cover; }
 .adjnews__media--empty { background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
-.adjnews__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.adjnews__body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+/* Подпись и дата — одной строкой: тремя этажами (подпись, дата, заголовок)
+   карточка выглядела рыхлой, а дата разрывала связку подписи с заголовком. */
+.adjnews__meta { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.adjnews--next .adjnews__meta { justify-content: flex-end; }
 .adjnews__label { text-transform: uppercase; font-size: var(--step--4); letter-spacing: .08em; font-weight: 700; color: var(--gov-muted); }
 .adjnews__date { color: var(--gov-muted); font-size: var(--step--3); }
-.adjnews__title { font-weight: 700; color: var(--section-title-fg); line-height: 1.35; font-size: var(--step--1); }
+/* Заголовок в две строки: соседние новости — навигация, а не анонс, и длинное
+   название не должно растягивать карточку вдвое против парной. */
+.adjnews__title {
+    font-weight: 700; color: var(--section-title-fg); line-height: 1.35; font-size: var(--step--1);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
 .adjnews:hover .adjnews__title { color: var(--gov-teal); }
+/* Одна колонка — зеркалить нечего: обе карточки читаются слева направо. */
+@media (max-width: 720px) {
+    .adjnews--next { grid-template-columns: auto auto minmax(0, 1fr); text-align: left; }
+    .adjnews--next .adjnews__arrow { order: -2; }
+    .adjnews--next .adjnews__media { order: -1; }
+    .adjnews--next .adjnews__meta { justify-content: flex-start; }
+}
+/* На телефоне кадр уступает место тексту. Стрелка, отступы и превью съедали
+   180px из 380: на заголовок оставалась колонка в полтора слова, и подпись
+   «предыдущая новость» ломалась пополам. Кадр здесь украшение, заголовок — суть. */
+@media (max-width: 560px) {
+    .adjnews,
+    .adjnews--next { grid-template-columns: auto minmax(0, 1fr); }
+    .adjnews__media { display: none; }
+    .adjnews__meta { flex-direction: column; align-items: flex-start; gap: 2px; }
+    .adjnews--next .adjnews__meta { align-items: flex-start; }
+}
 @media (prefers-reduced-motion: reduce) {
     .newsdetail-photos__item, .adjnews, .relnews-card { transition: none; }
 }
@@ -2743,9 +2940,6 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .textimage__media { display: block; aspect-ratio: 16/11; border-radius: var(--radius); background: var(--gov-navy) center/cover no-repeat; width: 100%; object-fit: cover; }
 
 /* Сетка документов. */
-.docslist-grid { display: grid; grid-template-columns: repeat(var(--grid-track, 4), minmax(0, 1fr)); gap: 16px; }
-@media (max-width: 1000px) { .docslist-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .docslist-grid { grid-template-columns: 1fr; } }
 
 /* Карта с меткой. */
 .block-map__title { font-size: var(--font-size-h2, var(--step-5)); margin: 0 0 20px; }
@@ -2931,8 +3125,10 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .news-cover { position: relative; display: block; }
 .newslist-lead .news-cover { height: 100%; }
 
-/* Сетка новостей: 4 колонки на широком экране, дальше по общей шкале точек. */
-.newslist-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+/* Сетка новостей: 4 колонки на широком экране, дальше по общей шкале точек.
+   Промежуток объявлен переменной: его же берёт широкая карточка, чтобы её
+   внутренняя граница совпала с границей колонки сетки. */
+.newslist-grid { --newsgrid-gap: 24px; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--newsgrid-gap); }
 @media (max-width: 1100px) { .newslist-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 1000px) {
     .newslist-grid { grid-template-columns: repeat(2, 1fr); }
@@ -2941,6 +3137,169 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 @media (max-width: 560px) {
     .newslist-grid { grid-template-columns: 1fr; }
     .newslist-grid .newslist-lead { grid-column: span 1; }
+}
+
+
+/* Тело карточки: обёртка нужна широкой карточке, где текст стоит рядом с
+   фотографией, а не под ней. У обычной карточки промежуток остаётся прежним.
+
+   Боковой отступ — здесь, а не у карточки: фотография у неё «в край», это её
+   роль обложки, а текст без отступа упирался в границу — дата стояла вплотную
+   к рамке. Сверху ещё несколько пикселей: между низом фотографии и датой было
+   9px, и число читалось приклеенным к снимку. */
+.relnews-card__body { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 4px 14px 0; }
+
+/* Обложка ленты — первая карточка цикла: фотография во всю карточку, текст
+   поверх неё. Это главная новость страницы, и роль у неё другая, чем у
+   широкой карточки в конце цикла (там фотография сбоку, текст рядом).
+
+   Растяжение на две ячейки общее у обоих крупных видов, поэтому объявлено
+   ниже одним правилом: различается только внутреннее устройство. */
+.relnews-card.relnews-card--hero {
+    grid-column: span 2;
+    position: relative;
+    min-height: clamp(280px, 24vw, 400px);
+    padding: 0;
+    overflow: hidden;
+    isolation: isolate;
+}
+/* Кадр — подложка: обёртка растянута на карточку, а не стоит в потоке. */
+.relnews-card--hero .news-cover { position: absolute; inset: 0; }
+.relnews-card--hero .relnews-card__media {
+    height: 100%;
+    width: 100%;
+    aspect-ratio: auto;
+    border-radius: 0;
+}
+/* Затемнение снизу вверх: белый текст обязан читаться на любой фотографии, а
+   не только на удачной. Верх кадра остаётся чистым — там нет текста. */
+.relnews-card--hero .news-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(6, 14, 28, 0) 28%, rgba(6, 14, 28, .55) 62%, rgba(6, 14, 28, .9) 100%);
+}
+.relnews-card--hero .relnews-card__body {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    justify-content: flex-end;
+    gap: 10px;
+    /* Боковой отступ — тот же, что у компактной карточки (14px): карточки
+       стоят в одной сетке, и текст обязан начинаться на одной вертикали.
+       Свой у обложки только вертикальный: снизу просторнее, потому что под
+       текстом кнопка, сверху зарезервировано место под метку — она лежит на
+       кадре отдельным слоем, и на узком экране первая строка заезжала под неё. */
+    padding: clamp(58px, 13vw, 76px) 14px clamp(18px, 2vw, 26px);
+}
+/* Цвет объявлен на самой карточке: внутри есть и заголовок, и дата, и анонс,
+   у каждого свой токен, и перечислять их по отдельности значило бы забыть
+   следующий добавленный элемент. */
+.relnews-card--hero,
+.relnews-card--hero .relnews-card__title,
+.relnews-card--hero .relnews-card__date,
+.relnews-card--hero .news-category { color: #fff; }
+.relnews-card--hero .relnews-card__title { font-size: var(--step-4); }
+.relnews-card--hero .relnews-card__excerpt {
+    color: rgba(255, 255, 255, .86);
+    font-size: var(--step--1);
+    line-height: var(--base-line-height, 1.6);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.relnews-card--hero .news-category { border-color: rgba(255, 255, 255, .5); }
+/* Завершение обложки — кнопка, а не ссылка с чертой: черта поверх фотографии
+   читается как случайная линия. Заливка та же, что у кнопки обложки страницы
+   (`--color-primary`), поэтому цвет один на весь сайт и настраивается в
+   «Дизайне». */
+.relnews-card--hero .card-more {
+    align-self: flex-start;
+    margin-top: 4px;
+    padding: 12px 24px;
+    border: 0;
+    border-radius: var(--btn-radius, 10px);
+    background: var(--color-primary, var(--gov-navy));
+    color: #fff;
+}
+.relnews-card--hero:hover .relnews-card__title { color: #fff; }
+/* Кадр обложки не уезжает при наведении: он размером с карточку, и увеличение
+   съедало бы края фотографии вместе с затемнением. */
+.relnews-card--hero:hover .relnews-card__media img { transform: scale(1.03); }
+
+/* Завершение карточки в ленте — без черты сверху: она рисует по горизонтали
+   лишний ряд линий на каждой карточке. В блоках подборок черта остаётся: там
+   карточек три-четыре, и она отделяет ссылку от текста. */
+.newslist-grid .card-more { border-top: 0; padding-top: 2px; }
+
+/* Дата с иконкой: значок и число — одна строка, а не два соседних элемента. */
+.relnews-card__date { display: inline-flex; align-items: center; gap: 6px; }
+.relnews-card__date .ui-icon { flex: none; opacity: .75; }
+
+/* Крупная карточка ленты занимает две ячейки сетки и показывает анонс. Ровно
+   две, а не всю строку: цикл ленты — «крупная + две компактные», ряд из
+   четырёх компактных, «две компактные + крупная», то есть двенадцать ячеек
+   (см. App\Core\NewsFeedRhythm). Двенадцать делится и на 4, и на 2, и на 1
+   колонку — ряды остаются полными, а крупная карточка идёт зигзагом: слева,
+   потом справа. */
+/* Кадр занимает ровно одну колонку сетки, а не долю карточки: карточка
+   растянута на две ячейки, и при произвольной доле её внутренняя граница
+   попадала между колонками — текст начинался не там, где начинается карточка
+   ряда выше. Отсюда и промежуток внутри карточки, равный промежутку сетки. */
+.relnews-card.relnews-card--wide {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: minmax(0, calc(50% - var(--newsgrid-gap, 24px) / 2)) minmax(0, 1fr);
+    column-gap: var(--newsgrid-gap, 24px);
+    align-items: stretch;
+    padding: 0;
+}
+/* Кадр занимает свою половину целиком: карточка стоит в ряду с компактными,
+   её высоту задают они, и при фиксированной пропорции над кадром и под ним
+   оставались бы пустые поля в полсотни пикселей — на белой карточке это
+   читается как незагрузившаяся картинка. Роль «крупного кадра с честной
+   пропорцией» забрала обложка в начале цикла: там фотография и есть карточка.
+   `min-width: 0` снимает автоминимум по содержимому: без него колонка с
+   фотографией разъезжается шире заданной доли, а текст ужимается вдвое. */
+.relnews-card--wide .news-cover { min-width: 0; }
+/* Своей пропорции у кадра нет — он заполняет обёртку целиком, кадрирует
+   `object-fit: cover` у изображения. */
+.relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: auto; }
+.relnews-card--wide .relnews-card__body { min-width: 0; justify-content: center; padding: 18px 14px; }
+.relnews-card--wide .relnews-card__title { font-size: var(--step-2); }
+/* Анонс — три строки: карточка стоит в ряду с компактными, и её высота задаёт
+   высоту всего ряда. Правило адресовано только широкой карточке: у той же
+   `.relnews-card__excerpt` есть свои размеры в части темы для детальной
+   новости, и общий селектор здесь спорил бы с ними. */
+.relnews-card--wide .relnews-card__excerpt {
+    color: var(--gov-muted);
+    font-size: var(--step--1);
+    line-height: var(--base-line-height, 1.6);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+/* В одну колонку широкой карточке растягиваться некуда: `span 2` создал бы
+   вторую колонку и горизонтальную прокрутку. Кадр остаётся 16:9 — обёртка
+   считает высоту от ширины карточки. */
+@media (max-width: 560px) {
+    .relnews-card.relnews-card--hero { grid-column: auto; min-height: clamp(300px, 78vw, 380px); }
+    .relnews-card.relnews-card--wide { grid-column: auto; grid-template-columns: minmax(0, 1fr); padding: 0 0 14px; }
+    .relnews-card--wide .relnews-card__body { padding: 4px 14px 0; }
+}
+/* На трёх колонках ритм выключается. Цикл считает ячейки парами и тройками,
+   а на три колонки не раскладывается: крупная карточка рано или поздно
+   упирается в последнюю колонку, места на две ячейки там нет, сетка переносит
+   её на следующий ряд и оставляет дыру. Ровный ряд компактных карточек лучше
+   дырявой ленты. */
+@media (max-width: 1100px) and (min-width: 1001px) {
+    .relnews-card.relnews-card--hero { grid-column: auto; min-height: 320px; }
+    .relnews-card.relnews-card--wide { grid-column: auto; grid-template-columns: minmax(0, 1fr); padding: 0 0 14px; }
+    .relnews-card--wide .relnews-card__body { padding: 4px 14px 0; }
+    .relnews-card--wide .relnews-card__title { font-size: var(--step-0); }
+    .relnews-card--wide .relnews-card__excerpt { display: none; }
 }
 
 /* «Читать подробнее» — завершение карточки. Отделено чертой сверху и всегда
@@ -3037,91 +3396,6 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .listing__results { transition: opacity .18s ease; }
 .listing--loading .listing__results { opacity: .45; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .listing__results { transition: none; } }
-
-/* ============================================================================
-   6. КОНТЕНТНЫЕ БЛОКИ, РАЗМЕТКА И HERO-БЛОКИ (Sections, Hero layout, Grid blocks)
-   ============================================================================ */
-
-/* --- Полоса статистики (counters): спокойная цельная карта без стекла --- */
-.block-counters { 
-    background: var(--counters-bg, var(--gov-surface));
-    border: 1px solid var(--gov-border);
-    border-radius: var(--radius); 
-    padding: clamp(20px, 3vw, 34px); 
-    box-shadow: 0 14px 34px rgba(19, 42, 92, 0.08);
-}
-.block-counters:hover {
-    transform: none !important;
-}
-:root[data-theme="dark"] .block-counters {
-    background: var(--counters-bg, var(--gov-surface));
-    border-color: var(--gov-border);
-}
-.block-counters__title { color: var(--counters-text, var(--gov-title)); }
-.block-counters__grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0; }
-.counter { 
-    border: 0; 
-    border-right: 1px solid var(--gov-border); 
-    border-radius: 0; 
-    padding: 6px 26px; 
-    box-shadow: none; 
-    background: transparent; 
-    flex-direction: row; 
-    align-items: flex-start; 
-    gap: 14px; 
-}
-.counter:hover {
-    transform: none !important;
-}
-.counter:last-child { border-right: 0; }
-.counter__value, .counter__suffix { color: var(--counters-text, var(--gov-title)) !important; font-family: var(--font-family, 'Noto Sans', sans-serif); font-weight: 700; font-size: var(--step-8); line-height: 1; }
-/* Плотный межстрочный: подпись из 2–3 слов не должна «рассыпаться». */
-.counter__label { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--2); line-height: 1.35; margin: 4px 0 0; transition: color 0.3s ease; }
-.counter:hover .counter__label { color: var(--counters-text, var(--gov-title)); }
-.block-counters[style*="--counters-text"] .counter__label { opacity: .78; }
-@media (max-width: 720px) { .counter { border-right: 0; border-bottom: 1px solid var(--gov-border); padding: 14px 0; } .counter:last-child { border-bottom: 0; } }
-
-/* --- Показатели: приставка, примечание, ссылка, крупный кегль, карточки --- */
-
-/* Приставка («более», «до», «≈») набирается мельче числа и стоит на общей
-   с ним базовой линии: выравнивание задано у .counter__num. */
-.counter__prefix { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--1); font-weight: 600; }
-
-
-/* Примечание — третья строка после подписи: сноска к показателю
-   («по данным на 2026 год»), а не вторая подпись. */
-/* Приглушать примечание прозрачностью нельзя: --gov-muted уже подобран впритык
-   к 4.5:1, и множитель 0.8 сажал контраст до 3.51:1 на светлой теме (замерено).
-   Разница с подписью держится кеглем, а не блёклостью. */
-.counter__note { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--3); line-height: 1.35; margin: 4px 0 0; text-wrap: pretty; }
-
-/* Показатель со ссылкой остаётся показателем: цвет наследуется, подчёркивания
-   нет — иначе в полосе появляется синяя строка поперёк остальных. */
-.counter--link { text-decoration: none; color: inherit; }
-.counter--link:hover .counter__label { color: var(--counters-text, var(--gov-title)); }
-.counter--link:focus-visible { outline: 3px solid var(--color-accent, var(--gov-teal)); outline-offset: 3px; }
-
-/* Крупные числа требуют более широкой дорожки: «1 200» с приставкой не влезает
-   в 180px и вылезает за карточку — переносить его нельзя (см. nowrap выше). */
-.block-counters--size-large .block-counters__grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-.block-counters--size-large .counter__value,
-.block-counters--size-large .counter__suffix { font-size: var(--step-9); }
-
-/* Вариант «Карточки»: у каждого показателя своя поверхность вместо общей
-   полосы с разделителями. Разделители при этом надо снять — иначе у карточки
-   правая граница оказывается двойной. */
-.block-counters--cards .block-counters__grid { gap: var(--card-gap, 20px); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-.block-counters--cards .counter {
-    border: 1px solid var(--gov-border);
-    border-radius: var(--radius, 14px);
-    padding: clamp(16px, 2vw, 24px);
-    background: var(--counters-bg, var(--gov-surface));
-}
-.block-counters--cards .counter:last-child { border-right: 1px solid var(--gov-border); }
-@media (max-width: 720px) {
-    .block-counters--cards .counter { border-bottom: 1px solid var(--gov-border); }
-    .block-counters--cards .counter:last-child { border-bottom: 1px solid var(--gov-border); }
-}
 
 /* --- Секции: серифные заголовки с teal-акцентом --- */
 .block-news__head::after, .news-index__head::after { background: var(--gov-teal); }
@@ -3414,61 +3688,12 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .block-hero--media .content-crumbs--on-hero a:hover { color: #fff; }
 /* На страницах с прозрачной шапкой крошки опускаем ниже неё. */
 body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: clamp(88px, 11vw, 130px); }
-
-/* Полоса статистики — белая карта, «наплывает» на нижний край фона hero.
-   Работает на любой странице, где блок счётчиков идёт сразу за hero. */
-.cms-block--hero:has(+ .cms-block--counters) { padding-bottom: 0; }
-/* Запас снизу внутри hero, чтобы карта наезжала на фон, а не на текст/кнопки. */
-/* +28px «воздуха»: карточка счётчиков наезжает ровно на clamp-высоту,
-   без добавки она прилипала вплотную к кнопкам hero. */
-.cms-block--hero:has(+ .cms-block--counters) .block-hero--media { padding-bottom: calc(clamp(80px, 9vw, 130px) + 28px); }
-.cms-block--hero + .cms-block--counters { padding-top: 0; position: relative; z-index: 3; }
-.cms-block--hero + .cms-block--counters .block-counters { margin-top: clamp(-120px, -9vw, -80px); position: relative; z-index: 3; }
-.counter { flex-direction: row; align-items: flex-start; gap: 14px; }
-/* Иконка выровнена к строке числа (компенсирует разницу высот 54px vs текст). */
-.counter__icon { 
-    display: grid; 
-    place-items: center; 
-    width: var(--counter-icon-box-size, 50px);
-    height: var(--counter-icon-box-size, 50px);
-    margin-top: 2px; 
-    border-radius: 50%; 
-    flex-shrink: 0; 
-    background: color-mix(in srgb, var(--counters-text, var(--gov-title)) 8%, transparent); 
-    color: var(--counters-text, var(--gov-title)) !important; 
-    transition: background 0.35s ease, color 0.35s ease;
-}
-.counter:hover .counter__icon {
-    background: var(--color-accent, var(--gov-teal));
-    color: #fff;
-    transform: none !important;
-}
-.counter__icon svg,
-.counter__icon img,
-.counter__icon-img {
-    width: var(--counter-icon-size, 28px) !important;
-    height: var(--counter-icon-size, 28px) !important;
-    object-fit: contain;
-}
-.counter__num { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
-.counter__body { display: flex; flex-direction: column; gap: 2px; }
-/* Мобильная иконка меньше и без сдвига — идёт после базовой, чтобы
-   перекрыть её на узком экране (число там мельче). */
 @media (max-width: 720px) {
-    .counter__icon {
-        width: var(--counter-icon-box-size, 50px);
-        height: var(--counter-icon-box-size, 50px);
-        margin-top: 0;
-    }
-}
-@media (max-width: 720px) {
-    .cms-block--hero:has(+ .cms-block--counters) .block-hero--media { padding-bottom: 0; }
-    .cms-block--hero + .cms-block--counters { padding-top: var(--space-premium); }
-    .cms-block--hero + .cms-block--counters .block-counters { margin-top: 0; }
     /* Своя ширина текста (--hero-text-width) на телефонах игнорируется,
        иначе 50vw и подобные значения сжимают текст в узкий столбик. */
     .block-hero .block-hero__text { max-width: none; }
 }
+
 
 /* Заголовок секции: серифный + ссылка «Все …». */
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 26px; flex-wrap: wrap; }
@@ -3509,23 +3734,17 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 24px !important;
+    padding: 24px;
     background: var(--gov-surface);
     border: 1px solid var(--gov-border);
     border-radius: var(--radius, 14px);
     text-decoration: none;
     color: var(--gov-ink);
-    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+    box-shadow: var(--card-shadow, 0 4px 16px -2px rgba(15, 23, 42, .04));
     transition: transform var(--feature-card-motion-duration) var(--feature-card-motion-ease),
         box-shadow var(--feature-card-motion-duration) var(--feature-card-motion-ease),
-        border-color .46s ease, background-color .46s ease !important;
+        border-color .46s ease, background-color .46s ease;
     backface-visibility: hidden;
-}
-.feature-card:hover {
-    background: var(--gov-surface);
-    box-shadow: 0 16px 36px -12px rgba(15, 23, 42, 0.12);
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--gov-teal) 40%, var(--gov-border));
 }
 .feature-card__top {
     display: flex;
@@ -3780,7 +3999,9 @@ span.imgcard__media::after {
 .section-head--split-tools .section-head__all { margin-inline-start: auto; }
 .carousel-nav { display: inline-flex; gap: 8px; }
 .carousel-nav[hidden] { display: none; }
-.carousel-nav__btn { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gov-border); background: var(--gov-surface); color: var(--gov-title); font-size: var(--step-3); line-height: 1; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease; }
+/* 44px — минимальная цель для касания; прежде это требование лежало в
+   отдельном правиле выше по файлу, которое перекрывалось этим. */
+.carousel-nav__btn { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--gov-border); background: var(--gov-surface); color: var(--gov-title); font-size: var(--step-3); line-height: 1; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease; }
 .carousel-nav__btn:hover { background: var(--gov-navy); color: #fff; border-color: var(--gov-title); }
 .carousel-nav__btn[disabled] { opacity: .35; cursor: default; }
 .carousel-nav__btn[disabled]:hover { background: var(--gov-surface); color: var(--gov-title); border-color: var(--gov-border); }
@@ -3953,7 +4174,7 @@ span.imgcard__media::after {
     .social-embed-card, .team-card, .testimonial, .timeline-card, .widget--style-card) { background-color: var(--gov-surface); }
 .cms-block--bg-navy .section-head__all { color: var(--section-link-fg); }
 
-.cms-block--fullwidth { background: transparent !important; }
+.cms-block--fullwidth { background: transparent; }
 .cms-block--fullwidth::before {
     content: ''; position: absolute; top: 0; bottom: 0; left: calc(50% - 50vw); width: 100vw; z-index: -1;
 }
@@ -3980,32 +4201,19 @@ span.imgcard__media::after {
 .cms-block__watermark {
     position: absolute;
     z-index: 0;
-    color: var(--block-watermark-ink, var(--section-title-fg, var(--gov-title)));
-    font-family: var(--block-watermark-family, var(--font-heading, var(--font-family)));
+    color: var(--section-title-fg, var(--gov-title));
+    font-family: var(--font-heading, var(--font-family));
     opacity: var(--block-watermark-opacity, 0.12);
     font-size: var(--block-watermark-size, 22vw);
     font-weight: 800;
     line-height: 0.9;
     letter-spacing: -0.02em;
     white-space: nowrap;
-    /* Привязка к краю задаёт место грубо, смещение доводит его точно.
-       Проценты считаются от самой надписи, поэтому шаг остаётся соразмерным
-       её размеру на любом экране. */
-    transform: translate(
-        calc(var(--block-watermark-ax, 0%) + var(--block-watermark-dx, 0%)),
-        calc(var(--block-watermark-ay, 0%) + var(--block-watermark-dy, 0%))
-    );
+    /* Привязка к краю: центр выравнивается сдвигом на половину надписи. */
+    transform: translate(var(--block-watermark-ax, 0%), var(--block-watermark-ay, 0%));
     pointer-events: none;
     user-select: none;
 }
-
-/* Контур вместо заливки: цвет уходит в обводку, сам текст прозрачный. */
-.cms-block__watermark--outline {
-    color: transparent;
-    -webkit-text-stroke: var(--block-watermark-stroke, 2px)
-        var(--block-watermark-ink, var(--section-title-fg, var(--gov-title)));
-}
-.cms-block__watermark--font-body { --block-watermark-family: var(--font-family); }
 
 .cms-block__watermark--x-left { left: 0; }
 .cms-block__watermark--x-center { left: 50%; --block-watermark-ax: -50%; }
@@ -4040,7 +4248,7 @@ span.imgcard__media::after {
     background-position: var(--block-bg-position, center center);
     background-repeat: var(--block-bg-repeat, no-repeat);
 }
-.cms-block--fullwidth.cms-block--bg-custom { background: transparent !important; }
+.cms-block--fullwidth.cms-block--bg-custom { background: transparent; }
 .cms-block--fullwidth.cms-block--bg-custom::before {
     background: var(--block-bg, transparent);
     background-size: var(--block-bg-size, cover);
@@ -4268,13 +4476,6 @@ span.imgcard__media::after {
 .newsdocs-item__title { font-weight: 700; color: var(--section-title-fg); line-height: 1.35; font-size: var(--step--1); }
 .newsdocs-item:hover .newsdocs-item__title { color: var(--gov-teal); }
 .newsdocs-docs { display: flex; flex-direction: column; gap: 14px; }
-.doc-card { 
-    display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; padding: 18px 20px; 
-    text-decoration: none; color: var(--gov-ink); 
-}
-.doc-card:hover { 
-    border-color: var(--gov-teal);
-}
 .doc-card__icon { 
     display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-sm, 10px); 
     background: color-mix(in srgb, var(--gov-teal) 12%, var(--gov-surface)); color: var(--gov-teal); 
@@ -4287,16 +4488,7 @@ span.imgcard__media::after {
 }
 .doc-card__body { display: flex; flex-direction: column; gap: 4px; }
 .doc-card__title { font-weight: 700; color: var(--gov-title); font-size: var(--step--1); line-height: 1.35; transition: color 0.3s ease; }
-.doc-card:hover .doc-card__title { color: var(--gov-teal-text); }
 .doc-card__meta { color: var(--gov-muted); font-size: var(--step--3); text-transform: uppercase; letter-spacing: .04em; }
-.doc-card__dl { 
-    color: var(--gov-title); 
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease; 
-}
-.doc-card:hover .doc-card__dl {
-    transform: translateY(3px);
-    color: var(--gov-teal);
-}
 
 /* CTA-полоса (navy) «Есть вопросы или предложения?». */
 .block-ctaband { 
@@ -4516,7 +4708,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     -webkit-mask: var(--gov-emblem) center / 44% no-repeat;
     mask: var(--gov-emblem) center / 44% no-repeat;
 }
-.newsfeat-lead:hover .newsfeat-lead__media { transform: scale(1.04) !important; }
+.newsfeat-lead:hover .newsfeat-lead__media { transform: scale(1.04); }
 /* Подложка под текстом — затемнение снизу, чтобы белый читался на любом фото. */
 .newsfeat-lead__over {
     position: absolute; inset-inline: 0; bottom: 0; display: flex; flex-direction: column;
@@ -4560,7 +4752,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .newsfeat-mini { display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: var(--gov-ink); }
 .newsfeat-mini__thumb { display: block; width: 100%; aspect-ratio: 16/10; min-height: 150px; border-radius: var(--radius-sm, 8px); overflow: hidden; background: var(--gov-navy); }
 .newsfeat-mini__media { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
-.newsfeat-mini:hover .newsfeat-mini__media { transform: scale(1.04) !important; }
+.newsfeat-mini:hover .newsfeat-mini__media { transform: scale(1.04); }
 .newsfeat-mini__media--empty { display: block; width: 100%; height: 100%; background: linear-gradient(120deg, color-mix(in srgb, var(--gov-navy) 14%, var(--gov-surface)), var(--gov-surface)); }
 .newsfeat-mini__body { display: flex; flex-direction: column; gap: 6px; }
 .newsfeat-mini__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
@@ -4730,7 +4922,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .newsfeat-text__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
 .newsfeat-mini:hover .newsfeat-mini__title, .newsfeat-text:hover .newsfeat-text__title { color: var(--color-accent, var(--gov-teal)); }
 /* Заголовок лида белый на фото — при наведении оставляем чистым белый при зуме обложки */
-.newsfeat-lead:hover .newsfeat-lead__title { text-decoration: none !important; }
+.newsfeat-lead:hover .newsfeat-lead__title { text-decoration: none; }
 @media (max-width: 560px) { .newsfeat-lead__over { padding: 14px; } .newsfeat-lead__title { font-size: var(--step-1); } }
 
 /* --- Медиа-галерея: переключатели --- */
@@ -4783,225 +4975,11 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 }
 .mediacard__play--photo svg { width: 22px; height: 22px; }
 
-/* ===== Каталог (вакансии, тендеры, документы, мероприятия) ===== */
-.catlist-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-.catlist-toolbar__search { position: relative; flex: 1 1 260px; max-width: 460px; }
-.catlist-toolbar__search svg { position: absolute; left: 14px; top: 50%; translate: 0 -50%; color: var(--gov-muted); pointer-events: none; }
-.catlist-toolbar__search input { width: 100%; height: 46px; padding: 0 14px 0 42px; border: 1px solid var(--gov-border); border-radius: 10px; background: var(--gov-surface); color: var(--gov-title); font: inherit; outline: none; }
-.catlist-toolbar__sort { height: 46px; padding: 0 12px; border: 1px solid var(--gov-border); border-radius: 10px; background: var(--gov-surface); color: var(--gov-title); font: inherit; }
-.catlist-toolbar__btn { height: 46px; padding: 0 22px; border: 0; border-radius: 10px; background: var(--gov-navy); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
-.catlist-toolbar__btn:hover { background: var(--gov-teal); }
-.catlist-toolbar__reset { color: var(--gov-teal-text); font-weight: 600; text-decoration: none; }
-.catlist-count { color: var(--gov-muted); margin: 0; }
-.catlist-count b { color: var(--gov-title); }
-
-.catlist { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--card-gap, 20px); }
-@media (max-width: 900px) { .catlist { grid-template-columns: 1fr; } }
-
-/* --- Управление шаблоном списка разделов (Каталог) из настроек дизайна --- */
-body.design-catalog-cards_lg .catlist { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--card-gap, 24px); }
-body.design-catalog-cards_sm .catlist { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-body.design-catalog-cards_sm .catcard { padding: 16px; }
-body.design-catalog-cards_sm .catcard__title { font-size: var(--step-0); }
-body.design-catalog-list .catlist { display: flex; flex-direction: column; gap: 12px; }
-body.design-catalog-list .catcard { display: flex; flex-direction: row; align-items: flex-start; padding: 16px 20px; }
-@media (max-width: 900px) {
-    body.design-catalog-cards_lg .catlist { grid-template-columns: 1fr; }
-    body.design-catalog-cards_sm .catlist { grid-template-columns: 1fr; }
-    body.design-catalog-list .catcard { flex-direction: column; }
-}
-
 /* --- Управление сайдбаром и детальным шаблоном --- */
 body.design-sidebar-floating .entry-side,
 body.design-sidebar-floating .content-sidebar { position: sticky; top: 20px; }
 body.design-sidebar-fixed .entry-side,
 body.design-sidebar-fixed .content-sidebar { position: static; }
-.catcard {
-    display: flex;
-    gap: 18px;
-    padding: 24px;
-    border-radius: var(--radius);
-    background: color-mix(in srgb, var(--gov-surface) 75%, transparent);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid color-mix(in srgb, var(--gov-border) 60%, transparent);
-    box-shadow: var(--card-shadow, 0 4px 20px -6px rgba(15, 27, 45, 0.05));
-    transition: transform 0.35s cubic-bezier(0.165, 0.84, 0.44, 1),
-                box-shadow 0.35s cubic-bezier(0.165, 0.84, 0.44, 1),
-                border-color 0.3s ease,
-                background-color 0.3s ease;
-}
-.catcard:hover {
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 60%, var(--gov-border));
-    box-shadow: 0 12px 32px -8px rgba(15, 27, 45, 0.10);
-    background: color-mix(in srgb, var(--gov-surface) 92%, transparent);
-}
-.catcard--archived {
-    background: color-mix(in srgb, var(--gov-surface) 40%, transparent);
-    opacity: 0.85;
-}
-.catcard--archived .catcard__title a { color: var(--gov-muted); }
-
-.catcard__main {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    min-width: 0;
-    flex: 1;
-}
-.catcard__top {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 2px;
-}
-.catcard__doc-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm, 8px);
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 12%, transparent);
-    color: var(--gov-teal-text);
-    flex-shrink: 0;
-}
-.catcard__status {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 12px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 12%, transparent);
-    color: var(--gov-teal-text);
-    font-size: var(--step--4);
-    font-weight: 700;
-    letter-spacing: .02em;
-}
-.catcard__status--off {
-    background: color-mix(in srgb, var(--gov-title) 8%, transparent);
-    color: var(--gov-muted);
-}
-.catcard__created {
-    margin-left: auto;
-    color: var(--gov-muted);
-    font-size: var(--step--3);
-    font-weight: 500;
-}
-
-.catcard__title {
-    margin: 0;
-    font-size: var(--step-2);
-    font-weight: 700;
-    line-height: 1.35;
-    letter-spacing: var(--heading-letter-spacing, -0.015em);
-}
-.catcard__title a {
-    color: var(--gov-title);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-.catcard__title a:hover {
-    color: var(--gov-teal-text);
-}
-
-.catcard__meta {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 8px 12px;
-    margin: 4px 0;
-}
-.catcard__meta-item {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding: 8px 12px;
-    border-radius: var(--radius-sm, 8px);
-    background: color-mix(in srgb, var(--gov-bg) 65%, transparent);
-    border: 1px solid color-mix(in srgb, var(--gov-border) 50%, transparent);
-    transition: background-color 0.25s ease, border-color 0.25s ease;
-}
-.catcard:hover .catcard__meta-item {
-    background: color-mix(in srgb, var(--gov-bg) 88%, transparent);
-    border-color: color-mix(in srgb, var(--gov-border) 75%, transparent);
-}
-.catcard__meta-item i {
-    font-style: normal;
-    font-size: var(--step--4);
-    font-weight: 700;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    color: var(--gov-muted);
-}
-.catcard__meta-item span {
-    font-size: var(--step--2);
-    font-weight: 600;
-    color: var(--gov-title);
-    line-height: 1.3;
-}
-
-.catcard__excerpt {
-    margin: 0;
-    color: var(--gov-muted);
-    font-size: var(--step--2);
-    line-height: var(--base-line-height, 1.5);
-}
-
-.catcard__foot {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-top: auto;
-    padding-top: 10px;
-    border-top: 1px dashed color-mix(in srgb, var(--gov-border) 50%, transparent);
-}
-.catcard__file {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 5px 12px;
-    border-radius: var(--radius-sm, 6px);
-    background: color-mix(in srgb, var(--color-primary, var(--gov-navy)) 6%, transparent);
-    color: var(--gov-title);
-    font-size: var(--step--3);
-    font-weight: 600;
-}
-.catcard__more {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: auto;
-    color: var(--gov-teal-text);
-    font-weight: 700;
-    font-size: var(--step--2);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-.catcard__more .catcard__arrow {
-    display: inline-block;
-    transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-.catcard:hover .catcard__more .catcard__arrow {
-    transform: translateX(4px);
-}
-
-/* Мероприятия: плитка даты слева. */
-.catlist--events .catcard { align-items: flex-start; }
-.catlist--events .catcard--with-image { display: grid; grid-template-columns: 74px minmax(0, 1fr); align-items: start; }
-.catcard__event-media { display: block; grid-column: 1 / -1; width: 100%; height: 190px; overflow: hidden; border-radius: var(--radius, 12px); background: var(--gov-bg); }
-.catcard__event-media picture { display: block; width: 100%; height: 100%; }
-.catcard__event-image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--media-object-position, center); transition: transform .35s ease; }
-.catcard:hover .catcard__event-image { transform: scale(1.035); }
-.catcard--with-image .catcard__datebox { grid-column: 1; }
-.catcard--with-image .catcard__main { grid-column: 2; }
-.catcard__datebox { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 74px; min-height: 84px; padding: 10px 6px; border-radius: var(--radius, 12px); background: var(--gov-navy); color: #fff; text-align: center; }
-.catcard__datebox b { font-family: var(--font-heading, 'Noto Serif', serif); font-size: var(--step-5); line-height: 1; }
-.catcard__datebox i { font-style: normal; font-size: var(--step--4); font-weight: 700; letter-spacing: .08em; margin-top: 4px; }
-.catcard__datebox em { font-style: normal; font-size: var(--step--4); opacity: .75; }
-@media (max-width: 560px) {
-    .catcard__event-media { height: 180px; }
-}
 
 /* Анимация фокуса для фильтров, поиска и полей ввода */
 .catlist-toolbar__search input, .catlist-toolbar__sort, .site-search input {
@@ -5128,131 +5106,6 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     .block-hero__slider-nav { display: none; }
 }
 
-
-
-/* 2. Overlap layout for integrated counters (adjacent to Hero) */
-.cms-block--hero:has(+ .cms-block--counters) .block-hero--media {
-    padding-bottom: clamp(80px, 9vw, 130px);
-}
-.cms-block--hero + .cms-block--counters {
-    padding-top: 0;
-    position: relative;
-    z-index: 3;
-}
-.cms-block--hero + .cms-block--counters .block-counters {
-    margin-top: clamp(-100px, -7vw, -60px);
-}
-
-/* 3. Improved Premium Counter Card Style */
-.block-counters {
-    background: var(--counters-bg, var(--gov-surface));
-    border: 1px solid var(--gov-border);
-    border-radius: var(--radius, 20px);
-    padding: clamp(24px, 3.5vw, 38px);
-    box-shadow: 0 16px 40px rgba(19, 42, 92, 0.06), 0 2px 8px rgba(19, 42, 92, 0.02);
-    position: relative;
-    overflow: hidden;
-    z-index: 3;
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
-                box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
-                border-color 0.4s ease;
-}
-:root[data-theme="light"] .block-counters {
-    background: linear-gradient(135deg, #ffffff 60%, #f4f8fc 100%);
-}
-:root[data-theme="dark"] .block-counters {
-    background: linear-gradient(135deg, color-mix(in srgb, var(--gov-surface) 95%, #fff) 0%, color-mix(in srgb, var(--gov-surface) 90%, #000) 100%);
-    border-color: rgba(255, 255, 255, 0.08);
-}
-.block-counters:hover {
-    transform: translateY(-8px) !important;
-    box-shadow: 0 24px 50px rgba(23, 58, 99, 0.12) !important;
-    border-color: var(--color-accent, var(--gov-teal)) !important;
-}
-
-.counter {
-    border-right: 1px solid var(--gov-border);
-    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-.counter:hover {
-    transform: translateY(-2px) !important;
-}
-.counter:last-child {
-    border-right: 0;
-}
-
-.counter__value, .counter__suffix {
-    font-family: var(--font-heading, var(--font-family));
-    font-weight: var(--heading-font-weight, 800);
-    font-size: clamp(var(--step-6), 3.5vw, var(--step-8));
-    /* Сплошной цвет вместо градиента: градиент по тексту перекрывал «Цвет
-       текста» блока — что бы редактор ни выбрал, цифры оставались прежними. */
-    color: var(--counters-text, var(--gov-title));
-    -webkit-text-fill-color: currentColor;
-    display: inline-block;
-}
-
-.counter__label {
-    color: var(--counters-text, var(--gov-muted));
-    font-size: var(--step--1);
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-.counter:hover .counter__label {
-    color: var(--color-accent, var(--gov-teal)) !important;
-}
-
-.counter__icon {
-    background: color-mix(in srgb, var(--gov-teal) 8%, transparent);
-    color: var(--color-accent, var(--gov-teal));
-    transition: background 0.35s ease, color 0.35s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.counter:hover .counter__icon {
-    background: var(--color-accent, var(--gov-teal)) !important;
-    color: #fff !important;
-    transform: scale(1.1) !important;
-}
-.block-counters--icons-no-bg .counter__icon,
-.block-counters--icons-no-bg .counter:hover .counter__icon {
-    background: transparent !important;
-}
-.block-counters--icons-no-bg .counter:hover .counter__icon {
-    color: var(--color-accent, var(--gov-teal)) !important;
-}
-.block-counters .counter__body {
-    flex: 1;
-    min-width: 0;
-}
-.block-counters--icon-pos-left .counter {
-    flex-direction: row;
-}
-.block-counters--icon-pos-right .counter {
-    flex-direction: row-reverse;
-}
-.block-counters--icon-pos-top .counter,
-.block-counters--icon-pos-center .counter {
-    flex-direction: column;
-}
-.block-counters--icon-pos-center .counter {
-    align-items: center;
-}
-.block-counters--icon-pos-top .counter__body,
-.block-counters--icon-pos-center .counter__body {
-    width: 100%;
-}
-.block-counters--text-align-left .counter__body {
-    align-items: flex-start;
-    text-align: left;
-}
-.block-counters--text-align-center .counter__body {
-    align-items: center;
-    text-align: center;
-}
-.block-counters--text-align-right .counter__body {
-    align-items: flex-end;
-    text-align: right;
-}
-
 /* 4. Directions Cards (cards_grid) styling with Spotlight */
 .cards-grid {
     counter-reset: cards-counter;
@@ -5260,19 +5113,19 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .feature-card {
     position: relative;
     counter-increment: cards-counter;
-    border-bottom: 3px solid transparent !important;
+    border-bottom: 3px solid transparent;
     transition: transform var(--feature-card-motion-duration) var(--feature-card-motion-ease),
                 box-shadow var(--feature-card-motion-duration) var(--feature-card-motion-ease),
                 border-color .46s ease,
                 border-bottom-color .46s ease,
-                background-color .46s ease !important;
+                background-color .46s ease;
 }
 .feature-card::before {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: radial-gradient(220px circle at var(--mouse-x, 0) var(--mouse-y, 0), color-mix(in srgb, var(--gov-teal) 7%, transparent), transparent 80%) !important;
+    background: radial-gradient(220px circle at var(--mouse-x, 0) var(--mouse-y, 0), color-mix(in srgb, var(--gov-teal) 7%, transparent), transparent 80%);
     opacity: 0;
     transition: opacity .5s ease;
     pointer-events: none;
@@ -5282,8 +5135,8 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     opacity: 1;
 }
 .feature-card::after {
-    content: "0" counter(cards-counter) !important;
-    display: none !important;
+    content: "0" counter(cards-counter);
+    display: none;
     font-size: var(--step-3);
     font-weight: 800;
 }
@@ -5292,7 +5145,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     box-shadow: 0 16px 36px rgba(37, 99, 235, 0.12);
     transform: translateY(-4px);
     border-color: var(--color-accent, var(--gov-teal));
-    border-bottom-color: var(--color-accent, var(--gov-teal)) !important;
+    border-bottom-color: var(--color-accent, var(--gov-teal));
 }
 .feature-card__title::after {
     content: "\00a0→";
@@ -5303,35 +5156,6 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .feature-card:hover .feature-card__title::after {
     transform: translateX(4px);
 }
-
-
-
-/* Деталка записи каталога. */
-.catdetail { display: flex; flex-direction: column; gap: clamp(24px, 3.4vw, 40px); padding-block: 10px clamp(40px, 5vw, 64px); }
-.catdetail__head { max-width: 900px; }
-.catdetail__eyebrow { display: inline-block; color: var(--gov-teal-text); font-size: var(--step--3); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-.catdetail__title { margin: 12px 0 10px; font-size: clamp(var(--step-5), 3vw, var(--step-8)); line-height: 1.15; color: var(--section-title-fg); }
-.catdetail__date { color: var(--gov-muted); font-size: var(--step--2); }
-.catdetail__event-banner { width: 100%; margin: 0; overflow: hidden; border-radius: clamp(14px, 2vw, 22px); aspect-ratio: 16 / 7; background: var(--gov-bg); box-shadow: var(--card-shadow); }
-.catdetail__event-banner picture { display: block; width: 100%; height: 100%; }
-.catdetail__event-image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--media-object-position, center); }
-.catdetail__grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: clamp(24px, 3.4vw, 48px); align-items: start; }
-@media (max-width: 900px) { .catdetail__grid { grid-template-columns: 1fr; } }
-.catdetail__body { display: flex; flex-direction: column; gap: 26px; }
-.catdetail__subtitle { margin: 0 0 10px; font-size: var(--step-2); color: var(--gov-title); }
-.catdetail__text { color: var(--gov-ink, #2b3b4e); line-height: var(--base-line-height, 1.6); }
-.catdetail__text img { max-width: 100%; border-radius: var(--radius, 12px); }
-.catdetail__empty { color: var(--gov-muted); }
-.catdetail__card { position: sticky; top: 90px; display: flex; flex-direction: column; gap: 16px; padding: 24px; }
-.catdetail__card-title { margin: 0; font-size: var(--step-0); color: var(--gov-title); }
-.catdetail__facts { display: flex; flex-direction: column; gap: 12px; margin: 0; }
-.catdetail__fact dt { font-size: var(--step--4); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--gov-muted); }
-.catdetail__fact dd { margin: 2px 0 0; color: var(--gov-title); font-weight: 600; }
-.catdetail__download { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: var(--radius-sm, 10px); background: var(--gov-navy); color: #fff; font-weight: 700; text-decoration: none; }
-button.catdetail__download { border: none; cursor: pointer; font-family: inherit; font-size: inherit; width: 100%; }
-.catdetail__download:hover { background: var(--gov-teal); }
-.catdetail__back { color: var(--gov-teal-text); font-weight: 600; font-size: var(--step--2); text-decoration: none; }
-.catdetail__back:hover { text-decoration: underline; }
 
 /* Календарь мероприятий. */
 .gcal-nav { display: flex; align-items: center; gap: 14px; }
@@ -5392,12 +5216,12 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
     border: 1px solid color-mix(in srgb, var(--gov-border) 45%, transparent);
 }
 .block-cards--custom-bg .feature-card:hover {
-    background: color-mix(in srgb, var(--card-bg) 88%, transparent) !important;
+    background: color-mix(in srgb, var(--card-bg) 88%, transparent);
 }
 .block-cards--custom-text .feature-card__title { color: var(--cards-text); }
 .block-cards--custom-text .feature-card__text { color: var(--cards-text); opacity: .82; }
 .block-cards--custom-text .feature-card__icon { color: var(--cards-text); }
-.block-cards--custom-text .feature-card:hover .feature-card__title { color: var(--color-accent, var(--gov-teal)) !important; }
+.block-cards--custom-text .feature-card:hover .feature-card__title { color: var(--color-accent, var(--gov-teal)); }
 
 /* CTA-полоса */
 .block-ctaband[style*="--ctaband-bg"] { background: var(--ctaband-bg); }
@@ -5421,12 +5245,22 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 .site-footer--columns .site-footer__heading::after { background: var(--gov-teal); }
 .site-footer__social-link:hover { background: var(--gov-teal); }
 .site-footer__logo { max-height: 80px; width: auto; object-fit: contain; margin-bottom: 14px; display: block; }
+/* Виджеты подвала на тёмном: те же приглушённые белые, что у строк колонок.
+   Знак у контакта берёт акцент в варианте «на тёмном» — обычный акцент на
+   navy проваливается. */
+.site-footer--columns .footer-contacts__item,
+.site-footer--columns .site-footer__about,
+.site-footer--columns .site-footer__text { color: rgba(255,255,255,.72); }
+.site-footer--columns .footer-contacts__icon { color: var(--gov-teal-text); opacity: 1; }
+.site-footer--columns .site-footer__text h2,
+.site-footer--columns .site-footer__text h3,
+.site-footer--columns .site-footer__text h4 { color: #fff; }
 
 /* --- Форма подписки в подвале --- */
 .footer-subscribe { display: flex; flex-wrap: wrap; margin-top: 12px; max-width: 320px; }
 .footer-subscribe input[type=email] { flex: 1; min-width: 0; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff; border-radius: 8px 0 0 8px; padding: 11px 14px; }
 .footer-subscribe input[type=email]::placeholder { color: rgba(255,255,255,.55); }
-.footer-subscribe button { border: 0; background: var(--gov-teal); color: #fff; padding: 0 18px; border-radius: 0 8px 8px 0; cursor: pointer; font-size: var(--step-1); }
+.footer-subscribe button { display: inline-grid; place-items: center; border: 0; background: var(--gov-teal); color: #fff; padding: 0 18px; border-radius: 0 8px 8px 0; cursor: pointer; }
 .footer-subscribe button:hover { background: color-mix(in srgb, var(--gov-teal) 85%, #000); }
 .footer-subscribe__consent { display: flex; flex: 1 0 100%; align-items: flex-start; gap: 8px; margin-top: 10px; color: rgba(255,255,255,.72); font-size: var(--step--4); line-height: var(--base-line-height, 1.45); cursor: pointer; }
 .footer-subscribe__consent input { flex: 0 0 auto; margin-top: 2px; accent-color: var(--gov-teal); }
@@ -5443,6 +5277,23 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 .widget--pad-spacious.widget--style-card, .widget--pad-spacious.widget--style-tinted, .widget--pad-spacious.widget--style-navy { padding: 32px; }
 .widget--accent .widget__title { padding-bottom: 10px; position: relative; }
 .widget--accent .widget__title::after { content: ''; position: absolute; left: 0; bottom: 0; width: 44px; height: 3px; border-radius: 2px; background: var(--gov-teal); }
+
+/* Карусель «случайная цель»: название и описание над кадрами. Название —
+   не заголовок разметки (виджет встаёт в любое место страницы, и уровень
+   заголовка тут не предсказать), поэтому размер задаётся здесь, а диктору
+   имя приходит подписью самой карусели. Цвет берётся у виджета: на его
+   тёмном оформлении собственный тёмный цвет пропал бы. */
+.goal-carousel__text { margin-bottom: 12px; }
+.goal-carousel__text:empty { margin-bottom: 0; }
+.goal-carousel__name {
+    margin: 0 0 4px; font-weight: 700; font-size: var(--step-0); line-height: 1.3;
+    color: inherit;
+}
+.goal-carousel__desc {
+    margin: 0; font-size: var(--step--2); line-height: var(--base-line-height, 1.5);
+    color: var(--gov-muted, #64748b);
+}
+.widget--style-navy .goal-carousel__desc { color: rgba(255, 255, 255, .72); }
 
 /* ===== Кнопка webpush-подписки (футер) ===== */
 .push-optin { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; min-height: 40px; padding: 0 16px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: var(--step--2); font-weight: 600; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
@@ -5471,9 +5322,9 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 }
 .captcha-row input:focus,
 .captcha-row input:focus-visible {
-    border-color: var(--color-accent, var(--gov-teal)) !important;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent) !important;
-    outline: none !important;
+    border-color: var(--color-accent, var(--gov-teal));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent);
+    outline: none;
 }
 
 /* ===== Публичные формы (плавная анимация фокуса) ===== */
@@ -5486,9 +5337,9 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 }
 .block-form__field input:focus, .block-form__field textarea:focus, .block-form__field select:focus,
 .block-form__field input:focus-visible, .block-form__field textarea:focus-visible, .block-form__field select:focus-visible {
-    border-color: var(--color-accent, var(--gov-teal)) !important;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent) !important;
-    outline: none !important;
+    border-color: var(--color-accent, var(--gov-teal));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent);
+    outline: none;
 }
 
 /* --- Зона нажатия на сенсорных экранах ---
@@ -5617,7 +5468,7 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
    иначе тёплый #e67e22/#f1c40f выбивается на фоне hero. */
 body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__sun,
 body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__moon {
-    color: #ffffff !important;
+    color: var(--hdr-fg, #fff) !important;
 }
 
 /* Анимация лучей солнца при наведении */
@@ -5696,8 +5547,10 @@ body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__moon {
     justify-content: center;
     align-items: center;
     gap: 5px;
-    width: 40px;
-    height: 40px;
+    /* 44px — минимальная цель для касания: бургер открывают пальцем, и это
+       единственный вход в меню на телефоне. */
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius-sm, 8px);
     border: 1px solid var(--gov-border);
     background: var(--gov-surface);
@@ -5743,7 +5596,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle {
     border-radius: var(--radius-sm, 6px);
     background: transparent;
     box-shadow: none;
-    color: #fff;
+    color: var(--hdr-fg, #fff);
 }
 body .site-header--transparent:not(.is-scrolled) .site-burger:hover,
 body .site-header--transparent:not(.is-scrolled) .site-burger:focus-visible,
@@ -6162,7 +6015,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-underline > .
     outline-offset: 1px;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__toggle {
-    color: var(--menu-color-transparent, var(--menu-color, #fff)) !important;
+    color: var(--menu-color-transparent, var(--hdr-fg, #fff)) !important;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:hover > .site-menu__toggle,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:focus-within > .site-menu__toggle,
@@ -6258,15 +6111,15 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     }
     .site-submenu__link:hover,
     .site-submenu__link:focus-visible {
-        color: var(--submenu-hover, var(--menu-hover-color, var(--gov-teal))) !important;
-        background: transparent !important;
+        color: var(--submenu-hover, var(--menu-hover-color, var(--gov-teal)));
+        background: transparent;
         border-bottom-color: var(--submenu-hover, var(--menu-hover-color, var(--gov-teal)));
         transform: none;
     }
     .site-submenu__link.is-active,
     .site-submenu__link[aria-current="page"] {
-        color: var(--submenu-hover, var(--menu-active-color, var(--gov-teal))) !important;
-        background: transparent !important;
+        color: var(--submenu-hover, var(--menu-active-color, var(--gov-teal)));
+        background: transparent;
         border-bottom-color: var(--submenu-hover, var(--menu-active-color, var(--gov-teal)));
         box-shadow: none;
     }
@@ -6362,8 +6215,10 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 }
 .block-anchornav--sticky { border-bottom: 0; }
 .block-anchornav__link:focus-visible { outline: 3px solid var(--color-accent, var(--gov-teal)); outline-offset: -3px; }
-/* Якорь не должен уезжать под закреплённую полосу. */
-.cms-block[id] { scroll-margin-top: calc(var(--anchornav-top, 0px) + 64px); }
+/* Якорь не должен уезжать под закреплённую полосу оглавления. Высоту шапки
+   здесь не учитываем: её держит scroll-padding-top у html — один отступ на все
+   якоря сайта, а не константа у каждого вида цели. */
+.cms-block[id] { scroll-margin-top: var(--anchornav-top, 0px); }
 
 /* ==========================================================================
    Карточка правового акта
@@ -6555,11 +6410,6 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .team-card__photo { margin-bottom: 12px; }
 .team-card__name,
 .team-card__position { margin-inline: 14px; }
-.catcard--with-image { padding: 0 24px 24px; }
-.catcard--with-image .catcard__event-media {
-    width: calc(100% + 48px);
-    margin-inline: -24px;
-}
 
 @media (max-width: 1000px) {
     .newsdetail:not(.newsdetail--premium) .newsdetail-article { order: 2; }
@@ -6601,7 +6451,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 
 /* --- FAQ / Аккордеон вопросов --- */
 .block-faq { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 100%; }
-.block-faq__title { font-size: clamp(var(--step-4), 2.8vw, var(--step-7)); margin: 0 0 10px; color: var(--section-title-fg); text-align: left; }
+.block-faq__title { margin: 0 0 10px; color: var(--section-title-fg); text-align: left; }
 .faq-tools { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; width: 100%; }
 .faq-tools__search, .faq-tools__category select {
     display: flex; align-items: center; gap: 10px; padding: 10px 16px;
@@ -6617,7 +6467,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 }
 .faq-item[open] {
     border-color: color-mix(in srgb, var(--gov-teal) 45%, var(--gov-border));
-    box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
+    box-shadow: var(--card-shadow, 0 4px 16px -2px rgba(15, 23, 42, .04));
 }
 .faq-item__q {
     padding: 20px 24px; font-weight: 700; font-size: var(--step-0);
@@ -6683,7 +6533,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
     padding: 16px 18px; border: 1px solid var(--gov-border); border-radius: var(--radius, 14px);
     background: var(--gov-surface); text-decoration: none; color: var(--gov-ink);
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+    box-shadow: var(--card-shadow, 0 4px 16px -2px rgba(15, 23, 42, .04));
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .doc-card:hover {
@@ -6706,7 +6556,9 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .doc-card:hover .doc-card__title { color: var(--gov-teal-text, #0284c7); }
 .doc-card__meta { display: block; color: var(--gov-muted, #475569); font-size: var(--step--3); font-weight: 600; margin-top: 3px; }
 .doc-card__dl {
-    display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+    /* 44px — минимальная цель для касания: кнопка скачивания круглая и стояла
+       34px, то есть меньше нормы, хотя рядом карусель уже приведена к 44. */
+    display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
     background: color-mix(in srgb, var(--gov-navy) 6%, transparent); color: var(--gov-title);
     transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
@@ -6741,7 +6593,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .contact-card {
     display: flex; flex-direction: column; gap: 14px; padding: 24px;
     border: 1px solid var(--gov-border); border-radius: var(--radius, 14px);
-    background: var(--gov-surface); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    background: var(--gov-surface); box-shadow: var(--card-shadow, 0 4px 16px -2px rgba(15, 23, 42, .04));
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .contact-card:hover {
@@ -6765,17 +6617,17 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     flex-direction: column;
     gap: 12px;
     min-height: 100%;
-    padding: 24px !important;
+    padding: 24px;
     border: 1px solid var(--gov-border);
-    border-bottom: 3px solid transparent !important;
+    border-bottom: 3px solid transparent;
     border-radius: var(--radius, 14px);
     background: var(--gov-surface);
     color: var(--gov-ink);
-    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, .04);
+    box-shadow: var(--card-shadow, 0 4px 16px -2px rgba(15, 23, 42, .04));
     transition: transform var(--feature-card-motion-duration) var(--feature-card-motion-ease),
         box-shadow var(--feature-card-motion-duration) var(--feature-card-motion-ease),
         border-color .46s ease, border-bottom-color .46s ease,
-        background-color .46s ease !important;
+        background-color .46s ease;
 }
 
 .feature-card.block-advantages__item:hover,
@@ -6783,7 +6635,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .feature-card.act-card:hover {
     transform: translateY(var(--feature-card-hover-lift, -4px));
     border-color: var(--color-accent, var(--gov-teal));
-    border-bottom-color: var(--color-accent, var(--gov-teal)) !important;
+    border-bottom-color: var(--color-accent, var(--gov-teal));
     background: var(--gov-surface);
     box-shadow: 0 16px 36px rgba(37, 99, 235, .12);
 }
@@ -6846,8 +6698,13 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     line-height: var(--base-line-height, 1.6);
 }
 
+/* Водяной знак у карточки-акта: в верхнем правом углу он садился под номер
+   («01»), и его просто выключали — вместе с ним пропадал фирменный слой.
+   Переносим вниз, где карточка пуста: знак виден, номер читается. */
 .feature-card.act-card .act-card__emblem {
-    display: none;
+    inset-block-start: auto;
+    inset-block-end: -12px;
+    inset-inline-end: -12px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -6966,3 +6823,40 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .icon-text__value { margin: 0 0 6px; color: var(--gov-title); font-size: var(--step-1); font-weight: 700; line-height: 1.25; }
 .icon-text__value:last-child { margin-bottom: 0; }
 .block-icon-text__empty { color: var(--gov-muted); margin: 0; }
+/* ==========================================================================
+   ЦЕЛЬ ДЛЯ КАСАНИЯ
+   Иконочные кнопки нарисованы мелкими (25–38px) — так их задумал макет, и
+   увеличивать сам кружок незачем. Но пальцем в 28px попадают не все, поэтому
+   область нажатия расширяется прозрачным псевдоэлементом до 44×44: вид
+   прежний, промахов меньше. Приём безопасен для соседей — псевдоэлемент
+   центрирован и не перехватывает события за пределами своей кнопки.
+   ========================================================================== */
+/* .site-drawer__close сюда не входит: он уже позиционирован absolute, и
+   переключение на relative увело бы кнопку из своего угла. */
+.site-search-toggle,
+.site-search__submit,
+.site-search__close,
+.site-theme-toggle,
+.a11y-toggle,
+.hero__arrow,
+.hero__playpause,
+.carousel-nav__btn {
+    position: relative;
+}
+
+.site-search-toggle::after,
+.site-search__submit::after,
+.site-search__close::after,
+.site-theme-toggle::after,
+.a11y-toggle::after,
+.site-drawer__close::after,
+.hero__arrow::after,
+.hero__playpause::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+}

@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Core\BlockData;
 
-use App\Core\HtmlSanitizer;
 use App\Core\Icon;
-use App\Core\TextProcessor;
 
+/**
+ * Нормализатор блока «Преимущества»: собирает только репитер. Скалярные поля
+ * описаны схемой (`BlockFieldSchema`) — второй их список здесь и был тем
+ * дублем, из-за которого значения расходились с формой.
+ */
 final class AdvantagesBlockNormalizer
 {
     /**
@@ -38,20 +41,9 @@ final class AdvantagesBlockNormalizer
             ];
         }
 
-        $variant = (string) ($input['variant'] ?? 'grid');
-
-        return [
-            'variant' => in_array($variant, ['grid', 'indexed', 'inline', 'band'], true) ? $variant : 'grid',
-            'title' => BlockDataInput::plain($input, 'title_field', $locale),
-            'description' => TextProcessor::process(
-                HtmlSanitizer::sanitizeText((string) ($input['description'] ?? '')),
-                $locale,
-            ),
-            'all_text' => BlockDataInput::trimmed($input, 'all_text'),
-            'all_url' => BlockDataInput::safeLink($input['all_url'] ?? ''),
-            // 0 — колонки подбираются по числу карточек (прежнее поведение).
-            'columns' => BlockDataInput::int($input, 'columns', 0, 5, 0),
-            'items' => $items,
-        ];
+        return array_merge(
+            BlockFieldSchema::normalize('advantages', $input, $locale),
+            ['items' => $items]
+        );
     }
 }

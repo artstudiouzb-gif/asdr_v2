@@ -52,7 +52,7 @@ test('Пустота считается по содержимому, а не т�
 });
 
 test('Все типы блоков имеют русское название для сообщений редактору', function () {
-    foreach (array_keys(BlockRenderer::DEFAULTS) as $type) {
+    foreach (array_keys(BlockRenderer::defaults()) as $type) {
         assert_true(
             isset(BlockRenderer::TYPE_LABELS[$type]),
             "нет подписи для типа {$type}: редактор увидит служебный идентификатор"

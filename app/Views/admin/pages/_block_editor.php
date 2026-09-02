@@ -283,6 +283,37 @@ foreach ($blocks as $b) {
             <?php else: ?>
                 <p class="form-hint">Пока нет сохранённых шаблонов.</p>
             <?php endif; ?>
+
+            <?php
+            // Обмен файлами: шаблон переносится на другой сайт или приходит
+            // готовым. Без этого сборка жила только в базе своего сайта.
+            ?>
+            <?php if (!empty($snippets)): ?>
+                <form method="get" action="/admin/snippets/export" class="snippet-tools__row">
+                    <select name="id" required aria-label="Шаблон для скачивания">
+                        <option value="">— выберите шаблон —</option>
+                        <?php foreach ($snippets as $s): ?>
+                            <option value="<?= (int) $s['id'] ?>"><?= htmlspecialchars((string) $s['name'], ENT_QUOTES) ?><?= ($s['summary'] ?? '') !== '' ? ' — ' . htmlspecialchars((string) $s['summary'], ENT_QUOTES) : '' ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="submit" class="btn btn--small"><?= \App\Core\AdminUi::icon('download') ?>Скачать файлом</button>
+                </form>
+            <?php endif; ?>
+            <form method="post" action="/admin/snippets/import" enctype="multipart/form-data" class="snippet-tools__row">
+                <?= Csrf::field() ?>
+                <input type="file" name="template" accept="application/json,.json" required aria-label="Файл шаблона">
+                <input type="text" name="snippet_name" placeholder="Название (пусто — из файла)">
+                <button type="submit" class="btn btn--small"><?= \App\Core\AdminUi::icon('upload') ?>Загрузить из файла</button>
+            </form>
+            <p class="form-hint">
+                Файл — JSON с пометкой <code>artstudio.page-template</code>. При загрузке
+                проверяются типы блоков и их поля: что не подошло, попадёт в сообщение,
+                а не пропадёт молча. Загруженный шаблон появляется в списке выше — оттуда
+                его и применяют к странице.
+                <?php if (!\App\Core\Auth::isSuperAdmin()): ?>
+                    Блок «HTML-код» и «Свой CSS» из файла не принимаются — их правит только супер-администратор.
+                <?php endif; ?>
+            </p>
         </div>
     </div>
     <?php endif; ?>

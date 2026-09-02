@@ -39,15 +39,15 @@ final class NewsController
 
         $total = News::publishedCount($categoryId > 0 ? $categoryId : null, $lang);
 
-        // Лента новостей формирует сбалансированную 4-строчную сетку (14 новостей на страницу):
-        // Строка 1: 1 крупный лид (2 колонки) + 2 карточки (3 новости)
-        // Строка 2: 4 карточки (4 новости)
-        // Строка 3: 2 карточки + 1 крупный лид (2 колонки) (3 новости)
-        // Строка 4: 4 карточки (4 новости)
-        $perPage = 14;
-        $pages = max(1, (int) ceil($total / $perPage));
+        // Композиция страницы одна и та же везде — и на первой, и в рубрике:
+        // лента идёт группами «крупная плюс две компактные». Отдельной крупной
+        // новости над сеткой больше нет, поэтому и особого размера первой
+        // страницы тоже: размер задаёт ритм (App\Core\NewsFeedRhythm).
+        $gridPageSize = \App\Core\NewsFeedRhythm::PAGE_SIZE;
+        $pages = max(1, (int) ceil($total / $gridPageSize));
         $page = min($page, $pages);
-        $offset = ($page - 1) * $perPage;
+        $perPage = $gridPageSize;
+        $offset = ($page - 1) * $gridPageSize;
 
         $vars = [
             'items' => News::published($perPage, $offset, $lang, $categoryId > 0 ? $categoryId : null),

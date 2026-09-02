@@ -32,8 +32,36 @@ final class ErrorHandler
         if (!(error_reporting() & $severity)) {
             return false;
         }
-        // Превращаем ошибку в исключение, чтобы обработать единообразно.
+        // Уведомление об устаревшем API — не повод отдавать 500. Каждая новая
+        // версия PHP помечает deprecated то, что вчера работало молча (8.5 —
+        // curl_close(), imagedestroy(), $http_response_header, driver-константы
+        // PDO), а обработчик превращал любую ошибку в исключение: сайт целиком
+        // переставал открываться на новом сервере, хотя код продолжал работать.
+        // Поэтому deprecated пишем в журнал, а не бросаем.
+        if ($severity === E_DEPRECATED || $severity === E_USER_DEPRECATED) {
+            self::logDeprecation($message, $file, $line);
+            return true;
+        }
+        // Остальные ошибки превращаем в исключение, чтобы обработать единообразно.
         throw new \ErrorException($message, 0, $severity, $file, $line);
+    }
+
+    /**
+     * Устаревший вызов повторяется на каждой странице, поэтому одинаковые
+     * сообщения за запрос пишутся один раз — иначе журнал вырастает быстрее,
+     * чем его успевают прочитать.
+     */
+    private static function logDeprecation(string $message, string $file, int $line): void
+    {
+        static $seen = [];
+
+        $key = $message . '|' . $file . '|' . $line;
+        if (isset($seen[$key])) {
+            return;
+        }
+        $seen[$key] = true;
+
+        Logger::log('error', Logger::redact($message) . ' in ' . $file . ':' . $line, 'DEPRECATED');
     }
 
     public static function handleException(Throwable $e): void
@@ -94,7 +122,10 @@ final class ErrorHandler
     {
         if (PHP_SAPI === 'cli') {
             fwrite(STDERR, (string) $e . PHP_EOL);
-            return;
+            // Без явного кода выхода упавший скрипт возвращает 0: шаг CI с
+            // фикстурой отрабатывал «успешно» на неприменённой фикстуре, а
+            // ошибка вылезала позже — на входе в панель.
+            exit(1);
         }
 
         if (!headers_sent()) {
@@ -104,6 +135,14 @@ final class ErrorHandler
         // Очищаем незавершённый вывод, чтобы отдать чистую страницу ошибки.
         while (ob_get_level() > 0) {
             ob_end_clean();
+        }
+
+        // AJAX-эндпоинты админки ждут JSON. Отдать им HTML-страницу 500 значит
+        // показать редактору «Сервер вернул некорректный ответ» вместо причины:
+        // именно так выглядел обрыв импорта новостей на «2006 gone away».
+        if (self::wantsJson()) {
+            self::renderJsonError($e);
+            return;
         }
 
         if (self::$debug) {
@@ -119,5 +158,39 @@ final class ErrorHandler
         } else {
             echo 'Внутренняя ошибка сервера.';
         }
+    }
+
+    /** Запрос пришёл из fetch/XHR и ждёт JSON, а не страницу. */
+    private static function wantsJson(): bool
+    {
+        if (strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest') {
+            return true;
+        }
+
+        return str_contains(strtolower((string) ($_SERVER['HTTP_ACCEPT'] ?? '')), 'application/json');
+    }
+
+    private static function renderJsonError(Throwable $e): void
+    {
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=UTF-8');
+            header('Cache-Control: no-store');
+        }
+
+        $technical = get_class($e) . ': ' . $e->getMessage();
+        try {
+            // Тот же «перевод» ошибок, что и в журнале: внутренностей не
+            // раскрывает, но говорит, что случилось и что с этим делать.
+            $message = \App\Models\ErrorLog::explain($technical);
+        } catch (Throwable) {
+            $message = 'Внутренняя ошибка сервера.';
+        }
+        if (self::$debug) {
+            $message .= ' — ' . Logger::redact($technical);
+        } else {
+            $message .= ' Подробности — в разделе «Журнал ошибок».';
+        }
+
+        echo json_encode(['ok' => false, 'error' => $message], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 }

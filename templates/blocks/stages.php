@@ -6,10 +6,11 @@ $title = trim((string) ($data['title'] ?? ''));
 $description = trim(\App\Core\HtmlSanitizer::sanitizeText((string) ($data['description'] ?? '')));
 $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
-$variant = ($data['variant'] ?? 'default') === 'history' ? 'history' : 'default';
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$variant = (string) $data['variant'];
 $items = is_array($data['items'] ?? null) ? array_values($data['items']) : [];
-$columns = max(0, min(5, (int) ($data['columns'] ?? 0)));
-$autoplay = max(0, min(30, (int) ($data['autoplay'] ?? 0)));
+$columns = (int) $data['columns'];
+$autoplay = (int) $data['autoplay'];
 $carousel = count($items) > 1;
 // Полосой хронология становится, когда этапов больше, чем помещается в ряд.
 $desktopCarousel = count($items) > ($columns > 0 ? $columns : 5);

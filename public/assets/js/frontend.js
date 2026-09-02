@@ -794,24 +794,83 @@
         });
     })();
 
+    // Переход не запускается, если начальное состояние элемента ни разу не
+    // нарисовано: браузер считает конечное значение первым. Скрипт с defer
+    // выполняется до первой отрисовки, поэтому блок в первом экране получал
+    // `is-visible` в том же кадре, где впервые получил стили, и появлялся
+    // мгновенно — настройка «анимация появления» на верхних блоках не
+    // работала вовсе. Ждём кадр после первой отрисовки и только потом
+    // включаем наблюдение.
+    function afterFirstPaint(fn) {
+        if (typeof requestAnimationFrame !== 'function') { fn(); return; }
+        requestAnimationFrame(function () { requestAnimationFrame(fn); });
+    }
+
     // Микро-движок анимаций появления при скролле на Intersection Observer.
     (function () {
         var reveals = document.querySelectorAll('[data-reveal]');
-        if (reveals.length) {
-            if (!('IntersectionObserver' in window)) {
-                reveals.forEach(function (el) { el.classList.add('is-visible'); });
-            } else {
-                var io = new IntersectionObserver(function (entries, observer) {
-                    entries.forEach(function (entry) {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('is-visible');
-                            observer.unobserve(entry.target);
-                        }
-                    });
-                }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-                reveals.forEach(function (el) { io.observe(el); });
-            }
+        if (!('IntersectionObserver' in window)) {
+            reveals.forEach(function (el) { el.classList.add('is-visible'); });
+            window.asdrRevealObserve = function (list) {
+                list.forEach(function (el) { el.classList.add('is-visible'); });
+            };
+            return;
         }
+        var io = new IntersectionObserver(function (entries, observer) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+        window.asdrRevealObserve = function (list) {
+            afterFirstPaint(function () {
+                list.forEach(function (el) { io.observe(el); });
+            });
+        };
+        window.asdrRevealObserve(Array.prototype.slice.call(reveals));
+    })();
+
+    // Проявление заголовков (Дизайн → Типографика). Заголовок секции ждёт
+    // прокрутки бледным и набирает свой цвет. Бледное состояние вешает сам
+    // скрипт: без него, при «меньше движения» и в режимах контраста заголовок
+    // остаётся обычным — это украшение, а не содержимое. Заголовки секций —
+    // это h2 (у карточек h3/h4), поэтому список ровно такой.
+    (function () {
+        var body = document.body;
+        if (!body || !/\bdesign-title-(fade|wipe)\b/.test(body.className)) { return; }
+        if (!('IntersectionObserver' in window)) { return; }
+        if (typeof window.asdrReduceMotion === 'function' && window.asdrReduceMotion()) { return; }
+        var contrast = document.documentElement.getAttribute('data-a11y-contrast');
+        if (contrast && contrast !== 'normal') { return; }
+
+        var titles = Array.prototype.filter.call(
+            document.querySelectorAll('.cms-block h2'),
+            function (el) { return (el.textContent || '').trim() !== ''; }
+        );
+        if (!titles.length) { return; }
+
+        // Класс снимается сразу после показа: пока он висит, заливка текста
+        // прозрачная, и выделение мышью, печать и цвет выбранного слова живут
+        // по правилам анимации, а не по своим.
+        var settle = function (el) { el.classList.remove('is-title-reveal'); };
+        var io = new IntersectionObserver(function (entries, obs) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) { return; }
+                var el = entry.target;
+                obs.unobserve(el);
+                el.addEventListener('animationend', function () { settle(el); }, { once: true });
+                // Анимация могла не начаться (вкладка в фоне, тема без правил):
+                // заголовок обязан вернуться к своим стилям в любом случае.
+                setTimeout(function () { settle(el); }, 2500);
+            });
+        }, { threshold: 0.25, rootMargin: '0px 0px -5% 0px' });
+
+        titles.forEach(function (el) { el.classList.add('is-title-reveal'); });
+        afterFirstPaint(function () {
+            titles.forEach(function (el) { io.observe(el); });
+        });
     })();
 
     // Медиа-галерея: переключатели «Видео / Фото».
@@ -1223,14 +1282,24 @@
                 if (topbar) { topbar.style.setProperty('--hdr-panel-height', panelHeight + 'px'); }
             }
         };
+        // Высота шапки уходит в --scroll-offset: на неё опирается
+        // scroll-padding-top, иначе якорная ссылка прячет заголовок раздела
+        // под шапкой. Меряем, а не подбираем константу: макетов шапки четыре.
+        var syncScrollOffset = function () {
+            var stuck = getComputedStyle(hdr).position === 'sticky';
+            var height = stuck ? Math.round(hdr.getBoundingClientRect().height) : 0;
+            document.documentElement.style.setProperty('--scroll-offset', height + 'px');
+        };
         var apply = function () {
             hdr.classList.toggle('is-scrolled', window.scrollY > 12);
         };
         window.addEventListener('scroll', apply, { passive: true });
         window.addEventListener('resize', offset);
+        window.addEventListener('resize', syncScrollOffset, { passive: true });
         window.addEventListener('a11y:panelchange', offset);
         offset();
         apply();
+        syncScrollOffset();
     })();
 
     // Плавающая кнопка «Наверх»: активна только при включённом тумблере
@@ -1284,7 +1353,9 @@
     // и видео YouTube (карточки на главной/страницах, «Смотреть видео» в новостях).
     (function () {
         var IMG_RE = /\.(jpe?g|png|gif|webp|avif)(\?.*)?$/i;
-        var PHOTO_SCOPES = '.album-photos, .newsdetail-photos__grid, .mediagallery-grid';
+        // Блок «Изображение» попадает сюда только с включённым увеличением:
+        // класс ставит шаблон, поэтому обычный снимок остаётся обычным.
+        var PHOTO_SCOPES = '.album-photos, .newsdetail-photos__grid, .mediagallery-grid, .block-image--zoomable';
 
         function ytId(url) {
             var patterns = [
@@ -1440,8 +1511,9 @@
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
         if (!('IntersectionObserver' in window)) { return; }
         var GRIDS = '.imgcards-grid, .newsfeat-grid, .mediagallery-grid, .albums-grid, .persons-grid, .cards-grid, .cat-grid, .block-news__grid, .block-advantages__grid, .block-counters__grid, .docslist-grid, .docslist-acts, .contact-cards, .block-partners__grid, .block-team__grid, .block-projects__grid, .block-faq__list, .stages, .timeline-list, .featband, .media-list, .newsdocs-news, .newsdocs-docs';
+        var sections = Array.prototype.slice.call(document.querySelectorAll('[data-reveal-items]'));
+        if (!sections.length) { return; }
         var grids = document.querySelectorAll('[data-reveal-items] ' + GRIDS.split(', ').join(', [data-reveal-items] '));
-        if (!grids.length) { return; }
         var io = new IntersectionObserver(function (entries, obs) {
             entries.forEach(function (entry) {
                 if (!entry.isIntersecting) { return; }
@@ -1452,6 +1524,7 @@
                 obs.unobserve(entry.target);
             });
         }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
+        var staged = [];
         grids.forEach(function (grid) {
             var cards = Array.prototype.filter.call(grid.children, function (c) { return c.nodeType === 1; });
             if (cards.length < 2) { return; }
@@ -1459,8 +1532,36 @@
             if (section) { section.classList.add('is-motion-ready'); }
             cards.forEach(function (c) { c.classList.add('anim-card'); });
             grid.__animCards = cards;
-            io.observe(grid);
+            staged.push(grid);
         });
+        // Наблюдение — только после первой отрисовки: иначе для сетки в первом
+        // экране `.anim-card` и `is-inview` появляются в одном кадре, начальное
+        // скрытие ни разу не нарисовано и каскад не запускается.
+        afterFirstPaint(function () {
+            staged.forEach(function (grid) { io.observe(grid); });
+        });
+
+        // Секции без подходящей сетки (текст, баннер, одиночная карточка)
+        // очередь строить не из чего, и раньше выбор «карточки по очереди»
+        // не давал им ровно ничего. Настройка обязана что-то менять, поэтому
+        // такая секция появляется целиком — обычным плавным проявлением.
+        var plain = sections.filter(function (s) { return !s.classList.contains('is-motion-ready'); });
+        if (plain.length && typeof window.asdrRevealObserve === 'function') {
+            // Секция сейчас видима, а `data-reveal` задаёт ей opacity: 0 —
+            // без сброса перехода она на глазах гасла бы за 0.75s, чтобы потом
+            // проявиться снова. Прячем мгновенно и возвращаем переход кадром
+            // позже, уже к настоящему появлению.
+            plain.forEach(function (s) {
+                s.style.transition = 'none';
+                s.setAttribute('data-reveal-type', 'fade');
+                s.setAttribute('data-reveal', '');
+            });
+            void document.body.offsetHeight;
+            requestAnimationFrame(function () {
+                plain.forEach(function (s) { s.style.transition = ''; });
+                window.asdrRevealObserve(plain);
+            });
+        }
 
         // Страховка: если IntersectionObserver почему-то не сработал, любая
         // карточка, попавшая в область просмотра (скролл/ресайз/через 2.5с),
@@ -1477,7 +1578,12 @@
                 if (r.top < window.innerHeight - 20 && r.bottom > 0) { c.classList.add('is-inview'); }
             });
         };
-        var onScroll = function () { window.requestAnimationFrame(failsafe); };
+        var pending = false;
+        var onScroll = function () {
+            if (pending) { return; }
+            pending = true;
+            window.requestAnimationFrame(function () { pending = false; failsafe(); });
+        };
         window.addEventListener('scroll', onScroll, { passive: true });
         window.addEventListener('resize', onScroll, { passive: true });
         setTimeout(failsafe, 2500);
@@ -1753,14 +1859,32 @@
     (function () {
         var bar = document.getElementById('site-scroll-progress-bar');
         if (!bar) { return; }
-        var update = function () {
-            var winScroll = document.documentElement.scrollTop || document.body.scrollTop;
-            var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        // scrollHeight читается не на каждом событии прокрутки, а раз в кадр:
+        // это чтение заставляет браузер пересчитать раскладку, и на инерционной
+        // прокрутке (несколько событий в кадр) оно и делало ход рваным.
+        var height = 0;
+        var ticking = false;
+        var measure = function () {
+            height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        };
+        var paint = function () {
+            ticking = false;
+            var winScroll = window.scrollY || document.documentElement.scrollTop || 0;
             var scrolled = height > 0 ? (winScroll / height) * 100 : 0;
             bar.style.setProperty('--scroll-progress', Math.min(Math.max(scrolled, 0), 100) + '%');
         };
+        var update = function () {
+            if (ticking) { return; }
+            ticking = true;
+            window.requestAnimationFrame(paint);
+        };
         window.addEventListener('scroll', update, { passive: true });
-        update();
+        // Высота документа меняется от ресайза и от догруженных картинок,
+        // а не от самой прокрутки.
+        window.addEventListener('resize', function () { measure(); update(); }, { passive: true });
+        window.addEventListener('load', function () { measure(); update(); });
+        measure();
+        paint();
     })();
 
     // Движок Toast-уведомлений

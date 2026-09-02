@@ -19,11 +19,10 @@ $showTabs = $hasVideo && $hasPhoto;
 // меньше, а на десктопе ряд держит заданное редактором число.
 $initialKind = $hasVideo ? 'video' : 'photo';
 $initialCount = $initialKind === 'video' ? $videoCount : $photoCount;
-$columns = max(2, min(5, (int) ($data['columns'] ?? 4)));
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$columns = (int) $data['columns'];
 $initialColumns = max(1, min(4, $initialCount));
-$ratio = in_array($data['ratio'] ?? '16-9', ['16-9', '4-3', '1-1'], true)
-    ? (string) $data['ratio']
-    : '16-9';
+$ratio = (string) $data['ratio'];
 
 // Число колонок десктопа — в scoped CSS блока: раньше оно было прибито
 // четвёркой в теме и не настраивалось.
@@ -93,5 +92,18 @@ if ($showTabs) {
                 </<?= $tag ?>>
             <?php endforeach; ?>
         </div>
+    <?php endif; ?>
+    <?php if (!empty($data['_pager'])): ?>
+        <?php
+        // Полоса страниц у блока — та же, что у ленты новостей и каталогов:
+        // расходясь, две копии дали бы разное поведение на половинах сайта.
+        $mediaPager = (array) $data['_pager'];
+        $mediaBlockId = (int) $blockId;
+        ?>
+        <?= \App\Core\View::renderPartial('site/_pager', [
+            'page' => (int) $mediaPager['page'],
+            'pages' => (int) $mediaPager['pages'],
+            'pageUrl' => static fn (int $p): string => \App\Core\BlockPager::url($p, $mediaBlockId),
+        ]) ?>
     <?php endif; ?>
 </div>

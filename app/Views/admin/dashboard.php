@@ -87,30 +87,31 @@ require __DIR__ . '/layout/header.php';
             </div>
             <div class="u-inline-4588dc62ed">
                 <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('База данных'), ENT_QUOTES) ?></div>
-                <span class="badge badge--published u-inline-e48b05836a"><?= \App\Core\AdminUi::icon('check', 13) ?> <?= htmlspecialchars(t('Подключена'), ENT_QUOTES) ?></span>
+                <span class="badge badge--published badge--small"><?= \App\Core\AdminUi::icon('check', 13) ?> <?= htmlspecialchars(t('Подключена'), ENT_QUOTES) ?></span>
             </div>
             <div class="u-inline-4588dc62ed">
                 <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('Защита 2FA / Telegram'), ENT_QUOTES) ?></div>
                 <?php if (!empty($systemHealth['telegram_linked'])): ?>
-                    <span class="badge badge--published u-inline-e48b05836a"><?= \App\Core\AdminUi::icon('check', 13) ?> <?= htmlspecialchars(t('Активна'), ENT_QUOTES) ?></span>
+                    <span class="badge badge--published badge--small"><?= \App\Core\AdminUi::icon('check', 13) ?> <?= htmlspecialchars(t('Активна'), ENT_QUOTES) ?></span>
                 <?php else: ?>
-                    <span class="badge badge--draft u-inline-e48b05836a"><?= htmlspecialchars(t('Не настроена'), ENT_QUOTES) ?></span>
+                    <span class="badge badge--draft badge--small"><?= htmlspecialchars(t('Не настроена'), ENT_QUOTES) ?></span>
                 <?php endif; ?>
             </div>
             <div class="u-inline-4588dc62ed">
                 <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('Очередь задач'), ENT_QUOTES) ?></div>
-                <span class="badge badge--published u-inline-e48b05836a"><?= \App\Core\AdminUi::icon('check', 13) ?> <?= (int) ($systemHealth['queue_pending'] ?? 0) ?> <?= htmlspecialchars(t('в очереди'), ENT_QUOTES) ?></span>
+                <span class="badge badge--published badge--small"><?= \App\Core\AdminUi::icon('check', 13) ?> <?= (int) ($systemHealth['queue_pending'] ?? 0) ?> <?= htmlspecialchars(t('в очереди'), ENT_QUOTES) ?></span>
             </div>
             <div class="u-inline-4588dc62ed">
-                <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('Passkeys / Биометрия'), ENT_QUOTES) ?></div>
-                <span class="badge badge--published u-inline-e48b05836a"><?= \App\Core\AdminUi::icon('fingerprint', 13) ?> <?= (int) ($systemHealth['passkeys_count'] ?? 0) ?> <?= htmlspecialchars(t('ключей'), ENT_QUOTES) ?></span>
+                <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('Ошибки очереди'), ENT_QUOTES) ?></div>
+                <?php $queueFailed = (int) ($systemHealth['queue_failed'] ?? 0); ?>
+                <span class="badge <?= $queueFailed > 0 ? 'badge--draft' : 'badge--published' ?> badge--small"><?= \App\Core\AdminUi::icon($queueFailed > 0 ? 'alert-triangle' : 'check', 13) ?> <?= $queueFailed ?></span>
             </div>
             <div class="u-inline-4588dc62ed">
                 <div class="form-hint u-inline-48b8779b18"><?= htmlspecialchars(t('Обслуживание'), ENT_QUOTES) ?></div>
                 <?php if (!empty($systemHealth['maintenance'])): ?>
-                    <span class="badge badge--draft u-inline-e48b05836a"><?= htmlspecialchars(t('Включён'), ENT_QUOTES) ?></span>
+                    <span class="badge badge--draft badge--small"><?= htmlspecialchars(t('Включён'), ENT_QUOTES) ?></span>
                 <?php else: ?>
-                    <span class="badge badge--published u-inline-e48b05836a"><?= htmlspecialchars(t('Выключен'), ENT_QUOTES) ?></span>
+                    <span class="badge badge--published badge--small"><?= htmlspecialchars(t('Выключен'), ENT_QUOTES) ?></span>
                 <?php endif; ?>
             </div>
         </div>
@@ -146,7 +147,7 @@ require __DIR__ . '/layout/header.php';
                         </div>
                         <div class="u-inline-a527bac1ee">
                             <?php if ($isUnread): ?>
-                                <span class="badge badge--draft u-inline-0c8a27e103"><?= htmlspecialchars(t('Новая'), ENT_QUOTES) ?></span>
+                                <span class="badge badge--draft badge--small"><?= htmlspecialchars(t('Новая'), ENT_QUOTES) ?></span>
                             <?php endif; ?>
                             <span class="form-hint u-inline-083bdc9269"><?= date('d.m H:i', strtotime((string) $sub['created_at'])) ?></span>
                         </div>
@@ -173,9 +174,9 @@ require __DIR__ . '/layout/header.php';
             <div class="u-inline-3df38c3cc4">
                 <?= \App\Core\AdminUi::icon('search', 13, 'btn__icon', 2.5) ?>
                 <strong>«<?= htmlspecialchars($q, ENT_QUOTES) ?>»</strong>
-                <span class="badge u-inline-42cb127355"><?= $cnt ?> <?= htmlspecialchars(t('запросов'), ENT_QUOTES) ?></span>
+                <span class="badge badge--small"><?= $cnt ?> <?= htmlspecialchars(t('запросов'), ENT_QUOTES) ?></span>
                 <?php if ($resCnt === 0): ?>
-                    <span class="badge badge--draft u-inline-0c8a27e103"><?= htmlspecialchars(t('0 результатов'), ENT_QUOTES) ?></span>
+                    <span class="badge badge--draft badge--small"><?= htmlspecialchars(t('0 результатов'), ENT_QUOTES) ?></span>
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>

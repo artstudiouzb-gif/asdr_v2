@@ -9,7 +9,9 @@ test('admin filters wrap inside their panel and sidebar uses a light accessible 
     assert_contains('--admin-sidebar-bg: #f6f7f7', $css);
     assert_contains('--admin-sidebar-text: #2c3338', $css);
     assert_contains('--admin-sidebar-active: #dcecf7', $css);
-    assert_contains('.list-filters--panel { display: flex; flex-wrap: wrap;', $css);
+    // Панель фильтров — сетка одинаковых дорожек: при переносе flex-строкой
+    // вторая строка вставала своими ширинами и не совпадала с первой.
+    assert_contains('.list-filters--panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));', $css);
     assert_contains('.list-filters__actions { display: flex; flex: 0 0 auto;', $css);
     assert_contains('.list-filters__actions { width: 100%; margin-left: 0; }', $css);
 });
@@ -29,7 +31,12 @@ test('header settings group behavior controls into spacious responsive cards', f
             "в конструкторе шапки нет элемента с классом {$class}"
         );
     }
-    assert_contains('.hb-behavior__options { display: grid;', $css);
+    // Проверяем действующее правило, а не первое попавшееся: у этого селектора
+    // было два семейства, и нижнее перекрывало верхнее целиком — тест держался
+    // за мёртвую копию и прошёл бы даже с испорченной сеткой.
+    // Без !important: слой переопределений разобран, правило действует весом
+    // селектора. Пиноваться к !important в тесте значит закреплять его насовсем.
+    assert_contains(".hb-behavior__options {\n    display: grid;", $css);
     assert_contains('@media (max-width: 720px)', $css);
 });
 
@@ -80,7 +87,10 @@ test('header and footer builders use the shared wide workspace', function (): vo
     assert_true(is_string($css));
     assert_contains('class="admin-builder-workspace"', $header);
     assert_contains('class="admin-builder-workspace"', $footer);
-    assert_contains('.admin-builder-workspace { width: 100%; }', $css);
+    // Ширину рабочей области задаёт общий блок «во всю ширину» ниже по файлу;
+    // отдельное правило было его мёртвой копией.
+    assert_contains('.admin-builder-workspace,', $css);
+    assert_contains('width: 100% !important;', $css);
     assert_contains('grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));', $css);
 });
 

@@ -2,24 +2,23 @@
 /** @var array $data */
 $title = $data['title'] ?? '';
 $items = $data['items'] ?? [];
-$cardBg = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['card_bg'] ?? '')) ? $data['card_bg'] : '';
-$textColor = preg_match('/^#[0-9a-f]{6}$/i', (string) ($data['text_color'] ?? '')) ? $data['text_color'] : '';
-$iconSize = max(16, min(64, (int) ($data['icon_size'] ?? 28)));
+// Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
+$cardBg = (string) $data['card_bg'];
+$textColor = (string) $data['text_color'];
+$iconSize = (int) $data['icon_size'];
 $iconBoxSize = max(42, $iconSize + 22);
-$iconBackground = ($data['icon_bg'] ?? 'on') === 'off' ? 'off' : 'on';
-$iconPositionRaw = (string) ($data['icon_position'] ?? 'left');
-$iconPosition = in_array($iconPositionRaw, ['top', 'left', 'right', 'center'], true) ? $iconPositionRaw : 'left';
-$textAlignRaw = (string) ($data['text_align'] ?? 'left');
-$textAlign = in_array($textAlignRaw, ['left', 'center', 'right'], true) ? $textAlignRaw : 'left';
-$variantRaw = (string) ($data['variant'] ?? 'row');
-$variant = in_array($variantRaw, ['row', 'cards'], true) ? $variantRaw : 'row';
-$valueSizeRaw = (string) ($data['value_size'] ?? 'normal');
-$valueSize = in_array($valueSizeRaw, ['normal', 'large'], true) ? $valueSizeRaw : 'normal';
+$iconBackground = (string) $data['icon_bg'];
+$iconPosition = (string) $data['icon_position'];
+$panel = (string) $data['panel'];
+$textAlign = (string) $data['text_align'];
+$variant = (string) $data['variant'];
+$valueSize = (string) $data['value_size'];
 $cstyle = '--counter-icon-size:' . $iconSize . 'px;--counter-icon-box-size:' . $iconBoxSize . 'px;'
     . ($cardBg !== '' ? '--counters-bg:' . $cardBg . ';' : '')
     . ($textColor !== '' ? '--counters-text:' . $textColor . ';' : '');
 $templateCss = '#block-' . $blockId . ' .block-counters{' . $cstyle . '}';
 $blockClasses = ($iconBackground === 'off' ? ' block-counters--icons-no-bg' : '')
+    . ' block-counters--panel-' . $panel
     . ' block-counters--icon-pos-' . $iconPosition
     . ' block-counters--text-align-' . $textAlign
     . ' block-counters--' . $variant

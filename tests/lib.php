@@ -190,6 +190,29 @@ function reset_design_state(): void
 }
 
 /**
+ * Разметка редактора блока целиком: рукописная форма плюс поля, которые
+ * рисует схема (`BlockFieldSchema`).
+ *
+ * Проверки «настройка доступна редактору» обязаны смотреть сюда, а не в один
+ * `block_form.php`: у типа, переехавшего на схему, поля собираются на лету, и
+ * поиск по файлу формы их не находит — тест падал бы на здоровом коде.
+ */
+function block_editor_markup(): string
+{
+    static $markup = null;
+    if ($markup !== null) {
+        return $markup;
+    }
+
+    $markup = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
+    foreach (array_keys(\App\Core\BlockData\BlockFieldSchema::all()) as $type) {
+        $markup .= "\n" . \App\Core\BlockData\BlockFieldSchema::formHtml($type, []);
+    }
+
+    return $markup;
+}
+
+/**
  * Публичная тема целиком: gov-theme.css плюс части, вынесенные из общего
  * бандла ради страниц, которым они не нужны (AssetCollector::THEME_PART_MAP).
  *

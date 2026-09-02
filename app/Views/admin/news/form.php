@@ -592,7 +592,8 @@ $existingPoll = !empty($news['id']) ? \App\Models\NewsPoll::findByNews((int) $ne
                 </div>
                 <p class="form-hint">
                     Работает при макете «Карточка». Всё, что здесь набрано, переводится вместе
-                    с новостью. В заголовке обложки можно выделить слово звёздочками: <code>*слово*</code>.
+                    с новостью. В заголовке обложки работает разметка строки: <code>*слово*</code> — выделение,
+                    <code>|</code> — принудительный перенос строки.
                 </p>
                 <div class="form-grid-2col">
                     <div class="form-field">

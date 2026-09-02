@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash   VARCHAR(255) NOT NULL,
     totp_secret     TEXT         NULL,
     totp_enabled    TINYINT(1)   NOT NULL DEFAULT 0,
+    totp_last_step  BIGINT       NULL DEFAULT NULL COMMENT 'последний принятый шаг TOTP (защита от повтора кода)',
     role            ENUM('admin', 'editor') NOT NULL DEFAULT 'admin',
     admin_lang      VARCHAR(8) NULL COMMENT 'предпочитаемый язык интерфейса админки (ru, uz, en)',
     last_login_at   DATETIME NULL,
@@ -706,6 +707,17 @@ CREATE TABLE IF NOT EXISTS error_log (
 -- ---------------------------------------------------------------------------
 -- Менеджер 301/302-редиректов: переезд со старого сайта без потери ссылок
 -- ---------------------------------------------------------------------------
+-- История проверок индексации: без неё нельзя ответить на вопрос «стало хуже
+-- или так было всегда», а именно он возникает первым.
+CREATE TABLE IF NOT EXISTS seo_audits (
+    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    errors      SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    warnings    SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    findings    LONGTEXT NOT NULL,
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_seo_audits_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS redirects (
     id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     from_path   VARCHAR(255) NOT NULL,
@@ -766,13 +778,18 @@ CREATE TABLE IF NOT EXISTS videos (
     description  TEXT NULL,
     cover_url    VARCHAR(500) NOT NULL DEFAULT '',
     video_url    VARCHAR(500) NOT NULL DEFAULT '',
+    youtube_id   VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'id ролика YouTube — ключ повторного импорта',
+    source       VARCHAR(20) NOT NULL DEFAULT '' COMMENT 'происхождение: пусто — вручную, youtube — импорт',
+    published_at DATETIME NULL COMMENT 'дата публикации ролика на канале',
     duration     VARCHAR(20) NOT NULL DEFAULT '',
     is_published TINYINT(1) NOT NULL DEFAULT 1,
     is_featured  TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'показывать на главной (блок Медиа)',
     sort_order   INT NOT NULL DEFAULT 0,
     created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uniq_videos_slug (slug),
-    KEY idx_videos_listing (is_published, sort_order, created_at)
+    KEY idx_videos_listing (is_published, sort_order, created_at),
+    KEY idx_videos_youtube (youtube_id),
+    KEY idx_videos_dates (is_published, published_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Переводы видео (заголовок и описание на неосновных языках)
@@ -808,6 +825,7 @@ CREATE TABLE IF NOT EXISTS content_types (
     slug             VARCHAR(60)  NOT NULL,
     name             VARCHAR(190) NOT NULL,
     description      VARCHAR(255) NOT NULL DEFAULT '',
+    icon             VARCHAR(60)  NOT NULL DEFAULT '' COMMENT 'имя иконки Tabler для пункта меню',
     has_translations TINYINT(1)   NOT NULL DEFAULT 0,
     is_public        TINYINT(1)   NOT NULL DEFAULT 1,
     created_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -857,10 +875,10 @@ CREATE TABLE IF NOT EXISTS content_entry_translations (
 -- ---------------------------------------------------------------------------
 -- Стартовые публичные типы контента государственного сайта (редактируемы)
 -- ---------------------------------------------------------------------------
-INSERT IGNORE INTO content_types (slug, name, description, has_translations, is_public, created_at) VALUES
-    ('documenty', 'Документы', 'Официальные документы, приказы и постановления', 1, 1, NOW()),
-    ('vakansii',  'Вакансии',  'Открытые вакансии организации', 1, 1, NOW()),
-    ('tendery',   'Тендеры',   'Актуальные тендеры и закупки', 1, 1, NOW());
+INSERT IGNORE INTO content_types (slug, name, description, icon, has_translations, is_public, created_at) VALUES
+    ('documenty', 'Документы', 'Официальные документы, приказы и постановления', 'file-text', 1, 1, NOW()),
+    ('vakansii',  'Вакансии',  'Открытые вакансии организации', 'briefcase', 1, 1, NOW()),
+    ('tendery',   'Тендеры',   'Актуальные тендеры и закупки', 'gavel', 1, 1, NOW());
 
 INSERT INTO content_type_fields (type_id, name, label, field_type, required, sort_order, created_at)
 SELECT t.id, f.name, f.label, f.field_type, f.required, f.sort_order, NOW()
@@ -913,6 +931,7 @@ CREATE TABLE IF NOT EXISTS repo_users (
     password_hash   VARCHAR(255) NOT NULL,
     totp_secret     TEXT         NULL,
     totp_enabled    TINYINT(1)   NOT NULL DEFAULT 0,
+    totp_last_step  BIGINT       NULL DEFAULT NULL COMMENT 'последний принятый шаг TOTP (защита от повтора кода)',
     telegram_chat_id BIGINT      NULL COMMENT '2FA через Telegram-бота (NULL — не привязан)',
     is_active       TINYINT(1)   NOT NULL DEFAULT 1,
     last_login_at   DATETIME NULL,
@@ -1107,6 +1126,49 @@ CREATE TABLE IF NOT EXISTS webpush_queue (
 -- будет пытаться накатить их повторно. (Старые установки, созданные на схеме
 -- этапов 1–2, накатят их через migrate.php.)
 
+-- «Цели» (Maqsadlar) — тип контента, у которого нет текста наружу: цель это
+-- набор снимков, и на сайте она показывается только каруселью в виджете.
+--
+-- Название и описание видны на сайте и переводятся (механизм А, таблица
+-- goal_translations): набор снимков без единого слова не сообщает посетителю
+-- ни что за объект, ни зачем он. Отдельной страницы и slug'а у цели нет —
+-- публичного адреса, который надо было бы держать стабильным, не существует,
+-- поэтому языковая версия остаётся переводом строки, а не отдельной записью.
+CREATE TABLE IF NOT EXISTS goals (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(255) NOT NULL COMMENT 'название цели: видно на сайте и переводится',
+    description TEXT NULL COMMENT 'описание под названием; необязательно',
+    is_active  TINYINT(1) NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_goals_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Снимки цели. Порядок задаётся редактором; случайным бывает выбор самой
+-- цели, а не кадров внутри неё — иначе история, рассказанная слайдами, каждый
+-- раз рассыпалась бы.
+CREATE TABLE IF NOT EXISTS goal_images (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    goal_id    INT NOT NULL,
+    image      VARCHAR(500) NOT NULL,
+    alt        VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'описание для диктора; на экране не видно',
+    sort_order INT NOT NULL DEFAULT 0,
+    INDEX idx_goal_images_goal (goal_id, sort_order),
+    CONSTRAINT fk_goal_images_goal FOREIGN KEY (goal_id) REFERENCES goals (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Перевод названия и описания цели. Пустое поле откатывается к основному
+-- языку — как у альбомов и видео.
+CREATE TABLE IF NOT EXISTS goal_translations (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    goal_id     INT NOT NULL,
+    lang        VARCHAR(5) NOT NULL,
+    name        VARCHAR(255) NULL,
+    description TEXT NULL,
+    UNIQUE KEY uniq_goal_translation (goal_id, lang),
+    CONSTRAINT fk_goal_translations_goal FOREIGN KEY (goal_id) REFERENCES goals (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT INTO migrations (filename) VALUES
     ('2026_07_05_block5_multilang_header_widgets.sql'),
     ('2026_07_05_soft_deletes.sql'),
@@ -1195,7 +1257,13 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_14_heroes.sql'),
     ('2026_08_14_hero_watermark.sql'),
     ('2026_08_15_news_layout_card.sql'),
-    ('2026_08_15_news_card_fields.sql')
+    ('2026_08_15_news_card_fields.sql'),
+    ('2026_08_21_videos_youtube_import.sql'),
+    ('2026_08_23_totp_replay_guard.sql'),
+    ('2026_08_26_goals.sql'),
+    ('2026_08_27_goal_texts.sql'),
+    ('2026_08_29_content_type_icon.sql'),
+    ('2026_09_01_seo_audits.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (

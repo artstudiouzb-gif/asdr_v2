@@ -97,6 +97,13 @@ $currentType = $widget['type'] ?? 'latest_news';
             </div>
         <?php endif; ?>
 
+        <!-- Настройки: section_menu -->
+        <?php if ($showType('section_menu')): ?>
+            <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="section_menu">
+                <span class="form-hint">Настроек нет: виджет сам находит раздел основного меню, внутри которого лежит открытая страница, и показывает его страницы. На странице вне разделов виджет не выводится. Заголовок можно не задавать — им служит название раздела.</span>
+            </div>
+        <?php endif; ?>
+
         <!-- Настройки: contacts -->
         <?php if ($showType('contacts')): ?>
             <div class="form-field form-field--checkbox<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="contacts">
@@ -118,6 +125,78 @@ $currentType = $widget['type'] ?? 'latest_news';
             <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="subscribe">
                 <label>Подзаголовок формы подписки (необязательно)</label>
                 <input type="text" name="text" value="<?= htmlspecialchars((string) ($data['text'] ?? 'Eng muhim yangiliklar va tahliliy materiallarni pochtangizga oling.'), ENT_QUOTES) ?>">
+            </div>
+        <?php endif; ?>
+
+        <!-- Настройки: photo_slider -->
+        <?php if ($showType('photo_slider')): ?>
+            <?php $sliderSlides = (array) ($data['slides'] ?? []); ?>
+            <?php $sliderSource = (string) ($data['source'] ?? 'manual'); ?>
+            <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="photo_slider">
+                <label for="source">Откуда брать фотографии</label>
+                <select id="source" name="source">
+                    <?php foreach (\App\Core\WidgetRenderer::SLIDER_SOURCES as $val => $label): ?>
+                        <option value="<?= htmlspecialchars((string) $val, ENT_QUOTES) ?>" <?= $sliderSource === (string) $val ? 'selected' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="form-hint">
+                    «Случайная цель» — виджет берёт одну цель из раздела «Цели» и листает
+                    её снимки; у каждого посетителя цель своя. Список ниже тогда не
+                    используется.
+                </span>
+            </div>
+            <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="photo_slider">
+                <label>Фотографии карусели</label>
+                <span class="form-hint">
+                    Подписей и ссылок у этого виджета нет — только снимки. Текст в поле
+                    «Описание для незрячих» на экране не показывается: его читает диктор,
+                    и без него карусель не проходит проверку доступности.
+                </span>
+                <div data-repeater="slides">
+                    <?php foreach ($sliderSlides as $i => $row): ?>
+                        <div class="repeater-row">
+                            <?= \App\Core\AdminUi::imageField('slides[' . $i . '][image]', (string) ($row['image'] ?? ''), ['label' => 'Фотография']) ?>
+                            <div class="form-field">
+                                <label>Описание для незрячих</label>
+                                <input type="text" name="slides[<?= $i ?>][alt]" maxlength="200" value="<?= htmlspecialchars((string) ($row['alt'] ?? ''), ENT_QUOTES) ?>">
+                            </div>
+                            <button type="button" class="btn btn--small btn--danger" data-repeater-remove>Удалить</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <template data-repeater-template="slides">
+                    <?= \App\Core\AdminUi::imageField('slides[__INDEX__][image]', '', ['label' => 'Фотография']) ?>
+                    <div class="form-field">
+                        <label>Описание для незрячих</label>
+                        <input type="text" name="slides[__INDEX__][alt]" maxlength="200">
+                    </div>
+                    <button type="button" class="btn btn--small btn--danger" data-repeater-remove>Удалить</button>
+                </template>
+                <button type="button" class="btn btn--small" data-repeater-add="slides">+ Добавить фотографию</button>
+            </div>
+            <div class="form-field form-field--checkbox<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="photo_slider">
+                <input type="checkbox" id="shuffle" name="shuffle" value="1" <?= !empty($data['shuffle']) ? 'checked' : '' ?>>
+                <label for="shuffle">Случайный порядок фотографий</label>
+                <span class="form-hint">
+                    Порядок выбирается заново у каждого посетителя, в браузере: страницы
+                    кэшируются, и порядок, выбранный на сервере, был бы одинаковым для всех
+                    до сброса кэша. При источнике «Случайная цель» не действует — порядок
+                    кадров внутри цели авторский.
+                </span>
+            </div>
+            <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="photo_slider">
+                <label for="ratio">Соотношение сторон кадра</label>
+                <select id="ratio" name="ratio">
+                    <?php $currentRatio = \App\Core\SliderRatio::normalize($data['ratio'] ?? null); ?>
+                    <?php foreach (\App\Core\SliderRatio::ALL as $val => $label): ?>
+                        <option value="<?= htmlspecialchars((string) $val, ENT_QUOTES) ?>" <?= $currentRatio === (string) $val ? 'selected' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-field<?= (!$isEdit) ? ' is-hidden' : '' ?>" data-wtype="photo_slider">
+                <label for="autoplay">Автопрокрутка, секунд</label>
+                <input type="number" id="autoplay" name="autoplay" min="0" max="30" value="<?= (int) ($data['autoplay'] ?? 0) ?>">
+                <span class="form-hint">0 — переключать только вручную. Показ встаёт на паузу при наведении и при включённой настройке «остановка анимаций».</span>
             </div>
         <?php endif; ?>
 

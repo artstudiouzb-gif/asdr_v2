@@ -17,7 +17,6 @@ use App\Models\User;
 function totp_current_code(string $secret): string
 {
     $method = new ReflectionMethod(TOTP::class, 'calculateCode');
-    $method->setAccessible(true);
 
     return (string) $method->invoke(null, $secret, (int) floor(time() / 30));
 }

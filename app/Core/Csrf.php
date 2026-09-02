@@ -6,6 +6,9 @@ namespace App\Core;
 
 final class Csrf
 {
+    /** Методы без побочных эффектов — токен не требуется (RFC 9110 §9.2.1). */
+    private const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
+
     public static function token(): string
     {
         Session::start();
@@ -31,14 +34,22 @@ final class Csrf
         return hash_equals($_SESSION['csrf_token'], $token);
     }
 
+    /**
+     * Проверяет токен у всех небезопасных методов, а не только у POST:
+     * роутер сегодня знает лишь GET и POST, но глушить проверку на первом же
+     * добавленном PUT/DELETE было бы слишком тихим отказом.
+     */
     public static function verifyRequest(): void
     {
-        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
-            $token = $_POST['csrf_token'] ?? null;
-            if (!self::verify($token)) {
-                http_response_code(419);
-                exit('Сессия устарела (CSRF token mismatch). Обновите страницу и попробуйте снова.');
-            }
+        $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+        if (in_array($method, self::SAFE_METHODS, true)) {
+            return;
+        }
+
+        $token = $_POST['csrf_token'] ?? null;
+        if (!self::verify(is_string($token) ? $token : null)) {
+            http_response_code(419);
+            exit('Сессия устарела (CSRF token mismatch). Обновите страницу и попробуйте снова.');
         }
     }
 

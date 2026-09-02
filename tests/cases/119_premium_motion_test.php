@@ -21,18 +21,34 @@ test('Карусель проектов не отключает анимации
 
     assert_true(!str_contains($govCss, '[data-carousel-track] *'), 'Вложенные переходы карусели должны оставаться активными');
     assert_contains('transition: transform .7s cubic-bezier(.22, 1, .36, 1)', $govCss);
-    assert_contains('transform: translateY(18px) scale(.99)', $frontendCss);
+    // Сдвиг и масштаб появления живут в переменных: сам показ описан
+    // ключевыми кадрами (переход карточки объявлен темой и заменял базовый).
+    assert_contains('@keyframes card-reveal', $frontendCss);
+    assert_contains('--card-reveal-shift: 18px', $frontendCss);
+    assert_contains('--card-reveal-scale: .99;', $frontendCss);
+    assert_contains('translateY(var(--card-reveal-shift)) scale(var(--card-reveal-scale))', $frontendCss);
 });
 
 test('Счётчики без стекла и поворота, новости появляются мягко', function (): void {
     $govCss = theme_css();
     $frontendCss = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/frontend.css');
 
-    $countersStart = (int) strpos($govCss, '.block-counters {');
-    $countersEnd = (int) strpos($govCss, '/* --- Секции:', $countersStart);
-    $countersCss = substr($govCss, $countersStart, $countersEnd - $countersStart);
-    assert_contains('background: var(--counters-bg, var(--gov-surface))', $countersCss);
-    assert_true(!str_contains($countersCss, 'backdrop-filter'), 'У счётчиков не должно быть размытия стекла');
+    // Проверяем все объявления .block-counters, а не срез «до ближайшего
+    // комментария»: прежний срез ломался от любой перестановки правил выше и
+    // молча проверял чужой код.
+    preg_match_all('/\.block-counters\s*\{([^}]*)\}/', $govCss, $countersMatches);
+    $countersBodies = $countersMatches[1] ?? [];
+    assert_true($countersBodies !== [], 'правило .block-counters должно существовать');
+    assert_true(
+        (bool) array_filter(
+            $countersBodies,
+            static fn (string $body): bool => str_contains($body, 'background: var(--counters-bg, var(--gov-surface))')
+        ),
+        'фон счётчиков берётся из настройки блока'
+    );
+    foreach ($countersBodies as $body) {
+        assert_true(!str_contains($body, 'backdrop-filter'), 'У счётчиков не должно быть размытия стекла');
+    }
 
     $iconStart = (int) strpos($govCss, '.counter__icon {');
     $iconEnd = (int) strpos($govCss, '.counter__icon svg', $iconStart);
@@ -40,7 +56,8 @@ test('Счётчики без стекла и поворота, новости �
     assert_true(!str_contains($iconCss, 'rotate('), 'Иконки счётчиков не должны поворачиваться');
 
     assert_contains('.newsfeat-grid > .anim-card', $frontendCss);
-    assert_contains('transform: translateY(8px) scale(.995)', $frontendCss);
+    assert_contains('--card-reveal-shift: 8px', $frontendCss);
+    assert_contains('--card-reveal-scale: .995', $frontendCss);
     assert_contains(':where(.newsfeat-lead, .newsfeat-mini, .newsfeat-text):hover', $govCss);
     assert_contains('transform: translateY(-1px)', $govCss);
 });

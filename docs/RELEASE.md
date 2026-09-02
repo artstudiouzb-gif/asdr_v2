@@ -20,7 +20,7 @@
 - [ ] Открыть сайт в браузере → автоматически запустится установщик
       `/install`: проверка окружения → подключение БД → данные сайта →
       супер-админ.
-- [ ] PHP 8.2+ с расширениями: pdo_mysql, gd, zip, curl, mbstring, dom.
+- [ ] PHP 8.4+ с расширениями: pdo_mysql, gd, zip, curl, mbstring, dom.
 - [ ] После установки выполнить `php scripts/release_check.php`; ошибок
       (`FAIL`) быть не должно.
 
@@ -36,6 +36,12 @@
       полном отказе сервера.
 - [ ] По желанию: `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` — алерты об ошибках
       из логов (это отдельный канал от бота для входа, см. п. 4).
+- [ ] `HEALTH_CHECK_TOKEN` — токен подробностей `/health?token=…` для
+      мониторинга.
+- [ ] `MONITORING_HEARTBEAT_URL` — приёмник heartbeat (healthchecks.io,
+      Better Uptime, любой cron-монитор): сторож пингует его по чистому
+      проходу, и тревогу поднимает отсутствие сигнала — так о простое узнают,
+      даже когда упал сам сервер.
 
 ## 3. Cron (обязательно)
 
@@ -50,6 +56,10 @@
 0 3 * * *  php /path/app/Console/backup_worker.php    >> /path/storage/logs/backup_worker.log 2>&1
 30 3 * * * php /path/app/Console/gdpr_cleanup.php     >> /path/storage/logs/gdpr_cleanup.log 2>&1
 0 9 * * 1  php /path/app/Console/digest_worker.php    >> /path/storage/logs/digest_worker.log 2>&1
+17 * * * * php /path/app/Console/integrity_check.php  >> /path/storage/logs/integrity.log 2>&1
+*/15 * * * * php /path/app/Console/watchdog.php       >> /path/storage/logs/watchdog.log 2>&1
+25 4 * * * php /path/app/Console/seo_worker.php       >> /path/storage/logs/seo_worker.log 2>&1
+40 3 * * 0 php /path/app/Console/restore_drill.php    >> /path/storage/logs/restore_drill.log 2>&1
 ```
 
 - [ ] Cron установлен; `/health` возвращает `ok` (а не `degraded`).
@@ -69,9 +79,9 @@
 - [ ] Дождаться первого ночного бэкапа (или запустить вручную:
       `php app/Console/backup_worker.php`).
 - [ ] Убедиться, что копия появилась в `BACKUP_EXTERNAL_DIR`.
-- [ ] **Один раз прогнать восстановление** на тестовую БД:
-      `php database/restore.php <архив.zip> <тестовая_БД> <каталог>` —
-      непроверенный бэкап равен отсутствию бэкапа.
+- [ ] **Один раз прогнать восстановление** до открытия сайта:
+      `php app/Console/restore_drill.php` (дальше её еженедельно повторяет
+      cron) — непроверенный бэкап равен отсутствию бэкапа.
 
 ## 6. Переезд со старого сайта (asdr.gov.uz)
 
@@ -109,6 +119,10 @@
 ## 9. Контроль после запуска (первая неделя)
 
 - [ ] `/health` в мониторинг (uptime-сервис) — `degraded` значит встал воркер.
+- [ ] Проверить, что heartbeat доходит: в приёмнике (`MONITORING_HEARTBEAT_URL`)
+      виден регулярный сигнал от сторожа.
+- [ ] «Поиск и индексация» (`/admin/seo`) — снимок без ошибок; находки
+      разобрать до подачи sitemap в поисковики.
 - [ ] «Журнал действий» — активность администраторов.
 - [ ] «Редиректы → Недавние 404» — добить потерянные ссылки.
 - [ ] `storage/logs/error.log` — должен быть пустым или почти пустым.

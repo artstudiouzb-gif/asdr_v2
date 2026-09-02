@@ -222,37 +222,23 @@
     position: absolute;
     z-index: 2;
     max-width: 100%;
-    /* Цвет по умолчанию — текст обложки: надпись видна на любой схеме.
-       Свой цвет редактора приходит переменной --hero-watermark-ink. */
-    color: var(--hero-watermark-ink, var(--hero-fg, #fff));
-    font-family: var(--hero-watermark-family, var(--font-heading, var(--font-family)));
+    /* Цвет — текст обложки: надпись видна на любой схеме, и подбирать его
+       под каждую схему отдельно не нужно. */
+    color: var(--hero-fg, #fff);
+    font-family: var(--font-heading, var(--font-family));
     opacity: var(--hero-watermark-opacity, 0.12);
     font-size: var(--hero-watermark-size, 22vw);
     font-weight: 700;
     line-height: 0.9;
     letter-spacing: -0.02em;
     white-space: nowrap;
-    /* Привязка к краю задаёт место грубо, смещение доводит его точно.
-       Проценты здесь считаются от самой надписи, поэтому шаг остаётся
-       соразмерным её размеру и на телефоне, и на большом экране. */
-    transform: translate(
-        calc(var(--hero-watermark-ax, 0%) + var(--hero-watermark-dx, 0%)),
-        calc(var(--hero-watermark-ay, 0%) + var(--hero-watermark-dy, 0%))
-    );
+    /* Привязка к краю: центр выравнивается сдвигом на половину надписи. */
+    transform: translate(var(--hero-watermark-ax, 0%), var(--hero-watermark-ay, 0%));
     /* Слово шириной в экран лежит поверх фона: без этого оно перехватывало бы
        клики по кнопкам и по ссылке слайда. */
     pointer-events: none;
     user-select: none;
 }
-
-/* Контур вместо заливки: буквы становятся полыми. Цвет уходит в обводку,
-   поэтому сам текст прозрачный — currentColor тут не годится, он был бы
-   прозрачным вместе с текстом. */
-.hero__watermark--outline {
-    color: transparent;
-    -webkit-text-stroke: var(--hero-watermark-stroke, 2px) var(--hero-watermark-ink, var(--hero-fg, #fff));
-}
-.hero__watermark--font-body { --hero-watermark-family: var(--font-family); }
 
 .hero__watermark--x-left { left: 0; }
 .hero__watermark--x-center { left: 50%; --hero-watermark-ax: -50%; }
@@ -286,6 +272,10 @@
     display: flex;
     flex-direction: column;
     gap: 0;
+    /* Отступ всего блока сверху. Промежутки gap-* работают между частями и у
+       первой части сняты, поэтому опустить колонку целиком можно только
+       отдельной настройкой — раньше её дописывали в «Свой CSS» страницы. */
+    padding-top: var(--hero-text-offset, 0px);
     max-width: var(--hero-text-width);
     min-width: 0;
     color: var(--hero-fg);
@@ -388,9 +378,6 @@
 .hero__cta--ghost:hover { background: color-mix(in srgb, var(--hero-fg) 14%, transparent); }
 .hero__cta--link { padding-inline: 0; color: var(--hero-fg); text-decoration: underline; }
 .hero__cta-icon { display: inline-flex; flex: none; }
-/* Размер своей картинки задаёт HeroRenderer: 20x20 только для режима
-   «как иконка». Fill/custom не наследуют старое жёсткое ограничение. */
-.hero__cta-icon img { object-fit: contain; display: block; }
 
 /* --- Навигация --- */
 /* Внешний слой — только положение: ширина колонки сайта и отступ от низа.
@@ -588,11 +575,6 @@
     to { transform: scale(1.12); }
 }
 
-@keyframes hero-kenburns {
-    from { transform: scale(1); }
-    to { transform: scale(1.12); }
-}
-
 /*
  * Соседний блок, надвинутый на низ обложки.
  *
@@ -621,14 +603,6 @@
     .hero__nav { padding: var(--space-xs) var(--space-s); }
     .hero__thumbs { display: none; }
     .hero--no-arrows-mobile .hero__arrow { display: none; }
-    .hero--pos-m-left .hero__inner { justify-content: flex-start; text-align: start; }
-    .hero--pos-m-center .hero__inner { justify-content: center; text-align: center; }
-    .hero--pos-m-right .hero__inner { justify-content: flex-end; text-align: end; }
-    .hero--pos-m-center .hero__text { align-items: center; }
-    .hero--pos-m-right .hero__text { align-items: flex-end; }
-    .hero__slide.hero--y-m-top { align-items: start; }
-    .hero__slide.hero--y-m-center { align-items: center; }
-    .hero__slide.hero--y-m-bottom { align-items: end; }
     /* Кнопки на узком экране растягиваются на строку: обрезанная CTA хуже,
        чем высокая колонка. */
     .hero__actions { width: 100%; }

@@ -82,7 +82,6 @@ final class DashboardController
             'telegram_linked' => \App\Core\TelegramBot::isConfigured() || \App\Core\TelegramGateway::isConfigured(),
             'queue_pending' => (int) (Database::isConnected() ? Database::pdo()->query("SELECT COUNT(*) FROM jobs WHERE status = 'pending'")->fetchColumn() : 0),
             'queue_failed' => (int) (Database::isConnected() ? Database::pdo()->query("SELECT COUNT(*) FROM jobs WHERE status = 'failed'")->fetchColumn() : 0),
-            'passkeys_count' => (int) (Database::isConnected() ? Database::pdo()->query("SELECT COUNT(*) FROM user_passkeys")->fetchColumn() : 0),
         ];
 
         // Статистика заявок за последние 7 дней для графика

@@ -28,18 +28,13 @@ final class HeroSlideData
     public const CTA_STYLES = ['primary', 'secondary', 'ghost', 'link'];
 
     /** Как отображать свою SVG/PNG-картинку внутри CTA. */
-    public const CTA_IMAGE_MODES = ['icon', 'fill', 'custom'];
 
     /** Привязка фоновой надписи к краю; точное место доводится смещением. */
     public const WATERMARK_X = ['left', 'center', 'right'];
 
     public const WATERMARK_Y = ['top', 'middle', 'bottom'];
 
-    /** Заливка или контур: контур даёт фирменный «вырезанный» знак. */
-    public const WATERMARK_STYLES = ['fill', 'outline'];
 
-    /** Шрифт надписи: заголовочный или основной — третьего в теме нет. */
-    public const WATERMARK_FONTS = ['heading', 'body'];
 
     /**
      * Значения по умолчанию — они же список допустимых ключей.
@@ -64,20 +59,13 @@ final class HeroSlideData
             // «средняя/крупная»: нужный кегль зависит от длины слова, и
             // угадать его пресетом заранее нельзя.
             'watermark_size' => 22,
-            // Привязка к краю плюс смещение в процентах от размера надписи:
-            // край задаёт грубо, смещение доводит до места.
+            // Привязка к краю кадра. Точная доводка смещениями убрана вместе
+            // с контуром, толщиной, своим цветом и выбором семейства: слово
+            // рисуется цветом текста обложки, поэтому остаётся видимым на
+            // любой схеме, а не только на той, под которую его подобрали.
             'watermark_x' => 'center',
             'watermark_y' => 'middle',
-            'watermark_dx' => 0,
-            'watermark_dy' => 0,
             'watermark_opacity' => 12,
-            'watermark_style' => 'fill',
-            // Толщина контура в пикселях; при заливке не используется.
-            'watermark_stroke' => 2,
-            // Пусто — цвет текста обложки: надпись остаётся видимой на любой
-            // схеме, а не только на той, под которую её подобрали.
-            'watermark_color' => '',
-            'watermark_font' => 'heading',
 
             // --- Фон ---
             'media_type' => 'none',
@@ -100,10 +88,6 @@ final class HeroSlideData
             'link_new_tab' => false,
 
             // --- Цвет (пусто = как у обложки) ---
-            'scheme' => '',
-            'scheme_bg' => '',
-            'scheme_text' => '',
-            'scheme_accent' => '',
             'content_scheme' => '',
 
             // --- Затемнение и подложка (пусто = как у обложки) ---
@@ -111,24 +95,11 @@ final class HeroSlideData
             'overlay_color' => '',
             'overlay_opacity' => -1,
             'overlay_direction' => '',
-            'panel' => '',
 
             // --- Раскладка (пусто = как у обложки) ---
-            'text_position' => '',
-            'text_align_y' => '',
-            'text_position_mobile' => '',
-            'text_align_y_mobile' => '',
-            'title_size' => '',
-            'subtitle_size' => '',
-            'title_size_mobile' => '',
-            'subtitle_size_mobile' => '',
             // Отступ сверху у части текста. Пусто — «как у обложки»;
             // 0 — значимое значение «прижать вплотную», поэтому пустая
             // строка и ноль здесь разное.
-            'gap_title' => '',
-            'gap_subtitle' => '',
-            'gap_actions' => '',
-            'gap_art' => '',
 
             // --- Кнопки ---
             'cta_enabled' => false,
@@ -139,18 +110,12 @@ final class HeroSlideData
             // Своя картинка кнопки (SVG/PNG). Задана — побеждает иконку из
             // набора: выбирают её осознанно, ради фирменного знака, которого
             // в Tabler нет.
-            'cta_image' => '',
-            'cta_image_mode' => 'icon',
-            'cta_image_width' => 80,
             'cta_new_tab' => false,
             'cta2_enabled' => false,
             'cta2_text' => '',
             'cta2_url' => '',
             'cta2_style' => 'ghost',
             'cta2_icon' => '',
-            'cta2_image' => '',
-            'cta2_image_mode' => 'icon',
-            'cta2_image_width' => 80,
             'cta2_new_tab' => false,
 
             // --- Картинка поверх фона (эмблема, логотип программы) ---
@@ -220,13 +185,7 @@ final class HeroSlideData
             'watermark_size' => self::ranged($input['watermark_size'] ?? null, 2, 60, 22),
             'watermark_x' => BlockDataInput::enum($input, 'watermark_x', self::WATERMARK_X, 'center'),
             'watermark_y' => BlockDataInput::enum($input, 'watermark_y', self::WATERMARK_Y, 'middle'),
-            'watermark_dx' => self::ranged($input['watermark_dx'] ?? null, -100, 100, 0),
-            'watermark_dy' => self::ranged($input['watermark_dy'] ?? null, -100, 100, 0),
             'watermark_opacity' => self::percent($input['watermark_opacity'] ?? null, 12),
-            'watermark_style' => BlockDataInput::enum($input, 'watermark_style', self::WATERMARK_STYLES, 'fill'),
-            'watermark_stroke' => self::ranged($input['watermark_stroke'] ?? null, 1, 12, 2),
-            'watermark_color' => BlockDataInput::optionalColor($input, 'watermark_color'),
-            'watermark_font' => BlockDataInput::enum($input, 'watermark_font', self::WATERMARK_FONTS, 'heading'),
 
             'media_type' => $mediaType,
             'image' => $image,
@@ -247,10 +206,6 @@ final class HeroSlideData
             'link_url' => BlockDataInput::safeLink($input['link_url'] ?? ''),
             'link_new_tab' => !empty($input['link_new_tab']),
 
-            'scheme' => BlockDataInput::enum($input, 'scheme', HeroSettings::SCHEMES, ''),
-            'scheme_bg' => BlockDataInput::optionalColor($input, 'scheme_bg'),
-            'scheme_text' => BlockDataInput::optionalColor($input, 'scheme_text'),
-            'scheme_accent' => BlockDataInput::optionalColor($input, 'scheme_accent'),
             'content_scheme' => BlockDataInput::enum($input, 'content_scheme', HeroSettings::CONTENT_SCHEMES, ''),
 
             'overlay' => BlockDataInput::enum($input, 'overlay', HeroSettings::OVERLAYS, ''),
@@ -259,38 +214,19 @@ final class HeroSlideData
             // (затемнение выключено ползунком), поэтому пустоту им не заменяем.
             'overlay_opacity' => self::optionalPercent($input['overlay_opacity'] ?? null),
             'overlay_direction' => BlockDataInput::enum($input, 'overlay_direction', HeroSettings::OVERLAY_DIRECTIONS, ''),
-            'panel' => BlockDataInput::enum($input, 'panel', ['on', 'off'], ''),
 
-            'text_position' => BlockDataInput::enum($input, 'text_position', ['left', 'center', 'right'], ''),
-            'text_align_y' => BlockDataInput::enum($input, 'text_align_y', ['top', 'center', 'bottom'], ''),
-            'text_position_mobile' => BlockDataInput::enum($input, 'text_position_mobile', ['left', 'center', 'right'], ''),
-            'text_align_y_mobile' => BlockDataInput::enum($input, 'text_align_y_mobile', ['top', 'center', 'bottom'], ''),
-            'title_size' => BlockDataInput::enum($input, 'title_size', ['s', 'm', 'l', 'xl'], ''),
-            'subtitle_size' => BlockDataInput::enum($input, 'subtitle_size', ['s', 'm', 'l'], ''),
-            'title_size_mobile' => BlockDataInput::enum($input, 'title_size_mobile', ['s', 'm', 'l', 'xl'], ''),
-            'subtitle_size_mobile' => BlockDataInput::enum($input, 'subtitle_size_mobile', ['s', 'm', 'l'], ''),
-            'gap_title' => self::gap($input['gap_title'] ?? null),
-            'gap_subtitle' => self::gap($input['gap_subtitle'] ?? null),
-            'gap_actions' => self::gap($input['gap_actions'] ?? null),
-            'gap_art' => self::gap($input['gap_art'] ?? null),
 
             'cta_enabled' => !empty($input['cta_enabled']),
             'cta_text' => BlockDataInput::plain($input, 'cta_text', $locale),
             'cta_url' => BlockDataInput::safeLink($input['cta_url'] ?? ''),
             'cta_style' => BlockDataInput::enum($input, 'cta_style', self::CTA_STYLES, 'primary'),
             'cta_icon' => Icon::cleanName($input['cta_icon'] ?? ''),
-            'cta_image' => BlockDataInput::safeMedia($input['cta_image'] ?? ''),
-            'cta_image_mode' => BlockDataInput::enum($input, 'cta_image_mode', self::CTA_IMAGE_MODES, 'icon'),
-            'cta_image_width' => self::ranged($input['cta_image_width'] ?? null, 20, 400, 80),
             'cta_new_tab' => !empty($input['cta_new_tab']),
             'cta2_enabled' => !empty($input['cta2_enabled']),
             'cta2_text' => BlockDataInput::plain($input, 'cta2_text', $locale),
             'cta2_url' => BlockDataInput::safeLink($input['cta2_url'] ?? ''),
             'cta2_style' => BlockDataInput::enum($input, 'cta2_style', self::CTA_STYLES, 'ghost'),
             'cta2_icon' => Icon::cleanName($input['cta2_icon'] ?? ''),
-            'cta2_image' => BlockDataInput::safeMedia($input['cta2_image'] ?? ''),
-            'cta2_image_mode' => BlockDataInput::enum($input, 'cta2_image_mode', self::CTA_IMAGE_MODES, 'icon'),
-            'cta2_image_width' => self::ranged($input['cta2_image_width'] ?? null, 20, 400, 80),
             'cta2_new_tab' => !empty($input['cta2_new_tab']),
 
             'art_image' => BlockDataInput::safeMedia($input['art_image'] ?? ''),
@@ -397,10 +333,6 @@ final class HeroSlideData
         $d['link_url'] = BlockDataInput::safeLink($d['link_url'] ?? '');
         $d['link_new_tab'] = !empty($d['link_new_tab']);
 
-        $d['scheme'] = $enum($d['scheme'] ?? '', HeroSettings::SCHEMES, '');
-        $d['scheme_bg'] = $hex($d['scheme_bg'] ?? '');
-        $d['scheme_text'] = $hex($d['scheme_text'] ?? '');
-        $d['scheme_accent'] = $hex($d['scheme_accent'] ?? '');
         $d['content_scheme'] = $enum($d['content_scheme'] ?? '', HeroSettings::CONTENT_SCHEMES, '');
 
         $d['overlay'] = $enum($d['overlay'] ?? '', HeroSettings::OVERLAYS, '');
@@ -408,29 +340,11 @@ final class HeroSlideData
         $d['watermark_size'] = self::ranged($d['watermark_size'] ?? null, 2, 60, 22);
         $d['watermark_x'] = $enum($d['watermark_x'] ?? '', self::WATERMARK_X, 'center');
         $d['watermark_y'] = $enum($d['watermark_y'] ?? '', self::WATERMARK_Y, 'middle');
-        $d['watermark_dx'] = self::ranged($d['watermark_dx'] ?? null, -100, 100, 0);
-        $d['watermark_dy'] = self::ranged($d['watermark_dy'] ?? null, -100, 100, 0);
         $d['watermark_opacity'] = self::percent($d['watermark_opacity'] ?? null, 12);
-        $d['watermark_style'] = $enum($d['watermark_style'] ?? '', self::WATERMARK_STYLES, 'fill');
-        $d['watermark_stroke'] = self::ranged($d['watermark_stroke'] ?? null, 1, 12, 2);
-        $d['watermark_font'] = $enum($d['watermark_font'] ?? '', self::WATERMARK_FONTS, 'heading');
         $d['css_class'] = self::cssClass($d['css_class'] ?? '');
 
         $d['overlay_opacity'] = self::optionalPercent($d['overlay_opacity'] ?? null);
         $d['overlay_direction'] = $enum($d['overlay_direction'] ?? '', HeroSettings::OVERLAY_DIRECTIONS, '');
-        $d['panel'] = $enum($d['panel'] ?? '', ['on', 'off'], '');
-
-        $d['text_position'] = $enum($d['text_position'] ?? '', ['left', 'center', 'right'], '');
-        $d['text_align_y'] = $enum($d['text_align_y'] ?? '', ['top', 'center', 'bottom'], '');
-        $d['text_position_mobile'] = $enum($d['text_position_mobile'] ?? '', ['left', 'center', 'right'], '');
-        $d['text_align_y_mobile'] = $enum($d['text_align_y_mobile'] ?? '', ['top', 'center', 'bottom'], '');
-        $d['title_size'] = $enum($d['title_size'] ?? '', ['s', 'm', 'l', 'xl'], '');
-        $d['subtitle_size'] = $enum($d['subtitle_size'] ?? '', ['s', 'm', 'l'], '');
-        foreach (['gap_title', 'gap_subtitle', 'gap_actions', 'gap_art'] as $gap) {
-            $d[$gap] = self::gap($d[$gap] ?? null);
-        }
-        $d['title_size_mobile'] = $enum($d['title_size_mobile'] ?? '', ['s', 'm', 'l', 'xl'], '');
-        $d['subtitle_size_mobile'] = $enum($d['subtitle_size_mobile'] ?? '', ['s', 'm', 'l'], '');
 
         foreach (['cta', 'cta2'] as $cta) {
             $d[$cta . '_enabled'] = !empty($d[$cta . '_enabled']);
@@ -438,9 +352,6 @@ final class HeroSlideData
             $d[$cta . '_url'] = BlockDataInput::safeLink($d[$cta . '_url'] ?? '');
             $d[$cta . '_style'] = $enum($d[$cta . '_style'] ?? '', self::CTA_STYLES, $cta === 'cta' ? 'primary' : 'ghost');
             $d[$cta . '_icon'] = Icon::cleanName($d[$cta . '_icon'] ?? '');
-            $d[$cta . '_image'] = BlockDataInput::safeMedia($d[$cta . '_image'] ?? '');
-            $d[$cta . '_image_mode'] = $enum($d[$cta . '_image_mode'] ?? '', self::CTA_IMAGE_MODES, 'icon');
-            $d[$cta . '_image_width'] = self::ranged($d[$cta . '_image_width'] ?? null, 20, 400, 80);
             $d[$cta . '_new_tab'] = !empty($d[$cta . '_new_tab']);
         }
 

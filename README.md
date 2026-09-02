@@ -1,6 +1,6 @@
 # ArtStudio CMS
 
-CMS на чистом PHP 8.2+ и MySQL/MariaDB — **без Composer, npm и внешних
+CMS на чистом PHP 8.4+ и MySQL/MariaDB — **без Composer, npm и внешних
 библиотек во время выполнения**. Composer/PHPStan и npm/Playwright используются
 только для разработки и CI. Всё, от TOTP и SMTP-клиента до Web Push (RFC 8291/8292) и
 QR-генератора, реализовано на стандартных расширениях PHP. Дизайн страниц
@@ -57,9 +57,10 @@ QR-генератора, реализовано на стандартных ра
   операции, глобальный поиск Ctrl+K.
 
 **Безопасность** (подробно — в [SECURITY.md](SECURITY.md))
-- Обязательное подтверждение входа администратора одноразовым кодом через
-  Telegram Bot API или Telegram Gateway; TOTP доступен для файлового портала.
-  Bcrypt cost 12, политика паролей со словарём, управление активными сессиями.
+- Обязательный второй фактор при входе — приложение-аутентификатор (TOTP)
+  либо одноразовый код через Telegram Bot API / Telegram Gateway; и в
+  админ-панели, и в файловом портале. Bcrypt cost 12, политика паролей со
+  словарём, управление активными сессиями.
 - CSRF на всех POST, rate limiting, security-заголовки и CSP на всех
   ответах (инлайн-скрипты только по nonce, без `unsafe-inline`),
   журнал входов с IP, SVG-санитайзер, SSRF-guard, проверка реального MIME
@@ -67,7 +68,7 @@ QR-генератора, реализовано на стандартных ра
 
 ## Требования
 
-- PHP 8.2+ с `pdo_mysql`, `mbstring`, `json`, `gd`, `curl`, `dom`, `openssl`, `zip`
+- PHP 8.4+ с `pdo_mysql`, `mbstring`, `json`, `gd`, `curl`, `dom`, `openssl`, `zip`
 - MySQL 5.7+ / MariaDB 10.3+
 - Apache (`mod_rewrite`, `mod_headers`) или nginx
   ([docs/nginx.conf.example](docs/nginx.conf.example))
@@ -172,7 +173,8 @@ php scripts/smoke.php https://artstudio.uz --admin ЛОГИН:ПАРОЛЬ
 Обходит публичные страницы (по ссылкам от главной + ключевые маршруты, RU и UZ)
 и, при логине, все разделы админки; печатает таблицу «страница → статус» и
 выходит с кодом 1, если хоть где-то ошибка. Нужен только PHP c cURL — работает
-и на shared-хостинге. При включённой 2FA обход админки пропускается.
+и на shared-хостинге. Обход админки при включённой 2FA требует `--totp СЕКРЕТ`;
+без него второй фактор не проходится и админка пропускается.
 
 ### Безопасный выпуск после загрузки кода
 
@@ -199,7 +201,7 @@ php scripts/release_check.php
 ### CI
 
 `.github/workflows/ci.yml` на каждый push/PR запускает четыре задачи: `php -l`
-и полный прогон тестов на PHP 8.2–8.4 с MySQL 8; обязательный PHPStan и
+и полный прогон тестов на PHP 8.4 и 8.5 с MySQL 8; обязательный PHPStan и
 `composer audit`; проверку синтаксиса JavaScript и актуальности production-
 ассетов на Node.js 22; публичные browser-smoke сценарии в Chromium. При падении browser smoke отчёт,
 скриншоты и лог PHP-сервера сохраняются в artifact `browser-smoke-diagnostics`.

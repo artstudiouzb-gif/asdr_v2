@@ -11,8 +11,9 @@ use App\Core\View;
 use App\Models\User;
 
 /**
- * Вход в админку: пароль + одноразовый код, который приходит в Telegram от
- * официального канала Verification Codes (Telegram Gateway API).
+ * Вход в админку: пароль плюс второй фактор. Подходит любой из двух каналов —
+ * приложение-аутентификатор (TOTP) или одноразовый код в Telegram (бот либо
+ * шлюз Verification Codes). Сама логика — в App\Core\Auth.
  */
 final class AuthController
 {
@@ -49,17 +50,17 @@ final class AuthController
                 exit;
             case 'setup_required':
                 \App\Models\AuditLog::auth('login.setup-required', (int) ($_SESSION['user_id'] ?? 0) ?: null, $username);
-                \App\Core\Flash::error('Для доступа к панели сначала настройте код входа через Telegram.');
+                \App\Core\Flash::error('Для доступа к панели сначала подключите второй фактор: приложение-аутентификатор или код в Telegram.');
                 header('Location: /admin/profile');
                 exit;
             case 'needs_code':
-                \App\Models\AuditLog::auth('login.pending-2fa', (int) ($_SESSION['pending_user_id'] ?? 0) ?: null, $username);
+                \App\Models\AuditLog::auth('login.pending-2fa', Auth::pendingUserId(), $username);
                 header('Location: /admin/login/2fa');
                 exit;
             case 'send_failed':
                 \App\Models\AuditLog::auth('login.send-failed', null, $username);
                 View::render('admin/auth/login', [
-                    'error' => 'Не удалось отправить код в Telegram. Проверьте токен шлюза в настройках и телефон пользователя, либо повторите позже.',
+                    'error' => 'Не удалось отправить код в Telegram. Проверьте токен бота или шлюза в настройках и телефон пользователя, либо повторите позже. Обходной путь — приложение-аутентификатор: оно работает без сети.',
                 ]);
                 return;
             case 'locked':
@@ -77,7 +78,7 @@ final class AuthController
 
     public function showTwoFactor(): void
     {
-        if (empty($_SESSION['pending_user_id'])) {
+        if (Auth::pendingUserId() === null) {
             header('Location: /admin/login');
             exit;
         }
@@ -89,14 +90,14 @@ final class AuthController
     {
         Csrf::verifyRequest();
 
-        if (empty($_SESSION['pending_user_id'])) {
+        if (Auth::pendingUserId() === null) {
             header('Location: /admin/login');
             exit;
         }
 
         $code = trim((string) ($_POST['code'] ?? ''));
-        $pendingId = (int) ($_SESSION['pending_user_id'] ?? 0) ?: null;
-        $pendingUser = $pendingId ? User::findById($pendingId) : null;
+        $pendingId = Auth::pendingUserId();
+        $pendingUser = $pendingId !== null ? User::findById($pendingId) : null;
         $pendingUsername = (string) ($pendingUser['username'] ?? '');
 
         if (Auth::completeTwoFactor($code)) {
@@ -107,7 +108,7 @@ final class AuthController
         \App\Models\AuditLog::auth('2fa.failed', $pendingId, $pendingUsername);
 
         // Просроченный/сброшенный pending уводит на логин, неверный код — ошибка.
-        if (empty($_SESSION['pending_user_id'])) {
+        if (Auth::pendingUserId() === null) {
             Flash::error('Код устарел. Войдите заново — мы отправим новый.');
             header('Location: /admin/login');
             exit;
@@ -121,13 +122,13 @@ final class AuthController
     {
         Csrf::verifyRequest();
 
-        if (empty($_SESSION['pending_user_id'])) {
+        if (Auth::pendingUserId() === null) {
             header('Location: /admin/login');
             exit;
         }
 
-        $pendingId = (int) ($_SESSION['pending_user_id'] ?? 0) ?: null;
-        $pendingUser = $pendingId ? User::findById($pendingId) : null;
+        $pendingId = Auth::pendingUserId();
+        $pendingUser = $pendingId !== null ? User::findById($pendingId) : null;
         $resent = Auth::resendCode();
         \App\Models\AuditLog::auth(
             $resent ? '2fa.resent' : '2fa.resend-failed',

@@ -15,11 +15,15 @@ use App\Models\RepoUser;
  */
 final class RepoAuth
 {
+    /** Корзины перебора, которые снимает успешный вход (кроме корзины IP). */
+    private const CLEAR_ON_SUCCESS = ['pair', 'account'];
+
     /**
      * @return array{status: string, retry_after?: int}
      */
     public static function attemptLogin(string $username, string $password): array
     {
+        Session::start();
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         $identifiers = self::loginIdentifiers($username, $ip);
 
@@ -45,8 +49,11 @@ final class RepoAuth
             return ['status' => 'disabled'];
         }
 
-        RateLimiter::clearAttempts(array_key_first($identifiers));
-        RateLimiter::clearAttempts(array_key_last($identifiers));
+        // Корзину IP успешный вход не трогает: иначе один известный пароль
+        // сбрасывал бы защиту от перебора остальных аккаунтов с того же адреса.
+        foreach (self::CLEAR_ON_SUCCESS as $bucket) {
+            RateLimiter::clearAttempts(self::loginIdentifier($bucket, $username, $ip));
+        }
 
         session_regenerate_id(true);
         $_SESSION['repo_pending_user_id'] = (int) $user['id'];
@@ -86,14 +93,30 @@ final class RepoAuth
      */
     private static function loginIdentifiers(string $username, string $ip): array
     {
-        $account = mb_strtolower(trim($username));
         $base = max(1, (int) Config::get('security.login_max_attempts', 5));
-
-        return [
-            'repo_login|pair|' . $ip . '|' . $account => $base,
-            'repo_login|ip|' . $ip => max(25, $base * 5),
-            'repo_login|account|' . $account => max(10, $base * 2),
+        $limits = [
+            'pair' => $base,
+            'ip' => max(25, $base * 5),
+            'account' => max(10, $base * 2),
         ];
+
+        $identifiers = [];
+        foreach ($limits as $bucket => $limit) {
+            $identifiers[self::loginIdentifier($bucket, $username, $ip)] = $limit;
+        }
+
+        return $identifiers;
+    }
+
+    private static function loginIdentifier(string $bucket, string $username, string $ip): string
+    {
+        $account = mb_strtolower(trim($username));
+
+        return match ($bucket) {
+            'pair' => 'repo_login|pair|' . $ip . '|' . $account,
+            'ip' => 'repo_login|ip|' . $ip,
+            'account' => 'repo_login|account|' . $account,
+        };
     }
 
     /** Генерирует одноразовый код, хэш — в сессию, код — в Telegram. */
@@ -165,7 +188,9 @@ final class RepoAuth
         // или одноразовый код, отправленный в Telegram.
         $valid = false;
         if ((int) $user['totp_enabled'] === 1 && !empty($user['totp_secret'])) {
-            $valid = TOTP::verify($user['totp_secret'], $code);
+            // Шаг времени засчитывается один раз (RFC 6238 §5.2).
+            $step = TOTP::matchStep((string) $user['totp_secret'], $code);
+            $valid = $step !== null && RepoUser::consumeTotpStep((int) $user['id'], $step);
         }
         if (!$valid && !empty($_SESSION['repo_2fa_telegram'])) {
             $hash = (string) ($_SESSION['repo_tg_code_hash'] ?? '');
@@ -239,6 +264,15 @@ final class RepoAuth
 
     public static function check(): bool
     {
+        // Без cookie сессии портального входа не было — публичный GET не
+        // должен получать Set-Cookie и терять общий HTTP-кэш (см. Auth::check).
+        if (empty($_SESSION['repo_user_id'])
+            && session_status() !== PHP_SESSION_ACTIVE
+            && !Session::hasCookie()) {
+            return false;
+        }
+
+        Session::start();
         if (empty($_SESSION['repo_user_id'])) {
             return false;
         }

@@ -163,6 +163,14 @@ final class Uploader
             throw new RuntimeException('Не удалось сохранить файл на диске.');
         }
 
+        // Права выставляем явно. Файл из формы приходит через
+        // move_uploaded_file() и получает права по umask, а вот файл, собранный
+        // самим PHP (чанковая загрузка, импорт с YouTube или из WP), наследует
+        // права временного файла — tempnam() создаёт его с 0600. На хостинге
+        // статику отдаёт веб-сервер, и такой файл он прочитать не может:
+        // картинка молча выходит битой и в админке, и на сайте.
+        @chmod($destination, 0644);
+
         if ($extension === 'svg') {
             self::sanitizeSvgFile($destination);
         }
@@ -459,10 +467,20 @@ final class Uploader
         file_put_contents($path, $sanitized);
     }
 
+    /** Число без хвостовых нулей: 24.0 → «24», 24.5 → «24.5». */
+    private static function number(float $value): string
+    {
+        return rtrim(rtrim(number_format($value, 3, '.', ''), '0'), '.');
+    }
+
     public static function sanitizeSvgString(string $svg): string
     {
         // Быстрая грубая очистка на случай, если DOM не сможет разобрать документ.
         $svg = preg_replace('#<\?php.*?\?>#is', '', $svg) ?? $svg;
+        // BOM перед <?xml валит loadXML, и файл целиком заменялся заглушкой —
+        // редактор видел «сохранено», а на сайте пусто. Редакторы дописывают
+        // его молча, поэтому снимаем сами.
+        $svg = preg_replace('/^\xEF\xBB\xBF/', '', $svg) ?? $svg;
 
         // DOCTYPE вырезаем целиком: объявления <!ENTITY ... SYSTEM "file://...">
         // — это XXE (чтение локальных файлов сервера), а рекурсивные внутренние
@@ -530,6 +548,18 @@ final class Uploader
                         $node->removeAttribute($attr->nodeName);
                     }
                 }
+            }
+        }
+
+        // 3. Гарантируем viewBox. Без него SVG нечем масштабировать: как
+        // CSS-маска (фирменная эмблема, --gov-emblem) он не отрисуется вовсе,
+        // а в <img> с заданной высотой схлопывается по ширине.
+        $root = $dom->documentElement;
+        if (strtolower($root->localName) === 'svg' && trim($root->getAttribute('viewBox')) === '') {
+            $width = Emblem::length($root->getAttribute('width'));
+            $height = Emblem::length($root->getAttribute('height'));
+            if ($width !== null && $height !== null && $width > 0.0 && $height > 0.0) {
+                $root->setAttribute('viewBox', '0 0 ' . self::number($width) . ' ' . self::number($height));
             }
         }
 

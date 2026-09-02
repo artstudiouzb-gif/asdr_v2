@@ -9,6 +9,7 @@ use App\Core\Csrf;
 use App\Core\Flash;
 use App\Core\ImageField;
 use App\Core\View;
+use App\Core\YoutubeImport;
 use App\Models\Language;
 use App\Models\Video;
 use App\Models\VideoTranslation;
@@ -16,13 +17,98 @@ use App\Models\VideoTranslation;
 /**
  * Управление видео: список + создание, редактирование (обложка, ссылка,
  * длительность), публикация, флаг «показать на главном», удаление.
+ * Здесь же — автозагрузка карточек роликов с YouTube-канала.
  */
 final class VideoController
 {
     public function index(): void
     {
         Auth::requireLogin();
-        View::render('admin/videos/index', ['items' => Video::all()]);
+        View::render('admin/videos/index', [
+            'items' => Video::all(),
+            'youtube' => YoutubeImport::settings(),
+            'youtubeConfigured' => YoutubeImport::isConfigured(),
+        ]);
+    }
+
+    /**
+     * Настройки автозагрузки с канала. Ключ API — секрет, поэтому раздел
+     * настраивает только супер-админ (запуск импорта доступен всем админам:
+     * он работает уже сохранённой конфигурацией).
+     */
+    public function importSettings(): void
+    {
+        Auth::requireSuperAdmin();
+        Csrf::verifyRequest();
+
+        YoutubeImport::saveSettings($_POST);
+        if (!YoutubeImport::isConfigured()) {
+            Flash::error('Не удалось разобрать адрес канала. Укажите ссылку вида https://www.youtube.com/@канал или id канала UC….');
+        } else {
+            Flash::success('Настройки импорта с YouTube сохранены.');
+        }
+        header('Location: /admin/videos#youtube-import');
+        exit;
+    }
+
+    /**
+     * Массовые действия из списка: публикация, «показать на главной»,
+     * удаление. Импорт с канала приносит записи десятками и черновиками —
+     * без этого их пришлось бы открывать по одной.
+     */
+    public function bulk(): void
+    {
+        Auth::requireLogin();
+        Csrf::verifyRequest();
+
+        $ids = (array) ($_POST['ids'] ?? []);
+        $action = (string) ($_POST['bulk_action'] ?? '');
+        if ($ids === []) {
+            Flash::error('Не выбрано ни одного видео.');
+            header('Location: /admin/videos');
+            exit;
+        }
+
+        $done = match ($action) {
+            'publish' => Video::setPublishedMany($ids, true),
+            'unpublish' => Video::setPublishedMany($ids, false),
+            'feature' => Video::setFeaturedMany($ids, true),
+            'unfeature' => Video::setFeaturedMany($ids, false),
+            'delete' => Video::deleteMany($ids),
+            default => null,
+        };
+
+        if ($done === null) {
+            Flash::error('Неизвестное действие.');
+            header('Location: /admin/videos');
+            exit;
+        }
+
+        Flash::success(match ($action) {
+            'publish' => 'Опубликовано видео: ' . $done . '.',
+            'unpublish' => 'Снято с публикации: ' . $done . '.',
+            'feature' => 'Отмечено «на главной»: ' . $done . '.',
+            'unfeature' => 'Снято с главной: ' . $done . '.',
+            default => 'Удалено видео: ' . $done . '.',
+        });
+        header('Location: /admin/videos');
+        exit;
+    }
+
+    /** Ручной запуск импорта («Загрузить сейчас»). */
+    public function importRun(): void
+    {
+        Auth::requireLogin();
+        Csrf::verifyRequest();
+
+        $result = YoutubeImport::sync(Auth::id());
+        if (!$result['ok']) {
+            Flash::error('Импорт с YouTube не удался. ' . $result['error']);
+        } else {
+            Flash::success('Импорт с YouTube: ' . $result['summary'] . '.');
+        }
+        header('Location: /admin/videos#youtube-import');
+        exit;
     }
 
     public function store(): void

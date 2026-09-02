@@ -179,6 +179,15 @@ final class WidgetController
             'subscribe' => [
                 'text' => trim((string) ($_POST['text'] ?? '')),
             ],
+            'photo_slider' => [
+                'source' => isset(\App\Core\WidgetRenderer::SLIDER_SOURCES[(string) ($_POST['source'] ?? '')])
+                    ? (string) $_POST['source']
+                    : 'manual',
+                'slides' => $this->collectSlides(),
+                'shuffle' => !empty($_POST['shuffle']),
+                'autoplay' => max(0, min(30, (int) ($_POST['autoplay'] ?? 0))),
+                'ratio' => \App\Core\SliderRatio::normalize($_POST['ratio'] ?? null),
+            ],
             default => [],
         };
 
@@ -203,5 +212,33 @@ final class WidgetController
         ]]);
 
         return $data;
+    }
+
+    /**
+     * Фотографии карусели из репитера. Пустая строка адреса — это удалённая
+     * строка формы, а не картинка: такие пропускаем, иначе в карусели окажется
+     * пустой кадр. Опасный адрес чистит UrlGuard на выводе, но отсеять его
+     * лучше здесь — тогда он и в базу не попадёт.
+     *
+     * @return array<int, array{image: string, alt: string}>
+     */
+    private function collectSlides(): array
+    {
+        $images = [];
+        foreach ((array) ($_POST['slides'] ?? []) as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $src = trim((string) ($row['image'] ?? ''));
+            if ($src === '' || !\App\Core\UrlGuard::isSafeMedia($src)) {
+                continue;
+            }
+            $images[] = [
+                'image' => $src,
+                'alt' => mb_substr(trim((string) ($row['alt'] ?? '')), 0, 200),
+            ];
+        }
+
+        return $images;
     }
 }

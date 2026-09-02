@@ -113,7 +113,7 @@ test('XSS: результаты поиска и карточки медиаби�
 
     // Медиабиблиотека: расширение файла подставляется текстом.
     assert_not_contains("'<span class=\"media-modal__fileicon\">' + ext", $js);
-    assert_contains(".media-modal__fileicon').textContent = ext", $js);
+    assert_contains("badge.textContent = extOf(it.name);", $js);
 
     // Репитер разворачивает <template> клонированием, а не повторным разбором
     // разметки: чтение innerHTML с обратной записью теряет экранирование.

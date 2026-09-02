@@ -256,6 +256,23 @@ final class LocalGoogleFonts
     }
 
     /** @param list<array{subset:string,family:string,style:string,weight:string,url:string,unicode_range:string}> $faces */
+    /**
+     * Лицо переменного шрифта объявляет диапазон («400 700»), а не одно число:
+     * файлы Noto в поставке переменные, одна woff2 покрывает всю ось. Прежде
+     * сравнение шло строкой, и такой файл не засчитывался ни одному весу.
+     */
+    private static function weightCovered(string $declared, string $weight): bool
+    {
+        $parts = preg_split('/\s+/', trim($declared)) ?: [];
+        if ($parts === [] || count($parts) > 2) {
+            return false;
+        }
+        $min = (int) $parts[0];
+        $max = (int) ($parts[1] ?? $parts[0]);
+
+        return (int) $weight >= $min && (int) $weight <= $max;
+    }
+
     private static function coverageError(string $slug, array $faces): ?string
     {
         $catalog = DesignSettings::fontCatalog();
@@ -272,7 +289,7 @@ final class LocalGoogleFonts
                     if ($face['subset'] === $subset
                         && $face['family'] === $family
                         && $face['style'] === 'normal'
-                        && $face['weight'] === $weight
+                        && self::weightCovered($face['weight'], $weight)
                         && $face['url'] !== ''
                         && $face['unicode_range'] !== '') {
                         $found = true;
