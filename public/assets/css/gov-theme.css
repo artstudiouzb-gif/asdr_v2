@@ -3115,8 +3115,10 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .news-cover { position: relative; display: block; }
 .newslist-lead .news-cover { height: 100%; }
 
-/* Сетка новостей: 4 колонки на широком экране, дальше по общей шкале точек. */
-.newslist-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+/* Сетка новостей: 4 колонки на широком экране, дальше по общей шкале точек.
+   Промежуток объявлен переменной: его же берёт широкая карточка, чтобы её
+   внутренняя граница совпала с границей колонки сетки. */
+.newslist-grid { --newsgrid-gap: 24px; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--newsgrid-gap); }
 @media (max-width: 1100px) { .newslist-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 1000px) { .newslist-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .newslist-grid { grid-template-columns: 1fr; } }
@@ -3225,7 +3227,18 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    (см. App\Core\NewsFeedRhythm). Двенадцать делится и на 4, и на 2, и на 1
    колонку — ряды остаются полными, а крупная карточка идёт зигзагом: слева,
    потом справа. */
-.relnews-card.relnews-card--wide { grid-column: span 2; display: grid; grid-template-columns: minmax(0, 56%) minmax(0, 1fr); align-items: stretch; padding: 0; }
+/* Кадр занимает ровно одну колонку сетки, а не долю карточки: карточка
+   растянута на две ячейки, и при произвольной доле её внутренняя граница
+   попадала между колонками — текст начинался не там, где начинается карточка
+   ряда выше. Отсюда и промежуток внутри карточки, равный промежутку сетки. */
+.relnews-card.relnews-card--wide {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: minmax(0, calc(50% - var(--newsgrid-gap, 24px) / 2)) minmax(0, 1fr);
+    column-gap: var(--newsgrid-gap, 24px);
+    align-items: stretch;
+    padding: 0;
+}
 /* Кадр занимает свою половину целиком: карточка стоит в ряду с компактными,
    её высоту задают они, и при фиксированной пропорции над кадром и под ним
    оставались бы пустые поля в полсотни пикселей — на белой карточке это

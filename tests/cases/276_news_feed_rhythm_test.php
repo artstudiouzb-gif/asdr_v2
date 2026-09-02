@@ -80,7 +80,10 @@ test('Широкая карточка занимает две ячейки и с
     // blocks/news-detail.css подключается после общего бандла и задаёт
     // `.relnews-card { padding: 0 0 14px }`. Модификатору нужен вес выше, иначе
     // нижний отступ карточки оставлял под фотографией белую полосу.
-    assert_contains('.relnews-card.relnews-card--wide { grid-column: span 2;', $css, 'две ячейки, а не вся строка');
+    assert_true(
+        (bool) preg_match('/\.relnews-card\.relnews-card--wide \{\s*grid-column: span 2;/', $css),
+        'две ячейки, а не вся строка'
+    );
     // В одноколоночной сетке `span 2` создал бы вторую колонку и
     // горизонтальную прокрутку — на узком экране растяжение снимается.
     assert_contains('.relnews-card.relnews-card--wide { grid-column: auto; grid-template-columns: minmax(0, 1fr);', $css);
@@ -123,12 +126,15 @@ test('Кадры крупных карточек занимают свою пл�
     // задаёт соседняя компактная карточка, а не эта фотография.
     assert_contains('.relnews-card--wide .news-cover { min-width: 0; }', $css);
     assert_contains('.relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: auto; }', $css);
+    // Кадр занимает ровно одну колонку сетки: карточка растянута на две
+    // ячейки, и при произвольной доле её внутренняя граница попадала между
+    // колонками — текст начинался не там, где начинается карточка ряда выше.
+    assert_contains('grid-template-columns: minmax(0, calc(50% - var(--newsgrid-gap, 24px) / 2)) minmax(0, 1fr);', $css);
+    assert_contains('column-gap: var(--newsgrid-gap, 24px);', $css, 'промежуток внутри карточки равен промежутку сетки');
+    assert_contains('--newsgrid-gap: 24px;', $css, 'промежуток объявлен один раз — у самой сетки');
     assert_true(
-        (bool) preg_match(
-            '/\.relnews-card\.relnews-card--wide \{[^}]*grid-template-columns: minmax\(0, 56%\)[^}]*align-items: stretch;/',
-            $css
-        ),
-        'кадр занимает большую долю карточки и всю её высоту'
+        (bool) preg_match('/\.relnews-card\.relnews-card--wide \{[^}]*align-items: stretch;/', $css),
+        'кадр занимает всю высоту карточки'
     );
 });
 
