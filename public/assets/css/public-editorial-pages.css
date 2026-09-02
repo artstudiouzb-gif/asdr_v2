@@ -70,7 +70,6 @@
     font-weight: 700;
     line-height: 1.08;
     letter-spacing: -.038em;
-    text-wrap: balance;
 }
 
 .content-pagehead--editorial .content-pagehead__lead {
@@ -203,7 +202,6 @@
     font-weight: 700;
     line-height: 1.18;
     letter-spacing: -.03em;
-    text-wrap: balance;
 }
 
 .editorial-page__content > .cms-block--text:has(.block-text__title) .block-text__title::before,

@@ -23,10 +23,6 @@
 [data-visual-system] .section-head__title {
     position: relative;
     padding-inline-start: 18px;
-    /* Жёсткого предела в символах здесь нет: 24ch резали заголовок в узкую
-       колонку даже там, где строка помещалась целиком, а по-русски и по-узбекски
-       слова длиннее. Ровные строки даёт text-wrap: balance, ширину — колонка. */
-    text-wrap: balance;
 }
 
 [data-visual-system] .section-head__title::before {
@@ -595,7 +591,7 @@
 
 /* ========================================================================
    Senior Editorial Design System Refinements
-   (Optical tracking, text-wrap balance, tactile hover, WCAG 2.1 focus)
+   (Optical tracking, tactile hover, WCAG 2.1 focus)
    ======================================================================== */
 :root {
     --editorial-headline-tracking: -0.025em;
@@ -670,7 +666,6 @@ body {
     .block-hero__title,
     .section-head__title
 ) {
-    text-wrap: balance;
     letter-spacing: var(--editorial-headline-tracking);
 }
 

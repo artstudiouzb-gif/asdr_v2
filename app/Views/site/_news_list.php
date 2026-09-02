@@ -43,9 +43,10 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
         <?php foreach (array_values($items) as $index => $item): ?>
             <?php
             $c = News::getCoverImage($item);
-            // Ритм ленты: цикл «обложка плюс две компактные» → ряд из четырёх
-            // компактных → «две компактные плюс широкая». Ряд одинаковых
-            // карточек читался бы как таблица (App\Core\NewsFeedRhythm).
+            // Ритм ленты: четыре ряда — «обложка плюс две компактные» → ряд из
+            // четырёх компактных → «две компактные плюс широкая» → ряд из
+            // четырёх компактных. Ряд одинаковых карточек читался бы как
+            // таблица (App\Core\NewsFeedRhythm).
             $slot = \App\Core\NewsFeedRhythm::slot($index);
             $isHero = $slot === \App\Core\NewsFeedRhythm::SLOT_HERO;
             $isWide = $slot === \App\Core\NewsFeedRhythm::SLOT_WIDE;
@@ -78,12 +79,13 @@ $categoryOf = static function (array $item) use ($categoryNames): string {
                     <?php if ($excerpt !== ''): ?>
                         <span class="relnews-card__excerpt"><?= htmlspecialchars($excerpt, ENT_QUOTES) ?></span>
                     <?php endif; ?>
-                    <?php // Завершение карточки: у обложки это кнопка, у остальных — ссылка
-                          // со стрелкой; компонент один, чтобы они не разъехались.
-                          // Целиком скрыт от диктора: карточка сама является
-                          // ссылкой, и без этого её имя читалось бы как
-                          // «Заголовок… Читать подробнее» у каждой новости. ?>
-                    <span class="card-more" aria-hidden="true"><?= htmlspecialchars(t('Читать подробнее'), ENT_QUOTES) ?><span class="card-more__arrow">→</span></span>
+                    <?php // «Читать подробнее» в ленте нет: карточка сама является
+                          // ссылкой, и надпись ничего не добавляла — диктору она
+                          // была скрыта (aria-hidden), а глазу повторяла то, что
+                          // и так очевидно, зато на каждой из четырнадцати
+                          // карточек рисовала лишнюю строку и рвала низ ряда.
+                          // В блоках подборок (news_feature) она остаётся: там
+                          // карточек три-четыре и ссылка отделяет их от текста. ?>
                 </span>
             </a>
         <?php endforeach; ?>

@@ -7,7 +7,12 @@ test('visual refinement unifies section headings without changing markup', funct
 
     assert_contains('[data-visual-system] .section-head__title::before', $css);
     assert_contains('background: var(--gov-teal);', $css);
-    assert_contains('text-wrap: balance;', $css);
+    // `text-wrap: balance` в публичном CSS нет: браузер разносил заголовок на
+    // строки по своей ширине, и в сетке карточек соседние заголовки ломались
+    // в разных местах — ряд читался неровным. Ширину строки задаёт колонка.
+    // `text-wrap: pretty` остаётся: он убирает висячее слово, а не двигает
+    // перенос.
+    assert_not_contains('text-wrap: balance', $css, 'разрыв строк отдан колонке, а не браузеру');
 });
 
 test('editorial media treatment excludes portraits and respects forced colors', function (): void {
