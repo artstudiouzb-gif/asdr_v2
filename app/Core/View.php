@@ -52,6 +52,12 @@ final class View
         if (self::isPublic($template) && self::wantsCyrillic()) {
             $html = UzCyrillic::html($html);
         }
+        // Предзагрузка следующей страницы объявляется заголовком документа —
+        // только у страниц сайта: у портала файлов и у ошибок предзагружать
+        // нечего, а в админке за ссылкой стоит действие (App\Core\Speculation).
+        if (str_starts_with($template, 'site/')) {
+            Speculation::sendHeader();
+        }
         PublicResponseCache::apply($template);
         if (PublicResponseCache::sendConditional($html)) {
             return;

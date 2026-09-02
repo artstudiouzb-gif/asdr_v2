@@ -229,7 +229,10 @@ if (!$isPremium) {
 $sidebar = $sidebar ?? null;
 $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '';
 ?>
-<article class="newsdetail newsdetail--layout-<?= htmlspecialchars($layout, ENT_QUOTES) ?><?= $isPremium ? ' newsdetail--premium' : '' ?>">
+<?php // Просмотр засчитывает маячок из news.js, а не показ страницы: HTML
+      // уезжает к браузеру и без читателя — из общего кэша и предзагрузкой
+      // (App\Core\Speculation). ?>
+<article class="newsdetail newsdetail--layout-<?= htmlspecialchars($layout, ENT_QUOTES) ?><?= $isPremium ? ' newsdetail--premium' : '' ?>" data-news-view="<?= (int) ($news['id'] ?? 0) ?>">
     <?php if (!$isPremium): ?>
         <nav class="newsdetail-actionrail no-print" aria-label="<?= htmlspecialchars(t('Действия новости'), ENT_QUOTES) ?>">
             <a class="newsdetail-actionrail__btn newsdetail-actionrail__btn--home" href="<?= htmlspecialchars($homeUrl, ENT_QUOTES) ?>" data-label="<?= htmlspecialchars(t('На главную'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('На главную'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('arrow-left', 19, 'ui-icon', 1.9) ?></a>

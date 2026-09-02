@@ -17,6 +17,9 @@ use App\Models\Setting;
 
 final class NewsController
 {
+    /** Просмотров с одного адреса за минуту: читают вкладками, но не сотнями. */
+    private const VIEW_LIMIT_PER_MINUTE = 60;
+
     public function index(): void
     {
         $lang = Locale::current();
@@ -194,7 +197,6 @@ final class NewsController
             return;
         }
 
-        News::incrementViews((int) $news['id']);
         // hreflang и переключатель — только языки с переводом этой новости.
         Locale::setContentLangs($available);
         Locale::setAlternatePaths(\App\Core\TranslationGroupHelper::publishedPaths('news', (int) $news['id'], 'news/'));
@@ -240,5 +242,39 @@ final class NewsController
             'nextNews' => $adjacent['next'],
             'sidebar' => $sidebar,
         ]);
+    }
+
+    /**
+     * Маячок «страницу действительно показали» — учёт просмотра новости.
+     *
+     * Раньше просмотр считал сам показ страницы, но HTML уезжает к браузеру и
+     * без читателя: общий кэш отдаёт его повторно, а предзагрузка
+     * (App\Core\Speculation) забирает страницу до клика — при `prerender`
+     * почти каждое наведение стало бы «просмотром». Считает теперь браузер,
+     * когда страница показана: `blocks`-независимый маячок из news.js.
+     *
+     * Ручка публичная и без CSRF по тем же причинам, что у приёма Web Vitals:
+     * сессии у посетителя нет, а заводить её ради счётчика нельзя — это
+     * сломало бы кеширование публичных ответов. Накрутить счётчик и раньше
+     * можно было простой перезагрузкой страницы, поэтому ограничитель частоты
+     * здесь — тот же уровень защиты, что и был.
+     */
+    public function countView(): void
+    {
+        header('Cache-Control: no-store');
+        http_response_code(204);
+
+        $identifier = 'news-view:' . sha1((string) ($_SERVER['REMOTE_ADDR'] ?? ''));
+        if (\App\Core\FileRateLimiter::allow($identifier, self::VIEW_LIMIT_PER_MINUTE, 60) === false) {
+            http_response_code(429);
+            return;
+        }
+
+        $raw = trim((string) file_get_contents('php://input'));
+        if ($raw === '' || strlen($raw) > 16 || preg_match('/^\d+$/', $raw) !== 1) {
+            return;
+        }
+
+        News::incrementViews((int) $raw);
     }
 }
