@@ -140,6 +140,42 @@ test('Файлы workflow не содержат повторяющихся кл�
     }
 });
 
+test('Пакет знает собственную версию', function () {
+    // Без этого свежая установка отвечает `unknown`, а обновление считает
+    // `available = (тег !== установленное)` — то есть панель вечно предлагает
+    // поставить версию, которая уже стоит. `storage/` не в git, поэтому
+    // `git archive` файл версии не принесёт: его кладёт сборка.
+    $workflow = (string) file_get_contents(APP_ROOT . '/.github/workflows/release.yml');
+
+    assert_contains('inject/asdr-cms/storage/release.json', $workflow, 'сборка не кладёт версию в пакет');
+    assert_contains('storage/release.json \\', $workflow, 'файл версии не в списке обязательных для архива');
+    // Регулярка, а не подстрока: в bash кавычки экранированы, и точное
+    // совпадение зависело бы от способа их записи.
+    assert_true(
+        (bool) preg_match('#grep -q .*release.*\$\{release_id\}.*storage/release\.json#', $workflow),
+        'содержимое файла версии не сверяется'
+    );
+
+    // Идентификатор в пакете обязан совпасть с именем тега: обновление
+    // сравнивает установленную версию именно с ним, и расхождение хоть на
+    // префикс `v` означало бы «доступно обновление» навсегда.
+    assert_contains('release_id="${RELEASE_TAG}"', $workflow, 'версия в пакете считается мимо тега');
+
+    // Чтение версии: переменная окружения главнее файла — так боевой сервер
+    // может назвать выкладку сам, не переписывая пакет.
+    $before = getenv('APP_RELEASE');
+    try {
+        putenv('APP_RELEASE=2.8');
+        assert_same('2.8', Updater::installedVersion(), 'установленная версия не читается');
+    } finally {
+        if (is_string($before) && $before !== '') {
+            putenv('APP_RELEASE=' . $before);
+        } else {
+            putenv('APP_RELEASE');
+        }
+    }
+});
+
 test('Релиз выходит с установочным архивом, а не без него', function () {
     // Обновлять нечем, если релиз опубликован без asdr-cms-*.zip и .sha256:
     // «Source code» ставить нельзя (в нём тесты и composer.json), архив без
