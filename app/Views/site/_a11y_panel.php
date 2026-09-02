@@ -77,36 +77,36 @@ $toggle = static function (string $key, string $activeVal, string $label, string
             <div class="a11y-group__head">
                 <span class="a11y-group__title">
                     <span class="a11y-group__icon" aria-hidden="true"><?= Icon::render('palette', 20) ?></span>
-                    <?= htmlspecialchars(t('Цвет и контраст'), ENT_QUOTES) ?>
+                    <?= htmlspecialchars(t('Контраст и фон'), ENT_QUOTES) ?>
                 </span>
             </div>
             <div class="a11y-group__grid a11y-group__grid--schemes">
                 <button type="button" class="a11y-choice a11y-choice--badge-only a11y-choice--normal"
                         data-a11y-set="contrast:normal"
                         aria-pressed="<?= ((string) $settings['contrast'] === 'normal') ? 'true' : 'false' ?>"
-                        aria-label="<?= htmlspecialchars(t('Стандартная схема'), ENT_QUOTES) ?>"
-                        title="<?= htmlspecialchars(t('Стандартная'), ENT_QUOTES) ?>">
+                        aria-label="<?= htmlspecialchars(t('Обычный'), ENT_QUOTES) ?>"
+                        title="<?= htmlspecialchars(t('Обычный'), ENT_QUOTES) ?>">
                     <span class="a11y-scheme-badge a11y-scheme-badge--normal" aria-hidden="true">A</span>
                 </button>
                 <button type="button" class="a11y-choice a11y-choice--badge-only a11y-choice--mono"
                         data-a11y-set="contrast:mono"
                         aria-pressed="<?= ((string) $settings['contrast'] === 'mono') ? 'true' : 'false' ?>"
-                        aria-label="<?= htmlspecialchars(t('Чёрно-белая схема'), ENT_QUOTES) ?>"
-                        title="<?= htmlspecialchars(t('Чёрно-белая'), ENT_QUOTES) ?>">
+                        aria-label="<?= htmlspecialchars(t('Чёрно-белый'), ENT_QUOTES) ?>"
+                        title="<?= htmlspecialchars(t('Чёрно-белый'), ENT_QUOTES) ?>">
                     <span class="a11y-scheme-badge a11y-scheme-badge--mono" aria-hidden="true">A</span>
                 </button>
                 <button type="button" class="a11y-choice a11y-choice--badge-only a11y-choice--warm"
                         data-a11y-set="contrast:warm"
                         aria-pressed="<?= ((string) $settings['contrast'] === 'warm') ? 'true' : 'false' ?>"
-                        aria-label="<?= htmlspecialchars(t('Тёплая схема (бежевый фон)'), ENT_QUOTES) ?>"
-                        title="<?= htmlspecialchars(t('Тёплая (бежевая)'), ENT_QUOTES) ?>">
+                        aria-label="<?= htmlspecialchars(t('Тёплый'), ENT_QUOTES) ?>"
+                        title="<?= htmlspecialchars(t('Тёплый'), ENT_QUOTES) ?>">
                     <span class="a11y-scheme-badge a11y-scheme-badge--warm" aria-hidden="true">A</span>
                 </button>
                 <button type="button" class="a11y-choice a11y-choice--badge-only a11y-choice--dark"
                         data-a11y-theme
                         aria-pressed="false"
-                        aria-label="<?= htmlspecialchars(t('Тёмная тема'), ENT_QUOTES) ?>"
-                        title="<?= htmlspecialchars(t('Тёмная тема'), ENT_QUOTES) ?>">
+                        aria-label="<?= htmlspecialchars(t('Тёмный'), ENT_QUOTES) ?>"
+                        title="<?= htmlspecialchars(t('Тёмный'), ENT_QUOTES) ?>">
                     <span class="a11y-scheme-badge a11y-scheme-badge--dark" aria-hidden="true"><?= Icon::render('moon', 18) ?></span>
                 </button>
             </div>
@@ -121,8 +121,8 @@ $toggle = static function (string $key, string $activeVal, string $label, string
                 </span>
             </div>
             <div class="a11y-group__grid a11y-group__grid--fonts">
-                <?= $choice('font', 'default', t('Стандарт'), '<span class="a11y-font-badge a11y-font-badge--sans">Aa</span>', 'a11y-choice--card') ?>
-                <?= $choice('font', 'readable', t('Без засечек'), '<span class="a11y-font-badge a11y-font-badge--readable">Aa</span>', 'a11y-choice--card a11y-choice--font-readable') ?>
+                <?= $choice('font', 'default', t('Обычный'), '<span class="a11y-font-badge a11y-font-badge--sans">Aa</span>', 'a11y-choice--card') ?>
+                <?= $choice('font', 'readable', t('Читаемый'), '<span class="a11y-font-badge a11y-font-badge--readable">Aa</span>', 'a11y-choice--card a11y-choice--font-readable') ?>
                 <?= $choice('font', 'serif', t('С засечками'), '<span class="a11y-font-badge a11y-font-badge--serif">Aa</span>', 'a11y-choice--card a11y-choice--font-serif') ?>
             </div>
         </section>
@@ -136,9 +136,9 @@ $toggle = static function (string $key, string $activeVal, string $label, string
                 </span>
             </div>
             <div class="a11y-group__grid a11y-group__grid--spacing">
-                <?= $choice('spacing', 'normal', t('Обычный'), '<span class="a11y-spacing-icon a11y-spacing-icon--normal"><i></i><i></i><i></i></span>', 'a11y-choice--card') ?>
-                <?= $choice('spacing', 'wide', t('Средний'), '<span class="a11y-spacing-icon a11y-spacing-icon--wide"><i></i><i></i><i></i></span>', 'a11y-choice--card') ?>
-                <?= $choice('spacing', 'wider', t('Большой'), '<span class="a11y-spacing-icon a11y-spacing-icon--wider"><i></i><i></i><i></i></span>', 'a11y-choice--card') ?>
+                <?= $choice('spacing', 'normal', t('Обычные'), '<span class="a11y-spacing-icon a11y-spacing-icon--normal"><i></i><i></i><i></i></span>', 'a11y-choice--card') ?>
+                <?= $choice('spacing', 'wide', t('Увеличенные'), '<span class="a11y-spacing-icon a11y-spacing-icon--wide"><i></i><i></i><i></i></span>', 'a11y-choice--card') ?>
+                <?= $choice('spacing', 'wider', t('Максимальные'), '<span class="a11y-spacing-icon a11y-spacing-icon--wider"><i></i><i></i><i></i></span>', 'a11y-choice--card') ?>
             </div>
         </section>
 
@@ -162,7 +162,7 @@ $toggle = static function (string $key, string $activeVal, string $label, string
     <div class="a11y-drawer__foot">
         <button type="button" class="a11y-reset" data-a11y-reset>
             <span class="a11y-reset__icon" aria-hidden="true"><?= Icon::render('refresh', 18) ?></span>
-            <?= htmlspecialchars(t('Сбросить все настройки'), ENT_QUOTES) ?>
+            <?= htmlspecialchars(t('Сбросить настройки'), ENT_QUOTES) ?>
         </button>
     </div>
 </aside>
