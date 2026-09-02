@@ -1,5 +1,19 @@
 name: Release package
 
+# Сборка запускается публикацией релиза, а не пушем тега.
+#
+# Прежде здесь стояло `push: tags: 'v*'`, и это тихо не работало: теги в этом
+# репозитории называются `2.4`, `2.7-final`, `3108` — ни один не начинается с
+# `v`, поэтому workflow не запускался ни разу с июля, а релизы выходили без
+# установочного архива. Отказ был невидимым: релиз публиковался, ассетов у
+# него не появлялось, и никто об этом не узнавал, пока архив не понадобился
+# обновлению из панели.
+#
+# Событие `release: published` совпадает с тем, как релизы выпускаются на
+# самом деле — кнопкой в интерфейсе GitHub, — и не зависит от того, как назван
+# тег. Тег-триггер убран, а не добавлен рядом: публикация релиза через
+# интерфейс создаёт и тег, и оба триггера сработали бы на одно действие,
+# запустив сборку дважды.
 on:
   workflow_dispatch:
     inputs:
@@ -7,9 +21,8 @@ on:
         description: 'Имя сборки (например, 2.0.0-rc1); пустое = short SHA'
         required: false
         type: string
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [published]
 
 permissions:
   contents: write
@@ -60,10 +73,11 @@ jobs:
         shell: bash
         env:
           MANUAL_NAME: ${{ inputs.release_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
-          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
-            release_name="${GITHUB_REF_NAME#v}"
+          if [[ -n "${RELEASE_TAG}" ]]; then
+            release_name="${RELEASE_TAG#v}"
           elif [[ -n "${MANUAL_NAME}" ]]; then
             release_name="${MANUAL_NAME}"
           else
@@ -117,15 +131,22 @@ jobs:
             dist/${{ steps.package.outputs.archive }}.sha256
           if-no-files-found: error
 
-      - name: Publish tagged GitHub release
-        if: github.ref_type == 'tag'
+      # Ассеты прикладываются к уже опубликованному релизу, а не создаётся
+      # новый: релиз к этому моменту существует — им и запущена сборка.
+      # Прежний `gh release create` на такое событие просто падал бы с
+      # «release already exists».
+      #
+      # `--clobber` нужен для повторного запуска: сборку релиза перезапускают
+      # после починки, и без него второй заход падал бы на существующем файле.
+      - name: Attach package to the published release
+        if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
           ARCHIVE: ${{ steps.package.outputs.archive }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" \
+          set -euo pipefail
+          gh release upload "${RELEASE_TAG}" \
             "dist/${ARCHIVE}" \
             "dist/${ARCHIVE}.sha256" \
-            --verify-tag \
-            --generate-notes \
-            --title "ASDR CMS ${GITHUB_REF_NAME}"
+            --clobber
