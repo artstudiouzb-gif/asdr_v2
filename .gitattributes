@@ -20,6 +20,7 @@
 /phpstan-bootstrap.php export-ignore
 /phpunit.xml export-ignore
 /phpstan.neon export-ignore
+/phpstan-baseline.neon export-ignore
 /playwright.config.js export-ignore
 /scripts/build-assets.mjs export-ignore
 /scripts/extract-static-inline-styles.mjs export-ignore
