@@ -673,7 +673,7 @@ if (is_array($cdnParts) && in_array($cdnParts['scheme'] ?? '', ['http', 'https']
 ?>
 <?php if ($cdnOrigin !== ''): ?>
 <link rel="preconnect" href="<?= htmlspecialchars($cdnOrigin, ENT_QUOTES) ?>" crossorigin>
-<link rel="dns-prefetch" href="//<?= htmlspecialchars((string) $cdnParts['host'], ENT_QUOTES) ?>">
+<link rel="dns-prefetch" href="//<?= htmlspecialchars((string) ($cdnParts['host'] ?? ''), ENT_QUOTES) ?>">
 <?php endif; ?>
 <?php if ($fontUrl !== '' && $fontFaceName !== ''): ?>
 <link rel="preload" href="<?= htmlspecialchars($fontUrl, ENT_QUOTES) ?>" as="font" type="font/woff2" crossorigin>

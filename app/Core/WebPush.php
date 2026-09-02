@@ -54,6 +54,9 @@ final class WebPush
         }
         openssl_pkey_export($res, $pem);
         $det = openssl_pkey_get_details($res);
+        if ($det === false || !isset($det['ec']['x'], $det['ec']['y'])) {
+            throw new \RuntimeException('Не удалось прочитать сгенерированные VAPID-ключи (openssl).');
+        }
         $point = "\x04" . self::pad32((string) $det['ec']['x']) . self::pad32((string) $det['ec']['y']);
 
         Setting::set('webpush_vapid_private', (string) $pem);
@@ -119,8 +122,17 @@ final class WebPush
         }
 
         // Эфемерная пара отправителя + ECDH с ключом браузера.
+        // Отказ openssl здесь не проверялся вовсе: дальше ключ уходил в
+        // openssl_pkey_get_details() и разбор деталей падал уже в глубине,
+        // без внятной причины в логе.
         $eph = openssl_pkey_new(['curve_name' => 'prime256v1', 'private_key_type' => OPENSSL_KEYTYPE_EC]);
+        if ($eph === false) {
+            throw new \RuntimeException('Не удалось сгенерировать эфемерный ключ отправителя (openssl).');
+        }
         $det = openssl_pkey_get_details($eph);
+        if ($det === false || !isset($det['ec']['x'], $det['ec']['y'])) {
+            throw new \RuntimeException('Не удалось прочитать эфемерный ключ отправителя (openssl).');
+        }
         $asPublic = "\x04" . self::pad32((string) $det['ec']['x']) . self::pad32((string) $det['ec']['y']);
         $peer = openssl_pkey_get_public(self::pointToPem($uaPublic));
         if ($peer === false) {

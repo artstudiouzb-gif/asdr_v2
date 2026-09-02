@@ -85,7 +85,7 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
                     <td class="form-hint"><?= htmlspecialchars((string) $f['original_name'], ENT_QUOTES) ?></td>
                     <td><?= htmlspecialchars(Format::fileSize((int) $f['size']), ENT_QUOTES) ?></td>
                     <td><?= !empty($f['repo_username']) ? htmlspecialchars((string) $f['repo_username'], ENT_QUOTES) : '—' ?></td>
-                    <td><?= htmlspecialchars(date('d.m.Y H:i', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></td>
+                    <td><?= htmlspecialchars(\App\Core\DateFormatter::format((string) $f['created_at'], 'd.m.Y H:i'), ENT_QUOTES) ?></td>
                     <td class="data-table__actions">
                         <form method="post" action="/admin/repository/<?= (int) $f['id'] ?>/approve">
                             <?= Csrf::field() ?>
@@ -167,7 +167,7 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
                     <td class="form-hint"><?= htmlspecialchars((string) $f['original_name'], ENT_QUOTES) ?></td>
                     <td><?= htmlspecialchars(Format::fileSize((int) $f['size']), ENT_QUOTES) ?></td>
                     <td><?= (int) $f['download_count'] ?></td>
-                    <td><?= htmlspecialchars(date('d.m.Y', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></td>
+                    <td><?= htmlspecialchars(\App\Core\DateFormatter::format((string) $f['created_at'], 'd.m.Y'), ENT_QUOTES) ?></td>
                     <td class="data-table__actions">
                         <div class="repo-popover">
                             <details>

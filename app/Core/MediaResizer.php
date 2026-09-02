@@ -49,6 +49,13 @@ final class MediaResizer
             exit('Invalid signature');
         }
 
+        // Подпись подтверждает, что адрес наш, но не что размеры осмысленны:
+        // нулевая ширина или высота валила создание холста.
+        if ($width < 1 || $height < 1) {
+            http_response_code(400);
+            exit('Invalid size');
+        }
+
         // Защита от Path Traversal
         if (str_contains($relativeFile, '..') || str_starts_with($relativeFile, '/') || str_starts_with($relativeFile, '\\')) {
             http_response_code(400);

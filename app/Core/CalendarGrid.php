@@ -49,6 +49,11 @@ final class CalendarGrid
     public static function build(int $year, int $month): array
     {
         $first = mktime(0, 0, 0, $month, 1, $year);
+        if ($first === false) {
+            // Год вне диапазона — сетки нет. Прежде false уходил в date() и
+            // молча превращался в январь 1970-го.
+            return [];
+        }
         $daysInMonth = (int) date('t', $first);
         $startWeekday = (int) date('N', $first); // 1 = Пн
 
@@ -84,7 +89,7 @@ final class CalendarGrid
     {
         $ts = mktime(0, 0, 0, $month + $delta, 1, $year);
 
-        return date('Y-m', $ts);
+        return $ts === false ? sprintf('%04d-%02d', $year, $month) : date('Y-m', $ts);
     }
 
     /**

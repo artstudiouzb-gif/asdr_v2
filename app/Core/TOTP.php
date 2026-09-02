@@ -111,7 +111,7 @@ final class TOTP
             if (strlen($chunk) < 5) {
                 $chunk = str_pad($chunk, 5, '0');
             }
-            $output .= self::BASE32_ALPHABET[bindec($chunk)];
+            $output .= self::BASE32_ALPHABET[(int) bindec($chunk)];
         }
 
         return $output;

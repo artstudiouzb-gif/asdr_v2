@@ -274,7 +274,7 @@ $extBadge = static function (array $f): string {
                                         <?php endif; ?>
                                     </td>
                                     <td class="repo-meta"><?= htmlspecialchars(Format::fileSize((int) $f['size']), ENT_QUOTES) ?></td>
-                                    <td class="repo-meta"><?= htmlspecialchars(date('d.m.Y', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></td>
+                                    <td class="repo-meta"><?= htmlspecialchars(\App\Core\DateFormatter::format((string) $f['created_at'], 'd.m.Y'), ENT_QUOTES) ?></td>
                                     <td>
                                         <div class="rd-table-actions">
                                             <?php if ($canPreview): ?>
@@ -320,7 +320,7 @@ $extBadge = static function (array $f): string {
                                 </label>
                                 <?php if (!empty($f['category'])): ?><span class="rd-doc__cat"><?= htmlspecialchars((string) $f['category'], ENT_QUOTES) ?></span><?php endif; ?>
                             </div>
-                            <time class="rd-doc__date"><?= htmlspecialchars(date('d.m.Y', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></time>
+                            <time class="rd-doc__date"><?= htmlspecialchars(\App\Core\DateFormatter::format((string) $f['created_at'], 'd.m.Y'), ENT_QUOTES) ?></time>
                             <h3 class="rd-doc__title"><?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?></h3>
                             <div class="rd-doc__meta"><?= htmlspecialchars($extBadge($f) . ' · ' . Format::fileSize((int) $f['size']), ENT_QUOTES) ?><?= (int) $f['download_count'] > 0 ? ' · скачано ' . (int) $f['download_count'] : '' ?></div>
                             <?php if (!empty($f['description'])): ?>
@@ -376,7 +376,7 @@ $extBadge = static function (array $f): string {
                     <ol class="rd-col__list">
                         <?php foreach ($latest as $f): ?>
                             <li>
-                                <span class="rd-col__date"><span><?= htmlspecialchars(date('d', strtotime((string) $f['created_at'])), ENT_QUOTES) ?></span><?= htmlspecialchars(mb_strtoupper(['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'][(int) date('n', strtotime((string) $f['created_at'])) - 1]), ENT_QUOTES) ?></span>
+                                <span class="rd-col__date"><span><?= htmlspecialchars(\App\Core\DateFormatter::format((string) $f['created_at'], 'd'), ENT_QUOTES) ?></span><?= htmlspecialchars(mb_strtoupper(['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'][(int) \App\Core\DateFormatter::format((string) $f['created_at'], 'n') - 1]), ENT_QUOTES) ?></span>
                                 <span class="rd-col__body">
                                     <a href="/repo/download/<?= (int) $f['id'] ?>"><?= htmlspecialchars((string) $f['title'], ENT_QUOTES) ?></a>
                                     <span class="rd-col__meta"><?= htmlspecialchars($extBadge($f) . ' · ' . Format::fileSize((int) $f['size']), ENT_QUOTES) ?></span>

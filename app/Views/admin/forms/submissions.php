@@ -158,7 +158,7 @@ $preview = static function (array $data): string {
                             <?= $isUnread ? 'Новая' : 'Просмотрена' ?>
                         </span>
                     </td>
-                    <td><?= htmlspecialchars(date('d.m.Y H:i', strtotime((string) $submission['created_at'])), ENT_QUOTES) ?></td>
+                    <td><?= htmlspecialchars(\App\Core\DateFormatter::format((string) $submission['created_at'], 'd.m.Y H:i'), ENT_QUOTES) ?></td>
                     <?php if (!$selectedForm): ?>
                         <td><?= htmlspecialchars((string) $submission['form_name'], ENT_QUOTES) ?></td>
                     <?php endif; ?>
