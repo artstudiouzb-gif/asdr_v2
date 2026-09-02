@@ -11,9 +11,19 @@ namespace App\Core;
  */
 final class SchemaOrg
 {
-    /** @return array<string, mixed> */
-    public static function organization(string $name, string $url, string $phone = '', string $email = '', string $address = '', string $logo = ''): array
-    {
+    /**
+     * @param list<string> $sameAs список ссылок на официальные профили в соцсетях
+     * @return array<string, mixed>
+     */
+    public static function organization(
+        string $name,
+        string $url,
+        string $phone = '',
+        string $email = '',
+        string $address = '',
+        string $logo = '',
+        array $sameAs = []
+    ): array {
         $data = [
             '@context' => 'https://schema.org',
             '@type' => 'GovernmentOrganization',
@@ -32,31 +42,114 @@ final class SchemaOrg
         if ($address !== '') {
             $data['address'] = ['@type' => 'PostalAddress', 'streetAddress' => $address];
         }
+        if ($sameAs !== []) {
+            $data['sameAs'] = array_values(array_filter($sameAs));
+        }
 
         return $data;
     }
 
-    /** @return array<string, mixed> */
-    public static function newsArticle(string $title, string $url, string $datePublished, string $description = '', string $image = '', string $publisher = ''): array
-    {
+    /**
+     * Разметка новостной статьи (Google Search / Discover / Yandex).
+     *
+     * @param string|list<string> $image URL изображения или массив изображений в разных пропорциях
+     * @param string|array<string, mixed> $publisher издатель статьи
+     * @param string $dateModified дата последнего обновления
+     * @param string|array<string, mixed> $author автор статьи
+     * @param string $inLanguage код языка статьи (uz, ru, en)
+     * @param string $articleSection рубрика / категория новости
+     * @return array<string, mixed>
+     */
+    public static function newsArticle(
+        string $title,
+        string $url,
+        string $datePublished,
+        string $description = '',
+        string|array $image = '',
+        string|array $publisher = '',
+        string $dateModified = '',
+        string|array $author = '',
+        string $inLanguage = '',
+        string $articleSection = ''
+    ): array {
         $data = [
             '@context' => 'https://schema.org',
             '@type' => 'NewsArticle',
             'headline' => mb_substr($title, 0, 110),
             'url' => $url,
-            'mainEntityOfPage' => $url,
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id' => $url,
+            ],
         ];
         if ($datePublished !== '') {
             $data['datePublished'] = date('c', (int) strtotime($datePublished));
         }
+        if ($dateModified !== '') {
+            $data['dateModified'] = date('c', (int) strtotime($dateModified));
+        } elseif ($datePublished !== '') {
+            $data['dateModified'] = date('c', (int) strtotime($datePublished));
+        }
         if ($description !== '') {
             $data['description'] = mb_substr($description, 0, 300);
         }
-        if ($image !== '') {
-            $data['image'] = [$image];
+        if ($image !== '' && $image !== []) {
+            $data['image'] = is_array($image) ? array_values($image) : [$image];
         }
-        if ($publisher !== '') {
-            $data['publisher'] = ['@type' => 'Organization', 'name' => $publisher];
+        if ($publisher !== '' && $publisher !== []) {
+            $data['publisher'] = is_array($publisher)
+                ? $publisher
+                : ['@type' => 'Organization', 'name' => $publisher];
+        }
+        if ($author !== '' && $author !== []) {
+            $data['author'] = is_array($author)
+                ? $author
+                : ['@type' => 'Person', 'name' => $author];
+        }
+        if ($inLanguage !== '') {
+            $data['inLanguage'] = $inLanguage;
+        }
+        if ($articleSection !== '') {
+            $data['articleSection'] = $articleSection;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Разметка государственной услуги / сервиса ведомства.
+     *
+     * @return array<string, mixed>
+     */
+    public static function governmentService(
+        string $name,
+        string $url,
+        string $serviceType = '',
+        string $provider = '',
+        string $description = '',
+        string $areaServed = 'Uzbekistan'
+    ): array {
+        $data = [
+            '@context' => 'https://schema.org',
+            '@type' => 'GovernmentService',
+            'name' => $name,
+            'url' => $url,
+            'areaServed' => [
+                '@type' => 'AdministrativeArea',
+                'name' => $areaServed,
+            ],
+        ];
+        if ($serviceType !== '') {
+            $data['serviceType'] = $serviceType;
+        }
+        if ($provider !== '') {
+            $data['provider'] = [
+                '@type' => 'GovernmentOrganization',
+                'name' => $provider,
+            ];
+        }
+        if ($description !== '') {
+            $data['description'] = mb_substr($description, 0, 300);
         }
 
         return $data;
