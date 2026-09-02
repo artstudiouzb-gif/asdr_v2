@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Core\Database;
-use App\Core\TranslationGroupHelper;
+use App\Core\Translations;
 use App\Models\Page;
 
 /*
@@ -16,7 +16,7 @@ use App\Models\Page;
  * запись в запись, а не «оба непустые».
  */
 
-test('Пакетное чтение переводов совпадает с поштучным (БД)', function () {
+test('Пакетное чтение языковых версий совпадает с поштучным (БД)', function () {
     ensure_test_db();
     $pdo = Database::pdo();
     $pdo->exec('DELETE FROM pages');
@@ -25,8 +25,8 @@ test('Пакетное чтение переводов совпадает с п�
         "INSERT INTO pages (title, slug, lang, translation_group_id, entity_type, status, created_at, updated_at)
          VALUES (:title, :slug, :lang, :grp, 'page', :status, NOW(), NOW())"
     );
-    // Группа из двух языков, одиночная страница и черновик: getTranslations()
-    // отдаёт группу целиком, не фильтруя по статусу, — это и сверяем.
+    // Группа из двух языков, одиночная страница и черновик: с publishedOnly
+    // = false отдаётся группа целиком, не фильтруя по статусу, — это и сверяем.
     $insert->execute([':title' => 'Об агентстве', ':slug' => 'about', ':lang' => 'ru', ':grp' => 0, ':status' => 'published']);
     $ruId = (int) $pdo->lastInsertId();
     $insert->execute([':title' => 'Agentlik haqida', ':slug' => 'about-uz', ':lang' => 'uz', ':grp' => $ruId, ':status' => 'published']);
@@ -37,10 +37,10 @@ test('Пакетное чтение переводов совпадает с п�
     $draftId = (int) $pdo->lastInsertId();
 
     $ids = [$ruId, $uzId, $aloneId, $draftId];
-    $batch = TranslationGroupHelper::getTranslationsBatch('pages', $ids);
+    $batch = Translations::rowsBatch('pages', $ids, false);
 
     foreach ($ids as $id) {
-        $one = TranslationGroupHelper::getTranslations('pages', $id);
+        $one = Translations::rows('pages', $id, false);
         $many = $batch[$id] ?? [];
         assert_same(
             array_keys($one),
@@ -53,7 +53,7 @@ test('Пакетное чтение переводов совпадает с п�
     }
 
     // Несуществующий id не должен ронять выборку и не выдумывает переводов.
-    $withGhost = TranslationGroupHelper::getTranslationsBatch('pages', [$ruId, 999999]);
+    $withGhost = Translations::rowsBatch('pages', [$ruId, 999999], false);
     assert_same([], $withGhost[999999] ?? [], 'у несуществующей записи переводов нет');
 
     $pdo->exec('DELETE FROM pages');
@@ -115,4 +115,42 @@ test('Цель пункта меню в пределах запроса спра
     // Запись страниц сбрасывает память: адреса изменились.
     Page::forgetMenuTargets();
     assert_same(null, Page::findPublishedMenuTarget('contacts', 'ru'), 'после сброса память пуста');
+});
+
+test('Карта сайта видит оба механизма перевода, как и <head> страницы (БД)', function () {
+    ensure_test_db();
+    $pdo = App\Core\Database::pdo();
+    $pdo->exec('DELETE FROM news_translations');
+    $pdo->exec('DELETE FROM news');
+
+    // Перевод полями (механизм А): отдельной записи нет, языковая версия
+    // живёт строкой в news_translations и имеет свой адрес с префиксом.
+    $pdo->exec("INSERT INTO news (title, slug, status, lang, published_at, created_at, updated_at)
+                VALUES ('Новость', 'a-demo', 'published', 'ru', NOW() - INTERVAL 1 HOUR, NOW(), NOW())");
+    $id = (int) $pdo->lastInsertId();
+    $stmt = $pdo->prepare("INSERT INTO news_translations (news_id, lang, title, excerpt, content)
+                           VALUES (:id, 'uz', 'Yangilik', '', '')");
+    $stmt->execute([':id' => $id]);
+
+    // <head> страницы берёт языки отсюда — карта сайта обязана совпадать.
+    $head = App\Core\TranslationGroupHelper::publishedPaths('news', $id, 'news/');
+    $sitemap = App\Core\Translations::rowsBatch('news', [$id], false)[$id] ?? [];
+
+    assert_true(isset($head['uz']), 'перевод полями виден странице');
+    assert_true(
+        isset($sitemap['uz']),
+        'перевод полями виден и карте сайта — прежде она знала только связанные записи'
+    );
+    assert_same(
+        array_keys($head),
+        array_keys($sitemap),
+        'наборы языков совпадают'
+    );
+
+    // Язык перевода нельзя брать из строки: у наложенного перевода lang
+    // остаётся языком оригинала, и hreflang="uz" указал бы на русский адрес.
+    assert_same('ru', (string) $sitemap['uz']['lang'], 'строка перевода несёт язык оригинала');
+
+    $pdo->exec('DELETE FROM news_translations');
+    $pdo->exec('DELETE FROM news');
 });

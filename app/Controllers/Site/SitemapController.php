@@ -7,7 +7,7 @@ namespace App\Controllers\Site;
 use App\Core\AppUrl;
 use App\Core\Database;
 use App\Core\Locale;
-use App\Core\TranslationGroupHelper;
+use App\Core\Translations;
 use App\Models\Language;
 use App\Models\Page;
 use App\Models\News;
@@ -40,13 +40,16 @@ final class SitemapController
         $news = Database::pdo()->query("SELECT n.* FROM news n WHERE n.status = 'published' AND n.published_at <= NOW() AND n.deleted_at IS NULL ORDER BY n.published_at DESC LIMIT 1000")->fetchAll();
         $projects = Database::pdo()->query("SELECT pr.* FROM pages pr WHERE pr.entity_type = 'project' AND pr.status = 'published' AND pr.deleted_at IS NULL ORDER BY pr.updated_at DESC")->fetchAll();
 
-        // Переводы читаются пакетом на каждый тип. Поштучный запрос давал по
-        // два обращения к базе на запись: на 450 записях — 900 запросов и
-        // половину времени ответа страницы.
+        // Языковые версии читаются пакетом на каждый тип: поштучный запрос давал
+        // по два обращения к базе на запись. Спрашиваем App\Core\Translations —
+        // он знает оба механизма перевода, тогда как прежний помощник видел
+        // только связанные записи, и карта сайта расходилась с <head> страницы.
+        // publishedOnly здесь false: у карты сайта своя, более строгая проверка
+        // (у новости учитывается ещё и published_at).
         $groups = [
-            'pages' => TranslationGroupHelper::getTranslationsBatch('pages', array_column($pages, 'id')),
-            'news' => TranslationGroupHelper::getTranslationsBatch('news', array_column($news, 'id')),
-            'projects' => TranslationGroupHelper::getTranslationsBatch('projects', array_column($projects, 'id')),
+            'pages' => Translations::rowsBatch('pages', array_column($pages, 'id'), false),
+            'news' => Translations::rowsBatch('news', array_column($news, 'id'), false),
+            'projects' => Translations::rowsBatch('projects', array_column($projects, 'id'), false),
         ];
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
@@ -101,10 +104,19 @@ final class SitemapController
         echo $xml;
     }
 
-    /** @param array<string, mixed> $row */
-    private static function canonicalUrl(string $baseUrl, string $type, array $row): string
+    /**
+     * Адрес записи на указанном языке.
+     *
+     * Язык передаётся отдельно, а не берётся из строки: у перевода полями
+     * (механизм А) строка — это базовая запись с наложенными полями, и её
+     * `lang` остаётся языком оригинала. Раньше язык читался из строки, и
+     * такой перевод дал бы hreflang="uz" с адресом русской версии.
+     *
+     * @param array<string, mixed> $row
+     */
+    private static function canonicalUrl(string $baseUrl, string $type, array $row, ?string $lang = null): string
     {
-        $lang = (string) ($row['lang'] ?? Language::defaultCode());
+        $lang = $lang ?? (string) ($row['lang'] ?? Language::defaultCode());
         $slug = ltrim((string) ($row['slug'] ?? ''), '/');
         $path = match ($type) {
             'news' => 'news/' . $slug,
@@ -123,7 +135,7 @@ final class SitemapController
             if (!self::isPublished($type, $row)) {
                 continue;
             }
-            $links[(string) $langCode] = self::canonicalUrl($baseUrl, $type, $row);
+            $links[(string) $langCode] = self::canonicalUrl($baseUrl, $type, $row, (string) $langCode);
         }
 
         if (count($links) < 2) {
