@@ -391,7 +391,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                     <div class="newsdetail-gallery__thumbs">
                         <?php foreach ($heroSlides as $i => $s): ?>
                             <button type="button" class="newsdetail-gallery__thumb<?= $i === 0 ? ' is-active' : '' ?>" data-ndg-thumb="<?= $i ?>" aria-label="<?= htmlspecialchars(t('Фото'), ENT_QUOTES) ?> <?= $i + 1 ?>">
-                                <img src="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" alt="<?= htmlspecialchars((string) ($s['alt'] ?? ''), ENT_QUOTES) ?>" loading="lazy">
+                                <img src="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" alt="<?= htmlspecialchars($s['alt'], ENT_QUOTES) ?>" loading="lazy">
                             </button>
                         <?php endforeach; ?>
                     </div>
@@ -658,7 +658,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
     if ($layout === 'video' && $cover !== '') {
         $photoStripSlides = array_values(array_filter(
             $slides,
-            static fn (array $slide): bool => (string) ($slide['path'] ?? '') !== $cover
+            static fn (array $slide): bool => $slide['path'] !== $cover
         ));
     }
     // Если макет новости «gallery» — все фото уже показаны в верхнем слайдере.

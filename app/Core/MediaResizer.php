@@ -82,7 +82,7 @@ final class MediaResizer
             self::generateThumb($sourceFile, $cacheFile, $width, $height, $mode, $quality);
             self::serveFile($cacheFile);
         } catch (Throwable $e) {
-            Logger::error('MediaResizer failed: ' . $e->getMessage(), ['source' => $sourceFile]);
+            Logger::error('MediaResizer failed: ' . $e->getMessage(), 'error', ['source' => $sourceFile]);
             http_response_code(500);
             exit('Resizer error');
         }

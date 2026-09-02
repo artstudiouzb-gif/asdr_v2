@@ -374,20 +374,6 @@ final class HeroSlideData
      * успевает только моргнуть, а такой слайд читается как сбой, а не как
      * настройка.
      */
-    /**
-     * Отступ части текста у слайда: пусто — «как у обложки», иначе 0..200 px.
-     * Возвращает строку, потому что пустое значение обязано отличаться от
-     * нуля: ноль — это осознанное «прижать вплотную».
-     */
-    private static function gap(mixed $value): int|string
-    {
-        if ($value === null || (is_string($value) && trim($value) === '') || !is_numeric($value)) {
-            return '';
-        }
-
-        return max(0, min(200, (int) $value));
-    }
-
     private static function duration(mixed $value): int
     {
         if (!is_numeric($value)) {

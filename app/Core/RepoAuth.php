@@ -108,6 +108,13 @@ final class RepoAuth
         return $identifiers;
     }
 
+    /**
+     * Набор корзин закрыт, и match это отражает: значения вне набора нет.
+     * Тип параметра сужен, чтобы несоответствие ловилось у вызывающего, а не
+     * превращалось в UnhandledMatchError посреди проверки перебора паролей.
+     *
+     * @param 'pair'|'ip'|'account' $bucket
+     */
     private static function loginIdentifier(string $bucket, string $username, string $ip): string
     {
         $account = mb_strtolower(trim($username));

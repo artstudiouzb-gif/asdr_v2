@@ -59,7 +59,7 @@ final class JobQueue
 
             return (int) Database::pdo()->lastInsertId();
         } catch (Throwable $e) {
-            Logger::error('JobQueue::push failed: ' . $e->getMessage(), ['handler' => $handler, 'queue' => $queue]);
+            Logger::error('JobQueue::push failed: ' . $e->getMessage(), 'error', ['handler' => $handler, 'queue' => $queue]);
             return 0;
         }
     }
@@ -149,7 +149,7 @@ final class JobQueue
             );
             $stmt->execute([':id' => $id]);
         } catch (Throwable $e) {
-            Logger::error('JobQueue::markCompleted failed: ' . $e->getMessage(), ['id' => $id]);
+            Logger::error('JobQueue::markCompleted failed: ' . $e->getMessage(), 'error', ['id' => $id]);
         }
     }
 
@@ -182,7 +182,7 @@ final class JobQueue
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
         } catch (Throwable $e) {
-            Logger::error('JobQueue::markFailed failed: ' . $e->getMessage(), ['id' => $id]);
+            Logger::error('JobQueue::markFailed failed: ' . $e->getMessage(), 'error', ['id' => $id]);
         }
     }
 

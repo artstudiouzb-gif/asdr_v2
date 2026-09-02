@@ -306,7 +306,7 @@ final class HeaderConfig
                         break 2;
                     }
                 }
-            } elseif (isset($result[$secKey]) && is_array($result[$secKey])) {
+            } elseif (is_array($result[$secKey])) {
                 foreach ($result[$secKey] as $zList) {
                     if (is_array($zList) && in_array('language', $zList, true)) {
                         $isLanguagePlaced = true;

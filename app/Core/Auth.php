@@ -153,6 +153,13 @@ final class Auth
         return $identifiers;
     }
 
+    /**
+     * Набор корзин закрыт, и match это отражает: значения вне набора нет.
+     * Тип параметра сужен, чтобы несоответствие ловилось у вызывающего, а не
+     * превращалось в UnhandledMatchError посреди проверки перебора паролей.
+     *
+     * @param 'pair'|'ip'|'account' $bucket
+     */
     private static function loginIdentifier(string $bucket, string $username, string $ip): string
     {
         $account = mb_strtolower(trim($username));
@@ -472,6 +479,17 @@ final class Auth
      * $_SESSION напрямую, — иначе GET страницы ввода кода читает суперглобал
      * до того, как кто-нибудь запустит сессию (Session::start ленивый).
      */
+    /**
+     * Идентификатор входа, ожидающего второго фактора.
+     *
+     * Значение читается из сессии и **меняется между вызовами**: неудачная
+     * или просроченная проверка кода зовёт `clearPending()`. Без пометки
+     * статический анализ считает вызов детерминированным, запоминает результат
+     * первой проверки и объявляет вторую лишней — а она как раз и отличает
+     * «код неверный» от «сессия истекла, войдите заново».
+     *
+     * @phpstan-impure
+     */
     public static function pendingUserId(): ?int
     {
         Session::start();
@@ -570,7 +588,7 @@ final class Auth
                 'domain' => $params['domain'],
                 'secure' => $params['secure'],
                 'httponly' => $params['httponly'],
-                'samesite' => $params['samesite'] ?? 'Lax',
+                'samesite' => $params['samesite'],
             ]);
         }
 

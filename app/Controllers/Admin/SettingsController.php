@@ -65,6 +65,10 @@ final class SettingsController
                 'smtp_encryption' => in_array($raw, ['tls', 'ssl', 'none'], true) ? $raw : 'tls',
                 'smtp_username' => SettingsValidator::plainText($raw, 254),
                 'smtp_from_name' => SettingsValidator::plainText($raw, 120),
+                // Оба ключа перечислены намеренно: список TEXT_KEYS растёт, и
+                // привязка разбора к порядку веток сделала бы правку списка
+                // молчаливой сменой проверки.
+                // @phpstan-ignore match.alwaysTrue
                 'contact_email', 'smtp_from_email' => SettingsValidator::optionalEmail($raw),
                 default => SettingsValidator::plainText($raw),
             };

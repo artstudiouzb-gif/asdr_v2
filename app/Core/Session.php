@@ -41,6 +41,11 @@ final class Session
 
         try {
             session_start();
+        // Перехват живой, хотя анализатор считает иначе: `session_start()`
+        // сам исключений не бросает, но `ErrorHandler` превращает его
+        // предупреждение (недоступный каталог сессий) в исключение. Без этого
+        // перехвата сайт падал бы вместо перехода на запасной каталог.
+        // @phpstan-ignore catch.neverThrown
         } catch (\Throwable $e) {
             $fallback = defined('APP_ROOT') ? APP_ROOT . '/storage/sessions' : sys_get_temp_dir();
             if (!is_dir($fallback)) {

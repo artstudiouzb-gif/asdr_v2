@@ -575,7 +575,7 @@ final class News
             'timeline_json', 'docs', 'poll_question', 'poll_options_json',
             ...\App\Core\NewsCard::FIELDS,
         ] as $field) {
-            if (isset($translation[$field]) && $translation[$field] !== null && $translation[$field] !== '') {
+            if (isset($translation[$field]) && $translation[$field] !== '') {
                 $row[$field] = $translation[$field];
             }
         }

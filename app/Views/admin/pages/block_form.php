@@ -454,8 +454,8 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                             . $sel($collagePatterns, 'pattern', (string) ($item['pattern'] ?? 'dots')) . '</select></div>'
                     . '</div>'
                     . '<div class="colorfield-row" data-collage-fields="colors">'
-                        . \App\Core\AdminUi::colorField($p('bg'), (string) ($item['bg'] ?? ''), ['label' => 'Цвет подложки'])
-                        . \App\Core\AdminUi::colorField($p('fg'), (string) ($item['fg'] ?? ''), ['label' => 'Цвет содержимого'])
+                        . \App\Core\AdminUi::colorField($p('bg'), (string) ($item['bg'] ?? ''), 'Цвет подложки')
+                        . \App\Core\AdminUi::colorField($p('fg'), (string) ($item['fg'] ?? ''), 'Цвет содержимого')
                     . '</div>'
                     . '<div class="form-field" data-collage-fields="link"><label>Ссылка</label><input type="text" name="' . $p('link') . '" value="' . $v('link') . '" placeholder="/page"></div>'
                     . '<button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>'

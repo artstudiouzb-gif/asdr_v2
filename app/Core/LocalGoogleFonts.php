@@ -305,6 +305,17 @@ final class LocalGoogleFonts
         return null;
     }
 
+    /**
+     * Готова ли локальная копия шрифта на диске.
+     *
+     * Ответ меняется между вызовами: проверка стоит до блокировки, повторно
+     * под блокировкой (пока мы её ждали, копию мог установить другой процесс)
+     * и ещё раз после записи файлов. Без пометки статический анализ считает
+     * вызов детерминированным и объявляет две последние проверки мёртвыми —
+     * а это ровно двойная проверка блокировки и сверка результата записи.
+     *
+     * @phpstan-impure
+     */
     private static function installedReady(string $slug): bool
     {
         $directory = self::root() . self::PUBLIC_DIR . '/' . $slug;
@@ -317,7 +328,7 @@ final class LocalGoogleFonts
             return false;
         }
         preg_match_all("/url\\('([a-z0-9-]+\\.woff2)'\\)/", $css, $files);
-        if (($files[1] ?? []) === []) {
+        if ($files[1] === []) {
             return false;
         }
         foreach (array_unique($files[1]) as $filename) {
@@ -345,7 +356,7 @@ final class LocalGoogleFonts
             return false;
         }
         preg_match_all("/url\\('\.\.\/fonts\/" . preg_quote($name, '/') . "\/([a-z0-9-]+\\.woff2)'\\)/", $css, $files);
-        if (($files[1] ?? []) === []) {
+        if ($files[1] === []) {
             return false;
         }
         foreach (array_unique($files[1]) as $filename) {
