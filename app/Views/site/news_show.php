@@ -779,14 +779,18 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
         </nav>
     <?php endif; ?>
 </article>
-<?php // Schema.org: карточка новости для поисковиков. ?>
+<?php // Schema.org: карточка новости для поисковиков (Google Discover, Yandex). ?>
 <?= \App\Core\SchemaOrg::render(\App\Core\SchemaOrg::newsArticle(
     (string) $news['title'],
     $pageUrl,
     (string) ($news['published_at'] ?? ''),
     (string) ($news['excerpt'] ?? ''),
     $ogImage !== '' ? $base . $ogImage : '',
-    \App\Models\Setting::get('site_name', '')
+    \App\Models\Setting::get('site_name', ''),
+    (string) ($news['updated_at'] ?? $news['published_at'] ?? ''),
+    (string) ($news['author'] ?? \App\Models\Setting::get('site_name', '')),
+    $lang,
+    (string) ($newsCategory['name'] ?? '')
 )) ?>
 <div class="reader-mode-overlay" id="reader-mode-overlay" hidden role="dialog" aria-modal="true" aria-label="<?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?>">
     <div class="reader-mode-bar">
