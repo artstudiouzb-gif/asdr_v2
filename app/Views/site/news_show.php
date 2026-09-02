@@ -229,21 +229,14 @@ if (!$isPremium) {
 $sidebar = $sidebar ?? null;
 $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '';
 ?>
-<?php // Просмотр засчитывает маячок из news.js, а не показ страницы: HTML
-      // уезжает к браузеру и без читателя — из общего кэша и предзагрузкой
-      // (App\Core\Speculation). ?>
-<article class="newsdetail newsdetail--layout-<?= htmlspecialchars($layout, ENT_QUOTES) ?><?= $isPremium ? ' newsdetail--premium' : '' ?>" data-news-view="<?= (int) ($news['id'] ?? 0) ?>">
+<article class="newsdetail newsdetail--layout-<?= htmlspecialchars($layout, ENT_QUOTES) ?><?= $isPremium ? ' newsdetail--premium' : '' ?>">
     <?php if (!$isPremium): ?>
         <nav class="newsdetail-actionrail no-print" aria-label="<?= htmlspecialchars(t('Действия новости'), ENT_QUOTES) ?>">
             <a class="newsdetail-actionrail__btn newsdetail-actionrail__btn--home" href="<?= htmlspecialchars($homeUrl, ENT_QUOTES) ?>" data-label="<?= htmlspecialchars(t('На главную'), ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('На главную'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('arrow-left', 19, 'ui-icon', 1.9) ?></a>
         </nav>
     <?php endif; ?>
     <?php if ($isPremium): ?>
-    <?php // Атрибут ниже — цель переезда обложки из карточки ленты
-          // (frontend.js + view-transition-name в frontend.css). Разметка
-          // называет ровно один элемент на странице: ветки макета
-          // взаимоисключающие ($hasMedia = !$isPremium && …). ?>
-    <div class="newsdetail-phero<?= $isCard ? ' newsdetail-phero--card' : '' ?>" data-news-cover<?= $cover !== '' ? ' style="--news-cover-image:url(\'' . htmlspecialchars($cover, ENT_QUOTES) . '\')"' : '' ?>>
+    <div class="newsdetail-phero<?= $isCard ? ' newsdetail-phero--card' : '' ?>"<?= $cover !== '' ? ' style="--news-cover-image:url(\'' . htmlspecialchars($cover, ENT_QUOTES) . '\')"' : '' ?>>
         <span class="newsdetail-phero__overlay"></span>
         <div class="newsdetail-phero__body">
             <?php require __DIR__ . '/_crumbs.php'; ?>
@@ -360,7 +353,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             $embed = \App\Core\Video::youtubeEmbed($videoId) . '&autoplay=1';
             ?>
             <div class="newsdetail-media newsdetail-media--video">
-                <div class="news-video newsdetail-video skeleton" data-news-cover data-youtube="<?= htmlspecialchars($videoId, ENT_QUOTES) ?>" data-embed="<?= htmlspecialchars($embed, ENT_QUOTES) ?>" data-replay-label="<?= htmlspecialchars(t('Посмотреть ещё раз'), ENT_QUOTES) ?>">
+                <div class="news-video newsdetail-video skeleton" data-youtube="<?= htmlspecialchars($videoId, ENT_QUOTES) ?>" data-embed="<?= htmlspecialchars($embed, ENT_QUOTES) ?>" data-replay-label="<?= htmlspecialchars(t('Посмотреть ещё раз'), ENT_QUOTES) ?>">
                     <img class="news-video__thumb" src="<?= htmlspecialchars($cover !== '' ? $cover : $thumb, ENT_QUOTES) ?>" data-fallback="<?= htmlspecialchars($fallback, ENT_QUOTES) ?>" alt="<?= htmlspecialchars((string) $news['title'], ENT_QUOTES) ?>" loading="eager" decoding="async">
                     <?= $badgeOnMedia ?>
                     <button type="button" class="news-video__play" aria-label="<?= htmlspecialchars(t('Смотреть видео'), ENT_QUOTES) ?>"></button>
@@ -368,7 +361,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             </div>
         <?php elseif (!empty($heroSlides)): ?>
             <div class="newsdetail-gallery" data-ndgallery>
-                <div class="newsdetail-gallery__main" data-news-cover>
+                <div class="newsdetail-gallery__main">
                     <?php foreach ($heroSlides as $i => $s): ?>
                         <?= \App\Core\Media::picture((string) $s['path'], (string) ($s['alt'] !== '' ? $s['alt'] : ($s['caption'] ?? '')), null, null, 'newsdetail-gallery__slide' . ($i === 0 ? ' is-active' : ''), $i !== 0, '(max-width: 900px) 100vw, 70vw') ?>
                     <?php endforeach; ?>

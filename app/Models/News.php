@@ -979,24 +979,12 @@ final class News
         self::bustPageCache();
     }
 
-    /**
-     * Счётчик просмотров детальной страницы (без учёта повторов — простая метрика).
-     *
-     * Зовёт его маячок из браузера, а не показ страницы: разметку страницы
-     * браузер забирает и заранее (предзагрузка), и из общего кэша, поэтому
-     * «отдали HTML» и «человек прочитал» — разные события (App\Core\Speculation).
-     * Отсюда и проверка статуса: id приходит снаружи, и черновик считаться
-     * не должен.
-     */
+    /** Счётчик просмотров детальной страницы (без учёта повторов — простая метрика). */
     public static function incrementViews(int $id): void
     {
         try {
             $pdo = Database::pdo();
-            $updated = $pdo->prepare("UPDATE news SET views = views + 1 WHERE id = :id AND status = 'published'");
-            $updated->execute([':id' => $id]);
-            if ($updated->rowCount() === 0) {
-                return;
-            }
+            $pdo->prepare('UPDATE news SET views = views + 1 WHERE id = :id')->execute([':id' => $id]);
             $pdo->prepare(
                 'INSERT INTO news_views (news_id, view_date, views_count) VALUES (:id, CURRENT_DATE(), 1)
                  ON DUPLICATE KEY UPDATE views_count = views_count + 1'

@@ -109,7 +109,7 @@ a:hover { text-decoration: underline; }
     border: 1px solid var(--repo-navy); border-radius: 8px;
     padding: 10px 20px; font: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; text-decoration: none;
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
-    transition: all 0.2s var(--ease-inout-soft, cubic-bezier(.65, 0, .35, 1));
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .repo-btn:hover { background: var(--repo-teal); border-color: var(--repo-teal); color: #fff; text-decoration: none; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(13, 148, 136, 0.25); }
 .repo-btn--ghost { background: transparent; color: var(--repo-accent); border-color: var(--repo-border); }
@@ -209,7 +209,7 @@ a:hover { text-decoration: underline; }
     align-items: center;
     gap: 16px;
     box-shadow: var(--repo-shadow);
-    transition: all 0.25s var(--ease-inout-soft, cubic-bezier(.65, 0, .35, 1));
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
 }
@@ -308,7 +308,7 @@ a:hover { text-decoration: underline; }
 .rd-cat {
     display: flex; flex-direction: column; gap: 10px; padding: 18px; background: var(--repo-surface); border: 1px solid var(--repo-border);
     border-radius: var(--repo-radius); text-decoration: none; color: var(--repo-text); box-shadow: var(--repo-shadow);
-    transition: all 0.2s var(--ease-inout-soft, cubic-bezier(.65, 0, .35, 1));
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .rd-cat:hover { border-color: var(--repo-teal); transform: translateY(-2px); box-shadow: var(--repo-shadow-hover); text-decoration: none; }
 .rd-cat.is-active { border-color: var(--repo-teal); background: color-mix(in srgb, var(--repo-teal) 8%, var(--repo-surface)); }
@@ -322,7 +322,7 @@ a:hover { text-decoration: underline; }
 
 .rd-doc {
     display: flex; flex-direction: column; gap: 10px; background: var(--repo-surface); border: 1px solid var(--repo-border);
-    border-radius: var(--repo-radius); padding: 20px; box-shadow: var(--repo-shadow); transition: all 0.2s var(--ease-inout-soft, cubic-bezier(.65, 0, .35, 1));
+    border-radius: var(--repo-radius); padding: 20px; box-shadow: var(--repo-shadow); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .rd-doc:hover { box-shadow: var(--repo-shadow-hover); border-color: var(--repo-teal); transform: translateY(-3px); }
 .rd-doc__head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }

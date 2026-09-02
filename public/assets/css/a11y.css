@@ -319,7 +319,7 @@ html[data-a11y-reading="on"] .cms-block {
     from { opacity: 0; }
     to { opacity: 1; }
 }
-.a11y-drawer:not([hidden]) { animation: a11y-drawer-in .28s var(--ease-soft); }
+.a11y-drawer:not([hidden]) { animation: a11y-drawer-in .28s cubic-bezier(0.16, 1, 0.3, 1); }
 .a11y-backdrop:not([hidden]) { animation: a11y-backdrop-in .28s ease; }
 @media (prefers-reduced-motion: reduce) {
     .a11y-drawer:not([hidden]),
