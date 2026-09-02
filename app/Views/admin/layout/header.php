@@ -71,6 +71,7 @@ if ($navIsSuper) {
         'performance' => ['/admin/performance', t('Производительность')],
         'database' => ['/admin/database', t('База данных')],
         'security' => ['/admin/security', t('Безопасность')],
+        'update' => ['/admin/update', t('Обновление системы')],
         'settings' => ['/admin/settings', t('Настройки')],
     ];
     $navUsersGroup = [

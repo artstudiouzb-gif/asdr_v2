@@ -212,6 +212,7 @@ final class AdminUi
             'performance' => 'gauge',
             'database' => 'database',
             'audit' => 'history',
+            'update' => 'cloud-download',
         ][$name] ?? $name;
 
         return self::icon($name, 18, 'admin-nav-item__icon', 1.7);

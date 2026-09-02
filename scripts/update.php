@@ -14,10 +14,15 @@ declare(strict_types=1);
  * только затем миграции и проверки. Если замена сорвалась на середине —
  * откатываемся из снимка, снятого перед ней.
  *
- * Обновление НЕ вынесено кнопкой в админку намеренно: замена кода — самое
- * опасное действие в CMS, а веб-запрос может оборваться по таймауту ровно
- * посередине и оставить сайт с половиной старых и половиной новых файлов.
- * Панель только показывает, что вышла новая версия.
+ * Замену файлов делает не этот скрипт, а общий `App\Core\UpdateRunner`: то же
+ * самое умеет кнопка в панели (`/admin/update`), и две копии опасной
+ * последовательности разъехались бы при первой правке. Скрипт остаётся ради
+ * случая, когда панель недоступна — сайт лежит, а обновиться надо.
+ *
+ * В веб-запросе замена по-прежнему не выполняется никогда: запрос обрывается
+ * по таймауту и оставил бы сайт с половиной старых и половиной новых файлов.
+ * Кнопка в панели только ставит задачу, а выполняет её из командной строки
+ * `app/Console/update_worker.php`.
  */
 
 require __DIR__ . '/../app/Core/Cli.php';
@@ -25,8 +30,9 @@ require __DIR__ . '/../app/Core/Cli.php';
 
 require __DIR__ . '/../app/Core/bootstrap.php';
 
-use App\Core\Backup;
+use App\Core\UpdateRunner;
 use App\Core\Updater;
+use App\Core\UpdateState;
 
 $root = dirname(__DIR__);
 $args = array_slice($argv, 1);
@@ -72,74 +78,32 @@ if ($checkOnly) {
     exit(0);
 }
 
-$archive = $state['asset']['archive'];
-$checksum = $state['asset']['checksum'];
-
-// --- 2. Загрузка и сверка суммы -------------------------------------------
-
-$work = $root . '/storage/updates';
-if (!is_dir($work) && !@mkdir($work, 0750, true) && !is_dir($work)) {
-    updateFail('не удалось создать каталог ' . $work);
-}
-$zipPath = $work . '/' . basename($archive['name']);
-$treeDir = $work . '/tree-' . preg_replace('/[^A-Za-z0-9._-]/', '-', (string) $state['latest']);
-
-fwrite(STDOUT, PHP_EOL . '== Загрузка ' . $archive['name'] . ' ==' . PHP_EOL);
-try {
-    $size = Updater::download($archive['url'], $zipPath);
-    fwrite(STDOUT, 'Скачано ' . number_format($size / 1048576, 2, '.', ' ') . ' МБ.' . PHP_EOL);
-    $checksumLine = $work . '/' . basename($checksum['name']);
-    Updater::download($checksum['url'], $checksumLine);
-} catch (\Throwable $e) {
-    updateFail($e->getMessage());
-}
-
-if (!Updater::verifyChecksum($zipPath, (string) file_get_contents($checksumLine))) {
-    updateFail('контрольная сумма архива не сошлась — загрузка повреждена или подменена.');
-}
-fwrite(STDOUT, 'Контрольная сумма SHA-256 сошлась.' . PHP_EOL);
-
-// --- 3. Распаковка и проверка формы дерева --------------------------------
-
-if (is_dir($treeDir)) {
-    exec('rm -rf ' . escapeshellarg($treeDir));
-}
-try {
-    Updater::extract($zipPath, $treeDir);
-} catch (\Throwable $e) {
-    updateFail($e->getMessage());
-}
-// git archive кладёт всё под общий префикс каталога.
-$inner = glob($treeDir . '/*', GLOB_ONLYDIR) ?: [];
-$newTree = count($inner) === 1 && !is_file($treeDir . '/public/index.php') ? $inner[0] : $treeDir;
-
-$problems = Updater::validateTree($newTree);
-if ($problems !== []) {
-    updateFail('архив не похож на установочный: ' . implode('; ', $problems));
-}
-fwrite(STDOUT, 'Состав архива проверен.' . PHP_EOL);
-
-// --- 4. План замены --------------------------------------------------------
-
-$plan = Updater::plan($newTree, $root);
-fwrite(STDOUT, PHP_EOL . '== План ==' . PHP_EOL);
-fwrite(STDOUT, 'Заменить файлов: ' . count($plan['copy']) . PHP_EOL);
-fwrite(STDOUT, 'Удалить устаревших: ' . count($plan['delete']) . PHP_EOL);
-foreach (array_slice($plan['delete'], 0, 20) as $gone) {
-    fwrite(STDOUT, '  - ' . $gone . PHP_EOL);
-}
-if (count($plan['delete']) > 20) {
-    fwrite(STDOUT, '  … и ещё ' . (count($plan['delete']) - 20) . PHP_EOL);
-}
-fwrite(STDOUT, 'Данные сайта (config/config.php, storage, public/uploads) не затрагиваются.' . PHP_EOL);
+// --- 2. План замены (для показа и пробного прогона) -------------------------
 
 if ($dryRun) {
-    fwrite(STDOUT, PHP_EOL . 'Пробный прогон: ничего не менялось.' . PHP_EOL);
+    fwrite(STDOUT, PHP_EOL . '== Пробный прогон ==' . PHP_EOL);
+    try {
+        $plan = UpdateRunner::preview($state, static function (string $line): void {
+            fwrite(STDOUT, '  ' . $line . PHP_EOL);
+        });
+    } catch (\Throwable $e) {
+        updateFail($e->getMessage());
+    }
+    fwrite(STDOUT, 'Заменить файлов: ' . count($plan['copy']) . PHP_EOL);
+    fwrite(STDOUT, 'Удалить устаревших: ' . count($plan['delete']) . PHP_EOL);
+    foreach (array_slice($plan['delete'], 0, 20) as $gone) {
+        fwrite(STDOUT, '  - ' . $gone . PHP_EOL);
+    }
+    if (count($plan['delete']) > 20) {
+        fwrite(STDOUT, '  … и ещё ' . (count($plan['delete']) - 20) . PHP_EOL);
+    }
+    fwrite(STDOUT, 'Данные сайта (config/config.php, storage, public/uploads) не затрагиваются.' . PHP_EOL);
+    fwrite(STDOUT, PHP_EOL . 'Ничего не менялось.' . PHP_EOL);
     exit(0);
 }
 
 if (!$assumeYes) {
-    fwrite(STDOUT, PHP_EOL . 'Продолжить обновление? Введите "да": ');
+    fwrite(STDOUT, PHP_EOL . 'Обновить ' . $state['installed'] . ' → ' . $state['latest'] . '? Введите "да": ');
     $answer = trim((string) fgets(STDIN));
     if (mb_strtolower($answer) !== 'да') {
         fwrite(STDOUT, 'Отменено.' . PHP_EOL);
@@ -147,57 +111,31 @@ if (!$assumeYes) {
     }
 }
 
-// --- 5. Резервная копия и снимок для отката --------------------------------
+// --- 3. Обновление ---------------------------------------------------------
+//
+// Вся опасная часть — в UpdateRunner: загрузка, сверка суммы, проверка
+// состава, резервная копия, снимок для отката, режим обслуживания, замена,
+// миграции, эталон целостности, кэш. Здесь остаётся только показ хода.
 
-fwrite(STDOUT, PHP_EOL . '== Резервная копия ==' . PHP_EOL);
+fwrite(STDOUT, PHP_EOL . '== Обновление ==' . PHP_EOL);
+// Отмечаемся в общем состоянии и отсюда: панель показывает ход любого
+// обновления, а по тем же отметкам времени сорвавшееся отличается от идущего
+// (см. UpdateState) — ручной запуск не должен быть исключением.
+UpdateState::queue((string) $state['latest'], 'консоль');
+UpdateState::markRunning();
 try {
-    $backupPath = Backup::create(true);
+    $result = UpdateRunner::run($state, static function (string $line): void {
+        fwrite(STDOUT, '  ' . $line . PHP_EOL);
+    });
 } catch (\Throwable $e) {
-    updateFail('резервная копия не снята (' . $e->getMessage() . ') — без неё обновление не начинаем.');
+    UpdateState::finish(UpdateState::STATUS_FAILED, $e->getMessage());
+    updateFail($e->getMessage());
 }
-fwrite(STDOUT, 'Копия: ' . basename($backupPath) . PHP_EOL);
+UpdateState::finish(UpdateState::STATUS_DONE);
+fwrite(STDOUT, 'Заменено ' . $result['copied'] . ', удалено ' . $result['deleted']
+    . ', миграций ' . $result['migrations'] . '.' . PHP_EOL);
 
-$rollbackDir = $work . '/rollback-' . gmdate('Ymd-His');
-if (!@mkdir($rollbackDir, 0750, true)) {
-    updateFail('не удалось создать каталог отката ' . $rollbackDir);
-}
-foreach (array_merge($plan['copy'], $plan['delete']) as $relative) {
-    $source = $root . '/' . $relative;
-    if (!is_file($source)) {
-        continue;
-    }
-    $target = $rollbackDir . '/' . $relative;
-    if (!is_dir(dirname($target))) {
-        @mkdir(dirname($target), 0750, true);
-    }
-    if (!@copy($source, $target)) {
-        updateFail('не удалось сохранить для отката: ' . $relative);
-    }
-}
-fwrite(STDOUT, 'Снимок для отката: ' . basename($rollbackDir) . PHP_EOL);
-
-// --- 6. Замена файлов -------------------------------------------------------
-
-fwrite(STDOUT, PHP_EOL . '== Замена файлов ==' . PHP_EOL);
-\App\Models\Setting::set('maintenance_mode', '1');
-try {
-    $result = Updater::apply($newTree, $plan, $root);
-    fwrite(STDOUT, 'Заменено ' . $result['copied'] . ', удалено ' . $result['deleted'] . '.' . PHP_EOL);
-} catch (\Throwable $e) {
-    fwrite(STDERR, 'Сбой замены: ' . $e->getMessage() . PHP_EOL);
-    fwrite(STDERR, 'Откатываю файлы из снимка…' . PHP_EOL);
-    foreach (Updater::listFiles($rollbackDir) as $relative) {
-        $target = $root . '/' . $relative;
-        if (!is_dir(dirname($target))) {
-            @mkdir(dirname($target), 0755, true);
-        }
-        @copy($rollbackDir . '/' . $relative, $target);
-    }
-    \App\Models\Setting::set('maintenance_mode', '0');
-    updateFail('файлы возвращены из снимка ' . basename($rollbackDir) . '. Проверьте сайт.');
-}
-
-// --- 7. Миграции, эталон целостности, кэш ----------------------------------
+// --- 4. Проверки после обновления ------------------------------------------
 
 function updateRun(string $label, string $script, array $arguments = []): void
 {
@@ -206,30 +144,9 @@ function updateRun(string $label, string $script, array $arguments = []): void
     passthru(implode(' ', array_map('escapeshellarg', $parts)), $code);
     if ($code !== 0) {
         fwrite(STDERR, 'Шаг «' . $label . '» завершился с кодом ' . $code . '.' . PHP_EOL);
-        fwrite(STDERR, 'Файлы уже заменены. Откат: распакуйте ' . PHP_EOL);
         exit($code);
     }
 }
-
-updateRun('Миграции базы данных', $root . '/database/migrate.php');
-updateRun('Эталон целостности файлов', $root . '/app/Console/integrity_check.php', ['--baseline']);
-
-$releaseFile = $root . '/storage/release.json';
-file_put_contents($releaseFile, json_encode([
-    'release' => (string) $state['latest'],
-    'deployed_at' => gmdate('c'),
-], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . PHP_EOL, LOCK_EX);
-
-$cacheDir = $root . '/storage/cache/page';
-if (is_dir($cacheDir)) {
-    foreach (glob($cacheDir . '/*') ?: [] as $item) {
-        if (is_file($item)) {
-            @unlink($item);
-        }
-    }
-}
-
-\App\Models\Setting::set('maintenance_mode', '0');
 
 updateRun('Проверка окружения', $root . '/scripts/release_check.php');
 if ($baseUrl !== '') {

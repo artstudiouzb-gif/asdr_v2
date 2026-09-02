@@ -60,7 +60,13 @@ if (!in_array($requestMethod, ['GET', 'HEAD', 'OPTIONS'], true)
 // --- Режим обслуживания: гостям 503-заглушка, авторизованным админам —
 // полный доступ (чтобы можно было наполнять сайт при закрытом фронтенде). ---
 $maintenancePath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
+// Оговорка про обновление: режим обслуживания включает и оно, а процесс
+// обновления может умереть (таймаут хостинга, OOM-убийца, перезагрузка) —
+// снять флаг тогда некому, и сайт остался бы закрытым навсегда. Поэтому
+// заглушку не показываем, если её включило обновление, переставшее
+// отчитываться (см. App\Core\UpdateState::maintenanceStuck).
 if (\App\Models\Setting::get('maintenance_mode', '0') === '1'
+    && !\App\Core\UpdateState::maintenanceStuck()
     && !(\App\Core\Session::hasCookie() && \App\Core\Auth::check())
     && !str_starts_with($maintenancePath, '/admin')
     && !str_starts_with($maintenancePath, '/repo')
@@ -274,6 +280,11 @@ $router->get('/admin/footer', [\App\Controllers\Admin\FooterController::class, '
 $router->post('/admin/footer', [\App\Controllers\Admin\FooterController::class, 'update']);
 
 // --- Admin: производительность ---
+$router->get('/admin/update', [\App\Controllers\Admin\UpdateController::class, 'index']);
+// Заказ обновления: пишет намерение и возвращает редирект. Саму замену делает
+// app/Console/update_worker.php — веб-запрос её не пережил бы (см. контроллер).
+$router->post('/admin/update/request', [\App\Controllers\Admin\UpdateController::class, 'request']);
+$router->post('/admin/update/reset', [\App\Controllers\Admin\UpdateController::class, 'reset']);
 $router->get('/admin/seo', [\App\Controllers\Admin\SeoController::class, 'index']);
 $router->post('/admin/seo/run', [\App\Controllers\Admin\SeoController::class, 'run']);
 $router->get('/admin/performance', [\App\Controllers\Admin\PerformanceController::class, 'index']);
