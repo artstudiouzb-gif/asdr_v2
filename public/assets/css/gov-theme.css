@@ -3131,21 +3131,25 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    9px, и число читалось приклеенным к снимку. */
 .relnews-card__body { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 4px 14px 0; }
 
-/* Каждая пятая карточка ленты — широкая: занимает две ячейки сетки и
-   показывает анонс. Ровно две, а не всю строку: группа «4 компактные + 1
-   широкая» даёт шесть ячеек, а шесть делится и на 4, и на 3, и на 2 колонки —
-   ряды остаются полными на любой ширине (см. App\Core\NewsFeedRhythm). */
-.relnews-card.relnews-card--wide { grid-column: span 2; flex-direction: row; align-items: stretch; padding: 0; }
-/* `min-width: 0` — не косметика: у флекс-элемента автоматический минимум равен
-   содержимому, а содержимое здесь — картинка с заданной пропорцией. Из-за него
-   колонка с фотографией разъезжалась до 60% вместо заданных 42%, а текст
-   ужимался вдвое. */
-.relnews-card--wide .news-cover { flex: 0 0 42%; min-width: 0; }
-/* Без пропорции: она спорила с `height: 100%` — браузер укорачивал кадр, чтобы
-   сойтись с 4:3, и под фотографией оставалась белая полоса в 17px. Высоту
-   задаёт сама карточка, кадрирование — `object-fit: cover` у изображения. */
+/* Крупная карточка ленты занимает две ячейки сетки и показывает анонс. Ровно
+   две, а не всю строку: цикл ленты — «крупная + две компактные», ряд из
+   четырёх компактных, «две компактные + крупная», то есть двенадцать ячеек
+   (см. App\Core\NewsFeedRhythm). Двенадцать делится и на 4, и на 2, и на 1
+   колонку — ряды остаются полными, а крупная карточка идёт зигзагом: слева,
+   потом справа. */
+.relnews-card.relnews-card--wide { grid-column: span 2; display: grid; grid-template-columns: minmax(0, 56%) minmax(0, 1fr); align-items: center; padding: 0; }
+/* Пропорция кадра объявлена у обёртки, а не у самой картинки: обёртка — блок
+   известной ширины (доля карточки), из неё браузер и считает высоту 16:9.
+   Выравнивание `center` у сетки нужно ровно за этим: при растяжении (`stretch`)
+   высоту колонки задавала бы карточка, и пропорция ни на что не влияла бы —
+   именно поэтому прежний вариант с `height: 100%` давал почти квадратный кадр.
+   `min-width: 0` снимает автоминимум по содержимому: без него колонка с
+   фотографией разъезжается шире заданной доли, а текст ужимается вдвое. */
+.relnews-card--wide .news-cover { min-width: 0; aspect-ratio: 16 / 9; }
+/* Своей пропорции у кадра нет — он заполняет обёртку целиком, кадрирует
+   `object-fit: cover` у изображения. */
 .relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: auto; }
-.relnews-card--wide .relnews-card__body { flex: 1 1 auto; justify-content: center; padding: 18px 20px; }
+.relnews-card--wide .relnews-card__body { min-width: 0; justify-content: center; padding: 18px 20px; }
 .relnews-card--wide .relnews-card__title { font-size: var(--step-2); }
 /* Анонс — три строки: карточка стоит в ряду с компактными, и её высота задаёт
    высоту всего ряда. Правило адресовано только широкой карточке: у той же
@@ -3161,22 +3165,19 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     overflow: hidden;
 }
 /* В одну колонку широкой карточке растягиваться некуда: `span 2` создал бы
-   вторую колонку и горизонтальную прокрутку. */
+   вторую колонку и горизонтальную прокрутку. Кадр остаётся 16:9 — обёртка
+   считает высоту от ширины карточки. */
 @media (max-width: 560px) {
-    .relnews-card.relnews-card--wide { grid-column: auto; flex-direction: column; padding: 0 0 14px; }
-    .relnews-card--wide .news-cover { flex: none; }
-    .relnews-card--wide .relnews-card__media { height: auto; aspect-ratio: 16 / 10; }
+    .relnews-card.relnews-card--wide { grid-column: auto; grid-template-columns: minmax(0, 1fr); padding: 0 0 14px; }
     .relnews-card--wide .relnews-card__body { padding: 4px 14px 0; }
 }
-/* На трёх колонках ритм выключается. Группа «крупная плюс две компактные» —
-   это четыре ячейки, а четыре на три не делятся: крупная карточка рано или
-   поздно упирается в последнюю колонку, места на две ячейки там нет, сетка
-   переносит её на следующий ряд и оставляет дыру. Ровный ряд компактных
-   карточек лучше дырявой ленты. */
+/* На трёх колонках ритм выключается. Цикл считает ячейки парами и тройками,
+   а на три колонки не раскладывается: крупная карточка рано или поздно
+   упирается в последнюю колонку, места на две ячейки там нет, сетка переносит
+   её на следующий ряд и оставляет дыру. Ровный ряд компактных карточек лучше
+   дырявой ленты. */
 @media (max-width: 1100px) and (min-width: 1001px) {
-    .relnews-card.relnews-card--wide { grid-column: auto; flex-direction: column; padding: 0 0 14px; }
-    .relnews-card--wide .news-cover { flex: none; }
-    .relnews-card--wide .relnews-card__media { height: auto; aspect-ratio: 16 / 10; }
+    .relnews-card.relnews-card--wide { grid-column: auto; grid-template-columns: minmax(0, 1fr); padding: 0 0 14px; }
     .relnews-card--wide .relnews-card__body { padding: 4px 14px 0; }
     .relnews-card--wide .relnews-card__title { font-size: var(--step-0); }
     .relnews-card--wide .relnews-card__excerpt { display: none; }
