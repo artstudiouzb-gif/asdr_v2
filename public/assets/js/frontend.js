@@ -2637,4 +2637,39 @@
         if (mobile.addEventListener) { mobile.addEventListener('change', sync); }
         sync();
     });
+    // --- Переезд обложки новости из карточки в статью ---
+    // Переход между страницами у нас декларативный (@view-transition), и
+    // браузер сам сопоставляет снимки с одинаковым view-transition-name. Имя
+    // нельзя объявить в CSS сразу всем карточкам: два элемента с одним именем
+    // отменяют переход целиком, поэтому имя получает только тот кадр, по
+    // которому кликнули, — в самом обработчике, до ухода со страницы.
+    (function () {
+        if (!('startViewTransition' in document)) { return; }
+
+        var COVERS = '.news-cover, .news-card__cover, .relnews-card__media, .newsfeat-card__media';
+        var marked = null;
+
+        function clear() {
+            if (marked) { marked.style.viewTransitionName = ''; marked = null; }
+        }
+
+        document.addEventListener('click', function (event) {
+            if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) { return; }
+            var link = event.target.closest ? event.target.closest('a[href]') : null;
+            if (!link || link.target === '_blank') { return; }
+            // Ссылка на новость этого же сайта: у чужого адреса перехода не будет.
+            if (link.origin !== location.origin || !/\/news\/[^/]+$/.test(link.pathname)) { return; }
+
+            clear();
+            var cover = link.querySelector(COVERS) || (link.closest('article, .news-card, .relnews-card') || link).querySelector(COVERS);
+            if (!cover) { return; }
+            cover.style.viewTransitionName = 'news-cover';
+            marked = cover;
+        }, true);
+
+        // Возврат «назад» отдаёт страницу из кэша вместе с проставленным именем.
+        // Второй такой же элемент на странице — и следующий переход отменится.
+        window.addEventListener('pageshow', clear);
+        window.addEventListener('pagehide', clear);
+    })();
 })();

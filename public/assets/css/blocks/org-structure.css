@@ -101,7 +101,7 @@
     background: color-mix(in srgb, var(--gov-teal) 16%, var(--gov-navy)); color: #fff;
     border-radius: var(--radius); text-decoration: none;
     box-shadow: 0 14px 34px color-mix(in srgb, var(--gov-navy) 28%, transparent);
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), background-color 0.4s ease, box-shadow 0.4s ease;
+    transition: transform 0.4s var(--ease-soft), background-color 0.4s ease, box-shadow 0.4s ease;
 }
 a.orgstruct__head:hover {
     transform: translateY(-4px) scale(1.02);
@@ -169,7 +169,7 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
     background: var(--gov-surface); border: 1px solid var(--gov-border);
     border-top: 3px solid var(--gov-teal); border-radius: var(--radius);
     box-shadow: 0 8px 22px -14px color-mix(in srgb, var(--gov-navy) 35%, transparent);
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+    transition: transform 0.4s var(--ease-soft), border-color 0.4s ease, box-shadow 0.4s ease;
 }
 .orgstruct__deputy:hover {
     transform: translateY(-4px);

@@ -20,7 +20,8 @@ test('Карусель проектов не отключает анимации
     $frontendCss = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/css/frontend.css');
 
     assert_true(!str_contains($govCss, '[data-carousel-track] *'), 'Вложенные переходы карусели должны оставаться активными');
-    assert_contains('transition: transform .7s cubic-bezier(.22, 1, .36, 1)', $govCss);
+    // Кривая — общий токен движения (см. тест 293), а не своё значение у карусели.
+    assert_contains('transition: transform .7s var(--ease-soft)', $govCss);
     // Сдвиг и масштаб появления живут в переменных: сам показ описан
     // ключевыми кадрами (переход карточки объявлен темой и заменял базовый).
     assert_contains('@keyframes card-reveal', $frontendCss);

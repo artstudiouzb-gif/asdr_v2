@@ -53,8 +53,8 @@ body.design-catalog-list .catcard { display: flex; flex-direction: row; align-it
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     border: 1px solid color-mix(in srgb, var(--gov-border) 60%, transparent);
     box-shadow: var(--card-shadow, 0 4px 20px -6px rgba(15, 27, 45, 0.05));
-    transition: transform 0.35s cubic-bezier(0.165, 0.84, 0.44, 1),
-                box-shadow 0.35s cubic-bezier(0.165, 0.84, 0.44, 1),
+    transition: transform 0.35s var(--ease-soft),
+                box-shadow 0.35s var(--ease-soft),
                 border-color 0.3s ease,
                 background-color 0.3s ease;
 }
@@ -207,7 +207,7 @@ body.design-catalog-list .catcard { display: flex; flex-direction: row; align-it
 }
 .catcard__more .catcard__arrow {
     display: inline-block;
-    transition: transform 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
+    transition: transform 0.25s var(--ease-soft);
 }
 .catcard:hover .catcard__more .catcard__arrow {
     transform: translateX(4px);
