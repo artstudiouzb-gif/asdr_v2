@@ -172,10 +172,19 @@ final class TranslationGroupHelper
             return [];
         }
 
-        $groupId = (int) ($row['translation_group_id'] ?? $recordId);
+        // Ноль означает «группы нет», как и NULL: остальной код читает колонку
+        // через COALESCE(NULLIF(...,0), id). Здесь стоял `??`, который ноль
+        // пропускал, — и запись оказывалась в несуществующей «группе 0»,
+        // теряя свои переводы. На живых данных колонка бывает NULL или равна
+        // своему id, поэтому вывод не меняется; расходились только правила.
+        $groupId = (int) ($row['translation_group_id'] ?: $recordId);
+        // Порядок закреплён: без него он зависит от плана запроса и разъезжается
+        // между MySQL и MariaDB — на одних и тех же данных языки возвращались в
+        // разном порядке, и это протекало в порядок hreflang карты сайта.
         $stmtGroup = Database::pdo()->prepare(
             "SELECT * FROM {$table} WHERE (translation_group_id = :gid OR id = :gid2)
-               AND deleted_at IS NULL{$typeWhere}"
+               AND deleted_at IS NULL{$typeWhere}
+             ORDER BY id"
         );
         $stmtGroup->execute([':gid' => $groupId, ':gid2' => $groupId]);
 

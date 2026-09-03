@@ -63,6 +63,24 @@ final class DateFormatter
         return $dt === null ? '' : $dt->format('d.m.Y H:i');
     }
 
+    /**
+     * Произвольный формат в ташкентском времени; непригодный вход → ''.
+     *
+     * Заменяет связку `date($fmt, strtotime($value))`, которой было засеяно
+     * пол-проекта. У неё две беды. Первая: `strtotime()` на неразобранной дате
+     * возвращает `false`, и в файле со `strict_types` это `TypeError` — одна
+     * кривая запись в базе роняла карту сайта и RSS целиком, а во вьюхах
+     * молча печаталось 1 января 1970 года. Вторая: `date()` считает в
+     * таймзоне сервера, а весь остальной сайт — в ташкентской, поэтому даты
+     * рядом на одной странице могли расходиться на часы.
+     */
+    public static function format(string|int $date, string $format): string
+    {
+        $dt = self::toDateTime($date);
+
+        return $dt === null ? '' : $dt->format($format);
+    }
+
     private static function toDateTime(string|int $date): ?\DateTimeImmutable
     {
         try {

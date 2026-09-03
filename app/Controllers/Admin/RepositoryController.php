@@ -59,7 +59,10 @@ final class RepositoryController
         exit;
     }
 
-    /** Одобрение файла, загруженного пользователем портала. */
+    /**
+     * Одобрение файла, загруженного пользователем портала.
+     * @param array<string, string> $params
+     */
     public function approveFile(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -115,6 +118,7 @@ final class RepositoryController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function updateFile(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -168,6 +172,7 @@ final class RepositoryController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function renameCategory(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -188,6 +193,7 @@ final class RepositoryController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroyCategory(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -199,6 +205,7 @@ final class RepositoryController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroyFile(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -251,6 +258,7 @@ final class RepositoryController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function toggleUser(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -266,6 +274,7 @@ final class RepositoryController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function resetUserPassword(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -289,6 +298,7 @@ final class RepositoryController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroyUser(array $params): void
     {
         Auth::requireSuperAdmin();

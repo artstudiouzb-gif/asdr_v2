@@ -573,19 +573,13 @@ final class HeroRenderer
             $vars['--hero-watermark-size'] = (int) $d['watermark_size'] . 'vw';
         }
 
-        $desktop = [];
-        $vars = array_merge($vars, $desktop);
-
+        // Своих переопределений по ширине экрана у слайда нет: раскладка и
+        // размеры принадлежат обложке. Здесь оставались пустые каркасы —
+        // слияние с пустым массивом и ветка @media, которая не выполнялась
+        // никогда; мёртвый код читается как работающий приём.
         $selector = $scope . ' .hero__slide[data-hero-index="' . $index . '"]';
-        $css = $vars === [] ? '' : $selector . '{' . self::declarations($vars) . '}';
 
-        $mobile = [];
-        if ($mobile !== []) {
-            $css .= ($css !== '' ? "\n" : '')
-                . '@media (max-width:720px){' . $selector . '{' . self::declarations($mobile) . '}}';
-        }
-
-        return $css;
+        return $vars === [] ? '' : $selector . '{' . self::declarations($vars) . '}';
     }
 
     /**

@@ -30,7 +30,6 @@ final class HeaderConfig
         'a11y' => 'Версия для слабовидящих',
         'phone' => 'Телефон',
         'email' => 'E-mail',
-        'currency' => 'Курсы валют (JSON API)',
         'snippet' => 'Сниппет (текст/HTML)',
         'divider' => 'Разделитель',
         'spacer' => 'Гибкий отступ',
@@ -306,7 +305,7 @@ final class HeaderConfig
                         break 2;
                     }
                 }
-            } elseif (isset($result[$secKey]) && is_array($result[$secKey])) {
+            } elseif (is_array($result[$secKey])) {
                 foreach ($result[$secKey] as $zList) {
                     if (is_array($zList) && in_array('language', $zList, true)) {
                         $isLanguagePlaced = true;

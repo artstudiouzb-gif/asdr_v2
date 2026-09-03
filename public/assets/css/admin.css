@@ -4639,6 +4639,8 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
 .u-inline-c0f5c28d5f{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;font-size:var(--admin-fs-md);padding:10px 16px;background:var(--admin-card-bg,#ffffff);border:1px solid var(--admin-border,#e2e8f0);border-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,0.03);}
 .u-inline-d60c3b2481{font-size:var(--admin-fs-sm);color:#202124;display:flex;align-items:center;gap:6px;margin-bottom:4px;}
 .u-inline-f8b0a0e950{font-size:var(--admin-fs-md);color:#4d5156;line-height:1.5;word-break:break-word;}
+.u-inline-611bf920db{width: 160px;}
+.u-inline-7006b2a9a3{width: 220px;}
 /* generated:inline-utilities:end */
 
 /* generated:embedded-styles:start */

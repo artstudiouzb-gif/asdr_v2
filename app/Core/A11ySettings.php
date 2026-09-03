@@ -69,7 +69,7 @@ final class A11ySettings
 
         parse_str($raw, $parsed);
 
-        return self::normalize(is_array($parsed) ? $parsed : []);
+        return self::normalize($parsed);
     }
 
     public static function normalize(array $values): array

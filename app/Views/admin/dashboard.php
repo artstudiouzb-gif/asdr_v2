@@ -149,7 +149,7 @@ require __DIR__ . '/layout/header.php';
                             <?php if ($isUnread): ?>
                                 <span class="badge badge--draft badge--small"><?= htmlspecialchars(t('Новая'), ENT_QUOTES) ?></span>
                             <?php endif; ?>
-                            <span class="form-hint u-inline-083bdc9269"><?= date('d.m H:i', strtotime((string) $sub['created_at'])) ?></span>
+                            <span class="form-hint u-inline-083bdc9269"><?= \App\Core\DateFormatter::format((string) $sub['created_at'], 'd.m H:i') ?></span>
                         </div>
                     </a>
                 <?php endforeach; ?>
@@ -201,7 +201,7 @@ require __DIR__ . '/layout/header.php';
                     <span class="u-inline-ad45a8dba2">#<?= $idx + 1 ?></span>
                     <div class="u-inline-1a3ecb21b1">
                         <strong class="u-inline-86c549d021"><?= htmlspecialchars((string) $n['title'], ENT_QUOTES) ?></strong>
-                        <span class="form-hint u-inline-33d0b17b27"><?= date('d.m.Y', strtotime((string) ($n['published_at'] ?? 'now'))) ?></span>
+                        <span class="form-hint u-inline-33d0b17b27"><?= \App\Core\DateFormatter::format((string) ($n['published_at'] ?? 'now'), 'd.m.Y') ?></span>
                     </div>
                 </div>
                 <div>
@@ -230,7 +230,7 @@ require __DIR__ . '/layout/header.php';
                 <span class="continue-item__kind"><?= $isNews ? htmlspecialchars(t('Новость'), ENT_QUOTES) : htmlspecialchars(t('Страница'), ENT_QUOTES) ?></span>
                 <span class="continue-item__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></span>
                 <span class="badge <?= $isDraft ? 'badge--draft' : 'badge--published' ?>"><?= $isDraft ? htmlspecialchars(t('Черновик'), ENT_QUOTES) : htmlspecialchars(t('Опубликовано'), ENT_QUOTES) ?></span>
-                <span class="continue-item__time"><?= date('d.m.Y H:i', strtotime((string) $item['updated_at'])) ?></span>
+                <span class="continue-item__time"><?= \App\Core\DateFormatter::format((string) $item['updated_at'], 'd.m.Y H:i') ?></span>
             </a>
         <?php endforeach; ?>
     </div>
@@ -295,7 +295,7 @@ $fillPointsStr = "$padding," . ($height - $padding) . " $pointsStr " . ($width -
                     <?php 
                     $parts = explode(',', $points[$i]); 
                     $cx = $parts[0];
-                    $label = date('d.m', strtotime($date));
+                    $label = \App\Core\DateFormatter::format($date, 'd.m');
                     ?>
                     <text x="<?= $cx ?>" y="<?= $height - $padding + 18 ?>" font-size="10" fill="var(--admin-muted)" text-anchor="middle"><?= $label ?></text>
                 <?php $i++; endforeach; ?>
@@ -316,7 +316,7 @@ $fillPointsStr = "$padding," . ($height - $padding) . " $pointsStr " . ($width -
                     <div class="activity-item">
                         <div class="activity-item__meta">
                             <strong><?= htmlspecialchars((string) ($log['username'] ?? 'System'), ENT_QUOTES) ?></strong>
-                            <span class="activity-item__time"><?= date('H:i d.m.Y', strtotime((string) $log['created_at'])) ?></span>
+                            <span class="activity-item__time"><?= \App\Core\DateFormatter::format((string) $log['created_at'], 'H:i d.m.Y') ?></span>
                         </div>
                         <div class="activity-item__desc">
                             <?php $m = strtoupper((string) ($log['method'] ?? '')); ?>
@@ -363,7 +363,7 @@ $fillPointsStr = "$padding," . ($height - $padding) . " $pointsStr " . ($width -
                             <span class="badge badge--success"><?= (int) $doc['download_count'] ?></span>
                         </td>
                         <td class="text-muted">
-                            <?= date('d.m.Y', strtotime((string) $doc['created_at'])) ?>
+                            <?= \App\Core\DateFormatter::format((string) $doc['created_at'], 'd.m.Y') ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>

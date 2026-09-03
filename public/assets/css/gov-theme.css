@@ -2079,24 +2079,11 @@ body.lightbox-active { overflow: hidden; }
 .news-poll-card__actions { margin-top: 14px; }
 .news-poll-card__actions .btn { width: 100%; justify-content: center; }
 
-/* Виджет информера валют (JSON API) */
-.currency-widget {
-    display: inline-flex; align-items: center; gap: 14px; padding: 4px 12px;
-    border-radius: var(--radius-sm, 14px); background: color-mix(in srgb, var(--gov-teal, #0d9488) 10%, transparent);
-    font-size: var(--step--3); font-weight: 600; color: var(--gov-title);
-}
-.currency-item { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
-.currency-item__code { opacity: 0.85; font-size: var(--step--4); font-weight: 700; text-transform: uppercase; color: var(--gov-teal, #0d9488); }
-.currency-item__rate { font-weight: 700; }
-.currency-item__diff { font-size: var(--step--4); padding: 1px 4px; border-radius: 4px; font-weight: 700; }
-
 /* Живой поиск */
 .search-suggest__item { display: flex; align-items: center; gap: 12px; }
 .search-suggest__thumb { width: 44px; height: 44px; border-radius: var(--radius-sm, 8px); object-fit: cover; flex-shrink: 0; }
 .search-suggest__info { display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0; }
 .search-suggest__meta { display: flex; align-items: center; gap: 8px; font-size: var(--step--4); color: var(--gov-subtext); }
-.currency-item__diff.is-up { color: #10b981; background: rgba(16, 185, 129, 0.15); }
-.currency-item__diff.is-down { color: #ef4444; background: rgba(239, 68, 68, 0.15); }
 
 /* 4. Чистая печатная верстка (@media print) */
 @media print {
@@ -2597,10 +2584,19 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     height: 100%;
     object-fit: cover;
     display: block;
+}
+/* Переход — только у карточек, которые кадр действительно двигают. У карточки
+   новости зума нет, и объявленный переход читался бы как рабочий приём. */
+.album-card__cover img,
+.album-card__img,
+.catcard__media img,
+.project-card__media img {
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.relnews-card:hover .relnews-card__media img,
-.relnews-card:hover .relnews-card__img,
+/* Карточка новости из этого списка исключена намеренно: при наведении она уже
+   поднимается, меняет цвет рамки и тень — наезд кадра был четвёртым движением
+   на одном элементе, и в сетке из четырнадцати карточек лента дёргалась под
+   курсором. У остальных карточек зум остаётся: их на странице три-четыре. */
 .album-card:hover .album-card__cover img,
 .album-card:hover .album-card__img,
 .catcard:hover .catcard__media img,
@@ -3162,6 +3158,10 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     padding: 0;
     overflow: hidden;
     isolation: isolate;
+    /* Высота растушёвки над текстом. Одно число на два применения: им же
+       задан верхний отступ тела карточки, поэтому граница подложки и начало
+       текста не разъедутся при правке. */
+    --newshero-fade: clamp(56px, 9vw, 84px);
 }
 /* Кадр — подложка: обёртка растянута на карточку, а не стоит в потоке. */
 .relnews-card--hero .news-cover { position: absolute; inset: 0; }
@@ -3171,26 +3171,45 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     aspect-ratio: auto;
     border-radius: 0;
 }
-/* Затемнение снизу вверх: белый текст обязан читаться на любой фотографии, а
-   не только на удачной. Верх кадра остаётся чистым — там нет текста. */
+/* Лёгкая вуаль по низу кадра: она смягчает переход к подложке текста, но за
+   контраст не отвечает — градиент во всю карточку отвечать за него и не может.
+   Плотность градиента считается в процентах от высоты карточки, а высота
+   текста от неё не зависит: на светлой фотографии заголовок попадал в зону,
+   где затемнения ещё почти нет (замерено 1.9:1 при норме 4.5:1). Поэтому
+   подложка объявлена у самого текста — см. `.relnews-card--hero
+   .relnews-card__body`. */
 .relnews-card--hero .news-cover::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(6, 14, 28, 0) 28%, rgba(6, 14, 28, .55) 62%, rgba(6, 14, 28, .9) 100%);
+    background: linear-gradient(180deg, rgba(6, 14, 28, 0) 45%, rgba(6, 14, 28, .35) 100%);
 }
+/* Текст обложки лежит на **своей** подложке, а не на градиенте во всю
+   карточку: подложка ровно такой высоты, какой вышел текст, поэтому белые
+   буквы читаются на любой фотографии, а не только на удачной. Тело прижато к
+   низу `margin-top: auto` (а не растянуто `flex: 1`) — растянутое на всю
+   карточку, оно закрасило бы и кадр.
+
+   Слоёв два: сплошная заливка под текстом и растушёвка `--newshero-fade`
+   сверху, чтобы граница подложки не читалась как обрезанная фотография.
+   Сплошным цветом фона (третьим слоем) её задать нельзя — фон рисуется под
+   всеми слоями сразу и закрасил бы растушёвку. */
 .relnews-card--hero .relnews-card__body {
     position: relative;
     z-index: 1;
-    flex: 1;
-    justify-content: flex-end;
+    margin-top: auto;
     gap: 10px;
     /* Боковой отступ — тот же, что у компактной карточки (14px): карточки
        стоят в одной сетке, и текст обязан начинаться на одной вертикали.
-       Свой у обложки только вертикальный: снизу просторнее, потому что под
-       текстом кнопка, сверху зарезервировано место под метку — она лежит на
-       кадре отдельным слоем, и на узком экране первая строка заезжала под неё. */
-    padding: clamp(58px, 13vw, 76px) 14px clamp(18px, 2vw, 26px);
+       Свой у обложки только вертикальный: сверху зарезервировано место под
+       растушёвку и метку — она лежит на кадре отдельным слоем, и на узком
+       экране первая строка заезжала под неё. */
+    padding: var(--newshero-fade) 14px clamp(18px, 2vw, 26px);
+    background:
+        linear-gradient(180deg, rgba(6, 14, 28, 0), rgba(6, 14, 28, .88))
+            top / 100% var(--newshero-fade) no-repeat,
+        linear-gradient(180deg, rgba(6, 14, 28, .88), rgba(6, 14, 28, .88))
+            bottom / 100% calc(100% - var(--newshero-fade) + 1px) no-repeat;
 }
 /* Цвет объявлен на самой карточке: внутри есть и заголовок, и дата, и анонс,
    у каждого свой токен, и перечислять их по отдельности значило бы забыть
@@ -3199,7 +3218,15 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
 .relnews-card--hero .relnews-card__title,
 .relnews-card--hero .relnews-card__date,
 .relnews-card--hero .news-category { color: #fff; }
-.relnews-card--hero .relnews-card__title { font-size: var(--step-4); }
+/* Заголовок обложки ограничен тремя строками: подложка растёт вместе с
+   текстом, и длинный заголовок с анонсом закрасил бы фотографию целиком. */
+.relnews-card--hero .relnews-card__title {
+    font-size: var(--step-4);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 .relnews-card--hero .relnews-card__excerpt {
     color: rgba(255, 255, 255, .86);
     font-size: var(--step--1);
@@ -3210,37 +3237,17 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     overflow: hidden;
 }
 .relnews-card--hero .news-category { border-color: rgba(255, 255, 255, .5); }
-/* Завершение обложки — кнопка, а не ссылка с чертой: черта поверх фотографии
-   читается как случайная линия. Заливка та же, что у кнопки обложки страницы
-   (`--color-primary`), поэтому цвет один на весь сайт и настраивается в
-   «Дизайне». */
-.relnews-card--hero .card-more {
-    align-self: flex-start;
-    margin-top: 4px;
-    padding: 12px 24px;
-    border: 0;
-    border-radius: var(--btn-radius, 10px);
-    background: var(--color-primary, var(--gov-navy));
-    color: #fff;
-}
 .relnews-card--hero:hover .relnews-card__title { color: #fff; }
-/* Кадр обложки не уезжает при наведении: он размером с карточку, и увеличение
-   съедало бы края фотографии вместе с затемнением. */
-.relnews-card--hero:hover .relnews-card__media img { transform: scale(1.03); }
-
-/* Завершение карточки в ленте — без черты сверху: она рисует по горизонтали
-   лишний ряд линий на каждой карточке. В блоках подборок черта остаётся: там
-   карточек три-четыре, и она отделяет ссылку от текста. */
-.newslist-grid .card-more { border-top: 0; padding-top: 2px; }
 
 /* Дата с иконкой: значок и число — одна строка, а не два соседних элемента. */
 .relnews-card__date { display: inline-flex; align-items: center; gap: 6px; }
 .relnews-card__date .ui-icon { flex: none; opacity: .75; }
 
 /* Крупная карточка ленты занимает две ячейки сетки и показывает анонс. Ровно
-   две, а не всю строку: цикл ленты — «крупная + две компактные», ряд из
-   четырёх компактных, «две компактные + крупная», то есть двенадцать ячеек
-   (см. App\Core\NewsFeedRhythm). Двенадцать делится и на 4, и на 2, и на 1
+   две, а не всю строку: цикл ленты — «обложка + две компактные», ряд из
+   четырёх компактных, «две компактные + широкая», ряд из четырёх компактных,
+   то есть шестнадцать ячеек на четырнадцать карточек (см.
+   App\Core\NewsFeedRhythm). Шестнадцать делится и на 4, и на 2, и на 1
    колонку — ряды остаются полными, а крупная карточка идёт зигзагом: слева,
    потом справа. */
 /* Кадр занимает ровно одну колонку сетки, а не долю карточки: карточка
@@ -3315,8 +3322,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     font-weight: 700; font-size: var(--step--2);
 }
 .card-more__arrow { transition: transform 0.2s ease; }
-.newslist-lead:hover .card-more__arrow,
-.relnews-card:hover .card-more__arrow { transform: translateX(4px); }
+.newslist-lead:hover .card-more__arrow { transform: translateX(4px); }
 @media (prefers-reduced-motion: reduce) { .card-more__arrow { transition: none; } }
 
 /* Кнопка под подборкой новостей: ведёт в общую ленту. Светлая, а не тёмная

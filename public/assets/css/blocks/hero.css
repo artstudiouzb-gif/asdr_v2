@@ -328,7 +328,6 @@
     line-height: 1.1;
     letter-spacing: -.02em;
     color: var(--hero-fg);
-    text-wrap: balance;
 }
 
 .hero__title-link { color: inherit; text-decoration: none; }

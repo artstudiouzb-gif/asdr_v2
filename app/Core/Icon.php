@@ -213,7 +213,7 @@ final class Icon
         }
 
         preg_match_all('/href="#tabler-([a-z0-9-]+)"/', $html, $matches);
-        $names = array_values(array_unique(array_merge($matches[1] ?? [], self::RUNTIME_ICONS)));
+        $names = array_values(array_unique(array_merge($matches[1], self::RUNTIME_ICONS)));
         if ($names === []) {
             return $html;
         }

@@ -90,6 +90,7 @@ final class UserController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireSuperAdmin();

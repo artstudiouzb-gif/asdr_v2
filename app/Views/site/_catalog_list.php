@@ -77,7 +77,7 @@ $qs = static function (array $overrides) use ($q, $sort): string {
                         <?php if ($hasDeadline): ?>
                             <span class="catcard__status<?= !empty($entry['is_archived']) ? ' catcard__status--off' : '' ?>"><?= htmlspecialchars(t(!empty($entry['is_archived']) ? 'Архив' : 'Приём открыт'), ENT_QUOTES) ?></span>
                         <?php endif; ?>
-                        <time class="catcard__created"><?= htmlspecialchars(date('d.m.Y', strtotime((string) $entry['created_at'])), ENT_QUOTES) ?></time>
+                        <time class="catcard__created"><?= htmlspecialchars(\App\Core\DateFormatter::format((string) $entry['created_at'], 'd.m.Y'), ENT_QUOTES) ?></time>
                     </div>
                     <h2 class="catcard__title"><a href="<?= htmlspecialchars($url, ENT_QUOTES) ?>"><?= htmlspecialchars((string) $entry['title'], ENT_QUOTES) ?></a></h2>
                     <?php

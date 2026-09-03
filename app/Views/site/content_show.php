@@ -52,7 +52,7 @@ $sideFields = array_values(array_filter(
     <header class="catdetail__head">
         <span class="catdetail__eyebrow"><?= htmlspecialchars(t((string) $type['name']), ENT_QUOTES) ?></span>
         <h1 class="catdetail__title"><?= htmlspecialchars((string) $entry['title'], ENT_QUOTES) ?></h1>
-        <time class="catdetail__date"><?= htmlspecialchars(t('Опубликовано'), ENT_QUOTES) ?> <?= htmlspecialchars(date('d.m.Y', strtotime((string) $entry['created_at'])), ENT_QUOTES) ?></time>
+        <time class="catdetail__date"><?= htmlspecialchars(t('Опубликовано'), ENT_QUOTES) ?> <?= htmlspecialchars(\App\Core\DateFormatter::format((string) $entry['created_at'], 'd.m.Y'), ENT_QUOTES) ?></time>
     </header>
 
     <?php if ($eventBanner !== ''): ?>

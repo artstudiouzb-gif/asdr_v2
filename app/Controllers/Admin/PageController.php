@@ -41,6 +41,7 @@ final class PageController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function duplicate(array $params): void
     {
         Auth::requireLogin();
@@ -107,6 +108,7 @@ final class PageController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function edit(array $params): void
     {
         Auth::requireLogin();
@@ -141,6 +143,7 @@ final class PageController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function copyLanguageBlocks(array $params): void
     {
         Auth::requireLogin();
@@ -173,6 +176,7 @@ final class PageController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function createTranslation(array $params): void
     {
         Auth::requireLogin();
@@ -201,6 +205,7 @@ final class PageController
      * Предпросмотр страницы до публикации (группа 5.2). Рендерит страницу
      * (в т.ч. черновик) со всеми блоками и scoped CSS, но: доступ только
      * авторизованным, noindex, без записи в кэш и sitemap.
+     * @param array<string, string> $params
      */
     public function preview(array $params): void
     {
@@ -242,6 +247,7 @@ final class PageController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function update(array $params): void
     {
         Auth::requireLogin();
@@ -323,6 +329,7 @@ final class PageController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireLogin();
@@ -335,6 +342,7 @@ final class PageController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function makeHome(array $params): void
     {
         Auth::requireLogin();

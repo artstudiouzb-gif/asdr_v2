@@ -57,6 +57,7 @@ final class FormController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function edit(array $params): void
     {
         Auth::requireLogin();
@@ -71,6 +72,7 @@ final class FormController
         View::render('admin/forms/form', ['form' => $form, 'error' => null]);
     }
 
+    /** @param array<string, string> $params */
     public function update(array $params): void
     {
         Auth::requireLogin();
@@ -97,6 +99,7 @@ final class FormController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireLogin();
@@ -109,6 +112,7 @@ final class FormController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function submissions(array $params): void
     {
         Auth::requireLogin();
@@ -133,7 +137,10 @@ final class FormController
         $this->renderSubmissions(null);
     }
 
-    /** Карточка одной заявки; только здесь она считается прочитанной. */
+    /**
+     * Карточка одной заявки; только здесь она считается прочитанной.
+     * @param array<string, string> $params
+     */
     public function submission(array $params): void
     {
         Auth::requireLogin();
@@ -154,6 +161,7 @@ final class FormController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function deleteSubmission(array $params): void
     {
         Auth::requireLogin();
@@ -219,11 +227,13 @@ final class FormController
     {
         parse_str(mb_substr((string) $raw, 0, 1000), $input);
         $params = [];
-        $q = mb_substr(trim((string) ($input['q'] ?? '')), 0, 120);
+        $rawQ = $input['q'] ?? '';
+        $q = mb_substr(trim(is_string($rawQ) ? $rawQ : ''), 0, 120);
         if ($q !== '') {
             $params['q'] = $q;
         }
-        $status = (string) ($input['status'] ?? '');
+        $rawStatus = $input['status'] ?? '';
+        $status = is_string($rawStatus) ? $rawStatus : '';
         if (in_array($status, ['unread', 'read'], true)) {
             $params['status'] = $status;
         }

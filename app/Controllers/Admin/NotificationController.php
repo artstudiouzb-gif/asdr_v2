@@ -31,12 +31,12 @@ final class NotificationController
             return true;
         }
         if ($method === 'POST' && $path === '/admin/notifications/read-all') {
+            // Обработчик объявлен `never`: он делает редирект и выходит,
+            // поэтому возврата после него нет — он был бы недостижим.
             $controller->readAll();
-            return true;
         }
         if ($method === 'POST' && $path === '/admin/notifications/preferences') {
             $controller->savePreferences();
-            return true;
         }
         if ($method === 'POST' && preg_match('#^/admin/notifications/(\d+)/(read|acknowledge|dismiss)$#', $path, $matches) === 1) {
             $id = (int) $matches[1];
@@ -45,7 +45,6 @@ final class NotificationController
                 'acknowledge' => $controller->acknowledge($id),
                 'dismiss' => $controller->dismiss($id),
             };
-            return true;
         }
 
         http_response_code(404);

@@ -64,10 +64,11 @@ $searchQuery = (string) ($_GET['q'] ?? '');
                 <option value="">Все даты</option>
                 <?php foreach (($availableDates ?? []) as $dVal): ?>
                     <?php 
-                    $time = strtotime($dVal . '-01');
+                    $monthStart = $dVal . '-01';
                     $monthsRu = ['01'=>'Январь','02'=>'Февраль','03'=>'Март','04'=>'Апрель','05'=>'Май','06'=>'Июнь','07'=>'Июль','08'=>'Август','09'=>'Сентябрь','10'=>'Октябрь','11'=>'Ноябрь','12'=>'Декабрь'];
-                    $mNum = date('m', $time);
-                    $dLabel = ($monthsRu[$mNum] ?? date('F', $time)) . ' ' . date('Y', $time);
+                    $mNum = \App\Core\DateFormatter::format($monthStart, 'm');
+                    $dLabel = trim(($monthsRu[$mNum] ?? \App\Core\DateFormatter::format($monthStart, 'F'))
+                        . ' ' . \App\Core\DateFormatter::format($monthStart, 'Y'));
                     ?>
                     <option value="<?= htmlspecialchars($dVal, ENT_QUOTES) ?>" <?= $selectedDate === $dVal ? 'selected' : '' ?>>
                         <?= htmlspecialchars($dLabel, ENT_QUOTES) ?>
@@ -136,7 +137,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
                      data-url="<?= htmlspecialchars($url, ENT_QUOTES) ?>"
                      data-size="<?= htmlspecialchars(Format::fileSize((int) $item['size']), ENT_QUOTES) ?>"
                      data-mime="<?= htmlspecialchars((string) $item['mime_type'], ENT_QUOTES) ?>"
-                     data-date="<?= htmlspecialchars(date('d.m.Y H:i', strtotime((string) $item['created_at'])), ENT_QUOTES) ?>"
+                     data-date="<?= htmlspecialchars(\App\Core\DateFormatter::format((string) $item['created_at'], 'd.m.Y H:i'), ENT_QUOTES) ?>"
                      data-access="<?= htmlspecialchars((string) $item['access_type'], ENT_QUOTES) ?>"
                      data-token="<?= htmlspecialchars((string) $item['access_token'], ENT_QUOTES) ?>"
                      data-is-img="<?= $isImg ? '1' : '0' ?>"

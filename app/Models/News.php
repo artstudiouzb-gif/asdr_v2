@@ -298,9 +298,24 @@ final class News
         $shadowAlias = $prefix . '_shadow';
 
         return [
+            // «Есть ли у группы собственная запись нужного языка» спрашивается
+            // один раз производной таблицей, а не коррелированным NOT EXISTS
+            // на каждую строку. Прежний вид сравнивал выражение
+            // COALESCE(NULLIF(tgid,0), id) с таким же выражением, поэтому под
+            // него не подходил никакой индекс: EXPLAIN показывал DEPENDENT
+            // SUBQUERY с type=ALL, то есть полный проход по news для каждой
+            // строки-кандидата. Замерено на 409 новостях: страница /uz/news
+            // отвечала 155 мс против 12 мс у русской, и рост был квадратичным.
             'join' => " LEFT JOIN news_translations {$translationAlias}
                         ON {$translationAlias}.news_id = {$alias}.id
-                       AND {$translationAlias}.lang = :{$prefix}_legacy_lang",
+                       AND {$translationAlias}.lang = :{$prefix}_legacy_lang
+                        LEFT JOIN (
+                            SELECT DISTINCT COALESCE(NULLIF(translation_group_id, 0), id) AS group_key
+                            FROM news
+                            WHERE deleted_at IS NULL AND lang = :{$prefix}_shadow_lang
+                        ) {$shadowAlias}
+                        ON {$shadowAlias}.group_key
+                           = COALESCE(NULLIF({$alias}.translation_group_id, 0), {$alias}.id)",
             'where' => "(
                 {$alias}.lang = :{$prefix}_exact_lang
                 OR (
@@ -310,13 +325,7 @@ final class News
                         TRIM(COALESCE({$translationAlias}.title, '')) <> ''
                         OR TRIM(COALESCE({$translationAlias}.content, '')) <> ''
                     )
-                    AND NOT EXISTS (
-                        SELECT 1 FROM news {$shadowAlias}
-                        WHERE {$shadowAlias}.deleted_at IS NULL
-                          AND {$shadowAlias}.lang = :{$prefix}_shadow_lang
-                          AND COALESCE(NULLIF({$shadowAlias}.translation_group_id, 0), {$shadowAlias}.id)
-                              = COALESCE(NULLIF({$alias}.translation_group_id, 0), {$alias}.id)
-                    )
+                    AND {$shadowAlias}.group_key IS NULL
                 )
             )",
             'params' => [
@@ -575,7 +584,7 @@ final class News
             'timeline_json', 'docs', 'poll_question', 'poll_options_json',
             ...\App\Core\NewsCard::FIELDS,
         ] as $field) {
-            if (isset($translation[$field]) && $translation[$field] !== null && $translation[$field] !== '') {
+            if (isset($translation[$field]) && $translation[$field] !== '') {
                 $row[$field] = $translation[$field];
             }
         }

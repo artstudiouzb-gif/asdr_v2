@@ -97,7 +97,7 @@ final class NewsController
         echo '  <atom:link href="' . htmlspecialchars($selfUrl, ENT_XML1) . '" rel="self" type="application/rss+xml"/>' . "\n";
         foreach ($items as $item) {
             $link = $base . Locale::url('news/' . $item['slug'], $lang);
-            $pub = $item['published_at'] ? date(DATE_RSS, strtotime((string) $item['published_at'])) : date(DATE_RSS);
+            $pub = $item['published_at'] ? \App\Core\DateFormatter::format((string) $item['published_at'], DATE_RSS) : date(DATE_RSS);
             echo '  <item>' . "\n";
             echo '    <title>' . htmlspecialchars((string) $item['title'], ENT_XML1) . '</title>' . "\n";
             echo '    <link>' . htmlspecialchars($link, ENT_XML1) . '</link>' . "\n";
@@ -116,6 +116,7 @@ final class NewsController
     /**
      * Скачивание всех фото новости одним zip-архивом (кнопка «Скачать все фото»).
      * В архив попадают только файлы из каталога публичных загрузок.
+     * @param array<string, string> $params
      */
     public function photosZip(array $params): void
     {
@@ -171,6 +172,7 @@ final class NewsController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function show(array $params): void
     {
         $lang = Locale::current();

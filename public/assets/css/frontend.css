@@ -1783,7 +1783,7 @@ p { line-height: var(--base-line-height, 1.6); }
 }
 .site-content > section.cms-block--cta:first-of-type .block-cta h2,
 .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 {
-    color: #fff; font-size: var(--font-size-h1, var(--step-10)); margin: 0 0 14px; text-wrap: balance;
+    color: #fff; font-size: var(--font-size-h1, var(--step-10)); margin: 0 0 14px;
 }
 .site-content > section.cms-block--cta:first-of-type .block-cta p,
 .page-blocks > section.cms-block--cta:first-of-type .block-cta p {
@@ -2001,7 +2001,7 @@ p { line-height: var(--base-line-height, 1.6); }
 
 /* --- Детальная новость: читаемая колонка, дата-чип, возврат --- */
 .news-single { max-width: 760px; }
-.news-single h1 { font-size: var(--font-size-h1, var(--step-8)); margin: 0 0 14px; text-wrap: balance; }
+.news-single h1 { font-size: var(--font-size-h1, var(--step-8)); margin: 0 0 14px; }
 .news-single > time,
 .news-single--side > time {
     display: inline-block; margin-bottom: 20px; padding: 4px 12px; border-radius: 999px;
@@ -2516,7 +2516,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .block-hero__media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--bg-primary) 6%, color-mix(in srgb, var(--bg-primary) 55%, transparent) 42%, transparent 66%); }
 .block-hero__inner { position: relative; width: 100%; }
 .block-hero__text { max-width: var(--hero-text-width, 560px); }
-.block-hero__title { font-size: var(--font-size-h1, var(--step-10)); color: var(--color-primary, #223d79); margin: 0 0 16px; line-height: 1.15; text-wrap: balance; }
+.block-hero__title { font-size: var(--font-size-h1, var(--step-10)); color: var(--color-primary, #223d79); margin: 0 0 16px; line-height: 1.15; }
 .block-hero__subtitle { font-size: var(--font-size-lead, var(--step-1)); color: var(--text-muted); max-width: 480px; margin: 0; line-height: var(--base-line-height, 1.6); }
 .block-hero__button {
     /* Без margin-top: кнопки всегда внутри .block-hero__actions (flex,

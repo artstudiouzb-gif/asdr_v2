@@ -184,7 +184,7 @@ final class Widget
         $index = null;
         foreach ($siblings as $i => $s) {
             if ((int) $s['id'] === $id) {
-                $index = $i;
+                $index = (int) $i;
                 break;
             }
         }

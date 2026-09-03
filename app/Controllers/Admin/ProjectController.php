@@ -39,6 +39,7 @@ final class ProjectController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function duplicate(array $params): void
     {
         Auth::requireLogin();
@@ -84,6 +85,7 @@ final class ProjectController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function edit(array $params): void
     {
         Auth::requireLogin();
@@ -101,6 +103,7 @@ final class ProjectController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function createTranslation(array $params): void
     {
         Auth::requireLogin();
@@ -125,6 +128,7 @@ final class ProjectController
         }
     }
 
+    /** @param array<string, string> $params */
     public function update(array $params): void
     {
         Auth::requireLogin();
@@ -181,6 +185,7 @@ final class ProjectController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireLogin();

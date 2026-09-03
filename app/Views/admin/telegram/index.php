@@ -26,7 +26,7 @@ $channelReady = \App\Core\SocialSettings::isReady('telegram');
 $notifyCount = count(\App\Core\FormNotifier::parseChatIds($notifyChatIds));
 $detectedChannels = is_array($detectedChannels ?? null) ? array_values($detectedChannels) : [];
 $detectedChatId = count($detectedChannels) === 1
-    ? (string) ($detectedChannels[0]['id'] ?? '')
+    ? (string) $detectedChannels[0]['id']
     : '';
 
 // Значок шага через единый локальный набор Tabler Icons.
@@ -242,12 +242,16 @@ $mark = static function (bool $done, bool $started = true): string {
                     <strong>Найдено несколько каналов — выберите нужный:</strong>
                     <div class="form-actions">
                         <?php foreach ($detectedChannels as $detectedChannel): ?>
-                            <?php $candidateId = (string) ($detectedChannel['id'] ?? ''); ?>
-                            <?php if ($candidateId === '') { continue; } ?>
+                            <?php // id канала — число (у приватного отрицательное), и «нет id»
+                                  // это ноль, а не пустая строка: прежняя проверка на ''
+                                  // не срабатывала никогда и пропускала кнопку с id «0». ?>
+                            <?php $candidateId = (int) $detectedChannel['id']; ?>
+                            <?php if ($candidateId === 0) { continue; } ?>
+                            <?php $candidateId = (string) $candidateId; ?>
                             <button type="button" class="btn btn--small btn--outline"
                                     aria-pressed="false"
                                     data-tg-use-channel-id="<?= htmlspecialchars($candidateId, ENT_QUOTES) ?>">
-                                <?= htmlspecialchars((string) ($detectedChannel['title'] ?? $candidateId), ENT_QUOTES) ?>
+                                <?= htmlspecialchars($detectedChannel['title'] !== '' ? $detectedChannel['title'] : $candidateId, ENT_QUOTES) ?>
                                 <code><?= htmlspecialchars($candidateId, ENT_QUOTES) ?></code>
                             </button>
                         <?php endforeach; ?>

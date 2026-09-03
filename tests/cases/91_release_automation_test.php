@@ -24,3 +24,44 @@ test('release archive excludes repository-only security documentation', function
     assert_contains('/README.md export-ignore', $attributes);
     assert_contains('/SECURITY.md export-ignore', $attributes);
 });
+
+test('root-level development files never reach the release archive', function (): void {
+    // Список export-ignore перечисляет файлы поимённо, и каждый новый инструмент
+    // разработки приходится вписывать туда руками. Забыть строку легко и тихо:
+    // так в пакет 3.0 уехал phpstan-baseline.neon (172 КБ). Поэтому правило
+    // перевёрнуто — в корне репозитория релизу принадлежат только те файлы,
+    // которые перечислены здесь; всё остальное обязано быть исключено.
+    $root = dirname(__DIR__, 2);
+    if (!is_dir($root . '/.git')) {
+        skip_test('нужна рабочая копия git');
+    }
+
+    $runtime = ['.htaccess', 'preload.php'];
+
+    $tracked = [];
+    exec('git -C ' . escapeshellarg($root) . ' ls-files 2>/dev/null', $tracked, $code);
+    if ($code !== 0 || $tracked === []) {
+        skip_test('git ls-files недоступен');
+    }
+
+    $rootFiles = [];
+    foreach ($tracked as $path) {
+        if (!str_contains($path, '/')) {
+            $rootFiles[] = $path;
+        }
+    }
+    assert_true(count($rootFiles) > 5, 'список файлов корня подозрительно короткий');
+
+    $attributes = (string) file_get_contents($root . '/.gitattributes');
+    foreach ($rootFiles as $file) {
+        if (in_array($file, $runtime, true)) {
+            continue;
+        }
+        assert_contains(
+            '/' . $file . ' export-ignore',
+            $attributes,
+            "файл {$file} уедет в релизный архив: добавьте строку в .gitattributes"
+            . ' или в список runtime, если он действительно нужен на боевом сервере'
+        );
+    }
+});

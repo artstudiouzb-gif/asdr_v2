@@ -157,7 +157,7 @@ final class PageTemplateFile
 
         $block = [
             'type' => $type,
-            'title' => isset($raw['title']) && $raw['title'] !== null && (string) $raw['title'] !== ''
+            'title' => isset($raw['title']) && (string) $raw['title'] !== ''
                 ? mb_substr((string) $raw['title'], 0, 255)
                 : null,
             'data' => self::data($type, $raw['data'] ?? [], $human, $warnings),

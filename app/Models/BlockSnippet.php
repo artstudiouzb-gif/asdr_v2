@@ -213,7 +213,7 @@ final class BlockSnippet
             $pageId,
             $lang,
             (string) $b['type'],
-            isset($b['title']) && $b['title'] !== '' && $b['title'] !== null ? (string) $b['title'] : null,
+            isset($b['title']) && $b['title'] !== '' ? (string) $b['title'] : null,
             is_array($b['data'] ?? null) ? $b['data'] : [],
             (string) ($b['custom_css'] ?? ''),
             $parentId,

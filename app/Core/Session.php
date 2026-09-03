@@ -41,6 +41,11 @@ final class Session
 
         try {
             session_start();
+        // Перехват живой, хотя анализатор считает иначе: `session_start()`
+        // сам исключений не бросает, но `ErrorHandler` превращает его
+        // предупреждение (недоступный каталог сессий) в исключение. Без этого
+        // перехвата сайт падал бы вместо перехода на запасной каталог.
+        // @phpstan-ignore catch.neverThrown
         } catch (\Throwable $e) {
             $fallback = defined('APP_ROOT') ? APP_ROOT . '/storage/sessions' : sys_get_temp_dir();
             if (!is_dir($fallback)) {
@@ -69,6 +74,32 @@ final class Session
      * Защищает от сбоев Plesk/cPanel/Shared-хостингов, когда системный session.save_path
      * недоступен или использует многоуровневые несуществующие пути.
      */
+    /**
+     * Идентификатор текущей сессии строкой.
+     *
+     * `session_id()` объявлен как `string|false`: вне сессии он отдаёт пустую
+     * строку, а при сбое — `false`. В файлах со `strict_types` это значение
+     * уходило в `setcookie()` и в реестр сессий типизированными параметрами,
+     * то есть отказ хранилища сессий превращался в `TypeError` на входе и
+     * выходе из панели. Пустая строка вместо `false` оставляет поведение тем
+     * же, но снимает падение; вызывающий код, которому нужен настоящий
+     * идентификатор, проверяет непустоту сам.
+     */
+    public static function id(): string
+    {
+        $id = session_id();
+
+        return $id === false ? '' : $id;
+    }
+
+    /** Имя сессионной cookie строкой; `session_name()` тоже бывает `false`. */
+    public static function name(): string
+    {
+        $name = session_name();
+
+        return $name === false ? '' : $name;
+    }
+
     public static function ensureSavePath(): void
     {
         $current = (string) session_save_path();

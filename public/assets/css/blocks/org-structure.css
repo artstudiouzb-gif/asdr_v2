@@ -224,7 +224,7 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
 .orgstruct__head-name,
 .orgstruct__deputy-role,
 .orgstruct__unit,
-.orgstruct__subunit { text-wrap: balance; hyphens: auto; }
+.orgstruct__subunit { hyphens: auto; }
 .orgstruct__link { color: inherit; text-decoration: none; }
 .orgstruct__link:hover { color: var(--gov-teal-text, #0284c7); text-decoration: underline; }
 

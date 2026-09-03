@@ -153,6 +153,13 @@ final class Auth
         return $identifiers;
     }
 
+    /**
+     * Набор корзин закрыт, и match это отражает: значения вне набора нет.
+     * Тип параметра сужен, чтобы несоответствие ловилось у вызывающего, а не
+     * превращалось в UnhandledMatchError посреди проверки перебора паролей.
+     *
+     * @param 'pair'|'ip'|'account' $bucket
+     */
     private static function loginIdentifier(string $bucket, string $username, string $ip): string
     {
         $account = mb_strtolower(trim($username));
@@ -297,7 +304,7 @@ final class Auth
         try {
             SessionRegistry::register(
                 (int) $user['id'],
-                session_id(),
+                Session::id(),
                 $_SERVER['REMOTE_ADDR'] ?? null,
                 $_SERVER['HTTP_USER_AGENT'] ?? null
             );
@@ -386,13 +393,13 @@ final class Auth
         // строка присутствует в реестре. Удаление строки («выйти на этом
         // устройстве»/«везде»/смена пароля) немедленно завершает сессию.
         try {
-            if (!SessionRegistry::exists((int) $_SESSION['user_id'], session_id())) {
+            if (!self::sessionStillRegistered((int) $_SESSION['user_id'], Session::id())) {
                 self::logout();
                 return false;
             }
             // Обновляем «последнюю активность» не чаще раза в минуту.
             if ((time() - (int) ($_SESSION['sid_seen_at'] ?? 0)) > 60) {
-                SessionRegistry::touch((int) $_SESSION['user_id'], session_id());
+                SessionRegistry::touch((int) $_SESSION['user_id'], Session::id());
                 $_SESSION['sid_seen_at'] = time();
             }
         } catch (\Throwable $e) {
@@ -409,6 +416,33 @@ final class Auth
         Session::start();
         return isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
     }
+
+    /**
+     * Строка сессии всё ещё в реестре — ответ на запрос спрашивается один раз.
+     *
+     * `check()` зовут отовсюду: `requireLogin`, `user()`, помощники вьюх, RBAC.
+     * Каждый вызов ходил в реестр, и страница админки делала 5–8 одинаковых
+     * запросов. Мгновенность отзыва от памяти не страдает: запрос живёт
+     * миллисекунды, а «немедленно» и означает «со следующего запроса».
+     * Ключ включает идентификатор сессии, поэтому смена сессии внутри запроса
+     * (вход, регенерация) память не переиспользует.
+     */
+    private static function sessionStillRegistered(int $userId, string $sessionId): bool
+    {
+        $key = $userId . '|' . $sessionId;
+        if (array_key_exists($key, self::$registryMemo)) {
+            return self::$registryMemo[$key];
+        }
+
+        return self::$registryMemo[$key] = SessionRegistry::exists($userId, $sessionId);
+    }
+
+    /**
+     * Ответы реестра в пределах запроса: «пользователь|сессия» → есть ли строка.
+     *
+     * @var array<string, bool>
+     */
+    private static array $registryMemo = [];
 
     public static function user(): ?array
     {
@@ -471,6 +505,17 @@ final class Auth
      * Идентификатор входа, ожидающего второго фактора. Через него, а не через
      * $_SESSION напрямую, — иначе GET страницы ввода кода читает суперглобал
      * до того, как кто-нибудь запустит сессию (Session::start ленивый).
+     */
+    /**
+     * Идентификатор входа, ожидающего второго фактора.
+     *
+     * Значение читается из сессии и **меняется между вызовами**: неудачная
+     * или просроченная проверка кода зовёт `clearPending()`. Без пометки
+     * статический анализ считает вызов детерминированным, запоминает результат
+     * первой проверки и объявляет вторую лишней — а она как раз и отличает
+     * «код неверный» от «сессия истекла, войдите заново».
+     *
+     * @phpstan-impure
      */
     public static function pendingUserId(): ?int
     {
@@ -542,11 +587,13 @@ final class Auth
 
     public static function logout(): void
     {
+        // Сессия закончилась — прежний ответ реестра больше не действует.
+        self::$registryMemo = [];
         Session::start();
         // Снимаем сессию с реестра активных сессий.
         try {
             if (session_status() === PHP_SESSION_ACTIVE) {
-                SessionRegistry::remove(session_id());
+                SessionRegistry::remove(Session::id());
             }
         } catch (\Throwable $e) {
             Logger::error('SessionRegistry::remove failed: ' . $e->getMessage());
@@ -564,13 +611,13 @@ final class Auth
 
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
-            setcookie(session_name(), '', [
+            setcookie(Session::name(), '', [
                 'expires' => time() - 42000,
                 'path' => $params['path'],
                 'domain' => $params['domain'],
                 'secure' => $params['secure'],
                 'httponly' => $params['httponly'],
-                'samesite' => $params['samesite'] ?? 'Lax',
+                'samesite' => $params['samesite'],
             ]);
         }
 

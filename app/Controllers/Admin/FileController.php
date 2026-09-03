@@ -130,6 +130,7 @@ final class FileController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireLogin();
@@ -178,6 +179,7 @@ final class FileController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function regenerateToken(array $params): void
     {
         Auth::requireLogin();

@@ -1,3 +1,4 @@
+import { readdirSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { brotliCompressSync, constants as zlibConstants, gzipSync } from 'node:zlib';
@@ -25,19 +26,20 @@ const jsSources = [
 // THEME_PART_MAP), в общий бандл не входят. Раньше они и не минифицировались —
 // отдавались исходниками. Здесь они проходят ту же обработку, что и бандлы, и
 // попадают в манифест отдельным разделом.
+// Список выводится из файловой системы, а не ведётся руками. Пока он был
+// ручным, в него не попали одиннадцать блочных стилей, добавленных позже:
+// counters (16 КБ), catalog (12.7 КБ), news-feature (11 КБ) и другие уезжали
+// браузеру без минификации и без готового сжатия, потому что манифест про них
+// не знал, а Asset откатывался на исходник. Забыть строку легко и тихо —
+// теперь забывать нечего.
+const blockDirs = ['public/assets/css/blocks', 'public/assets/js/blocks'];
 const blockSources = [
-    'public/assets/css/blocks/news-detail.css',
-    'public/assets/css/blocks/org-structure.css',
-    'public/assets/css/blocks/leader-card.css',
-    'public/assets/css/blocks/media-gallery.css',
-    'public/assets/css/blocks/tabs.css',
-    'public/assets/css/blocks/hero.css',
-    'public/assets/js/blocks/slider.js',
-    'public/assets/js/blocks/anchor_nav.js',
-    'public/assets/js/blocks/leader_card.js',
-    'public/assets/js/blocks/tabs.js',
-    'public/assets/js/blocks/org_structure.js',
-    'public/assets/js/blocks/hero.js',
+    ...blockDirs.flatMap((dir) =>
+        readdirSync(dir)
+            .filter((name) => /\.(css|js)$/.test(name) && !/\.min\.(css|js)$/.test(name))
+            .sort()
+            .map((name) => `${dir}/${name}`)
+    ),
     'public/assets/js/news.js',
 ];
 

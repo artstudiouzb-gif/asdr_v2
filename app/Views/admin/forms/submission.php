@@ -44,7 +44,7 @@ $displayValue = static function (mixed $value): string {
             <div>
                 <h2 class="u-inline-291b7bbb01">Данные заявителя</h2>
                 <p class="form-hint">
-                    Получена <?= htmlspecialchars(date('d.m.Y в H:i', strtotime((string) ($submission['created_at'] ?? 'now'))), ENT_QUOTES) ?>
+                    Получена <?= htmlspecialchars(\App\Core\DateFormatter::format((string) ($submission['created_at'] ?? 'now'), 'd.m.Y в H:i'), ENT_QUOTES) ?>
                 </p>
             </div>
             <span class="badge badge--success">Просмотрена</span>

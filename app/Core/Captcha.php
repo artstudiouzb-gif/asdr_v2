@@ -77,13 +77,13 @@ final class Captcha
         $h = 62;
         $im = imagecreatetruecolor($w, $h);
 
-        $bg = imagecolorallocate($im, 244, 246, 249);   // --gov-bg
-        $navy = imagecolorallocate($im, 23, 58, 99);    // --gov-navy
-        $teal = imagecolorallocate($im, 18, 128, 127);  // --gov-teal-text
+        $bg = self::color($im, 244, 246, 249);   // --gov-bg
+        $navy = self::color($im, 23, 58, 99);    // --gov-navy
+        $teal = self::color($im, 18, 128, 127);  // --gov-teal-text
         imagefilledrectangle($im, 0, 0, $w, $h, $bg);
 
         // Шум: точки и две дуги.
-        $noise = imagecolorallocatealpha($im, 23, 58, 99, 96);
+        $noise = self::color($im, 23, 58, 99, 96);
         for ($i = 0; $i < 140; $i++) {
             imagesetpixel($im, random_int(0, $w - 1), random_int(0, $h - 1), $noise);
         }
@@ -124,9 +124,9 @@ final class Captcha
             if (!$drawn) {
                 // Фолбэк без TTF: встроенный шрифт GD, увеличенный вдвое.
                 $g = imagecreatetruecolor(9, 15);
-                $gbg = imagecolorallocate($g, 244, 246, 249);
+                $gbg = self::color($g, 244, 246, 249);
                 imagefilledrectangle($g, 0, 0, 9, 15, $gbg);
-                imagestring($g, 5, 0, 0, $ch, imagecolorallocate($g, 23, 58, 99));
+                imagestring($g, 5, 0, 0, $ch, self::color($g, 23, 58, 99));
                 imagecopyresized($im, $g, $x, $y - 10, 0, 0, 27, 45, 9, 15);
             }
         }
@@ -151,5 +151,30 @@ final class Captcha
             . '</div>'
             . '<span class="form-hint" id="' . htmlspecialchars($inputId, ENT_QUOTES) . '-hint">Введите символы с картинки (регистр не важен).</span>'
             . '</div>';
+    }
+
+    /**
+     * Цвет палитры числом.
+     *
+     * `imagecolorallocate()` объявлена как `int|false`, и это значение уходило
+     * дальше в `imagestring()`, `imagefilledrectangle()` и другие функции
+     * типизированным параметром: в файле со `strict_types` исчерпание палитры
+     * превращалось в `TypeError`, то есть страница входа отдавала 500 вместо
+     * капчи. Чёрный (0) — заведомо допустимый индекс: картинка выйдет
+     * невзрачной, но форма останется рабочей.
+     *
+     * @param \GdImage $image
+     * @param int<0, 255> $r
+     * @param int<0, 255> $g
+     * @param int<0, 255> $b
+     * @param int<0, 127>|null $alpha
+     */
+    private static function color($image, int $r, int $g, int $b, ?int $alpha = null): int
+    {
+        $color = $alpha === null
+            ? imagecolorallocate($image, $r, $g, $b)
+            : imagecolorallocatealpha($image, $r, $g, $b, $alpha);
+
+        return $color === false ? 0 : $color;
     }
 }

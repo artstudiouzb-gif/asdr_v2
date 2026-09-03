@@ -231,7 +231,7 @@ final class Block
         $index = null;
         foreach ($blocks as $i => $block) {
             if ((int) $block['id'] === $id) {
-                $index = $i;
+                $index = (int) $i;
                 break;
             }
         }

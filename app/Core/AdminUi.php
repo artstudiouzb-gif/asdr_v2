@@ -212,6 +212,7 @@ final class AdminUi
             'performance' => 'gauge',
             'database' => 'database',
             'audit' => 'history',
+            'update' => 'cloud-download',
         ][$name] ?? $name;
 
         return self::icon($name, 18, 'admin-nav-item__icon', 1.7);
@@ -429,7 +430,7 @@ final class AdminUi
         $allParams = $params;
         $allParams['lang'] = 'all';
         unset($allParams['page']);
-        $allUrl = $baseUrl . ($allParams !== [] ? '?' . http_build_query($allParams) : '');
+        $allUrl = $baseUrl . '?' . http_build_query($allParams);
         $allCount = isset($counts['all']) ? (int) $counts['all'] : (int) array_sum(array_map('intval', $counts));
         $isAllActive = ($currentLang === '' || $currentLang === 'all');
 

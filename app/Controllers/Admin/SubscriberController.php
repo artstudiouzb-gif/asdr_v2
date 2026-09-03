@@ -69,6 +69,7 @@ final class SubscriberController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireSuperAdmin();

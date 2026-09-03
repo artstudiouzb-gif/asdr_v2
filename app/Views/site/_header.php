@@ -491,6 +491,7 @@ $emailHtml = $emailVal !== ''
         . htmlspecialchars($emailVal, ENT_QUOTES) . '</a>'
     : '';
 $snippetHtml = (string) ($hcfg['snippet'] ?? ''); // очищен санитайзером при сохранении
+
 $fragments = [
     'logo' => $logoHtml,
     'menu' => $priorityMenuHtml,
@@ -502,7 +503,6 @@ $fragments = [
     'a11y' => $a11yToggle,
     'phone' => $phoneHtml,
     'email' => $emailHtml,
-    'currency' => \App\Core\CurrencyInformer::renderWidgetHtml(),
     'snippet' => $snippetHtml !== '' ? '<span class="hdr-snippet">' . $snippetHtml . '</span>' : '',
     'divider' => '<span class="site-header__divider" aria-hidden="true"></span>',
     'spacer' => '<span class="site-header__spacer" aria-hidden="true"></span>',
@@ -566,7 +566,6 @@ $zones['left'] .= $composed['left'];
 $zones['center'] .= $composed['center'];
 $zones['right'] .= $composed['right'];
 
-$navBarHtml = '';
 $drawerMenu = '';
 
 if ($menuHtml !== '') {
@@ -674,7 +673,7 @@ if (is_array($cdnParts) && in_array($cdnParts['scheme'] ?? '', ['http', 'https']
 ?>
 <?php if ($cdnOrigin !== ''): ?>
 <link rel="preconnect" href="<?= htmlspecialchars($cdnOrigin, ENT_QUOTES) ?>" crossorigin>
-<link rel="dns-prefetch" href="//<?= htmlspecialchars((string) $cdnParts['host'], ENT_QUOTES) ?>">
+<link rel="dns-prefetch" href="//<?= htmlspecialchars((string) ($cdnParts['host'] ?? ''), ENT_QUOTES) ?>">
 <?php endif; ?>
 <?php if ($fontUrl !== '' && $fontFaceName !== ''): ?>
 <link rel="preload" href="<?= htmlspecialchars($fontUrl, ENT_QUOTES) ?>" as="font" type="font/woff2" crossorigin>
@@ -762,13 +761,13 @@ $bodyClass = trim($designBodyClass
 <?php if (empty($hideChrome)): // лендинг (группа 6) скрывает шапку сайта ?>
 <?= $topbarHtml ?>
 <?php
-$hasHeaderContent = trim($zones['left'] . $zones['center'] . $zones['right'] . $topbarHtml . $navBarHtml) !== '';
+$hasHeaderContent = trim($zones['left'] . $zones['center'] . $zones['right'] . $topbarHtml) !== '';
 $containerMode = in_array($hcfg['container_mode'] ?? 'full', ['full', 'container', 'floating'], true) ? $hcfg['container_mode'] : 'full';
 $headerClasses = [
     'site-header',
     'site-header--logo-' . $logoPos,
     'site-header--container-' . $containerMode,
-    $navBarHtml !== '' ? 'site-header--has-nav' : '',
+    $hasBottomExtras ? 'site-header--has-nav' : '',
     $drawerMenu !== '' ? 'site-header--has-drawer' : '',
     !empty($hcfg['sticky']) ? 'site-header--sticky' : '',
     !empty($hcfg['sticky_full_width']) ? 'site-header--sticky-full' : '',
@@ -801,11 +800,10 @@ $headerClasses = implode(' ', array_filter($headerClasses));
         <div class="site-header__zone site-header__zone--center"><?= $zones['center'] ?></div>
         <div class="site-header__zone site-header__zone--right"><?= $zones['right'] ?></div>
     </div>
-    <?php if ($navBarHtml !== '' || $hasBottomExtras): ?>
-    <div class="site-nav site-nav--align-<?= htmlspecialchars($navAlign, ENT_QUOTES) ?><?= $hasBottomExtras ? ' site-nav--with-extras' : '' ?>">
+    <?php if ($hasBottomExtras): ?>
+    <div class="site-nav site-nav--align-<?= htmlspecialchars($navAlign, ENT_QUOTES) ?><?= ' site-nav--with-extras' ?>">
         <div class="site-nav__inner">
             <?php if ($bottomExtras['left'] !== ''): ?><span class="site-nav__extra site-nav__extra--left"><?= $bottomExtras['left'] ?></span><?php endif; ?>
-            <?= $navBarHtml ?>
             <?php if ($bottomExtras['center'] !== ''): ?><span class="site-nav__extra site-nav__extra--center"><?= $bottomExtras['center'] ?></span><?php endif; ?>
             <?php if ($bottomExtras['right'] !== ''): ?><span class="site-nav__extra site-nav__extra--right"><?= $bottomExtras['right'] ?></span><?php endif; ?>
         </div>

@@ -7,7 +7,7 @@ namespace App\Controllers\Site;
 use App\Core\AppUrl;
 use App\Core\Database;
 use App\Core\Locale;
-use App\Core\TranslationGroupHelper;
+use App\Core\Translations;
 use App\Models\Language;
 use App\Models\Page;
 use App\Models\News;
@@ -40,6 +40,18 @@ final class SitemapController
         $news = Database::pdo()->query("SELECT n.* FROM news n WHERE n.status = 'published' AND n.published_at <= NOW() AND n.deleted_at IS NULL ORDER BY n.published_at DESC LIMIT 1000")->fetchAll();
         $projects = Database::pdo()->query("SELECT pr.* FROM pages pr WHERE pr.entity_type = 'project' AND pr.status = 'published' AND pr.deleted_at IS NULL ORDER BY pr.updated_at DESC")->fetchAll();
 
+        // Языковые версии читаются пакетом на каждый тип: поштучный запрос давал
+        // по два обращения к базе на запись. Спрашиваем App\Core\Translations —
+        // он знает оба механизма перевода, тогда как прежний помощник видел
+        // только связанные записи, и карта сайта расходилась с <head> страницы.
+        // publishedOnly здесь false: у карты сайта своя, более строгая проверка
+        // (у новости учитывается ещё и published_at).
+        $groups = [
+            'pages' => Translations::rowsBatch('pages', array_column($pages, 'id'), false),
+            'news' => Translations::rowsBatch('news', array_column($news, 'id'), false),
+            'projects' => Translations::rowsBatch('projects', array_column($projects, 'id'), false),
+        ];
+
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' . "\n";
 
@@ -49,12 +61,12 @@ final class SitemapController
             $xml .= '  <url>' . "\n";
             $xml .= '    <loc>' . self::xmlEscape($loc) . '</loc>' . "\n";
             if (!empty($p['updated_at'])) {
-                $xml .= '    <lastmod>' . date('c', strtotime((string) $p['updated_at'])) . '</lastmod>' . "\n";
+                $xml .= '    <lastmod>' . \App\Core\DateFormatter::format((string) $p['updated_at'], 'c') . '</lastmod>' . "\n";
             }
             $xml .= '    <changefreq>weekly</changefreq>' . "\n";
             $xml .= '    <priority>' . (!empty($p['is_home']) ? '1.0' : '0.8') . '</priority>' . "\n";
 
-            $xml .= self::alternateLinks($baseUrl, 'pages', (int) $p['id']);
+            $xml .= self::alternateLinks($baseUrl, 'pages', $groups['pages'][(int) $p['id']] ?? []);
 
             $xml .= '  </url>' . "\n";
         }
@@ -65,11 +77,11 @@ final class SitemapController
             $xml .= '  <url>' . "\n";
             $xml .= '    <loc>' . self::xmlEscape($loc) . '</loc>' . "\n";
             $pubDate = !empty($n['published_at']) ? (string) $n['published_at'] : (string) $n['created_at'];
-            $xml .= '    <lastmod>' . date('c', strtotime($pubDate)) . '</lastmod>' . "\n";
+            $xml .= '    <lastmod>' . \App\Core\DateFormatter::format($pubDate, 'c') . '</lastmod>' . "\n";
             $xml .= '    <changefreq>daily</changefreq>' . "\n";
             $xml .= '    <priority>0.7</priority>' . "\n";
 
-            $xml .= self::alternateLinks($baseUrl, 'news', (int) $n['id']);
+            $xml .= self::alternateLinks($baseUrl, 'news', $groups['news'][(int) $n['id']] ?? []);
 
             $xml .= '  </url>' . "\n";
         }
@@ -80,11 +92,11 @@ final class SitemapController
             $xml .= '  <url>' . "\n";
             $xml .= '    <loc>' . self::xmlEscape($loc) . '</loc>' . "\n";
             if (!empty($pr['updated_at'])) {
-                $xml .= '    <lastmod>' . date('c', strtotime((string) $pr['updated_at'])) . '</lastmod>' . "\n";
+                $xml .= '    <lastmod>' . \App\Core\DateFormatter::format((string) $pr['updated_at'], 'c') . '</lastmod>' . "\n";
             }
             $xml .= '    <changefreq>monthly</changefreq>' . "\n";
             $xml .= '    <priority>0.6</priority>' . "\n";
-            $xml .= self::alternateLinks($baseUrl, 'projects', (int) $pr['id']);
+            $xml .= self::alternateLinks($baseUrl, 'projects', $groups['projects'][(int) $pr['id']] ?? []);
             $xml .= '  </url>' . "\n";
         }
 
@@ -92,10 +104,19 @@ final class SitemapController
         echo $xml;
     }
 
-    /** @param array<string, mixed> $row */
-    private static function canonicalUrl(string $baseUrl, string $type, array $row): string
+    /**
+     * Адрес записи на указанном языке.
+     *
+     * Язык передаётся отдельно, а не берётся из строки: у перевода полями
+     * (механизм А) строка — это базовая запись с наложенными полями, и её
+     * `lang` остаётся языком оригинала. Раньше язык читался из строки, и
+     * такой перевод дал бы hreflang="uz" с адресом русской версии.
+     *
+     * @param array<string, mixed> $row
+     */
+    private static function canonicalUrl(string $baseUrl, string $type, array $row, ?string $lang = null): string
     {
-        $lang = (string) ($row['lang'] ?? Language::defaultCode());
+        $lang = $lang ?? (string) ($row['lang'] ?? Language::defaultCode());
         $slug = ltrim((string) ($row['slug'] ?? ''), '/');
         $path = match ($type) {
             'news' => 'news/' . $slug,
@@ -106,14 +127,15 @@ final class SitemapController
         return $baseUrl . Locale::url($path, $lang);
     }
 
-    private static function alternateLinks(string $baseUrl, string $type, int $recordId): string
+    /** @param array<string, array<string,mixed>> $translations язык → строка */
+    private static function alternateLinks(string $baseUrl, string $type, array $translations): string
     {
         $links = [];
-        foreach (TranslationGroupHelper::getTranslations($type, $recordId) as $langCode => $row) {
+        foreach ($translations as $langCode => $row) {
             if (!self::isPublished($type, $row)) {
                 continue;
             }
-            $links[(string) $langCode] = self::canonicalUrl($baseUrl, $type, $row);
+            $links[(string) $langCode] = self::canonicalUrl($baseUrl, $type, $row, (string) $langCode);
         }
 
         if (count($links) < 2) {
@@ -156,6 +178,7 @@ final class SitemapController
         return htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
     }
 
+    /** @param array<string, string> $params */
     public function rss(array $params = []): void
     {
         header('Content-Type: application/rss+xml; charset=utf-8');
@@ -186,7 +209,7 @@ final class SitemapController
 
         foreach ($items as $n) {
             $link = self::canonicalUrl($baseUrl, 'news', $n);
-            $pubDate = date('r', strtotime((string) $n['published_at']));
+            $pubDate = \App\Core\DateFormatter::format((string) $n['published_at'], 'r');
             $title = (string) $n['title'];
             $excerpt = (string) ($n['excerpt'] ?: $n['title']);
             $image = (string) ($n['image'] ?? '');

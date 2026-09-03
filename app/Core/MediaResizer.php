@@ -49,6 +49,13 @@ final class MediaResizer
             exit('Invalid signature');
         }
 
+        // Подпись подтверждает, что адрес наш, но не что размеры осмысленны:
+        // нулевая ширина или высота валила создание холста.
+        if ($width < 1 || $height < 1) {
+            http_response_code(400);
+            exit('Invalid size');
+        }
+
         // Защита от Path Traversal
         if (str_contains($relativeFile, '..') || str_starts_with($relativeFile, '/') || str_starts_with($relativeFile, '\\')) {
             http_response_code(400);
@@ -82,12 +89,21 @@ final class MediaResizer
             self::generateThumb($sourceFile, $cacheFile, $width, $height, $mode, $quality);
             self::serveFile($cacheFile);
         } catch (Throwable $e) {
-            Logger::error('MediaResizer failed: ' . $e->getMessage(), ['source' => $sourceFile]);
+            Logger::error('MediaResizer failed: ' . $e->getMessage(), 'error', ['source' => $sourceFile]);
             http_response_code(500);
             exit('Resizer error');
         }
     }
 
+    /**
+     * Размеры уже проверены в handle(): нулевой холст валил создание картинки.
+     * Диапазон описан здесь, потому что за границу вызова это знание не
+     * переносится — а без него значение уходит в imagecreatetruecolor(), где
+     * ноль означает ошибку, и в файле со strict_types это TypeError.
+     *
+     * @param int<1, max> $w
+     * @param int<1, max> $h
+     */
     private static function generateThumb(string $src, string $dest, int $w, int $h, string $mode, int $quality): void
     {
         $info = @getimagesize($src);

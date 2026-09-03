@@ -36,6 +36,7 @@ final class LanguageController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function update(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -62,6 +63,7 @@ final class LanguageController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireSuperAdmin();
