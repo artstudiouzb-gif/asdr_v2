@@ -407,7 +407,9 @@ final class LegacyWxrImporter
                     NewsImage::create($newsId, $pathUrl, null, $i);
                 }
 
-                self::createRedirect((string) $primary['link'], '/news/' . $slug, $out);
+                if (self::createRedirect((string) $primary['link'], '/news/' . $slug)) {
+                    $out['redirects']++;
+                }
 
                 foreach ($group as $p) {
                     if ((int) $p['id'] === (int) $primary['id']) {
@@ -427,7 +429,9 @@ final class LegacyWxrImporter
                     ]);
                     $out['translations']++;
                     // Переводная запись использует тот же новый slug; Locale определит язык.
-                    self::createRedirect((string) $p['link'], '/news/' . $slug, $out);
+                    if (self::createRedirect((string) $p['link'], '/news/' . $slug)) {
+                        $out['redirects']++;
+                    }
                 }
             } catch (\Throwable $e) {
                 $out['errors'][] = 'Запись "' . $slug . '": ' . $e->getMessage();
@@ -577,13 +581,18 @@ final class LegacyWxrImporter
         return trim(html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
-    /** @param array<string,mixed> $out */
-    private static function createRedirect(string $oldLink, string $to, array &$out): void
+    /**
+     * Возвращает признак «редирект создан», а не приписывает счётчик в массив
+     * итогов по ссылке. Причина та же, что у transferBody(): параметр
+     * `array<string,mixed> &$out` расширял тип итогового массива до
+     * `array<string,mixed>` на всю оставшуюся часть importFile(), и
+     * объявленная форма ответа переставала проверяться анализатором.
+     */
+    private static function createRedirect(string $oldLink, string $to): bool
     {
         $from = (string) parse_url($oldLink, PHP_URL_PATH);
-        if ($from !== '' && trim($from, '/') !== '' && $from !== $to && Redirect::create($from, $to, 301)) {
-            $out['redirects']++;
-        }
+
+        return $from !== '' && trim($from, '/') !== '' && $from !== $to && Redirect::create($from, $to, 301);
     }
 
     /**
