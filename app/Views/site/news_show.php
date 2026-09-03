@@ -217,6 +217,7 @@ $shareBlock = static function (string $extraClass) use ($shareUrl, $shareTitle, 
                     <a class="newsdetail-share__btn" href="https://x.com/intent/post?url=<?= $shareUrl ?>&text=<?= $shareTitle ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в X'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('brand-x', 16) ?></a>
                     <a class="newsdetail-share__btn" href="https://www.linkedin.com/sharing/share-offsite/?url=<?= $shareUrl ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars(t('Поделиться в LinkedIn'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('brand-linkedin', 17) ?></a>
                     <button type="button" class="newsdetail-share__btn" data-copy-link="<?= htmlspecialchars($pageUrl, ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Скопировать ссылку'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('link', 17, 'ui-icon', 1.8) ?></button>
+                    <button type="button" class="newsdetail-share__btn" data-reader-mode-toggle aria-label="<?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?>" title="<?= htmlspecialchars(t('Открыть режим чтения'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('book', 17, 'ui-icon', 1.8) ?></button>
                     <button type="button" class="newsdetail-share__btn" data-print-page aria-label="<?= htmlspecialchars(t('Распечатать'), ENT_QUOTES) ?>"><?= \App\Core\Icon::render('printer', 17, 'ui-icon', 1.8) ?></button>
                 </div>
             </div>
@@ -255,6 +256,10 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 <?php if ($views > 0): ?>
                     <span class="newsdetail__meta-item"><?= \App\Core\Icon::render('eye', 18, 'ui-icon', 1.6) ?><?= htmlspecialchars(trim(number_format($views, 0, '', ' ') . ' ' . t('просмотров')), ENT_QUOTES) ?></span>
                 <?php endif; ?>
+                <button type="button" class="newsdetail__reader-btn newsdetail__reader-btn--onDark" data-reader-mode-toggle aria-label="<?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?>" title="<?= htmlspecialchars(t('Открыть режим чтения'), ENT_QUOTES) ?>">
+                    <?= \App\Core\Icon::render('book', 17, 'ui-icon', 1.8) ?>
+                    <span><?= htmlspecialchars(t('Режим чтения'), ENT_QUOTES) ?></span>
+                </button>
             </div>
             <?php
             // Заголовок на обложке — отдельная короткая строка. Настоящий

@@ -2064,15 +2064,17 @@
             if (readerLastFocus && readerLastFocus.focus) { readerLastFocus.focus(); }
         };
 
-        document.querySelectorAll('[data-reader-mode-toggle]').forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
+        document.addEventListener('click', function (e) {
+            var toggle = e.target.closest('[data-reader-mode-toggle]');
+            if (toggle) {
                 e.preventDefault();
-                openReader(btn);
-            });
-        });
-
-        document.querySelectorAll('[data-reader-close]').forEach(function (btn) {
-            btn.addEventListener('click', closeReader);
+                openReader(toggle);
+                return;
+            }
+            if (e.target.closest('[data-reader-close]')) {
+                e.preventDefault();
+                closeReader();
+            }
         });
 
         overlay.querySelectorAll('button[data-reader-theme]').forEach(function (btn) {

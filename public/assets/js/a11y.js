@@ -59,6 +59,7 @@
             if (Object.prototype.hasOwnProperty.call(DEFAULTS, name)) { state[name] = value; }
         });
         state.size = String(clampSize(state.size));
+        state.reading = 'off';
 
         return state;
     }

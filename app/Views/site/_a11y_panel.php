@@ -140,7 +140,6 @@ $toggle = static function (string $key, string $activeVal, string $label, string
                 </span>
             </div>
             <div class="a11y-group__list">
-                <?= $toggle('reading', 'on', t('Режим чтения'), 'file-text') ?>
                 <?= $toggle('images', 'off', t('Скрыть картинки'), 'photo-off') ?>
                 <?= $toggle('motion', 'off', t('Остановить анимации'), 'player-pause') ?>
                 <?= $toggle('links', 'underline', t('Подчёркивать ссылки'), 'underline') ?>
