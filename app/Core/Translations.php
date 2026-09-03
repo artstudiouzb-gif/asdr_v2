@@ -47,6 +47,9 @@ final class Translations
     /** Сущности, у которых языковая версия бывает отдельной записью. */
     private const LINKED_RECORDS = ['news', 'pages', 'projects'];
 
+    /** Порция для IN: у подготовленного запроса есть предел числа параметров. */
+    private const CHUNK = 500;
+
     /** Поля перевода, которые не переносятся в запись: они служебные. */
     private const SERVICE_FIELDS = ['id', 'lang', 'created_at', 'updated_at'];
 
@@ -101,6 +104,173 @@ final class Translations
         }
 
         return $rows;
+    }
+
+    /**
+     * То же, что rows(), но сразу для набора записей одной таблицы.
+     *
+     * Нужен страницам, которые перебирают сотни записей: карта сайта иначе
+     * спрашивает переводы по одной. Запросов здесь три независимо от числа
+     * записей — базовые строки, участники групп, строки таблицы переводов.
+     *
+     * Результат обязан совпадать с поштучным rows(): сверяет тест 294.
+     *
+     * @param array<array-key, mixed> $ids fetchAll() отдаёт нетипизированные
+     *        строки, поэтому значения приводятся здесь, а не у вызывающего
+     * @return array<int, array<string, array<string,mixed>>> id → язык → строка
+     */
+    public static function rowsBatch(string $table, array $ids, bool $publishedOnly = true): array
+    {
+        $clean = [];
+        foreach ($ids as $id) {
+            $id = (int) $id;
+            if ($id > 0) {
+                $clean[$id] = $id;
+            }
+        }
+        if ($clean === [] || !isset(self::TRANSLATION_TABLES[$table]) || !Database::isConnected()) {
+            return [];
+        }
+
+        [$source, $typeWhere] = self::source($table);
+        $pdo = Database::pdo();
+
+        $bases = [];
+        foreach (array_chunk($clean, self::CHUNK, true) as $chunk) {
+            $stmt = $pdo->prepare(
+                "SELECT * FROM {$source} WHERE id IN (" . self::marks($chunk) . "){$typeWhere}"
+            );
+            $stmt->execute(array_values($chunk));
+            foreach ($stmt->fetchAll() as $row) {
+                $bases[(int) $row['id']] = $row;
+            }
+        }
+        if ($bases === []) {
+            return array_fill_keys(array_values($clean), []);
+        }
+
+        // Механизм Б: участники групп переводов, все разом.
+        $byGroup = [];
+        if (self::supportsLinkedRecords($table)) {
+            $groupIds = [];
+            foreach ($bases as $id => $row) {
+                $gid = self::groupIdOf($row, $id);
+                $groupIds[$gid] = $gid;
+            }
+            foreach (array_chunk($groupIds, self::CHUNK) as $chunk) {
+                $stmt = $pdo->prepare(
+                    "SELECT * FROM {$source}
+                     WHERE COALESCE(NULLIF(translation_group_id, 0), id) IN (" . self::marks($chunk) . ")
+                       AND deleted_at IS NULL{$typeWhere}
+                     ORDER BY id"
+                );
+                $stmt->execute(array_values($chunk));
+                foreach ($stmt->fetchAll() as $row) {
+                    $gid = self::groupIdOf($row, (int) $row['id']);
+                    $lang = trim((string) ($row['lang'] ?? ''));
+                    if ($lang !== '' && !isset($byGroup[$gid][$lang])) {
+                        $byGroup[$gid][$lang] = $row;
+                    }
+                }
+            }
+        }
+
+        // Механизм А: строки таблицы переводов, все разом.
+        $byOwner = self::translationRowsBatch($table, $clean);
+
+        $result = [];
+        foreach ($clean as $id) {
+            $base = $bases[$id] ?? null;
+            if ($base === null) {
+                $result[$id] = [];
+                continue;
+            }
+
+            $ownLang = trim((string) ($base['lang'] ?? Language::defaultCode()));
+            if ($ownLang === '') {
+                $ownLang = Language::defaultCode();
+            }
+
+            $rows = [];
+            foreach ($byGroup[self::groupIdOf($base, $id)] ?? [] as $code => $row) {
+                if (!$publishedOnly || self::isPublished($row)) {
+                    $rows[$code] = $row;
+                }
+            }
+            if (!isset($rows[$ownLang]) && (!$publishedOnly || self::isPublished($base))) {
+                $rows[$ownLang] = $base;
+            }
+            foreach ($byOwner[$id] ?? [] as $code => $translation) {
+                if (isset($rows[$code]) || $code === $ownLang) {
+                    continue;
+                }
+                if ($publishedOnly && !self::isPublished($base)) {
+                    continue;
+                }
+                $rows[$code] = self::overlay($base, $translation);
+            }
+
+            $result[$id] = $rows;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Строки таблицы переводов для набора владельцев.
+     *
+     * @param array<int,int> $ids
+     * @return array<int, array<string, array<string,mixed>>>
+     */
+    private static function translationRowsBatch(string $table, array $ids): array
+    {
+        [$translationTable, $ownerKey] = self::TRANSLATION_TABLES[$table];
+        if ($translationTable === null || $ownerKey === null) {
+            return [];
+        }
+
+        $result = [];
+        foreach (array_chunk($ids, self::CHUNK, true) as $chunk) {
+            try {
+                $stmt = Database::pdo()->prepare(
+                    "SELECT * FROM {$translationTable}
+                     WHERE {$ownerKey} IN (" . self::marks($chunk) . ")
+                     ORDER BY id"
+                );
+                $stmt->execute(array_values($chunk));
+                $found = $stmt->fetchAll();
+            } catch (\Throwable $e) {
+                Logger::swallowed('Translations: не удалось прочитать ' . $translationTable, $e);
+
+                return $result;
+            }
+
+            foreach ($found as $row) {
+                $owner = (int) ($row[$ownerKey] ?? 0);
+                $lang = trim((string) ($row['lang'] ?? ''));
+                // У команды переводится имя, у остальных — заголовок.
+                $headline = trim((string) ($row['title'] ?? $row['name'] ?? ''));
+                if ($owner > 0 && $lang !== '' && $headline !== '') {
+                    $result[$owner][$lang] = $row;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /** @param array<string,mixed> $row */
+    private static function groupIdOf(array $row, int $fallbackId): int
+    {
+        $group = (int) ($row['translation_group_id'] ?? 0);
+
+        return $group > 0 ? $group : $fallbackId;
+    }
+
+    /** @param array<array-key,int> $ids */
+    private static function marks(array $ids): string
+    {
+        return implode(', ', array_fill(0, count($ids), '?'));
     }
 
     /**
