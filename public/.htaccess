@@ -24,15 +24,21 @@
     # Правила внутри mod_headers: без него у ответа не будет Content-Encoding,
     # и браузер получит сжатый файл как обычный — то есть сломанную страницу.
     <IfModule mod_headers.c>
+        # На CDN (Hostinger CDN / hcdn, Cloudflare) edge-сервер сжимает статику
+        # повторно. Отдаём готовые .br/.gz только при прямом запросе (без CDN).
+        RewriteCond %{HTTP:X-HCDN-Request-ID} ^$
+        RewriteCond %{HTTP:CF-RAY} ^$
         RewriteCond %{HTTP:Accept-Encoding} (^|,)\s*br($|[;,])
         RewriteCond %{REQUEST_FILENAME} \.(css|js|svg|json|xml)$
         RewriteCond %{REQUEST_FILENAME}\.br -f
-        RewriteRule ^(.*)$ $1.br [L]
+        RewriteRule ^(.*)$ $1.br [E=no-brotli:1,E=no-gzip:1,L]
 
+        RewriteCond %{HTTP:X-HCDN-Request-ID} ^$
+        RewriteCond %{HTTP:CF-RAY} ^$
         RewriteCond %{HTTP:Accept-Encoding} (^|,)\s*gzip($|[;,])
         RewriteCond %{REQUEST_FILENAME} \.(css|js|svg|json|xml)$
         RewriteCond %{REQUEST_FILENAME}\.gz -f
-        RewriteRule ^(.*)$ $1.gz [L]
+        RewriteRule ^(.*)$ $1.gz [E=no-brotli:1,E=no-gzip:1,L]
     </IfModule>
 
     # Существующие файлы и папки (assets, uploads) отдаются напрямую
@@ -92,7 +98,8 @@ DirectoryIndex index.php
 # автоматически используется gzip/DEFLATE. Бинарные изображения не трогаем.
 # Готовые .br/.gz повторно не жмём: они уже отданы со своим Content-Encoding.
 <IfModule mod_setenvif.c>
-    SetEnvIf Request_URI "\.(br|gz)$" no-brotli no-gzip dont-vary
+    SetEnvIf Request_URI "\.(br|gz)($|\?)" no-brotli no-gzip dont-vary
+    SetEnvIfNoCase Request_URI "\.(css|js)\.(br|gz)" no-brotli no-gzip dont-vary
 </IfModule>
 <IfModule mod_brotli.c>
     AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml
