@@ -24,6 +24,12 @@
     # а правило проксирования ниже возвращает его в public/.
     RewriteRule ^(?!public/|index\.php$|download\.php$).*\.php$ - [F]
 
+    # Если запрашиваемый jpg/jpeg/png в uploads отсутствует, но есть одноимённый .webp —
+    # отдаём webp-файл напрямую (fallback для корня на Hostinger / LiteSpeed).
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{DOCUMENT_ROOT}/public/uploads/public/$1.webp -f
+    RewriteRule ^(?:public/)?uploads/public/(.+)\.(jpe?g|png)$ public/uploads/public/$1.webp [T=image/webp,L]
+
     RewriteRule ^$ public/ [L]
 
     RewriteCond %{REQUEST_URI} !^/public/

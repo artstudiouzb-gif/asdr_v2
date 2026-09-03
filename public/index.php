@@ -41,8 +41,12 @@ $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
 // (проверено — строка пути действительно выходила наружу). Читать можно было
 // только *.webp, и Apache такой путь обычно нормализует раньше PHP, но
 // собирать путь из запроса без границ нельзя в любом случае.
-if (str_starts_with($requestPath, '/uploads/public/')
-    && preg_match('#^/uploads/public/([A-Za-z0-9._/-]+)\.(jpe?g|png)$#i', $requestPath, $m)
+$uploadsProbe = str_starts_with($requestPath, '/public/uploads/public/')
+    ? substr($requestPath, 7)
+    : $requestPath;
+
+if (str_starts_with($uploadsProbe, '/uploads/public/')
+    && preg_match('#^/uploads/public/([A-Za-z0-9._/-]+)\.(jpe?g|png)$#i', $uploadsProbe, $m)
     && !str_contains($m[1], '..')) {
     $uploadsRoot = realpath(__DIR__ . '/uploads/public');
     $webpDisk = realpath(__DIR__ . '/uploads/public/' . $m[1] . '.webp');

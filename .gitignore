@@ -23,7 +23,10 @@
 /storage/integrity/
 # Срезы вычисленных стилей админки (scripts/admin-style-snapshot.mjs).
 /storage/tmp/
+/public/uploads/*
+/public/uploads/**/*
 /public/uploads/public/*
+/public/uploads/public/**/*
 !/public/uploads/public/.gitkeep
 !/public/uploads/public/index.html
 
