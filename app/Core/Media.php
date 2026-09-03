@@ -289,7 +289,14 @@ final class Media
         $relative = substr($clean, strlen($urlPrefix));
         $diskPath = $diskBase . $relative;
 
-        if (is_file($diskPath)) {
+        // Файла на диске мало: 0600 веб-сервер не отдаст, а <img> на 403 не
+        // откатывается ни на что — вместо фотографии остаётся alt-текст.
+        // servable() чинит права, когда может; не смог — уходим на webp,
+        // который отдать получится. Прежде проверялся только is_file(), то есть
+        // самозалечивание досталось вариантам, а оригиналу — нет, хотя ломается
+        // страница именно на нём: у варианта есть запасной путь, у оригинала
+        // никакого.
+        if (self::servable($diskPath)) {
             return $url;
         }
 
@@ -353,7 +360,9 @@ final class Media
         }
         $variants = self::webpVariants($url);
         if ($variants === null) {
-            return $url;
+            // Вариантов нет — отдаём оригинал, но тем же путём, что и picture():
+            // непригодный к отдаче файл подменяется webp, если он есть.
+            return self::resolveExistingMediaUrl($url);
         }
         // Самый мелкий из существующих: ключи отсортированы по ширине.
         foreach ($variants['sized'] as $variantUrl) {

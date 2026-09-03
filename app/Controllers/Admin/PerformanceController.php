@@ -25,6 +25,9 @@ final class PerformanceController
     // не выбирала и секунды, то не укладывалась в шлюзовой таймаут. Столько же
     // и по той же причине берёт пакет импорта новостей.
     private const IMAGE_BATCH_SECONDS = 15.0;
+    // Проход по правам дешевле (stat + chmod, без декодирования картинок),
+    // но каталог тот же, поэтому и предел времени тот же.
+    private const PERMISSIONS_BATCH_SECONDS = 15.0;
 
     public function index(): void
     {
@@ -272,6 +275,49 @@ final class PerformanceController
             'optimized' => $result['optimized'],
             'planned' => $result['planned'],
             'skipped' => $result['skipped'],
+            'failed' => $result['failed'],
+            'done' => $result['cursor'] >= $result['total'],
+        ]);
+    }
+
+    /**
+     * Приводит права публичных загрузок к тем, при которых их отдаёт веб-сервер.
+     *
+     * Самозалечивание в `Media::servable()` чинит то, что попалось при
+     * отрисовке, но страницы кэшируются: до битой обложки очередь может не
+     * дойти никогда. Консольный `scripts/fix_upload_permissions.php` остаётся,
+     * однако на shared-хостинге его некому запустить — раздел предлагал
+     * команду, которую владелец выполнить не может.
+     */
+    public function fixPermissions(): never
+    {
+        Auth::requireSuperAdmin();
+        Csrf::verifyRequest();
+
+        $offset = max(0, (int) ($_POST['offset'] ?? 0));
+        $dryRun = (string) ($_POST['dry'] ?? '') === '1';
+        $directory = (string) \App\Core\Config::get('paths.public_uploads', APP_ROOT . '/public/uploads/public');
+
+        try {
+            $result = \App\Core\MediaPermissions::run(
+                $directory,
+                $dryRun,
+                $offset,
+                self::PERMISSIONS_BATCH_SECONDS
+            );
+        } catch (\Throwable $error) {
+            $this->json(['ok' => false, 'error' => $error->getMessage()], 500);
+        }
+
+        $this->json([
+            'ok' => true,
+            'dry' => $dryRun,
+            'cursor' => $result['cursor'],
+            'total' => $result['total'],
+            'scanned' => $result['scanned'],
+            'fixed' => $result['fixed'],
+            'planned' => $result['planned'],
+            'empty' => $result['empty'],
             'failed' => $result['failed'],
             'done' => $result['cursor'] >= $result['total'],
         ]);
