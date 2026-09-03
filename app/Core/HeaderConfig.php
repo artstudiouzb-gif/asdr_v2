@@ -30,7 +30,6 @@ final class HeaderConfig
         'a11y' => 'Версия для слабовидящих',
         'phone' => 'Телефон',
         'email' => 'E-mail',
-        'currency' => 'Курсы валют (JSON API)',
         'snippet' => 'Сниппет (текст/HTML)',
         'divider' => 'Разделитель',
         'spacer' => 'Гибкий отступ',

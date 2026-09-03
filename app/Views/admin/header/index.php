@@ -20,7 +20,6 @@ foreach (array_keys($elements) as $elementType) {
         'menu' => 'layout',
         'logo' => 'image',
         'language' => 'globe',
-        'currency' => 'stats',
     ][$elementType] ?? $elementType;
     $elementIcons[$elementType] = AdminUi::icon($iconName, 18, 'hb-el__icon-svg', 1.6);
 }

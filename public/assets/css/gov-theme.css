@@ -2079,24 +2079,11 @@ body.lightbox-active { overflow: hidden; }
 .news-poll-card__actions { margin-top: 14px; }
 .news-poll-card__actions .btn { width: 100%; justify-content: center; }
 
-/* Виджет информера валют (JSON API) */
-.currency-widget {
-    display: inline-flex; align-items: center; gap: 14px; padding: 4px 12px;
-    border-radius: var(--radius-sm, 14px); background: color-mix(in srgb, var(--gov-teal, #0d9488) 10%, transparent);
-    font-size: var(--step--3); font-weight: 600; color: var(--gov-title);
-}
-.currency-item { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
-.currency-item__code { opacity: 0.85; font-size: var(--step--4); font-weight: 700; text-transform: uppercase; color: var(--gov-teal, #0d9488); }
-.currency-item__rate { font-weight: 700; }
-.currency-item__diff { font-size: var(--step--4); padding: 1px 4px; border-radius: 4px; font-weight: 700; }
-
 /* Живой поиск */
 .search-suggest__item { display: flex; align-items: center; gap: 12px; }
 .search-suggest__thumb { width: 44px; height: 44px; border-radius: var(--radius-sm, 8px); object-fit: cover; flex-shrink: 0; }
 .search-suggest__info { display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0; }
 .search-suggest__meta { display: flex; align-items: center; gap: 8px; font-size: var(--step--4); color: var(--gov-subtext); }
-.currency-item__diff.is-up { color: #10b981; background: rgba(16, 185, 129, 0.15); }
-.currency-item__diff.is-down { color: #ef4444; background: rgba(239, 68, 68, 0.15); }
 
 /* 4. Чистая печатная верстка (@media print) */
 @media print {
