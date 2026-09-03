@@ -26,7 +26,7 @@ test('AdminUI: все явно запрошенные иконки сущест�
 });
 
 test('AdminUI: конструктор шапки покрыт тем же реестром иконок', function (): void {
-    $aliases = ['language' => 'globe', 'currency' => 'stats'];
+    $aliases = ['language' => 'globe'];
     foreach (array_keys(HeaderConfig::ELEMENTS) as $elementType) {
         $iconName = $aliases[$elementType] ?? $elementType;
         assert_true(AdminUi::icon($iconName) !== '', "Нет иконки элемента шапки {$elementType}");

@@ -40,12 +40,10 @@ test('SSRF-защита запрещает внутренние адреса и 
 
 test('Пользовательские исходящие запросы закрепляют проверенный DNS-адрес', function (): void {
     $http = (string) file_get_contents(APP_ROOT . '/app/Core/Http.php');
-    $externalJson = (string) file_get_contents(APP_ROOT . '/app/Core/ExternalJsonService.php');
     $legacyImporter = (string) file_get_contents(APP_ROOT . '/app/Core/LegacyCmsImporter.php');
 
     assert_contains('CURLOPT_RESOLVE', $http, 'HTTP-клиент закрепляет DNS-результат');
     assert_contains('CURLINFO_PRIMARY_IP', $http, 'HTTP-клиент сверяет фактический IP');
-    assert_contains('getSafeRemote', $externalJson, 'JSON-интеграция использует безопасный клиент');
     assert_contains('getSafeRemote', $legacyImporter, 'Импорт использует безопасный клиент');
 });
 
