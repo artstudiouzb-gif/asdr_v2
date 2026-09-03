@@ -4734,6 +4734,26 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     display: flex;
 }
 
+.media-bulk-bar__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.files-table .files-table__check {
+    display: none;
+    width: 36px;
+    text-align: center;
+}
+
+.files-table.is-bulk-active .files-table__check {
+    display: table-cell;
+}
+
+.file-row-check {
+    cursor: pointer;
+}
+
 /* Драг-н-Дроп зона загрузки файлов */
 .media-upload-drawer {
     display: none;

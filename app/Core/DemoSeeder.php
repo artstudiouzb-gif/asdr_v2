@@ -14,7 +14,7 @@ use PDO;
  */
 final class DemoSeeder
 {
-    private const DEMO_VERSION = '2026.08-v2';
+    private const DEMO_VERSION = '2026.09-v1';
 
     /** @return array<string,int> счётчики добавленного по разделам */
     /**
@@ -99,6 +99,8 @@ final class DemoSeeder
 
     /**
      * Выполняет полный сброс разделов (очистку контента) и загрузку эталонного комплекта «с чистого листа».
+     *
+     * @param list<string>|null $modules
      * @return array<string,int>
      */
     public static function resetAndRun(PDO $pdo, ?array $modules = null): array
@@ -162,7 +164,7 @@ final class DemoSeeder
             }
 
             $result = self::run($pdo, $modules);
-            $issues = self::verify($pdo);
+            $issues = self::verify($pdo, $modules);
             if ($issues !== []) {
                 throw new \RuntimeException(
                     'Проверка демо-данных не пройдена: ' . implode('; ', $issues)
@@ -184,11 +186,15 @@ final class DemoSeeder
     /**
      * Проверяет полноту и внутреннюю согласованность эталонного демо-комплекта.
      *
+     * @param list<string>|null $modules
      * @return list<string>
      */
-    public static function verify(PDO $pdo): array
+    public static function verify(PDO $pdo, ?array $modules = null): array
     {
         $issues = [];
+        $all = $modules === null || in_array('all', $modules, true) || $modules === [];
+        $selected = static fn (string $mod): bool => $all || in_array($mod, $modules, true);
+
         $minimums = [
             'news' => 7,
             'news_translations' => 6,
@@ -209,9 +215,23 @@ final class DemoSeeder
             'menu_items' => 40,
         ];
 
+        $moduleTableMap = [
+            'news' => ['news', 'news_translations', 'news_images', 'news_polls'],
+            'pages' => ['pages', 'blocks'],
+            'entries' => ['content_entries', 'content_entry_translations'],
+            'documents' => ['content_entries', 'content_entry_translations'],
+            'vacancies' => ['content_entries', 'content_entry_translations'],
+            'tenders' => ['content_entries', 'content_entry_translations'],
+            'events' => ['content_entries', 'content_entry_translations'],
+            'media' => ['photo_albums', 'photo_album_images', 'photo_album_translations', 'videos', 'video_translations'],
+            'forms' => ['forms'],
+            'team' => ['team_members', 'team_member_translations'],
+            'menu' => ['menu_items'],
+        ];
+
         // Проекты — строки pages, отдельной таблицы у них нет: считаем по типу.
         // У каждого проекта своя узбекская запись, как и у страниц.
-        if (self::tableExists($pdo, 'pages')) {
+        if ($selected('projects') && self::tableExists($pdo, 'pages')) {
             $projects = (int) $pdo->query(
                 "SELECT COUNT(*) FROM pages WHERE entity_type = 'project'"
             )->fetchColumn();
@@ -225,18 +245,32 @@ final class DemoSeeder
                 $issues[] = "отсутствует таблица {$table}";
                 continue;
             }
+            if (!$all) {
+                $relevant = false;
+                foreach ($modules as $mod) {
+                    if (isset($moduleTableMap[$mod]) && in_array($table, $moduleTableMap[$mod], true)) {
+                        $relevant = true;
+                        break;
+                    }
+                }
+                if (!$relevant) {
+                    continue;
+                }
+            }
             $count = (int) $pdo->query('SELECT COUNT(*) FROM `' . $table . '`')->fetchColumn();
             if ($count < $minimum) {
                 $issues[] = "{$table}: {$count}, ожидалось не менее {$minimum}";
             }
         }
 
-        if (self::tableExists($pdo, 'pages')) {
+        if ($selected('home') && self::tableExists($pdo, 'pages')) {
             $homeCount = (int) $pdo->query('SELECT COUNT(*) FROM pages WHERE is_home = 1')->fetchColumn();
             if ($homeCount !== 1) {
                 $issues[] = "главных страниц: {$homeCount}, ожидалась 1";
             }
+        }
 
+        if ($selected('pages') && self::tableExists($pdo, 'pages')) {
             $unlinkedPages = (int) $pdo->query(
                 'SELECT COUNT(*)
                  FROM pages p
@@ -275,7 +309,7 @@ final class DemoSeeder
             }
         }
 
-        if (self::tableExists($pdo, 'blocks')) {
+        if ($selected('pages') && self::tableExists($pdo, 'blocks')) {
             $knownTypes = BlockTypeRegistry::types();
             $actualTypes = $pdo->query('SELECT DISTINCT type FROM blocks')->fetchAll(PDO::FETCH_COLUMN) ?: [];
             foreach ($actualTypes as $type) {
@@ -296,7 +330,9 @@ final class DemoSeeder
             if ($mixedPageBlocks > 0) {
                 $issues[] = "блоки привязаны к странице другого языка: {$mixedPageBlocks}";
             }
+        }
 
+        if ($selected('home') && self::tableExists($pdo, 'blocks')) {
             $homeStacks = $pdo->query(
                 'SELECT b.lang, COUNT(*) AS total
                  FROM blocks b
@@ -314,23 +350,26 @@ final class DemoSeeder
             }
         }
 
-        if (self::tableExists($pdo, 'menu_items') && self::tableExists($pdo, 'pages')) {
-            // Пункт меню на проект хранится как projects/<slug> — при сверке
-            // отрезаем префикс и ищем запись нужного типа.
-            $brokenTargets = (int) $pdo->query(
-                "SELECT COUNT(*)
-                 FROM menu_items mi
-                 LEFT JOIN pages p
-                   ON mi.url_type = 'page'
-                  AND p.slug = IF(mi.url_value LIKE 'projects/%', SUBSTRING(mi.url_value, 10), mi.url_value)
-                  AND p.entity_type = IF(mi.url_value LIKE 'projects/%', 'project', 'page')
-                  AND p.lang = mi.lang
-                  AND p.status = 'published'
-                  AND p.deleted_at IS NULL
-                 WHERE mi.url_type = 'page' AND p.id IS NULL"
-            )->fetchColumn();
-            if ($brokenTargets > 0) {
-                $issues[] = "пункты меню с отсутствующими страницами: {$brokenTargets}";
+        if ($selected('menu') && self::tableExists($pdo, 'menu_items')) {
+            if ($selected('pages') && self::tableExists($pdo, 'pages')) {
+                // Пункт меню на проект хранится как projects/<slug> — при сверке
+                // отрезаем префикс и ищем запись нужного типа.
+                // Допускается как точный язык, так и наличие канонического оригинала (ru).
+                $brokenTargets = (int) $pdo->query(
+                    "SELECT COUNT(*)
+                     FROM menu_items mi
+                     LEFT JOIN pages p
+                       ON mi.url_type = 'page'
+                      AND p.slug = IF(mi.url_value LIKE 'projects/%', SUBSTRING(mi.url_value, 10), mi.url_value)
+                      AND p.entity_type = IF(mi.url_value LIKE 'projects/%', 'project', 'page')
+                      AND (p.lang = mi.lang OR p.lang = 'ru')
+                      AND p.status = 'published'
+                      AND p.deleted_at IS NULL
+                     WHERE mi.url_type = 'page' AND p.id IS NULL"
+                )->fetchColumn();
+                if ($brokenTargets > 0) {
+                    $issues[] = "пункты меню с отсутствующими страницами: {$brokenTargets}";
+                }
             }
 
             foreach (['ru', 'uz'] as $lang) {
@@ -342,7 +381,7 @@ final class DemoSeeder
             }
         }
 
-        if (self::tableExists($pdo, 'content_entries')) {
+        if ($selected('entries') && self::tableExists($pdo, 'content_entries')) {
             $stmt = $pdo->query('SELECT id, data FROM content_entries');
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $entry) {
                 json_decode((string) $entry['data'], true);
@@ -352,11 +391,13 @@ final class DemoSeeder
             }
         }
 
-        $assetSource = \dirname(__DIR__, 2) . '/database/demo_assets';
-        foreach (glob($assetSource . '/*.jpg') ?: [] as $source) {
-            $target = self::uploadsDir() . '/' . basename($source);
-            if (!is_file($target) || hash_file('sha256', $source) !== hash_file('sha256', $target)) {
-                $issues[] = 'демо-медиа не синхронизировано: ' . basename($source);
+        if ($all || in_array('assets', $modules, true)) {
+            $assetSource = \dirname(__DIR__, 2) . '/database/demo_assets';
+            foreach (glob($assetSource . '/*.jpg') ?: [] as $source) {
+                $target = self::uploadsDir() . '/' . basename($source);
+                if (!is_file($target) || hash_file('sha256', $source) !== hash_file('sha256', $target)) {
+                    $issues[] = 'демо-медиа не синхронизировано: ' . basename($source);
+                }
             }
         }
 
@@ -487,61 +528,90 @@ final class DemoSeeder
                AND (translation_group_id IS NULL OR translation_group_id = 0)'
         )->execute([':id' => $homeId]);
 
+        $activeLangs = self::tableExists($pdo, 'languages')
+            ? ($pdo->query('SELECT code FROM languages WHERE is_active = 1 ORDER BY sort_order, id')->fetchAll(PDO::FETCH_COLUMN) ?: ['ru', 'uz'])
+            : ['ru', 'uz'];
+
         $homeIds = ['ru' => $homeId];
-        if (isset($localizedBlocks['uz'])) {
-            $findUzHome = $pdo->prepare(
-                "SELECT id
+        $otherLangs = array_values(array_filter($activeLangs, static fn ($l) => $l !== 'ru'));
+        foreach ($otherLangs as $otherLang) {
+            $findOtherHome = $pdo->prepare(
+                'SELECT id
                  FROM pages
-                 WHERE lang = 'uz'
+                 WHERE lang = :lang
                    AND deleted_at IS NULL
                    AND (translation_group_id = :group_id OR slug = :slug)
                  ORDER BY (translation_group_id = :group_id_order) DESC, id ASC
-                 LIMIT 1"
+                 LIMIT 1'
             );
-            $findUzHome->execute([
+            $findOtherHome->execute([
+                ':lang' => $otherLang,
                 ':group_id' => $homeId,
                 ':slug' => $homeSlug,
                 ':group_id_order' => $homeId,
             ]);
-            $uzHomeId = $findUzHome->fetchColumn();
-            if ($uzHomeId === false) {
-                $insertUzHome = $pdo->prepare(
+            $otherHomeId = $findOtherHome->fetchColumn();
+            if ($otherHomeId === false) {
+                $hTitle = $otherLang === 'uz' ? 'Bosh sahifa' : ($otherLang === 'en' ? 'Home' : 'Главная');
+                $hMeta = $otherLang === 'uz'
+                    ? 'Strategik rivojlanish va islohotlar agentligi'
+                    : ($otherLang === 'en'
+                        ? 'Agency for Strategic Development and Reforms'
+                        : 'Агентство стратегического развития и реформ');
+                $hDesc = $otherLang === 'uz'
+                    ? 'Agentlikning strategik tashabbuslari, loyihalari, yangiliklari va tahliliy materiallari.'
+                    : ($otherLang === 'en'
+                        ? 'Strategic initiatives, projects, news and analytical materials of the Agency.'
+                        : 'Стратегические инициативы, проекты, новости и аналитические материалы Агентства.');
+                $hLead = $otherLang === 'uz'
+                    ? 'Strategiya. Islohotlar. Taraqqiyot.'
+                    : ($otherLang === 'en'
+                        ? 'Strategy. Reforms. Development.'
+                        : 'Стратегия. Реформы. Развитие.');
+
+                $insertOtherHome = $pdo->prepare(
                     "INSERT INTO pages
                         (title, slug, meta_title, meta_description, `lead`, status, is_home,
                          layout_type, transparent_header, lang, translation_group_id, created_at)
                      SELECT :title, :slug, :meta_title, :meta_description, :lead, 'published', 0,
-                            'no_sidebar', 1, 'uz', :group_id, NOW()
+                            'no_sidebar', 1, :lang, :group_id, NOW()
                      FROM DUAL
                      WHERE NOT EXISTS (
-                         SELECT 1 FROM pages WHERE slug = :slug_check AND lang = 'uz'
+                         SELECT 1 FROM pages WHERE slug = :slug_check AND lang = :lang_check
                      )"
                 );
-                $insertUzHome->execute([
-                    ':title' => 'Bosh sahifa',
+                $insertOtherHome->execute([
+                    ':title' => $hTitle,
                     ':slug' => $homeSlug,
-                    ':meta_title' => 'Strategik rivojlanish va islohotlar agentligi',
-                    ':meta_description' => 'Agentlikning strategik tashabbuslari, loyihalari, yangiliklari va tahliliy materiallari.',
-                    ':lead' => 'Strategiya. Islohotlar. Taraqqiyot.',
+                    ':meta_title' => $hMeta,
+                    ':meta_description' => $hDesc,
+                    ':lead' => $hLead,
+                    ':lang' => $otherLang,
                     ':group_id' => $homeId,
                     ':slug_check' => $homeSlug,
+                    ':lang_check' => $otherLang,
                 ]);
-                $c['pages'] += $insertUzHome->rowCount();
-                $findUzHome->execute([
+                $c['pages'] += $insertOtherHome->rowCount();
+                $findOtherHome->execute([
+                    ':lang' => $otherLang,
                     ':group_id' => $homeId,
                     ':slug' => $homeSlug,
                     ':group_id_order' => $homeId,
                 ]);
-                $uzHomeId = $findUzHome->fetchColumn();
+                $otherHomeId = $findOtherHome->fetchColumn();
             }
-            if ($uzHomeId !== false) {
-                $uzHomeId = (int) $uzHomeId;
+            if ($otherHomeId !== false) {
+                $otherHomeId = (int) $otherHomeId;
                 $pdo->prepare(
                     'UPDATE pages
                      SET translation_group_id = :group_id
                      WHERE id = :id
                        AND (translation_group_id IS NULL OR translation_group_id = 0 OR translation_group_id = id)'
-                )->execute([':group_id' => $homeId, ':id' => $uzHomeId]);
-                $homeIds['uz'] = $uzHomeId;
+                )->execute([':group_id' => $homeId, ':id' => $otherHomeId]);
+                $homeIds[$otherLang] = $otherHomeId;
+                if (!isset($localizedBlocks[$otherLang])) {
+                    $localizedBlocks[$otherLang] = $localizedBlocks['uz'] ?? $localizedBlocks['ru'] ?? [];
+                }
             }
         }
 
@@ -1899,6 +1969,28 @@ final class DemoSeeder
              VALUES (:pid, :lang, :ty, :ti, :d, :so, 1, NOW())'
         );
 
+        $activeLangs = self::tableExists($pdo, 'languages')
+            ? ($pdo->query('SELECT code FROM languages WHERE is_active = 1 ORDER BY sort_order, id')->fetchAll(PDO::FETCH_COLUMN) ?: ['ru', 'uz'])
+            : ['ru', 'uz'];
+
+        $enPageTitles = [
+            'o-nas' => 'About Agency',
+            'rukovodstvo' => 'Leadership',
+            'struktura' => 'Structure',
+            'direktor' => 'Director',
+            'pervyy-zamestitel-direktora' => 'First Deputy Director',
+            'antikorrupciya' => 'Anti-Corruption',
+            'napravleniya' => 'Priority Areas',
+            'strategiya-2030' => 'Strategy «Uzbekistan–2030»',
+            'ustoychivyy-ekonomicheskiy-rost' => 'Sustainable Economic Growth',
+            'analitika' => 'Analytics',
+            'press-centr' => 'Press Center',
+            'meropriyatiya' => 'Events',
+            'media' => 'Media Library',
+            'kontakty' => 'Contacts',
+            'karera' => 'Careers',
+        ];
+
         $createdPageSlugs = [];
         foreach ($pages as $slug => $langData) {
             if (!is_array($langData)) {
@@ -1907,6 +1999,16 @@ final class DemoSeeder
             $ruData = $langData['ru'] ?? null;
             if (!is_array($ruData)) {
                 continue;
+            }
+
+            foreach ($activeLangs as $aLang) {
+                if ($aLang !== 'ru' && !isset($langData[$aLang])) {
+                    $langData[$aLang] = [
+                        'title' => ($aLang === 'en' ? ($enPageTitles[$slug] ?? $ruData['title']) : $ruData['title']),
+                        'lead' => $aLang === 'en' ? 'Official information and key materials of the Agency.' : ($ruData['lead'] ?? ''),
+                        'blocks' => $ruData['blocks'] ?? [],
+                    ];
+                }
             }
 
             // Основная версия создаётся первой и становится корнем группы.
@@ -1925,12 +2027,16 @@ final class DemoSeeder
                     ? (string) $data['meta_title']
                     : $title . ($lang === 'uz'
                         ? ' — Strategik rivojlanish va islohotlar agentligi'
-                        : ' — Агентство стратегического развития и реформ');
+                        : ($lang === 'en'
+                            ? ' — Agency for Strategic Development and Reforms'
+                            : ' — Агентство стратегического развития и реформ'));
                 $metaDescription = array_key_exists('meta_description', $data)
                     ? (string) $data['meta_description']
                     : ($lang === 'uz'
                         ? '«' . $title . '» bo‘limining rasmiy ma’lumotlari.'
-                        : 'Официальная информация раздела «' . $title . '».');
+                        : ($lang === 'en'
+                            ? 'Official information for the «' . $title . '» section.'
+                            : 'Официальная информация раздела «' . $title . '».'));
                 // Лид из фикстуры может быть пустым намеренно: на странице с
                 // блоком «Профиль персоны» заголовок даёт сам блок, и лид
                 // добавил бы второй h1.
@@ -1938,7 +2044,9 @@ final class DemoSeeder
                     ? (string) $data['lead']
                     : ($lang === 'uz'
                         ? 'Agentlikning strategik tashabbuslari, natijalari va dolzarb materiallari.'
-                        : 'Стратегические инициативы, результаты и актуальные материалы Агентства.');
+                        : ($lang === 'en'
+                            ? 'Strategic initiatives, results, and key materials of the Agency.'
+                            : 'Стратегические инициативы, результаты и актуальные материалы Агентства.'));
 
                 if ($lang !== 'ru' && $groupId === null) {
                     continue;
@@ -2095,6 +2203,7 @@ final class DemoSeeder
         if ((int) $pdo->query('SELECT COUNT(*) FROM menu_items')->fetchColumn() > 0) {
             return;
         }
+        /** @var array<string, list<array{title: string, type: string, value: string, mega: int, children: list<array{0: string, 1: string, 2: string, 3?: string}>}>> $menus */
         $menus = [
             'ru' => [
                 ['title' => 'Агентство', 'type' => 'page', 'value' => 'o-nas', 'mega' => 0, 'children' => [
@@ -2154,6 +2263,35 @@ final class DemoSeeder
                 ]],
                 ['title' => 'Aloqa', 'type' => 'page', 'value' => 'kontakty', 'mega' => 0, 'children' => []],
             ],
+            'en' => [
+                ['title' => 'Agency', 'type' => 'page', 'value' => 'o-nas', 'mega' => 0, 'children' => [
+                    ['About Agency', 'page', 'o-nas'],
+                    ['Leadership', 'page', 'rukovodstvo'],
+                    ['Structure', 'page', 'struktura'],
+                    ['Director', 'page', 'direktor'],
+                    ['First Deputy Director', 'page', 'pervyy-zamestitel-direktora'],
+                    ['Anti-Corruption', 'page', 'antikorrupciya'],
+                ]],
+                ['title' => 'Activity', 'type' => 'page', 'value' => 'napravleniya', 'mega' => 0, 'children' => [
+                    ['Strategy «Uzbekistan–2030»', 'page', 'strategiya-2030', '2030'],
+                    ['Priority Areas', 'page', 'napravleniya'],
+                    ['Sustainable Economic Growth', 'page', 'ustoychivyy-ekonomicheskiy-rost'],
+                    ['Projects and Initiatives', 'custom', '/projects'],
+                    ['Analytics', 'page', 'analitika'],
+                ]],
+                ['title' => 'Press Center', 'type' => 'page', 'value' => 'press-centr', 'mega' => 0, 'children' => [
+                    ['News', 'news_index', ''],
+                    ['Events', 'page', 'meropriyatiya'],
+                    ['Photo Albums', 'custom', '/albums'],
+                    ['Media Library', 'page', 'media'],
+                ]],
+                ['title' => 'Open Data', 'type' => 'custom', 'value' => '/catalog/documenty', 'mega' => 0, 'children' => [
+                    ['Documents', 'custom', '/catalog/documenty'],
+                    ['Tenders', 'custom', '/catalog/tendery'],
+                    ['Vacancies', 'custom', '/catalog/vakansii'],
+                ]],
+                ['title' => 'Contacts', 'type' => 'page', 'value' => 'kontakty', 'mega' => 0, 'children' => []],
+            ],
         ];
         $langs = $pdo->query('SELECT code FROM languages WHERE is_active = 1 ORDER BY sort_order, id')->fetchAll(PDO::FETCH_COLUMN) ?: [];
         if ($langs === []) {
@@ -2184,11 +2322,12 @@ final class DemoSeeder
                 $c['menu'] += $ins->rowCount();
                 $parentId = (int) $pdo->lastInsertId();
                 foreach ($item['children'] as $childOrder => $child) {
+                    $badge = $child[3] ?? null;
                     $ins->execute([
                         ':lang' => $lang,
                         ':title' => $child[0],
-                        ':badge' => $child[3] ?? null,
-                        ':badge_color' => isset($child[3]) ? 'blue' : null,
+                        ':badge' => $badge,
+                        ':badge_color' => $badge !== null ? 'blue' : null,
                         ':badge_pos' => 'right',
                         ':url_type' => $child[1],
                         ':url_value' => $child[2],
