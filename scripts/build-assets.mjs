@@ -157,19 +157,6 @@ async function buildJs(sources) {
 async function verifyOrWrite(path, content) {
     if (!checkOnly) {
         await writeFile(path, content, 'utf8');
-        if (path.endsWith('.css') || path.endsWith('.js')) {
-            const buf = Buffer.from(content, 'utf8');
-            const gz = gzipSync(buf, { level: 9 });
-            const br = brotliCompressSync(buf, {
-                params: {
-                    [zlibConstants.BROTLI_PARAM_QUALITY]: 11,
-                },
-            });
-            await Promise.all([
-                writeFile(`${path}.gz`, gz),
-                writeFile(`${path}.br`, br),
-            ]);
-        }
         return;
     }
 

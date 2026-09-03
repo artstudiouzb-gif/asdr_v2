@@ -35,7 +35,7 @@
     </FilesMatch>
 </IfModule>
 
-Options -Indexes
+Options -Indexes -MultiViews
 DirectoryIndex index.php
 
 # Сжатие текстовых ответов. Brotli предпочтительнее; на серверах без него
