@@ -415,7 +415,7 @@ final class Uploader
             $quality = self::webpQuality();
 
             // WebP полного размера.
-            @imagewebp($src, $base . '.webp', $quality);
+            self::writeWebp($src, $base . '.webp', $quality);
 
             // Адаптивные размеры.
             foreach ([1600, 800] as $targetWidth) {
@@ -431,7 +431,7 @@ final class Uploader
                     imagesavealpha($resized, true);
                 }
                 imagecopyresampled($resized, $src, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
-                @imagewebp($resized, $base . '-' . $targetWidth . '.webp', $quality);
+                self::writeWebp($resized, $base . '-' . $targetWidth . '.webp', $quality);
             }
 
             // Даунскейл самого оригинала, если он неоправданно большой (фото
@@ -456,6 +456,27 @@ final class Uploader
         } catch (\Throwable $e) {
             Logger::error('Image optimize failed: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Записывает webp-вариант и **сразу открывает его на чтение**.
+     *
+     * Файл, созданный самим PHP, получает права по umask — на части хостингов
+     * это 0600, и веб-сервер такой файл не отдаёт. Оригинал снимка при этом
+     * читается (ему `storeFromPath()` ставит 0644), а вариант — нет, и картинка
+     * пропадает целиком: `<picture>` выбирает `<source type="image/webp"` по
+     * типу, а НЕ по тому, загрузился ли он, и на `<img>` уже не откатывается —
+     * посетитель видит alt-текст вместо фотографии. Проверено в Chromium:
+     * недоступный источник даёт naturalWidth = 0.
+     *
+     * @param \GdImage $image
+     */
+    private static function writeWebp(\GdImage $image, string $file, int $quality): void
+    {
+        if (!@imagewebp($image, $file, $quality)) {
+            return;
+        }
+        @chmod($file, 0644);
     }
 
     public static function sanitizeSvgFile(string $path): void
