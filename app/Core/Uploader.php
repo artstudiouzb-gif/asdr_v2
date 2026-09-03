@@ -417,8 +417,10 @@ final class Uploader
             // WebP полного размера.
             self::writeWebp($src, $base . '.webp', $quality);
 
-            // Адаптивные размеры.
-            foreach ([1600, 800] as $targetWidth) {
+            // Адаптивные размеры — из общего списка (Media::VARIANT_WIDTHS),
+            // от крупного к мелкому. Свой список здесь разъехался бы с тем, что
+            // ждут подбор srcset, пакетная достройка и удаление вариантов.
+            foreach (array_reverse(\App\Core\Media::VARIANT_WIDTHS) as $targetWidth) {
                 if ($width <= $targetWidth) {
                     continue;
                 }

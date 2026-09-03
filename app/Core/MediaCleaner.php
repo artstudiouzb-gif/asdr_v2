@@ -149,7 +149,7 @@ final class MediaCleaner
         @unlink($fullPath);
 
         $base = preg_replace('/\.[^.]+$/', '', $fullPath) ?? $fullPath;
-        foreach (['.webp', '-1600.webp', '-800.webp'] as $suffix) {
+        foreach (\App\Core\Media::variantSuffixes() as $suffix) {
             $variant = $base . $suffix;
             if (is_file($variant)) {
                 @unlink($variant);
