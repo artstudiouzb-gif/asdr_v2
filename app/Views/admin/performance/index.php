@@ -177,11 +177,11 @@ $size = static function (mixed $bytes): string {
             <h4>Проверка файлов медиатеки</h4>
             <p class="form-hint">
                 Отвечает на вопрос «почему на месте фотографии пусто». Причин с диска
-                видно три: файл не открыт на чтение (веб-сервер такой не отдаёт — так
-                бывает у снимков, которые PHP создал сам: перенос со старого сайта,
-                кадры-превью с YouTube), файл нулевого размера и запись в медиатеке,
-                у которой файла на диске уже нет. Проверка ничего не меняет, только
-                читает.
+                видно три: права только для владельца (так бывает у снимков, которые
+                PHP создал сам — перенос со старого сайта, кадры-превью с YouTube;
+                часть хостингов такие файлы не отдаёт, часть отдаёт), файл нулевого
+                размера и запись в медиатеке, у которой файла на диске уже нет.
+                Проверка ничего не меняет, только читает.
             </p>
             <p>
                 <a class="btn btn--small" rel="nofollow" href="/admin/performance?media_check=1#perf-images">
@@ -208,7 +208,7 @@ $size = static function (mixed $bytes): string {
                         <p class="alert alert--success">Все проверенные файлы на месте, читаются и не пусты. Причина пропавших картинок не в них.</p>
                     <?php else: ?>
                         <p class="alert alert--error">
-                            Не отдаётся веб-сервером: <strong><?= (int) $mediaHealth['unreadable'] ?></strong> ·
+                            Права только для владельца: <strong><?= (int) $mediaHealth['unreadable'] ?></strong> ·
                             пустых файлов: <strong><?= (int) $mediaHealth['empty'] ?></strong> ·
                             записей без файла на диске: <strong><?= (int) ($missing['missing'] ?? 0) ?></strong>.
                             Права чинит <code>php scripts/fix_upload_permissions.php</code>
@@ -216,7 +216,7 @@ $size = static function (mixed $bytes): string {
                         </p>
                         <?php $samples = (array) ($mediaHealth['samples'] ?? []); ?>
                         <?php $samples['missing'] = (array) ($missing['samples'] ?? []); ?>
-                        <?php foreach (['unreadable' => 'Не открыты на чтение', 'empty' => 'Пустые файлы', 'missing' => 'Записи без файла на диске'] as $key => $label): ?>
+                        <?php foreach (['unreadable' => 'Права только для владельца', 'empty' => 'Пустые файлы', 'missing' => 'Записи без файла на диске'] as $key => $label): ?>
                             <?php $rows = (array) ($samples[$key] ?? []); ?>
                             <?php if ($rows !== []): ?>
                                 <h5><?= htmlspecialchars($label, ENT_QUOTES) ?></h5>
