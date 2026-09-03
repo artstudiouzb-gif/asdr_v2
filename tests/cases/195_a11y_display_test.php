@@ -181,6 +181,35 @@ test('Панель: разметка, стили и скрипт согласо�
         assert_contains('html[data-a11y-size="' . $size . '"] { font-size: ' . $size . '%; }', $css);
     }
 
+    // Размер текста — главный элемент панели, и он обязан выдерживать её же
+    // настройки. В жёсткой сетке из трёх колонок подписи под кнопками росли
+    // вместе с текстом и схлопывали среднюю колонку: при 200 % под значение
+    // оставалось 16px, «150 %» превращалось в столбик символов (замерено в
+    // Chromium). Поэтому ряд переносится, а ширина значения считается в его
+    // собственных знаках, а не в долях панели.
+    assert_contains('data-a11y-step="-1"', $panel);
+    assert_contains('data-a11y-step="1"', $panel);
+    assert_contains('a11y-sizer__value', $panel, 'значение вынесено в крупный вывод');
+    assert_true(
+        (bool) preg_match('/\.a11y-sizer \{[^}]*flex-wrap: wrap;/', $css),
+        'ряд размера переносится, а не сжимает значение'
+    );
+    assert_true(
+        (bool) preg_match('/\.a11y-sizer__value \{[^}]*min-width: 4\.5ch;/', $css),
+        'ширина значения задана в его собственных знаках'
+    );
+    // Круг — цель нажатия: норма 44px, у нас 64 с запасом.
+    assert_true(
+        (bool) preg_match('/\.a11y-sizer__glyph \{[^}]*width: 64px;/', $css),
+        'кнопки размера крупные'
+    );
+    // Подпись обязана оставаться словом: принудительный перенос рвал
+    // «Kattalashtirish» посреди слова.
+    assert_true(
+        !(bool) preg_match('/\.a11y-sizer__caption \{[^}]*overflow-wrap: anywhere;/', $css),
+        'подпись не рвётся посреди слова'
+    );
+
     // Прежняя верхняя полоса заменена выдвижной панелью.
     assert_not_contains('a11y-panel__group', $header);
     assert_not_contains('data-a11y-set="scheme:', $header);

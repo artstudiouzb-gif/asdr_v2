@@ -56,20 +56,27 @@ $toggle = static function (string $key, string $activeVal, string $label, string
                     <span class="a11y-group__icon" aria-hidden="true"><?= Icon::render('typography', 18) ?></span>
                     <?= htmlspecialchars(t('Размер текста'), ENT_QUOTES) ?>
                 </span>
-                <output class="a11y-group__value" data-a11y-size-value><?= (int) $settings['size'] ?>%</output>
             </div>
-            <div class="a11y-range">
-                <button type="button" class="a11y-range__step" data-a11y-step="-1" aria-label="<?= htmlspecialchars(t('Уменьшить текст'), ENT_QUOTES) ?>" title="<?= htmlspecialchars(t('Уменьшить текст'), ENT_QUOTES) ?>">
-                    <span class="a11y-range__step-text" aria-hidden="true">A<sup>−</sup></span>
+            <?php // Главный элемент панели: им пользуются те, кому мелкое неудобно,
+                  // поэтому кнопки крупные, значение читается через комнату, а
+                  // подписи под кнопками говорят словами, что произойдёт. ?>
+            <div class="a11y-sizer">
+                <button type="button" class="a11y-sizer__step" data-a11y-step="-1" aria-label="<?= htmlspecialchars(t('Уменьшить текст'), ENT_QUOTES) ?>">
+                    <span class="a11y-sizer__glyph" aria-hidden="true">&minus;</span>
+                    <span class="a11y-sizer__caption"><?= htmlspecialchars(t('Уменьшить'), ENT_QUOTES) ?></span>
                 </button>
-                <input type="range" class="a11y-range__input" data-a11y-range="size"
-                       min="<?= A11ySettings::SIZE_MIN ?>" max="<?= A11ySettings::SIZE_MAX ?>" step="<?= A11ySettings::SIZE_STEP ?>"
-                       value="<?= (int) $settings['size'] ?>"
-                       aria-label="<?= htmlspecialchars(t('Размер текста'), ENT_QUOTES) ?>">
-                <button type="button" class="a11y-range__step" data-a11y-step="1" aria-label="<?= htmlspecialchars(t('Увеличить текст'), ENT_QUOTES) ?>" title="<?= htmlspecialchars(t('Увеличить текст'), ENT_QUOTES) ?>">
-                    <span class="a11y-range__step-text" aria-hidden="true">A<sup>+</sup></span>
+                <output class="a11y-sizer__value" data-a11y-size-value aria-live="polite"><?= (int) $settings['size'] ?>%</output>
+                <button type="button" class="a11y-sizer__step" data-a11y-step="1" aria-label="<?= htmlspecialchars(t('Увеличить текст'), ENT_QUOTES) ?>">
+                    <span class="a11y-sizer__glyph" aria-hidden="true">+</span>
+                    <span class="a11y-sizer__caption"><?= htmlspecialchars(t('Увеличить'), ENT_QUOTES) ?></span>
                 </button>
             </div>
+            <?php // Ползунок остаётся: он даёт стрелки на клавиатуре и показывает,
+                  // насколько далеко значение от краёв — кнопки этого не сообщают. ?>
+            <input type="range" class="a11y-sizer__range" data-a11y-range="size"
+                   min="<?= A11ySettings::SIZE_MIN ?>" max="<?= A11ySettings::SIZE_MAX ?>" step="<?= A11ySettings::SIZE_STEP ?>"
+                   value="<?= (int) $settings['size'] ?>"
+                   aria-label="<?= htmlspecialchars(t('Размер текста'), ENT_QUOTES) ?>">
         </section>
 
         <!-- 2. КОНТРАСТ И ЦВЕТОВАЯ СХЕМА -->
