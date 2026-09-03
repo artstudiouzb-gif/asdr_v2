@@ -18,6 +18,14 @@
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
+    # Если запрашиваемый jpg/jpeg/png в uploads отсутствует, но есть одноимённый .webp —
+    # отдаём webp-файл напрямую с правильным Content-Type (защита от 404 по старым ссылкам).
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} ^/uploads/public/ [NC]
+    RewriteCond %{REQUEST_FILENAME} ^(.+)\.(jpe?g|png)$ [NC]
+    RewriteCond %1.webp -f
+    RewriteRule ^(.+)\.(jpe?g|png)$ $1.webp [T=image/webp,L]
+
     # Всё остальное — через единую точку входа
     RewriteRule ^ index.php [L]
 </IfModule>

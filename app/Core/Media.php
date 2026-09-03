@@ -55,6 +55,10 @@ final class Media
             return '';
         }
 
+        // Если локальный jpg/png отсутствует на диске, но одноимённый webp есть —
+        // используем существующий webp, чтобы браузер не делал запрос к отсутствующему jpg.
+        $url = self::resolveExistingMediaUrl($url);
+
         // Глобальный тумблер ленивой загрузки (Производительность). Отключение
         // делает все картинки «eager» (например, для специфичных лендингов).
         try {
@@ -255,8 +259,48 @@ final class Media
             return false;
         }
         $mode = fileperms($path);
+        // Если у файла нет бита чтения «для всех» (0004), открываем на чтение:
+        // созданные PHP файлы принадлежат владельцу веб-процесса, поэтому chmod() разрешён.
+        if ($mode !== false && ($mode & 0004) === 0) {
+            @chmod($path, 0644);
+            $mode = fileperms($path);
+        }
+
+        if (PHP_OS_FAMILY === 'Windows') {
+            return is_readable($path);
+        }
 
         return $mode !== false && ($mode & 0004) !== 0;
+    }
+
+    /**
+     * Если переданный URL локальной загрузки (jpg/png) физически отсутствует на диске,
+     * но одноимённый webp-файл существует — перенаправляем на существующий webp,
+     * чтобы браузер не делал запрос к отсутствующему jpg.
+     */
+    public static function resolveExistingMediaUrl(string $url): string
+    {
+        $urlPrefix = rtrim((string) Config::get('paths.public_uploads_url', '/uploads/public'), '/');
+        $diskBase = rtrim((string) Config::get('paths.public_uploads', ''), '/');
+        if ($diskBase === '' || !str_starts_with($url, $urlPrefix . '/')) {
+            return $url;
+        }
+
+        $clean = preg_replace('/[?#].*$/', '', $url) ?? $url;
+        $relative = substr($clean, strlen($urlPrefix));
+        $diskPath = $diskBase . $relative;
+
+        if (is_file($diskPath)) {
+            return $url;
+        }
+
+        $relNoExt = preg_replace('/\.[^.\/]+$/', '', $relative) ?? $relative;
+        $webpPath = $diskBase . $relNoExt . '.webp';
+        if (self::servable($webpPath)) {
+            return $urlPrefix . $relNoExt . '.webp';
+        }
+
+        return $url;
     }
 
     /**
