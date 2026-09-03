@@ -106,7 +106,10 @@ $searchQuery = (string) ($_GET['q'] ?? '');
 
     <!-- Панель массовых действий -->
     <div class="media-bulk-bar" id="media_bulk_bar">
-        <span>Выбрано элементов: <strong id="bulk_count">0</strong></span>
+        <div class="media-bulk-bar__actions">
+            <button type="button" class="btn btn--small" id="btn_bulk_select_all">Выбрать все</button>
+            <span>Выбрано элементов: <strong id="bulk_count">0</strong></span>
+        </div>
         <form method="post" action="/admin/files/bulk-delete" id="bulk_delete_form">
             <?= Csrf::field() ?>
             <input type="hidden" name="ids" id="bulk_ids_input" value="[]">
@@ -169,6 +172,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
         <table class="data-table files-table">
             <thead>
                 <tr>
+                    <th class="files-table__check"><input type="checkbox" id="table_bulk_check_all" title="Выбрать все" aria-label="Выбрать все"></th>
                     <th>Имя файла</th>
                     <th>Тип</th>
                     <th>Размер</th>
@@ -179,7 +183,7 @@ $searchQuery = (string) ($_GET['q'] ?? '');
             </thead>
             <tbody>
                 <?php if (empty($items)): ?>
-                    <tr><td colspan="6" class="data-table__empty">Файлов пока нет.</td></tr>
+                    <tr><td colspan="7" class="data-table__empty">Файлов пока нет.</td></tr>
                 <?php endif; ?>
                 <?php foreach ($items as $item): ?>
                     <?php 
@@ -188,7 +192,10 @@ $searchQuery = (string) ($_GET['q'] ?? '');
                         $url = '/download.php?file_id=' . (int) $item['id'] . '&token=' . htmlspecialchars((string) $item['access_token'], ENT_QUOTES);
                     }
                     ?>
-                    <tr>
+                    <tr data-id="<?= (int) $item['id'] ?>" data-name="<?= htmlspecialchars((string) $item['original_name'], ENT_QUOTES) ?>">
+                        <td class="files-table__check">
+                            <input type="checkbox" class="file-row-check" data-id="<?= (int) $item['id'] ?>" aria-label="Выбрать файл">
+                        </td>
                         <td>
                             <div class="file-cell">
                                 <span class="file-name"><?= htmlspecialchars((string) $item['original_name'], ENT_QUOTES) ?></span>
@@ -305,15 +312,21 @@ $searchQuery = (string) ($_GET['q'] ?? '');
     var isBulkMode = false;
     var selectedIds = new Set();
     var btnBulkToggle = document.getElementById('btn_bulk_toggle');
+    var btnBulkSelectAll = document.getElementById('btn_bulk_select_all');
+    var tableBulkAll = document.getElementById('table_bulk_check_all');
     var bulkBar = document.getElementById('media_bulk_bar');
     var bulkCountEl = document.getElementById('bulk_count');
     var bulkIdsInput = document.getElementById('bulk_ids_input');
+    var filesTable = document.querySelector('.files-table');
 
     if (btnBulkToggle) {
         btnBulkToggle.addEventListener('click', function() {
             isBulkMode = !isBulkMode;
             btnBulkToggle.classList.toggle('btn--primary', isBulkMode);
             bulkBar.classList.toggle('is-active', isBulkMode);
+            if (filesTable) {
+                filesTable.classList.toggle('is-bulk-active', isBulkMode);
+            }
             if (!isBulkMode) {
                 selectedIds.clear();
                 updateBulkUI();
@@ -321,11 +334,88 @@ $searchQuery = (string) ($_GET['q'] ?? '');
         });
     }
 
-    function updateBulkUI() {
-        document.querySelectorAll('.media-card').forEach(function(card) {
-            var id = parseInt(card.getAttribute('data-id'), 10);
-            card.classList.toggle('is-selected', selectedIds.has(id));
+    if (btnBulkSelectAll) {
+        btnBulkSelectAll.addEventListener('click', function() {
+            var cards = document.querySelectorAll('.media-card');
+            var visibleCards = Array.from(cards).filter(function(c) {
+                return c.style.display !== 'none';
+            });
+            var allVisibleSelected = visibleCards.length > 0 && visibleCards.every(function(c) {
+                return selectedIds.has(parseInt(c.getAttribute('data-id'), 10));
+            });
+
+            if (allVisibleSelected) {
+                visibleCards.forEach(function(c) {
+                    selectedIds.delete(parseInt(c.getAttribute('data-id'), 10));
+                });
+            } else {
+                visibleCards.forEach(function(c) {
+                    selectedIds.add(parseInt(c.getAttribute('data-id'), 10));
+                });
+            }
+            updateBulkUI();
         });
+    }
+
+    if (tableBulkAll) {
+        tableBulkAll.addEventListener('change', function() {
+            var tableRows = document.querySelectorAll('.files-table tbody tr[data-id]');
+            var visibleRows = Array.from(tableRows).filter(function(r) {
+                return r.style.display !== 'none';
+            });
+            visibleRows.forEach(function(r) {
+                var id = parseInt(r.getAttribute('data-id'), 10);
+                if (tableBulkAll.checked) {
+                    selectedIds.add(id);
+                } else {
+                    selectedIds.delete(id);
+                }
+            });
+            updateBulkUI();
+        });
+    }
+
+    document.querySelectorAll('.file-row-check').forEach(function(ch) {
+        ch.addEventListener('change', function() {
+            var id = parseInt(ch.getAttribute('data-id'), 10);
+            if (ch.checked) {
+                selectedIds.add(id);
+            } else {
+                selectedIds.delete(id);
+            }
+            updateBulkUI();
+        });
+    });
+
+    function updateBulkUI() {
+        var cards = document.querySelectorAll('.media-card');
+        var visibleCards = [];
+        cards.forEach(function(card) {
+            var id = parseInt(card.getAttribute('data-id'), 10);
+            var isSel = selectedIds.has(id);
+            card.classList.toggle('is-selected', isSel);
+            if (card.style.display !== 'none') {
+                visibleCards.push(card);
+            }
+        });
+
+        document.querySelectorAll('.file-row-check').forEach(function(ch) {
+            var id = parseInt(ch.getAttribute('data-id'), 10);
+            ch.checked = selectedIds.has(id);
+        });
+
+        var allVisibleSelected = visibleCards.length > 0 && visibleCards.every(function(c) {
+            return selectedIds.has(parseInt(c.getAttribute('data-id'), 10));
+        });
+
+        if (tableBulkAll) {
+            tableBulkAll.checked = allVisibleSelected;
+        }
+
+        if (btnBulkSelectAll) {
+            btnBulkSelectAll.textContent = (allVisibleSelected && visibleCards.length > 0) ? 'Снять выбор' : 'Выбрать все';
+        }
+
         if (bulkCountEl) bulkCountEl.textContent = selectedIds.size;
         if (bulkIdsInput) bulkIdsInput.value = JSON.stringify(Array.from(selectedIds));
     }
@@ -450,6 +540,11 @@ $searchQuery = (string) ($_GET['q'] ?? '');
                 var name = (card.getAttribute('data-name') || '').toLowerCase();
                 card.style.display = name.includes(term) ? '' : 'none';
             });
+            document.querySelectorAll('.files-table tbody tr[data-name]').forEach(function(tr) {
+                var name = (tr.getAttribute('data-name') || '').toLowerCase();
+                tr.style.display = name.includes(term) ? '' : 'none';
+            });
+            updateBulkUI();
         });
     }
 })();
