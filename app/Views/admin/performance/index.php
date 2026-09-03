@@ -183,19 +183,19 @@ $size = static function (mixed $bytes): string {
                 трогает, и её можно прерывать: каждый пакет продолжает с того места,
                 где закончился прошлый.
             </p>
-            <div class="form-actions" data-image-optimize data-endpoint="/admin/performance/optimize-images">
-                <button type="button" class="btn btn--small" data-optimize="dry">
+            <div class="form-actions" data-batch-task="images" data-endpoint="/admin/performance/optimize-images">
+                <button type="button" class="btn btn--small" data-batch="dry">
                     <?= \App\Core\AdminUi::icon('search') ?>Посмотреть объём работы
                 </button>
-                <button type="button" class="btn btn--small btn--primary" data-optimize="run">
+                <button type="button" class="btn btn--small btn--primary" data-batch="run">
                     <?= \App\Core\AdminUi::icon('photo') ?>Достроить миниатюры
                 </button>
-                <button type="button" class="btn btn--small" data-optimize="stop" hidden>Остановить</button>
+                <button type="button" class="btn btn--small" data-batch="stop" hidden>Остановить</button>
             </div>
-            <div class="admin-progress" data-optimize-progress hidden>
-                <div class="admin-progress__bar" data-optimize-bar></div>
+            <div class="admin-progress" data-batch-progress="images" hidden>
+                <div class="admin-progress__bar" data-batch-bar></div>
             </div>
-            <p class="form-hint" data-optimize-status aria-live="polite" hidden></p>
+            <p class="form-hint" data-batch-status="images" aria-live="polite" hidden></p>
 
             <h4>Проверка файлов медиатеки</h4>
             <p class="form-hint">
@@ -234,8 +234,7 @@ $size = static function (mixed $bytes): string {
                             Права только для владельца: <strong><?= (int) $mediaHealth['unreadable'] ?></strong> ·
                             пустых файлов: <strong><?= (int) $mediaHealth['empty'] ?></strong> ·
                             записей без файла на диске: <strong><?= (int) ($missing['missing'] ?? 0) ?></strong>.
-                            Права чинит <code>php scripts/fix_upload_permissions.php</code>
-                            (сначала с <code>--dry-run</code>); пустые и пропавшие файлы надо загрузить заново.
+                            Права чинит кнопка ниже; пустые и пропавшие файлы надо загрузить заново.
                         </p>
                         <?php $samples = (array) ($mediaHealth['samples'] ?? []); ?>
                         <?php $samples['missing'] = (array) ($missing['samples'] ?? []); ?>
@@ -255,6 +254,29 @@ $size = static function (mixed $bytes): string {
                     <?php endif; ?>
                 <?php endif; ?>
             <?php endif; ?>
+
+            <h4>Права файлов медиатеки</h4>
+            <p class="form-hint">
+                Файл, который PHP создал сам — перенос со старого сайта, кадр-превью
+                с YouTube, сборка загрузки по частям, — наследует права временного
+                файла: только для владельца. Веб-сервер такой файл не отдаёт, и на
+                месте фотографии остаётся пустое место, хотя запись в медиатеке есть
+                и файл на диске лежит. Проход выставляет файлам 0644, каталогам 0755.
+                Содержимое файлов не меняется.
+            </p>
+            <div class="form-actions" data-batch-task="permissions" data-endpoint="/admin/performance/fix-permissions">
+                <button type="button" class="btn btn--small" data-batch="dry">
+                    <?= \App\Core\AdminUi::icon('search') ?>Посмотреть, что изменится
+                </button>
+                <button type="button" class="btn btn--small btn--primary" data-batch="run">
+                    <?= \App\Core\AdminUi::icon('lock-open') ?>Починить права
+                </button>
+                <button type="button" class="btn btn--small" data-batch="stop" hidden>Остановить</button>
+            </div>
+            <div class="admin-progress" data-batch-progress="permissions" hidden>
+                <div class="admin-progress__bar" data-batch-bar></div>
+            </div>
+            <p class="form-hint" data-batch-status="permissions" aria-live="polite" hidden></p>
         </div>
 
         <div class="header-builder__group" id="perf-vitals">
@@ -373,5 +395,5 @@ $size = static function (mixed $bytes): string {
         </div>
     <?php endif; ?>
 </div>
-<script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/js/admin-image-optimize.js'), ENT_QUOTES) ?>"></script>
+<script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/js/admin-media-batch.js'), ENT_QUOTES) ?>"></script>
 <?php require __DIR__ . '/../layout/footer.php'; ?>
