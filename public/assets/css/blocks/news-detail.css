@@ -50,6 +50,16 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero { pad
     outline: 3px solid color-mix(in srgb, var(--gov-teal, #0d9488) 42%, transparent);
     outline-offset: 2px;
 }
+.newsdetail__reader-btn--onDark {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.32);
+}
+.newsdetail__reader-btn--onDark:hover {
+    background: var(--gov-teal, #0d9488);
+    color: #ffffff;
+    border-color: var(--gov-teal, #0d9488);
+}
 
 /* Хештеги в статье */
 .newsdetail-hashtags {
