@@ -28,7 +28,7 @@ $size = static function (mixed $bytes): string {
     <a href="#perf-cloudflare"><?= \App\Core\AdminUi::icon('cloud', 16) ?>Cloudflare</a>
 </nav>
 
-<div class="form-card u-inline-7dde5e56b3 performance-section" id="perf-status">
+<div class="form-card u-inline-7dde5e56b3" id="perf-status">
     <div class="header-builder__group u-inline-76084ee4e5">
         <h3>Статус PHP OPcache и системного кеша</h3>
         <p class="form-hint u-inline-291b7bbb01">
@@ -74,7 +74,7 @@ $size = static function (mixed $bytes): string {
     <form method="post" action="/admin/performance" class="form-grid">
         <?= Csrf::field() ?>
 
-        <div class="header-builder__group performance-section" id="perf-pages">
+        <div class="header-builder__group" id="perf-pages">
             <h3>Кэширование страниц</h3>
             <div class="form-field form-field--checkbox">
                 <input type="checkbox" id="perf_page_cache" name="perf_page_cache" value="1" <?= $on('perf_page_cache', '1') ? 'checked' : '' ?>>
@@ -97,7 +97,7 @@ $size = static function (mixed $bytes): string {
             </div>
         </div>
 
-        <div class="header-builder__group performance-section" id="perf-assets">
+        <div class="header-builder__group" id="perf-assets">
             <h3>Сжатие CSS и JavaScript</h3>
             <div class="form-field form-field--checkbox">
                 <input type="checkbox" id="perf_asset_bundle" name="perf_asset_bundle" value="1" <?= $on('perf_asset_bundle', '1') ? 'checked' : '' ?>>
@@ -155,7 +155,7 @@ $size = static function (mixed $bytes): string {
             <?php endif; ?>
         </div>
 
-        <div class="header-builder__group performance-section" id="perf-images">
+        <div class="header-builder__group" id="perf-images">
             <h3>Изображения</h3>
             <div class="form-field">
                 <label for="perf_webp_quality">Качество WebP (40–95)</label>
@@ -173,7 +173,7 @@ $size = static function (mixed $bytes): string {
             </div>
         </div>
 
-        <div class="header-builder__group performance-section" id="perf-vitals">
+        <div class="header-builder__group" id="perf-vitals">
             <h3>Скорость у реальных посетителей</h3>
             <p class="form-hint">
                 Лабораторные замеры (Lighthouse) не показывают INP — отзывчивость на
@@ -220,7 +220,7 @@ $size = static function (mixed $bytes): string {
 <?php endif; ?>
         </div>
 
-        <div class="header-builder__group performance-section" id="perf-cdn">
+        <div class="header-builder__group" id="perf-cdn">
             <h3>CDN для статики и загрузок</h3>
             <div class="form-field">
                 <label for="perf_cdn_url">Базовый URL CDN (необязательно)</label>
@@ -237,7 +237,7 @@ $size = static function (mixed $bytes): string {
             </div>
         </div>
 
-        <div class="header-builder__group performance-section" id="perf-cloudflare">
+        <div class="header-builder__group" id="perf-cloudflare">
             <h3>Cloudflare (очистка кэша по API)</h3>
             <p class="form-hint u-inline-291b7bbb01">
                 Нужно только если сайт или его поддомен <b>проксируется через Cloudflare</b>

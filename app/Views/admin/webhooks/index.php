@@ -61,7 +61,7 @@ $appRoot = defined('APP_ROOT') ? APP_ROOT : '/path/to/site';
     <a href="#webhook-log"><?= AdminUi::icon('list', 16) ?>Журнал</a>
 </nav>
 
-<section class="form-card webhook-section" id="webhook-guide">
+<section class="form-card" id="webhook-guide">
     <h2 class="u-inline-291b7bbb01">Как это работает</h2>
     <div class="webhook-flow">
         <div class="webhook-flow__step">
@@ -112,7 +112,7 @@ $appRoot = defined('APP_ROOT') ? APP_ROOT : '/path/to/site';
     </details>
 </section>
 
-<section class="form-card webhook-section" id="webhook-endpoints">
+<section class="form-card" id="webhook-endpoints">
     <div class="webhook-section__heading">
         <div>
             <h2 class="u-inline-291b7bbb01">Получатели</h2>
@@ -212,7 +212,7 @@ $appRoot = defined('APP_ROOT') ? APP_ROOT : '/path/to/site';
     </div>
 </section>
 
-<section class="form-card webhook-section" id="webhook-add">
+<section class="form-card" id="webhook-add">
     <h2 class="u-inline-291b7bbb01">Добавить получателя</h2>
     <p class="form-hint">
         URL и общий секрет должен предоставить разработчик принимающей системы.
@@ -252,7 +252,7 @@ $appRoot = defined('APP_ROOT') ? APP_ROOT : '/path/to/site';
     </form>
 </section>
 
-<section class="form-card webhook-section" id="webhook-log">
+<section class="form-card" id="webhook-log">
     <div class="webhook-section__heading">
         <div>
             <h2 class="u-inline-291b7bbb01">Очередь и журнал доставок</h2>
