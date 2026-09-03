@@ -202,6 +202,17 @@ test('Соседние новости — зеркальная пара', functi
     assert_true($media < $arrow, 'стрелка замыкает карточку «следующей»');
 
     assert_contains('.adjnews--next { grid-template-columns: minmax(0, 1fr) auto auto;', $css, 'колонки зеркальны разметке');
+
+    // Колонок в карточке ровно три, поэтому лишняя ячейка ломает всю пару:
+    // элементы сдвигаются на одну, и последний уезжает на вторую строку —
+    // у «предыдущей» текст оказывался под кадром, у «следующей» стрелка под
+    // текстом. Ровно это и происходило вживую: обёртку <picture> растворяет
+    // `display: contents`, и её место в сетке занимали ОБА ребёнка — не только
+    // <img>, но и <source>, который ничего не рисует. Замерено в Chromium:
+    // с обёрткой было два ряда вместо одного.
+    $base = (string) file_get_contents(APP_ROOT . '/public/assets/css/frontend.css');
+    assert_contains('.media-picture { display: contents; }', $base);
+    assert_contains('source { display: none; }', $base, '<source> не занимает ячейку сетки');
     // На узком экране зеркало теряет смысл: обе карточки читаются слева направо.
     assert_contains('.adjnews--next .adjnews__arrow { order: -2; }', $css);
     // Кадр на телефоне уступает место заголовку — иначе на текст остаётся

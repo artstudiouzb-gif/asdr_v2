@@ -2630,13 +2630,6 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     transition: box-shadow .2s ease, border-color .2s ease, transform .2s ease;
 }
 .adjnews--next { grid-template-columns: minmax(0, 1fr) auto auto; text-align: right; }
-/* Все части карточки — в одной строке, явно. Колонок в шаблоне ровно столько,
-   сколько детей, поэтому в норме перенос невозможен и без этого правила; но
-   стоит появиться четвёртому элементу (или сузиться набору колонок), как
-   лишний ребёнок уезжает на вторую строку в первую колонку — стрелка
-   оказывается под текстом, а пара перестаёт читаться как навигация. Строка
-   задана явно, чтобы такой перенос не мог случиться молча. */
-.adjnews > * { grid-row: 1; }
 .adjnews:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 30px rgba(19,42,92,.1);

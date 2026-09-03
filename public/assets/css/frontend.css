@@ -2513,6 +2513,17 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 /* Responsive <picture> не создаёт дополнительный layout-box: существующие
    grid/flex/absolute стили продолжают применяться к самому <img>. */
 .media-picture { display: contents; }
+/* `display: contents` растворяет обёртку, и в сетке или флексе её место
+   занимают ДЕТИ — не только <img>, но и <source>. Рисует <source> ничего, а
+   ячейку занимает: все следующие элементы сдвигаются на одну, и последний
+   уезжает на вторую строку. Так ломалась пара «предыдущая/следующая» на
+   странице новости — текст оказывался под картинкой, а стрелка под текстом,
+   но задеть это могло любой контейнер, куда картинка попадает через
+   Media::picture() с webp-вариантами или отдельным кадром для телефона.
+   На выбор формата правило не влияет: <picture> выбирает источник в алгоритме
+   загрузки изображения, а не в раскладке (проверено — currentSrc остаётся
+   webp). */
+source { display: none; }
 .block-hero__media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--bg-primary) 6%, color-mix(in srgb, var(--bg-primary) 55%, transparent) 42%, transparent 66%); }
 .block-hero__inner { position: relative; width: 100%; }
 .block-hero__text { max-width: var(--hero-text-width, 560px); }
