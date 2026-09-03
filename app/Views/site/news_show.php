@@ -391,7 +391,14 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                     <div class="newsdetail-gallery__thumbs">
                         <?php foreach ($heroSlides as $i => $s): ?>
                             <button type="button" class="newsdetail-gallery__thumb<?= $i === 0 ? ' is-active' : '' ?>" data-ndg-thumb="<?= $i ?>" aria-label="<?= htmlspecialchars(t('Фото'), ENT_QUOTES) ?> <?= $i + 1 ?>">
-                                <img src="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" alt="<?= htmlspecialchars($s['alt'], ENT_QUOTES) ?>" loading="lazy">
+                                <?php // Миниатюра показывается 110×62, поэтому и грузить надо кадр
+                                      // такого порядка. Прежде здесь стоял сырой путь: браузер
+                                      // тянул оригинал целиком — и это была ВТОРАЯ загрузка той же
+                                      // фотографии, потому что главный слайд берёт webp-вариант по
+                                      // другому адресу. На галерее из четырёх снимков это четыре
+                                      // лишних оригинала. Подсказка «110px» уводит выбор на самый
+                                      // мелкий из существующих вариантов. ?>
+                                <?= \App\Core\Media::picture((string) $s['path'], (string) $s['alt'], null, null, '', true, '110px') ?>
                             </button>
                         <?php endforeach; ?>
                     </div>
