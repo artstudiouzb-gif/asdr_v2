@@ -15,22 +15,22 @@ declare(strict_types=1);
  */
 
 test('Стили галереи: неактивные слайды не перехватывают клики у активного слайда', function () {
-     = dirname(__DIR__, 2);
-     = (string) file_get_contents( . '/public/assets/css/blocks/news-detail.css');
+    $root = dirname(__DIR__, 2);
+    $css = (string) file_get_contents($root . '/public/assets/css/blocks/news-detail.css');
 
-    assert_contains('.newsdetail-gallery__slide {', );
-    assert_contains('pointer-events: none;', );
-    assert_contains('z-index: 0;', );
-    assert_contains('.newsdetail-gallery__slide.is-active { opacity: 1; pointer-events: auto; z-index: 1; }', );
-    assert_contains('.newsdetail-gallery__main { position: relative; aspect-ratio: 16/9; border-radius: var(--radius, 14px); overflow: hidden; background: #16283f; cursor: zoom-in; }', );
+    assert_contains('.newsdetail-gallery__slide {', $css);
+    assert_contains('pointer-events: none;', $css);
+    assert_contains('z-index: 0;', $css);
+    assert_contains('.newsdetail-gallery__slide.is-active { opacity: 1; pointer-events: auto; z-index: 1; }', $css);
+    assert_contains('.newsdetail-gallery__main { position: relative; aspect-ratio: 16/9; border-radius: var(--radius, 14px); overflow: hidden; background: #16283f; cursor: zoom-in; }', $css);
 });
 
 test('Frontend JS: лайтбокс галереи новости открывает именно активный слайд и синхронизирует навигацию', function () {
-     = dirname(__DIR__, 2);
-     = (string) file_get_contents( . '/public/assets/js/frontend.js');
+    $root = dirname(__DIR__, 2);
+    $js = (string) file_get_contents($root . '/public/assets/js/frontend.js');
 
-    assert_contains('root.__ndgShow = show;', , 'Слайдер должен публиковать функцию переключения слайда');
-    assert_contains("var activeImg = gallery.querySelector('.newsdetail-gallery__slide.is-active');", , 'Клик по фото должен разрешаться в активный слайд галереи');
-    assert_contains("[data-ndgallery] .newsdetail-gallery__main", , 'Контейнер слайдера должен открывать активный слайд');
-    assert_contains("typeof gallery.__ndgShow === 'function'", , 'Навигация в лайтбоксе должна синхронизировать слайдер');
+    assert_contains('root.__ndgShow = show;', $js, 'Слайдер должен публиковать функцию переключения слайда');
+    assert_contains("var activeImg = gallery.querySelector('.newsdetail-gallery__slide.is-active');", $js, 'Клик по фото должен разрешаться в активный слайд галереи');
+    assert_contains("[data-ndgallery] .newsdetail-gallery__main", $js, 'Контейнер слайдера должен открывать активный слайд');
+    assert_contains("typeof gallery.__ndgShow === 'function'", $js, 'Навигация в лайтбоксе должна синхронизировать слайдер');
 });
