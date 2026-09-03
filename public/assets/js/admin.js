@@ -1429,7 +1429,9 @@
                 thumb.className = 'media-modal__thumb';
                 if (isImageUrl(it.url)) {
                     var img = document.createElement('img');
-                    img.src = encodeURI(it.url);
+                    // Карточка показывается размером в сотню пикселей: берём
+                    // мелкий вариант, если сервер его прислал.
+                    img.src = encodeURI(it.thumb || it.url);
                     img.alt = '';
                     img.loading = 'lazy';
                     thumb.appendChild(img);
