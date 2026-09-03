@@ -377,7 +377,8 @@ final class LegacyWxrImporter
                     continue;
                 }
 
-                [$body, $gallery] = self::transferBody((string) $primary['content'], $site, $authorId, $uploadsDir, $out, $att, true);
+                [$body, $gallery, $bodyImages] = self::transferBody((string) $primary['content'], $site, $authorId, $uploadsDir, $att, true);
+                $out['images'] += $bodyImages;
                 $featuredUrl = (int) ($primary['thumb_id'] ?? 0) > 0 ? ($att[(int) $primary['thumb_id']] ?? '') : '';
                 $cover = '';
                 if ($featuredUrl !== '') {
@@ -417,7 +418,8 @@ final class LegacyWxrImporter
                     if ($artCode === '') {
                         continue;
                     }
-                    [$translatedBody] = self::transferBody((string) $p['content'], $site, $authorId, $uploadsDir, $out, $att, false);
+                    [$translatedBody, , $translatedImages] = self::transferBody((string) $p['content'], $site, $authorId, $uploadsDir, $att, false);
+                    $out['images'] += $translatedImages;
                     NewsTranslation::upsert($newsId, $artCode, [
                         'title' => self::plain((string) $p['title']),
                         'excerpt' => mb_substr(self::plain((string) $p['excerpt']), 0, 300),
@@ -585,28 +587,32 @@ final class LegacyWxrImporter
     }
 
     /**
-     * @param array<string,mixed> $out
+     * Число перенесённых картинок возвращается, а не приписывается в $out по
+     * ссылке: параметр `array<string,mixed> &$out` расширял тип итогового
+     * массива до `array<string,mixed>` на всю оставшуюся часть importFile(),
+     * и объявленная форма ответа переставала проверяться.
+     *
      * @param array<int,string> $attachments
-     * @return array{0:string,1:array<int,string>}
+     * @return array{0:string,1:array<int,string>,2:int}
      */
     private static function transferBody(
         string $html,
         string $site,
         ?int $authorId,
         ?string $uploadsDir,
-        array &$out,
         array $attachments,
         bool $includeGallery
     ): array {
         $map = [];
         $gallery = [];
+        $images = 0;
         foreach (LegacyCmsImporter::extractImageUrls($html) as $src) {
             $abs = LegacyCmsImporter::normalizeImageUrl(LegacyCmsImporter::absoluteUrl($src, $site !== '' ? $site : ''));
             $newUrl = LegacyCmsImporter::importImage($abs, $authorId, $uploadsDir);
             if ($newUrl !== null) {
                 $map[$src] = $newUrl;
                 $gallery[] = $newUrl;
-                $out['images']++;
+                $images++;
             }
         }
 
@@ -619,7 +625,7 @@ final class LegacyWxrImporter
                 $newUrl = LegacyCmsImporter::importImage($url, $authorId, $uploadsDir);
                 if ($newUrl !== null) {
                     $gallery[] = $newUrl;
-                    $out['images']++;
+                    $images++;
                 }
             }
         }
@@ -627,7 +633,7 @@ final class LegacyWxrImporter
         $clean = LegacyCmsImporter::stripResponsiveAttrs(LegacyCmsImporter::rewriteImages($html, $map));
         $clean = self::stripGalleryShortcodes($clean);
 
-        return [$clean, array_values(array_unique($gallery))];
+        return [$clean, array_values(array_unique($gallery)), $images];
     }
 
     private static function date(string $d): string
