@@ -261,6 +261,9 @@ final class FileController
         return [
             'id' => (int) $file['id'],
             'url' => FileEntry::publicUrl($file),
+            // Сетку окна выбора рисует JS, и ему нужен отдельный мелкий адрес:
+            // подставлять в карточку оригинал — это сотни килобайт на файл.
+            'thumb' => \App\Core\Media::thumbUrl(FileEntry::publicUrl($file)),
             'name' => (string) $file['original_name'],
             'mime_type' => (string) ($file['mime_type'] ?? ''),
             // Вес нужен подвалу окна выбора: по имени файла не видно, тянет

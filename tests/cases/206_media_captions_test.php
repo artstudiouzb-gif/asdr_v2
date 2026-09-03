@@ -127,3 +127,22 @@ test('Миниатюры галереи новости не тянут ориг�
         'точка фокуса берётся из медиатеки, а не задаётся числами наугад'
     );
 });
+
+test('Миниатюры медиатеки в админке не тянут оригинал', function () {
+    $view = (string) file_get_contents(APP_ROOT . '/app/Views/admin/files/index.php');
+    $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/FileController.php');
+    $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin.js');
+    $media = (string) file_get_contents(APP_ROOT . '/app/Core/Media.php');
+
+    // Карточка сетки — около 135px, а грузился оригинал: при ширине 2560px по
+    // умолчанию это сотни килобайт на карточку, а карточек на странице до
+    // трёхсот. Мест три, и все три обязаны брать мелкий вариант.
+    assert_contains('Media::thumbUrl($url)', $view, 'страница медиатеки берёт мелкий вариант');
+    assert_contains("'thumb' => \\App\\Core\\Media::thumbUrl(", $controller, 'ответ для окна выбора несёт адрес миниатюры');
+    assert_contains('it.thumb || it.url', $js, 'сетка окна выбора предпочитает миниатюру');
+
+    // Без вариантов помощник обязан вернуть исходный адрес: иначе у файлов,
+    // загруженных до появления webp, карточка осталась бы пустой.
+    assert_contains('public static function thumbUrl(string $url): string', $media);
+    assert_contains("return \$variants['w800'] ?? \$variants['w1600'] ?? \$variants['full'] ?? \$url;", $media);
+});
