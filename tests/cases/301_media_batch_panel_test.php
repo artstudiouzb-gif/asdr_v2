@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Core\ImageBatchOptimizer;
+use App\Core\MediaPermissions;
 
 /*
  * Достройка миниатюр запускается из админки, а не только из консоли.
@@ -69,9 +70,10 @@ test('Исчерпанный бюджет времени всё равно сд�
 
 test('Раздел производительности отдаёт кнопку, маршрут и обработчик', function () {
     $view = file_get_contents(APP_ROOT . '/app/Views/admin/performance/index.php') ?: '';
-    assert_true(str_contains($view, 'data-image-optimize'), 'В разделе есть блок достройки миниатюр');
+    assert_true(str_contains($view, 'data-batch-task="images"'), 'В разделе есть блок достройки миниатюр');
+    assert_true(str_contains($view, 'data-batch-task="permissions"'), 'И блок починки прав');
     assert_true(str_contains($view, '/admin/performance/optimize-images'), 'Указан адрес обработчика');
-    assert_true(str_contains($view, 'admin-image-optimize.js'), 'Подключён скрипт пакетов');
+    assert_true(str_contains($view, 'admin-media-batch.js'), 'Подключён общий бегунок пакетов');
 
     $routes = file_get_contents(APP_ROOT . '/public/index.php') ?: '';
     assert_true(
@@ -85,7 +87,78 @@ test('Раздел производительности отдаёт кнопк�
     assert_true(str_contains($controller, 'Csrf::verifyRequest'), 'Запрос проверяется на CSRF');
 
     assert_true(
-        is_file(APP_ROOT . '/public/assets/js/admin-image-optimize.js'),
+        is_file(APP_ROOT . '/public/assets/js/admin-media-batch.js'),
         'Файл скрипта существует'
     );
+});
+
+/*
+ * Права оригинала чинятся так же, как права вариантов.
+ *
+ * PR, закрывший это для WebP-вариантов, оригинала не касался: `is_file()`
+ * отвечает «файл есть», а отдаст ли его веб-сервер — не спрашивает. Файл с
+ * правами 0600 лежит на диске, PHP его видит, веб-сервер отвечает 403, и
+ * <img> на такой ответ не откатывается ни на что: вместо фотографии
+ * alt-текст. У варианта есть запасной путь, у оригинала никакого — поэтому
+ * страница ломается именно на нём.
+ */
+
+test('Оригинал с правами только для владельца открывается на чтение', function () {
+    // Конфигурацию не подменяем: Config::set() заменяет её целиком, а файлы
+    // кейсов идут по порядку строк — соседний тест получил бы пустые пути.
+    $root = rtrim((string) \App\Core\Config::get('paths.public_uploads', ''), '/');
+    $urlBase = rtrim((string) \App\Core\Config::get('paths.public_uploads_url', ''), '/');
+    if ($root === '' || $urlBase === '' || !is_dir($root)) {
+        skip_test('Каталог публичных загрузок не настроен');
+        return;
+    }
+    $dir = $root . '/probe-' . bin2hex(random_bytes(5));
+    mkdir($dir, 0755, true);
+
+    $path = $dir . '/cover.jpg';
+    $image = imagecreatetruecolor(1200, 800);
+    imagejpeg($image, $path, 88);
+    unset($image);
+    // 0600 — ровно то, что оставляет tempnam() у файла, собранного самим PHP.
+    chmod($path, 0600);
+
+    $url = $urlBase . '/' . basename($dir) . '/cover.jpg';
+    $html = \App\Core\Media::picture($url, 'Заголовок');
+
+    assert_same(0644, fileperms($path) & 0777, 'Права открыты на чтение при отрисовке');
+    assert_true(str_contains($html, 'src="' . $url . '"'), 'Адрес остался прежним');
+
+    unlink($path);
+    rmdir($dir);
+});
+
+test('Пакетная починка прав идёт по курсору и не трогает содержимое', function () {
+    $dir = sys_get_temp_dir() . '/perm-' . bin2hex(random_bytes(6));
+    mkdir($dir . '/2026', 0700, true);
+    $file = $dir . '/2026/photo.jpg';
+    file_put_contents($file, 'содержимое');
+    chmod($file, 0600);
+    $blank = $dir . '/2026/blank.jpg';
+    file_put_contents($blank, '');
+    chmod($blank, 0600);
+
+    $plan = MediaPermissions::run($dir, true, 0, 0.0);
+    assert_true($plan['planned'] > 0, 'Пробный проход видит работу');
+    assert_same(0600, fileperms($file) & 0777, 'Пробный проход ничего не меняет');
+
+    $done = MediaPermissions::run($dir, false, 0, 0.0);
+    assert_same(0644, fileperms($file) & 0777, 'Файлу выставлены 0644');
+    assert_same(0755, fileperms($dir . '/2026') & 0777, 'Каталогу выставлены 0755');
+    assert_same('содержимое', file_get_contents($file), 'Содержимое файла не тронуто');
+    // Пустой файл правами не чинится — он считается отдельно, иначе отчёт
+    // выдавал бы неудавшуюся загрузку за исправленную.
+    assert_true($done['empty'] >= 1, 'Пустой файл посчитан отдельно');
+    assert_same($done['total'], $done['cursor'], 'Курсор дошёл до конца');
+
+    assert_same(0, MediaPermissions::run($dir, false, 0, 0.0)['fixed'], 'Повторный проход ничего не делает');
+
+    unlink($file);
+    unlink($blank);
+    rmdir($dir . '/2026');
+    rmdir($dir);
 });

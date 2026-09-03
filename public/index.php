@@ -323,6 +323,7 @@ $router->post('/admin/performance', [\App\Controllers\Admin\PerformanceControlle
 $router->post('/admin/performance/clear-cache', [\App\Controllers\Admin\PerformanceController::class, 'clearCache']);
 $router->post('/admin/performance/reset-opcache', [\App\Controllers\Admin\PerformanceController::class, 'resetOpcache']);
 $router->post('/admin/performance/optimize-images', [\App\Controllers\Admin\PerformanceController::class, 'optimizeImages']);
+$router->post('/admin/performance/fix-permissions', [\App\Controllers\Admin\PerformanceController::class, 'fixPermissions']);
 $router->post('/admin/cloudflare/verify', [\App\Controllers\Admin\PerformanceController::class, 'cloudflareVerify']);
 $router->post('/admin/cloudflare/purge', [\App\Controllers\Admin\PerformanceController::class, 'cloudflarePurge']);
 
