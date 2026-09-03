@@ -16,7 +16,7 @@ test('accessibility controls open in a side drawer and stay above the page', fun
     assert_contains('.a11y-drawer {', $css);
     assert_contains('position: fixed;', $css);
     assert_contains('z-index: 901;', $css);
-    assert_contains('width: min(380px, 100vw);', $css);
+    assert_contains('width: min(420px, 100vw);', $css);
     // На узком экране занимает всю ширину.
     assert_contains('@media (max-width: 480px)', $css);
     assert_contains('width: 100vw;', $css);
