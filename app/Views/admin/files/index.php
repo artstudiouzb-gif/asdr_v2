@@ -148,7 +148,9 @@ $searchQuery = (string) ($_GET['q'] ?? '');
                     </div>
 
                     <?php if ($isImg): ?>
-                        <img src="<?= htmlspecialchars($url, ENT_QUOTES) ?>" class="media-card__thumb" alt="" loading="lazy">
+                        <?php // Карточка ~135px, а тянулся оригинал целиком: при 2560px
+                              // это сотни килобайт на каждую из трёхсот карточек страницы. ?>
+                        <img src="<?= htmlspecialchars(\App\Core\Media::thumbUrl($url), ENT_QUOTES) ?>" class="media-card__thumb" alt="" loading="lazy">
                     <?php else: ?>
                         <div class="media-card__icon-wrap">
                             <?= AdminUi::icon('document', 36, 'media-card__file-icon', 1.8) ?>

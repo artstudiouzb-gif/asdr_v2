@@ -102,3 +102,47 @@ test('«Фото:» переведено — подпись не выйдет п
     assert_true(array_key_exists('Фото:', $uz));
     assert_true(array_key_exists('Фото:', $en));
 });
+
+test('Миниатюры галереи новости не тянут оригинал', function () {
+    $view = (string) file_get_contents(APP_ROOT . '/app/Views/site/news_show.php');
+
+    // Миниатюра показывается 110×62. Прежде здесь стоял сырой путь к файлу:
+    // браузер тянул оригинал целиком, и это была ВТОРАЯ загрузка той же
+    // фотографии — главный слайд берёт webp-вариант по другому адресу. На
+    // галерее из четырёх снимков это четыре лишних оригинала.
+    $thumbs = substr($view, (int) strpos($view, 'newsdetail-gallery__thumbs'));
+    $thumbs = substr($thumbs, 0, (int) strpos($thumbs, '</div>'));
+
+    assert_true(
+        !(bool) preg_match('/<img\s+src="<\?=\s*htmlspecialchars\(\$s\[.path.\]/', $thumbs),
+        'миниатюра не ссылается на исходный файл напрямую'
+    );
+    assert_contains("Media::picture((string) \$s['path']", $thumbs, 'миниатюра идёт через Media::picture');
+    assert_contains("'110px'", $thumbs, 'подсказка размера уводит выбор на мелкий вариант');
+
+    // Третий и четвёртый аргументы picture() — это точка фокуса, а не размеры:
+    // числа вместо null уводили кадр к правому краю (object-position 100% 62%).
+    assert_true(
+        (bool) preg_match('/Media::picture\(\(string\) \$s\[.path.\], \(string\) \$s\[.alt.\], null, null,/', $thumbs),
+        'точка фокуса берётся из медиатеки, а не задаётся числами наугад'
+    );
+});
+
+test('Миниатюры медиатеки в админке не тянут оригинал', function () {
+    $view = (string) file_get_contents(APP_ROOT . '/app/Views/admin/files/index.php');
+    $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Admin/FileController.php');
+    $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/admin.js');
+    $media = (string) file_get_contents(APP_ROOT . '/app/Core/Media.php');
+
+    // Карточка сетки — около 135px, а грузился оригинал: при ширине 2560px по
+    // умолчанию это сотни килобайт на карточку, а карточек на странице до
+    // трёхсот. Мест три, и все три обязаны брать мелкий вариант.
+    assert_contains('Media::thumbUrl($url)', $view, 'страница медиатеки берёт мелкий вариант');
+    assert_contains("'thumb' => \\App\\Core\\Media::thumbUrl(", $controller, 'ответ для окна выбора несёт адрес миниатюры');
+    assert_contains('it.thumb || it.url', $js, 'сетка окна выбора предпочитает миниатюру');
+
+    // Без вариантов помощник обязан вернуть исходный адрес: иначе у файлов,
+    // загруженных до появления webp, карточка осталась бы пустой.
+    assert_contains('public static function thumbUrl(string $url): string', $media);
+    assert_contains("return \$variants['w800'] ?? \$variants['w1600'] ?? \$variants['full'] ?? \$url;", $media);
+});
