@@ -95,6 +95,15 @@ final class MediaResizer
         }
     }
 
+    /**
+     * Размеры уже проверены в handle(): нулевой холст валил создание картинки.
+     * Диапазон описан здесь, потому что за границу вызова это знание не
+     * переносится — а без него значение уходит в imagecreatetruecolor(), где
+     * ноль означает ошибку, и в файле со strict_types это TypeError.
+     *
+     * @param int<1, max> $w
+     * @param int<1, max> $h
+     */
     private static function generateThumb(string $src, string $dest, int $w, int $h, string $mode, int $quality): void
     {
         $info = @getimagesize($src);

@@ -54,6 +54,7 @@ final class HeroController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function edit(array $params): void
     {
         Auth::requireLogin();
@@ -77,6 +78,7 @@ final class HeroController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function update(array $params): void
     {
         Auth::requireLogin();
@@ -117,6 +119,7 @@ final class HeroController
      * Применение пресета отдельным действием, а не полем формы: пресет
      * перезаписывает часть настроек, и делать это молча при каждом сохранении
      * значило бы затирать ручные правки.
+     * @param array<string, string> $params
      */
     public function applyPreset(array $params): void
     {
@@ -144,6 +147,7 @@ final class HeroController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function duplicate(array $params): void
     {
         Auth::requireLogin();
@@ -161,6 +165,7 @@ final class HeroController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireLogin();
@@ -176,6 +181,7 @@ final class HeroController
 
     // --- Слайды ----------------------------------------------------------
 
+    /** @param array<string, string> $params */
     public function slideCreate(array $params): void
     {
         Auth::requireLogin();
@@ -199,6 +205,7 @@ final class HeroController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function slideEdit(array $params): void
     {
         Auth::requireLogin();
@@ -219,6 +226,7 @@ final class HeroController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function slideUpdate(array $params): void
     {
         Auth::requireLogin();
@@ -240,6 +248,7 @@ final class HeroController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function slideDuplicate(array $params): void
     {
         Auth::requireLogin();
@@ -261,6 +270,7 @@ final class HeroController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function slideToggle(array $params): void
     {
         Auth::requireLogin();
@@ -278,6 +288,7 @@ final class HeroController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function slideDestroy(array $params): void
     {
         Auth::requireLogin();
@@ -296,7 +307,10 @@ final class HeroController
         exit;
     }
 
-    /** Новый порядок после перетаскивания. Отвечает JSON — форму не перезагружаем. */
+    /**
+     * Новый порядок после перетаскивания. Отвечает JSON — форму не перезагружаем.
+     * @param array<string, string> $params
+     */
     public function reorder(array $params): void
     {
         Auth::requireLogin();

@@ -18,6 +18,7 @@ use App\Models\ContentType;
  */
 final class ContentController
 {
+    /** @param array<string, string> $params */
     public function index(array $params): void
     {
         $type = ContentType::findBySlug((string) ($params['type'] ?? ''));
@@ -84,6 +85,7 @@ final class ContentController
         View::render('site/content_index', $vars);
     }
 
+    /** @param array<string, string> $params */
     public function show(array $params): void
     {
         $type = ContentType::findBySlug((string) ($params['type'] ?? ''));

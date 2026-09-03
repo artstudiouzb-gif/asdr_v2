@@ -53,6 +53,7 @@ final class WebhookController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function update(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -77,6 +78,7 @@ final class WebhookController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -88,7 +90,10 @@ final class WebhookController
         exit;
     }
 
-    /** Проверить URL и HMAC-подпись безопасным событием webhook.test. */
+    /**
+     * Проверить URL и HMAC-подпись безопасным событием webhook.test.
+     * @param array<string, string> $params
+     */
     public function test(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -110,7 +115,10 @@ final class WebhookController
         exit;
     }
 
-    /** Повторить одну доставку, завершившуюся ошибкой. */
+    /**
+     * Повторить одну доставку, завершившуюся ошибкой.
+     * @param array<string, string> $params
+     */
     public function retry(array $params): void
     {
         Auth::requireSuperAdmin();

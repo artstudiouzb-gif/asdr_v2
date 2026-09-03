@@ -65,6 +65,7 @@ final class PasswordResetController
         View::render('admin/auth/forgot', ['error' => null, 'sent' => true]);
     }
 
+    /** @param array<string, string> $params */
     public function showReset(array $params): void
     {
         $token = (string) ($params['token'] ?? '');
@@ -82,6 +83,7 @@ final class PasswordResetController
         View::render('admin/auth/reset', ['error' => null, 'token' => $token, 'invalid' => false]);
     }
 
+    /** @param array<string, string> $params */
     public function submitReset(array $params): void
     {
         Csrf::verifyRequest();

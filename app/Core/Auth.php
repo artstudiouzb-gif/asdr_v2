@@ -304,7 +304,7 @@ final class Auth
         try {
             SessionRegistry::register(
                 (int) $user['id'],
-                session_id(),
+                Session::id(),
                 $_SERVER['REMOTE_ADDR'] ?? null,
                 $_SERVER['HTTP_USER_AGENT'] ?? null
             );
@@ -393,13 +393,13 @@ final class Auth
         // строка присутствует в реестре. Удаление строки («выйти на этом
         // устройстве»/«везде»/смена пароля) немедленно завершает сессию.
         try {
-            if (!SessionRegistry::exists((int) $_SESSION['user_id'], session_id())) {
+            if (!SessionRegistry::exists((int) $_SESSION['user_id'], Session::id())) {
                 self::logout();
                 return false;
             }
             // Обновляем «последнюю активность» не чаще раза в минуту.
             if ((time() - (int) ($_SESSION['sid_seen_at'] ?? 0)) > 60) {
-                SessionRegistry::touch((int) $_SESSION['user_id'], session_id());
+                SessionRegistry::touch((int) $_SESSION['user_id'], Session::id());
                 $_SESSION['sid_seen_at'] = time();
             }
         } catch (\Throwable $e) {
@@ -564,7 +564,7 @@ final class Auth
         // Снимаем сессию с реестра активных сессий.
         try {
             if (session_status() === PHP_SESSION_ACTIVE) {
-                SessionRegistry::remove(session_id());
+                SessionRegistry::remove(Session::id());
             }
         } catch (\Throwable $e) {
             Logger::error('SessionRegistry::remove failed: ' . $e->getMessage());
@@ -582,7 +582,7 @@ final class Auth
 
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
-            setcookie(session_name(), '', [
+            setcookie(Session::name(), '', [
                 'expires' => time() - 42000,
                 'path' => $params['path'],
                 'domain' => $params['domain'],

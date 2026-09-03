@@ -1118,7 +1118,7 @@ final class DesignSettings
                 'space_max' => $spacings['space_max'],
             ],
         ];
-        Setting::set(self::USER_PRESETS_KEY, json_encode($presets, JSON_UNESCAPED_UNICODE));
+        Setting::set(self::USER_PRESETS_KEY, self::encodePresets($presets));
         Setting::set('design_preset', 'user:' . $slug);
 
         return $slug;
@@ -1131,7 +1131,7 @@ final class DesignSettings
             return false;
         }
         unset($presets[$slug]);
-        Setting::set(self::USER_PRESETS_KEY, json_encode($presets, JSON_UNESCAPED_UNICODE));
+        Setting::set(self::USER_PRESETS_KEY, self::encodePresets($presets));
         if (Setting::get('design_preset', '') === 'user:' . $slug) {
             Setting::set('design_preset', '');
         }
@@ -1222,7 +1222,7 @@ final class DesignSettings
             foreach (array_slice(array_keys($auto), 0, count($auto) - self::DESIGN_BACKUP_KEEP + 1) as $slug) {
                 unset($presets[$slug]);
             }
-            Setting::set(self::USER_PRESETS_KEY, json_encode($presets, JSON_UNESCAPED_UNICODE));
+            Setting::set(self::USER_PRESETS_KEY, self::encodePresets($presets));
         }
 
         $name = self::DESIGN_BACKUP_PREFIX . ': ' . date('d.m.Y H:i');
@@ -1361,4 +1361,22 @@ final class DesignSettings
           . (($v['type_scale'] ?? 'static') === 'static' ? ' design-type-static' : '')
           . (($v['scroll_top'] ?? 'on') === 'on' ? ' design-scrolltop' : '');
     }
+
+    /**
+     * Пресеты строкой для настройки.
+     *
+     * `json_encode()` объявлена как `string|false` и при негодных данных (битая
+     * кодировка в названии пресета) отдаёт `false`. В файле со `strict_types`
+     * это значение уходило в `Setting::set()` типизированным параметром, то
+     * есть сохранение раздела «Дизайн» падало с `TypeError`, ничего не говоря о
+     * причине. `JSON_THROW_ON_ERROR` называет её вслух и не даёт записать в
+     * настройку мусор вместо пресетов.
+     *
+     * @param array<mixed> $presets
+     */
+    private static function encodePresets(array $presets): string
+    {
+        return json_encode($presets, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+    }
+
 }

@@ -19,6 +19,7 @@ final class ContentRevisionController
     private const LABELS = ['page' => 'страницы', 'news' => 'новости', 'project' => 'проекта'];
     private const EDIT_PATHS = ['page' => '/admin/pages/%d/edit', 'news' => '/admin/news/%d/edit', 'project' => '/admin/projects/%d/edit'];
 
+    /** @param array<string, string> $params */
     public function index(array $params): void
     {
         Auth::requireLogin();
@@ -40,6 +41,7 @@ final class ContentRevisionController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function restore(array $params): void
     {
         Auth::requireLogin();

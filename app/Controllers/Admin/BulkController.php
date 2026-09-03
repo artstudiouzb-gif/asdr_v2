@@ -26,6 +26,7 @@ final class BulkController
         'projects' => Project::class,
     ];
 
+    /** @param array<string, string> $params */
     public function handle(array $params): void
     {
         Auth::requireLogin();

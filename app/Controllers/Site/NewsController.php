@@ -116,6 +116,7 @@ final class NewsController
     /**
      * Скачивание всех фото новости одним zip-архивом (кнопка «Скачать все фото»).
      * В архив попадают только файлы из каталога публичных загрузок.
+     * @param array<string, string> $params
      */
     public function photosZip(array $params): void
     {
@@ -171,6 +172,7 @@ final class NewsController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function show(array $params): void
     {
         $lang = Locale::current();

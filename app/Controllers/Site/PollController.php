@@ -10,6 +10,7 @@ use App\Models\NewsPoll;
 
 final class PollController
 {
+    /** @param array<string, string> $params */
     public function vote(array $params): void
     {
         header("Content-Type: application/json; charset=utf-8");

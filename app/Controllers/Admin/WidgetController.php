@@ -58,6 +58,7 @@ final class WidgetController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function edit(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -77,6 +78,7 @@ final class WidgetController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function update(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -107,6 +109,7 @@ final class WidgetController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -119,6 +122,7 @@ final class WidgetController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function move(array $params): void
     {
         Auth::requireSuperAdmin();

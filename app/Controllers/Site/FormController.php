@@ -15,6 +15,7 @@ use App\Models\FormSubmission;
 
 final class FormController
 {
+    /** @param array<string, string> $params */
     public function submit(array $params): void
     {
         $slug = $params['slug'] ?? '';

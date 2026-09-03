@@ -21,6 +21,7 @@ final class ProjectController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function show(array $params): void
     {
         $slug = (string) ($params['slug'] ?? '');
