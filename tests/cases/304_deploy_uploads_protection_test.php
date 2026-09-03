@@ -52,25 +52,23 @@ test('Media::servable открывает права закрытого роди�
 });
 
 test('Media::resolveExistingMediaUrl подменяет отсутствующий jpg на существующий webp', function () {
-    $root = sys_get_temp_dir() . '/mediaurl-test-' . bin2hex(random_bytes(5));
-    mkdir($root . '/sub', 0755, true);
-    $webpPath = $root . '/sub/photo.webp';
+    $root = rtrim((string) \App\Core\Config::get('paths.public_uploads', ''), '/');
+    $urlBase = rtrim((string) \App\Core\Config::get('paths.public_uploads_url', ''), '/');
+    if ($root === '' || $urlBase === '' || !is_dir($root)) {
+        skip_test('Каталог публичных загрузок не настроен');
+        return;
+    }
+    $dir = $root . '/probe-res-' . bin2hex(random_bytes(5));
+    mkdir($dir, 0755, true);
+
+    $webpPath = $dir . '/photo.webp';
     file_put_contents($webpPath, 'webp payload');
 
-    $origUploads = \App\Core\Config::get('paths.public_uploads');
-    $origUrl = \App\Core\Config::get('paths.public_uploads_url');
+    $url = $urlBase . '/' . basename($dir) . '/photo.jpg';
+    $resolved = Media::resolveExistingMediaUrl($url);
 
-    try {
-        \App\Core\Config::set('paths.public_uploads', $root);
-        \App\Core\Config::set('paths.public_uploads_url', '/uploads/public');
+    assert_same($urlBase . '/' . basename($dir) . '/photo.webp', $resolved, 'JPG успешно заменён на WebP');
 
-        $resolved = Media::resolveExistingMediaUrl('/uploads/public/sub/photo.jpg');
-        assert_same('/uploads/public/sub/photo.webp', $resolved, 'JPG успешно заменён на WebP');
-    } finally {
-        \App\Core\Config::set('paths.public_uploads', $origUploads);
-        \App\Core\Config::set('paths.public_uploads_url', $origUrl);
-        @unlink($webpPath);
-        @rmdir($root . '/sub');
-        @rmdir($root);
-    }
+    unlink($webpPath);
+    rmdir($dir);
 });

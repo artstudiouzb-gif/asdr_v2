@@ -282,19 +282,18 @@ final class Media
 
     private static function servable(string $path): bool
     {
+        // Если родительский каталог закрыт umask (0700/0750), открываем его (0755):
+        // веб-серверу нужен бит исполнения (+x) для входа в каталог и отдачи статики.
+        $dir = dirname($path);
+        if (is_dir($dir)) {
+            $dirMode = fileperms($dir);
+            if ($dirMode !== false && ($dirMode & 0005) !== 0005) {
+                @chmod($dir, 0755);
+            }
+        }
+
         if (!is_file($path)) {
-            // Если родительский каталог закрыт umask (0700/0750), открываем его (0755)
-            // и повторяем проверку — после деплоя через Git права папок часто сбиваются.
-            $dir = dirname($path);
-            if (is_dir($dir)) {
-                $dirMode = fileperms($dir);
-                if ($dirMode !== false && ($dirMode & 0005) !== 0005) {
-                    @chmod($dir, 0755);
-                }
-            }
-            if (!is_file($path)) {
-                return false;
-            }
+            return false;
         }
         $mode = fileperms($path);
         // Если у файла нет бита чтения «для всех» (0004), открываем на чтение:
