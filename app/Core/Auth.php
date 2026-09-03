@@ -393,7 +393,7 @@ final class Auth
         // строка присутствует в реестре. Удаление строки («выйти на этом
         // устройстве»/«везде»/смена пароля) немедленно завершает сессию.
         try {
-            if (!SessionRegistry::exists((int) $_SESSION['user_id'], Session::id())) {
+            if (!self::sessionStillRegistered((int) $_SESSION['user_id'], Session::id())) {
                 self::logout();
                 return false;
             }
@@ -416,6 +416,33 @@ final class Auth
         Session::start();
         return isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
     }
+
+    /**
+     * Строка сессии всё ещё в реестре — ответ на запрос спрашивается один раз.
+     *
+     * `check()` зовут отовсюду: `requireLogin`, `user()`, помощники вьюх, RBAC.
+     * Каждый вызов ходил в реестр, и страница админки делала 5–8 одинаковых
+     * запросов. Мгновенность отзыва от памяти не страдает: запрос живёт
+     * миллисекунды, а «немедленно» и означает «со следующего запроса».
+     * Ключ включает идентификатор сессии, поэтому смена сессии внутри запроса
+     * (вход, регенерация) память не переиспользует.
+     */
+    private static function sessionStillRegistered(int $userId, string $sessionId): bool
+    {
+        $key = $userId . '|' . $sessionId;
+        if (array_key_exists($key, self::$registryMemo)) {
+            return self::$registryMemo[$key];
+        }
+
+        return self::$registryMemo[$key] = SessionRegistry::exists($userId, $sessionId);
+    }
+
+    /**
+     * Ответы реестра в пределах запроса: «пользователь|сессия» → есть ли строка.
+     *
+     * @var array<string, bool>
+     */
+    private static array $registryMemo = [];
 
     public static function user(): ?array
     {
@@ -560,6 +587,8 @@ final class Auth
 
     public static function logout(): void
     {
+        // Сессия закончилась — прежний ответ реестра больше не действует.
+        self::$registryMemo = [];
         Session::start();
         // Снимаем сессию с реестра активных сессий.
         try {

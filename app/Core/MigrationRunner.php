@@ -33,9 +33,40 @@ final class MigrationRunner
         ));
     }
 
+    /**
+     * Сколько миграций ещё не применено — для бейджа в шапке панели.
+     *
+     * Отличается от pending() тем, что **ничего не создаёт**: шапка рисуется на
+     * каждой странице админки, и через pending() туда попадал
+     * `CREATE TABLE IF NOT EXISTS migrations`, то есть DDL при отрисовке
+     * страницы. На хостинге, где у пользователя БД нет права CREATE, панель
+     * падала бы на каждой странице из-за счётчика в углу.
+     *
+     * Нет таблицы — значит не применено ничего: возвращаем число файлов.
+     */
     public static function pendingCount(PDO $pdo, string $migrationsDir): int
     {
-        return count(self::pending($pdo, $migrationsDir));
+        $files = glob(rtrim($migrationsDir, '/') . '/*.sql') ?: [];
+        if ($files === []) {
+            return 0;
+        }
+
+        try {
+            $applied = $pdo->query('SELECT filename FROM migrations')->fetchAll(PDO::FETCH_COLUMN) ?: [];
+        } catch (\Throwable $e) {
+            // Таблицы ещё нет (свежая установка) — создавать её на чтении
+            // нельзя, а честный ответ здесь «не применено ничего».
+            Logger::swallowed('MigrationRunner: таблица migrations недоступна для чтения', $e);
+
+            return count($files);
+        }
+
+        $applied = array_flip(array_map('strval', $applied));
+
+        return count(array_filter(
+            $files,
+            static fn (string $file): bool => !isset($applied[basename($file)])
+        ));
     }
 
     /**
