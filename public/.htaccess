@@ -13,6 +13,28 @@
     RewriteCond %{REQUEST_URI} !(^|/)(index|download)\.php$ [NC]
     RewriteRule .* - [F]
 
+    # Готовое сжатие вместо сжатия на лету. `npm run build:assets` кладёт рядом
+    # с каждым бандлом .br и .gz, сжатые с максимальным качеством, но сервер их
+    # не отдавал: mod_brotli жал ответ заново на каждый запрос и качеством 5 по
+    # умолчанию. Замерено — public.min.css: 50.6 КБ готовым файлом против
+    # 60.6 КБ на лету, то есть посетитель платил лишние 10 КБ, а сервер ещё и
+    # процессор на каждый запрос. Отдаём готовое, когда оно есть и клиент его
+    # принимает; иначе всё работает как прежде.
+    #
+    # Правила внутри mod_headers: без него у ответа не будет Content-Encoding,
+    # и браузер получит сжатый файл как обычный — то есть сломанную страницу.
+    <IfModule mod_headers.c>
+        RewriteCond %{HTTP:Accept-Encoding} (^|,)\s*br($|[;,])
+        RewriteCond %{REQUEST_FILENAME} \.(css|js|svg|json|xml)$
+        RewriteCond %{REQUEST_FILENAME}\.br -f
+        RewriteRule ^(.*)$ $1.br [L]
+
+        RewriteCond %{HTTP:Accept-Encoding} (^|,)\s*gzip($|[;,])
+        RewriteCond %{REQUEST_FILENAME} \.(css|js|svg|json|xml)$
+        RewriteCond %{REQUEST_FILENAME}\.gz -f
+        RewriteRule ^(.*)$ $1.gz [L]
+    </IfModule>
+
     # Существующие файлы и папки (assets, uploads) отдаются напрямую
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
@@ -23,6 +45,34 @@
 </IfModule>
 
 <IfModule mod_headers.c>
+    # Заголовки для заранее сжатых бандлов (см. rewrite выше). Тип берём по
+    # исходному имени: сам файл называется .css.br, и без этого браузер получил
+    # бы его как application/octet-stream. Vary обязателен — иначе кэш отдаст
+    # сжатую копию клиенту, который её не принимает.
+    # Кодировка проставляется по имени файла, а не по переменной из
+    # RewriteRule: после внутреннего перенаправления Apache переименовывает её
+    # в REDIRECT_*, заголовок не выставлялся, и браузер получал сжатые байты
+    # под видом обычного CSS. Проверено на живом Apache — без этого страница
+    # оставалась без стилей.
+    <FilesMatch "\.(css|js|svg|json|xml)\.br$">
+        Header set Content-Encoding "br"
+    </FilesMatch>
+    <FilesMatch "\.(css|js|svg|json|xml)\.gz$">
+        Header set Content-Encoding "gzip"
+    </FilesMatch>
+    <FilesMatch "\.(css|js|svg|json|xml)\.(br|gz)$">
+        Header append Vary Accept-Encoding
+    </FilesMatch>
+    <FilesMatch "\.css\.(br|gz)$">
+        ForceType text/css
+    </FilesMatch>
+    <FilesMatch "\.js\.(br|gz)$">
+        ForceType application/javascript
+    </FilesMatch>
+    <FilesMatch "\.svg\.(br|gz)$">
+        ForceType image/svg+xml
+    </FilesMatch>
+
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "SAMEORIGIN"
     Header set Referrer-Policy "strict-origin-when-cross-origin"
@@ -30,7 +80,7 @@
     # Долгий кэш для версионированных ассетов (задача 127). URL меняется через
     # ?v=<hash> при обновлении файла (App\Core\Asset::url), поэтому CDN отдаёт
     # новую версию без ручной очистки, а старые кэшируются «навсегда».
-    <FilesMatch "\.(css|js|woff2?|ttf|eot|svg|jpe?g|png|gif|webp|ico)$">
+    <FilesMatch "\.(css|js|woff2?|ttf|eot|svg|jpe?g|png|gif|webp|ico)(\.(br|gz))?$">
         Header set Cache-Control "public, max-age=31536000, immutable"
     </FilesMatch>
 </IfModule>
@@ -40,6 +90,10 @@ DirectoryIndex index.php
 
 # Сжатие текстовых ответов. Brotli предпочтительнее; на серверах без него
 # автоматически используется gzip/DEFLATE. Бинарные изображения не трогаем.
+# Готовые .br/.gz повторно не жмём: они уже отданы со своим Content-Encoding.
+<IfModule mod_setenvif.c>
+    SetEnvIf Request_URI "\.(br|gz)$" no-brotli no-gzip dont-vary
+</IfModule>
 <IfModule mod_brotli.c>
     AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml
     AddOutputFilterByType BROTLI_COMPRESS application/javascript application/json application/xml application/rss+xml image/svg+xml

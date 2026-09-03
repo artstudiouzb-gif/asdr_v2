@@ -39,8 +39,16 @@ test('Скрипт схемы подключается по типу блока 
     $collector = (string) file_get_contents(APP_ROOT . '/app/Core/AssetCollector.php');
     assert_contains("'org_structure' => '/assets/js/blocks/org_structure.js'", $collector);
 
-    $build = (string) file_get_contents(APP_ROOT . '/scripts/build-assets.mjs');
-    assert_contains('public/assets/js/blocks/org_structure.js', $build, 'скрипт должен попадать в сборку');
+    // Проверяем результат сборки, а не строку в её исходнике: список блочных
+    // ассетов выводится из каталога, поэтому имени файла в скрипте нет — и
+    // манифест отвечает на настоящий вопрос «файл собран?», а не на «упомянут?».
+    $manifest = json_decode((string) file_get_contents(APP_ROOT . '/public/assets/asset-manifest.json'), true);
+    $entry = $manifest['blocks']['/assets/js/blocks/org_structure.js'] ?? null;
+    assert_true(is_array($entry), 'скрипт должен попадать в сборку');
+    assert_true(
+        is_file(APP_ROOT . '/public' . (string) ($entry['path'] ?? '')),
+        'собранный файл лежит на диске'
+    );
 
     $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/blocks/org_structure.js');
     // Текст родителя включает вложенные списки: без отсечения департамент

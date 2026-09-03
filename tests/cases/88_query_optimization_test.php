@@ -36,6 +36,58 @@ test('Страница не предзагружает все локальные
     assert_contains('array_keys($fontPreloads)', $header);
 });
 
+test('Сервер отдаёт заранее сжатые бандлы, а не жмёт их заново', function () {
+    // npm run build:assets кладёт рядом с бандлом .br и .gz максимального
+    // качества, но сервер их не отдавал: mod_brotli жал ответ заново на каждый
+    // запрос и качеством 5 по умолчанию. Замерено на public.min.css —
+    // 50.6 КБ готовым файлом против 60.6 КБ на лету.
+    $htaccess = (string) file_get_contents(APP_ROOT . '/public/.htaccess');
+
+    assert_contains('.br -f', $htaccess, 'готовый .br подставляется, если он есть');
+    assert_contains('.gz -f', $htaccess, 'и .gz для клиентов без brotli');
+    assert_contains('Accept-Encoding} (^|,)', $htaccess, 'подстановка только если клиент принимает сжатие');
+
+    // Заголовок ставится по имени файла: переменная из RewriteRule после
+    // внутреннего перенаправления становится REDIRECT_*, и браузер получал бы
+    // сжатые байты под видом обычного CSS. Проверено на живом Apache.
+    assert_true(
+        !str_contains($htaccess, '%{ASSET_ENCODING}e'),
+        'кодировка не зависит от переменной, теряемой при перенаправлении'
+    );
+    assert_contains('Header set Content-Encoding "br"', $htaccess);
+    assert_contains('Header set Content-Encoding "gzip"', $htaccess);
+
+    // Без Vary общий кэш отдаст сжатую копию клиенту, который её не принимает.
+    assert_contains('Header append Vary Accept-Encoding', $htaccess);
+
+    // Тип берётся по исходному имени: файл называется .css.br, и без этого
+    // браузер получил бы его как поток байтов.
+    assert_contains('ForceType text/css', $htaccess);
+    assert_contains('ForceType application/javascript', $htaccess);
+
+    // Готовое не жмём повторно.
+    assert_contains('no-brotli no-gzip', $htaccess);
+
+    // Подстановка живёт внутри mod_headers: без него Content-Encoding не
+    // выставить, и подменять файл нельзя вовсе.
+    $rewriteAt = strpos($htaccess, '.br -f');
+    $guardAt = strpos($htaccess, '<IfModule mod_headers.c>');
+    assert_true(
+        $guardAt !== false && $rewriteAt !== false && $guardAt < $rewriteAt,
+        'подстановка обёрнута проверкой mod_headers'
+    );
+
+    // Файлы, которые подставляются, обязаны существовать в сборке.
+    foreach (['public/assets/css/public.min.css', 'public/assets/js/public.min.js'] as $bundle) {
+        foreach (['.br', '.gz'] as $ext) {
+            assert_true(
+                is_file(APP_ROOT . '/' . $bundle . $ext),
+                "сборка кладёт {$bundle}{$ext}"
+            );
+        }
+    }
+});
+
 test('Сервер сжимает текст, а hero загружает медиа по приоритету первого экрана', function () {
     $htaccess = (string) file_get_contents(APP_ROOT . '/public/.htaccess');
     assert_contains('BROTLI_COMPRESS', $htaccess);
