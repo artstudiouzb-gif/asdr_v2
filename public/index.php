@@ -31,12 +31,28 @@ use App\Core\Router;
 $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
 
 // Если переписанный запрос к отсутствующему файлу в uploads пришёл в index.php,
-// но есть одноимённый webp — отдаём его напрямую (fallback для окружений без mod_rewrite).
+// но есть одноимённый webp — отдаём его напрямую (fallback для окружений без
+// mod_rewrite).
+//
+// Имя файла берётся из запроса и уходит в readfile(), поэтому границы каталога
+// проверяются дважды. Набор символов не пропускает `..` вовсе, а realpath()
+// сверяет уже разрешённый путь с корнем загрузок: без этого запрос вида
+// `/uploads/public/../../config/config.jpg` собирал путь за пределами каталога
+// (проверено — строка пути действительно выходила наружу). Читать можно было
+// только *.webp, и Apache такой путь обычно нормализует раньше PHP, но
+// собирать путь из запроса без границ нельзя в любом случае.
 if (str_starts_with($requestPath, '/uploads/public/')
-    && preg_match('#^/uploads/public/(.+)\.(jpe?g|png)$#i', $requestPath, $m)) {
-    $webpDisk = __DIR__ . '/uploads/public/' . $m[1] . '.webp';
-    if (is_file($webpDisk)) {
+    && preg_match('#^/uploads/public/([A-Za-z0-9._/-]+)\.(jpe?g|png)$#i', $requestPath, $m)
+    && !str_contains($m[1], '..')) {
+    $uploadsRoot = realpath(__DIR__ . '/uploads/public');
+    $webpDisk = realpath(__DIR__ . '/uploads/public/' . $m[1] . '.webp');
+    if ($uploadsRoot !== false
+        && $webpDisk !== false
+        && str_starts_with($webpDisk, $uploadsRoot . DIRECTORY_SEPARATOR)
+        && is_file($webpDisk)
+    ) {
         header('Content-Type: image/webp');
+        header('X-Content-Type-Options: nosniff');
         header('Cache-Control: public, max-age=31536000, immutable');
         readfile($webpDisk);
         exit;
