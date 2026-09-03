@@ -10,11 +10,11 @@ $pageActions = '<a href="/admin/news" class="btn">' . AdminUi::icon('arrow-left'
 require __DIR__ . '/../layout/header.php';
 
 /** @var int $maxUploadMb */
-/** @var int $batchSize */
+/** @var int $batchSeconds */
 ?>
 <link rel="stylesheet" href="<?= htmlspecialchars(Asset::url('/assets/css/admin-news-import.css'), ENT_QUOTES) ?>">
 
-<div class="news-import" data-news-import data-endpoint="/admin/news/import" data-max-mb="<?= (int) $maxUploadMb ?>" data-batch-size="<?= (int) $batchSize ?>">
+<div class="news-import" data-news-import data-endpoint="/admin/news/import" data-max-mb="<?= (int) $maxUploadMb ?>" data-batch-seconds="<?= (int) $batchSeconds ?>">
     <div class="form-card news-import__intro">
         <?= AdminUi::cardHeader('Импорт из WXR/XML', 'database-import') ?>
         <p>Загрузите стандартный WXR/XML-экспорт старого сайта. Система сначала только проверит файл и покажет план. Запись в базу начнётся только после отдельного подтверждения.</p>
@@ -92,7 +92,7 @@ require __DIR__ . '/../layout/header.php';
             </div>
             <label class="news-import__check">
                 <input type="checkbox" checked data-import-backup>
-                <span><strong>Создать резервную копию перед импортом</strong><small>Рекомендуется оставить включённым.</small></span>
+                <span><strong>Создать резервную копию перед импортом</strong><small>Снимается отдельным шагом, до первого пакета. На большой базе дамп может не уложиться в лимит времени сервера — тогда импорт можно продолжить без копии или снять её заранее в «Базах данных».</small></span>
             </label>
         </div>
 
@@ -108,7 +108,7 @@ require __DIR__ . '/../layout/header.php';
             <div class="news-import__progress-head"><span data-import-status-text>Подготовка…</span><strong data-import-percent>0%</strong></div>
             <progress max="100" value="0" data-import-bar></progress>
         </div>
-        <p class="form-hint">Импорт выполняется небольшими пакетами по <?= (int) $batchSize ?> новости, чтобы не упираться в лимит времени shared hosting. Не закрывайте вкладку до завершения.</p>
+        <p class="form-hint">Импорт идёт пакетами примерно по <?= (int) $batchSeconds ?> секунд, чтобы не упираться в лимит времени сервера. Не закрывайте вкладку до завершения; если пакет всё же оборвётся, перенесённое сохранится и импорт продолжится с того же места.</p>
         <div class="news-import__running-stats">
             <span>Создано: <strong data-run="imported">0</strong></span>
             <span>Переводов: <strong data-run="translations">0</strong></span>
@@ -116,6 +116,10 @@ require __DIR__ . '/../layout/header.php';
             <span>Редиректов: <strong data-run="redirects">0</strong></span>
         </div>
         <div class="news-import__log" data-import-log aria-live="polite"></div>
+        <div class="form-actions" data-resume-actions hidden>
+            <button type="button" class="btn btn--primary" data-resume-import><?= AdminUi::icon('player-play') ?>Продолжить импорт</button>
+            <a href="/admin/news?status=draft" class="btn">Остановиться и открыть новости</a>
+        </div>
     </div>
 
     <div class="form-card news-import__done" data-stage="done" hidden>

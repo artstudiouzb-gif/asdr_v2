@@ -276,14 +276,24 @@ final class LegacyWxrImporter
     }
 
     /**
-     * @param array{status?:string,authorId?:?int,langs?:array<string,string>,uploadsDir?:?string,limit?:int,dryRun?:bool} $opts
-     * @return array{imported:int,skipped:int,images:int,redirects:int,translations:int,errors:array<int,string>,source_published:int,source_drafts:int,source_comments:int,planned_news:int,unresolved:int}
+     * Пакет ограничивается либо числом записей (`limit`), либо бюджетом времени
+     * (`timeBudget`, секунды), и начинается с группы `offset`. Курсор нужен
+     * затем, что без него каждый следующий пакет пролистывал уже перенесённое
+     * с начала плана, спрашивая News::slugExists() на каждую группу: стоимость
+     * пакета росла вместе с его номером, и импорт упирался в шлюзовой таймаут
+     * тем вернее, чем ближе был к концу. Порядок групп детерминирован (usort
+     * стабилен, вход — порядок записей в XML), а контроллер сверяет sha256
+     * файла перед каждым пакетом, поэтому курсор не может съехать.
+     *
+     * @param array{status?:string,authorId?:?int,langs?:array<string,string>,uploadsDir?:?string,limit?:int,offset?:int,timeBudget?:float,dryRun?:bool} $opts
+     * @return array{imported:int,skipped:int,images:int,redirects:int,translations:int,errors:array<int,string>,source_published:int,source_drafts:int,source_comments:int,planned_news:int,unresolved:int,cursor:int,total:int}
      */
     public static function importFile(string $path, array $opts = []): array
     {
         $out = [
             'imported' => 0, 'skipped' => 0, 'images' => 0, 'redirects' => 0, 'translations' => 0, 'errors' => [],
             'source_published' => 0, 'source_drafts' => 0, 'source_comments' => 0, 'planned_news' => 0, 'unresolved' => 0,
+            'cursor' => 0, 'total' => 0,
         ];
         if (!is_file($path)) {
             $out['errors'][] = 'Файл не найден: ' . $path;
@@ -300,6 +310,9 @@ final class LegacyWxrImporter
         $uploadsDir = $opts['uploadsDir'] ?? null;
         LegacyCmsImporter::clearImageCache();
         $limit = (int) ($opts['limit'] ?? 0);
+        $offset = max(0, (int) ($opts['offset'] ?? 0));
+        $budget = max(0.0, (float) ($opts['timeBudget'] ?? 0.0));
+        $startedAt = microtime(true);
         $dryRun = !empty($opts['dryRun']);
         /** @var array<string,string> $langs */
         $langs = (array) ($opts['langs'] ?? []);
@@ -320,10 +333,25 @@ final class LegacyWxrImporter
             return $out;
         }
 
-        foreach ($plan['groups'] as $group) {
+        $groups = $plan['groups'];
+        $total = count($groups);
+        $out['total'] = $total;
+        $index = min($offset, $total);
+        $processed = 0;
+
+        for (; $index < $total; $index++) {
             if ($limit > 0 && $out['imported'] >= $limit) {
                 break;
             }
+            // Бюджет проверяется только со второй записи пакета: пакет обязан
+            // сдвинуть курсор хотя бы на одну группу, иначе одна медленная
+            // запись остановила бы импорт навсегда, каждый раз возвращая
+            // «перенесено 0» на том же месте.
+            if ($budget > 0.0 && $processed > 0 && (microtime(true) - $startedAt) >= $budget) {
+                break;
+            }
+            $group = $groups[$index];
+            $processed++;
             $primary = self::groupPrimary($group, $primaryWp) ?? $group[0];
             $slug = (string) ($primary['slug'] ?? '');
             if ($slug === '') {
@@ -403,6 +431,7 @@ final class LegacyWxrImporter
                 $out['errors'][] = 'Запись "' . $slug . '": ' . $e->getMessage();
             }
         }
+        $out['cursor'] = $index;
 
         return $out;
     }
