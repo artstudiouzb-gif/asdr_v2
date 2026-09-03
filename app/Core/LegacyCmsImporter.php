@@ -320,7 +320,7 @@ final class LegacyCmsImporter
         }
 
         // Если исходная ссылка — raster (jpg/jpeg/png), добавляем WebP-варианты
-        // со старого сайта в конец списка: WordPress 5.8+ и плагины конвертации
+        // со старого сайта в конец списка: старая CMS и плагины конвертации
         // часто удаляют оригинальный JPG или хранят только WebP.
         if (in_array($ext, ['jpg', 'jpeg', 'png'], true)) {
             $candidates[] = $baseStem . '.webp';
