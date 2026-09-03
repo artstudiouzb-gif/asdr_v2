@@ -99,6 +99,8 @@ final class DemoSeeder
 
     /**
      * Выполняет полный сброс разделов (очистку контента) и загрузку эталонного комплекта «с чистого листа».
+     *
+     * @param list<string>|null $modules
      * @return array<string,int>
      */
     public static function resetAndRun(PDO $pdo, ?array $modules = null): array
@@ -2201,6 +2203,7 @@ final class DemoSeeder
         if ((int) $pdo->query('SELECT COUNT(*) FROM menu_items')->fetchColumn() > 0) {
             return;
         }
+        /** @var array<string, list<array{title: string, type: string, value: string, mega: int, children: list<array{0: string, 1: string, 2: string, 3?: string}>}>> $menus */
         $menus = [
             'ru' => [
                 ['title' => 'Агентство', 'type' => 'page', 'value' => 'o-nas', 'mega' => 0, 'children' => [
@@ -2319,17 +2322,15 @@ final class DemoSeeder
                 $c['menu'] += $ins->rowCount();
                 $parentId = (int) $pdo->lastInsertId();
                 foreach ($item['children'] as $childOrder => $child) {
-                    /** @var list<string> $childRow */
-                    $childRow = $child;
-                    $badge = $childRow[3] ?? null;
+                    $badge = $child[3] ?? null;
                     $ins->execute([
                         ':lang' => $lang,
-                        ':title' => $childRow[0],
+                        ':title' => $child[0],
                         ':badge' => $badge,
                         ':badge_color' => $badge !== null ? 'blue' : null,
                         ':badge_pos' => 'right',
-                        ':url_type' => $childRow[1],
-                        ':url_value' => $childRow[2],
+                        ':url_type' => $child[1],
+                        ':url_value' => $child[2],
                         ':parent_id' => $parentId,
                         ':mega' => 0,
                         ':sort_order' => $childOrder,
