@@ -25,8 +25,8 @@ test('Стили a11y: режим чтения не ломает сетку .new
     $css = (string) file_get_contents($root . '/public/assets/css/a11y.css');
 
     assert_contains('html[data-a11y-reading="on"] .newsdetail:not(.newsdetail--premium)', $css);
-    assert_contains('display: flex !important;', $css);
-    assert_contains('flex-direction: column !important;', $css);
+    assert_contains('display: flex;', $css);
+    assert_contains('flex-direction: column;', $css);
     assert_contains('html[data-a11y-reading="on"] .newsdetail-article', $css);
 });
 

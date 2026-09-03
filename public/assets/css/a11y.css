@@ -254,20 +254,20 @@ html[data-a11y-reading="on"] .site-content {
     display: block !important;
 }
 html[data-a11y-reading="on"] .newsdetail:not(.newsdetail--premium) {
-    display: flex !important;
-    flex-direction: column !important;
-    max-width: 860px !important;
-    margin-inline: auto !important;
+    display: flex;
+    flex-direction: column;
+    max-width: 860px;
+    margin-inline: auto;
 }
 html[data-a11y-reading="on"] .newsdetail:not(.newsdetail--premium) > .newsdetail-head,
 html[data-a11y-reading="on"] .newsdetail:not(.newsdetail--premium) > .newsdetail-body {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    display: block;
+    width: 100%;
+    max-width: 100%;
 }
 html[data-a11y-reading="on"] .newsdetail-article {
-    width: 100% !important;
-    max-width: 100% !important;
+    width: 100%;
+    max-width: 100%;
 }
 html[data-a11y-reading="on"] .site-content p,
 html[data-a11y-reading="on"] .site-content li,
