@@ -69,10 +69,16 @@ final class EnvironmentCheck
             APP_ROOT . '/storage/sessions',
             APP_ROOT . '/storage/backups',
             APP_ROOT . '/storage/protected_uploads',
+            APP_ROOT . '/public/uploads',
             APP_ROOT . '/public/uploads/public',
         ] as $directory) {
             if (!is_dir($directory)) {
                 @mkdir($directory, 0775, true);
+            } else {
+                $dMode = @fileperms($directory);
+                if ($dMode !== false && ($dMode & 0005) !== 0005) {
+                    @chmod($directory, 0755);
+                }
             }
         }
 
