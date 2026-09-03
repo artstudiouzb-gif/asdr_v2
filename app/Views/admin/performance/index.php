@@ -9,6 +9,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var array $settings */
 /** @var bool $cfTokenConfigured */
 /** @var array<string, mixed> $assetStatus */
+/** @var array<string, mixed>|null $mediaHealth */
 $val = fn (string $k, string $d = '') => htmlspecialchars($settings[$k] ?? $d, ENT_QUOTES);
 $on = fn (string $k, string $d = '0') => ($settings[$k] ?? $d) === '1';
 $size = static function (mixed $bytes): string {
@@ -171,6 +172,57 @@ $size = static function (mixed $bytes): string {
                 <input type="checkbox" id="perf_lazy_load" name="perf_lazy_load" value="1" <?= $on('perf_lazy_load', '1') ? 'checked' : '' ?>>
                 <label for="perf_lazy_load">Ленивая загрузка изображений (loading="lazy")</label>
             </div>
+
+            <h4>Проверка файлов медиатеки</h4>
+            <p class="form-hint">
+                Отвечает на вопрос «почему на месте фотографии пусто». Причин с диска
+                видно две: файл не открыт на чтение (веб-сервер такой не отдаёт — так
+                бывает у снимков, которые PHP создал сам: перенос со старого сайта,
+                кадры-превью с YouTube) и файл нулевого размера. Проверка ничего не
+                меняет, только читает.
+            </p>
+            <p>
+                <a class="btn btn--small" rel="nofollow" href="/admin/performance?media_check=1#perf-images">
+                    <?= \App\Core\AdminUi::icon('search') ?>Проверить медиатеку
+                </a>
+            </p>
+
+            <?php if ($mediaHealth !== null): ?>
+                <?php if (empty($mediaHealth['exists'])): ?>
+                    <p class="alert alert--error">Каталог загрузок не найден: <?= htmlspecialchars((string) $mediaHealth['dir'], ENT_QUOTES) ?></p>
+                <?php else: ?>
+                    <p class="form-hint">
+                        Проверено файлов: <strong><?= (int) $mediaHealth['checked'] ?></strong>,
+                        из них изображений: <strong><?= (int) $mediaHealth['images'] ?></strong>.
+                        <?php if (!empty($mediaHealth['truncated'])): ?>
+                            Показана часть каталога — обход остановлен по пределу.
+                        <?php endif; ?>
+                    </p>
+                    <?php if (\App\Core\MediaHealth::healthy($mediaHealth)): ?>
+                        <p class="alert alert--success">Все проверенные файлы читаются и не пусты. Причина пропавших картинок не в них.</p>
+                    <?php else: ?>
+                        <p class="alert alert--error">
+                            Не отдаётся веб-сервером: <strong><?= (int) $mediaHealth['unreadable'] ?></strong> ·
+                            пустых файлов: <strong><?= (int) $mediaHealth['empty'] ?></strong>.
+                            Права чинит <code>php scripts/fix_upload_permissions.php</code>
+                            (сначала с <code>--dry-run</code>); пустые файлы надо загрузить заново.
+                        </p>
+                        <?php foreach (['unreadable' => 'Не открыты на чтение', 'empty' => 'Пустые файлы'] as $key => $label): ?>
+                            <?php $rows = (array) ($mediaHealth['samples'][$key] ?? []); ?>
+                            <?php if ($rows !== []): ?>
+                                <h5><?= htmlspecialchars($label, ENT_QUOTES) ?></h5>
+                                <table class="data-table">
+                                    <tbody>
+                                    <?php foreach ($rows as $row): ?>
+                                        <tr><td><code><?= htmlspecialchars((string) $row, ENT_QUOTES) ?></code></td></tr>
+                                    <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                <?php endif; ?>
+            <?php endif; ?>
         </div>
 
         <div class="header-builder__group" id="perf-vitals">

@@ -23,6 +23,14 @@ final class PerformanceController
     {
         Auth::requireSuperAdmin();
 
+        // Проверка медиатеки — по явному запросу, а не на каждом открытии
+        // раздела: она обходит каталог загрузок, и делать это при каждом
+        // рендере значило бы платить за диагностику всегда. Действие читающее,
+        // поэтому обычная ссылка с параметром, а не форма: менять ей нечего.
+        $mediaHealth = ($_GET['media_check'] ?? '') === '1'
+            ? \App\Core\MediaHealth::scan()
+            : null;
+
         $opcacheInfo = [
             'enabled' => false,
             'memory_used' => '0 MB',
@@ -62,6 +70,7 @@ final class PerformanceController
         View::render('admin/performance/index', [
             'settings' => Setting::all(),
             'opcacheInfo' => $opcacheInfo,
+            'mediaHealth' => $mediaHealth,
             'assetStatus' => FrontendAssets::status(),
             'cfTokenConfigured' => Setting::get('cf_api_token', '') !== '',
             // Замеры с реальных посетителей: 75-й перцентиль за 28 дней.
