@@ -3145,13 +3145,14 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    9px, и число читалось приклеенным к снимку. */
 .relnews-card__body { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 4px 14px 0; }
 
-/* Обложка ленты — первая карточка цикла: фотография во всю карточку, текст
-   поверх неё. Это главная новость страницы, и роль у неё другая, чем у
-   широкой карточки в конце цикла (там фотография сбоку, текст рядом).
-
-   Растяжение на две ячейки общее у обоих крупных видов, поэтому объявлено
-   ниже одним правилом: различается только внутреннее устройство. */
-.relnews-card.relnews-card--hero {
+/* Крупные карточки ленты — обложка в начале цикла и широкая в конце. У обеих
+   фотография во всю карточку и текст поверх неё; различается только кегль
+   заголовка, поэтому устройство объявлено общим набором правил, а не двумя
+   похожими. Прежде широкая была устроена иначе (кадр сбоку, текст рядом), и
+   роли у видов были разные: обложка — главная новость, широкая лишь замыкала
+   композицию. Владелец попросил один вид на оба места. */
+.relnews-card.relnews-card--hero,
+.relnews-card.relnews-card--wide {
     grid-column: span 2;
     position: relative;
     min-height: clamp(280px, 24vw, 400px);
@@ -3164,8 +3165,10 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     --newshero-fade: clamp(56px, 9vw, 84px);
 }
 /* Кадр — подложка: обёртка растянута на карточку, а не стоит в потоке. */
-.relnews-card--hero .news-cover { position: absolute; inset: 0; }
-.relnews-card--hero .relnews-card__media {
+.relnews-card--hero .news-cover,
+.relnews-card--wide .news-cover { position: absolute; inset: 0; min-width: 0; }
+.relnews-card--hero .relnews-card__media,
+.relnews-card--wide .relnews-card__media {
     height: 100%;
     width: 100%;
     aspect-ratio: auto;
@@ -3178,7 +3181,8 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    где затемнения ещё почти нет (замерено 1.9:1 при норме 4.5:1). Поэтому
    подложка объявлена у самого текста — см. `.relnews-card--hero
    .relnews-card__body`. */
-.relnews-card--hero .news-cover::after {
+.relnews-card--hero .news-cover::after,
+.relnews-card--wide .news-cover::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -3194,7 +3198,8 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    сверху, чтобы граница подложки не читалась как обрезанная фотография.
    Сплошным цветом фона (третьим слоем) её задать нельзя — фон рисуется под
    всеми слоями сразу и закрасил бы растушёвку. */
-.relnews-card--hero .relnews-card__body {
+.relnews-card--hero .relnews-card__body,
+.relnews-card--wide .relnews-card__body {
     position: relative;
     z-index: 1;
     margin-top: auto;
@@ -3215,19 +3220,25 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    у каждого свой токен, и перечислять их по отдельности значило бы забыть
    следующий добавленный элемент. */
 .relnews-card--hero,
+.relnews-card--wide,
 .relnews-card--hero .relnews-card__title,
+.relnews-card--wide .relnews-card__title,
 .relnews-card--hero .relnews-card__date,
-.relnews-card--hero .news-category { color: #fff; }
+.relnews-card--wide .relnews-card__date,
+.relnews-card--hero .news-category,
+.relnews-card--wide .news-category { color: #fff; }
 /* Заголовок обложки ограничен тремя строками: подложка растёт вместе с
    текстом, и длинный заголовок с анонсом закрасил бы фотографию целиком. */
-.relnews-card--hero .relnews-card__title {
+.relnews-card--hero .relnews-card__title,
+.relnews-card--wide .relnews-card__title {
     font-size: var(--step-4);
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-.relnews-card--hero .relnews-card__excerpt {
+.relnews-card--hero .relnews-card__excerpt,
+.relnews-card--wide .relnews-card__excerpt {
     color: rgba(255, 255, 255, .86);
     font-size: var(--step--1);
     line-height: var(--base-line-height, 1.6);
@@ -3236,8 +3247,10 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-.relnews-card--hero .news-category { border-color: rgba(255, 255, 255, .5); }
-.relnews-card--hero:hover .relnews-card__title { color: #fff; }
+.relnews-card--hero .news-category,
+.relnews-card--wide .news-category { border-color: rgba(255, 255, 255, .5); }
+.relnews-card--hero:hover .relnews-card__title,
+.relnews-card--wide:hover .relnews-card__title { color: #fff; }
 
 /* Дата с иконкой: значок и число — одна строка, а не два соседних элемента. */
 .relnews-card__date { display: inline-flex; align-items: center; gap: 6px; }
@@ -3254,47 +3267,11 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    растянута на две ячейки, и при произвольной доле её внутренняя граница
    попадала между колонками — текст начинался не там, где начинается карточка
    ряда выше. Отсюда и промежуток внутри карточки, равный промежутку сетки. */
-.relnews-card.relnews-card--wide {
-    grid-column: span 2;
-    display: grid;
-    grid-template-columns: minmax(0, calc(50% - var(--newsgrid-gap, 24px) / 2)) minmax(0, 1fr);
-    column-gap: var(--newsgrid-gap, 24px);
-    align-items: stretch;
-    padding: 0;
-}
-/* Кадр занимает свою половину целиком: карточка стоит в ряду с компактными,
-   её высоту задают они, и при фиксированной пропорции над кадром и под ним
-   оставались бы пустые поля в полсотни пикселей — на белой карточке это
-   читается как незагрузившаяся картинка. Роль «крупного кадра с честной
-   пропорцией» забрала обложка в начале цикла: там фотография и есть карточка.
-   `min-width: 0` снимает автоминимум по содержимому: без него колонка с
-   фотографией разъезжается шире заданной доли, а текст ужимается вдвое. */
-.relnews-card--wide .news-cover { min-width: 0; }
-/* Своей пропорции у кадра нет — он заполняет обёртку целиком, кадрирует
-   `object-fit: cover` у изображения. */
-.relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: auto; }
-.relnews-card--wide .relnews-card__body { min-width: 0; justify-content: center; padding: 18px 14px; }
-.relnews-card--wide .relnews-card__title { font-size: var(--step-2); }
-/* Анонс — три строки: карточка стоит в ряду с компактными, и её высота задаёт
-   высоту всего ряда. Правило адресовано только широкой карточке: у той же
-   `.relnews-card__excerpt` есть свои размеры в части темы для детальной
-   новости, и общий селектор здесь спорил бы с ними. */
-.relnews-card--wide .relnews-card__excerpt {
-    color: var(--gov-muted);
-    font-size: var(--step--1);
-    line-height: var(--base-line-height, 1.6);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-/* В одну колонку широкой карточке растягиваться некуда: `span 2` создал бы
-   вторую колонку и горизонтальную прокрутку. Кадр остаётся 16:9 — обёртка
-   считает высоту от ширины карточки. */
+/* В одну колонку крупным карточкам растягиваться некуда: `span 2` создал бы
+   вторую колонку и горизонтальную прокрутку. */
 @media (max-width: 560px) {
-    .relnews-card.relnews-card--hero { grid-column: auto; min-height: clamp(300px, 78vw, 380px); }
-    .relnews-card.relnews-card--wide { grid-column: auto; grid-template-columns: minmax(0, 1fr); padding: 0 0 14px; }
-    .relnews-card--wide .relnews-card__body { padding: 4px 14px 0; }
+    .relnews-card.relnews-card--hero,
+    .relnews-card.relnews-card--wide { grid-column: auto; min-height: clamp(300px, 78vw, 380px); }
 }
 /* На трёх колонках ритм выключается. Цикл считает ячейки парами и тройками,
    а на три колонки не раскладывается: крупная карточка рано или поздно
@@ -3302,11 +3279,8 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
    её на следующий ряд и оставляет дыру. Ровный ряд компактных карточек лучше
    дырявой ленты. */
 @media (max-width: 1100px) and (min-width: 1001px) {
-    .relnews-card.relnews-card--hero { grid-column: auto; min-height: 320px; }
-    .relnews-card.relnews-card--wide { grid-column: auto; grid-template-columns: minmax(0, 1fr); padding: 0 0 14px; }
-    .relnews-card--wide .relnews-card__body { padding: 4px 14px 0; }
-    .relnews-card--wide .relnews-card__title { font-size: var(--step-0); }
-    .relnews-card--wide .relnews-card__excerpt { display: none; }
+    .relnews-card.relnews-card--hero,
+    .relnews-card.relnews-card--wide { grid-column: auto; min-height: 320px; }
 }
 
 /* «Читать подробнее» — завершение карточки. Отделено чертой сверху и всегда

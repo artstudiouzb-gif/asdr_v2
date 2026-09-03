@@ -154,6 +154,7 @@ $router->get('/admin/news', [AdminNewsController::class, 'index']);
 $router->get('/admin/news/import', [\App\Controllers\Admin\NewsImportController::class, 'index']);
 $router->post('/admin/news/import/upload', [\App\Controllers\Admin\NewsImportController::class, 'uploadChunk']);
 $router->post('/admin/news/import/inspect', [\App\Controllers\Admin\NewsImportController::class, 'inspect']);
+$router->post('/admin/news/import/backup', [\App\Controllers\Admin\NewsImportController::class, 'backup']);
 $router->post('/admin/news/import/run', [\App\Controllers\Admin\NewsImportController::class, 'importBatch']);
 $router->post('/admin/news/import/discard', [\App\Controllers\Admin\NewsImportController::class, 'discard']);
 $router->get('/admin/news/create', [AdminNewsController::class, 'create']);

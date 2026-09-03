@@ -15,7 +15,15 @@ final class NewsImportController
 {
     private const MAX_BYTES = 268435456; // 256 MiB
     private const MAX_CHUNKS = 4096;
-    private const BATCH_SIZE = 3;
+    // Пакет ограничен временем, а не числом новостей: стоимость записи
+    // непредсказуема (у одной три картинки со старого сайта, у другой ни
+    // одной), поэтому фиксированные «3 новости» то не выбирали и секунды, то
+    // не укладывались в шлюзовой таймаут. 15 секунд — с запасом под обычные
+    // 60 у nginx, включая разбор XML в начале запроса.
+    private const BATCH_SECONDS = 15;
+    // Верхняя граница на случай очень быстрых записей: ответ пакета не должен
+    // раздуваться без предела.
+    private const BATCH_MAX = 40;
     private const SESSION_KEY = 'admin_news_wxr_imports';
 
     public function index(): void
@@ -24,7 +32,7 @@ final class NewsImportController
         self::cleanupExpired();
         View::render('admin/news/import', [
             'maxUploadMb' => (int) floor(self::MAX_BYTES / 1048576),
-            'batchSize' => self::BATCH_SIZE,
+            'batchSeconds' => self::BATCH_SECONDS,
         ]);
     }
 
@@ -222,6 +230,40 @@ final class NewsImportController
         $this->json(['ok' => true, 'token' => $token, 'report' => $report]);
     }
 
+    /**
+     * Резервная копия снимается своим запросом, а не первым пакетом импорта.
+     * Дамп базы на боевом сайте занимает минуты, и внутри пакета он съедал
+     * весь шлюзовой таймаут ещё до первой перенесённой новости: импорт падал
+     * на самом первом «Начать импорт» и выглядел неработающим целиком.
+     * Отдельным шагом отказ копии остаётся отказом копии — импорт после него
+     * можно продолжить сознательно.
+     */
+    public function backup(): never
+    {
+        Auth::requireSuperAdmin();
+        Csrf::verifyRequest();
+
+        $token = strtolower(trim((string) ($_POST['token'] ?? '')));
+        $state = self::state($token);
+        if ($state === null || empty($state['inspected'])) {
+            $this->json(['ok' => false, 'error' => 'Сначала загрузите и проверьте XML.'], 409);
+        }
+        if (!empty($state['started_at'])) {
+            // Импорт уже идёт: копия «в середине» не описывает ни состояние до,
+            // ни состояние после, и снимать её незачем.
+            $this->json(['ok' => true, 'backup' => (string) ($state['backup'] ?? ''), 'skipped' => true]);
+        }
+
+        try {
+            $path = Backup::create();
+        } catch (\Throwable $e) {
+            $this->json(['ok' => false, 'error' => 'Не удалось создать резервную копию: ' . $e->getMessage()], 500);
+        }
+
+        $_SESSION[self::SESSION_KEY][$token]['backup'] = basename($path);
+        $this->json(['ok' => true, 'backup' => basename($path)]);
+    }
+
     public function importBatch(): never
     {
         Auth::requireSuperAdmin();
@@ -243,34 +285,34 @@ final class NewsImportController
         }
 
         $status = (string) ($_POST['status'] ?? 'draft') === 'published' ? 'published' : 'draft';
-        $makeBackup = (string) ($_POST['backup'] ?? '1') === '1';
         $first = empty($state['started_at']);
         if ($first) {
-            if ($makeBackup) {
-                try {
-                    $backupPath = Backup::create();
-                    $_SESSION[self::SESSION_KEY][$token]['backup'] = basename($backupPath);
-                } catch (\Throwable $e) {
-                    $this->json(['ok' => false, 'error' => 'Импорт не начат: не удалось создать резервную копию. ' . $e->getMessage()], 500);
-                }
-            }
             $_SESSION[self::SESSION_KEY][$token]['started_at'] = time();
             $_SESSION[self::SESSION_KEY][$token]['status'] = $status;
             $_SESSION[self::SESSION_KEY][$token]['new_imported'] = 0;
             $_SESSION[self::SESSION_KEY][$token]['translations'] = 0;
             $_SESSION[self::SESSION_KEY][$token]['images'] = 0;
             $_SESSION[self::SESSION_KEY][$token]['redirects'] = 0;
+            $_SESSION[self::SESSION_KEY][$token]['cursor'] = 0;
         } elseif (($state['status'] ?? 'draft') !== $status) {
             $this->json(['ok' => false, 'error' => 'Нельзя менять статус публикации после начала импорта.'], 409);
         }
 
+        // Смещение берётся из $first, а не из прочитанного выше состояния:
+        // на первом пакете курсор только что обнулён в сессии, и локальная
+        // копия о сбросе не знает.
+        $cursor = $first ? 0 : (int) ($state['cursor'] ?? 0);
+
         $result = LegacyWxrImporter::importFile($path, [
             'status' => $status,
             'langs' => ['uz' => 'uz', 'ru' => 'ru', 'en' => 'en'],
-            'limit' => self::BATCH_SIZE,
+            'limit' => self::BATCH_MAX,
+            'timeBudget' => (float) self::BATCH_SECONDS,
+            'offset' => $cursor,
             'dryRun' => false,
             'authorId' => Auth::id(),
         ]);
+        $_SESSION[self::SESSION_KEY][$token]['cursor'] = (int) ($result['cursor'] ?? 0);
 
         $_SESSION[self::SESSION_KEY][$token]['new_imported'] += (int) ($result['imported'] ?? 0);
         $_SESSION[self::SESSION_KEY][$token]['translations'] += (int) ($result['translations'] ?? 0);
@@ -278,8 +320,11 @@ final class NewsImportController
         $_SESSION[self::SESSION_KEY][$token]['redirects'] += (int) ($result['redirects'] ?? 0);
         $state = self::state($token) ?? [];
 
-        $done = (int) ($result['imported'] ?? 0) === 0
-            || (int) ($state['new_imported'] ?? 0) >= (int) ($report['to_import'] ?? 0);
+        // Завершение считается по курсору, а не по «пакет ничего не перенёс»:
+        // пакет, целиком ушедший на уже существующие записи, переносит ноль и
+        // при этом до конца плана не дошёл — прежнее условие обрывало бы
+        // импорт на первой же такой пачке.
+        $done = (int) ($result['cursor'] ?? 0) >= (int) ($result['total'] ?? 0);
         if ($done) {
             Cache::forgetPrefix('page:');
             $_SESSION[self::SESSION_KEY][$token]['finished_at'] = time();
