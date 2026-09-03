@@ -27,9 +27,15 @@ final class PerformanceController
         // раздела: она обходит каталог загрузок, и делать это при каждом
         // рендере значило бы платить за диагностику всегда. Действие читающее,
         // поэтому обычная ссылка с параметром, а не форма: менять ей нечего.
-        $mediaHealth = ($_GET['media_check'] ?? '') === '1'
-            ? \App\Core\MediaHealth::scan()
-            : null;
+        $mediaHealth = null;
+        $mediaMissing = null;
+        if (($_GET['media_check'] ?? '') === '1') {
+            $mediaHealth = \App\Core\MediaHealth::scan();
+            // Обход каталога видит только то, что лежит. Запись без файла он
+            // поймать не может, а это самый тихий отказ: страница показывает
+            // alt-текст, запись в медиатеке выглядит целой.
+            $mediaMissing = \App\Core\MediaHealth::missing();
+        }
 
         $opcacheInfo = [
             'enabled' => false,
@@ -71,6 +77,7 @@ final class PerformanceController
             'settings' => Setting::all(),
             'opcacheInfo' => $opcacheInfo,
             'mediaHealth' => $mediaHealth,
+            'mediaMissing' => $mediaMissing,
             'assetStatus' => FrontendAssets::status(),
             'cfTokenConfigured' => Setting::get('cf_api_token', '') !== '',
             // Замеры с реальных посетителей: 75-й перцентиль за 28 дней.

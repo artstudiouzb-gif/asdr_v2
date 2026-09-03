@@ -69,6 +69,33 @@ test('Проверка медиатеки находит нечитаемые и
     }
 });
 
+test('Проверка медиатеки находит записи без файла на диске', function () {
+    $dir = sys_get_temp_dir() . '/mediahealth-miss-' . bin2hex(random_bytes(6));
+    mkdir($dir, 0755, true);
+    file_put_contents($dir . '/есть.jpg', 'x');
+
+    try {
+        // Обход каталога такую находку поймать не может в принципе: он видит
+        // то, что лежит, а не то, на что ссылается сайт. Между тем это самый
+        // тихий отказ — запись в медиатеке выглядит целой.
+        $report = \App\Core\MediaHealth::missingFrom(['есть.jpg', 'wp-photo-пропал.jpg', ''], $dir);
+
+        assert_same(2, $report['checked'], 'пустое имя не считается записью');
+        assert_same(1, $report['missing']);
+        assert_same(['wp-photo-пропал.jpg'], $report['samples']);
+
+        $scan = \App\Core\MediaHealth::scan($dir);
+        assert_true(\App\Core\MediaHealth::healthy($scan), 'сам каталог здоров');
+        assert_true(
+            !\App\Core\MediaHealth::healthy($scan, $report),
+            'но с учётом пропавшей записи отчёт здоровым не считается'
+        );
+    } finally {
+        @unlink($dir . '/есть.jpg');
+        @rmdir($dir);
+    }
+});
+
 test('Проверка медиатеки не падает на отсутствующем каталоге', function () {
     $report = MediaHealth::scan(sys_get_temp_dir() . '/mediahealth-нет-такого-' . bin2hex(random_bytes(4)));
 
@@ -85,6 +112,7 @@ test('Проверка медиатеки доступна из админки �
     assert_contains('Auth::requireSuperAdmin()', $controller);
     assert_contains("(\$_GET['media_check'] ?? '') === '1'", $controller);
     assert_contains('MediaHealth::scan()', $controller);
+    assert_contains('MediaHealth::missing()', $controller, 'сверка записей с диском тоже включена');
     assert_contains('media_check=1#perf-images', $view, 'ссылка ведёт на свой раздел');
 
     // Обход ограничен: медиатека растёт, а раздел админки не имеет права зависнуть.

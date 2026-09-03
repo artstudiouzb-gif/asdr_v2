@@ -114,12 +114,67 @@ final class MediaHealth
     }
 
     /**
+     * Третья причина пустого места: запись в медиатеке есть, файла на диске
+     * нет. Обход каталога её поймать не может в принципе — он видит то, что
+     * лежит, а не то, на что ссылается сайт. Между тем это самый тихий отказ:
+     * страница показывает alt-текст, а в админке запись выглядит целой.
+     *
+     * Чистая часть вынесена отдельно от запроса, чтобы проверялась без базы.
+     *
+     * @param list<string> $storedNames имена файлов на диске из медиатеки
+     * @return array{checked:int, missing:int, samples:list<string>}
+     */
+    public static function missingFrom(array $storedNames, string $dir): array
+    {
+        $dir = rtrim($dir, '/');
+        $out = ['checked' => 0, 'missing' => 0, 'samples' => []];
+
+        foreach ($storedNames as $name) {
+            $name = ltrim((string) $name, '/');
+            if ($name === '') {
+                continue;
+            }
+            $out['checked']++;
+            if (is_file($dir . '/' . $name)) {
+                continue;
+            }
+            $out['missing']++;
+            if (count($out['samples']) < self::SAMPLE_SIZE) {
+                $out['samples'][] = $name;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return array{checked:int, missing:int, samples:list<string>}
+     */
+    public static function missing(?\PDO $pdo = null, ?string $dir = null): array
+    {
+        $dir = rtrim($dir ?? (string) Config::get('paths.public_uploads', ''), '/');
+        if ($dir === '' || !is_dir($dir)) {
+            return ['checked' => 0, 'missing' => 0, 'samples' => []];
+        }
+
+        $pdo ??= Database::pdo();
+        $rows = $pdo->query(
+            "SELECT stored_name FROM files WHERE access_type = 'public' LIMIT " . self::MAX_FILES
+        )->fetchAll(\PDO::FETCH_COLUMN);
+
+        return self::missingFrom(array_values(array_map(strval(...), (array) $rows)), $dir);
+    }
+
+    /**
      * Есть ли что чинить — короткий ответ для заголовка отчёта.
      *
      * @param array<string, mixed> $report отчёт scan()
+     * @param array<string, mixed> $missing отчёт missing(); пустой — если не считали
      */
-    public static function healthy(array $report): bool
+    public static function healthy(array $report, array $missing = []): bool
     {
-        return (int) ($report['unreadable'] ?? 0) === 0 && (int) ($report['empty'] ?? 0) === 0;
+        return (int) ($report['unreadable'] ?? 0) === 0
+            && (int) ($report['empty'] ?? 0) === 0
+            && (int) ($missing['missing'] ?? 0) === 0;
     }
 }

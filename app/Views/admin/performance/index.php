@@ -10,6 +10,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var bool $cfTokenConfigured */
 /** @var array<string, mixed> $assetStatus */
 /** @var array<string, mixed>|null $mediaHealth */
+/** @var array<string, mixed>|null $mediaMissing */
 $val = fn (string $k, string $d = '') => htmlspecialchars($settings[$k] ?? $d, ENT_QUOTES);
 $on = fn (string $k, string $d = '0') => ($settings[$k] ?? $d) === '1';
 $size = static function (mixed $bytes): string {
@@ -176,10 +177,11 @@ $size = static function (mixed $bytes): string {
             <h4>Проверка файлов медиатеки</h4>
             <p class="form-hint">
                 Отвечает на вопрос «почему на месте фотографии пусто». Причин с диска
-                видно две: файл не открыт на чтение (веб-сервер такой не отдаёт — так
+                видно три: файл не открыт на чтение (веб-сервер такой не отдаёт — так
                 бывает у снимков, которые PHP создал сам: перенос со старого сайта,
-                кадры-превью с YouTube) и файл нулевого размера. Проверка ничего не
-                меняет, только читает.
+                кадры-превью с YouTube), файл нулевого размера и запись в медиатеке,
+                у которой файла на диске уже нет. Проверка ничего не меняет, только
+                читает.
             </p>
             <p>
                 <a class="btn btn--small" rel="nofollow" href="/admin/performance?media_check=1#perf-images">
@@ -198,17 +200,24 @@ $size = static function (mixed $bytes): string {
                             Показана часть каталога — обход остановлен по пределу.
                         <?php endif; ?>
                     </p>
-                    <?php if (\App\Core\MediaHealth::healthy($mediaHealth)): ?>
-                        <p class="alert alert--success">Все проверенные файлы читаются и не пусты. Причина пропавших картинок не в них.</p>
+                    <?php $missing = (array) ($mediaMissing ?? []); ?>
+                    <?php if ((int) ($missing['checked'] ?? 0) > 0): ?>
+                        <p class="form-hint">Записей медиатеки сверено с диском: <strong><?= (int) $missing['checked'] ?></strong>.</p>
+                    <?php endif; ?>
+                    <?php if (\App\Core\MediaHealth::healthy($mediaHealth, $missing)): ?>
+                        <p class="alert alert--success">Все проверенные файлы на месте, читаются и не пусты. Причина пропавших картинок не в них.</p>
                     <?php else: ?>
                         <p class="alert alert--error">
                             Не отдаётся веб-сервером: <strong><?= (int) $mediaHealth['unreadable'] ?></strong> ·
-                            пустых файлов: <strong><?= (int) $mediaHealth['empty'] ?></strong>.
+                            пустых файлов: <strong><?= (int) $mediaHealth['empty'] ?></strong> ·
+                            записей без файла на диске: <strong><?= (int) ($missing['missing'] ?? 0) ?></strong>.
                             Права чинит <code>php scripts/fix_upload_permissions.php</code>
-                            (сначала с <code>--dry-run</code>); пустые файлы надо загрузить заново.
+                            (сначала с <code>--dry-run</code>); пустые и пропавшие файлы надо загрузить заново.
                         </p>
-                        <?php foreach (['unreadable' => 'Не открыты на чтение', 'empty' => 'Пустые файлы'] as $key => $label): ?>
-                            <?php $rows = (array) ($mediaHealth['samples'][$key] ?? []); ?>
+                        <?php $samples = (array) ($mediaHealth['samples'] ?? []); ?>
+                        <?php $samples['missing'] = (array) ($missing['samples'] ?? []); ?>
+                        <?php foreach (['unreadable' => 'Не открыты на чтение', 'empty' => 'Пустые файлы', 'missing' => 'Записи без файла на диске'] as $key => $label): ?>
+                            <?php $rows = (array) ($samples[$key] ?? []); ?>
                             <?php if ($rows !== []): ?>
                                 <h5><?= htmlspecialchars($label, ENT_QUOTES) ?></h5>
                                 <table class="data-table">
