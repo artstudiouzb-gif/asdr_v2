@@ -237,6 +237,29 @@ final class Media
     }
 
     /**
+     * Файл есть на диске И его отдаст веб-сервер.
+     *
+     * Одного `is_file()` мало: вариант, созданный самим PHP, получает права по
+     * umask, и на части хостингов это 0600 — PHP файл видит, а веб-сервер
+     * отдать не может. Для `<picture>` это не мелочь: источник выбирается по
+     * типу, а не по тому, загрузился ли он, и на `<img>` браузер уже не
+     * откатывается — вместо фотографии остаётся alt-текст. Проверяем бит
+     * чтения «для всех»: не отданный вариант просто не попадает в srcset, и
+     * посетитель видит исходный снимок вместо пустого места. Права при
+     * создании ставит Uploader::writeWebp(), уже лежащие чинит
+     * scripts/fix_upload_permissions.php.
+     */
+    private static function servable(string $path): bool
+    {
+        if (!is_file($path)) {
+            return false;
+        }
+        $mode = fileperms($path);
+
+        return $mode !== false && ($mode & 0004) !== 0;
+    }
+
+    /**
      * Возвращает пути к существующим WebP-вариантам для локального URL загрузки,
      * либо null, если это не локальная загрузка / вариантов нет.
      *
@@ -268,7 +291,7 @@ final class Media
         $result = ['full' => null, 'w1600' => null, 'w800' => null];
         $found = false;
         foreach ($map as $key => $rel) {
-            if (is_file($diskBase . $rel)) {
+            if (self::servable($diskBase . $rel)) {
                 $result[$key] = $urlPrefix . $rel;
                 $found = true;
             }
