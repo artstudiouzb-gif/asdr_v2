@@ -465,13 +465,20 @@ final class LegacyCmsImporter
         return null;
     }
 
+    // Ожидание одной картинки со старого сайта. Прежние 60 секунд означали,
+    // что одна недоступная ссылка съедает весь шлюзовой таймаут импорта и
+    // роняет пакет целиком, хотя остальные записи в нём здоровы. Картинка,
+    // которая не начала отдаваться за 15 секунд, с большой вероятностью не
+    // отдастся вовсе; пропуск такой картинки дешевле обрыва пакета.
+    private const IMAGE_TIMEOUT = 15;
+
     /** Скачивание с закреплением проверенного публичного IP и лимитом 20 МБ. */
     private static function download(string $url, string $dest): bool
     {
         $response = Http::getSafeRemote(
             $url,
             ['User-Agent: ArtStudio-Legacy-Import/1.0'],
-            60,
+            self::IMAGE_TIMEOUT,
             20 * 1024 * 1024
         );
         if ($response['status'] < 200 || $response['status'] >= 300 || $response['body'] === '') {

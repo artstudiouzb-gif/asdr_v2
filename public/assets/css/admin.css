@@ -245,6 +245,14 @@ body[data-admin-theme="dark_emerald"] {
 
 html { -webkit-text-size-adjust: 100%; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+/* Остановка прокрутки к якорю — ниже липкой шапки, и объявлена ОДИН раз.
+   Прежде отступ раздавался перечислением целей (`.settings-group[id]`,
+   `#demo-section`, `#backup-section`), а восемь разделов «Настроек сайта»
+   размечены как `.settings-card` — в список они не попали, и переход из
+   верхней навигации ставил заголовок раздела ровно под шапку: выглядело
+   так, будто ссылка ведёт не туда. Величина покрывает и полосу переходов
+   раздела настроек, которая тоже липкая и стоит под шапкой. */
+html { scroll-padding-top: calc(var(--admin-topbar-h) + 64px); }
 
 body {
     margin: 0;
@@ -1568,13 +1576,6 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
     color: var(--admin-accent);
     text-decoration: none;
 }
-.settings-group[id],
-.tg-step[id],
-.performance-section[id],
-.social-section[id],
-.webhook-section[id],
-#demo-section,
-#backup-section { scroll-margin-top: calc(var(--admin-topbar-h) + 64px); }
 .performance-settings-card > .form-grid { gap: 22px; }
 .performance-settings-card .header-builder__group { margin: 0; }
 .social-section.settings-group { margin: 0; }
@@ -3024,7 +3025,7 @@ body.has-sticky-actions .admin-main { padding-bottom: 120px; }
 }
 .design-anchors a:hover { border-color: var(--admin-accent); color: var(--admin-accent-hover); text-decoration: none; }
 
-.design-section { margin-bottom: 34px; scroll-margin-top: calc(var(--admin-topbar-h) + 56px); }
+.design-section { margin-bottom: 34px; }
 .design-section__title { font-size: var(--admin-fs-sm); text-transform: uppercase; letter-spacing: .05em; color: #66707c; margin: 0 0 16px; font-weight: var(--admin-fw-semibold); }
 
 /* Сворачиваемые секции точной настройки: каждая — аккуратная карточка-строка. */

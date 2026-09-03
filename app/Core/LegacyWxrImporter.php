@@ -276,14 +276,24 @@ final class LegacyWxrImporter
     }
 
     /**
-     * @param array{status?:string,authorId?:?int,langs?:array<string,string>,uploadsDir?:?string,limit?:int,dryRun?:bool} $opts
-     * @return array{imported:int,skipped:int,images:int,redirects:int,translations:int,errors:array<int,string>,source_published:int,source_drafts:int,source_comments:int,planned_news:int,unresolved:int}
+     * Пакет ограничивается либо числом записей (`limit`), либо бюджетом времени
+     * (`timeBudget`, секунды), и начинается с группы `offset`. Курсор нужен
+     * затем, что без него каждый следующий пакет пролистывал уже перенесённое
+     * с начала плана, спрашивая News::slugExists() на каждую группу: стоимость
+     * пакета росла вместе с его номером, и импорт упирался в шлюзовой таймаут
+     * тем вернее, чем ближе был к концу. Порядок групп детерминирован (usort
+     * стабилен, вход — порядок записей в XML), а контроллер сверяет sha256
+     * файла перед каждым пакетом, поэтому курсор не может съехать.
+     *
+     * @param array{status?:string,authorId?:?int,langs?:array<string,string>,uploadsDir?:?string,limit?:int,offset?:int,timeBudget?:float,dryRun?:bool} $opts
+     * @return array{imported:int,skipped:int,images:int,redirects:int,translations:int,errors:array<int,string>,source_published:int,source_drafts:int,source_comments:int,planned_news:int,unresolved:int,cursor:int,total:int}
      */
     public static function importFile(string $path, array $opts = []): array
     {
         $out = [
             'imported' => 0, 'skipped' => 0, 'images' => 0, 'redirects' => 0, 'translations' => 0, 'errors' => [],
             'source_published' => 0, 'source_drafts' => 0, 'source_comments' => 0, 'planned_news' => 0, 'unresolved' => 0,
+            'cursor' => 0, 'total' => 0,
         ];
         if (!is_file($path)) {
             $out['errors'][] = 'Файл не найден: ' . $path;
@@ -300,6 +310,9 @@ final class LegacyWxrImporter
         $uploadsDir = $opts['uploadsDir'] ?? null;
         LegacyCmsImporter::clearImageCache();
         $limit = (int) ($opts['limit'] ?? 0);
+        $offset = max(0, (int) ($opts['offset'] ?? 0));
+        $budget = max(0.0, (float) ($opts['timeBudget'] ?? 0.0));
+        $startedAt = microtime(true);
         $dryRun = !empty($opts['dryRun']);
         /** @var array<string,string> $langs */
         $langs = (array) ($opts['langs'] ?? []);
@@ -320,10 +333,25 @@ final class LegacyWxrImporter
             return $out;
         }
 
-        foreach ($plan['groups'] as $group) {
+        $groups = $plan['groups'];
+        $total = count($groups);
+        $out['total'] = $total;
+        $index = min($offset, $total);
+        $processed = 0;
+
+        for (; $index < $total; $index++) {
             if ($limit > 0 && $out['imported'] >= $limit) {
                 break;
             }
+            // Бюджет проверяется только со второй записи пакета: пакет обязан
+            // сдвинуть курсор хотя бы на одну группу, иначе одна медленная
+            // запись остановила бы импорт навсегда, каждый раз возвращая
+            // «перенесено 0» на том же месте.
+            if ($budget > 0.0 && $processed > 0 && (microtime(true) - $startedAt) >= $budget) {
+                break;
+            }
+            $group = $groups[$index];
+            $processed++;
             $primary = self::groupPrimary($group, $primaryWp) ?? $group[0];
             $slug = (string) ($primary['slug'] ?? '');
             if ($slug === '') {
@@ -349,7 +377,8 @@ final class LegacyWxrImporter
                     continue;
                 }
 
-                [$body, $gallery] = self::transferBody((string) $primary['content'], $site, $authorId, $uploadsDir, $out, $att, true);
+                [$body, $gallery, $bodyImages] = self::transferBody((string) $primary['content'], $site, $authorId, $uploadsDir, $att, true);
+                $out['images'] += $bodyImages;
                 $featuredUrl = (int) ($primary['thumb_id'] ?? 0) > 0 ? ($att[(int) $primary['thumb_id']] ?? '') : '';
                 $cover = '';
                 if ($featuredUrl !== '') {
@@ -378,7 +407,9 @@ final class LegacyWxrImporter
                     NewsImage::create($newsId, $pathUrl, null, $i);
                 }
 
-                self::createRedirect((string) $primary['link'], '/news/' . $slug, $out);
+                if (self::createRedirect((string) $primary['link'], '/news/' . $slug)) {
+                    $out['redirects']++;
+                }
 
                 foreach ($group as $p) {
                     if ((int) $p['id'] === (int) $primary['id']) {
@@ -389,7 +420,8 @@ final class LegacyWxrImporter
                     if ($artCode === '') {
                         continue;
                     }
-                    [$translatedBody] = self::transferBody((string) $p['content'], $site, $authorId, $uploadsDir, $out, $att, false);
+                    [$translatedBody, , $translatedImages] = self::transferBody((string) $p['content'], $site, $authorId, $uploadsDir, $att, false);
+                    $out['images'] += $translatedImages;
                     NewsTranslation::upsert($newsId, $artCode, [
                         'title' => self::plain((string) $p['title']),
                         'excerpt' => mb_substr(self::plain((string) $p['excerpt']), 0, 300),
@@ -397,12 +429,15 @@ final class LegacyWxrImporter
                     ]);
                     $out['translations']++;
                     // Переводная запись использует тот же новый slug; Locale определит язык.
-                    self::createRedirect((string) $p['link'], '/news/' . $slug, $out);
+                    if (self::createRedirect((string) $p['link'], '/news/' . $slug)) {
+                        $out['redirects']++;
+                    }
                 }
             } catch (\Throwable $e) {
                 $out['errors'][] = 'Запись "' . $slug . '": ' . $e->getMessage();
             }
         }
+        $out['cursor'] = $index;
 
         return $out;
     }
@@ -546,38 +581,47 @@ final class LegacyWxrImporter
         return trim(html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
-    /** @param array<string,mixed> $out */
-    private static function createRedirect(string $oldLink, string $to, array &$out): void
+    /**
+     * Возвращает признак «редирект создан», а не приписывает счётчик в массив
+     * итогов по ссылке. Причина та же, что у transferBody(): параметр
+     * `array<string,mixed> &$out` расширял тип итогового массива до
+     * `array<string,mixed>` на всю оставшуюся часть importFile(), и
+     * объявленная форма ответа переставала проверяться анализатором.
+     */
+    private static function createRedirect(string $oldLink, string $to): bool
     {
         $from = (string) parse_url($oldLink, PHP_URL_PATH);
-        if ($from !== '' && trim($from, '/') !== '' && $from !== $to && Redirect::create($from, $to, 301)) {
-            $out['redirects']++;
-        }
+
+        return $from !== '' && trim($from, '/') !== '' && $from !== $to && Redirect::create($from, $to, 301);
     }
 
     /**
-     * @param array<string,mixed> $out
+     * Число перенесённых картинок возвращается, а не приписывается в $out по
+     * ссылке: параметр `array<string,mixed> &$out` расширял тип итогового
+     * массива до `array<string,mixed>` на всю оставшуюся часть importFile(),
+     * и объявленная форма ответа переставала проверяться.
+     *
      * @param array<int,string> $attachments
-     * @return array{0:string,1:array<int,string>}
+     * @return array{0:string,1:array<int,string>,2:int}
      */
     private static function transferBody(
         string $html,
         string $site,
         ?int $authorId,
         ?string $uploadsDir,
-        array &$out,
         array $attachments,
         bool $includeGallery
     ): array {
         $map = [];
         $gallery = [];
+        $images = 0;
         foreach (LegacyCmsImporter::extractImageUrls($html) as $src) {
             $abs = LegacyCmsImporter::normalizeImageUrl(LegacyCmsImporter::absoluteUrl($src, $site !== '' ? $site : ''));
             $newUrl = LegacyCmsImporter::importImage($abs, $authorId, $uploadsDir);
             if ($newUrl !== null) {
                 $map[$src] = $newUrl;
                 $gallery[] = $newUrl;
-                $out['images']++;
+                $images++;
             }
         }
 
@@ -590,7 +634,7 @@ final class LegacyWxrImporter
                 $newUrl = LegacyCmsImporter::importImage($url, $authorId, $uploadsDir);
                 if ($newUrl !== null) {
                     $gallery[] = $newUrl;
-                    $out['images']++;
+                    $images++;
                 }
             }
         }
@@ -598,7 +642,7 @@ final class LegacyWxrImporter
         $clean = LegacyCmsImporter::stripResponsiveAttrs(LegacyCmsImporter::rewriteImages($html, $map));
         $clean = self::stripGalleryShortcodes($clean);
 
-        return [$clean, array_values(array_unique($gallery))];
+        return [$clean, array_values(array_unique($gallery)), $images];
     }
 
     private static function date(string $d): string

@@ -209,10 +209,16 @@
 
 .newslist-lead .newslist__date,
 .newslist-grid .relnews-card__date {
-    color: var(--gov-muted);
     font-size: var(--step--3);
     font-weight: 600;
     line-height: 1.3;
+}
+/* Цвет вынесен отдельным правилом с тем же исключением, что у заголовка: на
+   крупной карточке дата лежит поверх фотографии и обязана оставаться белой,
+   а приглушённый `--gov-muted` отсюда перебивал бы белый из темы. */
+.newslist-lead .newslist__date,
+.newslist-grid .relnews-card:not(.relnews-card--hero):not(.relnews-card--wide) .relnews-card__date {
+    color: var(--gov-muted);
 }
 
 .newslist-lead__title {
@@ -238,7 +244,13 @@ body.design-type-static .newslist-lead .newslist-lead__title {
     overflow: hidden;
 }
 
-.newslist-grid .relnews-card__title {
+/* Крупные карточки (обложка и широкая) исключены намеренно. Эта часть темы
+   подключается ПОСЛЕ общего бандла, поэтому при равном весе (0,2,0) её
+   правило побеждало `.relnews-card--hero .relnews-card__title {color:#fff}`
+   и красило заголовок поверх фотографии в тёмный `--gov-title`: на кадре он
+   пропадал совсем. Заодно отсюда уезжали кегль крупной карточки и обрезка в
+   три строки. Правило адресовано компактным карточкам — им и оставлено. */
+.newslist-grid .relnews-card:not(.relnews-card--hero):not(.relnews-card--wide) .relnews-card__title {
     color: var(--gov-title);
     font-size: var(--font-size-card-title, var(--step-0));
     line-height: 1.38;
@@ -251,7 +263,7 @@ body.design-type-static .newslist-lead .newslist-lead__title {
 }
 
 .newslist-lead:hover .newslist-lead__title,
-.newslist-grid .relnews-card:hover .relnews-card__title {
+.newslist-grid .relnews-card:not(.relnews-card--hero):not(.relnews-card--wide):hover .relnews-card__title {
     color: var(--color-accent, var(--gov-teal));
 }
 

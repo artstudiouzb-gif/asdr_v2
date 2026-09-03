@@ -22,6 +22,7 @@
     var selectedFile = null;
     var report = null;
     var busy = false;
+    var runStatus = 'draft';
     var csrfInput = form ? form.querySelector('input[type="hidden"]') : null;
 
     function csrf(formData) {
@@ -249,13 +250,11 @@
             : 'Импортировано ' + imported + ' из ' + target;
     }
 
-    async function runBatches(status, backup) {
-        var first = true;
+    async function runBatches(status) {
         while (true) {
             var fd = new FormData();
             fd.append('token', token);
             fd.append('status', status);
-            fd.append('backup', first && backup ? '1' : '0');
             var result = await jsonPost('run', fd);
             var batchErrors = result.batch && Array.isArray(result.batch.errors) ? result.batch.errors : [];
             if (batchErrors.length) {
@@ -264,7 +263,6 @@
             }
             updateRun(result.summary || {});
             appendLog('Пакет обработан: +' + Number((result.batch || {}).imported || 0) + ' новостей, +' + Number((result.batch || {}).translations || 0) + ' переводов.');
-            first = false;
             if (result.done) {
                 var summary = result.summary || {};
                 var text = 'Создано новостей: ' + Number(summary.imported || 0)
@@ -281,29 +279,74 @@
         }
     }
 
+    var resumeActions = root.querySelector('[data-resume-actions]');
+
+    // Обрыв пакета не отменяет импорт: курсор живёт на сервере, поэтому
+    // продолжение — это тот же вызов run, а не проход с начала. Прежде
+    // единственным выходом было вернуться к отчёту и запустить всё заново.
+    function offerResume(message) {
+        showError(message);
+        appendLog(message, true);
+        if (resumeActions) resumeActions.hidden = false;
+    }
+
+    async function drive(status) {
+        if (resumeActions) resumeActions.hidden = true;
+        busy = true;
+        try {
+            await runBatches(status);
+        } catch (e) {
+            offerResume(e.message);
+        } finally {
+            busy = false;
+        }
+    }
+
     var startButton = root.querySelector('[data-start-import]');
     if (startButton) {
         startButton.addEventListener('click', async function () {
             if (busy || !token || !report) return;
-            var status = root.querySelector('[data-import-status]').value;
+            runStatus = root.querySelector('[data-import-status]').value;
             var backup = root.querySelector('[data-import-backup]').checked;
-            if (status === 'published' && !window.confirm('Новые записи будут опубликованы сразу. Продолжить?')) return;
+            if (runStatus === 'published' && !window.confirm('Новые записи будут опубликованы сразу. Продолжить?')) return;
             clearError();
-            busy = true;
             startButton.disabled = true;
             reportStage.hidden = true;
             importStage.hidden = false;
             importStage.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            try {
-                await runBatches(status, backup);
-            } catch (e) {
-                showError(e.message);
-                appendLog(e.message, true);
-                reportStage.hidden = false;
-                startButton.disabled = false;
-            } finally {
+
+            if (backup) {
+                // Копия — свой запрос: её отказ не должен выглядеть как отказ
+                // импорта, а её время не должно тратиться из бюджета пакета.
+                busy = true;
+                appendLog('Снимается резервная копия базы…');
+                try {
+                    var done = await jsonPost('backup', (function () {
+                        var fd = new FormData();
+                        fd.append('token', token);
+                        return fd;
+                    })());
+                    appendLog(done.backup ? ('Резервная копия готова: ' + done.backup) : 'Резервная копия уже снята.');
+                } catch (e) {
+                    busy = false;
+                    offerResume('Резервная копия не создана: ' + e.message
+                        + ' Импорт можно продолжить без неё или снять копию в разделе «Базы данных».');
+                    return;
+                }
                 busy = false;
             }
+
+            await drive(runStatus);
+        });
+    }
+
+    var resumeButton = root.querySelector('[data-resume-import]');
+    if (resumeButton) {
+        resumeButton.addEventListener('click', async function () {
+            if (busy || !token || !report) return;
+            clearError();
+            appendLog('Продолжаем с того места, где импорт остановился.');
+            await drive(runStatus);
         });
     }
 
