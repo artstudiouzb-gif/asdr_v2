@@ -492,16 +492,36 @@ final class NewsController
         return $events;
     }
 
+    /**
+     * Варианты ответа опроса из формы: массивом или строкой по разделителям.
+     *
+     * Присланное значение приводится к строкам поимённо, а не `array_map('trim')`
+     * по сырому массиву: в форму можно прислать вложенный массив, и `trim()`
+     * получил бы не строку — в файле со `strict_types` это `TypeError`, то есть
+     * подделанная форма роняла бы сохранение новости. По той же причине
+     * результат `preg_split()` не приводится к массиву приведением типа:
+     * `(array) false` — это `[false]`, и `false` уходил бы дальше как значение.
+     *
+     * @return list<string>
+     */
     private function parsePollOptions(mixed $raw): array
     {
-        if (is_array($raw)) {
-            return array_values(array_filter(array_map('trim', $raw), static fn (string $v): bool => $v !== ''));
+        $items = is_array($raw)
+            ? $raw
+            : (preg_split('/[\r\n,]+/u', trim((string) $raw)) ?: []);
+
+        $options = [];
+        foreach ($items as $item) {
+            if (!is_scalar($item)) {
+                continue;
+            }
+            $value = trim((string) $item);
+            if ($value !== '') {
+                $options[] = $value;
+            }
         }
-        $str = trim((string) $raw);
-        if ($str === '') {
-            return [];
-        }
-        return array_values(array_filter(array_map('trim', (array) preg_split('/[\r\n,]+/u', $str)), static fn (string $v): bool => $v !== ''));
+
+        return $options;
     }
 
     /**

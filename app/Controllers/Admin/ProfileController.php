@@ -9,6 +9,7 @@ use App\Core\Csrf;
 use App\Core\Flash;
 use App\Core\Locale;
 use App\Core\PasswordPolicy;
+use App\Core\Session;
 use App\Core\View;
 use App\Models\SessionRegistry;
 use App\Models\User;
@@ -24,7 +25,7 @@ final class ProfileController
         Auth::requireLogin();
 
         $userId = (int) Auth::id();
-        $currentHash = SessionRegistry::hash(session_id());
+        $currentHash = SessionRegistry::hash(Session::id());
         $profileUser = User::findById($userId);
 
         // Одноразовый код привязки Telegram-бота: показываем, пока аккаунт
@@ -263,11 +264,11 @@ final class ProfileController
         session_regenerate_id(true);
         SessionRegistry::register(
             $userId,
-            session_id(),
+            Session::id(),
             $_SERVER['REMOTE_ADDR'] ?? null,
             $_SERVER['HTTP_USER_AGENT'] ?? null
         );
-        SessionRegistry::revokeAllExcept($userId, session_id());
+        SessionRegistry::revokeAllExcept($userId, Session::id());
 
         \App\Core\Logger::security('Пароль администратора изменён', [
             'user' => (string) ($user['username'] ?? ''),
@@ -295,7 +296,7 @@ final class ProfileController
         Auth::requireLogin();
         Csrf::verifyRequest();
 
-        SessionRegistry::revokeAllExcept((int) Auth::id(), session_id());
+        SessionRegistry::revokeAllExcept((int) Auth::id(), Session::id());
         \App\Core\Logger::security('Отзыв всех прочих сессий администратора', [
             'user' => (string) ($_SESSION['username'] ?? ''),
             'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
