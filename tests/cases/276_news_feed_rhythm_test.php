@@ -57,9 +57,10 @@ test('Крупные карточки стоят по краям цикла и �
         $slots,
         'на странице по одной обложке и одной широкой карточке'
     );
-    // Виды крупных карточек не взаимозаменяемы: обложка — фотография во всю
-    // карточку с текстом поверх (главная новость страницы), широкая — кадр
-    // сбоку и текст рядом. Растяжение на две ячейки у них общее.
+    // Позиции у видов разные (обложка открывает цикл, широкая замыкает), а
+    // оформление с недавних пор общее: у обеих фотография во всю карточку и
+    // текст поверх. Слоты при этом остаются раздельными — шаблон печатает имя
+    // слота классом, и вернуть видам разное устройство можно правкой одного CSS.
     assert_true(NewsFeedRhythm::isWide(0) && NewsFeedRhythm::isWide(9), 'обе крупные занимают две ячейки');
     foreach ([1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13] as $compact) {
         assert_same(NewsFeedRhythm::SLOT_COMPACT, NewsFeedRhythm::slot($compact), "карточка {$compact} остаётся компактной");
@@ -84,13 +85,22 @@ test('Широкая карточка занимает две ячейки и с
     // `.relnews-card { padding: 0 0 14px }`. Модификатору нужен вес выше, иначе
     // нижний отступ карточки оставлял под фотографией белую полосу.
     assert_true(
-        (bool) preg_match('/\.relnews-card\.relnews-card--wide \{\s*grid-column: span 2;/', $css),
-        'две ячейки, а не вся строка'
+        (bool) preg_match(
+            '/\.relnews-card\.relnews-card--hero,\s*\n\.relnews-card\.relnews-card--wide \{\s*grid-column: span 2;/',
+            $css
+        ),
+        'обе крупные карточки занимают две ячейки, а не всю строку'
     );
     // В одноколоночной сетке `span 2` создал бы вторую колонку и
     // горизонтальную прокрутку — на узком экране растяжение снимается.
-    assert_contains('.relnews-card.relnews-card--wide { grid-column: auto; grid-template-columns: minmax(0, 1fr);', $css);
-    assert_contains('.relnews-card--wide .relnews-card__excerpt', $css, 'анонс оформлен только у широкой карточки');
+    assert_true(
+        (bool) preg_match(
+            '/@media \(max-width: 560px\) \{\s*\n\s*\.relnews-card\.relnews-card--hero,\s*\n\s*\.relnews-card\.relnews-card--wide \{ grid-column: auto;/',
+            $css
+        ),
+        'на узком экране растяжение снято у обеих'
+    );
+    assert_contains('.relnews-card--wide .relnews-card__excerpt', $css, 'анонс оформлен у широкой карточки');
     // Три колонки: цикл на три колонки не раскладывается, поэтому ритм там
     // выключается — иначе крупная карточка упирается в последнюю колонку.
     assert_contains('@media (max-width: 1100px) and (min-width: 1001px)', $css, 'на трёх колонках ритм выключен');
@@ -118,11 +128,15 @@ test('Дата в карточке новости отбита от края н�
 test('Кадры крупных карточек занимают свою площадь целиком', function () {
     $css = theme_css();
 
-    // Обложка: фотография и есть карточка — кадр лежит подложкой, поверх него
-    // затемнение, иначе белый текст читался бы только на удачном снимке.
-    assert_contains('.relnews-card--hero .news-cover { position: absolute; inset: 0; }', $css);
-    assert_contains('.relnews-card--hero .news-cover::after', $css, 'вуаль по низу кадра');
-    assert_contains('.relnews-card--hero .relnews-card__body', $css, 'текст лежит поверх кадра');
+    // У обеих крупных карточек фотография и есть карточка: кадр лежит
+    // подложкой, поверх него затемнение, иначе белый текст читался бы только
+    // на удачном снимке.
+    assert_contains(
+        ".relnews-card--hero .news-cover,\n.relnews-card--wide .news-cover { position: absolute; inset: 0; min-width: 0; }",
+        $css
+    );
+    assert_contains('.relnews-card--wide .news-cover::after', $css, 'вуаль по низу кадра у обеих');
+    assert_contains('.relnews-card--wide .relnews-card__body', $css, 'текст лежит поверх кадра');
 
     // За контраст отвечает подложка под самим текстом, а не градиент во всю
     // карточку: его плотность считается в процентах от высоты карточки, а
@@ -131,7 +145,7 @@ test('Кадры крупных карточек занимают свою пл�
     // `margin-top: auto` — растянутое `flex: 1`, оно закрасило бы весь кадр.
     assert_true(
         (bool) preg_match(
-            '/\.relnews-card--hero \.relnews-card__body \{[^}]*margin-top: auto;[^}]*background:\s*\n\s*linear-gradient/',
+            '/\.relnews-card--wide \.relnews-card__body \{[^}]*margin-top: auto;[^}]*background:\s*\n\s*linear-gradient/',
             $css
         ),
         'подложка объявлена у текста и не растянута на всю карточку'
@@ -143,21 +157,31 @@ test('Кадры крупных карточек занимают свою пл�
     // Сплошная заливка под текстом: rgba(6,14,28,.88) поверх даже белой
     // фотографии даёт с белым текстом 13:1 при норме 4.5:1.
     assert_contains('rgba(6, 14, 28, .88)', $css, 'подложка сплошная, а не полупрозрачный градиент');
-
-    // Широкая: кадр тянется на всю высоту своей половины. Фиксированная
-    // пропорция здесь оставляла пустые поля сверху и снизу — высоту ряда
-    // задаёт соседняя компактная карточка, а не эта фотография.
-    assert_contains('.relnews-card--wide .news-cover { min-width: 0; }', $css);
-    assert_contains('.relnews-card--wide .relnews-card__media { height: 100%; aspect-ratio: auto; }', $css);
-    // Кадр занимает ровно одну колонку сетки: карточка растянута на две
-    // ячейки, и при произвольной доле её внутренняя граница попадала между
-    // колонками — текст начинался не там, где начинается карточка ряда выше.
-    assert_contains('grid-template-columns: minmax(0, calc(50% - var(--newsgrid-gap, 24px) / 2)) minmax(0, 1fr);', $css);
-    assert_contains('column-gap: var(--newsgrid-gap, 24px);', $css, 'промежуток внутри карточки равен промежутку сетки');
     assert_contains('--newsgrid-gap: 24px;', $css, 'промежуток объявлен один раз — у самой сетки');
-    assert_true(
-        (bool) preg_match('/\.relnews-card\.relnews-card--wide \{[^}]*align-items: stretch;/', $css),
-        'кадр занимает всю высоту карточки'
+
+    // Часть темы news-feature.css подключается ПОСЛЕ бандла, поэтому её
+    // правила для сетки обязаны обходить крупные карточки стороной: при равном
+    // весе они побеждали и красили заголовок поверх фотографии в тёмный
+    // --gov-title, то есть в цвет, на кадре не читаемый вовсе.
+    $feature = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/news-feature.css');
+    foreach (['.relnews-card__title', '.relnews-card__date'] as $target) {
+        assert_true(
+            !(bool) preg_match(
+                '/\.newslist-grid \.relnews-card(?:__| )[^{]*' . preg_quote(ltrim($target, '.'), '/') . '[^{]*\{[^}]*color:/',
+                $feature
+            ) || str_contains($feature, ':not(.relnews-card--hero):not(.relnews-card--wide)'),
+            'цвет ' . $target . ' в сетке не адресован крупным карточкам'
+        );
+    }
+    assert_contains(
+        '.newslist-grid .relnews-card:not(.relnews-card--hero):not(.relnews-card--wide) .relnews-card__title',
+        $feature,
+        'заголовок крупной карточки не перекрашивается частью темы'
+    );
+    assert_contains(
+        '.newslist-grid .relnews-card:not(.relnews-card--hero):not(.relnews-card--wide) .relnews-card__date',
+        $feature,
+        'дата крупной карточки не перекрашивается частью темы'
     );
 });
 
