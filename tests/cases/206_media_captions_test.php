@@ -144,5 +144,28 @@ test('Миниатюры медиатеки в админке не тянут о
     // Без вариантов помощник обязан вернуть исходный адрес: иначе у файлов,
     // загруженных до появления webp, карточка осталась бы пустой.
     assert_contains('public static function thumbUrl(string $url): string', $media);
-    assert_contains("return \$variants['w800'] ?? \$variants['w1600'] ?? \$variants['full'] ?? \$url;", $media);
+    assert_contains("return \$variants['full'] ?? \$url;", $media, 'без размерных вариантов берётся полный, затем исходный');
+
+    // Набор ширин объявлен один раз: прежде тот же список был выписан
+    // литералами в четырёх местах — генерация при загрузке, подбор srcset,
+    // пакетная достройка и удаление вместе с оригиналом, — и такой список
+    // расходится с первой правкой молча.
+    assert_contains('public const VARIANT_WIDTHS = [400, 800, 1600];', $media);
+    assert_contains('public static function variantSuffixes(): array', $media);
+    foreach ([
+        'app/Core/MediaCleaner.php',
+        'app/Controllers/Admin/FileController.php',
+        'app/Core/Uploader.php',
+        'app/Core/ImageBatchOptimizer.php',
+    ] as $file) {
+        $code = (string) file_get_contents(APP_ROOT . '/' . $file);
+        assert_true(
+            !(bool) preg_match("/\['\.webp', '-1600\.webp', '-800\.webp'\]/", $code),
+            'свой список вариантов не остался в ' . $file
+        );
+    }
+
+    // 400px — ради самих миниатюр: карточка около 135px, и даже с удвоенной
+    // плотностью экрана 800px там втрое больше нужного.
+    assert_contains('400', $media, 'мелкий вариант объявлен');
 });

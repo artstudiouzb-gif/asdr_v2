@@ -164,7 +164,7 @@ final class FileController
 
             // Удаляем сопутствующие WebP-варианты.
             $base = preg_replace('/\.[^.]+$/', '', $path) ?? $path;
-            foreach (['.webp', '-1600.webp', '-800.webp'] as $suffix) {
+            foreach (\App\Core\Media::variantSuffixes() as $suffix) {
                 $variant = $base . $suffix;
                 if (is_file($variant)) {
                     @unlink($variant);
@@ -235,7 +235,7 @@ final class FileController
                 unlink($path);
             }
             $base = preg_replace('/\.[^.]+$/', '', $path) ?? $path;
-            foreach (['.webp', '-1600.webp', '-800.webp'] as $suffix) {
+            foreach (\App\Core\Media::variantSuffixes() as $suffix) {
                 $variant = $base . $suffix;
                 if (is_file($variant)) {
                     @unlink($variant);
