@@ -4750,6 +4750,10 @@ details.design-manual[open] > summary::before { transform: rotate(90deg); }
     display: table-cell;
 }
 
+.file-row-check {
+    cursor: pointer;
+}
+
 /* Драг-н-Дроп зона загрузки файлов */
 .media-upload-drawer {
     display: none;

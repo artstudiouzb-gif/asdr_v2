@@ -184,6 +184,7 @@ final class DemoSeeder
     /**
      * Проверяет полноту и внутреннюю согласованность эталонного демо-комплекта.
      *
+     * @param list<string>|null $modules
      * @return list<string>
      */
     public static function verify(PDO $pdo, ?array $modules = null): array
@@ -2318,14 +2319,17 @@ final class DemoSeeder
                 $c['menu'] += $ins->rowCount();
                 $parentId = (int) $pdo->lastInsertId();
                 foreach ($item['children'] as $childOrder => $child) {
+                    /** @var list<string> $childRow */
+                    $childRow = $child;
+                    $badge = $childRow[3] ?? null;
                     $ins->execute([
                         ':lang' => $lang,
-                        ':title' => $child[0],
-                        ':badge' => $child[3] ?? null,
-                        ':badge_color' => isset($child[3]) ? 'blue' : null,
+                        ':title' => $childRow[0],
+                        ':badge' => $badge,
+                        ':badge_color' => $badge !== null ? 'blue' : null,
                         ':badge_pos' => 'right',
-                        ':url_type' => $child[1],
-                        ':url_value' => $child[2],
+                        ':url_type' => $childRow[1],
+                        ':url_value' => $childRow[2],
                         ':parent_id' => $parentId,
                         ':mega' => 0,
                         ':sort_order' => $childOrder,
