@@ -174,6 +174,29 @@ $size = static function (mixed $bytes): string {
                 <label for="perf_lazy_load">Ленивая загрузка изображений (loading="lazy")</label>
             </div>
 
+            <h4>Миниатюры для ранее загруженных фотографий</h4>
+            <p class="form-hint">
+                Уменьшенные копии (WebP шириной 400, 800 и 1600 px) создаются при
+                загрузке. У фотографий, загруженных раньше, их может не быть — тогда
+                в карточках и галереях браузер тянет оригинал: это мегабайты вместо
+                десятка килобайт. Обработка только добавляет копии, оригиналы не
+                трогает, и её можно прерывать: каждый пакет продолжает с того места,
+                где закончился прошлый.
+            </p>
+            <div class="form-actions" data-image-optimize data-endpoint="/admin/performance/optimize-images">
+                <button type="button" class="btn btn--small" data-optimize="dry">
+                    <?= \App\Core\AdminUi::icon('search') ?>Посмотреть объём работы
+                </button>
+                <button type="button" class="btn btn--small btn--primary" data-optimize="run">
+                    <?= \App\Core\AdminUi::icon('photo') ?>Достроить миниатюры
+                </button>
+                <button type="button" class="btn btn--small" data-optimize="stop" hidden>Остановить</button>
+            </div>
+            <div class="admin-progress" data-optimize-progress hidden>
+                <div class="admin-progress__bar" data-optimize-bar></div>
+            </div>
+            <p class="form-hint" data-optimize-status aria-live="polite" hidden></p>
+
             <h4>Проверка файлов медиатеки</h4>
             <p class="form-hint">
                 Отвечает на вопрос «почему на месте фотографии пусто». Причин с диска
@@ -350,4 +373,5 @@ $size = static function (mixed $bytes): string {
         </div>
     <?php endif; ?>
 </div>
+<script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/js/admin-image-optimize.js'), ENT_QUOTES) ?>"></script>
 <?php require __DIR__ . '/../layout/footer.php'; ?>
