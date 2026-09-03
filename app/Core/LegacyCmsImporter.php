@@ -319,6 +319,17 @@ final class LegacyCmsImporter
             $candidates[] = $baseStem . '-scaled.' . $ext;
         }
 
+        // Если исходная ссылка — raster (jpg/jpeg/png), добавляем WebP-варианты
+        // со старого сайта в конец списка: старая CMS и плагины конвертации
+        // часто удаляют оригинальный JPG или хранят только WebP.
+        if (in_array($ext, ['jpg', 'jpeg', 'png'], true)) {
+            $candidates[] = $baseStem . '.webp';
+            $candidates[] = $baseStem . '-scaled.webp';
+            if ($normalized !== $baseStem . '.' . $ext) {
+                $candidates[] = (string) preg_replace('/\.' . preg_quote($ext, '#') . '$/i', '.webp', $normalized);
+            }
+        }
+
         return array_values(array_unique($candidates));
     }
 
@@ -437,7 +448,13 @@ final class LegacyCmsImporter
                     continue;
                 }
                 $pathExt = strtolower((string) pathinfo((string) parse_url($cand, PHP_URL_PATH), PATHINFO_EXTENSION));
-                $ext = in_array($pathExt, self::IMG_EXT, true) ? $pathExt : self::extFromMime((string) (new \finfo(FILEINFO_MIME_TYPE))->file($tmp));
+                $detectedMime = (string) (new \finfo(FILEINFO_MIME_TYPE))->file($tmp);
+                $mimeExt = self::extFromMime($detectedMime);
+                // Фактический формат скачанного файла имеет приоритет: URL может
+                // заканчиваться на .jpg, но старый сервер (или плагин WebP Express)
+                // отдаёт под ним WebP. Ошибочное расширение приведёт к отказу
+                // валидатора Uploader::storeFromPath(), и картинка не сохранится.
+                $ext = $mimeExt ?? (in_array($pathExt, self::IMG_EXT, true) ? $pathExt : null);
                 if ($ext === null) {
                     @unlink($tmp);
                     continue;
@@ -519,7 +536,18 @@ final class LegacyCmsImporter
         }
         $rel = str_replace('..', '', rawurldecode($rel));
 
-        return rtrim($uploadsDir, '/') . '/' . ltrim($rel, '/');
+        $full = rtrim($uploadsDir, '/') . '/' . ltrim($rel, '/');
+        if (is_file($full)) {
+            return $full;
+        }
+
+        // Если в локальной папке нет .jpg/.png, но есть .webp — берём его
+        $webp = preg_replace('/\.(jpe?g|png)$/i', '.webp', $full);
+        if ($webp !== null && $webp !== $full && is_file($webp)) {
+            return $webp;
+        }
+
+        return $full;
     }
 
     private static function extFromMime(string $mime): ?string

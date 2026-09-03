@@ -29,6 +29,20 @@ use App\Core\Router;
 
 // --- Веб-инсталлятор: обработка /install и редирект неустановленной системы ---
 $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
+
+// Если переписанный запрос к отсутствующему файлу в uploads пришёл в index.php,
+// но есть одноимённый webp — отдаём его напрямую (fallback для окружений без mod_rewrite).
+if (str_starts_with($requestPath, '/uploads/public/')
+    && preg_match('#^/uploads/public/(.+)\.(jpe?g|png)$#i', $requestPath, $m)) {
+    $webpDisk = __DIR__ . '/uploads/public/' . $m[1] . '.webp';
+    if (is_file($webpDisk)) {
+        header('Content-Type: image/webp');
+        header('Cache-Control: public, max-age=31536000, immutable');
+        readfile($webpDisk);
+        exit;
+    }
+}
+
 if (!APP_INSTALLED && !str_starts_with($requestPath, '/install')) {
     header('Location: /install');
     exit;
