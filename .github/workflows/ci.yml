@@ -94,11 +94,17 @@ jobs:
       - name: Install development tools
         run: composer install --no-interaction --prefer-dist --no-progress
 
-      - name: Audit Composer dependencies
-        run: composer audit --no-interaction
-
+      # PHPStan идёт первым. Проверка уязвимостей ходит в сеть, и её отказ
+      # ронял всю джобу до анализа: недоступный packagist означал «статический
+      # анализ не пройден», хотя он даже не запускался.
       - name: PHPStan (blocking)
         run: composer analyse
+
+      # --ignore-unreachable: недоступный реестр советов — это его авария, а не
+      # наша уязвимость. Настоящие находки по-прежнему роняют сборку; молча
+      # пропускается только случай, когда сверять не с чем.
+      - name: Audit Composer dependencies
+        run: composer audit --no-interaction --ignore-unreachable
 
   javascript:
     name: JavaScript syntax
