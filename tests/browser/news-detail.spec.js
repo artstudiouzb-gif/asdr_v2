@@ -147,3 +147,29 @@ test('галерея, подписи, lightbox, копирование и реж
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(1);
 });
+
+test('клик по контейнеру галереи открывает текущий активный слайд в lightbox и синхронизирует навигацию', async ({ page }) => {
+    await mountNews(page);
+
+    // Переключаем на фото 2 через миниатюру
+    await page.locator('[data-ndg-thumb="1"]').click();
+    await expect(page.locator('[data-ndg-current]')).toHaveText('2');
+
+    // Кликаем по главному контейнеру фото
+    await page.locator('.newsdetail-gallery__main').click({ position: { x: 100, y: 100 } });
+    await expect(page.locator('.rich-lightbox-modal')).toBeVisible();
+    await expect(page.locator('[data-lightbox-counter]')).toHaveText('2 / 2');
+    await expect(page.locator('[data-lightbox-caption]')).toContainText('Вторая подпись · Фото: Автор 2');
+
+    // Внутри lightbox листаем назад
+    await page.locator('[data-lightbox-prev]').click();
+    await expect(page.locator('[data-lightbox-counter]')).toHaveText('1 / 2');
+    await expect(page.locator('[data-lightbox-caption]')).toContainText('Первая подпись · Фото: Автор 1');
+
+    // Закрываем — галерея на странице синхронизирована с фото 1
+    await page.getByRole('button', { name: 'Закрыть', exact: true }).click();
+    await expect(page.locator('.rich-lightbox-modal')).toBeHidden();
+    await expect(page.locator('[data-ndg-current]')).toHaveText('1');
+    await expect(page.locator('.newsdetail-gallery__slide.is-active')).toHaveAttribute('alt', 'Первое фото');
+});
+
