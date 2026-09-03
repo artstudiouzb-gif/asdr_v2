@@ -70,6 +70,8 @@ desktop.ini
 
 # Архивы
 *.zip
+*.gz
+*.br
 
 # Экспорт отчёта «Мониторинг 2030» (scripts/u30-report-export.php) — сборка, не исходник
 /build/
