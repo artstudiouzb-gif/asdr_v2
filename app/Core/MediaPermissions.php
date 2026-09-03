@@ -85,6 +85,20 @@ final class MediaPermissions
             'total' => $total,
         ];
 
+        // При старте проверяем сам корневой каталог загрузок (0755)
+        if ($offset === 0 && is_dir($directory)) {
+            $rootPerms = @fileperms($directory);
+            if ($rootPerms !== false && ($rootPerms & 0777) !== self::DIR_MODE) {
+                if ($dryRun) {
+                    $result['planned']++;
+                } elseif (@chmod($directory, self::DIR_MODE)) {
+                    $result['fixed']++;
+                } else {
+                    $result['failed']++;
+                }
+            }
+        }
+
         $startedAt = microtime(true);
         for (; $index < $total; $index++) {
             // Бюджет — после первой записи: иначе пакет вернулся бы, не сдвинув

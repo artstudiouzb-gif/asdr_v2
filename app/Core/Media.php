@@ -252,8 +252,46 @@ final class Media
      * создании ставит Uploader::writeWebp(), уже лежащие чинит
      * scripts/fix_upload_permissions.php.
      */
+    /**
+     * Гарантирует, что базовые каталоги загрузок имеют права 0755,
+     * предотвращая 403 Forbidden от веб-сервера после Git pull / деплоя.
+     */
+    public static function ensureUploadDirPermissions(): void
+    {
+        static $ensured = false;
+        if ($ensured) {
+            return;
+        }
+        $ensured = true;
+
+        $dir = (string) Config::get('paths.public_uploads', '');
+        if ($dir !== '' && is_dir($dir)) {
+            $mode = fileperms($dir);
+            if ($mode !== false && ($mode & 0005) !== 0005) {
+                @chmod($dir, 0755);
+            }
+            $parent = dirname($dir);
+            if (is_dir($parent)) {
+                $pMode = fileperms($parent);
+                if ($pMode !== false && ($pMode & 0005) !== 0005) {
+                    @chmod($parent, 0755);
+                }
+            }
+        }
+    }
+
     private static function servable(string $path): bool
     {
+        // Если родительский каталог закрыт umask (0700/0750), открываем его (0755):
+        // веб-серверу нужен бит исполнения (+x) для входа в каталог и отдачи статики.
+        $dir = dirname($path);
+        if (is_dir($dir)) {
+            $dirMode = fileperms($dir);
+            if ($dirMode !== false && ($dirMode & 0005) !== 0005) {
+                @chmod($dir, 0755);
+            }
+        }
+
         if (!is_file($path)) {
             return false;
         }
@@ -279,6 +317,8 @@ final class Media
      */
     public static function resolveExistingMediaUrl(string $url): string
     {
+        self::ensureUploadDirPermissions();
+
         $urlPrefix = rtrim((string) Config::get('paths.public_uploads_url', '/uploads/public'), '/');
         $diskBase = rtrim((string) Config::get('paths.public_uploads', ''), '/');
         if ($diskBase === '' || !str_starts_with($url, $urlPrefix . '/')) {
@@ -304,6 +344,13 @@ final class Media
         $webpPath = $diskBase . $relNoExt . '.webp';
         if (self::servable($webpPath)) {
             return $urlPrefix . $relNoExt . '.webp';
+        }
+
+        foreach (['.jpg', '.jpeg', '.png'] as $altExt) {
+            $altPath = $diskBase . $relNoExt . $altExt;
+            if (self::servable($altPath)) {
+                return $urlPrefix . $relNoExt . $altExt;
+            }
         }
 
         return $url;

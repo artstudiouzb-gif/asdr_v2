@@ -19,7 +19,10 @@
 /storage/updates/
 /storage/integrity/
 /storage/tmp/
+/public/uploads/*
+/public/uploads/**/*
 /public/uploads/public/*
+/public/uploads/public/**/*
 !/public/uploads/public/.gitkeep
 !/public/uploads/public/index.html
 .DS_Store
