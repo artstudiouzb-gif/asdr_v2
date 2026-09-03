@@ -365,6 +365,10 @@ return [
     'Размер текста' => 'Matn o‘lchami',
     'Уменьшить текст' => 'Matnni kichraytirish',
     'Увеличить текст' => 'Matnni kattalashtirish',
+    // Подписи под кнопками: короче, чем aria-подписи выше, — рядом с кнопкой
+    // уже видно, к чему они относятся.
+    'Уменьшить' => 'Kichraytirish',
+    'Увеличить' => 'Kattalashtirish',
     'Контраст и фон' => 'Kontrast va fon',
     'Чёрно-белый' => 'Oq-qora',
     'Тёплый' => 'Iliq',
