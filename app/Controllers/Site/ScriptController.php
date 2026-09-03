@@ -14,6 +14,7 @@ use App\Core\A11ySettings;
  */
 final class ScriptController
 {
+    /** @param array<string, string> $params */
     public function switch(array $params): void
     {
         A11ySettings::rememberScript((string) ($params['code'] ?? 'latn'));

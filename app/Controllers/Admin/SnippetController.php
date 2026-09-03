@@ -28,6 +28,7 @@ final class SnippetController
         return Language::isActive($lang) ? $lang : Language::defaultCode();
     }
 
+    /** @param array<string, string> $params */
     public function save(array $params): void
     {
         Auth::requireLogin();
@@ -61,6 +62,7 @@ final class SnippetController
         $this->back($pageId, $lang);
     }
 
+    /** @param array<string, string> $params */
     public function insert(array $params): void
     {
         Auth::requireLogin();
@@ -104,6 +106,7 @@ final class SnippetController
      * Готовая сборка страницы (App\Core\PagePresets): те же блоки, что и у
      * пользовательского шаблона, только описаны в коде и приходят с уже
      * расставленными фонами и отступами.
+     * @param array<string, string> $params
      */
     public function applyPreset(array $params): void
     {
@@ -238,6 +241,7 @@ final class SnippetController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireLogin();

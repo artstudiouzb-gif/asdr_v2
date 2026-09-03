@@ -74,6 +74,32 @@ final class Session
      * Защищает от сбоев Plesk/cPanel/Shared-хостингов, когда системный session.save_path
      * недоступен или использует многоуровневые несуществующие пути.
      */
+    /**
+     * Идентификатор текущей сессии строкой.
+     *
+     * `session_id()` объявлен как `string|false`: вне сессии он отдаёт пустую
+     * строку, а при сбое — `false`. В файлах со `strict_types` это значение
+     * уходило в `setcookie()` и в реестр сессий типизированными параметрами,
+     * то есть отказ хранилища сессий превращался в `TypeError` на входе и
+     * выходе из панели. Пустая строка вместо `false` оставляет поведение тем
+     * же, но снимает падение; вызывающий код, которому нужен настоящий
+     * идентификатор, проверяет непустоту сам.
+     */
+    public static function id(): string
+    {
+        $id = session_id();
+
+        return $id === false ? '' : $id;
+    }
+
+    /** Имя сессионной cookie строкой; `session_name()` тоже бывает `false`. */
+    public static function name(): string
+    {
+        $name = session_name();
+
+        return $name === false ? '' : $name;
+    }
+
     public static function ensureSavePath(): void
     {
         $current = (string) session_save_path();

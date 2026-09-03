@@ -23,6 +23,7 @@ final class AlbumController
         View::render('site/albums', ['albums' => $albums]);
     }
 
+    /** @param array<string, string> $params */
     public function show(array $params): void
     {
         $slug = (string) ($params['slug'] ?? '');

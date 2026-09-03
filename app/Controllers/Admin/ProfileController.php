@@ -278,6 +278,7 @@ final class ProfileController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function revokeSession(array $params): void
     {
         Auth::requireLogin();

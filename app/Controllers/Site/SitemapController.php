@@ -178,6 +178,7 @@ final class SitemapController
         return htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
     }
 
+    /** @param array<string, string> $params */
     public function rss(array $params = []): void
     {
         header('Content-Type: application/rss+xml; charset=utf-8');

@@ -90,6 +90,7 @@ final class PortalController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function download(array $params): void
     {
         RepoAuth::requireLogin();
@@ -136,6 +137,7 @@ final class PortalController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function preview(array $params): void
     {
         RepoAuth::requireLogin();

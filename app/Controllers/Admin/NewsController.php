@@ -66,6 +66,7 @@ final class NewsController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function duplicate(array $params): void
     {
         Auth::requireLogin();
@@ -135,6 +136,7 @@ final class NewsController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function edit(array $params): void
     {
         Auth::requireLogin();
@@ -168,6 +170,7 @@ final class NewsController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function createTranslation(array $params): void
     {
         Auth::requireLogin();
@@ -195,6 +198,7 @@ final class NewsController
     /**
      * Предпросмотр новости до публикации (группа 5.2): рендер как на сайте,
      * но только для авторизованных, с noindex и вне кэша/sitemap.
+     * @param array<string, string> $params
      */
     public function preview(array $params): void
     {
@@ -222,6 +226,7 @@ final class NewsController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function update(array $params): void
     {
         Auth::requireLogin();
@@ -336,6 +341,7 @@ final class NewsController
     /**
      * Предпросмотр поста Telegram. Раньше содержимое выяснялось по факту в
      * канале: сколько языков вошло, что попало в текст, влезает ли он в лимит.
+     * @param array<string, string> $params
      */
     public function socialPreview(array $params): void
     {
@@ -372,7 +378,10 @@ final class NewsController
         ]);
     }
 
-    /** Ручная постановка новости в очередь публикации во все готовые сети. */
+    /**
+     * Ручная постановка новости в очередь публикации во все готовые сети.
+     * @param array<string, string> $params
+     */
     public function pushSocial(array $params): void
     {
         Auth::requireLogin();
@@ -575,6 +584,7 @@ final class NewsController
         }
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireLogin();

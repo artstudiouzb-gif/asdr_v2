@@ -31,6 +31,7 @@ final class PageController
         $this->renderPage($page, $lang, true);
     }
 
+    /** @param array<string, string> $params */
     public function show(array $params): void
     {
         $lang = Locale::current();

@@ -30,6 +30,7 @@ use App\Models\Widget;
 
 final class BlockController
 {
+    /** @param array<string, string> $params */
     public function store(array $params): void
     {
         Auth::requireLogin();
@@ -125,6 +126,7 @@ final class BlockController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function edit(array $params): void
     {
         Auth::requireLogin();
@@ -147,6 +149,7 @@ final class BlockController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function update(array $params): void
     {
         Auth::requireLogin();
@@ -225,7 +228,10 @@ final class BlockController
         exit;
     }
 
-    /** История версий блока (группа 5.1). */
+    /**
+     * История версий блока (группа 5.1).
+     * @param array<string, string> $params
+     */
     public function revisions(array $params): void
     {
         Auth::requireLogin();
@@ -243,7 +249,10 @@ final class BlockController
         ]);
     }
 
-    /** Восстановление блока из ревизии (создаёт новую ревизию, группа 5.1). */
+    /**
+     * Восстановление блока из ревизии (создаёт новую ревизию, группа 5.1).
+     * @param array<string, string> $params
+     */
     public function restoreRevision(array $params): void
     {
         Auth::requireLogin();
@@ -297,6 +306,7 @@ final class BlockController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireLogin();
@@ -347,6 +357,7 @@ final class BlockController
         echo json_encode(['ok' => true]);
     }
 
+    /** @param array<string, string> $params */
     public function move(array $params): void
     {
         Auth::requireLogin();
@@ -372,7 +383,10 @@ final class BlockController
         exit;
     }
 
-    /** Включение/отключение вывода блока на сайте (без удаления). */
+    /**
+     * Включение/отключение вывода блока на сайте (без удаления).
+     * @param array<string, string> $params
+     */
     public function toggle(array $params): void
     {
         Auth::requireLogin();

@@ -65,6 +65,7 @@ final class RedirectController
         $this->back();
     }
 
+    /** @param array<string, string> $params */
     public function toggle(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -75,6 +76,7 @@ final class RedirectController
         $this->back();
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -85,7 +87,10 @@ final class RedirectController
         $this->back();
     }
 
-    /** Скрыть запись 404-трекера (не создавая редирект). */
+    /**
+     * Скрыть запись 404-трекера (не создавая редирект).
+     * @param array<string, string> $params
+     */
     public function dismissNotFound(array $params): void
     {
         Auth::requireSuperAdmin();

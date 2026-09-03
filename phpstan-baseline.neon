@@ -1,55 +1,7 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Method App\\Controllers\\Admin\\AlbumController\:\:addImage\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/AlbumController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\AlbumController\:\:deleteImage\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/AlbumController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\AlbumController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/AlbumController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\AlbumController\:\:edit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/AlbumController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\AlbumController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/AlbumController.php
-
-		-
 			message: '#^Method App\\Controllers\\Admin\\BlockController\:\:collectData\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/BlockController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\BlockController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/BlockController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\BlockController\:\:edit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/BlockController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\BlockController\:\:move\(\) has parameter \$params with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Controllers/Admin/BlockController.php
@@ -61,70 +13,10 @@ parameters:
 			path: app/Controllers/Admin/BlockController.php
 
 		-
-			message: '#^Method App\\Controllers\\Admin\\BlockController\:\:restoreRevision\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/BlockController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\BlockController\:\:revisions\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/BlockController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\BlockController\:\:store\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/BlockController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\BlockController\:\:toggle\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/BlockController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\BlockController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/BlockController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\BulkController\:\:handle\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/BulkController.php
-
-		-
 			message: '#^Method App\\Controllers\\Admin\\ChunkedUploadController\:\:json\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Controllers/Admin/ChunkedUploadController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ContentEntryController\:\:create\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ContentEntryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ContentEntryController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ContentEntryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ContentEntryController\:\:edit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ContentEntryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ContentEntryController\:\:index\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ContentEntryController.php
 
 		-
 			message: '#^Method App\\Controllers\\Admin\\ContentEntryController\:\:save\(\) has parameter \$entry with no value type specified in iterable type array\.$#'
@@ -139,19 +31,7 @@ parameters:
 			path: app/Controllers/Admin/ContentEntryController.php
 
 		-
-			message: '#^Method App\\Controllers\\Admin\\ContentEntryController\:\:store\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ContentEntryController.php
-
-		-
 			message: '#^Method App\\Controllers\\Admin\\ContentEntryController\:\:type\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ContentEntryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ContentEntryController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Controllers/Admin/ContentEntryController.php
@@ -163,55 +43,13 @@ parameters:
 			path: app/Controllers/Admin/ContentRevisionController.php
 
 		-
-			message: '#^Method App\\Controllers\\Admin\\ContentRevisionController\:\:index\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ContentRevisionController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ContentRevisionController\:\:restore\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ContentRevisionController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ContentTypeController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ContentTypeController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ContentTypeController\:\:fields\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ContentTypeController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ContentTypeController\:\:saveFields\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ContentTypeController.php
-
-		-
 			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(non\-empty\-string\|null\)\: mixed\)\|null, Closure\(string\)\: non\-falsy\-string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Controllers/Admin/DatabaseController.php
 
 		-
-			message: '#^Method App\\Controllers\\Admin\\FileController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/FileController.php
-
-		-
 			message: '#^Method App\\Controllers\\Admin\\FileController\:\:libraryItem\(\) has parameter \$file with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/FileController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\FileController\:\:regenerateToken\(\) has parameter \$params with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Controllers/Admin/FileController.php
@@ -229,114 +67,6 @@ parameters:
 			path: app/Controllers/Admin/FormController.php
 
 		-
-			message: '#^Method App\\Controllers\\Admin\\FormController\:\:deleteSubmission\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/FormController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\FormController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/FormController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\FormController\:\:edit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/FormController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\FormController\:\:submission\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/FormController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\FormController\:\:submissions\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/FormController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\FormController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/FormController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\HeroController\:\:applyPreset\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/HeroController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\HeroController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/HeroController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\HeroController\:\:duplicate\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/HeroController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\HeroController\:\:edit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/HeroController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\HeroController\:\:reorder\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/HeroController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\HeroController\:\:slideCreate\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/HeroController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\HeroController\:\:slideDestroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/HeroController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\HeroController\:\:slideDuplicate\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/HeroController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\HeroController\:\:slideEdit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/HeroController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\HeroController\:\:slideToggle\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/HeroController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\HeroController\:\:slideUpdate\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/HeroController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\HeroController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/HeroController.php
-
-		-
 			message: '#^Parameter \#2 \$ids of static method App\\Models\\HeroSlide\:\:reorder\(\) expects list\<int\>, array\<int\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -349,58 +79,10 @@ parameters:
 			path: app/Controllers/Admin/LanguageController.php
 
 		-
-			message: '#^Method App\\Controllers\\Admin\\LanguageController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/LanguageController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\LanguageController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/LanguageController.php
-
-		-
 			message: '#^Method App\\Controllers\\Admin\\MenuController\:\:collectInput\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Controllers/Admin/MenuController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\MenuController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/MenuController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\MenuController\:\:move\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/MenuController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\MenuController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/MenuController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\NewsCategoryController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/NewsCategoryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\NewsCategoryController\:\:edit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/NewsCategoryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\NewsCategoryController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/NewsCategoryController.php
 
 		-
 			message: '#^Method App\\Controllers\\Admin\\NewsController\:\:collectExtras\(\) return type has no value type specified in iterable type array\.$#'
@@ -421,31 +103,7 @@ parameters:
 			path: app/Controllers/Admin/NewsController.php
 
 		-
-			message: '#^Method App\\Controllers\\Admin\\NewsController\:\:createTranslation\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/NewsController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\NewsController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/NewsController.php
-
-		-
 			message: '#^Method App\\Controllers\\Admin\\NewsController\:\:dispatchNewsPublished\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/NewsController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\NewsController\:\:duplicate\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/NewsController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\NewsController\:\:edit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Controllers/Admin/NewsController.php
@@ -470,30 +128,6 @@ parameters:
 
 		-
 			message: '#^Method App\\Controllers\\Admin\\NewsController\:\:parseTimeline\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/NewsController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\NewsController\:\:preview\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/NewsController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\NewsController\:\:pushSocial\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/NewsController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\NewsController\:\:socialPreview\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/NewsController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\NewsController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Controllers/Admin/NewsController.php
@@ -529,72 +163,6 @@ parameters:
 			path: app/Controllers/Admin/PageController.php
 
 		-
-			message: '#^Method App\\Controllers\\Admin\\PageController\:\:copyLanguageBlocks\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/PageController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\PageController\:\:createTranslation\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/PageController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\PageController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/PageController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\PageController\:\:duplicate\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/PageController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\PageController\:\:edit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/PageController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\PageController\:\:makeHome\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/PageController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\PageController\:\:preview\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/PageController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\PageController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/PageController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\PasswordResetController\:\:showReset\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/PasswordResetController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\PasswordResetController\:\:submitReset\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/PasswordResetController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ProfileController\:\:revokeSession\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ProfileController.php
-
-		-
 			message: '#^Parameter \#1 \$sessionId of static method App\\Models\\SessionRegistry\:\:hash\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -625,126 +193,6 @@ parameters:
 			path: app/Controllers/Admin/ProjectController.php
 
 		-
-			message: '#^Method App\\Controllers\\Admin\\ProjectController\:\:createTranslation\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ProjectController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ProjectController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ProjectController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ProjectController\:\:duplicate\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ProjectController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ProjectController\:\:edit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ProjectController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\ProjectController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/ProjectController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\RedirectController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/RedirectController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\RedirectController\:\:dismissNotFound\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/RedirectController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\RedirectController\:\:toggle\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/RedirectController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\RepositoryController\:\:approveFile\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/RepositoryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\RepositoryController\:\:destroyCategory\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/RepositoryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\RepositoryController\:\:destroyFile\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/RepositoryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\RepositoryController\:\:destroyUser\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/RepositoryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\RepositoryController\:\:renameCategory\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/RepositoryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\RepositoryController\:\:resetUserPassword\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/RepositoryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\RepositoryController\:\:toggleUser\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/RepositoryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\RepositoryController\:\:updateFile\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/RepositoryController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\SnippetController\:\:applyPreset\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/SnippetController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\SnippetController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/SnippetController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\SnippetController\:\:insert\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/SnippetController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\SnippetController\:\:save\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/SnippetController.php
-
-		-
 			message: '#^Parameter \#2 \$blocks of static method App\\Models\\BlockSnippet\:\:create\(\) expects array\<int, array\{type\: string, title\: string\|null, data\: array, custom_css\: string\}\>, array\<int, array\<string, mixed\>\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -755,12 +203,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Controllers/Admin/SnippetController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\SubscriberController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/SubscriberController.php
 
 		-
 			message: '#^Method App\\Controllers\\Admin\\TeamController\:\:collectInput\(\) has parameter \$existing with no value type specified in iterable type array\.$#'
@@ -775,85 +217,7 @@ parameters:
 			path: app/Controllers/Admin/TeamController.php
 
 		-
-			message: '#^Method App\\Controllers\\Admin\\TeamController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/TeamController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\TeamController\:\:edit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/TeamController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\TeamController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/TeamController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\TrashController\:\:forceDelete\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/TrashController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\TrashController\:\:restore\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/TrashController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\UserController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/UserController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\VideoController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/VideoController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\VideoController\:\:edit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/VideoController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\VideoController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/VideoController.php
-
-		-
 			message: '#^Method App\\Controllers\\Admin\\WebhookController\:\:collect\(\) has parameter \$current with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/WebhookController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\WebhookController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/WebhookController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\WebhookController\:\:retry\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/WebhookController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\WebhookController\:\:test\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/WebhookController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\WebhookController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Controllers/Admin/WebhookController.php
@@ -871,46 +235,10 @@ parameters:
 			path: app/Controllers/Admin/WidgetController.php
 
 		-
-			message: '#^Method App\\Controllers\\Admin\\WidgetController\:\:destroy\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/WidgetController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\WidgetController\:\:edit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/WidgetController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\WidgetController\:\:move\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/WidgetController.php
-
-		-
-			message: '#^Method App\\Controllers\\Admin\\WidgetController\:\:update\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Admin/WidgetController.php
-
-		-
 			message: '#^Method App\\Controllers\\InstallController\:\:writeConfig\(\) has parameter \$db with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Controllers/InstallController.php
-
-		-
-			message: '#^Method App\\Controllers\\Repo\\PortalController\:\:download\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Repo/PortalController.php
-
-		-
-			message: '#^Method App\\Controllers\\Repo\\PortalController\:\:preview\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Repo/PortalController.php
 
 		-
 			message: '#^Method App\\Controllers\\Repo\\PortalController\:\:telegramViewData\(\) has parameter \$user with no value type specified in iterable type array\.$#'
@@ -923,24 +251,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Controllers/Repo/PortalController.php
-
-		-
-			message: '#^Method App\\Controllers\\Site\\AlbumController\:\:show\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Site/AlbumController.php
-
-		-
-			message: '#^Method App\\Controllers\\Site\\ContentController\:\:index\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Site/ContentController.php
-
-		-
-			message: '#^Method App\\Controllers\\Site\\ContentController\:\:show\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Site/ContentController.php
 
 		-
 			message: '#^Method App\\Controllers\\Site\\FormController\:\:fieldActive\(\) has parameter \$field with no value type specified in iterable type array\.$#'
@@ -961,64 +271,10 @@ parameters:
 			path: app/Controllers/Site/FormController.php
 
 		-
-			message: '#^Method App\\Controllers\\Site\\FormController\:\:submit\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Site/FormController.php
-
-		-
-			message: '#^Method App\\Controllers\\Site\\NewsController\:\:photosZip\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Site/NewsController.php
-
-		-
-			message: '#^Method App\\Controllers\\Site\\NewsController\:\:show\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Site/NewsController.php
-
-		-
-			message: '#^Method App\\Controllers\\Site\\OpenDataController\:\:dataset\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Site/OpenDataController.php
-
-		-
 			message: '#^Method App\\Controllers\\Site\\PageController\:\:renderPage\(\) has parameter \$page with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Controllers/Site/PageController.php
-
-		-
-			message: '#^Method App\\Controllers\\Site\\PageController\:\:show\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Site/PageController.php
-
-		-
-			message: '#^Method App\\Controllers\\Site\\PollController\:\:vote\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Site/PollController.php
-
-		-
-			message: '#^Method App\\Controllers\\Site\\ProjectController\:\:show\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Site/ProjectController.php
-
-		-
-			message: '#^Method App\\Controllers\\Site\\ScriptController\:\:switch\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Site/ScriptController.php
-
-		-
-			message: '#^Method App\\Controllers\\Site\\SitemapController\:\:rss\(\) has parameter \$params with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Controllers/Site/SitemapController.php
 
 		-
 			message: '#^Method App\\Core\\A11ySettings\:\:fromCookie\(\) return type has no value type specified in iterable type array\.$#'
@@ -1173,36 +429,6 @@ parameters:
 		-
 			message: '#^Method App\\Core\\Auth\:\:user\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: app/Core/Auth.php
-
-		-
-			message: '#^Parameter \#1 \$name of function setcookie expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/Auth.php
-
-		-
-			message: '#^Parameter \#1 \$sessionId of static method App\\Models\\SessionRegistry\:\:remove\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/Auth.php
-
-		-
-			message: '#^Parameter \#2 \$sessionId of static method App\\Models\\SessionRegistry\:\:exists\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/Auth.php
-
-		-
-			message: '#^Parameter \#2 \$sessionId of static method App\\Models\\SessionRegistry\:\:register\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/Auth.php
-
-		-
-			message: '#^Parameter \#2 \$sessionId of static method App\\Models\\SessionRegistry\:\:touch\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Core/Auth.php
 
@@ -1385,36 +611,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Core/BlockRenderer.php
-
-		-
-			message: '#^Parameter \#4 \$color of function imagesetpixel expects int, int\<0, max\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/Captcha.php
-
-		-
-			message: '#^Parameter \#6 \$color of function imagefilledrectangle expects int, int\<0, max\>\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Core/Captcha.php
-
-		-
-			message: '#^Parameter \#6 \$color of function imagestring expects int, int\<0, max\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/Captcha.php
-
-		-
-			message: '#^Parameter \#6 \$color of function imagettftext expects int, int\<0, max\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/Captcha.php
-
-		-
-			message: '#^Parameter \#8 \$color of function imagearc expects int, int\<0, max\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/Captcha.php
 
 		-
 			message: '#^Parameter \#1 \.\.\.\$arg1 of function max expects non\-empty\-array, list\<float\> given\.$#'
@@ -1907,18 +1103,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Core/MediaCleaner.php
-
-		-
-			message: '#^Parameter \#1 \$width of function imagecreatetruecolor expects int\<1, max\>, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/MediaResizer.php
-
-		-
-			message: '#^Parameter \#2 \$height of function imagecreatetruecolor expects int\<1, max\>, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/MediaResizer.php
 
 		-
 			message: '#^Method App\\Core\\NewsCard\:\:isEmpty\(\) has parameter \$row with no value type specified in iterable type array\.$#'

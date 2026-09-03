@@ -40,6 +40,7 @@ final class AlbumController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function edit(array $params): void
     {
         Auth::requireLogin();
@@ -58,6 +59,7 @@ final class AlbumController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function update(array $params): void
     {
         Auth::requireLogin();
@@ -105,6 +107,7 @@ final class AlbumController
         }
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireLogin();
@@ -116,6 +119,7 @@ final class AlbumController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function addImage(array $params): void
     {
         Auth::requireLogin();
@@ -132,6 +136,7 @@ final class AlbumController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function deleteImage(array $params): void
     {
         Auth::requireLogin();

@@ -26,6 +26,7 @@ final class TrashController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function restore(array $params): void
     {
         Auth::requireLogin();
@@ -50,6 +51,7 @@ final class TrashController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function forceDelete(array $params): void
     {
         Auth::requireLogin();

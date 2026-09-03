@@ -42,7 +42,10 @@ final class OpenDataController
         ], 'index');
     }
 
-    /** Датасет: /opendata/{dataset}.json или /opendata/{dataset}.csv */
+    /**
+     * Датасет: /opendata/{dataset}.json или /opendata/{dataset}.csv
+     * @param array<string, string> $params
+     */
     public function dataset(array $params): void
     {
         $raw = (string) ($params['dataset'] ?? '');

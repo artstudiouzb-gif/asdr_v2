@@ -26,6 +26,7 @@ final class ContentEntryController
         return ContentType::findBySlug($slug);
     }
 
+    /** @param array<string, string> $params */
     public function index(array $params): void
     {
         Auth::requireLogin();
@@ -52,6 +53,7 @@ final class ContentEntryController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function create(array $params): void
     {
         Auth::requireLogin();
@@ -70,6 +72,7 @@ final class ContentEntryController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function store(array $params): void
     {
         Auth::requireLogin();
@@ -97,6 +100,7 @@ final class ContentEntryController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function edit(array $params): void
     {
         Auth::requireLogin();
@@ -116,6 +120,7 @@ final class ContentEntryController
         ]);
     }
 
+    /** @param array<string, string> $params */
     public function update(array $params): void
     {
         Auth::requireLogin();
@@ -144,6 +149,7 @@ final class ContentEntryController
         exit;
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireLogin();

@@ -50,6 +50,7 @@ final class MenuController
         $this->redirectToMenu((string) $data['lang'], $id);
     }
 
+    /** @param array<string, string> $params */
     public function update(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -149,6 +150,7 @@ final class MenuController
         $this->redirectToMenu($targetLang);
     }
 
+    /** @param array<string, string> $params */
     public function destroy(array $params): void
     {
         Auth::requireSuperAdmin();
@@ -161,6 +163,7 @@ final class MenuController
         $this->redirectToMenu((string) ($item['lang'] ?? ''));
     }
 
+    /** @param array<string, string> $params */
     public function move(array $params): void
     {
         Auth::requireSuperAdmin();
