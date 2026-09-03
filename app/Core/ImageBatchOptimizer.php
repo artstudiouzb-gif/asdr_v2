@@ -72,12 +72,15 @@ final class ImageBatchOptimizer
     private static function variantsAreFresh(string $path, int $width): bool
     {
         $base = preg_replace('/\.[^.]+$/', '', $path) ?? $path;
+        // Ждём ровно те варианты, которые создаёт загрузчик: список общий
+        // (Media::VARIANT_WIDTHS). Свой список здесь означал бы, что после
+        // добавления размера пакетная обработка считает старые файлы готовыми
+        // и молча их пропускает.
         $expected = [$base . '.webp'];
-        if ($width > 800) {
-            $expected[] = $base . '-800.webp';
-        }
-        if ($width > 1600) {
-            $expected[] = $base . '-1600.webp';
+        foreach (Media::VARIANT_WIDTHS as $variantWidth) {
+            if ($width > $variantWidth) {
+                $expected[] = $base . '-' . $variantWidth . '.webp';
+            }
         }
 
         $sourceMtime = (int) @filemtime($path);

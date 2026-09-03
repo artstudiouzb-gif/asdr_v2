@@ -18,7 +18,7 @@ final class Media
     /** @var array<string, array{width: int, height: int}|null> */
     private static array $dimensionCache = [];
 
-    /** @var array<string, array{full: ?string, w1600: ?string, w800: ?string}|null> */
+    /** @var array<string, array{full: ?string, sized: array<int, string>}|null> */
     private static array $variantCache = [];
 
     /**
@@ -220,17 +220,16 @@ final class Media
             . $responsive . ' fetchpriority="high">';
     }
 
-    /** @param array{full: ?string, w1600: ?string, w800: ?string} $variants */
+    /**
+     * @param array{full: ?string, sized: array<int, string>} $variants
+     * @return list<string>
+     */
     private static function webpSrcset(array $variants): array
     {
         $srcset = [];
-        if ($variants['w800'] !== null) {
-            $srcset[] = htmlspecialchars($variants['w800'], ENT_QUOTES) . ' '
-                . self::imageWidth($variants['w800'], 800) . 'w';
-        }
-        if ($variants['w1600'] !== null) {
-            $srcset[] = htmlspecialchars($variants['w1600'], ENT_QUOTES) . ' '
-                . self::imageWidth($variants['w1600'], 1600) . 'w';
+        foreach ($variants['sized'] as $width => $variantUrl) {
+            $srcset[] = htmlspecialchars($variantUrl, ENT_QUOTES) . ' '
+                . self::imageWidth($variantUrl, $width) . 'w';
         }
         if ($variants['full'] !== null) {
             $srcset[] = htmlspecialchars($variants['full'], ENT_QUOTES) . ' '
@@ -304,6 +303,36 @@ final class Media
     }
 
     /**
+     * Ширины webp-вариантов, от мелкого к крупному. **Один список на проект.**
+     *
+     * Его читают все, кому нужен набор вариантов: генерация при загрузке,
+     * подбор для srcset, пакетная достройка старых файлов и удаление вместе с
+     * оригиналом. Прежде тот же набор был выписан литералами в четырёх местах,
+     * а такой список расходится с первой же правкой: файл перестают удалять
+     * или перестают ждать от пакетной обработки — и то и другое молча.
+     *
+     * 400px добавлен ради миниатюр: карточка медиатеки около 135px, кадр
+     * галереи новости 110px, и даже с учётом удвоенной плотности экрана
+     * 800px там втрое больше нужного.
+     */
+    public const VARIANT_WIDTHS = [400, 800, 1600];
+
+    /**
+     * Суффиксы всех файлов-вариантов, включая полноразмерный.
+     *
+     * @return list<string>
+     */
+    public static function variantSuffixes(): array
+    {
+        $suffixes = ['.webp'];
+        foreach (self::VARIANT_WIDTHS as $width) {
+            $suffixes[] = '-' . $width . '.webp';
+        }
+
+        return $suffixes;
+    }
+
+    /**
      * Адрес мелкого варианта для миниатюры — или исходный, если вариантов нет.
      *
      * Нужен там, где картинка показывается размером в сотню пикселей, а
@@ -326,15 +355,19 @@ final class Media
         if ($variants === null) {
             return $url;
         }
+        // Самый мелкий из существующих: ключи отсортированы по ширине.
+        foreach ($variants['sized'] as $variantUrl) {
+            return $variantUrl;
+        }
 
-        return $variants['w800'] ?? $variants['w1600'] ?? $variants['full'] ?? $url;
+        return $variants['full'] ?? $url;
     }
 
     /**
      * Возвращает пути к существующим WebP-вариантам для локального URL загрузки,
      * либо null, если это не локальная загрузка / вариантов нет.
      *
-     * @return array{full: ?string, w1600: ?string, w800: ?string}|null
+     * @return array{full: ?string, sized: array<int, string>}|null
      */
     private static function webpVariants(string $url): ?array
     {
@@ -353,20 +386,21 @@ final class Media
         $relative = substr($clean, strlen($urlPrefix));           // /abc.jpg
         $relNoExt = preg_replace('/\.[^.\/]+$/', '', $relative) ?? $relative;
 
-        $map = [
-            'full' => $relNoExt . '.webp',
-            'w1600' => $relNoExt . '-1600.webp',
-            'w800' => $relNoExt . '-800.webp',
-        ];
-
-        $result = ['full' => null, 'w1600' => null, 'w800' => null];
+        $result = ['full' => null, 'sized' => []];
         $found = false;
-        foreach ($map as $key => $rel) {
+        foreach (self::VARIANT_WIDTHS as $width) {
+            $rel = $relNoExt . '-' . $width . '.webp';
             if (self::servable($diskBase . $rel)) {
-                $result[$key] = $urlPrefix . $rel;
+                $result['sized'][$width] = $urlPrefix . $rel;
                 $found = true;
             }
         }
+        $fullRel = $relNoExt . '.webp';
+        if (self::servable($diskBase . $fullRel)) {
+            $result['full'] = $urlPrefix . $fullRel;
+            $found = true;
+        }
+        ksort($result['sized']);
 
         return self::$variantCache[$url] = ($found ? $result : null);
     }
