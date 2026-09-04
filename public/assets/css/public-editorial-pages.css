@@ -364,6 +364,36 @@
     border: 0;
 }
 
+/* Промежутка у сетки нет намеренно: колонки разделяют правый отступ карточки
+   и верхняя линейка. Полосе (карусели) тот же приём не годится — карточки
+   идут встык, линейки соседей сходятся в одну сплошную, а отрезок между
+   точками (100% + --stages-gap) уезжает за край экрана. Поэтому у полосы
+   промежуток настоящий, а отступ справа снимается, чтобы текст не оказался
+   отодвинут от своей колонки дважды. */
+.editorial-page__content .stages--carousel {
+    gap: var(--stages-gap);
+    padding: 18px 4px;
+    margin-inline: -4px;
+    scroll-padding-inline: 4px;
+}
+
+.editorial-page__content .stages--carousel .stage {
+    padding-right: 0;
+}
+
+@media (max-width: 560px) {
+    .editorial-page__content .stages[data-carousel-track] {
+        gap: var(--stages-gap);
+        padding: 18px 4px;
+        margin-inline: -4px;
+        scroll-padding-inline: 4px;
+    }
+
+    .editorial-page__content .stages[data-carousel-track] .stage {
+        padding-right: 0;
+    }
+}
+
 .editorial-page__content .stage {
     min-height: 178px;
     padding: 22px 18px 0 0;
