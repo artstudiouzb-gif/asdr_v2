@@ -2743,7 +2743,17 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     grid-template-columns: none;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    padding: 10px 4px 18px;
+    /* Отступы полосы — под кольцо текущей точки: оно уходит на 15px за
+       габарит самой точки, а прокручиваемая область срезает всё, что вышло
+       за её поле (overflow-x: auto делает область прокручиваемой и по
+       вертикали). Отрицательное поле возвращает карточки на общую линию
+       текста страницы. */
+    padding: 18px 4px;
+    margin-inline: -4px;
+    /* Без этого обязательная привязка (scroll-snap) равняет карточку по краю
+       поля прокрутки, то есть по внешней границе отступа, и весь ряд встаёт
+       на 4px левее текста страницы. */
+    scroll-padding-inline: 4px;
 }
 .stages--carousel .stage {
     flex: 0 0 min(280px, calc((100% - (3 * var(--stages-gap))) / 4));
@@ -2756,10 +2766,16 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
         grid-template-columns: none;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
-        padding: 10px 4px 18px;
+        padding: 18px 4px;
+        margin-inline: -4px;
+        scroll-padding-inline: 4px;
     }
     .stages[data-carousel-track] .stage {
-        flex: 0 0 min(82vw, 300px);
+        /* Доля дорожки, а не доля экрана: у страницы свои боковые отступы, и
+           карточка в 82vw не помещалась в полосу — её правый край срезался
+           экраном вместе с текстом. Остаток показывает начало следующей
+           карточки, то есть что список продолжается вбок. */
+        flex: 0 0 86%;
         min-width: 0;
         scroll-snap-align: start;
     }
@@ -3982,9 +3998,14 @@ span.imgcard__media::after {
 /* 44px — минимальная цель для касания; прежде это требование лежало в
    отдельном правиле выше по файлу, которое перекрывалось этим. */
 .carousel-nav__btn { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--gov-border); background: var(--gov-surface); color: var(--gov-title); font-size: var(--step-3); line-height: 1; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease; }
-.carousel-nav__btn:hover { background: var(--gov-navy); color: #fff; border-color: var(--gov-title); }
 .carousel-nav__btn[disabled] { opacity: .35; cursor: default; }
-.carousel-nav__btn[disabled]:hover { background: var(--gov-surface); color: var(--gov-title); border-color: var(--gov-border); }
+/* Наведение — только там, где курсор есть. На телефоне :hover остаётся на
+   кнопке после нажатия: стрелка «назад» так и стоит залитой тёмным, пока
+   посетитель не коснётся чего-то ещё, и читается как выбранная. */
+@media (hover: hover) and (pointer: fine) {
+    .carousel-nav__btn:hover { background: var(--gov-navy); color: #fff; border-color: var(--gov-title); }
+    .carousel-nav__btn[disabled]:hover { background: var(--gov-surface); color: var(--gov-title); border-color: var(--gov-border); }
+}
 .carousel-nav__dots { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; }
 .carousel-nav__dot {
     display: grid;
