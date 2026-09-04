@@ -117,8 +117,27 @@ jobs:
           cache: npm
       - name: Install JavaScript tooling
         run: npm ci
+      # Реестр советов, ответивший ошибкой, — авария реестра, а не наша
+      # уязвимость: тем же приёмом, что у composer audit (--ignore-unreachable,
+      # см. #327). Своего флага у npm audit нет, поэтому отказ разбирается по
+      # ответу: пришёл отчёт (auditReportVersion) — находки настоящие и роняют
+      # сборку; отчёта нет — предупреждаем и идём дальше, иначе чужая авария
+      # блокирует любой мерж.
       - name: Audit JavaScript dependencies
-        run: npm audit --audit-level=high
+        run: |
+          set +e
+          report=$(npm audit --audit-level=high --json 2>&1)
+          status=$?
+          set -e
+          printf '%s\n' "$report"
+          if [ "$status" -eq 0 ]; then
+            exit 0
+          fi
+          if printf '%s' "$report" | grep -q '"auditReportVersion"'; then
+            echo "::error::npm audit: найдены уязвимости уровня high и выше"
+            exit 1
+          fi
+          echo "::warning::Реестр советов npm недоступен — аудит пропущен"
       - name: Scan tracked files for committed secrets
         run: npm run check:security
       - name: Verify generated asset bundles
