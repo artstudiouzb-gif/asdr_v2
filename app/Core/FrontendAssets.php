@@ -28,6 +28,7 @@ final class FrontendAssets
         '/assets/css/a11y.css',
         '/assets/css/public-layout-polish.css',
         '/assets/css/public-editorial-pages.css',
+        '/assets/css/public-home.css',
     ];
 
     private const JS_SOURCES = [
