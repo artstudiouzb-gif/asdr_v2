@@ -1,7 +1,7 @@
 {
   ".site-header": {
     "backgroundColor": "rgb(255, 255, 255)",
-    "borderBottomColor": "rgb(230, 235, 240)",
+    "borderBottomColor": "rgb(226, 232, 240)",
     "boxShadow": "none",
     "height": "65px"
   },
@@ -26,7 +26,7 @@
     "lineHeight": "40px"
   },
   ".counter__label": {
-    "color": "rgb(102, 102, 102)",
+    "color": "rgb(71, 85, 105)",
     "fontSize": "15.2px",
     "lineHeight": "20.52px"
   },
@@ -34,7 +34,7 @@
     "backgroundColor": "rgb(255, 255, 255)",
     "borderRadius": "14px",
     "borderTopWidth": "1px",
-    "borderTopColor": "rgb(230, 235, 240)",
+    "borderTopColor": "rgb(226, 232, 240)",
     "boxShadow": "rgba(16, 24, 40, 0.06) 0px 1px 3px 0px, rgba(16, 24, 40, 0.05) 0px 6px 18px 0px",
     "padding": "24px"
   },
@@ -54,7 +54,7 @@
   ".faq-item": {
     "backgroundColor": "rgb(255, 255, 255)",
     "borderRadius": "14px",
-    "borderTopColor": "rgb(230, 235, 240)"
+    "borderTopColor": "rgb(226, 232, 240)"
   },
   ".faq-item__q": {
     "color": "rgb(15, 43, 70)",
@@ -81,7 +81,7 @@
     "backgroundColor": "rgb(255, 255, 255)",
     "borderRadius": "14px",
     "padding": "24px",
-    "borderTopColor": "rgb(230, 235, 240)"
+    "borderTopColor": "rgb(226, 232, 240)"
   },
   ".act-card__number": {
     "color": "rgb(15, 43, 70)",

@@ -3781,7 +3781,10 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     width: 44px;
     height: 44px;
     border-radius: var(--radius-sm, 10px);
-    background: color-mix(in srgb, var(--gov-navy) 8%, var(--gov-surface));
+    /* Подложка и сама иконка — одного семейства. Пока подложка была
+       синеватой (navy 8 %), а глиф бирюзовым, в одном квадрате 44×44
+       спорили два тона: карточки читались пыльными. */
+    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 10%, var(--gov-surface));
     color: var(--gov-teal-text, #0284c7);
     transition: transform .5s var(--feature-card-motion-ease),
         background-color .42s ease, color .42s ease;
