@@ -351,13 +351,14 @@ final class Updater
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS)
         );
-        $base = rtrim($dir, '/') . '/';
+        $base = rtrim(str_replace('\\', '/', $dir), '/') . '/';
         foreach ($iterator as $item) {
             if (!$item->isFile()) {
                 continue;
             }
-            $relative = substr($item->getPathname(), strlen($base));
-            $files[] = $prefix === '' ? $relative : $prefix . '/' . $relative;
+            $pathname = str_replace('\\', '/', $item->getPathname());
+            $relative = substr($pathname, strlen($base));
+            $files[] = $prefix === '' ? $relative : rtrim($prefix, '/') . '/' . ltrim($relative, '/');
         }
         sort($files);
 

@@ -36,8 +36,9 @@ test('header settings group behavior controls into spacious responsive cards', f
     // за мёртвую копию и прошёл бы даже с испорченной сеткой.
     // Без !important: слой переопределений разобран, правило действует весом
     // селектора. Пиноваться к !important в тесте значит закреплять его насовсем.
-    assert_contains(".hb-behavior__options {\n    display: grid;", $css);
-    assert_contains('@media (max-width: 720px)', $css);
+    $normalizedCss = str_replace("\r\n", "\n", $css);
+    assert_contains(".hb-behavior__options {\n    display: grid;", $normalizedCss);
+    assert_contains('@media (max-width: 720px)', $normalizedCss);
 });
 
 test('long admin editors expose a fixed save bar without covering their content', function (): void {

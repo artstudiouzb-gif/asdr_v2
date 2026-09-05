@@ -7,6 +7,9 @@ use App\Core\DatabaseDoctor;
 use App\Core\MigrationRunner;
 
 test('MigrationRunner: status() и pendingCount() возвращают корректные структуры', function (): void {
+    if (!in_array('sqlite', PDO::getAvailableDrivers(), true)) {
+        skip_test('sqlite driver is not installed');
+    }
     $tempDir = sys_get_temp_dir() . '/asdr_test_migrations_' . bin2hex(random_bytes(6));
     mkdir($tempDir, 0777, true);
 
@@ -29,6 +32,9 @@ test('MigrationRunner: status() и pendingCount() возвращают корр�
 });
 
 test('DatabaseDoctor: diagnose() возвращает структурированный отчёт о здоровье БД', function (): void {
+    if (!in_array('sqlite', PDO::getAvailableDrivers(), true)) {
+        skip_test('sqlite driver is not installed');
+    }
     $pdo = new PDO('sqlite::memory:');
     $report = DatabaseDoctor::diagnose($pdo, APP_ROOT . '/database/schema.sql', APP_ROOT . '/database/migrations');
 

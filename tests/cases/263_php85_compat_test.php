@@ -40,10 +40,12 @@ function php85_project_sources(): array
                 continue;
             }
             $path = $file->getPathname();
-            if ($path === __FILE__ || str_contains($path, '/vendor/') || str_contains($path, '/node_modules/')) {
+            $normalizedPath = str_replace('\\', '/', $path);
+            if (realpath($path) === realpath(__FILE__) || str_contains($normalizedPath, '/vendor/') || str_contains($normalizedPath, '/node_modules/')) {
                 continue;
             }
-            $cache[str_replace(APP_ROOT . '/', '', $path)] = php_strip_whitespace($path);
+            $normalizedRoot = str_replace('\\', '/', APP_ROOT);
+            $cache[str_replace($normalizedRoot . '/', '', $normalizedPath)] = php_strip_whitespace($path);
         }
     }
     ksort($cache);

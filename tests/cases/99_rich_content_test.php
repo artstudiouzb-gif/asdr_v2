@@ -25,7 +25,7 @@ test('text_image поддерживает безопасный HTML и стар�
     $template = dirname(__DIR__, 2) . '/templates/blocks/text_image.php';
 
     $render = static function (string $text) use ($template): string {
-        $data = ['text' => $text];
+        $data = \App\Core\BlockData\BlockFieldSchema::apply('text_image', ['text' => $text]);
         ob_start();
         require $template;
         return (string) ob_get_clean();

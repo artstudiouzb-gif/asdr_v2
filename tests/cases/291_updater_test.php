@@ -13,10 +13,31 @@ use App\Core\UpdateState;
  * выполняет на сервере чужой код. Каждое из трёх стережётся отдельно.
  */
 
+/** Рекурсивно удаляет каталог без вызова внешней утилиты rm. */
+function updater_rmdir(string $dir): void
+{
+    if (!is_dir($dir)) {
+        return;
+    }
+    $items = scandir($dir) ?: [];
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') {
+            continue;
+        }
+        $path = $dir . '/' . $item;
+        if (is_dir($path)) {
+            updater_rmdir($path);
+        } else {
+            @unlink($path);
+        }
+    }
+    @rmdir($dir);
+}
+
 /** Собирает дерево файлов во временном каталоге. */
 function updater_tree(string $dir, array $files): string
 {
-    exec('rm -rf ' . escapeshellarg($dir));
+    updater_rmdir($dir);
     foreach ($files as $path => $content) {
         $full = $dir . '/' . $path;
         if (!is_dir(dirname($full))) {
@@ -83,7 +104,7 @@ test('План замены сохраняет данные и убирает у
         assert_false(is_file($root . '/app/Core/Old.php'), 'устаревший файл не удалён');
         assert_true(is_file($root . '/app/Core/Brand.php'), 'новый файл не появился');
     } finally {
-        exec('rm -rf ' . escapeshellarg($base));
+        updater_rmdir($base);
     }
 });
 
@@ -266,7 +287,7 @@ test('Архив не той формы к установке не допуск�
         $problems = Updater::validateTree(updater_tree($base . '/bad', $good + ['config/config.php' => 'x']));
         assert_contains('config/config.php', implode(' ', $problems));
     } finally {
-        exec('rm -rf ' . escapeshellarg($base));
+        updater_rmdir($base);
     }
 });
 

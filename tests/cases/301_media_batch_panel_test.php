@@ -104,6 +104,9 @@ test('Раздел производительности отдаёт кнопк�
  */
 
 test('Оригинал с правами только для владельца открывается на чтение', function () {
+    if (DIRECTORY_SEPARATOR === '\\') {
+        skip_test('POSIX permissions are not supported on Windows');
+    }
     // Конфигурацию не подменяем: Config::set() заменяет её целиком, а файлы
     // кейсов идут по порядку строк — соседний тест получил бы пустые пути.
     $root = rtrim((string) \App\Core\Config::get('paths.public_uploads', ''), '/');
@@ -133,6 +136,9 @@ test('Оригинал с правами только для владельца 
 });
 
 test('Пакетная починка прав идёт по курсору и не трогает содержимое', function () {
+    if (DIRECTORY_SEPARATOR === '\\') {
+        skip_test('POSIX permissions are not supported on Windows');
+    }
     $dir = sys_get_temp_dir() . '/perm-' . bin2hex(random_bytes(6));
     mkdir($dir . '/2026', 0700, true);
     $file = $dir . '/2026/photo.jpg';

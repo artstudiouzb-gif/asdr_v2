@@ -178,8 +178,7 @@ test('У каждого типа блока в редакторе есть св�
     // срезать лишнее вместе с закрывающим `endif`: тогда ветка соседнего типа
     // проглатывает следующую — один тип показывает чужие поля, а другой не
     // показывает ничего и теряет содержимое при первом сохранении. Так уже
-    // случилось с «Иконка и текст» и «Карточкой руководителя».
-    $form = (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php');
+    $form = str_replace("\r\n", "\n", (string) file_get_contents(APP_ROOT . '/app/Views/admin/pages/block_form.php'));
 
     $covered = [];
     preg_match_all(
