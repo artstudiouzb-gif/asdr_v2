@@ -61,3 +61,22 @@ test('Новости в колонках (.news-column) и карточки но
     assert_contains('box-shadow: 0 16px 36px rgba(37, 99, 235, .12);', $homeCss);
     assert_contains('transform: translateY(var(--feature-card-hover-lift, -4px));', $homeCss);
 });
+
+test('Ссылки в новостях при наведении меняют цвет без подчёркивания', function () {
+    $newsCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/news-feature.css');
+    $homeCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-home.css');
+
+    // .news-column:hover не должен иметь text-decoration: underline
+    assert_not_contains('.news-column:hover .news-column__title { text-decoration: underline', $newsCss);
+    assert_contains('.news-column:hover .news-column__title { color: var(--color-accent, var(--gov-teal)); text-decoration: none; }', $newsCss);
+    assert_contains('text-decoration: none;', $homeCss);
+});
+
+test('Блок счётчиков не имеет подъёма (translateY) при наведении', function () {
+    $countersCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/counters.css');
+
+    assert_not_contains('.block-counters:hover { transform: translateY', $countersCss);
+    assert_not_contains('.counter:hover { transform: translateY', $countersCss);
+    assert_contains('.block-counters:hover {', $countersCss);
+});
+
