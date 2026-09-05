@@ -962,35 +962,35 @@ final class BlockRenderer
             // Номер из адреса принадлежит открытой вкладке, вторая
             // показывает своё начало, чтобы переключение не открывало её
             // пустой серединой.
-            $pagers = [];
-            $activeTab = '';
-            if ($paginate) {
-                $totals = [];
-                if ($mediaSource === 'videos' || $mediaSource === 'media') {
-                    $totals['video'] = \App\Models\Video::publishedTotal();
-                }
-                if ($mediaSource === 'albums' || $mediaSource === 'media') {
-                    $totals['photo'] = \App\Models\PhotoAlbum::publishedTotal();
-                }
-                // Пустой список вкладкой не становится: адрес с её именем не
-                // должен уводить на раздел, которого посетитель не видит.
-                $kinds = array_values(array_keys(array_filter(
-                    $totals,
-                    static fn (int $total): bool => $total > 0
-                )));
-                $activeTab = BlockPager::currentTab($kinds);
-                foreach ($kinds as $kind) {
-                    $pagers[$kind] = BlockPager::slice(
-                        $totals[$kind],
-                        $limit,
-                        $kind === $activeTab ? null : 1
-                    );
-                }
+            $videoTotal = 0;
+            $photoTotal = 0;
+            if ($paginate && ($mediaSource === 'videos' || $mediaSource === 'media')) {
+                $videoTotal = \App\Models\Video::publishedTotal();
             }
+            if ($paginate && ($mediaSource === 'albums' || $mediaSource === 'media')) {
+                $photoTotal = \App\Models\PhotoAlbum::publishedTotal();
+            }
+
+            // Пустой список вкладкой не становится: адрес с её именем не
+            // должен уводить на раздел, которого посетитель не видит.
+            $kinds = [];
+            if ($videoTotal > 0) {
+                $kinds[] = 'video';
+            }
+            if ($photoTotal > 0) {
+                $kinds[] = 'photo';
+            }
+            $activeTab = $paginate ? BlockPager::currentTab($kinds) : '';
+
+            $videoPager = $videoTotal > 0
+                ? BlockPager::slice($videoTotal, $limit, $activeTab === 'video' ? null : 1)
+                : null;
+            $albumPager = $photoTotal > 0
+                ? BlockPager::slice($photoTotal, $limit, $activeTab === 'photo' ? null : 1)
+                : null;
 
             $items = [];
             if ($mediaSource === 'videos' || $mediaSource === 'media') {
-                $videoPager = $pagers['video'] ?? null;
                 $videos = !$paginate
                     ? \App\Models\Video::forHome($limit, $lang)
                     : ($videoPager === null
@@ -1011,7 +1011,6 @@ final class BlockRenderer
                 }
             }
             if ($mediaSource === 'albums' || $mediaSource === 'media') {
-                $albumPager = $pagers['photo'] ?? null;
                 $albums = !$paginate
                     ? \App\Models\PhotoAlbum::forHome($limit, $lang)
                     : ($albumPager === null
@@ -1032,6 +1031,13 @@ final class BlockRenderer
                 }
             }
             $data['items'] = $items;
+            $pagers = [];
+            if ($videoPager !== null) {
+                $pagers['video'] = $videoPager;
+            }
+            if ($albumPager !== null) {
+                $pagers['photo'] = $albumPager;
+            }
             if ($pagers !== []) {
                 $data['_pagers'] = $pagers;
                 $data['_media_tab'] = $activeTab;
