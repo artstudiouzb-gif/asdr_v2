@@ -13,11 +13,11 @@
       "/assets/css/public-editorial-pages.css",
       "/assets/css/public-home.css"
     ],
-    "sourceSha256": "cd4a33448bf62e49c844c0e95e4aa4c80164040a1e243efefe886eec77409862",
-    "sha256": "bdb32e26116e0530281e3ad9bb1a8ce24048cfad5ad89015ea3e207bed89c8c0",
-    "raw": 400043,
-    "gzip": 67041,
-    "brotli": 52113
+    "sourceSha256": "71261736e7666c599c30c7dd844b2b1535b08690d701c2ad8f7e232446972c52",
+    "sha256": "af3098d406706ec9289d20c020fc706fd69e734e9cf0eb71ab87e13a70336ad7",
+    "raw": 400458,
+    "gzip": 67096,
+    "brotli": 52163
   },
   "js": {
     "path": "/assets/js/public.min.js",
@@ -67,11 +67,11 @@
     },
     "/assets/css/blocks/counters.css": {
       "path": "/assets/css/blocks/counters.min.css",
-      "sourceSha256": "91b33dd6838f89abfcabb70473f547f7c3b5a0dd066963beb27064bf16a62827",
-      "sha256": "099a6479d32ba79b2a837ceaad004898e889136ec395ea4fe6510988692ba8b0",
-      "raw": 8141,
-      "gzip": 1984,
-      "brotli": 1692
+      "sourceSha256": "83b347d1675fa12116f78d767cd8d1055c9802f8e0f602aeab6463eb0a9b332a",
+      "sha256": "291a16fcffec15382481226512686ed0843a0ae9fddfd7497700e43d5c195e42",
+      "raw": 8004,
+      "gzip": 1965,
+      "brotli": 1675
     },
     "/assets/css/blocks/divider.css": {
       "path": "/assets/css/blocks/divider.min.css",
@@ -139,11 +139,11 @@
     },
     "/assets/css/blocks/news-feature.css": {
       "path": "/assets/css/blocks/news-feature.min.css",
-      "sourceSha256": "3315a451edb56db1f1ca29a228129a4c527a42284e323eaa9b511cb55da6b0b5",
-      "sha256": "6bd068a66679ab84f49088f9450789afb398fd728c1223b74ff3ddf48e63c9ff",
-      "raw": 9666,
-      "gzip": 2202,
-      "brotli": 1893
+      "sourceSha256": "04141435157b46f8c1c55f92b3167780f01c5c40e121a97248a6f242a2f972e4",
+      "sha256": "9dbd7aab8157e9ee32305e24163ae8df59d41aea1e00c02f5be57cbc77554bed",
+      "raw": 10072,
+      "gzip": 2236,
+      "brotli": 1920
     },
     "/assets/css/blocks/org-structure.css": {
       "path": "/assets/css/blocks/org-structure.min.css",
