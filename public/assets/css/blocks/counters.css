@@ -37,21 +37,14 @@
 .rich-lightbox-counter { font-size: var(--step--2); font-weight: 700; color: rgba(255, 255, 255, 0.85); letter-spacing: 0.05em; }
 
 /* ==========================================================================
-   Статичные размеры заголовков (Дизайн → Типографика → «Статичные»).
-   Плавающие clamp(min, Nvw, max) заменяются фиксированным размером (max)
-   на десктопе и min на узких экранах — «спокойная» типографика без
-   непрерывного масштабирования по ширине. Тело body получает класс
-   .design-type-static из DesignSettings::bodyClasses().
+   Размеры заголовков: фиксированный размер на десктопе и меньший на узких
+   экранах — «спокойная» типографика без непрерывного масштабирования по
+   ширине. Прежде эти правила висели на классе .design-type-static, то есть
+   на настройке «Масштаб типографики»; у неё не было второго состояния
+   (варианта «Плавающие» в CSS не существовало), и настройка удалена.
    ========================================================================== */
-body.design-type-static .counter__value,
-body.design-type-static .counter__suffix { font-size: var(--step-8); }
 
-/* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
-   чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем). */
-@media (max-width: 640px) {
-    body.design-type-static .counter__value,
-    body.design-type-static .counter__suffix { font-size: var(--step-5); }
-}
+
 
 
 /* ============================================================================
@@ -226,7 +219,7 @@ body.design-type-static .counter__suffix { font-size: var(--step-8); }
 .counter__value, .counter__suffix {
     font-family: var(--font-heading, var(--font-family));
     font-weight: var(--heading-font-weight, 800);
-    font-size: clamp(var(--step-6), 3.5vw, var(--step-8));
+    font-size: var(--step-8);
     /* Сплошной цвет вместо градиента: градиент по тексту перекрывал «Цвет
        текста» блока — что бы редактор ни выбрал, цифры оставались прежними. */
     color: var(--counters-text, var(--gov-title));
@@ -328,3 +321,17 @@ body.design-type-static .counter__suffix { font-size: var(--step-8); }
    встать вровень с остальными блоками страницы. */
 .block-counters--panel-none.block-counters--row .counter:first-child { padding-left: 0; }
 .block-counters--panel-none.block-counters--row .counter:last-child { padding-right: 0; }
+
+/* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
+   чтобы не переполнять строку.
+
+   `body[class]` — не украшение, а вес селектора: «Дизайн» печатает точные
+   размеры переменными (`--font-size-*`), и правила ниже читают их через
+   `var(...)`. Раньше вес давал режимный класс `design-type-static` на `<body>`
+   (два класса против одного); класса больше нет, а `[class]` даёт ровно
+   тот же вес — классы «Дизайна» у `<body>` есть всегда. Блок обязан
+   оставаться последним в файле. */
+@media (max-width: 640px) {
+    body[class] .counter__value,
+    body[class] .counter__suffix { font-size: var(--step-5); }
+}

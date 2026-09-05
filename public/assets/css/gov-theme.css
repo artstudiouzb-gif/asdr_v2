@@ -2395,80 +2395,79 @@ body.design-title-fade .is-title-reveal {
         -webkit-text-fill-color: currentColor;
     }
 }
-:where(body.design-type-static) h1, :where(body.design-type-static) .h1 { font-size: var(--font-size-h1, var(--step-8)); }
-:where(body.design-type-static) h2, :where(body.design-type-static) .h2 { font-size: var(--font-size-h2, var(--step-6)); }
-:where(body.design-type-static) h3, :where(body.design-type-static) .h3 { font-size: var(--font-size-h3, var(--step-4)); }
-:where(body.design-type-static) h4, :where(body.design-type-static) .h4 { font-size: var(--font-size-h4, var(--step-2)); }
-:where(body.design-type-static) h5, :where(body.design-type-static) .h5 { font-size: var(--font-size-h5, var(--step-1)); }
-:where(body.design-type-static) h6, :where(body.design-type-static) .h6 { font-size: var(--font-size-h6, var(--step-0)); }
-body.design-type-static .block-hero--media .block-hero__title { font-size: var(--font-size-h1, var(--step-10)); }
-body.design-type-static .block-hero--media .block-hero__subtitle { font-size: var(--font-size-lead, var(--step-0)); }
-body.design-type-static .block-hero__title { font-size: var(--font-size-h1, var(--step-10)); }
-body.design-type-static .block-hero__subtitle { font-size: var(--font-size-lead, var(--step-0)); }
-body.design-type-static .section-head__title { font-size: var(--font-size-h2, var(--step-6)); }
-body.design-type-static .timeline-cta__title { font-size: var(--font-size-h3, var(--step-5)); }
-body.design-type-static .profile__name { font-size: var(--font-size-h1, var(--step-8)); }
-body.design-type-static .block-featband__title { font-size: var(--font-size-h2, var(--step-6)); }
-body.design-type-static .block-banner--light .block-banner__title { font-size: var(--font-size-h2, var(--step-8)); }
-body.design-type-static .block-banner__title { font-size: var(--font-size-h2, var(--step-8)); }
-body.design-type-static .textimage__title,
-body.design-type-static .block-map__title { font-size: var(--font-size-h2, var(--step-5)); }
-body.design-type-static .listing__title,
-body.design-type-static .content-pagehead__title { font-size: var(--font-size-h1, var(--step-8)); }
-body.design-type-static .newslist-lead__title { font-size: var(--font-size-h3, var(--step-5)); }
-body.design-type-static .projdetail__title { font-size: var(--font-size-h1, var(--step-8)); }
-body.design-type-static .block-cta h2 { font-size: var(--font-size-h2, var(--step-9)); }
-body.design-type-static .cms-columns__col .cms-block--cta .block-cta h2 { font-size: var(--font-size-card-title, var(--step-4)); }
-body.design-type-static .site-content > section.cms-block--cta:first-of-type .block-cta h2,
-body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 { font-size: var(--font-size-h1, var(--step-10)); }
-body.design-type-static .site-content > section.cms-block--cta:first-of-type .block-cta p,
-body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta p { font-size: var(--font-size-lead, var(--step-2)); }
-body.design-type-static .block-news__title { font-size: var(--font-size-h2, var(--step-6)); }
-body.design-type-static .content-list__head h1 { font-size: var(--font-size-h1, var(--step-8)); }
-body.design-type-static .news-index__title { font-size: var(--font-size-h1, var(--step-8)); }
-body.design-type-static .news-single h1 { font-size: var(--font-size-h1, var(--step-8)); }
-body.design-type-static .block-contact-cards__title { font-size: var(--font-size-h2, var(--step-6)); }
-body.design-type-static .block-categories__title { font-size: var(--font-size-h2, var(--step-6)); }
-body.design-type-static .block-counters__title,
-body.design-type-static .block-team__title,
-body.design-type-static .block-projects__title,
-body.design-type-static .block-faq__title,
-body.design-type-static .section-title { font-size: var(--font-size-h2, var(--step-6)); }
+h1, .h1 { font-size: var(--font-size-h1, var(--step-8)); }
+h2, .h2 { font-size: var(--font-size-h2, var(--step-6)); }
+h3, .h3 { font-size: var(--font-size-h3, var(--step-4)); }
+h4, .h4 { font-size: var(--font-size-h4, var(--step-2)); }
+h5, .h5 { font-size: var(--font-size-h5, var(--step-1)); }
+h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
+.block-hero__title { font-size: var(--font-size-h1, var(--step-10)); }
+.block-banner__title { font-size: var(--font-size-h2, var(--step-8)); }
+.textimage__title,
+.block-map__title { font-size: var(--font-size-h2, var(--step-5)); }
+.listing__title,
+.content-pagehead__title { font-size: var(--font-size-h1, var(--step-8)); }
+.block-cta h2 { font-size: var(--font-size-h2, var(--step-9)); }
+.cms-columns__col .cms-block--cta .block-cta h2 { font-size: var(--font-size-card-title, var(--step-4)); }
+.site-content > section.cms-block--cta:first-of-type .block-cta h2,
+.page-blocks > section.cms-block--cta:first-of-type .block-cta h2 { font-size: var(--font-size-h1, var(--step-10)); }
+.site-content > section.cms-block--cta:first-of-type .block-cta p,
+.page-blocks > section.cms-block--cta:first-of-type .block-cta p { font-size: var(--font-size-lead, var(--step-2)); }
+.block-news__title { font-size: var(--font-size-h2, var(--step-6)); }
+.content-list__head h1 { font-size: var(--font-size-h1, var(--step-8)); }
+.news-index__title { font-size: var(--font-size-h1, var(--step-8)); }
+.news-single h1 { font-size: var(--font-size-h1, var(--step-8)); }
+.block-contact-cards__title { font-size: var(--font-size-h2, var(--step-6)); }
+.block-categories__title { font-size: var(--font-size-h2, var(--step-6)); }
+.block-counters__title,
+.block-team__title,
+.block-projects__title,
+.block-faq__title,
+.section-title { font-size: var(--font-size-h2, var(--step-6)); }
 
 /* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
-   чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем). */
+   чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем).
+
+   `body[class]` — не украшение, а вес селектора. «Дизайн» печатает точные
+   размеры заголовков переменными (`--font-size-h1` и далее), и правила
+   редакционных страниц читают их через `var(...)`: без довеса телефон
+   получил бы десктопные 42px в заголовке страницы. Раньше вес давал
+   режимный класс `design-type-static` на `<body>` (два класса против одного);
+   класса больше нет, а `[class]` даёт ровно тот же вес — классы «Дизайна»
+   у `<body>` есть всегда. Голые теги оставлены без довеса: с ним они
+   перебивали компоненты со своим размером (заголовок панели настроек). */
 @media (max-width: 640px) {
-    :where(body.design-type-static) h1, :where(body.design-type-static) .h1 { font-size: var(--step-5); }
-    :where(body.design-type-static) h2, :where(body.design-type-static) .h2 { font-size: var(--step-3); }
-    :where(body.design-type-static) h3, :where(body.design-type-static) .h3 { font-size: var(--step-2); }
-    body.design-type-static .block-hero--media .block-hero__title { font-size: var(--step-6); }
-    body.design-type-static .block-hero__title { font-size: var(--step-6); }
-    body.design-type-static .section-head__title { font-size: var(--step-4); }
-    body.design-type-static .timeline-cta__title { font-size: var(--step-2); }
-    body.design-type-static .profile__name { font-size: var(--step-5); }
-    body.design-type-static .block-featband__title { font-size: var(--step-4); }
-    body.design-type-static .block-banner--light .block-banner__title { font-size: var(--step-5); }
-    body.design-type-static .block-banner__title { font-size: var(--step-4); }
-    body.design-type-static .textimage__title,
-    body.design-type-static .block-map__title { font-size: var(--step-3); }
-    body.design-type-static .listing__title,
-    body.design-type-static .content-pagehead__title { font-size: var(--step-5); }
-    body.design-type-static .newslist-lead__title { font-size: var(--step-2); }
-    body.design-type-static .projdetail__title { font-size: var(--step-5); }
-    body.design-type-static .block-cta h2 { font-size: var(--step-5); }
-    body.design-type-static .site-content > section.cms-block--cta:first-of-type .block-cta h2,
-    body.design-type-static .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 { font-size: var(--step-6); }
-    body.design-type-static .block-news__title { font-size: var(--step-4); }
-    body.design-type-static .content-list__head h1 { font-size: var(--step-5); }
-    body.design-type-static .news-index__title { font-size: var(--step-5); }
-    body.design-type-static .news-single h1 { font-size: var(--step-5); }
-    body.design-type-static .block-contact-cards__title { font-size: var(--step-4); }
-    body.design-type-static .block-categories__title { font-size: var(--step-3); }
-    body.design-type-static .block-counters__title,
-    body.design-type-static .block-team__title,
-    body.design-type-static .block-projects__title,
-    body.design-type-static .block-faq__title,
-    body.design-type-static .section-title { font-size: var(--step-4); }
+    h1, .h1 { font-size: var(--step-5); }
+    h2, .h2 { font-size: var(--step-3); }
+    h3, .h3 { font-size: var(--step-2); }
+    body[class] .block-hero--media .block-hero__title { font-size: var(--step-6); }
+    body[class] .block-hero__title { font-size: var(--step-6); }
+    body[class] .section-head__title { font-size: var(--step-4); }
+    body[class] .timeline-cta__title { font-size: var(--step-2); }
+    body[class] .profile__name { font-size: var(--step-5); }
+    body[class] .block-featband__title { font-size: var(--step-4); }
+    body[class] .block-banner--light .block-banner__title { font-size: var(--step-5); }
+    body[class] .block-banner__title { font-size: var(--step-4); }
+    body[class] .textimage__title,
+    body[class] .block-map__title { font-size: var(--step-3); }
+    body[class] .listing__title,
+    body[class] .content-pagehead__title { font-size: var(--step-5); }
+    body[class] .newslist-lead__title { font-size: var(--step-2); }
+    body[class] .projdetail__title { font-size: var(--step-5); }
+    body[class] .block-cta h2 { font-size: var(--step-5); }
+    body[class] .site-content > section.cms-block--cta:first-of-type .block-cta h2,
+    body[class] .page-blocks > section.cms-block--cta:first-of-type .block-cta h2 { font-size: var(--step-6); }
+    body[class] .block-news__title { font-size: var(--step-4); }
+    body[class] .content-list__head h1 { font-size: var(--step-5); }
+    body[class] .news-index__title { font-size: var(--step-5); }
+    body[class] .news-single h1 { font-size: var(--step-5); }
+    body[class] .block-contact-cards__title { font-size: var(--step-4); }
+    body[class] .block-categories__title { font-size: var(--step-3); }
+    body[class] .block-counters__title,
+    body[class] .block-team__title,
+    body[class] .block-projects__title,
+    body[class] .block-faq__title,
+    body[class] .section-title { font-size: var(--step-4); }
 }
 
 
@@ -3132,7 +3131,7 @@ body.design-type-static .section-title { font-size: var(--font-size-h2, var(--st
     background: var(--gov-surface);
 }
 .newslist__date { color: var(--gov-muted); font-size: var(--step--3); font-weight: 600; }
-.newslist-lead__title { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: var(--font-size-h3, var(--step-2)); color: var(--gov-title); line-height: 1.3; margin: 0; }
+.newslist-lead__title { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: var(--step-5); color: var(--gov-title); line-height: 1.3; margin: 0; }
 .newslist-lead__excerpt { color: var(--gov-muted); line-height: 1.5; font-size: var(--step--2); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .newslist-lead:hover .newslist-lead__title { color: var(--color-accent, var(--gov-teal)); }
 
@@ -4467,7 +4466,7 @@ span.imgcard__media::after {
 .timeline-cta { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--timeline-cta-image, var(--gov-navy)) center/cover no-repeat; display: flex; align-items: flex-start; min-height: 320px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .timeline-cta__overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(15,33,60,.92) 25%, rgba(15,33,60,.55) 100%); }
 .timeline-cta__body { position: relative; padding: 36px; color: #fff; display: flex; flex-direction: column; gap: 14px; max-width: 480px; }
-.timeline-cta__title { font-size: var(--font-size-h3, var(--step-4)); margin: 0; color: #fff; }
+.timeline-cta__title { font-size: var(--step-5); margin: 0; color: #fff; } /* размер держался режимным классом «Точная шкала»; настройки больше нет */
 .timeline-cta__text { margin: 0; color: rgba(255,255,255,.85); line-height: var(--base-line-height, 1.55); }
 .timeline-cta__button { display: inline-block; align-self: flex-start; margin-top: 8px; padding: 12px 22px; border: 1px solid rgba(255,255,255,.7); border-radius: var(--btn-radius, 8px); color: #fff; font-weight: 700; font-size: var(--step--2); text-decoration: none; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
 .timeline-cta__button:hover { background: var(--gov-teal); border-color: var(--gov-teal); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(23,153,155, 0.3); }

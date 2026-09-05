@@ -237,17 +237,17 @@ a.orgstruct__head:hover .orgstruct__head-name { color: color-mix(in srgb, var(--
 .orgstruct__footnote { margin-top: 22px; color: var(--gov-muted, #475569); font-size: clamp(var(--step--4), calc(var(--org-font) * 0.85), var(--step--2)); }
 
 /* --- Оптимизированный статичный режим (Static Design Mode) --- */
-body.design-type-static .orgstruct {
+.orgstruct {
     --org-font: 16px;
 }
-body.design-type-static .orgstruct__head-role { font-size: 12px; line-height: 1.3; }
-body.design-type-static .orgstruct__head-name { font-size: 20px; line-height: 1.25; }
-body.design-type-static .orgstruct__aside-item { font-size: 13.5px; line-height: 1.4; }
-body.design-type-static .orgstruct__deputy-role { font-size: 15px; line-height: 1.35; }
-body.design-type-static .orgstruct__deputy-name { font-size: 13px; line-height: 1.35; }
-body.design-type-static .orgstruct__unit { font-size: 13.5px; line-height: 1.45; }
-body.design-type-static .orgstruct__subunits { font-size: 12.5px; line-height: 1.4; }
-body.design-type-static .orgstruct__note { font-size: 13px; line-height: 1.5; }
+.orgstruct__head-role { font-size: 12px; line-height: 1.3; }
+.orgstruct__head-name { font-size: 20px; line-height: 1.25; }
+.orgstruct__aside-item { font-size: 13.5px; line-height: 1.4; }
+.orgstruct__deputy-role { font-size: 15px; line-height: 1.35; }
+.orgstruct__deputy-name { font-size: 13px; line-height: 1.35; }
+.orgstruct__unit { font-size: 13.5px; line-height: 1.45; }
+.orgstruct__subunits { font-size: 12.5px; line-height: 1.4; }
+.orgstruct__note { font-size: 13px; line-height: 1.5; }
 
 /* Сворачивание подразделений включается в настройках блока: тогда кнопка
    видна на любой ширине, а не только на телефоне. */

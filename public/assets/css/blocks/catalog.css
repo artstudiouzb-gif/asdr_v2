@@ -4,13 +4,8 @@
 /* Анимация фокуса для фильтров, поиска и полей ввода */
 .catlist-toolbar__search input, .catlist-toolbar__sort { transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease; }
 .catlist-toolbar__search input:focus, .catlist-toolbar__search input:focus-visible, .catlist-toolbar__sort:focus, .catlist-toolbar__sort:focus-visible { border-color: var(--color-accent, var(--gov-teal)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent); outline: none; }
-body.design-type-static .catdetail__title { font-size: var(--font-size-h1, var(--step-8)); }
 
-/* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
-   чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем). */
-@media (max-width: 640px) {
-    body.design-type-static .catdetail__title { font-size: var(--step-5); }
-}
+
 
 
 /* ===== Каталог (вакансии, тендеры, документы, мероприятия) ===== */
@@ -237,7 +232,7 @@ body.design-catalog-list .catcard { display: flex; flex-direction: row; align-it
 .catdetail { display: flex; flex-direction: column; gap: clamp(24px, 3.4vw, 40px); padding-block: 10px clamp(40px, 5vw, 64px); }
 .catdetail__head { max-width: 900px; }
 .catdetail__eyebrow { display: inline-block; color: var(--gov-teal-text); font-size: var(--step--3); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-.catdetail__title { margin: 12px 0 10px; font-size: clamp(var(--step-5), 3vw, var(--step-8)); line-height: 1.15; color: var(--section-title-fg); }
+.catdetail__title { margin: 12px 0 10px; font-size: var(--step-8); line-height: 1.15; color: var(--section-title-fg); }
 .catdetail__date { color: var(--gov-muted); font-size: var(--step--2); }
 .catdetail__event-banner { width: 100%; margin: 0; overflow: hidden; border-radius: clamp(14px, 2vw, 22px); aspect-ratio: 16 / 7; background: var(--gov-bg); box-shadow: var(--card-shadow); }
 .catdetail__event-banner picture { display: block; width: 100%; height: 100%; }
@@ -265,4 +260,17 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 .catcard--with-image .catcard__event-media {
     width: calc(100% + 48px);
     margin-inline: -24px;
+}
+
+/* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
+   чтобы не переполнять строку.
+
+   `body[class]` — не украшение, а вес селектора: «Дизайн» печатает точные
+   размеры переменными (`--font-size-*`), и правила ниже читают их через
+   `var(...)`. Раньше вес давал режимный класс `design-type-static` на `<body>`
+   (два класса против одного); класса больше нет, а `[class]` даёт ровно
+   тот же вес — классы «Дизайна» у `<body>` есть всегда. Блок обязан
+   оставаться последним в файле. */
+@media (max-width: 640px) {
+    body[class] .catdetail__title { font-size: var(--step-5); }
 }
