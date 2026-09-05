@@ -12,7 +12,7 @@
     var selector = '.block-newsfeat--mosaic .newsfeat-lead, '
         + '.block-newsfeat--mosaic .newsfeat-mini, '
         + '.block-newsfeat--mosaic .newsfeat-text, '
-        + '.newslist-lead, .newslist-grid .relnews-card';
+        + '.newslist-lead, .newslist-grid .relnews-card, .news-column';
 
     document.addEventListener('mousemove', function (event) {
         lastEvent = event;

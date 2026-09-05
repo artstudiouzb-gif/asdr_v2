@@ -14,6 +14,7 @@ const cssSources = [
     'public/assets/css/a11y.css',
     'public/assets/css/public-layout-polish.css',
     'public/assets/css/public-editorial-pages.css',
+    'public/assets/css/public-home.css',
 ];
 
 const jsSources = [

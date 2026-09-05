@@ -759,6 +759,7 @@ $pageCssUrls = \App\Core\CustomAssetHelper::resolveCssUrls((string) $page['custo
 </head>
 <?php
 $bodyClass = trim($designBodyClass
+    . (!empty($isHome) && empty($hideChrome) ? ' site-home' : '')
     . (!empty($previewNotice) ? ' is-preview' : '')
     . (\App\Core\AppToolbar::isVisible() ? ' has-admin-bar' : ''));
 ?>

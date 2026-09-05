@@ -10,13 +10,14 @@
       "/assets/css/rich-content.css",
       "/assets/css/a11y.css",
       "/assets/css/public-layout-polish.css",
-      "/assets/css/public-editorial-pages.css"
+      "/assets/css/public-editorial-pages.css",
+      "/assets/css/public-home.css"
     ],
-    "sourceSha256": "a9bcc2d9cb2cfaf326452c8d85bea5814a4c72a72e6600703614d9b94c31923c",
-    "sha256": "8639f68925b8becc440bd8c71a7661d3d1eb83a92d118287d136ee186972d277",
-    "raw": 397645,
-    "gzip": 66450,
-    "brotli": 51772
+    "sourceSha256": "23e71928f6f3fcac5d1f0dc4be97265b6443801d68208ff20b4cc0a193f7b7dc",
+    "sha256": "2a949ae734cef3551fab377c32582f4fb7a7918754e8e210c7123c46afdea788",
+    "raw": 401212,
+    "gzip": 67152,
+    "brotli": 52314
   },
   "js": {
     "path": "/assets/js/public.min.js",
@@ -138,11 +139,11 @@
     },
     "/assets/css/blocks/news-feature.css": {
       "path": "/assets/css/blocks/news-feature.min.css",
-      "sourceSha256": "9b33eda667e574da2841d505362a76fb67d3b2e496ed77f23c77e3cb8e4b3540",
-      "sha256": "c2ecf1b56c6bd7ab42e0a012aabea15623c17b288c76c979f454e5d14cd446ad",
-      "raw": 7711,
-      "gzip": 1770,
-      "brotli": 1515
+      "sourceSha256": "ab20e9393f90d3c35e47cf22d941b803866c7a9cdbb460a01a0284dd48e443d1",
+      "sha256": "6fd0ab1ab65afde7aaaff1aaef8853ba0e40c9a6896500f988ba91239687ca49",
+      "raw": 10144,
+      "gzip": 2253,
+      "brotli": 1940
     },
     "/assets/css/blocks/org-structure.css": {
       "path": "/assets/css/blocks/org-structure.min.css",
@@ -194,11 +195,11 @@
     },
     "/assets/js/blocks/news_feature.js": {
       "path": "/assets/js/blocks/news_feature.min.js",
-      "sourceSha256": "e55cb236f93d541f9b653a77d397cbcb31c1ddbe03842298e662b059e6fd7958",
-      "sha256": "552b4993051ddfd5215d3fe8f55220225cac24a3bf4348493be9df9f5163478a",
-      "raw": 769,
-      "gzip": 428,
-      "brotli": 354
+      "sourceSha256": "edbd227158e25b5cd571a146c81cf25a73d1c1cd8832a9e3f3e2fb3e57474b98",
+      "sha256": "1ee7c442b01a66a176a3d8b378cf8d280138d6d537f70cdc2603d014a779c56e",
+      "raw": 783,
+      "gzip": 435,
+      "brotli": 356
     },
     "/assets/js/blocks/org_structure.js": {
       "path": "/assets/js/blocks/org_structure.min.js",
