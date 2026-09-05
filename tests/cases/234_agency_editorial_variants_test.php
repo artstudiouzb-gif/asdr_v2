@@ -172,7 +172,9 @@ test('Профиль руководителя использует адапти�
     assert_contains('.editorial-page__content .profile__info::before', $css, 'между портретом и текстом нужен редакционный акцент');
     assert_not_contains('.editorial-page__content .profile__media::before', $css, 'у портрета не должно быть отдельной цветной псевдотени');
     assert_contains('box-shadow: var(--page-soft-shadow);', $css, 'портрет должен использовать общую тень внутренних страниц');
-    assert_contains(".profile__photo {\n    aspect-ratio: 4 / 4.8;\n    border-radius: 16px;\n    box-shadow: var(--page-soft-shadow);", $layoutCss);
+    // Радиус портрета берётся из настройки «Скругление углов» (тест 309):
+    // жёсткое число здесь означало бы, что ползунок в «Дизайне» его не двигает.
+    assert_contains(".profile__photo {\n    aspect-ratio: 4 / 4.8;\n    border-radius: var(--radius, 16px);\n    box-shadow: var(--page-soft-shadow);", $layoutCss);
 
     foreach (['bio__text', 'profile__name', 'profile__position', 'profile__text'] as $selector) {
         $matched = preg_match(

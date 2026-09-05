@@ -211,7 +211,12 @@ h1, h2, h3, h4, h5, h6,
     color: var(--gov-title);
     letter-spacing: var(--heading-letter-spacing, -0.02em);
     font-weight: var(--heading-font-weight, 700);
-    line-height: 1.25;
+    /* Настройка «Межстрочный интервал заголовков» доходит только отсюда:
+       тема грузится после базы, и жёсткое число здесь перекрывало
+       var(--heading-line-height) у h1…h6 — замерено, что на всей странице
+       настройку слушал ровно один заголовок из двадцати семи. Соседние
+       свойства (насыщенность, трекинг) переменные уже читали. */
+    line-height: var(--heading-line-height, 1.25);
 }
 :root[data-theme="dark"] h1, :root[data-theme="dark"] h2, :root[data-theme="dark"] h3 { color: var(--gov-ink); }
 a { color: var(--gov-teal); }
