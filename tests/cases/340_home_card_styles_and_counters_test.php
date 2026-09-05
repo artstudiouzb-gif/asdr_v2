@@ -44,3 +44,20 @@ test('Карточки главной страницы подчиняются н
     assert_not_contains('box-shadow: none', $cardBody, 'feature-card должен наследовать --card-shadow');
     assert_not_contains('box-shadow:', $cardBody, 'feature-card не должен жестко задавать тень');
 });
+
+test('Новости в колонках (.news-column) и карточки новостей имеют тень и подъём при наведении', function () {
+    $newsCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/news-feature.css');
+    $homeCss = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-home.css');
+
+    // .news-column включён в список интерактивных карточек с наследованием тени и подъёма
+    assert_contains('.news-column', $newsCss);
+    assert_true(
+        (bool) preg_match('/:is\([^)]*\.news-column[^)]*\):hover/s', $newsCss),
+        '.news-column должен входить в интерактивный :is(...):hover в news-feature.css'
+    );
+
+    // На главной странице новостные карточки имеют hover-подъём и тень
+    assert_contains('.site-home :is(.news-column, .news-card, .newslist-lead, .relnews-card, .newsfeat-lead, .newsfeat-mini):hover', $homeCss);
+    assert_contains('box-shadow: 0 16px 36px rgba(37, 99, 235, .12);', $homeCss);
+    assert_contains('transform: translateY(var(--feature-card-hover-lift, -4px));', $homeCss);
+});
