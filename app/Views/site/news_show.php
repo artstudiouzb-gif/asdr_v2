@@ -23,6 +23,11 @@ $metaTitle = $news['meta_title'] ?: $news['title'];
 $metaDescription = $news['meta_description'] ?: ($news['excerpt'] ?? '');
 $leadHtml = NewsLead::html($news['lead_html'] ?? null, $news['excerpt'] ?? null);
 $ogType = 'article';
+// Даты уходят в article:published_time / article:modified_time. Переменные
+// читает _header.php; пока их никто не задавал, у новостей не было ни одной
+// из двух дат, хотя разметка для них написана.
+$publishedAt = (string) ($news['published_at'] ?? '');
+$modifiedAt = (string) ($news['updated_at'] ?? '');
 $ogImage = News::getCoverImage($news) ?? '';
 
 // Рубрика новости на языке страницы; ссылка ведёт в отфильтрованную ленту.

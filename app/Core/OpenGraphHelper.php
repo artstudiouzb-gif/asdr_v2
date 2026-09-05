@@ -36,6 +36,8 @@ final class OpenGraphHelper
      * Локальные изображения выводятся только после проверки физического
      * файла в public/. Внешние HTTPS URL не запрашиваются во время рендера:
      * такая проверка замедляла бы каждый публичный ответ и создавала SSRF-риск.
+     *
+     * @param list<string> $alternateLangs языки, на которых страница есть
      */
     public static function render(
         string $appUrl,
@@ -45,7 +47,9 @@ final class OpenGraphHelper
         string $currentLang = 'ru',
         string $image = '',
         string $type = 'website',
-        ?string $publishedTime = null
+        ?string $publishedTime = null,
+        ?string $modifiedTime = null,
+        array $alternateLangs = []
     ): string {
         $siteName = Setting::getLocalized(
             'site_name',
@@ -86,6 +90,17 @@ final class OpenGraphHelper
         $html = "\n<!-- Rich Open Graph & Social Cards -->\n";
         $html .= self::meta('property', 'og:site_name', $siteName);
         $html .= self::meta('property', 'og:locale', $locale);
+        // Языковые версии страницы объявляются и здесь: hreflang читает поиск,
+        // og:locale:alternate — соцсети и мессенджеры, которые собирают
+        // карточку ссылки. Список приходит уже отфильтрованным по наличию
+        // перевода, поэтому карточка не обещает страницу, которой нет.
+        foreach ($alternateLangs as $alternateLang) {
+            $alternateLang = (string) $alternateLang;
+            if ($alternateLang === $currentLang || !isset($locales[$alternateLang])) {
+                continue;
+            }
+            $html .= self::meta('property', 'og:locale:alternate', $locales[$alternateLang]);
+        }
         $html .= self::meta('property', 'og:type', $type);
         $html .= self::meta('property', 'og:title', $title);
 
@@ -107,10 +122,17 @@ final class OpenGraphHelper
             $html .= self::meta('property', 'og:image:alt', $title);
         }
 
-        if ($publishedTime !== null && $publishedTime !== '') {
-            $time = strtotime($publishedTime);
-            if ($time !== false) {
-                $html .= self::meta('property', 'article:published_time', date('c', $time));
+        if ($type === 'article') {
+            // ISO-8601 в ташкентском времени: date(strtotime()) считала бы в
+            // таймзоне сервера, а неразобранная дата роняла бы страницу
+            // (см. DateFormatter).
+            $published = DateFormatter::format((string) $publishedTime, 'c');
+            if ($published !== '') {
+                $html .= self::meta('property', 'article:published_time', $published);
+            }
+            $modified = DateFormatter::format((string) $modifiedTime, 'c');
+            if ($modified !== '' && $modified !== $published) {
+                $html .= self::meta('property', 'article:modified_time', $modified);
             }
         }
 

@@ -52,6 +52,13 @@ final class View
         if (self::isPublic($template) && self::wantsCyrillic()) {
             $html = UzCyrillic::html($html);
         }
+        // «Исходный код страницы» — публичное лицо сайта не меньше, чем сама
+        // страница: разметку читают ведомственные проверки, интеграторы и
+        // разработчики. Форматирование двигает только незначимые пробелы,
+        // поэтому применяется и к странице из кэша (см. HtmlFormatter).
+        if (self::isPublic($template) && HtmlFormatter::enabled()) {
+            $html = HtmlFormatter::format($html);
+        }
         PublicResponseCache::apply($template);
         if (PublicResponseCache::sendConditional($html)) {
             return;

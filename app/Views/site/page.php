@@ -7,7 +7,19 @@
 /** @var array|null $sidebar */
 
 $metaTitle = $page['meta_title'] ?: $page['title'];
-$metaDescription = $page['meta_description'] ?? '';
+// Описание страницы: своё поле → лид → первый абзац содержимого. Пустым оно
+// оставаться не должно — именно так главная годами уходила в поиск без
+// <meta name="description">, хотя лид у неё был написан.
+$metaDescription = trim((string) ($page['meta_description'] ?? ''));
+if ($metaDescription === '') {
+    $metaDescription = \App\Core\SeoHelper::clip(
+        trim((string) preg_replace('/\s+/u', ' ', strip_tags((string) ($page['lead'] ?? '')))),
+        200
+    );
+}
+if ($metaDescription === '') {
+    $metaDescription = \App\Core\SeoHelper::autoDescription($content);
+}
 $extraHeadCss = $blockCss;
 $hideChrome = !empty($page['hide_chrome']); // лендинг (группа 6)
 // Флаг страницы «Прозрачная шапка» — активирует режим из конструктора.
