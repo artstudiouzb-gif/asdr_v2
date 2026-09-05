@@ -322,23 +322,6 @@ foreach ($options as $key => $opt) {
             <input type="hidden" name="font_size" value="<?= htmlspecialchars((string) ($values['font_size'] ?? 'md'), ENT_QUOTES) ?>">
             <input type="hidden" name="line_height" value="<?= htmlspecialchars((string) ($values['line_height'] ?? 'normal'), ENT_QUOTES) ?>">
 
-            <?php $typeScaleOption = $options['type_scale']; ?>
-            <div class="design-opt">
-                <div class="design-opt__label">
-                    <span><?= htmlspecialchars($typeScaleOption['label'], ENT_QUOTES) ?></span>
-                    <small><?= htmlspecialchars($typeScaleOption['hint'], ENT_QUOTES) ?></small>
-                </div>
-                <div class="design-opt__choices">
-                    <?php foreach ($typeScaleOption['choices'] as $val => $label): ?>
-                        <label class="design-card">
-                            <input type="radio" name="type_scale" value="<?= htmlspecialchars($val, ENT_QUOTES) ?>"
-                                   <?= ($values['type_scale'] ?? 'fluid') === $val ? 'checked' : '' ?> data-design-preview-field>
-                            <span class="design-card__label"><?= htmlspecialchars($label, ENT_QUOTES) ?></span>
-                        </label>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-
             <div class="design-manual u-inline-7dde5e56b3">
                 <div class="design-manual__head">
                     <strong>Семейства шрифтов</strong>

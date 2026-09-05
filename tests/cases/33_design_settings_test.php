@@ -85,16 +85,6 @@ test('DesignSettings::bodyClasses включает глобальные комп
     assert_not_contains('design-footer-minimal', $min);
 });
 
-test('DesignSettings: масштаб типографики — статичный режим даёт класс, плавающий нет', function () {
-    assert_same('static', DesignSettings::sanitize('type_scale', 'static'));
-    assert_same('static', DesignSettings::sanitize('type_scale', 'bogus')); // default — статичный
-
-    $base = DesignSettings::PRESETS['classic']['values'];
-    assert_contains('design-type-static', DesignSettings::bodyClasses($base)); // дефолт статичный
-    assert_contains('design-type-static', DesignSettings::bodyClasses(['type_scale' => 'static'] + $base));
-    assert_not_contains('design-type-static', DesignSettings::bodyClasses(['type_scale' => 'fluid'] + $base));
-});
-
 test('DesignSettings: кнопка «Наверх» — тумблер даёт/убирает класс design-scrolltop', function () {
     assert_same('on', DesignSettings::sanitize('scroll_top', 'on'));
     assert_same('on', DesignSettings::sanitize('scroll_top', 'bogus')); // default — включена
@@ -191,7 +181,7 @@ test('Пользовательские конфигурации: сохрани�
 test('Частичное сохранение не сбрасывает отсутствующие настройки дизайна (БД)', function () {
     ensure_test_db();
     reset_design_state();
-    \App\Models\Setting::set('design_type_scale', 'static');
+    \App\Models\Setting::set('design_radius', 'large');
     \App\Models\Setting::set('design_heading_line_height', 'relaxed');
 
     DesignSettings::save([
@@ -200,7 +190,7 @@ test('Частичное сохранение не сбрасывает отсу
     ]);
 
     $current = DesignSettings::current();
-    assert_same('static', $current['type_scale']);
+    assert_same('large', $current['radius']);
     assert_same('relaxed', $current['heading_line_height']);
     reset_design_state();
 });

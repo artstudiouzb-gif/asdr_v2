@@ -118,7 +118,7 @@ test('Рукописный шрифт — отдельный каталог с �
 
 test('Проявление заголовков: класс на body, правила в теме и только через JS', function (): void {
     $base = ['catalog_layout' => 'list', 'sidebar_position' => 'fixed', 'card_style' => 'flat',
-        'detail_layout' => 'sidebar', 'type_scale' => 'static', 'scroll_top' => 'on', 'title_mark' => 'accent'];
+        'detail_layout' => 'sidebar', 'scroll_top' => 'on', 'title_mark' => 'accent'];
 
     // Умолчание — без анимации: включать её всем без спроса нельзя.
     assert_not_contains('design-title-', DesignSettings::bodyClasses($base));

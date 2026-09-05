@@ -5,8 +5,10 @@ declare(strict_types=1);
 test('дизайн сайта показывает все глобальные поля и доступные вкладки', function (): void {
     $view = (string) file_get_contents(APP_ROOT . '/app/Views/admin/design/index.php');
 
-    assert_contains('name="type_scale"', $view);
     assert_contains('name="heading_line_height"', $view);
+    // Настройки «Масштаб типографики» больше нет: у неё не было второго
+    // состояния — варианта «Плавающие» в CSS не существовало (тест 310).
+    assert_not_contains('name="type_scale"', $view);
     assert_contains('data-design-tabs', $view);
     assert_contains('role="tabpanel"', $view);
     assert_contains('aria-selected="true"', $view);
