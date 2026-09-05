@@ -761,14 +761,43 @@ final class DesignSettings
         return $colors;
     }
 
-    /** @return array{space_small:string,space_premium:string,space_max:string} */
+    /**
+     * Вертикальный ритм секций.
+     *
+     * Набор умолчаний выбирает «Плотность секций». До этого настройка не
+     * действовала вовсе: каждый блок выводится с классом
+     * `cms-block--space-<пресет>`, а тот берёт отступ из `--space-*`, минуя
+     * `--section-pad`, куда плотность и печаталась. Замерено обходом страницы:
+     * переключение «Компактно» → «Просторно» не меняло ни одного пикселя —
+     * редактор двигал настройку, а страница оставалась прежней.
+     *
+     * Явные значения из полей «Отступы» по-прежнему главнее: плотность задаёт
+     * умолчание, а не переписывает выбор редактора. Набор «Стандарт» совпадает
+     * с прежними значениями, поэтому сайт без этой настройки не меняется.
+     *
+     * @return array{space_small:string,space_premium:string,space_max:string}
+     */
     public static function semanticSpacings(): array
     {
-        $defaults = [
-            'space_small' => 'clamp(14px, 2.5vw, 24px)',
-            'space_premium' => 'clamp(28px, 4vw, 56px)',
-            'space_max' => 'clamp(40px, 5vw, 76px)',
+        $byDensity = [
+            'compact' => [
+                'space_small' => 'clamp(10px, 1.8vw, 16px)',
+                'space_premium' => 'clamp(18px, 2.6vw, 36px)',
+                'space_max' => 'clamp(26px, 3.4vw, 50px)',
+            ],
+            'standard' => [
+                'space_small' => 'clamp(14px, 2.5vw, 24px)',
+                'space_premium' => 'clamp(28px, 4vw, 56px)',
+                'space_max' => 'clamp(40px, 5vw, 76px)',
+            ],
+            'spacious' => [
+                'space_small' => 'clamp(18px, 3.2vw, 32px)',
+                'space_premium' => 'clamp(38px, 5.4vw, 76px)',
+                'space_max' => 'clamp(54px, 6.8vw, 104px)',
+            ],
         ];
+        $density = (string) Setting::get('design_density', 'standard');
+        $defaults = $byDensity[$density] ?? $byDensity['standard'];
         $spacings = [];
         foreach ($defaults as $key => $fallback) {
             $spacings[$key] = SettingsValidator::safeCssValue(

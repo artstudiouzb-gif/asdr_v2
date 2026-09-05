@@ -17,9 +17,9 @@ body.design-type-static .catdetail__title { font-size: var(--font-size-h1, var(-
 .catlist-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .catlist-toolbar__search { position: relative; flex: 1 1 260px; max-width: 460px; }
 .catlist-toolbar__search svg { position: absolute; left: 14px; top: 50%; translate: 0 -50%; color: var(--gov-muted); pointer-events: none; }
-.catlist-toolbar__search input { width: 100%; height: 46px; padding: 0 14px 0 42px; border: 1px solid var(--gov-border); border-radius: 10px; background: var(--gov-surface); color: var(--gov-title); font: inherit; outline: none; }
-.catlist-toolbar__sort { height: 46px; padding: 0 12px; border: 1px solid var(--gov-border); border-radius: 10px; background: var(--gov-surface); color: var(--gov-title); font: inherit; }
-.catlist-toolbar__btn { height: 46px; padding: 0 22px; border: 0; border-radius: 10px; background: var(--gov-navy); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.catlist-toolbar__search input { width: 100%; height: 46px; padding: 0 14px 0 42px; border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 10px); background: var(--gov-surface); color: var(--gov-title); font: inherit; outline: none; }
+.catlist-toolbar__sort { height: 46px; padding: 0 12px; border: 1px solid var(--gov-border); border-radius: var(--radius-sm, 10px); background: var(--gov-surface); color: var(--gov-title); font: inherit; }
+.catlist-toolbar__btn { height: 46px; padding: 0 22px; border: 0; border-radius: var(--radius-sm, 10px); background: var(--gov-navy); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
 .catlist-toolbar__btn:hover { background: var(--gov-teal); }
 .catlist-toolbar__reset { color: var(--gov-teal-text); font-weight: 600; text-decoration: none; }
 .catlist-count { color: var(--gov-muted); margin: 0; }
