@@ -8,8 +8,8 @@ $title = $data['title'] ?? '';
 $allText = trim((string) ($data['all_text'] ?? ''));
 $allUrl = trim((string) ($data['all_url'] ?? ''));
 $news = $data['news'] ?? [];
-// Два макета блока: «карточки» — крупная новость и ряд карточек, как в ленте;
-// «мозаика» — крупная с текстом на обложке и колонка справа.
+// «Колонки» — равные карточки; прежние «Карточки» и «Мозаика» сохраняют
+// собственную композицию. Все настройки проверены схемой полей.
 // Значение проверено схемой полей (BlockFieldSchema) — читаем как есть.
 $variant = (string) $data['variant'];
 
@@ -46,6 +46,29 @@ $templateCss = '';
 
     <?php if ($featured === null): ?>
         <p class="block-newsfeat__empty"><?= htmlspecialchars(t('Новостей пока нет.'), ENT_QUOTES) ?></p>
+    <?php elseif ($variant === 'columns'): ?>
+        <div class="news-columns news-columns--<?= (int) $data['columns'] ?>">
+            <?php foreach ($news as $item): ?>
+                <a class="news-column" href="<?= htmlspecialchars((string) $item['url'], ENT_QUOTES) ?>">
+                    <span class="news-column__cover news-cover">
+                        <?php if (!empty($item['cover'])): ?>
+                            <?= \App\Core\Media::picture((string) $item['cover'], '', null, null, 'news-column__image', true, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, ' . (int) ceil(100 / $data['columns']) . 'vw') ?>
+                        <?php else: ?>
+                            <span class="news-column__empty" aria-hidden="true"></span>
+                        <?php endif; ?>
+                        <?= $badgeOverlay($item) ?>
+                    </span>
+                    <span class="news-column__body">
+                        <span class="news-meta">
+                            <?php if (!empty($item['published_at'])): ?><time class="news-column__date"><?= htmlspecialchars($fmt((string) $item['published_at']), ENT_QUOTES) ?></time><?php endif; ?>
+                            <?php if ($category($item) !== ''): ?><span class="news-category"><?= htmlspecialchars($category($item), ENT_QUOTES) ?></span><?php endif; ?>
+                        </span>
+                        <span class="news-column__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></span>
+                        <span class="news-column__arrow" aria-hidden="true">→</span>
+                    </span>
+                </a>
+            <?php endforeach; ?>
+        </div>
     <?php elseif ($variant === 'cards'): ?>
         <?php // Макет «карточки»: тот же вид, что и на странице новостей. ?>
         <a class="newslist-lead" href="<?= htmlspecialchars((string) $featured['url'], ENT_QUOTES) ?>">
