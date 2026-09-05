@@ -97,6 +97,16 @@ $size = static function (mixed $bytes): string {
                 <input type="number" id="perf_shared_cache_ttl" name="perf_shared_cache_ttl" min="0" max="86400" value="<?= $val('perf_shared_cache_ttl', '300') ?>">
                 <span class="form-hint">Рекомендуется 300. При изменении контента интеграция Cloudflare очищает кеш автоматически.</span>
             </div>
+            <div class="form-field form-field--checkbox">
+                <input type="checkbox" id="perf_pretty_html" name="perf_pretty_html" value="1" <?= $on('perf_pretty_html', '1') ? 'checked' : '' ?>>
+                <label for="perf_pretty_html">Форматировать исходный код публичных страниц</label>
+            </div>
+            <p class="form-hint">
+                «Просмотр кода страницы» показывает разметку с отступами и переносами.
+                Двигаются только незначимые пробелы — рядом со строчными элементами
+                (ссылки, значки) разметка остаётся нетронутой. Выключайте, если нужно
+                отдавать разметку ровно в том виде, в каком её собрали шаблоны.
+            </p>
         </div>
 
         <div class="header-builder__group" id="perf-assets">
