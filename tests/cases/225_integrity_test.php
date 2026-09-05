@@ -60,7 +60,7 @@ test('Целостность: подмена, подложенный файл и
         Integrity::writeBaseline();
 
         file_put_contents($root . '/app/Core/Demo.php', '<?php // подменено');
-        file_put_contents($root . '/public/shell.php', '<?php eval($_GET["c"]);');
+        file_put_contents($root . '/public/shell.php', '<?php // unauthorized script');
         unlink($root . '/templates/page.php');
 
         $diff = Integrity::compare();
@@ -95,7 +95,7 @@ test('Целостность: повторный алерт об одном на
     $root = integrity_fixture();
     try {
         Integrity::writeBaseline();
-        file_put_contents($root . '/public/shell.php', '<?php eval($_GET["c"]);');
+        file_put_contents($root . '/public/shell.php', '<?php // unauthorized script');
 
         $diff = Integrity::compare();
         assert_true(Integrity::isNewReport($diff), 'первое расхождение — новое');

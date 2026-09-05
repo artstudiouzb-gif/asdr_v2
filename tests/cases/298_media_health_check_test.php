@@ -15,6 +15,9 @@ use App\Core\MediaHealth;
  */
 
 test('Проверка медиатеки находит нечитаемые и пустые файлы', function () {
+    if (DIRECTORY_SEPARATOR === '\\') {
+        skip_test('POSIX permissions are not supported on Windows');
+    }
     $dir = sys_get_temp_dir() . '/mediahealth-' . bin2hex(random_bytes(6));
     mkdir($dir . '/2026/08', 0755, true);
 

@@ -85,6 +85,10 @@ function assert_equals($expected, $actual, string $message = ''): void
 function assert_contains(string $needle, string $haystack, string $message = ''): void
 {
     if (!str_contains($haystack, $needle)) {
+        if ((str_contains($haystack, "\r") || str_contains($needle, "\r"))
+            && str_contains(str_replace("\r\n", "\n", $haystack), str_replace("\r\n", "\n", $needle))) {
+            return;
+        }
         throw new \RuntimeException(sprintf(
             "assert_contains failed%s\n     needle:   %s\n     haystack: %s",
             $message !== '' ? ": {$message}" : '',
@@ -96,7 +100,10 @@ function assert_contains(string $needle, string $haystack, string $message = '')
 
 function assert_not_contains(string $needle, string $haystack, string $message = ''): void
 {
-    if (str_contains($haystack, $needle)) {
+    $found = str_contains($haystack, $needle)
+        || ((str_contains($haystack, "\r") || str_contains($needle, "\r"))
+            && str_contains(str_replace("\r\n", "\n", $haystack), str_replace("\r\n", "\n", $needle)));
+    if ($found) {
         throw new \RuntimeException(sprintf(
             "assert_not_contains failed%s\n     forbidden needle found: %s",
             $message !== '' ? ": {$message}" : '',
@@ -124,6 +131,10 @@ function run_tests(): int
                 fwrite(STDOUT, "      {$line}\n");
             }
         }
+    }
+
+    if (TestRunner::$failed > 0) {
+        fwrite(STDOUT, "\n\033[31mПроваленные тесты:\033[0m\n  - " . implode("\n  - ", TestRunner::$failures) . "\n");
     }
 
     fwrite(STDOUT, sprintf(

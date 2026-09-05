@@ -23,7 +23,7 @@ test('Эталон PHPStan не растёт', function () {
     $baseline = APP_ROOT . '/phpstan-baseline.neon';
     assert_true(is_file($baseline), 'эталон PHPStan не найден');
 
-    $text = (string) file_get_contents($baseline);
+    $text = str_replace("\r\n", "\n", (string) file_get_contents($baseline));
 
     // Каждая запись эталона несёт `count: N` — считаем находки, а не строки.
     $found = 0;
@@ -44,7 +44,7 @@ test('Эталон PHPStan не растёт', function () {
 });
 
 test('Уровень анализа не понижен', function () {
-    $config = (string) file_get_contents(APP_ROOT . '/phpstan.neon');
+    $config = str_replace("\r\n", "\n", (string) file_get_contents(APP_ROOT . '/phpstan.neon'));
 
     assert_true(
         (bool) preg_match('/^\s*level:\s*(\d+)$/m', $config, $m) && (int) $m[1] >= 7,
