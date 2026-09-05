@@ -40,7 +40,7 @@
     .site-home .cms-block--hero + .cms-block--counters .block-counters { margin-top: -24px; }
     .site-home .block-counters--panel-card {
         padding: 18px 12px;
-        border-radius: 6px;
+        border-radius: min(var(--radius, 14px), 6px);
         background: var(--counters-bg, var(--gov-surface));
         box-shadow: 0 4px 16px color-mix(in srgb, var(--gov-navy) 7%, transparent);
     }
@@ -59,7 +59,7 @@
         padding: 20px 18px;
         gap: 12px;
         border: 1px solid var(--gov-border);
-        border-radius: 5px;
+        border-radius: min(var(--radius, 14px), 5px);
         box-shadow: none;
     }
     .site-home .feature-card__top { margin-bottom: 0; }
@@ -68,7 +68,7 @@
     .site-home .feature-card__title::after { content: none; }
     .site-home .feature-card__icon { width: 36px; height: 36px; padding: 0; border-radius: 0; background: transparent; }
     .site-home .feature-card__num { font-size: .875rem; }
-    .site-home .imgcard { min-height: 190px; border-radius: 5px; }
+    .site-home .imgcard { min-height: 190px; border-radius: min(var(--radius, 14px), 5px); }
     .site-home .imgcard__body { padding: 18px; }
     .site-home .imgcard__title { font-size: .9375rem; line-height: 1.4; }
     .site-home .mediacard.mediacard {
@@ -77,7 +77,7 @@
         background: transparent;
         box-shadow: none;
     }
-    .site-home .mediacard__media { border-radius: 5px; }
+    .site-home .mediacard__media { border-radius: min(var(--radius, 14px), 5px); }
     .site-home .mediacard__title { padding: 10px 0 0; font-size: .9375rem; line-height: 1.4; }
     .site-home .site-content :is(.feature-card, .mediacard, .imgcard, .newsfeat-lead, .newsfeat-mini, .newsfeat-text, .newslist-lead, .relnews-card):hover { transform: none; box-shadow: none; }
     .site-home .feature-card:hover .feature-card__icon { transform: none; }
@@ -91,7 +91,7 @@
         .site-home .block-counters--row .block-counters__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 0; }
         .site-home .block-counters--row .counter { border: 0; padding: 4px 14px; }
     }
-    @media (max-width: 600px) {
+    @media (max-width: 560px) {
         .site-home .site-content { --space-premium: 24px; }
         .site-home .hero__inner { padding-block-start: 28px; }
         .site-home .hero__cta { padding-inline: 16px; }

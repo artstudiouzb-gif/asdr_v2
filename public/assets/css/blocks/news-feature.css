@@ -419,7 +419,7 @@
     min-width: 0;
     overflow: hidden;
     border: 1px solid var(--gov-border);
-    border-radius: 5px;
+    border-radius: min(var(--radius, 14px), 5px);
     background: var(--gov-surface);
     color: var(--gov-title);
     text-decoration: none;
@@ -453,7 +453,7 @@
 @media (max-width: 1000px) {
     .news-columns--3, .news-columns--4 { --news-columns: 2; }
 }
-@media (max-width: 600px) {
+@media (max-width: 560px) {
     .news-columns { grid-template-columns: minmax(0, 1fr); gap: 20px; }
 }
 @media (prefers-reduced-motion: reduce) {

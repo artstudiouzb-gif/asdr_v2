@@ -52,7 +52,7 @@ $templateCss = '';
                 <a class="news-column" href="<?= htmlspecialchars((string) $item['url'], ENT_QUOTES) ?>">
                     <span class="news-column__cover news-cover">
                         <?php if (!empty($item['cover'])): ?>
-                            <?= \App\Core\Media::picture((string) $item['cover'], '', null, null, 'news-column__image', true, '(max-width: 600px) 100vw, (max-width: 1000px) 50vw, ' . (int) ceil(100 / $data['columns']) . 'vw') ?>
+                            <?= \App\Core\Media::picture((string) $item['cover'], '', null, null, 'news-column__image', true, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, ' . (int) ceil(100 / $data['columns']) . 'vw') ?>
                         <?php else: ?>
                             <span class="news-column__empty" aria-hidden="true"></span>
                         <?php endif; ?>
