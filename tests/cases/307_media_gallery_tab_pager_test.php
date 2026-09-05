@@ -74,21 +74,27 @@ test('Блок «Медиа»: вкладки листаются раздель�
     $videoIds = [];
     foreach (['Ролик A', 'Ролик B', 'Ролик C', 'Ролик D'] as $i => $title) {
         $id = (int) Video::create($title);
+        // Порядок задаём явно: страницы должны быть предсказуемыми, а не
+        // зависеть от совпадения дат создания.
         Video::update($id, $title, '', '/uploads/public/v.jpg', 'https://youtu.be/tabpager0' . $i, '', true, false, $i);
         $videoIds[] = $id;
     }
 
-    // Списки намеренно разной длины: ровно из-за этого общая полоса и врала.
+    // Списки намеренно разной длины: ровно из-за этого общая полоса и врала —
+    // у видео две страницы, у фото две, но записей в них разное число.
+    // Альбомы отдаются от свежего к старому, поэтому «Альбом A» окажется
+    // последним.
     $albumIds = [];
-    foreach (['Альбом A', 'Альбом B'] as $title) {
-        $id = (int) PhotoAlbum::create($title, '', '/uploads/public/a.jpg', true);
-        $albumIds[] = $id;
+    foreach (['Альбом A', 'Альбом B', 'Альбом C'] as $title) {
+        $albumIds[] = (int) PhotoAlbum::create($title, '', '/uploads/public/a.jpg', true);
     }
 
+    // «Сколько показывать» — размер страницы, и схема полей держит минимум в
+    // две карточки: меньшее значение всё равно поднимется до двух.
     $block = [
         'id' => 51,
         'type' => 'media_gallery',
-        'data' => json_encode(['source' => 'media', 'limit' => 1, 'paginate' => true]),
+        'data' => json_encode(['source' => 'media', 'limit' => 2, 'paginate' => true]),
     ];
 
     $saved = $_GET;
@@ -111,8 +117,10 @@ test('Блок «Медиа»: вкладки листаются раздель�
     );
     // Обе вкладки показывают своё начало.
     assert_contains('Ролик A', $html);
-    assert_contains('Альбом B', $html, 'у фото видна первая страница её собственного списка');
-    assert_true(!str_contains($html, 'Ролик B'), 'на странице по одной карточке каждого вида');
+    assert_contains('Ролик B', $html);
+    assert_true(!str_contains($html, 'Ролик C'), 'на странице своя порция видео');
+    assert_contains('Альбом C', $html, 'у фото видна первая страница её собственного списка');
+    assert_true(!str_contains($html, 'Альбом A'), 'последний альбом — уже на второй странице фото');
 
     // Переход по полосе «Фото»: листается фото, вкладка остаётся открытой,
     // видео возвращается к своему началу.
@@ -120,8 +128,9 @@ test('Блок «Медиа»: вкладки листаются раздель�
     $html = BlockRenderer::render($block)['html'];
     assert_contains('data-media-active="photo"', $html);
     assert_contains('Альбом A', $html, 'вторая страница фото');
-    assert_true(!str_contains($html, 'Альбом B'), 'вторая страница не повторяет первую');
+    assert_true(!str_contains($html, 'Альбом C'), 'вторая страница не повторяет первую');
     assert_contains('Ролик A', $html, 'видео осталось на своём начале');
+    assert_true(!str_contains($html, 'Ролик C'), 'номер страницы принадлежит только открытой вкладке');
     assert_true(
         (bool) preg_match('#data-media-pager="video"[^>]*\shidden#', $html),
         'теперь скрыта полоса видео'
