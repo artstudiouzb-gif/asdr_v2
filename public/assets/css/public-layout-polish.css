@@ -597,6 +597,7 @@
     --editorial-headline-tracking: -0.025em;
     --editorial-eyebrow-tracking: 0.06em;
     --editorial-smooth-transition: 240ms cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
     
     /* Layered atmospheric elevation tokens (Apple / Pentagram optical standard) */
     --elevation-flat: 0 0 0 1px color-mix(in srgb, var(--gov-navy, #0f172a) 8%, transparent);
@@ -679,6 +680,30 @@ body {
     text-wrap: pretty;
 }
 
+/* Editorial tabular numerals & metric typography */
+:where(
+    .counter__number,
+    .counter__value,
+    .counter-card__number,
+    .counter-card__value,
+    .block-counters__value,
+    .stat-card__value,
+    .stat-number,
+    time,
+    .news-card__date,
+    .newslist__date,
+    .relnews-card__date,
+    .post-date,
+    .bio-career__years,
+    .stage__year,
+    table td,
+    .table td,
+    .cms-table td,
+    .stats-table td
+) {
+    font-variant-numeric: tabular-nums lining-nums;
+}
+
 /* Editorial Eyebrows, Categories and Badges */
 :where(
     .block-hero__eyebrow,
@@ -717,9 +742,40 @@ body {
     }
 }
 
+/* Editorial Card Flex & Baseline Alignment */
+:where(.news-card, .relnews-card, .project-card, .album-card, .news-column) {
+    display: flex;
+    flex-direction: column;
+}
+:where(.news-card__body, .relnews-card__body, .project-card__body, .album-card__body) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+:where(.news-card__meta, .relnews-card__meta, .project-card__meta, .album-card__footer) {
+    margin-top: auto;
+}
+
 /* High-contrast accessible focus ring (WCAG 2.1 AAA) */
 :focus-visible {
     outline: 2px solid var(--color-accent, var(--gov-teal, #0d7a74));
     outline-offset: 3px;
+}
+
+/* Executive Mobile Precision: Touch Target Size (WCAG 2.2 AA) */
+@media (pointer: coarse) {
+    :where(
+        button,
+        .btn,
+        .header-search__toggle,
+        .theme-toggle,
+        .lang-select,
+        .site-nav__link,
+        .pagination__link,
+        .accordion__trigger
+    ) {
+        min-height: 44px;
+        min-width: 44px;
+    }
 }
 
