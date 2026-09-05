@@ -219,12 +219,15 @@ final class Icon
         }
 
         $symbols = self::symbols($names);
-        if ($symbols === '') {
+        if ($symbols === []) {
             return $html;
         }
 
-        $sprite = '<svg class="tabler-sprite" aria-hidden="true" focusable="false" width="0" height="0">'
-            . '<defs>' . $symbols . '</defs></svg>';
+        // Символы разложены по строкам: спрайт — самый крупный кусок страницы,
+        // и одной строкой он превращал «Исходный код» в нечитаемую простыню.
+        // Пробел между <symbol> в SVG ничего не значит.
+        $sprite = '<svg class="tabler-sprite" aria-hidden="true" focusable="false" width="0" height="0"><defs>'
+            . "\n    " . implode("\n    ", $symbols) . "\n  </defs></svg>";
 
         return substr($html, 0, $bodyEnd) . $sprite . substr($html, $bodyEnd);
     }
@@ -247,20 +250,21 @@ final class Icon
      * Вырезает <symbol> из спрайта по индексу смещений (без разбора файла).
      *
      * @param list<string> $names
+     * @return list<string>
      */
-    private static function symbols(array $names): string
+    private static function symbols(array $names): array
     {
         $index = self::spriteIndex();
         if ($index === []) {
-            return '';
+            return [];
         }
         $file = \dirname(__DIR__, 2) . '/public' . self::SPRITE_PATH;
         $handle = @fopen($file, 'rb');
         if ($handle === false) {
-            return '';
+            return [];
         }
 
-        $out = '';
+        $out = [];
         foreach ($names as $name) {
             if (!isset($index[$name])) {
                 continue;
@@ -271,7 +275,7 @@ final class Icon
             }
             $chunk = fread($handle, $length);
             if (is_string($chunk)) {
-                $out .= $chunk;
+                $out[] = $chunk;
             }
         }
         fclose($handle);

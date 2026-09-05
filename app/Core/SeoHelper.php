@@ -80,6 +80,131 @@ final class SeoHelper
             ];
         }
 
+        $sameAs = self::socialProfiles();
+        if ($sameAs !== []) {
+            $data["sameAs"] = $sameAs;
+        }
+
+        return "<script type=\"application/ld+json\">" . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "</script>\n";
+    }
+
+    /**
+     * Официальные аккаунты организации для поля sameAs.
+     *
+     * Отдельной настройки для них нет и заводить её незачем: ссылки уже
+     * набраны в конструкторах шапки и подвала, а второй список разъехался бы
+     * с ними при первой правке. Берём только внешние http(s)-адреса — «sameAs»
+     * означает «тот же субъект в другом месте», ссылка внутрь сайта туда не
+     * относится.
+     *
+     * @return list<string>
+     */
+    private static function socialProfiles(): array
+    {
+        $urls = [];
+        foreach ([HeaderConfig::get(), FooterConfig::get()] as $config) {
+            $buttons = $config['social_buttons'] ?? [];
+            if (!is_array($buttons)) {
+                continue;
+            }
+            foreach ($buttons as $button) {
+                if (!is_array($button)) {
+                    continue;
+                }
+                $url = trim((string) ($button['url'] ?? ''));
+                if (preg_match('#^https?://#i', $url) !== 1 || in_array($url, $urls, true)) {
+                    continue;
+                }
+                $urls[] = $url;
+            }
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Описание страницы из её же текста — последний рубеж перед пустым
+     * <meta name="description">.
+     *
+     * Пустое описание не «ничего»: поиск всё равно соберёт сниппет, но из
+     * случайного куска страницы — у нас это оказывалось меню или подпись к
+     * фотографии. Берём первый содержательный абзац: заголовки, подписи и
+     * цифры описанием страницы не являются, а сплошной strip_tags склеил бы
+     * их в одну строку.
+     */
+    public static function autoDescription(string $html, int $limit = 200): string
+    {
+        if ($html === '' || !str_contains($html, '<p')) {
+            return "";
+        }
+        if (preg_match_all('#<p\b[^>]*>(.*?)</p>#si', $html, $matches) < 1) {
+            return "";
+        }
+
+        foreach ($matches[1] as $paragraph) {
+            $text = html_entity_decode(strip_tags((string) $paragraph), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $text = trim((string) preg_replace('/\s+/u', ' ', $text));
+            if (mb_strlen($text) < 40) {
+                continue;
+            }
+
+            return self::clip($text, $limit);
+        }
+
+        return "";
+    }
+
+    /** Обрезка по границе слова: половина слова в сниппете читается как сбой. */
+    public static function clip(string $text, int $limit): string
+    {
+        $text = trim($text);
+        if ($limit <= 0 || mb_strlen($text) <= $limit) {
+            return $text;
+        }
+
+        $cut = mb_substr($text, 0, $limit);
+        $space = mb_strrpos($cut, ' ');
+        if ($space !== false && $space > (int) ($limit * 0.6)) {
+            $cut = mb_substr($cut, 0, $space);
+        }
+
+        return rtrim($cut, " ,.;:—-") . '…';
+    }
+
+    /**
+     * JSON-LD WebSite с поиском по сайту (sitelinks searchbox).
+     *
+     * Разметка описывает сайт целиком, поэтому выводится только на главной:
+     * на каждой странице она повторяла бы одно и то же и спорила бы с
+     * разметкой самой страницы. Адрес поиска — реальный маршрут /search?q=,
+     * иначе поисковик проверит его и проигнорирует всю разметку.
+     */
+    public static function websiteSchema(string $appUrl, string $siteName): string
+    {
+        if (trim(Locale::path(), '/') !== '') {
+            return "";
+        }
+
+        $lang = Locale::current();
+        $home = rtrim($appUrl, "/") . Locale::url('', $lang);
+        $search = rtrim($appUrl, "/") . Locale::url('search', $lang);
+
+        $data = [
+            "@context" => "https://schema.org",
+            "@type" => "WebSite",
+            "name" => $siteName,
+            "url" => $home,
+            "inLanguage" => $lang,
+            "potentialAction" => [
+                "@type" => "SearchAction",
+                "target" => [
+                    "@type" => "EntryPoint",
+                    "urlTemplate" => $search . "?q={search_term_string}",
+                ],
+                "query-input" => "required name=search_term_string",
+            ],
+        ];
+
         return "<script type=\"application/ld+json\">" . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "</script>\n";
     }
 

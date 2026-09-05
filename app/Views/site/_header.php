@@ -646,6 +646,15 @@ if ($pageTitleText === '') {
 <link rel="alternate" hreflang="x-default" href="<?= htmlspecialchars($appUrl . Locale::url(Locale::alternatePath($xDefault), $xDefault), ENT_QUOTES) ?>">
 <?php endif; ?>
 <link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($siteName . ' — Новости', ENT_QUOTES) ?>" href="<?= htmlspecialchars(Locale::url('news/rss.xml', $currentLang), ENT_QUOTES) ?>">
+<?php
+// og:locale:alternate объявляет те же языки, что и hreflang выше: список уже
+// отфильтрован по наличию перевода, поэтому карточка ссылки не обещает
+// страницу, которой нет.
+$ogAlternateLangs = [];
+foreach ($hrefLangs as $hrefLangRow) {
+    $ogAlternateLangs[] = (string) $hrefLangRow['code'];
+}
+?>
 <?= \App\Core\OpenGraphHelper::render(
     $appUrl,
     $metaTitle,
@@ -654,9 +663,12 @@ if ($pageTitleText === '') {
     $currentLang,
     $ogImageRaw,
     $ogType,
-    $publishedAt ?? null
+    $publishedAt ?? null,
+    $modifiedAt ?? null,
+    $ogAlternateLangs
 ) ?>
 <?= \App\Core\SeoHelper::organizationSchema($appUrl) ?>
+<?= \App\Core\SeoHelper::websiteSchema($appUrl, $siteName) ?>
 <?php // Первый Hero уже отрендерен/закэширован до header, поэтому его LCP-кандидат
       // можно начать загружать до блокирующих stylesheet. ?>
 <?php foreach (array_slice(array_values(array_unique($preloadImages ?? [])), 0, 1) as $preloadImage): ?>
