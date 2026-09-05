@@ -879,6 +879,9 @@
         if (!tabs.length) { return; }
         var cards = gallery.querySelectorAll('[data-media-kind]');
         var grid = gallery.querySelector('[data-media-grid]');
+        // У каждой вкладки своя полоса страниц: списки видео и фото разной
+        // длины, и одна полоса на обе показывала бы чужие страницы.
+        var pagers = gallery.querySelectorAll('[data-media-pager]');
         var apply = function (kind) {
             var visibleCount = 0;
             cards.forEach(function (c) {
@@ -890,6 +893,9 @@
                 grid.classList.remove('mediagallery-grid--cols-1', 'mediagallery-grid--cols-2', 'mediagallery-grid--cols-3', 'mediagallery-grid--cols-4');
                 grid.classList.add('mediagallery-grid--cols-' + Math.max(1, Math.min(4, visibleCount)));
             }
+            pagers.forEach(function (p) {
+                p.hidden = p.getAttribute('data-media-pager') !== kind;
+            });
             tabs.forEach(function (t) {
                 var on = t.getAttribute('data-media-tab') === kind;
                 t.classList.toggle('is-active', on);
@@ -897,7 +903,10 @@
             });
         };
         tabs.forEach(function (t) { t.addEventListener('click', function () { apply(t.getAttribute('data-media-tab')); }); });
-        apply('video');
+        // Открытую вкладку выбирает сервер (она приходит в адресе вместе с
+        // номером страницы) — иначе переход по полосе страниц «Фото»
+        // возвращал бы посетителя на «Видео».
+        apply(gallery.getAttribute('data-media-active') === 'photo' ? 'photo' : 'video');
     });
 
     // Якорная навигация: активный пункт следует за видимым разделом,

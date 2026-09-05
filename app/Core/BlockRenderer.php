@@ -955,27 +955,51 @@ final class BlockRenderer
             // страниц блок показывает отмеченные «на главной» записи (forHome),
             // с полосой — весь опубликованный список подряд: иначе читатель
             // упирался бы в первые записи и не мог дойти до остальных.
-            $pager = null;
+            //
+            // У каждой вкладки своя полоса страниц. Общая на оба списка
+            // показывала неправду: списки разной длины, и на «Фото» стояли
+            // страницы видео — переход по ним не менял ни одной карточки.
+            // Номер из адреса принадлежит открытой вкладке, вторая
+            // показывает своё начало, чтобы переключение не открывало её
+            // пустой серединой.
+            $pagers = [];
+            $activeTab = '';
             if ($paginate) {
                 $totals = [];
                 if ($mediaSource === 'videos' || $mediaSource === 'media') {
-                    $totals[] = \App\Models\Video::publishedTotal();
+                    $totals['video'] = \App\Models\Video::publishedTotal();
                 }
                 if ($mediaSource === 'albums' || $mediaSource === 'media') {
-                    $totals[] = \App\Models\PhotoAlbum::publishedTotal();
+                    $totals['photo'] = \App\Models\PhotoAlbum::publishedTotal();
                 }
-                // Смешанный источник показывает видео и фото двумя вкладками,
-                // поэтому и листаются они вместе: на каждой странице своя
-                // порция и тех, и других. Страниц столько, сколько нужно
-                // самому длинному списку.
-                $pager = BlockPager::slice($totals === [] ? 0 : max($totals), $limit);
+                // Пустой список вкладкой не становится: адрес с её именем не
+                // должен уводить на раздел, которого посетитель не видит.
+                $kinds = array_values(array_keys(array_filter(
+                    $totals,
+                    static fn (int $total): bool => $total > 0
+                )));
+                $activeTab = BlockPager::currentTab($kinds);
+                foreach ($kinds as $kind) {
+                    $pagers[$kind] = BlockPager::slice(
+                        $totals[$kind],
+                        $limit,
+                        $kind === $activeTab ? null : 1
+                    );
+                }
             }
 
             $items = [];
             if ($mediaSource === 'videos' || $mediaSource === 'media') {
-                $videos = $pager === null
+                $videoPager = $pagers['video'] ?? null;
+                $videos = !$paginate
                     ? \App\Models\Video::forHome($limit, $lang)
-                    : \App\Models\Video::publishedSlice($pager['per_page'], $pager['offset'], $lang);
+                    : ($videoPager === null
+                        ? []
+                        : \App\Models\Video::publishedSlice(
+                            $videoPager['per_page'],
+                            $videoPager['offset'],
+                            $lang
+                        ));
                 foreach ($videos as $v) {
                     $items[] = [
                         'kind' => 'video',
@@ -987,9 +1011,16 @@ final class BlockRenderer
                 }
             }
             if ($mediaSource === 'albums' || $mediaSource === 'media') {
-                $albums = $pager === null
+                $albumPager = $pagers['photo'] ?? null;
+                $albums = !$paginate
                     ? \App\Models\PhotoAlbum::forHome($limit, $lang)
-                    : \App\Models\PhotoAlbum::publishedSlice($pager['per_page'], $pager['offset'], $lang);
+                    : ($albumPager === null
+                        ? []
+                        : \App\Models\PhotoAlbum::publishedSlice(
+                            $albumPager['per_page'],
+                            $albumPager['offset'],
+                            $lang
+                        ));
                 foreach ($albums as $a) {
                     $items[] = [
                         'kind' => 'photo',
@@ -1001,8 +1032,9 @@ final class BlockRenderer
                 }
             }
             $data['items'] = $items;
-            if ($pager !== null) {
-                $data['_pager'] = $pager;
+            if ($pagers !== []) {
+                $data['_pagers'] = $pagers;
+                $data['_media_tab'] = $activeTab;
             }
             if ($mediaSource === 'albums' && ($data['all_url'] ?? '') === '') {
                 $data['all_url'] = Locale::url('albums', $lang);
