@@ -15,9 +15,17 @@ $hasVideo = $videoCount > 0;
 $hasPhoto = $photoCount > 0;
 $showTabs = $hasVideo && $hasPhoto;
 
+// Открытая вкладка приходит из адреса (`?mtab=photo`), а не выбирается
+// скриптом: номер страницы принадлежит вкладке, и после перехода по полосе
+// страниц открыться должна та же вкладка, что листали.
+$activeTab = (string) ($data['_media_tab'] ?? '');
+if ($activeTab !== 'photo' || !$hasPhoto) {
+    $activeTab = $hasVideo ? 'video' : 'photo';
+}
+
 // Логический класс количества колонок нужен адаптиву: на узких экранах их
 // меньше, а на десктопе ряд держит заданное редактором число.
-$initialKind = $hasVideo ? 'video' : 'photo';
+$initialKind = $activeTab;
 $initialCount = $initialKind === 'video' ? $videoCount : $photoCount;
 // Значения проверены схемой полей (BlockFieldSchema) — читаем как есть.
 $columns = (int) $data['columns'];
@@ -34,13 +42,13 @@ if ($showTabs) {
     ob_start(); ?>
     <div class="media-tabs" role="group" aria-label="<?= htmlspecialchars(t('Фильтр медиа'), ENT_QUOTES) ?>">
         <span class="media-tabs__indicator" aria-hidden="true"></span>
-        <button type="button" class="media-tabs__tab is-active" data-media-tab="video" aria-pressed="true"><span class="media-tabs__tab-text"><?= htmlspecialchars(t('Видео'), ENT_QUOTES) ?></span></button>
-        <button type="button" class="media-tabs__tab" data-media-tab="photo" aria-pressed="false"><span class="media-tabs__tab-text"><?= htmlspecialchars(t('Фото'), ENT_QUOTES) ?></span></button>
+        <button type="button" class="media-tabs__tab<?= $activeTab === 'video' ? ' is-active' : '' ?>" data-media-tab="video" aria-pressed="<?= $activeTab === 'video' ? 'true' : 'false' ?>"><span class="media-tabs__tab-text"><?= htmlspecialchars(t('Видео'), ENT_QUOTES) ?></span></button>
+        <button type="button" class="media-tabs__tab<?= $activeTab === 'photo' ? ' is-active' : '' ?>" data-media-tab="photo" aria-pressed="<?= $activeTab === 'photo' ? 'true' : 'false' ?>"><span class="media-tabs__tab-text"><?= htmlspecialchars(t('Фото'), ENT_QUOTES) ?></span></button>
     </div>
     <?php $tabsHtml = (string) ob_get_clean();
 }
 ?>
-<div class="block-mediagallery" data-media-gallery>
+<div class="block-mediagallery" data-media-gallery data-media-active="<?= htmlspecialchars($activeTab, ENT_QUOTES) ?>">
     <?= \App\Core\SectionHead::render([
         'title' => (string) $title,
         'description' => (string) ($data['description'] ?? ''),
@@ -93,17 +101,30 @@ if ($showTabs) {
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
-    <?php if (!empty($data['_pager'])): ?>
-        <?php
-        // Полоса страниц у блока — та же, что у ленты новостей и каталогов:
-        // расходясь, две копии дали бы разное поведение на половинах сайта.
-        $mediaPager = (array) $data['_pager'];
-        $mediaBlockId = (int) $blockId;
+    <?php
+    // Полоса страниц у блока — та же, что у ленты новостей и каталогов:
+    // расходясь, две копии дали бы разное поведение на половинах сайта.
+    // Полос столько, сколько вкладок: у видео и фото списки разной длины,
+    // и общая полоса на «Фото» показывала страницы видео. Видна та, чья
+    // вкладка открыта; вторую показывает переключатель.
+    $mediaPagers = (array) ($data['_pagers'] ?? []);
+    $mediaBlockId = (int) $blockId;
+    foreach ($mediaPagers as $pagerKind => $mediaPager):
+        $mediaPager = (array) $mediaPager;
+        if ((int) $mediaPager['pages'] < 2) {
+            continue;
+        }
+        $pagerKind = (string) $pagerKind;
+        // Имя вкладки в адресе нужно только там, где вкладки есть: у блока
+        // с одним источником лишний параметр ничего не значит.
+        $pagerTab = $showTabs ? $pagerKind : '';
         ?>
-        <?= \App\Core\View::renderPartial('site/_pager', [
-            'page' => (int) $mediaPager['page'],
-            'pages' => (int) $mediaPager['pages'],
-            'pageUrl' => static fn (int $p): string => \App\Core\BlockPager::url($p, $mediaBlockId),
-        ]) ?>
-    <?php endif; ?>
+        <div class="block-mediagallery__pager" data-media-pager="<?= htmlspecialchars($pagerKind, ENT_QUOTES) ?>"<?= $showTabs && $pagerKind !== $activeTab ? ' hidden' : '' ?>>
+            <?= \App\Core\View::renderPartial('site/_pager', [
+                'page' => (int) $mediaPager['page'],
+                'pages' => (int) $mediaPager['pages'],
+                'pageUrl' => static fn (int $p): string => \App\Core\BlockPager::url($p, $mediaBlockId, $pagerTab),
+            ]) ?>
+        </div>
+    <?php endforeach; ?>
 </div>
