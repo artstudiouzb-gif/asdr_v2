@@ -244,6 +244,16 @@ foreach ($options as $key => $opt) {
                             <small class="form-hint">Переменные: <code><?= htmlspecialchars($cInfo['vars'], ENT_QUOTES) ?></code><br>Управляет: <?= htmlspecialchars($cInfo['desc'], ENT_QUOTES) ?></small>
                         </div>
                     <?php endforeach; ?>
+                    <div class="form-field">
+                        <label for="design_shadow_color">Цвет тени карточек</label>
+                        <input type="color" id="design_shadow_color" name="shadow_color" value="<?= htmlspecialchars(\App\Core\DesignSettings::shadowColor(), ENT_QUOTES) ?>" data-design-preview-field>
+                        <small class="form-hint">Переменная: <code>--card-shadow</code><br>Форму тени выбирает «Стиль карточек», а здесь — её цвет. На тёплой или тёмной палитре холодная серо-синяя тень читается грязным пятном.</small>
+                    </div>
+                    <div class="form-field">
+                        <label for="design_shadow_strength">Сила тени, %</label>
+                        <input type="number" id="design_shadow_strength" name="shadow_strength" min="0" max="300" step="5" value="<?= (int) \App\Core\DesignSettings::shadowStrength() ?>" data-design-preview-field>
+                        <small class="form-hint">100 — как в теме, 0 — тени нет вовсе (то же, что «Плоские»), 300 — предел: дальше тень перестаёт быть тенью.</small>
+                    </div>
                     <?php foreach ([
                         'space_small' => 'Малый отступ (space-small)',
                         'space_premium' => 'Премиальный отступ (space-premium)',

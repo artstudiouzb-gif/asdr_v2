@@ -144,6 +144,21 @@ final class DesignController
                 );
             }
         }
+        if (array_key_exists('shadow_color', $preview)) {
+            Setting::overrideInMemory('design_shadow_color', \App\Core\SettingsValidator::hexColor(
+                (string) $preview['shadow_color'],
+                DesignSettings::shadowColor()
+            ));
+        }
+        if (array_key_exists('shadow_strength', $preview)) {
+            $previewStrength = (string) $preview['shadow_strength'];
+            if (is_numeric($previewStrength)) {
+                Setting::overrideInMemory(
+                    'design_shadow_strength',
+                    (string) max(0, min(300, (int) round((float) $previewStrength)))
+                );
+            }
+        }
         foreach (DesignSettings::semanticSpacings() as $key => $current) {
             if (array_key_exists($key, $preview)) {
                 Setting::overrideInMemory(
