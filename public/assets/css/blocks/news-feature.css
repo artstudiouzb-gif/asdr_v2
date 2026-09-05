@@ -230,7 +230,7 @@
     overflow-wrap: anywhere;
 }
 
-body.design-type-static .newslist-lead .newslist-lead__title {
+.newslist-lead .newslist-lead__title {
     font-size: var(--font-size-h3, var(--step-2));
 }
 

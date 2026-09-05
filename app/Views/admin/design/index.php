@@ -244,6 +244,16 @@ foreach ($options as $key => $opt) {
                             <small class="form-hint">Переменные: <code><?= htmlspecialchars($cInfo['vars'], ENT_QUOTES) ?></code><br>Управляет: <?= htmlspecialchars($cInfo['desc'], ENT_QUOTES) ?></small>
                         </div>
                     <?php endforeach; ?>
+                    <div class="form-field">
+                        <label for="design_shadow_color">Цвет тени карточек</label>
+                        <input type="color" id="design_shadow_color" name="shadow_color" value="<?= htmlspecialchars(\App\Core\DesignSettings::shadowColor(), ENT_QUOTES) ?>" data-design-preview-field>
+                        <small class="form-hint">Переменная: <code>--card-shadow</code><br>Форму тени выбирает «Стиль карточек», а здесь — её цвет. На тёплой или тёмной палитре холодная серо-синяя тень читается грязным пятном.</small>
+                    </div>
+                    <div class="form-field">
+                        <label for="design_shadow_strength">Сила тени, %</label>
+                        <input type="number" id="design_shadow_strength" name="shadow_strength" min="0" max="300" step="5" value="<?= (int) \App\Core\DesignSettings::shadowStrength() ?>" data-design-preview-field>
+                        <small class="form-hint">100 — как в теме, 0 — тени нет вовсе (то же, что «Плоские»), 300 — предел: дальше тень перестаёт быть тенью.</small>
+                    </div>
                     <?php foreach ([
                         'space_small' => 'Малый отступ (space-small)',
                         'space_premium' => 'Премиальный отступ (space-premium)',
@@ -321,23 +331,6 @@ foreach ($options as $key => $opt) {
             ?>
             <input type="hidden" name="font_size" value="<?= htmlspecialchars((string) ($values['font_size'] ?? 'md'), ENT_QUOTES) ?>">
             <input type="hidden" name="line_height" value="<?= htmlspecialchars((string) ($values['line_height'] ?? 'normal'), ENT_QUOTES) ?>">
-
-            <?php $typeScaleOption = $options['type_scale']; ?>
-            <div class="design-opt">
-                <div class="design-opt__label">
-                    <span><?= htmlspecialchars($typeScaleOption['label'], ENT_QUOTES) ?></span>
-                    <small><?= htmlspecialchars($typeScaleOption['hint'], ENT_QUOTES) ?></small>
-                </div>
-                <div class="design-opt__choices">
-                    <?php foreach ($typeScaleOption['choices'] as $val => $label): ?>
-                        <label class="design-card">
-                            <input type="radio" name="type_scale" value="<?= htmlspecialchars($val, ENT_QUOTES) ?>"
-                                   <?= ($values['type_scale'] ?? 'fluid') === $val ? 'checked' : '' ?> data-design-preview-field>
-                            <span class="design-card__label"><?= htmlspecialchars($label, ENT_QUOTES) ?></span>
-                        </label>
-                    <?php endforeach; ?>
-                </div>
-            </div>
 
             <div class="design-manual u-inline-7dde5e56b3">
                 <div class="design-manual__head">

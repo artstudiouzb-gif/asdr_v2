@@ -216,13 +216,6 @@ final class DesignSettings
             'choices' => ['tight' => 'Плотный (-0.03em)', 'normal' => 'Стандарт (-0.02em)', 'wide' => 'Широкий (0em)'],
             'default' => 'normal',
         ],
-        'type_scale' => [
-            'label' => 'Масштаб типографики',
-            'hint' => 'Статичные — точные фиксированные размеры с дискретными брейкпоинтами для мобильных. Плавающие — размер плавно растягивается с шириной экрана (vw).',
-            'group' => 'Типографика',
-            'choices' => ['static' => 'Точные / Статичные', 'fluid' => 'Плавающие (fluid)'],
-            'default' => 'static',
-        ],
         'title_mark' => [
             'label' => 'Выделение в заголовках',
             'hint' => 'Как выглядит слово, обёрнутое звёздочками: «Стратегия *развития*».',
@@ -290,22 +283,22 @@ final class DesignSettings
         'classic' => [
             'label' => 'Классический',
             'desc' => 'Строгий официальный стиль, умеренные отступы.',
-            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'sm', 'density' => 'standard', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'plain', 'title_mark' => 'accent', 'title_reveal' => 'off', 'type_scale' => 'static', 'scroll_top' => 'on', 'palette' => 'gov_blue', 'font_style' => 'system'],
+            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'sm', 'density' => 'standard', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'plain', 'title_mark' => 'accent', 'title_reveal' => 'off', 'scroll_top' => 'on', 'palette' => 'gov_blue', 'font_style' => 'system'],
         ],
         'modern' => [
             'label' => 'Современный',
             'desc' => 'Крупные скругления, воздух, акцентная шапка.',
-            'values' => ['container' => 'wide', 'radius' => 'large', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'lg', 'line_height' => 'relaxed', 'heading_line_height' => 'tight', 'heading_font_weight' => '800', 'heading_letter_spacing' => 'tight', 'button' => 'pill', 'card_style' => 'elevated', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'sidebar', 'title_mark' => 'accent', 'title_reveal' => 'fade', 'type_scale' => 'static', 'scroll_top' => 'on', 'palette' => 'violet', 'font_style' => 'noto'],
+            'values' => ['container' => 'wide', 'radius' => 'large', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'lg', 'line_height' => 'relaxed', 'heading_line_height' => 'tight', 'heading_font_weight' => '800', 'heading_letter_spacing' => 'tight', 'button' => 'pill', 'card_style' => 'elevated', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'sidebar', 'title_mark' => 'accent', 'title_reveal' => 'fade', 'scroll_top' => 'on', 'palette' => 'violet', 'font_style' => 'noto'],
         ],
         'minimal' => [
             'label' => 'Минимал',
             'desc' => 'Прямые углы, максимум воздуха, список в каталоге.',
-            'values' => ['container' => 'narrow', 'radius' => 'none', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'square', 'card_style' => 'flat', 'sidebar_position' => 'fixed', 'catalog_layout' => 'list', 'detail_layout' => 'plain', 'title_mark' => 'accent', 'title_reveal' => 'off', 'type_scale' => 'static', 'scroll_top' => 'on', 'palette' => 'graphite', 'font_style' => 'serif'],
+            'values' => ['container' => 'narrow', 'radius' => 'none', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'square', 'card_style' => 'flat', 'sidebar_position' => 'fixed', 'catalog_layout' => 'list', 'detail_layout' => 'plain', 'title_mark' => 'accent', 'title_reveal' => 'off', 'scroll_top' => 'on', 'palette' => 'graphite', 'font_style' => 'serif'],
         ],
         'compact' => [
             'label' => 'Компактный',
             'desc' => 'Плотная сетка, маленькие карточки — много данных.',
-            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'xs', 'density' => 'compact', 'font_size' => 'sm', 'line_height' => 'tight', 'heading_line_height' => 'tight', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'tight', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'fixed', 'catalog_layout' => 'cards_sm', 'detail_layout' => 'sidebar', 'title_mark' => 'accent', 'title_reveal' => 'off', 'type_scale' => 'static', 'scroll_top' => 'on', 'palette' => 'classic_red', 'font_style' => 'system'],
+            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'xs', 'density' => 'compact', 'font_size' => 'sm', 'line_height' => 'tight', 'heading_line_height' => 'tight', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'tight', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'fixed', 'catalog_layout' => 'cards_sm', 'detail_layout' => 'sidebar', 'title_mark' => 'accent', 'title_reveal' => 'off', 'scroll_top' => 'on', 'palette' => 'classic_red', 'font_style' => 'system'],
         ],
     ];
 
@@ -408,6 +401,63 @@ final class DesignSettings
     }
 
     /** Точное скругление, 0–48px; пусто — значение пресета. */
+    /**
+     * Цвет тени карточек. Прежде тень была зашита в код тремя строками
+     * `rgba(16,24,40,…)`: «Стиль карточек» выбирал форму, а цвет и силу
+     * поменять было нечем — на тёплой или тёмной палитре холодная серо-синяя
+     * тень читается грязным пятном.
+     */
+    public static function shadowColor(): string
+    {
+        return SettingsValidator::hexColor(
+            (string) Setting::get('design_shadow_color', self::SHADOW_COLOR_DEFAULT),
+            self::SHADOW_COLOR_DEFAULT
+        );
+    }
+
+    /**
+     * Сила тени в процентах от прежней: 100 — как было, 0 — тени нет вовсе.
+     * Верхняя граница 300 % — дальше тень перестаёт быть тенью и становится
+     * заливкой под карточкой.
+     */
+    public static function shadowStrength(): int
+    {
+        $raw = trim((string) Setting::get('design_shadow_strength', ''));
+        if ($raw === '' || !is_numeric($raw)) {
+            return 100;
+        }
+
+        return max(0, min(300, (int) round((float) $raw)));
+    }
+
+    /** Тень карточек: форма из «Стиля карточек», цвет и сила — из настроек. */
+    public static function cardShadow(string $style): string
+    {
+        if ($style === 'flat') {
+            return 'none';
+        }
+        $strength = self::shadowStrength() / 100;
+        if ($strength <= 0) {
+            return 'none';
+        }
+        $color = static function (float $alpha) use ($strength): string {
+            $hex = ltrim(self::shadowColor(), '#');
+            $alpha = min(1.0, round($alpha * $strength, 3));
+
+            return sprintf(
+                'rgba(%d,%d,%d,%s)',
+                (int) hexdec(substr($hex, 0, 2)),
+                (int) hexdec(substr($hex, 2, 2)),
+                (int) hexdec(substr($hex, 4, 2)),
+                rtrim(rtrim(number_format($alpha, 3, '.', ''), '0'), '.') ?: '0'
+            );
+        };
+
+        return $style === 'elevated'
+            ? '0 10px 30px ' . $color(0.12)
+            : '0 1px 3px ' . $color(0.06) . ', 0 6px 18px ' . $color(0.05);
+    }
+
     public static function radiusCustom(): string
     {
         return self::normalizePixelValue((string) Setting::get('design_radius_custom', ''), 0, 48);
@@ -463,6 +513,9 @@ final class DesignSettings
      * Правила выводятся с !important, чтобы предсказуемо перекрывать
      * компонентные clamp()-размеры тем (панель a11y всё равно сильнее).
      */
+    /** Прежний цвет зашитой тени: холодный сине-серый. */
+    public const SHADOW_COLOR_DEFAULT = '#101828';
+
     public const TYPO_SIZES = [
         'fs_h1' => ['Заголовок H1', '.block-hero__title, .content-pagehead__title, .profile__name, .listing__title, .projdetail__title, .catdetail__title, .translation-notice__title, .newsdetail__title, .newsdetail-phero__title, .reader-mode__headline', '42'],
         'fs_h2' => ['Заголовок H2', '.section-title, .block-title, .block-text__title, .bio__title, .content-list__head h1, .block-news__title, .block-categories__title, .block-contact-cards__title, .block-counters__title, .block-projects__title, .block-team__title, .block-faq__title, .block-testimonials__title, .block-advantages__title, .block-banner__title, .block-featband__title, .block-map__title, .block-partners__title, .textimage__title, .subscribe-block__title, .section-head__title, .newslist-lead__title, .catdetail__subtitle, .block-timeline__title', '32'],
@@ -954,6 +1007,19 @@ final class DesignSettings
                 );
             }
         }
+        if (array_key_exists('shadow_color', $input)) {
+            Setting::set('design_shadow_color', SettingsValidator::hexColor(
+                (string) $input['shadow_color'],
+                self::shadowColor()
+            ));
+        }
+        if (array_key_exists('shadow_strength', $input)) {
+            $strength = (string) $input['shadow_strength'];
+            Setting::set(
+                'design_shadow_strength',
+                is_numeric($strength) ? (string) max(0, min(300, (int) round((float) $strength))) : '100'
+            );
+        }
         $spacings = self::semanticSpacings();
         foreach ($spacings as $key => $current) {
             if (array_key_exists($key, $input)) {
@@ -1318,11 +1384,7 @@ final class DesignSettings
         if ($customLineHeight !== '') {
             $lineHeight = $customLineHeight;
         }
-        $shadow = [
-            'flat' => 'none',
-            'soft' => '0 1px 3px rgba(16,24,40,.06), 0 6px 18px rgba(16,24,40,.05)',
-            'elevated' => '0 10px 30px rgba(16,24,40,.12)',
-        ][$v['card_style'] ?? 'soft'] ?? 'none';
+        $shadow = self::cardShadow((string) ($v['card_style'] ?? 'soft'));
 
         $divColor = (string) Setting::get('design_menu_divider_color_use', '0') === '1'
             ? (string) Setting::get('design_menu_divider_color', '')
@@ -1396,7 +1458,6 @@ final class DesignSettings
           . (in_array($v['title_reveal'] ?? 'off', ['fade', 'wipe'], true)
               ? ' design-title-' . $v['title_reveal']
               : '')
-          . (($v['type_scale'] ?? 'static') === 'static' ? ' design-type-static' : '')
           . (($v['scroll_top'] ?? 'on') === 'on' ? ' design-scrolltop' : '');
     }
 

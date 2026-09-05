@@ -123,15 +123,8 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero { pad
     display: block; width: 100%; height: 100%;
     object-fit: cover; border-radius: inherit;
 }
-body.design-type-static .newsdetail__title { font-size: var(--font-size-h1, var(--step-9)); }
-body.design-type-static .newsdetail-phero__title { font-size: var(--font-size-h1, var(--step-9)); }
 
-/* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
-   чтобы не переполнять строку (мелкие подзаголовки/h4 не трогаем). */
-@media (max-width: 640px) {
-    body.design-type-static .newsdetail__title { font-size: var(--step-5); }
-    body.design-type-static .newsdetail-phero__title { font-size: var(--step-5); }
-}
+
 
 
 /* --- Тело: 3 колонки --- */
@@ -1215,4 +1208,18 @@ button.newsdetail-gallery__thumb:hover {
    правилом — иначе при тапе плитка «залипала» бы приподнятой. */
 @media (hover: none) {
     .newsdetail-photos__item:hover { transform: none; }
+}
+
+/* Узкие экраны: крупные заголовки берут нижнюю границу прежнего clamp,
+   чтобы не переполнять строку.
+
+   `body[class]` — не украшение, а вес селектора: «Дизайн» печатает точные
+   размеры переменными (`--font-size-*`), и правила ниже читают их через
+   `var(...)`. Раньше вес давал режимный класс `design-type-static` на `<body>`
+   (два класса против одного); класса больше нет, а `[class]` даёт ровно
+   тот же вес — классы «Дизайна» у `<body>` есть всегда. Блок обязан
+   оставаться последним в файле. */
+@media (max-width: 640px) {
+    body[class] .newsdetail__title { font-size: var(--step-5); }
+    body[class] .newsdetail-phero__title { font-size: var(--step-5); }
 }
