@@ -24,7 +24,13 @@
     align-items: center;
     min-height: 36px;
     font-weight: 700;
-    text-underline-offset: 5px;
+    text-decoration: none;
+    transition: color .2s ease;
+}
+
+.block-newsfeat--mosaic .section-head__all:hover {
+    color: var(--color-accent, var(--gov-teal));
+    text-decoration: none;
 }
 
 /* Featured story: only the content overlay changes. */
@@ -433,11 +439,13 @@
 .news-column__empty::after { content: ''; width: 72px; height: 72px; background: var(--gov-muted); mask: var(--gov-emblem) center / contain no-repeat; opacity: .4; }
 .news-column__body { position: relative; display: flex; flex: 1; flex-direction: column; gap: 8px; padding: 14px 48px 18px 16px; }
 .news-column__date { font-size: .75rem; color: var(--gov-muted); }
-.news-column__title { font-family: var(--font-heading, inherit); font-size: var(--font-size-card-title, 1rem); font-weight: 650; line-height: 1.4; overflow-wrap: anywhere; }
-.news-column__arrow { position: absolute; inset-inline-end: 12px; bottom: 16px; display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid var(--gov-border); border-radius: 50%; }
+.news-column__title { font-family: var(--font-heading, inherit); font-size: var(--font-size-card-title, 1rem); font-weight: 650; line-height: 1.4; overflow-wrap: anywhere; transition: color .2s ease; }
+.news-column__arrow { position: absolute; inset-inline-end: 12px; bottom: 16px; display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid var(--gov-border); border-radius: 50%; transition: border-color .2s ease, color .2s ease; }
 .news-column:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 3px; }
 @media (hover: hover) and (pointer: fine) {
-    .news-column:hover .news-column__title { text-decoration: underline; text-underline-offset: .18em; }
+    .news-column:hover { text-decoration: none; }
+    .news-column:hover .news-column__title { color: var(--color-accent, var(--gov-teal)); text-decoration: none; }
+    .news-column:hover .news-column__arrow { border-color: var(--color-accent, var(--gov-teal)); color: var(--color-accent, var(--gov-teal)); }
 }
 @media (max-width: 1000px) {
     .news-columns--3, .news-columns--4 { --news-columns: 2; }

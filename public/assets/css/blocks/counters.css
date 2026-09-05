@@ -188,8 +188,7 @@
     position: relative;
     overflow: hidden;
     z-index: 3;
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
-                box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+    transition: box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
                 border-color 0.4s ease;
 }
 :root[data-theme="light"] .block-counters {
@@ -200,17 +199,16 @@
     border-color: rgba(255, 255, 255, 0.08);
 }
 .block-counters:hover {
-    transform: translateY(-8px);
+    transform: none;
     box-shadow: 0 24px 50px rgba(23, 58, 99, 0.12);
     border-color: var(--color-accent, var(--gov-teal));
 }
 
 .counter {
     border-right: 1px solid var(--gov-border);
-    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 .counter:hover {
-    transform: translateY(-2px) !important;
+    transform: none;
 }
 .counter:last-child {
     border-right: 0;
