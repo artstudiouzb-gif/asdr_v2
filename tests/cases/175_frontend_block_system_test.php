@@ -78,7 +78,7 @@ test('Цветовая цепочка этапов различает завер
     // Текущий этап красится акцентом из настроек, а не фиксированным синим:
     // раньше здесь стоял #2f80ed — тот самый хардкод бренд-цвета, который
     // правила проекта запрещают.
-    assert_contains('border-color: var(--color-accent, var(--gov-teal));', $theme);
+    assert_contains('border-color: var(--gov-teal);', $theme);
     assert_not_contains('#2f80ed', $theme, 'чужой синий не должен возвращаться в тему');
     assert_contains('.stage--planned .stage__dot {', $theme);
     assert_contains('.stage--planned .stage__status {', $theme);

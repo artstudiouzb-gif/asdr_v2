@@ -39,7 +39,7 @@ test('news-feature.css содержит улучшенные пропорции 
     assert_contains('aspect-ratio: 16 / 10;', $css, 'Обложка в колонках новостей имеет благородную пропорцию 16/10');
     assert_contains('.news-column:hover .news-column__image { transform: scale(1.035); }', $css, 'Плавный микро-зум кадра при наведении');
     assert_contains('.newsfeat-more__btn', $css, 'Кнопка «Все новости» оформлена в редакционном стиле');
-    assert_contains('.news-column:hover .news-column__arrow { border-color: var(--color-accent, var(--gov-teal)); color: var(--color-accent, var(--gov-teal)); transform: translateX(4px);', $css);
+    assert_contains('.news-column:hover .news-column__arrow { border-color: var(--gov-teal); color: var(--gov-teal); transform: translateX(4px);', $css);
 });
 
 test('news-feature.css сохраняет регрессионные инварианты из тестов 340 и 276', function () {
@@ -47,7 +47,7 @@ test('news-feature.css сохраняет регрессионные инвар�
 
     // Инвариант теста 340: hover на колонке не должен подчеркивать заголовок
     assert_contains(
-        '.news-column:hover .news-column__title { color: var(--color-accent, var(--gov-teal)); text-decoration: none; }',
+        '.news-column:hover .news-column__title { color: var(--gov-teal); text-decoration: none; }',
         $css,
         'Инвариант 340_home_card_styles_and_counters_test должен сохраняться'
     );

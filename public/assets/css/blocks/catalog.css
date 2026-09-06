@@ -3,7 +3,7 @@
 
 /* Анимация фокуса для фильтров, поиска и полей ввода */
 .catlist-toolbar__search input, .catlist-toolbar__sort { transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease; }
-.catlist-toolbar__search input:focus, .catlist-toolbar__search input:focus-visible, .catlist-toolbar__sort:focus, .catlist-toolbar__sort:focus-visible { border-color: var(--color-accent, var(--gov-teal)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent); outline: none; }
+.catlist-toolbar__search input:focus, .catlist-toolbar__search input:focus-visible, .catlist-toolbar__sort:focus, .catlist-toolbar__sort:focus-visible { border-color: var(--gov-teal); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gov-teal) 15%, transparent); outline: none; }
 
 
 
@@ -55,7 +55,7 @@ body.design-catalog-list .catcard { display: flex; flex-direction: row; align-it
 }
 .catcard:hover {
     transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 60%, var(--gov-border));
+    border-color: color-mix(in srgb, var(--gov-teal) 60%, var(--gov-border));
     box-shadow: 0 12px 32px -8px rgba(15, 27, 45, 0.10);
     background: color-mix(in srgb, var(--gov-surface) 92%, transparent);
 }
@@ -85,7 +85,7 @@ body.design-catalog-list .catcard { display: flex; flex-direction: row; align-it
     width: 32px;
     height: 32px;
     border-radius: var(--radius-sm, 8px);
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 12%, transparent);
+    background: color-mix(in srgb, var(--gov-teal) 12%, transparent);
     color: var(--gov-teal-text);
     flex-shrink: 0;
 }
@@ -94,7 +94,7 @@ body.design-catalog-list .catcard { display: flex; flex-direction: row; align-it
     align-items: center;
     padding: 4px 12px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 12%, transparent);
+    background: color-mix(in srgb, var(--gov-teal) 12%, transparent);
     color: var(--gov-teal-text);
     font-size: var(--step--4);
     font-weight: 700;
@@ -184,7 +184,7 @@ body.design-catalog-list .catcard { display: flex; flex-direction: row; align-it
     gap: 7px;
     padding: 5px 12px;
     border-radius: var(--radius-sm, 6px);
-    background: color-mix(in srgb, var(--color-primary, var(--gov-navy)) 6%, transparent);
+    background: color-mix(in srgb, var(--gov-navy) 6%, transparent);
     color: var(--gov-title);
     font-size: var(--step--3);
     font-weight: 600;

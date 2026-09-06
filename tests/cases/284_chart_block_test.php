@@ -111,5 +111,5 @@ test('Диаграмма: палитра долей фиксирована и о
     );
 
     // Полосы и шкала берут акцент из настройки, а не бренд-константу.
-    assert_contains('var(--color-accent, var(--gov-teal))', $css);
+    assert_contains('var(--gov-teal)', $css);
 });

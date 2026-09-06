@@ -229,7 +229,7 @@ test('Акцент на светлой карточке берётся из «Д
     $theme = (string) file_get_contents(APP_ROOT . '/public/assets/css/gov-theme.css');
     assert_contains('--gov-teal-text: var(--gov-teal-on-light);', $theme,
         'карточка берёт акцент по имени, а не фиксированным цветом');
-    assert_contains('--gov-teal-on-light: var(--gov-teal-dark, #0284c7);', $theme,
+    assert_contains('--gov-teal-on-light: #127778;', $theme,
         'у имени есть статический откат для установки без сгенерированной темы');
 
     $generator = (string) file_get_contents(APP_ROOT . '/app/Core/SiteThemeCss.php');

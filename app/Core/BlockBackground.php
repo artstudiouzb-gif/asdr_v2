@@ -84,7 +84,7 @@ final class BlockBackground
             $base = (string) ($data['_bg_color'] ?? '');
             $ink = (string) ($data['_bg_pattern_color'] ?? '');
             if ($ink === '') {
-                $ink = 'var(--color-accent, var(--gov-teal))';
+                $ink = 'var(--gov-teal)';
             }
             $size = (int) ($data['_bg_pattern_size'] ?? 28);
             $opacity = ((int) ($data['_bg_pattern_opacity'] ?? 12)) / 100;
