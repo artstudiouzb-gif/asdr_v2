@@ -22,24 +22,47 @@
     --gov-bg: #f8fafc;
     --gov-surface: #ffffff;
     --gov-border: #e2e8f0;
+    /* Основной цвет так же, как акцент ниже: одно имя, одно запасное
+       значение, точки использования пишут голое var(--gov-navy). Прежде
+       по файлам лежало шесть разных «умолчаний» одного и того же цвета
+       (#0f2756, #1f4b8e, #223d79, #173a63, #173d63, #1a1a1a). */
     --gov-navy: var(--color-primary, #0f2756);
-    --gov-teal: var(--color-accent, #0ea5e9);
+    /* --------------------------------------------------------------------
+       Бренд-акцент и его роли. Это ЕДИНСТВЕННОЕ место в публичном CSS, где
+       акцент записан числом: на живом сайте весь набор ролей печатает
+       «Дизайн» (App\Core\SiteThemeCss по --color-accent из админки), а здесь
+       лежит запасной набор на случай, когда сгенерированный слой ещё не
+       собран. Точки использования запасных значений не носят: в правилах
+       пишется голое var(--gov-teal) / var(--gov-teal-text) — иначе один и тот
+       же цвет разъезжается по файлам (так в теме одновременно жили пять
+       «умолчаний» акцента: #0ea5e9, #17999b, #e63946, #5b52e5, #2f6fed).
+
+       Производные посчитаны от --gov-teal тем же кодом, что и на сервере
+       (App\Core\AccentContrast), и сверяются тестом 345 — подбирать их на
+       глаз нельзя, они держат контраст 4.5:1.
+       -------------------------------------------------------------------- */
+    --gov-teal: var(--color-accent, #17999b);
     --gov-ink: #0f172a;
     --gov-muted: #475569; /* WCAG AAA: 7.1:1 контрастность на белом и светлом фоне */
-    /* Цвет заголовков/акцентного текста: тёмно-синий на светлой теме, светлый
-       на тёмной (чтобы навигационные заголовки карточек не пропадали). */
+    /* Цвет заголовков: тёмно-синий на светлой теме, светлый на тёмной
+       (чтобы навигационные заголовки карточек не пропадали). */
     --gov-title: var(--gov-navy);
-    --gov-teal-text: var(--gov-teal-dark, #0284c7); /* WCAG AA: 5.4:1 контрастность на белом фоне */
-    /* Тот же акцент под именем, которое тёмная секция не переопределяет:
-       по нему белая карточка внутри такой секции берёт читаемый цвет ссылок.
-       Настоящее значение приходит из «Дизайна» (SiteThemeCss). */
-    --gov-teal-on-light: var(--gov-teal-dark, #0284c7);
-    /* Заливка, на которой читается белый текст. Без своего акцента совпадает
-       с текстовым вариантом бирюзы — у него те же 5.4:1 к белому. */
-    --accent-fill-strong: var(--gov-teal-dark, #0284c7);
+    /* Акцент как ТЕКСТ. Сам --gov-teal для текста не годится: у акцента по
+       умолчанию 3.46:1 на белом при норме 4.5. Роль объявлена через
+       --gov-teal-on-light, потому что тёмная секция переопределяет
+       --gov-teal-text у себя, а белая карточка внутри неё берёт читаемый
+       цвет обратно по имени, которого секция не трогает. */
+    --gov-teal-text: var(--gov-teal-on-light);
+    --gov-teal-on-light: #127778;  /* AccentContrast::onLight(#17999b, #fff) */
+    /* Акцент как текст на ТЁМНОЙ поверхности. Здесь запасное значение
+       выведено самим CSS: color-mix следует за --color-accent, даже если
+       слой «Дизайна» ещё не собран. */
+    --gov-teal-on-dark: color-mix(in srgb, var(--gov-teal) 75%, #ffffff);
+    /* Заливка, на которой гарантированно читается БЕЛЫЙ текст. */
+    --accent-fill-strong: #127778;
     /* Текст на подложке из самого акцента (плашки, бейджи, номера): она
        темнее поверхности, и --gov-teal-text на ней не добирает до 4.5:1. */
-    --gov-teal-on-tint: var(--gov-teal-tint-light, #00697d);
+    --gov-teal-on-tint: var(--gov-teal-tint-light, #127778);
     --radius: 12px;
     --container-max: 1440px;
     /* Эмблема агентства: восьмиконечная звезда-гирих. Отдельным файлом,
@@ -135,8 +158,8 @@
        подписи) давал 3.77:1 при норме 4.5. */
     --gov-muted: #adb8c7;
     --gov-title: #f2f6fa;
-    --gov-teal-text: var(--gov-teal-on-dark, var(--color-accent, #38bdf8));
-    --gov-teal-on-tint: var(--gov-teal-on-dark, var(--color-accent, #6fd7e8));
+    --gov-teal-text: var(--gov-teal-on-dark);
+    --gov-teal-on-tint: var(--gov-teal-on-dark);
 }
 
 body {
@@ -262,12 +285,12 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
         background-color: var(--gov-bg, #f3f4f6);
     }
     html::-webkit-scrollbar-thumb {
-        background-color: color-mix(in srgb, var(--color-primary, var(--gov-navy)) 28%, transparent);
+        background-color: color-mix(in srgb, var(--gov-navy) 28%, transparent);
         border-radius: var(--radius-sm, 10px);
         transition: background-color 0.3s ease;
     }
     html::-webkit-scrollbar-thumb:hover {
-        background-color: var(--color-accent, var(--gov-teal));
+        background-color: var(--gov-teal);
     }
 }
 
@@ -326,8 +349,8 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     background: linear-gradient(
         90deg,
         transparent 0%,
-        var(--menu-active-color, var(--gov-teal, #12807f)) 35%,
-        var(--menu-active-color, var(--gov-teal, #12807f)) 65%,
+        var(--menu-active-color, var(--gov-teal)) 35%,
+        var(--menu-active-color, var(--gov-teal)) 65%,
         transparent 100%
     );
     border-radius: 99px;
@@ -335,7 +358,7 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     transform-origin: center;
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
     box-shadow: none;
-    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--menu-active-color, var(--gov-teal, #12807f)) 80%, transparent));
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--menu-active-color, var(--gov-teal)) 80%, transparent));
     opacity: 0;
 }
 .site-menu__link:hover::after,
@@ -350,7 +373,7 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     /* Запасной цвет — контрастный вариант акцента, а не сам акцент: на белой
        шапке сырой #009bbe даёт 3.26:1 при норме 4.5:1 (ловил axe). Если цвет
        наведения задан в конструкторе шапки, он остаётся выбором админа. */
-    color: var(--menu-hover-color, var(--gov-teal-text, #12807f)) !important;
+    color: var(--menu-hover-color, var(--gov-teal-text)) !important;
     background: transparent !important;
     background-color: transparent !important;
 }
@@ -367,8 +390,8 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
 }
 
 .site-submenu__link.is-active {
-    color: var(--gov-teal, #12807f);
-    background: color-mix(in srgb, var(--gov-teal, #12807f) 10%, transparent);
+    color: var(--gov-teal);
+    background: color-mix(in srgb, var(--gov-teal) 10%, transparent);
     font-weight: 700;
 }
 
@@ -404,12 +427,12 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
 /* === Advanced Menu Design System === */
 .site-menu {
     --menu-text-color: var(--menu-color, var(--gov-title));
-    --menu-hover-color: var(--menu-hover, var(--gov-teal-text, #12807f));
+    --menu-hover-color: var(--menu-hover, var(--gov-teal-text));
     /* Контрастный вариант акцента: этой переменной красится текст активного
        пункта, а сырой акцент на белой шапке не добирает 4.5:1. Цвет, заданный
        в конструкторе шапки (--menu-active), остаётся выбором админа. */
-    --menu-active-color: var(--menu-active, var(--gov-teal-text, #12807f));
-    --menu-capsule-bg: var(--menu-pill-bg, var(--gov-teal, #12807f));
+    --menu-active-color: var(--menu-active, var(--gov-teal-text));
+    --menu-capsule-bg: var(--menu-pill-bg, var(--gov-teal));
 }
 .site-menu__link {
     color: var(--menu-text-color);
@@ -499,8 +522,8 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--menu-active-color, var(--gov-teal, #12807f));
-    box-shadow: 0 0 10px var(--menu-active-color, var(--gov-teal, #12807f));
+    background: var(--menu-active-color, var(--gov-teal));
+    box-shadow: 0 0 10px var(--menu-active-color, var(--gov-teal));
     transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
     opacity: 0;
 }
@@ -679,7 +702,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 .site-submenu__link .site-menu__badge::after { display: none; }
 .site-lang-switcher__item { color: var(--gov-title); font-weight: 700; font-size: var(--step--3); transition: color 0.25s ease, opacity 0.25s ease; }
 .site-lang-switcher__item.is-active { color: var(--gov-teal); }
-.site-lang-switcher__item:not(.is-active):hover { color: var(--color-accent, var(--gov-teal)); opacity: 0.85; }
+.site-lang-switcher__item:not(.is-active):hover { color: var(--gov-teal); opacity: 0.85; }
 
 /* === Премиальный выпадающий переключатель языков (Dropdown) === */
 .site-lang-dropdown { position: relative; display: inline-block; user-select: none; }
@@ -702,7 +725,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 }
 .site-lang-dropdown__trigger:hover .site-lang-dropdown__globe,
 .site-lang-dropdown[open] .site-lang-dropdown__globe {
-    opacity: 1; color: var(--gov-teal, #0d9488); transform: rotate(15deg);
+    opacity: 1; color: var(--gov-teal); transform: rotate(15deg);
 }
 .site-lang-dropdown[open] .site-lang-dropdown__trigger {
     border-color: transparent;
@@ -728,25 +751,25 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
     border-radius: var(--radius-sm, 6px); color: var(--gov-title, #1e293b); text-decoration: none;
     font-size: var(--step--3); font-weight: 600; transition: background 0.15s ease, color 0.15s ease;
 }
-.site-lang-dropdown__item:hover { background: var(--gov-bg, #f1f5f9); color: var(--gov-teal, #0d9488); }
+.site-lang-dropdown__item:hover { background: var(--gov-bg, #f1f5f9); color: var(--gov-teal); }
 .site-lang-dropdown__item.is-active {
     background: var(--gov-bg, #f1f5f9);
     /* Не сырой акцент: он давал 3.19:1 при норме 4.5, а подложка из того же
        акцента съедала ещё 0.14. --gov-teal-text считает SiteThemeCss через
        AccentContrast::onLight() как раз от нейтральной поверхности. */
-    color: var(--gov-teal-text, #0f766e); font-weight: 700;
+    color: var(--gov-teal-text); font-weight: 700;
 }
 .site-lang-dropdown__item-flag { font-size: var(--step-0); line-height: 1; }
 .site-lang-dropdown__item-name { flex: 1; white-space: nowrap; }
-.site-lang-dropdown__check { color: var(--gov-teal, #0d9488); flex-shrink: 0; }
+.site-lang-dropdown__check { color: var(--gov-teal); flex-shrink: 0; }
 
 :root[data-theme="dark"] .site-lang-dropdown__trigger { color: var(--gov-ink, #f8fafc); border-color: rgba(255, 255, 255, 0.16); }
 :root[data-theme="dark"] .site-lang-dropdown__menu { background: var(--gov-surface); border-color: rgba(255, 255, 255, 0.12); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4); }
 :root[data-theme="dark"] .site-lang-dropdown__item { color: #f1f5f9; }
-:root[data-theme="dark"] .site-lang-dropdown__item:hover { background: rgba(255, 255, 255, 0.08); color: var(--gov-teal-text, #3fc1c0); }
+:root[data-theme="dark"] .site-lang-dropdown__item:hover { background: rgba(255, 255, 255, 0.08); color: var(--gov-teal-text); }
 /* Подсветка активного языка: 18 % акцента давали 4.09:1 при норме 4.5 —
    светлее подложка, тусклее текст. 12 % возвращают 4.61:1. */
-:root[data-theme="dark"] .site-lang-dropdown__item.is-active { background: rgba(63, 193, 192, 0.12); color: var(--gov-teal-text, #3fc1c0); }
+:root[data-theme="dark"] .site-lang-dropdown__item.is-active { background: rgba(63, 193, 192, 0.12); color: var(--gov-teal-text); }
 .a11y-toggle, .site-theme-toggle, .site-search, .site-search input, .site-search-toggle { color: var(--gov-title); }
 .site-search { border: 1px solid var(--gov-border); border-radius: 999px; background: var(--gov-surface); }
 .site-search input { border: 0; background: transparent; background-image: none; border-radius: 0; }
@@ -765,7 +788,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 :root[data-theme="dark"] .site-search,
 :root[data-theme="dark"] .site-menu__link,
 :root[data-theme="dark"] .site-lang-switcher__item { color: var(--gov-ink); }
-:root[data-theme="dark"] .site-lang-switcher__item.is-active { color: var(--gov-teal-text, #3fc1c0); }
+:root[data-theme="dark"] .site-lang-switcher__item.is-active { color: var(--gov-teal-text); }
 :root[data-theme="dark"] .site-burger { color: var(--gov-ink); border-color: var(--gov-border); }
 :root[data-theme="dark"] .site-search { background: color-mix(in srgb, var(--gov-surface) 70%, #000); }
 /* Свой цвет шапки (конструктор: middlebar/bottombar bg) не зависит от темы —
@@ -961,8 +984,8 @@ body.is-hero-light:has(.site-header--transparent) .site-topbar {
     --hdr-veil: 15, 23, 42;
     --hdr-ink-shadow: 0 1px 2px rgba(255, 255, 255, .55);
     --menu-color-transparent: #0f172a;
-    --menu-hover-transparent: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 78%, #0b1220);
-    --menu-active-transparent: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 78%, #0b1220);
+    --menu-hover-transparent: color-mix(in srgb, var(--gov-teal) 78%, #0b1220);
+    --menu-active-transparent: color-mix(in srgb, var(--gov-teal) 78%, #0b1220);
 }
 /* Контур для набора поверх кадра. Подложка держит основную массу, но на
    светлом небе фотографии белым иконкам её не хватает: тонкая тень добавляет
@@ -998,7 +1021,7 @@ body.is-hero-light .site-header--transparent:not(.is-scrolled) .site-header__log
 .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle:hover,
 .site-header--transparent:not(.is-scrolled) .site-menu__overflow-toggle:focus-visible,
 .site-header--transparent:not(.is-scrolled) .site-menu__overflow.is-open .site-menu__overflow-toggle {
-    color: var(--menu-hover-transparent, var(--menu-hover, var(--color-accent, var(--gov-teal)))) !important;
+    color: var(--menu-hover-transparent, var(--menu-hover, var(--gov-teal))) !important;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__link.is-active,
 body .site-header--transparent:not(.is-scrolled) .site-menu__link[aria-current="page"] {
@@ -1015,12 +1038,12 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__link[aria-current="
     background: linear-gradient(
         90deg,
         rgba(0, 0, 0, 0) 0%,
-        var(--menu-active, var(--gov-teal, #17999b)) 25%,
-        var(--menu-active, var(--gov-teal, #17999b)) 75%,
+        var(--menu-active, var(--gov-teal)) 25%,
+        var(--menu-active, var(--gov-teal)) 75%,
         rgba(0, 0, 0, 0) 100%
     );
     border-radius: var(--hoverline-height, 2px);
-    box-shadow: 0 0 10px color-mix(in srgb, var(--menu-active, var(--gov-teal, #17999b)) 75%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--menu-active, var(--gov-teal)) 75%, transparent);
     transform: scaleX(0);
     transform-origin: center;
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1256,8 +1279,8 @@ body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: va
 }
 
 .site-search-wrap .site-search:focus-within {
-    border-color: var(--gov-teal, #0ea5e9) !important;
-    box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--gov-teal, #0ea5e9) 20%, transparent), 0 10px 30px rgba(15, 27, 45, 0.16) !important;
+    border-color: var(--gov-teal) !important;
+    box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--gov-teal) 20%, transparent), 0 10px 30px rgba(15, 27, 45, 0.16) !important;
 }
 
 .site-search-wrap .site-search input[type="search"] {
@@ -1310,7 +1333,7 @@ body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: va
     padding: 6px !important;
     border: none !important;
     background: transparent !important;
-    color: var(--gov-teal-text, var(--gov-teal)) !important;
+    color: var(--gov-teal-text) !important;
     cursor: pointer;
     transition: transform 0.2s ease;
 }
@@ -1608,13 +1631,8 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
 }
 
 /* --- Доступность (WCAG, гос-требования): фокус-кольца, контраст, touch-цели --- */
-/* Акцент для текста динамически следует за --color-accent. */
-:root { 
-    --gov-teal: var(--color-accent, #17999b);
-    --gov-teal-text: var(--color-accent, var(--gov-teal, #17999b)); 
-    --gov-teal-on-dark: color-mix(in srgb, var(--color-accent, var(--gov-teal, #17999b)) 75%, #ffffff); 
-}
-:root[data-theme="dark"] { --gov-teal-text: var(--gov-teal-on-dark); }
+/* Тёмная поверхность переопределяет акцентный текст на осветлённый вариант.
+   Сам акцент и его роли объявлены один раз — в :root в начале файла. */
 .cms-block--bg-navy, .block-hero--media, .site-footer { --gov-teal-text: var(--gov-teal-on-dark); }
 /* Альтернативный фон-подложка (карточки-выноски в контенте, напр. .gov-card из
    демо). Раньше был не определён — везде брался светлый фолбэк #f8f9fa, из-за
@@ -1699,7 +1717,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     background: color-mix(in srgb, var(--gov-surface) 88%, transparent);
     box-shadow: 0 16px 36px rgba(19,42,92,.09);
     transform: translateY(-6px);
-    border-color: var(--color-accent, var(--gov-teal));
+    border-color: var(--gov-teal);
 }
 
 /* ============================================================================
@@ -1747,29 +1765,29 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     padding: 16px 20px; margin: 0 0 28px;
     background: linear-gradient(135deg, rgba(13, 148, 136, 0.06), rgba(2, 132, 199, 0.04));
     border: 1px solid var(--gov-border, rgba(13, 148, 136, 0.18));
-    border-left: 4px solid var(--gov-teal, #0d9488); border-radius: var(--radius, 14px);
+    border-left: 4px solid var(--gov-teal); border-radius: var(--radius, 14px);
     box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
 }
 .news-audio-player__icon {
     display: flex; align-items: center; justify-content: center;
     width: 44px; height: 44px; border-radius: var(--radius-sm, 8px);
-    background: var(--gov-teal, #0d9488); color: #ffffff;
+    background: var(--gov-teal); color: #ffffff;
     flex-shrink: 0; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
 }
 .news-audio-player__info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 180px; }
 .news-audio-player__badge {
     font-size: var(--step--4); font-weight: 800; letter-spacing: 0.05em;
-    text-transform: uppercase; color: var(--gov-teal, #0d9488);
+    text-transform: uppercase; color: var(--gov-teal);
 }
 .news-audio-player__title { font-size: var(--step--1); font-weight: 700; color: var(--gov-title, #1e293b); }
 .news-audio-player__element { flex: 1 1 280px; height: 40px; border-radius: var(--radius, 20px); outline: none; }
 
 :root[data-theme="dark"] .news-audio-player {
     background: linear-gradient(135deg, rgba(63, 193, 192, 0.1), rgba(30, 41, 59, 0.6));
-    border-color: rgba(63, 193, 192, 0.25); border-left-color: var(--gov-teal-text, #3fc1c0);
+    border-color: rgba(63, 193, 192, 0.25); border-left-color: var(--gov-teal-text);
 }
 :root[data-theme="dark"] .news-audio-player__title { color: #f8fafc; }
-:root[data-theme="dark"] .news-audio-player__badge { color: var(--gov-teal-text, #3fc1c0); }
+:root[data-theme="dark"] .news-audio-player__badge { color: var(--gov-teal-text); }
 
 .reader-mode-overlay {
     position: fixed; inset: 0; z-index: 9999;
@@ -1800,7 +1818,7 @@ body.reader-mode-active { overflow: hidden; }
 }
 .reader-mode-overlay[data-reader-theme="dark"] .reader-mode-bar { border-bottom-color: rgba(255, 255, 255, 0.1); }
 
-.reader-mode-bar__progress { width: var(--reader-progress, 0%); height: 3px; background: var(--gov-teal, #0d9488); transition: width 0.1s linear; }
+.reader-mode-bar__progress { width: var(--reader-progress, 0%); height: 3px; background: var(--gov-teal); transition: width 0.1s linear; }
 .reader-mode-bar__inner {
     max-width: 900px; margin: 0 auto; padding: 10px 20px;
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
@@ -1889,22 +1907,22 @@ body.reader-mode-active { overflow: hidden; }
 .social-embed-card__url { font-size: var(--step--3); color: var(--gov-subtext, #64748b); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .social-embed-card__btn {
     font-size: var(--step--3); font-weight: 700; padding: 6px 14px; border-radius: 9999px;
-    background: var(--gov-bg, #f1f5f9); color: var(--gov-teal, #0d9488);
+    background: var(--gov-bg, #f1f5f9); color: var(--gov-teal);
     white-space: nowrap; transition: all 0.2s ease;
 }
-.social-embed-card:hover .social-embed-card__btn { background: var(--gov-teal, #0d9488); color: #ffffff; }
+.social-embed-card:hover .social-embed-card__btn { background: var(--gov-teal); color: #ffffff; }
 
 :root[data-theme="dark"] .social-embed-card { background: var(--gov-surface); border-color: rgba(255, 255, 255, 0.1); }
 :root[data-theme="dark"] .social-embed-card__title { color: #f8fafc; }
 :root[data-theme="dark"] .social-embed-card__url { color: #94a3b8; }
-:root[data-theme="dark"] .social-embed-card__btn { background: rgba(255, 255, 255, 0.1); color: var(--gov-teal-text, #3fc1c0); }
+:root[data-theme="dark"] .social-embed-card__btn { background: rgba(255, 255, 255, 0.1); color: var(--gov-teal-text); }
 
 /* ==========================================================================
    Универсальный полноэкранный Lightbox просмотр фотографий
    ========================================================================== */
 .is-lightboxable { cursor: zoom-in; }
 .is-lightboxable[tabindex]:focus-visible {
-    outline: 3px solid var(--gov-teal, #0d9488);
+    outline: 3px solid var(--gov-teal);
     outline-offset: 4px;
 }
 body.lightbox-active { overflow: hidden; }
@@ -1936,7 +1954,7 @@ body.lightbox-active { overflow: hidden; }
     font-size: var(--step-4); line-height: 1; cursor: pointer;
     transition: all 0.2s ease; text-decoration: none;
 }
-.rich-lightbox-btn:hover { background: var(--gov-teal, #0d9488); transform: scale(1.08); }
+.rich-lightbox-btn:hover { background: var(--gov-teal); transform: scale(1.08); }
 
 .rich-lightbox-stage {
     position: relative; z-index: 5; flex: 1;
@@ -1964,7 +1982,7 @@ body.lightbox-active { overflow: hidden; }
     background: rgba(255, 255, 255, 0.15); color: #ffffff;
     font-size: var(--step-4); cursor: pointer; transition: all 0.2s ease; flex-shrink: 0;
 }
-.rich-lightbox-nav:hover { background: var(--gov-teal, #0d9488); transform: scale(1.1); }
+.rich-lightbox-nav:hover { background: var(--gov-teal); transform: scale(1.1); }
 @media (max-width: 640px) {
     .rich-lightbox-nav { width: 38px; height: 38px; font-size: var(--step-1); }
     .rich-lightbox-stage { padding: 10px 6px; }
@@ -1977,7 +1995,7 @@ body.lightbox-active { overflow: hidden; }
     position: fixed; bottom: 24px; left: 24px; z-index: 998;
     display: flex; align-items: center; justify-content: center;
     width: 48px; height: 48px; border-radius: 50%; border: 0;
-    background: var(--gov-teal, #0d9488); color: #ffffff;
+    background: var(--gov-teal); color: #ffffff;
     box-shadow: 0 8px 24px rgba(13, 148, 136, 0.4);
     cursor: pointer; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -2039,7 +2057,7 @@ body.lightbox-active { overflow: hidden; }
     border: 0; background: transparent; color: #f8fafc; font-size: var(--step--3); font-weight: 600;
     cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
 }
-.quote-share-btn:hover { background: var(--gov-teal, #0d9488); color: #ffffff; }
+.quote-share-btn:hover { background: var(--gov-teal); color: #ffffff; }
 
 /* 3. Интерактивные опросы */
 .news-poll-card {
@@ -2049,7 +2067,7 @@ body.lightbox-active { overflow: hidden; }
 }
 .news-poll-card__badge {
     display: inline-block; padding: 4px 10px; border-radius: var(--radius-sm, 6px);
-    background: color-mix(in srgb, var(--gov-teal, #0d9488) 12%, transparent);
+    background: color-mix(in srgb, var(--gov-teal) 12%, transparent);
     color: var(--gov-teal-on-tint, #00697d); font-size: var(--step--4); font-weight: 700; margin-bottom: 8px;
 }
 .news-poll-card__question {
@@ -2063,7 +2081,7 @@ body.lightbox-active { overflow: hidden; }
     cursor: pointer; transition: all 0.2s ease;
 }
 .news-poll-option:hover {
-    border-color: var(--gov-teal, #0d9488); background: color-mix(in srgb, var(--gov-teal, #0d9488) 5%, var(--gov-surface));
+    border-color: var(--gov-teal); background: color-mix(in srgb, var(--gov-teal) 5%, var(--gov-surface));
 }
 .news-poll-option input { display: none; }
 .news-poll-option__custom {
@@ -2071,7 +2089,7 @@ body.lightbox-active { overflow: hidden; }
     flex-shrink: 0; transition: all 0.2s ease;
 }
 .news-poll-option input:checked + .news-poll-option__custom {
-    border-color: var(--gov-teal, #0d9488); background: var(--gov-teal, #0d9488);
+    border-color: var(--gov-teal); background: var(--gov-teal);
     box-shadow: inset 0 0 0 3px #ffffff;
 }
 .news-poll-option__text { font-size: var(--step--1); font-weight: 500; color: var(--gov-title); }
@@ -2079,7 +2097,7 @@ body.lightbox-active { overflow: hidden; }
 .news-poll-res-row { margin-bottom: 14px; }
 .news-poll-res-info { display: flex; justify-content: space-between; font-size: var(--step--2); font-weight: 600; margin-bottom: 6px; color: var(--gov-title); }
 .news-poll-bar-track { height: 10px; border-radius: var(--radius-sm, 5px); background: color-mix(in srgb, var(--gov-border) 40%, transparent); overflow: hidden; }
-.news-poll-bar-fill { width: var(--poll-percent, 0%); height: 100%; border-radius: var(--radius-sm, 5px); background: var(--gov-teal, #0d9488); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+.news-poll-bar-fill { width: var(--poll-percent, 0%); height: 100%; border-radius: var(--radius-sm, 5px); background: var(--gov-teal); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
 .news-poll-card__meta { margin-top: 14px; font-size: var(--step--3); color: var(--gov-subtext); }
 .news-poll-card__actions { margin-top: 14px; }
 .news-poll-card__actions .btn { width: 100%; justify-content: center; }
@@ -2200,7 +2218,7 @@ body.lightbox-active { overflow: hidden; }
     }
     body.design-mmenu-burger.mobile-menu-open .site-header--transparent:not(.is-scrolled) .site-menu__link:hover,
     body.design-mmenu-burger.mobile-menu-open .site-header--transparent:not(.is-scrolled) .site-menu__link:focus-visible {
-        color: var(--gov-teal-text, var(--gov-teal));
+        color: var(--gov-teal-text);
     }
 
     .newsfeat-grid, .block-newsdocs { gap: var(--card-gap, 20px); }
@@ -2320,7 +2338,7 @@ body.lightbox-active { overflow: hidden; }
    тёмном фоне и к тёмному на светлом. Тот же приём, что у надписи обложки:
    она рисуется цветом текста обложки (`--hero-fg`). */
 body.design-mark-accent .tx-mark {
-    color: color-mix(in srgb, var(--gov-teal-text, var(--color-accent, var(--gov-teal))) 70%, currentColor);
+    color: color-mix(in srgb, var(--gov-teal-text) 70%, currentColor);
 }
 
 /* Рукописное семейство — своя роль в «Дизайне» (--font-script). Оно оптически
@@ -2339,7 +2357,7 @@ body.design-mark-script .tx-mark {
 /* Мазок — тень внутрь, а не фон и не подчёркивание: не меняет размеры строки,
    не разрывается на переносе слова и не трогает цвет самого текста. */
 body.design-mark-underline .tx-mark {
-    box-shadow: inset 0 -0.18em 0 color-mix(in srgb, var(--color-accent, var(--gov-teal)) 32%, transparent);
+    box-shadow: inset 0 -0.18em 0 color-mix(in srgb, var(--gov-teal) 32%, transparent);
     padding-inline: 0.05em;
 }
 
@@ -2800,9 +2818,9 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 }
 .stage--done.stage--next-done::before { background: var(--gov-teal); }
 .stage--done.stage--next-active::before {
-    background: linear-gradient(90deg, var(--gov-teal) 0%, var(--color-accent, var(--gov-teal)) 100%);
+    background: linear-gradient(90deg, var(--gov-teal) 0%, var(--gov-teal) 100%);
 }
-.stage--active.stage--next-active::before { background: var(--color-accent, var(--gov-teal)); }
+.stage--active.stage--next-active::before { background: var(--gov-teal); }
 @media (max-width: 1000px) and (min-width: 561px) {
     /* В два столбца (правило выше) отрезки соединяли бы этапы из разных
        строк — прячем их, точки остаются. */
@@ -2858,24 +2876,24 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 .stage--done:hover .stage__dot { box-shadow: 0 0 0 3px var(--gov-bg), 0 0 12px rgba(23, 153, 155, 0.5); }
 .stage--active .stage__dot {
     background: var(--gov-surface);
-    border-color: var(--color-accent, var(--gov-teal));
+    border-color: var(--gov-teal);
     /* Крупнее соседей — текущий этап должен читаться сразу. Через transform,
        а не через размер: это не сдвигает точку с линии и не вызывает
        перекомпоновку. */
     transform: scale(1.2);
-    box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 26%, transparent);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--gov-teal) 26%, transparent);
     /* Текущий этап дышит кольцом: анимируется только тень, поэтому нет ни
        перекомпоновки, ни рывков. Медленно и без вспышек — мигание чаще трёх
        раз в секунду запрещено (WCAG 2.3.1), здесь один цикл в 2.6 секунды. */
     animation: gov-pulse-ring 2.6s ease-in-out infinite;
 }
 @keyframes gov-pulse-ring {
-    0%, 100% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 26%, transparent); }
-    50% { box-shadow: 0 0 0 15px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 7%, transparent); }
+    0%, 100% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--gov-teal) 26%, transparent); }
+    50% { box-shadow: 0 0 0 15px color-mix(in srgb, var(--gov-teal) 7%, transparent); }
 }
 .stage--active:hover .stage__dot {
     transform: scale(1.4);
-    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 30%, transparent), 0 0 14px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 28%, transparent);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--gov-teal) 30%, transparent), 0 0 14px color-mix(in srgb, var(--gov-teal) 28%, transparent);
 }
 .stage--planned .stage__dot {
     background: var(--gov-surface);
@@ -2898,7 +2916,7 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 .stage__text { color: var(--gov-muted); font-size: var(--step--2); line-height: var(--base-line-height, 1.5); flex: 1; }
 .stage__status { align-self: flex-start; padding: 5px 12px; border-radius: 999px; font-size: var(--step--4); font-weight: 700; background: color-mix(in srgb, var(--gov-navy) 7%, var(--gov-bg)); color: var(--gov-muted); transition: background 0.3s, color 0.3s; }
 .stage--done .stage__status { background: color-mix(in srgb, var(--gov-teal) 14%, var(--gov-bg)); color: color-mix(in srgb, var(--gov-teal-text) 82%, #000); }
-.stage--active .stage__status { background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 13%, var(--gov-bg)); color: #2465c6; }
+.stage--active .stage__status { background: color-mix(in srgb, var(--gov-teal) 13%, var(--gov-bg)); color: #2465c6; }
 /* Тёмная тема: синий текста рассчитан на светлый фон, на тёмном он давал
    3.22:1. Берём светлый оттенок той же линейки. */
 :root[data-theme="dark"] .stage--active .stage__status { color: #9dc1f7; }
@@ -3133,7 +3151,7 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 .newslist__date { color: var(--gov-muted); font-size: var(--step--3); font-weight: 600; }
 .newslist-lead__title { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; font-size: var(--step-5); color: var(--gov-title); line-height: 1.3; margin: 0; }
 .newslist-lead__excerpt { color: var(--gov-muted); line-height: 1.5; font-size: var(--step--2); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-.newslist-lead:hover .newslist-lead__title { color: var(--color-accent, var(--gov-teal)); }
+.newslist-lead:hover .newslist-lead__title { color: var(--gov-teal); }
 
 /* Обёртка обложки: система координат для метки-плашки. Отдельный элемент
    нужен потому, что саму <picture> собирает Media::picture(), и вложить в неё
@@ -3332,7 +3350,7 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
     transition: border-color .2s ease, box-shadow .2s ease, color .2s ease;
 }
 .newsfeat-more__btn:hover {
-    border-color: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 45%, var(--gov-border));
+    border-color: color-mix(in srgb, var(--gov-teal) 45%, var(--gov-border));
     color: var(--gov-teal-text);
     box-shadow: var(--shadow-3);
 }
@@ -3384,7 +3402,7 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 /* Значок рубрики: слева от названия, с левым отступом чуть меньше — иначе
    кнопка с иконкой выглядит шире соседних. */
 .listing-filter__item--icon { gap: 8px; padding-left: 14px; }
-.listing-filter__icon { display: inline-flex; color: var(--color-accent, var(--gov-teal)); }
+.listing-filter__icon { display: inline-flex; color: var(--gov-teal); }
 .listing-filter__item.is-active .listing-filter__icon { color: currentColor; }
 .listing-filter__item.is-active { background: var(--gov-navy); border-color: var(--gov-title); color: #fff; }
 
@@ -3788,8 +3806,8 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     /* Подложка и сама иконка — одного семейства. Пока подложка была
        синеватой (navy 8 %), а глиф бирюзовым, в одном квадрате 44×44
        спорили два тона: карточки читались пыльными. */
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 10%, var(--gov-surface));
-    color: var(--gov-teal-text, #0284c7);
+    background: color-mix(in srgb, var(--gov-teal) 10%, var(--gov-surface));
+    color: var(--gov-teal-text);
     transition: transform .5s var(--feature-card-motion-ease),
         background-color .42s ease, color .42s ease;
     align-self: flex-start;
@@ -3809,7 +3827,7 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     background: transparent;
 }
 .block-cards--icons-no-bg .feature-card:hover .feature-card__icon {
-    color: var(--color-accent, var(--gov-teal-text, #0284c7));
+    color: var(--gov-teal-text);
 }
 .block-cards .feature-card__content {
     display: flex;
@@ -3898,14 +3916,14 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
     word-break: normal;
 }
 .feature-card:hover .feature-card__title {
-    color: var(--gov-teal-text, #0284c7);
+    color: var(--gov-teal-text);
 }
 .feature-card__arrow {
     display: inline-block;
     white-space: nowrap;
     font-family: system-ui, sans-serif;
     font-weight: 400;
-    color: var(--gov-teal-text, #0284c7);
+    color: var(--gov-teal-text);
     transition: transform .5s var(--feature-card-motion-ease);
     margin-left: 4px;
 }
@@ -3976,7 +3994,7 @@ span.imgcard__media::after {
 .imgcard--below .imgcard__more { margin-top: auto; color: var(--gov-teal-text); }
 @media (hover: hover) and (pointer: fine) {
     .imgcard--below:hover .imgcard__more,
-    .imgcard--below:focus-visible .imgcard__more { color: var(--color-accent, var(--gov-teal)); }
+    .imgcard--below:focus-visible .imgcard__more { color: var(--gov-teal); }
 }
 
 /* Карточка целиком — ссылка, а «Подробнее» внутри неё был мёртвым текстом:
@@ -4401,9 +4419,9 @@ span.imgcard__media::after {
 }
 .timeline-item--done.timeline-item--next-done::after { background: var(--gov-teal); }
 .timeline-item--done.timeline-item--next-active::after {
-    background: linear-gradient(180deg, var(--gov-teal) 0%, var(--color-accent, var(--gov-teal)) 100%);
+    background: linear-gradient(180deg, var(--gov-teal) 0%, var(--gov-teal) 100%);
 }
-.timeline-item--active.timeline-item--next-active::after { background: var(--color-accent, var(--gov-teal)); }
+.timeline-item--active.timeline-item--next-active::after { background: var(--gov-teal); }
 .timeline-item::before {
     content: '';
     position: absolute;
@@ -4424,10 +4442,10 @@ span.imgcard__media::after {
 }
 .timeline-item--active::before {
     background: var(--gov-bg);
-    border-color: var(--color-accent, var(--gov-teal));
+    border-color: var(--gov-teal);
     /* Как и у этапов: текущая точка крупнее и с более заметным кольцом. */
     transform: scale(1.2);
-    box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 26%, transparent);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--gov-teal) 26%, transparent);
     animation: gov-pulse-ring 2.6s ease-in-out infinite;
 }
 /* Хвост шкалы после последнего пункта: сплошная линия обрывалась на
@@ -4441,7 +4459,7 @@ span.imgcard__media::after {
     top: 16px;
     height: 34px;
     width: 0;
-    border-left: 2px dashed color-mix(in srgb, var(--color-accent, var(--gov-teal)) 45%, var(--gov-border));
+    border-left: 2px dashed color-mix(in srgb, var(--gov-teal) 45%, var(--gov-border));
     pointer-events: none;
 }
 .timeline-item--planned::before {
@@ -4454,7 +4472,7 @@ span.imgcard__media::after {
 .timeline-item--done:hover::before { box-shadow: 0 0 0 5px color-mix(in srgb, var(--gov-teal) 20%, transparent); }
 .timeline-item--active:hover::before {
     transform: scale(1.4);
-    box-shadow: 0 0 0 7px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 30%, transparent);
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--gov-teal) 30%, transparent);
 }
 .timeline-item--planned:hover::before { border-color: var(--gov-muted); }
 .timeline-item__year { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; color: var(--gov-title); transition: color 0.25s ease; }
@@ -4547,14 +4565,14 @@ span.imgcard__media::after {
 }
 .profile__photo--empty > * { position: relative; z-index: 1; }
 .profile__name { font-size: var(--font-size-h1, var(--step-8)); margin: 0 0 12px; }
-.profile__position { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; color: var(--gov-teal-text, #0284c7); font-size: var(--step-1); line-height: 1.35; margin-bottom: 18px; }
+.profile__position { font-family: var(--font-heading, 'Noto Serif', serif); font-weight: 700; color: var(--gov-teal-text); font-size: var(--step-1); line-height: 1.35; margin-bottom: 18px; }
 .profile__text { color: var(--gov-ink); line-height: var(--base-line-height, 1.65); margin: 0 0 22px; font-size: var(--step-0); }
 .profile__contacts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
 .profile__contact { display: flex; align-items: center; gap: 10px; color: var(--gov-ink); font-size: var(--step--1); }
-.profile__contact svg { color: var(--gov-teal-text, #0284c7); flex: 0 0 auto; }
+.profile__contact svg { color: var(--gov-teal-text); flex: 0 0 auto; }
 .profile__contact-label { color: var(--gov-muted, #475569); font-weight: 600; }
 .profile__contact a { color: var(--gov-title); font-weight: 700; text-decoration: none; }
-.profile__contact a:hover { color: var(--gov-teal-text, #0284c7); }
+.profile__contact a:hover { color: var(--gov-teal-text); }
 .profile__button { display: inline-block; padding: 13px 26px; background: var(--gov-navy); color: #fff; border-radius: var(--btn-radius, 8px); font-weight: 700; font-size: var(--step--1); text-decoration: none; transition: opacity .15s ease; }
 .profile__button:hover { opacity: .92; }
 .profile__buttons { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -4646,7 +4664,7 @@ span.imgcard__media::after {
 /* Рубрика на детальной — ссылка в отфильтрованную ленту. Подчёркивание
    появляется только при наведении: иначе плашка выглядит сломанной. */
 a.newsdetail__badge { text-decoration: none; }
-a.newsdetail__badge:hover { background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 22%, transparent); }
+a.newsdetail__badge:hover { background: color-mix(in srgb, var(--gov-teal) 22%, transparent); }
 .news-lead-rich > :first-child { margin-top: 0; }
 .news-lead-rich > :last-child { margin-bottom: 0; }
 .news-lead-rich p { margin: 0 0 .75em; }
@@ -4655,10 +4673,10 @@ a.newsdetail__badge:hover { background: color-mix(in srgb, var(--color-accent, v
 .news-lead-rich blockquote {
     margin: .8em 0;
     padding: .2em 0 .2em 1em;
-    border-inline-start: 3px solid var(--gov-teal, #12807f);
+    border-inline-start: 3px solid var(--gov-teal);
     font-weight: 400;
 }
-.news-lead-rich a { color: var(--gov-teal-text, #0b6f70); text-underline-offset: .16em; }
+.news-lead-rich a { color: var(--gov-teal-text); text-underline-offset: .16em; }
 .reader-mode__lead.news-lead-rich p { margin: 0 0 .75em; }
 
 /* --- Hero: ширина и высота секции --- */
@@ -4778,7 +4796,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 }
 .block-newsfeat--mosaic .newsfeat-mini:hover,
 .block-newsfeat--mosaic .newsfeat-text:hover {
-    border-color: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 35%, var(--gov-border));
+    border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
     box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
 }
 .block-newsfeat--mosaic .newsfeat-mini { gap: 0; }
@@ -4912,7 +4930,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .news-badge {
     display: inline-flex; align-items: center; min-width: 0; max-width: 100%;
     padding: 2px 8px; border-radius: 4px;
-    background: var(--news-badge-bg, color-mix(in srgb, var(--color-accent, var(--gov-teal)) 14%, transparent));
+    background: var(--news-badge-bg, color-mix(in srgb, var(--gov-teal) 14%, transparent));
     color: var(--news-badge-fg, var(--gov-teal-text));
     font-size: var(--step--3); font-weight: 700; line-height: 1.35;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -4928,7 +4946,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
     box-shadow: var(--shadow-2);
 }
 .newsfeat-text__title { font-weight: 700; color: var(--gov-title); line-height: 1.35; font-size: var(--step--1); }
-.newsfeat-mini:hover .newsfeat-mini__title, .newsfeat-text:hover .newsfeat-text__title { color: var(--color-accent, var(--gov-teal)); }
+.newsfeat-mini:hover .newsfeat-mini__title, .newsfeat-text:hover .newsfeat-text__title { color: var(--gov-teal); }
 /* Заголовок лида белый на фото — при наведении оставляем чистым белый при зуме обложки */
 .newsfeat-lead:hover .newsfeat-lead__title { text-decoration: none; }
 @media (max-width: 560px) { .newsfeat-lead__over { padding: 14px; } .newsfeat-lead__title { font-size: var(--step-1); } }
@@ -4974,8 +4992,8 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
        заливку, на которой он гарантированно читается: на чистом акценте
        выходило 3.26:1 при норме 4.5. Подбирать оттенок руками нельзя —
        акцент задаётся в админке. */
-    background: var(--accent-fill-strong, var(--color-accent, var(--gov-teal))) !important;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 30%, transparent);
+    background: var(--accent-fill-strong) !important;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--gov-teal) 30%, transparent);
 }
 .media-tabs__tab:hover:not(.is-active) {
     color: var(--gov-title);
@@ -4999,8 +5017,8 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .catlist-toolbar__sort:focus-visible,
 .site-search input:focus,
 .site-search input:focus-visible {
-    border-color: var(--color-accent, var(--gov-teal)) !important;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent) !important;
+    border-color: var(--gov-teal) !important;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--gov-teal) 15%, transparent) !important;
     outline: none !important;
 }
 
@@ -5152,13 +5170,13 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     background: var(--gov-surface);
     box-shadow: 0 16px 36px rgba(37, 99, 235, 0.12);
     transform: translateY(-4px);
-    border-color: var(--color-accent, var(--gov-teal));
-    border-bottom-color: var(--color-accent, var(--gov-teal));
+    border-color: var(--gov-teal);
+    border-bottom-color: var(--gov-teal);
 }
 .feature-card__title::after {
     content: "\00a0→";
     display: inline-block;
-    color: var(--gov-teal-text, #0284c7);
+    color: var(--gov-teal-text);
     transition: transform .5s var(--feature-card-motion-ease);
 }
 .feature-card:hover .feature-card__title::after {
@@ -5229,7 +5247,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .block-cards--custom-text .feature-card__title { color: var(--cards-text); }
 .block-cards--custom-text .feature-card__text { color: var(--cards-text); opacity: .82; }
 .block-cards--custom-text .feature-card__icon { color: var(--cards-text); }
-.block-cards--custom-text .feature-card:hover .feature-card__title { color: var(--color-accent, var(--gov-teal)); }
+.block-cards--custom-text .feature-card:hover .feature-card__title { color: var(--gov-teal); }
 
 /* CTA-полоса */
 .block-ctaband[style*="--ctaband-bg"] { background: var(--ctaband-bg); }
@@ -5330,8 +5348,8 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 }
 .captcha-row input:focus,
 .captcha-row input:focus-visible {
-    border-color: var(--color-accent, var(--gov-teal));
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent);
+    border-color: var(--gov-teal);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--gov-teal) 15%, transparent);
     outline: none;
 }
 
@@ -5345,8 +5363,8 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 }
 .block-form__field input:focus, .block-form__field textarea:focus, .block-form__field select:focus,
 .block-form__field input:focus-visible, .block-form__field textarea:focus-visible, .block-form__field select:focus-visible {
-    border-color: var(--color-accent, var(--gov-teal));
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent, var(--gov-teal)) 15%, transparent);
+    border-color: var(--gov-teal);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--gov-teal) 15%, transparent);
     outline: none;
 }
 
@@ -5664,7 +5682,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow.is-open .s
 .site-scroll-progress__bar {
     height: 100%;
     width: var(--scroll-progress, 0%);
-    background: linear-gradient(90deg, var(--gov-teal), var(--color-accent, #3fc1c0));
+    background: linear-gradient(90deg, var(--gov-teal), var(--gov-teal));
     box-shadow: 0 0 10px var(--gov-teal);
     transition: width 0.1s linear;
 }
@@ -5897,7 +5915,7 @@ body.quick-search-active { overflow: hidden; }
 }
 .widget-latest-news__title:hover,
 .widget-latest-news a:hover {
-    color: var(--gov-teal, #0d9488);
+    color: var(--gov-teal);
 }
 .widget-latest-news__date,
 .widget-latest-news time {
@@ -6028,13 +6046,13 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__toggle {
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:hover > .site-menu__toggle,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:focus-within > .site-menu__toggle,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .site-menu__toggle {
-    color: var(--menu-hover-transparent, var(--menu-hover, var(--color-accent, var(--gov-teal)))) !important;
+    color: var(--menu-hover-transparent, var(--menu-hover, var(--gov-teal))) !important;
     background: transparent !important;
 }
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:hover > .site-menu__link,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item--has-children:focus-within > .site-menu__link,
 body .site-header--transparent:not(.is-scrolled) .site-menu__item.is-open > .site-menu__link {
-    color: var(--menu-hover-transparent, var(--menu-hover, var(--color-accent, var(--gov-teal)))) !important;
+    color: var(--menu-hover-transparent, var(--menu-hover, var(--gov-teal))) !important;
 }
 
 /* Панель «Ещё» имеет собственный непрозрачный фон, поэтому её ссылки
@@ -6222,7 +6240,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     box-shadow: 0 12px 24px -22px rgba(11, 26, 48, .5);
 }
 .block-anchornav--sticky { border-bottom: 0; }
-.block-anchornav__link:focus-visible { outline: 3px solid var(--color-accent, var(--gov-teal)); outline-offset: -3px; }
+.block-anchornav__link:focus-visible { outline: 3px solid var(--gov-teal); outline-offset: -3px; }
 /* Якорь не должен уезжать под закреплённую полосу оглавления. Высоту шапки
    здесь не учитываем: её держит scroll-padding-top у html — один отступ на все
    якоря сайта, а не константа у каждого вида цели. */
@@ -6258,7 +6276,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     border-radius: var(--radius);
     /* Слева — акцентная грань: по ней карточка акта отличается от обычного
        документа даже боковым зрением. */
-    border-inline-start: 4px solid var(--color-accent, var(--gov-teal));
+    border-inline-start: 4px solid var(--gov-teal);
     transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
 }
 .act-card:hover {
@@ -6274,7 +6292,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     width: 96px;
     height: 96px;
     z-index: 0;
-    background: var(--color-accent, var(--gov-teal));
+    background: var(--gov-teal);
     opacity: .16;
     -webkit-mask: var(--gov-emblem) center / contain no-repeat;
     mask: var(--gov-emblem) center / contain no-repeat;
@@ -6296,7 +6314,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     color: var(--gov-title);
     padding: 4px 10px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 14%, transparent);
+    background: color-mix(in srgb, var(--gov-teal) 14%, transparent);
 }
 .act-card__date { color: var(--gov-muted); font-size: var(--font-size-meta, var(--step--2)); }
 .act-card__foot {
@@ -6329,7 +6347,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     /* Акцентная грань слева — тот же приём, что у карточек актов: подпись
        читается как часть фирменного слоя, а не как случайная сноска. */
     padding-inline-start: 12px;
-    border-inline-start: 2px solid color-mix(in srgb, var(--color-accent, var(--gov-teal)) 50%, transparent);
+    border-inline-start: 2px solid color-mix(in srgb, var(--gov-teal) 50%, transparent);
     font-family: var(--font-family, 'Noto Sans', sans-serif);
     font-size: 12px;
     line-height: 1.5;
@@ -6505,7 +6523,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     background-color: var(--gov-navy);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
-.faq-item__q:hover { color: var(--gov-teal-text, #0284c7); }
+.faq-item__q:hover { color: var(--gov-teal-text); }
 .faq-item__a {
     padding: 0 24px 22px; color: var(--gov-ink); font-size: var(--step-0); line-height: var(--base-line-height, 1.65);
     border-top: 1px solid color-mix(in srgb, var(--gov-border) 60%, transparent);
@@ -6514,7 +6532,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .faq-item__category {
     font-size: var(--step--4); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
     padding: 4px 10px; border-radius: 999px; background: color-mix(in srgb, var(--gov-teal) 10%, transparent);
-    color: var(--gov-teal-text, #0284c7); margin-left: auto;
+    color: var(--gov-teal-text); margin-left: auto;
 }
 
 /* --- Документы и списки актов (Docs Grid / List) --- */
@@ -6552,7 +6570,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .doc-card__icon {
     display: grid; place-items: center; width: 44px; height: 44px;
     border-radius: var(--radius-sm, 8px); background: color-mix(in srgb, var(--gov-navy) 8%, var(--gov-surface));
-    color: var(--gov-teal-text, #0284c7); flex-shrink: 0;
+    color: var(--gov-teal-text); flex-shrink: 0;
 }
 .doc-card[data-document-kind="pdf"] .doc-card__icon { background: #fff1f2; color: #e11d48; }
 .doc-card[data-document-kind="doc"] .doc-card__icon,
@@ -6561,7 +6579,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .doc-card[data-document-kind="xlsx"] .doc-card__icon { background: #f0fdf4; color: #16a34a; }
 
 .doc-card__title { font-weight: 700; font-size: var(--step--1); color: var(--gov-title); line-height: 1.35; display: block; }
-.doc-card:hover .doc-card__title { color: var(--gov-teal-text, #0284c7); }
+.doc-card:hover .doc-card__title { color: var(--gov-teal-text); }
 .doc-card__meta { display: block; color: var(--gov-muted, #475569); font-size: var(--step--3); font-weight: 600; margin-top: 3px; }
 .doc-card__dl {
     /* 44px — минимальная цель для касания: кнопка скачивания круглая и стояла
@@ -6588,7 +6606,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .block-advantages__icon {
     display: grid; place-items: center; width: 50px; height: 50px;
     border-radius: var(--radius-sm, 10px); background: color-mix(in srgb, var(--gov-teal) 14%, transparent);
-    color: var(--gov-teal-text, #0284c7); font-size: var(--step-3); font-weight: 700;
+    color: var(--gov-teal-text); font-size: var(--step-3); font-weight: 700;
 }
 /* Заголовок блока — как у остальных секций: 1.1rem читался подписью, а не
    названием раздела, и ломал иерархию страницы. */
@@ -6611,9 +6629,9 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 }
 .contact-card__title { font-weight: 700; font-size: var(--step-1); color: var(--gov-title); margin: 0; }
 .contact-card__item { display: flex; align-items: center; gap: 10px; color: var(--gov-ink); font-size: var(--step--1); }
-.contact-card__item svg { color: var(--gov-teal-text, #0284c7); flex-shrink: 0; }
+.contact-card__item svg { color: var(--gov-teal-text); flex-shrink: 0; }
 .contact-card__item a { color: var(--gov-title); font-weight: 700; text-decoration: none; }
-.contact-card__item a:hover { color: var(--gov-teal-text, #0284c7); }
+.contact-card__item a:hover { color: var(--gov-teal-text); }
 
 /* Advantages and Contacts render through the same feature-card component.
    Legacy type selectors remain for content fields only and must not fork the
@@ -6642,8 +6660,8 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .feature-card.contact-card:hover,
 .feature-card.act-card:hover {
     transform: translateY(var(--feature-card-hover-lift, -4px));
-    border-color: var(--color-accent, var(--gov-teal));
-    border-bottom-color: var(--color-accent, var(--gov-teal));
+    border-color: var(--gov-teal);
+    border-bottom-color: var(--gov-teal);
     background: var(--gov-surface);
     box-shadow: 0 16px 36px rgba(37, 99, 235, .12);
 }
@@ -6656,7 +6674,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     margin: 0;
     border-radius: var(--radius-sm, 10px);
     background: color-mix(in srgb, var(--gov-navy) 8%, var(--gov-surface));
-    color: var(--gov-teal-text, #0284c7);
+    color: var(--gov-teal-text);
 }
 
 .feature-card:hover .block-advantages__icon,
@@ -6746,7 +6764,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .stage-item__num {
     display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%;
     background: var(--gov-surface); border: 2px solid var(--gov-teal);
-    color: var(--gov-teal-text, #0284c7); font-weight: 800; font-size: var(--step-1);
+    color: var(--gov-teal-text); font-weight: 800; font-size: var(--step-1);
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 .stage-item--active .stage-item__num {
@@ -6812,7 +6830,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     width: 48px;
     height: 48px;
     border-radius: var(--radius-sm, 10px);
-    background: color-mix(in srgb, var(--icon-text-accent, var(--color-accent, var(--gov-teal))) 14%, var(--gov-surface));
+    background: color-mix(in srgb, var(--icon-text-accent, var(--gov-teal)) 14%, var(--gov-surface));
     color: var(--icon-text-accent, var(--gov-teal-text));
 }
 .icon-text__body { min-width: 0; display: flex; flex-direction: column; gap: 8px; }

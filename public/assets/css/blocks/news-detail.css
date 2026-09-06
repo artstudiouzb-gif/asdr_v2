@@ -43,11 +43,11 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero { pad
     cursor: pointer; transition: all 0.2s ease; margin-left: auto;
 }
 .newsdetail__reader-btn:hover {
-    background: var(--gov-teal, #0d9488); color: var(--on-accent, #ffffff);
-    border-color: var(--gov-teal, #0d9488); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+    background: var(--gov-teal); color: var(--on-accent, #ffffff);
+    border-color: var(--gov-teal); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
 }
 .newsdetail__reader-btn:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--gov-teal, #0d9488) 42%, transparent);
+    outline: 3px solid color-mix(in srgb, var(--gov-teal) 42%, transparent);
     outline-offset: 2px;
 }
 .newsdetail__reader-btn--onDark {
@@ -56,9 +56,9 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero { pad
     border-color: rgba(255, 255, 255, 0.32);
 }
 .newsdetail__reader-btn--onDark:hover {
-    background: var(--gov-teal, #0d9488);
+    background: var(--gov-teal);
     color: #ffffff;
-    border-color: var(--gov-teal, #0d9488);
+    border-color: var(--gov-teal);
 }
 
 /* Хештеги в статье */
@@ -67,32 +67,32 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero { pad
 }
 .newsdetail-tag {
     display: inline-flex; align-items: center; padding: 6px 14px; border-radius: var(--radius, 20px);
-    background: color-mix(in srgb, var(--gov-teal, #0d9488) 10%, transparent);
+    background: color-mix(in srgb, var(--gov-teal) 10%, transparent);
     color: var(--gov-teal-on-tint, #00697d); font-size: var(--step--2); font-weight: 600;
     text-decoration: none; transition: all 0.2s ease;
 }
 .newsdetail-tag:hover {
-    background: var(--gov-teal, #0d9488); color: #ffffff; transform: translateY(-2px);
+    background: var(--gov-teal); color: #ffffff; transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
 }
 
 /* 2. Хронология событий (Таймлайн) */
 .newsdetail-timeline {
     margin: 32px 0; padding: 24px; border-radius: var(--radius, 16px);
-    background: color-mix(in srgb, var(--gov-teal, #0d9488) 3%, var(--gov-surface));
+    background: color-mix(in srgb, var(--gov-teal) 3%, var(--gov-surface));
     border: 1px solid var(--gov-border, rgba(0, 0, 0, 0.1));
 }
 .newsdetail-timeline__title {
     display: flex; align-items: center; gap: 8px; margin: 0 0 20px;
     font-size: var(--step-1); font-weight: 700; color: var(--gov-title);
 }
-.newsdetail-timeline__title svg { color: var(--gov-teal, #0d9488); }
+.newsdetail-timeline__title svg { color: var(--gov-teal); }
 .newsdetail-timeline__list {
     position: relative; padding-left: 20px;
 }
 .newsdetail-timeline__list::before {
     content: ''; position: absolute; top: 8px; bottom: 8px; left: 6px; width: 2px;
-    background: color-mix(in srgb, var(--gov-teal, #0d9488) 30%, transparent);
+    background: color-mix(in srgb, var(--gov-teal) 30%, transparent);
 }
 .newsdetail-timeline__item {
     position: relative; margin-bottom: 20px;
@@ -100,12 +100,12 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero { pad
 .newsdetail-timeline__item:last-child { margin-bottom: 0; }
 .newsdetail-timeline__dot {
     position: absolute; left: -20px; top: 6px; width: 14px; height: 14px; border-radius: 50%;
-    background: var(--gov-teal, #0d9488); border: 3px solid var(--gov-surface);
-    box-shadow: 0 0 0 2px var(--gov-teal, #0d9488);
+    background: var(--gov-teal); border: 3px solid var(--gov-surface);
+    box-shadow: 0 0 0 2px var(--gov-teal);
 }
 .newsdetail-timeline__date {
     display: inline-block; font-size: var(--step--4); font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.05em; color: var(--gov-teal, #0d9488); margin-bottom: 4px;
+    letter-spacing: 0.05em; color: var(--gov-teal); margin-bottom: 4px;
 }
 .newsdetail-timeline__heading {
     margin: 0 0 4px; font-size: var(--step-0); font-weight: 700; color: var(--gov-title);
@@ -537,8 +537,8 @@ button.newsdetail-gallery__thumb img {
 .newsdetail-gallery__thumb.is-active,
 button.newsdetail-gallery__thumb.is-active {
     opacity: 1;
-    border-color: var(--gov-teal, #0d9488);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gov-teal, #0d9488) 30%, transparent);
+    border-color: var(--gov-teal);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gov-teal) 30%, transparent);
 }
 .newsdetail-gallery__thumb:hover,
 button.newsdetail-gallery__thumb:hover {
@@ -572,13 +572,13 @@ button.newsdetail-gallery__thumb:hover {
 .newsdetail-dl-btn__icon {
     display: inline-flex;
     align-items: center;
-    color: var(--gov-teal, #0d9488);
+    color: var(--gov-teal);
     transition: transform 0.2s ease;
 }
 .newsdetail-dl-btn:hover {
-    background: var(--gov-navy, #0f172a);
+    background: var(--gov-navy);
     color: #ffffff;
-    border-color: var(--gov-navy, #0f172a);
+    border-color: var(--gov-navy);
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
     transform: translateY(-1px);
 }
@@ -592,8 +592,8 @@ button.newsdetail-gallery__thumb:hover {
     color: #f1f5f9;
 }
 :root[data-theme="dark"] .newsdetail-dl-btn:hover {
-    background: var(--gov-teal, #0d9488);
-    border-color: var(--gov-teal, #0d9488);
+    background: var(--gov-teal);
+    border-color: var(--gov-teal);
     color: #ffffff;
 }
 .newsdetail-photos__figure { margin: 0; }
@@ -633,7 +633,7 @@ button.newsdetail-gallery__thumb:hover {
     width: 36px;
     height: 36px;
     border-radius: 9999px;
-    background: var(--gov-navy, #0b1a30);
+    background: var(--gov-navy);
     color: #ffffff;
     text-decoration: none;
     transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
@@ -642,7 +642,7 @@ button.newsdetail-gallery__thumb:hover {
 }
 .newsdetail-back-pill:hover,
 .newsdetail-back-pill:focus-visible {
-    background: var(--gov-teal, #00a896);
+    background: var(--gov-teal);
     color: #ffffff;
     transform: translateY(-1px);
     box-shadow: 0 4px 14px rgba(0, 168, 150, 0.3);
@@ -796,7 +796,7 @@ button.newsdetail-gallery__thumb:hover {
     color: var(--gov-ink, #0b1a30);
 }
 .newsdetail:not(.newsdetail--premium) .newsdetail__reader-btn:hover {
-    background: var(--gov-teal, #0d9488);
+    background: var(--gov-teal);
     color: var(--on-accent, #ffffff);
 }
 .newsdetail:not(.newsdetail--premium) .newsdetail__lead {

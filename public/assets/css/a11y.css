@@ -388,7 +388,7 @@ html[data-a11y-reading="on"] .cms-block {
 .a11y-drawer__title-icon {
     display: inline-flex;
     align-items: center;
-    color: var(--color-accent, var(--gov-teal));
+    color: var(--gov-teal);
 }
 .a11y-drawer__close {
     display: grid;
@@ -518,8 +518,8 @@ html[data-a11y-reading="on"] .cms-block {
    добавляло третий признак того же самого и превращало плитку в кнопку
    тревоги. */
 .a11y-choice[aria-pressed="true"] {
-    border-color: var(--color-accent, var(--gov-teal));
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 9%, var(--bg-surface, #fff));
+    border-color: var(--gov-teal);
+    background: color-mix(in srgb, var(--gov-teal) 9%, var(--bg-surface, #fff));
 }
 .a11y-choice__visual {
     display: flex;
@@ -658,9 +658,9 @@ html[data-a11y-reading="on"] .cms-block {
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .a11y-sizer__step:hover .a11y-sizer__glyph {
-    border-color: var(--color-accent, var(--gov-teal));
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 12%, transparent);
-    color: var(--gov-teal-text, var(--text-main, #0f172a));
+    border-color: var(--gov-teal);
+    background: color-mix(in srgb, var(--gov-teal) 12%, transparent);
+    color: var(--gov-teal-text);
 }
 .a11y-sizer__caption {
     font-size: var(--step--2);
@@ -692,7 +692,7 @@ html[data-a11y-reading="on"] .cms-block {
     margin: 18px 0 0;
     padding: 18px 0;
     box-sizing: content-box;
-    accent-color: var(--color-accent, var(--gov-teal));
+    accent-color: var(--gov-teal);
     cursor: pointer;
 }
 
@@ -726,7 +726,7 @@ html[data-a11y-reading="on"] .cms-block {
     background: color-mix(in srgb, var(--text-main, #0f172a) 5%, transparent);
 }
 .a11y-toggle-btn[aria-pressed="true"] {
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 8%, transparent);
+    background: color-mix(in srgb, var(--gov-teal) 8%, transparent);
 }
 .a11y-toggle-btn__icon {
     display: grid;
@@ -744,7 +744,7 @@ html[data-a11y-reading="on"] .cms-block {
     color: var(--text-main, #0f172a);
 }
 .a11y-toggle-btn[aria-pressed="true"] .a11y-toggle-btn__icon {
-    color: var(--gov-teal-text, var(--color-accent, var(--gov-teal)));
+    color: var(--gov-teal-text);
 }
 
 /* Свитч */
@@ -773,7 +773,7 @@ html[data-a11y-reading="on"] .cms-block {
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .a11y-toggle-btn[aria-pressed="true"] .a11y-switch__track {
-    background: var(--color-accent, var(--gov-teal));
+    background: var(--gov-teal);
 }
 .a11y-toggle-btn[aria-pressed="true"] .a11y-switch__thumb {
     /* Ход = ширина дорожки − диаметр кружка − отступы с двух сторон
@@ -809,9 +809,9 @@ html[data-a11y-reading="on"] .cms-block {
     color: var(--text-muted, #64748b);
 }
 .a11y-reset:hover {
-    border-color: var(--color-accent, var(--gov-teal));
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 8%, transparent);
-    color: var(--gov-teal-text, var(--color-accent, var(--gov-teal)));
+    border-color: var(--gov-teal);
+    background: color-mix(in srgb, var(--gov-teal) 8%, transparent);
+    color: var(--gov-teal-text);
 }
 
 @media (max-width: 480px) {

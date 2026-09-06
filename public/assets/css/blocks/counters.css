@@ -91,7 +91,7 @@
    нет — иначе в полосе появляется синяя строка поперёк остальных. */
 .counter--link { text-decoration: none; color: inherit; }
 .counter--link:hover .counter__label { color: var(--counters-text, var(--gov-title)); }
-.counter--link:focus-visible { outline: 3px solid var(--color-accent, #2f6fed); outline-offset: 3px; }
+.counter--link:focus-visible { outline: 3px solid var(--gov-teal); outline-offset: 3px; }
 
 /* Крупные числа требуют более широкой дорожки: «1 200» с приставкой не влезает
    в 180px и вылезает за карточку — переносить его нельзя (см. nowrap выше). */
@@ -201,7 +201,7 @@
 .block-counters:hover {
     transform: none;
     box-shadow: 0 24px 50px rgba(23, 58, 99, 0.12);
-    border-color: var(--color-accent, var(--gov-teal));
+    border-color: var(--gov-teal);
 }
 
 .counter {
@@ -232,16 +232,16 @@
     transition: color 0.3s ease;
 }
 .counter:hover .counter__label {
-    color: var(--color-accent, var(--gov-teal)) !important;
+    color: var(--gov-teal) !important;
 }
 
 .counter__icon {
-    background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 8%, transparent);
-    color: var(--color-accent, var(--gov-teal));
+    background: color-mix(in srgb, var(--gov-teal) 8%, transparent);
+    color: var(--gov-teal);
     transition: background 0.35s ease, color 0.35s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .counter:hover .counter__icon {
-    background: var(--color-accent, var(--gov-teal)) !important;
+    background: var(--gov-teal) !important;
     color: #fff !important;
     transform: scale(1.1) !important;
 }
@@ -250,7 +250,7 @@
     background: transparent !important;
 }
 .block-counters--icons-no-bg .counter:hover .counter__icon {
-    color: var(--color-accent, var(--gov-teal)) !important;
+    color: var(--gov-teal) !important;
 }
 .block-counters .counter__body {
     flex: 1;

@@ -854,7 +854,7 @@ final class HeroRenderer
         }
         // Акцент по умолчанию берётся из настроек «Дизайна»: фирменный цвет
         // задаётся в админке, а не прибивается в коде.
-        $vars['--hero-accent'] = $accent !== '' ? $accent : 'var(--color-accent)';
+        $vars['--hero-accent'] = $accent !== '' ? $accent : 'var(--gov-teal)';
 
         return $vars;
     }

@@ -13,7 +13,7 @@
 .block-divider--short {
     width: 96px;
     margin-inline: auto;
-    border-top: 3px solid var(--color-accent, var(--gov-teal));
+    border-top: 3px solid var(--gov-teal);
     border-radius: 3px;
 }
 /* Знак — та же эмблема, что у заглушек и водяного знака карточек: своей

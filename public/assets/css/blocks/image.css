@@ -16,7 +16,7 @@
     border-radius: var(--radius, 14px);
 }
 a.block-image__frame:focus-visible {
-    outline: 3px solid var(--color-accent, #2f6fed);
+    outline: 3px solid var(--gov-teal);
     outline-offset: 3px;
 }
 
