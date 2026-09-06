@@ -40,7 +40,8 @@ $contrast = static function (string $a, string $b): float {
 
 test('Палитра «Дизайна» совпадает с токенами темы', function () {
     $theme = (string) file_get_contents(__DIR__ . '/../../public/assets/css/gov-theme.css');
-    $root = substr($theme, (int) strpos($theme, ':root {'), 1200);
+    $rootAt = (int) strpos($theme, ':root {');
+    $root = substr($theme, $rootAt, (int) strpos($theme, "\n}", $rootAt) - $rootAt);
     $token = static function (string $name) use ($root): string {
         preg_match('/' . preg_quote($name, '/') . ':\s*([^;]+);/', $root, $m);
 

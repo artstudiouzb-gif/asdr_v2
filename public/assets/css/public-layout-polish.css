@@ -32,7 +32,7 @@
     inset-inline-start: 0;
     inline-size: 3px;
     border-radius: 999px;
-    background: var(--color-accent, var(--gov-teal));
+    background: var(--gov-teal);
 }
 
 [data-visual-system] .cms-block--bg-navy .section-head {
@@ -600,7 +600,7 @@
     --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
     
     /* Layered atmospheric elevation tokens (Apple / Pentagram optical standard) */
-    --elevation-flat: 0 0 0 1px color-mix(in srgb, var(--gov-navy, #0f172a) 8%, transparent);
+    --elevation-flat: 0 0 0 1px color-mix(in srgb, var(--gov-navy) 8%, transparent);
     --elevation-resting: 
         0 1px 2px rgba(15, 23, 42, 0.03),
         0 8px 20px -4px rgba(15, 23, 42, 0.05),
@@ -758,7 +758,7 @@ body {
 
 /* High-contrast accessible focus ring (WCAG 2.1 AAA) */
 :focus-visible {
-    outline: 2px solid var(--color-accent, var(--gov-teal, #0d7a74));
+    outline: 2px solid var(--gov-teal);
     outline-offset: 3px;
 }
 

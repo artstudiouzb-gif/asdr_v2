@@ -68,7 +68,7 @@ test('Ссылки в новостях при наведении меняют ц
 
     // .news-column:hover не должен иметь text-decoration: underline
     assert_not_contains('.news-column:hover .news-column__title { text-decoration: underline', $newsCss);
-    assert_contains('.news-column:hover .news-column__title { color: var(--color-accent, var(--gov-teal)); text-decoration: none; }', $newsCss);
+    assert_contains('.news-column:hover .news-column__title { color: var(--gov-teal); text-decoration: none; }', $newsCss);
     assert_contains('text-decoration: none;', $homeCss);
 });
 

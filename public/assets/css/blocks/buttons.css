@@ -28,7 +28,7 @@
     transition: background-color .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 .block-buttons__btn:focus-visible {
-    outline: 3px solid var(--color-accent, #2f6fed);
+    outline: 3px solid var(--gov-teal);
     outline-offset: 3px;
 }
 .block-buttons--size-large .block-buttons__btn {
@@ -55,14 +55,14 @@
     border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
 }
 .block-buttons__btn--outline:hover {
-    border-color: var(--color-accent, var(--gov-teal));
-    color: var(--color-accent, var(--gov-teal));
+    border-color: var(--gov-teal);
+    color: var(--gov-teal);
 }
 .block-buttons__btn--link {
     background: transparent;
     border: 0;
     padding-inline: 0;
-    color: var(--section-link-fg, var(--color-accent, var(--gov-teal)));
+    color: var(--section-link-fg, var(--gov-teal));
     text-decoration: underline;
     text-underline-offset: 4px;
 }

@@ -35,7 +35,7 @@
 .cms-tabs__tab:hover { color: var(--gov-title, var(--ink)); }
 
 .cms-tabs__tab:focus-visible {
-    outline: 2px solid var(--color-accent, var(--gov-teal));
+    outline: 2px solid var(--gov-teal);
     outline-offset: 2px;
 }
 
@@ -57,7 +57,7 @@
 
 .cms-tabs--segmented .cms-tabs__tab.is-active,
 .cms-tabs--segmented .cms-tabs__tab.is-active:hover {
-    background: var(--color-accent, var(--gov-teal));
+    background: var(--gov-teal);
     box-shadow: var(--shadow-2, var(--shadow-md));
     color: #fff;
 }
@@ -75,7 +75,7 @@
 }
 
 .cms-tabs--underline .cms-tabs__tab.is-active {
-    border-bottom-color: var(--color-accent, var(--gov-teal));
+    border-bottom-color: var(--gov-teal);
     color: var(--gov-title, var(--ink));
 }
 
@@ -97,7 +97,7 @@
     }
 
     .cms-tabs--vertical .cms-tabs__tab.is-active {
-        background: color-mix(in srgb, var(--color-accent, var(--gov-teal)) 12%, transparent);
+        background: color-mix(in srgb, var(--gov-teal) 12%, transparent);
         color: var(--gov-title, var(--ink));
     }
 
