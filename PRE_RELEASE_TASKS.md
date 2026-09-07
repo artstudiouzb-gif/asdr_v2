@@ -27,7 +27,10 @@ production-сервера и реального контента. Полный �
 
 - [ ] Указать боевой `APP_URL`, `APP_ENV=production`, `APP_DEBUG=false`.
 - [ ] Направить DocumentRoot на `public/` либо проверить актуальные `.htaccess`.
-- [ ] Установить HTTPS и проверить редирект HTTP → HTTPS.
+- [ ] Установить HTTPS. Редирект HTTP → HTTPS включается сам, как только
+      `APP_URL` объявлен через `https://` (`RequestUrl::httpsRedirectTarget`);
+      факт проверяет `release_check.php` строкой `https_redirect` — она
+      опрашивает сайт по `http://` и требует 301/308 на `https://`.
 - [ ] Проверить, что служебные URL из `SECURITY.md` возвращают 403/404.
 - [ ] Настроить cron всех воркеров и убедиться, что `/health` возвращает `ok`.
 - [ ] Снять эталон целостности: `php app/Console/integrity_check.php --baseline`

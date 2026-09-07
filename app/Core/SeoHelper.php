@@ -154,6 +154,75 @@ final class SeoHelper
         return "";
     }
 
+    /**
+     * Значащие параметры адреса, которые попадают в canonical.
+     *
+     * Порядок здесь — это и порядок в готовой ссылке: `?page=2&category=x` и
+     * `?category=x&page=2` — один и тот же набор записей, и объявлять для него
+     * два разных canonical значило бы своими руками сделать дубль, ради
+     * борьбы с которым canonical и существует.
+     *
+     * Чего в списке намеренно нет:
+     *  - `sort` — те же записи в другом порядке. Это и есть дубль, canonical
+     *    обязан вести на список без сортировки.
+     *  - `q` — свободный ввод, пространство значений бесконечно.
+     *  - `token`, `to`, `format` — служебные, к содержимому страницы отношения
+     *    не имеют.
+     */
+    private const CANONICAL_PARAMS = ['category', 'page', 'mtab', 'mpage', 'm'];
+
+    /**
+     * Первые страницы списков: значение по умолчанию из адреса убираем.
+     *
+     * `/news` и `/news?page=1` — побайтно одна страница, и разный canonical
+     * у них снова развёл бы её на два адреса.
+     */
+    private const CANONICAL_DEFAULTS = ['page' => '1', 'mpage' => '1'];
+
+    /**
+     * Canonical текущей страницы: путь плюс значащие параметры адреса.
+     *
+     * Раньше здесь был только путь, и каждый адрес с параметром объявлял себя
+     * дублем: `/news?page=7` вело на `/news`, а рубрикатор новостей
+     * (`?category=<slug>`) не имел в выдаче ни одного индексируемого адреса
+     * вовсе. Ссылки `rel="prev|next"` это не компенсируют — как сигнал
+     * индексации поиск их больше не использует.
+     *
+     * Обратное тоже неверно: пускать в canonical всю query-строку значит
+     * плодить адреса на каждую метку рекламной кампании (`utm_*`, `fbclid`) и
+     * на каждый порядок сортировки. Поэтому список закрытый — см.
+     * CANONICAL_PARAMS.
+     *
+     * @param string $query сырая query-строка запроса (без «?»)
+     */
+    public static function canonicalUrl(string $appUrl, string $path, string $query): string
+    {
+        $base = $appUrl . $path;
+        if (trim($query) === '') {
+            return $base;
+        }
+
+        $parsed = [];
+        parse_str($query, $parsed);
+
+        $kept = [];
+        foreach (self::CANONICAL_PARAMS as $name) {
+            $value = $parsed[$name] ?? null;
+            // `?page[]=1` — массив: в canonical такому значению взяться неоткуда,
+            // а http_build_query() развернул бы его в `page%5B0%5D=1`.
+            if (!is_scalar($value)) {
+                continue;
+            }
+            $value = trim((string) $value);
+            if ($value === '' || $value === (self::CANONICAL_DEFAULTS[$name] ?? null)) {
+                continue;
+            }
+            $kept[$name] = $value;
+        }
+
+        return $kept === [] ? $base : $base . '?' . http_build_query($kept);
+    }
+
     /** Обрезка по границе слова: половина слова в сниппете читается как сбой. */
     public static function clip(string $text, int $limit): string
     {
