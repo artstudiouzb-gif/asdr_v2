@@ -47,7 +47,13 @@ if (\App\Core\DesignSettings::bodyFontChoice() !== 'style:custom') {
 
 // --- SEO / Open Graph ---
 $appUrl = \App\Core\AppUrl::base();
-$canonicalUrl = $appUrl . Locale::url(Locale::path());
+// Canonical: путь плюс значащие параметры адреса (страница списка,
+// рубрика, вкладка медиа-блока). Закрытый список — в SeoHelper.
+$canonicalUrl = \App\Core\SeoHelper::canonicalUrl(
+    $appUrl,
+    Locale::url(Locale::path()),
+    (string) (parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_QUERY) ?? '')
+);
 $ogType = $ogType ?? 'website';
 // Приоритет OG-картинки: страница -> дефолтный OG:Image -> логотип (задача 116).
 $defaultOg = Setting::get('default_og_image', '');

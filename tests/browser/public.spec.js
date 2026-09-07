@@ -1,17 +1,66 @@
 const { test, expect } = require('@playwright/test');
+const { PUBLIC_PAGES } = require('./pages');
 
-test('public home renders without horizontal overflow', async ({ page }) => {
-    const response = await page.goto('/');
-    expect(response).not.toBeNull();
-    expect(response.status()).toBe(200);
-    await expect(page.locator('main#main-content')).toBeVisible();
+/**
+ * Горизонтальная прокрутка проверялась только на главной, хотя ломают её
+ * обычно не там: широкая таблица, длинное слово в заголовке, карточка,
+ * растянутая на две ячейки сетки, полоса прокрутки «Хронологии». Обход идёт
+ * по тому же списку страниц, что и аудит доступности, и на обоих проектах
+ * Playwright — то есть и на телефоне, где переполнение как раз и заметно.
+ *
+ * В CI фактически проверяются те страницы, что существуют без демо-контента:
+ * главная, лента, поиск, узбекская версия и каталог. Остальные пропускаются
+ * (см. ниже) — чтобы покрыть и их, фикстуре CI нужен демо-комплект.
+ *
+ * Допуск 15px — тот же, что стоял у проверки главной: он покрывает
+ * округление ширины полосы прокрутки, но не настоящее переполнение.
+ */
+for (const [name, url] of PUBLIC_PAGES) {
+    test(`нет горизонтальной прокрутки: ${name}`, async ({ page }) => {
+        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+        expect(response).not.toBeNull();
 
-    const overflow = await page.evaluate(() => ({
-        viewport: document.documentElement.clientWidth,
-        content: document.documentElement.scrollWidth
-    }));
-    expect(overflow.content).toBeLessThanOrEqual(overflow.viewport + 15);
-});
+        // Минимальная фикстура CI содержит только главную и витрину блоков:
+        // новость, проект, контакты и страница со слайдером приезжают с
+        // демо-комплектом, которого в CI нет. Пропуск ровно такой же, как в
+        // аудите доступности, и по той же причине — мерить ширину страницы
+        // ошибки бессмысленно. Пропускаем только 404: 500 обязан ронять тест,
+        // иначе сломанная страница выглядела бы как отсутствующая.
+        test.skip(
+            response.status() === 404,
+            `${url} — нет в этой сборке контента`
+        );
+        expect(response.status()).toBe(200);
+        await expect(page.locator('main#main-content')).toBeVisible();
+
+        const overflow = await page.evaluate(() => ({
+            viewport: document.documentElement.clientWidth,
+            content: document.documentElement.scrollWidth,
+            // Имя самого широкого элемента: без него отчёт говорит «шире на
+            // 40px» и не говорит, кто именно вылез.
+            widest: (() => {
+                let worst = null;
+                let width = 0;
+                for (const el of document.querySelectorAll('body *')) {
+                    const box = el.getBoundingClientRect();
+                    if (box.right > width) {
+                        width = box.right;
+                        worst = el.tagName.toLowerCase()
+                            + (el.className && typeof el.className === 'string'
+                                ? '.' + el.className.trim().split(/\s+/).join('.')
+                                : '');
+                    }
+                }
+                return worst;
+            })()
+        }));
+
+        expect(
+            overflow.content,
+            `${url}: содержимое шире экрана, самый правый элемент — ${overflow.widest}`
+        ).toBeLessThanOrEqual(overflow.viewport + 15);
+    });
+}
 
 test('поиск в шапке отправляется с клавиатуры и с первого нажатия кнопки', async ({ page }) => {
     await page.goto('/');

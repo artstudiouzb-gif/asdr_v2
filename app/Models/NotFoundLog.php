@@ -22,6 +22,16 @@ final class NotFoundLog
         '~\.(php|env|git|sql|asp|aspx|cgi|jsp|xml|txt|js|css|map|ico|png|jpe?g|gif|webp|svg|woff2?|ttf|zip|gz|bak)$|wp-(admin|login|content|includes)|/\.(git|env|well-known/(?!security))~i';
 
     /**
+     * Путь похож на скан или на статику, а не на попытку человека открыть
+     * страницу. Публичный, потому что этим же знанием пользуется страница
+     * 404: подбирать похожие материалы для `/wp-login.php` незачем.
+     */
+    public static function isNoise(string $path): bool
+    {
+        return $path === '' || preg_match(self::NOISE_PATTERN, $path) === 1;
+    }
+
+    /**
      * Фиксирует 404 (только GET, не /admin, без статики/сканеров).
      * Любая ошибка журнала не должна мешать отдаче страницы 404.
      */
@@ -33,7 +43,7 @@ final class NotFoundLog
             }
             $path = (string) (parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH) ?: '');
             if ($path === '' || $path === '/' || str_starts_with($path, '/admin')
-                || mb_strlen($path) > 255 || preg_match(self::NOISE_PATTERN, $path) === 1) {
+                || mb_strlen($path) > 255 || self::isNoise($path)) {
                 return;
             }
 

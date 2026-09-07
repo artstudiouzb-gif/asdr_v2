@@ -11,8 +11,14 @@ $hint = match (true) {
     $channels['telegram'] => 'Введите 6-значный код, отправленный в ваш Telegram.',
     default => 'Введите 6-значный код из приложения-аутентификатора.',
 };
+
+// Экран входа тоже обязан приходить в выбранном виде: настройки
+// отображения посетитель задаёт на сайте, а логинится здесь.
+$a11yAttributes = \App\Core\A11ySettings::htmlAttributes(
+    \App\Core\A11ySettings::fromCookie($_COOKIE[\App\Core\A11ySettings::COOKIE] ?? null)
+);
 ?><!doctype html>
-<html lang="ru">
+<html lang="ru"<?= $a11yAttributes !== '' ? ' ' . $a11yAttributes : '' ?>>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,6 +26,7 @@ $hint = match (true) {
     <?= \App\Core\Icon::browserConfigHtml() ?>
     <title>Двухфакторная аутентификация — Защищённое хранилище</title>
     <link rel="stylesheet" href="/assets/css/repo.css">
+    <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body class="repo-auth">
 <div class="repo-auth__card">

@@ -5,8 +5,14 @@ use App\Core\Csrf;
 /** @var string|null $error */
 $repoName = htmlspecialchars((string) \App\Models\Setting::get('site_name', 'Файловый портал'), ENT_QUOTES);
 $repoLogo = trim((string) \App\Models\Setting::get('repo_logo', ''));
+
+// Экран входа тоже обязан приходить в выбранном виде: настройки
+// отображения посетитель задаёт на сайте, а логинится здесь.
+$a11yAttributes = \App\Core\A11ySettings::htmlAttributes(
+    \App\Core\A11ySettings::fromCookie($_COOKIE[\App\Core\A11ySettings::COOKIE] ?? null)
+);
 ?><!doctype html>
-<html lang="ru">
+<html lang="ru"<?= $a11yAttributes !== '' ? ' ' . $a11yAttributes : '' ?>>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,6 +20,7 @@ $repoLogo = trim((string) \App\Models\Setting::get('repo_logo', ''));
     <?= \App\Core\Icon::browserConfigHtml() ?>
     <title>Вход — Защищённое хранилище</title>
     <link rel="stylesheet" href="/assets/css/repo.css">
+    <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body class="repo-auth">
 <div class="repo-auth__card">

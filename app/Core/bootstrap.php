@@ -63,6 +63,23 @@ $prepareHttpSecurity = static function (): void {
     if (!headers_sent()) {
         header('Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()');
     }
+
+    // Принудительный HTTPS, когда боевой адрес объявлен как https (условия и
+    // причина — в RequestUrl::httpsRedirectTarget). Стоит сразу после
+    // applyTrustedProxy(): к этому моменту X-Forwarded-Proto от недоверенного
+    // peer уже снят, то есть схему нельзя подделать заголовком. И до
+    // подключения к БД — незашифрованный запрос не должен доходить до данных.
+    $httpsTarget = \App\Core\RequestUrl::httpsRedirectTarget();
+    if ($httpsTarget !== null && !headers_sent()) {
+        // 301 кэшируется браузером и понятен поиску, но превращает POST в GET
+        // и теряет тело. Для небезопасных методов 308: он тоже постоянный, но
+        // обязывает повторить запрос тем же методом.
+        $permanent = in_array(strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')), ['GET', 'HEAD'], true)
+            ? 301
+            : 308;
+        header('Location: ' . $httpsTarget, true, $permanent);
+        exit;
+    }
 };
 
 if (is_file($configFile)) {

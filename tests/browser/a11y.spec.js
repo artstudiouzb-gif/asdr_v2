@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const { AxeBuilder } = require('@axe-core/playwright');
+const { PUBLIC_PAGES: PAGES } = require('./pages');
 
 /**
  * Автоматический аудит доступности. Раньше он был обязательной ручной
@@ -11,21 +12,6 @@ const { AxeBuilder } = require('@axe-core/playwright');
  * axe не заменяет ручную проверку: он не оценивает осмысленность alt, порядок
  * табуляции и понятность формулировок. Он ловит регресс.
  */
-const PAGES = [
-    ['главная', '/'],
-    ['лента новостей', '/news'],
-    ['поиск', '/search?q=%D1%81%D1%82%D1%80%D0%B0%D1%82%D0%B5%D0%B3%D0%B8%D1%8F'],
-    ['узбекская версия', '/uz'],
-    // Формы и таблицы — там нарушений больше всего: у полей теряются подписи,
-    // у ячеек — заголовки. Детальная новость и проект добавлены как самые
-    // читаемые страницы сайта.
-    ['детальная новость', '/news/ekspertnyy-kadrovyy-rezerv'],
-    ['проект', '/projects/cifrovaya-transformaciya'],
-    ['каталог документов', '/catalog/documenty'],
-    ['контакты с формой', '/kontakty'],
-    ['страница со слайдером', '/antikorrupciya'],
-];
-
 for (const [name, url] of PAGES) {
     for (const theme of ['light', 'dark']) {
         test(`доступность: ${name} (${theme})`, async ({ page }) => {
