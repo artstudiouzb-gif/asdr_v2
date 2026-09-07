@@ -8,18 +8,18 @@ use App\Core\Flash;
 $repoName = htmlspecialchars((string) \App\Models\Setting::get('site_name', 'Файловый портал'), ENT_QUOTES);
 $repoLogo = trim((string) \App\Models\Setting::get('repo_logo', ''));
 
-// Версия для слабовидящих: состояние из cookie (общая с основным сайтом).
-$a11ySchemes = ['cw', 'wc', 'bb'];
-$a11ySizes = ['m', 'l', 'xl'];
-$a11yParts = explode(':', (string) ($_COOKIE['a11y'] ?? ''));
-$a11y = [
-    'on' => in_array($a11yParts[0] ?? '', $a11ySchemes, true),
-    'scheme' => in_array($a11yParts[0], $a11ySchemes, true) ? $a11yParts[0] : 'cw',
-    'size' => in_array($a11yParts[1] ?? '', $a11ySizes, true) ? $a11yParts[1] : 'm',
-    'images' => ($a11yParts[2] ?? '') === 'off' ? 'off' : 'on',
-];
+// Настройки отображения общие с основным сайтом и читаются одним классом.
+// Прежде здесь жил разбор cookie прежней версии («cw:l:on») с атрибутами
+// data-a11y-scheme и data-a11y-size="m|l|xl": ни того формата, ни тех правил
+// в a11y.css давно нет, поэтому условие не срабатывало никогда и портал
+// приходил без атрибутов. Настройки всё равно применялись — их доставлял
+// a11y.js уже после загрузки, — но страница успевала нарисоваться обычной и
+// прыгала в высокий контраст на глазах у того, кому он и нужен.
+$a11ySettings = \App\Core\A11ySettings::fromCookie($_COOKIE[\App\Core\A11ySettings::COOKIE] ?? null);
+$a11yActive = \App\Core\A11ySettings::isActive($a11ySettings);
+$a11yAttributes = \App\Core\A11ySettings::htmlAttributes($a11ySettings);
 ?><!doctype html>
-<html lang="ru"<?= $a11y['on'] ? ' data-a11y="1" data-a11y-scheme="' . htmlspecialchars($a11y['scheme'], ENT_QUOTES) . '" data-a11y-size="' . htmlspecialchars($a11y['size'], ENT_QUOTES) . '" data-a11y-images="' . htmlspecialchars($a11y['images'], ENT_QUOTES) . '"' : '' ?>>
+<html lang="ru"<?= $a11yAttributes !== '' ? ' ' . $a11yAttributes : '' ?>>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -43,7 +43,11 @@ $a11y = [
         <span>Защищённое хранилище</span>
     </a>
     <nav>
-        <button type="button" class="a11y-toggle" aria-label="Версия для слабовидящих" title="Версия для слабовидящих" aria-controls="a11y-panel" aria-expanded="<?= $a11y['on'] ? 'true' : 'false' ?>">
+        <?php // data-a11y-open обязателен: по нему a11y.js и открывает панель.
+              // Без него кнопка была видна, но не делала ничего. ?>
+        <button type="button" class="a11y-toggle<?= $a11yActive ? ' is-active' : '' ?>" data-a11y-open
+                aria-label="Настройки отображения" title="Настройки отображения: размер текста, контраст, интервалы"
+                aria-controls="a11y-panel" aria-expanded="false">
             <?= \App\Core\Icon::render('eye', 18) ?>
         </button>
         <?php if (!empty($repoUser)): ?>
@@ -57,28 +61,15 @@ $a11y = [
         <?php endif; ?>
     </nav>
 </header>
-<?php if ($a11y['on']): ?>
-<div class="a11y-panel is-open" id="a11y-panel" role="region" aria-label="Настройки версии для слабовидящих">
-    <div class="a11y-panel__group">
-        <b>Цвет:</b>
-        <button type="button" data-a11y-set="scheme:cw" title="Чёрным по белому">Ч</button>
-        <button type="button" data-a11y-set="scheme:wc" title="Белым по чёрному">Б</button>
-        <button type="button" data-a11y-set="scheme:bb" title="Тёмно-синим по голубому">С</button>
-    </div>
-    <div class="a11y-panel__group">
-        <b>Размер:</b>
-        <button type="button" class="a11y-panel__size-a1" data-a11y-set="size:m" title="Обычный">А</button>
-        <button type="button" class="a11y-panel__size-a2" data-a11y-set="size:l" title="Крупный">А</button>
-        <button type="button" class="a11y-panel__size-a3" data-a11y-set="size:xl" title="Очень крупный">А</button>
-    </div>
-    <div class="a11y-panel__group">
-        <b>Изображения:</b>
-        <button type="button" data-a11y-set="images:on" title="Показывать">Вкл</button>
-        <button type="button" data-a11y-set="images:off" title="Скрыть">Выкл</button>
-    </div>
-    <a href="#" class="a11y-panel__off">Обычная версия</a>
-</div>
-<?php endif; ?>
+<?php
+// Панель — тот же партиал, что и на публичной части. Прежде здесь лежала своя
+// копия из прошлой версии: кнопки «scheme:cw» и «size:m|l|xl» нормализатор
+// A11ySettings уже не знает (у размера теперь проценты 100–200), поэтому
+// «Крупный» сбрасывал бы размер в 100, а выбор цвета не делал ничего. Плюс у
+// класса .a11y-panel не осталось ни одного правила в CSS — разметка была
+// мёртвой целиком. Копия и разъехалась бы снова при первой правке настроек.
+require dirname(__DIR__, 2) . '/site/_a11y_panel.php';
+?>
 <main class="repo-main">
     <?php foreach (Flash::pull() as $flash): ?>
         <div class="repo-alert repo-alert--<?= $flash['type'] === 'success' ? 'success' : 'error' ?>"

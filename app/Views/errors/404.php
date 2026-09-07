@@ -33,7 +33,14 @@ $latest = [];
 $sections = [];
 if ($dbOn) {
     try {
-        if (mb_strlen($guess) >= 2 && class_exists(Search::class)) {
+        // Поиск по сайту — десяток запросов, и раньше он шёл на каждый промах,
+        // включая сплошной поток от сканеров (/wp-login.php, /.env, битые
+        // ссылки на картинки). Человеку подсказка нужна, скану — нет, и что
+        // считать сканом, уже решено один раз в журнале 404: второй список
+        // разъехался бы с первым.
+        if (mb_strlen($guess) >= 2
+            && !\App\Models\NotFoundLog::isNoise($reqPath)
+            && class_exists(Search::class)) {
             $suggest = array_slice(Search::site($guess, 6), 0, 5);
         }
     } catch (\Throwable $e) {
