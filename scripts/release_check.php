@@ -62,7 +62,54 @@ if (is_file($configFile)) {
         $url = (string) ($config['app']['url'] ?? '');
         $add('production_env', $env === 'production' ? 'ok' : 'warning', 'APP_ENV=' . $env);
         $add('debug_disabled', !$debug ? 'ok' : 'error', $debug ? 'APP_DEBUG включён' : 'APP_DEBUG выключен');
-        $add('https_url', str_starts_with($url, 'https://') ? 'ok' : 'error', $url !== '' ? $url : 'APP_URL не задан');
+        $httpsUrl = str_starts_with($url, 'https://');
+        $add('https_url', $httpsUrl ? 'ok' : 'error', $url !== '' ? $url : 'APP_URL не задан');
+
+        // Схема в APP_URL — это намерение, а не факт. Раньше проверялась
+        // только она, и установка, где шаг «включить HTTPS» на хостинге
+        // пропущен, показывала https_url: OK, продолжая отвечать по HTTP:
+        // сессионная cookie уходила без флага Secure (Session::start() берёт
+        // его у RequestUrl::isHttps()), а HSTS не отправлялся вовсе — он
+        // ставится только на HTTPS-ответе. Поэтому спрашиваем сам сайт: заход
+        // по http:// обязан ответить постоянным редиректом на https://.
+        if ($httpsUrl) {
+            $plain = 'http://' . substr($url, strlen('https://'));
+            // Свой curl, а не Http::request(): тот отдаёт только код и тело,
+            // а здесь нужен именно адрес перенаправления — иначе «301» на
+            // чужой хост прошёл бы за успех.
+            // curl_init() объявлен как CurlHandle|false, и в файле со
+            // strict_types false ушёл бы параметром в curl_setopt_array(),
+            // то есть TypeError вместо строки отчёта.
+            $ch = function_exists('curl_init') ? curl_init($plain) : false;
+            if ($ch === false) {
+                $add('https_redirect', 'warning', 'Не удалось опросить ' . $plain);
+            } else {
+                curl_setopt_array($ch, [
+                    CURLOPT_NOBODY => true,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_FOLLOWLOCATION => false,
+                    CURLOPT_TIMEOUT => 10,
+                    CURLOPT_CONNECTTIMEOUT => 5,
+                ]);
+                $answered = curl_exec($ch) !== false;
+                $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $location = trim((string) curl_getinfo($ch, CURLINFO_REDIRECT_URL));
+
+                if (!$answered || $status === 0) {
+                    $add('https_redirect', 'warning', $plain . ' не ответил — проверьте вручную');
+                } elseif (in_array($status, [301, 308], true) && str_starts_with(strtolower($location), 'https://')) {
+                    $add('https_redirect', 'ok', $status . ' -> ' . $location);
+                } else {
+                    $add(
+                        'https_redirect',
+                        'error',
+                        $plain . ' отвечает ' . $status . ($location !== '' ? ' -> ' . $location : '')
+                            . ' вместо 301/308 на https. Проверьте APP_URL и редирект на хостинге.'
+                    );
+                }
+            }
+        }
+
         $add(
             'encryption_key',
             SecretBox::hasValidCurrentKey() ? 'ok' : 'error',
