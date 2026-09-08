@@ -589,6 +589,31 @@
     .block-textimage--image-left .textimage__visual { order: initial; }
 }
 
+/* Колонка конструктора — свой контейнер измерения. Сетки блоков считают
+   раскладку по ширине экрана, а в колонке 1:3 узкая доля остаётся узкой на
+   любом экране: пять карточек в ряд там не помещаются никогда, и настройка
+   «Колонок» ломала вёрстку вместо того, чтобы её задавать. Медиазапросы
+   остаются фолбэком — правило @container действует только внутри колонки. */
+.cms-columns__col {
+    container-type: inline-size;
+    container-name: cms-col;
+}
+
+@container cms-col (max-width: 720px) {
+    .cards-grid,
+    .imgcards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .imgcards-grid--carousel .imgcard,
+    .cards-track > * { flex: 0 0 calc((100% - var(--card-gap, 20px)) / 2); }
+}
+
+@container cms-col (max-width: 480px) {
+    .cards-grid,
+    .imgcards-grid,
+    .cat-grid { grid-template-columns: minmax(0, 1fr); }
+    .imgcards-grid--carousel .imgcard,
+    .cards-track > * { flex: 0 0 85%; }
+}
+
 /* ========================================================================
    Senior Editorial Design System Refinements
    (Optical tracking, tactile hover, WCAG 2.1 focus)

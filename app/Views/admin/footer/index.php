@@ -182,6 +182,49 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
                 <input type="text" id="bottom" name="bottom" value="<?= htmlspecialchars($config['bottom'], ENT_QUOTES) ?>">
                 <span class="form-hint">Плейсхолдеры: <code>{year}</code> — текущий год, <code>{site}</code> — название сайта.</span>
             </div>
+            <?php $bottomLinks = (array) ($config['bottom_links'] ?? []); ?>
+            <p class="form-hint">
+                Ссылки справа в строке копирайта — до <?= FooterConfig::MAX_BOTTOM_LINKS ?> штук
+                (условия использования, карта сайта, обратная связь). Внутренний адрес
+                пишется от корня (<code>/sitemap</code>) и сам получает языковой префикс;
+                внешний — полностью, с <code>https://</code>. Ссылка без подписи или без
+                адреса не выводится.
+            </p>
+            <div data-repeater="footlink" data-repeater-max="<?= FooterConfig::MAX_BOTTOM_LINKS ?>" class="fb-grid">
+                <?php foreach ($bottomLinks as $i => $link): ?>
+                    <div class="repeater-row fb-card">
+                        <div class="fb-card__head">
+                            <span class="fb-card__badge">Ссылка</span>
+                        </div>
+                        <div class="form-field">
+                            <label>Подпись</label>
+                            <input type="text" name="bottom_links[<?= $i ?>][label]" value="<?= htmlspecialchars((string) $link['label'], ENT_QUOTES) ?>" placeholder="напр. Карта сайта">
+                        </div>
+                        <div class="form-field">
+                            <label>Адрес</label>
+                            <input type="text" name="bottom_links[<?= $i ?>][url]" value="<?= htmlspecialchars((string) $link['url'], ENT_QUOTES) ?>" placeholder="/sitemap">
+                        </div>
+                        <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить ссылку</button>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <template data-repeater-template="footlink">
+                <div class="fb-card__head">
+                    <span class="fb-card__badge">Ссылка</span>
+                </div>
+                <div class="form-field">
+                    <label>Подпись</label>
+                    <input type="text" name="bottom_links[__INDEX__][label]" placeholder="напр. Карта сайта">
+                </div>
+                <div class="form-field">
+                    <label>Адрес</label>
+                    <input type="text" name="bottom_links[__INDEX__][url]" placeholder="/sitemap">
+                </div>
+                <button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить ссылку</button>
+            </template>
+            <div class="repeater-actions">
+                <button type="button" class="btn btn--small" data-repeater-add="footlink"><?= \App\Core\AdminUi::icon('plus') ?>Добавить ссылку</button>
+            </div>
         </div>
 
         <div class="form-actions form-actions--sticky">

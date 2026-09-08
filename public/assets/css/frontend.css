@@ -1465,11 +1465,21 @@ a.footer-contacts__value:hover { color: var(--gov-teal); text-decoration: underl
 .site-footer__bottom-col--right {
     justify-content: flex-end;
 }
-.site-footer__bottom-col--middle a {
+/* Ссылки нижней строки: служебные страницы справа от копирайта. Переносятся
+   по словам — на узком экране их подписи не обязаны уместиться в один ряд. */
+.site-footer__bottom-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+}
+.site-footer__bottom-col--middle a,
+.site-footer__bottom-links a {
     color: inherit;
     text-decoration: none;
 }
-.site-footer__bottom-col--middle a:hover {
+.site-footer__bottom-col--middle a:hover,
+.site-footer__bottom-links a:hover {
     text-decoration: underline;
     color: var(--gov-teal);
 }
@@ -1486,6 +1496,9 @@ a.footer-contacts__value:hover { color: var(--gov-teal); text-decoration: underl
     .site-footer__bottom-col {
         justify-content: center;
         width: 100%;
+    }
+    .site-footer__bottom-links {
+        justify-content: center;
     }
 }
 /* Четвёртая колонка на планшете вставала одна во второй ряд рядом с тремя
@@ -2589,6 +2602,11 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
 
 /* Сетка категорий: плитки с иконкой; первая — активная (акцент). */
 .block-categories__title { font-size: var(--font-size-h2, var(--step-6)); margin: 0 0 20px; }
+/* Шапка появляется только в режиме слайдера: стрелкам нужно место рядом с
+   заголовком. Нижний отступ переезжает на неё — иначе он сложился бы с
+   отступом заголовка и оторвал управление от полосы. */
+.block-categories__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 0 0 20px; }
+.block-categories__head .block-categories__title { margin: 0; }
 .block-categories__empty { color: var(--text-muted); }
 .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
 .cat-tile {

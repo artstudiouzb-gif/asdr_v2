@@ -32,6 +32,17 @@ final class FooterController
             ];
         }
 
+        $bottomLinks = [];
+        foreach ((array) ($_POST['bottom_links'] ?? []) as $link) {
+            if (!is_array($link)) {
+                continue;
+            }
+            $bottomLinks[] = [
+                'label' => (string) ($link['label'] ?? ''),
+                'url' => (string) ($link['url'] ?? ''),
+            ];
+        }
+
         FooterConfig::save([
             // Версия формата приходит из формы: разовый перенос колонок не
             // должен повторяться при каждом сохранении (иначе удалённые
@@ -40,6 +51,7 @@ final class FooterController
             'style' => $_POST['style'] ?? 'columns',
             'columns' => $columns,
             'bottom' => $_POST['bottom'] ?? '',
+            'bottom_links' => $bottomLinks,
             // Фон подвала описывают те же поля, что и фон секции страницы,
             // поэтому и разбирает их тот же нормализатор.
             'background' => \App\Core\BlockData\BlockPresentationNormalizer::background($_POST),
