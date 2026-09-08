@@ -2,6 +2,7 @@
 
 use App\Core\ContentFields;
 use App\Core\Locale;
+use App\Models\ContentType;
 
 /** @var array $type */
 /** @var array $fields */
@@ -31,7 +32,7 @@ require __DIR__ . '/_header.php';
 
 $crumbs = [
     ['label' => t('Главная'), 'url' => Locale::url('/')],
-    ['label' => t((string) $type['name']), 'url' => Locale::url('catalog/' . $type['slug'])],
+    ['label' => t((string) $type['name']), 'url' => Locale::url(ContentType::path($type))],
     ['label' => (string) $entry['title']],
 ];
 require __DIR__ . '/_crumbs.php';
@@ -109,7 +110,7 @@ $sideFields = array_values(array_filter(
                         </a>
                     <?php endif; ?>
                 <?php endforeach; ?>
-                <a class="catdetail__back" href="<?= htmlspecialchars(Locale::url('catalog/' . $type['slug']), ENT_QUOTES) ?>">← <?= htmlspecialchars(t('Ко всем записям раздела'), ENT_QUOTES) ?></a>
+                <a class="catdetail__back" href="<?= htmlspecialchars(Locale::url(ContentType::path($type)), ENT_QUOTES) ?>">← <?= htmlspecialchars(t('Ко всем записям раздела'), ENT_QUOTES) ?></a>
             </div>
         </aside>
     </div>
@@ -129,7 +130,7 @@ if ($isEvent) {
     }
     echo \App\Core\SchemaOrg::render(\App\Core\SchemaOrg::event(
         (string) $entry['title'],
-        $schemaUrl('catalog/' . $type['slug'] . '/' . $entry['slug']),
+        $schemaUrl(ContentType::entryPath($type, (string) $entry['slug'])),
         $eventStart,
         (string) ($entry['data']['location'] ?? ''),
         strip_tags((string) ($entry['data']['summary'] ?? '')),

@@ -130,7 +130,7 @@ final class OpenDataController
                 'id' => (int) $row['id'],
                 'title' => (string) $row['title'],
                 'slug' => (string) $row['slug'],
-                'url' => $base . '/catalog/' . $slug . '/' . $row['slug'],
+                'url' => $base . '/' . ContentType::entryPath($type, (string) $row['slug']),
                 'created_at' => (string) $row['created_at'],
                 'fields' => json_decode((string) ($row['data'] ?? '{}'), true) ?: new \stdClass(),
             ];

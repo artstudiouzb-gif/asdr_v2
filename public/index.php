@@ -542,6 +542,13 @@ $router->get('/catalog/{type}/{slug}', [\App\Controllers\Site\ContentController:
 $router->post('/forms/{slug}/submit', [SiteFormController::class, 'submit']);
 $router->get('/{slug}', [SitePageController::class, 'show']);
 
+// Раздел каталога, у которого снят префикс `/catalog`: его запись живёт на
+// `/<type>/<entry>`. Маршрут объявлен ПОСЛЕДНИМ намеренно — это шаблон из двух
+// произвольных сегментов, и объявленный выше он перехватывал бы `/news/...`,
+// `/projects/...` и всё остальное. Новый двухсегментный маршрут добавляется
+// перед ним, иначе он никогда не сработает (стережёт тест 353).
+$router->get('/{type}/{slug}', [\App\Controllers\Site\ContentController::class, 'rootShow']);
+
 // Журнал действий администраторов: центральная запись изменяющих запросов
 // панели (кто/что/когда/откуда; тело запроса не сохраняется).
 if (\App\Core\Session::hasCookie()) {

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Models\ContentType;
+
 final class Search
 {
     /** @return array<int,array{type:string,title:string,url:string}> */
@@ -223,7 +225,8 @@ final class Search
             $stmt = $pdo->prepare(
                 "SELECT COALESCE(NULLIF(tr.title, ''), ce.title) AS title, ce.slug,
                         CONCAT_WS(' ', ce.data, tr.data) AS body, '' AS excerpt,
-                        ct.slug AS type_slug, ct.name AS type_name, ce.created_at AS sort_date
+                        ct.slug AS type_slug, ct.name AS type_name, ct.root_url AS type_root_url,
+                        ce.created_at AS sort_date
                  FROM content_entries ce JOIN content_types ct ON ct.id = ce.type_id
                  LEFT JOIN content_entry_translations tr ON tr.entry_id = ce.id AND tr.lang = ?
                  WHERE ce.deleted_at IS NULL AND ce.status = 'published' AND ct.is_public = 1 AND {$condition}
@@ -232,7 +235,7 @@ final class Search
             self::bindSeq($stmt, [$lang, ...$params, $candidateLimit]);
             $stmt->execute();
             foreach ($stmt->fetchAll() as $row) {
-                self::append($results, $term, (string) $row['type_name'], $row, Locale::url('catalog/' . $row['type_slug'] . '/' . $row['slug'], $lang));
+                self::append($results, $term, (string) $row['type_name'], $row, Locale::url(ContentType::entryPath(['slug' => $row['type_slug'], 'root_url' => $row['type_root_url'] ?? 0], (string) $row['slug']), $lang));
             }
         } catch (\Throwable $e) {
             Logger::error('Site search (content_entries) failed: ' . $e->getMessage());

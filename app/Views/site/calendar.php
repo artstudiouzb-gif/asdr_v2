@@ -2,6 +2,7 @@
 
 use App\Core\CalendarGrid;
 use App\Core\Locale;
+use App\Models\ContentType;
 
 /** @var array $type */
 /** @var array $weeks */
@@ -18,13 +19,13 @@ require __DIR__ . '/_header.php';
 
 $crumbs = [
     ['label' => t('Главная'), 'url' => Locale::url('/')],
-    ['label' => t('Мероприятия'), 'url' => Locale::url('catalog/' . $type['slug'])],
+    ['label' => t('Мероприятия'), 'url' => Locale::url(ContentType::path($type))],
     ['label' => t('Календарь')],
 ];
 require __DIR__ . '/_crumbs.php';
 
 $calUrl = Locale::url('calendar');
-$entryUrl = static fn (array $e): string => Locale::url('catalog/' . $type['slug'] . '/' . $e['slug']);
+$entryUrl = static fn (array $e): string => Locale::url(ContentType::entryPath($type, (string) $e['slug']));
 ?>
 <div class="listing">
     <div class="listing__head">
@@ -38,7 +39,7 @@ $entryUrl = static fn (array $e): string => Locale::url('catalog/' . $type['slug
         <a class="gcal-nav__btn" href="<?= htmlspecialchars($calUrl . '?m=' . $prevMonth, ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Предыдущий месяц'), ENT_QUOTES) ?>">←</a>
         <strong class="gcal-nav__label"><?= htmlspecialchars($calLabel, ENT_QUOTES) ?></strong>
         <a class="gcal-nav__btn" href="<?= htmlspecialchars($calUrl . '?m=' . $nextMonth, ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars(t('Следующий месяц'), ENT_QUOTES) ?>">→</a>
-        <a class="gcal-nav__all" href="<?= htmlspecialchars(Locale::url('catalog/' . $type['slug']), ENT_QUOTES) ?>"><?= htmlspecialchars(t('Списком'), ENT_QUOTES) ?> →</a>
+        <a class="gcal-nav__all" href="<?= htmlspecialchars(Locale::url(ContentType::path($type)), ENT_QUOTES) ?>"><?= htmlspecialchars(t('Списком'), ENT_QUOTES) ?> →</a>
     </div>
 
     <div class="gcal-scroll">
