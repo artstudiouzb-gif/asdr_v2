@@ -655,7 +655,7 @@ if ($pageTitleText === '') {
 <?php $xDefault = \App\Models\Language::defaultCode(); ?>
 <link rel="alternate" hreflang="x-default" href="<?= htmlspecialchars($appUrl . Locale::url(Locale::alternatePath($xDefault), $xDefault), ENT_QUOTES) ?>">
 <?php endif; ?>
-<link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($siteName . ' — Новости', ENT_QUOTES) ?>" href="<?= htmlspecialchars(Locale::url('news/rss.xml', $currentLang), ENT_QUOTES) ?>">
+<link rel="alternate" type="application/rss+xml" title="<?= htmlspecialchars($siteName . ' — ' . t('Новости'), ENT_QUOTES) ?>" href="<?= htmlspecialchars(Locale::url('news/rss.xml', $currentLang), ENT_QUOTES) ?>">
 <?php
 // og:locale:alternate объявляет те же языки, что и hreflang выше: список уже
 // отфильтрован по наличию перевода, поэтому карточка ссылки не обещает

@@ -419,4 +419,17 @@ return [
     'Таблица не заполнена.' => 'The table is empty.',
     'Изображение не выбрано.' => 'No image selected.',
     'Откроется в новой вкладке' => 'Opens in a new tab',
+    // Подписи, которые приходят из конструкторов (подвал) и из скриптов.
+    'Все' => 'All',
+    'Разделы' => 'Sections',
+    'Связь' => 'Contact',
+    'Контакты' => 'Contacts',
+    'Запустить автопрокрутку' => 'Start autoplay',
+    'Остановить автопрокрутку' => 'Stop autoplay',
+    'Нет ни одной цели со снимками.' => 'No goal has photos yet.',
+    'Фотографии не добавлены.' => 'No photos added.',
+    'Официальные новости и аналитические материалы Агентства.' => 'Official news and analytical materials of the Agency.',
+    'Будьте в курсе главных событий! Подпишитесь на мгновенные push-уведомления о новых публикациях.' => 'Stay on top of the news: subscribe to instant push notifications about new publications.',
+    'Включить уведомления' => 'Enable notifications',
+    'Позже' => 'Later',
 ];

@@ -41,6 +41,67 @@ test('Словари UZ и EN синхронны и не содержат пус
     }
 });
 
+test('Каждый ключ t() из публичного кода есть в обоих словарях', function () {
+    // Ключ, которого нет в словаре, не ошибка для t() — он вернёт саму
+    // русскую строку, и на /uz она молча остаётся русской. Отдельно найти
+    // такую строку нечем: страница отвечает 200 и выглядит целой.
+    $uz = require APP_ROOT . '/app/Core/lang/uz.php';
+    $en = require APP_ROOT . '/app/Core/lang/en.php';
+
+    $files = [];
+    foreach (['app/Views/site', 'app/Views/errors', 'app/Controllers/Site', 'app/Core', 'templates'] as $dir) {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(APP_ROOT . '/' . $dir, FilesystemIterator::SKIP_DOTS)
+        );
+        foreach ($iterator as $file) {
+            $path = $file->getPathname();
+            if (str_contains($path, '/lang/') || !str_ends_with($path, '.php')) {
+                continue;
+            }
+            $files[] = $path;
+        }
+    }
+    sort($files);
+
+    $missing = [];
+    foreach ($files as $path) {
+        $tokens = token_get_all((string) file_get_contents($path));
+        $significant = [];
+        foreach ($tokens as $index => $token) {
+            if (is_array($token) && in_array($token[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
+                continue;
+            }
+            $significant[] = $index;
+        }
+        foreach ($significant as $n => $index) {
+            $token = $tokens[$index];
+            if (!is_array($token) || $token[0] !== T_STRING || $token[1] !== 't') {
+                continue;
+            }
+            if (($tokens[$significant[$n + 1] ?? -1] ?? null) !== '(') {
+                continue;
+            }
+            $arg = $tokens[$significant[$n + 2] ?? -1] ?? null;
+            if (!is_array($arg) || $arg[0] !== T_CONSTANT_ENCAPSED_STRING) {
+                continue; // t($variable) проверить нечем
+            }
+            $key = stripcslashes(substr($arg[1], 1, -1));
+            if (!preg_match('~[А-Яа-яЁё]~u', $key)) {
+                continue;
+            }
+            $where = str_replace(APP_ROOT . '/', '', $path) . ':' . $arg[2];
+            if (!isset($uz[$key])) {
+                $missing[] = "uz: «{$key}» ({$where})";
+            }
+            if (!isset($en[$key])) {
+                $missing[] = "en: «{$key}» ({$where})";
+            }
+        }
+    }
+
+    assert_same([], $missing, 'нет перевода у ключей: ' . implode('; ', array_slice($missing, 0, 5)));
+});
+
 test('Публичная шапка переводит навигацию, поиск и панель доступности', function () {
     $header = (string) file_get_contents(APP_ROOT . '/app/Views/site/_header.php');
     foreach (['Основное меню', 'Открыть подменю', 'Для слабовидящих', 'Перейти к содержимому', 'Закрыть поиск'] as $label) {

@@ -18,10 +18,12 @@ $sectionPage = $sectionPage ?? null;
 $sectionTitle = (string) ($sectionPage['title'] ?? '');
 $sectionLead = (string) ($sectionPage['lead'] ?? '');
 $sectionMetaTitle = (string) ($sectionPage['meta_title'] ?? '');
-$metaTitle = $sectionMetaTitle !== '' ? $sectionMetaTitle : ($sectionTitle !== '' ? $sectionTitle : 'Новости');
+$metaTitle = $sectionMetaTitle !== '' ? $sectionMetaTitle : ($sectionTitle !== '' ? $sectionTitle : t('Новости'));
 $metaDescription = (string) ($sectionPage['meta_description'] ?? '');
 if ($metaDescription === '') {
-    $metaDescription = $sectionLead !== '' ? $sectionLead : 'Официальные новости и аналитические материалы Агентства.';
+    $metaDescription = $sectionLead !== ''
+    ? $sectionLead
+    : t('Официальные новости и аналитические материалы Агентства.');
 }
 // Стили блоков раздела уезжают в <head> тем же путём, что и у страницы.
 $extraHeadCss = (string) ($sectionPage['css'] ?? '');
