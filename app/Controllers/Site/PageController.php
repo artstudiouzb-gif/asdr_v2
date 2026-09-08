@@ -39,6 +39,13 @@ final class PageController
         $page = Page::findBySlug($slug, $lang);
 
         if (!$page) {
+            // Раздел каталога, вынесенный в корень («Документы» на /documenty,
+            // а не /catalog/documenty). Страница проверяется первой: этот
+            // маршрут её и обслуживает, а перенос типа в корень запрещён,
+            // пока адрес занят страницей (ContentType::rootUrlConflict).
+            if ((new ContentController())->tryRootIndex((string) $slug)) {
+                return;
+            }
             http_response_code(404);
             View::render('errors/404');
             return;

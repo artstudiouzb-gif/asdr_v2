@@ -18,7 +18,11 @@ use App\Models\ContentType;
  */
 final class ContentController
 {
-    /** @param array<string, string> $params */
+    /**
+     * Список раздела по адресу `/catalog/<type>`.
+     *
+     * @param array<string, string> $params
+     */
     public function index(array $params): void
     {
         $type = ContentType::findBySlug((string) ($params['type'] ?? ''));
@@ -27,7 +31,78 @@ final class ContentController
             View::render('errors/404');
             return;
         }
+        // У раздела без префикса адрес с `catalog/` остаётся рабочим, но
+        // каноническим быть перестаёт: две страницы с одним содержимым — это
+        // дубль, а старые ссылки и закладки терять нельзя.
+        if ($this->redirectToCanonical($type)) {
+            return;
+        }
 
+        $this->renderIndex($type);
+    }
+
+    /**
+     * Список раздела, вынесенного в корень сайта (`/<type>`).
+     *
+     * Зовётся из маршрута страниц: `/{slug}` обслуживает страницы, и каталог
+     * отвечает там только тогда, когда страницы с таким адресом нет.
+     * Возвращает false, ничего не напечатав, если это не наш адрес, — тогда
+     * маршрут страниц отдаёт свой 404.
+     */
+    public function tryRootIndex(string $slug): bool
+    {
+        $type = ContentType::findRootBySlug($slug);
+        if ($type === null) {
+            return false;
+        }
+
+        $this->renderIndex($type);
+
+        return true;
+    }
+
+    /**
+     * Запись раздела в корне сайта (`/<type>/<entry>`).
+     *
+     * @param array<string, string> $params
+     */
+    public function rootShow(array $params): void
+    {
+        $type = ContentType::findRootBySlug((string) ($params['type'] ?? ''));
+        if ($type === null) {
+            http_response_code(404);
+            View::render('errors/404');
+            return;
+        }
+
+        $this->renderEntry($type, (string) ($params['slug'] ?? ''));
+    }
+
+    /**
+     * Постоянный редирект на канонический адрес раздела, если запрос пришёл на
+     * прежний. Возвращает true, когда ответ уже отправлен.
+     *
+     * @param array<string, mixed> $type
+     */
+    private function redirectToCanonical(array $type, string $entrySlug = ''): bool
+    {
+        if (empty($type['root_url'])) {
+            return false;
+        }
+
+        $path = $entrySlug === ''
+            ? ContentType::path($type)
+            : ContentType::entryPath($type, $entrySlug);
+        $query = (string) ($_SERVER['QUERY_STRING'] ?? '');
+        $target = Locale::url($path) . ($query !== '' ? '?' . $query : '');
+        header('Location: ' . $target, true, 301);
+
+        return true;
+    }
+
+    /** @param array<string, mixed> $type */
+    private function renderIndex(array $type): void
+    {
         // Стили каталога вынесены из общей темы: подключаем их только здесь.
         \App\Core\AssetCollector::requireThemePart('catalog');
 
@@ -85,7 +160,11 @@ final class ContentController
         View::render('site/content_index', $vars);
     }
 
-    /** @param array<string, string> $params */
+    /**
+     * Запись раздела по адресу `/catalog/<type>/<entry>`.
+     *
+     * @param array<string, string> $params
+     */
     public function show(array $params): void
     {
         $type = ContentType::findBySlug((string) ($params['type'] ?? ''));
@@ -94,8 +173,17 @@ final class ContentController
             View::render('errors/404');
             return;
         }
+        if ($this->redirectToCanonical($type, (string) ($params['slug'] ?? ''))) {
+            return;
+        }
 
-        $entry = ContentEntry::findPublishedBySlug((int) $type['id'], (string) ($params['slug'] ?? ''));
+        $this->renderEntry($type, (string) ($params['slug'] ?? ''));
+    }
+
+    /** @param array<string, mixed> $type */
+    private function renderEntry(array $type, string $entrySlug): void
+    {
+        $entry = ContentEntry::findPublishedBySlug((int) $type['id'], $entrySlug);
         if ($entry === null) {
             http_response_code(404);
             View::render('errors/404');
@@ -107,7 +195,7 @@ final class ContentController
         $lang = Locale::current();
         if ((int) ($type['has_translations'] ?? 0) === 1) {
             $available = ContentEntry::availableLangs((int) $entry['id']);
-            $path = '/catalog/' . (string) $type['slug'] . '/' . (string) $entry['slug'];
+            $path = '/' . ContentType::entryPath($type, (string) $entry['slug']);
             if (ContentLanguageNotice::renderIfMissing($available, $path)) {
                 return;
             }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Core\Locale;
+use App\Models\ContentType;
 
 /** @var array $type */
 /** @var array $fields */
@@ -29,7 +30,7 @@ $pagerQuery = static function (int $p) use ($q, $sort): string {
 ['prev' => $pagerPrev, 'next' => $pagerNext] = \App\Core\Pager::relLinks(
     $page,
     $pages,
-    static fn (int $p): string => Locale::url('catalog/' . $type['slug']) . $pagerQuery($p)
+    static fn (int $p): string => Locale::url(ContentType::path($type)) . $pagerQuery($p)
 );
 require __DIR__ . '/_header.php';
 
@@ -39,7 +40,7 @@ $crumbs = [
 ];
 require __DIR__ . '/_crumbs.php';
 
-$baseUrl = Locale::url('catalog/' . $type['slug']);
+$baseUrl = Locale::url(ContentType::path($type));
 ?>
 <div class="listing" data-listing>
     <div class="listing__head">
