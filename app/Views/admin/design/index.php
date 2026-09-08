@@ -522,6 +522,43 @@ foreach ($options as $key => $opt) {
                 </div>
             </div>
 
+            <div class="design-opt">
+                <div class="design-opt__label">
+                    <span>Метка заголовка секции</span>
+                    <small>Знак перед заголовком секции на внутренних страницах. У заголовка по центру и справа метка не рисуется — она указывает на начало строки.</small>
+                </div>
+                <div class="design-opt__choices">
+                    <?php $secMarker = (string) ($values['section_marker'] ?? 'line'); ?>
+                    <select class="u-inline-e73ebf4146" name="section_marker" data-design-preview-field>
+                        <?php foreach (\App\Core\DesignSettings::OPTIONS['section_marker']['choices'] as $val => $label): ?>
+                            <option value="<?= htmlspecialchars((string) $val, ENT_QUOTES) ?>" <?= $secMarker === (string) $val ? 'selected' : '' ?>><?= htmlspecialchars((string) $label, ENT_QUOTES) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="design-opt">
+                <div class="design-opt__label">
+                    <span>Толщина метки</span>
+                    <small>Ширина линии, 1–12px. Пусто — 3px. У знака-эмблемы ширину задаёт следующее поле.</small>
+                </div>
+                <div class="design-opt__choices">
+                    <?php $markerThickness = preg_replace('/px$/', '', \App\Core\DesignSettings::sectionMarkerThickness()); ?>
+                    <input class="u-inline-e73ebf4146" type="number" name="section_marker_thickness" min="1" max="12" step="0.5" inputmode="decimal"
+                           value="<?= htmlspecialchars((string) $markerThickness, ENT_QUOTES) ?>" placeholder="напр. 3" data-design-preview-field>
+                </div>
+            </div>
+            <div class="design-opt">
+                <div class="design-opt__label">
+                    <span>Высота метки</span>
+                    <small>4–80px. Пусто — метка тянется по высоте строки заголовка: у крупного заголовка длиннее, у мелкого короче.</small>
+                </div>
+                <div class="design-opt__choices">
+                    <?php $markerHeight = preg_replace('/px$/', '', \App\Core\DesignSettings::sectionMarkerHeight()); ?>
+                    <input class="u-inline-e73ebf4146" type="number" name="section_marker_height" min="4" max="80" step="1" inputmode="numeric"
+                           value="<?= htmlspecialchars((string) $markerHeight, ENT_QUOTES) ?>" placeholder="по высоте строки" data-design-preview-field>
+                </div>
+            </div>
+
             <?php
             $currentScale = \App\Core\DesignSettings::typoScale();
             $scaleSizes = \App\Core\DesignSettings::scaleSizes();

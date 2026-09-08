@@ -270,3 +270,62 @@ test('Локальный каталог шрифтов: неизвестный s
     DesignSettings::save(['font_google_heading' => 'evil-font']);
     assert_same('', (string) \App\Models\Setting::get('design_font_google_heading', ''));
 });
+
+test('Метка заголовка секции: вид, толщина и высота приходят из «Дизайна»', function () {
+    // Прежде черта перед заголовком была константой в правиле темы (3px,
+    // .16em, акцент) — поменять её было нечем, и у центрированного заголовка
+    // она висела слева сама по себе.
+    $options = (new ReflectionClass(DesignSettings::class))->getConstant('OPTIONS');
+    assert_true(isset($options['section_marker']), 'настройка объявлена в «Дизайне»');
+    assert_same(['line', 'emblem', 'off'], array_keys($options['section_marker']['choices']));
+
+    // Класс на <body> — потребитель настройки; вид метки читается из него.
+    foreach (['line', 'emblem', 'off'] as $marker) {
+        assert_contains('design-secmark-' . $marker, DesignSettings::bodyClasses(['section_marker' => $marker]));
+    }
+    // Значение вне списка не выводит класса-призрака.
+    assert_contains('design-secmark-line', DesignSettings::bodyClasses(['section_marker' => 'мусор']));
+
+    // Пустые размеры дают прежний вид: 3px и высота по строке заголовка.
+    $css = DesignSettings::cssVariables(DesignSettings::current());
+    assert_contains('--section-marker-width:3px', $css);
+    assert_contains('--section-marker-height:calc(100% - .32em)', $css);
+    assert_contains('--section-marker-emblem:.9em', $css);
+
+    $polish = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-layout-polish.css');
+    // Правило читает переменные, а не числа.
+    assert_contains('inline-size: var(--section-marker-width, 3px);', $polish);
+    assert_contains('block-size: var(--section-marker-height, calc(100% - .32em));', $polish);
+    // Знак — маска эмблемы сайта, а не второй файл с картинкой.
+    assert_contains('mask: var(--gov-emblem) center / contain no-repeat;', $polish);
+    // Режимный класс обёрнут в :where() — иначе правило весило бы больше
+    // компонентных и перебивало бы их (тот же случай, что с design-type-static).
+    assert_contains(':where(body.design-secmark-emblem)', $polish);
+    assert_contains(':where(body.design-secmark-off)', $polish);
+    // У заголовка не у левого края метки нет: она указывает на начало строки.
+    assert_contains('.section-head--align-center .section-head__title::before', $polish);
+    assert_contains('.section-head--align-right .section-head__title::before', $polish);
+});
+
+test('Метка заголовка секции: размеры сохраняются числом и проверяются диапазоном', function () {
+    ensure_test_db();
+
+    DesignSettings::save(['section_marker' => 'emblem', 'section_marker_thickness' => '6', 'section_marker_height' => '40']);
+    assert_same('emblem', (string) \App\Models\Setting::get('design_section_marker', ''));
+    assert_same('6px', DesignSettings::sectionMarkerThickness());
+    assert_same('40px', DesignSettings::sectionMarkerHeight());
+
+    $css = DesignSettings::cssVariables(DesignSettings::current());
+    assert_contains('--section-marker-width:6px', $css);
+    assert_contains('--section-marker-height:40px', $css);
+    // Знак квадратный, поэтому его сторону задаёт высота, а не толщина линии.
+    assert_contains('--section-marker-emblem:40px', $css);
+
+    // Значение вне диапазона — это подделанная форма, а не «ближайшее
+    // допустимое»: возвращаемся к умолчанию темы.
+    DesignSettings::save(['section_marker_thickness' => '99', 'section_marker_height' => '1']);
+    assert_same('', DesignSettings::sectionMarkerThickness());
+    assert_same('', DesignSettings::sectionMarkerHeight());
+
+    reset_design_state();
+});
