@@ -12,7 +12,7 @@ $widgets = FooterConfig::WIDGETS;
 
 /** Рендер select виджета с выбранным значением. */
 $widgetSelect = function (string $name, string $current) use ($widgets): string {
-    $out = '<select name="' . $name . '" class="footer-col__widget">';
+    $out = '<select name="' . $name . '">';
     foreach ($widgets as $val => $label) {
         $sel = $current === $val ? ' selected' : '';
         $out .= '<option value="' . htmlspecialchars($val, ENT_QUOTES) . '"' . $sel . '>' . htmlspecialchars($label, ENT_QUOTES) . '</option>';
@@ -48,7 +48,7 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
             </p>
             <div data-repeater="footcol" data-repeater-max="<?= FooterConfig::MAX_COLUMNS ?>" class="fb-grid">
                 <?php foreach ($config['columns'] as $i => $col): ?>
-                    <div class="repeater-row footer-col fb-card">
+                    <div class="repeater-row fb-card">
                         <div class="fb-card__head">
                             <span class="fb-card__badge">Колонка</span>
                             <span class="fb-card__tools">
@@ -64,7 +64,7 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
                             <label>Виджет</label>
                             <?= $widgetSelect('columns[' . $i . '][widget]', $col['widget']) ?>
                         </div>
-                        <div class="form-field footer-col__text">
+                        <div class="form-field">
                             <label>Текст / HTML (для виджетов «Логотип и описание» и «Текст»)</label>
                             <textarea name="columns[<?= $i ?>][text]" rows="3" placeholder="<p>Произвольный текст…</p>"><?= htmlspecialchars($col['text'], ENT_QUOTES) ?></textarea>
                         </div>
@@ -88,7 +88,7 @@ $widgetSelect = function (string $name, string $current) use ($widgets): string 
                     <label>Виджет</label>
                     <?= $widgetSelect('columns[__INDEX__][widget]', 'menu') ?>
                 </div>
-                <div class="form-field footer-col__text">
+                <div class="form-field">
                     <label>Текст / HTML (для виджетов «Логотип и описание» и «Текст»)</label>
                     <textarea name="columns[__INDEX__][text]" rows="3" placeholder="<p>Произвольный текст…</p>"></textarea>
                 </div>

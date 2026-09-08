@@ -55,7 +55,15 @@ $renderZones = function (array $placed, string $inputName) use ($renderChip): st
     <?php return (string) ob_get_clean();
 };
 
-$labelsJson = htmlspecialchars(json_encode($elements, JSON_UNESCAPED_UNICODE), ENT_QUOTES);
+// Подписи набирает редактор, поэтому битая кодировка в одной из них не должна
+// закрывать весь конструктор: `JSON_INVALID_UTF8_SUBSTITUTE` оставляет строку
+// читаемой, подменив негодный байт. Запасное `[]` — на случай отказа по другой
+// причине: пустой атрибут уронил бы `JSON.parse` в скрипте, то есть отняло бы
+// у конструктора подписи целиком вместо одной испорченной.
+$labelsJson = htmlspecialchars(
+    json_encode($elements, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE) ?: '[]',
+    ENT_QUOTES
+);
 
 $heightSelect = function (string $name, string $current): string {
     $out = '<select name="' . $name . '" class="hb-select" aria-label="Высота секции">';

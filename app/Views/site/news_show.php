@@ -392,7 +392,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                 $hasCaptions = array_filter($galleryCaptions, static fn (array $c): bool => $c['caption'] !== '' || $c['credit'] !== '');
                 ?>
                 <?php if ($hasCaptions !== []): ?>
-                    <figcaption class="media-caption newsdetail-gallery__caption" data-ndg-captions='<?= htmlspecialchars((string) json_encode($galleryCaptions, JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>'>
+                    <figcaption class="media-caption newsdetail-gallery__caption" data-ndg-captions='<?= htmlspecialchars(json_encode($galleryCaptions, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE) ?: '[]', ENT_QUOTES) ?>'>
                         <span data-ndg-caption-text><?= htmlspecialchars($galleryCaptions[0]['caption'], ENT_QUOTES) ?></span>
                         <span class="media-caption__credit" data-ndg-caption-credit<?= $galleryCaptions[0]['credit'] === '' ? ' hidden' : '' ?>><?= $galleryCaptions[0]['credit'] !== '' ? htmlspecialchars(t('Фото:'), ENT_QUOTES) . ' ' . htmlspecialchars($galleryCaptions[0]['credit'], ENT_QUOTES) : '' ?></span>
                     </figcaption>
