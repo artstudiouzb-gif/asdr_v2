@@ -170,3 +170,60 @@ test('Блоки новостей и проектов знают о ссылке
     assert_true(array_key_exists('all_url', $projects));
     assert_same(3, $projects['columns'], 'по умолчанию три колонки');
 });
+
+test('Контейнер «Колонки»: заголовок и описание над колонками, уровень и выравнивание', function () {
+    $render = function (array $data): string {
+        // id = 0: без него рендер пошёл бы в базу за дочерними блоками, а
+        // проверяем мы шапку, а не наполнение колонок.
+        return (string) BlockRenderer::render([
+            'id' => 0,
+            'type' => 'columns',
+            'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
+            'custom_css' => '',
+        ])['html'];
+    };
+
+    $head = $render([
+        'title' => 'Группа *колонок*',
+        'description' => 'Вводный текст',
+        'title_level' => 'h4',
+        'title_align' => 'center',
+        'columns' => 2,
+    ]);
+    // Разметка общая с остальными блоками, поэтому работает и выделение слова.
+    assert_contains('<h4 class="section-head__title">', $head);
+    assert_contains('<span class="tx-mark">колонок</span>', $head);
+    assert_contains('section-head--align-center', $head);
+    assert_contains('Вводный текст', $head);
+    // Шапка идёт до колонок: подпись группы стоит над ней, а не под.
+    assert_true(strpos($head, 'section-head') < strpos($head, 'cms-columns'), 'шапка выше колонок');
+
+    // Уровень вне списка — H2, выравнивание слева класса не добавляет.
+    $plain = $render(['title' => 'Заголовок', 'title_level' => 'h9', 'columns' => 2]);
+    assert_contains('<h2 class="section-head__title">', $plain);
+    assert_not_contains('section-head--align-', $plain);
+
+    // Пустой заголовок и описание не рисуют пустую полосу над колонками.
+    assert_not_contains('section-head', $render(['columns' => 3]));
+
+    // Настройка обязана что-то менять на выводе — оформление есть в теме.
+    $theme = theme_css();
+    assert_contains('.section-head--align-center { justify-content: center; text-align: center; }', $theme);
+    assert_contains('.section-head--align-right', $theme);
+    assert_contains('h4.section-head__title', $theme, 'мелкий уровень отличается и размером');
+});
+
+test('Контейнер «Колонки»: фоновая надпись берётся из общего оформления секции', function () {
+    // Отдельной настройки водяного знака у контейнера нет и не нужно: `_watermark*`
+    // принадлежит любой секции, и вторая копия разъехалась бы с первой.
+    $html = (string) BlockRenderer::render([
+        'id' => 0,
+        'type' => 'columns',
+        'data' => json_encode(['columns' => 2, '_watermark' => 'MAQSADLAR'], JSON_UNESCAPED_UNICODE),
+        'custom_css' => '',
+    ])['html'];
+
+    assert_contains('cms-block--has-watermark', $html);
+    assert_contains('cms-block__watermark', $html);
+    assert_contains('MAQSADLAR', $html);
+});
