@@ -589,12 +589,6 @@ parameters:
 			path: app/Core/BlockRenderer.php
 
 		-
-			message: '#^Parameter \#1 \.\.\.\$arg1 of function max expects non\-empty\-array, list\<float\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/ChartData.php
-
-		-
 			message: '#^Method App\\Core\\Config\:\:merge\(\) has parameter \$data with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -635,12 +629,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Core/Database.php
-
-		-
-			message: '#^Method App\\Core\\DemoSeeder\:\:resetAndRun\(\) has parameter \$modules with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Core/DemoSeeder.php
 
 		-
 			message: '#^Method App\\Core\\DemoSeeder\:\:seedAssets\(\) has parameter \$c with no value type specified in iterable type array\.$#'
@@ -721,12 +709,6 @@ parameters:
 			path: app/Core/DemoSeeder.php
 
 		-
-			message: '#^Parameter \#2 \$modules of static method App\\Core\\DemoSeeder\:\:run\(\) expects list\<string\>\|null, array\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/DemoSeeder.php
-
-		-
 			message: '#^Method App\\Core\\DesignSettings\:\:cssVariables\(\) has parameter \$v with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -799,12 +781,6 @@ parameters:
 			path: app/Core/FooterConfig.php
 
 		-
-			message: '#^Parameter \#2 \$value of static method App\\Models\\Setting\:\:set\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/FooterConfig.php
-
-		-
 			message: '#^Parameter \#2 \$options of function curl_setopt_array expects array\{47\: bool, 10015\: array\|string, 10023\: array\<int, string\>, 19913\: bool, 13\: int, 78\: int, 64\: bool, 81\: 0\|2\}, array\{47\: true, 10015\: non\-empty\-string\|false, 10023\: array\{''Content\-Type\:…''\}, 19913\: true, 13\: 3, 78\: 2, 64\: true, 81\: 2\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -843,12 +819,6 @@ parameters:
 		-
 			message: '#^Method App\\Core\\HeaderConfig\:\:save\(\) has parameter \$config with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: app/Core/HeaderConfig.php
-
-		-
-			message: '#^Parameter \#2 \$value of static method App\\Models\\Setting\:\:set\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Core/HeaderConfig.php
 
@@ -941,12 +911,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Core/Http.php
-
-		-
-			message: '#^Parameter \#2 \$length of function fread expects int\<1, max\>, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/Icon.php
 
 		-
 			message: '#^Method App\\Core\\LegacyCmsImporter\:\:fetchPost\(\) return type has no value type specified in iterable type array\.$#'
@@ -1055,12 +1019,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Core/Mailer.php
-
-		-
-			message: '#^Method App\\Core\\Media\:\:webpSrcset\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Core/Media.php
 
 		-
 			message: '#^Method App\\Core\\MediaCleaner\:\:collectForNews\(\) has parameter \$news with no value type specified in iterable type array\.$#'

@@ -80,9 +80,21 @@ final class FooterConfig
         return self::mergeDefaults($decoded);
     }
 
+    /**
+     * `json_encode()` объявлена как `string|false` и при негодных данных
+     * (битая кодировка в подписи колонки, пришедшая из конструктора) отдаёт
+     * `false`. В файле со `strict_types` это значение уходит в
+     * `Setting::set()` типизированным параметром — сохранение подвала падало
+     * бы с `TypeError`, ничего не говоря о причине. `JSON_THROW_ON_ERROR`
+     * называет её вслух и не даёт записать в настройку мусор вместо
+     * конфигурации. Тот же приём, что у пресетов «Дизайна».
+     */
     public static function save(array $config): void
     {
-        Setting::set('footer_config', json_encode(self::mergeDefaults($config), JSON_UNESCAPED_UNICODE));
+        Setting::set(
+            'footer_config',
+            json_encode(self::mergeDefaults($config), JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)
+        );
     }
 
     public static function normalize(array $config): array

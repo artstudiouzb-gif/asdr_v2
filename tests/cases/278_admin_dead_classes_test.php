@@ -15,67 +15,27 @@ declare(strict_types=1);
  * роняет тест.
  */
 
-/** @return array<string,string> класс => файлы, где он встречается */
-function admin_markup_classes(): array
-{
-    $used = [];
-    $dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(APP_ROOT . '/app/Views/admin'));
-    foreach ($dir as $file) {
-        if (!$file->isFile() || $file->getExtension() !== 'php') {
-            continue;
-        }
-        $src = (string) file_get_contents($file->getPathname());
-        if (!preg_match_all('/class=(["\'])(.*?)\1/s', $src, $m)) {
-            continue;
-        }
-        foreach ($m[2] as $value) {
-            // PHP-вставка внутри атрибута оставляет обрубок вида `badge--`.
-            $value = (string) preg_replace('/<\?.*?\?>/s', ' ', $value);
-            foreach (preg_split('/\s+/', $value) ?: [] as $class) {
-                $class = trim($class);
-                if (!preg_match('/^[a-zA-Z][a-zA-Z0-9_-]*[a-zA-Z0-9]$/', $class)) {
-                    continue;
-                }
-                $used[$class] = ($used[$class] ?? '') . ' ' . basename($file->getPathname());
-            }
-        }
-    }
-
-    return $used;
-}
+/*
+ * `admin_markup_classes()` и `admin_orphan_classes()` объявлены в
+ * tests/budgets.php — там же лежит потолок, и отчёт по бюджетам считает
+ * ровно то же самое.
+ */
 
 test('Классы админки описаны в CSS', function () {
     $css = '';
-    foreach (glob(APP_ROOT . '/public/assets/css/admin*.css') ?: [] as $file) {
+    foreach (admin_css_files() as $file) {
         $css .= (string) file_get_contents($file);
-    }
-    $js = '';
-    foreach (glob(APP_ROOT . '/public/assets/js/admin*.js') ?: [] as $file) {
-        $js .= (string) file_get_contents($file);
     }
     assert_true(strlen($css) > 100000, 'CSS админки прочитан');
 
     $used = admin_markup_classes();
     assert_true(count($used) > 300, 'классы разметки собраны (найдено ' . count($used) . ')');
 
-    $orphans = [];
-    foreach ($used as $class => $files) {
-        // Имя класса целиком: `.admin-grid` не должен считаться найденным
-        // из-за `.admin-grid-auto`.
-        if (preg_match('/\.' . preg_quote($class, '/') . '(?![a-zA-Z0-9_-])/', $css)) {
-            continue;
-        }
-        if (str_contains($js, $class)) {
-            continue;
-        }
-        $orphans[] = $class;
-    }
-
-    sort($orphans);
-    $budget = 15;
+    $budget = quality_budget('admin_dead_classes');
     assert_true(
-        count($orphans) <= $budget,
-        'классов без правил не больше ' . $budget . ' (сейчас ' . count($orphans) . ': ' . implode(', ', $orphans) . ')'
+        $budget['value'] <= $budget['ceiling'],
+        'классов без правил не больше ' . $budget['ceiling']
+            . ' (сейчас ' . $budget['value'] . ': ' . $budget['detail'] . ')'
     );
 });
 

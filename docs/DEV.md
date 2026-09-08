@@ -1,111 +1,102 @@
-# Developer Guide (DEV.md) — ArtStudio CMS (asdr)
+# Разработка
 
-Welcome to the **ArtStudio CMS** developer documentation. This guide details how to set up your local development environment, run test suites, inspect static analysis, and extend CMS functionality (such as adding new block types).
+Как поднять проект, чем его проверять и как добавить тип блока. Возможности
+и структура каталогов — в [README](../README.md), справочник блоков — в
+[BLOCKS.md](BLOCKS.md), развёртывание — в [DEPLOY.md](DEPLOY.md).
 
----
+## Что нужно
 
-## 1. System Requirements & Local Setup
+- PHP **8.4+** (боевой сервер на 8.5), расширения `pdo_mysql`, `mbstring`,
+  `gd`, `openssl`, `json`, `session`, `ctype`;
+- MariaDB 10.3+ / MySQL 5.7+;
+- Node.js 22 — **только** для сборки ассетов и браузерных тестов; сайт
+  работает без него.
 
-### Requirements
-- **PHP**: 8.4 or higher
-- **Extensions**: `pdo_mysql`, `mbstring`, `gd`, `openssl`, `json`, `session`, `ctype`
-- **Database**: MariaDB 10.5+ or MySQL 8.0+
+Composer нужен тоже только разработке: единственная зависимость —
+PHPStan. Во время выполнения внешних библиотек нет ни одной.
 
-### Installation & Launch
-1. Clone the repository into your local server environment:
-   ```bash
-   git clone https://github.com/artstudiouzb-gif/asdr.git
-   cd asdr
-   ```
-2. Point your local web server (Nginx, Apache, or OpenServer) document root to the `public/` folder.
-3. Open `http://localhost` or your local domain. The interactive 4-step web installer will launch automatically if `config.php` does not exist.
+## Локальный запуск
 
----
+Встроенный сервер PHP не читает `.htaccess`, поэтому запускается с
+router-файлом:
 
-## 2. Developer Commands & Testing
-
-Shortcut commands are configured via `composer.json` and `Makefile`:
-
-| Command | Action | Description |
-|---|---|---|
-| `composer test` | `php tests/run.php` | Runs full unit & integration test suite (570+ tests) |
-| `composer lint` | `php -l ...` | Syntax check across all `app/` PHP files |
-| `composer analyse` | `phpstan analyse` | Runs PHPStan static analysis |
-| `composer check` | `lint + test` | Combined syntax lint and unit testing |
-| `composer smoke` | `php scripts/smoke.php` | Runs smoke checks against a live instance |
-| `make help` | `make ...` | Shows Makefile command options |
-
-### Running Tests with MySQL / MariaDB
-By default, unit tests use an isolated test environment. To run DB-dependent integration tests:
 ```bash
-TEST_DB_HOST=127.0.0.1 TEST_DB_PORT=3306 TEST_DB_DATABASE=test_asdr_ci TEST_DB_USERNAME=root TEST_DB_PASSWORD= php tests/run.php
+php -S 127.0.0.1:8000 -t public public/router.php
 ```
 
----
+`config/config.php` в git не хранится: если его нет, при первом обращении
+открывается установщик. Базы: `asdr_cms` — рабочая, `asdr_test` — для тестов
+(имя жёстко ждут тесты и CI, схему заливает `php tests/load_schema.php asdr_test`).
 
-## 3. Architecture & Code Structure
+## Проверки
 
-```text
-asdr/
-├── app/
-│   ├── Controllers/   # Admin and Site controllers (PageController, NewsController, etc.)
-│   ├── Core/          # Base components (Router, Cache, View, Locale, AdminUi, SecretBox)
-│   ├── Models/        # Data models (Page, News, Project, Block, BlockSnippet, Setting)
-│   └── Views/         # PHP templates (admin/, site/, blocks/, install/)
-├── docs/              # Developer and architectural documentation
-├── public/            # Public document root (index.php, uploads/, assets/)
-├── tests/             # Comprehensive unit and integration tests
-├── composer.json      # Composer manifest (dev dependencies & scripts)
-└── Makefile           # Convenient dev task shortcuts
+```bash
+php tests/run.php                     # весь набор
+composer analyse                      # PHPStan, уровень 7, блокирующий в CI
+npm run check:assets                  # актуальность собранных бандлов и бюджет веса
+php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp СЕКРЕТ
 ```
 
----
+Тест-раннер свой, без PHPUnit (`tests/run.php` + `tests/lib.php`): внешних
+зависимостей во время выполнения в проекте нет, и в тестах их заводить тоже
+незачем. Без переменных `TEST_DB_*` сценарии, которым нужна база, помечаются
+**пропущенными** — не пройденными:
 
-## 4. How to Add a New Page Block
-
-Page blocks are modular components rendered via `BlockRenderer`. To add a new block type (e.g. `event_grid`):
-
-### Step 1: Register in `BlockTypeRegistry`
-Open [app/Core/BlockTypeRegistry.php](file:///C:/Users/Ulugbek/Documents/Codex/2026-07-26/new-chat/work/asdr/app/Core/BlockTypeRegistry.php) and add the new type definition:
-```php
-public const TYPES = [
-    // ...
-    'event_grid' => 'Сетка мероприятий',
-];
-```
-Define default data fields in `defaultsFor(string $type)`:
-```php
-'event_grid' => [
-    'title' => 'Предстоящие события',
-    'items' => [],
-],
+```bash
+TEST_DB_HOST=127.0.0.1 TEST_DB_DATABASE=asdr_test TEST_DB_USERNAME=root \
+TEST_DB_PASSWORD= php tests/run.php
 ```
 
-### Step 2: Create Template View
-Create `app/Views/blocks/event_grid.php`:
-```php
-<?php
-/** @var array $block */
-/** @var array $data */
-$title = (string) ($data['title'] ?? '');
-?>
-<section class="block-event-grid" id="block-<?= (int) $block['id'] ?>">
-    <div class="container">
-        <?php if ($title !== ''): ?>
-            <h2><?= htmlspecialchars($title, ENT_QUOTES) ?></h2>
-        <?php endif; ?>
-        <!-- Render block content -->
-    </div>
-</section>
+Ярлыки `composer lint | test | check | smoke` и `make help` делают то же
+самое короче.
+
+### Бюджеты качества
+
+Часть величин в проекте может только уменьшаться: `!important`, классы без
+правил в CSS, находки в эталоне PHPStan, вес бандлов, типы блоков вне схемы.
+Потолок и замер объявлены один раз в `tests/budgets.php`, сторожа в
+`tests/cases` читают их оттуда. Запас до падения показывает отчёт:
+
+```bash
+php .claude/skills/quality-budgets/report.php
 ```
 
-### Step 3: Add Unit Test
-Add a test case in `tests/` verifying that `BlockRenderer::render()` produces clean, sanitized HTML output for `event_grid`.
+## Как добавить тип блока
 
----
+Пример: `event_grid`.
 
-## 5. Production Build & Deployment
+**1. Опиши поля — один раз, в схеме.** `App\Core\BlockData\BlockFieldSchema`:
+из описания поля получаются умолчание, поле формы в редакторе, нормализация
+присланного и приведение сохранённых данных на выводе. Раньше то же знание
+лежало в четырёх местах (реестр, форма, `collectData()`, шаблон) и списки
+значений расходились молча — форма отдавала значение, нормализатор принимал,
+шаблон о нём не знал и откатывался к умолчанию.
 
-- Production runtime dependencies are strictly zero (standard PHP extensions only).
-- Dev tools (`phpstan`, `phpunit`, linters) are scoped under `require-dev`.
-- Deployments require uploading repository files, setting directory permissions on `storage/` and `public/uploads/`, and running database migrations if applicable.
+**2. Заведи ключ в реестре.** `App\Core\BlockTypeRegistry::BASE_DEFAULTS` —
+у типа со схемой там пустой массив: ключ остаётся ради порядка типов в
+редакторе.
+
+**3. Положи шаблон** в `templates/blocks/event_grid.php` (не в `app/Views`).
+Инлайн-стили в блоках запрещены тестом — оформление уходит в scoped CSS
+через `$templateCss`, его селекторы автоматически получают префикс
+`#block-{id}`. Шаблон читает `$data` как есть: приведение уже сделала схема.
+
+**4. Напиши тест.** Проверка «настройка доступна редактору» обязана читать
+`block_editor_markup()` (форма плюс поля схемы), а не один `block_form.php`.
+
+Контейнеры (`columns`, `tabs`) шаблона не имеют — их рендер программный
+(`BlockRenderer::renderColumns/renderTabs`), поэтому файлов в
+`templates/blocks/` на два меньше, чем типов.
+
+## Договорённости, которые стоит знать до первой правки
+
+- **Размеры шрифта — только из шкалы** `--step--4 … --step-12`; точки перелома
+  публички — из общей шкалы `480…1360`. Новое значение мимо шкалы роняет тест.
+- **Настройка обязана что-то менять на выводе.** Тесты проверяют это замером:
+  меняют значение, снимают вычисленные стили до и после и сравнивают. Объявить
+  переменную мало — правило, где значение написано числом, её не слушает, а
+  тема грузится после базы и перекрывает её.
+- **Админку не переводим** — её интерфейс по-русски. Переводится публичная
+  часть (RU=ключ, UZ-словарь) и контент (per-language в БД).
+- **После правок CSS/JS** — `npm run build:assets`, иначе `check:assets`
+  уронит CI.

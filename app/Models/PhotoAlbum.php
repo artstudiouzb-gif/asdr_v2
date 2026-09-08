@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Core\Database;
 use App\Core\Slug;
 use App\Core\Logger;
+use App\Core\Translations;
 
 /**
  * Фотоальбомы: галереи изображений с обложкой. Изображения хранятся ссылками
@@ -85,16 +86,7 @@ final class PhotoAlbum
 
     private static function applyTranslation(array $row, ?array $translation): array
     {
-        if ($translation === null) {
-            return $row;
-        }
-        foreach (['title', 'description'] as $field) {
-            if (isset($translation[$field]) && trim((string) $translation[$field]) !== '') {
-                $row[$field] = $translation[$field];
-            }
-        }
-
-        return $row;
+        return Translations::overlayFields($row, $translation, ['title', 'description']);
     }
 
     /**
@@ -104,60 +96,17 @@ final class PhotoAlbum
      * @param array<int|string> $ids
      * @return array<int, array<int, string>>
      */
+    /**
+     * Языки контента для набора альбомов одним запросом (без N+1).
+     * Разбор — общий для всех сущностей механизма А: полсотни строк, которые
+     * повторялись здесь дословно, живут в `Translations::availableLangs()`.
+     *
+     * @param array<int|string> $ids
+     * @return array<int, array<int, string>>
+     */
     public static function availableLangsForIds(array $ids): array
     {
-        $ids = array_values(array_unique(array_map('intval', $ids)));
-        $map = [];
-        foreach ($ids as $id) {
-            $map[$id] = [];
-        }
-        if ($ids === []) {
-            return $map;
-        }
-
-        $in = implode(',', array_fill(0, count($ids), '?'));
-        $default = Language::defaultCode();
-
-        try {
-            $stmtBase = Database::pdo()->prepare(
-                "SELECT id, title FROM photo_albums WHERE id IN ($in)"
-            );
-            $stmtBase->execute($ids);
-            foreach ($stmtBase->fetchAll() as $row) {
-                $id = (int) $row['id'];
-                if (trim((string) ($row['title'] ?? '')) !== '' && isset($map[$id])) {
-                    $map[$id][] = $default;
-                }
-            }
-        } catch (\Throwable $e) {
-            Logger::swallowed('PhotoAlbum::availableLangsForIds: не удалось прочитать базовые записи', $e);
-        }
-
-        try {
-            $stmtTrans = Database::pdo()->prepare(
-                "SELECT album_id, lang FROM photo_album_translations
-                 WHERE album_id IN ($in)
-                   AND (TRIM(COALESCE(title, '')) <> '' OR TRIM(COALESCE(description, '')) <> '')"
-            );
-            $stmtTrans->execute($ids);
-            foreach ($stmtTrans->fetchAll() as $row) {
-                $id = (int) $row['album_id'];
-                $lang = (string) $row['lang'];
-                if (isset($map[$id]) && !in_array($lang, $map[$id], true)) {
-                    $map[$id][] = $lang;
-                }
-            }
-        } catch (\Throwable $e) {
-            Logger::swallowed('PhotoAlbum::availableLangsForIds: не удалось прочитать photo_album_translations', $e);
-        }
-
-        foreach ($ids as $id) {
-            if (empty($map[$id])) {
-                $map[$id] = [$default];
-            }
-        }
-
-        return $map;
+        return Translations::availableLangs('photo_albums', $ids, ['title', 'description']);
     }
 
     /** Создаёт альбом; slug — из названия, при коллизии добавляется суффикс. */
