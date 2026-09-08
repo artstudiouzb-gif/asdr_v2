@@ -132,7 +132,7 @@ $preview = static function (array $data): string {
         </div>
     </div>
 
-    <table class="data-table submissions-table">
+    <table class="data-table">
         <thead>
             <tr>
                 <th>Статус</th>

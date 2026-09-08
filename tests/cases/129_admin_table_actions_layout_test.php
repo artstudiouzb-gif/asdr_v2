@@ -25,7 +25,12 @@ test('Текстовые действия языков не схлопывают
 
     assert_contains('.data-table__actions .btn:not(.btn--icon) { width: auto;', $css);
     assert_contains('.data-table td.language-settings-table__actions { width: auto;', $css);
-    assert_contains('<div class="table-responsive language-settings-table-wrap">', $view);
+    // Прежде здесь проверялся класс `language-settings-table-wrap`, у которого
+    // в admin.css нет ни одного правила: тест закреплял пустышку и при этом
+    // спорил с бюджетом мёртвых классов (тест 278). Работу делает
+    // `.table-responsive` — его и проверяем.
+    assert_contains('<div class="table-responsive">', $view);
+    assert_not_contains('language-settings-table-wrap', $view, 'вернулся класс без правил');
     assert_contains('language-settings-table__actions', $view);
     assert_contains("AdminUi::icon('save')", $view);
     assert_contains('>Сохранить</button>', $view);

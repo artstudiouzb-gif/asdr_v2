@@ -1555,18 +1555,6 @@ parameters:
 			path: app/Core/SocialSettings.php
 
 		-
-			message: '#^Parameter \#1 \$codepoint of function chr expects int, float\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/TOTP.php
-
-		-
-			message: '#^Parameter \#1 \$length of function random_bytes expects int\<1, max\>, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/TOTP.php
-
-		-
 			message: '#^Method App\\Core\\TableRows\:\:width\(\) has parameter \$rows with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1639,12 +1627,6 @@ parameters:
 			path: app/Core/UpdateState.php
 
 		-
-			message: '#^Parameter \#2 \$value of static method App\\Models\\Setting\:\:set\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Core/UpdateState.php
-
-		-
 			message: '#^Method App\\Core\\Updater\:\:check\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1677,12 +1659,6 @@ parameters:
 		-
 			message: '#^Method App\\Core\\Uploader\:\:storeFromPath\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: app/Core/Uploader.php
-
-		-
-			message: '#^Parameter \#1 \$width of function imagecreatetruecolor expects int\<1, max\>, int given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Core/Uploader.php
 
@@ -3129,12 +3105,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @var for variable \$config has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: app/Views/admin/header/index.php
-
-		-
-			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, string\|false given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Views/admin/header/index.php
 
