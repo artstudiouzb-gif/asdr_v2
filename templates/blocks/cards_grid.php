@@ -16,6 +16,15 @@ $variant = (string) $data['variant'];
 // затемнением.
 $imageBelow = $variant === 'image_below';
 $columns = (int) $data['columns'];
+// Раскладка. «Слайдер» доступен любому варианту; «авто» — прежнее поведение
+// карточек с фотографией: сетка, а когда карточек больше, чем колонок, полоса.
+// Порог считается по настройке «Колонок», а не по числу 4: в сетке и в кадре
+// слайдера обязано помещаться одно и то же число карточек, иначе настройка
+// действует наполовину. У остальных вариантов «авто» — это сетка: включать им
+// прокрутку задним числом значило бы поменять вид собранных страниц.
+$layout = (string) $data['layout'];
+$itemCount = count($items);
+$explicitSlider = $layout === 'slider' && $itemCount > 1;
 $mediaClasses = MediaPosition::classes($data['image_position'] ?? null, $data['image_position_mobile'] ?? null);
 $cardBg = (string) $data['card_bg'];
 $textColor = (string) $data['text_color'];
@@ -29,7 +38,10 @@ $cardStyle = '--feature-card-icon-size:' . $iconSize . 'px;'
     . ($cardBg !== '' ? '--card-bg:' . $cardBg . ';' : '')
     . ($textColor !== '' ? '--cards-text:' . $textColor . ';' : '');
 $scope = '#block-' . (int) $blockId;
-$templateCss = $scope . ' .block-cards{--cards-cols:' . $columns . ';' . $cardStyle . '}';
+// Число колонок принадлежит блоку, а не одному его варианту: сетку карточек с
+// фотографиями и кадр слайдера считает та же переменная.
+$templateCss = $scope . '{--cards-cols:' . $columns . ';}';
+$templateCss .= $scope . ' .block-cards{' . $cardStyle . '}';
 $templateCss .= $scope . ' .feature-card__icon{width:' . $iconBoxSize . 'px;height:' . $iconBoxSize . 'px;}';
 $cardClasses = ($cardBg !== '' ? ' block-cards--custom-bg' : '')
     . ($textColor !== '' ? ' block-cards--custom-text' : '')
@@ -53,19 +65,16 @@ if ($variant === 'icon' && $visualStyle === 'new') {
 }
 ?>
 <?php if ($variant === 'image' || $imageBelow): ?>
-    <?php $carousel = count($items) > 1; $desktopCarousel = count($items) > 4; ?>
+    <?php
+    $carousel = $layout !== 'grid' && $itemCount > 1;
+    $desktopCarousel = $explicitSlider || ($layout === 'auto' && $itemCount > $columns);
+    ?>
     <div class="block-imgcards<?= $imageBelow ? ' block-imgcards--below' : '' ?>"<?= $carousel ? ' data-carousel' : '' ?>>
         <div class="section-head">
             <?php if ($title !== ''): ?><h2 class="section-head__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
             <div class="section-head__tools">
                 <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
-                <?php if ($carousel): ?>
-                    <span class="carousel-nav" data-carousel-nav hidden>
-                        <button type="button" class="carousel-nav__btn" data-carousel-prev aria-label="<?= htmlspecialchars(t('Назад'), ENT_QUOTES) ?>"><?= Icon::render('chevron-left', 18) ?></button>
-                        <span class="carousel-nav__dots" data-carousel-dots role="group" aria-label="<?= htmlspecialchars(t('Выбор слайда'), ENT_QUOTES) ?>"></span>
-                        <button type="button" class="carousel-nav__btn" data-carousel-next aria-label="<?= htmlspecialchars(t('Вперёд'), ENT_QUOTES) ?>"><?= Icon::render('chevron-right', 18) ?></button>
-                    </span>
-                <?php endif; ?>
+                <?php if ($carousel): ?><?php include __DIR__ . '/partials/carousel_nav.php'; ?><?php endif; ?>
             </div>
         </div>
         <?php if ($items === []): ?>
@@ -80,7 +89,7 @@ if ($variant === 'icon' && $visualStyle === 'new') {
                     <div class="imgcard<?= $imageBelow ? ' imgcard--below' : '' ?>"<?= $carousel ? ' data-carousel-item' : '' ?>>
                     <?php endif; ?>
                         <?php if ($image !== ''): ?>
-                            <?= Media::picture($image, (string) ($item['title'] ?? ''), null, null, 'imgcard__media ' . $mediaClasses, true, '(max-width: 700px) 100vw, 25vw') ?>
+                            <?= Media::picture($image, (string) ($item['title'] ?? ''), null, null, 'imgcard__media ' . $mediaClasses, true, '(max-width: 700px) 100vw, ' . (int) round(100 / max(1, $columns)) . 'vw') ?>
                         <?php else: ?>
                             <span class="imgcard__media" aria-hidden="true"></span>
                         <?php endif; ?>
@@ -95,18 +104,23 @@ if ($variant === 'icon' && $visualStyle === 'new') {
         <?php endif; ?>
     </div>
 <?php elseif ($variant === 'compact'): ?>
-    <div class="block-categories">
-        <?php if ($title !== ''): ?><h2 class="block-categories__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
+    <div class="block-categories"<?= $explicitSlider ? ' data-carousel' : '' ?>>
+        <?php if ($title !== '' || $explicitSlider): ?>
+            <div class="block-categories__head">
+                <?php if ($title !== ''): ?><h2 class="block-categories__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
+                <?php if ($explicitSlider): ?><?php include __DIR__ . '/partials/carousel_nav.php'; ?><?php endif; ?>
+            </div>
+        <?php endif; ?>
         <?php if ($items === []): ?>
             <p class="block-categories__empty"><?= htmlspecialchars(t('Категории ещё не добавлены.'), ENT_QUOTES) ?></p>
         <?php else: ?>
-            <div class="cat-grid">
+            <div class="cat-grid<?= $explicitSlider ? ' cards-track' : '' ?>"<?= $explicitSlider ? ' data-carousel-track tabindex="0" role="group" aria-label="' . htmlspecialchars(t('Категории — прокрутка вбок'), ENT_QUOTES) . '"' : '' ?>>
                 <?php foreach ($items as $index => $item): ?>
                     <?php $url = trim((string) ($item['url'] ?? '')); ?>
                     <?php if ($url !== ''): ?>
-                    <a class="cat-tile<?= $index === 0 ? ' is-active' : '' ?>" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                    <a class="cat-tile<?= $index === 0 ? ' is-active' : '' ?>"<?= $explicitSlider ? ' data-carousel-item' : '' ?> href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
                     <?php else: ?>
-                    <span class="cat-tile<?= $index === 0 ? ' is-active' : '' ?>">
+                    <span class="cat-tile<?= $index === 0 ? ' is-active' : '' ?>"<?= $explicitSlider ? ' data-carousel-item' : '' ?>>
                     <?php endif; ?>
                         <?php if (!empty($item['icon_svg'])): ?><span class="cat-tile__icon" aria-hidden="true"><?= Icon::render($item['icon_svg'], 28) ?></span><?php endif; ?>
                         <span class="cat-tile__label"><?= htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES) ?></span>
@@ -116,27 +130,30 @@ if ($variant === 'icon' && $visualStyle === 'new') {
         <?php endif; ?>
     </div>
 <?php else: ?>
-    <div class="block-cards<?= $cardClasses ?>">
-        <?php if ($title !== '' || ($allText !== '' && $allUrl !== '')): ?>
+    <div class="block-cards<?= $cardClasses ?>"<?= $explicitSlider ? ' data-carousel' : '' ?>>
+        <?php if ($title !== '' || ($allText !== '' && $allUrl !== '') || $explicitSlider): ?>
             <div class="section-head">
                 <?php if ($title !== ''): ?><h2 class="section-head__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
-                <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
+                <div class="section-head__tools">
+                    <?php if ($allText !== '' && $allUrl !== ''): ?><a class="section-head__all" href="<?= htmlspecialchars($allUrl, ENT_QUOTES) ?>"><?= htmlspecialchars($allText, ENT_QUOTES) ?> →</a><?php endif; ?>
+                    <?php if ($explicitSlider): ?><?php include __DIR__ . '/partials/carousel_nav.php'; ?><?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
         <?php if ($items === []): ?>
             <p class="block-cards__empty"><?= htmlspecialchars(t('Пункты ещё не добавлены.'), ENT_QUOTES) ?></p>
         <?php else: ?>
-            <div class="cards-grid">
+            <div class="cards-grid<?= $explicitSlider ? ' cards-track' : '' ?>"<?= $explicitSlider ? ' data-carousel-track tabindex="0" role="group" aria-label="' . htmlspecialchars(t('Карточки — прокрутка вбок'), ENT_QUOTES) . '"' : '' ?>>
                 <?php foreach ($items as $index => $item): ?>
                     <?php $url = trim((string) ($item['url'] ?? '')); $hasIcon = !empty($item['icon_svg']); ?>
                     <?php if ($url !== '' && $hasIcon): ?>
-                    <a class="feature-card feature-card--has-icon" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                    <a class="feature-card feature-card--has-icon"<?= $explicitSlider ? ' data-carousel-item' : '' ?> href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
                     <?php elseif ($url !== ''): ?>
-                    <a class="feature-card" href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
+                    <a class="feature-card"<?= $explicitSlider ? ' data-carousel-item' : '' ?> href="<?= htmlspecialchars($url, ENT_QUOTES) ?>">
                     <?php elseif ($hasIcon): ?>
-                    <article class="feature-card feature-card--has-icon">
+                    <article class="feature-card feature-card--has-icon"<?= $explicitSlider ? ' data-carousel-item' : '' ?>>
                     <?php else: ?>
-                    <article class="feature-card">
+                    <article class="feature-card"<?= $explicitSlider ? ' data-carousel-item' : '' ?>>
                     <?php endif; ?>
                         <div class="feature-card__top">
                             <?php if ($hasIcon): ?>

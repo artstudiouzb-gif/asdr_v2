@@ -39,7 +39,9 @@ test('cards template does not generate element names or links through string con
 
     assert_not_contains('$tag =', $template);
     assert_contains('<a class="feature-card"', $template);
-    assert_contains('<article class="feature-card">', $template);
+    // Хвост тега открыт: у карточки бывает условный атрибут (`data-carousel-item`
+    // в режиме слайдера). Стережём имя элемента в разметке, а не его атрибуты.
+    assert_contains('<article class="feature-card"', $template);
     assert_contains('<h3 class="feature-card__title">', $template);
 });
 

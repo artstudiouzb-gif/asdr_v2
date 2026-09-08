@@ -2602,6 +2602,11 @@ img.block-hero__button-icon { width: 20px; height: 20px; object-fit: contain; }
 
 /* Сетка категорий: плитки с иконкой; первая — активная (акцент). */
 .block-categories__title { font-size: var(--font-size-h2, var(--step-6)); margin: 0 0 20px; }
+/* Шапка появляется только в режиме слайдера: стрелкам нужно место рядом с
+   заголовком. Нижний отступ переезжает на неё — иначе он сложился бы с
+   отступом заголовка и оторвал управление от полосы. */
+.block-categories__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 0 0 20px; }
+.block-categories__head .block-categories__title { margin: 0; }
 .block-categories__empty { color: var(--text-muted); }
 .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
 .cat-tile {

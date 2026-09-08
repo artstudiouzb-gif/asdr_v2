@@ -185,6 +185,7 @@ return [
     'Мы в соцсети' => 'Ijtimoiy tarmoqdamiz',
     'Политика конфиденциальности' => 'Maxfiylik siyosati',
     'Дополнительные ссылки' => 'Qo‘shimcha havolalar',
+    'Категории — прокрутка вбок' => 'Turkumlar — yon tomonga aylantirish',
     'Источник:' => 'Manba:',
     'Основное меню' => 'Asosiy menyu',
     'Открыть подменю' => 'Ichki menyuni ochish',
