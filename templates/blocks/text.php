@@ -14,6 +14,38 @@ $variant = in_array($data['variant'] ?? 'default', ['default', 'section', 'intro
 $asideTitle = trim((string) ($data['aside_title'] ?? ''));
 $items = is_array($data['items'] ?? null) ? array_values($data['items']) : [];
 $quote = trim((string) ($data['quote'] ?? ''));
+// Оформление цитаты. Пустой цвет и нулевой размер означают «как в теме»:
+// переменная не объявляется вовсе, и работает запасное значение из gov-theme.
+$quoteBg = trim((string) ($data['quote_bg'] ?? ''));
+$quoteFg = trim((string) ($data['quote_color'] ?? ''));
+$quoteMark = in_array($data['quote_mark'] ?? 'text', ['text', 'icon', 'none'], true)
+    ? (string) $data['quote_mark']
+    : 'text';
+$quoteMarkPosition = in_array($data['quote_mark_position'] ?? 'top-left', ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'above'], true)
+    ? (string) $data['quote_mark_position']
+    : 'top-left';
+$quoteMarkSize = max(0, min(240, (int) ($data['quote_mark_size'] ?? 0)));
+$quoteMarkColor = trim((string) ($data['quote_mark_color'] ?? ''));
+$quoteMarkHtml = '';
+if ($quoteMark === 'icon') {
+    // Кегль знака задаёт CSS (svg { width: 1em }), поэтому размер значка тут
+    // нужен только как разумный запас качества.
+    $quoteMarkHtml = Icon::render((string) ($data['quote_mark_icon'] ?? ''), 48, 'block-text__quote-glyph');
+} elseif ($quoteMark === 'text') {
+    $quoteMarkHtml = htmlspecialchars(mb_substr(trim((string) ($data['quote_mark_text'] ?? "\u{201c}")), 0, 2), ENT_QUOTES);
+}
+
+$quoteVars = ($quoteBg !== '' ? '--quote-bg:' . $quoteBg . ';' : '')
+    // Свой цвет текста главнее подбора; если задан только фон, цвет считается
+    // по контрасту — белым по светлой заливке цитату не прочесть.
+    . ($quoteFg !== ''
+        ? '--quote-fg:' . $quoteFg . ';'
+        : ($quoteBg !== '' ? '--quote-fg:' . \App\Core\AccentContrast::onFill($quoteBg) . ';' : ''))
+    . ($quoteMarkColor !== '' ? '--quote-mark-color:' . $quoteMarkColor . ';' : '')
+    . ($quoteMarkSize > 0 ? '--quote-mark-size:' . $quoteMarkSize . 'px;' : '');
+if ($variant === 'spotlight' && $quote !== '' && $quoteVars !== '') {
+    $templateCss = '#block-' . (int) $blockId . ' .block-text__quote{' . $quoteVars . '}';
+}
 $mediaType = in_array($data['media_type'] ?? 'none', ['none', 'image', 'video', 'youtube'], true)
     ? (string) $data['media_type']
     : 'none';
@@ -94,7 +126,10 @@ $resolvedMediaType = match ($mediaType) {
                 <?php endif; ?>
             </aside>
         <?php elseif ($variant === 'spotlight' && $quote !== ''): ?>
-            <blockquote class="block-text__quote"><p><?= nl2br(htmlspecialchars($quote, ENT_QUOTES)) ?></p></blockquote>
+            <blockquote class="block-text__quote block-text__quote--mark-<?= htmlspecialchars($quoteMarkPosition, ENT_QUOTES) ?>">
+                <?php if ($quoteMarkHtml !== ''): ?><span class="block-text__quote-mark" aria-hidden="true"><?= $quoteMarkHtml ?></span><?php endif; ?>
+                <p><?= nl2br(htmlspecialchars($quote, ENT_QUOTES)) ?></p>
+            </blockquote>
         <?php endif; ?>
     </div>
 </div>
