@@ -3074,6 +3074,98 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 /* Заголовок блока идёт во всю ширину контейнера, как и его текст: колонка
    в ch обрывала строку раньше абзаца под ней и выглядела случайной. */
 .block-text__title { max-width: none; }
+
+/* «Текст + акцентная цитата» ------------------------------------------------
+   Раскладка и карточка цитаты жили в public-editorial-pages.css, то есть
+   действовали только внутри `.editorial-page__content`: на главной и на
+   странице, начинающейся с обложки, вариант предлагался редактору и не давал
+   ничего — обычный текст и голый blockquote. Оформление принадлежит блоку, а
+   не разметке страницы, поэтому лежит в теме.
+
+   Фон, цвет текста и знак кавычки объявлены переменными: их задаёт редактор
+   («Дизайн цитаты» в форме блока), а шаблон печатает значения scoped-CSS у
+   `#block-<id>`. Пустая настройка — это отсутствующая переменная, то есть
+   запасное значение из темы. */
+.block-text--spotlight .block-text__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(420px, .92fr);
+    gap: clamp(44px, 6vw, 84px);
+    align-items: stretch;
+    margin-top: 26px;
+}
+
+.block-text__quote {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 250px;
+    margin: 0;
+    padding: clamp(34px, 4vw, 54px);
+    overflow: hidden;
+    border-radius: var(--radius, 14px);
+    background: var(--quote-bg, var(--gov-navy));
+    color: var(--quote-fg, #fff);
+}
+
+/* Эмблема в углу — декорация карточки, а не знак цитаты: её редактор не
+   настраивает, поэтому она остаётся псевдоэлементом. */
+.block-text__quote::after {
+    content: '';
+    position: absolute;
+    right: -36px;
+    bottom: -46px;
+    width: 190px;
+    aspect-ratio: 1;
+    background: url('../img/emblem.svg') center / contain no-repeat;
+    opacity: .055;
+}
+
+.block-text__quote p {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    color: inherit;
+    font-size: var(--font-size-h3, clamp(var(--step-2), 1.8vw, var(--step-4)));
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* Знак кавычки — настоящий элемент, а не `content` у ::before. Псевдоэлемент
+   умеет показать только строку: значок из спрайта в него не вставить, а
+   выбранный редактором символ пришлось бы экранировать в CSS. Диктору знак не
+   адресован (aria-hidden), поэтому потери разметки тут нет.
+   z-index не задаём: абзац цитаты объявляет свой, и текст остаётся поверх
+   знака при любом его размере. */
+.block-text__quote-mark {
+    position: absolute;
+    display: block;
+    color: var(--quote-mark-color, var(--gov-teal));
+    font-family: Georgia, serif;
+    font-size: var(--quote-mark-size, var(--step-12));
+    line-height: .8;
+    pointer-events: none;
+}
+
+/* Значок наследует кегль знака: одна настройка размера на символ и на SVG. */
+.block-text__quote-mark svg { display: block; width: 1em; height: 1em; }
+
+.block-text__quote--mark-top-left .block-text__quote-mark { top: 12px; left: 26px; }
+.block-text__quote--mark-top-right .block-text__quote-mark { top: 12px; right: 26px; }
+.block-text__quote--mark-bottom-left .block-text__quote-mark { bottom: 12px; left: 26px; }
+.block-text__quote--mark-bottom-right .block-text__quote-mark { bottom: 12px; right: 26px; }
+
+/* «Над текстом»: знак встаёт в поток, поэтому карточка раскладывается
+   колонкой — иначе он оказался бы рядом с абзацем, а не над ним. */
+.block-text__quote--mark-above { flex-direction: column; justify-content: center; align-items: flex-start; }
+.block-text__quote--mark-above .block-text__quote-mark { position: static; margin-bottom: .08em; }
+
+@media (max-width: 1000px) {
+    .block-text--spotlight .block-text__layout { grid-template-columns: 1fr; gap: 34px; }
+}
+
+@media (max-width: 720px) {
+    .block-text__quote { min-height: 220px; }
+}
 .content-pagehead__inner { max-width: var(--container-max); margin: 0 auto; }
 .content-pagehead__title { font-size: var(--font-size-h1, var(--step-8)); margin: 0 0 10px; color: var(--section-title-fg); }
 .content-pagehead__lead { color: var(--gov-muted); font-size: var(--step-0); line-height: var(--base-line-height, 1.6); margin: 0; }
