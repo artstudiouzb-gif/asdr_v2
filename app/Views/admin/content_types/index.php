@@ -37,6 +37,11 @@ require __DIR__ . '/../layout/header.php';
             <input type="checkbox" id="is_public" name="is_public" value="1" checked>
             <label for="is_public">Публичный раздел (показывать на сайте: <code>/catalog/…</code>)</label>
         </div>
+        <div class="form-field form-field--checkbox">
+            <input type="checkbox" id="root_url" name="root_url" value="1">
+            <label for="root_url">Адрес без префикса <code>/catalog</code> — раздел живёт в корне сайта</label>
+        </div>
+        <span class="form-hint">Например, <code>/documenty</code> вместо <code>/catalog/documenty</code>. Адрес должен быть свободен: страница или служебный раздел с таким адресом занимает его первым, и тогда настройка не сохранится.</span>
         <div class="form-actions"><button type="submit" class="btn btn--primary">Создать тип</button></div>
     </form>
 </div>
@@ -57,7 +62,8 @@ require __DIR__ . '/../layout/header.php';
                 <td><?= (int) $t['has_translations'] === 1 ? 'да' : 'нет' ?></td>
                 <td>
                     <?php if ((int) ($t['is_public'] ?? 1) === 1): ?>
-                        <a href="/catalog/<?= htmlspecialchars((string) $t['slug'], ENT_QUOTES) ?>" target="_blank" rel="noopener">/catalog/<?= htmlspecialchars((string) $t['slug'], ENT_QUOTES) ?></a>
+                        <?php $publicPath = '/' . \App\Models\ContentType::path($t); ?>
+                        <a href="<?= htmlspecialchars($publicPath, ENT_QUOTES) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($publicPath, ENT_QUOTES) ?></a>
                     <?php else: ?>
                         <span class="form-hint">скрыт</span>
                     <?php endif; ?>

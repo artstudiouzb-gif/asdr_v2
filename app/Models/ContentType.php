@@ -43,6 +43,94 @@ final class ContentType
         return $stmt->fetch() ?: null;
     }
 
+    /**
+     * Адрес раздела каталога без языкового префикса: `catalog/<slug>` или
+     * просто `<slug>`, если у типа снят префикс.
+     *
+     * Единственное место, где это знание живёт. Прежде `'catalog/' . $slug`
+     * было написано в десятке мест — списке, карточке, календаре, поиске,
+     * открытых данных и уведомлении о языке, — и переключатель у одного типа
+     * пришлось бы вносить в каждое из них.
+     *
+     * @param array<string, mixed> $type
+     */
+    public static function path(array $type): string
+    {
+        $slug = (string) ($type['slug'] ?? '');
+
+        return empty($type['root_url']) ? 'catalog/' . $slug : $slug;
+    }
+
+    /**
+     * Адрес записи раздела.
+     *
+     * @param array<string, mixed> $type
+     */
+    public static function entryPath(array $type, string $entrySlug): string
+    {
+        return self::path($type) . '/' . $entrySlug;
+    }
+
+    /**
+     * Публичный тип, живущий в корне сайта. Не «любой тип с таким слагом»:
+     * маршрут `/{slug}` обслуживает страницы, и отвечать каталогом он вправе
+     * только там, где префикс снят осознанно.
+     */
+    public static function findRootBySlug(string $slug): ?array
+    {
+        $stmt = Database::pdo()->prepare(
+            'SELECT * FROM content_types
+             WHERE slug = :s AND is_public = 1 AND root_url = 1 LIMIT 1'
+        );
+        $stmt->execute([':s' => $slug]);
+
+        return $stmt->fetch() ?: null;
+    }
+
+    /**
+     * Занятые адреса первого уровня: у них свои маршруты, объявленные до
+     * `/{slug}`, поэтому тип с таким слагом в корне не открылся бы никогда —
+     * настройка выглядела бы сохранённой и не работала.
+     */
+    public const RESERVED_ROOT = [
+        'admin', 'api', 'assets', 'health', 'install', 'repo', 'uploads',
+        'catalog', 'news', 'projects', 'albums', 'opendata', 'search',
+        'goals', 'forms', 'push', 'subscribe', 'unsubscribe', 'script',
+        'sitemap.xml', 'robots.txt', 'rss.xml', 'captcha.png',
+    ];
+
+    /**
+     * Причина, по которой слаг нельзя вынести в корень, или пустая строка.
+     *
+     * Проверка нужна ровно потому, что столкновение молчаливое: маршрут
+     * `/{slug}` сначала ищет страницу, поэтому тип с занятым адресом просто
+     * никогда бы не открылся, а редактор видел бы сохранённую настройку.
+     */
+    public static function rootUrlConflict(string $slug): string
+    {
+        $slug = strtolower(trim($slug));
+        if ($slug === '') {
+            return 'Укажите адрес раздела.';
+        }
+        if (in_array($slug, self::RESERVED_ROOT, true)) {
+            return 'Адрес «/' . $slug . '» занят служебным разделом сайта.';
+        }
+        if (in_array($slug, Language::activeCodes(), true)) {
+            return 'Адрес «/' . $slug . '» занят языковой версией сайта.';
+        }
+
+        $stmt = Database::pdo()->prepare(
+            "SELECT entity_type FROM pages WHERE slug = :s AND deleted_at IS NULL LIMIT 1"
+        );
+        $stmt->execute([':s' => $slug]);
+        $entity = $stmt->fetchColumn();
+        if ($entity === 'page') {
+            return 'Адрес «/' . $slug . '» занят страницей сайта.';
+        }
+
+        return '';
+    }
+
     public static function slugExists(string $slug, ?int $excludeId = null): bool
     {
         $sql = 'SELECT COUNT(*) FROM content_types WHERE slug = :s';
@@ -57,11 +145,11 @@ final class ContentType
         return (int) $stmt->fetchColumn() > 0;
     }
 
-    public static function create(string $slug, string $name, bool $hasTranslations, string $description = '', bool $isPublic = true, string $icon = ''): int
+    public static function create(string $slug, string $name, bool $hasTranslations, string $description = '', bool $isPublic = true, string $icon = '', bool $rootUrl = false): int
     {
         $stmt = Database::pdo()->prepare(
-            'INSERT INTO content_types (slug, name, description, icon, has_translations, is_public, created_at)
-             VALUES (:s, :n, :d, :i, :t, :p, NOW())'
+            'INSERT INTO content_types (slug, name, description, icon, has_translations, is_public, root_url, created_at)
+             VALUES (:s, :n, :d, :i, :t, :p, :r, NOW())'
         );
         $stmt->execute([
             ':s' => $slug,
@@ -70,15 +158,16 @@ final class ContentType
             ':i' => Icon::cleanName($icon),
             ':t' => $hasTranslations ? 1 : 0,
             ':p' => $isPublic ? 1 : 0,
+            ':r' => $rootUrl ? 1 : 0,
         ]);
 
         return (int) Database::pdo()->lastInsertId();
     }
 
-    public static function update(int $id, string $name, bool $hasTranslations, string $description = '', bool $isPublic = true, string $icon = ''): void
+    public static function update(int $id, string $name, bool $hasTranslations, string $description = '', bool $isPublic = true, string $icon = '', bool $rootUrl = false): void
     {
         $stmt = Database::pdo()->prepare(
-            'UPDATE content_types SET name = :n, description = :d, icon = :i, has_translations = :t, is_public = :p WHERE id = :id'
+            'UPDATE content_types SET name = :n, description = :d, icon = :i, has_translations = :t, is_public = :p, root_url = :r WHERE id = :id'
         );
         $stmt->execute([
             ':n' => $name,
@@ -86,6 +175,7 @@ final class ContentType
             ':i' => Icon::cleanName($icon),
             ':t' => $hasTranslations ? 1 : 0,
             ':p' => $isPublic ? 1 : 0,
+            ':r' => $rootUrl ? 1 : 0,
             ':id' => $id,
         ]);
     }

@@ -33,8 +33,17 @@ $ftypes = ['text' => 'Текст', 'textarea' => 'Многострочный', '
         </div>
         <div class="form-field form-field--checkbox">
             <input type="checkbox" id="is_public" name="is_public" value="1" <?= (int) ($type['is_public'] ?? 1) === 1 ? 'checked' : '' ?>>
-            <label for="is_public">Публичный раздел (доступен на сайте по адресу <code>/catalog/<?= htmlspecialchars((string) $type['slug'], ENT_QUOTES) ?></code>)</label>
+            <label for="is_public">Публичный раздел (доступен на сайте по адресу <code>/<?= htmlspecialchars(\App\Models\ContentType::path($type), ENT_QUOTES) ?></code>)</label>
         </div>
+        <div class="form-field form-field--checkbox">
+            <input type="checkbox" id="root_url" name="root_url" value="1" <?= !empty($type['root_url']) ? 'checked' : '' ?>>
+            <label for="root_url">Адрес без префикса <code>/catalog</code> — раздел живёт в корне сайта</label>
+        </div>
+        <span class="form-hint">
+            Прежний адрес <code>/catalog/<?= htmlspecialchars((string) $type['slug'], ENT_QUOTES) ?></code> продолжит работать: он отвечает постоянным
+            перенаправлением на новый, поэтому старые ссылки и закладки не теряются.
+            Адрес должен быть свободен — страница или служебный раздел с таким адресом занимает его первым.
+        </span>
 
         <h3>Поля</h3>
         <div data-repeater="cfields">

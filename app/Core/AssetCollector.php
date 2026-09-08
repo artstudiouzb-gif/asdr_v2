@@ -50,8 +50,8 @@ final class AssetCollector
         'media_gallery' => '/assets/css/blocks/media-gallery.css',
         'tabs' => '/assets/css/blocks/tabs.css',
         'hero_slides' => '/assets/css/blocks/hero.css',
-        // Каталоги живут на своих адресах (/catalog/{type}) — на обычных
-        // страницах их стили были мёртвым грузом.
+        // Каталоги живут на своих адресах (`/catalog/{type}`, а у типа со снятым
+        // префиксом — `/{type}`) — на обычных страницах их стили были мёртвым грузом.
         'catalog' => '/assets/css/blocks/catalog.css',
         // Ключ совпадает с типом блока — подключение происходит само,
         // когда блок есть на странице (BlockRenderer::renderPage).
