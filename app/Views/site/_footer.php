@@ -44,6 +44,26 @@ try {
 $footerSocial = $hcfg['social_buttons'] ?? [];
 $footerBottom = \App\Core\FooterConfig::renderBottom($footerCfg['bottom'], $siteName);
 
+// Ссылки справа в строке копирайта. Собираются один раз: разметка нижней
+// строки повторяется у обоих стилей подвала, и вторая копия разъехалась бы
+// с первой при первой правке.
+// Подпись приходит из конструктора, поэтому идёт через t() — как заголовки
+// колонок; внутренний адрес получает языковой префикс тем же методом, что и
+// произвольная ссылка пункта меню (второго такого разбора заводить не за чем).
+$footerBottomLinks = '';
+foreach ((array) ($footerCfg['bottom_links'] ?? []) as $footerLink) {
+    $footerLinkUrl = \App\Models\MenuItem::resolveUrl(
+        ['url_type' => 'custom', 'url_value' => (string) $footerLink['url']],
+        $footerLang
+    );
+    $footerBottomLinks .= '<a href="' . htmlspecialchars($footerLinkUrl, ENT_QUOTES) . '">'
+        . htmlspecialchars(t((string) $footerLink['label']), ENT_QUOTES) . '</a>';
+}
+if ($footerBottomLinks !== '') {
+    $footerBottomLinks = '<nav class="site-footer__bottom-links" aria-label="'
+        . htmlspecialchars(t('Дополнительные ссылки'), ENT_QUOTES) . '">' . $footerBottomLinks . '</nav>';
+}
+
 // Логотип подвала: тёмный фон → используем светлый (тёмный) вариант логотипа —
 // сначала для текущего языка, затем общий, иначе обычный логотип.
 $footerHcfg = \App\Core\HeaderConfig::get();
@@ -164,6 +184,7 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
                 <?php endif; ?>
             </div>
             <div class="site-footer__bottom-col site-footer__bottom-col--right">
+                <?= $footerBottomLinks ?>
                 <?php $footerCounters = \App\Core\SecurityHeaders::injectScriptNonce((string) Setting::get('footer_counters', '')); ?>
                 <?php if (trim($footerCounters) !== ''): ?>
                     <div class="site-footer__counters">
@@ -187,6 +208,7 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
                 <?php endif; ?>
             </div>
             <div class="site-footer__bottom-col site-footer__bottom-col--right">
+                <?= $footerBottomLinks ?>
                 <?php $footerCounters = \App\Core\SecurityHeaders::injectScriptNonce((string) Setting::get('footer_counters', '')); ?>
                 <?php if (trim($footerCounters) !== ''): ?>
                     <div class="site-footer__counters">

@@ -44,6 +44,14 @@ final class FooterConfig
     /** Максимум колонок в подвале. */
     public const MAX_COLUMNS = 4;
 
+    /**
+     * Максимум ссылок в нижней строке. Их место — служебные страницы (условия
+     * использования, карта сайта, обратная связь), а не второе меню: строка
+     * идёт мелким кеглем рядом с копирайтом, и с пятой ссылки она перестаёт
+     * читаться как приписка и начинает спорить с настоящей навигацией подвала.
+     */
+    public const MAX_BOTTOM_LINKS = 4;
+
     public const DEFAULTS = [
         'v' => self::VERSION,
         'style' => 'columns',                 // columns | minimal
@@ -54,6 +62,8 @@ final class FooterConfig
         ],
         // Плейсхолдеры: {year} — текущий год, {site} — название сайта.
         'bottom' => '© {year} {site}',
+        // Ссылки справа в строке копирайта: [{label, url}].
+        'bottom_links' => [],
         // Фон подвала: те же режимы, что и у секции страницы (цвет, градиент,
         // фотография, узор). Пустой режим — как было, из темы.
         'background' => ['_bg_mode' => 'preset'],
@@ -158,9 +168,43 @@ final class FooterConfig
         if ($result['bottom'] === '') {
             $result['bottom'] = self::DEFAULTS['bottom'];
         }
+        $result['bottom_links'] = self::normalizeBottomLinks($config['bottom_links'] ?? null);
         $result['v'] = self::VERSION;
 
         return $result;
+    }
+
+    /**
+     * Ссылки нижней строки: подпись и адрес. Ссылка без подписи или без адреса
+     * не выводится — пустой текст ссылки диктор читает как сам адрес. Адрес
+     * проверяет тот же `UrlGuard`, что и остальной вывод в href: поле правит
+     * редактор, а `javascript:` в подвале виден на каждой странице сайта.
+     *
+     * @return list<array{label: string, url: string}>
+     */
+    private static function normalizeBottomLinks(mixed $raw): array
+    {
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $links = [];
+        foreach ($raw as $link) {
+            if (!is_array($link)) {
+                continue;
+            }
+            $label = mb_substr(trim((string) ($link['label'] ?? '')), 0, 60);
+            $url = mb_substr(trim((string) ($link['url'] ?? '')), 0, 300);
+            if ($label === '' || $url === '' || !UrlGuard::isSafeLink($url)) {
+                continue;
+            }
+            $links[] = ['label' => $label, 'url' => $url];
+            if (count($links) >= self::MAX_BOTTOM_LINKS) {
+                break;
+            }
+        }
+
+        return $links;
     }
 
     /**

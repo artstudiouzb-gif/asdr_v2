@@ -145,3 +145,47 @@ test('Подвал: меню в две дорожки только в широк
     // «от 220px» снова даёт две полуколонки, поэтому явно возвращаем одну.
     assert_contains('@media (max-width: 720px) { .site-footer--columns .site-footer__col--menu ul { columns: 1; } }', $css);
 });
+
+test('FooterConfig: ссылки нижней строки — подпись, адрес, лимит и проверка href', function () {
+    $cfg = FooterConfig::normalize([
+        'bottom_links' => [
+            ['label' => 'Карта сайта', 'url' => '/sitemap'],
+            ['label' => '', 'url' => '/no-label'],                 // без подписи — выброс
+            ['label' => 'Без адреса', 'url' => ''],                // без адреса — выброс
+            ['label' => 'Дыра', 'url' => 'javascript:alert(1)'],   // небезопасная схема — выброс
+            ['label' => 'Условия', 'url' => 'https://example.uz/terms'],
+            ['label' => 'Обратная связь', 'url' => '/feedback'],
+            ['label' => 'Пятая', 'url' => '/five'],
+            ['label' => 'Шестая', 'url' => '/six'],                // за лимитом
+        ],
+    ]);
+
+    $labels = array_map(fn ($l) => $l['label'], $cfg['bottom_links']);
+    assert_same(['Карта сайта', 'Условия', 'Обратная связь', 'Пятая'], $labels, 'мусор убран, лимит 4 ссылки');
+    assert_same(FooterConfig::MAX_BOTTOM_LINKS, count($cfg['bottom_links']));
+});
+
+test('FooterConfig: ссылок нижней строки по умолчанию нет', function () {
+    assert_same([], FooterConfig::normalize([])['bottom_links'], 'без настройки строка копирайта не меняется');
+    assert_same([], FooterConfig::normalize(['bottom_links' => 'мусор'])['bottom_links'], 'не-массив игнорируется');
+});
+
+test('Подвал: ссылки нижней строки выводятся в обеих раскладках и оформлены', function () {
+    $view = (string) file_get_contents(APP_ROOT . '/app/Views/site/_footer.php');
+    $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/frontend.css');
+
+    // Нижняя строка есть у обоих стилей подвала — ссылки обязаны быть в обеих.
+    assert_same(2, substr_count($view, '<?= $footerBottomLinks ?>'), 'ссылки выводятся у columns и minimal');
+    // Подпись из конструктора переводится, как и заголовки колонок.
+    assert_contains('t((string) $footerLink[\'label\'])', $view);
+    assert_contains('.site-footer__bottom-links', $css, 'настройка без оформления ничего не меняет');
+});
+
+test('Подвал: форма конструктора даёт редактору ссылки нижней строки', function () {
+    $view = (string) file_get_contents(APP_ROOT . '/app/Views/admin/footer/index.php');
+
+    assert_contains('data-repeater="footlink"', $view);
+    assert_contains('data-repeater-max="<?= FooterConfig::MAX_BOTTOM_LINKS ?>"', $view);
+    assert_contains('bottom_links[__INDEX__][label]', $view);
+    assert_contains('bottom_links[__INDEX__][url]', $view);
+});

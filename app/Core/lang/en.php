@@ -184,6 +184,7 @@ return [
     'Будьте в курсе наших новостей и аналитических материалов.' => 'Stay up to date with our news and analytical materials.',
     'Мы в соцсети' => 'Find us on',
     'Политика конфиденциальности' => 'Privacy policy',
+    'Дополнительные ссылки' => 'Additional links',
     'Источник:' => 'Source:',
     'Основное меню' => 'Main menu',
     'Открыть подменю' => 'Open submenu',

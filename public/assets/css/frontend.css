@@ -1465,11 +1465,21 @@ a.footer-contacts__value:hover { color: var(--gov-teal); text-decoration: underl
 .site-footer__bottom-col--right {
     justify-content: flex-end;
 }
-.site-footer__bottom-col--middle a {
+/* Ссылки нижней строки: служебные страницы справа от копирайта. Переносятся
+   по словам — на узком экране их подписи не обязаны уместиться в один ряд. */
+.site-footer__bottom-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+}
+.site-footer__bottom-col--middle a,
+.site-footer__bottom-links a {
     color: inherit;
     text-decoration: none;
 }
-.site-footer__bottom-col--middle a:hover {
+.site-footer__bottom-col--middle a:hover,
+.site-footer__bottom-links a:hover {
     text-decoration: underline;
     color: var(--gov-teal);
 }
@@ -1486,6 +1496,9 @@ a.footer-contacts__value:hover { color: var(--gov-teal); text-decoration: underl
     .site-footer__bottom-col {
         justify-content: center;
         width: 100%;
+    }
+    .site-footer__bottom-links {
+        justify-content: center;
     }
 }
 /* Четвёртая колонка на планшете вставала одна во второй ряд рядом с тремя
