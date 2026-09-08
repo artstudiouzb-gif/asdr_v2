@@ -22,17 +22,49 @@
 
 [data-visual-system] .section-head__title {
     position: relative;
-    padding-inline-start: 18px;
+    padding-inline-start: calc(var(--section-marker-width, 3px) + 15px);
 }
 
+/* Метка заголовка секции. Толщина, высота и вид приходят из «Дизайна»:
+   раньше здесь стояли константы 3px/.16em, и поменять черту было нечем. */
 [data-visual-system] .section-head__title::before {
     content: "";
     position: absolute;
-    inset-block: .16em;
+    inset-block-start: .16em;
     inset-inline-start: 0;
-    inline-size: 3px;
+    block-size: var(--section-marker-height, calc(100% - .32em));
+    inline-size: var(--section-marker-width, 3px);
     border-radius: 999px;
     background: var(--gov-teal);
+}
+
+/* Знак вместо черты: та же метка, только залитая по маске эмблемы сайта
+   («Дизайн» → «Эмблема»). Квадрат, поэтому сторону задаёт высота метки. */
+:where(body.design-secmark-emblem) [data-visual-system] .section-head__title {
+    padding-inline-start: calc(var(--section-marker-emblem, .9em) + 14px);
+}
+
+:where(body.design-secmark-emblem) [data-visual-system] .section-head__title::before {
+    inline-size: var(--section-marker-emblem, .9em);
+    block-size: var(--section-marker-emblem, .9em);
+    border-radius: 0;
+    -webkit-mask: var(--gov-emblem) center / contain no-repeat;
+    mask: var(--gov-emblem) center / contain no-repeat;
+}
+
+/* «Без метки» и заголовок не у левого края: метка указывает на начало строки,
+   а у центрированного и правого заголовка начала нет — черта повисала бы
+   слева от текста сама по себе. */
+:where(body.design-secmark-off) [data-visual-system] .section-head__title::before,
+[data-visual-system] .section-head--align-center .section-head__title::before,
+[data-visual-system] .section-head--align-right .section-head__title::before {
+    content: none;
+}
+
+:where(body.design-secmark-off) [data-visual-system] .section-head__title,
+[data-visual-system] .section-head--align-center .section-head__title,
+[data-visual-system] .section-head--align-right .section-head__title {
+    padding-inline-start: 0;
 }
 
 [data-visual-system] .cms-block--bg-navy .section-head {

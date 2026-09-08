@@ -228,6 +228,17 @@ final class DesignSettings
             ],
             'default' => 'accent',
         ],
+        'section_marker' => [
+            'label' => 'Метка заголовка секции',
+            'hint' => 'Знак перед заголовком секции на внутренних страницах. У заголовка по центру и справа метка не рисуется: она указывает на начало строки, а там его нет.',
+            'group' => 'Типографика',
+            'choices' => [
+                'line' => 'Линия слева',
+                'emblem' => 'Знак-эмблема',
+                'off' => 'Без метки',
+            ],
+            'default' => 'line',
+        ],
         'title_reveal' => [
             'label' => 'Проявление заголовков',
             'hint' => 'Заголовок секции ждёт прокрутки бледным и набирает свой цвет. Приём выключается сам при «меньше движения» и в режимах контраста.',
@@ -283,22 +294,22 @@ final class DesignSettings
         'classic' => [
             'label' => 'Классический',
             'desc' => 'Строгий официальный стиль, умеренные отступы.',
-            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'sm', 'density' => 'standard', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'plain', 'title_mark' => 'accent', 'title_reveal' => 'off', 'scroll_top' => 'on', 'palette' => 'gov_blue', 'font_style' => 'system'],
+            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'sm', 'density' => 'standard', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'plain', 'title_mark' => 'accent', 'title_reveal' => 'off', 'section_marker' => 'line', 'scroll_top' => 'on', 'palette' => 'gov_blue', 'font_style' => 'system'],
         ],
         'modern' => [
             'label' => 'Современный',
             'desc' => 'Крупные скругления, воздух, акцентная шапка.',
-            'values' => ['container' => 'wide', 'radius' => 'large', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'lg', 'line_height' => 'relaxed', 'heading_line_height' => 'tight', 'heading_font_weight' => '800', 'heading_letter_spacing' => 'tight', 'button' => 'pill', 'card_style' => 'elevated', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'sidebar', 'title_mark' => 'accent', 'title_reveal' => 'fade', 'scroll_top' => 'on', 'palette' => 'violet', 'font_style' => 'noto'],
+            'values' => ['container' => 'wide', 'radius' => 'large', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'lg', 'line_height' => 'relaxed', 'heading_line_height' => 'tight', 'heading_font_weight' => '800', 'heading_letter_spacing' => 'tight', 'button' => 'pill', 'card_style' => 'elevated', 'sidebar_position' => 'floating', 'catalog_layout' => 'cards_lg', 'detail_layout' => 'sidebar', 'title_mark' => 'accent', 'title_reveal' => 'fade', 'section_marker' => 'line', 'scroll_top' => 'on', 'palette' => 'violet', 'font_style' => 'noto'],
         ],
         'minimal' => [
             'label' => 'Минимал',
             'desc' => 'Прямые углы, максимум воздуха, список в каталоге.',
-            'values' => ['container' => 'narrow', 'radius' => 'none', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'square', 'card_style' => 'flat', 'sidebar_position' => 'fixed', 'catalog_layout' => 'list', 'detail_layout' => 'plain', 'title_mark' => 'accent', 'title_reveal' => 'off', 'scroll_top' => 'on', 'palette' => 'graphite', 'font_style' => 'serif'],
+            'values' => ['container' => 'narrow', 'radius' => 'none', 'card_gap' => 'md', 'density' => 'spacious', 'font_size' => 'md', 'line_height' => 'normal', 'heading_line_height' => 'normal', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'normal', 'button' => 'square', 'card_style' => 'flat', 'sidebar_position' => 'fixed', 'catalog_layout' => 'list', 'detail_layout' => 'plain', 'title_mark' => 'accent', 'title_reveal' => 'off', 'section_marker' => 'off', 'scroll_top' => 'on', 'palette' => 'graphite', 'font_style' => 'serif'],
         ],
         'compact' => [
             'label' => 'Компактный',
             'desc' => 'Плотная сетка, маленькие карточки — много данных.',
-            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'xs', 'density' => 'compact', 'font_size' => 'sm', 'line_height' => 'tight', 'heading_line_height' => 'tight', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'tight', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'fixed', 'catalog_layout' => 'cards_sm', 'detail_layout' => 'sidebar', 'title_mark' => 'accent', 'title_reveal' => 'off', 'scroll_top' => 'on', 'palette' => 'classic_red', 'font_style' => 'system'],
+            'values' => ['container' => 'standard', 'radius' => 'small', 'card_gap' => 'xs', 'density' => 'compact', 'font_size' => 'sm', 'line_height' => 'tight', 'heading_line_height' => 'tight', 'heading_font_weight' => '700', 'heading_letter_spacing' => 'tight', 'button' => 'rounded', 'card_style' => 'soft', 'sidebar_position' => 'fixed', 'catalog_layout' => 'cards_sm', 'detail_layout' => 'sidebar', 'title_mark' => 'accent', 'title_reveal' => 'off', 'section_marker' => 'line', 'scroll_top' => 'on', 'palette' => 'classic_red', 'font_style' => 'system'],
         ],
     ];
 
@@ -466,6 +477,25 @@ final class DesignSettings
     public static function normalizeRadius(string $raw): string
     {
         return self::normalizePixelValue($raw, 0, 48);
+    }
+
+    /**
+     * Толщина метки заголовка секции, 1–12px. Пусто — 3px, как было записано
+     * константой в правиле темы.
+     */
+    public static function sectionMarkerThickness(): string
+    {
+        return self::normalizePixelValue((string) Setting::get('design_section_marker_thickness', ''), 1, 12);
+    }
+
+    /**
+     * Высота метки, 4–80px. Пусто — метка тянется по высоте самой строки
+     * заголовка (прежнее поведение): у крупного заголовка черта длиннее, у
+     * мелкого короче, и подгонять её под каждый кегль руками не нужно.
+     */
+    public static function sectionMarkerHeight(): string
+    {
+        return self::normalizePixelValue((string) Setting::get('design_section_marker_height', ''), 4, 80);
     }
 
     /** Подъём feature-card и карточек, наследующих его hover, 0–20px. */
@@ -987,6 +1017,18 @@ final class DesignSettings
         if (array_key_exists('menu_divider_color_use', $input)) {
             Setting::set('design_menu_divider_color_use', (string) $input['menu_divider_color_use'] === '1' ? '1' : '0');
         }
+        if (array_key_exists('section_marker_thickness', $input)) {
+            Setting::set(
+                'design_section_marker_thickness',
+                self::normalizePixelValue((string) $input['section_marker_thickness'], 1, 12)
+            );
+        }
+        if (array_key_exists('section_marker_height', $input)) {
+            Setting::set(
+                'design_section_marker_height',
+                self::normalizePixelValue((string) $input['section_marker_height'], 4, 80)
+            );
+        }
         if (array_key_exists('menu_divider_thickness', $input)) {
             Setting::set('design_menu_divider_thickness', self::normalizePixelValue((string) $input['menu_divider_thickness'], 0, 10));
         }
@@ -1416,6 +1458,18 @@ final class DesignSettings
             $divHeight = '18px';
         }
 
+        // Метка заголовка секции. Пустая высота оставляет прежнее поведение —
+        // черта по высоте строки; свой размер задаётся числом, потому что нужный
+        // зависит от кегля заголовка и пресетом его не угадать.
+        $markerWidth = self::sectionMarkerThickness();
+        $markerWidth = $markerWidth === '' ? '3px' : $markerWidth;
+        $markerHeight = self::sectionMarkerHeight();
+        $markerHeight = $markerHeight === '' ? 'calc(100% - .32em)' : $markerHeight;
+        // Знак-эмблема квадратный, поэтому его сторону задаёт высота метки, а
+        // не толщина линии: у линии толщина 3px, и знак был бы полоской.
+        $markerEmblem = self::sectionMarkerHeight();
+        $markerEmblem = $markerEmblem === '' ? '.9em' : $markerEmblem;
+
         $headingLineHeight = ['tight' => '1.15', 'normal' => '1.25', 'relaxed' => '1.35'][$v['heading_line_height'] ?? 'normal'] ?? '1.25';
         $customHeadingLineHeight = self::headingLineHeightCustom();
         if ($customHeadingLineHeight !== '') {
@@ -1427,7 +1481,7 @@ final class DesignSettings
         // Точечные размеры по элементам дописываются после :root; итоговую
         // строку SiteThemeCss публикует во внешнем сгенерированном файле.
         return self::typographyCss() . sprintf(
-            ':root{--container-max:%s;--radius:%s;--radius-sm:calc(%s * .6);--card-gap:%s;--section-pad:%s;--btn-radius:%s;--base-font-size:%s;--base-line-height:%s;--heading-line-height:%s;--heading-font-weight:%s;--heading-letter-spacing:%s;--card-shadow:%s;--menu-divider-color:%s;--menu-divider-width:%s;--menu-divider-height:%s;}',
+            ':root{--container-max:%s;--radius:%s;--radius-sm:calc(%s * .6);--card-gap:%s;--section-pad:%s;--btn-radius:%s;--base-font-size:%s;--base-line-height:%s;--heading-line-height:%s;--heading-font-weight:%s;--heading-letter-spacing:%s;--card-shadow:%s;--menu-divider-color:%s;--menu-divider-width:%s;--menu-divider-height:%s;--section-marker-width:%s;--section-marker-height:%s;--section-marker-emblem:%s;}',
             $container,
             $radius,
             $radius,
@@ -1442,7 +1496,10 @@ final class DesignSettings
             $shadow,
             $divColor,
             $divThickness,
-            $divHeight
+            $divHeight,
+            $markerWidth,
+            $markerHeight,
+            $markerEmblem
         );
     }
 
@@ -1471,6 +1528,9 @@ final class DesignSettings
           . (in_array($v['title_reveal'] ?? 'off', ['fade', 'wipe'], true)
               ? ' design-title-' . $v['title_reveal']
               : '')
+          . ' design-secmark-' . (isset(self::OPTIONS['section_marker']['choices'][(string) ($v['section_marker'] ?? '')])
+              ? (string) $v['section_marker']
+              : 'line')
           . (($v['scroll_top'] ?? 'on') === 'on' ? ' design-scrolltop' : '');
     }
 
