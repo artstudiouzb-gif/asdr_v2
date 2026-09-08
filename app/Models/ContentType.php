@@ -75,6 +75,8 @@ final class ContentType
      * Публичный тип, живущий в корне сайта. Не «любой тип с таким слагом»:
      * маршрут `/{slug}` обслуживает страницы, и отвечать каталогом он вправе
      * только там, где префикс снят осознанно.
+     *
+     * @return array<string, mixed>|null
      */
     public static function findRootBySlug(string $slug): ?array
     {
