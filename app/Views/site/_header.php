@@ -421,10 +421,14 @@ $designBodyClass = \App\Core\DesignSettings::bodyClasses($designVals);
 $searchConfig = (array) ($hcfg['search'] ?? []);
 $searchType = ($searchConfig['style'] ?? 'inline') === 'modal' ? 'overlay' : 'inline';
 $designBodyClass .= ' design-search-' . $searchType;
+// Подпись поля поиска приходит из конструктора шапки и печаталась как есть,
+// поэтому на узбекской странице оставалась русской — хотя перевод в словаре
+// есть (и для многоточия, и для трёх точек). Прогоняем через t(): свой текст
+// редактора, которого в словаре нет, остаётся без изменений.
 $searchPlaceholder = trim((string) ($searchConfig['placeholder'] ?? ''));
-if ($searchPlaceholder === '') {
-    $searchPlaceholder = t('Поиск по сайту…');
-}
+$searchPlaceholder = $searchPlaceholder === ''
+    ? t('Поиск по сайту…')
+    : t($searchPlaceholder);
 
 // --- Поиск по сайту: безрамочная иконка-лупа с плавно выезжающим полем ввода ---
 $searchAction = htmlspecialchars(Locale::url('search', $currentLang), ENT_QUOTES);
