@@ -114,10 +114,65 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
                 </template>
                 <div class="repeater-actions"><button type="button" class="btn btn--small" data-repeater-add="items"><?= \App\Core\AdminUi::icon('plus') ?>Добавить пункт</button></div>
             </div>
-            <div class="form-field">
+            <div class="form-field" data-field-when="variant" data-field-value="spotlight">
                 <label for="quote">Акцентная цитата</label>
                 <textarea id="quote" name="quote" rows="4"><?= htmlspecialchars($data['quote'] ?? '', ENT_QUOTES) ?></textarea>
                 <span class="form-hint">Используется вариантом «Текст + акцентная цитата».</span>
+            </div>
+            <?php
+            // Оформление цитаты. Поля показываются только у своего варианта:
+            // скрытие — подсказка редактору, а не условие сохранения (без JS
+            // они остаются видимыми и работают по-прежнему).
+            $quoteMark = (string) ($data['quote_mark'] ?? 'text');
+            $quoteMark = in_array($quoteMark, ['text', 'icon', 'none'], true) ? $quoteMark : 'text';
+            $quoteMarkPos = (string) ($data['quote_mark_position'] ?? 'top-left');
+            $quoteMarkPositions = [
+                'top-left' => 'Сверху слева',
+                'top-right' => 'Сверху справа',
+                'bottom-left' => 'Снизу слева',
+                'bottom-right' => 'Снизу справа',
+                'above' => 'Над текстом цитаты',
+            ];
+            $quoteMarkPos = isset($quoteMarkPositions[$quoteMarkPos]) ? $quoteMarkPos : 'top-left';
+            ?>
+            <div data-field-when="variant" data-field-value="spotlight">
+                <div class="colorfield-row">
+                    <?= \App\Core\AdminUi::colorField('quote_bg', $data['quote_bg'] ?? '', 'Фон цитаты', '#173a63', 'Как в теме') ?>
+                    <?= \App\Core\AdminUi::colorField('quote_color', $data['quote_color'] ?? '', 'Цвет текста цитаты', '#ffffff', 'Подобрать по фону') ?>
+                </div>
+                <span class="form-hint">Пустой цвет текста подбирается по контрасту с выбранным фоном.</span>
+            </div>
+            <div class="form-field" data-field-when="variant" data-field-value="spotlight">
+                <label for="quote_mark">Знак кавычки</label>
+                <select id="quote_mark" name="quote_mark">
+                    <option value="text" <?= $quoteMark === 'text' ? 'selected' : '' ?>>Символ</option>
+                    <option value="icon" <?= $quoteMark === 'icon' ? 'selected' : '' ?>>Значок из набора</option>
+                    <option value="none" <?= $quoteMark === 'none' ? 'selected' : '' ?>>Без знака</option>
+                </select>
+            </div>
+            <div class="form-field" data-field-when="variant" data-field-value="spotlight">
+                <label for="quote_mark_text">Символ знака</label>
+                <input type="text" id="quote_mark_text" name="quote_mark_text" value="<?= htmlspecialchars((string) ($data['quote_mark_text'] ?? '“'), ENT_QUOTES) ?>" placeholder="“">
+                <span class="form-hint">Любой знак из документа: “ « „ ❝ ". Показывается при варианте «Символ».</span>
+            </div>
+            <div data-field-when="variant" data-field-value="spotlight">
+                <?= \App\Core\AdminUi::iconField('quote_mark_icon', $data['quote_mark_icon'] ?? '', ['label' => 'Значок знака', 'hint' => 'Показывается при варианте «Значок из набора».']) ?>
+            </div>
+            <div class="form-field" data-field-when="variant" data-field-value="spotlight">
+                <label for="quote_mark_size">Размер знака, px</label>
+                <input type="number" id="quote_mark_size" name="quote_mark_size" min="0" max="240" step="1" value="<?= (int) ($data['quote_mark_size'] ?? 0) ?>">
+                <span class="form-hint">0 — размер из темы (80px). Нужный кегль зависит от знака, поэтому задаётся числом.</span>
+            </div>
+            <div class="form-field" data-field-when="variant" data-field-value="spotlight">
+                <label for="quote_mark_position">Расположение знака</label>
+                <select id="quote_mark_position" name="quote_mark_position">
+                    <?php foreach ($quoteMarkPositions as $value => $label): ?>
+                        <option value="<?= $value ?>" <?= $quoteMarkPos === $value ? 'selected' : '' ?>><?= $label ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div data-field-when="variant" data-field-value="spotlight">
+                <?= \App\Core\AdminUi::colorField('quote_mark_color', $data['quote_mark_color'] ?? '', 'Цвет знака', '#17999b', 'Акцент темы') ?>
             </div>
         <?php endif; ?>
 

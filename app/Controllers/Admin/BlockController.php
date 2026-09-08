@@ -475,6 +475,21 @@ final class BlockController
                     'aside_title' => TextProcessor::typographPlain(trim((string) ($_POST['aside_title'] ?? '')), $locale),
                     'items' => $items,
                     'quote' => TextProcessor::typographPlain(trim((string) ($_POST['quote'] ?? '')), $locale),
+                    'quote_bg' => \App\Core\BlockData\BlockDataInput::optionalColor($_POST, 'quote_bg'),
+                    'quote_color' => \App\Core\BlockData\BlockDataInput::optionalColor($_POST, 'quote_color'),
+                    'quote_mark' => \App\Core\BlockData\BlockDataInput::enum($_POST, 'quote_mark', ['text', 'icon', 'none'], 'text'),
+                    // Символ набирается редактором: подрезаем до одного знака —
+                    // в углу карточки стоит кавычка, а не строка текста.
+                    'quote_mark_text' => mb_substr(trim((string) ($_POST['quote_mark_text'] ?? '')), 0, 2),
+                    'quote_mark_icon' => \App\Core\Icon::cleanName($_POST['quote_mark_icon'] ?? ''),
+                    'quote_mark_size' => \App\Core\BlockData\BlockDataInput::int($_POST, 'quote_mark_size', 0, 240, 0),
+                    'quote_mark_color' => \App\Core\BlockData\BlockDataInput::optionalColor($_POST, 'quote_mark_color'),
+                    'quote_mark_position' => \App\Core\BlockData\BlockDataInput::enum(
+                        $_POST,
+                        'quote_mark_position',
+                        ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'above'],
+                        'top-left'
+                    ),
                     'media_type' => $mediaType,
                     'media_image' => $mediaImage,
                     'media_video' => $mediaVideo,
