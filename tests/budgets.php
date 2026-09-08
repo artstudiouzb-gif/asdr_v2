@@ -535,6 +535,22 @@ function quality_budgets(): array
                 return ['value' => (int) $count, 'detail' => 'считается по public_design_css()'];
             },
         ],
+        'blocks_off_schema' => [
+            'title' => 'типы блоков вне схемы полей',
+            'unit' => 'шт',
+            'guard' => 'tests/cases/354_readme_facts_test.php',
+            'why' => 'у типа без схемы настройка объявлена в четырёх местах — реестр, форма, '
+                . 'collectData(), шаблон — и списки значений расходятся молча',
+            'ceiling' => static fn (): int => 4,
+            'measure' => static function (): array {
+                $off = array_values(array_diff(
+                    array_keys(\App\Core\BlockTypeRegistry::BASE_DEFAULTS),
+                    array_keys(\App\Core\BlockData\BlockFieldSchema::all())
+                ));
+
+                return ['value' => count($off), 'detail' => implode(', ', $off)];
+            },
+        ],
         'bundle_css' => [
             'title' => 'вес public.min.css (brotli)',
             'unit' => 'Б',

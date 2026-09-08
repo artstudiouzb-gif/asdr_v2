@@ -126,16 +126,13 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   что шаблон читает `$data` как есть. Прежде то же самое лежало в четырёх
   местах — реестр, форма, `collectData()`, шаблон, — и списки значений
   расходились молча: форма отдавала значение, нормализатор принимал, шаблон о
-  нём не знал и откатывался к умолчанию. Переезд типов постепенный: на схеме
-  `columns`, `tabs`, `partners`, `advantages`, `testimonials`, `projects_list`,
-  `faq`, `stages`, `docs_list`, `subscribe`, `slider`, `person_cards`,
-  `contact_cards`, `icon_text`, `cta`, `counters`, `cards_grid`,
-  `media_gallery`, `news_latest`, `news_feature`, `news_docs`, `map_point`,
-  `text_image`, `anchor_nav`, `timeline`, `team_list`, `person_profile`,
-  `leader_card`, `org_structure`, `bio_education` (у них в
-  `BlockTypeRegistry::BASE_DEFAULTS`
-  пустой массив — ключ остаётся ради порядка типов в редакторе), остальные
-  по-старому. Число из закрытого набора — `Field::intChoice`, и значение вне
+  нём не знал и откатывался к умолчанию. Переезд типов постепенный: на схеме **37 из 41**, по-старому остались
+  `text`, `html`, `form`, `hero`. Поимённый список здесь не ведётся — он
+  разъезжался с кодом при каждом переезде; актуальный отдаёт
+  `array_keys(BlockFieldSchema::all())`, а число непереехавших может только
+  уменьшаться (бюджет `blocks_off_schema`, см. «Бюджеты качества»). У типов на
+  схеме в `BlockTypeRegistry::BASE_DEFAULTS` пустой массив — ключ остаётся ради
+  порядка типов в редакторе. Число из закрытого набора — `Field::intChoice`, и значение вне
   набора заменяется умолчанием, а не ближайшим допустимым: в списке его нет,
   значит форма подделана. Картинка, иконка и цвет — тоже виды полей
   (`Field::media/icon/color`): их рисуют готовые виджеты `AdminUi`, поэтому
