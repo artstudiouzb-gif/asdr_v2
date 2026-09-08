@@ -500,3 +500,92 @@ test('Карточки с фото: вариант «текст под фото�
     $controller = (string) file_get_contents(__DIR__ . '/../../app/Controllers/Admin/BlockController.php');
     assert_contains("in_array(\$collected['variant'] ?? '', ['image', 'image_below'], true)", $controller);
 });
+
+test('Карточки: число колонок действует у всех вариантов — и в сетке, и в слайдере', function () {
+    $items = array_fill(0, 6, ['title' => 'Карточка', 'image' => '/uploads/public/one.jpg', 'icon_svg' => 'star']);
+
+    // Прежде вариант с фотографией рисовался жёсткой четвёркой: настройка
+    // «Колонок» до него не доходила ни в сетке, ни в кадре слайдера.
+    $photo = variant_block('cards_grid', ['variant' => 'image', 'columns' => 3, 'items' => $items], 770);
+    assert_contains('--cards-cols:3', $photo['css'], 'колонки объявлены блоком, а не вариантом');
+
+    $icons = variant_block('cards_grid', ['variant' => 'icon', 'columns' => 2, 'items' => $items], 771);
+    assert_contains('--cards-cols:2', $icons['css']);
+
+    $theme = theme_css();
+    assert_contains('.imgcards-grid { display: grid; grid-template-columns: repeat(var(--cards-cols, 4)', $theme);
+    assert_true(
+        !str_contains($theme, '.imgcards-grid--carousel .imgcard { flex: 0 0 calc((100% - 60px) / 4)'),
+        'ширина карточки в кадре слайдера больше не записана числом'
+    );
+    assert_contains('.cards-track > * { flex: 0 0 calc((100% - var(--card-gap, 20px) * (var(--cards-cols, 4) - 1))', $theme);
+});
+
+test('Карточки: раскладка выбирается редактором — сетка, слайдер или авто', function () {
+    $items = array_fill(0, 6, ['title' => 'Карточка', 'image' => '/uploads/public/one.jpg', 'icon_svg' => 'star']);
+
+    // «Авто» у карточек с фотографией — прежнее поведение: карточек больше,
+    // чем колонок, значит полоса.
+    $auto = variant_block('cards_grid', ['variant' => 'image', 'layout' => 'auto', 'columns' => 4, 'items' => $items], 772);
+    assert_contains('imgcards-grid--carousel', $auto['html']);
+
+    // Тех же шести карточек хватает на шесть колонок — полосе взяться неоткуда.
+    $autoWide = variant_block('cards_grid', ['variant' => 'image', 'layout' => 'auto', 'columns' => 5, 'items' => array_slice($items, 0, 5)], 773);
+    assert_not_contains('imgcards-grid--carousel', $autoWide['html']);
+
+    // «Сетка» снимает прокрутку целиком, вместе со стрелками и мобильной полосой.
+    $grid = variant_block('cards_grid', ['variant' => 'image', 'layout' => 'grid', 'columns' => 4, 'items' => $items], 774);
+    assert_not_contains('data-carousel', $grid['html']);
+    assert_not_contains('imgcards-grid--mobile-carousel', $grid['html']);
+
+    // «Слайдер» доступен и вариантам без фотографии — там его не было вовсе.
+    $iconSlider = variant_block('cards_grid', ['variant' => 'icon', 'layout' => 'slider', 'items' => $items], 775);
+    assert_contains('cards-grid cards-track', $iconSlider['html']);
+    assert_contains('data-carousel-track', $iconSlider['html']);
+    assert_contains('data-carousel-item', $iconSlider['html']);
+
+    $compactSlider = variant_block('cards_grid', ['variant' => 'compact', 'layout' => 'slider', 'items' => $items], 776);
+    assert_contains('cat-grid cards-track', $compactSlider['html']);
+    assert_contains('block-categories__head', $compactSlider['html']);
+
+    // Собранные раньше страницы не меняются: у вариантов без фотографии
+    // «авто» — это сетка, как и было.
+    $iconAuto = variant_block('cards_grid', ['variant' => 'icon', 'items' => $items], 777);
+    assert_not_contains('data-carousel', $iconAuto['html']);
+    $compactAuto = variant_block('cards_grid', ['variant' => 'compact', 'items' => $items], 778);
+    assert_not_contains('data-carousel', $compactAuto['html']);
+});
+
+test('Карточки: разметка стрелок и точек — одна на все варианты', function () {
+    $partial = (string) file_get_contents(APP_ROOT . '/templates/blocks/partials/carousel_nav.php');
+    $template = (string) file_get_contents(APP_ROOT . '/templates/blocks/cards_grid.php');
+
+    assert_contains('data-carousel-nav hidden', $partial);
+    assert_same(3, substr_count($template, "include __DIR__ . '/partials/carousel_nav.php'"), 'все три ветки берут одну разметку');
+    assert_true(!str_contains($template, 'data-carousel-prev'), 'своей копии стрелок у шаблона не осталось');
+});
+
+test('Карточки в колонке конструктора считают раскладку по ширине колонки', function () {
+    $polish = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-layout-polish.css');
+
+    // Колонка объявлена контейнером измерения; без имени правило @container
+    // цеплялось бы к любому контейнеру-предку.
+    assert_contains('.cms-columns__col {', $polish);
+    assert_contains('container-type: inline-size;', $polish);
+    assert_contains('container-name: cms-col;', $polish);
+
+    // Сетка и кадр слайдера сжимаются вместе: узкая колонка 1:3 остаётся узкой
+    // на любом экране, и медиазапрос по ширине окна о ней ничего не знает.
+    assert_contains('@container cms-col (max-width: 720px)', $polish);
+    assert_contains('@container cms-col (max-width: 480px)', $polish);
+    foreach (['.cards-grid', '.imgcards-grid', '.cards-track > *'] as $selector) {
+        assert_contains($selector, $polish, $selector . ' участвует в контейнерных правилах');
+    }
+
+    // Файл подключается после общей темы — иначе её медиазапросы перекрыли бы
+    // контейнерные правила при равной специфичности.
+    $assets = (string) file_get_contents(APP_ROOT . '/app/Core/FrontendAssets.php');
+    $themeAt = strpos($assets, '/assets/css/gov-theme.css');
+    $polishAt = strpos($assets, '/assets/css/public-layout-polish.css');
+    assert_true($themeAt !== false && $polishAt !== false && $polishAt > $themeAt, 'полиш подключается после темы');
+});

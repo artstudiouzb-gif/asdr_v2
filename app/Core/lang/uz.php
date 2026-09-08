@@ -184,6 +184,8 @@ return [
     'Будьте в курсе наших новостей и аналитических материалов.' => 'Yangiliklarimiz va tahliliy materiallarimizdan xabardor bo‘ling.',
     'Мы в соцсети' => 'Ijtimoiy tarmoqdamiz',
     'Политика конфиденциальности' => 'Maxfiylik siyosati',
+    'Дополнительные ссылки' => 'Qo‘shimcha havolalar',
+    'Категории — прокрутка вбок' => 'Turkumlar — yon tomonga aylantirish',
     'Источник:' => 'Manba:',
     'Основное меню' => 'Asosiy menyu',
     'Открыть подменю' => 'Ichki menyuni ochish',
