@@ -65,6 +65,43 @@ final class MenuItem
         return self::$activeRequestCache[$lang] = self::buildTree($rows);
     }
 
+    /**
+     * Переписывает произвольные ссылки меню с одного адреса на другой.
+     *
+     * Нужна ровно одному случаю: раздел каталога переехал в корень
+     * (`/catalog/documenty` → `/documenty`). Прежний адрес продолжает работать
+     * редиректом, но пункт меню, оставшийся на нём, перестал бы подсвечиваться
+     * — посетитель приходит уже на новый адрес, а меню сравнивает со старым.
+     * Искать такие пункты руками по всем языкам редактор не должен.
+     *
+     * Сравнение точное, с учётом записи со слэшем и без: адрес пункта — это
+     * ровно тот раздел, а не всё, что начинается на него.
+     *
+     * @return int сколько пунктов переписано
+     */
+    public static function retargetCustomUrl(string $from, string $to): int
+    {
+        $from = '/' . trim($from, '/');
+        $to = '/' . trim($to, '/');
+        if ($from === $to || $from === '/' || $to === '/') {
+            return 0;
+        }
+
+        $stmt = Database::pdo()->prepare(
+            "UPDATE menu_items SET url_value = :to
+              WHERE url_type = 'custom' AND url_value IN (:from, :from_slash, :from_bare)"
+        );
+        $stmt->execute([
+            ':to' => $to,
+            ':from' => $from,
+            ':from_slash' => $from . '/',
+            ':from_bare' => ltrim($from, '/'),
+        ]);
+        self::$activeRequestCache = [];
+
+        return $stmt->rowCount();
+    }
+
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM menu_items WHERE id = :id LIMIT 1');

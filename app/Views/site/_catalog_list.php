@@ -2,6 +2,7 @@
 
 use App\Core\ContentFields;
 use App\Core\Locale;
+use App\Models\ContentType;
 
 /**
  * Область результатов каталога: счётчик, карточки записей и пагинация.
@@ -34,7 +35,7 @@ $months = match (Locale::current()) {
     default => ['ЯНВ', 'ФЕВ', 'МАР', 'АПР', 'МАЙ', 'ИЮН', 'ИЮЛ', 'АВГ', 'СЕН', 'ОКТ', 'НОЯ', 'ДЕК'],
 };
 
-$baseUrl = Locale::url('catalog/' . $type['slug']);
+$baseUrl = Locale::url(ContentType::path($type));
 $qs = static function (array $overrides) use ($q, $sort): string {
     $params = array_filter(array_merge(['q' => $q, 'sort' => $sort === 'new' ? '' : $sort], $overrides), static fn ($v) => $v !== '' && $v !== null);
     return $params === [] ? '' : '?' . http_build_query($params);
@@ -49,7 +50,7 @@ $qs = static function (array $overrides) use ($q, $sort): string {
     <div class="catlist<?= $isEvents ? ' catlist--events' : '' ?>">
         <?php foreach ($entries as $entry): ?>
             <?php
-            $url = Locale::url('catalog/' . $type['slug'] . '/' . $entry['slug']);
+            $url = Locale::url(ContentType::entryPath($type, (string) $entry['slug']));
             $banner = $bannerField !== null ? trim((string) ($entry['data']['banner_image'] ?? '')) : '';
             if ($banner !== '' && !\App\Core\UrlGuard::isSafeMedia($banner)) {
                 $banner = '';

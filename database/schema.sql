@@ -828,6 +828,7 @@ CREATE TABLE IF NOT EXISTS content_types (
     icon             VARCHAR(60)  NOT NULL DEFAULT '' COMMENT 'имя иконки Tabler для пункта меню',
     has_translations TINYINT(1)   NOT NULL DEFAULT 0,
     is_public        TINYINT(1)   NOT NULL DEFAULT 1,
+    root_url         TINYINT(1)   NOT NULL DEFAULT 0 COMMENT 'адрес без префикса /catalog',
     created_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_content_types_slug (slug)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1263,7 +1264,8 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_26_goals.sql'),
     ('2026_08_27_goal_texts.sql'),
     ('2026_08_29_content_type_icon.sql'),
-    ('2026_09_01_seo_audits.sql')
+    ('2026_09_01_seo_audits.sql'),
+    ('2026_09_08_content_type_root_url.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (
