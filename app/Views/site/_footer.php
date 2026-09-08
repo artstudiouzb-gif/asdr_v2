@@ -145,7 +145,10 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
             <?php $inner = $renderFooterWidget($col); ?>
             <?php if ($inner === '' && $col['widget'] !== 'text') { continue; } // пустые колонки скрываем ?>
             <div class="site-footer__col site-footer__col--<?= htmlspecialchars($col['widget'], ENT_QUOTES) ?>">
-                <?php if ($col['heading'] !== ''): ?><div class="site-footer__heading"><?= htmlspecialchars($col['heading'], ENT_QUOTES) ?></div><?php endif; ?>
+                <?php // Заголовок приходит из конструктора подвала — переводим так же, как
+                      // подпись поиска и текст кнопки шапки: умолчания есть в словаре,
+                      // свой текст редактора t() оставит как есть. ?>
+                <?php if ($col['heading'] !== ''): ?><div class="site-footer__heading"><?= htmlspecialchars(t($col['heading']), ENT_QUOTES) ?></div><?php endif; ?>
                 <?= $inner ?>
             </div>
         <?php endforeach; ?>
@@ -236,6 +239,11 @@ $renderFooterWidget = function (array $col) use ($footerLogo, $siteName, $addres
     'labels' => [
         'off' => t('Уведомления о новостях'),
         'on' => t('Уведомления включены'),
+        // Карточка предложения подписки рисуется скриптом, поэтому её текст
+        // тоже приходит переведённым отсюда, а не литералом в JS.
+        'promptText' => t('Будьте в курсе главных событий! Подпишитесь на мгновенные push-уведомления о новых публикациях.'),
+        'enable' => t('Включить уведомления'),
+        'later' => t('Позже'),
     ],
 ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>
 </script>

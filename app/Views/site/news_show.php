@@ -576,7 +576,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                             <?php
                             // У миниатюр подпись не выводим текстом — она бы
                             // сломала плитку; отдаём её как имя ссылки и подсказку.
-                            $thumbLabel = trim((string) ($s['caption'] ?? '')) ?: ($s['alt'] !== '' ? $s['alt'] : 'Фото');
+                            $thumbLabel = trim((string) ($s['caption'] ?? '')) ?: ($s['alt'] !== '' ? $s['alt'] : t('Фото'));
                             $thumbCredit = trim((string) ($s['credit'] ?? ''));
                             $thumbTitle = $thumbLabel . ($thumbCredit !== '' ? ' — ' . t('Фото:') . ' ' . $thumbCredit : '');
                             ?>
@@ -695,7 +695,7 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
             <div class="newsdetail-photos__grid">
                 <?php foreach (array_slice($photoStripSlides, 0, 8) as $s): ?>
                     <figure class="newsdetail-photos__figure">
-                        <a class="newsdetail-photos__item" href="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars($s['alt'] !== '' ? $s['alt'] : 'Фото', ENT_QUOTES) ?>"><?= \App\Core\Media::picture((string) $s['path'], (string) $s['alt'], null, null, '', true, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw') ?></a>
+                        <a class="newsdetail-photos__item" href="<?= htmlspecialchars($s['path'], ENT_QUOTES) ?>" target="_blank" rel="noopener" aria-label="<?= htmlspecialchars($s['alt'] !== '' ? $s['alt'] : t('Фото'), ENT_QUOTES) ?>"><?= \App\Core\Media::picture((string) $s['path'], (string) $s['alt'], null, null, '', true, '(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw') ?></a>
                         <?= $photoCaption($s) ?>
                     </figure>
                 <?php endforeach; ?>
