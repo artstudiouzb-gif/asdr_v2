@@ -96,6 +96,26 @@ function admin_orphan_classes(): array
         $js .= (string) file_get_contents($file);
     }
 
+    /*
+     * Скрипты живут не только в `public/assets/js`: часть админских экранов
+     * несёт свой `<script>` прямо во вьюхе, и класс бывает хуком именно там
+     * (`querySelectorAll('.doc-item-row')`, `data-remove-closest=".doc-item-row"`).
+     * Пока проверка смотрела только в собранные файлы, такой класс числился
+     * мёртвым — то есть сторож разрешал удалить рабочий хук, а это хуже, чем
+     * лишний класс в разметке.
+     *
+     * Из самих вьюх вырезаем содержимое `class="…"`: там имя класса встречается
+     * по определению, и без этого мёртвым не считался бы никто.
+     */
+    $dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(APP_ROOT . '/app/Views/admin'));
+    foreach ($dir as $file) {
+        if (!$file->isFile() || $file->getExtension() !== 'php') {
+            continue;
+        }
+        $src = (string) file_get_contents($file->getPathname());
+        $js .= (string) preg_replace('/class=(["\']).*?\1/s', ' ', $src);
+    }
+
     $orphans = [];
     foreach (admin_markup_classes() as $class => $files) {
         // Имя класса целиком: `.admin-grid` не должен считаться найденным
@@ -169,6 +189,73 @@ function public_hard_radius_rules(): array
         return !str_contains($value, 'var(')
             && preg_match('/^(0|0px|50%|100%|999px|9999px|inherit)$/', $value) !== 1;
     }));
+}
+
+/**
+ * Вызовы `json_encode()` вместе с их выражением целиком.
+ *
+ * Разбор именно по выражению, а не по строке: после правки флаг и сам вызов
+ * часто оказываются на разных строках, и построчная проверка объявила бы
+ * защищённый вызов незащищённым — то есть требовала бы «починить» уже
+ * починенное.
+ *
+ * @return list<array{file: string, line: int, expr: string, cast: bool}>
+ */
+function json_encode_call_sites(): array
+{
+    $sites = [];
+
+    foreach ([APP_ROOT . '/app', APP_ROOT . '/templates'] as $root) {
+        $dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root));
+        foreach ($dir as $file) {
+            if (!$file->isFile() || $file->getExtension() !== 'php') {
+                continue;
+            }
+
+            $src = (string) file_get_contents($file->getPathname());
+            if (preg_match_all('/(\(string\)\s*)?json_encode\s*\(/', $src, $m, PREG_OFFSET_CAPTURE) === 0) {
+                continue;
+            }
+
+            foreach ($m[0] as $i => $match) {
+                $open = strpos($src, '(', (int) $match[1] + strlen($m[0][$i][0]) - 1);
+                if ($open === false) {
+                    continue;
+                }
+
+                $depth = 0;
+                $len = strlen($src);
+                $close = $open;
+                for ($j = $open; $j < $len; $j++) {
+                    if ($src[$j] === '(') {
+                        $depth++;
+                    } elseif ($src[$j] === ')') {
+                        $depth--;
+                        if ($depth === 0) {
+                            $close = $j;
+                            break;
+                        }
+                    }
+                }
+
+                $sites[] = [
+                    'file' => str_replace(APP_ROOT . '/', '', $file->getPathname()),
+                    'line' => substr_count($src, "\n", 0, (int) $match[1]) + 1,
+                    'expr' => substr($src, (int) $match[1], $close - (int) $match[1] + 1),
+                    'cast' => $m[1][$i][1] !== -1,
+                ];
+            }
+        }
+    }
+
+    return $sites;
+}
+
+/** Вызов защищён, если отказ либо назван, либо заменён. */
+function json_encode_guarded(string $expr): bool
+{
+    return str_contains($expr, 'JSON_THROW_ON_ERROR')
+        || str_contains($expr, 'JSON_INVALID_UTF8_SUBSTITUTE');
 }
 
 /** Сколько раз встречается подстрока во всех перечисленных файлах. */
@@ -428,7 +515,10 @@ function quality_budgets(): array
             'guard' => 'tests/cases/278_admin_dead_classes_test.php',
             'why' => 'класс без правила ничего не ломает и потому живёт годами: '
                 . '.btn--success рисовал обычную серую кнопку',
-            'ceiling' => static fn (): int => 15,
+            // 52 -> 15 -> 5. Оставшиеся пять — блоки BEM, у которых оформлены
+            // элементы (`.hb-zone__…`), а сам блок правила не имеет: имя
+            // держит структуру разметки, а не вид.
+            'ceiling' => static fn (): int => 5,
             'measure' => static function (): array {
                 $orphans = admin_orphan_classes();
 

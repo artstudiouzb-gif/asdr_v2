@@ -743,7 +743,7 @@ document.addEventListener('click', function(e) {
             <label class="news-social-toggle" title="Отправить публикацию в привязанные каналы (Telegram и др.) только при явном подтверждении">
                 <input type="checkbox" name="publish_to_social" value="1" form="news_edit_form">
                 <span class="news-social-toggle__icon"><?= \App\Core\AdminUi::icon('send', 15) ?></span>
-                <span class="news-social-toggle__text">Опубликовать в соцсетях</span>
+                <span>Опубликовать в соцсетях</span>
             </label>
             <label class="u-inline-7519b07094 news-schedule" title="Пусто — отправить при ближайшем запуске воркера">
                 <?= \App\Core\AdminUi::icon('clock', 14) ?>

@@ -48,7 +48,7 @@ require __DIR__ . '/../layout/header.php';
         </form>
     </div>
 
-    <div class="form-card news-import__report" data-stage="report" hidden>
+    <div class="form-card" data-stage="report" hidden>
         <?= AdminUi::cardHeader('2. Результат проверки', 'clipboard-check') ?>
         <div class="news-import__source"><span>Источник</span><strong data-report-site>—</strong></div>
 
@@ -122,7 +122,7 @@ require __DIR__ . '/../layout/header.php';
         </div>
     </div>
 
-    <div class="form-card news-import__done" data-stage="done" hidden>
+    <div class="form-card" data-stage="done" hidden>
         <?= AdminUi::cardHeader('Импорт завершён', 'circle-check') ?>
         <p data-done-text>Новости перенесены.</p>
         <div class="form-actions">

@@ -16,7 +16,7 @@ require __DIR__ . '/../layout/header.php';
     </form>
 <?php endforeach; ?>
 
-<div class="table-responsive language-settings-table-wrap">
+<div class="table-responsive">
     <table class="data-table language-settings-table u-inline-5370cbf1a7">
         <thead>
             <tr><th>Код</th><th>Название</th><th>Короткое</th><th>По умолчанию</th><th>Активен</th><th>Порядок</th><th class="language-settings-table__actions-head">Действия</th></tr>

@@ -25,72 +25,12 @@ declare(strict_types=1);
  * страницу или закрывать конструктор из-за одного байта нельзя.
  */
 
-/**
- * Вызовы `json_encode()` вместе с их выражением целиком.
- *
- * Разбор именно по выражению, а не по строке: после правки флаг и сам вызов
- * часто оказываются на разных строках, и построчная проверка объявила бы
- * защищённый вызов незащищённым — то есть требовала бы «починить» уже
- * починенное.
- *
- * @return list<array{file: string, line: int, expr: string, cast: bool}>
+/*
+ * Сборщик вызовов (`json_encode_call_sites`) и признак защищённости
+ * (`json_encode_guarded`) объявлены в tests/budgets.php: по ним считает бюджет,
+ * и отчёт `php .claude/skills/quality-budgets/report.php` обязан их видеть —
+ * он загружает реестр, а не файлы набора.
  */
-function json_encode_call_sites(): array
-{
-    $sites = [];
-
-    foreach ([APP_ROOT . '/app', APP_ROOT . '/templates'] as $root) {
-        $dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root));
-        foreach ($dir as $file) {
-            if (!$file->isFile() || $file->getExtension() !== 'php') {
-                continue;
-            }
-
-            $src = (string) file_get_contents($file->getPathname());
-            if (preg_match_all('/(\(string\)\s*)?json_encode\s*\(/', $src, $m, PREG_OFFSET_CAPTURE) === 0) {
-                continue;
-            }
-
-            foreach ($m[0] as $i => $match) {
-                $open = strpos($src, '(', (int) $match[1] + strlen($m[0][$i][0]) - 1);
-                if ($open === false) {
-                    continue;
-                }
-
-                $depth = 0;
-                $len = strlen($src);
-                $close = $open;
-                for ($j = $open; $j < $len; $j++) {
-                    if ($src[$j] === '(') {
-                        $depth++;
-                    } elseif ($src[$j] === ')') {
-                        $depth--;
-                        if ($depth === 0) {
-                            $close = $j;
-                            break;
-                        }
-                    }
-                }
-
-                $sites[] = [
-                    'file' => str_replace(APP_ROOT . '/', '', $file->getPathname()),
-                    'line' => substr_count($src, "\n", 0, (int) $match[1]) + 1,
-                    'expr' => substr($src, (int) $match[1], $close - (int) $match[1] + 1),
-                    'cast' => $m[1][$i][1] !== -1,
-                ];
-            }
-        }
-    }
-
-    return $sites;
-}
-
-/** Вызов защищён, если отказ либо назван, либо заменён. */
-function json_encode_guarded(string $expr): bool
-{
-    return str_contains($expr, 'JSON_THROW_ON_ERROR')
-        || str_contains($expr, 'JSON_INVALID_UTF8_SUBSTITUTE');
-}
 
 test('Число незащищённых json_encode с приведением только уменьшается', function (): void {
     // Оставшиеся — служебные данные, где битой кодировке взяться неоткуда:
