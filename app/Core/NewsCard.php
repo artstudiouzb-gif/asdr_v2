@@ -96,7 +96,11 @@ final class NewsCard
     {
         $stats = self::stats($input);
 
-        return $stats === [] ? '' : (string) json_encode($stats, JSON_UNESCAPED_UNICODE);
+        // Показатели набирает редактор: битый байт в подписи не должен
+        // стирать всю тройку молча.
+        return $stats === []
+            ? ''
+            : (string) json_encode($stats, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
     }
 
     private static function text(mixed $value, int $limit): string

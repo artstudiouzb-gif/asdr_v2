@@ -169,7 +169,14 @@ final class Watchdog
     /** @param list<string> $keys */
     private static function rememberAlerts(array $keys): void
     {
-        \App\Models\Setting::set(self::STATE_KEY, (string) json_encode(array_values($keys), JSON_UNESCAPED_UNICODE));
+        // Приведение `(string)` прятало бы отказ: `(string) false` — пустая
+        // строка, то есть сторож молча забыл бы, о чём уже сообщал, и начал
+        // слать те же тревоги заново. Имена воркеров свои, поэтому отказ
+        // кодирования здесь — ошибка.
+        \App\Models\Setting::set(self::STATE_KEY, json_encode(
+            array_values($keys),
+            JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
+        ));
     }
 
     public static function formatBytes(int $bytes): string

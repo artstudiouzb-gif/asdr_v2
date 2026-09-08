@@ -162,7 +162,15 @@ final class OpenDataController
             $this->output($cached);
             return;
         }
-        $json = (string) json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        // Данные приходят из контента, то есть кодировка бывает битой.
+        // Приведение `(string)` отдало бы потребителю пустое тело **и
+        // положило бы его в кэш** — до сброса раздел открытых данных был бы
+        // пуст без единой ошибки в журнале. Замена негодного байта оставляет
+        // выгрузку целой.
+        $json = (string) json_encode(
+            $payload,
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
+        );
         $this->cachePut($cacheKey, $json);
         $this->output($json);
     }

@@ -14,8 +14,21 @@ final class TOTP
     private const PERIOD = 30;
     private const DIGITS = 6;
 
+    /**
+     * Длина секрета в байтах. Нижняя граница не косметическая: RFC 4226 требует
+     * не меньше 128 бит, а `random_bytes(0)` — это ещё и `ValueError`, то есть
+     * подключение второго фактора упало бы на пустом месте. Ни один вызывающий
+     * своё значение не передаёт, поэтому проверка ничего не меняет сегодня и
+     * страхует завтрашнего.
+     *
+     * @param int<16, max> $bytesLength
+     */
     public static function generateSecret(int $bytesLength = 20): string
     {
+        if ($bytesLength < 16) {
+            throw new \InvalidArgumentException('секрет TOTP короче 128 бит: ' . $bytesLength . ' байт');
+        }
+
         return self::base32Encode(random_bytes($bytesLength));
     }
 
@@ -133,7 +146,11 @@ final class TOTP
         $bytes = '';
         foreach (str_split($bits, 8) as $byte) {
             if (strlen($byte) === 8) {
-                $bytes .= chr(bindec($byte));
+                // `bindec()` объявлена как `int|float` — float она отдаёт на
+                // числах больше PHP_INT_MAX. Здесь их не бывает: восемь бит
+                // это максимум 255. Приведение говорит это вслух, потому что
+                // под `strict_types` float в `chr()` был бы TypeError.
+                $bytes .= chr((int) bindec($byte));
             }
         }
 

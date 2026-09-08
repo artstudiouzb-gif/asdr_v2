@@ -116,7 +116,11 @@ final class SocialPublisher
             if (!empty($cfg['silent'])) {
                 $payload['disable_notification'] = true;
             }
-            $res = ($this->http)('POST', $api . '/sendMediaGroup', (string) json_encode($payload, JSON_UNESCAPED_UNICODE), $headers);
+            // Тело поста собрано из заголовка и анонса новости, то есть из
+            // текста редактора. Приведение `(string)` отправило бы в Telegram
+            // пустую строку вместо публикации, и ошибка пришла бы уже от их
+            // API — про «неверный запрос», а не про негодный байт у нас.
+            $res = ($this->http)('POST', $api . '/sendMediaGroup', (string) json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE), $headers);
             $group = $this->interpretTelegram($res, true);
             // К альбому кнопку прикрепить нельзя — она уходит с текстом следом.
             if ($group['ok'] && $splitText) {
@@ -142,7 +146,7 @@ final class SocialPublisher
             if (!empty($cfg['silent'])) {
                 $payload['disable_notification'] = true;
             }
-            $res = ($this->http)('POST', $api . '/sendPhoto', (string) json_encode($payload, JSON_UNESCAPED_UNICODE), $headers);
+            $res = ($this->http)('POST', $api . '/sendPhoto', (string) json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE), $headers);
             $photoRes = $this->interpretTelegram($res);
             if ($photoRes['ok'] && $splitText) {
                 $this->telegramText($cfg, $api, $headers, $full, $buttons, $post);
@@ -189,7 +193,7 @@ final class SocialPublisher
             if (!empty($cfg['silent'])) {
                 $payload['disable_notification'] = true;
             }
-            $res = ($this->http)('POST', $api . '/sendPhoto', (string) json_encode($payload, JSON_UNESCAPED_UNICODE), $headers);
+            $res = ($this->http)('POST', $api . '/sendPhoto', (string) json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE), $headers);
             $photoRes = $this->interpretTelegram($res);
             if ($photoRes['ok']) {
                 return $photoRes;
@@ -201,7 +205,7 @@ final class SocialPublisher
             if (!empty($cfg['silent'])) {
                 $payload['disable_notification'] = true;
             }
-            $res = ($this->http)('POST', $api . '/sendPhoto', (string) json_encode($payload, JSON_UNESCAPED_UNICODE), $headers);
+            $res = ($this->http)('POST', $api . '/sendPhoto', (string) json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE), $headers);
             $this->interpretTelegram($res);
         }
 
@@ -236,7 +240,7 @@ final class SocialPublisher
         } elseif (!empty($post['link_preview_options']) && is_array($post['link_preview_options'])) {
             $payload['link_preview_options'] = $post['link_preview_options'];
         }
-        $res = ($this->http)('POST', $api . '/sendMessage', (string) json_encode($payload, JSON_UNESCAPED_UNICODE), $headers);
+        $res = ($this->http)('POST', $api . '/sendMessage', (string) json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE), $headers);
 
         return $this->interpretTelegram($res);
     }
@@ -321,7 +325,7 @@ final class SocialPublisher
         $res = ($this->http)(
             'POST',
             self::TG_API . '/bot' . trim((string) $cfg['token']) . '/sendRichMessage',
-            (string) json_encode($payload, JSON_UNESCAPED_UNICODE),
+            (string) json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
             ['Content-Type: application/json']
         );
 
@@ -370,7 +374,7 @@ final class SocialPublisher
             $res = ($this->http)(
                 'POST',
                 $api . '/' . $method,
-                (string) json_encode($payload, JSON_UNESCAPED_UNICODE),
+                (string) json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
                 ['Content-Type: application/json']
             );
             $data = json_decode((string) ($res['body'] ?? ''), true);
@@ -651,7 +655,7 @@ final class SocialPublisher
         $res = ($this->http)(
             'POST',
             'https://api.linkedin.com/v2/ugcPosts',
-            (string) json_encode($payload, JSON_UNESCAPED_UNICODE),
+            (string) json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
             [
                 'Authorization: Bearer ' . $cfg['token'],
                 'X-Restli-Protocol-Version: 2.0.0',

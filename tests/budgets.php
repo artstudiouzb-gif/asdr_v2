@@ -461,9 +461,9 @@ function quality_budgets(): array
             'guard' => 'tests/cases/293_phpstan_baseline_budget_test.php',
             'why' => 'новый код проверяется целиком, старый долг посчитан и виден; '
                 . 'дописать находку в эталон вместо починки нельзя',
-            // 724 -> 578 -> 577 -> 570: закрыты четыре находки, каждая
-            // оказалась настоящим отказом под strict_types (см. коммит).
-            'ceiling' => static fn (): int => 570,
+            // 724 -> 578 -> 577 -> 570 -> 565: каждая закрытая находка оказывалась
+            // настоящим отказом под strict_types (см. коммиты).
+            'ceiling' => static fn (): int => 565,
             'measure' => static function (): array {
                 $baseline = APP_ROOT . '/phpstan-baseline.neon';
                 if (!is_file($baseline)) {
@@ -551,6 +551,25 @@ function quality_budgets(): array
                 ));
 
                 return ['value' => count($off), 'detail' => implode(', ', $off)];
+            },
+        ],
+        'json_encode_unguarded' => [
+            'title' => 'json_encode с приведением и без флага отказа',
+            'unit' => 'шт',
+            'guard' => 'tests/cases/356_json_encode_failure_test.php',
+            'why' => '`(string) false` — это пустая строка: отказ кодирования исчезает '
+                . 'бесследно, и данные молча подменяются пустотой',
+            'ceiling' => static fn (): int => 9,
+            'measure' => static function (): array {
+                $sites = [];
+                foreach (json_encode_call_sites() as $site) {
+                    if ($site['cast'] && !json_encode_guarded($site['expr'])) {
+                        $sites[] = $site['file'] . ':' . $site['line'];
+                    }
+                }
+                sort($sites);
+
+                return ['value' => count($sites), 'detail' => implode(', ', array_slice($sites, 0, 6))];
             },
         ],
         'bundle_css' => [

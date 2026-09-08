@@ -44,13 +44,16 @@ final class PageTemplateFile
      */
     public static function export(string $name, array $blocks): string
     {
+        // Пустой файл вместо шаблона — отказ, который замечают уже при
+        // импорте, когда собралось не то. Названия и тексты блоков приходят
+        // от редактора, поэтому негодный байт заменяем, а не теряем конверт.
         return (string) json_encode([
             'kind' => self::KIND,
             'version' => self::VERSION,
             'name' => $name,
             'exported_at' => date('c'),
             'blocks' => array_values($blocks),
-        ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
     }
 
     /**

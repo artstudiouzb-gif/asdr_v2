@@ -77,10 +77,24 @@ final class UpdateState
         return self::normalize(is_array($data) ? $data : []);
     }
 
-    /** @param array<string,mixed> $state */
+    /**
+     * `json_encode()` объявлена как `string|false`, а `Setting::set()` принимает
+     * `string`: под `strict_types` отказ кодирования уронил бы запись состояния
+     * с `TypeError`, ничего не сказав о причине. Здесь это опаснее, чем в
+     * настройках оформления, — состоянием обновления заведуют режим
+     * обслуживания и отметки шагов, и записанное неверно означало бы сайт,
+     * закрытый на профилактику, которую некому снять. Данные свои, не
+     * редакторские, поэтому отказ кодирования — это ошибка, а не замена
+     * символов.
+     *
+     * @param array<string,mixed> $state
+     */
     public static function write(array $state): void
     {
-        Setting::set(self::KEY, json_encode(self::normalize($state), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        Setting::set(self::KEY, json_encode(
+            self::normalize($state),
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+        ));
     }
 
     /**
