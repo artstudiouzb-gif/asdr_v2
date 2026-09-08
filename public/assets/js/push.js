@@ -28,6 +28,11 @@
     var LABELS = config.labels || {};
     var LABEL_ON = LABELS.on || 'Уведомления включены';
     var LABEL_OFF = LABELS.off || 'Уведомления о новостях';
+    // Подписи приходят переведёнными из разметки; литерал здесь — только
+    // запасной вариант на случай устаревшего кэша страницы.
+    var LABEL_PROMPT = LABELS.promptText || 'Будьте в курсе главных событий! Подпишитесь на мгновенные push-уведомления о новых публикациях.';
+    var LABEL_ENABLE = LABELS.enable || 'Включить уведомления';
+    var LABEL_LATER = LABELS.later || 'Позже';
     var renderIcon = window.asdrPublicIcon || function () { return ''; };
     var BELL_ICON = renderIcon('bell', 20);
     var CHECK_ICON = renderIcon('check', 18);
@@ -45,8 +50,8 @@
     var floatingBell = document.createElement('button');
     floatingBell.type = 'button';
     floatingBell.className = 'push-floating-bell';
-    floatingBell.setAttribute('aria-label', 'Уведомления о новостях');
-    floatingBell.setAttribute('title', 'Уведомления о новостях');
+    floatingBell.setAttribute('aria-label', LABEL_OFF);
+    floatingBell.setAttribute('title', LABEL_OFF);
     floatingBell.innerHTML = BELL_ICON + '<span class="push-floating-bell__badge"></span>';
 
     var promptCard = document.createElement('div');
@@ -57,10 +62,10 @@
             '<span class="push-prompt-card__icon">' + BELL_ICON + '</span>' +
             '<span class="push-prompt-card__title">' + escapeHtml(LABEL_OFF) + '</span>' +
         '</div>' +
-        '<p class="push-prompt-card__text">Будьте в курсе главных событий! Подпишитесь на мгновенные push-уведомления о новых публикациях.</p>' +
+        '<p class="push-prompt-card__text">' + escapeHtml(LABEL_PROMPT) + '</p>' +
         '<div class="push-prompt-card__actions">' +
-            '<button type="button" class="btn btn--small btn--primary" data-push-enable>Включить уведомления</button>' +
-            '<button type="button" class="btn btn--small btn--ghost" data-push-dismiss>Позже</button>' +
+            '<button type="button" class="btn btn--small btn--primary" data-push-enable>' + escapeHtml(LABEL_ENABLE) + '</button>' +
+            '<button type="button" class="btn btn--small btn--ghost" data-push-dismiss>' + escapeHtml(LABEL_LATER) + '</button>' +
         '</div>';
 
     document.body.appendChild(floatingBell);

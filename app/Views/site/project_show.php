@@ -63,7 +63,6 @@ $others = array_values(array_filter(
                         <span class="imgcard__overlay"></span>
                         <span class="imgcard__body">
                             <h3 class="imgcard__title"><?= htmlspecialchars((string) $item['title'], ENT_QUOTES) ?></h3>
-                            <span class="imgcard__more"><?= htmlspecialchars(t('Подробнее'), ENT_QUOTES) ?> →</span>
                         </span>
                     </a>
                 <?php endforeach; ?>

@@ -1687,7 +1687,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
 }
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline-offset: 2px; border-radius: 4px; }
 .cms-block--bg-navy a:focus-visible, .block-ctaband a:focus-visible, .featband a:focus-visible, .timeline-cta a:focus-visible { outline-color: #fff; }
-.section-head__all, .newsfeat__more, .person-card__more, .imgcard__more { color: var(--gov-teal-text); }
+.section-head__all, .newsfeat__more, .person-card__more { color: var(--gov-teal-text); }
 .media-tabs button, .media-tabs a { min-height: 32px; }
 @media (prefers-reduced-motion: reduce) {
     .imgcards-grid--carousel { scroll-behavior: auto; }
@@ -2283,7 +2283,6 @@ body.lightbox-active { overflow: hidden; }
     .block-cta__button:hover, .site-footer__social-link:hover,
     .block-hero__button:hover, .btn-cta:hover, .btn:hover,
     .cms-columns__col .cms-block--cta .block-cta:hover,
-    .imgcard:hover .imgcard__more,
     .imgcard:hover .imgcard__media { transform: none; }
 }
 
@@ -4028,7 +4027,9 @@ body:has(.site-header--transparent) .block-hero .content-crumbs--on-hero { top: 
 .imgcards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--card-gap, 20px); }
 @media (max-width: 1000px) { .imgcards-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .imgcards-grid { grid-template-columns: 1fr; } }
-.imgcard { position: relative; display: block; min-height: 240px; border-radius: var(--radius); overflow: hidden; text-decoration: none; color: #fff; isolation: isolate; }
+/* Кадр карточки — 16:9: карточки стоят рядом, и высота, набранная
+   содержимым, делала ряд разновысоким. */
+.imgcard { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; text-decoration: none; color: #fff; isolation: isolate; }
 .imgcard__media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: var(--gov-navy) center/cover no-repeat; transform: scale(1.001); transition: transform .7s cubic-bezier(.22, 1, .36, 1); will-change: transform; }
 .imgcard:hover .imgcard__media { transform: scale(1.04); }
 /* Карточка без изображения: фирменная подложка с эмблемой вместо пустой
@@ -4051,13 +4052,15 @@ span.imgcard__media::after {
 .imgcard__overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,26,48,0) 22%, rgba(11,26,48,.55) 58%, rgba(11,26,48,.92) 100%); transition: opacity .5s ease; }
 .imgcard__body { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px; display: flex; flex-direction: column; gap: 10px; transform: translateY(2px); transition: transform .55s cubic-bezier(.22, 1, .36, 1); }
 .imgcard__title { margin: 0; font-family: var(--font-heading, var(--font-family)); font-weight: 700; font-size: var(--step-1); line-height: 1.25; color: #fff; }
-.imgcard__more { display: inline-flex; align-items: center; font-size: var(--step--2); font-weight: 700; color: rgba(255,255,255,.9); transition: color .3s ease, transform .45s cubic-bezier(.22, 1, .36, 1); }
 /* Вариант «фото сверху, текст под ним»: снимок занимает верх карточки, подпись
    уходит на подложку. Тот же список карточек, поэтому классы общие — меняется
    только раскладка и цвета текста. */
 .imgcard--below {
     display: flex;
     flex-direction: column;
+    /* Пропорция 16:9 принадлежит кадру, а не карточке: тут под снимком есть
+       ещё и подпись, и карточка растёт по ней. */
+    aspect-ratio: auto;
     min-height: 0;
     background: var(--gov-surface);
     border: 1px solid var(--gov-border);
@@ -4066,7 +4069,7 @@ span.imgcard__media::after {
 .imgcard--below .imgcard__media {
     position: relative;
     inset: auto;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 9;
     height: auto;
     border-radius: 0;
 }
@@ -4083,22 +4086,9 @@ span.imgcard__media::after {
     font-size: var(--step--1);
     line-height: var(--base-line-height, 1.5);
 }
-.imgcard--below .imgcard__more { margin-top: auto; color: var(--gov-teal-text); }
-@media (hover: hover) and (pointer: fine) {
-    .imgcard--below:hover .imgcard__more,
-    .imgcard--below:focus-visible .imgcard__more { color: var(--gov-teal); }
-}
-
-/* Карточка целиком — ссылка, а «Подробнее» внутри неё был мёртвым текстом:
-   при наведении не менялось ничего, кроме масштаба фото. Специфичность здесь
-   выше правила-переопределения цвета ниже по файлу, поэтому порядок не важен. */
 @media (hover: hover) and (pointer: fine) {
     .imgcard:hover .imgcard__body,
     .imgcard:focus-visible .imgcard__body { transform: translateY(0); }
-    .imgcard:hover .imgcard__more,
-    .imgcard:focus-visible .imgcard__more {
-        color: #fff; text-decoration: underline; text-underline-offset: 3px; transform: translateX(4px);
-    }
 }
 
 /* Карусель проектов. */
@@ -5468,7 +5458,6 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
     .section-head__all,
     .newsfeat__more,
     .person-card__more,
-    .imgcard__more,
     .content-card__more,
     .news-card__more,
     .catcard__more,
@@ -5499,7 +5488,6 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .section-head__all,
 .newsfeat__more,
 .person-card__more,
-.imgcard__more,
 .content-card__more,
 .news-card__more,
 .catcard__more,

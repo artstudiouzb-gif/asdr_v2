@@ -45,7 +45,6 @@ require __DIR__ . '/_crumbs.php';
                         <?php if (!empty($item['description'])): ?>
                             <span class="imgcard__desc"><?= htmlspecialchars(excerpt((string) $item['description'], 120), ENT_QUOTES) ?></span>
                         <?php endif; ?>
-                        <span class="imgcard__more"><?= htmlspecialchars(t('Подробнее'), ENT_QUOTES) ?> →</span>
                     </span>
                 </a>
             <?php endforeach; ?>

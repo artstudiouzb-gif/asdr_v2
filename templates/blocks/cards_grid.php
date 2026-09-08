@@ -88,7 +88,6 @@ if ($variant === 'icon' && $visualStyle === 'new') {
                         <span class="imgcard__body">
                             <span class="imgcard__title"><?= htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES) ?></span>
                             <?php if (!empty($item['text'])): ?><span class="imgcard__text"><?= htmlspecialchars((string) $item['text'], ENT_QUOTES) ?></span><?php endif; ?>
-                            <?php if ($url !== ''): ?><span class="imgcard__more"><?= htmlspecialchars(t('Подробнее'), ENT_QUOTES) ?> →</span><?php endif; ?>
                         </span>
                     <?php if ($url !== ''): ?></a><?php else: ?></div><?php endif; ?>
                 <?php endforeach; ?>
