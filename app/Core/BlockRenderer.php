@@ -478,8 +478,22 @@ final class BlockRenderer
         $modifiers = $valign !== 'stretch' ? ' cms-columns--valign-' . $valign : '';
         $modifiers .= $mobileOrder === 'reverse' ? ' cms-columns--mobile-reverse' : '';
 
+        // Заголовок и описание подписывают всю группу колонок сразу. Разметку
+        // собирает общая шапка секции (`SectionHead`) — та же, что у полутора
+        // десятков блоков: своя копия разъехалась бы с ней при первой правке,
+        // а вместе с ней потерялись бы разметка заголовка (*слово* и |) и
+        // структура `__copy`. Выравнивание — класс, а не инлайн-стиль.
+        $align = (string) $data['title_align'];
+        $head = SectionHead::render([
+            'title' => (string) $data['title'],
+            'description' => (string) $data['description'],
+            'level' => (string) $data['title_level'],
+            'class' => $align === 'left' ? '' : 'section-head--align-' . $align,
+        ]);
+
         $html = sprintf(
-            "<div class=\"cms-columns cms-columns--%d cms-columns--gap-%s%s\">\n%s</div>",
+            "%s<div class=\"cms-columns cms-columns--%d cms-columns--gap-%s%s\">\n%s</div>",
+            $head === '' ? '' : $head . "\n",
             $count,
             htmlspecialchars($gap, ENT_QUOTES),
             $modifiers,
