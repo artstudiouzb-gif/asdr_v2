@@ -461,7 +461,9 @@ function quality_budgets(): array
             'guard' => 'tests/cases/293_phpstan_baseline_budget_test.php',
             'why' => 'новый код проверяется целиком, старый долг посчитан и виден; '
                 . 'дописать находку в эталон вместо починки нельзя',
-            'ceiling' => static fn (): int => 577,
+            // 724 -> 578 -> 577 -> 570: закрыты четыре находки, каждая
+            // оказалась настоящим отказом под strict_types (см. коммит).
+            'ceiling' => static fn (): int => 570,
             'measure' => static function (): array {
                 $baseline = APP_ROOT . '/phpstan-baseline.neon';
                 if (!is_file($baseline)) {

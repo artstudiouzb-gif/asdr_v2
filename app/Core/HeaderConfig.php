@@ -182,10 +182,16 @@ final class HeaderConfig
         return self::mergeDefaults($decoded);
     }
 
+    /**
+     * `JSON_THROW_ON_ERROR` по той же причине, что у подвала и у пресетов
+     * «Дизайна»: `json_encode()` отдаёт `false` на битой кодировке, а
+     * `Setting::set()` принимает `string` — под `strict_types` сохранение
+     * шапки падало бы с `TypeError` вместо понятной ошибки.
+     */
     public static function save(array $config): void
     {
         $clean = self::mergeDefaults($config);
-        Setting::set('header_config', json_encode($clean, JSON_UNESCAPED_UNICODE));
+        Setting::set('header_config', json_encode($clean, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
     }
 
     /** Публичная нормализация конфигурации (валидация значений) без записи в БД. */

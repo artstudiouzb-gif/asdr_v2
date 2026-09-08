@@ -58,8 +58,13 @@ final class ChartData
             $rows = self::foldTail($rows);
         }
 
-        $sum = array_sum(array_column($rows, 'value'));
-        $max = max(array_column($rows, 'value'));
+        // `array_column()` молча пропускает строку без ключа `value`, поэтому
+        // на испорченных данных набор может оказаться пустым — а `max()` от
+        // пустого массива это ValueError, то есть 500 на странице вместо
+        // диаграммы. Ноль здесь безопасен: ниже он даёт базу расчёта 1.
+        $values = array_column($rows, 'value');
+        $sum = array_sum($values);
+        $max = $values === [] ? 0.0 : max($values);
 
         // База расчёта: у долей это сумма, у показателя к цели — 100 %,
         // у столбцов — самое большое значение (самая длинная полоса = вся ширина).
