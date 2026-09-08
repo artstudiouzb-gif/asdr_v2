@@ -179,3 +179,32 @@ test('Типы блоков вне схемы полей: число тольк�
             . ' (' . $budget['detail'] . '). Новый тип объявляется схемой.'
     );
 });
+
+test('CLAUDE.md не заводит второй копии числа сценариев', function (): void {
+    // Число объявлено в README и стережётся выше. Повтор здесь пришлось бы
+    // править в двух местах на каждый новый тест, а значит рано или поздно
+    // одно из них отстало бы — ровно так «1293 сценария» и прожили до 1665.
+    $claude = (string) file_get_contents(APP_ROOT . '/CLAUDE.md');
+
+    assert_true(
+        preg_match('/Полный прогон:?\s*\d/u', $claude) !== 1,
+        'в CLAUDE.md снова записано число сценариев — оно живёт в README'
+    );
+});
+
+test('CLAUDE.md называет действующий уровень PHPStan', function (): void {
+    // Уровень был поднят с 3-го до 7-го, а описание CI осталось на пятом:
+    // читающий решил бы, что часть находок анализатор просто не ищет.
+    $config = (string) file_get_contents(APP_ROOT . '/phpstan.neon');
+    assert_true(
+        preg_match('/^\s*level:\s*(\d+)$/m', $config, $m) === 1,
+        'уровень не найден в phpstan.neon'
+    );
+
+    $claude = (string) file_get_contents(APP_ROOT . '/CLAUDE.md');
+    assert_contains(
+        'уровень ' . $m[1] . ')',
+        $claude,
+        'в CLAUDE.md назван другой уровень PHPStan, чем в phpstan.neon'
+    );
+});

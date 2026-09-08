@@ -61,7 +61,9 @@ root@127.0.0.1 без пароля. Если админ-пароль неизв�
 
 ## Проверки (вместо ручного клика)
 ```bash
-# Полный прогон: 1293 сценария; без TEST_DB_* 199 DB-сценариев пропускается
+# Полный прогон всего набора (число сценариев объявлено в README — второй
+# копии здесь не держим). Сценарии, которым нужна база, без доступа к ней
+# помечаются пропущенными — именно пропущенными, а не молча пройденными
 TEST_DB_HOST=127.0.0.1 TEST_DB_DATABASE=asdr_test TEST_DB_USERNAME=root TEST_DB_PASSWORD= php tests/run.php
 
 # Smoke-обход всего сайта (HTTP+PHP-фаталы), RU+UZ, публичка и вся админка.
@@ -949,7 +951,7 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   Pull-zone CDN (BunnyCDN и т.п.) — без переноса домена. `App\Core\Cloudflare` —
   purge через API (только если домен проксируется через CF).
 - **CI**: `.github/workflows/ci.yml` — 4 джобы: php -l + тесты на PHP 8.4/8.5
-  с MariaDB; PHPStan **блокирующий** (`composer analyse`, уровень 5) +
+  с MariaDB; PHPStan **блокирующий** (`composer analyse`, уровень 7) +
   `composer audit`;
   проверка синтаксиса JS (`node --check`); browser smoke на Chromium (Playwright).
   Отдельный сторож против тихого устаревания: прогон тестов пишет уведомления
