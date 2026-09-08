@@ -536,7 +536,7 @@ final class MenuItem
             if ($page === null) {
                 return null;
             }
-            $source['url_value'] = (string) $page['slug'];
+            $source['url_value'] = Page::menuTargetValue($page);
             $fallbackTitle = (string) $page['title'];
             $groupId = (int) ($page['translation_group_id'] ?: $page['id']);
             $key = 'page:' . $groupId;
@@ -730,7 +730,14 @@ final class MenuItem
         return in_array($pos, ['left', 'center', 'right'], true) ? $pos : 'right';
     }
 
-    /** URL только самостоятельной опубликованной страницы нужного языка. */
+    /**
+     * URL только самостоятельной опубликованной страницы нужного языка.
+     *
+     * Адрес собирается `Page::menuTargetValue()`, а не голым слагом: у проекта
+     * публичный адрес — `/projects/<slug>`, и пункт меню, собранный из одного
+     * слага, вёл на несуществующий `/<slug>`, то есть на 404. Знание о
+     * префиксе живёт в одном месте — там же, где пункт разбирается обратно.
+     */
     private static function pageUrl(string $slug, string $lang): string
     {
         $page = Page::findPublishedMenuTarget($slug, $lang);
@@ -741,6 +748,6 @@ final class MenuItem
             return Locale::url('/', $lang);
         }
 
-        return Locale::url('/' . (string) $page['slug'], $lang);
+        return Locale::url('/' . Page::menuTargetValue($page), $lang);
     }
 }
