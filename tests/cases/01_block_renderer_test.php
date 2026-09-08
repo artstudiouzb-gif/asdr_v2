@@ -52,7 +52,7 @@ test('BlockRenderer: пресет отступов и reveal попадают в
     assert_contains('data-reveal', $result['html']);
 });
 
-test('BlockRenderer: старый cards_grid без _cards_style рендерится классическим стилем', function () {
+test('BlockRenderer: cards_grid без выбранного стиля рендерится классическим', function () {
     $result = BlockRenderer::render([
         'id' => 11,
         'type' => 'cards_grid',
@@ -83,11 +83,11 @@ test('BlockRenderer: cards_grid применяет размер и отключ�
         'type' => 'cards_grid',
         'data' => json_encode([
             'variant' => 'icon',
-            '_cards_icon_size' => 38,
-            '_cards_icon_bg' => 'off',
-            '_cards_icon_position' => 'right',
-            '_cards_text_align' => 'center',
-            '_cards_style' => 'new',
+            'icon_size' => 38,
+            'icon_bg' => 'off',
+            'icon_position' => 'right',
+            'text_align' => 'center',
+            'card_style' => 'new',
             'items' => [['icon_svg' => 'target', 'title' => 'Направление']],
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         'custom_css' => '',

@@ -567,13 +567,21 @@ foreach ($options as $key => $opt) {
                 <summary><strong>Точные размеры типографики (в пикселях)</strong> <span class="form-hint">— индивидуальная настройка каждого уровня в px (переопределяет общую шкалу)</span></summary>
                 <div class="design-manual__grid u-inline-9374e84210">
                     <?php foreach (\App\Core\DesignSettings::TYPO_SIZES as $fsKey => $fsMeta): ?>
-                        <?php $fromScale = $scaleSizes[$fsKey] ?? ''; ?>
+                        <?php
+                        $fromScale = $scaleSizes[$fsKey] ?? '';
+                        // Пустое поле заголовков новостей означает «как у
+                        // остальных карточек» — так было до того, как у них
+                        // появился свой размер.
+                        $fsPlaceholder = $fsKey === 'fs_news_title'
+                            ? 'как у карточек'
+                            : ($fromScale !== '' ? 'шкала: ' . rtrim($fromScale, 'px') : 'напр. ' . $fsMeta[2]);
+                        ?>
                         <div class="form-field">
                             <label for="design_<?= htmlspecialchars($fsKey, ENT_QUOTES) ?>"><?= htmlspecialchars($fsMeta[0], ENT_QUOTES) ?>, px</label>
                             <input type="number" id="design_<?= htmlspecialchars($fsKey, ENT_QUOTES) ?>" name="<?= htmlspecialchars($fsKey, ENT_QUOTES) ?>"
                                    min="8" max="96" step="0.5" inputmode="decimal"
                                    value="<?= htmlspecialchars(preg_replace('/px$/', '', $overrides[$fsKey]) ?? '', ENT_QUOTES) ?>"
-                                   placeholder="<?= $fromScale !== '' ? 'шкала: ' . htmlspecialchars(rtrim($fromScale, 'px'), ENT_QUOTES) : 'напр. ' . htmlspecialchars($fsMeta[2], ENT_QUOTES) ?>" data-design-preview-field>
+                                   placeholder="<?= htmlspecialchars($fsPlaceholder, ENT_QUOTES) ?>" data-design-preview-field>
                         </div>
                     <?php endforeach; ?>
                 </div>

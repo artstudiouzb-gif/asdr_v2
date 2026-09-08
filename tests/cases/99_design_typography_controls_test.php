@@ -165,6 +165,39 @@ test('редакционные размеры используют переме�
     );
 });
 
+test('заголовки карточек новостей настраиваются отдельно от остальных карточек', function (): void {
+    $cards = DesignSettings::TYPO_SIZES['fs_card_title'][1];
+    $news = DesignSettings::TYPO_SIZES['fs_news_title'][1];
+    foreach (['.news-card__title', '.relnews-card__title', '.adjnews__title', '.newsfeat-mini__title', '.widget-latest-news__title'] as $selector) {
+        assert_contains($selector, $news, "{$selector}: заголовок новости должен слушать свою настройку");
+        assert_not_contains($selector, $cards, "{$selector}: заголовок новости не должен слушать размер карточек");
+    }
+
+    // Пустое поле означает «как у карточек»: до появления настройки эти
+    // заголовки слушались размера карточек, и пустое значение не должно
+    // менять размер на уже настроенном сайте.
+    \App\Models\Setting::overrideInMemory('design_fs_card_title', '18px');
+    \App\Models\Setting::overrideInMemory('design_fs_news_title', '');
+    assert_same('18px', DesignSettings::typographySizes()['fs_news_title']);
+
+    \App\Models\Setting::overrideInMemory('design_fs_news_title', '22px');
+    assert_same('22px', DesignSettings::typographySizes()['fs_news_title']);
+    $css = DesignSettings::typographyCss();
+    assert_contains('--font-size-news-title:22px', $css);
+    assert_contains('--font-size-card-title:18px', $css);
+    assert_contains('.relnews-card__title', $css);
+
+    // Заголовок карточки новости остаётся <h3>/<h2> по структуре страницы,
+    // поэтому его класс обязан быть в исключении правила по тегу — иначе
+    // уровень заголовка перебил бы собственную настройку.
+    \App\Models\Setting::overrideInMemory('design_fs_h3', '24px');
+    assert_contains('.relnews-card__title', substr(DesignSettings::typographyCss(), (int) strpos(DesignSettings::typographyCss(), ':root body h3[class]:not(')));
+
+    \App\Models\Setting::overrideInMemory('design_fs_h3', '');
+    \App\Models\Setting::overrideInMemory('design_fs_card_title', '');
+    \App\Models\Setting::overrideInMemory('design_fs_news_title', '');
+});
+
 test('HTML-уровень заголовка главнее компонентного класса', function (): void {
     assert_not_contains('.newsdetail-card__title', DesignSettings::TYPO_SIZES['fs_h2'][1]);
     assert_contains('.newsdetail-card__title', DesignSettings::TYPO_SIZES['fs_h3'][1]);
