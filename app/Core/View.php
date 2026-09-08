@@ -60,6 +60,10 @@ final class View
             $html = HtmlFormatter::format($html);
         }
         PublicResponseCache::apply($template);
+        // Аварийный снимок: пока база жива, каждая публичная страница
+        // оставляет свою копию на диске. Когда база ляжет, bootstrap отдаст
+        // её вместо 503 — см. PublicResponseCache::tryServeStale().
+        PublicResponseCache::saveSnapshot($html);
         if (PublicResponseCache::sendConditional($html)) {
             return;
         }

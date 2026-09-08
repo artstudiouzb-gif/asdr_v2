@@ -33,9 +33,19 @@ final class PublicResponseCache
      */
     private static bool $cacheable = false;
 
+    /**
+     * Годится ли ответ в аварийный снимок. Условие строже, чем у HTTP-кеша:
+     * снимок отдаётся ЛЮБОМУ посетителю при лежащей базе, поэтому в него не
+     * должны попадать ни персонализированные ответы (настройки отображения,
+     * узбекская кириллица — они уходят как `private`), ни адреса с
+     * параметрами: ключей стало бы столько же, сколько запросов от сканеров.
+     */
+    private static bool $snapshotable = false;
+
     public static function apply(string $template): void
     {
         self::$cacheable = false;
+        self::$snapshotable = false;
         if (!str_starts_with($template, 'site/')) {
             return;
         }
@@ -111,6 +121,8 @@ final class PublicResponseCache
         $varyCookie = Locale::current() === 'uz';
         header('Vary: Accept-Encoding' . ($varyCookie ? ', Cookie' : ''));
         self::$cacheable = true;
+        self::$snapshotable = !$personalized
+            && ((string) (parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_QUERY) ?? '')) === '';
     }
 
     /**
@@ -268,37 +280,106 @@ final class PublicResponseCache
             $status = http_response_code();
             if (!is_int($status) || $status < 400) {
                 Cache::forgetPrefix('page:');
+                // Снимки стираем вместе с кэшем страниц. Иначе снятая с
+                // публикации новость могла бы вернуться на глаза во время
+                // аварии — для госсайта это хуже, чем 503. Окно без запасной
+                // копии короткое: она пересобирается первым же успешным
+                // заходом на страницу.
+                Cache::forgetPrefix('stale_page:');
             }
         });
     }
 
     /**
-     * Сохраняет снимок готовой страницы для отказоустойчивой отдачи при сбоях БД.
+     * Срок жизни аварийного снимка. Неделя — это не «свежесть», а верхняя
+     * граница: снимок и так пересобирается при каждом успешном заходе и
+     * стирается при правке контента.
      */
-    public static function saveSnapshot(string $path, string $lang, string $html): void
+    private const STALE_TTL = 604800;
+
+    /**
+     * Ключ снимка. Считается из адреса и **одним методом на обе стороны**:
+     * сохранение идёт при живой базе, а отдача — при мёртвой, где ни языка,
+     * ни настроек из БД уже не спросить. Разъехавшиеся ключи означали бы, что
+     * снимок пишется, но никогда не находится, — отказ, который заметен
+     * только в аварии, то есть ровно тогда, когда проверять поздно.
+     *
+     * Язык в ключ отдельно не входит: он и так в адресе (`/uz/news`). Ответы,
+     * которые различаются не адресом, а cookie (узбекская кириллица, режимы
+     * отображения), в снимок не попадают вовсе — см. $snapshotable.
+     */
+    private static function staleKey(string $path): string
     {
-        if (self::$cacheable && $html !== '') {
-            $key = 'stale_page:' . md5($path . ':' . $lang);
-            Cache::put($key, $html, 86400 * 7); // храним до 7 дней как аварийный снимок
-        }
+        return 'stale_page:' . md5($path);
+    }
+
+    /** Путь текущего запроса без параметров. */
+    private static function requestPath(): string
+    {
+        return (string) (parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/');
     }
 
     /**
-     * Отдаёт аварийный снимок при временном отказе БД (Stale-While-Revalidate fallback).
+     * Сохраняет снимок готовой публичной страницы на случай отказа БД.
+     *
+     * Вызывается из View::render() после apply(): к этому моменту уже
+     * известно, годится ли ответ (200, GET/HEAD, без сессии, не служебный
+     * путь, не персонализированный, без параметров адреса).
      */
-    public static function tryServeStale(string $path, string $lang): bool
+    public static function saveSnapshot(string $html): void
     {
-        $key = 'stale_page:' . md5($path . ':' . $lang);
-        $staleHtml = Cache::get($key);
-        if (is_string($staleHtml) && $staleHtml !== '') {
-            if (!headers_sent()) {
-                http_response_code(200);
-                header('X-Cache-Status: STALE-RECOVERED');
-                header('Cache-Control: public, max-age=30, stale-while-revalidate=60');
-            }
-            echo $staleHtml;
-            return true;
+        if (!self::$snapshotable || $html === '') {
+            return;
         }
-        return false;
+
+        Cache::put(self::staleKey(self::requestPath()), $html, self::STALE_TTL);
+    }
+
+    /**
+     * Отдаёт вчерашнюю копию страницы, когда база недоступна.
+     *
+     * Вызывается из bootstrap.php вместо брендированной 503. Ходить в БД
+     * здесь нельзя ничем: ни за языком, ни за настройками, — поэтому все
+     * проверки опираются только на сам запрос и файловый кеш.
+     *
+     * Отдаём 200, а не 503: содержимое настоящее, просто не самое свежее —
+     * это семантика `stale-if-error`. Мониторинг при этом не обманут:
+     * `/health` до сюда не доходит, он отвечает 503 отдельной веткой выше.
+     *
+     * `no-store` намеренно: пока база лежит, каждый следующий запрос должен
+     * снова попробовать её поднять. Иначе после восстановления посетители
+     * ещё какое-то время получали бы старую копию из чужого кеша.
+     */
+    public static function tryServeStale(): bool
+    {
+        if (PHP_SAPI === 'cli' || headers_sent()) {
+            return false;
+        }
+        if (!in_array(strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')), ['GET', 'HEAD'], true)) {
+            return false;
+        }
+        // Адрес с параметрами в снимок не попадал — искать нечего.
+        if (((string) (parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_QUERY) ?? '')) !== '') {
+            return false;
+        }
+
+        $path = self::requestPath();
+        if (self::isPrivatePath($path)) {
+            return false;
+        }
+
+        $html = Cache::get(self::staleKey($path));
+        if (!is_string($html) || $html === '') {
+            return false;
+        }
+
+        http_response_code(200);
+        header('Content-Type: text/html; charset=UTF-8');
+        header('Cache-Control: no-store');
+        header('X-Cache-Status: STALE-RECOVERED');
+
+        echo $html;
+
+        return true;
     }
 }
