@@ -524,7 +524,12 @@ final class DesignSettings
         'fs_h5' => ['Заголовок H5', '', '18'],
         'fs_h6' => ['Заголовок H6', '', '16'],
         'fs_lead' => ['Вводный и крупный текст', '.content-pagehead__lead, .content-list__lead, .listing__lead, .block-hero__lead, .block-hero__subtitle, .block-banner__text, .newsdetail__lead, .newsdetail-phero__lead, .newslist-lead__excerpt, .newsfeat-lead__excerpt, .profile__text, .bio-quote__text, .rich-content--lead', '17'],
-        'fs_card_title' => ['Заголовки карточек и этапов', '.card__title, .content-card__title, .feature-card__title, .contact-card__title, .stage__title, .stage-item__title, .person-card__name, .doc-card__title, .repo-card__title, .news-card__title, .project-card__title, .album-card__title, .relnews-card__title, .adjnews__title, .imgcard__title, .newsfeat-mini__title, .newsfeat-text__title, .newsdocs-item__title, .catcard__title, .catdetail__card-title, .faq-item__q, .news-poll-card__question, .newsdetail-doc__title, .block-map__card-title, .gcal-list__title, .widget-latest-news__title, .bio-edu__degree', '16'],
+        'fs_card_title' => ['Заголовки карточек и этапов', '.card__title, .content-card__title, .feature-card__title, .contact-card__title, .stage__title, .stage-item__title, .person-card__name, .doc-card__title, .repo-card__title, .project-card__title, .album-card__title, .imgcard__title, .catcard__title, .catdetail__card-title, .faq-item__q, .newsdetail-doc__title, .block-map__card-title, .gcal-list__title, .bio-edu__degree', '16'],
+        // Карточка новости живёт своей жизнью: её заголовок стоит в ленте из
+        // четырнадцати карточек и в подборках на главной, где длина строки
+        // другая, чем у карточки документа или этапа. Пустое поле — размер
+        // берётся у «Заголовков карточек», как было до появления настройки.
+        'fs_news_title' => ['Заголовки карточек новостей', '.news-card__title, .relnews-card__title, .adjnews__title, .newsfeat-mini__title, .newsfeat-text__title, .newsdocs-item__title, .news-poll-card__question, .widget-latest-news__title', '16'],
         'fs_card_text' => ['Текст карточек и этапов', '.feature-card__text, .stage__text, .stage-item__text, .person-card__role, .act-card__desc, .doc-card__desc, .repo-card__desc, .news-card__desc, .news-card__excerpt, .project-card__desc, .relnews-card__excerpt, .imgcard__desc, .catcard__excerpt, .timeline-item__text, .featband__text, .bio-career__text, .newsdetail-timeline__desc, .newsdetail-points__item, .faq-item__a, .block-advantages__text, .contact-card__item, .block-map__card-address', '14'],
         'fs_meta' => ['Метаданные и подписи', '.crumbs, .content-crumbs, .content-card__meta, .content-detail__date, .stage__year, .stage__label, .act-card__number, .act-card__date, .act-card__meta, .person-card__more, .person-card__vacant, .news-card__date, .news-card__meta, .project-card__meta, .album-card__meta, .relnews-card__date, .adjnews__date, .newsfeat__date, .newsdocs-item__date, .doc-card__meta, .catcard__created, .catcard__meta-item, .catcard__file, .catdetail__date, .newsdetail__meta, .newsdetail__source, .newsdetail-gallery__caption, .newsdetail-timeline__date, .newsdetail-event__label, .newsdetail-doc__meta, .newsdetail-points__number, .bio-career__years, .bio-edu__years, .bio-edu__org, .block-text__media-caption, .article-media__caption, .article-media__credit, .media-caption, .gcal-list__time, .gcal-list__loc', '13'],
         'fs_small' => ['Мелкий и вспомогательный текст', 'small, .form-hint, .section-head__eyebrow, .block-hero__eyebrow, .content-badge, .newsdetail__badge, .news-badge, .faq-item__category, .search-suggest__type, .search-suggest__meta, .site-search-results__type, .news-poll-card__badge, .news-poll-card__meta', '13'],
@@ -603,6 +608,14 @@ final class DesignSettings
             $sizes[$key] = $manual !== '' ? $manual : ($scale[$key] ?? '');
         }
 
+        // Заголовки карточек новостей отделены от остальных карточек, но
+        // незаданное поле обязано означать «как раньше»: до появления
+        // настройки эти заголовки слушались «Заголовков карточек», и пустое
+        // значение не должно менять размер на уже настроенном сайте.
+        if ($sizes['fs_news_title'] === '') {
+            $sizes['fs_news_title'] = $sizes['fs_card_title'];
+        }
+
         return $sizes;
     }
 
@@ -635,7 +648,7 @@ final class DesignSettings
     private static function componentTitleExclusion(): string
     {
         $classes = [];
-        foreach (['fs_lead', 'fs_card_title', 'fs_card_text', 'fs_meta', 'fs_menu', 'fs_topbar'] as $group) {
+        foreach (['fs_lead', 'fs_card_title', 'fs_news_title', 'fs_card_text', 'fs_meta', 'fs_menu', 'fs_topbar'] as $group) {
             foreach (explode(',', self::TYPO_SIZES[$group][1]) as $selector) {
                 $selector = trim($selector);
                 if (preg_match('/^\.[A-Za-z0-9_-]+$/', $selector) === 1) {

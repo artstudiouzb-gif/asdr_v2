@@ -104,19 +104,28 @@ test('Преимущества, этапы и таймлайн имеют соб
     }
 });
 
-test('Старый cards_grid без служебного ключа открывается в админке', function (): void {
+test('Иконки cards_grid настраиваются в редакторе так же, как у счётчиков', function (): void {
+    // Настройка объявляется один раз — в схеме полей: прежде эти пять полей
+    // дорисовывал скрипт в подвале админки по id «cards_variant», которого у
+    // схемной формы нет, и редактор не видел их ни разу.
+    $fields = \App\Core\BlockData\BlockFieldSchema::fields('cards_grid');
+    foreach (['card_style', 'icon_size', 'icon_bg', 'icon_position', 'text_align'] as $key) {
+        assert_true(isset($fields[$key]), "cards_grid: настройка {$key} не описана схемой");
+        assert_same(['field' => 'variant', 'values' => ['icon']], $fields[$key]->when, "cards_grid: {$key} показывается не только у варианта с иконками");
+    }
+    assert_same(22, $fields['icon_size']->default);
+    assert_same('top', $fields['icon_position']->default);
+
+    $editor = block_editor_markup();
+    foreach (['icon_size', 'icon_bg', 'icon_position'] as $key) {
+        assert_contains('id="bf_' . $key . '"', $editor, "cards_grid: поля {$key} нет в форме блока");
+    }
+    assert_contains('Справа от текста', $editor);
+
+    // Прежнее место этих настроек — рукописный скрипт в подвале админки.
     $footer = (string) file_get_contents(APP_ROOT . '/app/Views/admin/layout/footer.php');
-    assert_contains("(string) (\$data['_cards_style'] ?? 'old')", $footer);
-    assert_not_contains("(string) \$data['_cards_style']", $footer);
-    assert_contains("(string) (\$data['_cards_icon_bg'] ?? 'on')", $footer);
-    assert_contains("backgroundSelect.name = 'cards_icon_bg'", $footer);
-    assert_contains("['off', 'Без подложки']", $footer);
-    assert_contains("(string) (\$data['_cards_icon_position'] ?? 'top')", $footer);
-    assert_contains("positionSelect.name = 'cards_icon_position'", $footer);
-    assert_contains("['right', 'Справа от текста']", $footer);
-    assert_contains("(string) (\$data['_cards_text_align'] ?? 'left')", $footer);
-    assert_contains("textAlignSelect.name = 'cards_text_align'", $footer);
-    assert_contains("['center', 'По центру']", $footer);
+    assert_not_contains('cards_icon_position', $footer);
+    assert_not_contains('_cards_style', $footer);
 });
 
 test('Заголовки редакционных разделов используют единый акцентный маркер', function (): void {
