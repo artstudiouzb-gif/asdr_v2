@@ -122,6 +122,13 @@ if (is_file($configFile)) {
                     echo json_encode(['status' => 'down'], JSON_UNESCAPED_UNICODE);
                     exit;
                 }
+                // Вчерашняя копия лучше заглушки: содержимое настоящее,
+                // просто не самое свежее. Файловый кеш базы не требует,
+                // поэтому работает именно тогда, когда она недоступна.
+                if (\App\Core\PublicResponseCache::tryServeStale()) {
+                    exit;
+                }
+
                 http_response_code(503);
                 header('Retry-After: 60');
                 $view = APP_ROOT . '/app/Views/errors/503.php';
