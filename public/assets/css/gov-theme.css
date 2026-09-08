@@ -4103,6 +4103,20 @@ span.imgcard__media::after {
    к правому краю их строки. На телефоне строка вкладок занимает всю ширину —
    иначе ссылка переносится под них и выравнивание теряется. */
 .section-head--split-tools .section-head__all { margin-inline-start: auto; }
+/* Выравнивание шапки секции. Полоса — flex, поэтому одного text-align мало:
+   колонка текста иначе остаётся у левого края, а описание с его max-width
+   не двигается вовсе. */
+/* Уровень заголовка редактор выбирает и ради веса: группа внутри готового
+   раздела не должна кричать размером H2. Тег при этом остаётся структурой —
+   диктор и поиск строят по нему оглавление. */
+h3.section-head__title { font-size: var(--font-size-h3, var(--step-4)); }
+h4.section-head__title { font-size: var(--font-size-card-title, var(--step-2)); }
+.section-head--align-center { justify-content: center; text-align: center; }
+.section-head--align-center .section-head__copy { flex: 0 1 auto; }
+.section-head--align-center .section-head__description { margin-inline: auto; }
+.section-head--align-right { justify-content: flex-end; text-align: right; }
+.section-head--align-right .section-head__copy { flex: 0 1 auto; }
+.section-head--align-right .section-head__description { margin-inline-start: auto; }
 .carousel-nav { display: inline-flex; gap: 8px; }
 .carousel-nav[hidden] { display: none; }
 /* 44px — минимальная цель для касания; прежде это требование лежало в

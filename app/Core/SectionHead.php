@@ -55,8 +55,12 @@ final class SectionHead
             return '';
         }
 
+        // H4 нужен группам внутри готового раздела (контейнер «Колонки» внутри
+        // страницы, где H2 и H3 уже заняты): уровень — структура документа, по
+        // нему диктор строит оглавление, поэтому пропуск ступени хуже мелкого
+        // заголовка.
         $level = (string) ($options['level'] ?? 'h2');
-        if (!in_array($level, ['h2', 'h3'], true)) {
+        if (!in_array($level, ['h2', 'h3', 'h4'], true)) {
             $level = 'h2';
         }
         $titleClass = trim('section-head__title ' . (string) ($options['title_class'] ?? ''));
