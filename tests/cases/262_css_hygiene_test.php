@@ -85,20 +85,10 @@ function css_props(string $body): array
     return $props;
 }
 
-/** @return list<string> публичные таблицы стилей (без собранных и админских) */
-function public_css_files(): array
-{
-    $files = array_merge(
-        glob(APP_ROOT . '/public/assets/css/*.css') ?: [],
-        glob(APP_ROOT . '/public/assets/css/blocks/*.css') ?: []
-    );
-
-    return array_values(array_filter($files, static function (string $path): bool {
-        $name = basename($path);
-
-        return !str_contains($name, '.min.') && !str_starts_with($name, 'admin');
-    }));
-}
+/*
+ * `public_css_files()` объявлена в tests/budgets.php: тот же список файлов
+ * меряет бюджет `!important`, и два глоба разъехались бы при первой правке.
+ */
 
 test('Публичный CSS не хранит мёртвых повторов одного селектора', function () {
     $dead = [];
@@ -174,33 +164,19 @@ test('Правило из базового файла не дублируетс�
 });
 
 test('Число !important в публичном CSS не растёт', function () {
-    // Потолок — текущее состояние после уборки (было 449, стало 367). Значение
-    // может только уменьшаться: каждый !important это правка, не выигравшая по
-    // специфичности, и следующая правка поверх него становится непредсказуемой.
-    // Оставшиеся держат поведение, а не оформление: скрытие [hidden], тач-цели
-    // шапки, вкладки галереи, появление карточек, контраст активного пункта
-    // меню (4.5:1), цвет счётчиков из настройки блока, режимы доступности.
-    $limit = 370;
-
-    $total = 0;
-    $perFile = [];
-    foreach (public_css_files() as $path) {
-        $n = substr_count((string) file_get_contents($path), '!important');
-        $total += $n;
-        if ($n > 0) {
-            $perFile[basename($path)] = $n;
-        }
-    }
-
-    arsort($perFile);
-    $top = [];
-    foreach (array_slice($perFile, 0, 5, true) as $name => $n) {
-        $top[] = $name . '=' . $n;
-    }
+    // Потолок и замер объявлены в tests/budgets.php: оттуда же их читает отчёт
+    // `php .claude/skills/quality-budgets/report.php`, показывающий запас до
+    // падения. Значение может только уменьшаться: каждый !important это правка,
+    // не выигравшая по специфичности, и следующая поверх него становится
+    // непредсказуемой. Оставшиеся держат поведение, а не оформление: скрытие
+    // [hidden], тач-цели шапки, вкладки галереи, появление карточек, контраст
+    // активного пункта меню (4.5:1), цвет счётчиков, режимы доступности.
+    $budget = quality_budget('public_important');
 
     assert_true(
-        $total <= $limit,
-        'стало ' . $total . ' при потолке ' . $limit . '; больше всего: ' . implode(', ', $top)
+        $budget['value'] <= $budget['ceiling'],
+        'стало ' . $budget['value'] . ' при потолке ' . $budget['ceiling']
+            . '; больше всего: ' . $budget['detail']
     );
 });
 

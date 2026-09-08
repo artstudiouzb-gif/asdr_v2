@@ -16,11 +16,10 @@ declare(strict_types=1);
  * роняет тест: подобрать «ещё один 13.5px» заново нельзя.
  */
 
-/** @return list<string> файлы CSS админки */
-function admin_css_files(): array
-{
-    return glob(APP_ROOT . '/public/assets/css/admin*.css') ?: [];
-}
+/*
+ * `admin_css_files()` объявлена в tests/budgets.php: по тому же списку считается
+ * бюджет `!important` панели.
+ */
 
 /**
  * Значения одного свойства во всех файлах админки.
@@ -167,16 +166,14 @@ test('Число !important в CSS админки не растёт', function (
     // после полей форм — 895, таблиц — 867, бейджей — 860, заголовков — 845,
     // остальных секций слоя (вход, конструктор шапки, слайды обложек, панель
     // действий, тосты, сайдбар, фильтры, меню действий) — 372.
-    $budget = 372;
-
-    $total = 0;
-    foreach (admin_css_files() as $file) {
-        $total += substr_count((string) file_get_contents($file), '!important');
-    }
+    // Потолок и замер — в tests/budgets.php, запас показывает отчёт
+    // `php .claude/skills/quality-budgets/report.php`.
+    $budget = quality_budget('admin_important');
 
     assert_true(
-        $total <= $budget,
-        'было ' . $budget . ', стало ' . $total . ' — новый !important в админке не проходит'
+        $budget['value'] <= $budget['ceiling'],
+        'было ' . $budget['ceiling'] . ', стало ' . $budget['value']
+            . ' — новый !important в админке не проходит; больше всего: ' . $budget['detail']
     );
 });
 

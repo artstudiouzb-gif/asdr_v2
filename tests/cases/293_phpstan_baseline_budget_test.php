@@ -20,26 +20,22 @@ declare(strict_types=1);
  */
 
 test('Эталон PHPStan не растёт', function () {
-    $baseline = APP_ROOT . '/phpstan-baseline.neon';
-    assert_true(is_file($baseline), 'эталон PHPStan не найден');
+    // Потолок и подсчёт объявлены в tests/budgets.php вместе с остальными
+    // бюджетами проекта: каждая запись эталона несёт `count: N`, считаем
+    // находки, а не строки.
+    assert_true(is_file(APP_ROOT . '/phpstan-baseline.neon'), 'эталон PHPStan не найден');
 
-    $text = str_replace("\r\n", "\n", (string) file_get_contents($baseline));
-
-    // Каждая запись эталона несёт `count: N` — считаем находки, а не строки.
-    $found = 0;
-    if (preg_match_all('/^\s*count:\s*(\d+)$/m', $text, $m) > 0) {
-        foreach ($m[1] as $n) {
-            $found += (int) $n;
-        }
-    }
-    assert_true($found > 0, 'в эталоне не разобрано ни одной записи');
+    $budget = quality_budget('phpstan_baseline');
+    assert_true(
+        $budget['value'] !== null && $budget['value'] > 0,
+        'в эталоне не разобрано ни одной записи'
+    );
 
     // Планка. Уменьшать — можно и нужно; увеличивать — нет.
-    $budget = 577;
     assert_true(
-        $found <= $budget,
-        'находок в эталоне не больше ' . $budget . ' (сейчас ' . $found . '). '
-            . 'Новую находку надо чинить, а не дописывать в эталон.'
+        $budget['value'] <= $budget['ceiling'],
+        'находок в эталоне не больше ' . $budget['ceiling'] . ' (сейчас ' . $budget['value'] . ', '
+            . $budget['detail'] . '). Новую находку надо чинить, а не дописывать в эталон.'
     );
 });
 

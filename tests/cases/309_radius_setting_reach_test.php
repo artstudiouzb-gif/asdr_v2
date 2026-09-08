@@ -20,41 +20,11 @@ use App\Core\DesignSettings;
  * уменьшаться — тем же приёмом, что бюджеты `!important` и классов без правил.
  */
 
-/** Правила публичного CSS: селектор => список объявлений border-radius. */
-$publicRadiusRules = static function (): array {
-    $root = dirname(__DIR__, 2) . '/public/assets/css';
-    $files = [];
-    /** @var SplFileInfo $file */
-    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root)) as $file) {
-        $path = $file->getPathname();
-        if (!str_ends_with($path, '.css')
-            || str_contains($path, '.min.')
-            || str_contains($path, 'admin')
-            || str_contains($path, 'vendor')) {
-            continue;
-        }
-        $files[] = $path;
-    }
-    sort($files);
-
-    $rules = [];
-    foreach ($files as $path) {
-        $css = (string) file_get_contents($path);
-        preg_match_all('/([^{}]+)\{([^}]*)\}/s', $css, $matches, PREG_SET_ORDER);
-        foreach ($matches as $rule) {
-            $selector = trim((string) preg_replace('/\s+/', ' ', $rule[1]));
-            if ($selector === '' || str_starts_with($selector, '@')) {
-                continue;
-            }
-            preg_match_all('/border(?:-[a-z-]+)?-radius\s*:\s*([^;!}]+)/', $rule[2], $found);
-            foreach ($found[1] as $value) {
-                $rules[] = ['file' => basename($path), 'selector' => $selector, 'value' => trim($value)];
-            }
-        }
-    }
-
-    return $rules;
-};
+/*
+ * Сбор правил (`public_radius_rules`) и отбор жёстких значений
+ * (`public_hard_radius_rules`) объявлены в tests/budgets.php: по ним же считает
+ * бюджет отчёт `php .claude/skills/quality-budgets/report.php`.
+ */
 
 test('Настройка «Скругление углов» печатает переменные', function () {
     $css = DesignSettings::cssVariables(['radius' => 'large', 'button' => 'rounded']);
@@ -67,8 +37,8 @@ test('Настройка «Скругление углов» печатает п
     assert_contains('--radius:0px', $none, 'вариант «Прямые» обязан давать ноль');
 });
 
-test('Ключевые карточки берут радиус из переменной', function () use ($publicRadiusRules) {
-    $rules = $publicRadiusRules();
+test('Ключевые карточки берут радиус из переменной', function () {
+    $rules = public_radius_rules();
 
     // Компонент => селектор, ровно с которого начинается его правило.
     $required = [
@@ -97,21 +67,17 @@ test('Ключевые карточки берут радиус из перем�
     }
 });
 
-test('Бюджет жёстких скруглений в публичном CSS только уменьшается', function () use ($publicRadiusRules) {
+test('Бюджет жёстких скруглений в публичном CSS только уменьшается', function () {
     // Круги, пилюли и нули настройкой не управляются: это форма элемента,
-    // а не оформление карточки.
-    $hard = array_values(array_filter($publicRadiusRules(), static function (array $rule): bool {
-        $value = $rule['value'];
+    // а не оформление карточки, — отбор живёт в public_hard_radius_rules().
+    $budget = quality_budget('public_hard_radius');
 
-        return !str_contains($value, 'var(')
-            && preg_match('/^(0|0px|50%|100%|999px|9999px|inherit)$/', $value) !== 1;
-    }));
-
-    $budget = 90;
     assert_true(
-        count($hard) <= $budget,
-        'жёстких значений border-radius стало больше бюджета: ' . count($hard) . ' > ' . $budget
+        $budget['value'] <= $budget['ceiling'],
+        'жёстких значений border-radius стало больше бюджета: '
+        . $budget['value'] . ' > ' . $budget['ceiling']
         . '; новое правило должно брать var(--radius), var(--radius-sm) или var(--btn-radius)'
+        . '. Например: ' . $budget['detail']
     );
 });
 
