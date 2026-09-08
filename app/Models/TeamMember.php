@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Core\Database;
 use App\Core\Logger;
 use App\Core\Slug;
+use App\Core\Translations;
 
 final class TeamMember
 {
@@ -152,16 +153,8 @@ final class TeamMember
         // Базовое название отдела сохраняем до наложения перевода: якорь
         // ссылки не должен меняться вместе с языком страницы.
         $row['department_base'] = (string) ($row['department'] ?? '');
-        if ($translation === null) {
-            return $row;
-        }
-        foreach (['name', 'position', 'department', 'unit'] as $field) {
-            if (isset($translation[$field]) && trim((string) $translation[$field]) !== '') {
-                $row[$field] = $translation[$field];
-            }
-        }
 
-        return $row;
+        return Translations::overlayFields($row, $translation, ['name', 'position', 'department', 'unit']);
     }
 
     /**
@@ -171,60 +164,17 @@ final class TeamMember
      * @param array<int|string> $ids
      * @return array<int, array<int, string>>
      */
+    /**
+     * Языки контента для набора сотрудников одним запросом (без N+1).
+     * Разбор — общий для всех сущностей механизма А: полсотни строк, которые
+     * повторялись здесь дословно, живут в `Translations::availableLangs()`.
+     *
+     * @param array<int|string> $ids
+     * @return array<int, array<int, string>>
+     */
     public static function availableLangsForIds(array $ids): array
     {
-        $ids = array_values(array_unique(array_map('intval', $ids)));
-        $map = [];
-        foreach ($ids as $id) {
-            $map[$id] = [];
-        }
-        if ($ids === []) {
-            return $map;
-        }
-
-        $in = implode(',', array_fill(0, count($ids), '?'));
-        $default = Language::defaultCode();
-
-        try {
-            $stmtBase = Database::pdo()->prepare(
-                "SELECT id, name FROM team_members WHERE id IN ($in)"
-            );
-            $stmtBase->execute($ids);
-            foreach ($stmtBase->fetchAll() as $row) {
-                $id = (int) $row['id'];
-                if (trim((string) ($row['name'] ?? '')) !== '' && isset($map[$id])) {
-                    $map[$id][] = $default;
-                }
-            }
-        } catch (\Throwable $e) {
-            Logger::swallowed('TeamMember::availableLangsForIds: не удалось прочитать базовые записи', $e);
-        }
-
-        try {
-            $stmtTrans = Database::pdo()->prepare(
-                "SELECT member_id, lang FROM team_member_translations
-                 WHERE member_id IN ($in)
-                   AND (TRIM(COALESCE(name, '')) <> '' OR TRIM(COALESCE(position, '')) <> '')"
-            );
-            $stmtTrans->execute($ids);
-            foreach ($stmtTrans->fetchAll() as $row) {
-                $id = (int) $row['member_id'];
-                $lang = (string) $row['lang'];
-                if (isset($map[$id]) && !in_array($lang, $map[$id], true)) {
-                    $map[$id][] = $lang;
-                }
-            }
-        } catch (\Throwable $e) {
-            Logger::swallowed('TeamMember::availableLangsForIds: не удалось прочитать team_member_translations', $e);
-        }
-
-        foreach ($ids as $id) {
-            if (empty($map[$id])) {
-                $map[$id] = [$default];
-            }
-        }
-
-        return $map;
+        return Translations::availableLangs('team_members', $ids, ['name', 'position', 'department', 'unit']);
     }
 
     public static function findById(int $id): ?array

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Core\ConcurrencyException;
 use App\Core\Database;
+use App\Core\Translations;
 use App\Core\Video;
 use App\Core\Logger;
 use App\Core\UzbekText;
@@ -575,26 +576,23 @@ final class News
 
     private static function applyTranslation(array $row, ?array $translation): array
     {
+        // Пустая строка здесь проверяется без trim: часть полей несёт HTML и
+        // JSON, и менять на них правило заодно с переездом на общий метод
+        // значило бы протащить смену поведения под видом уборки.
+        $row = Translations::overlayFields($row, $translation, [
+            'title', 'badge', 'excerpt', 'lead_html', 'content', 'key_points', 'event_meta',
+            'timeline_json', 'docs', 'poll_question', 'poll_options_json',
+            ...\App\Core\NewsCard::FIELDS,
+        ], false);
+
         if ($translation === null) {
             return $row;
         }
 
-        foreach ([
-            'title', 'badge', 'excerpt', 'lead_html', 'content', 'key_points', 'event_meta',
-            'timeline_json', 'docs', 'poll_question', 'poll_options_json',
-            ...\App\Core\NewsCard::FIELDS,
-        ] as $field) {
-            if (isset($translation[$field]) && $translation[$field] !== '') {
-                $row[$field] = $translation[$field];
-            }
-        }
         $row['meta_title'] = $translation['meta_title'] ?? null;
         $row['meta_description'] = $translation['meta_description'] ?? null;
-        if (isset($translation['hashtags']) && trim((string) $translation['hashtags']) !== '') {
-            $row['hashtags'] = $translation['hashtags'];
-        }
 
-        return $row;
+        return Translations::overlayFields($row, $translation, ['hashtags']);
     }
 
     public static function cleanHashtags(?string $input): ?string

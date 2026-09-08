@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use App\Core\Translations;
 use App\Core\UrlGuard;
 
 /**
@@ -111,16 +112,7 @@ final class Goal
      */
     private static function applyTranslation(array $row, ?array $translation): array
     {
-        if ($translation === null) {
-            return $row;
-        }
-        foreach (['name', 'description'] as $field) {
-            if (isset($translation[$field]) && trim((string) $translation[$field]) !== '') {
-                $row[$field] = $translation[$field];
-            }
-        }
-
-        return $row;
+        return Translations::overlayFields($row, $translation, ['name', 'description']);
     }
 
     /**

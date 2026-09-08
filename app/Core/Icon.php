@@ -270,7 +270,12 @@ final class Icon
                 continue;
             }
             [$offset, $length] = $index[$name];
-            if (fseek($handle, $offset) !== 0) {
+            // Длина приходит из сгенерированного индекса. Нулевая или
+            // отрицательная означала бы, что индекс пересобран не тем
+            // спрайтом; `fread()` на такой длине бросает ValueError, то есть
+            // одна испорченная запись уронила бы страницу целиком вместо
+            // единственной ненарисованной иконки.
+            if ($length < 1 || fseek($handle, $offset) !== 0) {
                 continue;
             }
             $chunk = fread($handle, $length);

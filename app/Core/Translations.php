@@ -334,17 +334,15 @@ final class Translations
      */
     private static function overlay(array $base, array $translation): array
     {
-        $row = $base;
-        foreach ($translation as $field => $value) {
-            if (in_array($field, self::SERVICE_FIELDS, true) || !array_key_exists($field, $base)) {
-                continue;
-            }
-            if ($value !== null && trim((string) $value) !== '') {
-                $row[$field] = $value;
-            }
-        }
+        // Здесь список полей не задан — берём всё, что перевод и базовая
+        // строка называют одинаково, кроме служебных колонок. Само правило
+        // «непустое переведённое побеждает» одно на весь проект.
+        $fields = array_values(array_diff(
+            array_intersect(array_keys($translation), array_keys($base)),
+            self::SERVICE_FIELDS
+        ));
 
-        return $row;
+        return self::overlayFields($base, $translation, $fields);
     }
 
     /**
@@ -462,5 +460,134 @@ final class Translations
         }
 
         return (string) $row['status'] === 'published';
+    }
+
+    /**
+     * Наложение перевода на базовую строку (механизм А).
+     *
+     * Правило одно на все сущности: непустое переведённое значение побеждает,
+     * пустое — уступает базовому языку. Оно было записано по разу в каждой
+     * модели (`applyTranslation`) плюс здесь, различаясь только тем, откуда
+     * берётся список полей. Такие копии расходятся молча: у одной сущности
+     * «пусто» значило бы строку из пробелов, у другой — отсутствие ключа.
+     *
+     * @param array<string,mixed> $row базовая строка
+     * @param array<string,mixed>|null $translation строка перевода или null
+     * @param list<string> $fields переводимые поля
+     * @param bool $trimBlank считать ли строку из одних пробелов пустой
+     * @return array<string,mixed>
+     */
+    public static function overlayFields(
+        array $row,
+        ?array $translation,
+        array $fields,
+        bool $trimBlank = true
+    ): array {
+        if ($translation === null) {
+            return $row;
+        }
+
+        foreach ($fields as $field) {
+            if (!isset($translation[$field])) {
+                continue;
+            }
+            $value = $translation[$field];
+            $blank = $trimBlank ? trim((string) $value) === '' : $value === '';
+            if (!$blank) {
+                $row[$field] = $value;
+            }
+        }
+
+        return $row;
+    }
+
+    /**
+     * Языки, на которых у записей есть контент (механизм А), одним запросом.
+     *
+     * Отвечает колонке «Языки» в админских списках. Метод повторялся в моделях
+     * дословно — полсотни строк на сущность, включая оба `try/catch` и условие
+     * «непуст хотя бы один переводимый столбец»; отличались только имена
+     * таблиц. Имя таблицы переводов и ключ на владельца берутся из
+     * `TRANSLATION_TABLES` — из того же места, что и остальные ответы класса,
+     * а не из третьей копии этого знания.
+     *
+     * Основной язык добавляется, только если базовая запись заполнена: пустая
+     * строка версией на языке не является.
+     *
+     * @param array<int|string> $ids
+     * @param list<string> $columns переводимые столбцы; первый служит признаком
+     *                              заполненности базовой записи
+     * @return array<int, list<string>>
+     */
+    public static function availableLangs(string $table, array $ids, array $columns): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        $map = [];
+        foreach ($ids as $id) {
+            $map[$id] = [];
+        }
+        if ($ids === [] || $columns === []) {
+            return $map;
+        }
+
+        [$translationTable, $foreignKey] = self::TRANSLATION_TABLES[$table] ?? [null, null];
+        if ($translationTable === null || $foreignKey === null) {
+            throw new \InvalidArgumentException('у таблицы ' . $table . ' нет таблицы переводов');
+        }
+
+        $in = implode(',', array_fill(0, count($ids), '?'));
+        $default = Language::defaultCode();
+        $baseColumn = $columns[0];
+
+        try {
+            $stmt = Database::pdo()->prepare("SELECT id, {$baseColumn} FROM {$table} WHERE id IN ({$in})");
+            $stmt->execute($ids);
+            foreach ($stmt->fetchAll() as $row) {
+                $id = (int) $row['id'];
+                if (isset($map[$id]) && trim((string) ($row[$baseColumn] ?? '')) !== '') {
+                    $map[$id][] = $default;
+                }
+            }
+        } catch (\Throwable $e) {
+            Logger::swallowed(
+                'Translations::availableLangs(' . $table . '): не удалось прочитать базовые записи',
+                $e
+            );
+        }
+
+        $filled = implode(' OR ', array_map(
+            static fn (string $column): string => "TRIM(COALESCE({$column}, '')) <> ''",
+            $columns
+        ));
+
+        try {
+            $stmt = Database::pdo()->prepare(
+                "SELECT {$foreignKey}, lang FROM {$translationTable}
+                  WHERE {$foreignKey} IN ({$in}) AND ({$filled})"
+            );
+            $stmt->execute($ids);
+            foreach ($stmt->fetchAll() as $row) {
+                $id = (int) $row[$foreignKey];
+                $lang = (string) $row['lang'];
+                if (isset($map[$id]) && !in_array($lang, $map[$id], true)) {
+                    $map[$id][] = $lang;
+                }
+            }
+        } catch (\Throwable $e) {
+            Logger::swallowed(
+                'Translations::availableLangs(' . $table . '): не удалось прочитать ' . $translationTable,
+                $e
+            );
+        }
+
+        // Запись без единого заполненного поля всё равно числится на основном
+        // языке: иначе в списке админки у неё не было бы ни одной метки.
+        foreach ($ids as $id) {
+            if ($map[$id] === []) {
+                $map[$id] = [$default];
+            }
+        }
+
+        return $map;
     }
 }
