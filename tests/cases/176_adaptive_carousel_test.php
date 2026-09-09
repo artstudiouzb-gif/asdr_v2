@@ -64,3 +64,53 @@ test('Единый движок управляет переполнением, �
     assert_contains('.imgcards-grid--mobile-carousel', $css);
     assert_contains('@media (prefers-reduced-motion: reduce)', $css);
 });
+
+test('Ход полосы никто не перебивает: ни плавность CSS, ни привязка карточек', function (): void {
+    // Ход считает frontend.js покадрово, и на том же элементе за прокрутку
+    // тянут ещё двое. `scroll-behavior: smooth` превращает каждое присвоение
+    // scrollLeft в отдельную браузерную анимацию — наша ползла по 2px за кадр
+    // и не доходила до цели (замерено 638 из 820). Обязательная привязка
+    // (scroll-snap) подтягивает каждый промежуточный кадр к ближайшей карточке
+    // — ход распадался на прыжки 0 → 205 → 410 → 615 → 820. Оба отказа видны
+    // только глазом на живой странице, поэтому проверяются здесь.
+    $files = [APP_ROOT . '/public/assets/css/frontend.css'];
+    foreach (glob(APP_ROOT . '/public/assets/css/*.css') ?: [] as $file) {
+        if (!str_ends_with($file, '.min.css')) {
+            $files[] = $file;
+        }
+    }
+    foreach (glob(APP_ROOT . '/public/assets/css/blocks/*.css') ?: [] as $file) {
+        if (!str_ends_with($file, '.min.css')) {
+            $files[] = $file;
+        }
+    }
+
+    $offenders = [];
+    foreach (array_unique($files) as $file) {
+        $css = (string) @file_get_contents($file);
+        if (preg_match_all('/([^{}]*)\{([^{}]*)\}/', $css, $rules, PREG_SET_ORDER) === false) {
+            continue;
+        }
+        foreach ($rules as $rule) {
+            $selector = trim($rule[1]);
+            $isTrack = str_contains($selector, 'carousel')
+                || str_contains($selector, 'cards-track')
+                || str_contains($selector, '__track');
+            if (!$isTrack) {
+                continue;
+            }
+            if (preg_match('/scroll-behavior\s*:\s*smooth/', $rule[2]) === 1) {
+                $offenders[] = basename($file) . ' → ' . $selector;
+            }
+        }
+    }
+
+    assert_same([], $offenders, 'у полосы карусели снова своя плавность CSS: ' . implode(', ', $offenders));
+
+    $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js');
+    assert_contains("track.style.scrollSnapType = 'none'", $js, 'привязка обязана сниматься на время своей анимации');
+    assert_contains('releaseSnap();', $js, 'снятие привязки должно идти вместе с запуском анимации');
+    assert_contains("track.addEventListener('pointerdown', yieldToUser", $js, 'привязка обязана вернуться к прокрутке посетителя');
+    assert_contains("track.addEventListener('touchstart', yieldToUser", $js);
+    assert_contains("track.addEventListener('wheel', yieldToUser", $js);
+});
