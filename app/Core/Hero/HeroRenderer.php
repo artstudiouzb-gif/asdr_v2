@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core\Hero;
 
+use App\Core\AccentContrast;
 use App\Core\AppUrl;
 use App\Core\Icon;
 use App\Core\Media;
@@ -855,6 +856,16 @@ final class HeroRenderer
         // Акцент по умолчанию берётся из настроек «Дизайна»: фирменный цвет
         // задаётся в админке, а не прибивается в коде.
         $vars['--hero-accent'] = $accent !== '' ? $accent : 'var(--gov-teal)';
+
+        // Надпись на основной кнопке считается по контрасту от её заливки, а не
+        // настраивается отдельно. `--on-accent` объявлен в `:root` от акцента
+        // сайта, поэтому свой цвет кнопки менял заливку и не менял надпись:
+        // на светлой заливке оставался белый текст. Отдельного поля «цвет
+        // текста кнопки» не заводим — оно позволило бы выбрать нечитаемое
+        // сочетание, а решает здесь контраст.
+        if ($accent !== '') {
+            $vars['--on-accent'] = AccentContrast::onFill($accent);
+        }
 
         return $vars;
     }
