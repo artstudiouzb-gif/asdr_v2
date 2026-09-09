@@ -112,25 +112,40 @@
             var color = group.querySelector('[data-coloris]');
             if (!off || !color) { return; }
 
-            // Выключенное поле не отправляется, поэтому на время «по умолчанию»
-            // прячем значение и пишем в подсказке, что цвет берётся из темы:
-            // прежде поле показывало посторонний HEX, который никуда не шёл.
+            // Поле остаётся рабочим и в состоянии «по умолчанию». Прежде оно
+            // выключалось (disabled), и образец не открывался вовсе: редактор
+            // видел поле цвета, которое не отзывается на нажатие, — так «Цвет
+            // текста» и «Цвет фона основной кнопки» у обложки было нечем
+            // поменять. Само значение при этом на сайт не уходит: сервер
+            // читает галочку (<имя>_off) раньше значения.
+            var syncing = false;
+
             function syncDefaultState() {
-                color.disabled = off.checked;
+                syncing = true;
                 group.classList.toggle('is-default', off.checked);
 
                 if (off.checked) {
                     if (color.value) { color.dataset.colorfieldValue = color.value; }
                     color.value = '';
                     color.placeholder = 'цвет темы';
-                } else {
-                    if (!color.value && color.dataset.colorfieldValue) {
-                        color.value = color.dataset.colorfieldValue;
-                    }
-                    color.placeholder = '#17375E';
+                } else if (!color.value) {
+                    // Возврат к своему цвету без выбора: подставляем прежний,
+                    // а на первый раз — умолчание поля из разметки.
+                    color.value = color.dataset.colorfieldValue || color.defaultValue || '';
                 }
+                if (!off.checked) { color.placeholder = '#17375E'; }
                 color.dispatchEvent(new Event('input', { bubbles: true }));
+                syncing = false;
             }
+
+            // Выбор цвета сам означает «не по умолчанию»: снимать галочку
+            // заранее редактор не обязан — о том, что она запирает поле,
+            // ниоткуда не видно.
+            color.addEventListener('input', function () {
+                if (syncing || !off.checked || color.value.trim() === '') { return; }
+                off.checked = false;
+                syncDefaultState();
+            });
 
             off.addEventListener('change', syncDefaultState);
             syncDefaultState();
