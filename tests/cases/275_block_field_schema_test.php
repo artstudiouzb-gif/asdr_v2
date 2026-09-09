@@ -182,7 +182,7 @@ test('У каждого типа блока в редакторе есть св�
 
     $covered = [];
     preg_match_all(
-        "/^        <\\?php if \\(\\\$type === '([a-z_]+)'\\): \\?>$/m",
+        "/^        <\\?php if \\(\\\$type === '([a-z0-9_]+)'\\): \\?>$/m",
         $form,
         $single,
         PREG_OFFSET_CAPTURE | PREG_SET_ORDER
@@ -200,8 +200,10 @@ test('У каждого типа блока в редакторе есть св�
     }
     // Ветки на несколько типов сразу: `in_array($type, [...])`.
     preg_match_all("/in_array\\(\\\$type, \\[([^\\]]+)\\], true\\)/", $form, $groups);
+        // Цифра в имени типа допустима (hero_v2): без неё ветка не находилась
+        // вовсе, и сторож объявлял живой тип «оставшимся без полей».
     foreach ($groups[1] as $list) {
-        preg_match_all("/'([a-z_]+)'/", $list, $names);
+        preg_match_all("/'([a-z0-9_]+)'/", $list, $names);
         $covered = array_merge($covered, $names[1]);
     }
 
@@ -237,7 +239,7 @@ test('Форма, разбитая на несколько вызовов схе
     $listed = [];
     $whole = [];
     preg_match_all(
-        "/BlockFieldSchema::formHtml\\('([a-z_]+)', \\\$data(?:, \\[([^\\]]*)\\])?\\)/",
+        "/BlockFieldSchema::formHtml\\('([a-z0-9_]+)', \\\$data(?:, \\[([^\\]]*)\\])?\\)/",
         $form,
         $calls,
         PREG_SET_ORDER

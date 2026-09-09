@@ -29,6 +29,10 @@ final class AssetCollector
         'tabs' => '/assets/js/blocks/tabs.js',
         'org_structure' => '/assets/js/blocks/org_structure.js',
         'hero_slides' => '/assets/js/blocks/hero.js',
+        // Блок «Обложка страницы» отдаёт ту же разметку, что и обложка из
+        // раздела «Обложки», поэтому и скрипт у них один: второй, почти
+        // такой же, разошёлся бы с первым при первой правке.
+        'hero_v2' => '/assets/js/blocks/hero.js',
     ];
 
     /**
@@ -50,6 +54,7 @@ final class AssetCollector
         'media_gallery' => '/assets/css/blocks/media-gallery.css',
         'tabs' => '/assets/css/blocks/tabs.css',
         'hero_slides' => '/assets/css/blocks/hero.css',
+        'hero_v2' => '/assets/css/blocks/hero.css',
         // Каталоги живут на своих адресах (`/catalog/{type}`, а у типа со снятым
         // префиксом — `/{type}`) — на обычных страницах их стили были мёртвым грузом.
         'catalog' => '/assets/css/blocks/catalog.css',
