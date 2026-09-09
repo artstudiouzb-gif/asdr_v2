@@ -237,6 +237,89 @@ $backUrl = '/admin/pages/' . (int) $block['page_id'] . '/edit?block_lang=' . url
             </div>
         <?php endif; ?>
 
+        <?php if ($type === 'hero_v2'): ?>
+            <?= \App\Core\BlockData\BlockFieldSchema::formHtml('hero_v2', $data) ?>
+            <?php
+            // Кадрирование: точка снимка, которая обязана остаться в кадре при
+            // любой высоте обложки. Одна на все экраны — вторая настройка
+            // рядом с первой заполняется наугад.
+            $heroCrop = [
+                'left-top' => 'Слева сверху', 'center-top' => 'По центру сверху', 'right-top' => 'Справа сверху',
+                'left-center' => 'Слева', 'center-center' => 'По центру', 'right-center' => 'Справа',
+                'left-bottom' => 'Слева снизу', 'center-bottom' => 'По центру снизу', 'right-bottom' => 'Справа снизу',
+            ];
+            $heroCtaStyles = [
+                'primary' => 'Основная (заливка акцентом)',
+                'secondary' => 'Вторичная (светлая заливка)',
+                'ghost' => 'Контурная',
+                'link' => 'Ссылка',
+            ];
+            /** Поля одного слайда: и в списке, и в шаблоне добавления. */
+            $heroSlideFields = static function (string $i, array $slide) use ($heroCrop, $heroCtaStyles): string {
+                $esc = static fn ($v): string => htmlspecialchars((string) $v, ENT_QUOTES);
+                $val = static fn (string $k): string => (string) ($slide[$k] ?? '');
+                $name = static fn (string $k): string => 'slides[' . $i . '][' . $k . ']';
+                $html = '<div class="form-field"><label>Надзаголовок</label>'
+                    . '<input type="text" name="' . $name('eyebrow') . '" value="' . $esc($val('eyebrow')) . '" placeholder="ОТЧЁТ"></div>';
+                $html .= '<div class="form-field"><label>Заголовок</label>'
+                    . '<input type="text" name="' . $name('title') . '" value="' . $esc($val('title')) . '">'
+                    . '<span class="form-hint">' . $esc(\App\Core\BlockData\Field::TITLE_MARKUP_HINT) . '</span></div>';
+                $html .= '<div class="form-field"><label>Описание</label>'
+                    . '<textarea name="' . $name('subtitle') . '" rows="2">' . $esc($val('subtitle')) . '</textarea></div>';
+                $html .= \App\Core\AdminUi::imageField($name('image'), $val('image'), ['label' => 'Кадр']);
+                $html .= \App\Core\AdminUi::imageField($name('image_mobile'), $val('image_mobile'), [
+                    'label' => 'Кадр для телефона',
+                    'hint' => 'Пусто — показывается общий кадр. Нужен, когда широкий снимок на узком экране режется до полоски.',
+                ]);
+                $crop = $val('image_position') !== '' ? $val('image_position') : 'center-center';
+                $html .= '<div class="form-field"><label>Кадрирование</label><select name="' . $name('image_position') . '">';
+                foreach ($heroCrop as $key => $label) {
+                    $html .= '<option value="' . $esc($key) . '"' . ($crop === $key ? ' selected' : '') . '>' . $esc($label) . '</option>';
+                }
+                $html .= '</select></div>';
+                $html .= '<div class="form-field"><label>Видео</label>'
+                    . '<input type="text" name="' . $name('video_url') . '" value="' . $esc($val('video_url')) . '" placeholder="https://youtu.be/… или /uploads/public/hero.mp4">'
+                    . '<span class="form-hint">Что это — ролик YouTube или файл MP4 — определяется по самой ссылке. Постером служит «Кадр»: он же остаётся на экране, если видео не загрузилось или выключено на телефоне.</span></div>';
+                $html .= '<div class="form-field"><label>Кнопка — текст</label>'
+                    . '<input type="text" name="' . $name('cta_text') . '" value="' . $esc($val('cta_text')) . '">'
+                    . '<span class="form-hint">Пусто — кнопки нет.</span></div>';
+                $html .= '<div class="form-field"><label>Кнопка — адрес</label>'
+                    . '<input type="text" name="' . $name('cta_url') . '" value="' . $esc($val('cta_url')) . '" placeholder="/about"></div>';
+                $style = $val('cta_style') !== '' ? $val('cta_style') : 'primary';
+                $html .= '<div class="form-field"><label>Кнопка — стиль</label><select name="' . $name('cta_style') . '">';
+                foreach ($heroCtaStyles as $key => $label) {
+                    $html .= '<option value="' . $esc($key) . '"' . ($style === $key ? ' selected' : '') . '>' . $esc($label) . '</option>';
+                }
+                $html .= '</select></div>';
+                $html .= '<div class="form-field"><label>Вторая кнопка — текст</label>'
+                    . '<input type="text" name="' . $name('cta2_text') . '" value="' . $esc($val('cta2_text')) . '">'
+                    . '<span class="form-hint">Вторая кнопка всегда контурная: две заливки рядом спорят за главное действие.</span></div>';
+                $html .= '<div class="form-field"><label>Вторая кнопка — адрес</label>'
+                    . '<input type="text" name="' . $name('cta2_url') . '" value="' . $esc($val('cta2_url')) . '" placeholder="/contacts"></div>';
+                $html .= '<button type="button" class="btn btn--small btn--danger repeater-row__remove" data-repeater-remove>Удалить слайд</button>';
+
+                return $html;
+            };
+            ?>
+            <div>
+                <label>Слайды</label>
+                <div data-repeater="slides">
+                    <?php foreach (($data['slides'] ?? []) as $i => $slide): ?>
+                        <div class="repeater-row">
+                            <?= $heroSlideFields((string) $i, is_array($slide) ? $slide : []) ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <template data-repeater-template="slides">
+                    <?= $heroSlideFields('__INDEX__', []) ?>
+                </template>
+                <div class="repeater-actions">
+                    <button type="button" class="btn btn--small" data-repeater-add="slides"><?= \App\Core\AdminUi::icon('plus') ?>Добавить слайд</button>
+                </div>
+                <span class="form-hint">Один слайд — обычная обложка без карусели: стрелки, точки и автопрокрутка появляются со второго. Больше <?= \App\Core\Hero\HeroV2::MAX_SLIDES ?> слайдов блок не примет — до последнего кадра посетитель не досматривает.</span>
+            </div>
+        <?php endif; ?>
+
         <?php if ($type === 'slider'): ?>
             <?= \App\Core\BlockData\BlockFieldSchema::formHtml('slider', $data) ?>
             <div>

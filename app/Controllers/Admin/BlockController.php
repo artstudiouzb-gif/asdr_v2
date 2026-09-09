@@ -510,6 +510,14 @@ final class BlockController
                 return BlockFieldSchema::normalize('cta', $_POST, $locale);
             case 'advantages':
                 return AdvantagesBlockNormalizer::normalize($_POST, $locale);
+            case 'hero_v2':
+                // Слайды идут мимо схемы, как любой репитер; их поля чистит
+                // HeroV2 — там же, где они превращаются в контракт рендерера,
+                // иначе два списка полей разъедутся молча.
+                return array_merge(
+                    BlockFieldSchema::normalize('hero_v2', $_POST, $locale),
+                    ['slides' => \App\Core\Hero\HeroV2::normalizeSlides($_POST)]
+                );
             case 'slider':
                 $slides = [];
                 foreach ((array) ($_POST['slides'] ?? []) as $slide) {

@@ -10,6 +10,14 @@ use App\Core\BlockTypeRegistry;
 
 test('Каждое поле блока читается на выводе', function () {
     $renderer = (string) file_get_contents(APP_ROOT . '/app/Core/BlockRenderer.php');
+    // Шаблон блока бывает пустой обёрткой: «Обложка страницы» целиком отдаёт
+    // свои настройки классу, который приводит их к контракту HeroRenderer.
+    // Класс — такой же участок пути вывода, как шаблон и партиалы, поэтому он
+    // назван здесь поимённо. Проверка от этого не слабеет: настройка
+    // по-прежнему обязана где-то читаться, просто список мест полон.
+    $helpers = [
+        'hero_v2' => '/app/Core/Hero/HeroV2.php',
+    ];
     $orphans = [];
 
     foreach (BlockTypeRegistry::defaults() as $type => $defaults) {
@@ -18,6 +26,9 @@ test('Каждое поле блока читается на выводе', func
         // Партиалы карточек лежат рядом: шаблон их подключает, поля читают они.
         foreach (glob(APP_ROOT . '/templates/blocks/partials/*.php') ?: [] as $partial) {
             $tpl .= (string) file_get_contents($partial);
+        }
+        if (isset($helpers[$type])) {
+            $tpl .= (string) file_get_contents(APP_ROOT . $helpers[$type]);
         }
         foreach (array_keys($defaults) as $key) {
             $used = str_contains($tpl, "'" . $key . "'")
