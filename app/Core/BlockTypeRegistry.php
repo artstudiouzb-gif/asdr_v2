@@ -103,6 +103,7 @@ final class BlockTypeRegistry
         'chart' => [], // схема: BlockFieldSchema
         'divider' => [], // схема: BlockFieldSchema
         'buttons' => [], // схема: BlockFieldSchema
+        'hero_v2' => [], // схема: BlockFieldSchema
     ];
 
     /** Короткие русские названия для сообщений редактору. */
@@ -124,6 +125,7 @@ final class BlockTypeRegistry
         'icon_text' => 'Иконка и текст', 'collage' => 'Коллаж', 'table' => 'Таблица',
         'image' => 'Изображение', 'embed' => 'Внешняя врезка',
         'chart' => 'Диаграмма', 'divider' => 'Разделитель', 'buttons' => 'Кнопки',
+        'hero_v2' => 'Обложка страницы',
     ];
 
     /**
@@ -139,6 +141,7 @@ final class BlockTypeRegistry
         'subscribe' => 'Подписка на дайджест',
         'contact_cards' => 'Контактные карточки',
         'hero' => 'Герой (титул + фото/видео)',
+        'hero_v2' => 'Обложка страницы (слайды, фото или видео)',
         'cards_grid' => 'Карточки (иконки / фото / категории)',
         'media_gallery' => 'Медиа-галерея (видео/фото)',
         'news_feature' => 'Новости и аналитика (крупная + список)',

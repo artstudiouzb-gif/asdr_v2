@@ -50,6 +50,7 @@ final class AdminUi
     {
         $iconMap = [
             'hero' => 'layout',
+            'hero_v2' => 'layout',
             'text' => 'document',
             'html' => 'code',
             'cta' => 'send',
