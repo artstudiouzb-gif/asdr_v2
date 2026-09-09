@@ -1690,7 +1690,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .section-head__all, .newsfeat__more, .person-card__more { color: var(--gov-teal-text); }
 .media-tabs button, .media-tabs a { min-height: 32px; }
 @media (prefers-reduced-motion: reduce) {
-    .imgcards-grid--carousel, .cards-track { scroll-behavior: auto; }
     .imgcard__media, .feature-card, .news-card, .doc-card { transition: none; }
     .imgcard:hover .imgcard__media { transform: none; }
     .feature-card:hover { transform: none; }
@@ -4152,8 +4151,10 @@ h4.section-head__title { font-size: var(--font-size-card-title, var(--step-2)); 
 .carousel-nav__dot:hover::before,
 .carousel-nav__dot:focus-visible::before { transform: scale(1.25); background: var(--gov-teal); }
 .carousel-nav__dot.is-active::before { width: 22px; background: var(--gov-teal); }
+/* `scroll-behavior: smooth` здесь нет намеренно: ход полосы считает
+   frontend.js покадрово, и вторая, браузерная анимация к каждому
+   промежуточному кадру превращала бы её в рывки. */
 [data-carousel-track] {
-    scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-inline: contain;
     scrollbar-width: none;
@@ -4168,7 +4169,7 @@ h4.section-head__title { font-size: var(--font-size-card-title, var(--step-2)); 
    (.cards-track вешает раскладка «Слайдер»). Ширина карточки в кадре считается
    по тому же --cards-cols, что и колонки сетки: прежняя формула была записана
    числом 4 и от настройки не зависела. */
-.imgcards-grid--carousel, .cards-track { display: flex; grid-template-columns: none; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 4px; }
+.imgcards-grid--carousel, .cards-track { display: flex; grid-template-columns: none; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 4px; }
 .imgcards-grid--carousel::-webkit-scrollbar, .cards-track::-webkit-scrollbar { display: none; }
 .imgcards-grid--carousel .imgcard, .cards-track > * { flex: 0 0 calc((100% - var(--card-gap, 20px) * (var(--cards-cols, 4) - 1)) / var(--cards-cols, 4)); scroll-snap-align: start; }
 @media (max-width: 1000px) { .imgcards-grid--carousel .imgcard, .cards-track > * { flex: 0 0 calc((100% - var(--card-gap, 20px)) / 2); } }
@@ -4190,7 +4191,6 @@ h4.section-head__title { font-size: var(--font-size-card-title, var(--step-2)); 
     }
 }
 @media (prefers-reduced-motion: reduce) {
-    [data-carousel-track] { scroll-behavior: auto; }
     .carousel-nav__dot::before { transition: none; }
 }
 
