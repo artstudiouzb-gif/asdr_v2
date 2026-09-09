@@ -985,13 +985,41 @@
             }
         };
 
-        // Native smooth-scroll timing differs noticeably between browsers.
-        // Use one gentle ease-in-out for every card carousel and keep the
-        // reduced-motion path instant.
+        // Привязка карточек (scroll-snap) и своя анимация тянут полосу порознь:
+        // при обязательной привязке браузер подтягивает к ближайшей карточке
+        // каждое присвоение scrollLeft, и ход распадался на прыжки от карточки
+        // к карточке — замерено 0 → 205 → 410 → 615 → 820 вместо плавной дуги.
+        // Поэтому на время своей анимации привязка снимается. Вернуть её сразу
+        // по окончании нельзя: последний кадр полосы стоит у её конца, а это не
+        // точка привязки — браузер отдёрнул бы полосу назад. Возвращается она
+        // перед прокруткой самого посетителя, чтобы свайп по-прежнему доводил
+        // карточку до края.
+        var snapReleased = false;
+
+        var releaseSnap = function () {
+            if (snapReleased) { return; }
+            snapReleased = true;
+            track.style.scrollSnapType = 'none';
+        };
+
+        var yieldToUser = function () {
+            stopMotion();
+            if (!snapReleased) { return; }
+            snapReleased = false;
+            track.style.scrollSnapType = '';
+        };
+
+        // Ход считает JS: у нативной плавной прокрутки время и кривая
+        // различаются от браузера к браузеру. Отсюда требование к CSS: у полосы
+        // не должно быть `scroll-behavior: smooth` — каждое присвоение
+        // scrollLeft запускало бы вторую, браузерную анимацию к тому же кадру,
+        // и наша ползла бы по 2px за кадр, не доходя до цели (замерено: 638 из
+        // 820). При «меньше движения» переход мгновенный.
         var scrollToPosition = function (target) {
             var max = Math.max(0, track.scrollWidth - track.clientWidth);
             var destination = Math.max(0, Math.min(max, Number(target) || 0));
             stopMotion();
+            releaseSnap();
             if (motionPreference.matches || Math.abs(destination - track.scrollLeft) < 2) {
                 track.scrollLeft = destination;
                 return;
@@ -1135,9 +1163,9 @@
                 scrollToPosition(positions[positions.length - 1] || 0);
             }
         });
-        track.addEventListener('pointerdown', stopMotion, { passive: true });
-        track.addEventListener('touchstart', stopMotion, { passive: true });
-        track.addEventListener('wheel', stopMotion, { passive: true });
+        track.addEventListener('pointerdown', yieldToUser, { passive: true });
+        track.addEventListener('touchstart', yieldToUser, { passive: true });
+        track.addEventListener('wheel', yieldToUser, { passive: true });
         track.addEventListener('scroll', function () {
             if (frame !== null) { return; }
             frame = window.requestAnimationFrame(function () {
