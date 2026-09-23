@@ -59,7 +59,11 @@
     // admin.js — единственный источник логики выбора медиа, включая
     // MediaPicker.pickMany() для фотогалереи. Остальные слои только улучшают
     // загрузку, представление галереи и progressive «Показать ещё».
-    load('admin.js', function () {
+    // Метка min=1 в адресе загрузчика ставится сервером, только когда
+    // минифицированная копия собрана и свежая (FrontendAssets::adminAsset).
+    var main = /[?&]min=1(?:&|$)/.test(version) ? 'admin.min.js' : 'admin.js';
+
+    load(main, function () {
         load('admin-media-bridge.js', function () {
             load('admin-workflow-fixes.js', function () {
                 load('admin-gallery-dropzone.js', function () {
