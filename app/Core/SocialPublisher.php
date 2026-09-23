@@ -56,6 +56,10 @@ final class SocialPublisher
      * Telegram-канал: галерея — sendMediaGroup (до 10 фото, подпись у первого),
      * одно фото — sendPhoto, без фото — sendMessage. Подпись: жирный заголовок,
      * анонс и ссылка «Читать на сайте» (HTML-разметка).
+     * @param array<string, mixed> $post
+     *
+     * @param array<string, mixed> $cfg
+     * @return array{ok:bool, remote_id:?string, error:?string}
      */
     private function telegram(array $cfg, array $post): array
     {
@@ -251,6 +255,7 @@ final class SocialPublisher
      *
      * @param array<string,mixed> $post
      * @return list<array{text:string,url:string}>
+     * @param array<string, mixed> $cfg
      */
     private static function telegramButtons(array $post, array $cfg = []): array
     {
@@ -472,7 +477,12 @@ final class SocialPublisher
         return $description;
     }
 
-    /** Разбор ответа Bot API; для sendMediaGroup result — массив сообщений. */
+    /**
+     * Разбор ответа Bot API; для sendMediaGroup result — массив сообщений.
+     *
+     * @param array<string, mixed> $res
+     * @return array{ok:bool, remote_id:?string, error:?string}
+     */
     private function interpretTelegram(array $res, bool $group = false): array
     {
         $data = json_decode($res['body'] ?? '', true);
@@ -615,6 +625,11 @@ final class SocialPublisher
         return trim($text . $tail);
     }
 
+    /** @param array<string, mixed> $post */
+    /**
+     * @param array<string, mixed> $cfg
+     * @return array{ok:bool, remote_id:?string, error:?string}
+     */
     private function facebook(array $cfg, array $post): array
     {
         if (empty($cfg['token']) || empty($cfg['page_id'])) {
@@ -631,6 +646,11 @@ final class SocialPublisher
         return $this->interpretGraph($res);
     }
 
+    /** @param array<string, mixed> $post */
+    /**
+     * @param array<string, mixed> $cfg
+     * @return array{ok:bool, remote_id:?string, error:?string}
+     */
     private function linkedin(array $cfg, array $post): array
     {
         if (empty($cfg['token']) || empty($cfg['author'])) {
@@ -671,6 +691,11 @@ final class SocialPublisher
         return self::err(self::extractError($res, $data));
     }
 
+    /** @param array<string, mixed> $post */
+    /**
+     * @param array<string, mixed> $cfg
+     * @return array{ok:bool, remote_id:?string, error:?string}
+     */
     private function instagram(array $cfg, array $post): array
     {
         if (empty($cfg['token']) || empty($cfg['user_id'])) {
@@ -705,7 +730,12 @@ final class SocialPublisher
         return $this->interpretGraph($p);
     }
 
-    /** Общий разбор ответа Graph API (Facebook/Instagram publish). */
+    /**
+     * Общий разбор ответа Graph API (Facebook/Instagram publish).
+     *
+     * @param array<string, mixed> $res
+     * @return array{ok:bool, remote_id:?string, error:?string}
+     */
     private function interpretGraph(array $res): array
     {
         $data = json_decode($res['body'] ?? '', true);
@@ -716,6 +746,7 @@ final class SocialPublisher
         return self::err(self::extractError($res, $data));
     }
 
+    /** @param array<string, mixed> $res */
     private static function extractError(array $res, mixed $data): string
     {
         if (is_array($data) && isset($data['error']['message'])) {
@@ -728,6 +759,7 @@ final class SocialPublisher
         return 'HTTP ' . (int) ($res['status'] ?? 0);
     }
 
+    /** @return array{ok:bool, remote_id:?string, error:?string} */
     private static function err(string $message): array
     {
         return ['ok' => false, 'remote_id' => null, 'error' => $message];

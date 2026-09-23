@@ -47,7 +47,7 @@ final class Goal
         $stmt = Database::pdo()->prepare($sql);
         $stmt->execute($params);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     public static function countAll(string $search = ''): int
@@ -164,7 +164,7 @@ final class Goal
         );
         $stmt->execute([$goalId]);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /**

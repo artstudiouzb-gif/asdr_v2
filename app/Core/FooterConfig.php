@@ -69,6 +69,7 @@ final class FooterConfig
         'background' => ['_bg_mode' => 'preset'],
     ];
 
+    /** @return array<string, mixed> */
     public static function get(): array
     {
         $raw = Setting::get('footer_config', '');
@@ -88,6 +89,8 @@ final class FooterConfig
      * бы с `TypeError`, ничего не говоря о причине. `JSON_THROW_ON_ERROR`
      * называет её вслух и не даёт записать в настройку мусор вместо
      * конфигурации. Тот же приём, что у пресетов «Дизайна».
+     *
+     * @param array<string, mixed> $config
      */
     public static function save(array $config): void
     {
@@ -97,6 +100,10 @@ final class FooterConfig
         );
     }
 
+    /**
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
+     */
     public static function normalize(array $config): array
     {
         return self::mergeDefaults($config);
@@ -133,6 +140,10 @@ final class FooterConfig
         return $input;
     }
 
+    /**
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
+     */
     private static function mergeDefaults(array $config): array
     {
         $result = self::DEFAULTS;

@@ -37,6 +37,7 @@ final class Webhook
         return array_map([self::class, 'decryptSecrets'], $stmt->fetchAll());
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM webhooks WHERE id = :id LIMIT 1');

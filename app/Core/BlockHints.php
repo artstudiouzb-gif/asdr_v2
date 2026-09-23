@@ -173,7 +173,11 @@ final class BlockHints
         return $hints;
     }
 
-    /** Есть ли в данных схемы ссылки на якоря секторов. */
+    /**
+     * Есть ли в данных схемы ссылки на якоря секторов.
+     *
+     * @param array<string, mixed> $data
+     */
     private static function linksToTeamAnchors(array $data): bool
     {
         $haystack = json_encode($data, JSON_UNESCAPED_UNICODE);

@@ -11,13 +11,15 @@ use App\Core\Translations;
 
 final class TeamMember
 {
+    /** @return list<array<string, mixed>> */
     public static function all(): array
     {
         $stmt = Database::pdo()->query('SELECT * FROM team_members ORDER BY sort_order ASC, id ASC');
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
+    /** @return array<int, array<string, mixed>> */
     public static function published(?string $lang = null): array
     {
         $lang = $lang ?? Language::defaultCode();
@@ -26,7 +28,7 @@ final class TeamMember
                 "SELECT * FROM team_members WHERE status = 'published' ORDER BY sort_order ASC, id ASC"
             );
 
-            return $stmt->fetchAll();
+            return Database::rows($stmt);
         }
 
         $stmt = Database::pdo()->prepare(
@@ -49,6 +51,9 @@ final class TeamMember
     /**
      * Накладывает перевод указанного языка на базовую строку. Пустые поля
      * перевода откатываются к значению основного языка (graceful fallback).
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
      */
     public static function localize(array $row, string $lang): array
     {
@@ -71,6 +76,8 @@ final class TeamMember
     /**
      * Якорь отдела для ссылок из схемы оргструктуры. Считается от названия на
      * основном языке, поэтому одна и та же ссылка работает на всех языках.
+     *
+     * @param array<string, mixed> $row
      */
     public static function departmentSlug(array $row): string
     {
@@ -148,6 +155,11 @@ final class TeamMember
         return $result;
     }
 
+    /** @param array<string, mixed> $translation */
+    /**
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
     private static function applyTranslation(array $row, ?array $translation): array
     {
         // Базовое название отдела сохраняем до наложения перевода: якорь
@@ -177,6 +189,7 @@ final class TeamMember
         return Translations::availableLangs('team_members', $ids, ['name', 'position', 'department', 'unit']);
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM team_members WHERE id = :id LIMIT 1');
@@ -186,6 +199,7 @@ final class TeamMember
         return $row ?: null;
     }
 
+    /** @param array<string, mixed> $data */
     public static function create(array $data): int
     {
         // Всё, кроме имени и статуса, в схеме NULL-able, поэтому отсутствующий
@@ -218,6 +232,7 @@ final class TeamMember
         return $id;
     }
 
+    /** @param array<string, mixed> $data */
     public static function update(int $id, array $data): void
     {
         $stmt = Database::pdo()->prepare(

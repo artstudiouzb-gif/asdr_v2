@@ -169,6 +169,7 @@ final class Subscriber
 
     /**
      * @return array{items:array<int,array<string,mixed>>,total:int,page:int,pages:int}
+     * @param array<string, mixed> $filters
      */
     public static function search(array $filters, int $page = 1, int $perPage = 25): array
     {

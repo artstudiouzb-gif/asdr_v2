@@ -120,7 +120,11 @@ final class UpdateState
         ]);
     }
 
-    /** Воркер взял задачу. */
+    /**
+     * Воркер взял задачу.
+     *
+     * @return array<string, mixed>
+     */
     public static function markRunning(): array
     {
         $state = self::read();

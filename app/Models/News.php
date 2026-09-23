@@ -31,6 +31,8 @@ final class News
      *   3) первое фото из галереи (news_images),
      *   4) логотип сайта (settings.logo_url).
      * Возвращает URL или null, если ничего нет.
+     *
+     * @param array<string, mixed> $row
      */
     public static function getCoverImage(array $row): ?string
     {
@@ -59,21 +61,27 @@ final class News
         $logo = trim((string) Setting::get('logo_url', ''));
         return $logo !== '' ? $logo : null;
     }
+    /** @return list<array<string, mixed>> */
     public static function all(): array
     {
         $stmt = Database::pdo()->query('SELECT * FROM news WHERE deleted_at IS NULL ORDER BY created_at DESC');
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
+    /** @return list<array<string, mixed>> */
     public static function trashed(): array
     {
         $stmt = Database::pdo()->query('SELECT * FROM news WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC');
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
-    /** Список с фильтрами админки (задача 91). */
+    /**
+     * Список с фильтрами админки (задача 91).
+     *
+     * @return list<array<string, mixed>>
+     */
     public static function filter(?string $status = null, ?string $lang = null): array
     {
         $sql = 'SELECT n.* FROM news n';
@@ -92,10 +100,14 @@ final class News
         $stmt = Database::pdo()->prepare($sql);
         $stmt->execute($params);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
-    /** Фильтрованный и постраничный список для административной панели. */
+    /**
+     * Фильтрованный и постраничный список для административной панели.
+     *
+     * @param array<string, mixed> $filters
+     */
     public static function adminList(array $filters): array
     {
         [$from, $params] = self::adminListFrom($filters);
@@ -137,6 +149,7 @@ final class News
         return $items;
     }
 
+    /** @param array<string, mixed> $filters */
     public static function adminCount(array $filters): int
     {
         [$from, $params] = self::adminListFrom($filters);
@@ -146,7 +159,10 @@ final class News
         return (int) $stmt->fetchColumn();
     }
 
-    /** @return array{0:string,1:array<string,string>} */
+    /**
+     * @return array{0:string,1:array<string,string>}
+     * @param array<string, mixed> $filters
+     */
     private static function adminListFrom(array $filters): array
     {
         $from = 'FROM news n';
@@ -378,6 +394,8 @@ final class News
      * одна на все языковые версии новости, переводится только её название.
      * Прежний фильтр по бейджу сравнивал строки и требовал разбора перевода
      * прямо в SQL.
+     *
+     * @return array<int, array<string, mixed>>
      */
     public static function published(int $limit = 20, int $offset = 0, ?string $lang = null, ?int $categoryId = null): array
     {
@@ -468,6 +486,7 @@ final class News
         ));
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM news WHERE id = :id LIMIT 1');
@@ -479,6 +498,8 @@ final class News
 
     /**
      * Псевдоним для поиска опубликованной новости по слагу.
+     *
+     * @return array<string, mixed>|null
      */
     public static function findBySlug(string $slug, ?string $lang = null): ?array
     {
@@ -487,6 +508,8 @@ final class News
 
     /**
      * Ищет опубликованную новость по слагу и локализует под язык.
+     *
+     * @return array<string, mixed>|null
      */
     public static function findPublishedBySlug(string $slug, ?string $lang = null): ?array
     {
@@ -567,6 +590,9 @@ final class News
     /**
      * Накладывает перевод указанного языка на базовую строку. Пустые поля
      * перевода откатываются к значению языка по умолчанию (graceful fallback).
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
      */
     public static function localize(array $row, string $lang): array
     {
@@ -574,6 +600,11 @@ final class News
         return self::applyTranslation($row, $translation);
     }
 
+    /** @param array<string, mixed> $translation */
+    /**
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
     private static function applyTranslation(array $row, ?array $translation): array
     {
         // Пустая строка здесь проверяется без trim: часть полей несёт HTML и
@@ -820,6 +851,7 @@ final class News
         return (int) $stmt->fetchColumn() > 0;
     }
 
+    /** @return array<string, mixed> */
     public static function langCounts(): array
     {
         $pdo = Database::pdo();
@@ -865,6 +897,7 @@ final class News
         return NewsCategory::find($id) !== null ? $id : null;
     }
 
+    /** @param array<string, mixed> $data */
     public static function create(array $data): int
     {
         $lang = (string) ($data['lang'] ?? Language::defaultCode());
@@ -904,6 +937,7 @@ final class News
         return $id;
     }
 
+    /** @param array<string, mixed> $data */
     public static function update(int $id, array $data, ?int $expectedLockVersion = null): void
     {
         $stmt = Database::pdo()->prepare(
@@ -957,7 +991,11 @@ final class News
         self::bustPageCache();
     }
 
-    /** Дополнительные поля детальной страницы (эскиз): бейдж, тезисы, мероприятие, документы. */
+    /**
+     * Дополнительные поля детальной страницы (эскиз): бейдж, тезисы, мероприятие, документы.
+     *
+     * @param array<string, mixed> $data
+     */
     public static function updateExtras(int $id, array $data): void
     {
         $stmt = Database::pdo()->prepare(
@@ -1005,6 +1043,7 @@ final class News
      * Соседние опубликованные новости по дате публикации (для «предыдущая/следующая»).
      *
      * @return array{prev: ?array, next: ?array}
+     * @param array<string, mixed> $news
      */
     public static function adjacent(array $news, ?string $lang = null): array
     {
@@ -1041,7 +1080,11 @@ final class News
         ];
     }
 
-    /** Похожие новости: последние опубликованные, исключая текущую. */
+    /**
+     * Похожие новости: последние опубликованные, исключая текущую.
+     *
+     * @return array<int, array<string, mixed>>
+     */
     public static function related(int $excludeId, int $limit = 4, ?string $lang = null): array
     {
         $lang = $lang ?? Language::defaultCode();
@@ -1063,7 +1106,11 @@ final class News
         return self::localizePublicRows($stmt->fetchAll() ?: [], $lang);
     }
 
-    /** Самые читаемые новости за период (days = 0 — за всё время). */
+    /**
+     * Самые читаемые новости за период (days = 0 — за всё время).
+     *
+     * @return array<int, array<string, mixed>>
+     */
     public static function mostViewed(int $days = 30, int $limit = 5, ?string $lang = null): array
     {
         $lang = $lang ?? Language::defaultCode();

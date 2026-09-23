@@ -74,7 +74,7 @@ final class NotificationDelivery
             $stmt->bindValue(':max_attempts', self::MAX_ATTEMPTS, PDO::PARAM_INT);
             $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->fetchAll();
+            return Database::rows($stmt);
         }
     }
 

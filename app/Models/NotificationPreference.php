@@ -74,6 +74,7 @@ final class NotificationPreference
         ]);
     }
 
+    /** @param array<string, mixed> $preference */
     public static function allowsSeverity(array $preference, string $severity): bool
     {
         $rank = [
@@ -89,6 +90,7 @@ final class NotificationPreference
             >= ($rank[self::normalizeSeverity((string) ($preference['minimum_severity'] ?? 'warning'))] ?? 20);
     }
 
+    /** @param array<string, mixed> $preference */
     public static function isQuietNow(array $preference, ?\DateTimeImmutable $now = null): bool
     {
         $start = self::normalizeTime(isset($preference['quiet_start']) ? (string) $preference['quiet_start'] : null);

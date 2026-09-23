@@ -68,7 +68,11 @@ final class AdminListQuery
         ];
     }
 
-    /** Корректирует страницу после получения общего количества записей. */
+    /**
+     * Корректирует страницу после получения общего количества записей.
+     *
+     * @param array<string, mixed> $filters
+     */
     public static function fitPage(array $filters, int $total): array
     {
         $pages = max(1, (int) ceil($total / max(1, (int) $filters['per_page'])));
@@ -78,7 +82,12 @@ final class AdminListQuery
         return [$filters, $pages];
     }
 
-    /** Параметры, которые можно безопасно вернуть в URL и массовую форму. */
+    /**
+     * Параметры, которые можно безопасно вернуть в URL и массовую форму.
+     *
+     * @param array<string, mixed> $filters
+     * @return array<string, mixed>
+     */
     public static function urlParams(array $filters): array
     {
         return array_filter([

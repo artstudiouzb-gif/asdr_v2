@@ -28,13 +28,19 @@ final class Http
         return self::viaStream($method, $url, $body, $headers, $timeout);
     }
 
-    /** @param array<int, string> $headers */
+    /**
+     * @param array<int, string> $headers
+     * @return array{status:int, body:string, error:string}
+     */
     public static function get(string $url, array $headers = [], int $timeout = 20): array
     {
         return self::request('GET', $url, '', $headers, $timeout);
     }
 
-    /** @param array<int, string> $headers */
+    /**
+     * @param array<int, string> $headers
+     * @return array{status:int, body:string, error:string}
+     */
     public static function postForm(string $url, array $fields, array $headers = [], int $timeout = 20): array
     {
         $headers[] = 'Content-Type: application/x-www-form-urlencoded';
@@ -44,6 +50,7 @@ final class Http
     /**
      * @param array<string, mixed> $payload
      * @param array<int, string> $headers
+     * @return array{status:int, body:string, error:string}
      */
     public static function postJson(string $url, array $payload, array $headers = [], int $timeout = 20): array
     {
@@ -86,7 +93,10 @@ final class Http
         );
     }
 
-    /** @param array<int, string> $headers */
+    /**
+     * @param array<int, string> $headers
+     * @return array{status:int, body:string, error:string}
+     */
     public static function getSafeRemote(
         string $url,
         array $headers = [],
@@ -96,6 +106,7 @@ final class Http
         return self::requestSafeRemote('GET', $url, '', $headers, $timeout, $maxResponseBytes);
     }
 
+    /** @return array{status:int, body:string, error:string} */
     private static function viaCurl(string $method, string $url, string $body, array $headers, int $timeout): array
     {
         $ch = curl_init($url);
@@ -205,6 +216,7 @@ final class Http
         ];
     }
 
+    /** @return array{status:int, body:string, error:string} */
     private static function viaStream(string $method, string $url, string $body, array $headers, int $timeout): array
     {
         $context = stream_context_create([

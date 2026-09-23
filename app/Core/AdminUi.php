@@ -469,6 +469,8 @@ final class AdminUi
 
     /**
      * Рендерит интерактивный живой предпросмотр SEO и карточек Telegram / соцсетей.
+     *
+     * @param array<string, mixed> $data
      */
     public static function seoPreviewBox(array $data = []): string
     {

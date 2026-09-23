@@ -22,13 +22,15 @@ final class Widget
         'section_menu' => 'Меню раздела',
     ];
 
+    /** @return list<array<string, mixed>> */
     public static function all(): array
     {
         $stmt = Database::pdo()->query('SELECT * FROM widgets ORDER BY sidebar ASC, sort_order ASC, id ASC');
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
+    /** @return list<array<string, mixed>> */
     public static function forSidebar(string $sidebar): array
     {
         $stmt = Database::pdo()->prepare(
@@ -36,11 +38,13 @@ final class Widget
         );
         $stmt->execute([':sidebar' => $sidebar]);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /**
      * Активные виджеты колонки для языка: язык виджета совпадает или пуст.
+     *
+     * @return list<array<string, mixed>>
      */
     public static function activeForSidebar(string $sidebar, string $lang): array
     {
@@ -50,7 +54,7 @@ final class Widget
         );
         $stmt->execute([':sidebar' => $sidebar, ':lang' => $lang]);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /**
@@ -118,6 +122,7 @@ final class Widget
         return $html;
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM widgets WHERE id = :id LIMIT 1');
@@ -127,6 +132,7 @@ final class Widget
         return $row ?: null;
     }
 
+    /** @param array<string, mixed> $data */
     public static function create(array $data): int
     {
         $stmt = Database::pdo()->prepare(
@@ -152,6 +158,7 @@ final class Widget
         return (int) Database::pdo()->lastInsertId();
     }
 
+    /** @param array<string, mixed> $data */
     public static function update(int $id, array $data): void
     {
         $stmt = Database::pdo()->prepare(

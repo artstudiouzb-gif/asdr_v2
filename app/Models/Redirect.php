@@ -135,7 +135,11 @@ final class Redirect
         )->fetchAll();
     }
 
-    /** Активный редирект для пути (или null). */
+    /**
+     * Активный редирект для пути (или null).
+     *
+     * @return array<string, mixed>|null
+     */
     public static function findByPath(string $path): ?array
     {
         $stmt = Database::pdo()->prepare(

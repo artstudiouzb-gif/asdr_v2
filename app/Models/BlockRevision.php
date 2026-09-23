@@ -17,6 +17,8 @@ final class BlockRevision
 
     /**
      * Снимает ревизию (текущее состояние блока) и подрезает историю до KEEP.
+     *
+     * @param array<string, mixed> $data
      */
     public static function snapshot(int $blockId, ?string $title, array $data, ?string $customCss, ?int $userId): int
     {
@@ -56,9 +58,10 @@ final class BlockRevision
         );
         $stmt->execute([':block_id' => $blockId]);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM block_revisions WHERE id = :id LIMIT 1');

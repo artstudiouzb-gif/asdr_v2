@@ -34,6 +34,7 @@ final class PhotoAlbum
         return self::localizeRows($rows, $lang);
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM photo_albums WHERE id = :id LIMIT 1');
@@ -43,6 +44,7 @@ final class PhotoAlbum
         return $row ?: null;
     }
 
+    /** @return array<string, mixed>|null */
     public static function findPublishedBySlug(string $slug, ?string $lang = null): ?array
     {
         $stmt = Database::pdo()->prepare(
@@ -65,6 +67,9 @@ final class PhotoAlbum
     /**
      * Накладывает перевод указанного языка на базовую строку. Пустые поля
      * перевода откатываются к значению основного языка (graceful fallback).
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
      */
     public static function localize(array $row, string $lang): array
     {
@@ -84,6 +89,11 @@ final class PhotoAlbum
         );
     }
 
+    /** @param array<string, mixed> $translation */
+    /**
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
     private static function applyTranslation(array $row, ?array $translation): array
     {
         return Translations::overlayFields($row, $translation, ['title', 'description']);
@@ -239,7 +249,7 @@ final class PhotoAlbum
         );
         $stmt->execute([':a' => $albumId]);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     public static function addImage(int $albumId, string $imageUrl, string $caption = '', string $credit = ''): ?int

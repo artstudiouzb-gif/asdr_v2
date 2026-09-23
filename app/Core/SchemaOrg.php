@@ -277,7 +277,11 @@ final class SchemaOrg
         return true;
     }
 
-    /** Печатает готовый JSON-LD блок. @param array<string, mixed> $data */
+    /**
+     * Печатает готовый JSON-LD блок. @param array<string, mixed> $data
+     *
+     * @param array<string, mixed> $data
+     */
     public static function render(array $data): string
     {
         if ($data === []) {

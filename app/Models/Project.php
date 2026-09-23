@@ -37,7 +37,7 @@ final class Project
              ORDER BY p.sort_order ASC, p.created_at DESC'
         );
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /** @return array<int, array<string, mixed>> */
@@ -48,7 +48,7 @@ final class Project
              ORDER BY p.deleted_at DESC'
         );
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /**
@@ -77,7 +77,7 @@ final class Project
         $stmt->bindValue(':offset', (int) $filters['offset'], \PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /** @param array<string, mixed> $filters */
@@ -203,7 +203,7 @@ final class Project
         );
         $stmt->execute([':lang' => $lang]);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /**
@@ -226,7 +226,7 @@ final class Project
             $stmt = Database::pdo()->prepare($sql);
             $stmt->execute([':lang' => $lang]);
 
-            return $stmt->fetchAll();
+            return Database::rows($stmt);
         };
 
         $rows = $query(true);
