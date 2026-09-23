@@ -26,9 +26,21 @@ ENV_LOCAL="storage/.env.local"
 say() { printf '  %s\n' "$1"; }
 
 # --- 1. MariaDB -------------------------------------------------------------
+# В образе контейнера сервера БД может не быть вовсе — тогда тесты с базой
+# молча уходят в «пропущено». Ставим его сами (около минуты), а не оставляем
+# сессию без половины проверок.
+if ! command -v mariadbd >/dev/null 2>&1 && ! command -v mysqld >/dev/null 2>&1; then
+    say 'MariaDB не установлена — ставлю…'
+    { sudo -n apt-get update -q && sudo -n DEBIAN_FRONTEND=noninteractive apt-get install -y -q mariadb-server; } \
+        >/tmp/mariadb-install.log 2>&1 || say 'Установка не удалась — смотрите /tmp/mariadb-install.log'
+fi
 if ! mysqladmin --protocol=socket ping >/dev/null 2>&1; then
     say 'Запускаю MariaDB…'
-    mariadbd-safe --user=mysql >/tmp/mariadb-start.log 2>&1 &
+    if command -v mariadbd-safe >/dev/null 2>&1; then
+        mariadbd-safe --user=mysql >/tmp/mariadb-start.log 2>&1 &
+    else
+        sudo -n service mariadb start >/tmp/mariadb-start.log 2>&1 &
+    fi
     for _ in $(seq 1 40); do
         mysqladmin --protocol=socket ping >/dev/null 2>&1 && break
         sleep 1
