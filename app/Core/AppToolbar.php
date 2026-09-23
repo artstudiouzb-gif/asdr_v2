@@ -16,6 +16,8 @@ final class AppToolbar
 
     /**
      * Рендерит плавающую панель администратора на публичных страницах.
+     *
+     * @param array<string, mixed> $context
      */
     public static function renderHtml(array $context = []): string
     {

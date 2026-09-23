@@ -15,6 +15,7 @@ use App\Models\FileEntry;
  */
 final class ContentFields
 {
+    /** @param array<string, mixed> $field */
     public static function inputName(array $field, string $prefix): string
     {
         return $prefix . preg_replace('/[^a-z0-9_]/i', '', (string) $field['name']);
@@ -130,6 +131,7 @@ final class ContentFields
         }
     }
 
+    /** @param array<string, mixed> $field */
     private static function renderRelation(array $field, string $name, string $id, string $value, string $required): string
     {
         $targetSlug = (string) ($field['options']['relation_type'] ?? '');

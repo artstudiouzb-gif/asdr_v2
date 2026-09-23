@@ -24,6 +24,7 @@ final class TeamMemberTranslation
         return $result;
     }
 
+    /** @return array<string, mixed>|null */
     public static function find(int $memberId, string $lang): ?array
     {
         $stmt = Database::pdo()->prepare(
@@ -60,6 +61,7 @@ final class TeamMemberTranslation
         return $result;
     }
 
+    /** @param array<string, mixed> $data */
     public static function upsert(int $memberId, string $lang, array $data): void
     {
         $stmt = Database::pdo()->prepare(

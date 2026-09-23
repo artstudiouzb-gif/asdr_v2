@@ -200,7 +200,11 @@ final class LegacyCmsImporter
         return $map;
     }
 
-    /** Запрашивает один пост по id (для переводов). */
+    /**
+     * Запрашивает один пост по id (для переводов).
+     *
+     * @return array<string, mixed>|null
+     */
     private static function fetchPost(string $base, int $id): ?array
     {
         $resp = Http::request('GET', $base . '/wp-json/wp/v2/posts/' . $id . '?_embed=1', '', ['Accept: application/json']);

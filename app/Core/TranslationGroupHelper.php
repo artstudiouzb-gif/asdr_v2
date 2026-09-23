@@ -160,6 +160,7 @@ final class TranslationGroupHelper
         };
     }
 
+    /** @return array<string, mixed> */
     public static function getTranslations(string $module, int $recordId): array
     {
         self::ensureSchema();

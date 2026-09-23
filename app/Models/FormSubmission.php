@@ -29,6 +29,7 @@ final class FormSubmission
         return $out;
     }
 
+    /** @return array<int, array<string, mixed>> */
     public static function forForm(int $formId): array
     {
         $stmt = Database::pdo()->prepare(
@@ -121,6 +122,7 @@ final class FormSubmission
         ];
     }
 
+    /** @return array<string, mixed>|null */
     public static function findWithForm(int $id): ?array
     {
         $stmt = Database::pdo()->prepare(
@@ -149,6 +151,7 @@ final class FormSubmission
         return (int) $stmt->fetchColumn();
     }
 
+    /** @param array<string, mixed> $data */
     public static function create(int $formId, array $data, ?string $ip, ?string $userAgent): int
     {
         $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

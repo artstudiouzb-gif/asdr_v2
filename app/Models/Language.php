@@ -18,6 +18,7 @@ final class Language
         'sort_order' => 0,
     ];
 
+    /** @var list<array<string, mixed>>|null */
     private static ?array $activeCache = null;
     private static ?array $defaultCache = null;
 
@@ -32,11 +33,11 @@ final class Language
 
         $stmt = Database::pdo()->query('SELECT * FROM languages ORDER BY sort_order ASC, id ASC');
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /**
-     * @return array<int, array<string, mixed>> только активные (для сайта)
+     * @return list<array<string, mixed>> только активные (для сайта)
      */
     public static function active(): array
     {
@@ -48,12 +49,13 @@ final class Language
             $stmt = Database::pdo()->query(
                 'SELECT * FROM languages WHERE is_active = 1 ORDER BY sort_order ASC, id ASC'
             );
-            self::$activeCache = $stmt->fetchAll();
+            self::$activeCache = Database::rows($stmt);
         }
 
         return self::$activeCache;
     }
 
+    /** @return array<string, mixed> */
     public static function default(): array
     {
         if (!Database::isConnected()) {
@@ -107,6 +109,7 @@ final class Language
         return (string) self::default()['code'];
     }
 
+    /** @return list<string> */
     public static function activeCodes(): array
     {
         return array_map(static fn (array $l) => (string) $l['code'], self::active());
@@ -117,6 +120,7 @@ final class Language
         return in_array($code, self::activeCodes(), true);
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM languages WHERE id = :id LIMIT 1');
@@ -140,6 +144,7 @@ final class Language
         return (int) $stmt->fetchColumn() > 0;
     }
 
+    /** @param array<string, mixed> $data */
     public static function create(array $data): int
     {
         $pdo = Database::pdo();
@@ -172,6 +177,7 @@ final class Language
         }
     }
 
+    /** @param array<string, mixed> $data */
     public static function update(int $id, array $data): void
     {
         $pdo = Database::pdo();

@@ -147,7 +147,11 @@ final class Updater
         return null;
     }
 
-    /** Состояние обновления: что стоит, что доступно, можно ли ставить. */
+    /**
+     * Состояние обновления: что стоит, что доступно, можно ли ставить.
+     *
+     * @return array<string, mixed>
+     */
     public static function check(): array
     {
         $installed = self::installedVersion();

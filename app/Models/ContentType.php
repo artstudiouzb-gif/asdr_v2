@@ -27,20 +27,22 @@ final class ContentType
         return Database::pdo()->query('SELECT * FROM content_types WHERE is_public = 1 ORDER BY name ASC')->fetchAll();
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM content_types WHERE id = :id LIMIT 1');
         $stmt->execute([':id' => $id]);
 
-        return $stmt->fetch() ?: null;
+        return Database::row($stmt);
     }
 
+    /** @return array<string, mixed>|null */
     public static function findBySlug(string $slug): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM content_types WHERE slug = :s LIMIT 1');
         $stmt->execute([':s' => $slug]);
 
-        return $stmt->fetch() ?: null;
+        return Database::row($stmt);
     }
 
     /**
@@ -86,7 +88,7 @@ final class ContentType
         );
         $stmt->execute([':s' => $slug]);
 
-        return $stmt->fetch() ?: null;
+        return Database::row($stmt);
     }
 
     /**

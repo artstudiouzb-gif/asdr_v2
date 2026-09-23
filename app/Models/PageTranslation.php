@@ -24,6 +24,7 @@ final class PageTranslation
         return $result;
     }
 
+    /** @return array<string, mixed>|null */
     public static function find(int $pageId, string $lang): ?array
     {
         $stmt = Database::pdo()->prepare(
@@ -35,6 +36,7 @@ final class PageTranslation
         return $row ?: null;
     }
 
+    /** @param array<string, mixed> $data */
     public static function upsert(int $pageId, string $lang, array $data): void
     {
         $stmt = Database::pdo()->prepare(

@@ -15,6 +15,7 @@ final class WebhookDelivery
 {
     private const MAX_ATTEMPTS = 3;
 
+    /** @param array<string, mixed> $payload */
     public static function enqueue(int $webhookId, string $event, array $payload): int
     {
         $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -80,6 +81,7 @@ final class WebhookDelivery
         }
     }
 
+    /** @return array<string, mixed>|null */
     public static function find(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM webhook_deliveries WHERE id = :id LIMIT 1');
@@ -140,7 +142,7 @@ final class WebhookDelivery
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /** @return array{pending:int,sent:int,failed:int} */

@@ -13,12 +13,13 @@ use App\Core\Database;
  */
 final class RepoCategory
 {
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM repo_categories WHERE id = :id LIMIT 1');
         $stmt->execute([':id' => $id]);
 
-        return $stmt->fetch() ?: null;
+        return Database::row($stmt);
     }
 
     /**

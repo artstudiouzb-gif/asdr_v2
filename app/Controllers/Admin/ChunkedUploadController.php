@@ -193,6 +193,7 @@ final class ChunkedUploadController
         }
     }
 
+    /** @param array<string, mixed> $payload */
     private function json(array $payload, int $code = 200): never
     {
         http_response_code($code);

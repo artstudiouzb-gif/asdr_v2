@@ -28,6 +28,7 @@ final class SearchLog
         }
     }
 
+    /** @return list<array<string, mixed>> */
     public static function popular(int $limit = 5): array
     {
         try {
@@ -42,7 +43,7 @@ final class SearchLog
             $stmt->bindValue(':lim', $limit, \PDO::PARAM_INT);
             $stmt->execute();
 
-            return $stmt->fetchAll();
+            return Database::rows($stmt);
         } catch (\Throwable $e) {
             return [];
         }

@@ -164,6 +164,7 @@ final class WidgetController
         ], null];
     }
 
+    /** @return array<string, mixed> */
     private function collectData(string $type): array
     {
         $data = match ($type) {

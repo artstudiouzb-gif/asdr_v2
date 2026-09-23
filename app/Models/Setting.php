@@ -13,6 +13,7 @@ final class Setting
     private static ?array $cache = null;
     private static bool $cacheFromDatabase = false;
 
+    /** @return array<string, mixed> */
     public static function all(): array
     {
         // Чтение настроек используется и до подключения БД: в установщике,

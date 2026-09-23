@@ -24,6 +24,7 @@ final class PhotoAlbumTranslation
         return $result;
     }
 
+    /** @return array<string, mixed>|null */
     public static function find(int $albumId, string $lang): ?array
     {
         $stmt = Database::pdo()->prepare(
@@ -60,6 +61,7 @@ final class PhotoAlbumTranslation
         return $result;
     }
 
+    /** @param array<string, mixed> $data */
     public static function upsert(int $albumId, string $lang, array $data): void
     {
         $stmt = Database::pdo()->prepare(

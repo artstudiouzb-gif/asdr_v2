@@ -82,7 +82,11 @@ final class RepoAuth
         return ['status' => 'ok'];
     }
 
-    /** Привязан Telegram и настроен бот — второй фактор через Telegram доступен. */
+    /**
+     * Привязан Telegram и настроен бот — второй фактор через Telegram доступен.
+     *
+     * @param array<string, mixed> $user
+     */
     private static function telegramChannelAvailable(array $user): bool
     {
         return TelegramBot::isConfigured() && (int) ($user['telegram_chat_id'] ?? 0) !== 0;
@@ -126,7 +130,11 @@ final class RepoAuth
         };
     }
 
-    /** Генерирует одноразовый код, хэш — в сессию, код — в Telegram. */
+    /**
+     * Генерирует одноразовый код, хэш — в сессию, код — в Telegram.
+     *
+     * @param array<string, mixed> $user
+     */
     private static function sendTelegramCode(array $user): bool
     {
         $code = (string) random_int(100000, 999999);
@@ -224,6 +232,7 @@ final class RepoAuth
         return $id ? (int) $id : null;
     }
 
+    /** @param array<string, mixed> $user */
     private static function establishSession(array $user): void
     {
         session_regenerate_id(true);
@@ -323,6 +332,7 @@ final class RepoAuth
         return isset($_SESSION['repo_user_id']) ? (int) $_SESSION['repo_user_id'] : null;
     }
 
+    /** @return array<string, mixed>|null */
     public static function user(): ?array
     {
         if (!self::check()) {
@@ -359,6 +369,7 @@ final class RepoAuth
         );
     }
 
+    /** @param array<string, mixed> $user */
     private static function passwordVersion(array $user): string
     {
         return hash('sha256', (string) ($user['password_hash'] ?? ''));

@@ -147,21 +147,25 @@ final class Logger
         }
     }
 
+    /** @param array<string, mixed> $context */
     public static function critical(string $message, array $context = []): void
     {
         self::event('CRITICAL', $message, $context);
     }
 
+    /** @param array<string, mixed> $context */
     public static function warning(string $message, array $context = []): void
     {
         self::event('WARNING', $message, $context);
     }
 
+    /** @param array<string, mixed> $context */
     public static function security(string $message, array $context = []): void
     {
         self::event('SECURITY', $message, $context);
     }
 
+    /** @param array<string, mixed> $context */
     public static function info(string $message, array $context = []): void
     {
         self::event('INFO', $message, $context);

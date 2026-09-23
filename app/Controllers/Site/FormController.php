@@ -171,6 +171,8 @@ final class FormController
     /**
      * Активно ли поле по условной логике (задача 135): без условия — всегда;
      * с условием — только если поле-триггер равно заданному значению.
+     *
+     * @param array<string, mixed> $field
      */
     private function fieldActive(array $field): bool
     {
@@ -219,6 +221,7 @@ final class FormController
         $this->redirectBack();
     }
 
+    /** @param array<string, mixed> $data */
     private function notify(array $form, array $data): void
     {
         if (!Mailer::isConfigured()) {

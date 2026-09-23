@@ -140,6 +140,7 @@ final class BlockRenderer
         return preg_match('/background(?:-image)?\s*:\s*[^;]*url\s*\(/i', $withoutCode) !== 1;
     }
 
+    /** @return array<string, mixed> */
     public static function defaultsFor(string $type): array
     {
         return BlockTypeRegistry::defaultsFor($type);
@@ -758,6 +759,10 @@ final class BlockRenderer
         return $url . '?category=' . rawurlencode((string) $category['slug']);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private static function enrichData(string $type, array $data): array
     {
         return match ($type) {
@@ -775,6 +780,10 @@ final class BlockRenderer
         };
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private static function enrichForm(array $data): array
     {
         if (!empty($data['form_id'])) {
@@ -786,6 +795,10 @@ final class BlockRenderer
         return $data;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private static function enrichHero(array $data): array
     {
         if ((int) ($data['hero_id'] ?? 0) > 0) {
@@ -807,6 +820,10 @@ final class BlockRenderer
         return $data;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private static function enrichBioEducation(array $data): array
     {
         $lang = Locale::current();
@@ -815,6 +832,10 @@ final class BlockRenderer
         return $data;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private static function enrichTeamList(array $data): array
     {
         $items = \App\Models\TeamMember::published(Locale::current());
@@ -834,6 +855,10 @@ final class BlockRenderer
         return $data;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private static function enrichProjectsList(array $data): array
     {
         $lang = Locale::current();
@@ -846,6 +871,10 @@ final class BlockRenderer
         return $data;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private static function enrichNewsLatest(array $data): array
     {
         $limit = (int) ($data['limit'] ?? 3);
@@ -876,6 +905,10 @@ final class BlockRenderer
         return $data;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private static function enrichNewsFeature(array $data): array
     {
         $limit = (int) ($data['limit'] ?? 6);
@@ -911,6 +944,10 @@ final class BlockRenderer
         return $data;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private static function enrichNewsDocs(array $data): array
     {
         $limit = (int) ($data['limit'] ?? 3);
@@ -935,6 +972,10 @@ final class BlockRenderer
         return $data;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private static function enrichCardsGrid(array $data): array
     {
         if (($data['variant'] ?? 'icon') === 'image' && ($data['source'] ?? 'manual') === 'projects') {
@@ -957,6 +998,10 @@ final class BlockRenderer
         return $data;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private static function enrichMediaGallery(array $data): array
     {
         $mediaSource = (string) ($data['source'] ?? 'manual');
@@ -1100,7 +1145,10 @@ final class BlockRenderer
         return $sections;
     }
 
-    /** @return array{0:string,1:string} */
+    /**
+     * @return array{0:string,1:string}
+     * @param array<string, mixed> $data
+     */
     private static function renderTemplate(string $file, array $data, int $blockId): array
     {
         $render = static function (string $__file, array $data, int $blockId): string {

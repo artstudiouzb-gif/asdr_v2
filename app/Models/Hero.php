@@ -41,7 +41,7 @@ final class Hero
         $stmt = Database::pdo()->prepare('SELECT * FROM heroes WHERE id = :id AND deleted_at IS NULL LIMIT 1');
         $stmt->execute([':id' => $id]);
 
-        return $stmt->fetch() ?: null;
+        return Database::row($stmt);
     }
 
     /**
@@ -183,7 +183,11 @@ final class Hero
         self::bustCache();
     }
 
-    /** Сохранение только настроек (применение пресета). @param array<string, mixed> $settings */
+    /**
+     * Сохранение только настроек (применение пресета). @param array<string, mixed> $settings
+     *
+     * @param array<string, mixed> $settings
+     */
     public static function saveSettings(int $id, array $settings, string $preset): void
     {
         $stmt = Database::pdo()->prepare('UPDATE heroes SET settings = :s, preset = :p WHERE id = :id');

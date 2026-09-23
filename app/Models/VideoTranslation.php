@@ -24,6 +24,7 @@ final class VideoTranslation
         return $result;
     }
 
+    /** @return array<string, mixed>|null */
     public static function find(int $videoId, string $lang): ?array
     {
         $stmt = Database::pdo()->prepare(
@@ -60,6 +61,7 @@ final class VideoTranslation
         return $result;
     }
 
+    /** @param array<string, mixed> $data */
     public static function upsert(int $videoId, string $lang, array $data): void
     {
         $stmt = Database::pdo()->prepare(

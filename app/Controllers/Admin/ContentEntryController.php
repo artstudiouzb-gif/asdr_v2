@@ -21,6 +21,7 @@ use App\Models\Language;
  */
 final class ContentEntryController
 {
+    /** @return array<string, mixed>|null */
     private function type(string $slug): ?array
     {
         return ContentType::findBySlug($slug);

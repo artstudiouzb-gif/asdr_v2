@@ -54,6 +54,7 @@ final class A11ySettings
         return $sizes;
     }
 
+    /** @return array<string, mixed> */
     public static function fromCookie(?string $raw): array
     {
         $raw = trim((string) $raw);
@@ -72,6 +73,7 @@ final class A11ySettings
         return self::normalize($parsed);
     }
 
+    /** @return array<string, mixed> */
     public static function normalize(array $values): array
     {
         $result = self::DEFAULTS;
@@ -93,7 +95,11 @@ final class A11ySettings
         return $result;
     }
 
-    /** Хоть что-то отличается от обычного вида страницы. */
+    /**
+     * Хоть что-то отличается от обычного вида страницы.
+     *
+     * @param array<string, mixed> $settings
+     */
     public static function isActive(array $settings): bool
     {
         return self::normalize($settings) !== self::DEFAULTS;
@@ -102,6 +108,8 @@ final class A11ySettings
     /**
      * Атрибуты для <html>: значения по умолчанию не печатаем, чтобы обычная
      * страница оставалась обычной.
+     *
+     * @param array<string, mixed> $settings
      */
     public static function htmlAttributes(array $settings): string
     {
@@ -121,7 +129,11 @@ final class A11ySettings
         return implode(' ', $attributes);
     }
 
-    /** Строка для cookie: тот же формат, что читает JS. */
+    /**
+     * Строка для cookie: тот же формат, что читает JS.
+     *
+     * @param array<string, mixed> $settings
+     */
     public static function toCookie(array $settings): string
     {
         return http_build_query(self::normalize($settings));
@@ -150,6 +162,7 @@ final class A11ySettings
         ]);
     }
 
+    /** @return array<string, mixed> */
     private static function fromLegacy(string $raw): array
     {
         $parts = explode(':', $raw);

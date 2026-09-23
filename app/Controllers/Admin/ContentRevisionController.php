@@ -70,6 +70,7 @@ final class ContentRevisionController
         exit;
     }
 
+    /** @return array<string, mixed>|null */
     private function findEntity(string $type, int $id): ?array
     {
         return match ($type) {

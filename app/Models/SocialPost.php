@@ -113,7 +113,7 @@ final class SocialPost
         $stmt = Database::pdo()->prepare('SELECT * FROM social_posts WHERE news_id = :nid ORDER BY network');
         $stmt->execute([':nid' => $newsId]);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /**
@@ -132,7 +132,7 @@ final class SocialPost
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /**
@@ -222,6 +222,6 @@ final class SocialPost
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 }

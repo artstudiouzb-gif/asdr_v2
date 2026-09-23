@@ -64,6 +64,10 @@ final class BlockPresentationNormalizer
         return max($min, min($max, (int) $value));
     }
 
+    /**
+     * @param array<string, mixed> $input
+     * @return array<string, mixed>
+     */
     public static function background(array $input): array
     {
         $mode = self::scalarString($input['bg_mode'] ?? null, 'preset');
@@ -201,6 +205,10 @@ final class BlockPresentationNormalizer
         return ['_reveal' => ['enabled' => true, 'type' => 'fade']];
     }
 
+    /**
+     * @param array<string, mixed> $input
+     * @return array<string, mixed>
+     */
     public static function normalize(array $input): array
     {
         $spacing = self::scalarString($input['spacing'] ?? null, 'premium');

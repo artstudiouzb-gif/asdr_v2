@@ -23,6 +23,7 @@ final class Database
     private static ?array $lastConfig = null;
     private static float $lastUsedAt = 0.0;
 
+    /** @param array<string, mixed> $config */
     public static function init(array $config): void
     {
         self::$lastConfig = $config;
@@ -117,6 +118,37 @@ final class Database
      * @param callable(PDO): T $callback
      * @return T
      */
+    /**
+     * Все строки выборки — с типом, который анализатор может проверить.
+     *
+     * `PDOStatement::fetchAll()` объявлен просто как `array`, поэтому метод,
+     * отдающий выборку, не мог честно пообещать `list<array<string, mixed>>`:
+     * отсюда почти весь долг PHPStan «нет типа значений массива». Режим выборки
+     * тот же, что у соединения (FETCH_ASSOC), — поведение не меняется.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function rows(\PDOStatement $stmt): array
+    {
+        /** @var list<array<string, mixed>> $rows */
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $rows;
+    }
+
+    /**
+     * Одна строка выборки или null, если строк нет.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function row(\PDOStatement $stmt): ?array
+    {
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        /** @var array<string, mixed>|null */
+        return is_array($row) ? $row : null;
+    }
+
     public static function transaction(callable $callback): mixed
     {
         $pdo = self::pdo();
