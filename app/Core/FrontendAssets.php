@@ -42,6 +42,10 @@ final class FrontendAssets
     private const MANIFEST = '/public/assets/asset-manifest.json';
     private const CONTENT_MODES_CSS = '/assets/css/public-content-modes.css';
 
+    /** @var array<string, mixed>|null */
+    private static ?array $manifestMemo = null;
+    private static bool $manifestLoaded = false;
+
     /** @return array<int, string> */
     public static function styles(): array
     {
@@ -79,6 +83,38 @@ final class FrontendAssets
 
         // Файл мог не доехать при выкладке — тогда лучше исходник, чем 404.
         return is_file(APP_ROOT . '/public' . $entry['path']) ? $entry['path'] : $path;
+    }
+
+    /**
+     * Минифицированная копия файла админки (`admin.css`, `admin.js`) или null,
+     * если отдавать надо исходник: сборка выключена, записи нет, файл не
+     * доехал или исходник правили без пересборки (размер разошёлся с
+     * манифестом). Порядок подключения не меняется — копия встаёт на место
+     * исходника.
+     */
+    public static function adminAsset(string $path): ?string
+    {
+        try {
+            if (!self::enabled()) {
+                return null;
+            }
+        } catch (\Throwable) {
+            return null;
+        }
+
+        $manifest = self::manifest();
+        $entry = is_array($manifest['admin'] ?? null) ? ($manifest['admin'][$path] ?? null) : null;
+        if (!is_array($entry) || !is_string($entry['path'] ?? null) || !is_numeric($entry['sourceRaw'] ?? null)) {
+            return null;
+        }
+
+        $source = APP_ROOT . '/public' . $path;
+        $built = APP_ROOT . '/public' . $entry['path'];
+        if (!is_file($built) || !is_file($source) || filesize($source) !== (int) $entry['sourceRaw']) {
+            return null;
+        }
+
+        return $entry['path'];
     }
 
     public static function enabled(): bool
@@ -137,13 +173,20 @@ final class FrontendAssets
     /** @return array<string, mixed>|null */
     private static function manifest(): ?array
     {
+        // Манифест читают несколько раз за запрос (бандлы, блоки, админка);
+        // за время запроса он не меняется.
+        if (self::$manifestLoaded) {
+            return self::$manifestMemo;
+        }
+        self::$manifestLoaded = true;
+
         $raw = @file_get_contents(APP_ROOT . self::MANIFEST);
         if (!is_string($raw)) {
-            return null;
+            return self::$manifestMemo = null;
         }
         $data = json_decode($raw, true);
 
-        return is_array($data) && ($data['version'] ?? null) === 1 ? $data : null;
+        return self::$manifestMemo = is_array($data) && ($data['version'] ?? null) === 1 ? $data : null;
     }
 
     private static function entryCurrent(mixed $entry): bool

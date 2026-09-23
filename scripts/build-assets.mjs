@@ -44,6 +44,15 @@ const blockSources = [
     'public/assets/js/news.js',
 ];
 
+// Два крупных файла админки (350 и 215 КБ исходника) отдавались как есть.
+// Порядок и способ подключения не меняются: minified-копия встаёт ровно на
+// место исходника (FrontendAssets::adminAsset). Слои-патчи и загрузчик
+// остаются отдельными файлами — их склейка поменяла бы момент выполнения.
+const adminSources = [
+    'public/assets/css/admin.css',
+    'public/assets/js/admin.js',
+];
+
 const minifiedName = (path) => path.replace(/\.(css|js)$/, '.min.$1');
 
 const outputs = {
@@ -190,6 +199,9 @@ async function buildBlockAsset(path) {
 
     return [`/${path.replace(/^public\//, '')}`, {
         path: `/${output.replace(/^public\//, '')}`,
+        // Размер исходника — дешёвая проверка свежести на каждом запросе:
+        // правка без пересборки меняет размер, и сервер отдаёт исходник.
+        sourceRaw: Buffer.byteLength(content),
         sourceSha256: sha256(content),
         sha256: sha256(built),
         ...sizeReport(built),
@@ -199,6 +211,7 @@ async function buildBlockAsset(path) {
 const [cssInput, jsInput] = await Promise.all([readSources(cssSources), readSources(jsSources)]);
 const [css, js] = await Promise.all([buildCss(cssInput), buildJs(jsInput)]);
 const blocks = Object.fromEntries(await Promise.all(blockSources.map(buildBlockAsset)));
+const admin = Object.fromEntries(await Promise.all(adminSources.map(buildBlockAsset)));
 const cssSize = sizeReport(css);
 const jsSize = sizeReport(js);
 const manifest = `${JSON.stringify({
@@ -222,6 +235,8 @@ const manifest = `${JSON.stringify({
     // минифицированный файл. FrontendAssets::blockAsset() подставляет его,
     // когда включена сборка бандлов.
     blocks,
+    // Админка: те же правила, ключ — исходный путь.
+    admin,
 }, null, 2)}\n`;
 await Promise.all([
     verifyOrWrite(outputs.css, css),
@@ -235,6 +250,10 @@ console.log(`  CSS ${cssSize.raw} raw / ${cssSize.gzip} gzip / ${cssSize.brotli}
 console.log(`  JS  ${jsSize.raw} raw / ${jsSize.gzip} gzip / ${jsSize.brotli} brotli`);
 for (const [source, entry] of Object.entries(blocks)) {
     console.log(`  блок ${source} -> ${entry.raw} raw / ${entry.gzip} gzip / ${entry.brotli} brotli`);
+}
+
+for (const [source, entry] of Object.entries(admin)) {
+    console.log(`  админка ${source} -> ${entry.raw} raw / ${entry.gzip} gzip / ${entry.brotli} brotli`);
 }
 
 // Мягкий бюджет блочных файлов: предупреждение в любом режиме.

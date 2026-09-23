@@ -44,7 +44,11 @@ function public_css_files(): array
 /** @return list<string> файлы CSS админки */
 function admin_css_files(): array
 {
-    return glob(APP_ROOT . '/public/assets/css/admin*.css') ?: [];
+    // Собранные копии (admin.min.css) — не исходник: считались бы дважды.
+    return array_values(array_filter(
+        glob(APP_ROOT . '/public/assets/css/admin*.css') ?: [],
+        static fn (string $path): bool => !str_contains(basename($path), '.min.')
+    ));
 }
 
 /**
@@ -93,6 +97,9 @@ function admin_orphan_classes(): array
     }
     $js = '';
     foreach (glob(APP_ROOT . '/public/assets/js/admin*.js') ?: [] as $file) {
+        if (str_contains(basename($file), '.min.')) {
+            continue;
+        }
         $js .= (string) file_get_contents($file);
     }
 
