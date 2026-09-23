@@ -34,6 +34,14 @@ final class Asset
         // прозрачно отдаёт loader. В отпечаток включаем все связанные файлы,
         // чтобы CDN не оставлял старую комбинацию после изменения любого слоя.
         $fingerprintPaths = [$path];
+        $query = '';
+        if ($path === '/assets/css/admin.css') {
+            $minified = FrontendAssets::adminAsset($path);
+            if ($minified !== null) {
+                $path = $minified;
+                $fingerprintPaths = [$minified];
+            }
+        }
         if ($path === '/assets/js/admin.js') {
             $loader = '/assets/js/admin-media-loader.js';
             $bridge = '/assets/js/admin-media-bridge.js';
@@ -62,6 +70,13 @@ final class Asset
             if ($bundleReady) {
                 $path = $loader;
                 $fingerprintPaths = $adminBundle;
+                // Загрузчик берёт admin.min.js вместо admin.js по метке в
+                // своём адресе; в отпечаток входит и сама копия.
+                $minified = FrontendAssets::adminAsset('/assets/js/admin.js');
+                if ($minified !== null) {
+                    $fingerprintPaths[] = $minified;
+                    $query = 'min=1';
+                }
             }
         }
 
@@ -83,6 +98,9 @@ final class Asset
         if ($signature !== '') {
             $v = substr(hash('crc32b', $signature), 0, 8);
             $out = $path . (str_contains($path, '?') ? '&' : '?') . 'v=' . $v;
+        }
+        if ($query !== '') {
+            $out .= (str_contains($out, '?') ? '&' : '?') . $query;
         }
 
         // CDN-префикс из настроек производительности (пусто — отдаём с этого же

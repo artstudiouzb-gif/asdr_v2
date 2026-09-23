@@ -139,7 +139,11 @@ async function captureScreen(page, screen, url, theme, out) {
 async function capture(name) {
     const out = path.join(STORE, name);
     fs.mkdirSync(out, { recursive: true });
-    const browser = await chromium.launch();
+    // Тот же путь к браузеру, что у playwright.config: в облачной среде
+    // браузер лежит не там, куда его кладёт `npx playwright install`.
+    const browser = await chromium.launch(process.env.PLAYWRIGHT_CHROMIUM_PATH
+        ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
+        : {});
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, baseURL: BASE });
     const page = await context.newPage();
 
