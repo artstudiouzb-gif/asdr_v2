@@ -32,9 +32,14 @@ parameters:
     # может вывести сам. Добавлять проверки на `false` было бы вредно: ветка
     # недостижима, а читается как рабочая обработка ошибки. Переопределить
     # описание файлом-заглушкой нельзя — для классов ядра PHPStan берёт свои.
+    # То же самое, когда такой результат уходит аргументом в `Database::rows()`
+    # или `Database::row()`: типизированным помощникам выборки.
     ignoreErrors:
         -
             identifier: method.nonObject
             message: '#^Cannot call method [a-zA-Z]+\(\) on PDOStatement\|false\.$#'
+        -
+            identifier: argument.type
+            message: '#^Parameter \#1 \$stmt of static method App\\Core\\Database\:\:rows?\(\) expects PDOStatement, PDOStatement\|false given\.$#'
     treatPhpDocTypesAsCertain: false
     reportUnmatchedIgnoredErrors: false

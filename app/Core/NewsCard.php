@@ -73,7 +73,11 @@ final class NewsCard
         return $stats;
     }
 
-    /** Пустая обложка не должна рисовать пустую панель поверх фотографии. */
+    /**
+     * Пустая обложка не должна рисовать пустую панель поверх фотографии.
+     *
+     * @param array<string, mixed> $row
+     */
     public static function isEmpty(array $row): bool
     {
         foreach (self::FIELDS as $field) {

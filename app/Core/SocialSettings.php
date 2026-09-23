@@ -338,6 +338,8 @@ final class SocialSettings
     /**
      * Название категории новости на указанном языке. Пустая строка, если
      * рубрики нет — строка над заголовком тогда просто не выводится.
+     *
+     * @param array<string, mixed> $row
      */
     private static function categoryName(array $row, string $lang): string
     {
@@ -349,6 +351,7 @@ final class SocialSettings
         return trim((string) (\App\Models\NewsCategory::namesForIds([$categoryId], $lang)[$categoryId] ?? ''));
     }
 
+    /** @param array<string, mixed> $news */
     private static function languageBlocks(array $news, string $base): array
     {
         $default = Language::defaultCode();

@@ -22,7 +22,11 @@ final class TelegramBot
         return trim(Setting::get('telegram_bot_token', '')) !== '';
     }
 
-    /** Информация о боте (username для ссылки t.me/...); null при ошибке. */
+    /**
+     * Информация о боте (username для ссылки t.me/...); null при ошибке.
+     *
+     * @return array<string, mixed>|null
+     */
     public static function getMe(): ?array
     {
         $res = self::request('getMe', []);
@@ -30,7 +34,11 @@ final class TelegramBot
         return is_array($res) ? $res : null;
     }
 
-    /** Проверяет ещё не сохранённый токен, не меняя настройки CMS. */
+    /**
+     * Проверяет ещё не сохранённый токен, не меняя настройки CMS.
+     *
+     * @return array<string, mixed>|null
+     */
     public static function getMeWithToken(string $token): ?array
     {
         $res = self::request('getMe', [], trim($token));

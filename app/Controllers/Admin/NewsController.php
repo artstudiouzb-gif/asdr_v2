@@ -322,7 +322,11 @@ final class NewsController
         exit;
     }
 
-    /** Отправляет событие news.published в исходящие вебхуки (задача 136). */
+    /**
+     * Отправляет событие news.published в исходящие вебхуки (задача 136).
+     *
+     * @param array<string, mixed> $data
+     */
     private function dispatchNewsPublished(int $id, array $data): void
     {
         $base = AppUrl::base();
@@ -619,7 +623,11 @@ final class NewsController
     /**
      * @return array{0: array, 1: string|null}
      */
-    /** Поля детальной страницы (эскиз): бейдж, тезисы, мероприятие, документы. */
+    /**
+     * Поля детальной страницы (эскиз): бейдж, тезисы, мероприятие, документы.
+     *
+     * @return array<string, mixed>
+     */
     private function collectExtras(): array
     {
         return [
@@ -634,6 +642,7 @@ final class NewsController
         ] + \App\Core\NewsCard::fromInput($_POST);
     }
 
+    /** @param array<string, mixed> $existing */
     private function collectInput(?int $id, ?array $existing = null): array
     {
         $title = trim((string) ($_POST['title'] ?? ''));

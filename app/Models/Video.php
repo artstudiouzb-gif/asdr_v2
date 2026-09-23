@@ -36,6 +36,9 @@ final class Video
     /**
      * Накладывает перевод указанного языка на базовую строку. Пустые поля
      * перевода откатываются к значению основного языка (graceful fallback).
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
      */
     public static function localize(array $row, string $lang): array
     {
@@ -55,6 +58,11 @@ final class Video
         );
     }
 
+    /** @param array<string, mixed> $translation */
+    /**
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
     private static function applyTranslation(array $row, ?array $translation): array
     {
         return Translations::overlayFields($row, $translation, ['title', 'description']);
@@ -80,15 +88,20 @@ final class Video
         return Translations::availableLangs('videos', $ids, ['title', 'description']);
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM videos WHERE id = :id LIMIT 1');
         $stmt->execute([':id' => $id]);
 
-        return $stmt->fetch() ?: null;
+        return Database::row($stmt);
     }
 
-    /** Запись, импортированная с YouTube (ключ — id ролика). */
+    /**
+     * Запись, импортированная с YouTube (ключ — id ролика).
+     *
+     * @return array<string, mixed>|null
+     */
     public static function findByYoutubeId(string $youtubeId): ?array
     {
         $youtubeId = trim($youtubeId);
@@ -98,7 +111,7 @@ final class Video
         $stmt = Database::pdo()->prepare('SELECT * FROM videos WHERE youtube_id = :y LIMIT 1');
         $stmt->execute([':y' => $youtubeId]);
 
-        return $stmt->fetch() ?: null;
+        return Database::row($stmt);
     }
 
     /**

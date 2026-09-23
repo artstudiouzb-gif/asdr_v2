@@ -10,11 +10,12 @@ use App\Core\MediaMetadataSchema;
 
 final class FileEntry
 {
+    /** @return list<array<string, mixed>> */
     public static function all(): array
     {
         $stmt = Database::pdo()->query('SELECT * FROM files ORDER BY created_at DESC');
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /**
@@ -57,6 +58,8 @@ final class FileEntry
 
     /**
      * Постраничная выборка файлов для модальной медиабиблиотеки с фильтром по типу и поиску.
+     *
+     * @return list<array<string, mixed>>
      */
     public static function libraryFiltered(string $type = 'image', int $limit = 300, int $offset = 0, string $query = '', string $sort = 'date_desc'): array
     {
@@ -80,7 +83,7 @@ final class FileEntry
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /**
@@ -136,6 +139,7 @@ final class FileEntry
         return $counts;
     }
 
+    /** @return list<array<string, mixed>> */
     public static function filtered(array $params, bool $includeProtected = true): array
     {
         $q = trim((string) ($params['q'] ?? ''));
@@ -182,7 +186,7 @@ final class FileEntry
         $stmt = Database::pdo()->prepare($sql);
         $stmt->execute($bind);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     public static function availableDates(): array
@@ -191,6 +195,7 @@ final class FileEntry
         return $stmt->fetchAll(\PDO::FETCH_COLUMN) ?: [];
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM files WHERE id = :id LIMIT 1');
@@ -203,6 +208,8 @@ final class FileEntry
     /**
      * Находит публичный файл по каноническому URL медиабиблиотеки.
      * Внешние URL и произвольные пути намеренно не сопоставляются.
+     *
+     * @return array<string, mixed>|null
      */
     public static function findPublicByUrl(string $url): ?array
     {
@@ -226,6 +233,7 @@ final class FileEntry
         return $row ?: null;
     }
 
+    /** @param array<string, mixed> $data */
     public static function create(array $data): int
     {
         $stmt = Database::pdo()->prepare(
@@ -249,6 +257,7 @@ final class FileEntry
      * Обновляет редакционные метаданные уже загруженного файла.
      *
      * @param array{alt_text?:?string,caption?:?string,description?:?string,credit?:?string,focal_x?:?int,focal_y?:?int} $metadata
+     * @return array<string, mixed>|null
      */
     public static function updateMetadata(int $id, array $metadata): ?array
     {

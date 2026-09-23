@@ -17,6 +17,7 @@ final class Mailer
     private array $config;
     private ?string $lastError = null;
 
+    /** @param array<string, mixed> $config */
     public function __construct(?array $config = null)
     {
         if ($config !== null) {

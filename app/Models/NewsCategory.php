@@ -43,7 +43,11 @@ final class NewsCategory
         return self::$requestCache[$key] = $rows;
     }
 
-    /** Активные категории, у которых есть хотя бы одна опубликованная новость. */
+    /**
+     * Активные категории, у которых есть хотя бы одна опубликованная новость.
+     *
+     * @return array<int, array<string, mixed>>
+     */
     public static function withPublishedNews(?string $lang = null): array
     {
         $rows = Database::pdo()->query(
@@ -59,14 +63,16 @@ final class NewsCategory
         return self::localizeRows($rows, $lang);
     }
 
+    /** @return array<string, mixed>|null */
     public static function find(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM news_categories WHERE id = :id LIMIT 1');
         $stmt->execute([':id' => $id]);
 
-        return $stmt->fetch() ?: null;
+        return Database::row($stmt);
     }
 
+    /** @return array<string, mixed>|null */
     public static function findBySlug(string $slug, bool $activeOnly = false): ?array
     {
         $sql = 'SELECT * FROM news_categories WHERE slug = :slug';
@@ -76,13 +82,16 @@ final class NewsCategory
         $stmt = Database::pdo()->prepare($sql . ' LIMIT 1');
         $stmt->execute([':slug' => $slug]);
 
-        return $stmt->fetch() ?: null;
+        return Database::row($stmt);
     }
 
     /**
      * Название на нужном языке с откатом к основному, если перевод пуст.
      * Пустое поле перевода — не «нет категории», а «переводчик до неё не дошёл»:
      * посетителю всё равно нужно что-то показать.
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
      */
     public static function localize(array $row, ?string $lang = null): array
     {

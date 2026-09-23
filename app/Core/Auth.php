@@ -104,6 +104,8 @@ final class Auth
      * Настроен ли хоть один второй фактор: приложение-аутентификатор,
      * бесплатный бот (telegram_chat_id) или платный шлюз Verification Codes
      * (телефон). Пока нет ни одного — сессия ограничена онбордингом.
+     *
+     * @param array<string, mixed> $user
      */
     private static function hasCodeChannel(array $user): bool
     {
@@ -113,13 +115,19 @@ final class Auth
     /**
      * Приложение-аутентификатор: коды считаются на устройстве, поэтому канал
      * работает без сети и не зависит от чужого сервиса.
+     *
+     * @param array<string, mixed> $user
      */
     private static function totpChannelAvailable(array $user): bool
     {
         return (int) ($user['totp_enabled'] ?? 0) === 1 && trim((string) ($user['totp_secret'] ?? '')) !== '';
     }
 
-    /** Бесплатный бот (telegram_chat_id) или платный шлюз Verification Codes. */
+    /**
+     * Бесплатный бот (telegram_chat_id) или платный шлюз Verification Codes.
+     *
+     * @param array<string, mixed> $user
+     */
     private static function telegramChannelAvailable(array $user): bool
     {
         if (TelegramBot::isConfigured() && (int) ($user['telegram_chat_id'] ?? 0) > 0) {
@@ -175,6 +183,8 @@ final class Auth
      * Генерирует одноразовый код, сохраняет его хэш в сессии и отправляет в
      * Telegram. Приоритет — бесплатный бот; иначе платный шлюз (канал
      * Verification Codes). Используется при входе и при повторной отправке.
+     *
+     * @param array<string, mixed> $user
      */
     private static function sendLoginCode(array $user): bool
     {
@@ -284,6 +294,7 @@ final class Auth
         return true;
     }
 
+    /** @param array<string, mixed> $user */
     public static function establishSession(array $user): void
     {
         session_regenerate_id(true);
@@ -444,6 +455,7 @@ final class Auth
      */
     private static array $registryMemo = [];
 
+    /** @return array<string, mixed>|null */
     public static function user(): ?array
     {
         if (!self::check()) {
@@ -553,7 +565,11 @@ final class Auth
         unset($_SESSION['2fa_setup_required']);
     }
 
-    /** Синхронизирует ограничения текущей сессии после изменения каналов 2FA. */
+    /**
+     * Синхронизирует ограничения текущей сессии после изменения каналов 2FA.
+     *
+     * @param array<string, mixed> $user
+     */
     public static function syncTwoFactorSetup(array $user): void
     {
         Session::start();

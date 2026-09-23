@@ -65,7 +65,7 @@ final class SessionRegistry
         );
         $stmt->execute([':uid' => $userId]);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /** Отзывает одну сессию (по её id в таблице) в рамках владельца. */

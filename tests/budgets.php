@@ -559,8 +559,10 @@ function quality_budgets(): array
             'why' => 'новый код проверяется целиком, старый долг посчитан и виден; '
                 . 'дописать находку в эталон вместо починки нельзя',
             // 724 -> 578 -> 577 -> 570 -> 565: каждая закрытая находка оказывалась
-            // настоящим отказом под strict_types (см. коммиты).
-            'ceiling' => static fn (): int => 565,
+            // настоящим отказом под strict_types (см. коммиты). 565 -> 245:
+            // типизированная выборка (Database::rows/row) и типы значений
+            // массивов у строк БД, данных блоков и ответов Http/SocialPublisher.
+            'ceiling' => static fn (): int => 245,
             'measure' => static function (): array {
                 $baseline = APP_ROOT . '/phpstan-baseline.neon';
                 if (!is_file($baseline)) {

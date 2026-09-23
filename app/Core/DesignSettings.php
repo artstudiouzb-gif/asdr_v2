@@ -907,6 +907,7 @@ final class DesignSettings
 
     /**
      * @return list<string> предупреждения для редактора (пустой список — всё принято)
+     * @param array<string, mixed> $input
      */
     public static function save(array $input): array
     {

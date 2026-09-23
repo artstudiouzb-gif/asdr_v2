@@ -261,6 +261,7 @@ final class QrCode
         return self::$expTable[(self::$logTable[$a] + self::$logTable[$b]) % 255];
     }
 
+    /** @param array<string, mixed> $data */
     private static function reedSolomon(array $data, int $ecCount): array
     {
         self::initGf();

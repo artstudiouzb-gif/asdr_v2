@@ -21,7 +21,7 @@ final class NewsImage
         );
         $stmt->execute([':nid' => $newsId]);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     public static function create(int $newsId, string $path, ?string $alt = null, int $sortOrder = 0): int

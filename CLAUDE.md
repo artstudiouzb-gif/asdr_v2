@@ -190,6 +190,8 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
 - `json_encode`: свои данные — `JSON_THROW_ON_ERROR`, редакторские —
   `JSON_INVALID_UTF8_SUBSTITUTE` (+ `?: '[]'` в атрибут); `(string)` поверх
   нельзя (т. 356).
+- Выборку отдавать через `Database::rows($stmt)` / `Database::row($stmt)`
+  (типизированы), а не голым `fetchAll()`/`fetch()`.
 - Значение `X|false` не отдавать типизированному параметру под `strict_types`.
   Эталон PHPStan только уменьшается; новый код — без находок (т. 293).
 - `custom_css`/`custom_js` и блок «HTML» — только супер-админ, только файлами.

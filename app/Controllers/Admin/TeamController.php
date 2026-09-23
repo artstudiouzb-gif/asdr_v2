@@ -126,6 +126,7 @@ final class TeamController
 
     /**
      * @return array{0: array, 1: string|null}
+     * @param array<string, mixed> $existing
      */
     private function collectInput(?int $id, ?array $existing = null): array
     {

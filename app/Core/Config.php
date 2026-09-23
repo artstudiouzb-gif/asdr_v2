@@ -8,12 +8,17 @@ final class Config
 {
     private static array $data = [];
 
+    /** @param array<string, mixed> $data */
     public static function set(array $data): void
     {
         self::$data = $data;
     }
 
-    /** Поверхностное слияние в существующую конфигурацию (верхнеуровневые ключи). */
+    /**
+     * Поверхностное слияние в существующую конфигурацию (верхнеуровневые ключи).
+     *
+     * @param array<string, mixed> $data
+     */
     public static function merge(array $data): void
     {
         self::$data = array_merge(self::$data, $data);

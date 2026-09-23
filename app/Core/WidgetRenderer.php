@@ -60,6 +60,7 @@ final class WidgetRenderer
     /**
      * Нормализует настройки оформления из data._design.
      * @return array{style:string, pad:string, accent:bool}
+     * @param array<string, mixed> $data
      */
     public static function normalizeDesign(array $data): array
     {
@@ -113,6 +114,7 @@ final class WidgetRenderer
         return SecurityHeaders::injectScriptNonce($html);
     }
 
+    /** @param array<string, mixed> $widget */
     public static function resolveTitle(array $widget, string $lang): string
     {
         $data = json_decode((string) ($widget['data'] ?? '{}'), true);
@@ -133,6 +135,7 @@ final class WidgetRenderer
         return $rawTitle;
     }
 
+    /** @param array<string, mixed> $widget */
     public static function render(array $widget, string $lang): string
     {
         $type = preg_replace('/[^a-z0-9_]/', '', strtolower((string) $widget['type'])) ?? '';
@@ -182,6 +185,10 @@ final class WidgetRenderer
         );
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     private static function buildViewData(string $type, array $data, string $lang): array
     {
         switch ($type) {
@@ -234,6 +241,7 @@ final class WidgetRenderer
         return $data;
     }
 
+    /** @param array<string, mixed> $data */
     private static function renderTemplate(string $file, array $data, string $lang): string
     {
         $render = static function (string $__file, array $data, string $lang): void {

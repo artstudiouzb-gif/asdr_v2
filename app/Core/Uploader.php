@@ -63,7 +63,7 @@ final class Uploader
 
     /**
      * @param array $fileInput один элемент $_FILES, например $_FILES['file']
-     * @return array файл-запись из таблицы files (с id)
+     * @return array<string, mixed> файл-запись из таблицы files (с id)
      */
     public static function store(
         array $fileInput,
@@ -104,7 +104,7 @@ final class Uploader
      * и запись в БД.
      *
      * @param bool $isUploadedFile true если источник — временный файл PHP-загрузки
-     * @return array файл-запись из таблицы files
+     * @return array<string, mixed> файл-запись из таблицы files
      */
     public static function storeFromPath(
         string $sourcePath,

@@ -169,7 +169,10 @@ final class YoutubeImport
         return $result;
     }
 
-    /** @param array<string, mixed> $item @param array<string, mixed> $cfg */
+    /**
+     * @param array<string, mixed> $item @param array<string, mixed> $cfg
+     * @param array<string, mixed> $cfg
+     */
     private static function createOne(array $item, array $cfg, ?int $userId): bool
     {
         $title = trim((string) $item['title']);

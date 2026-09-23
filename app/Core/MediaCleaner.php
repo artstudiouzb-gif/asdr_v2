@@ -26,7 +26,10 @@ final class MediaCleaner
         return array_keys($refs);
     }
 
-    /** @return array<int, string> */
+    /**
+     * @return array<int, string>
+     * @param array<string, mixed> $news
+     */
     public static function collectForNews(array $news): array
     {
         $paths = [];

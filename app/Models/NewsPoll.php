@@ -10,6 +10,8 @@ final class NewsPoll
 {
     /**
      * Возвращает опрос для новости или null.
+     *
+     * @return array<string, mixed>|null
      */
     public static function findByNews(int $newsId): ?array
     {
@@ -62,6 +64,8 @@ final class NewsPoll
 
     /**
      * Голосование с хэш-защитой от накруток (IP + Cookie + UserAgent).
+     *
+     * @return array<string, mixed>
      */
     public static function vote(int $pollId, int $optionIndex, string $voterHash): array
     {
@@ -110,6 +114,8 @@ final class NewsPoll
 
     /**
      * Подсчитывает результаты опроса в процентах и голосах.
+     *
+     * @return array<string, mixed>
      */
     public static function getResults(int $pollId, ?array $options = null): array
     {

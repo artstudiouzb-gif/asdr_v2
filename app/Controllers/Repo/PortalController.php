@@ -240,7 +240,12 @@ final class PortalController
         ] + self::telegramViewData($user));
     }
 
-    /** Данные для блока «Вход через Telegram» на странице безопасности. */
+    /**
+     * Данные для блока «Вход через Telegram» на странице безопасности.
+     *
+     * @param array<string, mixed> $user
+     * @return array<string, mixed>
+     */
     private static function telegramViewData(array $user): array
     {
         $configured = TelegramBot::isConfigured();

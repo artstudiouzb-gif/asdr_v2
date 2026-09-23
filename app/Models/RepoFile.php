@@ -57,6 +57,8 @@ final class RepoFile
      * @param string $status 'approved' (по умолчанию), 'pending' или '' — любые
      * @param string $ext фильтр по расширению файла (pdf, docx, xlsx, zip, etc.)
      * @param string $sort сортировка (newest, popular, name, size)
+     *
+     * @return list<array<string, mixed>>
      */
     public static function all(string $query = '', int $categoryId = 0, string $status = 'approved', string $ext = '', string $sort = 'newest'): array
     {
@@ -111,7 +113,7 @@ final class RepoFile
         $stmt = Database::pdo()->prepare($sql);
         $stmt->execute($params);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     public static function count(): int
@@ -119,15 +121,19 @@ final class RepoFile
         return (int) Database::pdo()->query('SELECT COUNT(*) FROM repo_files')->fetchColumn();
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM repo_files WHERE id = :id LIMIT 1');
         $stmt->execute([':id' => $id]);
 
-        return $stmt->fetch() ?: null;
+        return Database::row($stmt);
     }
 
-    /** @param array<int> $ids */
+    /**
+     * @param array<int> $ids
+     * @return array<int, array<string, mixed>>
+     */
     public static function findManyByIds(array $ids): array
     {
         $cleanIds = array_values(array_filter(array_map('intval', $ids), static fn ($id) => $id > 0));
@@ -138,7 +144,11 @@ final class RepoFile
         return Database::pdo()->query("SELECT * FROM repo_files WHERE id IN ($in) AND status = 'approved'")->fetchAll();
     }
 
-    /** Файлы, ждущие одобрения, с логином загрузившего пользователя портала. */
+    /**
+     * Файлы, ждущие одобрения, с логином загрузившего пользователя портала.
+     *
+     * @return array<int, array<string, mixed>>
+     */
     public static function pending(): array
     {
         return Database::pdo()->query(

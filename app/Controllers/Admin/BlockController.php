@@ -408,6 +408,7 @@ final class BlockController
         exit;
     }
 
+    /** @param array<string, mixed> $block */
     private function pageEditUrl(array $block): string
     {
         return self::ownerEditUrl((int) $block['page_id'], (string) $block['lang']);
@@ -430,6 +431,7 @@ final class BlockController
         return $section . $pageId . '/edit?block_lang=' . urlencode($lang);
     }
 
+    /** @return array<string, mixed> */
     private function collectData(string $type, string $locale = 'ru'): array
     {
         switch ($type) {

@@ -14,6 +14,7 @@ use App\Core\SecretBox;
  */
 final class RepoUser
 {
+    /** @return array<int, array<string, mixed>> */
     public static function all(): array
     {
         return Database::pdo()->query(
@@ -27,6 +28,7 @@ final class RepoUser
         return (int) Database::pdo()->query('SELECT COUNT(*) FROM repo_users')->fetchColumn();
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM repo_users WHERE id = :id LIMIT 1');
@@ -35,6 +37,7 @@ final class RepoUser
         return self::decryptSecrets($stmt->fetch() ?: null);
     }
 
+    /** @return array<string, mixed>|null */
     public static function findByUsername(string $username): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM repo_users WHERE username = :u LIMIT 1');
@@ -166,6 +169,10 @@ final class RepoUser
         $stmt->execute([':id' => $id]);
     }
 
+    /**
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>|null
+     */
     private static function decryptSecrets(?array $row): ?array
     {
         if ($row !== null && array_key_exists('totp_secret', $row)) {

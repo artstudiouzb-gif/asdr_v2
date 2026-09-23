@@ -80,6 +80,7 @@ final class PageController
         $this->renderPage($page, $lang);
     }
 
+    /** @param array<string, mixed> $page */
     private function renderPage(array $page, string $lang, bool $isHome = false): void
     {
         // Переключатель языков и hreflang показывают только языки, на которых

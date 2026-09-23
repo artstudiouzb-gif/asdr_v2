@@ -8,13 +8,15 @@ use App\Core\Database;
 
 final class FormDef
 {
+    /** @return list<array<string, mixed>> */
     public static function all(): array
     {
         $stmt = Database::pdo()->query('SELECT * FROM forms ORDER BY created_at DESC');
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM forms WHERE id = :id LIMIT 1');
@@ -30,6 +32,7 @@ final class FormDef
         return $row;
     }
 
+    /** @return array<string, mixed>|null */
     public static function findBySlug(string $slug): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM forms WHERE slug = :slug LIMIT 1');
@@ -59,6 +62,7 @@ final class FormDef
         return (int) $stmt->fetchColumn() > 0;
     }
 
+    /** @param array<string, mixed> $data */
     public static function create(array $data): int
     {
         $stmt = Database::pdo()->prepare(
@@ -76,6 +80,7 @@ final class FormDef
         return (int) Database::pdo()->lastInsertId();
     }
 
+    /** @param array<string, mixed> $data */
     public static function update(int $id, array $data): void
     {
         $stmt = Database::pdo()->prepare(

@@ -6,6 +6,7 @@ namespace App\Core;
 
 final class View
 {
+    /** @param array<string, mixed> $data */
     public static function render(string $template, array $data = []): void
     {
         $file = __DIR__ . '/../Views/' . $template . '.php';
@@ -89,6 +90,7 @@ final class View
         return $settings['script'] === 'cyrl';
     }
 
+    /** @param array<string, mixed> $data */
     public static function renderPartial(string $template, array $data = []): string
     {
         $file = __DIR__ . '/../Views/' . $template . '.php';

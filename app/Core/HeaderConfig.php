@@ -171,6 +171,7 @@ final class HeaderConfig
         ],
     ];
 
+    /** @return array<string, mixed> */
     public static function get(): array
     {
         $raw = Setting::get('header_config', '');
@@ -187,6 +188,8 @@ final class HeaderConfig
      * «Дизайна»: `json_encode()` отдаёт `false` на битой кодировке, а
      * `Setting::set()` принимает `string` — под `strict_types` сохранение
      * шапки падало бы с `TypeError` вместо понятной ошибки.
+     *
+     * @param array<string, mixed> $config
      */
     public static function save(array $config): void
     {
@@ -194,7 +197,12 @@ final class HeaderConfig
         Setting::set('header_config', json_encode($clean, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
     }
 
-    /** Публичная нормализация конфигурации (валидация значений) без записи в БД. */
+    /**
+     * Публичная нормализация конфигурации (валидация значений) без записи в БД.
+     *
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
+     */
     public static function normalize(array $config): array
     {
         return self::mergeDefaults($config);
@@ -266,6 +274,10 @@ final class HeaderConfig
         return $zones;
     }
 
+    /**
+     * @param array<string, mixed> $config
+     * @return array<string, mixed>
+     */
     private static function mergeDefaults(array $config): array
     {
         $result = self::DEFAULTS;

@@ -59,6 +59,7 @@ final class BlockSnippet
         return count($labels) . ' бл.: ' . implode(', ', $shown) . $tail;
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM block_snippets WHERE id = :id LIMIT 1');

@@ -10,11 +10,12 @@ use App\Core\SecretBox;
 
 final class User
 {
+    /** @return list<array<string, mixed>> */
     public static function all(): array
     {
         $stmt = Database::pdo()->query('SELECT id, username, email, phone, role, admin_lang, last_login_at, created_at FROM users ORDER BY id ASC');
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     public static function count(): int
@@ -37,6 +38,7 @@ final class User
         return (int) $stmt->fetchColumn() > 0;
     }
 
+    /** @return array<string, mixed>|null */
     public static function findByUsername(string $username): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM users WHERE username = :username LIMIT 1');
@@ -58,6 +60,7 @@ final class User
      */
     private static array $byIdMemo = [];
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         if (array_key_exists($id, self::$byIdMemo)) {
@@ -77,6 +80,7 @@ final class User
         self::$byIdMemo = [];
     }
 
+    /** @return array<string, mixed>|null */
     public static function findByEmail(string $email): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM users WHERE email = :email LIMIT 1');
@@ -207,6 +211,10 @@ final class User
         return (int) Database::pdo()->lastInsertId();
     }
 
+    /**
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>|null
+     */
     private static function decryptSecrets(?array $row): ?array
     {
         if ($row !== null && array_key_exists('totp_secret', $row)) {

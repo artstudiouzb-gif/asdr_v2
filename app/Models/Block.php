@@ -14,6 +14,8 @@ final class Block
      * Блоки страницы для конкретного языкового стека. По умолчанию — только
      * верхнего уровня (parent_block_id IS NULL); дочерние блоки колонок
      * (группа 4.1) выбираются отдельно через childrenOf().
+     *
+     * @return list<array<string, mixed>>
      */
     public static function forPage(int $pageId, ?string $lang = null, bool $topLevelOnly = true, bool $activeOnly = false): array
     {
@@ -29,7 +31,7 @@ final class Block
         $stmt = Database::pdo()->prepare($sql);
         $stmt->execute([':page_id' => $pageId, ':lang' => $lang]);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /**
@@ -48,7 +50,7 @@ final class Block
         $stmt = Database::pdo()->prepare($sql);
         $stmt->execute([':pid' => $parentBlockId]);
 
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /**
@@ -57,6 +59,8 @@ final class Block
      * 2. Собственные блоки текущей страницы языка по умолчанию
      * 3. Блоки родительской страницы группы переводов нужного языка
      * 4. Блоки родительской страницы группы переводов языка по умолчанию
+     *
+     * @return array<int, array<string, mixed>>
      */
     public static function forPageLocalized(int $pageId, string $lang): array
     {
@@ -98,6 +102,7 @@ final class Block
         $stmt->execute([':a' => $active ? 1 : 0, ':id' => $id]);
     }
 
+    /** @return array<string, mixed>|null */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare('SELECT * FROM blocks WHERE id = :id LIMIT 1');
@@ -107,6 +112,7 @@ final class Block
         return $row ?: null;
     }
 
+    /** @param array<string, mixed> $data */
     public static function create(
         int $pageId,
         string $lang,
@@ -144,6 +150,7 @@ final class Block
         return (int) Database::pdo()->lastInsertId();
     }
 
+    /** @param array<string, mixed> $data */
     public static function update(
         int $id,
         ?string $title,

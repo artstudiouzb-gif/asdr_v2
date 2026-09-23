@@ -138,7 +138,7 @@ final class Notification
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return Database::rows($stmt);
     }
 
     /** @return list<array<string,mixed>> */

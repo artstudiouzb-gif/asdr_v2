@@ -24,6 +24,7 @@ final class NewsTranslation
         return $result;
     }
 
+    /** @return array<string, mixed>|null */
     public static function find(int $newsId, string $lang): ?array
     {
         $stmt = Database::pdo()->prepare(
@@ -60,6 +61,7 @@ final class NewsTranslation
         return $result;
     }
 
+    /** @param array<string, mixed> $data */
     public static function upsert(int $newsId, string $lang, array $data): void
     {
         $timelineJson = null;
