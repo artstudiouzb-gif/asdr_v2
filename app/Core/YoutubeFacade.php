@@ -10,8 +10,8 @@ namespace App\Core;
  * Ленивый iframe всё равно тянул ~1 МБ скриптов YouTube, как только ролик
  * подходил к экрану, — даже если его не смотрели. Здесь на странице только
  * картинка-превью и ссылка на ролик: без JS она открывает YouTube, с JS
- * (frontend.js) заменяется плеером по нажатию. Адрес плеера решает сервер
- * (домен без кук), скрипт его только подставляет.
+ * (frontend.js) заменяется плеером по нажатию. Скрипт берёт из разметки
+ * только id ролика и сам собирает адрес плеера на домене без кук.
  */
 final class YoutubeFacade
 {
@@ -25,11 +25,10 @@ final class YoutubeFacade
             return '';
         }
         $title = trim($title) !== '' ? trim($title) : 'YouTube';
-        $src = 'https://www.youtube-nocookie.com/embed/' . $id . '?rel=0&playsinline=1&autoplay=1';
         $classes = trim('yt-facade ' . $class);
 
         return '<div class="' . htmlspecialchars($classes, ENT_QUOTES) . '" data-yt-facade'
-            . ' data-yt-src="' . htmlspecialchars($src, ENT_QUOTES) . '"'
+            . ' data-yt-id="' . $id . '"'
             . ' data-yt-title="' . htmlspecialchars($title, ENT_QUOTES) . '">'
             . '<img class="yt-facade__thumb" src="' . htmlspecialchars(Video::youtubeThumbnail($id), ENT_QUOTES) . '"'
             . ' alt="" width="480" height="360" loading="lazy" decoding="async">'

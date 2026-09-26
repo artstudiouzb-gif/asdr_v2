@@ -14,7 +14,7 @@ use App\Core\YoutubeFacade;
 test('Обложка YouTube: превью и ссылка вместо iframe, плеер без кук', function (): void {
     $html = YoutubeFacade::html('dQw4w9WgXcQ', 'Ролик «О нас»', 'block-text__media-video');
     assert_not_contains('<iframe', $html);
-    assert_contains('data-yt-src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?', $html);
+    assert_contains('data-yt-id="dQw4w9WgXcQ"', $html);
     assert_contains('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg', $html);
     assert_contains('href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"', $html, 'без JS ролик открывается ссылкой');
     assert_contains('aria-label="', $html);
@@ -38,5 +38,6 @@ test('YouTube в тексте новости, во врезке и в блоке
 
     $js = (string) file_get_contents(APP_ROOT . '/public/assets/js/frontend.js');
     assert_contains("closest('[data-yt-facade] .yt-facade__play')", $js);
-    assert_contains("'https://www.youtube-nocookie.com/embed/'", $js, 'скрипт сверяет адрес плеера с доменом без кук');
+    assert_contains("'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id)", $js, 'адрес плеера собирает скрипт, из разметки — только id');
+    assert_contains('/^[A-Za-z0-9_-]{11}$/.test(id)', $js);
 });

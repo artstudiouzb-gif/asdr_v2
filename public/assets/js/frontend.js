@@ -58,17 +58,18 @@
     })();
 
     // Обложка YouTube (App\Core\YoutubeFacade) превращается в плеер только
-    // по нажатию: до этого страница не тянет скрипты YouTube. Адрес плеера
-    // дал сервер; здесь он лишь сверяется с доменом без кук.
+    // по нажатию: до этого страница не тянет скрипты YouTube. Из разметки
+    // берётся только id ролика строго по формату, адрес плеера (домен без
+    // кук) собирается здесь — чужой адрес в iframe не попадёт.
     document.addEventListener('click', function (event) {
         var play = event.target.closest ? event.target.closest('[data-yt-facade] .yt-facade__play') : null;
         if (!play) { return; }
         var box = play.closest('[data-yt-facade]');
-        var src = box.getAttribute('data-yt-src') || '';
-        if (src.indexOf('https://www.youtube-nocookie.com/embed/') !== 0) { return; }
+        var id = box.getAttribute('data-yt-id') || '';
+        if (!/^[A-Za-z0-9_-]{11}$/.test(id)) { return; }
         event.preventDefault();
         var iframe = document.createElement('iframe');
-        iframe.src = src;
+        iframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?rel=0&playsinline=1&autoplay=1';
         iframe.title = box.getAttribute('data-yt-title') || 'YouTube';
         iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
         iframe.allowFullscreen = true;
