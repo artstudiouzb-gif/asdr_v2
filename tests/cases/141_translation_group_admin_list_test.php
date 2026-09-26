@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Core\TranslationGroupHelper;
 use App\Models\Page;
+use App\Models\PageAdminList;
 
 test('Админка: группы переводов не дублируют строки в списке и выводят кликабельные языковые баджи', function (): void {
     ensure_test_db();
@@ -39,14 +40,14 @@ test('Админка: группы переводов не дублируют с
     );
 
     // Проверяем список без фильтра по языку (общий стандарт: выводит все записи)
-    $adminList = Page::adminList(['lang' => '', 'status' => '', 'q' => 'test-page-ru', 'sort' => 'newest', 'per_page' => 20, 'offset' => 0]);
+    $adminList = PageAdminList::items(['lang' => '', 'status' => '', 'q' => 'test-page-ru', 'sort' => 'newest', 'per_page' => 20, 'offset' => 0]);
     
     $idsInList = array_map(static fn(array $item): int => (int) $item['id'], $adminList);
     assert_true(in_array($origId, $idsInList, true), 'Первичная запись присутствует в списке');
     assert_true(in_array($uzId, $idsInList, true), 'Перевод также присутствует в общем списке Все языки');
 
     // Фильтр конкретного языка возвращает только запись этого языка
-    $uzOnly = Page::adminList(['lang' => 'uz', 'status' => '', 'q' => 'test-page-ru', 'sort' => 'newest', 'per_page' => 20, 'offset' => 0]);
+    $uzOnly = PageAdminList::items(['lang' => 'uz', 'status' => '', 'q' => 'test-page-ru', 'sort' => 'newest', 'per_page' => 20, 'offset' => 0]);
     $uzOnlyIds = array_map(static fn(array $item): int => (int) $item['id'], $uzOnly);
     assert_true(in_array($uzId, $uzOnlyIds, true), 'UZ-фильтр показывает самостоятельную UZ-запись');
     assert_false(in_array($origId, $uzOnlyIds, true), 'UZ-фильтр не подмешивает RU-запись той же группы');

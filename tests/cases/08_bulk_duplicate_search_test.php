@@ -6,6 +6,7 @@ use App\Core\Database;
 use App\Core\AdminListQuery;
 use App\Core\Search;
 use App\Models\Page;
+use App\Models\PageAdminList;
 
 // Все проверки этого файла требуют тестовую БД (см. TEST_DB_* в run.php).
 function ensure_test_db(): void
@@ -81,8 +82,8 @@ test('Admin filters: поиск, количество и пагинация ст
             'sort' => 'title_asc',
             'per_page' => 20,
         ], ['newest', 'title_asc'], 'newest');
-        assert_same(2, Page::adminCount($filters));
-        assert_same(2, count(Page::adminList($filters)));
+        assert_same(2, PageAdminList::count($filters));
+        assert_same(2, count(PageAdminList::items($filters)));
     } finally {
         foreach ($ids as $id) {
             Page::forceDelete($id);

@@ -23,6 +23,7 @@ use App\Core\TranslationGroupHelper;
 use App\Core\View;
 use App\Models\Language;
 use App\Models\News;
+use App\Models\NewsAdminList;
 use App\Models\NewsTranslation;
 use App\Models\ContentRevision;
 
@@ -43,9 +44,9 @@ final class NewsController
         $category = trim((string) ($_GET['category'] ?? ''));
         $filters['category'] = $category === 'none' ? 'none' : ((int) $category > 0 ? (string) (int) $category : '');
 
-        $total = News::adminCount($filters);
+        $total = NewsAdminList::count($filters);
         [$filters, $pages] = AdminListQuery::fitPage($filters, $total);
-        $items = News::adminList($filters);
+        $items = NewsAdminList::items($filters);
 
         // Названия категорий берём на языке, выбранном фильтром списка: рядом
         // уже стоят заголовки новостей на этом же языке.
