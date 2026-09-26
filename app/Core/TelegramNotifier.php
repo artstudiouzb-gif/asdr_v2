@@ -41,7 +41,7 @@ final class TelegramNotifier
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param array<array-key, mixed> $context
      */
     public static function send(string $level, string $message, array $context = []): void
     {
@@ -101,7 +101,7 @@ final class TelegramNotifier
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param array<array-key, mixed> $context
      */
     public static function buildText(string $level, string $message, array $context): string
     {

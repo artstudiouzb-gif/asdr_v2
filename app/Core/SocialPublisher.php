@@ -291,6 +291,7 @@ final class SocialPublisher
      */
     private function telegramRich(array $cfg, array $post): ?array
     {
+        /** @var list<array{code:string,label:string,title:string,excerpt:string,lead_html?:string,link:string,read_more:string}> $langs форма из SocialSettings::buildPost() */
         $langs = (array) ($post['langs'] ?? []);
         if ($langs === []) {
             return null;
@@ -516,6 +517,7 @@ final class SocialPublisher
      */
     private static function telegramCaption(array $post, string $signature, int $limit, callable $esc): string
     {
+        /** @var list<array{code:string,label:string,title:string,excerpt:string,lead_html?:string,link:string,read_more:string}> $langs форма из SocialSettings::buildPost() */
         $langs = (array) ($post['langs'] ?? []);
         if ($langs === []) {
             // Запасной вариант для старых вызовов без языковых блоков.
@@ -597,6 +599,7 @@ final class SocialPublisher
      */
     private static function plainMessage(array $post, string $signature, int $limit = 0): string
     {
+        /** @var list<array{code:string,label:string,title:string,excerpt:string,lead_html?:string,link:string,read_more:string}> $langs форма из SocialSettings::buildPost() */
         $langs = (array) ($post['langs'] ?? []);
         if ($langs === []) {
             $text = trim((string) ($post['message'] ?? '')) . "\n\n" . (string) ($post['link'] ?? '');

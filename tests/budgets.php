@@ -574,8 +574,12 @@ function quality_budgets(): array
             // 245 -> 45: типы элементов у всех параметров, результатов, свойств
             // и @var во вьюхах (missingType.iterableValue); однострочные PHPDoc
             // с несколькими тегами разбиты — второй тег анализатор не читал.
-            // Остаток — argument.type/return.type, отдельный проход.
-            'ceiling' => static fn (): int => 45,
+            // 45 -> 0: argument.type/return.type — формы результатов объявлены
+            // один раз (@phpstan-type), списки там, где функция сама делает
+            // array_values(), приняты как array<int, …>, и четыре настоящих
+            // отказа под strict_types закрыты в коде. Эталон пуст: новая
+            // находка — это сразу красный CI.
+            'ceiling' => static fn (): int => 0,
             'measure' => static function (): array {
                 $baseline = APP_ROOT . '/phpstan-baseline.neon';
                 if (!is_file($baseline)) {

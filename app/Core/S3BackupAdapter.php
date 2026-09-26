@@ -36,8 +36,12 @@ final class S3BackupAdapter
                 'Authorization: AWS ' . $accessKey . ':' . $signature,
             ];
 
+            $size = filesize($filePath);
             $input = fopen($filePath, 'rb');
-            if ($input === false) {
+            if ($input === false || $size === false) {
+                if ($input !== false) {
+                    fclose($input);
+                }
                 return false;
             }
             $ch = curl_init();
@@ -45,7 +49,7 @@ final class S3BackupAdapter
                 CURLOPT_URL => $url,
                 CURLOPT_PUT => true,
                 CURLOPT_INFILE => $input,
-                CURLOPT_INFILESIZE => filesize($filePath),
+                CURLOPT_INFILESIZE => $size,
                 CURLOPT_HTTPHEADER => $headers,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => 30,

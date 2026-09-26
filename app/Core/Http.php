@@ -21,6 +21,9 @@ final class Http
      */
     public static function request(string $method, string $url, string $body = '', array $headers = [], int $timeout = 20): array
     {
+        if ($method === '') {
+            $method = 'GET';
+        }
         if (function_exists('curl_init')) {
             return self::viaCurl($method, $url, $body, $headers, $timeout);
         }
@@ -75,6 +78,9 @@ final class Http
         int $timeout = 20,
         int $maxResponseBytes = self::SAFE_REMOTE_MAX_BYTES
     ): array {
+        if ($method === '') {
+            $method = 'GET';
+        }
         $target = UrlGuard::safeRemoteTarget($url);
         if ($target === null) {
             return ['status' => 0, 'body' => '', 'error' => 'unsafe remote URL'];
@@ -108,6 +114,7 @@ final class Http
     }
 
     /**
+     * @param non-empty-string $method
      * @param array<int, string> $headers
      * @return array{status:int, body:string, error:string}
      */
@@ -140,6 +147,7 @@ final class Http
     }
 
     /**
+     * @param non-empty-string $method
      * @param array<int, string> $headers
      * @param array{host:string,port:int,ips:list<string>} $target
      * @return array{status:int, body:string, error:string}
@@ -221,6 +229,7 @@ final class Http
     }
 
     /**
+     * @param non-empty-string $method
      * @param array<int, string> $headers
      * @return array{status:int, body:string, error:string}
      */

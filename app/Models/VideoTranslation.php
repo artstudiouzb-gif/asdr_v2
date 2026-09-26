@@ -38,7 +38,7 @@ final class VideoTranslation
 
     /**
      * Пакетная загрузка одного перевода для списка видео — устраняет N+1.
-     * @param list<int> $videoIds
+     * @param array<int, int> $videoIds
      * @return array<int, array<string, mixed>>
      */
     public static function forVideoIds(array $videoIds, string $lang): array

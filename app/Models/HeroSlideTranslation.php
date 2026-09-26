@@ -48,7 +48,7 @@ final class HeroSlideTranslation
      * Один язык для набора слайдов — обложка рендерится на каждой странице,
      * поэтому N+1 здесь недопустим.
      *
-     * @param list<int> $slideIds
+     * @param array<int, int> $slideIds
      * @return array<int, array<string, mixed>>
      */
     public static function forSlides(array $slideIds, string $lang): array

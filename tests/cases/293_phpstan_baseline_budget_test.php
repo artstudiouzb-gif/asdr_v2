@@ -26,9 +26,13 @@ test('Эталон PHPStan не растёт', function () {
     assert_true(is_file(APP_ROOT . '/phpstan-baseline.neon'), 'эталон PHPStan не найден');
 
     $budget = quality_budget('phpstan_baseline');
+    // Ноль находок законен только у честно пустого эталона. Иначе ноль
+    // означал бы, что разбор файла сломался и сторож перестал что-либо видеть.
+    $text = (string) file_get_contents(APP_ROOT . '/phpstan-baseline.neon');
+    $empty = preg_match('/^\s*ignoreErrors:\s*\[\]\s*$/m', $text) === 1;
     assert_true(
-        $budget['value'] !== null && $budget['value'] > 0,
-        'в эталоне не разобрано ни одной записи'
+        $budget['value'] !== null && ($budget['value'] > 0 || $empty),
+        'в эталоне не разобрано ни одной записи, а сам он не пуст'
     );
 
     // Планка. Уменьшать — можно и нужно; увеличивать — нет.

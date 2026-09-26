@@ -186,8 +186,8 @@ final class TelegramRichMessage
      * Полный языковой раздел. Открытый и сворачиваемый режимы используют
      * один результат и отличаются только внешней оболочкой <details>.
      *
-     * @param array<string,mixed> $lang
-     * @param callable(array<string, mixed>):string $metaLine
+     * @param array{code:string,label:string,title:string,excerpt:string,lead_html?:string,link:string,read_more:string} $lang
+     * @param callable(array{code:string,label:string,title:string,excerpt:string,lead_html?:string,link:string,read_more:string}):string $metaLine
      */
     private static function languageSection(array $lang, callable $esc, callable $metaLine): string
     {

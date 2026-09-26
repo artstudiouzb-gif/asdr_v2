@@ -16,7 +16,7 @@ final class ContentChecklist
 {
     /**
      * @param array<string,mixed> $news строка новости
-     * @param list<array<string,mixed>> $gallery снимки галереи
+     * @param array<int, array<string, mixed>> $gallery снимки галереи
      * @param list<string> $translatedLangs языки, на которых есть перевод
      * @return list<array{key:string, text:string, why:string}>
      */
