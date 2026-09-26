@@ -39,9 +39,12 @@ use App\Core\Csrf;
     $channels = \App\Core\Auth::pendingChannels();
     ?>
     <div class="auth-head">
-        <h1><?= $channels['totp'] && !$channels['telegram'] ? 'Код из приложения' : 'Код подтверждения' ?></h1>
+        <?php $codeChannel = $channels['totp'] || $channels['telegram']; ?>
+        <h1><?= !$codeChannel ? 'Ключ доступа' : ($channels['totp'] && !$channels['telegram'] ? 'Код из приложения' : 'Код подтверждения') ?></h1>
         <p class="auth-sub">
-            <?php if ($channels['totp'] && $channels['telegram']): ?>
+            <?php if (!$codeChannel): ?>
+                Подтвердите вход ключом доступа: отпечатком, лицом, PIN-кодом устройства или аппаратным ключом.
+            <?php elseif ($channels['totp'] && $channels['telegram']): ?>
                 Введите 6-значный код из приложения-аутентификатора или тот, что мы отправили в Telegram.
             <?php elseif ($channels['totp']): ?>
                 Откройте приложение-аутентификатор и введите 6-значный код для этого сайта.
@@ -58,6 +61,20 @@ use App\Core\Csrf;
         <div class="alert alert--error"><?= htmlspecialchars($error, ENT_QUOTES) ?></div>
     <?php endif; ?>
 
+    <?php if ($channels['passkey']): ?>
+        <?php // Ключ доступа подписывает вход на устройстве: вводить ничего не нужно. ?>
+        <div class="auth-form" data-passkey-login>
+            <?= Csrf::field() ?>
+            <div class="alert alert--error" data-passkey-error hidden></div>
+            <button type="button" class="auth-submit-btn">
+                <span>Войти ключом доступа</span>
+                <?= \App\Core\AdminUi::icon('lock', 18) ?>
+            </button>
+        </div>
+        <script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/js/admin-passkey.js'), ENT_QUOTES) ?>" defer></script>
+    <?php endif; ?>
+
+    <?php if ($codeChannel): ?>
     <form method="post" action="/admin/login/2fa" class="auth-form">
         <?= Csrf::field() ?>
         <div class="auth-field">
@@ -73,6 +90,7 @@ use App\Core\Csrf;
             <?= \App\Core\AdminUi::icon('arrow-right', 18) ?>
         </button>
     </form>
+    <?php endif; ?>
 
     <?php if ($channels['telegram']): ?>
         <?php // Коду из приложения повторная отправка не нужна — он там уже есть. ?>

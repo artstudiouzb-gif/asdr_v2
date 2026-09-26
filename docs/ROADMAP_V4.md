@@ -253,9 +253,12 @@ Lighthouse: LCP ≤ 2,5 с, INP ≤ 200 мс, CLS ≤ 0,1; TTFB HTML из кэш
   пустого `csp-report.log`, затем `security.csp_strict_style = true`.
 - **Trusted Types** в админке (`require-trusted-types-for 'script'`) — после
   аудита `innerHTML` в `admin.js`.
-- **Passkeys/WebAuthn — правильно**: проверка challenge, origin, подписи
-  (ES256/RS256 через `openssl_verify`, без библиотек), счётчика; как третий
-  канал второго фактора, затем как беспарольный вход.
+- ✅ **Passkeys/WebAuthn — третий канал второго фактора**: проверка
+  challenge, origin, rpId, подписи (ES256/RS256 через `openssl_verify`, без
+  библиотек) и счётчика; регистрация в профиле с паролем, в том числе из
+  ограниченной сессии онбординга. Проверено в Chromium с виртуальным
+  аутентификатором. Осталось: беспарольный вход (discoverable credentials)
+  и ключи для портала репозитория.
 - ✅ Пароли: Argon2id при доступности (`App\Core\Password`; `upgrade()` —
   прозрачная перехешовка bcrypt при входе), bcrypt — запасной вариант. Для
   несуществующего логина пароль сверяется с заготовкой — время ответа то же.
@@ -302,7 +305,7 @@ Lighthouse: LCP ≤ 2,5 с, INP ≤ 200 мс, CLS ≤ 0,1; TTFB HTML из кэш
 | 7 | Электронная приёмная + защита ПДн | v3.0 | L | 2 |
 | 8 | Форма блока из схемы, стили без атрибутов | v3.x | M | — |
 | 9 | CSP без `unsafe-inline` для стилей (report-only → боевая) | v3.x | M | 8 |
-| 10 | Passkeys, Argon2id, обязательная 2FA | v3.x | M | — |
+| 10 | ✅ Passkeys (2FA), Argon2id, обязательная 2FA | v3.x | M | — |
 | 11 | AVIF, facade YouTube, Speculation Rules | v3.x | M | 1 |
 | 12 | Чистка админки: слои-патчи → 0, разрез админ-CSS | v3.x | M | 4 |
 | 13 | Роутер-таблица, CRUD-каркас админки | v3.x | M | 6 |

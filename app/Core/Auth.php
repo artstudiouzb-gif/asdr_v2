@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Core\WebAuthn\WebAuthn;
+use App\Models\Passkey;
 use App\Models\SessionRegistry;
 use App\Models\User;
 
@@ -74,8 +76,9 @@ final class Auth
 
         $totpOn = self::totpChannelAvailable($user);
         $telegramOn = self::telegramChannelAvailable($user);
+        $passkeyOn = self::passkeyChannelAvailable($user);
 
-        if (!$totpOn && !$telegramOn) {
+        if (!$totpOn && !$telegramOn && !$passkeyOn) {
             self::establishSession($user);
 
             if ((string) Config::get('app.env') !== 'development') {
@@ -98,7 +101,7 @@ final class Auth
         // Приложение-аутентификатор работает офлайн, поэтому недоступный
         // Telegram больше не запирает вход.
         $sent = $telegramOn && self::sendLoginCode($user);
-        if ($telegramOn && !$sent && !$totpOn) {
+        if ($telegramOn && !$sent && !$totpOn && !$passkeyOn) {
             self::clearPending();
 
             return ['status' => 'send_failed'];
@@ -106,6 +109,7 @@ final class Auth
 
         $_SESSION['pending_totp'] = $totpOn;
         $_SESSION['pending_telegram'] = $sent;
+        $_SESSION['pending_passkey'] = $passkeyOn;
 
         return ['status' => 'needs_code'];
     }
@@ -119,7 +123,19 @@ final class Auth
      */
     private static function hasCodeChannel(array $user): bool
     {
-        return self::totpChannelAvailable($user) || self::telegramChannelAvailable($user);
+        return self::totpChannelAvailable($user) || self::telegramChannelAvailable($user)
+            || self::passkeyChannelAvailable($user);
+    }
+
+    /**
+     * Ключ доступа (passkey): подпись считает устройство, фишинговый сайт
+     * её не получит — ключ привязан к домену.
+     *
+     * @param array<string, mixed> $user
+     */
+    private static function passkeyChannelAvailable(array $user): bool
+    {
+        return Passkey::countForUser((int) ($user['id'] ?? 0)) > 0;
     }
 
     /**
@@ -373,7 +389,9 @@ final class Auth
             $_SESSION['pending_code_hash'],
             $_SESSION['pending_code_expires'],
             $_SESSION['pending_totp'],
-            $_SESSION['pending_telegram']
+            $_SESSION['pending_telegram'],
+            $_SESSION['pending_passkey'],
+            $_SESSION['webauthn']
         );
     }
 
@@ -551,7 +569,7 @@ final class Auth
      * Какими каналами можно подтвердить текущий вход. Нужно странице ввода
      * кода: «код из Telegram» и «код из приложения» — разные инструкции.
      *
-     * @return array{totp: bool, telegram: bool}
+     * @return array{totp: bool, telegram: bool, passkey: bool}
      */
     public static function pendingChannels(): array
     {
@@ -560,7 +578,106 @@ final class Auth
         return [
             'totp' => !empty($_SESSION['pending_totp']),
             'telegram' => !empty($_SESSION['pending_telegram']),
+            'passkey' => !empty($_SESSION['pending_passkey']),
         ];
+    }
+
+    /**
+     * Параметры navigator.credentials.get() для ожидающего входа; null —
+     * входа нет, он просрочен или ключей у пользователя нет.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function passkeyLoginOptions(): ?array
+    {
+        $user = self::pendingUser();
+        if ($user === null || empty($_SESSION['pending_passkey'])) {
+            return null;
+        }
+        $allow = [];
+        foreach (Passkey::forUser((int) $user['id']) as $key) {
+            $allow[] = ['type' => 'public-key', 'id' => (string) $key['credential_id']];
+        }
+        if ($allow === []) {
+            return null;
+        }
+
+        return [
+            'challenge' => WebAuthn::b64url(WebAuthn::challenge('login')),
+            'rpId' => WebAuthn::rpId(),
+            'allowCredentials' => $allow,
+            'userVerification' => 'preferred',
+            'timeout' => 60000,
+        ];
+    }
+
+    /**
+     * Второй фактор ключом доступа: подпись challenge этого входа ключом,
+     * зарегистрированным за пользователем. Попытки считаются тем же
+     * ограничителем, что и коды.
+     */
+    public static function completePasskey(string $credentialId, string $clientDataJson, string $authenticatorData, string $signature): bool
+    {
+        $user = self::pendingUser();
+        if ($user === null || empty($_SESSION['pending_passkey'])) {
+            return false;
+        }
+
+        $identifier = ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . '|2fa|' . mb_strtolower((string) $user['username']);
+        if (RateLimiter::tooManyAttempts($identifier)) {
+            return false;
+        }
+
+        $key = Passkey::find((int) $user['id'], $credentialId);
+        $challenge = WebAuthn::takeChallenge('login');
+        try {
+            if ($key === null || $challenge === null) {
+                throw new \InvalidArgumentException('Ключ не найден или challenge просрочен');
+            }
+            $count = WebAuthn::verifyAssertion(
+                $clientDataJson,
+                $authenticatorData,
+                $signature,
+                $challenge,
+                WebAuthn::origin(),
+                WebAuthn::rpId(),
+                (string) $key['public_key'],
+                (int) $key['sign_count']
+            );
+        } catch (\InvalidArgumentException $e) {
+            RateLimiter::recordAttempt($identifier, false);
+            Logger::security('Ключ доступа отклонён: ' . $e->getMessage(), [
+                'user' => (string) $user['username'],
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
+            ]);
+
+            return false;
+        }
+
+        Passkey::markUsed((int) $key['id'], $count);
+        RateLimiter::clearAttempts($identifier);
+        self::clearPending();
+        self::establishSession($user);
+
+        return true;
+    }
+
+    /**
+     * Пользователь незавершённого входа, если окно подтверждения не истекло.
+     *
+     * @return array<string, mixed>|null
+     */
+    private static function pendingUser(): ?array
+    {
+        Session::start();
+        $userId = (int) ($_SESSION['pending_user_id'] ?? 0);
+        if ($userId === 0 || (time() - (int) ($_SESSION['pending_since'] ?? 0)) > self::CODE_TTL) {
+            self::clearPending();
+
+            return null;
+        }
+
+        return User::findById($userId);
     }
 
     public static function requiresTwoFactorSetup(): bool

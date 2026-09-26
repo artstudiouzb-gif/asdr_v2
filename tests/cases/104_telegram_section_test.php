@@ -60,7 +60,8 @@ test('Раздел Telegram доступен до настройки второ�
     $routes = (string) file_get_contents(dirname(__DIR__, 2) . '/public/index.php');
     $pos = strpos($routes, '$allowedSetupPaths');
     assert_true($pos !== false, 'список разрешённых путей на месте');
-    $line = substr($routes, (int) $pos, 700);
+    $end = strpos($routes, '];', (int) $pos);
+    $line = substr($routes, (int) $pos, ($end === false ? 700 : $end - (int) $pos));
 
     assert_contains("'/admin/telegram'", $line);
     assert_contains("'/admin/profile'", $line);

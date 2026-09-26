@@ -46,6 +46,7 @@ final class ProfileController
             'botLinked' => $botLinked,
             'botUsername' => $botUsername,
             'linkCode' => $_SESSION['tg_link_code'] ?? null,
+            'passkeys' => \App\Models\Passkey::forUser($userId),
             'error' => null,
         ] + self::totpViewData($profileUser));
     }
