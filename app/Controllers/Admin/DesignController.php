@@ -8,6 +8,7 @@ use App\Core\Auth;
 use App\Core\Cache;
 use App\Core\Csrf;
 use App\Core\DesignSettings;
+use App\Core\DesignUserPresets;
 use App\Core\Flash;
 use App\Core\LocalGoogleFonts;
 use App\Core\View;
@@ -26,7 +27,7 @@ final class DesignController
             'options' => DesignSettings::OPTIONS,
             // Встроенные конфигурации в интерфейс не выводим (см. вью):
             // остались только сохранённые администратором.
-            'userPresets' => DesignSettings::userPresets(),
+            'userPresets' => DesignUserPresets::all(),
             'values' => DesignSettings::current(),
             'activePreset' => Setting::get('design_preset', ''),
         ]);
@@ -219,7 +220,7 @@ final class DesignController
         Auth::requireSuperAdmin();
         Csrf::verifyRequest();
 
-        $slug = DesignSettings::saveUserPreset((string) ($_POST['name'] ?? ''));
+        $slug = DesignUserPresets::saveCurrent((string) ($_POST['name'] ?? ''));
         if ($slug === null) {
             Flash::error('Не удалось сохранить: укажите название (до 40 символов); максимум 10 конфигураций.');
         } else {
@@ -235,7 +236,7 @@ final class DesignController
         Auth::requireSuperAdmin();
         Csrf::verifyRequest();
 
-        if (DesignSettings::deleteUserPreset((string) ($_POST['slug'] ?? ''))) {
+        if (DesignUserPresets::delete((string) ($_POST['slug'] ?? ''))) {
             Flash::success('Конфигурация удалена.');
         } else {
             Flash::error('Конфигурация не найдена.');
@@ -290,7 +291,7 @@ final class DesignController
         }
 
         $presetSlug = substr($preset, 5);
-        $presetData = DesignSettings::userPresets()[$presetSlug] ?? null;
+        $presetData = DesignUserPresets::all()[$presetSlug] ?? null;
         if (is_array($presetData)) {
             $appearance = (array) ($presetData['appearance'] ?? []);
             $fontInstall = LocalGoogleFonts::installSelected([
@@ -307,11 +308,11 @@ final class DesignController
 
         // Применение переписывает все настройки разом, поэтому сначала
         // откладываем текущее состояние — как автокопию страницы перед заменой.
-        $backup = DesignSettings::autoBackupPreset();
+        $backup = DesignUserPresets::autoBackup();
 
         if (DesignSettings::applyPreset($preset)) {
             Cache::forgetPrefix('page:');
-            $label = DesignSettings::userPresets()[substr($preset, 5)]['label'] ?? $preset;
+            $label = DesignUserPresets::all()[substr($preset, 5)]['label'] ?? $preset;
             Flash::success('Конфигурация «' . $label . '» применена.');
             if ($backup !== null) {
                 Flash::success('Прежние настройки сохранены как «' . $backup . '» — примените её, чтобы вернуть как было.');
