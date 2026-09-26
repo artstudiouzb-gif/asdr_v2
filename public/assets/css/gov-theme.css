@@ -134,12 +134,23 @@
        для случаев, где нужен заведомо меньший или больший скругление. */
     --radius-pill: 999px;
 
-    /* Тени: четыре ступени вместо 159 разных значений в теме. Цвет —
+    /* Тени: ступени вместо 159 разных значений в теме. Цвет —
        от чернильного, а не чистый чёрный: на светлом фоне так мягче. */
     --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.1);
     --shadow-2: 0 4px 12px rgba(15, 23, 42, 0.08);
     --shadow-3: 0 12px 32px rgba(15, 23, 42, 0.12);
     --shadow-4: 0 24px 60px rgba(15, 23, 42, 0.16);
+    /* Промежуточные ступени по факту использования: едва заметная тень
+       карточки в покое, мягкая, рассеянная крупная, всплывающая панель
+       (меню, подсказки поиска) и три «подъёма» с отрицательным разбросом —
+       тень под карточкой при наведении, не выходящая за её бока. */
+    --shadow-rest: 0 2px 8px rgba(15, 23, 42, 0.04);
+    --shadow-soft: 0 6px 24px rgba(15, 23, 42, 0.06);
+    --shadow-ambient: 0 10px 30px rgba(15, 23, 42, 0.08);
+    --shadow-float: 0 18px 44px rgba(11, 26, 48, 0.16);
+    --shadow-lift: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
+    --shadow-lift-deep: 0 16px 36px -24px rgba(11, 26, 48, 0.5);
+    --shadow-lift-xl: 0 24px 54px -36px rgba(11, 26, 48, 0.52);
 }
 :root[data-theme="dark"] {
     /* Тёмная тема: одна синевато-сланцевая гамма, ступени по светлоте ровные.
@@ -598,7 +609,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-dot .site-men
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(226, 232, 240, 0.9);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-ambient);
 }
 
 /* 2. На не-прозрачных внутренних страницах в тёмной теме (Inner Dark Pages) */
@@ -858,7 +869,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
    (.site-header--sticky/--transparent); прежние классы design-header-* из
    раздела «Дизайн» удалены вместе с настройками, которые их не выводили. --- */
 body .site-header--sticky { position: sticky; top: var(--hdr-panel-height, 0px); z-index: 200; }
-body .site-header--sticky.is-scrolled { box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12); }
+body .site-header--sticky.is-scrolled { box-shadow: var(--shadow-3); }
 
 /* Прозрачная шапка: накладывается на первый экран; текст/иконки белые.
    При прокрутке (is-scrolled) возвращается сплошной фон и цвета темы. */
@@ -1428,7 +1439,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
 body .site-header--borders-container.site-header--transparent:not(.is-scrolled) .site-nav .site-nav__inner { border-top-color: rgba(var(--hdr-veil, 255, 255, 255), .16); }
 
 /* --- Выпадающее подменю (гос-тема) --- */
-.site-submenu { background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 12px); box-shadow: 0 18px 44px rgba(11,26,48,.16); padding: 8px; min-width: 240px; margin-top: 6px; }
+.site-submenu { background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius, 12px); box-shadow: var(--shadow-float); padding: 8px; min-width: 240px; margin-top: 6px; }
 .site-submenu::before { content: ''; position: absolute; top: -6px; left: 26px; width: 10px; height: 10px; background: var(--gov-surface); border-left: 1px solid var(--gov-border); border-top: 1px solid var(--gov-border); transform: rotate(45deg); }
 .site-submenu::after { content: ''; position: absolute; top: -10px; left: 0; right: 0; height: 12px; background: transparent; }
 .site-submenu__link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-sm, 8px); color: var(--gov-title); font-weight: 600; font-size: var(--step--1); text-transform: var(--submenu-text-transform, none); letter-spacing: 0; }
@@ -1495,7 +1506,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
     background: var(--gov-surface);
     border: 1px solid var(--gov-border);
     border-radius: var(--radius, 12px);
-    box-shadow: 0 18px 44px rgba(11,26,48,.16);
+    box-shadow: var(--shadow-float);
     padding: 6px;
     max-height: min(60vh, 420px);
     overflow-y: auto;
@@ -1714,7 +1725,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .news-card:hover, .content-card:hover, .contact-card:hover, .cat-tile:hover, .team-card:hover, .project-card:hover, .person-card:hover, .block-advantages__item:hover, .album-card:hover,
 .doc-card:hover, .catcard:hover, .catdetail__card:hover, .widget--style-card:hover {
     background: color-mix(in srgb, var(--gov-surface) 88%, transparent);
-    box-shadow: 0 16px 36px rgba(19,42,92,.09);
+    box-shadow: var(--shadow-3);
     transform: translateY(-6px);
     border-color: var(--gov-teal);
 }
@@ -1765,7 +1776,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     background: linear-gradient(135deg, rgba(13, 148, 136, 0.06), rgba(2, 132, 199, 0.04));
     border: 1px solid var(--gov-border, rgba(13, 148, 136, 0.18));
     border-left: 4px solid var(--gov-teal); border-radius: var(--radius, 14px);
-    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
+    box-shadow: var(--shadow-soft);
 }
 .news-audio-player__icon {
     display: flex; align-items: center; justify-content: center;
@@ -1869,7 +1880,7 @@ body.reader-mode-active { overflow: hidden; }
 .reader-mode__body { font-size: calc(1.125rem * var(--reader-scale, 1)); }
 .reader-mode__cover {
     width: 100%; max-height: 480px; object-fit: cover;
-    border-radius: var(--radius, 16px); margin-bottom: 36px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius, 16px); margin-bottom: 36px; box-shadow: var(--shadow-ambient);
 }
 .reader-mode__body p { margin-bottom: 1.6em; }
 .reader-mode__body img { max-width: 100%; height: auto; border-radius: var(--radius, 12px); margin: 24px 0; }
@@ -1880,7 +1891,7 @@ body.reader-mode-active { overflow: hidden; }
 .social-embed { margin: 28px 0; clear: both; }
 .social-embed--youtube {
     position: relative; padding-bottom: 56.25%; height: 0;
-    overflow: hidden; border-radius: var(--radius, 16px); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    overflow: hidden; border-radius: var(--radius, 16px); box-shadow: var(--shadow-3);
 }
 .social-embed--youtube iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
 .social-embed--telegram { display: flex; justify-content: center; max-width: 100%; overflow-x: auto; }
@@ -1891,9 +1902,9 @@ body.reader-mode-active { overflow: hidden; }
     border-radius: var(--radius, 14px); border: 1px solid var(--gov-border, rgba(0, 0, 0, 0.1));
     background: var(--gov-surface, #ffffff); text-decoration: none;
     color: var(--gov-title, #1e293b); transition: all 0.25s ease;
-    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05); width: 100%;
+    box-shadow: var(--shadow-soft); width: 100%;
 }
-.social-embed-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12); }
+.social-embed-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-3); }
 .social-embed-card--telegram { border-left: 4px solid #229ed9; }
 .social-embed-card--telegram:hover { border-color: #229ed9; }
 .social-embed-card--instagram { border-left: 4px solid #e1306c; }
@@ -2018,7 +2029,7 @@ body.lightbox-active { overflow: hidden; }
     max-width: 360px; padding: 18px 20px; border-radius: var(--radius, 16px);
     background: var(--gov-surface, #ffffff);
     border: 1px solid var(--gov-border, rgba(0, 0, 0, 0.12));
-    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.15);
+    box-shadow: var(--shadow-3);
     color: var(--gov-title, #1e293b); animation: pushPromptSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @keyframes pushPromptSlideUp {
@@ -2062,7 +2073,7 @@ body.lightbox-active { overflow: hidden; }
 .news-poll-card {
     margin: 32px 0; padding: 24px; border-radius: var(--radius, 16px);
     background: var(--gov-surface); border: 1px solid var(--gov-border);
-    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
+    box-shadow: var(--shadow-soft);
 }
 .news-poll-card__badge {
     display: inline-block; padding: 4px 10px; border-radius: var(--radius-sm, 6px);
@@ -2568,7 +2579,7 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 .team-card:hover {
     transform: translateY(-4px);
     border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
-    box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
+    box-shadow: var(--shadow-lift);
 }
 
 .relnews-card__media,
@@ -2719,7 +2730,7 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 }
 .block-banner--light:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(19, 42, 92, 0.05);
+    box-shadow: var(--shadow-ambient);
 }
 @media (max-width: 900px) { .block-banner--light { grid-template-columns: 1fr; } .block-banner--light .block-banner__photo { display: none; } }
 .block-banner--light .block-banner__inner { padding: clamp(20px, 4vw, 48px) 0; text-align: left; }
@@ -3032,13 +3043,13 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 .block-map__card { 
     position: absolute; left: 24px; bottom: 24px; max-width: 300px; 
     background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius-sm, calc(var(--radius) * 0.6)); 
-    padding: 18px 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
+    padding: 18px 20px; box-shadow: var(--shadow-ambient); 
     display: flex; flex-direction: column; gap: 8px; 
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 .block-map__card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 16px 36px rgba(19,42,92,.12);
+    box-shadow: var(--shadow-3);
     border-color: var(--gov-teal);
 }
 .block-map__card-title { font-weight: 700; color: var(--gov-title); font-size: var(--step--1); line-height: 1.35; }
@@ -3190,7 +3201,7 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 }
 .newslist-lead:hover {
     border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
-    box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
+    box-shadow: var(--shadow-lift);
     transform: translateY(-2px);
 }
 @media (max-width: 900px) {
@@ -4219,11 +4230,11 @@ h4.section-head__title { font-size: var(--font-size-card-title, var(--step-2)); 
 .mediacard__media { 
     position: relative; display: grid; place-items: center; aspect-ratio: 16/10; 
     border-radius: var(--radius); overflow: hidden; background: #24425f center/cover no-repeat; 
-    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+    box-shadow: var(--shadow-soft);
     transition: box-shadow 0.4s ease;
 }
 .mediacard:hover .mediacard__media {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-ambient);
 }
 .mediacard__img { 
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; 
@@ -4264,7 +4275,7 @@ h4.section-head__title { font-size: var(--font-size-card-title, var(--step-2)); 
    выглядят суетливо (закреплено тестом 119). */
 .mediacard:hover {
     border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
-    box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
+    box-shadow: var(--shadow-lift);
 }
 .mediacard__date { display: block; color: var(--gov-muted); font-size: var(--step--2); margin-top: 4px; }
 
@@ -4903,7 +4914,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
 .block-newsfeat--mosaic .newsfeat-mini:hover,
 .block-newsfeat--mosaic .newsfeat-text:hover {
     border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
-    box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
+    box-shadow: var(--shadow-lift);
 }
 .block-newsfeat--mosaic .newsfeat-mini { gap: 0; }
 .block-newsfeat--mosaic .newsfeat-mini__thumb { border-radius: 0; }
@@ -5811,7 +5822,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow.is-open .s
     background: var(--gov-surface);
     color: var(--gov-title);
     border: 1px solid var(--gov-border);
-    box-shadow: 0 10px 30px rgba(11, 26, 48, 0.18);
+    box-shadow: var(--shadow-float);
     font-size: var(--step--2);
     font-weight: 600;
     pointer-events: auto;
@@ -6341,7 +6352,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     padding-block: 0;
     background: var(--gov-surface);
     border-bottom: 1px solid var(--gov-border);
-    box-shadow: 0 12px 24px -22px rgba(11, 26, 48, .5);
+    box-shadow: var(--shadow-lift-deep);
 }
 .block-anchornav--sticky { border-bottom: 0; }
 .block-anchornav__link:focus-visible { outline: 3px solid var(--gov-teal); outline-offset: -3px; }
@@ -6384,7 +6395,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
 }
 .act-card:hover {
-    box-shadow: 0 18px 36px -26px rgba(11, 26, 48, .55);
+    box-shadow: var(--shadow-lift-deep);
     transform: translateY(-2px);
 }
 /* Эмблема-звезда как водяной знак: фирменный слой, который не мешает
@@ -6488,7 +6499,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     background:
         radial-gradient(circle at 100% 0, rgba(38, 180, 185, .28), transparent 42%),
         var(--gov-navy);
-    box-shadow: 0 22px 50px -34px rgba(11, 26, 48, .7);
+    box-shadow: var(--shadow-lift-xl);
 }
 
 /* Текст статьи: спокойный вертикальный ритм. Меры строки здесь НЕТ, и это
@@ -6669,7 +6680,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .doc-card:hover {
     transform: translateY(-3px);
     border-color: color-mix(in srgb, var(--gov-teal) 40%, var(--gov-border));
-    box-shadow: 0 12px 28px -12px rgba(15, 23, 42, 0.1);
+    box-shadow: var(--shadow-lift);
 }
 .doc-card__icon {
     display: grid; place-items: center; width: 44px; height: 44px;
@@ -6699,13 +6710,13 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .block-advantages__item {
     display: flex; flex-direction: column; gap: 14px; padding: 26px 24px;
     border: 1px solid var(--gov-border); border-radius: var(--radius, 14px);
-    background: var(--gov-surface); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    background: var(--gov-surface); box-shadow: var(--shadow-rest);
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .block-advantages__item:hover {
     transform: translateY(-4px);
     border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
-    box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
+    box-shadow: var(--shadow-lift);
 }
 .block-advantages__icon {
     display: grid; place-items: center; width: 50px; height: 50px;
@@ -6729,7 +6740,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 .contact-card:hover {
     transform: translateY(-3px);
     border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
-    box-shadow: 0 16px 36px -16px rgba(15, 23, 42, 0.12);
+    box-shadow: var(--shadow-lift);
 }
 .contact-card__title { font-weight: 700; font-size: var(--step-1); color: var(--gov-title); margin: 0; }
 .contact-card__item { display: flex; align-items: center; gap: 10px; color: var(--gov-ink); font-size: var(--step--1); }
@@ -6876,7 +6887,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
 }
 .stage-item__body {
     padding: 20px 24px; border: 1px solid var(--gov-border); border-radius: var(--radius, 14px);
-    background: var(--gov-surface); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    background: var(--gov-surface); box-shadow: var(--shadow-rest);
 }
 .stage-item__title { font-weight: 700; font-size: var(--step-0); color: var(--section-title-fg); margin: 0 0 6px; }
 .stage-item__text { color: var(--gov-muted, #475569); font-size: var(--step--1); line-height: var(--base-line-height, 1.55); margin: 0; }

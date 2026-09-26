@@ -200,7 +200,7 @@
 }
 .block-counters:hover {
     transform: none;
-    box-shadow: 0 24px 50px rgba(23, 58, 99, 0.12);
+    box-shadow: var(--shadow-3);
     border-color: var(--gov-teal);
 }
 

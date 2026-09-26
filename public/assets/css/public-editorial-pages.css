@@ -313,7 +313,7 @@
     transform: translateY(-3px);
     border-color: color-mix(in srgb, var(--gov-teal) 38%, var(--editorial-line));
     background: color-mix(in srgb, var(--gov-teal) 3%, var(--gov-surface));
-    box-shadow: 0 14px 30px -22px rgba(15, 43, 70, .45);
+    box-shadow: var(--shadow-lift-deep);
 }
 
 .editorial-page__content .block-advantages__item:not(.feature-card) .block-advantages__icon {
@@ -461,7 +461,7 @@
 .editorial-page__content .act-card:not(.feature-card):hover,
 .editorial-page__content .doc-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 14px 30px -22px rgba(15, 43, 70, .45);
+    box-shadow: var(--shadow-lift-deep);
 }
 
 /* Reusable editorial variants ------------------------------------------- */
@@ -986,7 +986,7 @@
 .editorial-page__content .person-card:hover {
     transform: translateY(-3px);
     border-color: color-mix(in srgb, var(--gov-teal) 34%, var(--editorial-line));
-    box-shadow: 0 14px 30px -22px rgba(15, 43, 70, .45);
+    box-shadow: var(--shadow-lift-deep);
 }
 
 .editorial-page__content .person-card__photo,
@@ -1282,7 +1282,7 @@
     border: 1px solid color-mix(in srgb, var(--gov-navy) 8%, var(--editorial-line));
     border-radius: var(--radius, 14px);
     background: color-mix(in srgb, var(--gov-navy) 3%, var(--gov-surface));
-    box-shadow: 0 22px 48px -40px rgba(15, 43, 70, .48);
+    box-shadow: var(--shadow-lift-xl);
 }
 
 .editorial-page__content .bio-side__widgets {
