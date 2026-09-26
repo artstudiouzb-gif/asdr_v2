@@ -16,6 +16,9 @@ namespace App\Core;
  */
 final class SecurityHeaders
 {
+    /** Куда браузер шлёт отчёты о нарушении пробной (Report-Only) политики. */
+    public const CSP_REPORT_PATH = '/_csp-report';
+
     private static ?string $nonce = null;
 
     /** @var list<string> внешние источники стилей текущей страницы */
@@ -52,9 +55,31 @@ final class SecurityHeaders
         // бы существование скрываемой административной поверхности.
         $hasAdminContext = Session::hasCookie() || AdminEntryGate::hasPresentedCookie();
         $isAdmin = ($isAdminPath && $hasAdminContext) || str_starts_with($path, '/install');
-        header('Content-Security-Policy: ' . ($isAdmin
-            ? self::adminCsp(self::nonce())
-            : self::publicCsp(self::nonce(), self::publicCspOptions())));
+        if ($isAdmin) {
+            header('Content-Security-Policy: ' . self::adminCsp(self::nonce()));
+            return;
+        }
+        self::sendPublicCsp(self::publicCspOptions());
+    }
+
+    /**
+     * Публичная CSP. Строгий style-src (без 'unsafe-inline', <style> по nonce)
+     * включает config security.csp_strict_style; до этого он идёт заголовком
+     * Report-Only — нарушения видны в журнале, а посетитель ничего не теряет.
+     *
+     * @param array{ga?: bool, ym?: bool, counter_scripts?: list<string>, extra_style?: list<string>, extra_script?: list<string>} $opts
+     */
+    private static function sendPublicCsp(array $opts): void
+    {
+        $strict = (bool) Config::get('security.csp_strict_style', false);
+        header('Content-Security-Policy: ' . self::publicCsp(self::nonce(), $opts + ['strict_style' => $strict]));
+        if (!$strict) {
+            header('Content-Security-Policy-Report-Only: '
+                . self::publicCsp(self::nonce(), $opts + ['strict_style' => true])
+                . '; report-uri ' . self::CSP_REPORT_PATH);
+        } else {
+            header_remove('Content-Security-Policy-Report-Only');
+        }
     }
 
     /**
@@ -101,7 +126,10 @@ final class SecurityHeaders
      * — только по nonce; шрифты самохостятся, внешние хосты добавляются лишь
      * для фактически включённых счётчиков.
      *
-     * @param array{ga?: bool, ym?: bool, counter_scripts?: list<string>, extra_style?: list<string>, extra_script?: list<string>} $opts
+     * strict_style: стили только из файлов и по nonce, без 'unsafe-inline'
+     * (атрибут style в публичной разметке запрещён, см. StyleVars).
+     *
+     * @param array{ga?: bool, ym?: bool, counter_scripts?: list<string>, extra_style?: list<string>, extra_script?: list<string>, strict_style?: bool} $opts
      */
     public static function publicCsp(string $nonce, array $opts = []): string
     {
@@ -109,7 +137,9 @@ final class SecurityHeaders
         // Он нужен, чтобы заменить экран рекомендаций собственной обложкой.
         $script = ["'self'", "'nonce-{$nonce}'", 'https://www.youtube.com', 'https://telegram.org'];
         $connect = ["'self'"];
-        $style = ["'self'", "'unsafe-inline'"];
+        $style = !empty($opts['strict_style'])
+            ? ["'self'", "'nonce-{$nonce}'"]
+            : ["'self'", "'unsafe-inline'"];
         $font = ["'self'", 'data:'];
 
         if (!empty($opts['ga'])) {
@@ -224,7 +254,7 @@ final class SecurityHeaders
         $opts = self::publicCspOptions();
         $opts['extra_style'] = self::$pageStyleOrigins;
         $opts['extra_script'] = self::$pageScriptOrigins;
-        header('Content-Security-Policy: ' . self::publicCsp(self::nonce(), $opts));
+        self::sendPublicCsp($opts);
     }
 
     /**
@@ -268,6 +298,21 @@ final class SecurityHeaders
      * Нужен для закэшированных виджетов и legacy-фрагментов: HTML в кэше
      * общий, а nonce — на запрос. Обычные блоки script не пропускают.
      */
+    /**
+     * Теги <style> получают nonce текущего запроса: без него добавляется,
+     * устаревший (фрагмент из кэша) заменяется. Нужен строгому style-src.
+     */
+    public static function injectStyleNonce(string $html, ?string $nonce = null): string
+    {
+        if (stripos($html, '<style') === false) {
+            return $html;
+        }
+        $nonce ??= self::nonce();
+        $html = (string) preg_replace('/(<style\b[^>]*\bnonce=")[^"]*(")/i', '${1}' . $nonce . '${2}', $html);
+
+        return (string) preg_replace('/<style\b(?![^>]*\bnonce=)/i', '<style nonce="' . $nonce . '"', $html);
+    }
+
     public static function injectScriptNonce(string $html, ?string $nonce = null): string
     {
         if (stripos($html, '<script') === false) {
