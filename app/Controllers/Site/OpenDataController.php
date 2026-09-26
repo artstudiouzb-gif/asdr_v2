@@ -7,6 +7,7 @@ namespace App\Controllers\Site;
 use App\Models\ContentEntry;
 use App\Models\ContentType;
 use App\Models\News;
+use App\Models\NewsFeed;
 
 /**
  * «Открытые данные» (data.gov.uz): изолированная отдача контента госсайта в
@@ -101,7 +102,7 @@ final class OpenDataController
     {
         $base = $this->baseUrl();
         $items = [];
-        foreach (News::published(self::MAX_ITEMS) as $row) {
+        foreach (NewsFeed::published(self::MAX_ITEMS) as $row) {
             $items[] = [
                 'id' => (int) $row['id'],
                 'title' => (string) $row['title'],

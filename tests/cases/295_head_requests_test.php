@@ -65,7 +65,7 @@ test('Публичная выборка новостей не спрашивае
     // показывал DEPENDENT SUBQUERY с type=ALL — полный проход по news на каждую
     // строку-кандидата. Замерено на 409 новостях: /uz/news отвечала 155 мс
     // против 12 мс у русской версии, и рост был квадратичным.
-    $model = (string) file_get_contents(APP_ROOT . '/app/Models/News.php');
+    $model = (string) file_get_contents(APP_ROOT . '/app/Models/NewsFeed.php');
     $start = strpos($model, 'private static function publicLanguageParts');
     assert_true($start !== false, 'сборщик языковой части выборки на месте');
     $end = strpos($model, 'private static function localizePublicRows', $start);

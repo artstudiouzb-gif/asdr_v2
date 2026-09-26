@@ -190,7 +190,7 @@ final class ContentRevision
                 $parentId = !empty($snapshot['entity']['parent_id'])
                     ? (int) $snapshot['entity']['parent_id']
                     : null;
-                $parentError = Page::validateParent($parentId, $entityId, true);
+                $parentError = PageHierarchy::validateParent($parentId, $entityId, true);
                 if ($parentError !== null) {
                     throw new \DomainException('Нельзя восстановить иерархию страницы: ' . $parentError);
                 }

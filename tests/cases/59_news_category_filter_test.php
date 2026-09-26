@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Core\Database;
 use App\Models\News;
+use App\Models\NewsFeed;
 use App\Models\NewsCategory;
 use App\Models\NewsCategoryTranslation;
 
@@ -36,7 +37,7 @@ test('News::publishedCategories: только категории опублик�
         $ids[] = (int) $pdo->lastInsertId();
     }
 
-    $names = array_map(static fn (array $c): string => (string) $c['name'], News::publishedCategories());
+    $names = array_map(static fn (array $c): string => (string) $c['name'], NewsFeed::publishedCategories());
     assert_true(in_array('Пресс-релиз', $names, true), 'рубрика опубликованной новости есть в списке');
     assert_true(in_array('Аналитика', $names, true), 'вторая рубрика есть в списке');
     assert_true(!in_array('Только черновики', $names, true), 'рубрика без опубликованных новостей не попадает');
@@ -67,16 +68,16 @@ test('News::published и publishedCount фильтруют по категори
         $ids[] = (int) $pdo->lastInsertId();
     }
 
-    assert_same(2, News::publishedCount($pressId));
-    $rows = News::published(50, 0, null, $pressId);
+    assert_same(2, NewsFeed::publishedCount($pressId));
+    $rows = NewsFeed::published(50, 0, null, $pressId);
     assert_same(2, count($rows));
     foreach ($rows as $row) {
         assert_same($pressId, (int) $row['category_id']);
     }
-    assert_true(News::publishedCount() >= 3, 'без фильтра — все опубликованные');
+    assert_true(NewsFeed::publishedCount() >= 3, 'без фильтра — все опубликованные');
     // Несуществующая рубрика — пустая лента, а не вся лента: иначе битая
     // ссылка молча показывала бы всё подряд.
-    assert_same(0, News::publishedCount(999999));
+    assert_same(0, NewsFeed::publishedCount(999999));
 
     $pdo->exec('DELETE FROM news WHERE id IN (' . implode(',', $ids) . ')');
     NewsCategory::delete($pressId);

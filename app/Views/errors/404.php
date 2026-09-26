@@ -48,7 +48,7 @@ if ($dbOn) {
     }
     try {
         if (class_exists(\App\Models\News::class)) {
-            foreach (\App\Models\News::published(4, 0, $lang) as $n) {
+            foreach (\App\Models\NewsFeed::published(4, 0, $lang) as $n) {
                 $latest[] = ['title' => (string) $n['title'], 'url' => Locale::url('news/' . $n['slug'], $lang)];
             }
         }

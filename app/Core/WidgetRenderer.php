@@ -6,6 +6,7 @@ namespace App\Core;
 
 use App\Models\Goal;
 use App\Models\News;
+use App\Models\NewsFeed;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\TeamMember;
@@ -193,7 +194,7 @@ final class WidgetRenderer
     {
         switch ($type) {
             case 'latest_news':
-                $data['items'] = News::published((int) ($data['count'] ?? 5), 0, $lang);
+                $data['items'] = NewsFeed::published((int) ($data['count'] ?? 5), 0, $lang);
                 break;
             case 'projects_list':
                 $data['items'] = array_slice(Project::published($lang), 0, (int) ($data['count'] ?? 5));
