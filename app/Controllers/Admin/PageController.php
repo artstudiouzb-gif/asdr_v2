@@ -16,6 +16,7 @@ use App\Core\View;
 use App\Models\Block;
 use App\Models\Language;
 use App\Models\Page;
+use App\Models\PageAdminList;
 use App\Models\PageTranslation;
 use App\Models\ContentRevision;
 
@@ -29,10 +30,10 @@ final class PageController
             ['newest', 'oldest', 'title_asc', 'title_desc'],
             'newest'
         );
-        $total = Page::adminCount($filters);
+        $total = PageAdminList::count($filters);
         [$filters, $pages] = AdminListQuery::fitPage($filters, $total);
         View::render('admin/pages/index', [
-            'items' => Page::adminList($filters),
+            'items' => PageAdminList::items($filters),
             'filters' => $filters,
             'filterParams' => AdminListQuery::urlParams($filters),
             'total' => $total,
