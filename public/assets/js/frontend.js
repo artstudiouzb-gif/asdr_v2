@@ -37,13 +37,15 @@
             && HTMLScriptElement.supports('speculationrules')) {
             return;
         }
-        var skipPath = /^\/(admin|repo|install|api|uploads|storage|_)|\.(xml|txt|pdf|zip|docx?|xlsx?|pptx?)$/i;
+        var skipArea = /^\/(?:admin|repo|install|api|uploads|storage|_)/;
+        var skipFile = /\.(?:xml|txt|pdf|zip|docx?|xlsx?|pptx?)$/i;
         var skipLink = '[href*="_lang="], [href*="_fragment="], [download], [rel~="nofollow"], [target="_blank"], [data-no-prefetch]';
         var prefetched = new Set();
         document.addEventListener('mouseover', function (event) {
             var anchor = event.target.closest('a');
             if (!anchor || !anchor.href || anchor.origin !== location.origin
-                || anchor.href.includes('#') || skipPath.test(anchor.pathname)
+                || anchor.href.includes('#') || skipArea.test(anchor.pathname)
+                || skipFile.test(anchor.pathname)
                 || anchor.matches(skipLink) || prefetched.has(anchor.href)) {
                 return;
             }
