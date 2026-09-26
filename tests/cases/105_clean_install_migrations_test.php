@@ -57,7 +57,7 @@ test('Чистая установка доводит Hero-переводы до 
 
 test('Демо Hero использует только существующие колонки переводов', function () use ($connectTestDb): void {
     $pdo = $connectTestDb();
-    $source = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
+    $source = demo_seeder_source();
 
     assert_contains('seedHeroes($pdo, $c)', $source, 'демо-комплект должен включать Hero');
     assert_true(

@@ -42,7 +42,7 @@ test('Вывод подписи на сайте и в посте пользуе�
 });
 
 test('Демо-контент показывает подписи и не дублирует лид', function () {
-    $seeder = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
+    $seeder = demo_seeder_source();
 
     // Автор — без служебного слова: его подставляет сама подпись.
     assert_not_contains("'Фото: пресс-служба", $seeder);

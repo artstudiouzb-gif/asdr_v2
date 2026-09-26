@@ -315,3 +315,18 @@ function public_print_css(): string
  * читают оттуда же — второй список разъехался бы с первым молча.
  */
 require_once __DIR__ . '/budgets.php';
+
+/**
+ * Исходник демо-сидера вместе с его данными: тексты демо-контента живут в
+ * database/demo_content/*.php, и проверка «такая строка есть в демо» обязана
+ * видеть оба места, а не только код загрузки.
+ */
+function demo_seeder_source(): string
+{
+    $source = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
+    foreach (glob(APP_ROOT . '/database/demo_content/*.php') ?: [] as $file) {
+        $source .= "\n" . (string) file_get_contents($file);
+    }
+
+    return $source;
+}
