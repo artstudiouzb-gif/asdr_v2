@@ -510,6 +510,19 @@ a:hover { text-decoration: underline; }
     left: -9999px;
 }
 
+/* Системное «Уменьшить движение»: наведение меняет цвет и тень, но не
+   сдвигает и не увеличивает элемент. */
+@media (prefers-reduced-motion: reduce) {
+    .repo-btn:hover,
+    .rd-search button:hover,
+    .rd-stat:hover,
+    .rd-cat:hover,
+    .rd-doc:hover,
+    .rd-lang-pill:hover {
+        transform: none;
+    }
+}
+
 /* generated:inline-utilities:start */
 .u-inline-93420d7878{border:0;}
 .u-inline-9635e07f50{max-width:100%;height:auto;border-radius:8px;display:block;margin:0 auto;}

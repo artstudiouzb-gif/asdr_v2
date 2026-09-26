@@ -243,7 +243,12 @@
 .counter:hover .counter__icon {
     background: var(--gov-teal) !important;
     color: #fff !important;
-    transform: scale(1.1) !important;
+}
+/* Увеличение иконки — только без системного «Уменьшить движение». */
+@media (prefers-reduced-motion: no-preference) {
+    .counter:hover .counter__icon {
+        transform: scale(1.1) !important;
+    }
 }
 .block-counters--icons-no-bg .counter__icon,
 .block-counters--icons-no-bg .counter:hover .counter__icon {

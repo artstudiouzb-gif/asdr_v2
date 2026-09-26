@@ -344,3 +344,11 @@
     :where(.rich-content) table { display: table; overflow: visible; }
     :where(.rich-content) pre { white-space: pre-wrap; }
 }
+
+/* Системное «Уменьшить движение»: наведение меняет цвет и тень, но не
+   сдвигает и не увеличивает элемент. */
+@media (prefers-reduced-motion: reduce) {
+    :where(.rich-content) figure:hover img {
+        transform: none;
+    }
+}
