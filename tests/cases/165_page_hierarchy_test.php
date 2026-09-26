@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Page;
+use App\Models\PageHierarchy;
 
 test('Страницы: родитель, цепочка хлебных крошек и защита от циклов (БД)', function (): void {
     ensure_test_db();
@@ -35,11 +36,11 @@ test('Страницы: родитель, цепочка хлебных крош
     $leaf = Page::findById($leafId);
     assert_same($childId, (int) $leaf['parent_id'], 'непосредственный родитель сохранён');
 
-    $trail = Page::ancestorTrail($leaf, 'ru');
+    $trail = PageHierarchy::ancestorTrail($leaf, 'ru');
     assert_same([$rootId, $childId], array_map(static fn (array $row): int => (int) $row['id'], $trail));
 
-    assert_true(Page::validateParent($rootId, $rootId) !== null, 'страница не может быть родителем себе');
-    assert_true(Page::validateParent($leafId, $rootId) !== null, 'цикл через потомка запрещён');
+    assert_true(PageHierarchy::validateParent($rootId, $rootId) !== null, 'страница не может быть родителем себе');
+    assert_true(PageHierarchy::validateParent($leafId, $rootId) !== null, 'цикл через потомка запрещён');
 
     $cycleRejected = false;
     try {
@@ -51,7 +52,7 @@ test('Страницы: родитель, цепочка хлебных крош
     assert_true($cycleRejected, 'модель отклоняет цикл даже без административной формы');
     assert_same(null, Page::findById($rootId)['parent_id'], 'невалидная связь не сохранена');
 
-    $optionIds = array_map(static fn (array $option): int => (int) $option['id'], Page::parentOptions($rootId));
+    $optionIds = array_map(static fn (array $option): int => (int) $option['id'], PageHierarchy::parentOptions($rootId));
     assert_false(in_array($rootId, $optionIds, true), 'сама страница исключена из вариантов');
     assert_false(in_array($childId, $optionIds, true), 'потомок исключён из вариантов');
     assert_false(in_array($leafId, $optionIds, true), 'глубокий потомок исключён из вариантов');
@@ -72,5 +73,5 @@ test('Страницы: интерфейс и схема содержат под
     assert_contains('parent_id', $schema);
     assert_contains('ON DELETE SET NULL', $migration);
     assert_contains('name="parent_id"', $settings);
-    assert_contains('Page::ancestorTrail', $publicPage);
+    assert_contains('PageHierarchy::ancestorTrail', $publicPage);
 });

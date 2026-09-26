@@ -299,7 +299,7 @@ final class DemoSeeder
                 'SELECT id, parent_id FROM pages WHERE parent_id IS NOT NULL AND deleted_at IS NULL'
             )->fetchAll(PDO::FETCH_ASSOC) ?: [];
             foreach ($parentedPages as $parentedPage) {
-                $hierarchyError = \App\Models\Page::validateParent(
+                $hierarchyError = \App\Models\PageHierarchy::validateParent(
                     (int) $parentedPage['parent_id'],
                     (int) $parentedPage['id']
                 );
