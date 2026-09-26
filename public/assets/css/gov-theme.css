@@ -131,7 +131,12 @@
     --space-3xl: 6rem;
 
     /* Радиусы. --radius и --btn-radius задаёт админка, здесь — производные
-       для случаев, где нужен заведомо меньший или больший скругление. */
+       для случаев, где нужен заведомо меньший или больший скругление.
+       Производные следуют настройке: при «Прямых» (0) обнуляются вместе с ней.
+       При умолчании (14px) xs ≈ 4px — бейджи, метки, кольца фокуса; lg ≈ 18px —
+       крупные панели и поиск. */
+    --radius-xs: calc(var(--radius) * .3);
+    --radius-lg: calc(var(--radius) * 1.3);
     --radius-pill: 999px;
 
     /* Тени: ступени вместо 159 разных значений в теме. Цвет —
@@ -364,7 +369,7 @@ body.design-scrolltop .scroll-top:focus-visible { outline: 2px solid var(--gov-t
         var(--menu-active-color, var(--gov-teal)) 65%,
         transparent 100%
     );
-    border-radius: 99px;
+    border-radius: var(--radius-pill);
     transform: scaleX(0);
     transform-origin: center;
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
@@ -638,7 +643,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu--style-dot .site-men
 body .site-header--container-floating.site-header--sticky.is-scrolled {
     margin: 10px auto !important;
     max-width: min(calc(100% - 32px), var(--container-max, 1440px)) !important;
-    border-radius: 50px !important;
+    border-radius: var(--radius-pill) !important;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22) !important;
 }
 :root[data-theme="light"] body .site-header--container-floating.site-header--sticky.is-scrolled,
@@ -669,7 +674,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
 .site-menu__badge {
     position: absolute; top: 4px; right: 0px; z-index: 10;
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 1.5px 5px; border-radius: 3px;
+    padding: 1.5px 5px; border-radius: var(--radius-xs, 3px);
     /* Не ниже 12px: капслок с разрядкой на 9.6px переставал читаться. */
     font-size: var(--step--4); font-weight: 800; line-height: 1;
     letter-spacing: 0.04em; text-transform: uppercase; color: #ffffff;
@@ -1696,7 +1701,7 @@ body .site-header--borders-container.site-header--transparent:not(.is-scrolled) 
     /* В тёмной теме поверхность карточки сама тёмная — акцент снова светлый. */
     --gov-teal-text: var(--gov-teal-on-dark);
 }
-a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline-offset: 2px; border-radius: 4px; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline-offset: 2px; border-radius: var(--radius-xs, 4px); }
 .cms-block--bg-navy a:focus-visible, .block-ctaband a:focus-visible, .featband a:focus-visible, .timeline-cta a:focus-visible { outline-color: #fff; }
 .section-head__all, .newsfeat__more, .person-card__more { color: var(--gov-teal-text); }
 .media-tabs button, .media-tabs a { min-height: 32px; }
@@ -2871,7 +2876,7 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
    Колонку с прежним шагом держит уже обёртка. */
 .stage__body { display: flex; flex-direction: column; gap: 7px; color: inherit; text-decoration: none; }
 .stage__body--link:hover .stage__title { color: var(--gov-teal-text); }
-.stage__body--link:focus-visible { outline: 2px solid var(--gov-teal); outline-offset: 4px; border-radius: 8px; }
+.stage__body--link:focus-visible { outline: 2px solid var(--gov-teal); outline-offset: 4px; border-radius: var(--radius-sm, 8px); }
 .stage__dot {
     position: absolute; z-index: 2; top: 0; left: 0; width: 12px; height: 12px; border-radius: 50%;
     background: var(--gov-surface); border: 2px solid var(--gov-border);
@@ -2973,7 +2978,7 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
     .textimage__button:hover, .textimage__button:focus-visible { transform: none; }
 }
 .textimage__title { position: relative; font-size: var(--font-size-h2, var(--step-5)); margin: 0 0 18px; padding-left: 16px; }
-.textimage__title::before { content: ''; position: absolute; left: 0; top: .18em; bottom: .18em; width: 4px; border-radius: 2px; background: var(--gov-teal); }
+.textimage__title::before { content: ''; position: absolute; left: 0; top: .18em; bottom: .18em; width: 4px; border-radius: var(--radius-pill); background: var(--gov-teal); }
 .textimage__text { color: var(--gov-muted); line-height: var(--base-line-height, 1.6); margin-bottom: 24px; }
 .textimage__features { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 18px; }
 .textimage__feature { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
@@ -4261,7 +4266,7 @@ h4.section-head__title { font-size: var(--font-size-card-title, var(--step-2)); 
     transform: scale(1.1);
     box-shadow: 0 0 15px var(--gov-teal);
 }
-.mediacard__duration { position: absolute; right: 10px; bottom: 10px; background: rgba(11,26,48,.8); color: #fff; font-size: var(--step--4); padding: 2px 8px; border-radius: 4px; }
+.mediacard__duration { position: absolute; right: 10px; bottom: 10px; background: rgba(11,26,48,.8); color: #fff; font-size: var(--step--4); padding: 2px 8px; border-radius: var(--radius-xs, 4px); }
 .mediacard__title { 
     display: block; font-weight: 700; font-family: var(--font-heading, 'Noto Serif', serif); 
     color: var(--gov-title); line-height: 1.35; font-size: var(--step-0); 
@@ -4984,7 +4989,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
    полупрозрачная подложка. */
 .block-newsfeat--mosaic .newsfeat-lead__over {
     inset: auto clamp(14px, 2vw, 22px) clamp(14px, 2vw, 22px);
-    border-radius: 16px;
+    border-radius: var(--radius-lg, 16px);
     padding: clamp(18px, 2.2vw, 26px);
     background: rgba(18, 26, 50, .62);
     border: 1px solid rgba(255, 255, 255, .14);
@@ -5046,7 +5051,7 @@ body:has(.site-header--transparent) .cms-block--hero:first-child .block-hero--h-
    и приходит переменными --news-badge-bg/--news-badge-fg. */
 .news-badge {
     display: inline-flex; align-items: center; min-width: 0; max-width: 100%;
-    padding: 2px 8px; border-radius: 4px;
+    padding: 2px 8px; border-radius: var(--radius-xs, 4px);
     background: var(--news-badge-bg, color-mix(in srgb, var(--gov-teal) 14%, transparent));
     color: var(--news-badge-fg, var(--gov-teal-text));
     font-size: var(--step--3); font-weight: 700; line-height: 1.35;
@@ -5401,9 +5406,9 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 
 /* --- Форма подписки в подвале --- */
 .footer-subscribe { display: flex; flex-wrap: wrap; margin-top: 12px; max-width: 320px; }
-.footer-subscribe input[type=email] { flex: 1; min-width: 0; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff; border-radius: 8px 0 0 8px; padding: 11px 14px; }
+.footer-subscribe input[type=email] { flex: 1; min-width: 0; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff; border-radius: var(--radius-sm, 8px) 0 0 var(--radius-sm, 8px); padding: 11px 14px; }
 .footer-subscribe input[type=email]::placeholder { color: rgba(255,255,255,.55); }
-.footer-subscribe button { display: inline-grid; place-items: center; border: 0; background: var(--gov-teal); color: #fff; padding: 0 18px; border-radius: 0 8px 8px 0; cursor: pointer; }
+.footer-subscribe button { display: inline-grid; place-items: center; border: 0; background: var(--gov-teal); color: #fff; padding: 0 18px; border-radius: 0 var(--radius-sm, 8px) var(--radius-sm, 8px) 0; cursor: pointer; }
 .footer-subscribe button:hover { background: color-mix(in srgb, var(--gov-teal) 85%, #000); }
 .footer-subscribe__consent { display: flex; flex: 1 0 100%; align-items: flex-start; gap: 8px; margin-top: 10px; color: rgba(255,255,255,.72); font-size: var(--step--4); line-height: var(--base-line-height, 1.45); cursor: pointer; }
 .footer-subscribe__consent input { flex: 0 0 auto; margin-top: 2px; accent-color: var(--gov-teal); }
@@ -5419,7 +5424,7 @@ body.design-sidebar-fixed .content-sidebar { position: static; }
 .widget--pad-compact:not(.widget--style-card):not(.widget--style-tinted):not(.widget--style-navy) { padding: 0; }
 .widget--pad-spacious.widget--style-card, .widget--pad-spacious.widget--style-tinted, .widget--pad-spacious.widget--style-navy { padding: 32px; }
 .widget--accent .widget__title { padding-bottom: 10px; position: relative; }
-.widget--accent .widget__title::after { content: ''; position: absolute; left: 0; bottom: 0; width: 44px; height: 3px; border-radius: 2px; background: var(--gov-teal); }
+.widget--accent .widget__title::after { content: ''; position: absolute; left: 0; bottom: 0; width: 44px; height: 3px; border-radius: var(--radius-pill); background: var(--gov-teal); }
 
 /* Карусель «случайная цель»: название и описание над кадрами. Название —
    не заголовок разметки (виджет встаёт в любое место страницы, и уровень
@@ -5707,7 +5712,7 @@ body .site-header--transparent:not(.is-scrolled) .site-theme-toggle__moon {
     width: 20px;
     height: 2px;
     background: currentColor;
-    border-radius: 2px;
+    border-radius: var(--radius-pill);
     transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, width 0.25s ease;
 }
 .site-burger:hover span:nth-child(2) {
@@ -5943,7 +5948,7 @@ body.quick-search-active { overflow: hidden; }
     font-weight: 700;
     background: var(--gov-surface);
     border: 1px solid var(--gov-border);
-    border-radius: 4px;
+    border-radius: var(--radius-xs, 4px);
     padding: 1px 5px;
 }
 

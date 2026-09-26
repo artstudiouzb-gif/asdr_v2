@@ -195,7 +195,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero { pad
     margin-bottom: 30px;
     border: 1px solid var(--gov-border);
     border-left: 4px solid var(--gov-teal);
-    border-radius: 0 12px 12px 0;
+    border-radius: 0 var(--radius, 12px) var(--radius, 12px) 0;
     background: color-mix(in srgb, var(--gov-teal) 4%, var(--gov-surface));
 }
 .newsdetail-card--thesis-inline .newsdetail-card__title {
@@ -319,7 +319,7 @@ body:has(.site-header--transparent) .newsdetail--premium .newsdetail-phero { pad
     position: absolute;
     inset: clamp(16px, 2.5vw, 26px) 0;
     z-index: 0;
-    border-radius: 18px;
+    border-radius: var(--radius-lg, 18px);
     background: rgba(18, 26, 50, .62);
     border: 1px solid rgba(255, 255, 255, .14);
     backdrop-filter: blur(18px) saturate(140%);
@@ -532,7 +532,7 @@ button.newsdetail-gallery__thumb img {
     height: 100%;
     object-fit: cover;
     display: block;
-    border-radius: 4px;
+    border-radius: var(--radius-xs, 4px);
 }
 .newsdetail-gallery__thumb.is-active,
 button.newsdetail-gallery__thumb.is-active {
