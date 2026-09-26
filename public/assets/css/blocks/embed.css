@@ -13,7 +13,8 @@
     background: var(--gov-surface);
     border: 1px solid var(--gov-border);
 }
-.block-embed__frame iframe {
+.block-embed__frame iframe,
+.block-embed__frame .yt-facade {
     display: block;
     width: 100%;
     height: 100%;

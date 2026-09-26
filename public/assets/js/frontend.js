@@ -57,6 +57,27 @@
         }, { passive: true });
     })();
 
+    // Обложка YouTube (App\Core\YoutubeFacade) превращается в плеер только
+    // по нажатию: до этого страница не тянет скрипты YouTube. Адрес плеера
+    // дал сервер; здесь он лишь сверяется с доменом без кук.
+    document.addEventListener('click', function (event) {
+        var play = event.target.closest ? event.target.closest('[data-yt-facade] .yt-facade__play') : null;
+        if (!play) { return; }
+        var box = play.closest('[data-yt-facade]');
+        var src = box.getAttribute('data-yt-src') || '';
+        if (src.indexOf('https://www.youtube-nocookie.com/embed/') !== 0) { return; }
+        event.preventDefault();
+        var iframe = document.createElement('iframe');
+        iframe.src = src;
+        iframe.title = box.getAttribute('data-yt-title') || 'YouTube';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.allowFullscreen = true;
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+        iframe.className = box.className.replace(/(^|\s)yt-facade(?=\s|$)/, ' ').trim();
+        box.replaceWith(iframe);
+        iframe.focus();
+    });
+
     // Фон внутри карусели обложки принадлежит слайду: пока слайд не показан,
     // его видео не играет, а YouTube даже не загружается — иначе страница
     // тянула бы все ролики сразу. Следим за классом слайда, а не за событиями
