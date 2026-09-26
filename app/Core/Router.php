@@ -154,6 +154,15 @@ final class Router
 
         $requestedCode = LocalePreference::requestedCode($uri, $activeCodes);
         if ($requestedCode !== null) {
+            if (LocalePreference::isSpeculative($_SERVER)) {
+                // Смена языка — действие посетителя. Предзагрузке отказываем
+                // явно: ответ без cookie браузер подставил бы потом в
+                // настоящий клик, и выбор языка не сохранился бы.
+                header('Cache-Control: no-store');
+                http_response_code(503);
+
+                return null;
+            }
             LocalePreference::remember($requestedCode);
             $contentPath = $this->withoutLanguagePrefix($path, $activeCodes);
             $target = Locale::url($contentPath, $requestedCode) . LocalePreference::querySuffix($uri);

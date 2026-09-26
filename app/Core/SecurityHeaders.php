@@ -60,6 +60,9 @@ final class SecurityHeaders
             return;
         }
         self::sendPublicCsp(self::publicCspOptions());
+        if (SpeculationRules::appliesTo($path)) {
+            header('Speculation-Rules: "' . SpeculationRules::PATH . '"');
+        }
     }
 
     /**
