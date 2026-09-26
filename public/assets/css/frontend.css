@@ -78,12 +78,12 @@ select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible,
 summary:focus-visible {
     outline: 3px solid var(--gov-teal);
     outline-offset: 2px;
-    border-radius: 3px;
+    border-radius: var(--radius-xs, 3px);
 }
 /* Ссылка «пропустить к содержимому» для клавиатуры/скринридеров. */
 .skip-link {
     position: absolute; left: -999px; top: 0; z-index: 10000;
-    background: var(--bg-surface); color: var(--text-main); padding: 10px 16px; border-radius: 0 0 8px 0;
+    background: var(--bg-surface); color: var(--text-main); padding: 10px 16px; border-radius: 0 0 var(--radius-sm, 8px) 0;
 }
 .skip-link:focus { left: 0; }
 
@@ -104,7 +104,7 @@ summary:focus-visible {
 .site-menu__link.is-active { color: var(--gov-teal-text) !important; font-weight: 700; background: transparent !important; background-color: transparent !important; }
 .site-menu__link::after {
     content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-    background: var(--gov-teal); border-radius: 3px 3px 0 0;
+    background: var(--gov-teal); border-radius: var(--radius-xs, 3px) var(--radius-xs, 3px) 0 0;
     transform: scaleX(0); transition: transform 0.2s ease;
 }
 .site-menu__link:hover::after, .site-menu__link.is-active::after {
@@ -804,7 +804,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
 .block-testimonials__track:focus-visible {
     outline: 2px solid var(--gov-teal);
     outline-offset: 4px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm, 8px);
 }
 .testimonial {
     scroll-snap-align: start; flex: 0 0 min(360px, 85%); margin: 0;
@@ -1029,7 +1029,7 @@ body.is-preview { outline: 3px solid #b45309; outline-offset: -3px; }
     display: inline-flex;
     align-items: center;
     border: 1px solid transparent;
-    border-radius: 20px;
+    border-radius: var(--radius-lg, 20px);
     overflow: hidden;
     background: transparent;
     transition: background 0.3s ease, border-color 0.3s ease;
@@ -1508,7 +1508,7 @@ a.footer-contacts__value:hover { color: var(--gov-teal); text-decoration: underl
 @media (max-width: 720px) { .site-footer__inner { grid-template-columns: 1fr; gap: 28px; } }
 
 /* --- Мобильная версия (настройки дизайна): бургер-меню и мобильная шапка --- */
-.site-burger { display: none; flex-direction: column; justify-content: center; gap: 5px; width: 42px; height: 42px; padding: 9px; background: transparent; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; }
+.site-burger { display: none; flex-direction: column; justify-content: center; gap: 5px; width: 42px; height: 42px; padding: 9px; background: transparent; border: 1px solid var(--border-color); border-radius: var(--radius-sm, 8px); cursor: pointer; }
 body.mobile-menu-open .site-burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 body.mobile-menu-open .site-burger span:nth-child(2) { opacity: 0; }
 body.mobile-menu-open .site-burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
@@ -1862,7 +1862,7 @@ p { line-height: var(--base-line-height, 1.6); }
 /* --- Заголовки лент (новости и др.): линия-акцент --- */
 .block-news__head { align-items: baseline; border-bottom: 1px solid var(--border-color); padding-bottom: 14px; margin-bottom: 26px; position: relative; }
 .block-news__head::after {
-    content: ''; position: absolute; left: 0; bottom: -1px; width: 64px; height: 3px; border-radius: 2px;
+    content: ''; position: absolute; left: 0; bottom: -1px; width: 64px; height: 3px; border-radius: var(--radius-pill);
     background: linear-gradient(90deg, var(--gov-navy), var(--gov-teal));
 }
 .block-news__title { font-size: var(--font-size-h2, var(--step-6)); margin: 0; }
@@ -1907,7 +1907,7 @@ p { line-height: var(--base-line-height, 1.6); }
     padding-bottom: 10px; margin-bottom: 14px; position: relative;
 }
 .site-footer--columns .site-footer__heading::after {
-    content: ''; position: absolute; left: 0; bottom: 0; width: 36px; height: 2px; border-radius: 2px;
+    content: ''; position: absolute; left: 0; bottom: 0; width: 36px; height: 2px; border-radius: var(--radius-pill);
     background: var(--gov-teal);
 }
 .site-footer--columns .site-footer__line { margin: 0 0 8px; color: rgba(255, 255, 255, .72); }
@@ -1993,7 +1993,7 @@ p { line-height: var(--base-line-height, 1.6); }
 /* --- Страница новостей: единый карточный грид (как на главной) --- */
 .news-index__head { border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 28px; position: relative; }
 .news-index__head::after {
-    content: ''; position: absolute; left: 0; bottom: -1px; width: 64px; height: 3px; border-radius: 2px;
+    content: ''; position: absolute; left: 0; bottom: -1px; width: 64px; height: 3px; border-radius: var(--radius-pill);
     background: linear-gradient(90deg, var(--gov-navy), var(--gov-teal));
 }
 .news-index__title { font-size: var(--font-size-h1, var(--step-8)); margin: 0 0 6px; }
@@ -2224,7 +2224,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
 .site-drawer .site-menu__item--has-children > .site-menu__toggle {
     grid-column: 2; width: 44px; height: 44px;
     display: flex; align-items: center; justify-content: center;
-    border-radius: 8px; transition: transform 0.2s, background 0.2s;
+    border-radius: var(--radius-sm, 8px); transition: transform 0.2s, background 0.2s;
 }
 .site-drawer .site-menu__item--has-children > .site-menu__toggle:hover { background: var(--border-color); }
 .site-drawer .site-menu__item.is-open > .site-menu__toggle { transform: rotate(180deg); }
@@ -2272,7 +2272,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
     min-height: 42px;
     padding: 9px;
     border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
-    border-radius: 11px;
+    border-radius: var(--radius-sm, 11px);
     background: color-mix(in srgb, var(--bg-surface) 94%, currentColor 6%);
     box-shadow: var(--shadow-2);
     color: var(--menu-text-color, var(--text-main));
@@ -2323,7 +2323,7 @@ body.mobile-menu-open .site-drawer__panel { transform: translateX(0); }
     right: 8px;
     bottom: 3px;
     height: 2px;
-    border-radius: 2px;
+    border-radius: var(--radius-pill);
     background: currentColor;
 }
 .site-menu__overflow-panel {
@@ -2835,7 +2835,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="sea
 
 .translation-notice__button {
     padding: 12px 20px;
-    border-radius: 9px;
+    border-radius: var(--btn-radius, 9px);
     background: var(--gov-teal);
     color: #fff;
     font-weight: 700;
@@ -2938,7 +2938,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="sea
 .faq-tools select {
     min-height: 44px;
     border: 1px solid var(--gov-border);
-    border-radius: 10px;
+    border-radius: var(--radius-sm, 10px);
     background: var(--gov-surface);
     color: var(--gov-title);
 }
