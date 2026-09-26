@@ -271,12 +271,12 @@
     },
     "/assets/js/admin.js": {
       "path": "/assets/js/admin.min.js",
-      "sourceRaw": 214932,
-      "sourceSha256": "89dd73b3d4bd875d3615c29d77bcbe391e85e478059399071dcaf52198af3f4a",
-      "sha256": "437549fa48a0ecf468ce6d08b563f9eb3ef8703e20d6691d5f7e90e484045fbd",
-      "raw": 96954,
-      "gzip": 26456,
-      "brotli": 22724
+      "sourceRaw": 215263,
+      "sourceSha256": "7d8912d937f12e5346659de3b8a195ebcb061714c44a35d0cffd3dd3a097a3b1",
+      "sha256": "f4be7999c0568bb74672a1b17d829b2f58b8fe6343ab18ab24345392e55f563d",
+      "raw": 97019,
+      "gzip": 26480,
+      "brotli": 22745
     }
   },
   "adminBundles": {
@@ -331,7 +331,7 @@
       "sources": [
         {
           "path": "/assets/js/admin.js",
-          "sourceRaw": 214932
+          "sourceRaw": 215263
         },
         {
           "path": "/assets/js/admin-media-bridge.js",
@@ -354,11 +354,11 @@
           "sourceRaw": 11793
         }
       ],
-      "sourceSha256": "16a2ef1f1d2147ba9c67c191ad6d54db2bb179bb3dd08f11e17d585f3412096a",
-      "sha256": "ab93065e3e7d097cb37d43a9e2e47a46530828a12b930afe0d0858da88f61ca2",
-      "raw": 125017,
-      "gzip": 33549,
-      "brotli": 28325
+      "sourceSha256": "477423657306e9193f0f363ee6bc70e4006b594fe11682f02a0212f70f9a05d3",
+      "sha256": "ab23a41be5f9ae7d6d20830c11c6fe1154b24e2b11b3f0021ba8f87a865aa89f",
+      "raw": 125082,
+      "gzip": 33573,
+      "brotli": 28347
     }
   }
 }
