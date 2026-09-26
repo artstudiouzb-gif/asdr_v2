@@ -79,23 +79,33 @@ final class Media
             ? ' class="' . htmlspecialchars($pictureClass, ENT_QUOTES) . '"'
             : '';
         // Кадрирование задаётся двумя механизмами: классы `media-position--*`
-        // (пресеты из админки) и inline-переменная `--media-object-position`
-        // (автоподбор SmartCrop). В CSS правило классов идёт после правила
-        // `[style*="--media-object-position"]`, поэтому при одинаковой
-        // специфичности класс всегда выигрывает — inline-стиль в таком случае
-        // не применяется и остаётся мёртвым атрибутом на каждой картинке.
-        // Не выводим его, когда вызывающий код уже передал классы позиции.
+        // (пресеты из админки) и переменная `--media-object-position`
+        // (автоподбор SmartCrop) на классе `.media-focal`. В CSS правило классов
+        // пресета идёт после `.media-focal`, поэтому при одинаковой
+        // специфичности пресет всегда выигрывает — переменная в таком случае
+        // не применяется и была бы лишним правилом на каждой картинке.
+        // Не выводим её, когда вызывающий код уже передал классы позиции.
         $hasPositionClasses = str_contains($imgClass, 'media-position--')
             || str_contains($pictureClass, 'media-position--');
 
-        $styleAttr = '';
+        // Точка фокуса — переменная в правиле класса, а не атрибут style
+        // (StyleVars): атрибут держит в CSP 'unsafe-inline'.
+        $focalValue = null;
         if ($focalX !== null && $focalY !== null) {
             $fx = max(0, min(100, $focalX));
             $fy = max(0, min(100, $focalY));
-            $styleAttr = ' style="--media-object-position:' . $fx . '% ' . $fy . '%"';
+            $focalValue = $fx . '% ' . $fy . '%';
         } elseif (!$hasPositionClasses) {
-            $focalPos = SmartCrop::focalPosition($url);
-            $styleAttr = ' style="--media-object-position:' . htmlspecialchars($focalPos, ENT_QUOTES) . '"';
+            $focalValue = SmartCrop::focalPosition($url);
+        }
+        $focalStyle = '';
+        if ($focalValue !== null) {
+            $focal = StyleVars::apply(['--media-object-position' => $focalValue]);
+            if ($focal['class'] !== '') {
+                $imgClass = trim($imgClass . ' media-focal ' . $focal['class']);
+                $classAttr = ' class="' . htmlspecialchars($imgClass, ENT_QUOTES) . '"';
+                $focalStyle = $focal['style'];
+            }
         }
 
         // Собственные размеры файла резервируют место под картинку: без них
@@ -106,7 +116,7 @@ final class Media
             : '';
 
         $img = '<img src="' . htmlspecialchars($url, ENT_QUOTES) . '" alt="' . $altAttr . '"'
-            . $classAttr . $sizeAttr . $loadingAttr . $priorityAttr . $styleAttr . '>';
+            . $classAttr . $sizeAttr . $loadingAttr . $priorityAttr . '>';
 
         // Отдельный кадр для телефона: источник с медиазапросом идёт первым,
         // и браузер скачивает ровно одну картинку — ту, что подойдёт экрану.
@@ -116,20 +126,20 @@ final class Media
         $srcset = $variants !== null ? self::webpSrcset($variants) : [];
         if ($srcset === []) {
             if ($mobileSources === '' && $pictureClass === '') {
-                return $img;
+                return $focalStyle . $img;
             }
             if ($pictureClass === '') {
                 $pictureClassAttr = ' class="media-picture"';
             }
 
-            return '<picture' . $pictureClassAttr . '>' . $mobileSources . $img . '</picture>';
+            return $focalStyle . '<picture' . $pictureClassAttr . '>' . $mobileSources . $img . '</picture>';
         }
 
         if ($pictureClass === '') {
             $pictureClassAttr = ' class="media-picture"';
         }
 
-        return '<picture' . $pictureClassAttr . '>'
+        return $focalStyle . '<picture' . $pictureClassAttr . '>'
             . $mobileSources
             . '<source type="image/webp" srcset="' . implode(', ', $srcset) . '" '
             . 'sizes="' . htmlspecialchars($sizes, ENT_QUOTES) . '">'
