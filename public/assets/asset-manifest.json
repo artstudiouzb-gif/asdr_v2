@@ -278,5 +278,87 @@
       "gzip": 26456,
       "brotli": 22724
     }
+  },
+  "adminBundles": {
+    "css": {
+      "path": "/assets/css/admin.bundle.min.css",
+      "sources": [
+        {
+          "path": "/assets/css/admin.css",
+          "sourceRaw": 350509
+        },
+        {
+          "path": "/assets/css/admin-shell-v2.css",
+          "sourceRaw": 17331
+        },
+        {
+          "path": "/assets/css/admin-notifications.css",
+          "sourceRaw": 10934
+        },
+        {
+          "path": "/assets/css/admin-shell-stability.css",
+          "sourceRaw": 6253
+        },
+        {
+          "path": "/assets/css/admin-hero-slide-editor.css",
+          "sourceRaw": 12800
+        },
+        {
+          "path": "/assets/css/admin-hero-slide-editor-legacy-reset.css",
+          "sourceRaw": 1742
+        },
+        {
+          "path": "/assets/css/admin-workflow-fixes.css",
+          "sourceRaw": 5775
+        },
+        {
+          "path": "/assets/css/admin-media-unified.css",
+          "sourceRaw": 6600
+        },
+        {
+          "path": "/assets/css/admin-slider-settings-layout.css",
+          "sourceRaw": 8004
+        }
+      ],
+      "sourceSha256": "fdfcf26cbdbb5c032bf3a786512b545caae267998696f3bbde114f2725b386f1",
+      "sha256": "c2f0088c4cd75f67cb6b0f39767cf9ee202d8f5f20e38be7f0ec0b974b9440fc",
+      "raw": 301599,
+      "gzip": 51399,
+      "brotli": 41532
+    },
+    "js": {
+      "path": "/assets/js/admin.bundle.min.js",
+      "sources": [
+        {
+          "path": "/assets/js/admin.js",
+          "sourceRaw": 214932
+        },
+        {
+          "path": "/assets/js/admin-media-bridge.js",
+          "sourceRaw": 17488
+        },
+        {
+          "path": "/assets/js/admin-workflow-fixes.js",
+          "sourceRaw": 15301
+        },
+        {
+          "path": "/assets/js/admin-gallery-dropzone.js",
+          "sourceRaw": 5163
+        },
+        {
+          "path": "/assets/js/admin-media-loadmore.js",
+          "sourceRaw": 5461
+        },
+        {
+          "path": "/assets/js/admin-slider-settings-layout.js",
+          "sourceRaw": 11793
+        }
+      ],
+      "sourceSha256": "16a2ef1f1d2147ba9c67c191ad6d54db2bb179bb3dd08f11e17d585f3412096a",
+      "sha256": "ab93065e3e7d097cb37d43a9e2e47a46530828a12b930afe0d0858da88f61ca2",
+      "raw": 125017,
+      "gzip": 33549,
+      "brotli": 28325
+    }
   }
 }

@@ -134,7 +134,9 @@ php scripts/smoke.php http://127.0.0.1:8000 --admin admin:ПАРОЛЬ --totp С
   `npm run check:assets`. Блочные ассеты — `AssetCollector`.
 - **Админка**: `admin.css` + `admin-shell-v2.css`, `admin.js` (крупные два
   собираются в `admin.min.*` той же `build:assets` и встают на место исходника —
-  `FrontendAssets::adminAsset`; слои-патчи грузит `admin-media-loader.js`); UI-помощники
+  `FrontendAssets::adminAsset`; общие слои-патчи вместе с ними склеены в
+  `admin.bundle.min.*` — `FrontendAssets::adminBundle`, без сборки их грузит
+  `admin-media-loader.js`; новый глобальный слой — строка в `adminBundles`); UI-помощники
   `AdminUi` (`imageField`, `colorField`, `navigationIcon`).
 - **Шапка/подвал**: `HeaderConfig`/`FooterConfig`, вьюхи `site/_header.php`,
   `_footer.php`. **Иконки**: `Icon::render()` + `Icon::injectSprite()`;

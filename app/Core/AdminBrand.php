@@ -46,7 +46,11 @@ final class AdminBrand
      * Head-разметка админки: CSS-переменные бренда и внешние клиенты панели.
      * Имя метода сохраняется для обратной совместимости layout.
      */
-    public static function styleTag(): string
+    /**
+     * @param bool $withLayers false — слои уже в сборке панели
+     *                         (FrontendAssets::adminBundle), отдельные ссылки не нужны
+     */
+    public static function styleTag(bool $withLayers = true): string
     {
         $html = '';
         $accent = self::accent();
@@ -62,6 +66,12 @@ final class AdminBrand
                 . '--admin-primary:' . $accent . ';'
                 . '--admin-primary-dark:' . self::mix($accent, [0, 0, 0], 0.14) . ';'
                 . '}</style>';
+        }
+
+        if (!$withLayers) {
+            return $html . '<script nonce="' . htmlspecialchars(SecurityHeaders::nonce(), ENT_QUOTES)
+                . '" src="' . htmlspecialchars(Asset::url('/assets/js/admin-notifications.js'), ENT_QUOTES)
+                . '" defer></script>';
         }
 
         $html .= '<link rel="stylesheet" data-admin-notifications-css="1" href="'

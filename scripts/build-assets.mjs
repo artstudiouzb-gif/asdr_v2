@@ -46,12 +46,46 @@ const blockSources = [
 
 // Два крупных файла админки (350 и 215 КБ исходника) отдавались как есть.
 // Порядок и способ подключения не меняются: minified-копия встаёт ровно на
-// место исходника (FrontendAssets::adminAsset). Слои-патчи и загрузчик
-// остаются отдельными файлами — их склейка поменяла бы момент выполнения.
+// место исходника (FrontendAssets::adminAsset). Общие слои панели склеиваются
+// отдельно, в adminBundles ниже.
 const adminSources = [
     'public/assets/css/admin.css',
     'public/assets/js/admin.js',
 ];
+
+// Общие слои админки — то, что каждая страница панели получала отдельными
+// файлами (17 запросов, часть CSS подключал JS-загрузчик уже после отрисовки).
+// Порядок — ровно порядок каскада и выполнения при старой схеме: сначала
+// основной файл, затем слои в той очерёдности, в какой их вставлял загрузчик.
+// Отдельными остаются исходники: без сборки (perf_asset_bundle = 0) панель
+// работает по-старому.
+const adminBundles = {
+    css: {
+        output: 'public/assets/css/admin.bundle.min.css',
+        sources: [
+            'public/assets/css/admin.css',
+            'public/assets/css/admin-shell-v2.css',
+            'public/assets/css/admin-notifications.css',
+            'public/assets/css/admin-shell-stability.css',
+            'public/assets/css/admin-hero-slide-editor.css',
+            'public/assets/css/admin-hero-slide-editor-legacy-reset.css',
+            'public/assets/css/admin-workflow-fixes.css',
+            'public/assets/css/admin-media-unified.css',
+            'public/assets/css/admin-slider-settings-layout.css',
+        ],
+    },
+    js: {
+        output: 'public/assets/js/admin.bundle.min.js',
+        sources: [
+            'public/assets/js/admin.js',
+            'public/assets/js/admin-media-bridge.js',
+            'public/assets/js/admin-workflow-fixes.js',
+            'public/assets/js/admin-gallery-dropzone.js',
+            'public/assets/js/admin-media-loadmore.js',
+            'public/assets/js/admin-slider-settings-layout.js',
+        ],
+    },
+};
 
 const minifiedName = (path) => path.replace(/\.(css|js)$/, '.min.$1');
 
@@ -212,6 +246,24 @@ const [cssInput, jsInput] = await Promise.all([readSources(cssSources), readSour
 const [css, js] = await Promise.all([buildCss(cssInput), buildJs(jsInput)]);
 const blocks = Object.fromEntries(await Promise.all(blockSources.map(buildBlockAsset)));
 const admin = Object.fromEntries(await Promise.all(adminSources.map(buildBlockAsset)));
+const adminBundleEntries = {};
+for (const [kind, bundle] of Object.entries(adminBundles)) {
+    const input = await readSources(bundle.sources);
+    const built = kind === 'css' ? await buildCss(input) : await buildJs(input);
+    await verifyOrWrite(bundle.output, built);
+    adminBundleEntries[kind] = {
+        path: `/${bundle.output.replace(/^public\//, '')}`,
+        // Размеры исходников — та же дешёвая проверка свежести, что у admin:
+        // правка любого слоя без пересборки возвращает панель к исходникам.
+        sources: input.map(({ path, content }) => ({
+            path: `/${path.replace(/^public\//, '')}`,
+            sourceRaw: Buffer.byteLength(content),
+        })),
+        sourceSha256: sourceFingerprint(input),
+        sha256: sha256(built),
+        ...sizeReport(built),
+    };
+}
 const cssSize = sizeReport(css);
 const jsSize = sizeReport(js);
 const manifest = `${JSON.stringify({
@@ -237,6 +289,8 @@ const manifest = `${JSON.stringify({
     blocks,
     // Админка: те же правила, ключ — исходный путь.
     admin,
+    // Сборки общих слоёв панели (FrontendAssets::adminBundle).
+    adminBundles: adminBundleEntries,
 }, null, 2)}\n`;
 await Promise.all([
     verifyOrWrite(outputs.css, css),
@@ -254,6 +308,9 @@ for (const [source, entry] of Object.entries(blocks)) {
 
 for (const [source, entry] of Object.entries(admin)) {
     console.log(`  админка ${source} -> ${entry.raw} raw / ${entry.gzip} gzip / ${entry.brotli} brotli`);
+}
+for (const [kind, entry] of Object.entries(adminBundleEntries)) {
+    console.log(`  сборка админки ${kind} ${entry.path} -> ${entry.raw} raw / ${entry.gzip} gzip / ${entry.brotli} brotli`);
 }
 
 // Мягкий бюджет блочных файлов: предупреждение в любом режиме.

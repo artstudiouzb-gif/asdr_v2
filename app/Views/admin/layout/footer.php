@@ -255,6 +255,15 @@ window.addEventListener('DOMContentLoaded', function () {
 </script>
 <script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/js/vendor/editor.js'), ENT_QUOTES) ?>"></script>
 <script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/vendor/coloris/coloris.min.js'), ENT_QUOTES) ?>"></script>
+<?php // Сборка выполняется синхронно, как обычный скрипт в конце страницы:
+      // загрузчик вставлял admin.js динамически, и DOMContentLoaded его не
+      // ждал — обработчики на это событие (тосты, выпадающие меню) могли не
+      // сработать вовсе. Без сборки — прежний загрузчик. ?>
+<?php $adminJsBundle = \App\Core\FrontendAssets::adminBundle('js'); ?>
+<?php if ($adminJsBundle !== null): ?>
+<script src="<?= htmlspecialchars(\App\Core\Asset::url($adminJsBundle), ENT_QUOTES) ?>" data-admin-slider-settings-layout></script>
+<?php else: ?>
 <script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/js/admin.js'), ENT_QUOTES) ?>"></script>
+<?php endif; ?>
 </body>
 </html>
