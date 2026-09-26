@@ -35,7 +35,9 @@ final class RepoAuth
 
         $user = RepoUser::findByUsername($username);
 
-        if (!$user || !password_verify($password, $user['password_hash'])) {
+        // Без пользователя пароль сверяется с заготовкой: время ответа то же.
+        $hash = $user === null ? null : (string) $user['password_hash'];
+        if (!Password::verify($password, $hash) || $user === null) {
             foreach (array_keys($identifiers) as $identifier) {
                 RateLimiter::recordAttempt($identifier, false);
             }
@@ -53,6 +55,14 @@ final class RepoAuth
         // сбрасывал бы защиту от перебора остальных аккаунтов с того же адреса.
         foreach (self::CLEAR_ON_SUCCESS as $bucket) {
             RateLimiter::clearAttempts(self::loginIdentifier($bucket, $username, $ip));
+        }
+
+        // Хеш старого алгоритма (bcrypt) меняется на Argon2id сейчас, пока
+        // открытый пароль известен; пароль при этом остаётся прежним.
+        $upgraded = Password::upgrade($password, (string) $user['password_hash']);
+        if ($upgraded !== null) {
+            RepoUser::replacePasswordHash((int) $user['id'], $upgraded);
+            $user['password_hash'] = $upgraded;
         }
 
         session_regenerate_id(true);

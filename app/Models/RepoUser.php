@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Core\Database;
 use App\Core\Logger;
+use App\Core\Password;
 use App\Core\SecretBox;
 
 /**
@@ -73,17 +74,24 @@ final class RepoUser
             ':f' => $fullName,
             ':o' => $organization,
             ':e' => $email,
-            ':p' => password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]),
+            ':p' => Password::hash($password),
         ]);
 
         return (int) Database::pdo()->lastInsertId();
+    }
+
+    /** Хеш, уже посчитанный Password::upgrade() при входе: пароль тот же. */
+    public static function replacePasswordHash(int $id, string $hash): void
+    {
+        $stmt = Database::pdo()->prepare('UPDATE repo_users SET password_hash = :hash WHERE id = :id');
+        $stmt->execute([':hash' => $hash, ':id' => $id]);
     }
 
     public static function updatePassword(int $id, string $newPassword): void
     {
         $stmt = Database::pdo()->prepare('UPDATE repo_users SET password_hash = :p WHERE id = :id');
         $stmt->execute([
-            ':p' => password_hash($newPassword, PASSWORD_BCRYPT, ['cost' => 12]),
+            ':p' => Password::hash($newPassword),
             ':id' => $id,
         ]);
     }
