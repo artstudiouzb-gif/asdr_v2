@@ -6,6 +6,7 @@ namespace App\Core;
 
 use App\Models\Language;
 use App\Models\News;
+use App\Models\NewsFeed;
 use App\Models\Setting;
 
 /**
@@ -54,7 +55,7 @@ final class WeeklyRoundup
         $out = [];
         foreach (Language::activeCodes() as $code) {
             $items = array_values(array_filter(
-                News::published(self::MAX_ITEMS * 2, 0, $code),
+                NewsFeed::published(self::MAX_ITEMS * 2, 0, $code),
                 static function (array $news) use ($since, $until): bool {
                     $at = (string) ($news['published_at'] ?? '');
 

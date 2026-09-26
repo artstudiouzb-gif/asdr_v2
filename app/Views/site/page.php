@@ -47,7 +47,7 @@ if ($isHome) {
 }
 
 $ancestorTrail = !$isHome
-    ? \App\Models\Page::ancestorTrail($page, \App\Core\Locale::current())
+    ? \App\Models\PageHierarchy::ancestorTrail($page, \App\Core\Locale::current())
     : [];
 $crumbsHtml = '';
 

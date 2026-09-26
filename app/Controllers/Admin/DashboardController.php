@@ -107,7 +107,7 @@ final class DashboardController
         $popularSearches = \App\Models\SearchLog::popular(5);
 
         // Популярные / читаемые новости за 30 дней
-        $topReadNews = \App\Models\News::mostViewed(30, 5);
+        $topReadNews = \App\Models\NewsFeed::mostViewed(30, 5);
 
         View::render('admin/dashboard', [
             'user' => Auth::user(),

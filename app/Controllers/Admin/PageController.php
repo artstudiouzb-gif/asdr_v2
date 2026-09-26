@@ -16,6 +16,7 @@ use App\Core\View;
 use App\Models\Block;
 use App\Models\Language;
 use App\Models\Page;
+use App\Models\PageHierarchy;
 use App\Models\PageAdminList;
 use App\Models\PageTranslation;
 use App\Models\ContentRevision;
@@ -65,7 +66,7 @@ final class PageController
         View::render('admin/pages/form', [
             'page' => null,
             'translations' => [],
-            'parentOptions' => Page::parentOptions(),
+            'parentOptions' => PageHierarchy::parentOptions(),
             'error' => null,
         ]);
     }
@@ -81,7 +82,7 @@ final class PageController
             View::render('admin/pages/form', [
                 'page' => $data,
                 'translations' => [],
-                'parentOptions' => Page::parentOptions(),
+                'parentOptions' => PageHierarchy::parentOptions(),
                 'error' => $error,
             ]);
             return;
@@ -98,7 +99,7 @@ final class PageController
             View::render('admin/pages/form', [
                 'page' => $data,
                 'translations' => [],
-                'parentOptions' => Page::parentOptions(),
+                'parentOptions' => PageHierarchy::parentOptions(),
                 'error' => $e->getMessage(),
             ]);
             return;
@@ -139,7 +140,7 @@ final class PageController
             'blocks' => $blocks,
             'blockLang' => $blockLang,
             'usingFallback' => $usingFallback,
-            'parentOptions' => Page::parentOptions((int) $page['id']),
+            'parentOptions' => PageHierarchy::parentOptions((int) $page['id']),
             'error' => null,
         ]);
     }
@@ -270,7 +271,7 @@ final class PageController
                 'error' => 'Страница уже была изменена в другой вкладке или другим пользователем. Текущие данные перезагружены; восстановите локальный черновик и проверьте изменения.',
                 'blocks' => Block::forPage($id, $blockLang),
                 'blockLang' => $blockLang,
-                'parentOptions' => Page::parentOptions($id),
+                'parentOptions' => PageHierarchy::parentOptions($id),
             ]);
             return;
         }
@@ -285,7 +286,7 @@ final class PageController
                 'error' => $error,
                 'blocks' => Block::forPage($id, $blockLang),
                 'blockLang' => $blockLang,
-                'parentOptions' => Page::parentOptions($id),
+                'parentOptions' => PageHierarchy::parentOptions($id),
             ]);
             return;
         }
@@ -306,7 +307,7 @@ final class PageController
                 'error' => 'Страница уже была изменена в другой вкладке или другим пользователем. Текущие данные перезагружены; восстановите локальный черновик и проверьте изменения.',
                 'blocks' => Block::forPage($id, $blockLang),
                 'blockLang' => $blockLang,
-                'parentOptions' => Page::parentOptions($id),
+                'parentOptions' => PageHierarchy::parentOptions($id),
             ]);
             return;
         } catch (\DomainException $e) {
@@ -318,7 +319,7 @@ final class PageController
                 'error' => $e->getMessage(),
                 'blocks' => Block::forPage($id, $blockLang),
                 'blockLang' => $blockLang,
-                'parentOptions' => Page::parentOptions($id),
+                'parentOptions' => PageHierarchy::parentOptions($id),
             ]);
             return;
         }
@@ -465,7 +466,7 @@ final class PageController
             ], 'Выбрана некорректная родительская страница.'];
         }
 
-        $parentError = Page::validateParent($parentId, $id);
+        $parentError = PageHierarchy::validateParent($parentId, $id);
         if ($parentError !== null) {
             return [[
                 'title' => $title,
