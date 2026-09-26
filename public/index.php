@@ -516,6 +516,7 @@ $router->get('/sitemap.xml', [\App\Controllers\Site\SitemapController::class, 's
 $router->get('/rss.xml', [\App\Controllers\Site\SitemapController::class, 'rss']);
 $router->get('/rss/{lang}', [\App\Controllers\Site\SitemapController::class, 'rss']);
 $router->get('/robots.txt', [\App\Controllers\Site\SitemapController::class, 'robots']);
+$router->get(\App\Core\SpeculationRules::PATH, [\App\Controllers\Site\SpeculationRulesController::class, 'show']);
 
 // --- Письменность узбекского текста (латиница ↔ кириллица) ---
 $router->get('/goals/random', [SiteGoalController::class, 'random']);
