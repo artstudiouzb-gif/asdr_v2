@@ -31,8 +31,8 @@ final class SocialEmbed
                 if ($id === null) {
                     return $m[0];
                 }
-                $url = "https://www.youtube-nocookie.com/embed/" . $id;
-                return '<div class="social-embed social-embed--youtube"><iframe src="' . htmlspecialchars($url, ENT_QUOTES) . '" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div>';
+                // Плеер — по нажатию: до этого только обложка (YoutubeFacade).
+                return '<div class="social-embed social-embed--youtube">' . YoutubeFacade::html($id, 'YouTube') . '</div>';
             },
             $html
         );

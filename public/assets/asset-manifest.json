@@ -13,11 +13,11 @@
       "/assets/css/public-editorial-pages.css",
       "/assets/css/public-home.css"
     ],
-    "sourceSha256": "6735e248fbcae72f31699a16e1574b7e40b673bd03482d279951eb8473843101",
-    "sha256": "154504e72eee9ced971f40ce605102f0725ff8c9d12da29cff9de1a93f558d44",
-    "raw": 400710,
-    "gzip": 67243,
-    "brotli": 52165
+    "sourceSha256": "5ef3eea53734d8f231aebbda71a3641b67cd43fa7a527b76278199a7a953fe30",
+    "sha256": "1ddbcc136eb538260318ac96eeb6d9665cc9a59264b5dcac528be3cbc7b4eb71",
+    "raw": 400973,
+    "gzip": 67292,
+    "brotli": 52231
   },
   "js": {
     "path": "/assets/js/public.min.js",
@@ -26,11 +26,11 @@
       "/assets/js/frontend.js",
       "/assets/js/forms.js"
     ],
-    "sourceSha256": "6b6496a4ce4b0e6f83f68acd6da71c3b95fd183266965d9ab6b8704240ef9555",
-    "sha256": "4298b42b3a6c1f3df3645cac22699c9415fb21dc16d7c202f26d7feca2af6272",
-    "raw": 63077,
-    "gzip": 16743,
-    "brotli": 14707
+    "sourceSha256": "ac72c14cc763acf2c77f7a5cdaba7f0bfc609462b832879097431308a252764d",
+    "sha256": "4c6f760122c385092f81ac246da81924aab0f0d0a3f7af3cf77bb6273f0bc573",
+    "raw": 63812,
+    "gzip": 16981,
+    "brotli": 14906
   },
   "blocks": {
     "/assets/css/blocks/buttons.css": {
@@ -89,12 +89,12 @@
     },
     "/assets/css/blocks/embed.css": {
       "path": "/assets/css/blocks/embed.min.css",
-      "sourceRaw": 1957,
-      "sourceSha256": "0c9636b7f9d18d01d3729206db3db30d47d27d06e42bd4ca96093d24309926cf",
-      "sha256": "c398110e73520fc70b8856b16fce17b32b6c4b86a5c19b3cfa228793e30dcf50",
-      "raw": 750,
-      "gzip": 366,
-      "brotli": 274
+      "sourceRaw": 1989,
+      "sourceSha256": "b74b9f4a5812e29c721ab297d8a41a38d725fcf7a546270a03cc33ece83e38d7",
+      "sha256": "66f0a91e5cc51c990bda059cd013000842ce0d597bd2a2b2566ad176e9581ad1",
+      "raw": 781,
+      "gzip": 375,
+      "brotli": 285
     },
     "/assets/css/blocks/hero-art-layout.css": {
       "path": "/assets/css/blocks/hero-art-layout.min.css",

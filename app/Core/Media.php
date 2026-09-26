@@ -122,8 +122,7 @@ final class Media
         // и браузер скачивает ровно одну картинку — ту, что подойдёт экрану.
         $mobileSources = self::mobileSources($mobileUrl, $sizes);
 
-        $variants = self::webpVariants($url);
-        $srcset = $variants !== null ? self::webpSrcset($variants) : [];
+        $srcset = self::srcsetFor($url, 'webp');
         if ($srcset === []) {
             if ($mobileSources === '' && $pictureClass === '') {
                 return $focalStyle . $img;
@@ -139,10 +138,15 @@ final class Media
             $pictureClassAttr = ' class="media-picture"';
         }
 
+        // AVIF идёт первым: браузер берёт первый источник поддерживаемого
+        // типа, и тот, кто AVIF не умеет, спокойно уходит на WebP.
+        $sizesAttr = 'sizes="' . htmlspecialchars($sizes, ENT_QUOTES) . '"';
+        $avif = self::srcsetFor($url, 'avif');
+
         return $focalStyle . '<picture' . $pictureClassAttr . '>'
             . $mobileSources
-            . '<source type="image/webp" srcset="' . implode(', ', $srcset) . '" '
-            . 'sizes="' . htmlspecialchars($sizes, ENT_QUOTES) . '">'
+            . ($avif !== [] ? '<source type="image/avif" srcset="' . implode(', ', $avif) . '" ' . $sizesAttr . '>' : '')
+            . '<source type="image/webp" srcset="' . implode(', ', $srcset) . '" ' . $sizesAttr . '>'
             . $img
             . '</picture>';
     }
@@ -163,11 +167,12 @@ final class Media
         $sizesAttr = ' sizes="' . htmlspecialchars($sizes, ENT_QUOTES) . '"';
         $html = '';
 
-        $variants = self::webpVariants($mobileUrl);
-        $srcset = $variants !== null ? self::webpSrcset($variants) : [];
-        if ($srcset !== []) {
-            $html .= '<source media="' . $media . '" type="image/webp" srcset="'
-                . implode(', ', $srcset) . '"' . $sizesAttr . '>';
+        foreach (['avif', 'webp'] as $format) {
+            $srcset = self::srcsetFor($mobileUrl, $format);
+            if ($srcset !== []) {
+                $html .= '<source media="' . $media . '" type="image/' . $format . '" srcset="'
+                    . implode(', ', $srcset) . '"' . $sizesAttr . '>';
+            }
         }
 
         return $html . '<source media="' . $media . '" srcset="'
@@ -197,14 +202,23 @@ final class Media
         // как и для <img>: здесь остаётся обычный путь.
         $original = 'url("' . $escape($url) . '")';
 
-        $variants = self::webpVariants($url);
-        $webp = $variants['w1600'] ?? $variants['full'] ?? null;
-        if ($webp === null) {
+        // Фону хватает варианта 1600px; прежде здесь читался несуществующий
+        // ключ, и фон всегда тянул полноразмерный WebP.
+        $pick = static function (?array $variants): ?string {
+            return $variants === null ? null : ($variants['sized'][1600] ?? $variants['full']);
+        };
+        $candidates = [];
+        foreach (['avif', 'webp'] as $format) {
+            $variant = $pick(self::variants($url, $format));
+            if ($variant !== null) {
+                $candidates[] = 'url("' . $escape($variant) . '") type("image/' . $format . '")';
+            }
+        }
+        if ($candidates === []) {
             return $original;
         }
 
-        return 'image-set(url("' . $escape($webp) . '") type("image/webp"), '
-            . $original . ' type("image/jpeg"))';
+        return 'image-set(' . implode(', ', $candidates) . ', ' . $original . ' type("image/jpeg"))';
     }
 
     public static function preloadLink(string $url, string $sizes = '100vw'): string
@@ -216,14 +230,18 @@ final class Media
 
         $href = $url;
         $responsive = '';
-        $variants = self::webpVariants($url);
-        if ($variants !== null) {
-            $srcset = self::webpSrcset($variants);
-            if ($srcset !== []) {
-                $href = $variants['full'] ?? $variants['w1600'] ?? $variants['w800'] ?? $url;
-                $responsive = ' type="image/webp" imagesrcset="' . implode(', ', $srcset)
-                    . '" imagesizes="' . htmlspecialchars($sizes, ENT_QUOTES) . '"';
+        // Предзагружается ровно тот формат, который выберет <picture>:
+        // AVIF, если он есть, иначе WebP. Иначе браузер качал бы оба.
+        foreach (['avif', 'webp'] as $format) {
+            $variants = self::variants($url, $format);
+            $srcset = $variants !== null ? self::srcsetOf($variants) : [];
+            if ($variants === null || $srcset === []) {
+                continue;
             }
+            $href = $variants['full'] ?? end($variants['sized']) ?: $url;
+            $responsive = ' type="image/' . $format . '" imagesrcset="' . implode(', ', $srcset)
+                . '" imagesizes="' . htmlspecialchars($sizes, ENT_QUOTES) . '"';
+            break;
         }
 
         return '<link rel="preload" as="image" href="' . htmlspecialchars($href, ENT_QUOTES) . '"'
@@ -234,7 +252,7 @@ final class Media
      * @param array{full: ?string, sized: array<int, string>} $variants
      * @return list<string>
      */
-    private static function webpSrcset(array $variants): array
+    private static function srcsetOf(array $variants): array
     {
         $srcset = [];
         foreach ($variants['sized'] as $width => $variantUrl) {
@@ -247,6 +265,14 @@ final class Media
         }
 
         return $srcset;
+    }
+
+    /** @return list<string> srcset вариантов формата; пусто — вариантов нет */
+    private static function srcsetFor(string $url, string $format): array
+    {
+        $variants = self::variants($url, $format);
+
+        return $variants !== null ? self::srcsetOf($variants) : [];
     }
 
     /**
@@ -388,9 +414,12 @@ final class Media
      */
     public static function variantSuffixes(): array
     {
-        $suffixes = ['.webp'];
-        foreach (self::VARIANT_WIDTHS as $width) {
-            $suffixes[] = '-' . $width . '.webp';
+        $suffixes = [];
+        foreach (['webp', 'avif'] as $format) {
+            $suffixes[] = '.' . $format;
+            foreach (self::VARIANT_WIDTHS as $width) {
+                $suffixes[] = '-' . $width . '.' . $format;
+            }
         }
 
         return $suffixes;
@@ -415,7 +444,7 @@ final class Media
         if ($url === '') {
             return '';
         }
-        $variants = self::webpVariants($url);
+        $variants = self::variants($url, 'webp');
         if ($variants === null) {
             // Вариантов нет — отдаём оригинал, но тем же путём, что и picture():
             // непригодный к отдаче файл подменяется webp, если он есть.
@@ -430,21 +459,23 @@ final class Media
     }
 
     /**
-     * Возвращает пути к существующим WebP-вариантам для локального URL загрузки,
-     * либо null, если это не локальная загрузка / вариантов нет.
+     * Возвращает пути к существующим вариантам формата (webp, avif) для
+     * локального URL загрузки, либо null, если это не локальная загрузка /
+     * вариантов нет.
      *
      * @return array{full: ?string, sized: array<int, string>}|null
      */
-    private static function webpVariants(string $url): ?array
+    private static function variants(string $url, string $format = 'webp'): ?array
     {
-        if (array_key_exists($url, self::$variantCache)) {
-            return self::$variantCache[$url];
+        $cacheKey = $format . '|' . $url;
+        if (array_key_exists($cacheKey, self::$variantCache)) {
+            return self::$variantCache[$cacheKey];
         }
 
         $urlPrefix = rtrim((string) Config::get('paths.public_uploads_url', '/uploads/public'), '/');
         $diskBase = rtrim((string) Config::get('paths.public_uploads', ''), '/');
         if ($diskBase === '' || !str_starts_with($url, $urlPrefix . '/')) {
-            return self::$variantCache[$url] = null;
+            return self::$variantCache[$cacheKey] = null;
         }
 
         // Отбрасываем querystring/anchor.
@@ -455,20 +486,20 @@ final class Media
         $result = ['full' => null, 'sized' => []];
         $found = false;
         foreach (self::VARIANT_WIDTHS as $width) {
-            $rel = $relNoExt . '-' . $width . '.webp';
+            $rel = $relNoExt . '-' . $width . '.' . $format;
             if (self::servable($diskBase . $rel)) {
                 $result['sized'][$width] = $urlPrefix . $rel;
                 $found = true;
             }
         }
-        $fullRel = $relNoExt . '.webp';
+        $fullRel = $relNoExt . '.' . $format;
         if (self::servable($diskBase . $fullRel)) {
             $result['full'] = $urlPrefix . $fullRel;
             $found = true;
         }
         ksort($result['sized']);
 
-        return self::$variantCache[$url] = ($found ? $result : null);
+        return self::$variantCache[$cacheKey] = ($found ? $result : null);
     }
 
     /** @return array{width: int, height: int}|null */
