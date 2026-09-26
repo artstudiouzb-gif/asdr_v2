@@ -293,7 +293,7 @@
 .person-card {
     min-width: 0;
     border-radius: var(--radius, 16px);
-    box-shadow: 0 12px 34px -28px rgba(15, 39, 86, .45);
+    box-shadow: var(--shadow-lift-deep);
 }
 
 .person-card:hover {
