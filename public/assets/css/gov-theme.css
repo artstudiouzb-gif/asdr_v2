@@ -858,7 +858,7 @@ body .site-header--container-floating.site-header--sticky-full.is-scrolled {
    (.site-header--sticky/--transparent); прежние классы design-header-* из
    раздела «Дизайн» удалены вместе с настройками, которые их не выводили. --- */
 body .site-header--sticky { position: sticky; top: var(--hdr-panel-height, 0px); z-index: 200; }
-body .site-header--sticky.is-scrolled { box-shadow: 0 8px 28px rgba(11,26,48,.14); }
+body .site-header--sticky.is-scrolled { box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12); }
 
 /* Прозрачная шапка: накладывается на первый экран; текст/иконки белые.
    При прокрутке (is-scrolled) возвращается сплошной фон и цвета темы. */
@@ -1248,7 +1248,7 @@ body .site-header--transparent:not(.is-scrolled) .site-burger { border-color: va
     border-radius: 999px;
     background: var(--gov-surface, #ffffff);
     border: 1.5px solid var(--gov-border, #cbd5e1);
-    box-shadow: 0 10px 30px rgba(15, 27, 45, 0.14);
+    box-shadow: var(--shadow-3);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -1752,7 +1752,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
    клавиатуре, но визуально применяется к внешней рамке карточки. */
 .news-card:has(.news-card__link:focus-visible) {
     border-color: var(--gov-teal);
-    box-shadow: 0 10px 30px rgba(19, 42, 92, .10);
+    box-shadow: var(--shadow-3);
 }
 .news-card__link:focus-visible { outline-offset: -3px; }
 
@@ -1765,7 +1765,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     background: linear-gradient(135deg, rgba(13, 148, 136, 0.06), rgba(2, 132, 199, 0.04));
     border: 1px solid var(--gov-border, rgba(13, 148, 136, 0.18));
     border-left: 4px solid var(--gov-teal); border-radius: var(--radius, 14px);
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
 }
 .news-audio-player__icon {
     display: flex; align-items: center; justify-content: center;
@@ -1869,7 +1869,7 @@ body.reader-mode-active { overflow: hidden; }
 .reader-mode__body { font-size: calc(1.125rem * var(--reader-scale, 1)); }
 .reader-mode__cover {
     width: 100%; max-height: 480px; object-fit: cover;
-    border-radius: var(--radius, 16px); margin-bottom: 36px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius, 16px); margin-bottom: 36px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 .reader-mode__body p { margin-bottom: 1.6em; }
 .reader-mode__body img { max-width: 100%; height: auto; border-radius: var(--radius, 12px); margin: 24px 0; }
@@ -1891,7 +1891,7 @@ body.reader-mode-active { overflow: hidden; }
     border-radius: var(--radius, 14px); border: 1px solid var(--gov-border, rgba(0, 0, 0, 0.1));
     background: var(--gov-surface, #ffffff); text-decoration: none;
     color: var(--gov-title, #1e293b); transition: all 0.25s ease;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04); width: 100%;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05); width: 100%;
 }
 .social-embed-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12); }
 .social-embed-card--telegram { border-left: 4px solid #229ed9; }
@@ -2062,7 +2062,7 @@ body.lightbox-active { overflow: hidden; }
 .news-poll-card {
     margin: 32px 0; padding: 24px; border-radius: var(--radius, 16px);
     background: var(--gov-surface); border: 1px solid var(--gov-border);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
 }
 .news-poll-card__badge {
     display: inline-block; padding: 4px 10px; border-radius: var(--radius-sm, 6px);
@@ -2652,7 +2652,7 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 .adjnews--next { grid-template-columns: minmax(0, 1fr) auto auto; text-align: right; }
 .adjnews:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(19,42,92,.1);
+    box-shadow: var(--shadow-3);
     border-color: color-mix(in srgb, var(--gov-teal) 35%, var(--gov-border));
 }
 .adjnews--empty { border: 0; background: transparent; }
@@ -2719,7 +2719,7 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 }
 .block-banner--light:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(19, 42, 92, 0.04);
+    box-shadow: 0 12px 28px rgba(19, 42, 92, 0.05);
 }
 @media (max-width: 900px) { .block-banner--light { grid-template-columns: 1fr; } .block-banner--light .block-banner__photo { display: none; } }
 .block-banner--light .block-banner__inner { padding: clamp(20px, 4vw, 48px) 0; text-align: left; }
@@ -3032,7 +3032,7 @@ h6, .h6 { font-size: var(--font-size-h6, var(--step-0)); }
 .block-map__card { 
     position: absolute; left: 24px; bottom: 24px; max-width: 300px; 
     background: var(--gov-surface); border: 1px solid var(--gov-border); border-radius: var(--radius-sm, calc(var(--radius) * 0.6)); 
-    padding: 18px 20px; box-shadow: 0 10px 28px rgba(19,42,92,.08); 
+    padding: 18px 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
     display: flex; flex-direction: column; gap: 8px; 
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
@@ -4219,11 +4219,11 @@ h4.section-head__title { font-size: var(--font-size-card-title, var(--step-2)); 
 .mediacard__media { 
     position: relative; display: grid; place-items: center; aspect-ratio: 16/10; 
     border-radius: var(--radius); overflow: hidden; background: #24425f center/cover no-repeat; 
-    box-shadow: 0 4px 14px rgba(19, 42, 92, 0.03);
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
     transition: box-shadow 0.4s ease;
 }
 .mediacard:hover .mediacard__media {
-    box-shadow: 0 12px 28px rgba(19, 42, 92, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 .mediacard__img { 
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; 
@@ -6869,7 +6869,7 @@ body .site-header--transparent:not(.is-scrolled) .site-menu__overflow-panel > .s
     display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%;
     background: var(--gov-surface); border: 2px solid var(--gov-teal);
     color: var(--gov-teal-text); font-weight: 800; font-size: var(--step-1);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    box-shadow: var(--shadow-2);
 }
 .stage-item--active .stage-item__num {
     background: var(--gov-navy); border-color: var(--gov-navy); color: #ffffff;
