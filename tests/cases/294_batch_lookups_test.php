@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Core\Database;
 use App\Core\Translations;
 use App\Models\Page;
+use App\Models\PageMenuTarget;
 
 /*
  * Пакетные выборки заменили поштучные там, где страница перебирает записи:
@@ -75,12 +76,12 @@ test('Пакетное разрешение целей меню совпадае
     // Ведущий слэш, дубль, проект с префиксом, черновик и несуществующий адрес.
     $values = ['contacts', '/contacts', 'projects/bridge', 'hidden', 'nothing-here'];
 
-    Page::forgetMenuTargets();
-    $batch = Page::publishedMenuTargets($values, 'ru');
+    PageMenuTarget::forget();
+    $batch = PageMenuTarget::findMany($values, 'ru');
 
     foreach ($values as $value) {
-        Page::forgetMenuTargets();
-        $one = Page::findPublishedMenuTarget($value, 'ru');
+        PageMenuTarget::forget();
+        $one = PageMenuTarget::find($value, 'ru');
         $many = $batch[$value] ?? null;
         if ($one === null) {
             assert_same(null, $many, "адрес «{$value}» не разрешается ни там, ни там");
@@ -91,7 +92,7 @@ test('Пакетное разрешение целей меню совпадае
     }
 
     $pdo->exec('DELETE FROM pages');
-    Page::forgetMenuTargets();
+    PageMenuTarget::forget();
 });
 
 test('Цель пункта меню в пределах запроса спрашивается один раз (БД)', function () {
@@ -104,17 +105,17 @@ test('Цель пункта меню в пределах запроса спра
     // Шапка спрашивает одну и ту же цель дважды: разрешая дерево пунктов и
     // собирая ссылку каждого из них. Без памяти это давало 36 одинаковых
     // запросов на каждой странице сайта.
-    Page::forgetMenuTargets();
-    $first = Page::findPublishedMenuTarget('contacts', 'ru');
+    PageMenuTarget::forget();
+    $first = PageMenuTarget::find('contacts', 'ru');
     assert_true(is_array($first), 'цель найдена');
 
     $pdo->exec('DELETE FROM pages');
-    $cached = Page::findPublishedMenuTarget('contacts', 'ru');
+    $cached = PageMenuTarget::find('contacts', 'ru');
     assert_true(is_array($cached), 'повторный вопрос отвечен из памяти, без запроса');
 
     // Запись страниц сбрасывает память: адреса изменились.
-    Page::forgetMenuTargets();
-    assert_same(null, Page::findPublishedMenuTarget('contacts', 'ru'), 'после сброса память пуста');
+    PageMenuTarget::forget();
+    assert_same(null, PageMenuTarget::find('contacts', 'ru'), 'после сброса память пуста');
 });
 
 test('Карта сайта видит оба механизма перевода, как и <head> страницы (БД)', function () {

@@ -11,6 +11,7 @@ use App\Core\View;
 use App\Models\Language;
 use App\Models\MenuItem;
 use App\Models\Page;
+use App\Models\PageMenuTarget;
 
 final class MenuController
 {
@@ -218,11 +219,11 @@ final class MenuController
             return [[], 'Выберите страницу для пункта меню.'];
         }
         if ($urlType === 'page') {
-            $page = Page::findPublishedMenuTarget($urlValue, $lang);
+            $page = PageMenuTarget::find($urlValue, $lang);
             if ($page === null) {
                 return [[], 'Для выбранного языка нет опубликованной версии этой страницы.'];
             }
-            $urlValue = Page::menuTargetValue($page);
+            $urlValue = PageMenuTarget::value($page);
         }
         if ($urlType === 'custom' && $urlValue === '') {
             return [[], 'Укажите URL для пункта меню.'];
