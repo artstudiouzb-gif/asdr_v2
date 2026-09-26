@@ -53,7 +53,24 @@ final class NewsBadge
     }
 
     /**
-     * Атрибут style с переменными фона и текста. Пустая строка, если цвет не
+     * Переменные фона и текста для публичной метки — классом через StyleVars,
+     * без атрибута style (он держит в CSP 'unsafe-inline').
+     *
+     * @return array{class: string, style: string}
+     */
+    private static function vars(mixed $color): array
+    {
+        $bg = self::normalizeColor($color);
+        if ($bg === '') {
+            return ['class' => '', 'style' => ''];
+        }
+
+        return StyleVars::apply(['--news-badge-bg' => $bg, '--news-badge-fg' => self::textColor($bg)]);
+    }
+
+    /**
+     * Атрибут style с переменными фона и текста — для списка новостей в
+     * админке, у которой своя политика CSP. Пустая строка, если цвет не
      * выбран: тогда работают значения по умолчанию из темы.
      */
     public static function styleAttr(mixed $color): string
@@ -81,10 +98,13 @@ final class NewsBadge
             return '';
         }
 
+        $vars = self::vars($color);
+
         return sprintf(
-            '<span class="news-badge%s"%s>%s</span>',
+            '%s<span class="news-badge%s%s">%s</span>',
+            $vars['style'],
             $onMedia ? ' news-badge--on-media' : '',
-            self::styleAttr($color),
+            $vars['class'] !== '' ? ' ' . $vars['class'] : '',
             htmlspecialchars($text, ENT_QUOTES)
         );
     }
@@ -102,9 +122,12 @@ final class NewsBadge
             return '';
         }
 
+        $vars = self::vars($color);
+
         return sprintf(
-            '<span class="news-badge news-badge--overlay"%s>%s</span>',
-            self::styleAttr($color),
+            '%s<span class="news-badge news-badge--overlay%s">%s</span>',
+            $vars['style'],
+            $vars['class'] !== '' ? ' ' . $vars['class'] : '',
             htmlspecialchars($text, ENT_QUOTES)
         );
     }

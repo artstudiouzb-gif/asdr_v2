@@ -1159,8 +1159,16 @@ final class BlockRenderer
             return $templateCss;
         };
 
+        // Переменные, которые шаблон задаёт через StyleVars (фокус картинки,
+        // цвет метки), уходят в CSS блока и кэшируются вместе с его HTML.
         ob_start();
-        $templateCss = $render($file, $data, $blockId);
+        StyleVars::begin();
+        try {
+            $templateCss = $render($file, $data, $blockId);
+        } finally {
+            $varsCss = StyleVars::end();
+        }
+        $templateCss = implode("\n", array_filter([$templateCss, $varsCss], static fn (string $css): bool => $css !== ''));
 
         return [(string) ob_get_clean(), $templateCss];
     }
