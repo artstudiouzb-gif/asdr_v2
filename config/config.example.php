@@ -62,6 +62,12 @@ return [
         // HSTS с preload (hstspreload.org): включать только после месяца
         // стабильной работы по HTTPS на всех поддоменах — снять быстро нельзя.
         'hsts_preload' => false,
+        // Строгий style-src публичной части: без 'unsafe-inline', теги <style>
+        // только с nonce. Пока false — строгая политика идёт заголовком
+        // Content-Security-Policy-Report-Only, и нарушения копятся в
+        // storage/logs/csp-report.log (POST /_csp-report). Включать, когда
+        // журнал неделю пуст на боевом сайте.
+        'csp_strict_style' => false,
         // Заголовки CF-Connecting-IP / X-Forwarded-For принимаются только от
         // этих reverse-proxy адресов. Пустой список безопасно игнорирует их.
         // Пример для локального nginx: TRUSTED_PROXY_CIDRS=127.0.0.1/32,::1/128
