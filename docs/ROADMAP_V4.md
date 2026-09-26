@@ -246,11 +246,11 @@ Lighthouse: LCP ≤ 2,5 с, INP ≤ 200 мс, CLS ≤ 0,1; TTFB HTML из кэш
 - OneID (my.gov.uz) — через OAuth-поток на cURL, токены только на сервере.
 
 ### v3.x — ужесточение
-- **CSP без `style-src 'unsafe-inline'`**: стилевые атрибуты из кода → классы
-  и переменные (раздел 3), динамические значения — в `<style nonce>`;
-  `HtmlSanitizer` не пропускает `style` в контенте редакторов. Сначала
-  `Content-Security-Policy-Report-Only` + эндпоинт отчётов с rate-limit,
-  затем боевая политика.
+- ✅ **CSP без `style-src 'unsafe-inline'` — подготовлено.** Атрибутов `style`
+  в публичной разметке нет (`StyleVars`), `<style>` — по nonce, `HtmlSanitizer`
+  `style` не пропускает. Строгая политика идёт Report-Only с `/_csp-report`;
+  обход 50 страниц демо — 0 нарушений. Осталось на боевом сайте: неделя
+  пустого `csp-report.log`, затем `security.csp_strict_style = true`.
 - **Trusted Types** в админке (`require-trusted-types-for 'script'`) — после
   аудита `innerHTML` в `admin.js`.
 - **Passkeys/WebAuthn — правильно**: проверка challenge, origin, подписи
