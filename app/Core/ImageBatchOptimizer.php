@@ -133,6 +133,18 @@ final class ImageBatchOptimizer
                 $expected[] = $base . '-' . $variantWidth . '.webp';
             }
         }
+        // AVIF ждём там же, где его пишет загрузчик: иначе после включения
+        // поддержки старые файлы считались бы готовыми и остались без AVIF.
+        if (Uploader::avifSupported()) {
+            if ($width <= max(Media::VARIANT_WIDTHS)) {
+                $expected[] = $base . '.avif';
+            }
+            foreach (Media::VARIANT_WIDTHS as $variantWidth) {
+                if ($width > $variantWidth) {
+                    $expected[] = $base . '-' . $variantWidth . '.avif';
+                }
+            }
+        }
 
         $sourceMtime = (int) @filemtime($path);
         foreach ($expected as $variant) {

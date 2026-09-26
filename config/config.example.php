@@ -40,6 +40,12 @@ return [
         // Жёсткий предел сессии, даже если пользователь остаётся активным.
         'absolute_lifetime' => (int) (getenv('SESSION_ABSOLUTE_LIFETIME') ?: 28800),
     ],
+    // AVIF-варианты картинок рядом с WebP (нужен GD с libavif, PHP 8.1+).
+    // Нет поддержки — тихо остаётся WebP; false выключает AVIF явно.
+    'media' => [
+        'avif' => true,
+    ],
+
     'security' => [
         'login_max_attempts' => 5,
         'login_lockout_minutes' => 15,

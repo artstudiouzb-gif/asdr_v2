@@ -447,6 +447,13 @@ final class Uploader
 
             // WebP полного размера.
             self::writeWebp($src, $base . '.webp', $quality);
+            // AVIF полного размера — только для небольших картинок, у которых
+            // нет адаптивных вариантов: кодирование AVIF в разы дороже WebP,
+            // и 2560px оригинала при загрузке обошлись бы в секунды.
+            $avif = self::avifSupported();
+            if ($avif && $width <= max(\App\Core\Media::VARIANT_WIDTHS)) {
+                self::writeAvif($src, $base . '.avif', $quality);
+            }
 
             // Адаптивные размеры — из общего списка (Media::VARIANT_WIDTHS),
             // от крупного к мелкому. Свой список здесь разъехался бы с тем, что
@@ -465,6 +472,9 @@ final class Uploader
                 }
                 imagecopyresampled($resized, $src, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
                 self::writeWebp($resized, $base . '-' . $targetWidth . '.webp', $quality);
+                if ($avif) {
+                    self::writeAvif($resized, $base . '-' . $targetWidth . '.avif', $quality);
+                }
             }
 
             // Даунскейл самого оригинала, если он неоправданно большой (фото
@@ -507,6 +517,31 @@ final class Uploader
     private static function writeWebp(\GdImage $image, string $file, int $quality): void
     {
         if (!@imagewebp($image, $file, $quality)) {
+            return;
+        }
+        @chmod($file, 0644);
+    }
+
+    /**
+     * AVIF пишется, если GD собран с ним (PHP 8.1+, libavif) и он не выключен
+     * в config (`media.avif`). Нет поддержки — остаётся WebP, без ошибок.
+     */
+    public static function avifSupported(): bool
+    {
+        return function_exists('imageavif') && Config::get('media.avif', true) !== false;
+    }
+
+    /**
+     * AVIF-вариант с теми же правами, что и WebP (см. writeWebp). Качество
+     * AVIF при том же числе заметно выше, поэтому шкала сдвинута вниз:
+     * 80 у WebP ≈ 55 у AVIF. Скорость 6 — компромисс между временем
+     * кодирования на shared-хостинге и размером файла.
+     *
+     * @param \GdImage $image
+     */
+    private static function writeAvif(\GdImage $image, string $file, int $quality): void
+    {
+        if (!@imageavif($image, $file, max(30, $quality - 25), 6)) {
             return;
         }
         @chmod($file, 0644);

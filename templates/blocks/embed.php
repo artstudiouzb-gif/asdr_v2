@@ -43,6 +43,10 @@ $frameTitle = $title !== '' ? TitleMarkup::plain($title) : (string) ($embed['tit
             <h2 class="section-head__title block-embed__title"><?= TitleMarkup::html($title) ?></h2>
         <?php endif; ?>
         <div class="block-embed__frame block-embed__frame--<?= htmlspecialchars($embed['provider'], ENT_QUOTES) ?> block-embed__frame--ratio-<?= htmlspecialchars($ratio, ENT_QUOTES) ?>">
+            <?php if ($embed['provider'] === 'youtube'): ?>
+                <?php // Плеер YouTube — по нажатию, до этого только обложка. ?>
+                <?= \App\Core\YoutubeFacade::html((string) ($embed['video_id'] ?? ''), $frameTitle) ?>
+            <?php else: ?>
             <iframe
                 src="<?= htmlspecialchars($embed['src'], ENT_QUOTES) ?>"
                 title="<?= htmlspecialchars($frameTitle, ENT_QUOTES) ?>"
@@ -50,6 +54,7 @@ $frameTitle = $title !== '' ? TitleMarkup::plain($title) : (string) ($embed['tit
                 referrerpolicy="strict-origin-when-cross-origin"
                 allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture"
                 allowfullscreen></iframe>
+            <?php endif; ?>
         </div>
         <?php if ($caption !== ''): ?>
             <?php // Не figcaption: он допустим только внутри figure, а здесь
