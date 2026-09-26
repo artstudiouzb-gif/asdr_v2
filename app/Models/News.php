@@ -162,7 +162,7 @@ final class News
 
     /**
      * @param array<string, mixed> $filters
-     * @return array{0:string,1:array<string,string>}
+     * @return array{0:string,1:array<string,string|int>}
      */
     private static function adminListFrom(array $filters): array
     {
@@ -664,7 +664,7 @@ final class News
     /**
      * Языки с контентом сразу для списка новостей в виде списка кодов ['ru', 'uz'] (или с картой целевых постов при $withTargets = true).
      *
-     * @param list<int> $ids
+     * @param array<int, int> $ids
      * @return array<int, list<string>>|array<int, array<string, int>>
      */
     public static function availableLangsForIds(array $ids, bool $withTargets = false): array
@@ -685,7 +685,7 @@ final class News
     /**
      * Карта языков с контентом и ID целевых записей для кликабельных баджей ['ru' => 15, 'uz' => 98].
      *
-     * @param list<int> $ids
+     * @param array<int, int> $ids
      * @return array<int, array<string, int>> id => [langCode => targetId]
      */
     public static function availableLangTargetsForIds(array $ids): array

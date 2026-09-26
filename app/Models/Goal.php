@@ -119,7 +119,7 @@ final class Goal
      * Языки, на которых у цели заполнен перевод — для колонки «Языки» в списке
      * админки. Одним запросом на всю страницу, а не по запросу на строку.
      *
-     * @param list<int> $ids
+     * @param array<int, int> $ids
      * @return array<int, list<string>>
      */
     public static function availableLangsForIds(array $ids): array

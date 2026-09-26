@@ -35,7 +35,7 @@ final class NewsCategoryTranslation
      * Один язык для набора категорий — списки категорий читаются на каждой
      * странице новостей, поэтому N+1 здесь недопустим.
      *
-     * @param list<int> $categoryIds
+     * @param array<int, int> $categoryIds
      * @return array<int, string> id категории → переведённое название
      */
     public static function namesForIds(array $categoryIds, string $lang): array

@@ -38,7 +38,7 @@ final class TeamMemberTranslation
 
     /**
      * Пакетная загрузка одного перевода для списка сотрудников — устраняет N+1.
-     * @param list<int> $memberIds
+     * @param array<int, int> $memberIds
      * @return array<int, array<string, mixed>>
      */
     public static function forMemberIds(array $memberIds, string $lang): array

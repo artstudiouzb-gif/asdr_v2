@@ -23,6 +23,8 @@ namespace App\Core;
  *    (контакты, документы под текстом) — small.
  *  - Анимация появления — только у карточных секций ниже первого экрана;
  *    hero анимировать нельзя, он виден сразу и мигал бы при загрузке.
+ *
+ * @phpstan-type Preset array{name:string, description:string, outline:list<string>, blocks:list<array<string,mixed>>}
  */
 final class PagePresets
 {
@@ -47,7 +49,7 @@ final class PagePresets
      * страниц, собранных не из сборки (демо-контент, импорт). Сборки выше
      * размечены вручную и точнее: здесь мы знаем только порядок и типы блоков.
      *
-     * @param list<string> $types типы блоков страницы по порядку
+     * @param array<int, string> $types типы блоков страницы по порядку
      * @return list<array<string,mixed>> оформление для каждого блока
      */
     public static function rhythmFor(array $types): array
@@ -95,7 +97,7 @@ final class PagePresets
     }
 
     /**
-     * @return array<string, array{name:string, description:string, outline:list<string>, blocks:list<array<string,mixed>>}>
+     * @return array<string, Preset>
      */
     public static function all(?string $lang = null): array
     {
@@ -120,7 +122,7 @@ final class PagePresets
 
     /**
      * Готовая сборка: Главная страница (эталонный макет из демо-комплекта).
-     * @return array<string, mixed>
+     * @return Preset
      */
     private static function home(string $lang = 'ru'): array
     {
@@ -221,7 +223,7 @@ final class PagePresets
 
     /**
      * Страница структурного подразделения.
-     * @return array<string, mixed>
+     * @return Preset
      */
     private static function department(): array
     {
@@ -306,7 +308,7 @@ final class PagePresets
 
     /**
      * Страница услуги или направления деятельности.
-     * @return array<string, mixed>
+     * @return Preset
      */
     private static function service(): array
     {
@@ -386,7 +388,7 @@ final class PagePresets
 
     /**
      * Страница «О ведомстве».
-     * @return array<string, mixed>
+     * @return Preset
      */
     private static function about(): array
     {
@@ -476,7 +478,7 @@ final class PagePresets
 
     /**
      * Пресс-центр.
-     * @return array<string, mixed>
+     * @return Preset
      */
     private static function press(): array
     {
@@ -534,7 +536,7 @@ final class PagePresets
 
     /**
      * Контакты.
-     * @return array<string, mixed>
+     * @return Preset
      */
     private static function contacts(): array
     {
@@ -596,7 +598,7 @@ final class PagePresets
 
     /**
      * Проект или программа.
-     * @return array<string, mixed>
+     * @return Preset
      */
     private static function project(): array
     {

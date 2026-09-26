@@ -266,7 +266,7 @@ final class SocialSettings
      * @return array{message:string, link:string, image_url:string, title:string,
      *     hashtags:?string, category:string, date:string, gallery:list<string>,
      *     gallery_meta:array<string,array{caption:string,credit:string}>,
-     *     langs:list<array<string,mixed>>}
+     *     langs:list<array{code:string,label:string,title:string,excerpt:string,lead_html?:string,link:string,read_more:string}>}
      */
     public static function buildPost(array $news): array
     {
@@ -353,7 +353,7 @@ final class SocialSettings
 
     /**
      * @param array<string, mixed> $news
-     * @return list<array<string, string>>
+     * @return list<array{code:string,label:string,title:string,excerpt:string,lead_html?:string,link:string,read_more:string}>
      */
     private static function languageBlocks(array $news, string $base): array
     {
