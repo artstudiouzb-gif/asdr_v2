@@ -42,8 +42,8 @@ Composer и сторонних библиотек. PHPStan/Composer относя
 | TLS `verify_peer`/`verify_peer_name` в SMTP | `App\Core\Mailer::connect` — жёстко `true`, `allow_self_signed=false`, `peer_name=host` | ✅ |
 | TOTP-секрет только из `random_bytes` | `App\Core\TOTP::generateSecret` | ✅ |
 | Токены/коды сравниваются `hash_equals` | TOTP, CSRF, download-токен, reset-токены | ✅ |
-| Пароли — bcrypt | `App\Models\User` | ✅ |
-| Токены/коды в БД — только хеши | reset/backup/session — `sha256`; пароли — bcrypt | ✅ |
+| Пароли — Argon2id (bcrypt запасной, перехешовка при входе) | `App\Core\Password` | ✅ |
+| Токены/коды в БД — только хеши | reset/backup/session — `sha256`; пароли — Argon2id | ✅ |
 
 ## XSS и контент
 

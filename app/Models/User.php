@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Core\Database;
 use App\Core\Logger;
+use App\Core\Password;
 use App\Core\SecretBox;
 
 final class User
@@ -90,12 +91,20 @@ final class User
         return self::decryptSecrets($row ?: null);
     }
 
+    /** Хеш, уже посчитанный Password::upgrade() при входе: пароль тот же. */
+    public static function replacePasswordHash(int $id, string $hash): void
+    {
+        self::forgetCache();
+        $stmt = Database::pdo()->prepare('UPDATE users SET password_hash = :hash WHERE id = :id');
+        $stmt->execute([':hash' => $hash, ':id' => $id]);
+    }
+
     public static function updatePassword(int $id, string $newPassword): void
     {
         self::forgetCache();
         $stmt = Database::pdo()->prepare('UPDATE users SET password_hash = :hash WHERE id = :id');
         $stmt->execute([
-            ':hash' => password_hash($newPassword, PASSWORD_BCRYPT, ['cost' => 12]),
+            ':hash' => Password::hash($newPassword),
             ':id' => $id,
         ]);
     }
@@ -203,7 +212,7 @@ final class User
             ':username' => $username,
             ':email' => $email,
             ':phone' => $phone,
-            ':password' => password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]),
+            ':password' => Password::hash($password),
             ':role' => $role,
             ':admin_lang' => $adminLang,
         ]);
