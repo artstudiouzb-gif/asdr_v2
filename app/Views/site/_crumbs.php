@@ -3,7 +3,7 @@
  * Хлебные крошки. Ожидает $crumbs = [['label'=>..,'url'=>..], ..]; у последнего
  * элемента url можно опустить (текущая страница). Разметка совместима с
  * .content-crumbs (frontend.css).
- * @var array $crumbs
+ * @var array<int, array<string, string>> $crumbs
  */
 $crumbs = $crumbs ?? [];
 if (count($crumbs) < 2) {

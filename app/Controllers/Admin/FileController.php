@@ -255,7 +255,10 @@ final class FileController
         exit;
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $file
+     * @return array<string, mixed>
+     */
     private static function libraryItem(array $file): array
     {
         return [

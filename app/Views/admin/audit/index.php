@@ -9,7 +9,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var int $page */
 /** @var int $pages */
 /** @var array $filters */
-/** @var array $actors */
+/** @var array<int, array<string, mixed>> $actors */
 
 // Человекочитаемая метка раздела панели по началу пути.
 $sectionLabels = [

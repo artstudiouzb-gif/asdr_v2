@@ -47,7 +47,9 @@ final class QrCode
         6 => [6, 34],
     ];
 
+    /** @var array<int, int> */
     private static array $expTable = [];
+    /** @var array<int, int> */
     private static array $logTable = [];
 
     /**
@@ -140,6 +142,8 @@ final class QrCode
     /**
      * Строит поток данных-кодовых слов (без EC): режим, счётчик, данные,
      * терминатор, выравнивание и заполняющие байты.
+     * @param array<int, int> $bytes
+     * @return array<int, int>
      */
     private static function buildDataCodewords(array $bytes, int $version): array
     {
@@ -188,6 +192,8 @@ final class QrCode
 
     /**
      * Разбивает данные на блоки, считает EC для каждого и чередует их.
+     * @param array<int, int> $dataCodewords
+     * @return array<int, int>
      */
     private static function interleaveWithEc(array $dataCodewords, int $version): array
     {
@@ -261,7 +267,10 @@ final class QrCode
         return self::$expTable[(self::$logTable[$a] + self::$logTable[$b]) % 255];
     }
 
-    /** @param array<string, mixed> $data */
+    /**
+     * @param array<int, int> $data
+     * @return array<int, int>
+     */
     private static function reedSolomon(array $data, int $ecCount): array
     {
         self::initGf();
@@ -295,7 +304,7 @@ final class QrCode
     // ---- Размещение модулей ----
 
     /**
-     * @return array{0: array, 1: array} матрица и карта зарезервированных модулей
+     * @return array{0: array<int, array<int, int>>, 1: array<int, array<int, bool>>} матрица и карта зарезервированных модулей
      */
     private static function buildBaseMatrix(int $version, int $size): array
     {
@@ -379,6 +388,11 @@ final class QrCode
         return [$matrix, $reserved];
     }
 
+    /**
+     * @param array<int, array<int, int>> $matrix
+     * @param array<int, array<int, bool>> $reserved
+     * @param array<int, int> $codewords
+     */
     private static function placeData(array &$matrix, array $reserved, array $codewords, int $size): void
     {
         $bits = [];
@@ -409,6 +423,10 @@ final class QrCode
         }
     }
 
+    /**
+     * @param array<int, array<int, int>> $matrix
+     * @param array<int, array<int, bool>> $reserved
+     */
     private static function applyMask(array &$matrix, array $reserved, int $mask, int $size): void
     {
         for ($r = 0; $r < $size; $r++) {
@@ -434,6 +452,9 @@ final class QrCode
         }
     }
 
+    /**
+     * @param array<int, array<int, int>> $matrix
+     */
     private static function placeFormatInfo(array &$matrix, int $mask, int $size): void
     {
         $raw = self::formatInfoBits(self::EC_LEVEL_M, $mask);
@@ -484,6 +505,9 @@ final class QrCode
 
     // ---- Штрафные очки для выбора маски ----
 
+    /**
+     * @param array<int, array<int, int>> $matrix
+     */
     private static function penalty(array $matrix, int $size): int
     {
         $penalty = 0;
@@ -547,6 +571,9 @@ final class QrCode
         return (int) $penalty;
     }
 
+    /**
+     * @param array<int, int> $line
+     */
     private static function lineRunPenalty(array $line, int $size): int
     {
         $penalty = 0;
@@ -570,6 +597,9 @@ final class QrCode
         return $penalty;
     }
 
+    /**
+     * @param array<int, int> $bits
+     */
     private static function pushBits(array &$bits, int $value, int $length): void
     {
         for ($i = $length - 1; $i >= 0; $i--) {

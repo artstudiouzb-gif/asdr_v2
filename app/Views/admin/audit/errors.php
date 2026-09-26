@@ -10,7 +10,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var int $total */
 /** @var int $page */
 /** @var int $pages */
-/** @var array $filters */
+/** @var array<string, mixed> $filters */
 
 // Query-строка текущих фильтров для ссылок пагинации.
 $qs = static function (int $p) use ($filters): string {

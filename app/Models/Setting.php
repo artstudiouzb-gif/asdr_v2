@@ -10,6 +10,7 @@ use App\Core\SecretBox;
 
 final class Setting
 {
+    /** @var array<string, string|null>|null */
     private static ?array $cache = null;
     private static bool $cacheFromDatabase = false;
 

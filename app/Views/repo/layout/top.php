@@ -4,7 +4,7 @@ use App\Core\Csrf;
 use App\Core\Flash;
 
 /** @var string $pageTitle */
-/** @var array|null $repoUser */
+/** @var array<string, mixed>|null $repoUser */
 $repoName = htmlspecialchars((string) \App\Models\Setting::get('site_name', 'Файловый портал'), ENT_QUOTES);
 $repoLogo = trim((string) \App\Models\Setting::get('repo_logo', ''));
 

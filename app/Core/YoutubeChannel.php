@@ -71,7 +71,10 @@ final class YoutubeChannel
         return null;
     }
 
-    /** Адрес RSS-ленты источника; для @псевдонима нужен предварительно найденный id канала. */
+    /**
+     * Адрес RSS-ленты источника; для @псевдонима нужен предварительно найденный id канала.
+     * @param array<string, mixed> $source
+     */
     public static function feedUrl(array $source): ?string
     {
         return match ($source['type']) {
@@ -82,7 +85,10 @@ final class YoutubeChannel
         };
     }
 
-    /** Человеческий адрес канала — для ссылки «Открыть канал» в админке. */
+    /**
+     * Человеческий адрес канала — для ссылки «Открыть канал» в админке.
+     * @param array<string, mixed> $source
+     */
     public static function channelUrl(array $source): string
     {
         return match ($source['type']) {
@@ -97,6 +103,7 @@ final class YoutubeChannel
      * Находит UC-id канала по его странице (@псевдоним или /c/Имя): RSS-лента
      * умеет только channel_id, playlist_id и старый user. Результат вызывающий
      * код запоминает в настройках, чтобы не ходить сюда каждый раз.
+     * @param array<string, mixed> $source
      */
     public static function resolveChannelId(array $source): ?string
     {
@@ -158,7 +165,10 @@ final class YoutubeChannel
         return $result;
     }
 
-    /** @return array{ok:bool, error:string, items:array<int,array<string,mixed>>, channel_id:string} */
+    /**
+     * @param array<string, mixed> $source
+     * @return array{ok:bool, error:string, items:array<int,array<string,mixed>>, channel_id:string}
+     */
     private static function fetchViaFeed(array $source, int $limit): array
     {
         $url = self::feedUrl($source);
@@ -233,6 +243,7 @@ final class YoutubeChannel
     /**
      * Data API v3: список загрузок канала + длительность роликов.
      *
+     * @param array<string, mixed> $source
      * @return array{ok:bool, error:string, items:array<int,array<string,mixed>>, channel_id:string}
      */
     private static function fetchViaApi(array $source, int $limit, string $apiKey): array

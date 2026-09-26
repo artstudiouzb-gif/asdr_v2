@@ -27,7 +27,7 @@ final class SocialPublisher
     private const TG_CAPTION_LIMIT = 1024;
     private const TG_TEXT_LIMIT = 4096;
 
-    /** @var callable(string,string,string,array):array */
+    /** @var callable(string,string,string,array<int, string>):array{status:int, body:string, error:string} */
     private $http;
 
     /** @param callable|null $http fn(method,url,body,headers):array{status,body,error} */
@@ -254,8 +254,8 @@ final class SocialPublisher
      * при пересылке кнопки не всегда переносятся вместе с сообщением.
      *
      * @param array<string,mixed> $post
-     * @return list<array{text:string,url:string}>
      * @param array<string, mixed> $cfg
+     * @return list<array{text:string,url:string}>
      */
     private static function telegramButtons(array $post, array $cfg = []): array
     {
@@ -628,6 +628,7 @@ final class SocialPublisher
     /** @param array<string, mixed> $post */
     /**
      * @param array<string, mixed> $cfg
+     * @param array<string, mixed> $post
      * @return array{ok:bool, remote_id:?string, error:?string}
      */
     private function facebook(array $cfg, array $post): array
@@ -649,6 +650,7 @@ final class SocialPublisher
     /** @param array<string, mixed> $post */
     /**
      * @param array<string, mixed> $cfg
+     * @param array<string, mixed> $post
      * @return array{ok:bool, remote_id:?string, error:?string}
      */
     private function linkedin(array $cfg, array $post): array
@@ -694,6 +696,7 @@ final class SocialPublisher
     /** @param array<string, mixed> $post */
     /**
      * @param array<string, mixed> $cfg
+     * @param array<string, mixed> $post
      * @return array{ok:bool, remote_id:?string, error:?string}
      */
     private function instagram(array $cfg, array $post): array

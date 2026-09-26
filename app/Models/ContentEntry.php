@@ -29,8 +29,8 @@ final class ContentEntry
     }
 
     /**
-     * @return list<array<string, mixed>>
      * @param array<string, mixed> $filters
+     * @return list<array<string, mixed>>
      */
     public static function adminList(int $typeId, array $filters): array
     {
@@ -65,8 +65,8 @@ final class ContentEntry
     }
 
     /**
-     * @return array{0:string,1:array<string,string>}
      * @param array<string, mixed> $filters
+     * @return array{0:string,1:array<string,string>}
      */
     private static function adminListWhere(int $typeId, array $filters): array
     {
@@ -200,7 +200,10 @@ final class ContentEntry
         return [$join, $where, $params, $titleExpression];
     }
 
-    /** @param array<string,mixed> $row @return array<string,mixed> */
+    /**
+     * @param array<string,mixed> $row
+     * @return array<string,mixed>
+     */
     private static function decodePublicRow(array $row): array
     {
         $baseData = json_decode((string) ($row['data'] ?? ''), true) ?: [];
@@ -387,7 +390,10 @@ final class ContentEntry
         ]);
     }
 
-    /** @param array<string,mixed> $data @return array<string,mixed> */
+    /**
+     * @param array<string,mixed> $data
+     * @return array<string,mixed>
+     */
     private static function normalizeTranslationData(array $data): array
     {
         return array_filter(

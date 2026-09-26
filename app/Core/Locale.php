@@ -14,6 +14,7 @@ final class Locale
 {
     private static ?string $current = null;
     private static string $path = '/';
+    /** @var list<string>|null */
     private static ?array $contentLangs = null;
 
     /** @var array<string,string> */

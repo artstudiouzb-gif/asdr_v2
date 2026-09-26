@@ -70,7 +70,7 @@ final class BlockSnippet
     }
 
     /**
-     * @param array<int, array{type:string, title:?string, data:array, custom_css:string}> $blocks
+     * @param array<int, array{type:string, title:?string, data:array<string, mixed>, custom_css:string}> $blocks
      */
     public static function create(string $name, array $blocks): int
     {

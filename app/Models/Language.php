@@ -20,6 +20,7 @@ final class Language
 
     /** @var list<array<string, mixed>>|null */
     private static ?array $activeCache = null;
+    /** @var array<string, mixed>|null */
     private static ?array $defaultCache = null;
 
     /**

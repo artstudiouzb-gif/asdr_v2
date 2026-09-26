@@ -24,7 +24,10 @@ final class LocalePreference
         return $code !== '' && in_array($code, $activeCodes, true) ? $code : null;
     }
 
-    /** @param array<string, mixed> $cookies @param string[] $activeCodes */
+    /**
+     * @param array<string, mixed> $cookies
+     * @param string[] $activeCodes
+     */
     public static function storedCode(array $cookies, array $activeCodes): ?string
     {
         $code = strtolower(trim(is_string($cookies[self::COOKIE] ?? null) ? $cookies[self::COOKIE] : ''));

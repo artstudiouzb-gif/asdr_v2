@@ -14,6 +14,7 @@ final class Mailer
 {
     /** @var resource|null */
     private $socket = null;
+    /** @var array<string, mixed> */
     private array $config;
     private ?string $lastError = null;
 
@@ -247,6 +248,9 @@ final class Mailer
         return '=?UTF-8?B?' . base64_encode($name) . '?= <' . $email . '>';
     }
 
+    /**
+     * @param array<int, int> $expectedCodes
+     */
     private function command(string $cmd, array $expectedCodes): string
     {
         $this->write($cmd);
@@ -265,6 +269,9 @@ final class Mailer
         }
     }
 
+    /**
+     * @param array<int, int> $expectedCodes
+     */
     private function expect(array $expectedCodes): string
     {
         if ($this->socket === null) {

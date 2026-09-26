@@ -563,6 +563,7 @@ final class MenuItem
     }
 
     /**
+     * @param array<string, mixed> $source
      * @param array<string,array<int,array<string,mixed>>> $targetByKey
      * @return array<string,mixed>|null
      */

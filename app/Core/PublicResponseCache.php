@@ -236,6 +236,7 @@ final class PublicResponseCache
      * Сверяемся со списком активных языков, а не с шаблоном «/xx»: иначе
      * обычная страница со slug из двух-восьми букв (/news, /contacts) тоже
      * считалась бы корнем и потеряла кеширование.
+     * @param array<int, string> $activeCodes
      */
     public static function isLanguageRootPath(string $path, array $activeCodes): bool
     {

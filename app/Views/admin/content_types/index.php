@@ -6,7 +6,7 @@ $pageTitle = 'Типы контента';
 $activeNav = 'content_types';
 require __DIR__ . '/../layout/header.php';
 
-/** @var array $items */
+/** @var array<int, array<string, mixed>> $items */
 ?>
 <div class="form-card">
     <h2 class="u-inline-291b7bbb01">Новый тип контента</h2>

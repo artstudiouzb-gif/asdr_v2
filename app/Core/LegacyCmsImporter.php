@@ -23,7 +23,11 @@ final class LegacyCmsImporter
     /** Разрешённые расширения картинок для переноса. */
     private const IMG_EXT = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
-    /** Кэш перенесённых картинок за один запуск: исходный URL => новый URL. */
+    /**
+     * Кэш перенесённых картинок за один запуск: исходный URL => новый URL.
+     *
+     * @var array<string, string|null>
+     */
     private static array $imageCache = [];
 
     /**

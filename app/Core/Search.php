@@ -249,7 +249,10 @@ final class Search
         }, array_slice($results, 0, $limit));
     }
 
-    /** @param list<list<string>> $groups @return array{string,list<string>} */
+    /**
+     * @param list<list<string>> $groups
+     * @return array{string,list<string>}
+     */
     private static function condition(string $expression, array $groups): array
     {
         $parts = [];
@@ -264,7 +267,10 @@ final class Search
         return [implode(' AND ', $parts), $params];
     }
 
-    /** @param array<int,array<string,mixed>> $results @param array<string,mixed> $row */
+    /**
+     * @param array<int,array<string,mixed>> $results
+     * @param array<string,mixed> $row
+     */
     private static function append(array &$results, string $term, string $type, array $row, string $url): void
     {
         $title = (string) ($row['title'] ?? '');
@@ -298,6 +304,9 @@ final class Search
         return is_string($slug) && $slug !== '' ? $slug : null;
     }
 
+    /**
+     * @param list<mixed> $params
+     */
     private static function bindSeq(\PDOStatement $stmt, array $params): void
     {
         foreach (array_values($params) as $index => $value) {

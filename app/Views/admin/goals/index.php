@@ -11,7 +11,7 @@ require __DIR__ . '/../layout/header.php';
 
 /** @var array $goals */
 /** @var int $total */
-/** @var array $filters */
+/** @var array<string, mixed> $filters */
 
 $search = (string) $filters['q'];
 $perPage = (int) $filters['per_page'];

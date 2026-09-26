@@ -26,7 +26,10 @@ namespace App\Core;
  */
 final class PagePresets
 {
-    /** Оформление секции: фон + отступы + анимация одной строкой. */
+    /**
+     * Оформление секции: фон + отступы + анимация одной строкой.
+     * @return array<string, mixed>
+     */
     private static function look(string $bg = 'none', string $spacing = 'premium', string $reveal = ''): array
     {
         return [
@@ -115,7 +118,10 @@ final class PagePresets
         return self::all($lang)[$id] ?? null;
     }
 
-    /** Готовая сборка: Главная страница (эталонный макет из демо-комплекта). */
+    /**
+     * Готовая сборка: Главная страница (эталонный макет из демо-комплекта).
+     * @return array<string, mixed>
+     */
     private static function home(string $lang = 'ru'): array
     {
         $fixtureName = $lang === 'uz' ? 'home_blocks_uz.json' : 'home_blocks.json';
@@ -213,7 +219,10 @@ final class PagePresets
         ];
     }
 
-    /** Страница структурного подразделения. */
+    /**
+     * Страница структурного подразделения.
+     * @return array<string, mixed>
+     */
     private static function department(): array
     {
         return [
@@ -295,7 +304,10 @@ final class PagePresets
         ];
     }
 
-    /** Страница услуги или направления деятельности. */
+    /**
+     * Страница услуги или направления деятельности.
+     * @return array<string, mixed>
+     */
     private static function service(): array
     {
         return [
@@ -372,7 +384,10 @@ final class PagePresets
         ];
     }
 
-    /** Страница «О ведомстве». */
+    /**
+     * Страница «О ведомстве».
+     * @return array<string, mixed>
+     */
     private static function about(): array
     {
         return [
@@ -459,7 +474,10 @@ final class PagePresets
         ];
     }
 
-    /** Пресс-центр. */
+    /**
+     * Пресс-центр.
+     * @return array<string, mixed>
+     */
     private static function press(): array
     {
         return [
@@ -514,7 +532,10 @@ final class PagePresets
         ];
     }
 
-    /** Контакты. */
+    /**
+     * Контакты.
+     * @return array<string, mixed>
+     */
     private static function contacts(): array
     {
         return [
@@ -573,7 +594,10 @@ final class PagePresets
         ];
     }
 
-    /** Проект или программа. */
+    /**
+     * Проект или программа.
+     * @return array<string, mixed>
+     */
     private static function project(): array
     {
         return [
@@ -645,6 +669,7 @@ final class PagePresets
     /**
      * Завершающая тёмная полоса. Единственная navy-секция на странице —
      * поэтому вынесена в общий метод, чтобы не расползлась по пресетам.
+     * @return array<string, mixed>
      */
     private static function ctaBand(string $title, string $text, string $buttonText = 'Написать обращение'): array
     {

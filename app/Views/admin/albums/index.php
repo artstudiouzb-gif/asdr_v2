@@ -7,7 +7,7 @@ $pageTitle = 'Фотоальбомы';
 $activeNav = 'albums';
 require __DIR__ . '/../layout/header.php';
 
-/** @var array $items */
+/** @var array<int, array<string, mixed>> $items */
 $langs = Language::active();
 $siteLangs = array_map(static fn (array $l): string => (string) $l['code'], $langs);
 $langMap = \App\Models\PhotoAlbum::availableLangsForIds(array_map(static fn ($i): int => (int) $i['id'], $items));

@@ -5,7 +5,7 @@
  * Разметка отдаётся сервером: она переводится вместе с сайтом, работает
  * при выключенном JS (значения видны) и не требует inline-скриптов (CSP).
  *
- * @var array $a11ySettings — нормализованные настройки из cookie
+ * @var array<string, mixed> $a11ySettings — нормализованные настройки из cookie
  */
 
 use App\Core\A11ySettings;

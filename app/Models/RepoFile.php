@@ -185,7 +185,7 @@ final class RepoFile
      * Валидирует и сохраняет загруженный администратором файл, затем создаёт
      * запись. Возвращает id новой записи.
      *
-     * @param array $fileInput элемент $_FILES
+     * @param array<string, mixed> $fileInput элемент $_FILES
      */
     public static function store(
         array $fileInput,

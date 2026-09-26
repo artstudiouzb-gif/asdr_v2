@@ -9,7 +9,7 @@ $pageActions = '<a href="/admin/widgets/create" class="btn btn--primary">' . \Ap
 require __DIR__ . '/../layout/header.php';
 
 /** @var array $left */
-/** @var array $right */
+/** @var array<int, array<string, mixed>> $right */
 
 $renderColumn = static function (string $title, array $widgets): void {
     ?>

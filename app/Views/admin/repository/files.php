@@ -66,7 +66,7 @@ $categorySelect = static function (string $name, ?int $selected) use ($categorie
 </div>
 <?php endif; ?>
 
-<?php /** @var array $pending */ ?>
+<?php /** @var array<int, array<string, mixed>> $pending */ ?>
 <?php if (!empty($pending)): ?>
 <div class="form-card mb-4">
     <h2>На модерации (<?= count($pending) ?>)</h2>

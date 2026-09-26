@@ -6,7 +6,7 @@ $pageTitle = 'Соцсети — авто-публикация';
 $activeNav = 'social';
 require __DIR__ . '/../layout/header.php';
 
-/** @var array $config */
+/** @var array<string, mixed> $config */
 $labels = [
     'telegram' => 'Telegram-канал',
     'facebook' => 'Facebook (страница)',

@@ -19,7 +19,7 @@ final class WebPush
     /** DER-префикс SubjectPublicKeyInfo для несжатой точки P-256. */
     private const P256_SPKI_PREFIX = '3059301306072a8648ce3d020106082a8648ce3d030107034200';
 
-    /** @var callable(string,string,string,array):array */
+    /** @var callable(string,string,string,array<int, string>):array{status:int, body:string, error:string} */
     private $http;
 
     /** @param callable|null $http fn(method,url,body,headers):array{status,body,error} */

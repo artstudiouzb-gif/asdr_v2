@@ -14,7 +14,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var array $filterParams */
 /** @var int $total */
 /** @var int $pages */
-/** @var array $langCounts */
+/** @var array<string, int> $langCounts */
 $langs = Language::active();
 ?>
 

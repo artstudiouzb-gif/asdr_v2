@@ -12,7 +12,7 @@ use App\Models\Setting;
 /** @var array $gallery */
 /** @var array $related */
 /** @var ?array $prevNews */
-/** @var ?array $nextNews */
+/** @var array<string, mixed>|null $nextNews */
 $gallery = $gallery ?? [];
 $related = $related ?? [];
 $prevNews = $prevNews ?? null;

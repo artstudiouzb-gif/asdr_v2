@@ -13,7 +13,7 @@ $pages = $pages ?? 1;
 $categories = $categories ?? [];
 $category = $category ?? '';
 
-/** @var array|null $sectionPage шапка раздела из админки (может отсутствовать) */
+/** @var array<string, mixed>|null $sectionPage шапка раздела из админки (может отсутствовать) */
 $sectionPage = $sectionPage ?? null;
 $sectionTitle = (string) ($sectionPage['title'] ?? '');
 $sectionLead = (string) ($sectionPage['lead'] ?? '');

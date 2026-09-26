@@ -10,7 +10,7 @@ $pageTitle = 'Конструктор шапки сайта';
 $activeNav = 'header';
 require __DIR__ . '/../layout/header.php';
 
-/** @var array $config */
+/** @var array<string, mixed> $config */
 $networks = ['telegram' => 'Telegram', 'instagram' => 'Instagram', 'facebook' => 'Facebook', 'linkedin' => 'LinkedIn', 'youtube' => 'YouTube', 'whatsapp' => 'WhatsApp'];
 
 $elements = HeaderConfig::ELEMENTS;

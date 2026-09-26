@@ -101,7 +101,10 @@ final class AdminUi
         return Icon::render($name, $size, $class, $strokeWidth);
     }
 
-    /** Каталог популярных иконок AdminUI с русскими подписями для селекторов меню и блоков. */
+    /**
+     * Каталог популярных иконок AdminUI с русскими подписями для селекторов меню и блоков.
+     * @return array<string, string>
+     */
     public static function iconCatalog(): array
     {
         return [
@@ -421,6 +424,8 @@ final class AdminUi
     /**
      * Рендерит горизонтальную панель переключения языков (subsubsub):
      * Все языки (349) | Русский (151) | O‘zbekcha (160) | English (38)
+     * @param array<string, mixed> $counts
+     * @param array<string, mixed> $params
      */
     public static function renderLangSubsubsub(string $currentLang, array $counts, string $baseUrl, array $params = []): string
     {

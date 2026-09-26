@@ -221,7 +221,10 @@ final class FormController
         $this->redirectBack();
     }
 
-    /** @param array<string, mixed> $data */
+    /**
+     * @param array<string, mixed> $form
+     * @param array<string, mixed> $data
+     */
     private function notify(array $form, array $data): void
     {
         if (!Mailer::isConfigured()) {

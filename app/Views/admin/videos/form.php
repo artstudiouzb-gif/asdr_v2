@@ -5,7 +5,7 @@ use App\Core\Csrf;
 use App\Models\Language;
 
 /** @var array $video */
-/** @var array $translations */
+/** @var array<string, array<string, mixed>> $translations */
 
 $pageTitle = 'Видео: ' . $video['title'];
 $activeNav = 'videos';

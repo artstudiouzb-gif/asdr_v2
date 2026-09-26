@@ -720,6 +720,10 @@ final class HeroRenderer
      */
     private const VEIL_DECIDES_FROM = 25;
 
+    /**
+     * @param array<string, mixed> $d
+     * @param array<string, mixed> $s
+     */
     private static function contentScheme(array $d, array $s): string
     {
         $mode = $d['content_scheme'] !== '' ? (string) $d['content_scheme'] : (string) $s['content_scheme'];

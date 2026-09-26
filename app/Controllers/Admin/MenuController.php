@@ -177,7 +177,7 @@ final class MenuController
     }
 
     /**
-     * @return array{0: array, 1: string|null}
+     * @return array{0: array<string, mixed>, 1: string|null}
      */
     private function collectInput(): array
     {
