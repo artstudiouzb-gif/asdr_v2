@@ -20,7 +20,10 @@ test('дизайн сайта показывает все глобальные �
 });
 
 test('частичная форма дизайна не сбрасывает отсутствующие опции', function (): void {
-    $settings = (string) file_get_contents(APP_ROOT . '/app/Core/DesignSettings.php');
+    // Снимок пользовательской конфигурации живёт в DesignUserPresets, сохранение
+    // формы — в DesignSettings: проверяем оба места.
+    $settings = (string) file_get_contents(APP_ROOT . '/app/Core/DesignSettings.php')
+        . (string) file_get_contents(APP_ROOT . '/app/Core/DesignUserPresets.php');
 
     assert_contains("if (!array_key_exists(\$key, \$input))", $settings);
     assert_contains("'heading_line_height_custom' => Setting::get", $settings);

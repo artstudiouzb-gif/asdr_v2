@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Core\DesignSettings;
+use App\Core\DesignUserPresets;
 use App\Models\Setting;
 
 test('Готовые конфигурации убраны из интерфейса', function () {
@@ -21,7 +22,7 @@ test('Готовые конфигурации убраны из интерфей
     assert_not_contains("'presets' => DesignSettings::PRESETS", $controller);
     // …и отклоняет их применение, даже если запрос придёт из старой вкладки.
     assert_contains("str_starts_with(\$preset, 'user:')", $controller);
-    assert_contains('DesignSettings::autoBackupPreset()', $controller);
+    assert_contains('DesignUserPresets::autoBackup()', $controller);
 });
 
 test('Дизайн: автокопия перед применением конфигурации и возврат (БД)', function () {
@@ -33,30 +34,30 @@ test('Дизайн: автокопия перед применением кон�
 
     Setting::set('design_user_presets', json_encode([]));
     DesignSettings::save(['typo_scale' => 'expressive', 'font_size_custom' => '18']);
-    $slug = DesignSettings::saveUserPreset('Рабочая тема');
+    $slug = DesignUserPresets::saveCurrent('Рабочая тема');
     assert_true($slug !== null);
 
     // Настройки испортили, затем применили сохранённую конфигурацию.
     DesignSettings::save(['typo_scale' => 'compact', 'font_size_custom' => '14']);
     assert_same('compact', DesignSettings::typoScale());
 
-    $backup = DesignSettings::autoBackupPreset();
+    $backup = DesignUserPresets::autoBackup();
     assert_true($backup !== null);
-    assert_contains(DesignSettings::DESIGN_BACKUP_PREFIX, (string) $backup);
+    assert_contains(DesignUserPresets::BACKUP_PREFIX, (string) $backup);
 
-    DesignSettings::applyUserPreset((string) $slug);
+    DesignUserPresets::apply((string) $slug);
     assert_same('expressive', DesignSettings::typoScale(), 'конфигурация восстановила шкалу');
     assert_same('18px', DesignSettings::fontSizeCustom());
 
     // Возврат к состоянию до применения — через автокопию.
     $autoSlug = null;
-    foreach (DesignSettings::userPresets() as $s => $p) {
-        if (str_starts_with((string) $p['label'], DesignSettings::DESIGN_BACKUP_PREFIX)) {
+    foreach (DesignUserPresets::all() as $s => $p) {
+        if (str_starts_with((string) $p['label'], DesignUserPresets::BACKUP_PREFIX)) {
             $autoSlug = $s;
         }
     }
     assert_true($autoSlug !== null, 'автокопия должна лежать в списке конфигураций');
-    DesignSettings::applyUserPreset((string) $autoSlug);
+    DesignUserPresets::apply((string) $autoSlug);
     assert_same('compact', DesignSettings::typoScale(), 'автокопия вернула прежнее состояние');
 
     Setting::set('design_user_presets', (string) $backupPresets);
@@ -70,11 +71,11 @@ test('Дизайн: автокопии не забивают лимит конф
     Setting::set('design_user_presets', json_encode([]));
 
     for ($i = 0; $i < 5; $i++) {
-        DesignSettings::autoBackupPreset();
+        DesignUserPresets::autoBackup();
     }
     $auto = array_filter(
-        DesignSettings::userPresets(),
-        static fn (array $p): bool => str_starts_with((string) $p['label'], DesignSettings::DESIGN_BACKUP_PREFIX)
+        DesignUserPresets::all(),
+        static fn (array $p): bool => str_starts_with((string) $p['label'], DesignUserPresets::BACKUP_PREFIX)
     );
     assert_true(count($auto) <= 2, 'старые автокопии должны вытесняться, лимит наборов невелик');
 

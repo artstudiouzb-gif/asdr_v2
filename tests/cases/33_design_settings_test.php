@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Core\DesignSettings;
+use App\Core\DesignUserPresets;
 
 test('DesignSettings::sanitize отбрасывает неизвестные значения к дефолту', function () {
     assert_same('wide', DesignSettings::sanitize('container', 'wide'));
@@ -156,9 +157,9 @@ test('Пользовательские конфигурации: сохрани�
     \App\Models\Setting::set('color_primary', '#123456');
     \App\Models\Setting::set('color_accent', '#654321');
 
-    $slug = DesignSettings::saveUserPreset('Моя тема');
+    $slug = DesignUserPresets::saveCurrent('Моя тема');
     assert_true($slug !== null, 'пресет сохранён');
-    assert_true(isset(DesignSettings::userPresets()[$slug]), 'в списке');
+    assert_true(isset(DesignUserPresets::all()[$slug]), 'в списке');
 
     // Меняем всё, затем применяем пресет — опции и ручные цвета вернулись.
     DesignSettings::save(['palette' => 'gov_blue', 'container' => 'wide']);
@@ -172,9 +173,9 @@ test('Пользовательские конфигурации: сохрани�
     assert_same('#654321', \App\Models\Setting::get('color_accent'));
 
     // Пустое имя — отказ; удаление работает.
-    assert_true(DesignSettings::saveUserPreset('  ') === null);
-    assert_true(DesignSettings::deleteUserPreset($slug));
-    assert_false(isset(DesignSettings::userPresets()[$slug]));
+    assert_true(DesignUserPresets::saveCurrent('  ') === null);
+    assert_true(DesignUserPresets::delete($slug));
+    assert_false(isset(DesignUserPresets::all()[$slug]));
     assert_false(DesignSettings::applyPreset('user:' . $slug));
 });
 
@@ -207,8 +208,8 @@ test('Пользовательская конфигурация хранит о�
         'space_max' => '70px',
         'heading_line_height_custom' => '1.18',
     ]);
-    $first = DesignSettings::saveUserPreset('Основная тема');
-    $second = DesignSettings::saveUserPreset('Рабочая тема');
+    $first = DesignUserPresets::saveCurrent('Основная тема');
+    $second = DesignUserPresets::saveCurrent('Рабочая тема');
     assert_true($first !== null && $second !== null && $first !== $second);
 
     DesignSettings::save([
@@ -217,7 +218,7 @@ test('Пользовательская конфигурация хранит о�
         'space_max' => '80px',
         'heading_line_height_custom' => '1.4',
     ]);
-    assert_true(DesignSettings::applyUserPreset((string) $first));
+    assert_true(DesignUserPresets::apply((string) $first));
     assert_same('15px', DesignSettings::semanticSpacings()['space_small']);
     assert_same('35px', DesignSettings::semanticSpacings()['space_premium']);
     assert_same('70px', DesignSettings::semanticSpacings()['space_max']);
