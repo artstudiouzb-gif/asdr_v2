@@ -21,12 +21,15 @@ test('Заглушки WebAuthn/Passkey в коде не осталось', func
     // подписи, challenge и счётчика. Маршрутов не было, но класс лежал в одном
     // шаге от полного обхода пароля и второго фактора.
     assert_false(is_file(APP_ROOT . '/app/Core/WebAuthn.php'), 'App\Core\WebAuthn должен быть удалён');
-    assert_false(
-        is_file(APP_ROOT . '/app/Controllers/Admin/PasskeyController.php'),
-        'PasskeyController должен быть удалён'
-    );
+
+    // Настоящая реализация (App\Core\WebAuthn\*, т. 365) пускает только по
+    // подписи challenge этого входа, с проверкой rpId, origin и счётчика.
+    $webauthn = (string) file_get_contents(APP_ROOT . '/app/Core/WebAuthn/WebAuthn.php');
+    assert_contains('openssl_verify(', $webauthn);
+    assert_contains('hash_equals($challenge', $webauthn);
 
     $login = (string) file_get_contents(APP_ROOT . '/app/Views/admin/auth/login.php');
+    // Ключ доступа — второй фактор: кнопка живёт на странице кода, не у пароля.
     assert_not_contains('passkey', $login, 'кнопка входа по Passkey ведёт на несуществующий маршрут');
     assert_not_contains('/admin/passkey/', $login);
 

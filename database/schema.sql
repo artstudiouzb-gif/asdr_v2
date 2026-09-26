@@ -610,6 +610,21 @@ CREATE TABLE IF NOT EXISTS user_sessions (
     CONSTRAINT fk_user_sessions_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Ключи доступа (passkeys) — третий канал второго фактора админки
+CREATE TABLE IF NOT EXISTS user_passkeys (
+    id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id       INT UNSIGNED NOT NULL,
+    credential_id VARCHAR(255) NOT NULL COMMENT 'base64url идентификатора ключа',
+    public_key    TEXT         NOT NULL COMMENT 'PEM открытого ключа',
+    sign_count    INT UNSIGNED NOT NULL DEFAULT 0,
+    name          VARCHAR(100) NOT NULL DEFAULT '',
+    created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_used_at  DATETIME     NULL,
+    UNIQUE KEY uq_user_passkeys_credential (credential_id),
+    KEY idx_user_passkeys_user (user_id),
+    CONSTRAINT fk_user_passkeys_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ---------------------------------------------------------------------------
 -- Очередь авто-публикаций в соцсети (этап 13, обрабатывается CLI-воркером)
 -- ---------------------------------------------------------------------------
@@ -1265,7 +1280,9 @@ INSERT INTO migrations (filename) VALUES
     ('2026_08_27_goal_texts.sql'),
     ('2026_08_29_content_type_icon.sql'),
     ('2026_09_01_seo_audits.sql'),
-    ('2026_09_08_content_type_root_url.sql')
+    ('2026_09_08_content_type_root_url.sql'),
+    ('2026_08_23_drop_user_passkeys.sql'),
+    ('2026_09_26_user_passkeys.sql')
 ON DUPLICATE KEY UPDATE filename = filename;
 
 CREATE TABLE IF NOT EXISTS search_log (
