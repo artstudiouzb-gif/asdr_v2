@@ -63,6 +63,25 @@ final class LocalePreference
         ]);
     }
 
+    /**
+     * Запрос отправлен предзагрузкой (Speculation Rules, `<link rel=prefetch>`),
+     * а не переходом посетителя. Наведение на переключатель языка запрашивало
+     * `?_lang=uz` заранее, и ответ молча менял сохранённый язык; роутер такой
+     * запрос теперь отклоняет.
+     *
+     * @param array<string, mixed> $server
+     */
+    public static function isSpeculative(array $server): bool
+    {
+        foreach (['HTTP_SEC_PURPOSE', 'HTTP_PURPOSE', 'HTTP_X_MOZ'] as $header) {
+            if (str_contains(strtolower((string) ($server[$header] ?? '')), 'prefetch')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static function forget(): void
     {
         unset($_COOKIE[self::COOKIE]);

@@ -28,15 +28,25 @@
     };
     window.asdrPublicIcon = asdrIcon;
 
-    // Same-origin page hints belong to the shared frontend bundle, not to
-    // executable snippets injected into every response.
+    // Предзагрузка по наведению — запасной путь для браузеров без Speculation
+    // Rules: там правила приходят заголовком (App\Core\SpeculationRules), и
+    // исключения здесь те же. Главное из них — ссылки-действия: запрос
+    // `?_lang=` меняет сохранённый язык, его нельзя делать до клика.
     (function () {
+        if (window.HTMLScriptElement && HTMLScriptElement.supports
+            && HTMLScriptElement.supports('speculationrules')) {
+            return;
+        }
+        var skipArea = /^\/(?:admin|repo|install|api|uploads|storage|_)/;
+        var skipFile = /\.(?:xml|txt|pdf|zip|docx?|xlsx?|pptx?)$/i;
+        var skipLink = '[href*="_lang="], [href*="_fragment="], [download], [rel~="nofollow"], [target="_blank"], [data-no-prefetch]';
         var prefetched = new Set();
         document.addEventListener('mouseover', function (event) {
             var anchor = event.target.closest('a');
             if (!anchor || !anchor.href || anchor.origin !== location.origin
-                || anchor.href.includes('#') || anchor.href.includes('/admin')
-                || prefetched.has(anchor.href)) {
+                || anchor.href.includes('#') || skipArea.test(anchor.pathname)
+                || skipFile.test(anchor.pathname)
+                || anchor.matches(skipLink) || prefetched.has(anchor.href)) {
                 return;
             }
             prefetched.add(anchor.href);
