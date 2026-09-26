@@ -29,7 +29,7 @@
 | Качество | тестовых сценариев | 1681 (README) |
 | | PHPStan | уровень 7, эталон **245 → 0** находок (было 577) |
 | | миграций | 107 файлов |
-| | крупнейшие классы | `DemoSeeder` 2694 → 2218 стр., `block_form.php` 2142, `DesignSettings` 1555, `Page` 1299, `BlockRenderer` 1167 |
+| | крупнейшие классы | `DemoSeeder` 2694 → 2218 стр., `block_form.php` 2142, `DesignSettings` 1555 → 1354, `Page` 1299, `BlockRenderer` 1167 |
 | | роутер | `public/index.php` — 597 строк |
 | Дизайн-система | `!important` публичный / тема / админка | 366 / 320 / 372 |
 | | разных `box-shadow` / `border-radius` в теме | 156 → **101** / 32 → **21** |
@@ -147,7 +147,8 @@
   результатов и четыре настоящих отказа под `strict_types` (→ 0).
 - Разрезать крупнейшие классы по ответственности, без смены поведения:
   ✅ `DemoSeeder` → данные в `database/demo_content/*.php` + `DemoSeeder::content()`;
-  `DesignSettings` → схема настроек + генератор CSS; `Page`/`News` → запросы
+  `DesignSettings` → схема настроек + генератор CSS (✅ пользовательские
+  конфигурации вынесены в `DesignUserPresets`); `Page`/`News` → запросы
   списков в отдельные `*Query`-классы (как `AdminListQuery`).
 
 ### v3.x
