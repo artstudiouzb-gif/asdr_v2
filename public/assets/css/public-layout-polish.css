@@ -836,3 +836,17 @@ body {
     }
 }
 
+/* Системное «Уменьшить движение»: наведение меняет цвет и тень, но не
+   сдвигает и не увеличивает элемент. */
+@media (prefers-reduced-motion: reduce) {
+    .person-card:hover,
+    :where(
+        .news-card,
+        .project-card,
+        .album-card,
+        .feature-card,
+        .cms-card
+    ):hover {
+        transform: none;
+    }
+}

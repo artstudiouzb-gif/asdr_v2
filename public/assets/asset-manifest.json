@@ -13,11 +13,11 @@
       "/assets/css/public-editorial-pages.css",
       "/assets/css/public-home.css"
     ],
-    "sourceSha256": "492fb257c39b3fae1de1a86305f524c3e8f0eb26cadbacfc1140513c2fe42eb6",
-    "sha256": "7a1a5640bbf25001ed1b08527d1785836df8f934c9a80a8c5da723617b47284b",
-    "raw": 399629,
-    "gzip": 67202,
-    "brotli": 52159
+    "sourceSha256": "0f5a4171434884434f6ac31644f79a92ba30817217852376fffae2996048c589",
+    "sha256": "5f3fa5097151934dcdd1939520dc3242bd5aee2246a2c3ad7e209f7554b452c9",
+    "raw": 400228,
+    "gzip": 67261,
+    "brotli": 52196
   },
   "js": {
     "path": "/assets/js/public.min.js",
@@ -35,21 +35,21 @@
   "blocks": {
     "/assets/css/blocks/buttons.css": {
       "path": "/assets/css/blocks/buttons.min.css",
-      "sourceRaw": 3361,
-      "sourceSha256": "76abaa04533c6d0c163e784bd1867ab42b8d38333c9178d6b26f9ef78ef1be94",
-      "sha256": "ca8111d4792ce59f43ff5bdd044e61409f91658fdc545a4f36b45eb6d7b3ff1b",
-      "raw": 1713,
-      "gzip": 679,
-      "brotli": 551
+      "sourceRaw": 3675,
+      "sourceSha256": "dd145ebd6fccc21a0563c668a6292ecb921737b8df2a885776813cd2b101a693",
+      "sha256": "b7f78c26df7ca0c6cc9e9807a827f47e601cad2833d65f6fc717b940a499f483",
+      "raw": 1803,
+      "gzip": 706,
+      "brotli": 585
     },
     "/assets/css/blocks/catalog.css": {
       "path": "/assets/css/blocks/catalog.min.css",
-      "sourceRaw": 13061,
-      "sourceSha256": "60d32b3897ff63bafa6cf30a3e2104073aa3b1e9f98f14be5d424c8299e285a3",
-      "sha256": "37c78aedd90b23cebc941f8f9133e384afb8d2bc4b81a9dfb15ec05815e19320",
-      "raw": 9972,
-      "gzip": 2297,
-      "brotli": 1959
+      "sourceRaw": 13448,
+      "sourceSha256": "fa76c3ee0d0f62ee3686efbf713492a8bbb648da6accd19a3cbefd7d66f8f739",
+      "sha256": "5600dfdaa955fdf80cde281bb009b61a0c46b70ea981897cab2ebf2329b86d65",
+      "raw": 10125,
+      "gzip": 2330,
+      "brotli": 1985
     },
     "/assets/css/blocks/chart.css": {
       "path": "/assets/css/blocks/chart.min.css",
@@ -71,12 +71,12 @@
     },
     "/assets/css/blocks/counters.css": {
       "path": "/assets/css/blocks/counters.min.css",
-      "sourceRaw": 16608,
-      "sourceSha256": "e0a0b759baf1eee1fad2d1a6097490aa57ea396f32da9dea9cf925f54a942829",
-      "sha256": "949a1da913ecb2f341948d17df6f23dcbe902916f9a3abf6884aab8576dd1259",
-      "raw": 7872,
-      "gzip": 1950,
-      "brotli": 1657
+      "sourceRaw": 16831,
+      "sourceSha256": "edac86d888887814e150b3ce43ec457c0b1585e85004fe8c8413da5ae085abcd",
+      "sha256": "f71e6a727cba4fa7a5d560d85695821b4fc9fbb0e1e90c0d9b2d166efb5568db",
+      "raw": 7949,
+      "gzip": 1979,
+      "brotli": 1678
     },
     "/assets/css/blocks/divider.css": {
       "path": "/assets/css/blocks/divider.min.css",

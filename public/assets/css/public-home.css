@@ -78,3 +78,11 @@
         .site-home .hero__cta { padding-inline: 16px; }
     }
 }
+
+/* Системное «Уменьшить движение»: наведение меняет цвет и тень, но не
+   сдвигает и не увеличивает элемент. */
+@media (prefers-reduced-motion: reduce) {
+    .site-home :is(.news-column, .news-card, .newslist-lead, .relnews-card, .newsfeat-lead, .newsfeat-mini):hover {
+        transform: none;
+    }
+}
