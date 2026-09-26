@@ -404,6 +404,22 @@ final class DemoSeeder
         return $issues;
     }
 
+    /**
+     * Данные демо-контента из database/demo_content/<имя>.php. Код сидера и
+     * тексты разнесены: правка формулировки не трогает логику загрузки.
+     *
+     * @return array<array-key, mixed>
+     */
+    private static function content(string $name): array
+    {
+        $data = require \dirname(__DIR__, 2) . '/database/demo_content/' . $name . '.php';
+        if (!is_array($data)) {
+            throw new \RuntimeException('Демо-контент ' . $name . ' должен возвращать массив.');
+        }
+
+        return $data;
+    }
+
     /** Абсолютный путь каталога публичных загрузок. */
     private static function uploadsDir(): string
     {
@@ -706,96 +722,7 @@ final class DemoSeeder
     {
         self::seedFlagshipNews($pdo, $c);
 
-        $news = [
-            [
-                'title' => 'Представлена цифровая платформа мониторинга реформ',
-                'slug' => 'platforma-monitoringa-reform',
-                'excerpt' => 'Новая платформа объединяет ключевые показатели Стратегии «Узбекистан–2030» и позволяет отслеживать достижение результатов.',
-                'category' => 'Цифровизация',
-                'image' => '/uploads/public/demo-agency-hero.jpg',
-                'hashtags' => '#Узбекистан2030 #цифровизация #реформы',
-                'layout' => 'standard',
-                'uz_title' => 'Islohotlarni monitoring qilish raqamli platformasi taqdim etildi',
-                'uz_excerpt' => 'Yangi platforma «O‘zbekiston–2030» strategiyasining asosiy ko‘rsatkichlarini birlashtiradi va natijalar ijrosini kuzatish imkonini beradi.',
-                'uz_category' => 'Raqamlashtirish',
-                'uz_hashtags' => '#O‘zbekiston2030 #raqamlashtirish',
-            ],
-            [
-                'title' => 'Обсуждены приоритеты устойчивого регионального развития',
-                'slug' => 'regionalnoe-razvitie-prioritety',
-                'excerpt' => 'Эксперты и представители регионов рассмотрели проекты инфраструктуры, занятости и развития человеческого капитала.',
-                'category' => 'Региональное развитие',
-                'image' => '/uploads/public/demo-urban-development.jpg',
-                'hashtags' => '#регионы #инфраструктура #развитие',
-                'layout' => 'side_image',
-                'uz_title' => 'Hududlarni barqaror rivojlantirish ustuvor yo‘nalishlari muhokama qilindi',
-                'uz_excerpt' => 'Ekspertlar va hududlar vakillari infratuzilma, bandlik va inson kapitalini rivojlantirish loyihalarini ko‘rib chiqdilar.',
-                'uz_category' => 'Hududiy rivojlanish',
-                'uz_hashtags' => '#hududlar #infratuzilma',
-            ],
-            [
-                'title' => 'Опубликован аналитический обзор социально-экономической динамики',
-                'slug' => 'analiticheskiy-obzor-dinamiki',
-                'excerpt' => 'Обзор содержит ключевые тенденции, сценарные оценки и рекомендации для дальнейшего повышения устойчивости экономики.',
-                'category' => 'Аналитика',
-                'image' => '/uploads/public/demo-strategy-meeting.jpg',
-                'hashtags' => '#аналитика #экономика #прогноз',
-                'layout' => 'premium',
-                'uz_title' => 'Ijtimoiy-iqtisodiy dinamika bo‘yicha tahliliy sharh e’lon qilindi',
-                'uz_excerpt' => 'Sharh asosiy tendensiyalar, ssenariy baholari va iqtisodiyot barqarorligini oshirish bo‘yicha tavsiyalarni qamrab oladi.',
-                'uz_category' => 'Tahlil',
-                'uz_hashtags' => '#tahlil #iqtisodiyot',
-            ],
-            [
-                'title' => 'Расширяется портфель проектов зелёной экономики',
-                'slug' => 'portfel-zelenoy-ekonomiki',
-                'excerpt' => 'В портфель включены инициативы в сфере возобновляемой энергетики, энергоэффективности и устойчивой инфраструктуры.',
-                'category' => 'Зелёная экономика',
-                'image' => '/uploads/public/demo-green-energy.jpg',
-                'hashtags' => '#зелёнаяэкономика #энергетика #ESG',
-                'layout' => 'gallery',
-                // Слайдер новости — единственное место, где подпись и автор
-                // снимка видны текстом. Без снимков демо этого не показывало.
-                'gallery' => [
-                    ['/uploads/public/demo-green-energy.jpg', 'Ввод в эксплуатацию объекта возобновляемой энергетики', 'пресс-служба Агентства'],
-                    ['/uploads/public/demo-urban-development.jpg', 'Устойчивая городская инфраструктура', 'пресс-служба Агентства'],
-                    ['/uploads/public/demo-strategy-meeting.jpg', 'Обсуждение портфеля проектов', ''],
-                ],
-                'uz_title' => 'Yashil iqtisodiyot loyihalari portfeli kengaymoqda',
-                'uz_excerpt' => 'Portfelga qayta tiklanuvchi energiya, energiya samaradorligi va barqaror infratuzilma tashabbuslari kiritildi.',
-                'uz_category' => 'Yashil iqtisodiyot',
-                'uz_hashtags' => '#yashiliqtisodiyot #energetika',
-            ],
-            [
-                'title' => 'Открыт приём заявок в экспертный кадровый резерв',
-                'slug' => 'ekspertnyy-kadrovyy-rezerv',
-                'excerpt' => 'К участию приглашаются специалисты в области стратегического планирования, анализа данных и управления проектами.',
-                'category' => 'Карьера',
-                'image' => '/uploads/public/hero-demo-g2.jpg',
-                'hashtags' => '#карьера #эксперты #вакансии',
-                'layout' => 'standard',
-                'uz_title' => 'Ekspert kadrlar zaxirasiga arizalar qabul qilinmoqda',
-                'uz_excerpt' => 'Strategik rejalashtirish, ma’lumotlar tahlili va loyihalarni boshqarish sohasidagi mutaxassislar taklif etiladi.',
-                'uz_category' => 'Karyera',
-                'uz_hashtags' => '#karyera #ekspertlar',
-            ],
-            // Седьмая новость нужна раскладке «мозаика»: она строится как
-            // 1 + 2 + 4, и при шести записях нижний ряд оставался неполным —
-            // на свежей установке блок выглядел бы недоделанным.
-            [
-                'title' => 'Подписаны новые соглашения о партнёрстве с зарубежными организациями',
-                'slug' => 'soglasheniya-o-partnerstve',
-                'excerpt' => 'Договорённости касаются обмена опытом в стратегическом планировании и совместных исследований.',
-                'category' => 'Международное сотрудничество',
-                'image' => '/uploads/public/hero-demo-g3.jpg',
-                'hashtags' => '#партнёрство #сотрудничество',
-                'layout' => 'standard',
-                'uz_title' => 'Xorijiy tashkilotlar bilan yangi hamkorlik bitimlari imzolandi',
-                'uz_excerpt' => 'Kelishuvlar strategik rejalashtirish sohasidagi tajriba almashish va qo‘shma tadqiqotlarga taalluqli.',
-                'uz_category' => 'Xalqaro hamkorlik',
-                'uz_hashtags' => '#hamkorlik #xalqaro',
-            ],
-        ];
+        $news = self::content('news');
         // Рубрика демо-новостей — категория, а не текст в бейдже: справочник
         // нужен свежей установке сразу, иначе фильтр ленты нечем наполнить.
         //
@@ -1234,54 +1161,9 @@ final class DemoSeeder
              SELECT :tid, :t, :s, 'published', :d, NOW()
              FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM content_entries WHERE type_id = :tid2 AND slug = :s2)"
         );
-        $byType = [
-            'documenty' => [
-                ['Методология мониторинга Стратегии «Узбекистан–2030»', 'metodologiya-monitoringa-2030', ['doc_number' => 'ММ-2030', 'doc_date' => '2026-07-15', 'category' => 'Методология', 'summary' => 'Единые подходы к оценке достижения целей, индикаторов и результатов реформ.', 'file' => '/catalog/documenty/metodologiya-monitoringa-2030']],
-                ['Аналитический отчёт о ходе структурных реформ', 'otchet-strukturnye-reformy', ['doc_number' => 'АО-07/26', 'doc_date' => '2026-07-01', 'category' => 'Аналитические отчёты', 'summary' => 'Результаты мониторинга структурных преобразований и рекомендации по дальнейшим шагам.', 'file' => '/catalog/documenty/otchet-strukturnye-reformy']],
-                ['Регламент межведомственной координации', 'reglament-koordinacii', ['doc_number' => 'РК-12', 'doc_date' => '2026-06-20', 'category' => 'Регламенты', 'summary' => 'Порядок обмена данными, согласования решений и контроля исполнения.', 'file' => '/catalog/documenty/reglament-koordinacii']],
-                ['Обзор международного опыта стратегического планирования', 'obzor-mezhdunarodnogo-opyta', ['doc_number' => 'ОМО-04', 'doc_date' => '2026-06-05', 'category' => 'Обзоры', 'summary' => 'Сравнение современных моделей стратегического управления и оценки реформ.', 'file' => '/catalog/documenty/obzor-mezhdunarodnogo-opyta']],
-            ],
-            'vakansii' => [
-                ['Ведущий специалист отдела ИТ', 'vedushchiy-it', ['department' => 'Отдел информационных технологий', 'salary' => 'по договорённости', 'deadline' => '2026-08-31', 'requirements' => 'Высшее образование, опыт от 3 лет, знание PHP/MySQL.', 'duties' => 'Сопровождение и развитие информационных систем.']],
-                ['Юрисконсульт', 'yuriskonsult', ['department' => 'Юридический отдел', 'salary' => 'от 8 000 000 сум', 'deadline' => '2026-08-20', 'requirements' => 'Высшее юридическое образование, опыт от 2 лет.', 'duties' => 'Правовое сопровождение деятельности организации.']],
-                ['Специалист по кадрам', 'specialist-kadry', ['department' => 'Отдел кадров', 'salary' => 'от 6 000 000 сум', 'deadline' => '2026-09-10', 'requirements' => 'Опыт кадрового делопроизводства.', 'duties' => 'Ведение кадрового учёта и документации.']],
-                ['Пресс-секретарь', 'press-sekretar', ['department' => 'Пресс-служба', 'salary' => 'по итогам собеседования', 'deadline' => '2026-08-05', 'requirements' => 'Опыт в СМИ или PR, грамотная речь.', 'duties' => 'Взаимодействие со СМИ, ведение новостей сайта.']],
-            ],
-            'tendery' => [
-                ['Развитие аналитической платформы мониторинга', 'platforma-monitoringa-zakupka', ['tender_number' => 'T-2026-031', 'budget' => 'по итогам конкурса', 'start_date' => '2026-07-10', 'deadline' => '2026-08-20', 'summary' => 'Разработка модулей визуализации показателей и межведомственного обмена данными.', 'file' => '/catalog/tendery/platforma-monitoringa-zakupka']],
-                ['Исследование социально-экономической динамики регионов', 'issledovanie-regionov', ['tender_number' => 'T-2026-034', 'budget' => 'по итогам конкурса', 'start_date' => '2026-07-18', 'deadline' => '2026-09-01', 'summary' => 'Комплексное исследование факторов роста и качества жизни в регионах.', 'file' => '/catalog/tendery/issledovanie-regionov']],
-                ['Организация международного экспертного форума', 'ekspertnyy-forum', ['tender_number' => 'T-2026-038', 'budget' => 'по итогам конкурса', 'start_date' => '2026-07-25', 'deadline' => '2026-09-15', 'summary' => 'Организационное и техническое сопровождение экспертного форума.', 'file' => '/catalog/tendery/ekspertnyy-forum']],
-            ],
-            'meropriyatiya' => [
-                ['Открытая презентация системы мониторинга Стратегии', 'prezentaciya-monitoringa-strategii', ['event_date' => '2026-09-12', 'event_time' => '10:00', 'location' => 'Ташкент, конференц-зал Агентства', 'banner_image' => '/uploads/public/demo-strategy-meeting.jpg', 'summary' => 'Презентация цифровой системы мониторинга целей и показателей Стратегии «Узбекистан–2030».']],
-                ['Экспертный диалог по региональному развитию', 'dialog-regionalnoe-razvitie', ['event_date' => '2026-10-03', 'event_time' => '15:00', 'location' => 'Гибридный формат', 'banner_image' => '/uploads/public/demo-urban-development.jpg', 'summary' => 'Обсуждение новых подходов к развитию регионов и оценке качества государственных программ.']],
-                ['Форум стратегических инициатив', 'forum-strategicheskih-iniciativ', ['event_date' => '2026-11-18', 'event_time' => '09:30', 'location' => 'Ташкент', 'banner_image' => '/uploads/public/demo-agency-hero.jpg', 'summary' => 'Площадка для обмена опытом между государственными органами, экспертами и международными партнёрами.']],
-            ],
-        ];
-        $translations = [
-            'documenty' => [
-                'metodologiya-monitoringa-2030' => ['«O‘zbekiston–2030» strategiyasini monitoring qilish metodologiyasi', ['category' => 'Metodologiya', 'summary' => 'Islohotlar maqsadlari, indikatorlari va natijalarini baholashga yagona yondashuvlar.']],
-                'otchet-strukturnye-reformy' => ['Tarkibiy islohotlarning borishi bo‘yicha tahliliy hisobot', ['category' => 'Tahliliy hisobotlar', 'summary' => 'Tarkibiy o‘zgarishlar monitoringi natijalari va keyingi qadamlar bo‘yicha tavsiyalar.']],
-                'reglament-koordinacii' => ['Idoralararo muvofiqlashtirish reglamenti', ['category' => 'Reglamentlar', 'summary' => 'Ma’lumot almashish, qarorlarni kelishish va ijroni nazorat qilish tartibi.']],
-                'obzor-mezhdunarodnogo-opyta' => ['Strategik rejalashtirish bo‘yicha xalqaro tajriba sharhi', ['category' => 'Sharhlar', 'summary' => 'Strategik boshqaruv va islohotlarni baholashning zamonaviy modellarini taqqoslash.']],
-            ],
-            'vakansii' => [
-                'vedushchiy-it' => ['IT bo‘limining yetakchi mutaxassisi', ['department' => 'Axborot texnologiyalari bo‘limi', 'requirements' => 'Oliy ma’lumot, kamida 3 yillik tajriba, PHP/MySQL bilimlari.', 'duties' => 'Axborot tizimlarini qo‘llab-quvvatlash va rivojlantirish.']],
-                'yuriskonsult' => ['Yuriskonsult', ['department' => 'Yuridik bo‘lim', 'requirements' => 'Oliy yuridik ma’lumot va kamida 2 yillik tajriba.', 'duties' => 'Agentlik faoliyatini huquqiy qo‘llab-quvvatlash.']],
-                'specialist-kadry' => ['Kadrlar bo‘yicha mutaxassis', ['department' => 'Inson resurslari bo‘limi', 'requirements' => 'Kadrlar ish yurituvi bo‘yicha tajriba.', 'duties' => 'Kadrlar hisobi va hujjatlarini yuritish.']],
-                'press-sekretar' => ['Matbuot kotibi', ['department' => 'Matbuot xizmati', 'requirements' => 'OAV yoki PR sohasida tajriba, savodli nutq.', 'duties' => 'OAV bilan hamkorlik va sayt yangiliklarini yuritish.']],
-            ],
-            'tendery' => [
-                'platforma-monitoringa-zakupka' => ['Monitoring tahliliy platformasini rivojlantirish', ['summary' => 'Ko‘rsatkichlarni vizuallashtirish va idoralararo ma’lumot almashish modullarini ishlab chiqish.']],
-                'issledovanie-regionov' => ['Hududlarning ijtimoiy-iqtisodiy dinamikasini o‘rganish', ['summary' => 'Hududlarda o‘sish omillari va hayot sifatini kompleks o‘rganish.']],
-                'ekspertnyy-forum' => ['Xalqaro ekspert forumini tashkil etish', ['summary' => 'Ekspert forumini tashkiliy va texnik jihatdan qo‘llab-quvvatlash.']],
-            ],
-            'meropriyatiya' => [
-                'prezentaciya-monitoringa-strategii' => ['Strategiyani monitoring qilish tizimining ochiq taqdimoti', ['location' => 'Toshkent, Agentlik konferensiya zali', 'summary' => '«O‘zbekiston–2030» strategiyasi maqsad va ko‘rsatkichlarini monitoring qilish raqamli tizimi taqdimoti.']],
-                'dialog-regionalnoe-razvitie' => ['Hududiy rivojlanish bo‘yicha ekspert muloqoti', ['location' => 'Gibrid shakl', 'summary' => 'Hududlarni rivojlantirish va davlat dasturlari sifatini baholashning yangi yondashuvlari muhokamasi.']],
-                'forum-strategicheskih-iniciativ' => ['Strategik tashabbuslar forumi', ['location' => 'Toshkent', 'summary' => 'Davlat organlari, ekspertlar va xalqaro hamkorlar o‘rtasida tajriba almashish maydoni.']],
-            ],
-        ];
+        /** @var array<string, list<array{0: string, 1: string, 2: array<string, mixed>}>> $byType */
+        $byType = self::content('entries');
+        $translations = self::content('entries_translations');
         foreach ($byType as $slug => $rows) {
             $tid = self::typeId($pdo, $slug);
             if ($tid === null) {
@@ -1671,47 +1553,7 @@ final class DemoSeeder
         if (!self::tableExists($pdo, 'forms')) {
             return;
         }
-        $forms = [
-            [
-                'Обращение в Агентство',
-                'public-appeal',
-                [
-                    ['name' => 'name', 'label' => 'Ваше имя', 'type' => 'text', 'required' => true],
-                    ['name' => 'email', 'label' => 'E-mail', 'type' => 'email', 'required' => true],
-                    ['name' => 'phone', 'label' => 'Телефон', 'type' => 'tel', 'required' => false],
-                    ['name' => 'topic', 'label' => 'Тема обращения', 'type' => 'select', 'options' => 'Общий вопрос,Предложение,Запрос информации,Запись на приём', 'required' => true],
-                    ['name' => 'message', 'label' => 'Сообщение', 'type' => 'textarea', 'required' => true],
-                    ['name' => 'consent', 'label' => 'Согласен на обработку предоставленных данных', 'type' => 'checkbox', 'required' => true],
-                ],
-                'Спасибо! Ваше обращение зарегистрировано.',
-            ],
-            [
-                'Регистрация на мероприятие',
-                'event-registration',
-                [
-                    ['name' => 'name', 'label' => 'Ф.И.О.', 'type' => 'text', 'required' => true],
-                    ['name' => 'organization', 'label' => 'Организация', 'type' => 'text', 'required' => true],
-                    ['name' => 'email', 'label' => 'E-mail', 'type' => 'email', 'required' => true],
-                    ['name' => 'participation', 'label' => 'Формат участия', 'type' => 'radio', 'options' => 'Очно,Онлайн', 'required' => true],
-                    ['name' => 'topics', 'label' => 'Интересующие направления', 'type' => 'checkbox_group', 'options' => 'Стратегическое планирование,Региональное развитие,Зелёная экономика,Цифровизация', 'required' => false],
-                    ['name' => 'event_date', 'label' => 'Предпочтительная дата', 'type' => 'date', 'required' => false],
-                ],
-                'Регистрация принята. Подтверждение будет направлено на указанный e-mail.',
-            ],
-            [
-                'Заявка в экспертный резерв',
-                'expert-pool',
-                [
-                    ['name' => 'name', 'label' => 'Ф.И.О.', 'type' => 'text', 'required' => true],
-                    ['name' => 'email', 'label' => 'E-mail', 'type' => 'email', 'required' => true],
-                    ['name' => 'specialization', 'label' => 'Специализация', 'type' => 'select', 'options' => 'Экономика,Аналитика данных,Управление проектами,Международное сотрудничество', 'required' => true],
-                    ['name' => 'experience', 'label' => 'Кратко опишите опыт', 'type' => 'textarea', 'required' => true],
-                    ['name' => 'resume', 'label' => 'Резюме', 'type' => 'file', 'required' => true],
-                    ['name' => 'consent', 'label' => 'Подтверждаю достоверность сведений', 'type' => 'checkbox', 'required' => true],
-                ],
-                'Заявка принята и направлена на рассмотрение.',
-            ],
-        ];
+        $forms = self::content('forms');
         $ins = $pdo->prepare(
             "INSERT INTO forms (name, slug, fields_json, success_message, created_at)
              SELECT :n, :s, :f, :m, NOW()
@@ -1739,36 +1581,7 @@ final class DemoSeeder
         }
         // [ФИО, должность, ФИО (uz), должность (uz), сектор, отдел/группа,
         //  сектор (uz), отдел/группа (uz)] — руководство идёт без сектора.
-        $team = [
-            // Руководство — реальное (см. database/content/agency_content.php),
-            // остальные сотрудники демонстрационные.
-            ['Умурзаков Сардор Уктамович', 'Директор', 'Umurzoqov Sardor O‘ktamovich', 'Direktor', '', '', '', ''],
-            ['Абдукодиров Абдулла Мамасаатович', 'Первый заместитель директора', 'Abduqodirov Abdulla Mamasaatovich', 'Direktor birinchi o‘rinbosari', '', '', '', ''],
-            [
-                'Каримов Бехзод Шухратович', 'Руководитель сектора',
-                'Karimov Behzod Shuhratovich', 'Shoʻba rahbari',
-                'Сектор анализа и исследований', '',
-                'Tahlil va tadqiqotlar shoʻbasi', '',
-            ],
-            [
-                'Исмоилова Дилноза Фарходовна', 'Руководитель сектора',
-                'Ismoilova Dilnoza Farhodovna', 'Shoʻba rahbari',
-                'Сектор по связям с общественностью', '',
-                'Jamoatchilik bilan aloqalar shoʻbasi', '',
-            ],
-            [
-                'Ражабов Отабек Улугбекович', 'Главный специалист',
-                'Rajabov Otabek Ulugʻbekovich', 'Bosh mutaxassis',
-                'Информационно-аналитический и организационный сектор', 'группа по работе с кадрами',
-                'Axborot-tahlil va tashkiliy masalalar shoʻbasi', 'kadrlar bilan ishlash guruhi',
-            ],
-            [
-                'Хамидова Севара Рустамовна', 'Ведущий специалист',
-                'Hamidova Sevara Rustamovna', 'Yetakchi mutaxassis',
-                'Информационно-аналитический и организационный сектор', 'первый отдел',
-                'Axborot-tahlil va tashkiliy masalalar shoʻbasi', 'birinchi boʻlim',
-            ],
-        ];
+        $team = self::content('team');
         $ins = $pdo->prepare(
             "INSERT INTO team_members (name, position, department, unit, status, sort_order, created_at)
              SELECT :n, :p, :d, :u, 'published', :o, NOW()
@@ -1818,129 +1631,7 @@ final class DemoSeeder
     private static function seedPages(PDO $pdo, array &$c): void
     {
         // Страницы с переводами для 'ru' и 'uz'
-        $pages = [
-            'o-nas' => [
-                'ru' => [
-                    'title' => 'Об Агентстве',
-                    'blocks' => [
-                        ['text', 'Об Агентстве', [
-                            'title' => 'Об Агентстве',
-                            'content' => '<h2>Правовой статус и полномочия</h2><p>Агентство стратегического развития и реформ при Президенте Республики Узбекистан — уполномоченный государственный орган в сфере стратегического планирования и развития страны.</p><p>Указом Президента Республики Узбекистан от 30 октября 2025 года № УП-201 <a href="https://lex.uz/uz/docs/7806484" target="_blank" rel="noopener">«Об организационных мерах по внедрению системы стратегического планирования и развития»</a> в стране создана единая и комплексная система стратегического планирования и развития.</p><p>В соответствии с данным Указом Агентство:</p><ul><li>является уполномоченным государственным органом по регулированию организации системы стратегического планирования и развития, разработке конкретных механизмов, направленных на её эффективное внедрение, а также подготовке проектов документов стратегического планирования;</li><li>координирует деятельность структурных подразделений министерств и ведомств по стратегическому планированию, а также информационно-аналитических групп Совета Министров Республики Каракалпакстан, хокимиятов областей и города Ташкента.</li></ul><p>Организация работы Агентства строится вокруг трёх направлений, закреплённых в его структуре: стратегическое планирование и развитие отраслей и сфер, стратегическое планирование и развитие регионов, а также изучение передового зарубежного опыта и международное сотрудничество. По каждому направлению действуют профильные секторы и проектные офисы.</p><p>Ознакомиться с распределением задач можно в разделе <a href="/struktura">«Структура»</a>, с составом подразделений — в разделе <a href="/rukovodstvo">«Руководство»</a>.</p><h3>Основные документы, касающиеся деятельности Агентства</h3><ul><li><a href="https://lex.uz/uz/docs/5520880" target="_blank" rel="noopener">«О мерах по созданию Агентства стратегического развития Республики Узбекистан»</a> — Указ Президента Республики Узбекистан от 19 июля 2021 года № УП-6264;</li><li><a href="https://lex.uz/uz/docs/6188707" target="_blank" rel="noopener">«О дополнительных мерах по ускорению стратегических реформ»</a> — Указ Президента Республики Узбекистан от 8 сентября 2022 года № УП-216;</li><li><a href="https://lex.uz/uz/docs/6656978" target="_blank" rel="noopener">«О мерах по дальнейшему совершенствованию деятельности Агентства стратегических реформ при Президенте Республики Узбекистан»</a> — Указ Президента Республики Узбекистан от 8 ноября 2023 года № УП-190;</li><li><a href="https://lex.uz/uz/docs/7806484" target="_blank" rel="noopener">«Об организационных мерах по внедрению системы стратегического планирования и развития»</a> — Указ Президента Республики Узбекистан от 30 октября 2025 года № УП-201.</li></ul><p>Полные тексты документов публикуются в Национальной базе данных законодательства Республики Узбекистан lex.uz.</p>'
-                        ]]
-                    ]
-                ],
-                'uz' => [
-                    'title' => 'Agentlik haqida',
-                    'blocks' => [
-                        ['text', 'Agentlik haqida', [
-                            'title' => 'Agentlik haqida',
-                            'content' => '<h2>Huquqiy maqom va vakolatlar</h2><p>Oʻzbekiston Respublikasi Prezidenti huzuridagi Strategik rivojlanish va islohotlar agentligi — mamlakatda strategik rejalashtirish va rivojlanish sohasidagi vakolatli davlat organi.</p><p>Oʻzbekiston Respublikasi Prezidentining 2025-yil 30-oktabrdagi PF-201-son <a href="https://lex.uz/uz/docs/7806484" target="_blank" rel="noopener">«Strategik rejalashtirish va rivojlanish tizimini joriy etish boʻyicha tashkiliy chora-tadbirlar toʻgʻrisida»</a>gi Farmoni bilan mamlakatda yagona va kompleks strategik rejalashtirish va rivojlanish tizimi yaratildi.</p><p>Ushbu Farmonga muvofiq Agentlik:</p><ul><li>strategik rejalashtirish va rivojlanish tizimini tashkil etishni tartibga solish, uni samarali joriy etishga qaratilgan aniq mexanizmlarni ishlab chiqish, shuningdek, strategik rejalashtirish hujjatlari loyihalarini tayyorlash boʻyicha vakolatli davlat organi hisoblanadi;</li><li>vazirlik va idoralarning strategik rejalashtirish boʻyicha tarkibiy boʻlinmalari, shuningdek, Qoraqalpogʻiston Respublikasi Vazirlar Kengashi, viloyatlar va Toshkent shahri hokimliklarining axborot-tahlil guruhlari faoliyatini muvofiqlashtiradi.</li></ul><p>Agentlik faoliyati uning tuzilmasida mustahkamlangan uch yoʻnalish atrofida tashkil etilgan: soha va tarmoqlarni strategik rejalashtirish va rivojlantirish, hududlarni strategik rejalashtirish va rivojlantirish, hamda ilgʻor xorijiy tajribani oʻrganish va xalqaro hamkorlik. Har bir yoʻnalish boʻyicha tegishli shoʻbalar va loyiha ofislari faoliyat yuritadi.</p><p>Vazifalar taqsimoti bilan <a href="/struktura">«Tuzilma»</a> boʻlimida, boʻlinmalar tarkibi bilan <a href="/rukovodstvo">«Rahbariyat»</a> boʻlimida tanishishingiz mumkin.</p><h3>Agentlik faoliyatiga oid asosiy hujjatlar</h3><ul><li><a href="https://lex.uz/uz/docs/5520880" target="_blank" rel="noopener">«Oʻzbekiston Respublikasi Strategik taraqqiyot agentligini tashkil etish chora-tadbirlari toʻgʻrisida»</a> — Oʻzbekiston Respublikasi Prezidentining 2021-yil 19-iyuldagi PF-6264-son Farmoni;</li><li><a href="https://lex.uz/uz/docs/6188707" target="_blank" rel="noopener">«Strategik islohotlarni jadallashtirish boʻyicha qoʻshimcha chora-tadbirlar toʻgʻrisida»</a> — Oʻzbekiston Respublikasi Prezidentining 2022-yil 8-sentyabrdagi PF-216-son Farmoni;</li><li><a href="https://lex.uz/uz/docs/6656978" target="_blank" rel="noopener">«Oʻzbekiston Respublikasi Prezidenti huzuridagi Strategik islohotlar agentligi faoliyatini yanada takomillashtirish chora-tadbirlari toʻgʻrisida»</a> — Oʻzbekiston Respublikasi Prezidentining 2023-yil 8-noyabrdagi PF-190-son Farmoni;</li><li><a href="https://lex.uz/uz/docs/7806484" target="_blank" rel="noopener">«Strategik rejalashtirish va rivojlanish tizimini joriy etish boʻyicha tashkiliy chora-tadbirlar toʻgʻrisida»</a> — Oʻzbekiston Respublikasi Prezidentining 2025-yil 30-oktabrdagi PF-201-son Farmoni.</li></ul><p>Hujjatlarning toʻliq matnlari Oʻzbekiston Respublikasi qonunchilik maʼlumotlari milliy bazasi lex.uz saytida eʼlon qilinadi.</p>'
-                        ]]
-                    ]
-                ]
-            ],
-            'rukovodstvo' => [
-                'ru' => [
-                    'title' => 'Руководство',
-                    'blocks' => [
-                        ['text', 'Введение', ['title' => 'Руководство', 'content' => '<p>Руководящий состав организации.</p>']],
-                        ['team_list', 'Команда', ['title' => 'Руководящий состав', 'limit' => 0, 'group_by_department' => true]],
-                        ['cta', 'Директор', ['variant' => 'band', 'title' => 'Директор Агентства', 'text' => 'Биография, приоритеты работы и публикации руководителя.', 'button_text' => 'Страница директора', 'button_url' => '/direktor', 'bg_color' => '#072b61', 'text_color' => '#ffffff']]
-                    ]
-                ],
-                'uz' => [
-                    'title' => 'Rahbariyat',
-                    'blocks' => [
-                        ['text', 'Kirish', ['title' => 'Rahbariyat', 'content' => '<p>Tashkilotning rahbariyat tarkibi.</p>']],
-                        ['team_list', 'Jamoa', ['title' => 'Rahbariyat tarkibi', 'limit' => 0, 'group_by_department' => true]]
-                    ]
-                ]
-            ],
-            'struktura' => [
-                'ru' => [
-                    'title' => 'Структура',
-                    'lead' => 'Руководство, секторы и проектные офисы Агентства, а также их подчинённость.',
-                    'blocks' => [
-                        ['org_structure', 'Оргсхема', [
-                            'title' => 'Структура Агентства стратегического развития и реформ при Президенте Республики Узбекистан',
-                            'layout' => 'tree',
-                            'columns' => 4,
-                            'council' => 'Координационный совет',
-                            'head_title' => 'Директор',
-                            'head_name' => '',
-                            'head_url' => '/direktor',
-                            'side_items' => 'Советник',
-                            'branches' => [
-                                ['title' => 'Первый заместитель директора', 'name' => '', 'units' => "Сектор стратегического планирования и развития отраслей и сфер\nСектор анализа и исследований | /rukovodstvo#team-sektor-analiza-i-issledovaniy\nСектор организации деятельности Координационного совета\n* Проектные офисы по развитию отраслей"],
-                                ['title' => 'Заместитель директора', 'name' => '', 'units' => "Сектор стратегического планирования и развития регионов\nСектор контроля за исполнением задач по стратегическому развитию\nСектор экспертизы проектов нормативно-правовых актов\n* Проектные офисы по развитию регионов"],
-                                ['title' => 'Заместитель директора', 'name' => '', 'units' => "Сектор изучения передового зарубежного опыта, результатов научно-исследовательской деятельности и практики\nСектор координации процессов привлечения иностранных экспертов, консультантов и советников\n* Проектные офисы по развитию международного сотрудничества"],
-                                ['title' => '', 'name' => '', 'units' => "Сектор координации системы стратегического планирования\nСектор мониторинга и оценки эффективности реформ\nИнформационно-аналитический и организационный сектор | /rukovodstvo#team-informacionno-analiticheskiy-i-organizacionnyy-sektor\n- группа по работе с кадрами\n- первый отдел\nФинансово-хозяйственный сектор (Главный бухгалтер)\n- группа материального обеспечения и хозяйственных дел\nСектор по связям с общественностью | /rukovodstvo#team-sektor-po-svyazyam-s-obschestvennostyu"],
-                            ],
-                            'notes' => 'Секторы четвёртой колонки подчиняются директору напрямую.',
-                            'footnote' => 'Структура утверждена в установленном порядке и может уточняться при изменении задач Агентства.',
-                        ]]
-                    ]
-                ],
-                'uz' => [
-                    'title' => 'Tuzilma',
-                    'lead' => 'Agentlik rahbariyati, shoʻbalari va loyiha ofislari hamda ularning boʻysunuvi.',
-                    'blocks' => [
-                        ['org_structure', 'Tuzilma sxemasi', [
-                            'title' => 'Oʻzbekiston Respublikasi Prezidenti huzuridagi Strategik rivojlanish va islohotlar agentligining tuzilmasi',
-                            'layout' => 'tree',
-                            'columns' => 4,
-                            'council' => 'Muvofiqlashtiruvchi kengash',
-                            'head_title' => 'Direktor',
-                            'head_name' => '',
-                            'head_url' => '/direktor',
-                            'side_items' => 'Maslahatchi',
-                            'branches' => [
-                                ['title' => 'Direktorning birinchi oʻrinbosari', 'name' => '', 'units' => "Soha va tarmoqlarni strategik rejalashtirish va rivojlantirish shoʻbasi\nTahlil va tadqiqotlar shoʻbasi\nMuvofiqlashtiruvchi kengash faoliyatini tashkil qilish shoʻbasi\n* Tarmoqlarni rivojlantirish boʻyicha loyiha ofislari"],
-                                ['title' => 'Direktor oʻrinbosari', 'name' => '', 'units' => "Hududlarni strategik rejalashtirish va rivojlantirish shoʻbasi\nStrategik rivojlanish boʻyicha vazifalar ijrosini nazorat qilish shoʻbasi\nMeʼyoriy-huquqiy hujjatlar loyihalarini ekspertiza qilish shoʻbasi\n* Hududlarni rivojlantirish boʻyicha loyiha ofislari"],
-                                ['title' => 'Direktor oʻrinbosari', 'name' => '', 'units' => "Ilgʻor xorijiy tajriba, ilmiy-tadqiqot va amaliyot natijalarini oʻrganish shoʻbasi\nXorijiy ekspertlar, konsultant va maslahatchilarni jalb etish jarayonlarini muvofiqlashtirish shoʻbasi\n* Xalqaro hamkorlikni rivojlantirish boʻyicha loyiha ofislari"],
-                                ['title' => '', 'name' => '', 'units' => "Strategik rejalashtirish tizimini muvofiqlashtirish shoʻbasi\nIslohotlar samaradorligini monitoring qilish va baholash shoʻbasi\nAxborot-tahlil va tashkiliy masalalar shoʻbasi\n- kadrlar bilan ishlash guruhi\n- birinchi boʻlim\nMoliya-xoʻjalik shoʻbasi (Bosh buxgalter)\n- moddiy taʼminot va xoʻjalik ishlari guruhi\nJamoatchilik bilan aloqalar shoʻbasi"],
-                            ],
-                            'notes' => 'Toʻrtinchi ustundagi shoʻbalar bevosita direktorga boʻysunadi.',
-                            'footnote' => 'Tuzilma belgilangan tartibda tasdiqlangan boʻlib, Agentlik vazifalari oʻzgarganda aniqlashtirilishi mumkin.',
-                        ]]
-                    ]
-                ]
-            ],
-            'antikorrupciya' => [
-                'ru' => [
-                    'title' => 'Противодействие коррупции',
-                    'lead' => 'Антикоррупционная политика Агентства, нормативные документы и порядок обращений.',
-                    'blocks' => [
-                        ['text', 'Антикоррупция', ['title' => 'Противодействие коррупции', 'content' => '<p>Организация проводит последовательную антикоррупционную политику. Ознакомиться с нормативными документами можно в разделе «Документы».</p><p>Сообщить о фактах коррупции можно через форму обратной связи.</p>']]
-                    ]
-                ],
-                'uz' => [
-                    'title' => 'Korrupsiyaga qarshi kurash',
-                    'lead' => 'Agentlikning korrupsiyaga qarshi siyosati, normativ hujjatlar va murojaat tartibi.',
-                    'blocks' => [
-                        ['text', 'Korrupsiyaga qarshi kurashish', ['title' => 'Korrupsiyaga qarshi kurashish', 'content' => '<p>Tashkilotda korrupsiyaga qarshi kurashish bo‘yicha tizimli siyosat yuritiladi. Normativ hujjatlar bilan «Hujjatlar» bo‘limida tanishishingiz mumkin.</p><p>Korrupsiya holatlari haqida xabar berish uchun qayta aloqa shaklidan foydalanishingiz mumkin.</p>']]
-                    ]
-                ]
-            ],
-            // Видео и фото живут в блоке «Медиагалерея»; отдельного маршрута
-            // /videos у публички нет, поэтому раздел — обычная страница.
-            'media' => [
-                'ru' => [
-                    'title' => 'Медиатека',
-                    'lead' => 'Фотографии и видеозаписи с мероприятий, встреч и рабочих поездок Агентства.',
-                    'blocks' => [
-                        ['media_gallery', 'Медиатека', ['title' => 'Фото и видео', 'source' => 'media', 'limit' => 12]]
-                    ]
-                ],
-                'uz' => [
-                    'title' => 'Mediateka',
-                    'lead' => 'Agentlik tadbirlari, uchrashuvlari va ish safarlaridan foto va videolavhalar.',
-                    'blocks' => [
-                        ['media_gallery', 'Mediateka', ['title' => 'Foto va video', 'source' => 'media', 'limit' => 12]]
-                    ]
-                ]
-            ]
-        ];
+        $pages = self::content('pages');
 
         $prototypeFixture = \dirname(__DIR__, 2) . '/database/demo_assets/prototype_pages.json';
         if (is_file($prototypeFixture)) {
@@ -2000,23 +1691,7 @@ final class DemoSeeder
             ? ($pdo->query('SELECT code FROM languages WHERE is_active = 1 ORDER BY sort_order, id')->fetchAll(PDO::FETCH_COLUMN) ?: ['ru', 'uz'])
             : ['ru', 'uz'];
 
-        $enPageTitles = [
-            'o-nas' => 'About Agency',
-            'rukovodstvo' => 'Leadership',
-            'struktura' => 'Structure',
-            'direktor' => 'Director',
-            'pervyy-zamestitel-direktora' => 'First Deputy Director',
-            'antikorrupciya' => 'Anti-Corruption',
-            'napravleniya' => 'Priority Areas',
-            'strategiya-2030' => 'Strategy «Uzbekistan–2030»',
-            'ustoychivyy-ekonomicheskiy-rost' => 'Sustainable Economic Growth',
-            'analitika' => 'Analytics',
-            'press-centr' => 'Press Center',
-            'meropriyatiya' => 'Events',
-            'media' => 'Media Library',
-            'kontakty' => 'Contacts',
-            'karera' => 'Careers',
-        ];
+        $enPageTitles = self::content('page_titles_en');
 
         $createdPageSlugs = [];
         foreach ($pages as $slug => $langData) {
@@ -2234,95 +1909,7 @@ final class DemoSeeder
             return;
         }
         /** @var array<string, list<array{title: string, type: string, value: string, mega: int, children: list<array{0: string, 1: string, 2: string, 3?: string}>}>> $menus */
-        $menus = [
-            'ru' => [
-                ['title' => 'Агентство', 'type' => 'page', 'value' => 'o-nas', 'mega' => 0, 'children' => [
-                    ['Об агентстве', 'page', 'o-nas'],
-                    ['Руководство', 'page', 'rukovodstvo'],
-                    ['Структура', 'page', 'struktura'],
-                    ['Директор', 'page', 'direktor'],
-                    ['Первый заместитель директора', 'page', 'pervyy-zamestitel-direktora'],
-                    ['Противодействие коррупции', 'page', 'antikorrupciya'],
-                ]],
-                ['title' => 'Деятельность', 'type' => 'page', 'value' => 'napravleniya', 'mega' => 0, 'children' => [
-                    ['Стратегия «Узбекистан–2030»', 'page', 'strategiya-2030', '2030'],
-                    ['Приоритетные направления', 'page', 'napravleniya'],
-                    ['Устойчивый экономический рост', 'page', 'ustoychivyy-ekonomicheskiy-rost'],
-                    ['Проекты и инициативы', 'custom', '/projects'],
-                    ['Аналитика', 'page', 'analitika'],
-                ]],
-                ['title' => 'Пресс-центр', 'type' => 'page', 'value' => 'press-centr', 'mega' => 0, 'children' => [
-                    ['Новости', 'news_index', ''],
-                    ['Мероприятия', 'page', 'meropriyatiya'],
-                    ['Фотоальбомы', 'custom', '/albums'],
-                    ['Видеоматериалы', 'page', 'media'],
-                ]],
-                ['title' => 'Открытые данные', 'type' => 'custom', 'value' => '/catalog/documenty', 'mega' => 0, 'children' => [
-                    ['Документы', 'custom', '/catalog/documenty'],
-                    ['Тендеры', 'custom', '/catalog/tendery'],
-                    ['Вакансии', 'custom', '/catalog/vakansii'],
-                ]],
-                ['title' => 'Контакты', 'type' => 'page', 'value' => 'kontakty', 'mega' => 0, 'children' => []],
-            ],
-            'uz' => [
-                ['title' => 'Agentlik', 'type' => 'page', 'value' => 'o-nas', 'mega' => 0, 'children' => [
-                    ['Agentlik haqida', 'page', 'o-nas'],
-                    ['Rahbariyat', 'page', 'rukovodstvo'],
-                    ['Tuzilma', 'page', 'struktura'],
-                    ['Direktor', 'page', 'direktor'],
-                    ['Direktorning birinchi o‘rinbosari', 'page', 'pervyy-zamestitel-direktora'],
-                    ['Korrupsiyaga qarshi kurash', 'page', 'antikorrupciya'],
-                ]],
-                ['title' => 'Faoliyat', 'type' => 'page', 'value' => 'napravleniya', 'mega' => 0, 'children' => [
-                    ['«O‘zbekiston–2030» strategiyasi', 'page', 'strategiya-2030', '2030'],
-                    ['Ustuvor yo‘nalishlar', 'page', 'napravleniya'],
-                    ['Barqaror iqtisodiy o‘sish', 'page', 'ustoychivyy-ekonomicheskiy-rost'],
-                    ['Loyihalar va tashabbuslar', 'custom', '/projects'],
-                    ['Tahlil', 'page', 'analitika'],
-                ]],
-                ['title' => 'Matbuot markazi', 'type' => 'page', 'value' => 'press-centr', 'mega' => 0, 'children' => [
-                    ['Yangiliklar', 'news_index', ''],
-                    ['Tadbirlar', 'page', 'meropriyatiya'],
-                    ['Fotoalbomlar', 'custom', '/albums'],
-                    ['Videomateriallar', 'page', 'media'],
-                ]],
-                ['title' => 'Ochiq ma’lumotlar', 'type' => 'custom', 'value' => '/catalog/documenty', 'mega' => 0, 'children' => [
-                    ['Hujjatlar', 'custom', '/catalog/documenty'],
-                    ['Tenderlar', 'custom', '/catalog/tendery'],
-                    ['Bo‘sh ish o‘rinlari', 'custom', '/catalog/vakansii'],
-                ]],
-                ['title' => 'Aloqa', 'type' => 'page', 'value' => 'kontakty', 'mega' => 0, 'children' => []],
-            ],
-            'en' => [
-                ['title' => 'Agency', 'type' => 'page', 'value' => 'o-nas', 'mega' => 0, 'children' => [
-                    ['About Agency', 'page', 'o-nas'],
-                    ['Leadership', 'page', 'rukovodstvo'],
-                    ['Structure', 'page', 'struktura'],
-                    ['Director', 'page', 'direktor'],
-                    ['First Deputy Director', 'page', 'pervyy-zamestitel-direktora'],
-                    ['Anti-Corruption', 'page', 'antikorrupciya'],
-                ]],
-                ['title' => 'Activity', 'type' => 'page', 'value' => 'napravleniya', 'mega' => 0, 'children' => [
-                    ['Strategy «Uzbekistan–2030»', 'page', 'strategiya-2030', '2030'],
-                    ['Priority Areas', 'page', 'napravleniya'],
-                    ['Sustainable Economic Growth', 'page', 'ustoychivyy-ekonomicheskiy-rost'],
-                    ['Projects and Initiatives', 'custom', '/projects'],
-                    ['Analytics', 'page', 'analitika'],
-                ]],
-                ['title' => 'Press Center', 'type' => 'page', 'value' => 'press-centr', 'mega' => 0, 'children' => [
-                    ['News', 'news_index', ''],
-                    ['Events', 'page', 'meropriyatiya'],
-                    ['Photo Albums', 'custom', '/albums'],
-                    ['Media Library', 'page', 'media'],
-                ]],
-                ['title' => 'Open Data', 'type' => 'custom', 'value' => '/catalog/documenty', 'mega' => 0, 'children' => [
-                    ['Documents', 'custom', '/catalog/documenty'],
-                    ['Tenders', 'custom', '/catalog/tendery'],
-                    ['Vacancies', 'custom', '/catalog/vakansii'],
-                ]],
-                ['title' => 'Contacts', 'type' => 'page', 'value' => 'kontakty', 'mega' => 0, 'children' => []],
-            ],
-        ];
+        $menus = self::content('menus');
         $langs = $pdo->query('SELECT code FROM languages WHERE is_active = 1 ORDER BY sort_order, id')->fetchAll(PDO::FETCH_COLUMN) ?: [];
         if ($langs === []) {
             return;
@@ -2424,101 +2011,7 @@ final class DemoSeeder
         $heroId = (int) $pdo->lastInsertId();
         $c['heroes']++;
 
-        $slides = [
-            [
-                'ru' => [
-                    'eyebrow' => 'Цель. Действие. Результат.',
-                    'title' => 'От стратегической цели — к измеримому результату',
-                    'subtitle' => 'Агентство формирует единую систему стратегического планирования: от анализа и подготовки инициатив до координации, мониторинга и оценки достигнутых результатов.',
-                    'cta_text' => 'Об Агентстве',
-                    'cta2_text' => 'Узбекистан — 2030',
-                ],
-                'uz' => [
-                    'eyebrow' => 'Maqsad. Harakat. Natija.',
-                    'title' => 'Strategik maqsaddan — o‘lchanadigan natijaga',
-                    'subtitle' => 'Agentlik strategik rejalashtirishning yagona tizimini shakllantiradi: tahlil va tashabbuslarni tayyorlashdan tortib muvofiqlashtirish, monitoring va erishilgan natijalarni baholashgacha.',
-                    'cta_text' => 'Agentlik haqida',
-                    'cta2_text' => 'O‘zbekiston — 2030',
-                ],
-                'data' => [
-                    'media_type' => 'image',
-                    'image' => '/uploads/public/demo-agency-hero.jpg',
-                    'cta_enabled' => '1', 'cta_url' => '/o-nas', 'cta_icon' => 'arrow-right',
-                    'cta2_enabled' => '1', 'cta2_url' => '/strategiya-2030', 'cta2_style' => 'ghost',
-                ],
-            ],
-            [
-                'ru' => [
-                    'eyebrow' => 'Приоритеты',
-                    'title' => 'Цифровая трансформация государственных услуг',
-                    'subtitle' => 'Единая система показателей, межведомственный обмен данными и сокращение сроков предоставления услуг.',
-                    'cta_text' => 'Проекты',
-                    'cta2_text' => '',
-                ],
-                'uz' => [
-                    'eyebrow' => 'Ustuvor yo‘nalishlar',
-                    'title' => 'Davlat xizmatlarining raqamli transformatsiyasi',
-                    'subtitle' => 'Yagona ko‘rsatkichlar tizimi, idoralararo ma’lumot almashinuvi va xizmatlar muddatlarining qisqarishi.',
-                    'cta_text' => 'Loyihalar',
-                    'cta2_text' => '',
-                ],
-                'data' => [
-                    'media_type' => 'image',
-                    'image' => '/uploads/public/demo-urban-development.jpg',
-                    'overlay' => 'gradient', 'overlay_opacity' => '55',
-                    'cta_enabled' => '1', 'cta_url' => '/projects', 'cta_icon' => 'arrow-right',
-                ],
-            ],
-            [
-                'ru' => [
-                    'eyebrow' => 'Устойчивое развитие',
-                    'title' => 'Зелёная энергетика и рациональное природопользование',
-                    'subtitle' => 'Повышение энергоэффективности, развитие солнечной и ветровой генерации.',
-                    'cta_text' => 'Пресс-центр',
-                    'cta2_text' => '',
-                ],
-                'uz' => [
-                    'eyebrow' => 'Barqaror rivojlanish',
-                    'title' => 'Yashil energetika va tabiatdan oqilona foydalanish',
-                    'subtitle' => 'Energiya samaradorligini oshirish, quyosh va shamol generatsiyasini rivojlantirish.',
-                    'cta_text' => 'Matbuot markazi',
-                    'cta2_text' => '',
-                ],
-                'data' => [
-                    'media_type' => 'image',
-                    'image' => '/uploads/public/demo-green-energy.jpg',
-                    'cta_enabled' => '1', 'cta_url' => '/press-centr', 'cta_icon' => 'arrow-right',
-                ],
-            ],
-            [
-                // Светлый кадр. Демо показывало только тёмные обложки, и по
-                // нему нельзя было увидеть вторую половину поведения: белая
-                // вуаль осветляет фотографию, по ней же выбирается тёмный
-                // текст, а прозрачная шапка переходит в тёмный набор —
-                // логотип, меню и иконки перекрашиваются вместе с кадром.
-                // Заодно в заголовке показано выделение слова звёздочками.
-                'ru' => [
-                    'eyebrow' => 'Открытость',
-                    'title' => 'Аналитика и данные — в *открытом* доступе',
-                    'subtitle' => 'Показатели реформ, отчёты и наборы данных публикуются открыто: их можно скачать, перепроверить и использовать в собственных расчётах.',
-                    'cta_text' => 'Аналитика',
-                    'cta2_text' => '',
-                ],
-                'uz' => [
-                    'eyebrow' => 'Ochiqlik',
-                    'title' => 'Tahlil va ma’lumotlar — *ochiq* foydalanishda',
-                    'subtitle' => 'Islohotlar ko‘rsatkichlari, hisobotlar va ma’lumotlar to‘plamlari ochiq e’lon qilinadi: ularni yuklab olish, qayta tekshirish va o‘z hisob-kitoblaringizda ishlatish mumkin.',
-                    'cta_text' => 'Tahlil',
-                    'cta2_text' => '',
-                ],
-                'data' => [
-                    'media_type' => 'image',
-                    'image' => '/uploads/public/demo-strategy-meeting.jpg',
-                    'overlay' => 'solid', 'overlay_color' => '#ffffff', 'overlay_opacity' => '62',
-                    'cta_enabled' => '1', 'cta_url' => '/analitika', 'cta_icon' => 'arrow-right',
-                ],
-            ],
-        ];
+        $slides = self::content('hero_slides');
 
         $insertSlide = $pdo->prepare(
             'INSERT INTO hero_slides (hero_id, title, sort_order, is_active, data, created_at)
