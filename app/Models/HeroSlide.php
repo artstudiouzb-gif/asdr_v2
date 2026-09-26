@@ -234,7 +234,7 @@ final class HeroSlide
      * обложки: список приходит из браузера, и чужой id не должен переезжать
      * в чужую обложку.
      *
-     * @param list<int> $ids
+     * @param array<int, int> $ids
      */
     public static function reorder(int $heroId, array $ids): void
     {

@@ -868,7 +868,7 @@ final class NewsController
     {
         $pollQuestion = trim((string) ($_POST['poll_question'] ?? ''));
         $pollOptionsRaw = trim((string) ($_POST['poll_options'] ?? ''));
-        $pollOptions = array_values(array_filter(array_map('trim', (array) preg_split('/[\r\n,]+/u', $pollOptionsRaw)), static fn ($v) => $v !== ''));
+        $pollOptions = array_values(array_filter(array_map('trim', preg_split('/[\r\n,]+/u', $pollOptionsRaw) ?: []), static fn ($v) => $v !== ''));
         \App\Models\NewsPoll::saveForNews($newsId, $pollQuestion, $pollOptions);
     }
 

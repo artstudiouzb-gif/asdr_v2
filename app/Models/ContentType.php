@@ -211,7 +211,7 @@ final class ContentType
     /**
      * Полностью заменяет набор полей типа (из конструктора полей, задача 132).
      *
-     * @param array<int, array{name:string, label:string, field_type:string, required:bool, options:array<int, string>}> $fields
+     * @param array<int, array{name:string, label:string, field_type:string, required:bool, options:array<string, string>}> $fields
      */
     public static function replaceFields(int $typeId, array $fields): void
     {

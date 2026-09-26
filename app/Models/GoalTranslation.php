@@ -43,7 +43,7 @@ final class GoalTranslation
      * Пакетная загрузка одного перевода для списка целей — устраняет N+1 на
      * странице списка админки.
      *
-     * @param list<int> $goalIds
+     * @param array<int, int> $goalIds
      * @return array<int, array<string, mixed>>
      */
     public static function forGoalIds(array $goalIds, string $lang): array

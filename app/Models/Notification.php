@@ -9,6 +9,13 @@ use App\Core\NotificationSchema;
 use App\Core\UrlGuard;
 use PDO;
 
+/**
+ * @phpstan-type NotificationData array{
+ *   category?:string,severity?:string,title:string,message:string,
+ *   action_url?:?string,dedupe_key?:?string,requires_ack?:bool,
+ *   created_by?:?int,expires_at?:?string,user_ids?:list<int>,roles?:list<string>
+ * }
+ */
 final class Notification
 {
     private const CATEGORIES = ['system', 'security', 'content', 'forms', 'users', 'integration'];
@@ -16,11 +23,7 @@ final class Notification
     private const ROLES = ['admin', 'editor'];
 
     /**
-     * @param array{
-     *   category?:string,severity?:string,title:string,message:string,
-     *   action_url?:?string,dedupe_key?:?string,requires_ack?:bool,
-     *   created_by?:?int,expires_at?:?string,user_ids?:list<int>,roles?:list<string>
-     * } $data
+     * @param NotificationData $data
      */
     public static function create(array $data): int
     {

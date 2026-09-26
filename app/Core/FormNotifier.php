@@ -140,11 +140,13 @@ final class FormNotifier
 
         foreach ($chatIds as $chatId) {
             $ch = curl_init($url);
+            // Текст собран из заявки посетителя: битый UTF-8 заменяется, а не
+            // превращает тело запроса в false.
             $payload = json_encode([
                 'chat_id' => $chatId,
                 'text' => $text,
                 'parse_mode' => 'HTML',
-            ], JSON_UNESCAPED_UNICODE);
+            ], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE) ?: '{}';
 
             curl_setopt_array($ch, [
                 CURLOPT_POST => true,

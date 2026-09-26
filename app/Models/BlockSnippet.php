@@ -70,7 +70,10 @@ final class BlockSnippet
     }
 
     /**
-     * @param array<int, array{type:string, title:?string, data:array<string, mixed>, custom_css:string}> $blocks
+     * Блоки уходят в JSON как есть; поля type, title, data, custom_css
+     * читает createFromSnapshot() при вставке.
+     *
+     * @param array<int, array<string, mixed>> $blocks
      */
     public static function create(string $name, array $blocks): int
     {

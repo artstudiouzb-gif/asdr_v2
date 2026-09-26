@@ -105,10 +105,14 @@ final class Search
 
         usort($results, static fn (array $a, array $b): int => ($b['_score'] <=> $a['_score']) ?: strcmp((string) $b['_date'], (string) $a['_date']));
 
-        return array_map(static function (array $row): array {
-            unset($row['_score'], $row['_date']);
-            return $row;
-        }, array_slice($results, 0, $limit));
+        return array_map(
+            /** @param array{type: string, title: string, url: string, excerpt: string, _score: int, _date: string} $row */
+            static function (array $row): array {
+                unset($row['_score'], $row['_date']);
+                return $row;
+            },
+            array_slice($results, 0, $limit)
+        );
     }
 
     /** @return array<int,array{type:string,title:string,url:string,excerpt:string}> */
@@ -243,10 +247,14 @@ final class Search
 
         usort($results, static fn (array $a, array $b): int => ($b['_score'] <=> $a['_score']) ?: strcmp((string) $b['_date'], (string) $a['_date']));
 
-        return array_map(static function (array $row): array {
-            unset($row['_score'], $row['_date']);
-            return $row;
-        }, array_slice($results, 0, $limit));
+        return array_map(
+            /** @param array{type: string, title: string, url: string, excerpt: string, _score: int, _date: string} $row */
+            static function (array $row): array {
+                unset($row['_score'], $row['_date']);
+                return $row;
+            },
+            array_slice($results, 0, $limit)
+        );
     }
 
     /**
@@ -268,7 +276,7 @@ final class Search
     }
 
     /**
-     * @param array<int,array<string,mixed>> $results
+     * @param array<int, array{type: string, title: string, url: string, excerpt: string, _score: int, _date: string}> $results
      * @param array<string,mixed> $row
      */
     private static function append(array &$results, string $term, string $type, array $row, string $url): void

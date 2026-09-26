@@ -38,7 +38,7 @@ final class PhotoAlbumTranslation
 
     /**
      * Пакетная загрузка одного перевода для списка альбомов — устраняет N+1.
-     * @param list<int> $albumIds
+     * @param array<int, int> $albumIds
      * @return array<int, array<string, mixed>>
      */
     public static function forAlbumIds(array $albumIds, string $lang): array

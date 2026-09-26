@@ -1113,7 +1113,7 @@ final class BlockRenderer
      * он выводится на странице как заголовок секции, а якорем служит id самой
      * секции — отдельных якорей заводить не нужно.
      *
-     * @param list<array<string,mixed>> $blocks
+     * @param array<int, array<string, mixed>> $blocks
      * @return list<array{id: string, label: string}>
      */
     private static function collectSections(array $blocks): array

@@ -8,6 +8,8 @@ use App\Models\Setting;
 
 /**
  * ИИ-ассистент редактора: генерирует редакционный анонс и SEO-метаданные.
+ *
+ * @phpstan-type LocalFields array{excerpt:string,hashtags:string,meta_title:string,meta_description:string}
  */
 final class AiAssistantService
 {
@@ -121,7 +123,7 @@ final class AiAssistantService
      * Детерминированный резерв: выбирает наиболее информативные предложения
      * по всему материалу, а не копирует начало новости.
      *
-     * @return array{excerpt:string,hashtags:string,meta_title:string,meta_description:string}
+     * @return LocalFields
      */
     public static function generateLocalNewsFields(string $title, string $content): array
     {
@@ -264,9 +266,9 @@ PROMPT,
     }
 
     /**
-     * @param array<string, string> $fallback
+     * @param LocalFields $fallback
      * @param array<string, mixed> $generated
-     * @return array<string, string>
+     * @return LocalFields
      */
     private static function normalizeGeneratedFields(array $fallback, array $generated, string $target): array
     {
