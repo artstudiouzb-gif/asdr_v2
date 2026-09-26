@@ -18,6 +18,7 @@ $cstyle = '--counter-icon-size:' . $iconSize . 'px;--counter-icon-box-size:' . $
     . ($textColor !== '' ? '--counters-text:' . $textColor . ';' : '');
 $templateCss = '#block-' . $blockId . ' .block-counters{' . $cstyle . '}';
 $blockClasses = ($iconBackground === 'off' ? ' block-counters--icons-no-bg' : '')
+    . ($textColor !== '' ? ' block-counters--custom-text' : '')
     . ' block-counters--panel-' . $panel
     . ' block-counters--icon-pos-' . $iconPosition
     . ' block-counters--text-align-' . $textAlign
