@@ -55,6 +55,9 @@
             ? (body.textContent || '').replace(/\s+/g, ' ').trim()
             : plainTextFromLeadMarkup(field ? field.value : '');
     }
+    // Нужна и SEO-превью ниже по файлу, вне этой области видимости: без
+    // экспорта форма новости падала на ReferenceError при каждом вводе.
+    window.asdrPlainLeadText = plainLeadText;
 
     // --- Единая система выбора цвета во всей админке. ---
     // В HTML остаётся нативный input[type=color] как рабочий fallback без JS.
@@ -3542,7 +3545,7 @@
             var titleVal = titleInput ? (titleInput.value || '').trim() : '';
             var descVal = descInput ? (descInput.value || '').trim() : '';
             if (descInput && descInput.getAttribute('name') === 'lead_html') {
-                descVal = plainLeadText(descInput);
+                descVal = window.asdrPlainLeadText ? window.asdrPlainLeadText(descInput) : descVal;
             }
             var imgVal = imageInput ? (imageInput.value || '').trim() : '';
 
