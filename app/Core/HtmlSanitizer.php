@@ -213,6 +213,9 @@ final class HtmlSanitizer
         return $html;
     }
 
+    /**
+     * @param array<string, array<int, string>> $allowedAttrs
+     */
     private static function cleanAttributes(\DOMElement $el, string $tag, array $allowedAttrs): void
     {
         $allowed = array_merge(

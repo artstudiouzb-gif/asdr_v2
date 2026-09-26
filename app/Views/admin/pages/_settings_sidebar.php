@@ -4,7 +4,7 @@
 /** @var array $languages */
 /** @var bool $isEdit */
 /** @var string $blockLang */
-/** @var array $parentOptions */
+/** @var array<int, array<string, mixed>> $parentOptions */
 $parentOptions = $parentOptions ?? [];
 $selectedParentId = (int) ($page['parent_id'] ?? 0);
 $isHomePage = \App\Models\Page::isHomePage($page ?? []);

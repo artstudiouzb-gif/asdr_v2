@@ -3,7 +3,7 @@
 use App\Core\Csrf;
 
 /** @var string|null $error */
-/** @var array $data */
+/** @var array<string, mixed> $data */
 $step = '2';
 require __DIR__ . '/_header.php';
 ?>

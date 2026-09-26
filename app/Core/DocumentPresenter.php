@@ -32,7 +32,10 @@ final class DocumentPresenter
         'zip', 'rar', '7z',
     ];
 
-    /** @return array{title:string,url:string,meta:string,extension:string,icon:string,direct_file:bool,search:string} */
+    /**
+     * @param array<string, mixed> $document
+     * @return array{title:string,url:string,meta:string,extension:string,icon:string,direct_file:bool,search:string}
+     */
     public static function prepare(array $document): array
     {
         $title = trim((string) ($document['title'] ?? ''));

@@ -62,7 +62,10 @@ final class TableRows
         );
     }
 
-    /** Число столбцов — нужно шаблону для scoped CSS. */
+    /**
+     * Число столбцов — нужно шаблону для scoped CSS.
+     * @param array<int, array<int, string>> $rows
+     */
     public static function width(array $rows): int
     {
         return $rows === [] ? 0 : count($rows[0]);

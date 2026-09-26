@@ -73,7 +73,10 @@ final class A11ySettings
         return self::normalize($parsed);
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param array<mixed> $values
+     * @return array<string, mixed>
+     */
     public static function normalize(array $values): array
     {
         $result = self::DEFAULTS;

@@ -187,7 +187,7 @@ final class TelegramRichMessage
      * один результат и отличаются только внешней оболочкой <details>.
      *
      * @param array<string,mixed> $lang
-     * @param callable(array):string $metaLine
+     * @param callable(array<string, mixed>):string $metaLine
      */
     private static function languageSection(array $lang, callable $esc, callable $metaLine): string
     {

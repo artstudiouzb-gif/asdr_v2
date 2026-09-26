@@ -107,6 +107,7 @@ final class News
      * Фильтрованный и постраничный список для административной панели.
      *
      * @param array<string, mixed> $filters
+     * @return array<int, array<string, mixed>>
      */
     public static function adminList(array $filters): array
     {
@@ -160,8 +161,8 @@ final class News
     }
 
     /**
-     * @return array{0:string,1:array<string,string>}
      * @param array<string, mixed> $filters
+     * @return array{0:string,1:array<string,string>}
      */
     private static function adminListFrom(array $filters): array
     {
@@ -603,6 +604,7 @@ final class News
     /** @param array<string, mixed> $translation */
     /**
      * @param array<string, mixed> $row
+     * @param array<string, mixed>|null $translation
      * @return array<string, mixed>
      */
     private static function applyTranslation(array $row, ?array $translation): array
@@ -773,6 +775,9 @@ final class News
         return \App\Core\Translations::primaryId('news', $id);
     }
 
+    /**
+     * @return list<string>
+     */
     public static function availableLangs(int $id): array
     {
         $pdo = Database::pdo();
@@ -1042,8 +1047,8 @@ final class News
     /**
      * Соседние опубликованные новости по дате публикации (для «предыдущая/следующая»).
      *
-     * @return array{prev: ?array, next: ?array}
      * @param array<string, mixed> $news
+     * @return array{prev: array<string, mixed>|null, next: array<string, mixed>|null}
      */
     public static function adjacent(array $news, ?string $lang = null): array
     {

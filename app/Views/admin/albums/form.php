@@ -5,7 +5,7 @@ use App\Models\Language;
 
 /** @var array $album */
 /** @var array $images */
-/** @var array $translations */
+/** @var array<string, array<string, mixed>> $translations */
 
 $pageTitle = 'Альбом: ' . $album['title'];
 $activeNav = 'albums';

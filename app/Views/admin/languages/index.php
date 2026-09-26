@@ -6,7 +6,7 @@ $pageTitle = 'Языки';
 $activeNav = 'languages';
 require __DIR__ . '/../layout/header.php';
 
-/** @var array $items */
+/** @var array<int, array<string, mixed>> $items */
 ?>
 <p class="form-hint">Язык по умолчанию доступен на сайте без префикса в URL; остальные активные языки — по префиксу <code>/код/…</code>.</p>
 

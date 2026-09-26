@@ -3,7 +3,7 @@
 use App\Core\Locale;
 
 /** @var array $album */
-/** @var array $images */
+/** @var array<int, array<string, mixed>> $images */
 
 $metaTitle = (string) $album['title'];
 $metaDescription = mb_substr(trim((string) ($album['description'] ?? '')), 0, 160);

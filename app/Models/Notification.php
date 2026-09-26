@@ -201,7 +201,11 @@ final class Notification
         return $stmt->rowCount() > 0;
     }
 
-    /** @return list<int> */
+    /**
+     * @param array<mixed> $rawUserIds
+     * @param array<mixed> $rawRoles
+     * @return list<int>
+     */
     private static function recipientIds(array $rawUserIds, array $rawRoles): array
     {
         $ids = [];

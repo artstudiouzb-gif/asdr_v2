@@ -531,7 +531,10 @@ final class LegacyWxrImporter
         return 'uz';
     }
 
-    /** @param array<int,array<string,mixed>> $group */
+    /**
+     * @param array<int,array<string,mixed>> $group
+     * @return array<string, mixed>|null
+     */
     private static function groupPrimary(array $group, string $primary): ?array
     {
         foreach ($group as $p) {
@@ -568,7 +571,10 @@ final class LegacyWxrImporter
         return $stem . ($ext !== '' ? '.' . $ext : '');
     }
 
-    /** @param array<string,mixed> $a @param array<string,mixed> $b */
+    /**
+     * @param array<string,mixed> $a
+     * @param array<string,mixed> $b
+     */
     private static function timeDistance(array $a, array $b): int
     {
         $at = strtotime((string) ($a['date'] ?? '')) ?: 0;

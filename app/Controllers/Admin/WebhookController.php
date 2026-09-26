@@ -158,6 +158,7 @@ final class WebhookController
     }
 
     /**
+     * @param array<string, mixed>|null $current
      * @return array{0:string,1:string,2:?string,3:bool,4:?string}
      */
     private function collect(?array $current = null): array

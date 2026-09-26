@@ -6,7 +6,7 @@ use App\Models\ContentType;
 
 /** @var array $type */
 /** @var array $fields */
-/** @var array $entry */
+/** @var array<string, mixed> $entry */
 
 $metaTitle = (string) $entry['title'];
 $metaDescription = '';

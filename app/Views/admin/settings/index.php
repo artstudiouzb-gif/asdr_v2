@@ -7,7 +7,7 @@ $pageTitle = 'Настройки';
 $activeNav = 'settings';
 require __DIR__ . '/../layout/header.php';
 
-/** @var array $settings */
+/** @var array<string, mixed> $settings */
 ?>
 <p class="form-hint admin-section-intro">
     Общие параметры сайта, интеграции и служебные инструменты. Дизайн, шапка,

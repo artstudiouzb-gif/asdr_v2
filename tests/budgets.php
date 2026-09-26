@@ -571,7 +571,11 @@ function quality_budgets(): array
             // настоящим отказом под strict_types (см. коммиты). 565 -> 245:
             // типизированная выборка (Database::rows/row) и типы значений
             // массивов у строк БД, данных блоков и ответов Http/SocialPublisher.
-            'ceiling' => static fn (): int => 245,
+            // 245 -> 45: типы элементов у всех параметров, результатов, свойств
+            // и @var во вьюхах (missingType.iterableValue); однострочные PHPDoc
+            // с несколькими тегами разбиты — второй тег анализатор не читал.
+            // Остаток — argument.type/return.type, отдельный проход.
+            'ceiling' => static fn (): int => 45,
             'measure' => static function (): array {
                 $baseline = APP_ROOT . '/phpstan-baseline.neon';
                 if (!is_file($baseline)) {

@@ -38,6 +38,7 @@ final class Http
     }
 
     /**
+     * @param array<string, mixed> $fields
      * @param array<int, string> $headers
      * @return array{status:int, body:string, error:string}
      */
@@ -106,7 +107,10 @@ final class Http
         return self::requestSafeRemote('GET', $url, '', $headers, $timeout, $maxResponseBytes);
     }
 
-    /** @return array{status:int, body:string, error:string} */
+    /**
+     * @param array<int, string> $headers
+     * @return array{status:int, body:string, error:string}
+     */
     private static function viaCurl(string $method, string $url, string $body, array $headers, int $timeout): array
     {
         $ch = curl_init($url);
@@ -216,7 +220,10 @@ final class Http
         ];
     }
 
-    /** @return array{status:int, body:string, error:string} */
+    /**
+     * @param array<int, string> $headers
+     * @return array{status:int, body:string, error:string}
+     */
     private static function viaStream(string $method, string $url, string $body, array $headers, int $timeout): array
     {
         $context = stream_context_create([

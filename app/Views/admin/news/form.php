@@ -12,7 +12,7 @@ require __DIR__ . '/../layout/header.php';
 
 /** @var array|null $news */
 /** @var string|null $error */
-/** @var array $gallery */
+/** @var array<int, array<string, mixed>> $gallery */
 $gallery = $gallery ?? [];
 $layout = $news['layout_type'] ?? 'standard';
 $layoutLabels = [

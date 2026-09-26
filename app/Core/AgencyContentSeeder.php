@@ -24,6 +24,7 @@ final class AgencyContentSeeder
     private array $log = [];
 
     /**
+     * @param array<string, mixed>|null $fixture
      * @return array{pages_created:int, pages_updated:int, blocks:int, team_created:int, team_updated:int, log:list<string>}
      */
     public static function run(PDO $pdo, bool $dryRun = false, ?array $fixture = null): array

@@ -109,7 +109,10 @@ final class AdminBrand
         return '<span class="' . $letterClass . '">' . htmlspecialchars(self::letter(), ENT_QUOTES) . '</span>';
     }
 
-    /** Смешивание цвета с RGB-точкой (weight — доля второй точки). */
+    /**
+     * Смешивание цвета с RGB-точкой (weight — доля второй точки).
+     * @param array{0: int, 1: int, 2: int} $with
+     */
     private static function mix(string $hex, array $with, float $weight): string
     {
         $r = (int) hexdec(substr($hex, 1, 2));

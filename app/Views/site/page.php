@@ -4,7 +4,7 @@
 /** @var string $content */
 /** @var string $blockCss */
 /** @var string $layoutType */
-/** @var array|null $sidebar */
+/** @var array<string, string>|null $sidebar */
 
 $metaTitle = $page['meta_title'] ?: $page['title'];
 // Описание страницы: своё поле → лид → первый абзац содержимого. Пустым оно

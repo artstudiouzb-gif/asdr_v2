@@ -139,7 +139,10 @@ final class FileEntry
         return $counts;
     }
 
-    /** @return list<array<string, mixed>> */
+    /**
+     * @param array<string, mixed> $params
+     * @return list<array<string, mixed>>
+     */
     public static function filtered(array $params, bool $includeProtected = true): array
     {
         $q = trim((string) ($params['q'] ?? ''));
@@ -189,6 +192,9 @@ final class FileEntry
         return Database::rows($stmt);
     }
 
+    /**
+     * @return array<int, string>
+     */
     public static function availableDates(): array
     {
         $stmt = Database::pdo()->query("SELECT DISTINCT DATE_FORMAT(created_at, '%Y-%m') AS date_val FROM files ORDER BY date_val DESC");
@@ -307,11 +313,17 @@ final class FileEntry
         $stmt->execute([':id' => $id]);
     }
 
+    /**
+     * @param array<string, mixed> $file
+     */
     public static function publicUrl(array $file): string
     {
         return rtrim((string) Config::get('paths.public_uploads_url'), '/') . '/' . $file['stored_name'];
     }
 
+    /**
+     * @param array<string, mixed> $file
+     */
     public static function protectedUrl(array $file): string
     {
         if (($file['access_type'] ?? '') !== 'protected' || empty($file['access_token'])) {

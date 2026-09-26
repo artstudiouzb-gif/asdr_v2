@@ -3,7 +3,7 @@
 use App\Core\Locale;
 
 /** @var array $items */
-/** @var array|null $sectionPage шапка раздела из админки (может отсутствовать) */
+/** @var array<string, mixed>|null $sectionPage шапка раздела из админки (может отсутствовать) */
 $sectionPage = $sectionPage ?? null;
 $sectionTitle = (string) ($sectionPage['title'] ?? '');
 $sectionLead = (string) ($sectionPage['lead'] ?? '');

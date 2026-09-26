@@ -8,7 +8,7 @@ $activeNav = 'team';
 $pageActions = '<a href="/admin/team/create" class="btn btn--primary">' . \App\Core\AdminUi::icon('plus') . 'Добавить сотрудника</a>';
 require __DIR__ . '/../layout/header.php';
 
-/** @var array $items */
+/** @var array<int, array<string, mixed>> $items */
 $langs = Language::active();
 ?>
 

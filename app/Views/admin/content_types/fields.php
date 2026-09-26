@@ -8,7 +8,7 @@ require __DIR__ . '/../layout/header.php';
 
 /** @var array $type */
 /** @var array $fields */
-/** @var array $allTypes */
+/** @var array<int, array<string, mixed>> $allTypes */
 $ftypes = ['text' => 'Текст', 'textarea' => 'Многострочный', 'number' => 'Число', 'date' => 'Дата', 'image' => 'Изображение', 'file' => 'Файл', 'relation' => 'Связь'];
 ?>
 <a href="/admin/content-types" class="btn btn--small u-inline-79a1c5a5db">&larr; Все типы</a>

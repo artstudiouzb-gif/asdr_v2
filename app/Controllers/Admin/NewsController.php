@@ -458,6 +458,10 @@ final class NewsController
         exit;
     }
 
+    /**
+     * @param array<mixed> $rawDocs
+     * @return list<array<string, string>>
+     */
     private function parseDocs(array $rawDocs): array
     {
         $safeUrl = static function (string $u): string {
@@ -478,6 +482,9 @@ final class NewsController
         return $docs;
     }
 
+    /**
+     * @return list<array<string, string|null>>
+     */
     private function parseTimeline(string $raw): array
     {
         $events = [];
@@ -621,7 +628,7 @@ final class NewsController
     }
 
     /**
-     * @return array{0: array, 1: string|null}
+     * @return array{0: array<string, mixed>, 1: string|null}
      */
     /**
      * Поля детальной страницы (эскиз): бейдж, тезисы, мероприятие, документы.
@@ -642,7 +649,10 @@ final class NewsController
         ] + \App\Core\NewsCard::fromInput($_POST);
     }
 
-    /** @param array<string, mixed> $existing */
+    /**
+     * @param array<string, mixed>|null $existing
+     * @return array{0: array<string, mixed>, 1: string|null}
+     */
     private function collectInput(?int $id, ?array $existing = null): array
     {
         $title = trim((string) ($_POST['title'] ?? ''));

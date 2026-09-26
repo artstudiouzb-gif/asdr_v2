@@ -11,7 +11,7 @@ use App\Models\Language;
 /** @var array<string, mixed> $settings */
 /** @var array $slides */
 /** @var array<int, list<string>> $langMap */
-/** @var array $usage */
+/** @var array<int, array<string, mixed>> $usage */
 
 $heroId = (int) $hero['id'];
 $pageTitle = 'Обложка: ' . $hero['name'];

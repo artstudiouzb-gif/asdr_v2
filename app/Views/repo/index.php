@@ -12,7 +12,7 @@ use App\Core\Format;
 /** @var array|null $repoUser */
 /** @var int $totalCount */
 /** @var array $popular */
-/** @var array $latest */
+/** @var array<int, array<string, mixed>> $latest */
 $ext = $ext ?? '';
 $sort = $sort ?? 'newest';
 $totalCount = $totalCount ?? count($files);
