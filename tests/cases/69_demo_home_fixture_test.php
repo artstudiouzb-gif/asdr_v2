@@ -119,13 +119,13 @@ test('Демо: сравнение стартовой главной не зав
         'типы JSON-значений сравниваются строго'
     );
 
-    $seeder = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
+    $seeder = demo_seeder_source();
     assert_contains('self::canonicalJsonValue($data)', $seeder);
     assert_not_contains('|| $data !== $expected[$i][2])', $seeder);
 });
 
 test('Демо: повторный запуск не удаляет страницы и не дополняет настроенное меню', function () {
-    $seeder = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
+    $seeder = demo_seeder_source();
     assert_not_contains('DELETE FROM pages', $seeder);
     assert_not_contains('DELETE FROM page_translations', $seeder);
     assert_contains("SELECT COUNT(*) FROM menu_items", $seeder);

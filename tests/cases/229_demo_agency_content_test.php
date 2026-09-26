@@ -8,7 +8,7 @@ declare(strict_types=1);
 // сайте висел несуществующий руководитель.
 
 test('Демо-пакет: страницы руководства берутся из фикстуры Агентства', function () {
-    $seeder = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
+    $seeder = demo_seeder_source();
 
     assert_contains("/database/content/agency_content.php", $seeder);
     // Наложение идёт после демо-страниц и прототипов, иначе демо перекроет
@@ -19,7 +19,11 @@ test('Демо-пакет: страницы руководства берутс�
 });
 
 test('Демо-пакет: вымышленного руководителя не осталось', function () {
-    foreach (['app/Core/DemoSeeder.php', 'database/demo_assets/prototype_pages.json'] as $relative) {
+    $sources = ['app/Core/DemoSeeder.php', 'database/demo_assets/prototype_pages.json'];
+    foreach (glob(APP_ROOT . '/database/demo_content/*.php') ?: [] as $file) {
+        $sources[] = substr($file, strlen(APP_ROOT) + 1);
+    }
+    foreach ($sources as $relative) {
         $content = (string) file_get_contents(APP_ROOT . '/' . $relative);
         assert_not_contains('Нуриддинов', $content, 'вымышленный директор в ' . $relative);
         assert_not_contains('Nuriddinov', $content, 'вымышленный директор в ' . $relative);
@@ -32,7 +36,7 @@ test('Демо-пакет: вымышленного руководителя н�
 });
 
 test('Демо-пакет: в команде реальное руководство', function () {
-    $seeder = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
+    $seeder = demo_seeder_source();
     $fixture = require APP_ROOT . '/database/content/agency_content.php';
 
     foreach ($fixture['team'] as $member) {
@@ -41,7 +45,7 @@ test('Демо-пакет: в команде реальное руководст
 });
 
 test('Демо-пакет: мета и лид берутся из фикстуры, когда заданы', function () {
-    $seeder = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
+    $seeder = demo_seeder_source();
     // Пустой лид у страниц с «Профилем персоны» обязателен: иначе к заголовку
     // блока добавляется второй h1 из шапки страницы.
     foreach (['meta_title', 'meta_description', 'lead'] as $key) {
@@ -63,7 +67,7 @@ test('Демо-пакет: мета и лид берутся из фикстур
 });
 
 test('Демо-меню: пункты руководства ведут на существующие страницы', function () {
-    $seeder = (string) file_get_contents(APP_ROOT . '/app/Core/DemoSeeder.php');
+    $seeder = demo_seeder_source();
     $fixture = require APP_ROOT . '/database/content/agency_content.php';
 
     foreach (['o-nas', 'rukovodstvo', 'direktor', 'pervyy-zamestitel-direktora'] as $slug) {
