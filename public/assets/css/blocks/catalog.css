@@ -274,3 +274,13 @@ button.catdetail__download { border: none; cursor: pointer; font-family: inherit
 @media (max-width: 640px) {
     body[class] .catdetail__title { font-size: var(--step-5); }
 }
+
+/* Системное «Уменьшить движение»: наведение меняет цвет и тень, но не
+   сдвигает и не увеличивает элемент. */
+@media (prefers-reduced-motion: reduce) {
+    .catcard:hover,
+    .catcard:hover .catcard__more .catcard__arrow,
+    .catcard:hover .catcard__event-image {
+        transform: none;
+    }
+}

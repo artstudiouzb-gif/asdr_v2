@@ -76,3 +76,11 @@
     .block-buttons__btn { justify-content: center; }
     .block-buttons__btn--link { justify-content: flex-start; }
 }
+
+/* Системное «Уменьшить движение»: наведение меняет цвет и тень, но не
+   сдвигает и не увеличивает элемент. */
+@media (prefers-reduced-motion: reduce) {
+    .block-buttons__btn--primary:hover {
+        transform: none;
+    }
+}

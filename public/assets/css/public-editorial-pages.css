@@ -1531,3 +1531,14 @@ html[data-theme="dark"] .content-pagehead__emblem {
         margin-top: 8px;
     }
 }
+
+/* Системное «Уменьшить движение»: наведение меняет цвет и тень, но не
+   сдвигает и не увеличивает элемент. */
+@media (prefers-reduced-motion: reduce) {
+    .editorial-page__content .block-advantages__item:not(.feature-card):hover,
+    .editorial-page__content .act-card:not(.feature-card):hover,
+    .editorial-page__content .doc-card:hover,
+    .editorial-page__content .person-card:hover {
+        transform: none;
+    }
+}
