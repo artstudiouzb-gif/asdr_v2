@@ -25,7 +25,7 @@ final class EmbedSource
     public const PROVIDERS = ['youtube', 'telegram', 'google_form'];
 
     /**
-     * @return array{provider: string, src: string, title: string}|null
+     * @return array{provider: string, src: string, title: string, video_id?: string}|null
      *         null — ссылка не опознана: врезка не выводится вовсе
      */
     public static function parse(?string $url): ?array
@@ -44,6 +44,7 @@ final class EmbedSource
                 'provider' => 'youtube',
                 'src' => 'https://www.youtube-nocookie.com/embed/' . $videoId . '?rel=0&modestbranding=1',
                 'title' => 'YouTube',
+                'video_id' => $videoId,
             ];
         }
 

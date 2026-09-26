@@ -97,7 +97,7 @@ $resolvedMediaType = match ($mediaType) {
                         <source src="<?= htmlspecialchars($mediaVideo, ENT_QUOTES) ?>" type="video/mp4">
                     </video>
                 <?php elseif ($resolvedMediaType === 'youtube' && $mediaYoutubeId !== null): ?>
-                    <iframe class="block-text__media-video" src="https://www.youtube-nocookie.com/embed/<?= htmlspecialchars($mediaYoutubeId, ENT_QUOTES) ?>?rel=0&amp;playsinline=1" title="<?= htmlspecialchars($mediaAlt !== '' ? $mediaAlt : ($title !== '' ? $title : t('Видео')), ENT_QUOTES) ?>" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                    <?= \App\Core\YoutubeFacade::html($mediaYoutubeId, $mediaAlt !== '' ? $mediaAlt : ($title !== '' ? $title : t('Видео')), 'block-text__media-video') ?>
                 <?php else: ?>
                     <span class="block-text__media-placeholder" aria-hidden="true">
                         <span class="block-text__media-emblem"></span>

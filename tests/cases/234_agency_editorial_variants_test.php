@@ -272,7 +272,7 @@ test('Вводный блок Агентства имеет управляему
         'media_type' => 'youtube',
         'media_youtube' => 'https://youtu.be/dQw4w9WgXcQ',
     ], JSON_UNESCAPED_UNICODE)])['html'];
-    assert_contains('youtube-nocookie.com/embed/dQw4w9WgXcQ', $youtube);
+    assert_contains('data-yt-id="dQw4w9WgXcQ"', $youtube, 'ролик — обложкой, плеер по нажатию');
     assert_contains('loading="lazy"', $youtube);
 
     $css = (string) file_get_contents(APP_ROOT . '/public/assets/css/public-editorial-pages.css');

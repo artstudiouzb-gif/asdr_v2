@@ -36,13 +36,19 @@ test('ImageBatchOptimizer dry-run идемпотентен и не меняет 
 
         file_put_contents($dir . '/legacy.webp', 'existing');
         touch($dir . '/legacy.webp', time() + 2);
+        // С поддержкой AVIF свежий набор включает и его (картинка 1×1 —
+        // полноразмерный AVIF без адаптивных вариантов).
+        if (\App\Core\Uploader::avifSupported()) {
+            file_put_contents($dir . '/legacy.avif', 'existing');
+            touch($dir . '/legacy.avif', time() + 2);
+        }
         $second = ImageBatchOptimizer::run($dir, true);
         assert_same(1, $second['skipped'], 'актуальный вариант пропущен');
 
         $forced = ImageBatchOptimizer::run($dir, true, true);
         assert_same(1, $forced['planned'], '--force планирует повторную генерацию');
     } finally {
-        batch_optimizer_cleanup($dir, ['legacy.png', 'legacy.webp']);
+        batch_optimizer_cleanup($dir, ['legacy.png', 'legacy.webp', 'legacy.avif']);
     }
 });
 
@@ -62,9 +68,20 @@ test('ImageBatchOptimizer создаёт full и responsive WebP', function (): 
         assert_same(1, $result['optimized']);
         assert_true(is_file($dir . '/legacy.webp'));
         assert_true(is_file($dir . '/legacy-800.webp'));
+        if (\App\Core\Uploader::avifSupported()) {
+            // AVIF — рядом с WebP: адаптивные размеры и полный для картинки
+            // не шире крупнейшего варианта.
+            assert_true(is_file($dir . '/legacy-800.avif'), 'нет AVIF 800px');
+            assert_true(is_file($dir . '/legacy.avif'), 'нет полноразмерного AVIF');
+            assert_same('image/avif', (string) mime_content_type($dir . '/legacy-800.avif'));
+        }
         assert_same($before, hash_file('sha256', $dir . '/legacy.jpg'), 'оригинал не перезаписан');
     } finally {
-        batch_optimizer_cleanup($dir, ['legacy.jpg', 'legacy.webp', 'legacy-800.webp']);
+        $files = ['legacy.jpg'];
+        foreach (\App\Core\Media::variantSuffixes() as $suffix) {
+            $files[] = 'legacy' . $suffix;
+        }
+        batch_optimizer_cleanup($dir, $files);
     }
 });
 

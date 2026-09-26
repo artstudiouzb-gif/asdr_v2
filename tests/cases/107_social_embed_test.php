@@ -19,9 +19,10 @@ test("SocialEmbed::transform преобразует ссылки Telegram, Insta
     $yt = "<p>https://www.youtube.com/watch?v=dQw4w9WgXcQ</p>";
     $outYt = SocialEmbed::transform($yt);
     assert_contains("social-embed--youtube", $outYt);
-    assert_contains("youtube-nocookie.com/embed/dQw4w9WgXcQ", $outYt);
+    // Плеер (домен без кук) собирает frontend.js по нажатию — т. 367.
+    assert_contains('data-yt-id="dQw4w9WgXcQ"', $outYt);
     $outShort = SocialEmbed::transform('<p>https://www.youtube.com/shorts/dQw4w9WgXcQ</p>');
-    assert_contains('youtube-nocookie.com/embed/dQw4w9WgXcQ', $outShort, 'YouTube Shorts использует тот же безопасный плеер');
+    assert_contains('data-yt-id="dQw4w9WgXcQ"', $outShort, 'YouTube Shorts использует ту же обложку и плеер');
 
     // 4. Facebook — privacy-first карточка без обязательного внешнего SDK.
     $fb = '<p><a href="https://www.facebook.com/example/posts/123">https://www.facebook.com/example/posts/123</a></p>';
