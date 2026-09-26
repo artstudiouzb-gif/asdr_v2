@@ -51,7 +51,7 @@ final class MenuItem
                 $pageValues[] = (string) $row['url_value'];
             }
         }
-        $targets = $pageValues === [] ? [] : Page::publishedMenuTargets($pageValues, $lang);
+        $targets = $pageValues === [] ? [] : PageMenuTarget::findMany($pageValues, $lang);
 
         $rows = [];
         foreach ($items as $row) {
@@ -60,7 +60,7 @@ final class MenuItem
                 if ($page === null) {
                     continue;
                 }
-                $row['url_value'] = Page::menuTargetValue($page);
+                $row['url_value'] = PageMenuTarget::value($page);
             }
             $rows[] = $row;
         }
@@ -576,11 +576,11 @@ final class MenuItem
         $key = null;
         $fallbackTitle = (string) $source['title'];
         if ((string) $source['url_type'] === 'page') {
-            $page = Page::findPublishedMenuTarget((string) $source['url_value'], $targetLang);
+            $page = PageMenuTarget::find((string) $source['url_value'], $targetLang);
             if ($page === null) {
                 return null;
             }
-            $source['url_value'] = Page::menuTargetValue($page);
+            $source['url_value'] = PageMenuTarget::value($page);
             $fallbackTitle = (string) $page['title'];
             $groupId = (int) ($page['translation_group_id'] ?: $page['id']);
             $key = 'page:' . $groupId;
@@ -615,7 +615,7 @@ final class MenuItem
 
         return match ((string) $item['url_type']) {
             'page' => (static function () use ($item, $lang): ?string {
-                $page = Page::findPublishedMenuTarget((string) $item['url_value'], $lang);
+                $page = PageMenuTarget::find((string) $item['url_value'], $lang);
                 if ($page === null) {
                     return null;
                 }
@@ -785,14 +785,14 @@ final class MenuItem
     /**
      * URL только самостоятельной опубликованной страницы нужного языка.
      *
-     * Адрес собирается `Page::menuTargetValue()`, а не голым слагом: у проекта
+     * Адрес собирается `PageMenuTarget::value()`, а не голым слагом: у проекта
      * публичный адрес — `/projects/<slug>`, и пункт меню, собранный из одного
      * слага, вёл на несуществующий `/<slug>`, то есть на 404. Знание о
      * префиксе живёт в одном месте — там же, где пункт разбирается обратно.
      */
     private static function pageUrl(string $slug, string $lang): string
     {
-        $page = Page::findPublishedMenuTarget($slug, $lang);
+        $page = PageMenuTarget::find($slug, $lang);
         if ($page === null) {
             return '#';
         }
@@ -800,6 +800,6 @@ final class MenuItem
             return Locale::url('/', $lang);
         }
 
-        return Locale::url('/' . Page::menuTargetValue($page), $lang);
+        return Locale::url('/' . PageMenuTarget::value($page), $lang);
     }
 }

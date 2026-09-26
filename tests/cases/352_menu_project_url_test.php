@@ -5,20 +5,21 @@ declare(strict_types=1);
 use App\Core\Database;
 use App\Models\MenuItem;
 use App\Models\Page;
+use App\Models\PageMenuTarget;
 use App\Models\Project;
 
 /*
  * Пункт меню, ведущий на проект.
  *
  * Публичный адрес проекта — `/projects/<slug>`, у страницы — `/<slug>`.
- * Пункт меню хранит адрес целиком (`Page::menuTargetValue`), и форма админки
+ * Пункт меню хранит адрес целиком (`PageMenuTarget::value()`), и форма админки
  * так его и записывала, а вот ссылку в шапке собирал `MenuItem::pageUrl` —
  * из одного слага, минуя этот метод. Получался `/<slug>`, то есть 404 на
  * каждом пункте-проекте. Второе место с той же ошибкой — синхронизация меню
  * между языками: она записывала цели голый слаг, и у неосновного языка пункт
  * не разрешался вовсе и молча пропадал из шапки.
  *
- * Отсюда правило: адрес цели собирает `Page::menuTargetValue()`. Второй
+ * Отсюда правило: адрес цели собирает `PageMenuTarget::value()`. Второй
  * склейки `'/' . $slug` для пунктов меню быть не должно.
  */
 
@@ -50,7 +51,7 @@ test('Ссылка пункта меню на проект ведёт на /proj
             'is_home' => 0,
             'lang' => 'ru',
         ]);
-        Page::forgetMenuTargets();
+        PageMenuTarget::forget();
 
         $menuIds[] = MenuItem::create([
             'title' => 'Проект',
@@ -102,26 +103,26 @@ test('Ссылка пункта меню на проект ведёт на /proj
                 $pdo->prepare('DELETE FROM pages WHERE id = :id')->execute([':id' => $id]);
             }
         }
-        Page::forgetMenuTargets();
+        PageMenuTarget::forget();
     }
 });
 
 test('Адрес цели пункта меню собирается одним методом', function (): void {
     // Вторая склейка «слэш плюс слаг» — это и есть та копия, которая молча
-    // разошлась: знание о префиксе проекта живёт в menuTargetValue().
+    // разошлась: знание о префиксе проекта живёт в PageMenuTarget::value()().
     $menu = (string) file_get_contents(APP_ROOT . '/app/Models/MenuItem.php');
 
     assert_not_contains(
         "'/' . (string) \$page['slug']",
         $menu,
-        'адрес цели собирает Page::menuTargetValue(), а не голый слаг'
+        'адрес цели собирает PageMenuTarget::value(), а не голый слаг'
     );
     assert_not_contains(
         "\$source['url_value'] = (string) \$page['slug'];",
         $menu,
         'синхронизация языков тоже сохраняет полный адрес цели'
     );
-    assert_contains('Page::menuTargetValue($page)', $menu);
+    assert_contains('PageMenuTarget::value($page)', $menu);
 });
 
 test('Миграция чинит пункты меню, потерявшие префикс проекта', function (): void {
