@@ -66,6 +66,9 @@ final class PasswordPolicy
         return $errors;
     }
 
+    /**
+     * @param array<int, string> $personal
+     */
     public static function isValid(string $password, array $personal = []): bool
     {
         return self::validate($password, $personal) === [];

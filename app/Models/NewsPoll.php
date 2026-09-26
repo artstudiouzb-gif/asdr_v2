@@ -33,6 +33,7 @@ final class NewsPoll
 
     /**
      * Создаёт или обновляет опрос для новости.
+     * @param array<int, string> $options
      */
     public static function saveForNews(int $newsId, ?string $question, array $options): void
     {
@@ -115,6 +116,7 @@ final class NewsPoll
     /**
      * Подсчитывает результаты опроса в процентах и голосах.
      *
+     * @param array<int, string>|null $options
      * @return array<string, mixed>
      */
     public static function getResults(int $pollId, ?array $options = null): array

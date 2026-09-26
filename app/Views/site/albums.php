@@ -2,7 +2,7 @@
 
 use App\Core\Locale;
 
-/** @var array $albums */
+/** @var array<int, array<string, mixed>> $albums */
 
 $metaTitle = t('Фотоальбомы');
 $metaDescription = t('Фотогалереи и альбомы мероприятий');

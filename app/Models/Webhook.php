@@ -74,7 +74,10 @@ final class Webhook
         Database::pdo()->prepare('DELETE FROM webhooks WHERE id = :id')->execute([':id' => $id]);
     }
 
-    /** @param array<string,mixed> $row @return array<string,mixed> */
+    /**
+     * @param array<string,mixed> $row
+     * @return array<string,mixed>
+     */
     private static function decryptSecrets(array $row): array
     {
         $row['secret'] = SecretBox::decrypt($row['secret'] !== null ? (string) $row['secret'] : null, 'webhooks.secret');

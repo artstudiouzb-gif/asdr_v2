@@ -506,6 +506,7 @@ final class TranslationGroupHelper
 
     /**
      * Рендерит боковой мета-бокс перевода записи.
+     * @param array<string, mixed> $currentRecord
      */
     public static function renderSidebarMetaBox(string $module, array $currentRecord): string
     {

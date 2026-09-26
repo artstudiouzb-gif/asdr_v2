@@ -287,7 +287,10 @@ final class ContentRevision
         return $entity;
     }
 
-    /** @param array<string, mixed> $data */
+    /**
+     * @param array<int, string> $columns
+     * @param array<string, mixed> $data
+     */
     private static function updateRow(string $table, array $columns, int $id, array $data): void
     {
         $sets = [];
@@ -301,7 +304,10 @@ final class ContentRevision
         Database::pdo()->prepare('UPDATE ' . $table . ' SET ' . implode(', ', $sets) . ' WHERE id = :id')->execute($params);
     }
 
-    /** @param array<string, mixed> $data */
+    /**
+     * @param array<int, string> $columns
+     * @param array<string, mixed> $data
+     */
     private static function insertChild(string $table, string $fk, array $columns, int $entityId, array $data): void
     {
         $allColumns = array_merge([$fk], $columns);

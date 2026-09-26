@@ -313,7 +313,11 @@ final class DesignSettings
         ],
     ];
 
-    /** Текущие значения всех опций (из settings, с дефолтами). @return array<string,string> */
+    /**
+     * Текущие значения всех опций (из settings, с дефолтами).
+     *
+     * @return array<string,string>
+     */
     public static function current(): array
     {
         $values = [];
@@ -335,7 +339,11 @@ final class DesignSettings
         return isset(self::OPTIONS[$key]['choices'][$value]) ? $value : self::OPTIONS[$key]['default'];
     }
 
-    /** Сохраняет набор значений (только известные опции). @param array<string,mixed> $input */
+    /**
+     * Сохраняет набор значений (только известные опции).
+     *
+     * @param array<string,mixed> $input
+     */
     /**
      * Своя ширина контейнера (design_container_custom): '' если не задана/
      * невалидна. Принимает 640–2400 (px), px/rem/vw/% с единицей, или число.
@@ -649,7 +657,11 @@ final class DesignSettings
         return $sizes;
     }
 
-    /** Только ручные переопределения — для формы в админке. @return array<string,string> */
+    /**
+     * Только ручные переопределения — для формы в админке.
+     *
+     * @return array<string,string>
+     */
     public static function typographyOverrides(): array
     {
         $sizes = [];
@@ -906,8 +918,8 @@ final class DesignSettings
     }
 
     /**
-     * @return list<string> предупреждения для редактора (пустой список — всё принято)
      * @param array<string, mixed> $input
+     * @return list<string> предупреждения для редактора (пустой список — всё принято)
      */
     public static function save(array $input): array
     {
@@ -1416,6 +1428,9 @@ final class DesignSettings
         return $custom !== '' ? $custom : $container;
     }
 
+    /**
+     * @param array<string, string> $v
+     */
     public static function cssVariables(array $v): string
     {
         $container = self::containerWidth($v);

@@ -171,7 +171,10 @@ final class RepoAuth
         return self::sendTelegramCode($user);
     }
 
-    /** Каналы второго фактора текущего ожидающего входа (для вьюхи). */
+    /**
+     * Каналы второго фактора текущего ожидающего входа (для вьюхи).
+     * @return array{totp: bool, telegram: bool}
+     */
     public static function pendingChannels(): array
     {
         return [

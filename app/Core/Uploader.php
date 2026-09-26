@@ -62,7 +62,8 @@ final class Uploader
     private const LENIENT_MIME = ['svg', 'woff2', 'woff', 'mp3', 'ogg', 'wav', 'aac', 'm4a', 'css', 'js'];
 
     /**
-     * @param array $fileInput один элемент $_FILES, например $_FILES['file']
+     * @param array<string, mixed> $fileInput один элемент $_FILES, например $_FILES['file']
+     * @param array<int, string>|null $allowedExtensions
      * @return array<string, mixed> файл-запись из таблицы files (с id)
      */
     public static function store(
@@ -104,6 +105,7 @@ final class Uploader
      * и запись в БД.
      *
      * @param bool $isUploadedFile true если источник — временный файл PHP-загрузки
+     * @param array<int, string>|null $allowedExtensions
      * @return array<string, mixed> файл-запись из таблицы files
      */
     public static function storeFromPath(

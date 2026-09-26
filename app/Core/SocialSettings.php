@@ -351,7 +351,10 @@ final class SocialSettings
         return trim((string) (\App\Models\NewsCategory::namesForIds([$categoryId], $lang)[$categoryId] ?? ''));
     }
 
-    /** @param array<string, mixed> $news */
+    /**
+     * @param array<string, mixed> $news
+     * @return list<array<string, string>>
+     */
     private static function languageBlocks(array $news, string $base): array
     {
         $default = Language::defaultCode();

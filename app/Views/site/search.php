@@ -3,7 +3,7 @@
 use App\Core\Locale;
 
 /** @var string $query */
-/** @var array $results */
+/** @var array<int, array{type: string, title: string, url: string, excerpt: string}> $results */
 
 $metaTitle = $query !== '' ? (t('Поиск:') . ' ' . $query) : t('Поиск по сайту');
 $metaDescription = '';

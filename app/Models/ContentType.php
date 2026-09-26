@@ -21,7 +21,11 @@ final class ContentType
         return Database::pdo()->query('SELECT * FROM content_types ORDER BY name ASC')->fetchAll();
     }
 
-    /** Публичные типы (показываются на сайте). @return array<int, array<string, mixed>> */
+    /**
+     * Публичные типы (показываются на сайте).
+     *
+     * @return array<int, array<string, mixed>>
+     */
     public static function allPublic(): array
     {
         return Database::pdo()->query('SELECT * FROM content_types WHERE is_public = 1 ORDER BY name ASC')->fetchAll();
@@ -207,7 +211,7 @@ final class ContentType
     /**
      * Полностью заменяет набор полей типа (из конструктора полей, задача 132).
      *
-     * @param array<int, array{name:string, label:string, field_type:string, required:bool, options:array}> $fields
+     * @param array<int, array{name:string, label:string, field_type:string, required:bool, options:array<int, string>}> $fields
      */
     public static function replaceFields(int $typeId, array $fields): void
     {

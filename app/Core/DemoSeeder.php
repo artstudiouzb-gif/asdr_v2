@@ -416,6 +416,7 @@ final class DemoSeeder
      * загрузок и регистрирует их в медиабиблиотеке (таблица files). Нужно,
      * чтобы демо-главная и карточки показывали реальные картинки после чистой
      * установки (сами загрузки в репозиторий не входят).
+     * @param array<string, int> $c
      */
     private static function seedAssets(PDO $pdo, array &$c): void
     {
@@ -457,6 +458,7 @@ final class DemoSeeder
      * медиа. Блоки берутся из фикстуры database/demo_assets/home_blocks.json.
      * Идемпотентно: страница создаётся при отсутствии, блоки — только если
      * главная ещё пуста.
+     * @param array<string, int> $c
      */
     private static function seedHome(PDO $pdo, array &$c): void
     {
@@ -697,6 +699,9 @@ final class DemoSeeder
         }
     }
 
+    /**
+     * @param array<string, int> $c
+     */
     private static function seedNews(PDO $pdo, array &$c): void
     {
         self::seedFlagshipNews($pdo, $c);
@@ -1009,6 +1014,9 @@ final class DemoSeeder
         return $map;
     }
 
+    /**
+     * @param array<int, array{0: string, 1: string, 2: string}> $images
+     */
     private static function seedNewsGallery(PDO $pdo, int $newsId, array $images, string $altBase): void
     {
         $withCaptions = self::columnExists($pdo, 'news_images', 'caption')
@@ -1037,6 +1045,7 @@ final class DemoSeeder
      * страницы): бейдж, ключевые тезисы, карточка мероприятия, цитата,
      * документы и фотогалерея. Показывает редактору все возможности
      * медиа-движка новостей сразу после установки.
+     * @param array<string, int> $c
      */
     private static function seedFlagshipNews(PDO $pdo, array &$c): void
     {
@@ -1215,6 +1224,9 @@ final class DemoSeeder
         }
     }
 
+    /**
+     * @param array<string, int> $c
+     */
     private static function seedEntries(PDO $pdo, array &$c): void
     {
         $ins = $pdo->prepare(
@@ -1309,6 +1321,9 @@ final class DemoSeeder
         }
     }
 
+    /**
+     * @param array<string, int> $c
+     */
     private static function seedProjects(PDO $pdo, array &$c): void
     {
         if (!self::tableExists($pdo, 'pages')) {
@@ -1540,6 +1555,9 @@ final class DemoSeeder
         ]);
     }
 
+    /**
+     * @param array<string, int> $c
+     */
     private static function seedMedia(PDO $pdo, array &$c): void
     {
         if (self::tableExists($pdo, 'photo_albums')) {
@@ -1645,6 +1663,9 @@ final class DemoSeeder
         }
     }
 
+    /**
+     * @param array<string, int> $c
+     */
     private static function seedForms(PDO $pdo, array &$c): void
     {
         if (!self::tableExists($pdo, 'forms')) {
@@ -1708,6 +1729,9 @@ final class DemoSeeder
         }
     }
 
+    /**
+     * @param array<string, int> $c
+     */
     private static function seedTeam(PDO $pdo, array &$c): void
     {
         if (!self::tableExists($pdo, 'team_members')) {
@@ -1788,6 +1812,9 @@ final class DemoSeeder
         }
     }
 
+    /**
+     * @param array<string, int> $c
+     */
     private static function seedPages(PDO $pdo, array &$c): void
     {
         // Страницы с переводами для 'ru' и 'uz'
@@ -2195,6 +2222,9 @@ final class DemoSeeder
         }
     }
 
+    /**
+     * @param array<string, int> $c
+     */
     private static function seedMenu(PDO $pdo, array &$c): void
     {
         if (!self::tableExists($pdo, 'menu_items')) {
@@ -2358,6 +2388,7 @@ final class DemoSeeder
      * задумана: карусель, кадр-замена у видео и переводы слайдов. Обе языковые
      * версии главной ссылаются на ОДНУ обложку: текст слайда переводится
      * (hero_slide_translations), а медиа и раскладка у него общие.
+     * @param array<string, int> $c
      */
     private static function seedHeroes(PDO $pdo, array &$c): void
     {

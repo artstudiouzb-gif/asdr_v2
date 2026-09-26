@@ -72,6 +72,7 @@ final class AdminListQuery
      * Корректирует страницу после получения общего количества записей.
      *
      * @param array<string, mixed> $filters
+     * @return array{0: array<string, mixed>, 1: int}
      */
     public static function fitPage(array $filters, int $total): array
     {

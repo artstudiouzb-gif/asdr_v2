@@ -70,7 +70,10 @@ final class Page
         return Database::rows($stmt);
     }
 
-    /** @param array<string, mixed> $filters */
+    /**
+     * @param array<string, mixed> $filters
+     * @return array<int, array<string, mixed>>
+     */
     public static function adminList(array $filters): array
     {
         [$from, $params] = self::adminListFrom($filters);
@@ -128,8 +131,8 @@ final class Page
     }
 
     /**
-     * @return array{0:string,1:array<string,string>}
      * @param array<string, mixed> $filters
+     * @return array{0:string,1:array<string,string>}
      */
     private static function adminListFrom(array $filters): array
     {
@@ -450,7 +453,10 @@ final class Page
         return $found;
     }
 
-    /** Значение пункта меню для найденной цели: у проекта адрес с префиксом. */
+    /**
+     * Значение пункта меню для найденной цели: у проекта адрес с префиксом.
+     * @param array<string, mixed> $target
+     */
     public static function menuTargetValue(array $target): string
     {
         $slug = (string) ($target['slug'] ?? '');
@@ -884,8 +890,8 @@ final class Page
      * Родительские страницы от корневой к непосредственному родителю.
      * Заголовки локализуются, а URL остаются плоскими.
      *
-     * @return list<array<string,mixed>>
      * @param array<string, mixed> $page
+     * @return list<array<string,mixed>>
      */
     public static function ancestorTrail(array $page, string $lang): array
     {
@@ -1043,6 +1049,9 @@ final class Page
         return $map;
     }
 
+    /**
+     * @return list<string>
+     */
     public static function availableLangs(int $id): array
     {
         $langs = [Language::defaultCode()];

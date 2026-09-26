@@ -18,7 +18,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var array $filters */
 /** @var array $summary */
 /** @var array $queue */
-/** @var array $languages */
+/** @var array<int, array<string, mixed>> $languages */
 $status = (string) ($filters['status'] ?? '');
 $lang = (string) ($filters['lang'] ?? '');
 $query = (string) ($filters['q'] ?? '');

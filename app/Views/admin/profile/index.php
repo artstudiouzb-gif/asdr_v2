@@ -5,7 +5,7 @@ use App\Models\SessionRegistry;
 
 /** @var array $sessions */
 /** @var string $currentHash */
-/** @var array|null $profileUser */
+/** @var array<string, mixed>|null $profileUser */
 $sessions = $sessions ?? [];
 $currentHash = $currentHash ?? '';
 $profileUser = $profileUser ?? null;

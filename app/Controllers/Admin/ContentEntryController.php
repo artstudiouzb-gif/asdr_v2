@@ -169,6 +169,8 @@ final class ContentEntryController
     }
 
     /**
+     * @param array<string, mixed> $type
+     * @param array<string, mixed>|null $entry
      * @return array{0:bool, 1:?string, 2:int}
      */
     private function save(array $type, ?array $entry): array

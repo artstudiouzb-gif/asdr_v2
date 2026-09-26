@@ -11,7 +11,7 @@ use App\Models\ContentType;
 /** @var string $prevMonth */
 /** @var string $nextMonth */
 /** @var string $today */
-/** @var array $weekdays */
+/** @var array<int, string> $weekdays */
 
 $metaTitle = t('Календарь мероприятий');
 $metaDescription = (string) ($type['description'] ?? '');

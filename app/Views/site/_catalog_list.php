@@ -10,9 +10,9 @@ use App\Models\ContentType;
  * фрагмент для AJAX-фильтрации (ContentController::index), поэтому все
  * производные значения считаются здесь.
  *
- * @var array $type
- * @var array $fields
- * @var array $entries
+ * @var array<string, mixed> $type
+ * @var array<int, array<string, mixed>> $fields
+ * @var array<int, array<string, mixed>> $entries
  * @var string $q
  * @var string $sort
  * @var int $page

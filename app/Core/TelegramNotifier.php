@@ -31,10 +31,10 @@ final class TelegramNotifier
         'INFO' => 3600,
     ];
 
-    /** @var callable(string,array):void|null Инжектируемый транспорт (для тестов). */
+    /** @var callable(string,array<string, string>):void|null Инжектируемый транспорт (для тестов). */
     private static $transport = null;
 
-    /** @param callable(string,array):void|null $transport */
+    /** @param callable(string,array<string, string>):void|null $transport */
     public static function setTransport(?callable $transport): void
     {
         self::$transport = $transport;

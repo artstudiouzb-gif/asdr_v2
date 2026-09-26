@@ -34,7 +34,10 @@ final class LocalGoogleFonts
         'noto-serif' => 'noto-serif',
     ];
 
-    /** @param list<string> $slugs @return array{ok:bool,error:string} */
+    /**
+     * @param list<string> $slugs
+     * @return array{ok:bool,error:string}
+     */
     public static function installSelected(array $slugs): array
     {
         // Каталогов два (текстовые семейства и рукописные), а установка одна:
@@ -273,6 +276,9 @@ final class LocalGoogleFonts
         return (int) $weight >= $min && (int) $weight <= $max;
     }
 
+    /**
+     * @param list<array{subset:string,family:string,style:string,weight:string,url:string,unicode_range:string}> $faces
+     */
     private static function coverageError(string $slug, array $faces): ?string
     {
         $catalog = DesignSettings::fontCatalog();

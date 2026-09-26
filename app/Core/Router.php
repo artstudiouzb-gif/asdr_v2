@@ -9,9 +9,10 @@ use App\Models\Language;
 
 final class Router
 {
-    /** @var array<int, array{method: string, pattern: string, handler: callable|array}> */
+    /** @var array<int, array{method: string, pattern: string, handler: callable|array{class-string, string}}> */
     private array $routes = [];
 
+    /** @param callable|array{class-string, string} $handler */
     public function add(string $method, string $pattern, callable|array $handler): void
     {
         $this->routes[] = [
@@ -21,11 +22,13 @@ final class Router
         ];
     }
 
+    /** @param callable|array{class-string, string} $handler */
     public function get(string $pattern, callable|array $handler): void
     {
         $this->add('GET', $pattern, $handler);
     }
 
+    /** @param callable|array{class-string, string} $handler */
     public function post(string $pattern, callable|array $handler): void
     {
         $this->add('POST', $pattern, $handler);
@@ -244,6 +247,10 @@ final class Router
         return '#^' . $regex . '$#u';
     }
 
+    /**
+     * @param callable|array{class-string, string} $handler
+     * @param array<string, string> $params
+     */
     private function invoke(callable|array $handler, array $params): void
     {
         if (is_array($handler)) {

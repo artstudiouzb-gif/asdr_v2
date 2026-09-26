@@ -10,7 +10,7 @@ use App\Models\News;
  * для AJAX-фильтрации (NewsController::index). Поэтому всё, что нужно для
  * вывода, считается здесь, а не в родительском шаблоне.
  *
- * @var array $items
+ * @var array<int, array<string, mixed>> $items
  * @var int $page
  * @var int $pages
  * @var string $category slug выбранной рубрики ('' — все)

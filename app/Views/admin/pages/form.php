@@ -11,7 +11,7 @@ require __DIR__ . '/../layout/header.php';
 /** @var array|null $page */
 /** @var array $translations */
 /** @var string|null $error */
-/** @var array $blocks */
+/** @var array<int, array<string, mixed>> $blocks */
 $blocks = $blocks ?? [];
 $blockLang = $blockLang ?? Language::defaultCode();
 

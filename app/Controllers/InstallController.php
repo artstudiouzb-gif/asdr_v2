@@ -340,6 +340,9 @@ final class InstallController
         }
     }
 
+    /**
+     * @param array<string, mixed> $db
+     */
     private function writeConfig(array $db): void
     {
         $appUrl = $this->guessAppUrl();

@@ -6,6 +6,7 @@ namespace App\Core;
 
 final class Config
 {
+    /** @var array<string, mixed> */
     private static array $data = [];
 
     /** @param array<string, mixed> $data */

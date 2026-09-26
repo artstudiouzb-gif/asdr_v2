@@ -45,7 +45,10 @@ final class Video
         return self::applyTranslation($row, VideoTranslation::find((int) $row['id'], $lang));
     }
 
-    /** @param array<int, array<string, mixed>> $rows @return array<int, array<string, mixed>> */
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array<string, mixed>>
+     */
     private static function localizeRows(array $rows, string $lang): array
     {
         $translations = VideoTranslation::forVideoIds(
@@ -61,6 +64,7 @@ final class Video
     /** @param array<string, mixed> $translation */
     /**
      * @param array<string, mixed> $row
+     * @param array<string, mixed>|null $translation
      * @return array<string, mixed>
      */
     private static function applyTranslation(array $row, ?array $translation): array

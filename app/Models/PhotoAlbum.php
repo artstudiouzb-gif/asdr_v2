@@ -76,7 +76,10 @@ final class PhotoAlbum
         return self::applyTranslation($row, PhotoAlbumTranslation::find((int) $row['id'], $lang));
     }
 
-    /** @param array<int, array<string, mixed>> $rows @return array<int, array<string, mixed>> */
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array<string, mixed>>
+     */
     private static function localizeRows(array $rows, string $lang): array
     {
         $translations = PhotoAlbumTranslation::forAlbumIds(
@@ -92,6 +95,7 @@ final class PhotoAlbum
     /** @param array<string, mixed> $translation */
     /**
      * @param array<string, mixed> $row
+     * @param array<string, mixed>|null $translation
      * @return array<string, mixed>
      */
     private static function applyTranslation(array $row, ?array $translation): array
@@ -287,7 +291,10 @@ final class PhotoAlbum
         self::bustPageCache();
     }
 
-    /** Обложка альбома: заданная вручную или первое фото. */
+    /**
+     * Обложка альбома: заданная вручную или первое фото.
+     * @param array<string, mixed> $album
+     */
     public static function coverFor(array $album): string
     {
         $cover = trim((string) ($album['cover_url'] ?? ''));

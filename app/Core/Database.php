@@ -20,6 +20,7 @@ final class Database
     private const PING_IDLE_SECONDS = 2.0;
 
     private static ?PDO $connection = null;
+    /** @var array<string, mixed>|null */
     private static ?array $lastConfig = null;
     private static float $lastUsedAt = 0.0;
 

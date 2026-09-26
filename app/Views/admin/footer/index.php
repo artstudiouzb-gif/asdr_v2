@@ -7,7 +7,7 @@ $pageTitle = 'Подвал сайта';
 $activeNav = 'footer';
 require __DIR__ . '/../layout/header.php';
 
-/** @var array $config */
+/** @var array<string, mixed> $config */
 $widgets = FooterConfig::WIDGETS;
 
 /** Рендер select виджета с выбранным значением. */

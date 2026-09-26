@@ -4,7 +4,7 @@ use App\Core\Csrf;
 
 /** @var string|null $error */
 /** @var array $languages */
-/** @var array $timezones */
+/** @var array<int, string> $timezones */
 $step = '3';
 require __DIR__ . '/_header.php';
 ?>
