@@ -117,6 +117,43 @@ final class FrontendAssets
         return $entry['path'];
     }
 
+    /**
+     * Сборка общих слоёв панели (`css` или `js`) или null — тогда страница
+     * подключает исходники по-старому: сборка выключена, записи нет, файл не
+     * доехал или любой из слоёв правили без пересборки (размер разошёлся с
+     * манифестом). Порядок каскада и выполнения внутри сборки — тот же, что
+     * у отдельных файлов (scripts/build-assets.mjs, adminBundles).
+     */
+    public static function adminBundle(string $kind): ?string
+    {
+        try {
+            if (!self::enabled()) {
+                return null;
+            }
+        } catch (\Throwable) {
+            return null;
+        }
+
+        $manifest = self::manifest();
+        $bundles = is_array($manifest['adminBundles'] ?? null) ? $manifest['adminBundles'] : [];
+        $entry = is_array($bundles[$kind] ?? null) ? $bundles[$kind] : null;
+        if ($entry === null || !is_string($entry['path'] ?? null) || !is_array($entry['sources'] ?? null)
+            || !is_file(APP_ROOT . '/public' . $entry['path'])) {
+            return null;
+        }
+        foreach ($entry['sources'] as $source) {
+            if (!is_array($source) || !is_string($source['path'] ?? null) || !is_numeric($source['sourceRaw'] ?? null)) {
+                return null;
+            }
+            $file = APP_ROOT . '/public' . $source['path'];
+            if (!is_file($file) || filesize($file) !== (int) $source['sourceRaw']) {
+                return null;
+            }
+        }
+
+        return $entry['path'];
+    }
+
     public static function enabled(): bool
     {
         return Setting::get('perf_asset_bundle', '1') === '1' && self::bundleReady();

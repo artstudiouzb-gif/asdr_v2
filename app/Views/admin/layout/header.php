@@ -125,10 +125,17 @@ $navBrandSubtitle = $navBrandHost !== '' ? $navBrandHost : t('Панель уп�
 <title><?= htmlspecialchars($pageTitle, ENT_QUOTES) ?> — <?= htmlspecialchars(\App\Core\AdminBrand::name(), ENT_QUOTES) ?></title>
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/vendor/coloris/coloris.min.css'), ENT_QUOTES) ?>">
 <?= \App\Core\AdminUi::fontLinks() ?>
+<?php // Все общие слои панели — одним файлом, если сборка свежая; атрибуты
+      // слоёв гасят их повторную подгрузку из admin-workflow-fixes.js. ?>
+<?php $adminCssBundle = \App\Core\FrontendAssets::adminBundle('css'); ?>
+<?php if ($adminCssBundle !== null): ?>
+<link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url($adminCssBundle), ENT_QUOTES) ?>" data-admin-notifications-css="1" data-admin-slider-settings-layout>
+<?php else: ?>
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/css/admin.css'), ENT_QUOTES) ?>">
 <link rel="stylesheet" href="<?= htmlspecialchars(\App\Core\Asset::url('/assets/css/admin-shell-v2.css'), ENT_QUOTES) ?>">
+<?php endif; ?>
 <?= \App\Core\Icon::browserConfigHtml() ?>
-<?= \App\Core\AdminBrand::styleTag() ?>
+<?= \App\Core\AdminBrand::styleTag($adminCssBundle === null) ?>
 <?= \App\Core\AdminBrand::faviconHtml() ?>
 <script nonce="<?= \App\Core\SecurityHeaders::nonce() ?>">
 try {
