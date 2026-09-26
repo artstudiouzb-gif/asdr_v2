@@ -29,6 +29,19 @@ $color = static function (string $key, string $variable) use ($data): string {
 };
 $scope = '#block-' . (int) $blockId;
 $templateCss = '';
+// Модификатор на корне блока: правила темы применяют переменную цвета только
+// там, где она задана. Раньше они искали её в атрибуте style, а переменные
+// давно приходят scoped CSS — выбранные цвета просто не применялись.
+$customClasses = static function (string $base) use ($data): string {
+    $classes = '';
+    foreach (['bg_color' => 'bg', 'text_color' => 'text', 'button_color' => 'btn'] as $key => $suffix) {
+        if (preg_match('/^#[0-9a-f]{6}$/i', (string) ($data[$key] ?? ''))) {
+            $classes .= ' ' . $base . '--custom-' . $suffix;
+        }
+    }
+
+    return $classes;
+};
 
 if ($variant === 'band') {
     $vars = $color('bg_color', '--ctaband-bg') . $color('text_color', '--ctaband-text') . $color('button_color', '--ctaband-btn');
@@ -57,7 +70,7 @@ if ($variant === 'band') {
 }
 ?>
 <?php if ($variant === 'band'): ?>
-    <div class="block-ctaband">
+    <div class="block-ctaband<?= $customClasses('block-ctaband') ?>">
         <div class="ctaband__lead">
             <span class="ctaband__icon" aria-hidden="true"><?= Icon::render($icon !== '' ? $icon : 'mail', 40, '', 1.5) ?></span>
             <span class="ctaband__body">
@@ -70,7 +83,7 @@ if ($variant === 'band') {
         <?php endif; ?>
     </div>
 <?php elseif (str_starts_with($variant, 'media-')): ?>
-    <div class="block-banner<?= $variant === 'media-light' ? ' block-banner--light' : ($image !== '' ? ' block-banner--image' : '') ?> <?= $mediaClasses ?>">
+    <div class="block-banner<?= $variant === 'media-light' ? ' block-banner--light' : ($image !== '' ? ' block-banner--image' : '') ?><?= $customClasses('block-banner') ?> <?= $mediaClasses ?>">
         <div class="block-banner__inner">
             <?php if ($title !== ''): ?><h2 class="block-banner__title"><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
             <?php if ($text !== ''): ?><p class="block-banner__text"><?= htmlspecialchars($text, ENT_QUOTES) ?></p><?php endif; ?>
@@ -81,7 +94,7 @@ if ($variant === 'band') {
         <?php if ($variant === 'media-light' && $image !== ''): ?><span class="block-banner__photo <?= $mediaClasses ?>"></span><?php endif; ?>
     </div>
 <?php else: ?>
-    <div class="block-cta">
+    <div class="block-cta<?= $customClasses('block-cta') ?>">
         <?php if ($title !== ''): ?><h2><?= \App\Core\TitleMarkup::html($title) ?></h2><?php endif; ?>
         <?php if ($text !== ''): ?><p><?= htmlspecialchars($text, ENT_QUOTES) ?></p><?php endif; ?>
         <?php if ($buttonText !== '' && $buttonUrl !== ''): ?>

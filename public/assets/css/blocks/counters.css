@@ -68,7 +68,7 @@
 .counter__value, .counter__suffix { color: var(--counters-text, var(--gov-title)) !important; font-family: var(--font-family, 'Noto Sans', sans-serif); font-weight: 700; font-size: var(--step-8); line-height: 1; }
 /* Плотный межстрочный: подпись из 2–3 слов не должна «рассыпаться». */
 .counter__label { color: var(--counters-text, var(--gov-muted)); font-size: var(--step--2); line-height: 1.35; margin: 4px 0 0; transition: color 0.3s ease; }
-.block-counters[style*="--counters-text"] .counter__label { opacity: .78; }
+.block-counters.block-counters--custom-text .counter__label { opacity: .78; }
 @media (max-width: 720px) { .counter { border-right: 0; border-bottom: 1px solid var(--gov-border); padding: 14px 0; } .counter:last-child { border-bottom: 0; }
 }
 
