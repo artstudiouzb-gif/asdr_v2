@@ -121,7 +121,7 @@
     color: var(--rich-title, #1e293b);
     font-size: var(--font-size-lead, 1.08em);
     line-height: 1.68;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -221,7 +221,7 @@
 
 :where(.rich-content) figure:hover img {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+    box-shadow: var(--shadow-3);
 }
 
 :where(.rich-content) figcaption,
