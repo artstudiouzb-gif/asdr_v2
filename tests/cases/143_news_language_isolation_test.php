@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Core\Database;
 use App\Models\News;
+use App\Models\NewsFeed;
 use App\Models\NewsCategory;
 use App\Models\NewsTranslation;
 
@@ -113,34 +114,34 @@ test('Новости: публичные списки, рубрики и свя�
         $draftUzId = (int) $pdo->lastInsertId();
         $ids[] = $draftUzId;
 
-        $ruRows = News::published(10, 0, 'ru', $catIds['iso-ru']);
+        $ruRows = NewsFeed::published(10, 0, 'ru', $catIds['iso-ru']);
         assert_same([$ruId], array_map(static fn (array $row): int => (int) $row['id'], $ruRows));
-        assert_same(1, News::publishedCount($catIds['iso-ru'], 'ru'));
+        assert_same(1, NewsFeed::publishedCount($catIds['iso-ru'], 'ru'));
         // Рубрика общая для языков, но RU-запись на UZ не показывается:
         // у неё есть самостоятельная узбекская версия.
-        assert_same(0, News::publishedCount($catIds['iso-ru'], 'uz'));
+        assert_same(0, NewsFeed::publishedCount($catIds['iso-ru'], 'uz'));
 
-        $uzRows = News::published(10, 0, 'uz', $catIds['iso-uz']);
+        $uzRows = NewsFeed::published(10, 0, 'uz', $catIds['iso-uz']);
         assert_same([$uzId], array_map(static fn (array $row): int => (int) $row['id'], $uzRows));
-        assert_same(1, News::publishedCount($catIds['iso-uz'], 'uz'));
-        assert_same(0, News::publishedCount($catIds['iso-uz'], 'ru'));
+        assert_same(1, NewsFeed::publishedCount($catIds['iso-uz'], 'uz'));
+        assert_same(0, NewsFeed::publishedCount($catIds['iso-uz'], 'ru'));
 
-        $legacyRows = News::published(10, 0, 'uz', $catIds['legacy']);
+        $legacyRows = NewsFeed::published(10, 0, 'uz', $catIds['legacy']);
         assert_same(1, count($legacyRows), 'legacy-перевод остаётся доступен до создания независимой записи');
         assert_same($legacyId, (int) $legacyRows[0]['id']);
         assert_same('UZ legacy ' . $suffix, (string) $legacyRows[0]['title']);
 
-        assert_same([], News::published(10, 0, 'uz', $catIds['shadow']), 'legacy скрыт независимым черновиком');
-        assert_same(0, News::publishedCount($catIds['shadow'], 'uz'));
-        assert_same(0, News::publishedCount($catIds['draft'], 'uz'));
+        assert_same([], NewsFeed::published(10, 0, 'uz', $catIds['shadow']), 'legacy скрыт независимым черновиком');
+        assert_same(0, NewsFeed::publishedCount($catIds['shadow'], 'uz'));
+        assert_same(0, NewsFeed::publishedCount($catIds['draft'], 'uz'));
 
         $ruCats = array_map(
             static fn (array $row): int => (int) $row['id'],
-            News::publishedCategories('ru')
+            NewsFeed::publishedCategories('ru')
         );
         $uzCats = array_map(
             static fn (array $row): int => (int) $row['id'],
-            News::publishedCategories('uz')
+            NewsFeed::publishedCategories('uz')
         );
         assert_true(in_array($catIds['iso-ru'], $ruCats, true));
         assert_false(in_array($catIds['iso-uz'], $ruCats, true));
@@ -149,19 +150,19 @@ test('Новости: публичные списки, рубрики и свя�
         assert_false(in_array($catIds['iso-ru'], $uzCats, true));
         assert_false(in_array($catIds['shadow'], $uzCats, true));
 
-        $resolvedUz = News::findPublishedBySlug('news-lang-ru-' . $suffix, 'uz');
+        $resolvedUz = NewsFeed::findPublishedBySlug('news-lang-ru-' . $suffix, 'uz');
         assert_true($resolvedUz !== null);
         assert_same($uzId, (int) $resolvedUz['id'], 'чужой slug переводится в запись нужного языка');
         assert_same('news-lang-uz-' . $suffix, (string) $resolvedUz['slug']);
 
-        $shadowed = News::findPublishedBySlug('news-lang-shadowed-' . $suffix, 'uz');
+        $shadowed = NewsFeed::findPublishedBySlug('news-lang-shadowed-' . $suffix, 'uz');
         assert_true($shadowed !== null);
         assert_same($shadowRootId, (int) $shadowed['id']);
         assert_same('RU shadowed ' . $suffix, (string) $shadowed['title'], 'черновик не обходится legacy-переводом');
         assert_false(in_array('uz', News::availableLangs($shadowRootId), true));
         assert_true(in_array('uz', News::availableLangs($ruId), true));
 
-        $relatedUz = News::related($uzId, 12, 'uz');
+        $relatedUz = NewsFeed::related($uzId, 12, 'uz');
         $relatedIds = array_map(static fn (array $row): int => (int) $row['id'], $relatedUz);
         assert_true(in_array($legacyId, $relatedIds, true), 'связанные новости используют допустимый legacy-перевод');
         assert_false(in_array($ruId, $relatedIds, true), 'RU-копия текущей новости не дублируется');
@@ -170,11 +171,11 @@ test('Новости: публичные списки, рубрики и свя�
 
         $topRuIds = array_map(
             static fn (array $row): int => (int) $row['id'],
-            News::mostViewed(0, 20, 'ru')
+            NewsFeed::mostViewed(0, 20, 'ru')
         );
         $topUzIds = array_map(
             static fn (array $row): int => (int) $row['id'],
-            News::mostViewed(0, 20, 'uz')
+            NewsFeed::mostViewed(0, 20, 'uz')
         );
         assert_true(in_array($ruId, $topRuIds, true));
         assert_false(in_array($uzId, $topRuIds, true));
@@ -182,8 +183,8 @@ test('Новости: публичные списки, рубрики и свя�
         assert_false(in_array($ruId, $topUzIds, true));
 
         $controller = (string) file_get_contents(APP_ROOT . '/app/Controllers/Site/NewsController.php');
-        assert_contains('News::publishedCategories($lang)', $controller);
-        assert_contains('News::publishedCount($categoryId > 0 ? $categoryId : null, $lang)', $controller);
+        assert_contains('NewsFeed::publishedCategories($lang)', $controller);
+        assert_contains('NewsFeed::publishedCount($categoryId > 0 ? $categoryId : null, $lang)', $controller);
         assert_contains('$requestedSlug !== $canonicalSlug', $controller, 'Чужой slug перенаправляется на canonical slug выбранного языка');
         assert_contains("Locale::url('news/' . \$canonicalSlug, \$lang)", $controller, 'Canonical redirect сохраняет языковой префикс');
     } finally {

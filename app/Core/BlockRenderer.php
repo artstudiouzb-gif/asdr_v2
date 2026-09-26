@@ -883,7 +883,7 @@ final class BlockRenderer
         }
         $lang = Locale::current();
         $category = (int) ($data['category'] ?? 0);
-        $rows = \App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null);
+        $rows = \App\Models\NewsFeed::published($limit, 0, $lang, $category > 0 ? $category : null);
         $categoryNames = self::newsCategoryNames($rows, $lang);
         $items = [];
         foreach ($rows as $row) {
@@ -920,7 +920,7 @@ final class BlockRenderer
         }
         $lang = Locale::current();
         $category = (int) ($data['category'] ?? 0);
-        $rows = \App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null);
+        $rows = \App\Models\NewsFeed::published($limit, 0, $lang, $category > 0 ? $category : null);
         $categoryNames = self::newsCategoryNames($rows, $lang);
         $items = [];
         foreach ($rows as $row) {
@@ -957,7 +957,7 @@ final class BlockRenderer
         $lang = Locale::current();
         $category = (int) ($data['category'] ?? 0);
         $items = [];
-        foreach (\App\Models\News::published($limit, 0, $lang, $category > 0 ? $category : null) as $row) {
+        foreach (\App\Models\NewsFeed::published($limit, 0, $lang, $category > 0 ? $category : null) as $row) {
             $items[] = [
                 'title' => (string) $row['title'],
                 'published_at' => (string) ($row['published_at'] ?? ''),

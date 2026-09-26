@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Core\Database;
 use App\Models\News;
+use App\Models\NewsFeed;
 
 // Детальная страница новости: экстра-поля, счётчик просмотров, соседние/похожие.
 
@@ -43,11 +44,11 @@ test('News::adjacent и related: соседние по дате и похожи�
         $ids[$slug] = (int) $pdo->lastInsertId();
     }
     $mid = News::findById($ids['adj-b']);
-    $adj = News::adjacent($mid);
+    $adj = NewsFeed::adjacent($mid);
     assert_same('test-adj-a', (string) $adj['prev']['slug']);
     assert_same('test-adj-c', (string) $adj['next']['slug']);
 
-    $related = News::related($ids['adj-b'], 4);
+    $related = NewsFeed::related($ids['adj-b'], 4);
     $slugs = array_column($related, 'slug');
     assert_true(!in_array('test-adj-b', $slugs, true), 'текущая новость исключена из похожих');
 

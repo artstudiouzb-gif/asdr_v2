@@ -27,7 +27,7 @@ test('Свежеопубликованная новость сразу видн�
         'image' => '', 'status' => 'published', 'published_at' => date('Y-m-d H:i:s'), 'author_id' => null,
     ]);
     try {
-        $ids = array_map(static fn ($n) => (int) $n['id'], \App\Models\News::published(50));
+        $ids = array_map(static fn ($n) => (int) $n['id'], \App\Models\NewsFeed::published(50));
         assert_true(in_array($id, $ids, true), 'новость с published_at=сейчас попадает в published()');
     } finally {
         \App\Models\News::forceDelete($id);

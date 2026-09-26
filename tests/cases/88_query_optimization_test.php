@@ -14,7 +14,7 @@ test('Предзагруженная обложка галереи не треб
 });
 
 test('Списки новостей загружают переводы одним пакетным запросом', function () {
-    $news = (string) file_get_contents(APP_ROOT . '/app/Models/News.php');
+    $news = (string) file_get_contents(APP_ROOT . '/app/Models/NewsFeed.php');
     $translations = (string) file_get_contents(APP_ROOT . '/app/Models/NewsTranslation.php');
 
     assert_contains('self::localizePublicRows(', $news);
@@ -23,7 +23,7 @@ test('Списки новостей загружают переводы одни
 });
 
 test('Списки новостей и меню повторно используются внутри одного запроса', function () {
-    $news = (string) file_get_contents(APP_ROOT . '/app/Models/News.php');
+    $news = (string) file_get_contents(APP_ROOT . '/app/Models/NewsFeed.php');
     $menu = (string) file_get_contents(APP_ROOT . '/app/Models/MenuItem.php');
 
     assert_contains('$publishedRequestCache', $news);

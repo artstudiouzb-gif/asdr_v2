@@ -12,6 +12,7 @@ use App\Core\Locale;
 use App\Core\OpenGraphHelper;
 use App\Core\View;
 use App\Models\News;
+use App\Models\NewsFeed;
 use App\Models\NewsImage;
 use App\Models\Setting;
 
@@ -24,7 +25,7 @@ final class NewsController
 
         // Рубрикатор по категориям. В адресе — slug, а не идентификатор:
         // ссылка остаётся читаемой и переживает пересоздание категории.
-        $categories = News::publishedCategories($lang);
+        $categories = NewsFeed::publishedCategories($lang);
         $categorySlug = trim((string) ($_GET['category'] ?? ''));
         $categoryId = 0;
         foreach ($categories as $category) {
@@ -37,7 +38,7 @@ final class NewsController
             $categorySlug = '';
         }
 
-        $total = News::publishedCount($categoryId > 0 ? $categoryId : null, $lang);
+        $total = NewsFeed::publishedCount($categoryId > 0 ? $categoryId : null, $lang);
 
         // Композиция страницы одна и та же везде — и на первой, и в рубрике:
         // лента идёт группами «крупная плюс две компактные». Отдельной крупной
@@ -50,7 +51,7 @@ final class NewsController
         $offset = ($page - 1) * $gridPageSize;
 
         $vars = [
-            'items' => News::published($perPage, $offset, $lang, $categoryId > 0 ? $categoryId : null),
+            'items' => NewsFeed::published($perPage, $offset, $lang, $categoryId > 0 ? $categoryId : null),
             'page' => $page,
             'pages' => $pages,
             'categories' => $categories,
@@ -81,7 +82,7 @@ final class NewsController
     public function feed(): void
     {
         $lang = Locale::current();
-        $items = News::published(30, 0, $lang);
+        $items = NewsFeed::published(30, 0, $lang);
         $base = AppUrl::base();
         $siteName = (string) Setting::get('site_name', 'ArtStudio');
         $selfUrl = $base . Locale::url('news/rss.xml', $lang);
@@ -121,7 +122,7 @@ final class NewsController
     public function photosZip(array $params): void
     {
         $lang = Locale::current();
-        $news = News::findPublishedBySlug($params['slug'] ?? '', $lang);
+        $news = NewsFeed::findPublishedBySlug($params['slug'] ?? '', $lang);
         if (!$news || !class_exists(\ZipArchive::class)) {
             http_response_code(404);
             View::render('errors/404');
@@ -177,7 +178,7 @@ final class NewsController
     {
         $lang = Locale::current();
         $requestedSlug = trim((string) ($params['slug'] ?? ''));
-        $news = News::findPublishedBySlug($requestedSlug, $lang);
+        $news = NewsFeed::findPublishedBySlug($requestedSlug, $lang);
 
         if (!$news) {
             http_response_code(404);
@@ -200,7 +201,7 @@ final class NewsController
         // hreflang и переключатель — только языки с переводом этой новости.
         Locale::setContentLangs($available);
         Locale::setAlternatePaths(\App\Core\TranslationGroupHelper::publishedPaths('news', (int) $news['id'], 'news/'));
-        $adjacent = News::adjacent($news, $lang);
+        $adjacent = NewsFeed::adjacent($news, $lang);
 
         $sidebar = \App\Core\WidgetRenderer::sidebarFor($news['sidebar_layout'] ?? 'right_sidebar', $lang);
         $gallery = NewsImage::forNews((int) $news['id']);
@@ -237,7 +238,7 @@ final class NewsController
         View::render('site/news_show', [
             'news' => $news,
             'gallery' => $gallery,
-            'related' => News::related((int) $news['id'], 4, $lang),
+            'related' => NewsFeed::related((int) $news['id'], 4, $lang),
             'prevNews' => $adjacent['prev'],
             'nextNews' => $adjacent['next'],
             'sidebar' => $sidebar,

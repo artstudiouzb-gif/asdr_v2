@@ -6,6 +6,7 @@ namespace App\Core;
 
 use App\Models\MailQueue;
 use App\Models\News;
+use App\Models\NewsFeed;
 use App\Models\Setting;
 use App\Models\Subscriber;
 
@@ -42,7 +43,7 @@ final class DigestDispatcher
         $baseUrl = AppUrl::base();
         foreach ($byLanguage as $lang => $recipients) {
             $items = array_values(array_filter(
-                News::published(50, 0, $lang),
+                NewsFeed::published(50, 0, $lang),
                 static fn (array $news): bool => (string) ($news['published_at'] ?? '') >= $weekAgo
             ));
             $result['news'] = max($result['news'], count($items));

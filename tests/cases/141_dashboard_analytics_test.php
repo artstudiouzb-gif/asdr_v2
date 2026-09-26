@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\News;
+use App\Models\NewsFeed;
 use App\Models\SearchLog;
 
 test('SearchLog и news_views аналитика дашборда', static function () {
@@ -21,7 +22,7 @@ test('SearchLog и news_views аналитика дашборда', static funct
     $newsId = (int) $db->lastInsertId();
     if ($newsId > 0) {
         News::incrementViews($newsId);
-        $topRead = News::mostViewed(30, 5);
+        $topRead = NewsFeed::mostViewed(30, 5);
         assert_true(is_array($topRead), 'News::mostViewed возвращает массив');
     }
 });
