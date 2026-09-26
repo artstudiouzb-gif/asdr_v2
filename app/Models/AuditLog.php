@@ -34,6 +34,8 @@ final class AuditLog
             'login.failed' => ['label' => 'Неверный логин или пароль', 'tone' => 'danger'],
             '2fa' => ['label' => 'Код входа подтверждён', 'tone' => 'success'],
             '2fa.failed' => ['label' => 'Неверный или просроченный код', 'tone' => 'danger'],
+            '2fa.passkey' => ['label' => 'Вход подтверждён ключом доступа', 'tone' => 'success'],
+            '2fa.passkey-failed' => ['label' => 'Ключ доступа отклонён', 'tone' => 'danger'],
             '2fa.resent' => ['label' => 'Код входа отправлен повторно', 'tone' => 'info'],
             '2fa.resend-failed' => ['label' => 'Повторная отправка кода отклонена', 'tone' => 'warning'],
             'logout' => ['label' => 'Выход из панели', 'tone' => 'info'],

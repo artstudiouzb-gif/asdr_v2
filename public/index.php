@@ -151,6 +151,8 @@ $router->post('/admin/login', [AdminAuthController::class, 'login']);
 $router->get('/admin/login/2fa', [AdminAuthController::class, 'showTwoFactor']);
 $router->post('/admin/login/2fa', [AdminAuthController::class, 'verifyTwoFactor']);
 $router->post('/admin/login/2fa/resend', [AdminAuthController::class, 'resendCode']);
+$router->post('/admin/login/2fa/passkey/options', [\App\Controllers\Admin\PasskeyController::class, 'loginOptions']);
+$router->post('/admin/login/2fa/passkey', [\App\Controllers\Admin\PasskeyController::class, 'login']);
 $router->post('/admin/logout', [AdminAuthController::class, 'logout']);
 
 // --- Admin: восстановление пароля (без требования логина) ---
@@ -169,6 +171,9 @@ $router->post('/admin/profile/telegram/link', [\App\Controllers\Admin\ProfileCon
 $router->post('/admin/profile/telegram/unlink', [\App\Controllers\Admin\ProfileController::class, 'unlinkTelegram']);
 $router->post('/admin/profile/totp/enable', [\App\Controllers\Admin\ProfileController::class, 'enableTotp']);
 $router->post('/admin/profile/totp/disable', [\App\Controllers\Admin\ProfileController::class, 'disableTotp']);
+$router->post('/admin/profile/passkey/options', [\App\Controllers\Admin\PasskeyController::class, 'registerOptions']);
+$router->post('/admin/profile/passkey/register', [\App\Controllers\Admin\PasskeyController::class, 'register']);
+$router->post('/admin/profile/passkey/delete', [\App\Controllers\Admin\PasskeyController::class, 'delete']);
 $router->post('/admin/profile/sessions/revoke-others', [\App\Controllers\Admin\ProfileController::class, 'revokeOthers']);
 $router->post('/admin/profile/sessions/{id}/revoke', [\App\Controllers\Admin\ProfileController::class, 'revokeSession']);
 
@@ -578,6 +583,9 @@ if (\App\Core\Session::hasCookie()
         // Без этого пункта админ без Telegram не смог бы подключить
         // приложение-аутентификатор: ограниченная сессия не пускает дальше.
         '/admin/profile/totp/enable',
+        // Ключ доступа — такой же полноценный второй фактор.
+        '/admin/profile/passkey/options',
+        '/admin/profile/passkey/register',
         '/admin/telegram',
         '/admin/telegram/bot',
         '/admin/telegram/bot/check',

@@ -223,6 +223,57 @@ $themeList = [
 </div>
 
 <div class="form-card u-inline-3343fd6464">
+    <h2 class="u-inline-291b7bbb01">Ключи доступа (passkeys)</h2>
+    <?php $passkeys = $passkeys ?? []; ?>
+    <p class="form-hint">Вход подтверждается отпечатком, лицом или PIN-кодом устройства либо аппаратным ключом. Ключ привязан к адресу сайта, поэтому поддельная страница входа его не получит.</p>
+    <?php if ($passkeys !== []): ?>
+        <table class="data-table">
+            <thead><tr><th>Название</th><th>Добавлен</th><th>Последний вход</th></tr></thead>
+            <tbody>
+            <?php foreach ($passkeys as $pk): ?>
+                <tr>
+                    <td><?= htmlspecialchars((string) $pk['name'], ENT_QUOTES) ?></td>
+                    <td><?= htmlspecialchars((string) $pk['created_at'], ENT_QUOTES) ?></td>
+                    <td><?= htmlspecialchars((string) ($pk['last_used_at'] ?? '—'), ENT_QUOTES) ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        <form method="post" action="/admin/profile/passkey/delete" class="form-grid u-inline-6add97efa7">
+            <?= Csrf::field() ?>
+            <div class="form-field">
+                <label for="passkey_delete_id">Удалить ключ</label>
+                <select id="passkey_delete_id" name="id">
+                    <?php foreach ($passkeys as $pk): ?>
+                        <option value="<?= (int) $pk['id'] ?>"><?= htmlspecialchars((string) $pk['name'], ENT_QUOTES) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="passkey_delete_password">Подтвердите паролем</label>
+                <input type="password" id="passkey_delete_password" name="password" autocomplete="current-password" required>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn">Удалить ключ</button></div>
+        </form>
+    <?php endif; ?>
+    <form method="post" action="/admin/profile/passkey/register" class="form-grid u-inline-6add97efa7" data-passkey-register>
+        <?= Csrf::field() ?>
+        <div class="alert alert--error" data-passkey-error hidden></div>
+        <div class="form-field">
+            <label for="passkey_name">Название ключа</label>
+            <input type="text" id="passkey_name" name="name" maxlength="100" placeholder="Например, «Ноутбук» или «YubiKey»">
+        </div>
+        <div class="form-field">
+            <label for="passkey_password">Подтвердите паролем</label>
+            <input type="password" id="passkey_password" name="password" autocomplete="current-password" required>
+            <p class="form-hint">Пароль нужен, чтобы чужая сессия не могла привязать к аккаунту свой ключ.</p>
+        </div>
+        <div class="form-actions"><button type="submit" class="btn btn--primary">Добавить ключ доступа</button></div>
+    </form>
+    <script src="<?= htmlspecialchars(\App\Core\Asset::url('/assets/js/admin-passkey.js'), ENT_QUOTES) ?>" defer></script>
+</div>
+
+<div class="form-card u-inline-3343fd6464">
     <h2 class="u-inline-291b7bbb01">Код входа через Telegram-бота (бесплатно)</h2>
     <?php if (!($botConfigured ?? false)): ?>
         <p class="form-hint">
