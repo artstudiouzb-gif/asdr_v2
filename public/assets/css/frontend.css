@@ -2864,7 +2864,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="sea
     opacity: 0;
 }
 
-[style*="--media-object-position"] {
+.media-focal {
     object-position: var(--media-object-position);
 }
 

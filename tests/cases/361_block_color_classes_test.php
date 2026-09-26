@@ -52,12 +52,11 @@ test('Цвет блока из настроек включает модифик�
 });
 
 test('Тема не ищет переменные блоков в атрибуте style', function (): void {
-    // Переменные блоков приходят scoped CSS, а не атрибутом: селектор
-    // `[style*="--…"]` по ним никогда не совпадёт. Единственное исключение —
-    // точка фокуса картинки, которую Media пока выводит атрибутом.
-    $css = theme_css() . (string) file_get_contents(APP_ROOT . '/public/assets/css/blocks/counters.css');
+    // Переменные блоков приходят scoped CSS или правилом класса (StyleVars),
+    // а не атрибутом: селектор `[style*="--…"]` по ним никогда не совпадёт.
+    $css = theme_css() . (string) file_get_contents(APP_ROOT . '/public/assets/css/frontend.css');
     preg_match_all('/\[style\*="(--[a-z-]+)"\]/', $css, $m);
-    $vars = array_values(array_diff(array_unique($m[1]), ['--media-object-position']));
+    $vars = array_values(array_unique($m[1]));
 
     assert_same([], $vars, 'селектор по атрибуту style для переменных: ' . implode(', ', $vars));
 });

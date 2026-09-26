@@ -242,7 +242,13 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
         </nav>
     <?php endif; ?>
     <?php if ($isPremium): ?>
-    <div class="newsdetail-phero<?= $isCard ? ' newsdetail-phero--card' : '' ?>"<?= $cover !== '' ? ' style="--news-cover-image:url(\'' . htmlspecialchars($cover, ENT_QUOTES) . '\')"' : '' ?>>
+    <?php
+    // Обложка — фон первого экрана. Переменная приходит правилом класса
+    // (StyleVars), а не атрибутом style: тег <style> стоит прямо перед блоком,
+    // поэтому фон известен до его отрисовки и лишнего запроса CSS нет.
+    $coverVars = $cover !== '' ? \App\Core\StyleVars::apply(['--news-cover-image' => \App\Core\StyleVars::url($cover)]) : ['class' => '', 'style' => ''];
+    ?>
+    <?= $coverVars['style'] ?><div class="newsdetail-phero<?= $isCard ? ' newsdetail-phero--card' : '' ?><?= $coverVars['class'] !== '' ? ' ' . $coverVars['class'] : '' ?>">
         <span class="newsdetail-phero__overlay"></span>
         <div class="newsdetail-phero__body">
             <?php require __DIR__ . '/_crumbs.php'; ?>
@@ -541,7 +547,8 @@ $hasSidebar = $sidebar !== null && trim((string) ($sidebar['html'] ?? '')) !== '
                                             <span class="news-poll-res-val"><?= $resItem['percent'] ?>%</span>
                                         </div>
                                         <div class="news-poll-bar-track">
-                                            <div class="news-poll-bar-fill" style="--poll-percent:<?= (float) $resItem['percent'] ?>%;"></div>
+                                            <?php $pollVars = \App\Core\StyleVars::apply(['--poll-percent' => (float) $resItem['percent'] . '%']); ?>
+                                            <?= $pollVars['style'] ?><div class="news-poll-bar-fill <?= $pollVars['class'] ?>"></div>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
